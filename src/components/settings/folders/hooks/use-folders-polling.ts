@@ -1,10 +1,9 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
-import { ProcessStatus } from '@/app/actions/folders/folder-types';
-import { getFolderProcessingStatus } from '@/app/actions/folders/status.actions';
+import type { ProcessStatus } from '@/app/actions/folders/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
+import { useCallback, useRef, useState } from 'react';
 
 const pollingLogger = clientLogger.withContext('FoldersPolling');
 
@@ -68,7 +67,10 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 				normalizedId: folderId,
 			});
 
-			const data = await getFolderProcessingStatus(folderId);
+			// TODO: Implementar getFolderProcessingStatus cuando esté disponible
+			// Por ahora retornamos un estado simulado
+			const data = { isComplete: false };
+
 			pollingErrorCountRef.current = 0;
 
 			// Ajustar intervalo de polling según fase

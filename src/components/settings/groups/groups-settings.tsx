@@ -9,12 +9,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { toastService } from '@/services/toast.service';
-import type { CreateGroupInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group/types';
-import { GroupSortCriteria } from '@/types/entities/group/types';
+import type { GroupWithStats } from '@/types/entities/group';
+import { Prisma } from '@prisma/client';
 import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
+
+// Definir enum local para los criterios de ordenación
+enum GroupSortCriteria {
+	NAME_ASC = 'NAME_ASC',
+	CATEGORY_ASC = 'CATEGORY_ASC',
+	DATE_CREATED_DESC = 'DATE_CREATED_DESC',
+}
 
 const SORT_OPTIONS = [
 	{ label: 'Nombre', value: GroupSortCriteria.NAME_ASC },
@@ -169,7 +176,7 @@ export function GroupsSettings() {
 		};
 	}, [state.groups]);
 
-	const handleCreateGroup = async (data: CreateGroupInput) => {
+	const handleCreateGroup = async (data: Prisma.GroupCreateInput) => {
 		try {
 			const newGroup = await createGroup(data);
 			if (!newGroup) {
@@ -184,7 +191,7 @@ export function GroupsSettings() {
 		}
 	};
 
-	const handleUpdateGroup = async (id: string, data: GroupUpdateInput) => {
+	const handleUpdateGroup = async (id: string, data: Prisma.GroupUpdateInput) => {
 		try {
 			const updatedGroup = await updateGroup(id, data);
 			if (!updatedGroup) {
@@ -266,7 +273,7 @@ export function GroupsSettings() {
 									<Button
 										key={group.id}
 										variant={state.selectedGroup?.id === group.id ? 'secondary' : 'ghost'}
-										className="w-full justify-start h-12 relative group"
+										className="w-full justify-start h-12 relative group/button"
 										onClick={() => dispatch({ type: 'SELECT_GROUP', payload: group })}
 									>
 										<div className="flex items-center gap-2">
@@ -276,7 +283,7 @@ export function GroupsSettings() {
 											<div className="flex flex-col items-start">
 												<span className="font-medium">{group.name}</span>
 												<span className="text-xs opacity-50">
-													{group._count ? Object.values(group._count).reduce((a, b) => a + (b ?? 0), 0) : 0} elementos
+													{group.stats ? group.stats.imageCount + group.stats.videoCount : 0} elementos
 												</span>
 											</div>
 										</div>
@@ -284,7 +291,7 @@ export function GroupsSettings() {
 										<Button
 											variant="ghost"
 											size="icon"
-											className="absolute right-1 opacity-0 group-hover:opacity-100"
+											className="absolute right-1 opacity-0 group-hover/button:opacity-100"
 											onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 												e.stopPropagation();
 												handleDeleteGroup(group.id);
@@ -305,13 +312,13 @@ export function GroupsSettings() {
 					<GroupPreview
 						group={state.selectedGroup}
 						onEdit={() => dispatch({ type: 'SET_EDIT_MODE', payload: true })}
-						onDelete={() => handleDeleteGroup(state.selectedGroup?.id)}
+						onDelete={() => handleDeleteGroup(state.selectedGroup.id)}
 						stats={stats}
 					/>
 				) : state.isEditMode && state.selectedGroup ? (
 					<CreateGroupForm
 						group={state.selectedGroup}
-						onSubmit={(data) => handleUpdateGroup(state.selectedGroup?.id, data)}
+						onSubmit={(data) => handleUpdateGroup(state.selectedGroup.id, data)}
 						onCancel={() => dispatch({ type: 'SET_EDIT_MODE', payload: false })}
 					/>
 				) : (

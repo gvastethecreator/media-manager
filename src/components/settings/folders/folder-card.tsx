@@ -1,8 +1,5 @@
 'use client';
 
-import { AlertCircle, Folder, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,10 +9,13 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { ExtendedProcessStatus } from '@/types/process';
+import { AlertCircle, Folder, RefreshCw, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
 import { FolderProgressDetails } from './folder-progress-details';
 import type { ExtendedFolder } from './folder-types';
+import type { ExtendedProcessStatus } from './hooks/use-folders';
 
 interface FolderCardProps {
 	folder: ExtendedFolder;

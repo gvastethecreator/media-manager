@@ -1,14 +1,13 @@
 'use client';
 
-import { PanelRightClose, X } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { memo, Suspense, useCallback, useEffect, useState } from 'react';
-import { DetailsPanel } from '@/components/features/file-browser/details/details-panel';
+import { DetailsPanelV2 } from '@/components/features/file-browser/details/details-panel-v2';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import type { ImageItem } from '@/types/image-item';
+import { PanelRightClose, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { memo, Suspense, useCallback, useEffect, useState } from 'react';
 
 // Lazy load del StatsPanel para reducir carga inicial
 const StatsPanel = dynamic(() => import('../stats/stats-panel'), {
@@ -118,7 +117,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				(hasSelectedItems ? (
 					<ScrollArea className="flex-1">
 						<div className="p-2">
-							<DetailsPanel selectedItems={selectedItems as ImageItem[]} />
+							<DetailsPanelV2 selectedItems={selectedItems} />
 						</div>
 					</ScrollArea>
 				) : (
@@ -127,3 +126,10 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 		</div>
 	);
 }
+
+/**
+ * 📝 Actualizado para usar DetailsPanelV2
+ * - Usa EntityWithStats desde el store
+ * - No requiere casting de tipos
+ * - Compatible con el nuevo sistema de tipos
+ */

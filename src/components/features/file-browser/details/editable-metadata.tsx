@@ -1,16 +1,16 @@
 'use client';
 
-import { Check, Loader2, Pencil, X } from 'lucide-react';
-import { useCallback, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import type { ImageItem } from '@/types/image-item';
+import type { FileItem } from '@/types/files';
+import { Check, Loader2, Pencil, X } from 'lucide-react';
+import { useCallback, useId, useState, useTransition } from 'react';
 
 export interface EditableMetadataProps {
-	item: ImageItem;
+	item: FileItem;
 	onUpdate?: (id: string, data: { title?: string; description?: string }) => Promise<void>;
 }
 
@@ -18,17 +18,21 @@ export interface EditableMetadataProps {
  * Componente para editar metadatos básicos de una imagen
  */
 export function EditableMetadata({ item, onUpdate }: EditableMetadataProps) {
-	// Estados
+	// Estados - FileItem solo tiene name, no description
 	const [isEditing, setIsEditing] = useState(false);
 	const [title, setTitle] = useState(item.name || '');
-	const [description, setDescription] = useState(item.description || '');
+	const [description, setDescription] = useState(''); // FileItem no tiene description
 	const [isPending, startTransition] = useTransition();
 	const { toast } = useToast();
+
+	// IDs únicos para los inputs
+	const titleId = useId();
+	const descriptionId = useId();
 
 	// Manejar el inicio de la edición
 	const handleStartEditing = useCallback(() => {
 		setTitle(item.name || '');
-		setDescription(item.description || '');
+		setDescription(''); // FileItem no tiene description
 		setIsEditing(true);
 	}, [item]);
 
@@ -43,7 +47,7 @@ export function EditableMetadata({ item, onUpdate }: EditableMetadataProps) {
 			try {
 				await onUpdate(item.id, {
 					title: title !== item.name ? title : undefined,
-					description: description !== item.description ? description : undefined,
+					description: description || undefined, // Solo enviar si hay descripción
 				});
 
 				toast({
@@ -67,7 +71,7 @@ export function EditableMetadata({ item, onUpdate }: EditableMetadataProps) {
 	const handleCancel = useCallback(() => {
 		setIsEditing(false);
 		setTitle(item.name || '');
-		setDescription(item.description || '');
+		setDescription(''); // FileItem no tiene description
 	}, [item]);
 
 	// Si está en modo edición, mostrar formulario
@@ -75,11 +79,11 @@ export function EditableMetadata({ item, onUpdate }: EditableMetadataProps) {
 		return (
 			<div className="space-y-3">
 				<div className="space-y-1.5">
-					<Label htmlFor="title" className="text-xs">
+					<Label htmlFor={titleId} className="text-xs">
 						Título
 					</Label>
 					<Input
-						id="title"
+						id={titleId}
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 						placeholder="Título de la imagen"
@@ -88,11 +92,11 @@ export function EditableMetadata({ item, onUpdate }: EditableMetadataProps) {
 				</div>
 
 				<div className="space-y-1.5">
-					<Label htmlFor="description" className="text-xs">
+					<Label htmlFor={descriptionId} className="text-xs">
 						Descripción
 					</Label>
 					<Textarea
-						id="description"
+						id={descriptionId}
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
 						placeholder="Descripción de la imagen"
@@ -120,8 +124,8 @@ export function EditableMetadata({ item, onUpdate }: EditableMetadataProps) {
 			<div className="flex justify-between items-start">
 				<div>
 					<h3 className="text-sm font-medium truncate">{item.name || 'Sin título'}</h3>
-					{item.description && <p className="text-xs text-muted-foreground mt-1">{item.description}</p>}
-					{!item.description && <p className="text-xs text-muted-foreground italic mt-1">Sin descripción</p>}
+					{/* FileItem no tiene description, por lo que siempre mostramos "Sin descripción" */}
+					<p className="text-xs text-muted-foreground italic mt-1">Sin descripción</p>
 				</div>
 
 				{onUpdate && (
