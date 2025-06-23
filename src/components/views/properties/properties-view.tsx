@@ -1,9 +1,5 @@
 'use client';
 
-import { Variable } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import { getProperties } from '@/app/actions/properties/property.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -12,13 +8,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePropertyStore } from '@/store/entities/property';
-import { fromPrismaProperty } from '@/transformers/property/serializers';
-import type { PropertyWithRelations } from '@/types/entities/property';
+import type { PropertyWithStats as PropertyWithStatsBase } from '@/types/entities/property';
+import { Variable } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 import { PropertyCard } from './property-card';
 
-// Definir el tipo para propiedades con estadísticas
-export type PropertyWithStats = PropertyWithRelations & {
+// Definir el tipo extendido para propiedades con estadísticas de asociaciones
+export type PropertyWithStats = PropertyWithStatsBase & {
 	totalAssociations: number;
 };
 
@@ -44,7 +43,7 @@ MemoizedPropertyCard.displayName = 'MemoizedPropertyCard';
 
 export function PropertiesView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { addProperty, addProperties } = usePropertyStore();
+	const { setProperties: setStoreProperties } = usePropertyStore();
 	const router = useRouter();
 	const [properties, setProperties] = useState<PropertyWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -59,21 +58,14 @@ export function PropertiesView(_props: ViewProps) {
 			viewLogger.info('🔄 Cargando propiedades...');
 			const data = await getProperties();
 
-			// Calcular total de asociaciones para cada propiedad
-			const propertiesWithStats = data.map((property) => {
-				const canonical = fromPrismaProperty(property);
-				const totalAssociations = Object.values(property._count || {}).reduce((sum, count) => sum + (count || 0), 0);
-				return {
-					...canonical,
-					totalAssociations,
-				};
-			});
+			// Convertir PropertyWithStats a PropertyWithStats local (con totalAssociations)
+			const propertiesWithStats: PropertyWithStats[] = data.map((property) => ({
+				...property,
+				totalAssociations: property.stats.totalRelations, // Usar el valor de stats
+			}));
 
 			setProperties(propertiesWithStats);
-			// Actualizar el store con las propiedades obtenidas
-			addProperties(
-				propertiesWithStats.map((p) => ({ ...p, _ui: { itemCount: p.totalAssociations, lastUpdated: p.updatedAt } }))
-			);
+			setStoreProperties(data); // Actualizar el store con las propiedades originales
 			viewLogger.info(`✅ ${data.length} propiedades cargadas`);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -82,7 +74,7 @@ export function PropertiesView(_props: ViewProps) {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [addProperties]);
+	}, [setStoreProperties]);
 
 	useEffect(() => {
 		// Cargar propiedades inicialmente
@@ -92,13 +84,11 @@ export function PropertiesView(_props: ViewProps) {
 	const handlePropertyClick = useCallback(
 		(property: PropertyWithStats) => {
 			viewLogger.info('🖱️ Click en propiedad:', property.name);
-			setCurrentView('property-detail');
-			// Actualizar la información de la propiedad en el store
-			addProperty({ ...property, _ui: { itemCount: property.totalAssociations, lastUpdated: property.updatedAt } });
+			setCurrentView('property-content');
 			// Navegar a la vista de detalle de la propiedad
 			router.push(`/properties/${property.id}`);
 		},
-		[setCurrentView, addProperty, router]
+		[setCurrentView, router]
 	);
 
 	if (error) {

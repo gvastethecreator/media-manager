@@ -1,6 +1,6 @@
 /**
  * @file Exportación del componente JsonFileCard
- * @module components/cards/jsonfile-card
+ * @module components/cards/json-file-card
  */
 
-export { JsonFileCard } from './jsonfile-card';
+export { JsonFileCard } from './json-file-card';

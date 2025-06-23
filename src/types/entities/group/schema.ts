@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { GroupViewMode } from './types';
+import { GroupViewMode } from './base';
 
 /**
  * Esquema para filtros de búsqueda de grupos

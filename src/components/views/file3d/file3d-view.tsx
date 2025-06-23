@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFile3DStore } from '@/store/entities/file3d';
+import { useFile3DStore } from '@/store/entities/file-3d';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -31,21 +31,19 @@ MemoizedFile3DCard.displayName = 'MemoizedFile3DCard';
  */
 export function File3DView(_props: ViewProps) {
 	const {
-		file3ds: file3dsRecord,
-		isLoading,
+		file3Ds: file3dsRecord,
+		loading: isLoading,
 		error,
-		loadFile3Ds,
-		getSortedFile3Ds,
+		fetchFile3Ds: loadFile3Ds,
 	} = useFile3DStore((s) => ({
-		file3ds: s.file3ds,
-		isLoading: s.isLoading,
+		file3Ds: s.file3Ds,
+		loading: s.loading,
 		error: s.error,
-		loadFile3Ds: s.loadFile3Ds,
-		getSortedFile3Ds: s.getSortedFile3Ds,
+		fetchFile3Ds: s.fetchFile3Ds,
 	}));
 
 	useEffect(() => {
-		if (Object.keys(file3dsRecord).length === 0) {
+		if (Array.isArray(file3dsRecord) && file3dsRecord.length === 0) {
 			viewLogger.info('Store de archivos 3D vacío, cargando desde el servidor...');
 			loadFile3Ds();
 		}
@@ -64,11 +62,14 @@ export function File3DView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading && Object.keys(file3dsRecord).length === 0) {
+	if (isLoading && (!Array.isArray(file3dsRecord) || file3dsRecord.length === 0)) {
 		return <LoadingScreen />;
 	}
 
-	const sortedFile3Ds = getSortedFile3Ds();
+	// Lógica de ordenamiento simple (por fecha de actualización, más recientes primero)
+	const sortedFile3Ds = Array.isArray(file3dsRecord) ? file3dsRecord.sort((a, b) =>
+		new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+	) : [];
 
 	if (sortedFile3Ds.length === 0) {
 		return (

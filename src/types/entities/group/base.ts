@@ -33,3 +33,12 @@ export interface GroupWithStats extends GroupBase {
 	stats: GroupStatistics;
 }
 
+/**
+ * 🎛️ Modos de visualización para la entidad Group
+ */
+export enum GroupViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	DETAIL = 'detail',
+}
+

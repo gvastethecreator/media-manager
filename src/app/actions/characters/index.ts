@@ -8,7 +8,7 @@
 import * as CharacterActions from './character.actions';
 
 // Re-exportar tipos
-export type { CharacterWithImages, CharacterWithStats } from './character.actions';
+export type { CharacterWithStats } from './character.actions';
 
 // Re-exportar funciones individuales
 export async function searchCharacters(options: any) {

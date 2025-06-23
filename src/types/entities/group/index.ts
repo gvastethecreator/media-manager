@@ -16,7 +16,7 @@
 export type { GroupBase, GroupStatistics, GroupWithStats } from './base';
 
 // --- Esquemas de Validación ---
-export { GroupCreateSchema, GroupUpdateSchema } from './schema';
+export { CreateGroupSchema, UpdateGroupSchema } from './schema';
 
 // --- Tipos Legacy (OBSOLETOS) ---
 /**
@@ -24,3 +24,6 @@ export { GroupCreateSchema, GroupUpdateSchema } from './schema';
  * Usar `GroupWithStats` y otros tipos canónicos desde `base.ts`.
  */
 // export * from './types';
+
+export { GroupViewMode } from './base';
+

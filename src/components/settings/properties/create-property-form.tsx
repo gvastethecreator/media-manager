@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import type { PropertyComplete as Property } from '@/store/entities/property/types';
-import { fromPrismaProperty } from '@/transformers/property/serializers';
+import type { PropertyWithStats as Property } from '@/types/entities/property';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
@@ -86,12 +85,12 @@ export function CreatePropertyForm({
 		if (isEditing && property) {
 			const updated = await updateProperty(property.id, data);
 			if (updated) {
-				onUpdated?.(fromPrismaProperty(updated) as Property);
+				onUpdated?.(updated);
 			}
 		} else {
 			const created = await createProperty(data);
 			if (created) {
-				onCreated?.(fromPrismaProperty(created) as Property);
+				onCreated?.(created);
 			}
 		}
 	};

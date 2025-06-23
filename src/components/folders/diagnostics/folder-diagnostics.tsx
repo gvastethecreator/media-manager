@@ -2,12 +2,13 @@
 
 import { AlertTriangle, Check, Database, RefreshCcw, X } from 'lucide-react';
 import { useState } from 'react';
-import { runAllDiagnostics } from '@/app/actions/folders/diagnostics.actions';
+// import { runAllDiagnostics } from '@/app/actions/folders/diagnostics.actions'; // TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-type DiagnosticResult = Awaited<ReturnType<typeof runAllDiagnostics>>;
+// type DiagnosticResult = Awaited<ReturnType<typeof runAllDiagnostics>>; // TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE
+type DiagnosticResult = any; // TIPO TEMPORAL
 
 export function FolderDiagnostics() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -19,8 +20,9 @@ export function FolderDiagnostics() {
 		setError(null);
 
 		try {
-			const diagnosticResults = await runAllDiagnostics();
-			setResults(diagnosticResults);
+			// const diagnosticResults = await runAllDiagnostics(); // TEMPORALMENTE COMENTADO - FUNCIÓN NO EXISTE
+			// setResults(diagnosticResults);
+			setResults(null); // TEMPORAL
 		} catch (e) {
 			console.error('Error al ejecutar diagnósticos:', e);
 			setError(e instanceof Error ? e.message : 'Error desconocido al ejecutar diagnósticos');

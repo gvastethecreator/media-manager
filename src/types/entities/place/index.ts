@@ -34,7 +34,6 @@ export type {
 export {
     PlaceCategory,
     PlaceSortCriteria,
-    PlaceType,
-    PlaceViewMode
+    PlaceType
 } from './types';
 
