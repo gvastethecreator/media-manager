@@ -11,13 +11,12 @@ import { calculateCompleteness } from '@/utils/transformers';
 const tagTransformerLogger = clientLogger.withContext('TagTransformer');
 
 /**
- * Convierte un objeto Tag de Prisma a TagWithStats.
- * Esta función es compatible con el sistema legacy que esperaba TagComplete.
+ * Convierte un objeto Tag de Prisma a TagWithStats. * Esta función es compatible con el sistema legacy que esperaba TagComplete.
  *
  * @param prismaTag El objeto Tag de Prisma, puede incluir conteos de relaciones
  * @returns Un objeto TagWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromPrismaTag(
+function fromPrismaTag(
 	prismaTag: PrismaTagWithCounts | TagBase | null
 ): TagWithStats | null {
 	if (!prismaTag) {
@@ -84,11 +83,21 @@ export function fromPrismaTag(
 	}
 }
 
+// === NAMESPACE DE EXPORTACIÓN ===
+// Esta estructura evita que Next.js detecte el archivo como Server Action
+
+/**
+ * TagTransformer - Namespace que contiene todas las funciones de transformación para tags
+ */
+export const TagTransformer = {
+	fromPrismaTag
+} as const;
+
 /**
  * Alias para compatibilidad con código legacy.
  * @deprecated Usar fromPrismaTag directamente.
  */
-export const transformTag = fromPrismaTag;
+export const transformTag = TagTransformer.fromPrismaTag;
 
 /**
  * Tipo de compatibilidad para código legacy que espera TagComplete.
