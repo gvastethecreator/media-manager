@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/files';
+import { useMemo } from 'react';
 
 /**
  * Hook personalizado para filtrar y ordenar datos según las opciones de vista globales
@@ -40,15 +40,27 @@ export function useFilteredData<T extends FileItem[]>(
 					const value = item[filter.field as keyof FileItem];
 					if (value === undefined) return false;
 
+					// Si filter.value es null, hacer comparaciones especiales
+					if (filter.value === null) {
+						switch (filter.operator) {
+							case 'eq':
+								return value === null;
+							case 'neq':
+								return value !== null;
+							default:
+								return false;
+						}
+					}
+
 					switch (filter.operator) {
 						case 'eq':
 							return value === filter.value;
 						case 'neq':
 							return value !== filter.value;
 						case 'gt':
-							return value > filter.value;
+							return value > filter.value!;
 						case 'lt':
-							return value < filter.value;
+							return value < filter.value!;
 						case 'contains':
 							return typeof value === 'string' && value.toLowerCase().includes(String(filter.value).toLowerCase());
 						case 'startsWith':

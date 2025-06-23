@@ -1,7 +1,5 @@
 'use client';
 
-import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { deleteConcept, getConcepts } from '@/app/actions/concepts/concept.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,13 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import type { ConceptExtended } from '@/types/entities/concept';
-import type { ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptComplete, ConceptExtended } from '@/types/entities/concept';
 import { calculateConceptsStats } from '@/utils/concept/helpers';
+import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { CreateConceptForm } from './create-concept-form';
 
 export function ConceptsSettings() {
-	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
+	const [concepts, setConcepts] = useState<ConceptComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [selectedConcept, setSelectedConcept] = useState<ConceptExtended | null>(null);
@@ -30,12 +29,17 @@ export function ConceptsSettings() {
 	const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
+	// Generar IDs únicos
+	const searchInputId = useId();
+	const categorySelectId = useId();
+	const favoritesCheckboxId = useId();
+
 	// Cargar conceptos al montar el componente
 	useEffect(() => {
 		const loadConcepts = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getConcepts();
+				const data = await getConcepts({});
 				setConcepts(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -66,8 +70,8 @@ export function ConceptsSettings() {
 					matches &&
 					Boolean(
 						concept.name.toLowerCase().includes(normalizedQuery) ||
-							concept.description?.toLowerCase().includes(normalizedQuery) ||
-							concept.content?.toLowerCase().includes(normalizedQuery)
+						concept.description?.toLowerCase().includes(normalizedQuery) ||
+						concept.content?.toLowerCase().includes(normalizedQuery)
 					);
 			}
 
@@ -105,7 +109,7 @@ export function ConceptsSettings() {
 	}, []);
 
 	// Manejar edición de concepto
-	const handleEditConcept = useCallback((concept: ConceptWithStats) => {
+	const handleEditConcept = useCallback((concept: ConceptComplete) => {
 		setSelectedConcept(concept as unknown as ConceptExtended);
 		setIsEditing(true);
 	}, []);
@@ -132,7 +136,7 @@ export function ConceptsSettings() {
 					prompts: 0,
 					images: 0,
 				},
-			} as ConceptWithStats,
+			} as ConceptComplete,
 			...prev,
 		]);
 		toastService.success('Concepto creado');
@@ -142,7 +146,7 @@ export function ConceptsSettings() {
 	const handleConceptUpdated = useCallback((updatedConcept: ConceptExtended) => {
 		setConcepts((prev) =>
 			prev.map((concept) =>
-				concept.id === updatedConcept.id ? ({ ...concept, ...updatedConcept } as ConceptWithStats) : concept
+				concept.id === updatedConcept.id ? ({ ...concept, ...updatedConcept } as ConceptComplete) : concept
 			)
 		);
 		toastService.success('Concepto actualizado');
@@ -225,9 +229,9 @@ export function ConceptsSettings() {
 											<h4 className="font-medium text-sm">Filtrar Conceptos</h4>
 
 											<div className="space-y-2">
-												<Label htmlFor="search">Buscar</Label>
+												<Label htmlFor={searchInputId}>Buscar</Label>
 												<Input
-													id="search"
+													id={searchInputId}
 													placeholder="Buscar conceptos..."
 													value={searchQuery}
 													onChange={(e) => setSearchQuery(e.target.value)}
@@ -236,9 +240,9 @@ export function ConceptsSettings() {
 											</div>
 
 											<div className="space-y-2">
-												<Label htmlFor="category">Categoría</Label>
+												<Label htmlFor={categorySelectId}>Categoría</Label>
 												<select
-													id="category"
+													id={categorySelectId}
 													value={selectedCategory || ''}
 													onChange={(e) => setSelectedCategory(e.target.value || null)}
 													className="w-full h-8 text-xs rounded-md border border-input px-3"
@@ -254,11 +258,11 @@ export function ConceptsSettings() {
 
 											<div className="flex items-center space-x-2">
 												<Checkbox
-													id="favorites"
+													id={favoritesCheckboxId}
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">
+												<Label htmlFor={favoritesCheckboxId} className="text-xs">
 													Solo favoritos
 												</Label>
 											</div>
@@ -329,7 +333,7 @@ export function ConceptsSettings() {
 										<button
 											key={concept.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditConcept(concept as Concept)}
+											onClick={() => handleEditConcept(concept)}
 											type="button"
 											aria-pressed={selectedConcept?.id === concept.id}
 										>

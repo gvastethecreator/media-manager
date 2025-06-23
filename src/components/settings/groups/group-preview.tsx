@@ -1,22 +1,38 @@
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
-import type { Group, GroupCount } from '@/types/entities/group/types';
+import type { GroupWithStats } from '@/types/entities/group';
 import { GroupDetails } from './components/group-details';
 import { GroupFilters } from './components/group-filters';
 import { GroupHeader } from './components/group-header';
 import { GroupStats } from './components/group-stats';
 
 interface GroupPreviewProps {
-	group: Group & {
-		_count?: GroupCount;
-	};
+	group: GroupWithStats;
 	onEdit?: () => void;
 	onDelete?: () => void;
 	onFavoriteToggle?: () => void;
 	isDeleting?: boolean;
+	stats?: {
+		totalGroups: number;
+		totalElements: number;
+		emptyGroups: number;
+		favoriteGroups: number;
+	};
 }
 
 export function GroupPreview({ group, onEdit, onDelete, onFavoriteToggle, isDeleting = false }: GroupPreviewProps) {
+	// Crear objeto de conteos para GroupStats
+	const groupCounts = {
+		imágenes: group.stats.imageCount,
+		vídeos: group.stats.videoCount,
+		álbumes: group.stats.albumCount,
+		colecciones: group.stats.collectionCount,
+		etiquetas: group.stats.tagCount,
+		personajes: group.stats.characterCount,
+		lugares: group.stats.placeCount,
+		conceptos: group.stats.conceptCount,
+	};
+
 	return (
 		<>
 			<GroupHeader
@@ -40,7 +56,7 @@ export function GroupPreview({ group, onEdit, onDelete, onFavoriteToggle, isDele
 
 				<GroupFilters filtersString={group.filters} />
 
-				{group._count && <GroupStats count={group._count} />}
+				<GroupStats count={groupCounts} />
 
 				{/* Imagen destacada */}
 				{group.featuredImage && (

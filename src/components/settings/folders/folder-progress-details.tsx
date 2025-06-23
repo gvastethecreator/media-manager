@@ -1,14 +1,14 @@
 'use client';
 
-import { Code, File, FileWarning, Folder, HelpCircle } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { ExtendedProcessStatus, ProcessPhase } from '@/types/process';
+import { Code, File, FileWarning, Folder, HelpCircle } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ExtendedProcessStatus } from './hooks/use-folders';
 
 // Crear una instancia de logger para este componente
 const componentLogger = clientLogger.withContext('FolderProgressDetails');
@@ -18,6 +18,9 @@ interface FolderProgressDetailsProps {
 	isProcessing: boolean;
 	className?: string;
 }
+
+// Define las fases del proceso si no están definidas
+type ProcessPhase = 'scanning' | 'metadata' | 'thumbnail' | 'complete' | 'error' | 'starting';
 
 export function FolderProgressDetails({ status, isProcessing, className }: FolderProgressDetailsProps) {
 	const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());

@@ -48,9 +48,9 @@ export function AlbumsSettings() {
 	// Calcular estadísticas generales
 	const stats = {
 		totalAlbums: albums.length,
-		totalImages: albums.reduce((acc, album) => acc + (album.stats.totalImages || 0), 0),
+		totalImages: albums.reduce((acc, album) => acc + (album.stats.imageCount || 0), 0),
 		totalSize: 0, // No hay información de tamaño en el schema
-		emptyAlbums: albums.filter((album) => album.stats.totalImages === 0).length,
+		emptyAlbums: albums.filter((album) => album.stats.imageCount === 0).length,
 	};
 
 	// Manejar eliminación de álbum
@@ -185,7 +185,7 @@ export function AlbumsSettings() {
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{album.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													<span>{album.stats.totalImages || 0} imágenes</span>
+													<span>{album.stats.imageCount || 0} imágenes</span>
 													{album.category && (
 														<>
 															<span>•</span>
@@ -249,26 +249,23 @@ export function AlbumsSettings() {
 									id: 'preview',
 									createdAt: new Date(),
 									updatedAt: new Date(),
+									userId: null,
+									sortBy: previewData.sortBy || null,
+									filters: previewData.filters || null,
 									stats: {
-										totalItems: 0,
-										totalImages: 0,
-										totalVideos: 0,
-										lastUpdated: new Date(),
-									},
-									_count: {
-										images: 0,
-										videos: 0,
-										collections: 0,
-										tags: 0,
-										characters: 0,
-										places: 0,
-										worldItems: 0,
-										concepts: 0,
-										notes: 0,
-										wildcards: 0,
-										properties: 0,
-										groups: 0,
-										prompts: 0,
+										imageCount: 0,
+										videoCount: 0,
+										collectionCount: 0,
+										tagCount: 0,
+										characterCount: 0,
+										placeCount: 0,
+										worldItemCount: 0,
+										conceptCount: 0,
+										promptCount: 0,
+										noteCount: 0,
+										wildcardCount: 0,
+										propertyCount: 0,
+										groupCount: 0,
 									},
 								}}
 								className="max-w-sm"

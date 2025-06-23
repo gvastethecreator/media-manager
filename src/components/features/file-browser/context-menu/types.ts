@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import type { FileItem } from '@/types/files';
+import type { ReactNode } from 'react';
 
 /**
  * Tipos de acciones disponibles en el menú contextual
@@ -113,6 +113,22 @@ export type LoadingStates = {
 	notes: EntityLoadingState;
 	concepts: EntityLoadingState;
 };
+
+/**
+ * Props para el componente EntitySubMenu
+ */
+export interface SubMenuProps {
+	title: string;
+	icon: ReactNode;
+	entityName: string;
+	entities: any[];
+	isLoading: boolean;
+	hasError: boolean;
+	onSelectAction: (entity: any) => void;
+	onCreateAction: () => void;
+	renderItemAction: (entity: any) => ReactNode;
+	onOpenChange?: (open: boolean) => void;
+}
 
 // Función auxiliar para parsear metadata
 export const getMetadata = (metadata: string | null) => {

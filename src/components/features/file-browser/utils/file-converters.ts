@@ -20,8 +20,6 @@ export function fileItemToImageItem(file: FileItem): ImageItem {
 		mimeType: file.mimeType || '',
 		metadata: file.metadata || null,
 		url: file.thumbnail || `/api/images/${file.id}/content`,
-		originalPath: file.path || '',
-		format: file.type?.split('/')[1] || '',
 		parsedMetadata: undefined,
 	};
 }

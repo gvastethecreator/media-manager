@@ -1,11 +1,12 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import type { GroupBase } from '@/types/entities/group/types';
+import type { GroupWithStats } from '@/types/entities/group';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Prisma } from '@prisma/client';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación para el formulario
@@ -15,7 +16,7 @@ const groupFormSchema = z.object({
 	color: z.string().default('#3b82f6'),
 	description: z.string().optional(),
 	shortcut: z.string().optional(),
-	category: z.enum(['general', 'technical', 'artistic', 'management']).default('general'),
+	category: z.string().optional(),
 	sortBy: z.string().default('name'),
 	filters: z.string().default('empty_array'),
 	featuredImage: z.string().optional(),
@@ -25,10 +26,9 @@ const groupFormSchema = z.object({
 type FormData = z.infer<typeof groupFormSchema>;
 
 interface CreateGroupFormProps {
-	group?: GroupBase;
+	group?: GroupWithStats;
 	isEditing?: boolean;
-	onCreated?: (data: GroupBase) => void;
-	onUpdated?: (data: GroupBase) => void;
+	onSubmit: (data: Prisma.GroupCreateInput | Prisma.GroupUpdateInput) => Promise<void>;
 	onCancel: () => void;
 	onPreview?: () => void;
 }
@@ -36,13 +36,12 @@ interface CreateGroupFormProps {
 export function CreateGroupForm({
 	group,
 	isEditing = false,
-	onCreated,
-	onUpdated,
+	onSubmit,
 	onCancel,
 	onPreview,
 }: CreateGroupFormProps) {
 	// Inicializar el formulario con el tipo correcto
-	const _form = useForm<FormData>({
+	const form = useForm<FormData>({
 		resolver: zodResolver(groupFormSchema),
 		defaultValues: {
 			name: group?.name ?? '',
@@ -50,7 +49,7 @@ export function CreateGroupForm({
 			color: group?.color ?? '#3b82f6',
 			description: group?.description ?? '',
 			shortcut: group?.shortcut ?? '',
-			category: (group?.category as FormData['category']) ?? 'general',
+			category: group?.category ?? 'general',
 			sortBy: group?.sortBy ?? 'name',
 			filters: group?.filters ?? 'empty_array',
 			featuredImage: group?.featuredImage ?? '',
@@ -87,18 +86,14 @@ export function CreateGroupForm({
 		// ...agregar más campos opcionales si es necesario...
 	];
 
+	const handleSubmit = async (data: FormData) => {
+		await onSubmit(data);
+	};
+
 	return (
 		<DynamicCreateForm
 			optionalFields={optionalFields}
-			onSubmit={async (data) => {
-				if (isEditing && group) {
-					// await updateGroup(group.id, data);
-					onUpdated?.({ ...group, ...data });
-				} else {
-					// const created = await createGroup(data);
-					onCreated?.(data as GroupBase);
-				}
-			}}
+			onSubmit={handleSubmit}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear grupo'}
 		/>
 	);

@@ -1,18 +1,25 @@
-import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import type { FolderStatistics } from '@/types/entities/folder';
+import type { ProcessStatus } from '@/app/actions/folders/types';
+import type { FolderExtended, FolderStats } from '@/types/entities/folder';
 
-// Extender la interfaz Folder para incluir las propiedades adicionales
-export interface ExtendedFolder extends Omit<FolderResponse, 'lastIndexed' | 'createdAt' | 'updatedAt'> {
-	lastIndexed: Date | null;
-	createdAt: Date;
-	updatedAt: Date;
-	_count?: {
-		images: number;
+/**
+ * 📁 Extensión del tipo canónico para incluir estado de error temporal
+ * Usado en los componentes de UI para mostrar errores de procesamiento
+ */
+export interface ExtendedFolder extends FolderExtended {
+	error?: string; // Error temporal durante el procesamiento
+}
+
+// 🔄 Estado extendido del proceso con propiedades adicionales
+export interface ExtendedProcessStatus extends ProcessStatus {
+	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
+	timestamp?: number;
+	startTime?: number;
+	filesProcessed?: number; // Añadido ya que se usa en use-folders.ts
+	globalProgress?: {
+		current: number;
+		total: number;
+		progress: number;
 	};
-	totalSize: number;
-	totalFiles: number;
-	autoReindex: boolean;
-	error?: string;
 }
 
 export interface GlobalReindexStatus {
@@ -42,7 +49,7 @@ export interface GlobalProcessingState {
 }
 
 // Usar FolderStatistics en lugar de FolderStats legacy
-export const initialStats: FolderStatistics = {
+export const initialStats: FolderStats = {
 	folderCount: 0,
 	totalSize: 0,
 	averageSize: 0,

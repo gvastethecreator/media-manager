@@ -2,10 +2,10 @@
  * @file Tipos unificados para el panel de detalles.
  * @module components/features/file-browser/details/details-panel-types
  * @description Define las props para los componentes del panel de detalles,
- * utilizando el tipo unificado `AnyFileItem`.
+ * utilizando el tipo unificado `FileItem`.
  */
 
-import type { AnyFileItem } from '@/types/files';
+import type { FileItem } from '@/types/files';
 import type { MediaMetadata } from '@/types/metadata.types';
 import type * as React from 'react';
 
@@ -17,21 +17,36 @@ export interface InfoItemProps {
 	label: string;
 	value: React.ReactNode;
 	className?: string;
+	maxLength?: number; // Añadido para el truncateText
 }
 
 /**
  * Props para el componente DetailsPanel principal.
  */
 export interface DetailsPanelProps {
-	selectedItems: AnyFileItem[];
+	selectedItems: FileItem[];
 }
 
 /**
  * Props genéricas para cualquier sub-componente del panel de detalles que renderiza un solo item.
  */
 export interface ItemComponentProps {
-	item: AnyFileItem;
+	item: FileItem;
 	metadata?: MediaMetadata | null; // Opcional, no todos los items tienen metadatos de medios.
+}
+
+/**
+ * Props para el componente BasicInfo
+ */
+export interface BasicInfoProps extends ItemComponentProps {
+	// Hereda item y metadata de ItemComponentProps
+}
+
+/**
+ * Props para el componente MetadataSections
+ */
+export interface MetadataSectionsProps extends ItemComponentProps {
+	// Hereda item y metadata de ItemComponentProps
 }
 
 /**

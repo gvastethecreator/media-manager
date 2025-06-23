@@ -10,17 +10,22 @@ import type { AnyEntity } from '@/types/entities';
 import type { FC } from 'react';
 
 import { AlbumCard } from './album-card/album-card';
+import { AudioCard } from './audio-card/audio-card';
 import { CharacterCard } from './character-card/character-card';
 import { CollectionCard } from './collection-card/collection-card';
 import { ConceptCard } from './concept-card/concept-card';
+import { DocumentCard } from './document-card/document-card';
+import { File3DCard } from './file3d-card/file3d-card';
 import { FolderCard } from './folder-card/folder-card';
 import { GroupCard } from './group-card/group-card';
 import { ImageCard } from './image-card/image-card-improved';
+import { JsonFileCard } from './json-file-card/json-file-card';
 import { NoteCard } from './note-card/note-card';
 import { PlaceCard } from './place-card/place-card';
 import { PromptCard } from './prompt-card/prompt-card';
 import { PropertyCard } from './property-card/property-card';
 import { TagCard } from './tag-card/tag-card';
+import { UploadedImageCard } from './uploaded-image-card/uploaded-image-card';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
@@ -42,6 +47,12 @@ const entityCardMap: Record<AnyEntity['entityType'], FC<any>> = {
 	wildcard: WildcardCard,
 	worldItem: WorldItemCard,
 	video: VideoCard,
+	// 🆕 Nuevas entidades agregadas
+	audio: AudioCard,
+	document: DocumentCard,
+	jsonFile: JsonFileCard,
+	file3d: File3DCard,
+	uploadedImage: UploadedImageCard,
 };
 
 interface EntityCardProps {

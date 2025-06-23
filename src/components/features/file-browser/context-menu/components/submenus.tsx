@@ -1,7 +1,5 @@
 'use client';
 
-import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
-import { memo, useCallback } from 'react';
 import {
 	ContextMenuItem,
 	ContextMenuSub,
@@ -13,6 +11,8 @@ import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
 import type { FileItem } from '@/types/files';
+import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
+import { memo, useCallback } from 'react';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
 // Logger para el componente
@@ -99,7 +99,7 @@ export const TagsSubmenu = memo(function TagsSubmenu({
 	handleOpenChange,
 }: SubmenuProps) {
 	// Obtener las etiquetas del store
-	const tags = useTagStore((state) => (Array.isArray(state.tags) ? state.tags : Object.values(state.core?.tags ?? {})));
+	const tags = useTagStore((state) => state.getTags());
 
 	// Manejar apertura del submenú
 	const handleSubMenuOpenChange = useCallback(
@@ -156,7 +156,7 @@ export const AlbumsSubmenu = memo(function AlbumsSubmenu({
 	handleOpenChange,
 }: SubmenuProps) {
 	// Obtener los álbumes del store
-	const albums = useAlbumStore((state) => state.getAlbums());
+	const albums = useAlbumStore((state) => Object.values(state.albums));
 
 	// Manejar apertura del submenú
 	const handleSubMenuOpenChange = useCallback(
