@@ -17,7 +17,7 @@ const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer'
  * @param prismaProperty El objeto Property de Prisma, puede incluir conteos de relaciones
  * @returns Un objeto PropertyWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromPrismaProperty(
+function fromPrismaProperty(
 	prismaProperty: PrismaPropertyWithCounts | PropertyBase | null
 ): PropertyWithStats | null {
 	if (!prismaProperty) {
@@ -83,11 +83,21 @@ export function fromPrismaProperty(
 	}
 }
 
+// === NAMESPACE DE EXPORTACIÓN ===
+// Esta estructura evita que Next.js detecte el archivo como Server Action
+
+/**
+ * PropertyTransformer - Namespace que contiene todas las funciones de transformación para properties
+ */
+export const PropertyTransformer = {
+	fromPrismaProperty
+} as const;
+
 /**
  * Alias para compatibilidad con código legacy.
  * @deprecated Usar fromPrismaProperty directamente.
  */
-export const transformProperty = fromPrismaProperty;
+export const transformProperty = PropertyTransformer.fromPrismaProperty;
 
 /**
  * Tipo de compatibilidad para código legacy que espera PropertyComplete.

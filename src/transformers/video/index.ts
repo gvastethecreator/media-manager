@@ -4,18 +4,25 @@
  * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Video.
  */
 
+// De transformer.ts
+export { VideoTransformer } from './transformer';
+
 // De mappers.ts
 export {
     mapCreateVideoDataToPrisma,
-    mapUpdateVideoDataToPrisma,
-    mapVideoSearchOptionsToPrisma
+    mapUpdateVideoDataToPrisma
 } from './mappers';
 
-// De transformer.ts
-export {
-    fromPrismaVideo, fromPrismaVideoWithCounts, fromPrismaVideos,
-    fromPrismaVideosWithCounts, getAllVideos,
+// Exportaciones individuales para compatibilidad legacy
+import { VideoTransformer } from './transformer';
+
+export const {
+    fromPrismaVideo,
+    fromPrismaVideoWithCounts,
+    fromPrismaVideos,
+    fromPrismaVideosWithCounts,
+    getAllVideos,
     getVideoById,
     videosToRecord
-} from './transformer';
+} = VideoTransformer;
 

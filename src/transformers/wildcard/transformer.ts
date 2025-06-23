@@ -11,13 +11,12 @@ import { toWildcardWithStats } from './mappers';
 const wildcardTransformerLogger = clientLogger.withContext('WildcardTransformer');
 
 /**
- * Convierte un objeto Wildcard de Prisma a WildcardWithStats.
- * Esta función es compatible con el sistema legacy que esperaba WildcardComplete.
+ * Convierte un objeto Wildcard de Prisma a WildcardWithStats. * Esta función es compatible con el sistema legacy que esperaba WildcardComplete.
  *
  * @param prismaWildcard El objeto Wildcard de Prisma
  * @returns Un objeto WildcardWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromPrismaWildcard(
+function fromPrismaWildcard(
 	prismaWildcard: any | null
 ): WildcardWithStats | null {
 	if (!prismaWildcard) {
@@ -37,10 +36,20 @@ export function fromPrismaWildcard(
 }
 
 /**
- * Alias para compatibilidad con código legacy.
- * @deprecated Usar fromPrismaWildcard directamente.
+ * Alias para compatibilidad con código legacy. * @deprecated Usar fromPrismaWildcard directamente.
  */
-export const transformWildcard = fromPrismaWildcard;
+
+// === NAMESPACE DE EXPORTACIÓN ===
+// Esta estructura evita que Next.js detecte el archivo como Server Action
+
+/**
+ * WildcardTransformer - Namespace que contiene todas las funciones de transformación para wildcards
+ */
+export const WildcardTransformer = {
+	fromPrismaWildcard
+} as const;
+
+export const transformWildcard = WildcardTransformer.fromPrismaWildcard;
 
 /**
  * Tipo de compatibilidad para código legacy que espera WildcardComplete.
