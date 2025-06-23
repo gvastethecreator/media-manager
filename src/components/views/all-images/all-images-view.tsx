@@ -1,112 +1,141 @@
 'use client';
 
-import { ImageIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getImages } from '@/app/actions/images/image-crud.actions';
+import { EntityCardV2 } from '@/components/cards/entity-card-v2';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
-import { useFiles } from '@/lib/contexts';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useImageStore } from '@/store/entities/image';
+import type { ImageWithStats } from '@/types/entities/image';
+import { ImageIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect } from 'react';
+import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AllImagesView');
 
-export function AllImagesView() {
-	const { currentItems: items, handleSelectItem, isLoading: contextLoading, setFiles } = useFiles();
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+const MemoizedEntityCard = React.memo(
+	({ image, onImageClick }: { image: ImageWithStats; onImageClick: () => void }) => (
+		<EntityCardV2 entity={image} onClick={onImageClick} className="h-full" />
+	),
+	(prevProps, nextProps) =>
+		prevProps.image.id === nextProps.image.id &&
+		prevProps.image.name === nextProps.image.name &&
+		prevProps.image.updatedAt === nextProps.image.updatedAt,
+);
+MemoizedEntityCard.displayName = 'MemoizedEntityCard';
 
-	// Cargar todas las imágenes al montar el componente
+/**
+ * Vista principal de todas las imágenes
+ * Muestra una galería optimizada con EntityCard TCG y efectos holográficos.
+ */
+export function AllImagesView(_props: ViewProps) {
+	const {
+		images: imagesRecord,
+		isLoading,
+		error,
+		loadImages,
+		getSortedImages,
+	} = useImageStore((s) => ({
+		images: s.images,
+		isLoading: s.isLoading,
+		error: s.error,
+		loadImages: s.loadImages,
+		getSortedImages: s.getSortedImages,
+	}));
+
 	useEffect(() => {
-		const loadImages = async () => {
-			try {
-				setIsLoading(true);
-				viewLogger.info('🔄 Cargando todas las imágenes...');
+		if (Object.keys(imagesRecord).length === 0) {
+			viewLogger.info('Store de imágenes vacío, cargando desde el servidor...');
+			loadImages();
+		}
+	}, [loadImages, imagesRecord]);
 
-				const result = await getImages({
-					page: 1,
-					pageSize: 100,
-					sortBy: 'createdAt',
-					sortOrder: 'desc',
-				});
+	const handleImageClick = useCallback((image: ImageWithStats) => {
+		viewLogger.info('🖱️ Click en imagen:', image.name);
+		// Lógica de navegación o apertura de visor aquí
+	}, []);
 
-				if (result?.images) {
-					// Transformar las imágenes al formato FileItem del contexto
-					const fileItems = result.images.map((image: any) => {
-						// Convertir thumbnail si existe
-						let thumbnailStr: string | undefined;
-						if (image.thumbnail) {
-							thumbnailStr = `data:image/webp;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
-						}
+	if (error) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<p className="text-destructive">Error: {error}</p>
+			</div>
+		);
+	}
 
-						return {
-							id: image.id,
-							name: image.name,
-							path: image.path,
-							size: image.size,
-							type: 'image',
-							modified: new Date(image.updatedAt),
-							metadata: {
-								width: image.width,
-								height: image.height,
-								format: 'image/webp',
-							},
-							tags: image.tags?.map((tag: any) => tag.name) || [],
-							collections: image.collections?.map((collection: any) => collection.name) || [],
-							characters: image.characters?.map((character: any) => character.name) || [],
-							places: image.places?.map((place: any) => place.name) || [],
-							worldItems: image.worldItems?.map((item: any) => item.name) || [],
-							concepts: image.concepts?.map((concept: any) => concept.name) || [],
-							prompts: image.prompts?.map((prompt: any) => prompt.name) || [],
-							notes: image.notes?.map((note: any) => note.name) || [],
-							groups: image.groups?.map((group: any) => group.name) || [],
-							properties: image.properties?.map((property: any) => property.name) || [],
-							wildcards: image.wildcards?.map((wildcard: any) => wildcard.name) || [],
-							isFavorite: image.isFavorite,
-							thumbnail: thumbnailStr,
-						};
-					});
+	if (isLoading && Object.keys(imagesRecord).length === 0) {
+		return <LoadingScreen />;
+	}
 
-					// Actualizar el contexto con las imágenes obtenidas
-					setFiles(fileItems as any);
-					viewLogger.info(`✅ ${fileItems.length} imágenes cargadas`);
-				} else {
-					setError('No se pudieron obtener las imágenes');
-				}
-			} catch (err) {
-				viewLogger.error('❌ Error cargando imágenes:', err);
-				setError('Error cargando las imágenes');
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	const sortedImages = getSortedImages();
 
-		loadImages();
-	}, [setFiles]);
+	if (sortedImages.length === 0) {
+		return (
+			<EmptyState
+				icon={ImageIcon}
+				title="No hay imágenes"
+				description="Sube imágenes para comenzar a usar la galería."
+			/>
+		);
+	}
 
 	return (
-		<>
-			{/* Contenido original */}
-			{error ? (
-				<div className="flex h-full w-full items-center justify-center">
-					<p className="text-destructive">Error: {error}</p>
+		<ScrollArea className="h-full">
+			<div className="container mx-auto p-6">
+				{/* Header con estadísticas */}
+				<div className="mb-6">
+					<h2 className="text-2xl font-bold text-foreground mb-2">
+						Todas las Imágenes
+					</h2>
+					<p className="text-muted-foreground">
+						{sortedImages.length} {sortedImages.length === 1 ? 'imagen' : 'imágenes'} en total
+					</p>
 				</div>
-			) : isLoading ? (
-				<LoadingScreen />
-			) : (
-				<div className="flex h-full w-full">
-					{/* Contenido del FileBrowser */}
-					{items && items.length > 0 ? (
-						<FileBrowser items={items as any} onItemClick={handleSelectItem as any} />
-					) : (
-						<EmptyState
-							icon={ImageIcon}
-							title="No hay imágenes"
-							description="No se encontraron imágenes en el sistema"
-						/>
-					)}
+
+				{/* Grid de imágenes */}
+				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+					{sortedImages.map((image, index) => {
+						const onImageClick = () => handleImageClick(image);
+						return (
+							<motion.div
+								key={image.id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: index * 0.05, duration: 0.3 }}
+								className="perspective-1000"
+							>
+								<div
+									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+									data-image-id={image.id}
+								>
+									<MemoizedEntityCard image={image} onImageClick={onImageClick} />
+								</div>
+							</motion.div>
+						);
+					})}
 				</div>
-			)}
-		</>
+
+				{/* Footer con información adicional */}
+				{sortedImages.length > 0 && (
+					<div className="mt-8 pt-6 border-t border-border">
+						<p className="text-sm text-muted-foreground text-center">
+							Mostrando {sortedImages.length} {sortedImages.length === 1 ? 'imagen' : 'imágenes'}
+						</p>
+					</div>
+				)}
+			</div>
+		</ScrollArea>
 	);
 }
+
+/**
+ * 📝 Documentación:
+ * - Vista principal optimizada que usa EntityCard TCG con efectos holográficos
+ * - Integra store Zustand para gestión eficiente de estado
+ * - Grid responsivo que se adapta a diferentes tamaños de pantalla
+ * - Animaciones escalonadas para carga suave
+ * - Lazy loading y memoización para rendimiento óptimo
+ * - Reemplaza FileBrowser por sistema de cards consistente
+ * - Estadísticas y información contextual
+ */

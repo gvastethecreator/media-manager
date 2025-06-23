@@ -1,14 +1,14 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createConcept, updateConcept } from '@/app/actions/concepts/concept.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import toastService from '@/services/toast.service';
-import type { ConceptBase, ConceptExtended } from '@/types/entities/concept';
+import type { ConceptComplete, ConceptCreateInput, ConceptExtended, ConceptUpdateInput } from '@/types/entities/concept';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod
@@ -19,7 +19,6 @@ const conceptSchema = z.object({
 	color: z.string().min(1, 'El color es requerido'),
 	emoji: z.string().min(1, 'El emoji es requerido'),
 	category: z.string().optional(),
-	tags: z.string().optional(),
 	isFavorite: z.boolean().default(false),
 });
 
@@ -28,8 +27,8 @@ type ConceptForm = z.infer<typeof conceptSchema>;
 interface CreateConceptFormProps {
 	concept?: ConceptExtended | null;
 	isEditing?: boolean;
-	onCreated?: (concept: ConceptBase) => void;
-	onUpdated?: (concept: ConceptBase) => void;
+	onCreated?: (concept: ConceptComplete) => void;
+	onUpdated?: (concept: ConceptComplete) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -54,7 +53,6 @@ export function CreateConceptForm({
 			color: '#3b82f6',
 			emoji: '💡',
 			category: 'general',
-			tags: '[]',
 			isFavorite: false,
 		},
 	});
@@ -79,7 +77,6 @@ export function CreateConceptForm({
 				color: concept.color || '#3b82f6',
 				emoji: concept.emoji || '💡',
 				category: concept.category || 'general',
-				tags: concept.tags || '[]',
 				isFavorite: concept.isFavorite || false,
 			});
 		}
@@ -93,16 +90,19 @@ export function CreateConceptForm({
 			if (isEditing && concept) {
 				// Actualizar concepto existente con el ID
 				const updatedConcept = await updateConcept(concept.id, {
-					id: concept.id,
 					...data,
-				});
+					content: data.content || '',
+				} as ConceptUpdateInput);
 				if (onUpdated) {
 					onUpdated(updatedConcept);
 				}
 				toastService.success('Concepto actualizado correctamente');
 			} else {
 				// Crear nuevo concepto
-				const newConcept = await createConcept(data);
+				const newConcept = await createConcept({
+					...data,
+					content: data.content || '',
+				} as ConceptCreateInput);
 				if (onCreated) {
 					onCreated(newConcept);
 				}
@@ -151,15 +151,7 @@ export function CreateConceptForm({
 	return (
 		<DynamicCreateForm
 			optionalFields={optionalFields}
-			onSubmit={async (data) => {
-				if (isEditing && concept) {
-					await updateConcept(concept.id, data);
-					onUpdated?.({ ...concept, ...data });
-				} else {
-					const created = await createConcept(data);
-					onCreated?.(created);
-				}
-			}}
+			onSubmit={_onSubmit}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear concepto'}
 		/>
 	);

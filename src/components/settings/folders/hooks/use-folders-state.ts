@@ -2,7 +2,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { folderService } from '@/services/folder-service-export';
-import type { FolderStatistics } from '@/types/entities/folder';
+import type { FolderStats } from '@/types/entities/folder';
 import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
@@ -15,7 +15,7 @@ const stateLogger = clientLogger.withContext('FoldersState');
 export function useFoldersState() {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
-	const [stats, setStats] = useState<FolderStatistics>(initialStats);
+	const [stats, setStats] = useState<FolderStats>(initialStats);
 	const [folders, setFolders] = useState<ExtendedFolder[]>([]);
 
 	// Cargar carpetas desde la API
@@ -46,9 +46,9 @@ export function useFoldersState() {
 			setFolders(transformedFolders);
 
 			// Calcular estadísticas básicas a partir de las carpetas usando FolderStatistics
-			const totalFiles = transformedFolders.reduce((acc, f) => acc + (f.totalFiles || f._count.images || 0), 0);
-			const totalSize = transformedFolders.reduce((acc, f) => acc + (f.totalSize || 0), 0);
-			const imageCount = transformedFolders.reduce((acc, f) => acc + (f._count.images || 0), 0);
+			const totalFiles = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f.totalFiles || f._count.images || 0), 0);
+			const totalSize = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f.totalSize || 0), 0);
+			const imageCount = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f._count.images || 0), 0);
 
 			setStats({
 				hierarchyDepth: 0,
@@ -114,8 +114,8 @@ export function useFoldersState() {
 	}, []);
 
 	// Actualizar estadísticas
-	const updateStats = useCallback((newStats: Partial<FolderStatistics>) => {
-		setStats((prevStats) => ({
+	const updateStats = useCallback((newStats: Partial<FolderStats>) => {
+		setStats((prevStats: any) => ({
 			...prevStats,
 			...newStats,
 		}));
@@ -146,5 +146,5 @@ function formatBytes(bytes: number): string {
 	const k = 1024;
 	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }

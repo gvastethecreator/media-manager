@@ -1,6 +1,6 @@
 'use client';
 
-import { FolderCard } from '@/components/cards/folder-card';
+import { EntityCard } from '@/components/cards/entity-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -20,37 +20,29 @@ import type { ViewProps } from '../../views/types';
 
 const viewLogger = clientLogger.withContext('FoldersView');
 
-// Usar FolderWithStats como tipo principal
-type FolderWithCount = FolderWithStats & {
+// Extender FolderWithStats para asegurar compatibilidad con EntityCard
+type FolderEntity = FolderWithStats & {
+	entityType: 'folder';
 	_count?: {
 		images: number;
 	};
-	// Asegurar que estos campos están disponibles explícitamente
 	totalSize: number;
 	totalFiles: number;
 };
 
-// Componente memoizado para cada tarjeta de carpeta
-const MemoizedFolderCard = React.memo(
-	({ folder, onFolderClick }: { folder: FolderWithCount; onFolderClick: () => void }) => {
-		return <FolderCard folder={folder} onClick={onFolderClick} className="h-full" />;
-	},
-	(prevProps, nextProps) => {
-		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes
-		return (
-			prevProps.folder.id === nextProps.folder.id &&
-			prevProps.folder.name === nextProps.folder.name &&
-			prevProps.folder.emoji === nextProps.folder.emoji &&
-			prevProps.folder.updatedAt === nextProps.folder.updatedAt &&
-			(prevProps.folder._count?.images || 0) === (nextProps.folder._count?.images || 0) &&
-			prevProps.folder.totalSize === nextProps.folder.totalSize &&
-			prevProps.folder.totalFiles === nextProps.folder.totalFiles
-		);
-	}
+const MemoizedEntityCard = React.memo(
+	({ folder, onFolderClick }: { folder: FolderEntity; onFolderClick: () => void }) => (
+		<EntityCard item={folder} onClick={onFolderClick} className="h-full" />
+	),
+	(prevProps, nextProps) =>
+		prevProps.folder.id === nextProps.folder.id &&
+		prevProps.folder.name === nextProps.folder.name &&
+		prevProps.folder.updatedAt === nextProps.folder.updatedAt &&
+		(prevProps.folder._count?.images || 0) === (nextProps.folder._count?.images || 0) &&
+		prevProps.folder.totalSize === nextProps.folder.totalSize &&
+		prevProps.folder.totalFiles === nextProps.folder.totalFiles,
 );
-
-// Para evitar advertencias de displayName
-MemoizedFolderCard.displayName = 'MemoizedFolderCard';
+MemoizedEntityCard.displayName = 'MemoizedEntityCard';
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView, setCurrentItem } = useNavigationStore();
@@ -63,27 +55,28 @@ export function FoldersView(_props: ViewProps) {
 	// 🧹 Para limpiar selección - usar el hook base directamente
 	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
 
-	const [folders, setFolders] = useState<FolderWithCount[]>([]);
+	const [folders, setFolders] = useState<FolderEntity[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el nuevo hook de eventos optimistas del cliente
-	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderWithStats[]>(folders);
+	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderEntity[]>(folders);
 	// Mantener un contador de reintentos
 	const [retryCount, setRetryCount] = useState(0);
 	const maxRetries = 3;
 
 	const loadFolders = useCallback(async () => {
 		try {
-			setIsLoading(true); // Siempre poner en loading al iniciar la carga/reintento
-			// viewLogger.info('🔄 Cargando carpetas...'); // Comentado
+			setIsLoading(true);
+			viewLogger.info('🔄 Cargando carpetas...');
 			const data = await folderService.getFolders();
 
-			// ✅ data ahora es el array correcto, no necesitamos .map si ya viene correcto
+			// ✅ Transformar datos para EntityCard
 			if (Array.isArray(data)) {
-				const transformedData = data.map((folderData: any) => {
+				const transformedData = data.map((folderData: any): FolderEntity => {
 					return {
 						...folderData,
+						entityType: 'folder', // 🆕 Requerido para EntityCard
 						lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
 						createdAt: new Date(folderData.createdAt),
 						updatedAt: new Date(folderData.updatedAt),
@@ -92,25 +85,13 @@ export function FoldersView(_props: ViewProps) {
 						// Asegurar que estos campos se preservan
 						totalSize: folderData.totalSize || 0,
 						totalFiles: folderData.totalFiles || 0,
-					} as FolderWithCount;
+					};
 				});
 
-				// viewLogger.debug('Datos de carpetas transformados:', { // Comentado
-				// 	firstFolder: transformedData[0]
-				// 		? {
-				// 		id: transformedData[0].id,
-				// 		name: transformedData[0].name,
-				// 		totalSize: transformedData[0].totalSize,
-				// 		totalFiles: transformedData[0].totalFiles,
-				// 		imageCount: transformedData[0]._count?.images,
-				// 	}
-				// 	: 'No hay carpetas',
-				// });
-
 				setFolders(transformedData);
-				setRetryCount(0); // Reiniciar el contador de reintentos si la carga es exitosa
-				setError(null); // Limpiar cualquier error previo
-				// viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`); // Comentado
+				setRetryCount(0);
+				setError(null);
+				viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
 			} else {
 				throw new Error('Respuesta del servicio no es un array válido');
 			}
@@ -127,9 +108,9 @@ export function FoldersView(_props: ViewProps) {
 			if (isTransientError && retryCount < maxRetries) {
 				// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
 				const retryDelay = 300 * 3 ** retryCount;
-				// viewLogger.debug(
-				// 	`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...` // Comentado
-				// );
+				viewLogger.debug(
+					`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
+				);
 
 				// Incrementar contador de reintentos y programar un nuevo intento
 				setRetryCount((prev) => prev + 1);
@@ -141,49 +122,48 @@ export function FoldersView(_props: ViewProps) {
 
 			// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
 			if (retryCount >= maxRetries) {
-				// viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`); // Comentado
+				viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
 			}
 
-			// viewLogger.error('❌ Error cargando carpetas:', error); // Comentado
+			viewLogger.error('❌ Error cargando carpetas:', error);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- isLoading se maneja internamente, retryCount es la única dependencia externa necesaria para la lógica de reintento.
 	}, [retryCount]);
 
 	useEffect(() => {
-		// viewLogger.debug('🟢 FoldersView Montado'); // <-- Comentado
+		viewLogger.debug('🟢 FoldersView Montado');
 		loadFolders();
 
 		return () => {
-			// viewLogger.debug('🔴 FoldersView Desmontado'); // <-- Comentado
+			viewLogger.debug('🔴 FoldersView Desmontado');
 		};
-	}, [loadFolders]); // <-- Incluir loadFolders en las dependencias
+	}, [loadFolders]);
 
 	const handleFolderClick = useCallback(
-		(folder: FolderWithCount) => {
+		(folder: FolderEntity) => {
 			try {
-				viewLogger.info('🖱️ Click en carpeta:', folder.name); // Descomentado
-				viewLogger.debug('ℹ️ Carpeta clickeada:', folder); // Nuevo log
+				viewLogger.info('🖱️ Click en carpeta:', folder.name);
+				viewLogger.debug('ℹ️ Carpeta clickeada:', folder);
 
 				// Verificaciones de seguridad
 				if (!folder || !folder.id) {
-					viewLogger.error('❌ Carpeta inválida:', folder); // Descomentado
+					viewLogger.error('❌ Carpeta inválida:', folder);
 					return;
 				}
 
-				viewLogger.debug('🧹 Limpiando selecciones previas...'); // Nuevo log
+				viewLogger.debug('🧹 Limpiando selecciones previas...');
 				// 🧹 Limpiar selecciones previas
 				deselectAllFiles();
-				viewLogger.debug('✅ Selecciones limpiadas.'); // Nuevo log
+				viewLogger.debug('✅ Selecciones limpiadas.');
 
-				viewLogger.debug('🔄 Actualizando el store de carpetas (setCurrentFolderId)...'); // Nuevo log
+				viewLogger.debug('🔄 Actualizando el store de carpetas (setCurrentFolderId)...');
 				// 🔄 Actualizar el store de carpetas PRIMERO
 				setCurrentFolderId(folder.id);
-				viewLogger.debug(`✅ setCurrentFolderId llamado con ID: ${folder.id}`); // Nuevo log
+				viewLogger.debug(`✅ setCurrentFolderId llamado con ID: ${folder.id}`);
 
-				viewLogger.debug('📋 Estableciendo elemento actual en navigation store...'); // Nuevo log
+				viewLogger.debug('📋 Estableciendo elemento actual en navigation store...');
 				// 📋 Establecer el elemento actual en el navigation store
 				setCurrentItem({
 					id: folder.id,
@@ -198,16 +178,16 @@ export function FoldersView(_props: ViewProps) {
 					createdAt: folder.createdAt,
 					itemType: 'folder',
 				});
-				viewLogger.debug('✅ setCurrentItem llamado con datos de carpeta.'); // Nuevo log
+				viewLogger.debug('✅ setCurrentItem llamado con datos de carpeta.');
 
-				viewLogger.debug('📍 Actualizando la vista de navegación (setCurrentView)...'); // Nuevo log
+				viewLogger.debug('📍 Actualizando la vista de navegación (setCurrentView)...');
 				// 📍 Actualizar la vista de navegación
 				setCurrentView('folder-content');
-				viewLogger.debug('✅ setCurrentView llamado a folder-content.'); // Nuevo log
+				viewLogger.debug('✅ setCurrentView llamado a folder-content.');
 
-				viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`); // Descomentado
+				viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`);
 			} catch (error) {
-				viewLogger.error('❌ Error al cambiar a la carpeta:', error); // Descomentado
+				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
 			}
 		},
 		[setCurrentView, setCurrentItem, deselectAllFiles, setCurrentFolderId]
@@ -226,7 +206,7 @@ export function FoldersView(_props: ViewProps) {
 					</p>
 					<div className="flex flex-col gap-2">
 						<Button variant="outline" onClick={loadFolders}>
-							<RefreshCcw className="h-4 w-4 mr-2" />
+							<RefreshCw className="h-4 w-4 mr-2" />
 							Reintentar
 						</Button>
 						<Link href="/diagnostics/database" className={buttonVariants({ variant: 'default' })}>
@@ -253,59 +233,76 @@ export function FoldersView(_props: ViewProps) {
 		);
 	}
 
-	// Log de depuración para ver qué datos tenemos disponibles
-	// if (optimisticFolders.length > 0) {
-	// 	viewLogger.debug('Datos de carpeta para renderizado:', { // Comentado
-	// 		id: optimisticFolders[0].id,
-	// 		name: optimisticFolders[0].name,
-	// 		totalSize: optimisticFolders[0].totalSize,
-	// 		totalFiles: optimisticFolders[0].totalFiles,
-	// 		_count: optimisticFolders[0]._count,
-	// 		updatedAt: optimisticFolders[0].updatedAt,
-	// 	});
-	// }
-
 	return (
-		<>
-			<ScrollArea className="h-full">
-				<div className="container mx-auto p-6">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-						{optimisticFolders.map((folder, index) => {
-							// Verificar que la carpeta tenga un id válido
-							if (!folder || !folder.id) {
-								console.error('Carpeta sin id válido:', folder);
-								return null;
-							}
-
-							// Crear una función de clic específica para esta carpeta
-							const onFolderClick = () => handleFolderClick(folder);
-
-							return (
-								<motion.div
-									key={folder.id}
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{
-										delay: index * 0.1,
-										duration: 0.4,
-										type: 'spring',
-										stiffness: 100,
-										damping: 12,
-									}}
-									className="perspective-1000"
-								>
-									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-										data-folder-id={folder.id}
-									>
-										<MemoizedFolderCard folder={folder} onFolderClick={onFolderClick} />
-									</div>
-								</motion.div>
-							);
-						})}
-					</div>
+		<ScrollArea className="h-full">
+			<div className="container mx-auto p-6">
+				{/* Header con estadísticas */}
+				<div className="mb-6">
+					<h2 className="text-2xl font-bold text-foreground mb-2">
+						Carpetas
+					</h2>
+					<p className="text-muted-foreground">
+						{optimisticFolders.length} {optimisticFolders.length === 1 ? 'carpeta' : 'carpetas'} indexadas
+					</p>
 				</div>
-			</ScrollArea>
-		</>
+
+				{/* Grid de carpetas */}
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+					{optimisticFolders.map((folder, index) => {
+						// Verificar que la carpeta tenga un id válido
+						if (!folder || !folder.id) {
+							console.error('Carpeta sin id válido:', folder);
+							return null;
+						}
+
+						// Crear una función de clic específica para esta carpeta
+						const onFolderClick = () => handleFolderClick(folder);
+
+						return (
+							<motion.div
+								key={folder.id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{
+									delay: index * 0.1,
+									duration: 0.4,
+									type: 'spring',
+									stiffness: 100,
+									damping: 12,
+								}}
+								className="perspective-1000"
+							>
+								<div
+									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+									data-folder-id={folder.id}
+								>
+									<MemoizedEntityCard folder={folder} onFolderClick={onFolderClick} />
+								</div>
+							</motion.div>
+						);
+					})}
+				</div>
+
+				{/* Footer con información adicional */}
+				{optimisticFolders.length > 0 && (
+					<div className="mt-8 pt-6 border-t border-border">
+						<p className="text-sm text-muted-foreground text-center">
+							Mostrando {optimisticFolders.length} {optimisticFolders.length === 1 ? 'carpeta' : 'carpetas'}
+						</p>
+					</div>
+				)}
+			</div>
+		</ScrollArea>
 	);
 }
+
+/**
+ * 📝 Documentación:
+ * - Vista optimizada que usa EntityCard TCG con efectos holográficos
+ * - Integra store Zustand para gestión eficiente de estado
+ * - Grid responsivo que se adapta a diferentes tamaños de pantalla
+ * - Animaciones escalonadas para carga suave
+ * - Lazy loading y memoización para rendimiento óptimo
+ * - Consistente con las otras 19 vistas del sistema
+ * - Estadísticas y información contextual
+ */

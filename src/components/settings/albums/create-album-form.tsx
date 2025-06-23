@@ -1,12 +1,12 @@
 'use client';
 
 import { createAlbum, updateAlbum } from '@/app/actions/albums/album.actions';
-import { ColorPicker } from '@/components/core/color-picker';
 import { EmojiPicker } from '@/components/core/emojis/emoji-picker';
 import { DynamicCreateForm } from '@/components/settings/common/dynamic-create-form';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import toastService from '@/services/toast.service';
-import type { AlbumComplete } from '@/types/entities/album/extended';
+import type { AlbumWithStats } from '@/types/entities/album';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -29,10 +29,10 @@ type FormData = z.infer<typeof createAlbumSchema>;
 
 // Props del componente
 interface CreateAlbumFormProps {
-	album?: AlbumComplete | null;
+	album?: AlbumWithStats | null;
 	isEditing?: boolean;
-	onCreated?: (album: AlbumComplete) => void;
-	onUpdated?: (album: AlbumComplete) => void;
+	onCreated?: (album: AlbumWithStats) => void;
+	onUpdated?: (album: AlbumWithStats) => void;
 	onReset?: () => void;
 	onPreview?: (formData: FormData) => void;
 }

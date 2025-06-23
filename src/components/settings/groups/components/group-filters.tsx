@@ -1,5 +1,19 @@
 import { cn } from '@/lib/utils';
-import { type GroupFilter, groupFilterSchema } from '@/types/entities/group/types';
+import { z } from 'zod';
+
+// Definir tipos locales ya que no están exportados
+interface GroupFilter {
+	type: string;
+	operator: string;
+	value: string | number | boolean;
+}
+
+// Esquema de validación local
+const groupFilterSchema = z.object({
+	type: z.string(),
+	operator: z.string(),
+	value: z.union([z.string(), z.number(), z.boolean()]),
+});
 
 interface GroupFiltersProps {
 	filtersString: string;

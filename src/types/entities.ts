@@ -5,21 +5,26 @@
  */
 
 import type {
-	Album,
-	Character,
-	Collection,
-	Concept,
-	Folder,
-	Group,
-	Image,
-	Note,
-	Place,
-	Prompt,
-	Property,
-	Tag,
-	Video,
-	Wildcard,
-	WorldItem,
+    Album,
+    Audio,
+    Character,
+    Collection,
+    Concept,
+    Document,
+    File3D,
+    Folder,
+    Group,
+    Image,
+    JsonFile,
+    Note,
+    Place,
+    Prompt,
+    Property,
+    Tag,
+    UploadedImage,
+    Video,
+    Wildcard,
+    WorldItem,
 } from '@prisma/client';
 
 /**
@@ -40,7 +45,12 @@ export type EntityType =
 	| 'group'
 	| 'property'
 	| 'wildcard'
-	| 'folder';
+	| 'folder'
+	| 'audio'
+	| 'document'
+	| 'jsonFile'
+	| 'file3d'
+	| 'uploadedImage';
 
 /**
  * Propiedad para discriminar entre tipos de entidad en el cliente.
@@ -69,7 +79,12 @@ export type DisplayableEntity =
 	| (Place & { entityType: 'place' })
 	| (Group & { entityType: 'group' })
 	| (Property & { entityType: 'property' })
-	| (Wildcard & { entityType: 'wildcard' });
+	| (Wildcard & { entityType: 'wildcard' })
+	| (Audio & { entityType: 'audio' })
+	| (Document & { entityType: 'document' })
+	| (JsonFile & { entityType: 'jsonFile' })
+	| (File3D & { entityType: 'file3d' })
+	| (UploadedImage & { entityType: 'uploadedImage' });
 
 /**
  * Alias para mayor claridad en los componentes.

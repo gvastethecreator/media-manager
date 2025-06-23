@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import { AnyEntity } from '@/types/entities';
 import { FileItem } from '@/types/files';
 import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -108,21 +109,21 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	}, []);
 
 	const containerCallbackRef = useCallback(
-		(element: HTMLDivElement | null) => {
+		(element: HTMLButtonElement | null) => {
 			if (element && containerRef.current !== element) {
-				containerRef.current = element;
-				_measureContainer(element);
+				containerRef.current = element as HTMLDivElement;
+				_measureContainer(element as HTMLDivElement);
 			}
 		},
 		[_measureContainer]
 	);
 
 	const handleItemClick = useCallback(
-		(item: AnyEntity | FileItem, _index: number, e: React.MouseEvent) => {
+		(item: AnyEntity | FileItem, e: React.MouseEvent) => {
 			const originalFileItem = filteredData.find((f) => f.id === item.id);
 			if (!originalFileItem) return;
 
-			const itemIndex = _index !== -1 ? _index : filteredData.indexOf(originalFileItem);
+			const itemIndex = filteredData.indexOf(originalFileItem);
 			const isShiftClick = e.shiftKey;
 			const isCtrlClick = e.ctrlKey || e.metaKey;
 
@@ -147,6 +148,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			onItemSelect?.(originalFileItem);
 		},
 		[selectedIds, setSelectedIds, onItemSelect, filteredData]
+	);
+
+	const handleListItemClick = useCallback(
+		(item: FileItem, e: React.MouseEvent) => {
+			handleItemClick(item, e);
+		},
+		[handleItemClick]
 	);
 
 	const handleItemDoubleClick = useCallback(
@@ -208,7 +216,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					<ListView
 						{...commonViewProps}
 						items={filteredData}
-						onItemClick={(item, e) => handleItemClick(item, filteredData.findIndex(f => f.id === item.id), e)}
+						onItemClick={handleListItemClick}
 					/>
 				);
 			case 'grid':
@@ -234,7 +242,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			<button
 				ref={containerCallbackRef}
 				type="button"
-				className="relative h-full w-full flex-grow overflow-y-auto bg-transparent p-0 text-left"
+				className="relative h-full w-full flex-grow overflow-y-auto bg-transparent cursor-default p-0 text-left border-0 focus:outline-none"
 				onClick={(e) => {
 					if (e.target === e.currentTarget) {
 						clearSelection();
@@ -252,13 +260,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					</motion.div>
 				</AnimatePresence>
 			</button>
-			<StatusBar
-				itemCount={items.length}
-				selectedCount={selectedIds.length}
-				isLoading={isLoading}
-				isReindexing={isReindexing}
-				reindexProgress={reindexProgress}
-			/>
+			<StatusBar items={filteredData} />
 		</div>
 	);
 });

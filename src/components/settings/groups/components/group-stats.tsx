@@ -1,18 +1,22 @@
 import { cn } from '@/lib/utils';
-import type { GroupCount } from '@/types/entities/group/types';
+
+// Definir tipo local
+interface GroupCount {
+	[key: string]: number;
+}
 
 interface GroupStatsProps {
 	count: GroupCount;
 }
 
 export function GroupStats({ count }: GroupStatsProps) {
-	const total = Object.values(count).reduce((acc, curr) => acc + curr, 0);
+	const total = Object.values(count).reduce((acc: number, curr: number) => acc + curr, 0);
 
 	return (
 		<div className="space-y-2">
 			<h3 className="text-sm font-medium">Estadísticas</h3>
 			<div className="grid grid-cols-2 gap-2">
-				{Object.entries(count).map(([key, value]) => (
+				{Object.entries(count).map(([key, value]: [string, number]) => (
 					<div
 						key={key}
 						className={cn(

@@ -3,27 +3,27 @@
 // Muestra solo el campo nombre inicialmente y permite agregar campos opcionales uno a uno
 // ⚠️ No usar para carpetas (folders)
 
-import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React, { useState } from 'react';
 
 // Tipos genéricos para flexibilidad
-export interface DynamicCreateFormProps<T> {
+export interface DynamicCreateFormProps {
 	/**
 	 * Lista de campos opcionales disponibles para la entidad (ej: emoji, color, categoría...)
 	 * Cada campo debe tener: name, label, render (función que retorna el campo JSX)
 	 */
 	optionalFields: Array<{
-		name: keyof T;
+		name: string;
 		label: string;
 		render: (props: { value: any; onChange: (v: any) => void }) => React.ReactNode;
 	}>;
 	/**
 	 * Función de submit (recibe los datos del formulario)
 	 */
-	onSubmit: (data: Partial<T>) => Promise<void>;
+	onSubmit: (data: any) => Promise<void>;
 	/**
 	 * Texto del botón principal
 	 */
@@ -34,14 +34,14 @@ export interface DynamicCreateFormProps<T> {
 	validateName?: (name: string) => string | null;
 }
 
-export function DynamicCreateForm<T extends { name: string }>({
+export function DynamicCreateForm({
 	optionalFields,
 	onSubmit,
 	submitLabel = 'Crear',
 	validateName,
-}: DynamicCreateFormProps<T>) {
-	const [formData, setFormData] = useState<Partial<T>>({ name: '' });
-	const [addedFields, setAddedFields] = useState<Array<keyof T>>([]);
+}: DynamicCreateFormProps) {
+	const [formData, setFormData] = useState<Record<string, any>>({ name: '' });
+	const [addedFields, setAddedFields] = useState<string[]>([]);
 	const [selectedField, setSelectedField] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,22 +54,23 @@ export function DynamicCreateForm<T extends { name: string }>({
 
 	// Manejar agregar campo opcional
 	const handleAddField = () => {
-		if (selectedField && !addedFields.includes(selectedField as keyof T)) {
-			setAddedFields((prev) => [...prev, selectedField as keyof T]);
+		if (selectedField && !addedFields.includes(selectedField)) {
+			setAddedFields((prev) => [...prev, selectedField]);
 			setSelectedField('');
 		}
 	};
 
 	// Manejar cambio de campo opcional
-	const handleFieldChange = (name: keyof T, value: any) => {
+	const handleFieldChange = (name: string, value: any) => {
 		setFormData((prev) => ({ ...prev, [name]: value }));
 	};
 
 	// Manejar submit
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!formData.name || validateName?.(formData.name)) {
-			setError(validateName ? validateName(formData.name as string) : 'El nombre es obligatorio');
+		const validationError = validateName ? validateName(formData.name) : null;
+		if (!formData.name || validationError) {
+			setError(validationError || 'El nombre es obligatorio');
 			return;
 		}
 		setIsSubmitting(true);
@@ -119,7 +120,7 @@ export function DynamicCreateForm<T extends { name: string }>({
 						</SelectTrigger>
 						<SelectContent>
 							{availableFields.map((f) => (
-								<SelectItem key={f.name as string} value={f.name as string}>
+								<SelectItem key={f.name} value={f.name}>
 									{f.label}
 								</SelectItem>
 							))}
@@ -137,15 +138,15 @@ export function DynamicCreateForm<T extends { name: string }>({
 				if (!field) return null;
 				return (
 					<FormField
-						key={field.name as string}
-						name={field.name as string}
+						key={fieldName}
+						name={fieldName}
 						render={() => (
 							<FormItem>
 								<FormLabel>{field.label}</FormLabel>
 								<FormControl>
 									{field.render({
-										value: formData[field.name],
-										onChange: (v) => handleFieldChange(field.name, v),
+										value: formData[fieldName],
+										onChange: (v) => handleFieldChange(fieldName, v),
 									})}
 								</FormControl>
 							</FormItem>

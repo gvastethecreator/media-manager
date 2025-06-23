@@ -1,21 +1,11 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createCharacter, updateCharacter } from '@/app/actions/characters/character.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import toastService from '@/services/toast.service';
-import type { CharacterBase, CreateCharacterData } from '@/types/entities/character';
+import type { CharacterWithStats, CharacterCreateInput, CharacterUpdateInput } from '@/types/entities/character';
 import {
 	CHARACTER_CLASS_COLORS,
 	CHARACTER_CLASS_EMOJIS,
@@ -24,6 +14,10 @@ import {
 	CharacterClass,
 	CharacterRace,
 } from '@/types/entities/character/enums';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
@@ -62,10 +56,10 @@ const createCharacterSchema = z.object({
 type FormValues = z.infer<typeof createCharacterSchema>;
 
 interface CreateCharacterFormProps {
-	character?: CharacterBase | null;
+	character?: CharacterWithStats | null;
 	isEditing?: boolean;
-	onCreated?: (character: CharacterBase) => void;
-	onUpdated?: (character: CharacterBase) => void;
+	onCreated?: (character: CharacterWithStats) => void;
+	onUpdated?: (character: CharacterWithStats) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -201,7 +195,7 @@ export function CreateCharacterForm({
 		try {
 			setIsSubmitting(true);
 
-			const characterData: CreateCharacterData = {
+			const characterData: CharacterCreateInput = {
 				name: data.name,
 				description: data.description,
 				color: data.color,
@@ -221,7 +215,7 @@ export function CreateCharacterForm({
 					psychologicalProfile: data.psychologicalProfile,
 					socialProfile: data.socialProfile,
 					isFavorite: data.isFavorite,
-				});
+				} as CharacterUpdateInput);
 				onUpdated?.(updated);
 			} else {
 				const created = await createCharacter(characterData);
@@ -288,15 +282,7 @@ export function CreateCharacterForm({
 	return (
 		<DynamicCreateForm
 			optionalFields={optionalFields}
-			onSubmit={async (data) => {
-				if (isEditing && character) {
-					await updateCharacter(character.id, data);
-					onUpdated?.({ ...character, ...data });
-				} else {
-					const created = await createCharacter(data);
-					onCreated?.(created);
-				}
-			}}
+			onSubmit={_onSubmit}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear personaje'}
 		/>
 	);

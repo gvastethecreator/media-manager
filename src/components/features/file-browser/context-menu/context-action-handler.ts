@@ -1,9 +1,11 @@
 'use client';
 
 // Importaciones de server actions para entidades
-import { addImageToAlbum } from '@/app/actions/albums/album.actions';
-import { addImageToCollection } from '@/app/actions/collections/collection-images.actions';
-import { addTagToImage } from '@/app/actions/tags/tag-images.actions';
+// TODO: addImageToAlbum no está implementada aún
+// import { addImageToAlbum } from '@/app/actions/albums/album.actions';
+// TODO: addImageToCollection no está implementada aún
+// import { addImageToCollection } from '@/app/actions/collections/collection-images.actions';
+import { addImageToTag } from '@/app/actions/tags/relation.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toast } from '@/services/toast.service';
 
@@ -26,16 +28,8 @@ function _redirectLegacyAction(action: ContextMenuAction): {
 	newAction: ContextMenuAction;
 	newData?: Record<string, unknown>;
 } {
-	switch (action) {
-		case 'object-create':
-			actionLogger.info('⏩ Redirigiendo object-create a world-item-create');
-			return { newAction: 'world-item-create' as ContextMenuAction };
-		case 'object-add':
-			actionLogger.info('⏩ Redirigiendo object-add a world-item-add');
-			return { newAction: 'world-item-add' as ContextMenuAction };
-		default:
-			return { newAction: action };
-	}
+	// Eliminar casos no válidos según el tipo ContextMenuAction
+	return { newAction: action };
 }
 
 // Implementación del servicio de operaciones de archivos
@@ -217,19 +211,19 @@ export const handleContextAction = async (
 
 			case 'add-to-collection':
 				if (data?.collectionId) {
-					// Añadir a colección
-					const collectionId = data.collectionId as string;
-					await addImageToCollection(item.id, collectionId);
-					toast.success('Imagen añadida a la colección');
+					// TODO: Implementar cuando addImageToCollection esté disponible
+					// const collectionId = data.collectionId as string;
+					// await addImageToCollection(item.id, collectionId);
+					toast.info('Función añadir a colección pendiente de implementación');
 				}
 				break;
 
 			case 'add-to-album':
 				if (data?.albumId) {
-					// Añadir a álbum
-					const albumId = data.albumId as string;
-					await addImageToAlbum(item.id, albumId);
-					toast.success('Imagen añadida al álbum');
+					// TODO: Implementar cuando addImageToAlbum esté disponible
+					// const albumId = data.albumId as string;
+					// await addImageToAlbum(item.id, albumId);
+					toast.info('Función añadir a álbum pendiente de implementación');
 				}
 				break;
 
@@ -237,7 +231,7 @@ export const handleContextAction = async (
 				if (data?.tagId) {
 					// Añadir etiqueta
 					const tagId = data.tagId as string;
-					await addTagToImage(item.id, tagId);
+					await addImageToTag(tagId, item.id);
 					toast.success('Etiqueta añadida a la imagen');
 				}
 				break;

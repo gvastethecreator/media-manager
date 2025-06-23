@@ -1,19 +1,19 @@
+import type { EntityWithStats } from '@/types/migration';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ImageItem } from '@/types/image-item';
 
 interface DetailsPanelState {
 	isVisible: boolean;
 	isFixed: boolean;
 	showStatsWhenEmpty: boolean;
-	selectedItems: ImageItem[];
+	selectedItems: EntityWithStats[];
 	toggleVisibility: () => void;
 	toggleFixed: () => void;
 	toggleShowStatsWhenEmpty: () => void;
 	setVisible: (visible: boolean) => void;
 	setFixed: (fixed: boolean) => void;
 	setShowStatsWhenEmpty: (show: boolean) => void;
-	setSelectedItems: (items: ImageItem[]) => void;
+	setSelectedItems: (items: EntityWithStats[]) => void;
 }
 
 export const useDetailsPanel = create<DetailsPanelState>()(
@@ -41,7 +41,7 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 					set({ showStatsWhenEmpty: show });
 				}
 			},
-			setSelectedItems: (items: ImageItem[]) => {
+			setSelectedItems: (items: EntityWithStats[]) => {
 				const currentItems = get().selectedItems;
 
 				if (currentItems.length !== items.length) {
@@ -67,3 +67,10 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 		}
 	)
 );
+
+/**
+ * 📝 Store actualizado para usar EntityWithStats
+ * - Reemplaza ImageItem con EntityWithStats
+ * - Mantiene la misma funcionalidad
+ * - Compatible con el nuevo sistema de tipos
+ */

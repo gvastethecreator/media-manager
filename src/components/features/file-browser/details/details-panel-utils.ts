@@ -1,6 +1,6 @@
 'use client';
 
-import type { FileMetadata } from '@/types/files';
+import type { FileMetadata } from '@/types/metadata.types';
 
 // Logger dedicado para metadata
 const metadataLogger = {

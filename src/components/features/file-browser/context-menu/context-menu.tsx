@@ -1,5 +1,11 @@
 'use client';
 
+import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
+import { Separator } from '@/components/ui/separator';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useTagStore } from '@/store/entities/tag';
+import { Tag as TagType } from '@/types/entities/tag';
 import {
 	Album,
 	BookImage,
@@ -14,12 +20,6 @@ import {
 	Trash,
 } from 'lucide-react';
 import { memo, useState } from 'react';
-import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
-import { Separator } from '@/components/ui/separator';
-import { useAlbumStore } from '@/store/entities/album';
-import { useCollectionStore } from '@/store/entities/collection';
-import { useTagStore } from '@/store/entities/tag';
-import { Tag as TagType } from '@/types/entities/tag';
 import { EnhancedSubmenu } from './components/enhanced-submenu';
 import type { ContextMenuAction, FileContextMenuProps } from './types';
 
@@ -36,9 +36,9 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 
 	// Obtener datos de los stores - Ahora esto solo ocurre una vez por renderizado del GridView
 	// en lugar de una vez por cada elemento de la cuadrícula
-	const collections = useCollectionStore((state) => state.collections);
-	const tags = useTagStore((state) => state.tags || []);
-	const albums = useAlbumStore((state) => state.albums);
+	const collections = useCollectionStore((state) => Object.values(state.collections));
+	const tags = useTagStore((state) => state.getTags());
+	const albums = useAlbumStore((state) => Object.values(state.albums));
 
 	// Manejador de acciones con indicador de carga
 	const handleAction = async (action: ContextMenuAction, data?: Record<string, unknown>) => {
