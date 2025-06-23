@@ -3,4 +3,5 @@
  * @module app/actions/characters/types
  */
 
-export type { CharacterWithImages, CharacterWithStats } from './character.actions';
+export type { CharacterWithStats } from './character.actions';
+

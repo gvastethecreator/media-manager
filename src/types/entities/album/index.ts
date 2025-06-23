@@ -16,7 +16,7 @@
 export type { AlbumBase, AlbumStatistics, AlbumWithStats } from './base';
 
 // --- Esquemas de Validación ---
-export { AlbumCreateSchema, AlbumUpdateSchema } from './schema';
+export { CreateAlbumSchema, UpdateAlbumSchema } from './schema';
 
 // --- Tipos Legacy (OBSOLETOS) ---
 /**
@@ -26,4 +26,11 @@ export { AlbumCreateSchema, AlbumUpdateSchema } from './schema';
 // export * from './types';
 // export * from './extended';
 // export * from './stats-types';
+
+// --- Enums y Constantes ---
+export {
+    ALBUM_SORT_PROPERTY_MAP,
+    AlbumSortCriteria,
+    AlbumViewMode
+} from './types';
 

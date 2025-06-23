@@ -6,6 +6,9 @@
  *   El tipo canónico para usar en la aplicación es **`AudioWithStats`**.
  */
 
+
+// Re-export from Prisma for compatibility
+export type { Audio } from '@prisma/client';
 export type {
     AudioBase,
     AudioStatistics,
@@ -13,3 +16,10 @@ export type {
 } from './base';
 
 // export * from './audio.schema'; // Descomentar cuando se creen los esquemas Zod
+
+export {
+    AUDIO_SORT_PROPERTY_MAP,
+    AudioSortCriteria,
+    AudioViewMode
+} from './types';
+
