@@ -1,5 +1,6 @@
 'use client';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
 	AlbumIcon,
 	BookIcon,
@@ -19,7 +20,6 @@ import {
 	WandIcon,
 } from 'lucide-react';
 import * as React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { cn } from '@/lib/utils';
 import { AlbumsSettings } from './albums/albums-settings';
@@ -28,7 +28,7 @@ import { CharactersSettings } from './characters/characters-settings';
 import { CollectionsSettings } from './collections/collections-settings';
 import { ConceptsSettings } from './concepts/concepts-settings';
 import { DocumentSettings } from './document/document-settings';
-import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings';
+// import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings'; // TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE
 import { File3DSettings } from './file3d/file3d-settings';
 import { FoldersSettings } from './folders/folders-settings';
 import { GroupsSettings } from './groups/groups-settings';
@@ -299,7 +299,7 @@ export function SettingsView() {
 					</TabsContent>
 
 					<TabsContent value="entities-cards" className="h-full w-full p-6 m-0 border-none">
-						<EntitiesCardsSettings />
+						{/* <EntitiesCardsSettings /> */} {/* TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE */}
 					</TabsContent>
 
 					<TabsContent value="albums" className="h-full w-full p-6 m-0 border-none">

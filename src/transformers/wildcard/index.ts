@@ -11,3 +11,5 @@ export {
     toWildcardWithStats
 } from './mappers';
 
+export { fromPrismaWildcard, transformWildcard, type WildcardComplete } from './transformer';
+
