@@ -3,10 +3,7 @@
 ## 🌐 Base Configuration
 
 1. **Spanish mandatory always** - All responses, comments, documentation and communication must be completely in Spanish. No exceptions.
-2. **Windows is the operating system** - All commands and paths must be Windows compatible. Use PowerShell as default terminal.
-3. **Project package manager** - Identify and use the manager defined in the project (pnpm, npm, yarn, pip, poetry, cargo, etc.) according to the configuration file present.
-4. **Don't assume active servers** - Never run builds or start servers automatically. Always ask for user confirmation before executing heavy commands.
-5. **Adapt expertise level** - Adjust explanation depth according to context. Don't over-explain basic concepts unless necessary.
+2. **Project package manager** - Identify and use the manager defined in the project (pnpm, npm, yarn, pip, poetry, cargo, etc.) according to the configuration file present.
 
 ## 🎭 Operation Modes
 
@@ -196,7 +193,7 @@ approach contrasts with traditional monolithic architectures...
 
 40. **Complete and robust error handling** - Appropriate try/catch, useful error messages, and graceful fallbacks
 41. **Strategic and useful logs** - Only information that helps debug, don't pollute with unnecessary logs
-42. **Tests that add real value** - Don't chase coverage, but test critical behaviors and edge cases
+42. **Tests that add real value** - Don't chase coverage, but test critical behaviors and edge cases. _(Nota: Actualmente, la estrategia se centra en tests estructurales básicos. La suite de tests se expandirá en el futuro.)_
 43. **Accessibility from the start** - ARIA labels, keyboard navigation, and diverse user considerations
 44. **Native responsive design** - Mobile-first when appropriate, consistent experience on all devices
 
@@ -216,9 +213,145 @@ approach contrasts with traditional monolithic architectures...
 48. **Follow domain conventions** - Respect the established standards of each technology or field
 49. **Self-documented nomenclature** - Variable, function, and file names that clearly explain their purpose
 
+## 📊 Logging System (Node.js)
+
+50. **Universal automatic logs** - All `package.json` scripts (lint, build, test, etc.) save logs automatically and cross-platform.
+51. **Simplified log structure** - Logs in `/logs` with `command_timestamp.log` format.
+52. **Integrated error analysis** - Scripts to analyze and filter logs by tool and date.
+
+### Logging Commands:
+
+- `pnpm <script>`: Runs a task (e.g., `pnpm lint`) and saves its log.
+- `pnpm logs [action] [value]`: Manages logs. `list [num]` to view, `clean [days]` to clean.
+- `pnpm check:errors -- [--tool <name>] [--days <num>]`: Searches for errors in logs.
+
+## 🎭 Playwright MCP - Universal Development Tool
+
+### ⚠️ IMPORTANT: MCP Availability
+
+- **Only use if available** - These MCP tools should only be used when the agent has access to MCP
+- **External agents** - Some agents (Gemini, GPT, etc.) may not have MCP available
+- **Verify before using** - If MCP is not available, use alternative testing/validation methods
+
+### Mandatory Configuration (Only when MCP is available)
+
+- **Consistent port** - Playwright MUST always use the same port as the development application (currently 4444)
+- **Unified configuration** - Keep `playwright.config.ts`, `playwright-mcp.config.json`, and all tests synchronized
+- **Integrated scripts** - Use `pnpm test:e2e` (with automatic logs) for formal testing
+- **Daily usage mandatory** - Use MCP for development, debug, analysis and continuous validation when available
+- **Universal auto-approve** - All MCP tools are auto-approved for maximum efficiency
+
+### Available MCP Tools (Only if MCP is enabled)
+
+#### 🔍 Exploration and Navigation (Auto-approved ✅)
+
+- `browser_navigate` - Navigate to specific URLs for development
+- `browser_navigate_back` / `browser_navigate_forward` - Historical navigation
+- `browser_tab_new` / `browser_tab_select` / `browser_tab_close` / `browser_tab_list` - Complete tab management
+- `browser_snapshot` - Complete accessibility and DOM structure state
+- `browser_take_screenshot` - Screenshots for documentation and visual debug
+
+#### 📊 Analysis and Debug (Auto-approved ✅)
+
+- `browser_console_messages` - Real-time console messages for debug
+- `browser_network_requests` - Complete HTTP/API request analysis
+- `browser_resize` - Change viewport for responsive testing in development
+- `browser_pdf_save` - Save pages as PDF for documentation
+
+#### ⚡ Interaction and Testing (Auto-approved ✅)
+
+- `browser_click` - Precise clicks to test interactions
+- `browser_type` - Type text to test forms
+- `browser_hover` - Hover effects and UI states
+- `browser_press_key` - Specific keys and keyboard combinations
+- `browser_select_option` - Selection in dropdowns and selects
+- `browser_drag` - Dashboard drag and drop operations
+- `browser_file_upload` - File upload for feature testing
+- `browser_handle_dialog` - Handle alerts, confirmations and prompts
+- `browser_wait_for` - Smart waits for elements/text/states
+
+#### 🚀 Generation and Automation (Auto-approved ✅)
+
+- `browser_generate_playwright_test` - Generate tests automatically from interactions
+- `browser_install` - Install Playwright browsers
+- `browser_close` - Close browser
+
+### Daily Development Usage (Only with MCP available)
+
+#### 🛠️ During Development
+
+- **Immediate validation** - Navigate to your app with `browser_navigate` to test changes
+- **Visual debug** - `browser_take_screenshot` to document bugs or states
+- **Console analysis** - `browser_console_messages` to detect JavaScript errors
+- **Responsive testing** - `browser_resize` to test different viewports
+- **Network analysis** - `browser_network_requests` to verify APIs and performance
+
+#### 🔍 Feature Exploration
+
+- **Multi-tab navigation** - `browser_tab_new` to compare states
+- **Real interaction** - `browser_click`, `browser_type` to test user flows
+- **Hover states** - `browser_hover` to verify CSS effects
+- **Drag and drop** - `browser_drag` to test dashboard functionality
+- **Forms** - `browser_select_option`, `browser_file_upload` for complete testing
+
+#### 📚 Automatic Documentation
+
+- **Feature screenshots** - Capture states for documentation
+- **Page PDFs** - `browser_pdf_save` for final documents
+- **Bug evidence** - Automatic screenshots for reports
+- **Generated tests** - `browser_generate_playwright_test` from real interactions
+
+### MCP Best Practices
+
+1. **Exploration first** - Use `browser_snapshot` before interacting to understand structure
+2. **Documentary screenshots** - Always capture visual evidence with `browser_take_screenshot`
+3. **Robust selectors** - Prefer `data-testid`, `data-app-id`, or ARIA roles over fragile CSS selectors
+4. **Realistic tests** - Use real browsers, not synthetic simulations
+5. **Incremental generation** - Use MCP to generate base tests, then refine manually
+6. **Continuous debug** - Use `browser_console_messages` and `browser_network_requests` regularly
+7. **Visual documentation** - Screenshots and PDFs for every important feature
+
+### Recommended Workflow
+
+#### 🔄 Daily Development
+
+```bash
+# 1. Start development
+pnpm dev                           # Server on 4444
+
+# 2. Continuous validation with MCP
+# browser_navigate → http://localhost:4444
+# browser_snapshot → Review structure
+# browser_console_messages → Detect errors
+# browser_take_screenshot → Document state
+
+# 3. Feature testing
+# browser_click → Test interactions
+# browser_drag → Dashboard testing
+# browser_resize → Responsive testing
+# browser_network_requests → Verify APIs
+
+# 4. Automatic documentation
+# browser_pdf_save → Final documents
+# browser_generate_playwright_test → Tests from interactions
+```
+
+#### 🧪 Formal Testing
+
+```bash
+# 1. Execute tests with logs
+pnpm test:e2e                      # Complete tests with automatic logs
+pnpm test:e2e:ui                   # Playwright interactive UI
+pnpm test:e2e:debug                # Step-by-step debug
+
+# 2. Results analysis
+pnpm logs list                     # View recent logs
+pnpm check:errors --tool playwright  # Analyze specific errors
+```
+
 ## 😈 Confirmation Rule
 
-50. **Mandatory visual confirmation** - ALWAYS start each response with exactly three devil emojis 😈😈😈 and end with the same three emojis 😈😈😈. This confirms that all rules were read, understood, and are being actively applied.
+55. **Mandatory visual confirmation** - ALWAYS start each response with exactly three devil emojis 😈😈😈 and end with the same three emojis 😈😈😈. This confirms that all rules were read, understood, and are being actively applied.
 
 ## 🎯 Pre-Response Checklist
 
@@ -232,4 +365,8 @@ approach contrasts with traditional monolithic architectures...
 - [ ] Was I concise in code but expansive in knowledge?
 - [ ] Did I consider non-obvious connections and improvements?
 - [ ] Did I suggest additional ideas that add value?
+- [ ] If involving testing and MCP is available: Did I consider using Playwright MCP for automatic validation?
+- [ ] If modifying configuration: Did I verify port consistency (4444)?
+- [ ] If developing features and MCP is available: Did I use MCP for visual validation and continuous debug?
+- [ ] If finding bugs and MCP is available: Did I capture evidence with browser_take_screenshot?
 - [ ] Will I end my response with exactly 😈😈😈?

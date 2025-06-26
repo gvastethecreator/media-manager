@@ -1,18 +1,20 @@
 /**
- * @file Transformador principal para la entidad Video.
+ * @file Transformer optimizado para la entidad Video
  * @module transformers/video/transformer
- * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
- * @updated 2025-01-24
+ * @description Transforma videos de Prisma a VideoWithStats con análisis técnico avanzado
+ * Última refactorización: 2025-01-27
  */
+
+'use server';
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
     PrismaVideoWithCounts,
     VideoComplete,
+    VideoQuality,
     VideoStatistics,
     VideoWithStats
 } from '@/types/entities/video/types';
-import { VideoQuality } from '@/types/entities/video/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
@@ -54,12 +56,13 @@ type VideoFromPrisma = Prisma.VideoGetPayload<{
 }>;
 
 /**
- * 🎬 Transforma un objeto de video de Prisma a VideoWithStats, * calculando todas las estadísticas y análisis técnico.
+ * 🎬 Transforma un objeto de video de Prisma a VideoWithStats,
+ * calculando todas las estadísticas y análisis técnico.
  *
  * @param prismaVideo - El objeto de video obtenido de Prisma, con los conteos.
  * @returns Un objeto VideoWithStats completo y optimizado.
  */
-function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): VideoWithStats {
+export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): VideoWithStats {
 	if (!prismaVideo) {
 		throw new TransformerError('Video de Prisma es null o undefined');
 	}
@@ -217,7 +220,7 @@ function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): VideoWit
  * 🎬 Función legacy para compatibilidad con otros transformers
  * @deprecated Usar fromPrismaVideoWithCounts para mejor rendimiento
  */
-function fromPrismaVideo(videoFromPrisma: VideoFromPrisma | null): VideoComplete | null {
+export function fromPrismaVideo(videoFromPrisma: VideoFromPrisma | null): VideoComplete | null {
 	if (!videoFromPrisma) return null;
 
 	try {
@@ -267,7 +270,7 @@ function fromPrismaVideo(videoFromPrisma: VideoFromPrisma | null): VideoComplete
  * 🎬 Función legacy para múltiples videos
  * @deprecated Usar fromPrismaVideosWithCounts para mejor rendimiento
  */
-function fromPrismaVideos(videos: VideoFromPrisma[]): VideoComplete[] {
+export function fromPrismaVideos(videos: VideoFromPrisma[]): VideoComplete[] {
 	if (!Array.isArray(videos)) {
 		logger.error('⚠️ Intentando transformar un array de videos inválido:', videos);
 		return [];
@@ -281,12 +284,13 @@ function fromPrismaVideos(videos: VideoFromPrisma[]): VideoComplete[] {
 	}
 }
 
-/** * 🎬 Transforma múltiples videos de Prisma.
+/**
+ * 🎬 Transforma múltiples videos de Prisma.
  *
  * @param videos Array de videos de Prisma.
  * @returns Array de videos transformados a VideoWithStats.
  */
-function fromPrismaVideosWithCounts(videos: PrismaVideoWithCounts[]): VideoWithStats[] {
+export function fromPrismaVideosWithCounts(videos: PrismaVideoWithCounts[]): VideoWithStats[] {
 	if (!Array.isArray(videos)) {
 		logger.error('⚠️ Intentando transformar un array de videos inválido:', videos);
 		throw new TransformerError('Error transformando videos: no es un array');
@@ -301,8 +305,9 @@ function fromPrismaVideosWithCounts(videos: PrismaVideoWithCounts[]): VideoWithS
 }
 
 /**
- * 🔄 Convierte array de VideoWithStats a Record para store optimizado */
-function videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats> {
+ * 🔄 Convierte array de VideoWithStats a Record para store optimizado
+ */
+export function videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats> {
 	return videos.reduce((acc, video) => {
 		acc[video.id] = video;
 		return acc;
@@ -312,14 +317,14 @@ function videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats
 /**
  * 🔍 Obtiene video por ID desde Record (acceso O(1))
  */
-function getVideoById(videos: Record<string, VideoWithStats>, id: string): VideoWithStats | undefined {
+export function getVideoById(videos: Record<string, VideoWithStats>, id: string): VideoWithStats | undefined {
 	return videos[id];
 }
 
 /**
  * 📋 Convierte Record a array para iteración
  */
-function getAllVideos(videos: Record<string, VideoWithStats>): VideoWithStats[] {
+export function getAllVideos(videos: Record<string, VideoWithStats>): VideoWithStats[] {
 	return Object.values(videos);
 }
 
@@ -432,7 +437,8 @@ function parseVideoMetadata(metadataStr: string | null): any {
 	if (!metadataStr) return null;
 
 	try {
-		return JSON.parse(metadataStr);	} catch {
+		return JSON.parse(metadataStr);
+	} catch (error) {
 		logger.warn('⚠️ JSON inválido para metadatos de video:', metadataStr);
 		return null;
 	}
@@ -490,7 +496,7 @@ function formatFileSize(bytes: number): string {
 	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -526,19 +532,3 @@ function getQualityLabel(qualityLevel: VideoQuality, technicalGrade: string): st
 
 	return `${qualityMap[qualityLevel]} (${technicalGrade})`;
 }
-
-// === NAMESPACE DE EXPORTACIÓN ===
-// Esta estructura evita que Next.js detecte el archivo como Server Action
-
-/**
- * VideoTransformer - Namespace que contiene todas las funciones de transformación para videos
- */
-export const VideoTransformer = {
-	fromPrismaVideoWithCounts,
-	fromPrismaVideo,
-	fromPrismaVideos,
-	fromPrismaVideosWithCounts,
-	videosToRecord,
-	getVideoById,
-	getAllVideos
-} as const;

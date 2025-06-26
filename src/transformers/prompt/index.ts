@@ -25,36 +25,27 @@ import {
 } from './serializers';
 
 // Importar funciones del transformer
-export { PromptTransformer } from './transformer';
-
-import { PromptTransformer } from './transformer';
+import {
+    fromPrismaPrompt,
+    fromPrismaPrompts
+} from './transformer';
 
 // Exportar funciones individuales
 export {
     // Serializers
     deserializeParameters,
     deserializeTags,
-    serializeParameters,
-    serializeTags,
     // Mappers
     filterPrompts,
-    mapCreatePromptDataToPrisma,
-    mapPromptsToRelated,
-    mapPromptToRelated,
-    mapUpdatePromptDataToPrisma,
-    paginatePrompts,
-    processPrompts,
-    sortPrompts,
-    toPromptWithStats
-};
-
-// Re-exportar funciones del transformer para compatibilidad
-export const {
+    // Transformers
     fromPrismaPrompt,
-    fromPrismaPrompts
-} = PromptTransformer;
-
-// Aliases para compatibilidad con código existente
-export const transformPrompt = fromPrismaPrompt;
-export const transformPrompts = fromPrismaPrompts;
+    fromPrismaPrompts, mapCreatePromptDataToPrisma, mapPromptsToRelated, mapPromptToRelated, mapUpdatePromptDataToPrisma,
+    paginatePrompts,
+    processPrompts, serializeParameters,
+    serializeTags, sortPrompts,
+    toPromptWithStats,
+    // Aliases para compatibilidad
+    fromPrismaPrompt as transformPrompt,
+    fromPrismaPrompts as transformPrompts
+};
 

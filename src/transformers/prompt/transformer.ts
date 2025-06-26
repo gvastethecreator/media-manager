@@ -4,6 +4,8 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
+'use server';
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PromptComplete, PromptFromPrisma } from '@/types/entities/prompt';
 import type { PropertyComplete } from '@/types/entities/property';
@@ -79,7 +81,7 @@ export const promptPayload = {
 /**
  * 🤖 Transforma un prompt de Prisma a PromptComplete
  */
-function fromPrismaPrompt(promptFromPrisma: PromptFromPrisma | null): PromptComplete | null {
+export function fromPrismaPrompt(promptFromPrisma: PromptFromPrisma | null): PromptComplete | null {
 	if (!promptFromPrisma) {
 		promptTransformerLogger.warn('⚠️ Prompt de Prisma nulo o indefinido');
 		return null;
@@ -133,21 +135,10 @@ function fromPrismaPrompt(promptFromPrisma: PromptFromPrisma | null): PromptComp
  * @param prismaPrompts - Un array de objetos Prompt de Prisma.
  * @returns Un array de objetos PromptComplete.
  */
-function fromPrismaPrompts(prismaPrompts: PromptFromPrisma[]): PromptComplete[] {
+export function fromPrismaPrompts(prismaPrompts: PromptFromPrisma[]): PromptComplete[] {
 	return prismaPrompts.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null);
 }
 
-// === NAMESPACE DE EXPORTACIÓN ===
-// Esta estructura evita que Next.js detecte el archivo como Server Action
-
-/**
- * PromptTransformer - Namespace que contiene todas las funciones de transformación para prompts
- */
-export const PromptTransformer = {
-	fromPrismaPrompt,
-	fromPrismaPrompts
-} as const;
-
 // Alias para compatibilidad con código existente
-export const transformPrompt = PromptTransformer.fromPrismaPrompt;
-export const transformPrompts = PromptTransformer.fromPrismaPrompts;
+export const transformPrompt = fromPrismaPrompt;
+export const transformPrompts = fromPrismaPrompts;

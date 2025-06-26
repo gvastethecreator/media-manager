@@ -250,13 +250,7 @@ Los próximos pasos incluyen:
 
 ## Testing
 
-La configuración de Jest se actualizó para transformar dependencias como `nanoid`
-y se añadió un polyfill de `TextEncoder` en `jest.setup.ts`.
-Se incorporaron pruebas unitarias para los selectores del store de perfiles y se
-mejoró el mock de `PrismaClient` para permitir la inicialización en entornos de
-test.
-Se añadió la dependencia @testing-library/user-event para pruebas de interacción.
-Todas las suites de Jest se ejecutan sin fallos tras ajustar los mocks y componentes.
+Sistema de testing configurado con Playwright para pruebas end-to-end.
 
 ## Licencia
 
@@ -265,49 +259,3 @@ Este proyecto está licenciado bajo [MIT License](LICENSE).
 ## Contacto
 
 Para más información, contáctanos en [tu-email@ejemplo.com](mailto:tu-email@ejemplo.com).
-
-# Hallazgos y convenciones recientes sobre tests de tarjetas y servicios (junio 2025)
-
-## Resumen de problemas detectados
-
-- Los tests de tarjetas (`TagCard`, `FolderCard`, etc.) usaban selectores y asserts que no coincidían con el markup real: buscaban enlaces `<a>` cuando el componente renderiza `<button>` o `<article>` si hay `onClick`.
-- Los asserts de badges de favorito y skeletons buscaban data-testid o clases que no existen; en el markup real se usan iconos Lucide (`Heart`, `Star`).
-- Los mocks de funciones asíncronas (ej. `getFolderStats`, `getRecentFolderImages`) no siempre se llamaban correctamente por diferencias en el flujo de datos simulado vs. real.
-- El archivo `use-folder-images.test.ts` estaba duplicado y con errores de sintaxis; fue eliminado.
-- El test funcional de servicios (`folder.service.functional.test.ts`) tenía problemas de rutas y moduleNameMapper, especialmente con imports de acciones y servicios.
-- Se detectaron warnings de act y errores de tipado por asserts sobre props/elementos inexistentes.
-
-## Soluciones aplicadas
-
-- Se corrigieron los selectores y asserts en los tests de tarjetas para que coincidan con el markup real:
-  - Los clicks se hacen sobre `<button>` o `<article>` con `role=button`.
-  - Los asserts de enlaces solo se hacen cuando no hay `onClick`.
-  - Los badges de favorito se buscan por el icono Lucide correspondiente (`svg.feather-heart`, `svg.feather-star`).
-- Se ajustaron los mocks de datos y funciones asíncronas para que coincidan con los tipos y el flujo real de los componentes.
-- Se eliminó el archivo duplicado y roto `use-folder-images.test.ts`.
-- Se revisó y ajustó el `moduleNameMapper` en `jest.config.ts` para que las rutas `@/` apunten correctamente a `src/`.
-- Se documentó el plan y los cambios en `CURRENT-TASK.md`.
-
-## Convenciones y recomendaciones para el siguiente agente
-
-- Antes de modificar tests, revisar el markup real de los componentes y ajustar los selectores/asserts para que sean robustos y coincidan exactamente.
-- Usar `waitFor` para asserts asíncronos y aceptar cualquier argumento en callbacks de mocks.
-- Evitar asserts sobre props/elementos que ya no existen en el markup.
-- Mantener mocks globales en `jest.setup.ts` para evitar errores de importación de código de servidor (ej. prisma, p-queue).
-- Validar siempre la suite de tests completa tras cambios en los tests o el markup.
-- Documentar hallazgos y convenciones en este README y en `CURRENT-TASK.md`.
-
-## Pendiente
-
-- Validar que los tests funcionales de servicios pasen sin errores de rutas/moduleNameMapper.
-- Documentar cualquier convención nueva o hallazgo relevante tras la próxima ejecución de la suite de tests.
-
----
-
-Para más detalles, ver también:
-
-- `CURRENT-TASK.md` (plan y checklist de la tarea)
-- `TRANSFORMERS-FIX.md` (convenciones de testing y mocks globales)
-- `AGENTS.md` (reglas de colaboración y traspaso de contexto)
-- `FOLDER-FIX-SUMMARY.md` (resumen de la corrección de indexación de carpetas)
-- `RESUMEN-VERIFICACION-TARJETAS.md` (detalles de las pruebas de tarjetas)
