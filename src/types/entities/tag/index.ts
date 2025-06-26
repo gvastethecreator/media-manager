@@ -30,10 +30,3 @@ export {
     TagSchema
 } from './schema';
 
-// --- Enums y Constantes ---
-export {
-    TAG_SORT_PROPERTY_MAP,
-    TagSortCriteria,
-    TagViewMode
-} from './types';
-

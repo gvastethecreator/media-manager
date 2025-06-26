@@ -3,15 +3,17 @@ description:
 globs:
 alwaysApply: true
 ---
-# MANDATORY RULES
+# REGLAS OBLIGATORIAS PARA EL WORKFLOW - cada una de estas reglas debe respetarse de forma consistente.
 
 ## 🌐 Base Configuration
 
-1. **Spanish mandatory always** - All responses, comments, documentation and communication must be completely in Spanish. No exceptions.
-2. **Windows is the operating system** - All commands and paths must be Windows compatible. Use PowerShell as default terminal.
-3. **Project package manager** - Identify and use the manager defined in the project (pnpm, npm, yarn, pip, poetry, cargo, etc.) according to the configuration file present.
-4. **Don't assume active servers** - Never run builds or start servers automatically. Always ask for user confirmation before executing heavy commands.
-5. **Adapt expertise level** - Adjust explanation depth according to context. Don't over-explain basic concepts unless necessary.
+1. **Español obligatorio** - Todas las respuestas, comentarios, documentación, etc. deben estar completamente en español.
+2. **Windows SIEMPRE** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell Core (pwsh) como terminal por defecto.
+3. **Gestor de paquetes del proyecto** - Identificar y usar el gestor definido en el proyecto según el archivo de configuración presente.
+4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
+5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
+6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
+7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
 
 ## 🎭 Operation Modes
 
@@ -162,8 +164,7 @@ approach contrasts with traditional monolithic architectures...
 
 - **Decoupling**: Each service is independent and can evolve separately
 - **Granular scalability**: Only the services that need it can be scaled
-- **Resilience**: The failure of one service doesn't bring down the entire application
-- **Heterogeneous technology**: Each service can use the most appropriate stack
+- **Resilience**: The faiwn erogeneous technology**: Each service can use the most appropriate stack
 
 ## Connections
 
@@ -221,9 +222,21 @@ approach contrasts with traditional monolithic architectures...
 48. **Follow domain conventions** - Respect the established standards of each technology or field
 49. **Self-documented nomenclature** - Variable, function, and file names that clearly explain their purpose
 
+## 📊 Logging System (Node.js)
+
+50. **Universal automatic logs** - All `package.json` scripts (lint, build, test, etc.) save logs automatically and cross-platform.
+51. **Simplified log structure** - Logs in `/logs` with `command_timestamp.log` format. No `:direct` versions needed.
+52. **Integrated error analysis** - Scripts to analyze and filter logs by tool and date.
+
+### Logging Commands:
+
+- `pnpm <script>`: Runs a task (e.g., `pnpm lint`) and saves its log.
+- `pnpm logs [action] [value]`: Manages logs. `list [num]` to view, `clean [days]` to clean.
+- `pnpm check:errors -- [--tool <name>] [--days <num>]`: Searches for errors in logs.
+
 ## 😈 Confirmation Rule
 
-50. **Mandatory visual confirmation** - ALWAYS start each response with exactly three devil emojis 😈😈😈 and end with the same three emojis 😈😈😈. This confirms that all rules were read, understood, and are being actively applied.
+55. **Mandatory visual confirmation** - ALWAYS start each response with exactly three devil emojis 😈😈😈 and end with the same three emojis 😈😈😈. This confirms that all rules were read, understood, and are being actively applied.
 
 ## 🎯 Pre-Response Checklist
 

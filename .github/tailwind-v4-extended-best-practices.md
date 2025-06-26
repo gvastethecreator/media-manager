@@ -24,7 +24,7 @@ globs: '**/*.{html,js,jsx,ts,tsx,vue,svelte,css,scss,sass,md,mdx,php,blade.php,e
 ## Styling (CSS Files)
 - Incorporate 3D transform utilities like `rotate-x-*`, `rotate-y-*`, and `scale-z-*` for advanced visual effects
 - Implement container queries with `@container`, `@max-*`, and `@min-*` utilities for adaptive layouts
-- Use arbitrary values and properties with square bracket notation (e.g., `[mask-type:luminance]` or `top-[117px]`)
+- Use arbitrary values and properties with square bracket notation (e.g., `mask-type-luminance` or `top-[117px]`)
 - Apply modifiers like `hover` or `lg` with arbitrary values for flexible styling
 - Use the `not-*` variant for `:not()` pseudo-classes and the `starting` variant for `@starting-style`
 - Check browser support for advanced features like `@starting-style` using resources like caniuse
@@ -47,7 +47,7 @@ globs: '**/*.{html,js,jsx,ts,tsx,vue,svelte,css,scss,sass,md,mdx,php,blade.php,e
 - Leverage the Oxide engine's fast build times for performance optimization
 - Avoid manual content configuration unless explicitly required
 - Maintain consistency by using theme variables defined in CSS configuration files
-- Reference theme variables in both utility classes and custom CSS (e.g., `text-[--color-primary]`)
+- Reference theme variables in both utility classes and custom CSS (e.g., `text-primary`)
 - Update rules regularly to reflect Tailwind v4's evolving feature set
 - Be aware of deprecated options from v3.x like `text-opacity`
 
