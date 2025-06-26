@@ -1,12 +1,12 @@
-# REGLAS OBLIGATORIAS
+# REGLAS OBLIGATORIAS PARA EL WORKFLOW - cada una de estas reglas debe respetarse de forma consistente.
 
-## 🌐 Configuración Base
-
-1. **Español obligatorio siempre** - Todas las respuestas, comentarios, documentación y comunicación deben estar completamente en español. Sin excepciones.
-2. **Windows es el sistema operativo** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell como terminal por defecto.
-3. **Gestor de paquetes del proyecto** - Identificar y usar el gestor definido en el proyecto (pnpm, npm, yarn, pip, poetry, cargo, etc.) según el archivo de configuración presente.
-4. **No asumir servidores activos** - Nunca ejecutar builds o iniciar servidores automáticamente. Siempre pedir confirmación al usuario antes de ejecutar comandos pesados.
-5. **Adaptar nivel de expertise** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
+1. **Español obligatorio** - Todas las respuestas, comentarios, documentación, etc. deben estar completamente en español.
+2. **Windows SIEMPRE** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell Core (pwsh) como terminal por defecto.
+3. **Gestor de paquetes del proyecto** - Identificar y usar el gestor definido en el proyecto según el archivo de configuración presente.
+4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
+5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
+6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
+7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
 
 ## 🎭 Modos de Operación
 
@@ -16,8 +16,10 @@
 - **Eficiencia máxima en cambios** - Mostrar solo las modificaciones necesarias, no repetir código completo
 - **Documentación técnica precisa** - Comentarios claros pero concisos que expliquen el "por qué" del código
 - **Enfoque en mejores prácticas** - Aplicar patrones y convenciones estándar del lenguaje/framework
+- **Uso obligatorio de scripts** - Usar `pnpm lint`, `pnpm test`, `pnpm check`, etc. en lugar de comandos directos. Los logs se guardan automáticamente en `/logs`
+- **Gestión de logs integrada** - Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores con filtros por herramienta y días
 
-### Modo Conocimiento (Obsidian, Documentación, Investigación)
+### Modo Conocimiento (Obsidian, Documentación, Investigación, Conocimiento)
 
 - **Ser expansivo y explorador** - Desarrollar ideas en profundidad, explorar múltiples ángulos y perspectivas
 - **Creatividad y conexiones** - Proponer vínculos interesantes entre conceptos, incluso si no son obvios inicialmente
@@ -27,11 +29,11 @@
 
 ## 📋 Gestión de Tareas
 
-6. **Un archivo de tarea activa** - Mantener solamente UNA tarea activa a la vez en el archivo principal, con todo el contexto necesario para comprenderla completamente
-7. **Identificadores secuenciales claros** - Usar IDs numéricos de 3 dígitos (001, 002, etc.) que se incrementen secuencialmente para cada nueva tarea
-8. **Metadata doble para clasificación** - Cada tarea debe tener [PRIORIDAD] y [COMPLEJIDAD] para facilitar la gestión y priorización
-9. **Archivar tareas completadas** - Mover las tareas terminadas a una carpeta de archivo con nomenclatura clara: [ID]-nombre-descriptivo.md
-10. **Diagramas obligatorios según contexto** - Incluir diagramas Mermaid para código/flujos técnicos, o mapas mentales para gestión de conocimiento
+- **Un archivo de tarea activa** - Mantener solamente UNA tarea activa a la vez en el archivo principal, con todo el contexto necesario para comprenderla completamente
+- **Identificadores secuenciales claros** - Usar IDs numéricos de 3 dígitos (001, 002, etc.) que se incrementen secuencialmente para cada nueva tarea
+- **Metadata doble para clasificación** - Cada tarea debe tener [PRIORIDAD] y [COMPLEJIDAD] para facilitar la gestión y priorización
+- **Archivar tareas completadas** - Mover las tareas terminadas a una carpeta de archivo con nomenclatura clara: [ID]-nombre-descriptivo.md
+- **Diagramas obligatorios según contexto** - Incluir diagramas Mermaid para código/flujos técnicos, o mapas mentales para gestión de conocimiento
 
 ### Sistema de Prioridades:
 
@@ -66,19 +68,21 @@
 
 ## 💻 Desarrollo
 
-22. **Comentarios significativos y útiles** - Usar las convenciones del proyecto y agregar valor real, no comentarios obvios
-23. **Documentación de API completa** - Seguir el estándar del lenguaje (JSDoc, docstrings, rustdoc, etc.) con ejemplos cuando sea útil
-24. **Formato consistente del proyecto** - Respetar prettier, black, rustfmt o cualquier formateador configurado
-25. **Maximizar type safety** - Usar tipos estrictos, evitar any/unknown, definir interfaces claras
-26. **Organización lógica de imports** - Seguir la convención del proyecto, generalmente: externos → internos → locales
+- **Scripts inteligentes primero** - SIEMPRE usar `pnpm lint`, `pnpm test`, `pnpm check`, etc. Los scripts manejan automáticamente logging y códigos de salida tolerantes
+- **Análisis de errores con logs** - Usar `pnpm logs` y `pnpm check:errors` para analizar issues en lugar de ejecutar comandos directos
+- **Comentarios significativos y útiles** - Usar las convenciones del proyecto y agregar valor real, no comentarios obvios
+- **Documentación de API completa** - Seguir el estándar del lenguaje (JSDoc, docstrings, rustdoc, etc.) con ejemplos cuando sea útil
+- **Formato consistente del proyecto** - Respetar prettier, black, rustfmt o cualquier formateador configurado
+- **Maximizar type safety** - Usar tipos estrictos, evitar any/unknown, definir interfaces claras
+- **Organización lógica de imports** - Seguir la convención del proyecto, generalmente: externos → internos → locales
 
 ## 📚 Documentación
 
-### Para proyectos de código:
+### Para proyectos de código
 
-27. **README contextual y útil** - Crear o actualizar READMEs que realmente ayuden a entender y usar el código
-28. **Documentar stack tecnológico** - Listar todas las dependencias principales con sus versiones y propósito
-29. **Configuración clara y completa** - Documentar todos los scripts disponibles, variables de entorno necesarias, y pasos de setup
+- **README contextual y útil** - Crear o actualizar READMEs que realmente ayuden a entender y usar el código
+- **Documentar stack tecnológico** - Listar todas las dependencias principales con sus versiones y propósito
+- **Configuración clara y completa** - Documentar todos los scripts disponibles, variables de entorno necesarias, y pasos de setup
 
 ### Para bases de conocimiento:
 
@@ -216,9 +220,183 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 48. **Seguir convenciones del dominio** - Respetar los estándares establecidos de cada tecnología o campo
 49. **Nomenclatura autodocumentada** - Nombres de variables, funciones y archivos que expliquen claramente su propósito
 
+## 📊 Sistema de Logging Inteligente
+
+- **Scripts tolerantes automáticos** - Todos los scripts usan `run-with-log.js` que detecta automáticamente comandos de linting/testing y maneja códigos de salida apropiadamente
+- **Logs organizados** - Todos los logs se guardan automáticamente en `/logs` con formato `comando_timestamp.log` y `comando_timestamp_error.log` para errores críticos
+- **Análisis de errores integrado** - Scripts dedicados para analizar y filtrar logs por herramienta, fecha y tipo de error
+
+### Comandos del Sistema
+
+#### Ejecución (siempre usa estos)
+
+- `pnpm lint` / `pnpm check` / `pnpm test` - Ejecuta con logging automático y tolerancia inteligente
+- `pnpm biome:fix` / `pnpm lint:fix` - Arregla issues automáticamente con logs
+
+#### Análisis de logs
+
+- `pnpm logs list [num]` - Lista logs recientes (por defecto 10)
+- `pnpm logs clean [días]` - Limpia logs antiguos (por defecto 7 días)
+- `pnpm check:errors` - Busca errores en logs del último día
+- `pnpm check:errors --tool biome --days 3` - Busca errores específicos
+
+#### Comportamiento inteligente
+
+- **Linting/Testing**: Exit code 1 → ⚠️ Issues encontrados (normal, no falla pnpm)
+- **Builds/Deploy**: Exit code 1 → ❌ Error crítico (falla pnpm como debe ser)
+- **Dependencias faltantes**: Siempre → ❌ Error crítico + sugerencia `pnpm install`
+
+## 🎭 Playwright MCP - Herramienta Universal de Desarrollo
+
+### Configuración Obligatoria
+
+- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 4444)
+- **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
+- **Scripts integrados** - Usar `pnpm test:e2e` (con logs automáticos) para testing formal
+- **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua
+
+### Herramientas MCP Disponibles
+
+#### 🔍 Exploración y Navegación (Auto-aprobadas)
+
+- `browser_navigate` - Navegar a URLs específicas para desarrollo
+- `browser_navigate_back` / `browser_navigate_forward` - Navegación histórica
+- `browser_tab_new` / `browser_tab_select` / `browser_tab_close` / `browser_tab_list` - Gestión completa de pestañas
+- `browser_snapshot` - Estado completo de accesibilidad y estructura DOM
+- `browser_take_screenshot` - Screenshots para documentación y debug visual
+
+#### 📊 Análisis y Debug (Auto-aprobadas)
+
+- `browser_console_messages` - Mensajes de consola en tiempo real para debug
+- `browser_network_requests` - Análisis completo de requests HTTP/API
+- `browser_resize` - Cambiar viewport para testing responsive en desarrollo
+- `browser_pdf_save` - Guardar páginas como PDF para documentación
+
+#### ⚡ Interacción y Testing (Auto-aprobadas ✅)
+
+- `browser_click` - Clicks precisos para probar interacciones
+- `browser_type` - Escribir texto para probar formularios
+- `browser_hover` - Efectos hover y estados de UI
+- `browser_press_key` - Teclas específicas y combinaciones de teclado
+- `browser_select_option` - Selección en dropdowns y selects
+- `browser_drag` - Operaciones de drag and drop del dashboard
+- `browser_file_upload` - Subida de archivos para testing de features
+- `browser_handle_dialog` - Manejo de alertas, confirmaciones y prompts
+- `browser_wait_for` - Esperas inteligentes por elementos/texto/estados
+
+#### 🚀 Generación y Automatización (Auto-aprobadas ✅)
+
+- `browser_generate_playwright_test` - Generar tests automáticamente desde interacciones
+- `browser_install` - Instalar navegadores de Playwright
+- `browser_close` - Cerrar navegador
+
+### Usos Diarios de Desarrollo (Obligatorio)
+
+#### 🛠️ Durante el Desarrollo
+
+- **Validación inmediata** - Navegar a tu app con `browser_navigate` para probar cambios
+- **Debug visual** - `browser_take_screenshot` para documentar bugs o estados
+- **Análisis de consola** - `browser_console_messages` para detectar errores JavaScript
+- **Testing responsive** - `browser_resize` para probar diferentes viewports
+- **Análisis de red** - `browser_network_requests` para verificar APIs y performance
+
+#### 🔍 Exploración de Features
+
+- **Navegación multi-pestaña** - `browser_tab_new` para comparar estados
+- **Interacción real** - `browser_click`, `browser_type` para probar flujos de usuario
+- **Estados hover** - `browser_hover` para verificar efectos CSS
+- **Drag and drop** - `browser_drag` para probar funcionalidad del dashboard
+- **Formularios** - `browser_select_option`, `browser_file_upload` para testing completo
+
+#### 📚 Documentación Automática
+
+- **Screenshots de features** - Capturar estados para documentación
+- **PDFs de páginas** - `browser_pdf_save` para documentos finales
+- **Evidencia de bugs** - Screenshots automáticos para reportes
+- **Tests generados** - `browser_generate_playwright_test` desde interacciones reales
+
+### Mejores Prácticas MCP
+
+1. **Exploración primero** - Usar `browser_snapshot` antes de interactuar para entender la estructura
+2. **Screenshots documentales** - Siempre capturar evidencia visual con `browser_take_screenshot`
+3. **Selectores robustos** - Preferir `data-testid`, `data-app-id`, o roles ARIA sobre selectores CSS frágiles
+4. **Tests realistas** - Usar navegadores reales, no simulaciones sintéticas
+5. **Generación incremental** - Usar MCP para generar tests base, luego refinar manualmente
+6. **Debug continuo** - Usar `browser_console_messages` y `browser_network_requests` regularmente
+7. **Documentación visual** - Screenshots y PDFs para cada feature importante
+
+### Flujo de Trabajo Recomendado
+
+#### 🔄 Desarrollo Diario
+
+```bash
+# 1. Iniciar desarrollo
+pnpm dev                           # Servidor en 4444
+
+# 2. Validación continua con MCP
+# browser_navigate → http://localhost:4444
+# browser_snapshot → Revisar estructura
+# browser_console_messages → Detectar errores
+# browser_take_screenshot → Documentar estado
+
+# 3. Testing de features
+# browser_click → Probar interacciones
+# browser_drag → Testing dashboard
+# browser_resize → Responsive testing
+# browser_network_requests → Verificar APIs
+
+# 4. Documentación automática
+# browser_pdf_save → Documentos finales
+# browser_generate_playwright_test → Tests desde interacciones
+```
+
+#### 🧪 Testing Formal
+
+```bash
+# 1. Ejecutar tests con logs
+pnpm test:e2e                      # Tests completos con logs automáticos
+pnpm test:e2e:ui                   # UI interactiva de Playwright
+pnpm test:e2e:debug                # Debug paso a paso
+
+# 2. Análisis de resultados
+pnpm logs list                     # Ver logs recientes
+pnpm check:errors --tool playwright  # Analizar errores específicos
+```
+
+### Configuración de Tests
+
+- **Estructura**: Tests en `tests/e2e/` con nombres descriptivos
+- **Formato**: Usar formato estándar `*.spec.ts` con describe/test anidados
+- **Timeouts**: Configurados para 30s por test, 120s para servidor
+- **Browsers**: Chrome (principal), Firefox, Safari (opcional)
+- **Mobile**: Tests responsive automáticos con viewports móviles
+
+### Selectores Recomendados (en orden de preferencia)
+
+1. `[data-testid="elemento"]` - IDs específicos para testing
+2. `[data-app-id="app-name"]` - IDs de aplicaciones del dashboard
+3. `role="button"`, `role="main"` - Roles ARIA semánticos
+4. `text="Texto específico"` - Texto visible (cuidado con i18n)
+5. `.clase-estable` - Clases CSS estables (último recurso)
+
+### Integración con CI/CD
+
+```yaml
+# Ejemplo para GitHub Actions
+- name: Ejecutar tests E2E
+  run: pnpm test:e2e
+
+- name: Subir screenshots de errores
+  if: failure()
+  uses: actions/upload-artifact@v3
+  with:
+    name: playwright-screenshots
+    path: test-results/
+```
+
 ## 😈 Regla de Confirmación
 
-50. **Confirmación visual obligatoria** - SIEMPRE iniciar cada respuesta con exactamente tres emojis diabólicos 😈😈😈 y terminar con los mismos tres emojis 😈😈😈. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
+- **Confirmación visual obligatoria** - SIEMPRE iniciar cada respuesta con exactamente tres emojis diabólicos 😈😈😈 y terminar con los mismos tres emojis 😈😈😈. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
 
 ## 🎯 Checklist Pre-Respuesta
 
@@ -232,4 +410,8 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 - [ ] ¿Fui conciso en código pero expansivo en conocimiento?
 - [ ] ¿Consideré conexiones y mejoras no obvias?
 - [ ] ¿Sugerí ideas adicionales que agreguen valor?
+- [ ] Si involucra testing: ¿Consideré usar Playwright MCP para validación automática?
+- [ ] Si modifiqué configuración: ¿Verifiqué consistencia de puertos (4444)?
+- [ ] Si desarrollé features: ¿Usé MCP para validación visual y debug continuo?
+- [ ] Si encontré bugs: ¿Capturé evidencia con browser_take_screenshot?
 - [ ] ¿Terminaré mi respuesta con exactamente 😈😈😈?
