@@ -12,7 +12,7 @@ import type {
     WorldItemRequirement,
     WorldItemStat
 } from '@/types/entities/world-item';
-import { safeJsonParse } from '@/lib/utils/json';
+import { safeJsonParse } from '@/utils/safe-json-parse';
 
 const logger = serverLogger.withContext('WorldItemSerializers');
 

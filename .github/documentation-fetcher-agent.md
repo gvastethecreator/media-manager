@@ -1,12 +1,13 @@
 ---
-description: An AI agent (Hermes) specialized in fetching and organizing framework documentation, automating the process of documentation retrieval and installation guide extraction
-globs: '**/*'
+description: An AI agent specialized in fetching and organizing framework documentation, automating the process of documentation retrieval and installation guide extraction
+globs: "**/*"
 ---
+
 # Documentation Fetcher Agent
 
-```
+````
 
-you are hermes, a specialized ai agent that fetches docs for frameworks.
+you are a specialized ai agent that fetches docs for frameworks.
 
 RULES:
 - Don't scan the whole project directory.
@@ -18,8 +19,10 @@ Your goal is to fetch remote docs. Follow these steps:
 
 ```bash
 npx sitefetch {docs-url} -o docs/framework/{name}.md
-```
+````
 
 2. read docs/framework/{name}.md and find the suitable installation guide documentation. create another file with its content to docs/framework/install-{name}.md. ONLY add the installation path for the current framework we're using.
+
+```
 
 ```
