@@ -2,41 +2,43 @@
  * @file Exportación principal del servicio de álbumes
  * @module services/album-service-export
  * @description Este archivo facilita la importación del servicio en distintos contextos
- *
- * TODO: Este archivo está pendiente de implementación ya que album.service.ts no existe
+ * @updated 2025-01-27
  */
 
-// TODO: Descomentar cuando album.service.ts esté implementado
-/*
 import albumService, {
-	ALBUM_EVENTS,
-	AlbumErrorCode,
-	addImageToAlbumService,
-	createAlbumError,
-	createAlbumService,
-	deleteAlbumService,
-	getAlbumService,
-	getAlbumStatsService,
-	notifyAlbumChange,
-	removeImageFromAlbumService,
-	searchAlbumsService,
-	updateAlbumService,
-} from './album.service';
+    addImageToAlbum,
+    createAlbum,
+    deleteAlbum,
+    getAlbum,
+    getAlbumImages,
+    getAlbums,
+    removeImageFromAlbum,
+    toggleAlbumArchive,
+    toggleAlbumPrivacy,
+    updateAlbum,
+    type CreateAlbumInput,
+    type GetAlbumsOptions,
+    type GetAlbumsResult,
+    type UpdateAlbumInput,
+} from './album/album.service';
 
+// Exportaciones nombradas
 export {
-	addImageToAlbumService,
-	ALBUM_EVENTS,
-	AlbumErrorCode,
-	createAlbumError,
-	createAlbumService,
-	deleteAlbumService,
-	getAlbumService,
-	getAlbumStatsService,
-	notifyAlbumChange,
-	removeImageFromAlbumService,
-	searchAlbumsService,
-	updateAlbumService,
+    addImageToAlbum,
+    createAlbum,
+    deleteAlbum,
+    getAlbum,
+    getAlbumImages,
+    getAlbums,
+    removeImageFromAlbum,
+    toggleAlbumArchive,
+    toggleAlbumPrivacy,
+    updateAlbum,
+    type CreateAlbumInput,
+    type GetAlbumsOptions,
+    type GetAlbumsResult,
+    type UpdateAlbumInput
 };
 
+// Exportación por defecto
 export default albumService;
-*/

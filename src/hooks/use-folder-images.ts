@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import { getFolderImages } from '@/app/actions/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 // Logger para depuración
 const logger = clientLogger.withContext('useFolderImages');
@@ -83,7 +83,7 @@ export function useFolderImages(folderId: string | null) {
 			? {
 					...query.data,
 					items: query.data.items.filter((img, idx) => {
-						const isValid = img && typeof img === 'object' && typeof (img as any).then !== 'function';
+						const isValid = img && typeof img === 'object' && !('then' in img && typeof img.then === 'function');
 						if (!isValid) {
 							logger.warn(`🛡️ Imagen excluida en posición ${idx}: nulo, promesa o tipo inválido`, { img });
 						}

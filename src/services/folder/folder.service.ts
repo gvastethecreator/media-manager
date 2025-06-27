@@ -60,7 +60,7 @@ export async function getFolders(parentId?: string): Promise<FolderComplete[]> {
 			orderBy: { name: 'asc' },
 			include: FOLDER_INCLUDE,
 		});
-		return fromPrismaFolders(folders as any); // 'as any' para bypasear discrepancias de tipo temporales
+		return fromPrismaFolders(folders);
 	} catch (error) {
 		logger.error('❌ Error al obtener carpetas', { error });
 		throw new Error('No se pudieron obtener las carpetas.');
@@ -79,7 +79,7 @@ export async function getFolder(id: string): Promise<FolderComplete | null> {
 			where: { id },
 			include: FOLDER_INCLUDE,
 		});
-		return folder ? fromPrismaFolder(folder as any) : null;
+		return folder ? fromPrismaFolder(folder) : null;
 	} catch (error) {
 		logger.error(`❌ Error al obtener la carpeta ${id}`, { error });
 		throw new Error('No se pudo obtener la carpeta.');
@@ -100,7 +100,7 @@ export async function createFolder(data: FolderCreateInput): Promise<FolderCompl
 			include: FOLDER_INCLUDE,
 		});
 		await revalidateFolderPaths();
-		return fromPrismaFolder(newFolder as any);
+		return fromPrismaFolder(newFolder);
 	} catch (error) {
 		logger.error('❌ Error al crear la carpeta', { error, data });
 		throw new Error('No se pudo crear la carpeta.');
@@ -123,7 +123,7 @@ export async function updateFolder(id: string, data: FolderUpdateInput): Promise
 			include: FOLDER_INCLUDE,
 		});
 		await revalidateFolderPaths(id);
-		return fromPrismaFolder(updatedFolder as any);
+		return fromPrismaFolder(updatedFolder);
 	} catch (error) {
 		logger.error(`❌ Error al actualizar la carpeta ${id}`, { error, data });
 		throw new Error('No se pudo actualizar la carpeta.');

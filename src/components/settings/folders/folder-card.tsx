@@ -14,8 +14,7 @@ import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
 import { FolderProgressDetails } from './folder-progress-details';
-import type { ExtendedFolder } from './folder-types';
-import type { ExtendedProcessStatus } from './hooks/use-folders';
+import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
 
 interface FolderCardProps {
 	folder: ExtendedFolder;

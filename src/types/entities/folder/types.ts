@@ -36,14 +36,10 @@ export interface FolderBase {
 export interface PrismaFolderWithCounts extends FolderBase {
 	parent?: FolderBase | null;
 	children?: FolderBase[];
-	images?: unknown[];
-	videos?: unknown[];
+	images?: unknown[]; // O un tipo más específico si ImageBase está disponible
 	_count: {
-		children: number;
 		images: number;
-		videos: number;
-		notes?: number;
-		documents?: number;
+		children: number;
 	};
 }
 

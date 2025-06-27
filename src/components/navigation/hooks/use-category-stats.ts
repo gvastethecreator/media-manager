@@ -54,7 +54,7 @@ export function useCategoryStats(initialData: NavigationData) {
 			if (!items) return 0;
 
 			return items.reduce((sum, item) => {
-				const count = (item as any)._count?.images ?? (item as any).imageCount ?? 0;
+				const count = item._count?.images ?? item.imageCount ?? 0;
 				return sum + (typeof count === 'number' ? count : 0);
 			}, 0);
 		},
