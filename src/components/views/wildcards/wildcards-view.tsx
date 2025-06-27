@@ -1,10 +1,7 @@
 'use client';
 
-import { WandSparkles } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
+import { WildcardCard } from '@/components/cards/wildcard-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -12,8 +9,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWildcardStore } from '@/store/entities/wildcard';
+import { WandSparkles } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
-import { WildcardCard } from './wildcard-card';
 
 // Definir el tipo para comodines con estadísticas
 export interface WildcardWithStats {
