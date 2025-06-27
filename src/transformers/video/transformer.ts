@@ -16,7 +16,7 @@ import type {
     VideoStatistics,
     VideoWithStats
 } from '@/types/entities/video/types';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('VideoTransformer');

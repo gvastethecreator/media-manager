@@ -18,7 +18,7 @@ import {
 	createServiceError,
 	ServiceErrorCode,
 	toServiceError,
-} from '@/utils/errors/service-errors';
+} from '@/lib/utils/errors/service-errors';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';

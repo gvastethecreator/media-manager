@@ -11,7 +11,7 @@ import {
     updateAudio,
 } from '@/app/actions/audio/audio.actions';
 import type { AudioWithStats } from '@/types/entities/audio';
-import { createSelectors } from '@/utils/store/create-selectors';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
 import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';

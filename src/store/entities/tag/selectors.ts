@@ -3,7 +3,7 @@
  * @module store/entities/tag/selectors
  */
 
-import { createTagsGroupedByCategory } from '@/utils/sort';
+import { createTagsGroupedByCategory } from '@/lib/utils/sort';
 import { useTagStore } from './index';
 import { TagSortCriteria, TagWithStats } from './types';
 

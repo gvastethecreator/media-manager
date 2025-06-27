@@ -13,7 +13,7 @@ import type {
     WorldItemUpdateInput,
     WorldItemWithStats
 } from '@/types/entities/world-item';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 import {
     serializeAttributes,

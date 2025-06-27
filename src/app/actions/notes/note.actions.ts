@@ -14,7 +14,7 @@ import type {
     NoteWithStats
 } from '@/types/entities/note';
 import type { FileItem } from '@/types/files';
-import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
+import { createNoteSchema, updateNoteSchema } from '@/lib/utils/note/validators';
 import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging

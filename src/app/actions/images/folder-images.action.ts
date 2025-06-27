@@ -3,7 +3,7 @@
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileItem } from '@/types/files';
-import { toServiceError } from '@/utils/errors/service-errors';
+import { toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'FolderImages';
 const folderImagesLogger = serverLogger.withContext(SERVER_ACTION_NAME);

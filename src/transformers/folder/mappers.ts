@@ -11,7 +11,7 @@ import type {
     FolderSearchOptions,
     FolderUpdateInput,
 } from '@/types/entities/folder';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma, Folder as PrismaFolder } from '@prisma/client';
 import { normalizeFolderPath } from './serializers';
 

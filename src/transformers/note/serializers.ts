@@ -12,7 +12,7 @@ import type {
 	NoteTransformerOptions,
 	NoteUpdateInput,
 } from '@/types/entities/note/types';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 
 // Logger específico para el transformer de Note
 const logger = serverLogger.withContext('NoteSerializer');

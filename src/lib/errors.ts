@@ -14,7 +14,7 @@ export {
     TypeMismatchError,
     UIError,
     ValidationError
-} from '@/utils/transformers/errors';
+} from '@/lib/utils/transformers/errors';
 
 const _errorLogger = serverLogger.withContext('ErrorHandler');
 

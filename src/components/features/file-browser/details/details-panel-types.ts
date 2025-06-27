@@ -6,7 +6,7 @@
  */
 
 import type { FileItem } from '@/types/files';
-import type { MediaMetadata } from '@/types/metadata.types';
+import type { MediaMetadata } from '@/types/metadata';
 import type * as React from 'react';
 
 /**
