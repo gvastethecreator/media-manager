@@ -16,16 +16,16 @@ export type File3DBase = File3D;
  * Estas métricas se enfocan en las características técnicas y complejidad del modelo.
  */
 export interface File3DStatistics {
-  /** Número de polígonos del modelo */
-  polygonCount: number;
-  /** Tamaño total de las texturas asociadas en MB */
-  textureSize: number;
-  /** Formato del archivo (por ejemplo, 'glb', 'obj') */
-  format: string;
-  /** Número de vértices del modelo */
-  vertexCount: number;
-  /** Número de materiales utilizados en el modelo */
-  materialCount: number;
+	/** Número de polígonos del modelo */
+	polygonCount: number;
+	/** Tamaño total de las texturas asociadas en MB */
+	textureSize: number;
+	/** Formato del archivo (por ejemplo, 'glb', 'obj') */
+	format: string;
+	/** Número de vértices del modelo */
+	vertexCount: number;
+	/** Número de materiales utilizados en el modelo */
+	materialCount: number;
 }
 
 /**
@@ -33,5 +33,5 @@ export interface File3DStatistics {
  * Este es el tipo canónico para usar en la aplicación.
  */
 export interface File3DWithStats extends File3DBase {
-  stats: File3DStatistics;
+	stats: File3DStatistics;
 }

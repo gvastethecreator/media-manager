@@ -7,4 +7,3 @@
 
 export * from './character.service';
 export { default } from './character.service';
-

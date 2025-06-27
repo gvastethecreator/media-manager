@@ -52,12 +52,10 @@ export interface TagFilterActions {
 /**
  * 🔍 Creador del slice de filtros para el store de Tag
  */
-export const createTagFiltersSlice: StateCreator<
-	TagStore,
-	[],
-	[],
-	{ filters: TagFilters } & TagFilterActions
-> = (set, get) => ({
+export const createTagFiltersSlice: StateCreator<TagStore, [], [], { filters: TagFilters } & TagFilterActions> = (
+	set,
+	get
+) => ({
 	// Estado inicial de filtros
 	filters: {
 		sortBy: TagSortCriteria.NAME_ASC,

@@ -16,15 +16,15 @@ const logger = serverLogger.withContext('PromptSerializers');
  * @returns Un string JSON o un array vacío en formato string si hay un error.
  */
 export function serializeParameters(parameters: PromptParameter[] | undefined | null): string {
-    if (!parameters) {
-        return '[]';
-    }
-    try {
-        return JSON.stringify(parameters);
-    } catch (error) {
-        logger.error('Error serializing parameters', { error, parameters });
-        return '[]';
-    }
+	if (!parameters) {
+		return '[]';
+	}
+	try {
+		return JSON.stringify(parameters);
+	} catch (error) {
+		logger.error('Error serializing parameters', { error, parameters });
+		return '[]';
+	}
 }
 
 /**
@@ -33,21 +33,21 @@ export function serializeParameters(parameters: PromptParameter[] | undefined | 
  * @returns Un array de PromptParameter o un array vacío si el string es inválido o hay un error.
  */
 export function deserializeParameters(jsonString: string | undefined | null): PromptParameter[] {
-    if (!jsonString) {
-        return [];
-    }
-    try {
-        const parsed = JSON.parse(jsonString);
-        // Validar que el resultado es un array para seguridad
-        if (Array.isArray(parsed)) {
-            return parsed;
-        }
+	if (!jsonString) {
+		return [];
+	}
+	try {
+		const parsed = JSON.parse(jsonString);
+		// Validar que el resultado es un array para seguridad
+		if (Array.isArray(parsed)) {
+			return parsed;
+		}
 		logger.warn('Deserialized parameters is not an array', { jsonString });
-        return [];
-    } catch (error) {
-        logger.error('Error deserializing parameters', { error, jsonString });
-        return [];
-    }
+		return [];
+	} catch (error) {
+		logger.error('Error deserializing parameters', { error, jsonString });
+		return [];
+	}
 }
 
 /**
@@ -56,15 +56,15 @@ export function deserializeParameters(jsonString: string | undefined | null): Pr
  * @returns Un string JSON o '[]' en caso de error.
  */
 export function serializeTags(tags: string[] | undefined | null): string {
-    if (!tags) {
-        return '[]';
-    }
-    try {
-        return JSON.stringify(tags);
-    } catch (error)        {
-        logger.error('Error serializing tags', { error, tags });
-        return '[]';
-    }
+	if (!tags) {
+		return '[]';
+	}
+	try {
+		return JSON.stringify(tags);
+	} catch (error) {
+		logger.error('Error serializing tags', { error, tags });
+		return '[]';
+	}
 }
 
 /**
@@ -73,19 +73,19 @@ export function serializeTags(tags: string[] | undefined | null): string {
  * @returns Un array de strings o un array vacío si hay errores.
  */
 export function deserializeTags(jsonString: string | undefined | null): string[] {
-    if (!jsonString) {
-        return [];
-    }
-    try {
-        const parsed = JSON.parse(jsonString);
-        if (Array.isArray(parsed)) {
-            // Asegurarse que todos los elementos son strings
-            return parsed.map(String);
-        }
+	if (!jsonString) {
+		return [];
+	}
+	try {
+		const parsed = JSON.parse(jsonString);
+		if (Array.isArray(parsed)) {
+			// Asegurarse que todos los elementos son strings
+			return parsed.map(String);
+		}
 		logger.warn('Deserialized tags is not an array', { jsonString });
-        return [];
-    } catch (error) {
-        logger.error('Error deserializing tags', { error, jsonString });
-        return [];
-    }
+		return [];
+	} catch (error) {
+		logger.error('Error deserializing tags', { error, jsonString });
+		return [];
+	}
 }

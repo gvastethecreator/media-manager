@@ -21,7 +21,7 @@ const MemoizedAlbumCard = React.memo(
 	(prevProps, nextProps) =>
 		prevProps.album.id === nextProps.album.id &&
 		prevProps.album.name === nextProps.album.name &&
-		prevProps.album.updatedAt === nextProps.album.updatedAt,
+		prevProps.album.updatedAt === nextProps.album.updatedAt
 );
 MemoizedAlbumCard.displayName = 'MemoizedAlbumCard';
 

@@ -46,4 +46,3 @@ export enum GroupViewMode {
  * 🔄 Claves de ordenamiento para la entidad Group
  */
 export type GroupSortKey = 'name' | 'category' | 'createdAt';
-

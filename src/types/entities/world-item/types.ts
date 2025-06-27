@@ -22,12 +22,38 @@ import type { WildcardComplete } from '../wildcard';
 
 // --- ESTRUCTURAS DE DATOS SERIALIZADAS ---
 
-export interface WorldItemAttribute { name: string; value: number; maxValue?: number; }
-export interface WorldItemEffect { name: string; description: string; duration?: string; cooldown?: string; }
-export interface WorldItemRequirement { name: string; value: number; description?: string; }
-export interface WorldItemStat { name: string; value: number; modifier?: string; }
-export interface WorldItemProperty { name: string; value: string | number | boolean; description?: string; }
-export interface WorldItemFilter { type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem'; operator: 'AND' | 'OR' | 'NOT'; value: string | number | boolean; field?: string; }
+export interface WorldItemAttribute {
+	name: string;
+	value: number;
+	maxValue?: number;
+}
+export interface WorldItemEffect {
+	name: string;
+	description: string;
+	duration?: string;
+	cooldown?: string;
+}
+export interface WorldItemRequirement {
+	name: string;
+	value: number;
+	description?: string;
+}
+export interface WorldItemStat {
+	name: string;
+	value: number;
+	modifier?: string;
+}
+export interface WorldItemProperty {
+	name: string;
+	value: string | number | boolean;
+	description?: string;
+}
+export interface WorldItemFilter {
+	type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
+	operator: 'AND' | 'OR' | 'NOT';
+	value: string | number | boolean;
+	field?: string;
+}
 
 // --- TIPOS BASE Y RELACIONES ---
 
@@ -101,8 +127,8 @@ export type WorldItemComplete = Omit<WorldItemBase, OmittedFields> & {
 	properties: WorldItemProperty[];
 	filters: WorldItemFilter[];
 	tags: string[];
-} & WorldItemRelations & WorldItemCounts;
-
+} & WorldItemRelations &
+	WorldItemCounts;
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 

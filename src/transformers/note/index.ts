@@ -8,19 +8,19 @@ import { prisma } from '@/lib/database/prisma';
 import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    NoteComplete,
-    NoteCreateInput,
-    NoteFilters,
-    NoteSearchOptions,
-    NoteSearchResult,
-    NoteUpdateInput,
+	NoteComplete,
+	NoteCreateInput,
+	NoteFilters,
+	NoteSearchOptions,
+	NoteSearchResult,
+	NoteUpdateInput,
 } from '@/types/entities/note/types';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import {
-    mapCreateNoteDataToPrisma,
-    mapNoteFiltersToPrisma,
-    mapNoteSearchOptionsToPrisma,
-    mapUpdateNoteDataToPrisma,
+	mapCreateNoteDataToPrisma,
+	mapNoteFiltersToPrisma,
+	mapNoteSearchOptionsToPrisma,
+	mapUpdateNoteDataToPrisma,
 } from './mappers';
 import { fromPrismaNote, validateNote } from './serializers';
 
@@ -424,4 +424,3 @@ export function toRelatedNote(
 // Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
 export { toCreateNoteData, toUpdateNoteData } from './mappers';
 export { fromPrismaNote, validateNote } from './serializers';
-

@@ -9,11 +9,11 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { safeJsonParse } from '@/lib/utils/json';
 import {
-    PrismaWildcardWithCounts,
-    WildcardCreateInput,
-    WildcardSearchOptions,
-    WildcardUpdateInput,
-    WildcardWithStats,
+	PrismaWildcardWithCounts,
+	WildcardCreateInput,
+	WildcardSearchOptions,
+	WildcardUpdateInput,
+	WildcardWithStats,
 } from '@/types/entities/wildcard';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { TransformerError } from '@/lib/utils/transformers/errors';
@@ -40,7 +40,7 @@ export function toWildcardWithStats(wildcard: PrismaWildcardWithCounts): Wildcar
 	];
 
 	const popularity = relationCounts.reduce((sum, count) => sum + count, 0);
-	const usageDiversity = relationCounts.filter(count => count > 0).length;
+	const usageDiversity = relationCounts.filter((count) => count > 0).length;
 
 	const stats: WildcardWithStats = {
 		...rest,

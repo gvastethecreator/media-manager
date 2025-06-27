@@ -99,7 +99,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 			includePrivate = true,
 			search,
 			orderBy = 'name',
-			orderDirection = 'asc'
+			orderDirection = 'asc',
 		} = options;
 
 		logger.info('🎞️ Obteniendo álbumes', { options });
@@ -132,7 +132,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 			prisma.album.count({ where }),
 		]);
 
-		const transformedAlbums = albums.map(album => toAlbumWithStats(album, album._count));
+		const transformedAlbums = albums.map((album) => toAlbumWithStats(album, album._count));
 
 		return {
 			albums: transformedAlbums,
@@ -140,7 +140,9 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		};
 	} catch (error) {
 		logger.error('❌ Error al obtener álbumes', { error, options });
-		throw new Error(`No se pudieron obtener los álbumes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudieron obtener los álbumes: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -221,8 +223,8 @@ export async function deleteAlbum(id: string): Promise<void> {
 	try {
 		logger.warn(`🗑️ Eliminando álbum: ${id}`);
 
-				await prisma.album.delete({
-			where: { id }
+		await prisma.album.delete({
+			where: { id },
 		});
 
 		// Revalidar rutas
@@ -266,7 +268,9 @@ export async function getAlbumImages(albumId: string): Promise<{ id: string; nam
 		return images;
 	} catch (error) {
 		logger.error(`❌ Error al obtener imágenes del álbum ${albumId}`, { error });
-		throw new Error(`No se pudieron obtener las imágenes del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudieron obtener las imágenes del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -287,13 +291,15 @@ export async function addImageToAlbum(albumId: string, imageId: string): Promise
 		});
 
 		// Revalidar rutas
-		REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${albumId}`);
 
 		logger.info(`✅ Imagen agregada exitosamente al álbum`);
 	} catch (error) {
 		logger.error(`❌ Error al agregar imagen al álbum`, { error, albumId, imageId });
-		throw new Error(`No se pudo agregar la imagen al álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudo agregar la imagen al álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -314,13 +320,15 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 		});
 
 		// Revalidar rutas
-		REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${albumId}`);
 
 		logger.info(`✅ Imagen removida exitosamente del álbum`);
 	} catch (error) {
 		logger.error(`❌ Error al remover imagen del álbum`, { error, albumId, imageId });
-		throw new Error(`No se pudo remover la imagen del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudo remover la imagen del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -348,7 +356,7 @@ export async function toggleAlbumArchive(id: string): Promise<AlbumWithStats> {
 		});
 
 		// Revalidar rutas
-		REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${id}`);
 
 		const result = toAlbumWithStats(updatedAlbum, updatedAlbum._count);
@@ -357,7 +365,9 @@ export async function toggleAlbumArchive(id: string): Promise<AlbumWithStats> {
 		return result;
 	} catch (error) {
 		logger.error(`❌ Error al cambiar estado de archivo del álbum ${id}`, { error });
-		throw new Error(`No se pudo cambiar el estado del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudo cambiar el estado del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -385,7 +395,7 @@ export async function toggleAlbumPrivacy(id: string): Promise<AlbumWithStats> {
 		});
 
 		// Revalidar rutas
-		REVALIDATE_PATHS.forEach(path => revalidatePath(path));
+		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${id}`);
 
 		const result = toAlbumWithStats(updatedAlbum, updatedAlbum._count);
@@ -394,7 +404,9 @@ export async function toggleAlbumPrivacy(id: string): Promise<AlbumWithStats> {
 		return result;
 	} catch (error) {
 		logger.error(`❌ Error al cambiar visibilidad del álbum ${id}`, { error });
-		throw new Error(`No se pudo cambiar la visibilidad del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudo cambiar la visibilidad del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 

@@ -48,7 +48,7 @@ export async function getGroups(): Promise<GroupWithStats[]> {
 			include: groupWithStatsInclude,
 			orderBy: { name: 'asc' },
 		});
-		return groups.map(group => toGroupWithStats(group, group._count));
+		return groups.map((group) => toGroupWithStats(group, group._count));
 	} catch (error) {
 		logger.error('❌ Error al obtener los grupos.', { error });
 		throw new Error('No se pudieron obtener los grupos.');
@@ -87,7 +87,7 @@ export async function createGroup(data: Prisma.GroupCreateInput): Promise<GroupW
 			data,
 			include: groupWithStatsInclude,
 		});
-		revalidatePaths.forEach(path => revalidatePath(path));
+		revalidatePaths.forEach((path) => revalidatePath(path));
 		return toGroupWithStats(newGroup, newGroup._count);
 	} catch (error) {
 		logger.error('❌ Error al crear el grupo.', { error, data });
@@ -106,7 +106,7 @@ export async function updateGroup(id: string, data: Prisma.GroupUpdateInput): Pr
 			data,
 			include: groupWithStatsInclude,
 		});
-		revalidatePaths.forEach(path => revalidatePath(path));
+		revalidatePaths.forEach((path) => revalidatePath(path));
 		revalidatePath(`/groups/${id}`);
 		return toGroupWithStats(updatedGroup, updatedGroup._count);
 	} catch (error) {
@@ -122,7 +122,7 @@ export async function deleteGroup(id: string): Promise<void> {
 	try {
 		logger.warn(`🗑️ Eliminando grupo: ${id}`);
 		await prisma.group.delete({ where: { id } });
-		revalidatePaths.forEach(path => revalidatePath(path));
+		revalidatePaths.forEach((path) => revalidatePath(path));
 	} catch (error) {
 		logger.error(`❌ Error al eliminar el grupo ${id}.`, { error });
 		throw new Error('No se pudo eliminar el grupo.');
@@ -146,7 +146,7 @@ export async function toggleGroupFavorite(id: string): Promise<GroupWithStats> {
 			include: groupWithStatsInclude,
 		});
 
-		revalidatePaths.forEach(path => revalidatePath(path));
+		revalidatePaths.forEach((path) => revalidatePath(path));
 		revalidatePath(`/groups/${id}`);
 		logger.info(`⭐ Favorito cambiado para grupo: ${id}`);
 		return toGroupWithStats(updatedGroup, updatedGroup._count);

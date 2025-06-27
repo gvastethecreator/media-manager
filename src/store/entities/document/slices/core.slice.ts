@@ -29,36 +29,39 @@ export const createDocumentCoreSlice: StateCreator<
 
 	loadDocuments: async () => {
 		if (get().isLoading) return;
-		set(state => {
+		set((state) => {
 			state.isLoading = true;
 			state.error = null;
 		});
 
 		try {
 			const documents = await actions.getDocuments();
-			set(state => {
-				state.documents = documents.reduce((acc, doc) => {
-					acc[doc.id] = doc;
-					return acc;
-				}, {} as Record<string, typeof documents[0]>);
+			set((state) => {
+				state.documents = documents.reduce(
+					(acc, doc) => {
+						acc[doc.id] = doc;
+						return acc;
+					},
+					{} as Record<string, (typeof documents)[0]>
+				);
 				state.lastUpdated = Date.now();
 			});
 			logger.info(`✅ ${documents.length} documentos cargados.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al cargar los documentos.';
 			logger.error(errorMsg, error);
-			set(state => {
+			set((state) => {
 				state.error = errorMsg;
 			});
 			toastService.error(errorMsg);
 		} finally {
-			set(state => {
+			set((state) => {
 				state.isLoading = false;
 			});
 		}
 	},
 
-	createDocument: async data => {
+	createDocument: async (data) => {
 		try {
 			await actions.createDocument(data);
 			toastService.success(`Documento "${data.name}" creado.`);
@@ -82,12 +85,12 @@ export const createDocumentCoreSlice: StateCreator<
 		}
 	},
 
-	deleteDocument: async id => {
+	deleteDocument: async (id) => {
 		const docName = get().documents[id]?.name ?? id;
 		set(
-			produce(draft => {
+			produce((draft) => {
 				delete draft.documents[id];
-			}),
+			})
 		);
 		try {
 			await actions.deleteDocument(id);
@@ -100,4 +103,3 @@ export const createDocumentCoreSlice: StateCreator<
 		}
 	},
 });
-

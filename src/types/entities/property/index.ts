@@ -16,10 +16,10 @@
 // --- Tipos Canónicos (NUEVO) ---
 export { PROPERTY_COUNTS_RELATIONS, propertyCounts } from './base';
 export type {
-    PrismaPropertyWithCounts,
-    PropertyBase,
-    PropertyStatistics,
-    PropertyWithStats
+	PrismaPropertyWithCounts,
+	PropertyBase,
+	PropertyStatistics,
+	PropertyWithStats,
 } from './base';
 
 // --- Esquemas de Validación ---
@@ -33,4 +33,3 @@ export * from './schema';
  * @see /src/types/entities/property/base.ts
  */
 // export * from './types';
-

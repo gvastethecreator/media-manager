@@ -40,7 +40,7 @@ export async function getWorkflows(): Promise<WorkflowWithStats[]> {
 		});
 
 		// Crear estadísticas básicas para cada workflow
-		return workflows.map(workflow => {
+		return workflows.map((workflow) => {
 			const contentLength = workflow.content.length;
 			const isValid = contentLength > 0;
 
@@ -93,7 +93,7 @@ export async function getWorkflowById(id: string): Promise<Workflow | null> {
 export async function createWorkflow(data: Prisma.WorkflowCreateInput): Promise<Workflow> {
 	try {
 		const newWorkflow = await prisma.workflow.create({
-			data
+			data,
 		});
 
 		// Emitir eventos con el nuevo sistema
@@ -122,7 +122,7 @@ export async function updateWorkflow(id: string, data: Prisma.WorkflowUpdateInpu
 	try {
 		const updatedWorkflow = await prisma.workflow.update({
 			where: { id },
-			data
+			data,
 		});
 
 		// Emitir eventos con el nuevo sistema
@@ -150,7 +150,7 @@ export async function updateWorkflow(id: string, data: Prisma.WorkflowUpdateInpu
 export async function deleteWorkflow(id: string): Promise<void> {
 	try {
 		await prisma.workflow.delete({
-			where: { id }
+			where: { id },
 		});
 
 		// Emitir eventos con el nuevo sistema

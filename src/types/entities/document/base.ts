@@ -21,7 +21,6 @@ export type DocumentBase = Document;
  */
 export type PrismaDocument = Document;
 
-
 // --- TIPOS CON ESTADÍSTICAS ---
 
 /**

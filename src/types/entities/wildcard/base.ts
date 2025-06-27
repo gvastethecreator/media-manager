@@ -14,9 +14,9 @@ import type { WithCounts } from '@/types/prisma.types';
  * @see Prisma.WildcardCreateInput
  */
 export type WildcardBase = Prisma.WildcardGetPayload<{
-  include: {
-    tags: true;
-  };
+	include: {
+		tags: true;
+	};
 }>;
 
 /**
@@ -25,14 +25,14 @@ export type WildcardBase = Prisma.WildcardGetPayload<{
  * Métricas para analizar la flexibilidad y adaptabilidad de un Wildcard.
  */
 export interface WildcardStatistics {
-  /** Puntuación de adaptabilidad basada en la diversidad de su contenido y relaciones. */
-  adaptabilityScore: number;
-  /** Nivel de uso en diferentes contextos (imágenes, personajes, etc.). */
-  usageDiversity: number;
-  /** Puntuación de la completitud de la información del wildcard. */
-  completenessScore: number;
-  /** Popularidad basada en el número de entidades relacionadas. */
-  popularity: number;
+	/** Puntuación de adaptabilidad basada en la diversidad de su contenido y relaciones. */
+	adaptabilityScore: number;
+	/** Nivel de uso en diferentes contextos (imágenes, personajes, etc.). */
+	usageDiversity: number;
+	/** Puntuación de la completitud de la información del wildcard. */
+	completenessScore: number;
+	/** Popularidad basada en el número de entidades relacionadas. */
+	popularity: number;
 }
 
 /**
@@ -40,10 +40,7 @@ export interface WildcardStatistics {
  *
  * Extiende el tipo de Prisma para incluir los conteos de relaciones de forma eficiente.
  */
-export type PrismaWildcardWithCounts = WithCounts<
-  WildcardBase,
-  'tags' | 'images' | 'characters' | 'places' | 'notes'
->;
+export type PrismaWildcardWithCounts = WithCounts<WildcardBase, 'tags' | 'images' | 'characters' | 'places' | 'notes'>;
 
 /**
  * 🃏 WILDCARD WITH STATS
@@ -73,9 +70,6 @@ export type WildcardUpdateInput = Prisma.WildcardUncheckedUpdateInput;
  *
  * Tipo para previsualizaciones de wildcards, con un subconjunto de campos.
  */
-export type WildcardPreview = Pick<
-  WildcardBase,
-  'id' | 'name' | 'description' | 'createdAt' | 'updatedAt' | 'type'
-> & {
-  imageUrl?: string;
+export type WildcardPreview = Pick<WildcardBase, 'id' | 'name' | 'description' | 'createdAt' | 'updatedAt' | 'type'> & {
+	imageUrl?: string;
 };

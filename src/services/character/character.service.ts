@@ -342,7 +342,7 @@ export async function deleteCharacter(id: string): Promise<void> {
 		}
 
 		await prisma.character.delete({
-			where: { id }
+			where: { id },
 		});
 
 		// Revalidar rutas

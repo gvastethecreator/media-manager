@@ -7,12 +7,6 @@ import type { DocumentStore, DocumentUIActions, DocumentUIState } from '../types
 
 const initialState: DocumentUIState = {};
 
-export const createDocumentUISlice: StateCreator<
-	DocumentStore,
-	[],
-	[],
-	DocumentUIState & DocumentUIActions
-> = () => ({
+export const createDocumentUISlice: StateCreator<DocumentStore, [], [], DocumentUIState & DocumentUIActions> = () => ({
 	...initialState,
 });
-

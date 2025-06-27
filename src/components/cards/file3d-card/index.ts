@@ -4,4 +4,3 @@
  */
 
 export { File3DCard } from './file3d-card';
-

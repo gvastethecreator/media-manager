@@ -70,8 +70,8 @@ export function ConceptsSettings() {
 					matches &&
 					Boolean(
 						concept.name.toLowerCase().includes(normalizedQuery) ||
-						concept.description?.toLowerCase().includes(normalizedQuery) ||
-						concept.content?.toLowerCase().includes(normalizedQuery)
+							concept.description?.toLowerCase().includes(normalizedQuery) ||
+							concept.content?.toLowerCase().includes(normalizedQuery)
 					);
 			}
 

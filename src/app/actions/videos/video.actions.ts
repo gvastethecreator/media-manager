@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 /**
  * @file Acciones del servidor para gestionar videos
@@ -10,12 +10,12 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { videoService } from '@/services/video';
 import type {
-    VideoCreateInput,
-    VideoFilters,
-    VideoPaginationOptions,
-    VideoStats,
-    VideoUpdateInput,
-    VideoWithStats,
+	VideoCreateInput,
+	VideoFilters,
+	VideoPaginationOptions,
+	VideoStats,
+	VideoUpdateInput,
+	VideoWithStats,
 } from '@/types/entities/video';
 
 // Logger específico para las acciones
@@ -41,10 +41,9 @@ export async function getVideo(id: string): Promise<VideoWithStats | null> {
  * @param options Opciones de búsqueda y paginación
  * @returns Videos con estadísticas
  */
-export async function findVideos(options: {
-	filters?: VideoFilters;
-	pagination?: VideoPaginationOptions;
-} = {}): Promise<VideoWithStats[]> {
+export async function findVideos(
+	options: { filters?: VideoFilters; pagination?: VideoPaginationOptions } = {}
+): Promise<VideoWithStats[]> {
 	try {
 		log.info('🔍 Action: Buscando videos con filtros', { options });
 		return await videoService.findVideos(options);

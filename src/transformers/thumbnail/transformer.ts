@@ -4,11 +4,11 @@
  */
 
 import {
-    ThumbnailComplete,
-    ThumbnailExtended,
-    ThumbnailQuality,
-    ThumbnailStats,
-    ThumbnailWithStats,
+	ThumbnailComplete,
+	ThumbnailExtended,
+	ThumbnailQuality,
+	ThumbnailStats,
+	ThumbnailWithStats,
 } from '@/types/entities/thumbnail';
 import { formatBytes, formatDate } from '@/lib/utils/formatters';
 

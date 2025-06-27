@@ -7,11 +7,11 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
-    FolderComplete,
-    FolderExtended,
-    FolderExtendedComplete,
-    FolderStatistics,
-    FolderWithStats
+	FolderComplete,
+	FolderExtended,
+	FolderExtendedComplete,
+	FolderStatistics,
+	FolderWithStats,
 } from '@/types/entities/folder';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -48,10 +48,7 @@ export type FolderFromPrisma = Prisma.FolderGetPayload<typeof folderWithCountsPa
 /**
  * 🔄 Calcula estadísticas avanzadas para una carpeta
  */
-function calculateFolderStatistics(
-	folder: FolderFromPrisma,
-	allFolders?: FolderFromPrisma[]
-): FolderStatistics {
+function calculateFolderStatistics(folder: FolderFromPrisma, allFolders?: FolderFromPrisma[]): FolderStatistics {
 	const { _count, path, name, totalFiles, totalSize, lastIndexed, parentId, children } = folder;
 
 	// Calcular profundidad de jerarquía
@@ -244,11 +241,9 @@ export function fromPrismaFolderWithCounts(
 /**
  * 🔄 Transforma una lista de carpetas de Prisma a FolderWithStats[]
  */
-export function fromPrismaFoldersWithCounts(
-	prismaFolders: FolderFromPrisma[]
-): FolderWithStats[] {
+export function fromPrismaFoldersWithCounts(prismaFolders: FolderFromPrisma[]): FolderWithStats[] {
 	return prismaFolders
-		.map(folder => fromPrismaFolderWithCounts(folder, prismaFolders))
+		.map((folder) => fromPrismaFolderWithCounts(folder, prismaFolders))
 		.filter((folder): folder is FolderWithStats => folder !== null);
 }
 
@@ -256,19 +251,19 @@ export function fromPrismaFoldersWithCounts(
  * 🔄 Convierte un array de FolderWithStats a Record optimizado
  */
 export function foldersToRecord(folders: FolderWithStats[]): Record<string, FolderWithStats> {
-	return folders.reduce((acc, folder) => {
-		acc[folder.id] = folder;
-		return acc;
-	}, {} as Record<string, FolderWithStats>);
+	return folders.reduce(
+		(acc, folder) => {
+			acc[folder.id] = folder;
+			return acc;
+		},
+		{} as Record<string, FolderWithStats>
+	);
 }
 
 /**
  * 🔍 Obtiene una carpeta por ID desde un Record (O(1))
  */
-export function getFolderById(
-	folders: Record<string, FolderWithStats>,
-	id: string
-): FolderWithStats | undefined {
+export function getFolderById(folders: Record<string, FolderWithStats>, id: string): FolderWithStats | undefined {
 	return folders[id];
 }
 
@@ -286,14 +281,14 @@ export function buildFolderTree(folders: FolderWithStats[]): FolderWithStats[] {
 	const folderMap = new Map<string, FolderWithStats & { children: FolderWithStats[] }>();
 
 	// Crear mapa de carpetas con array de hijos
-	folders.forEach(folder => {
+	folders.forEach((folder) => {
 		folderMap.set(folder.id, { ...folder, children: [] });
 	});
 
 	const rootFolders: FolderWithStats[] = [];
 
 	// Construir jerarquía
-	folders.forEach(folder => {
+	folders.forEach((folder) => {
 		if (folder.parentId && folderMap.has(folder.parentId)) {
 			const parent = folderMap.get(folder.parentId)!;
 			const child = folderMap.get(folder.id)!;
@@ -345,9 +340,7 @@ export function fromPrismaFolder(folderFromPrisma: FolderFromPrisma | null): Fol
  * 🔄 Transforma una lista de carpetas de Prisma a FolderComplete[] (LEGACY)
  */
 export function fromPrismaFolders(prismaFolders: FolderFromPrisma[]): FolderComplete[] {
-	return prismaFolders
-		.map(fromPrismaFolder)
-		.filter((folder): folder is FolderComplete => folder !== null);
+	return prismaFolders.map(fromPrismaFolder).filter((folder): folder is FolderComplete => folder !== null);
 }
 
 /**

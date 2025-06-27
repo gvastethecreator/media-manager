@@ -54,13 +54,20 @@ export function File3DCard({
 		const format = file3d.format?.toLowerCase();
 		switch (format) {
 			case 'glb':
-			case 'gltf': return '#8b5cf6'; // Púrpura para GLTF/GLB
-			case 'obj': return '#f59e0b'; // Amarillo para OBJ
-			case 'fbx': return '#3b82f6'; // Azul para FBX
-			case 'dae': return '#10b981'; // Verde para DAE
-			case 'ply': return '#ef4444'; // Rojo para PLY
-			case '3ds': return '#ec4899'; // Rosa para 3DS
-			default: return '#6b7280'; // Gris para otros
+			case 'gltf':
+				return '#8b5cf6'; // Púrpura para GLTF/GLB
+			case 'obj':
+				return '#f59e0b'; // Amarillo para OBJ
+			case 'fbx':
+				return '#3b82f6'; // Azul para FBX
+			case 'dae':
+				return '#10b981'; // Verde para DAE
+			case 'ply':
+				return '#ef4444'; // Rojo para PLY
+			case '3ds':
+				return '#ec4899'; // Rosa para 3DS
+			default:
+				return '#6b7280'; // Gris para otros
 		}
 	}, [file3d.format]);
 
@@ -110,10 +117,13 @@ export function File3DCard({
 		setIsRotating(false);
 	}, []);
 
-	const toggleRotation = useCallback((e: React.MouseEvent) => {
-		e.stopPropagation();
-		setIsRotating(!isRotating);
-	}, [isRotating]);
+	const toggleRotation = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			setIsRotating(!isRotating);
+		},
+		[isRotating]
+	);
 
 	return (
 		<CardContainer
@@ -210,10 +220,7 @@ export function File3DCard({
 									}}
 									style={{ transformStyle: 'preserve-3d' }}
 								>
-									<BoxIcon
-										className="h-12 w-12"
-										style={{ color: primaryColor }}
-									/>
+									<BoxIcon className="h-12 w-12" style={{ color: primaryColor }} />
 								</motion.div>
 
 								{/* Badge del formato */}
@@ -242,9 +249,7 @@ export function File3DCard({
 
 						{/* Descripción */}
 						{file3d.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">
-								{file3d.description}
-							</div>
+							<div className="text-sm text-muted-foreground line-clamp-2 italic">{file3d.description}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}
@@ -277,10 +282,7 @@ export function File3DCard({
 							<button
 								type="button"
 								onClick={toggleRotation}
-								className={cn(
-									"p-1 rounded hover:bg-muted/50 transition-colors",
-									isRotating && "bg-muted/50"
-								)}
+								className={cn('p-1 rounded hover:bg-muted/50 transition-colors', isRotating && 'bg-muted/50')}
 								style={{ color: primaryColor }}
 								title={isRotating ? 'Detener rotación' : 'Iniciar rotación'}
 							>
@@ -313,9 +315,7 @@ export function File3DCard({
 						</div>
 
 						{/* Fecha de modificación */}
-						<span className="text-muted-foreground">
-							{new Date(file3d.updatedAt).toLocaleDateString()}
-						</span>
+						<span className="text-muted-foreground">{new Date(file3d.updatedAt).toLocaleDateString()}</span>
 					</div>
 
 					{/* Barra de complejidad estilo TCG */}

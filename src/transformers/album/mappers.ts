@@ -34,10 +34,7 @@ type AlbumCounts = {
  * @param counts Los conteos de las relaciones del álbum.
  * @returns Un objeto AlbumWithStats.
  */
-export function toAlbumWithStats(
-	album: Album,
-	counts: AlbumCounts['_count'],
-): AlbumWithStats {
+export function toAlbumWithStats(album: Album, counts: AlbumCounts['_count']): AlbumWithStats {
 	const stats: AlbumStatistics = {
 		imageCount: counts.images,
 		videoCount: counts.videos,

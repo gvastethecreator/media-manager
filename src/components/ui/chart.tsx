@@ -79,9 +79,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 				})
 				.filter(Boolean)
 				.join('\n');
-			return rules
-				? `${prefix} [data-chart=${id}] {\n${rules}\n}`
-				: '';
+			return rules ? `${prefix} [data-chart=${id}] {\n${rules}\n}` : '';
 		})
 		.filter(Boolean)
 		.join('\n');
@@ -287,4 +285,3 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
 }
 
 export { ChartContainer, ChartLegend, ChartLegendContent, ChartStyle, ChartTooltip, ChartTooltipContent };
-

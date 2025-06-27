@@ -6,16 +6,18 @@
 
 // De mappers.ts
 export {
-    mapCreateVideoDataToPrisma,
-    mapUpdateVideoDataToPrisma,
-    mapVideoSearchOptionsToPrisma
+	mapCreateVideoDataToPrisma,
+	mapUpdateVideoDataToPrisma,
+	mapVideoSearchOptionsToPrisma,
 } from './mappers';
 
 // De transformer.ts
 export {
-    fromPrismaVideo, fromPrismaVideoWithCounts, fromPrismaVideos,
-    fromPrismaVideosWithCounts, getAllVideos,
-    getVideoById,
-    videosToRecord
+	fromPrismaVideo,
+	fromPrismaVideoWithCounts,
+	fromPrismaVideos,
+	fromPrismaVideosWithCounts,
+	getAllVideos,
+	getVideoById,
+	videosToRecord,
 } from './transformer';
-

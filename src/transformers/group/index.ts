@@ -7,4 +7,3 @@
  */
 
 export { toGroupWithStats } from './mappers';
-

@@ -117,12 +117,11 @@ export function preparePromptForDisplay(prompt: PromptComplete): PromptExtended 
 				: typeof prompt.tags === 'string'
 					? deserializeTags(prompt.tags)
 					: [],
-			parsedParameters:
-				Array.isArray(prompt.parameters)
-					? prompt.parameters
-					: typeof prompt.parameters === 'string'
-						? deserializeParameters(prompt.parameters)
-						: [],
+			parsedParameters: Array.isArray(prompt.parameters)
+				? prompt.parameters
+				: typeof prompt.parameters === 'string'
+					? deserializeParameters(prompt.parameters)
+					: [],
 			previewContent: prompt.content ? prompt.content.substring(0, 100) : undefined,
 			lastUpdated: prompt.updatedAt,
 		};

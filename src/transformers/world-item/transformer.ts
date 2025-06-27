@@ -4,7 +4,6 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
-
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { CollectionComplete } from '@/types/entities/collection';
 import type { ConceptComplete } from '@/types/entities/concept';
@@ -32,11 +31,11 @@ import { fromPrismaTag } from '../tag/transformer';
 import { fromPrismaVideo } from '../video/transformer';
 import { fromPrismaWildcard } from '../wildcard/transformer';
 import {
-    deserializeAttributes,
-    deserializeEffects,
-    deserializeFilters,
-    deserializeRequirements,
-    deserializeStats
+	deserializeAttributes,
+	deserializeEffects,
+	deserializeFilters,
+	deserializeRequirements,
+	deserializeStats,
 } from './serializers';
 
 // --- TIPO DE PAYLOAD DE PRISMA ---
@@ -139,20 +138,17 @@ export function fromPrismaWorldItem(worldItem: WorldItemFromPrisma | null): Worl
 		albums: worldItem.albums?.map(fromPrismaAlbum).filter((a): a is AlbumWithStats => a !== null) || [],
 		collections:
 			worldItem.collections?.map(fromPrismaCollection).filter((c): c is CollectionComplete => c !== null) || [],
-		characters:
-			worldItem.characters?.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null) || [],
+		characters: worldItem.characters?.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null) || [],
 		places: worldItem.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [],
 		concepts: worldItem.concepts?.map(fromPrismaConcept).filter((c): c is ConceptComplete => c !== null) || [],
 		prompts: worldItem.prompts?.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null) || [],
 		notes: worldItem.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
-		wildcards:
-			worldItem.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
+		wildcards: worldItem.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
 		groups: worldItem.groups?.map(fromPrismaGroup).filter((g): g is GroupWithStats => g !== null) || [],
 
 		// Asignación correcta de relaciones
 		tags: relationTags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],
-		properties:
-			relationProperties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
+		properties: relationProperties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
 
 		// Conteo de relaciones
 		_count: {

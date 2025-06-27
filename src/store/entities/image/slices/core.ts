@@ -6,11 +6,11 @@
  */
 
 import {
-    createImage as createServerImage,
-    deleteImage as deleteServerImage,
-    getImage,
-    getImages,
-    updateImage as updateServerImage,
+	createImage as createServerImage,
+	deleteImage as deleteServerImage,
+	getImage,
+	getImages,
+	updateImage as updateServerImage,
 } from '@/app/actions/images/image-crud.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';

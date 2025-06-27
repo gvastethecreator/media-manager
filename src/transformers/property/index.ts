@@ -9,4 +9,3 @@
 
 export { toPropertyWithStats } from './mappers';
 export { fromPrismaProperty, transformProperty, type PropertyComplete } from './transformer';
-

@@ -11,25 +11,24 @@ export * from './base';
 export * from './enums';
 // Exportar tipos extendidos (excepto los ya exportados)
 export type {
-    ParsedWorldItemWithRelations,
-    WorldItemExtended
+	ParsedWorldItemWithRelations,
+	WorldItemExtended,
 } from './extended';
 // Exportar esquemas
 export * from './schema';
 // Exportar tipos de stats (estos son los que usaremos para WorldItemEffect, WorldItemProperty, WorldItemRequirement)
 export type {
-    WorldItemEffect,
-    WorldItemProperty,
-    WorldItemRequirement,
-    WorldItemStats
+	WorldItemEffect,
+	WorldItemProperty,
+	WorldItemRequirement,
+	WorldItemStats,
 } from './stats-types';
 // Exportar tipos canónicos desde types.ts (excepto los conflictivos)
 export type {
-    WorldItemComplete,
-    WorldItemCreateInput,
-    WorldItemFilters,
-    WorldItemRelations,
-    WorldItemSearchOptions,
-    WorldItemUpdateInput
+	WorldItemComplete,
+	WorldItemCreateInput,
+	WorldItemFilters,
+	WorldItemRelations,
+	WorldItemSearchOptions,
+	WorldItemUpdateInput,
 } from './types';
-

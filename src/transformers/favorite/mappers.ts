@@ -5,14 +5,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    FAVORITE_ENTITY_COLORS,
-    FAVORITE_ENTITY_DISPLAY_NAMES,
-    FAVORITE_ENTITY_EMOJIS,
-    type FavoriteBase,
-    type FavoriteCreateInput,
-    type FavoriteExtended,
-    type FavoriteFilters,
-    type FavoriteUpdateInput,
+	FAVORITE_ENTITY_COLORS,
+	FAVORITE_ENTITY_DISPLAY_NAMES,
+	FAVORITE_ENTITY_EMOJIS,
+	type FavoriteBase,
+	type FavoriteCreateInput,
+	type FavoriteExtended,
+	type FavoriteFilters,
+	type FavoriteUpdateInput,
 } from '@/types/entities/favorite';
 import type { Prisma } from '@prisma/client';
 

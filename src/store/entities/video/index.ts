@@ -61,4 +61,3 @@ export { createVideoPlayerSlice } from './slices/player';
 export { createVideoUISlice } from './slices/ui';
 // Exportar todo desde types
 export * from './types';
-

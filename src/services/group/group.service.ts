@@ -8,19 +8,19 @@ import { prisma } from '@/lib/database/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-    createGroup,
-    deleteGroup,
-    getGroupById,
-    getGroupsByIds,
-    searchGroups,
-    updateGroup,
+	createGroup,
+	deleteGroup,
+	getGroupById,
+	getGroupsByIds,
+	searchGroups,
+	updateGroup,
 } from '@/transformers/group';
 import type {
-    GroupCreateInput,
-    GroupRelations,
-    GroupSearchResult,
-    GroupUpdateInput,
-    GroupWithStats
+	GroupCreateInput,
+	GroupRelations,
+	GroupSearchResult,
+	GroupUpdateInput,
+	GroupWithStats,
 } from '@/types/entities/group/types';
 
 // Logger específico para el servicio de grupos

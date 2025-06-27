@@ -7,12 +7,7 @@ import type {
 	ConceptWithStats,
 } from '@/types/entities/concept';
 import type { StateCreator } from 'zustand';
-import {
-	createConcept,
-	deleteConcept,
-	getConcepts,
-	updateConcept,
-} from '../../../../app/actions/concepts';
+import { createConcept, deleteConcept, getConcepts, updateConcept } from '../../../../app/actions/concepts';
 import type { ConceptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('ConceptStore:Core');

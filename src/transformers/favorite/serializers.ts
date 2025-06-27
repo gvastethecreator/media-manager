@@ -97,7 +97,7 @@ export function toFavoriteWithImage(favorite: PrismaFavoriteWithImage): Favorite
 		serializersLogger.error('Error convirtiendo a favorito con imagen:', error);
 		return {
 			...favorite,
-			image: transformImageToFileItem(favorite.image || {} as PrismaImage),
+			image: transformImageToFileItem(favorite.image || ({} as PrismaImage)),
 		} as FavoriteWithImage;
 	}
 }

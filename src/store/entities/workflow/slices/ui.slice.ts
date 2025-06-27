@@ -21,32 +21,32 @@ export const createWorkflowUISlice: StateCreator<
 > = (set, get) => ({
 	...initialState,
 
-	selectWorkflow: id => {
-		set(state => {
+	selectWorkflow: (id) => {
+		set((state) => {
 			state.selectedId = id;
 		});
 	},
 
 	openCreateModal: () => {
-		set(state => {
+		set((state) => {
 			state.isCreateModalOpen = true;
 		});
 	},
 
 	closeCreateModal: () => {
-		set(state => {
+		set((state) => {
 			state.isCreateModalOpen = false;
 		});
 	},
 
-	openEditModal: id => {
-		set(state => {
+	openEditModal: (id) => {
+		set((state) => {
 			state.editingId = id;
 		});
 	},
 
 	closeEditModal: () => {
-		set(state => {
+		set((state) => {
 			state.editingId = null;
 		});
 	},

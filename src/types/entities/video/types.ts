@@ -36,7 +36,7 @@ export enum VideoFormat {
 	MKV = 'mkv',
 	M4V = 'm4v',
 	THREE_GP = '3gp',
-	OGV = 'ogv'
+	OGV = 'ogv',
 }
 
 export enum VideoCodec {
@@ -46,15 +46,15 @@ export enum VideoCodec {
 	VP9 = 'vp9',
 	AV1 = 'av1',
 	XVID = 'xvid',
-	DIVX = 'divx'
+	DIVX = 'divx',
 }
 
 export enum VideoQuality {
-	LOW = 'low',        // < 480p
-	MEDIUM = 'medium',  // 480p-720p
-	HIGH = 'high',      // 720p-1080p
-	ULTRA = 'ultra',    // > 1080p
-	UNKNOWN = 'unknown'
+	LOW = 'low', // < 480p
+	MEDIUM = 'medium', // 480p-720p
+	HIGH = 'high', // 720p-1080p
+	ULTRA = 'ultra', // > 1080p
+	UNKNOWN = 'unknown',
 }
 
 export enum VideoSortCriteria {
@@ -69,13 +69,13 @@ export enum VideoSortCriteria {
 	SIZE_ASC = 'size:asc',
 	SIZE_DESC = 'size:desc',
 	QUALITY_ASC = 'quality:asc',
-	QUALITY_DESC = 'quality:desc'
+	QUALITY_DESC = 'quality:desc',
 }
 
 export enum VideoViewMode {
 	GRID = 'grid',
 	LIST = 'list',
-	TIMELINE = 'timeline'
+	TIMELINE = 'timeline',
 }
 
 /**

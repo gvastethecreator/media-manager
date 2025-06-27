@@ -21,7 +21,7 @@ const MemoizedAudioCard = React.memo(
 	(prevProps, nextProps) =>
 		prevProps.audio.id === nextProps.audio.id &&
 		prevProps.audio.name === nextProps.audio.name &&
-		prevProps.audio.updatedAt === nextProps.audio.updatedAt,
+		prevProps.audio.updatedAt === nextProps.audio.updatedAt
 );
 MemoizedAudioCard.displayName = 'MemoizedAudioCard';
 

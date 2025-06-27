@@ -10,15 +10,11 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-    mapCreateWildcardDataToPrisma,
-    mapUpdateWildcardDataToPrisma,
-    toWildcardWithStats,
+	mapCreateWildcardDataToPrisma,
+	mapUpdateWildcardDataToPrisma,
+	toWildcardWithStats,
 } from '@/transformers/wildcard';
-import type {
-    WildcardCreateInput,
-    WildcardUpdateInput,
-    WildcardWithStats,
-} from '@/types/entities/wildcard';
+import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
@@ -169,13 +165,7 @@ export async function getWildcard(id: string): Promise<WildcardWithStats | null>
  */
 export async function getWildcards(options: GetWildcardsOptions = {}): Promise<GetWildcardsResult> {
 	try {
-		const {
-			search,
-			orderBy = 'name',
-			orderDirection = 'asc',
-			onlyFavorites = false,
-			parentId,
-		} = options;
+		const { search, orderBy = 'name', orderDirection = 'asc', onlyFavorites = false, parentId } = options;
 
 		logger.info('🔍 Obteniendo wildcards', { options });
 		const prisma = await getPrismaClient();
@@ -204,14 +194,13 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 			prisma.wildcard.findMany({
 				where,
 				include: wildcardIncludeWithCounts,
-				orderBy: orderBy === 'name'
-					? [{ isFavorite: 'desc' }, { name: orderDirection }]
-					: { [orderBy]: orderDirection },
+				orderBy:
+					orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
 			}),
 			prisma.wildcard.count({ where }),
 		]);
 
-		const transformedWildcards = wildcards.map(w => toWildcardWithStats(w as PrismaWildcardWithData));
+		const transformedWildcards = wildcards.map((w) => toWildcardWithStats(w as PrismaWildcardWithData));
 
 		logger.info(`✅ ${transformedWildcards.length} wildcards obtenidos`);
 		return {

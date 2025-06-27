@@ -34,11 +34,14 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	// 📊 Estadísticas calculadas
 	const stats = {
 		total: tags.length,
-		favorites: tags.filter(tag => tag.isFavorite).length,
-		byCategory: Object.values(TagCategory).reduce((acc, category) => {
-			acc[category] = tags.filter(tag => tag.category === category).length;
-			return acc;
-		}, {} as Record<TagCategory, number>),
+		favorites: tags.filter((tag) => tag.isFavorite).length,
+		byCategory: Object.values(TagCategory).reduce(
+			(acc, category) => {
+				acc[category] = tags.filter((tag) => tag.category === category).length;
+				return acc;
+			},
+			{} as Record<TagCategory, number>
+		),
 	};
 
 	// 🔄 Cargar tags
@@ -59,8 +62,9 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	}, []);
 
 	// 🔍 Filtrar tags
-	const filteredTags = tags.filter(tag => {
-		const matchesSearch = !searchTerm ||
+	const filteredTags = tags.filter((tag) => {
+		const matchesSearch =
+			!searchTerm ||
 			tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			tag.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -75,7 +79,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 		try {
 			setDeletingTagId(tagId);
 			await deleteTag(tagId);
-			setTags(prev => prev.filter(tag => tag.id !== tagId));
+			setTags((prev) => prev.filter((tag) => tag.id !== tagId));
 			toastService.system.success('Etiqueta eliminada correctamente');
 		} catch (error) {
 			console.error('Error deleting tag:', error);
@@ -87,7 +91,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 
 	// 📝 Manejar creación de tag
 	const handleTagCreated = (newTag: TagWithStats) => {
-		setTags(prev => [...prev, newTag]);
+		setTags((prev) => [...prev, newTag]);
 		setShowCreateForm(false);
 		toastService.system.success('Etiqueta creada correctamente');
 	};
@@ -132,11 +136,11 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm">
-							{tags.length > 0 ?
-								tags.reduce((max, tag) =>
-									(tag.stats?.totalAssociations || 0) > (max.stats?.totalAssociations || 0) ? tag : max
-								).name : 'N/A'
-							}
+							{tags.length > 0
+								? tags.reduce((max, tag) =>
+										(tag.stats?.totalAssociations || 0) > (max.stats?.totalAssociations || 0) ? tag : max
+									).name
+								: 'N/A'}
 						</div>
 					</CardContent>
 				</Card>
@@ -172,16 +176,16 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 											checked={!selectedCategory}
 											onCheckedChange={() => setSelectedCategory(null)}
 										/>
-										<Label htmlFor="all-categories" className="text-sm">Todas</Label>
+										<Label htmlFor="all-categories" className="text-sm">
+											Todas
+										</Label>
 									</div>
-									{Object.values(TagCategory).map(category => (
+									{Object.values(TagCategory).map((category) => (
 										<div key={category} className="flex items-center space-x-2">
 											<Checkbox
 												id={`category-${category}`}
 												checked={selectedCategory === category}
-												onCheckedChange={() => setSelectedCategory(
-													selectedCategory === category ? null : category
-												)}
+												onCheckedChange={() => setSelectedCategory(selectedCategory === category ? null : category)}
 											/>
 											<Label htmlFor={`category-${category}`} className="text-sm">
 												{category} ({stats.byCategory[category] || 0})
@@ -195,12 +199,10 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 
 					{/* Filtro por favoritas */}
 					<div className="flex items-center space-x-2">
-						<Checkbox
-							id="favorites-only"
-							checked={showOnlyFavorites}
-							onCheckedChange={setShowOnlyFavorites}
-						/>
-						<Label htmlFor="favorites-only" className="text-sm">Solo favoritas</Label>
+						<Checkbox id="favorites-only" checked={showOnlyFavorites} onCheckedChange={setShowOnlyFavorites} />
+						<Label htmlFor="favorites-only" className="text-sm">
+							Solo favoritas
+						</Label>
 					</div>
 
 					{/* Botón crear */}
@@ -218,8 +220,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 					title="No hay etiquetas"
 					description={
 						searchTerm || selectedCategory || showOnlyFavorites
-							? "No se encontraron etiquetas que coincidan con los filtros aplicados."
-							: "Aún no has creado ninguna etiqueta. ¡Crea tu primera etiqueta!"
+							? 'No se encontraron etiquetas que coincidan con los filtros aplicados.'
+							: 'Aún no has creado ninguna etiqueta. ¡Crea tu primera etiqueta!'
 					}
 					action={
 						<Button onClick={() => setShowCreateForm(true)}>
@@ -230,7 +232,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 				/>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{filteredTags.map(tag => (
+					{filteredTags.map((tag) => (
 						<Card key={tag.id} className="hover:shadow-md transition-shadow">
 							<CardHeader className="pb-3">
 								<div className="flex items-start justify-between">
@@ -238,11 +240,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 										<span className="text-lg">{tag.emoji}</span>
 										<div>
 											<CardTitle className="text-sm font-medium">{tag.name}</CardTitle>
-											{tag.description && (
-												<CardDescription className="text-xs mt-1">
-													{tag.description}
-												</CardDescription>
-											)}
+											{tag.description && <CardDescription className="text-xs mt-1">{tag.description}</CardDescription>}
 										</div>
 									</div>
 									<div className="flex items-center gap-1">
@@ -277,10 +275,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 											</Badge>
 										)}
 									</div>
-									<div
-										className="w-4 h-4 rounded-full border"
-										style={{ backgroundColor: tag.color }}
-									/>
+									<div className="w-4 h-4 rounded-full border" style={{ backgroundColor: tag.color }} />
 								</div>
 							</CardContent>
 						</Card>
@@ -289,12 +284,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 			)}
 
 			{/* 📝 Formulario de creación */}
-			{showCreateForm && (
-				<CreateTagForm
-					onSuccess={handleTagCreated}
-					onCancel={() => setShowCreateForm(false)}
-				/>
-			)}
+			{showCreateForm && <CreateTagForm onSuccess={handleTagCreated} onCancel={() => setShowCreateForm(false)} />}
 		</div>
 	);
 }

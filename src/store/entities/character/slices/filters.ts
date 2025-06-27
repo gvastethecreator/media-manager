@@ -5,11 +5,11 @@
 
 import type { CharacterFilterItem, CharacterWithStats } from '@/types/entities/character';
 import {
-    CharacterAlignment,
-    CharacterCategory,
-    CharacterClass,
-    CharacterRace,
-    CharacterSortOption,
+	CharacterAlignment,
+	CharacterCategory,
+	CharacterClass,
+	CharacterRace,
+	CharacterSortOption,
 } from '@/types/entities/character';
 import { matchesCharacterSearch, sortCharacters } from '@/lib/utils/character';
 import type { StateCreator } from 'zustand';
@@ -325,10 +325,12 @@ export const createCharacterFiltersSlice: StateCreator<
 						if (levelValue.includes('-')) {
 							const [min, max] = levelValue.split('-').map(Number);
 							return character.level >= min && character.level <= max;
-						}if (levelValue.endsWith('+')) {
+						}
+						if (levelValue.endsWith('+')) {
 							const min = Number(levelValue.slice(0, -1));
 							return character.level >= min;
-						}if (levelValue.startsWith('<')) {
+						}
+						if (levelValue.startsWith('<')) {
 							const max = Number(levelValue.slice(1));
 							return character.level < max;
 						}
@@ -342,9 +344,7 @@ export const createCharacterFiltersSlice: StateCreator<
 
 		// Aplicar búsqueda por texto
 		if (searchTerm.trim()) {
-			charactersArray = charactersArray.filter((character) =>
-				matchesCharacterSearch(character, searchTerm)
-			);
+			charactersArray = charactersArray.filter((character) => matchesCharacterSearch(character, searchTerm));
 		}
 
 		return charactersArray;
@@ -357,7 +357,7 @@ export const createCharacterFiltersSlice: StateCreator<
 	 */
 	getCharactersByIds: (ids: string[]) => {
 		const { characters } = get();
-		return ids.map(id => characters[id]).filter(Boolean);
+		return ids.map((id) => characters[id]).filter(Boolean);
 	},
 
 	/**

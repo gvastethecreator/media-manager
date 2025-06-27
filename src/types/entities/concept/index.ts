@@ -7,23 +7,23 @@
  */
 
 export {
-    ConceptCategory,
-    ConceptStatus,
-    ConceptViewMode
+	ConceptCategory,
+	ConceptStatus,
+	ConceptViewMode,
 } from './enums';
 // Exportar esquema de validación
 export type { ConceptStats } from './schema';
 export type {
-    ConceptBase as Concept,
-    ConceptBase,
-    ConceptComplete,
-    ConceptCreateInput,
-    ConceptExtended,
-    ConceptFilters,
-    ConceptListItem,
-    ConceptSearchOptions,
-    ConceptSearchResult,
-    ConceptUpdateInput
+	ConceptBase as Concept,
+	ConceptBase,
+	ConceptComplete,
+	ConceptCreateInput,
+	ConceptExtended,
+	ConceptFilters,
+	ConceptListItem,
+	ConceptSearchOptions,
+	ConceptSearchResult,
+	ConceptUpdateInput,
 } from './types';
 // Exportar tipo principal como Concept para compatibilidad
 export { ConceptSchema } from './types';

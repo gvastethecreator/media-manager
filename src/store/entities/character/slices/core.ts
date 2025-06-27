@@ -25,12 +25,10 @@ export function charactersToRecord(characters: CharacterWithStats[]): Record<str
 /**
  * Crea el slice principal optimizado para Character.
  */
-export const createCharacterCoreSlice: StateCreator<
-	CharacterState & CharacterCoreSlice,
-	[],
-	[],
-	CharacterCoreSlice
-> = (set, get) => ({
+export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCoreSlice, [], [], CharacterCoreSlice> = (
+	set,
+	get
+) => ({
 	// Conversión y utilidades optimizadas
 	charactersToRecord,
 
@@ -91,7 +89,7 @@ export const createCharacterCoreSlice: StateCreator<
 				// Limpiar selección si el personaje eliminado estaba seleccionado
 				selectedCharacterId: state.selectedCharacterId === characterId ? null : state.selectedCharacterId,
 				hoveredCharacterId: state.hoveredCharacterId === characterId ? null : state.hoveredCharacterId,
-				expandedCharacterIds: state.expandedCharacterIds.filter(id => id !== characterId),
+				expandedCharacterIds: state.expandedCharacterIds.filter((id) => id !== characterId),
 			};
 		});
 		logger.info(`🗑️ Personaje eliminado del store: ${characterId}`);
@@ -147,7 +145,7 @@ export const createCharacterCoreSlice: StateCreator<
 				// Limpiar selecciones
 				selectedCharacterId: characterIds.includes(state.selectedCharacterId || '') ? null : state.selectedCharacterId,
 				hoveredCharacterId: characterIds.includes(state.hoveredCharacterId || '') ? null : state.hoveredCharacterId,
-				expandedCharacterIds: state.expandedCharacterIds.filter(id => !characterIds.includes(id)),
+				expandedCharacterIds: state.expandedCharacterIds.filter((id) => !characterIds.includes(id)),
 			};
 		});
 		logger.info(`🗑️ ${characterIds.length} personajes eliminados del store en lote`);

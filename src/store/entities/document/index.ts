@@ -27,6 +27,6 @@ export const useDocumentStore = create<DocumentStore>()(
 			...createDocumentUISlice(...a),
 			...createDocumentFilterSlice(...a),
 		})),
-		{ name: 'DocumentStore' },
-	),
+		{ name: 'DocumentStore' }
+	)
 );

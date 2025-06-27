@@ -143,7 +143,7 @@ export function GroupsSettings() {
 
 				return matchesQuery && matchesCategory && matchesFavorites;
 			}),
-		[state.groups, state.searchQuery, state.selectedCategories, state.onlyFavorites],
+		[state.groups, state.searchQuery, state.selectedCategories, state.onlyFavorites]
 	);
 
 	const sortedGroups = useMemo(
@@ -160,7 +160,7 @@ export function GroupsSettings() {
 						return 0;
 				}
 			}),
-		[filteredGroups, state.sortBy],
+		[filteredGroups, state.sortBy]
 	);
 
 	const stats = useMemo(() => {

@@ -33,4 +33,3 @@ export interface AlbumStatistics {
 export interface AlbumWithStats extends AlbumBase {
 	stats: AlbumStatistics;
 }
-

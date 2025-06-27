@@ -147,13 +147,13 @@ export function diff<T>(
  */
 export function arrayToRecord<T extends { [k in K]: string | number }, K extends keyof T>(
 	array: T[],
-	key: K,
+	key: K
 ): Record<T[K], T> {
 	return array.reduce(
 		(acc, item) => {
 			acc[item[key]] = item;
 			return acc;
 		},
-		{} as Record<T[K], T>,
+		{} as Record<T[K], T>
 	);
 }

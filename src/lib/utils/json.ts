@@ -17,17 +17,14 @@
  * const dataWithError = safeJsonParse('not a json', { a: 0 }); // devuelve { a: 0 }
  * const dataNull = safeJsonParse(null, []); // devuelve []
  */
-export function safeJsonParse<T>(
-  jsonString: string | null | undefined,
-  defaultValue: T,
-): T {
-  if (!jsonString) {
-    return defaultValue;
-  }
-  try {
-    return JSON.parse(jsonString) as T;
-  } catch (error) {
-    console.warn('Failed to parse JSON string:', error);
-    return defaultValue;
-  }
+export function safeJsonParse<T>(jsonString: string | null | undefined, defaultValue: T): T {
+	if (!jsonString) {
+		return defaultValue;
+	}
+	try {
+		return JSON.parse(jsonString) as T;
+	} catch (error) {
+		console.warn('Failed to parse JSON string:', error);
+		return defaultValue;
+	}
 }

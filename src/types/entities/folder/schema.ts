@@ -15,7 +15,10 @@ export const FolderBaseSchema = z.object({
 	description: z.string().max(1000, 'Descripción muy larga').nullable(),
 	path: z.string().min(1, 'La ruta es requerida'),
 	emoji: z.string().max(10, 'Emoji muy largo').nullable(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser hex válido').nullable(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser hex válido')
+		.nullable(),
 	featuredImage: z.string().url('Imagen destacada debe ser URL válida').nullable(),
 	isFavorite: z.boolean().default(false),
 	autoReindex: z.boolean().default(true),
@@ -32,82 +35,58 @@ export const FolderBaseSchema = z.object({
  * 📁 Schema para crear una carpeta
  */
 export const CreateFolderSchema = z.object({
-	name: z.string()
+	name: z
+		.string()
 		.min(1, 'El nombre es requerido')
 		.max(255, 'El nombre no puede exceder 255 caracteres')
 		.regex(/^[^<>:"/\\|?*]+$/, 'El nombre contiene caracteres no válidos'),
-	description: z.string()
-		.max(1000, 'La descripción no puede exceder 1000 caracteres')
-		.optional()
-		.nullable(),
-	path: z.string()
+	description: z.string().max(1000, 'La descripción no puede exceder 1000 caracteres').optional().nullable(),
+	path: z
+		.string()
 		.min(1, 'La ruta es requerida')
 		.max(500, 'La ruta es muy larga')
 		.regex(/^[^\0]+$/, 'La ruta contiene caracteres no válidos'),
-	emoji: z.string()
-		.max(10, 'Emoji muy largo')
-		.optional()
-		.nullable(),
-	color: z.string()
+	emoji: z.string().max(10, 'Emoji muy largo').optional().nullable(),
+	color: z
+		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/, 'El color debe ser un valor hexadecimal válido')
 		.optional()
 		.nullable(),
-	featuredImage: z.string()
-		.url('La imagen destacada debe ser una URL válida')
-		.optional()
-		.nullable(),
+	featuredImage: z.string().url('La imagen destacada debe ser una URL válida').optional().nullable(),
 	isFavorite: z.boolean().default(false).optional(),
 	autoReindex: z.boolean().default(true),
-	parentId: z.string()
-		.uuid('El ID del padre debe ser un UUID válido')
-		.optional()
-		.nullable(),
-	presetId: z.string()
-		.uuid('El ID del preset debe ser un UUID válido')
-		.optional()
-		.nullable(),
+	parentId: z.string().uuid('El ID del padre debe ser un UUID válido').optional().nullable(),
+	presetId: z.string().uuid('El ID del preset debe ser un UUID válido').optional().nullable(),
 });
 
 /**
  * 📁 Schema para actualizar una carpeta
  */
 export const UpdateFolderSchema = z.object({
-	name: z.string()
+	name: z
+		.string()
 		.min(1, 'El nombre es requerido')
 		.max(255, 'El nombre no puede exceder 255 caracteres')
 		.regex(/^[^<>:"/\\|?*]+$/, 'El nombre contiene caracteres no válidos')
 		.optional(),
-	description: z.string()
-		.max(1000, 'La descripción no puede exceder 1000 caracteres')
-		.nullable()
-		.optional(),
-	path: z.string()
+	description: z.string().max(1000, 'La descripción no puede exceder 1000 caracteres').nullable().optional(),
+	path: z
+		.string()
 		.min(1, 'La ruta es requerida')
 		.max(500, 'La ruta es muy larga')
 		.regex(/^[^\0]+$/, 'La ruta contiene caracteres no válidos')
 		.optional(),
-	emoji: z.string()
-		.max(10, 'Emoji muy largo')
-		.nullable()
-		.optional(),
-	color: z.string()
+	emoji: z.string().max(10, 'Emoji muy largo').nullable().optional(),
+	color: z
+		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/, 'El color debe ser un valor hexadecimal válido')
 		.nullable()
 		.optional(),
-	featuredImage: z.string()
-		.url('La imagen destacada debe ser una URL válida')
-		.nullable()
-		.optional(),
+	featuredImage: z.string().url('La imagen destacada debe ser una URL válida').nullable().optional(),
 	isFavorite: z.boolean().optional(),
 	autoReindex: z.boolean().optional(),
-	parentId: z.string()
-		.uuid('El ID del padre debe ser un UUID válido')
-		.nullable()
-		.optional(),
-	presetId: z.string()
-		.uuid('El ID del preset debe ser un UUID válido')
-		.nullable()
-		.optional(),
+	parentId: z.string().uuid('El ID del padre debe ser un UUID válido').nullable().optional(),
+	presetId: z.string().uuid('El ID del preset debe ser un UUID válido').nullable().optional(),
 });
 
 /**
@@ -133,11 +112,13 @@ export const FolderStatisticsSchema = z.object({
 	hasConsistentNaming: z.boolean(),
 	hasDeepHierarchy: z.boolean(),
 	isWellOrganized: z.boolean(),
-	breadcrumbs: z.array(z.object({
-		id: z.string(),
-		name: z.string(),
-		path: z.string(),
-	})),
+	breadcrumbs: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+			path: z.string(),
+		})
+	),
 	fullPath: z.string(),
 	relativePath: z.string(),
 	autoTags: z.array(z.string()),
@@ -168,10 +149,12 @@ export const FolderFiltersSchema = z.object({
 	parentId: z.string().uuid().nullable().optional(),
 	hasImages: z.boolean().optional(),
 	hierarchyDepth: z.number().int().min(0).optional(),
-	organizationScore: z.object({
-		min: z.number().min(0).max(100).optional(),
-		max: z.number().min(0).max(100).optional(),
-	}).optional(),
+	organizationScore: z
+		.object({
+			min: z.number().min(0).max(100).optional(),
+			max: z.number().min(0).max(100).optional(),
+		})
+		.optional(),
 });
 
 /**

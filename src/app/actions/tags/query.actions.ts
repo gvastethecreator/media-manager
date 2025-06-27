@@ -53,31 +53,34 @@ export async function searchTags(
 		const where: Prisma.TagWhereInput = {
 			AND: [
 				// Filtro por término de búsqueda
-				query.trim() ? {
-					OR: [
-						{ name: { contains: query, mode: 'insensitive' } },
-						{ description: { contains: query, mode: 'insensitive' } },
-						{ category: { contains: query, mode: 'insensitive' } },
-					]
-				} : {},
+				query.trim()
+					? {
+							OR: [
+								{ name: { contains: query, mode: 'insensitive' } },
+								{ description: { contains: query, mode: 'insensitive' } },
+								{ category: { contains: query, mode: 'insensitive' } },
+							],
+						}
+					: {},
 				// Filtro por categorías
-				categories && categories.length > 0 ? {
-					category: { in: categories }
-				} : {},
+				categories && categories.length > 0
+					? {
+							category: { in: categories },
+						}
+					: {},
 				// Filtro por favoritos
-				isFavorite !== undefined ? {
-					isFavorite
-				} : {},
+				isFavorite !== undefined
+					? {
+							isFavorite,
+						}
+					: {},
 			],
 		};
 
 		const tags = await prisma.tag.findMany({
 			where,
 			include: tagCounts,
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ name: 'asc' }
-			],
+			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
 			take: limit,
 		});
 
@@ -101,10 +104,7 @@ export async function getPopularTags(limit = 20): Promise<TagWithStats[]> {
 
 		const tags = await prisma.tag.findMany({
 			include: tagCounts,
-			orderBy: [
-				{ images: { _count: 'desc' } },
-				{ name: 'asc' }
-			],
+			orderBy: [{ images: { _count: 'desc' } }, { name: 'asc' }],
 			take: limit,
 		});
 
@@ -130,10 +130,7 @@ export async function getTagsByCategory(category: string, limit = 100): Promise<
 		const tags = await prisma.tag.findMany({
 			where: { category },
 			include: tagCounts,
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ name: 'asc' }
-			],
+			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
 			take: limit,
 		});
 
@@ -142,7 +139,11 @@ export async function getTagsByCategory(category: string, limit = 100): Promise<
 		return transformedTags;
 	} catch (error) {
 		tagLogger.error('❌ Error al obtener tags por categoría:', { category, error });
-		throw createTagError(`No se pudieron obtener los tags de la categoría: ${category}`, TagErrorCode.OPERATION_FAILED, error);
+		throw createTagError(
+			`No se pudieron obtener los tags de la categoría: ${category}`,
+			TagErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -170,8 +171,8 @@ export async function getTagImages(tagId: string, limit = 50): Promise<FileItem[
 		const images = await prisma.image.findMany({
 			where: {
 				tags: {
-					some: { id: tagId }
-				}
+					some: { id: tagId },
+				},
 			},
 			include: {
 				tags: {

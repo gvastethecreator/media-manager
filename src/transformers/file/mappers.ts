@@ -5,13 +5,13 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    DirectoryInfo,
-    EnhancedDirectory,
-    EnhancedImageFile,
-    FileBase,
-    FileFilterOptions,
-    FileInfo,
-    ImageFileInfo,
+	DirectoryInfo,
+	EnhancedDirectory,
+	EnhancedImageFile,
+	FileBase,
+	FileFilterOptions,
+	FileInfo,
+	ImageFileInfo,
 } from '@/types/entities/file';
 import { FILE_EXTENSION_GROUPS, FileType } from '@/types/entities/file/enums';
 import type { Stats } from 'fs';

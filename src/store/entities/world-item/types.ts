@@ -6,12 +6,12 @@
  */
 
 import type {
-    WorldItemCreateInput as CreateWorldItemData,
-    WorldItemUpdateInput as UpdateWorldItemData,
-    WorldItemFilters,
-    WorldItemSortCriteria,
-    WorldItemViewMode,
-    WorldItemWithStats,
+	WorldItemCreateInput as CreateWorldItemData,
+	WorldItemUpdateInput as UpdateWorldItemData,
+	WorldItemFilters,
+	WorldItemSortCriteria,
+	WorldItemViewMode,
+	WorldItemWithStats,
 } from '@/types/entities/world-item';
 
 /**
@@ -179,4 +179,3 @@ export interface WorldItemBatchOptions {
 
 // Re-exportar tipos canónicos
 export type { WorldItemSortCriteria };
-

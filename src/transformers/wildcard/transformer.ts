@@ -16,9 +16,7 @@ const wildcardTransformerLogger = clientLogger.withContext('WildcardTransformer'
  * @param prismaWildcard El objeto Wildcard de Prisma
  * @returns Un objeto WildcardWithStats con estadísticas calculadas o null si el input es inválido
  */
-function fromPrismaWildcard(
-	prismaWildcard: any | null
-): WildcardWithStats | null {
+function fromPrismaWildcard(prismaWildcard: any | null): WildcardWithStats | null {
 	if (!prismaWildcard) {
 		wildcardTransformerLogger.warn('⚠️ Wildcard de Prisma nulo o indefinido');
 		return null;
@@ -46,7 +44,7 @@ function fromPrismaWildcard(
  * WildcardTransformer - Namespace que contiene todas las funciones de transformación para wildcards
  */
 export const WildcardTransformer = {
-	fromPrismaWildcard
+	fromPrismaWildcard,
 } as const;
 
 export const transformWildcard = WildcardTransformer.fromPrismaWildcard;

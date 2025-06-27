@@ -40,19 +40,13 @@ export function VideoCardFooter({
 	const glow = rarityLevel >= 7 ? 4 : rarityLevel >= 5 ? 2 : 0;
 
 	return (
-		<div
-			className={cn(
-				'border-t mt-auto',
-				compact ? 'p-2' : 'p-3'
-			)}
-			style={{ borderColor: `${primaryColor}30` }}
-		>
+		<div className={cn('border-t mt-auto', compact ? 'p-2' : 'p-3')} style={{ borderColor: `${primaryColor}30` }}>
 			{/* Fondo decorativo */}
 			{tcgMode && (
 				<div
 					className="absolute inset-0 opacity-10"
 					style={{
-						background: `linear-gradient(0deg, ${secondaryColor}40, transparent 50%)`
+						background: `linear-gradient(0deg, ${secondaryColor}40, transparent 50%)`,
 					}}
 				/>
 			)}
@@ -63,14 +57,11 @@ export function VideoCardFooter({
 					{/* Contador de álbumes */}
 					{albumsCount > 0 && (
 						<div
-							className={cn(
-								'flex items-center gap-1 text-xs px-2 py-1 rounded',
-								tcgMode && 'border'
-							)}
+							className={cn('flex items-center gap-1 text-xs px-2 py-1 rounded', tcgMode && 'border')}
 							style={{
 								backgroundColor: tcgMode ? `${primaryColor}15` : 'rgba(0,0,0,0.1)',
 								borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
-								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none'
+								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 							}}
 						>
 							<Image className="w-3 h-3" />
@@ -81,14 +72,11 @@ export function VideoCardFooter({
 					{/* Contador de tags */}
 					{tagsCount > 0 && (
 						<div
-							className={cn(
-								'flex items-center gap-1 text-xs px-2 py-1 rounded',
-								tcgMode && 'border'
-							)}
+							className={cn('flex items-center gap-1 text-xs px-2 py-1 rounded', tcgMode && 'border')}
 							style={{
 								backgroundColor: tcgMode ? `${primaryColor}15` : 'rgba(0,0,0,0.1)',
 								borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
-								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none'
+								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 							}}
 						>
 							<Tag className="w-3 h-3" />
@@ -99,14 +87,11 @@ export function VideoCardFooter({
 					{/* Contador de colecciones */}
 					{collectionsCount > 0 && (
 						<div
-							className={cn(
-								'flex items-center gap-1 text-xs px-2 py-1 rounded',
-								tcgMode && 'border'
-							)}
+							className={cn('flex items-center gap-1 text-xs px-2 py-1 rounded', tcgMode && 'border')}
 							style={{
 								backgroundColor: tcgMode ? `${primaryColor}15` : 'rgba(0,0,0,0.1)',
 								borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
-								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none'
+								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 							}}
 						>
 							<Users className="w-3 h-3" />
@@ -118,9 +103,7 @@ export function VideoCardFooter({
 				{/* Lado derecho: Stats TCG */}
 				<div className="flex items-center gap-2">
 					{/* Indicador de favorito */}
-					{isFavorite && (
-						<Heart className="w-4 h-4 fill-red-500 text-red-500" />
-					)}
+					{isFavorite && <Heart className="w-4 h-4 fill-red-500 text-red-500" />}
 
 					{/* ID de carta TCG */}
 					{tcgMode && !compact && (
@@ -129,7 +112,7 @@ export function VideoCardFooter({
 							style={{
 								backgroundColor: `${primaryColor}10`,
 								borderColor: `${primaryColor}30`,
-								color: primaryColor
+								color: primaryColor,
 							}}
 						>
 							{cardId}
@@ -138,15 +121,12 @@ export function VideoCardFooter({
 
 					{/* Grade técnico */}
 					<div
-						className={cn(
-							'text-xs font-bold px-2 py-1 rounded',
-							tcgMode && 'border'
-						)}
+						className={cn('text-xs font-bold px-2 py-1 rounded', tcgMode && 'border')}
 						style={{
 							backgroundColor: `${primaryColor}20`,
 							borderColor: tcgMode ? `${primaryColor}50` : 'transparent',
 							color: primaryColor,
-							boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}40` : 'none'
+							boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}40` : 'none',
 						}}
 					>
 						{technicalGrade}
@@ -161,10 +141,7 @@ export function VideoCardFooter({
 						{Array.from({ length: 5 }, (_, i) => (
 							<div
 								key={i}
-								className={cn(
-									'w-1 h-1 rounded-full',
-									i < Math.floor(rarityLevel / 2) ? 'opacity-100' : 'opacity-30'
-								)}
+								className={cn('w-1 h-1 rounded-full', i < Math.floor(rarityLevel / 2) ? 'opacity-100' : 'opacity-30')}
 								style={{ backgroundColor: primaryColor }}
 							/>
 						))}

@@ -52,12 +52,17 @@ export function DocumentCard({
 	const primaryColor = useMemo(() => {
 		const ext = document.filePath?.split('.').pop()?.toLowerCase();
 		switch (ext) {
-			case 'pdf': return '#dc2626'; // Rojo para PDF
+			case 'pdf':
+				return '#dc2626'; // Rojo para PDF
 			case 'doc':
-			case 'docx': return '#2563eb'; // Azul para Word
-			case 'txt': return '#059669'; // Verde para texto
-			case 'md': return '#7c3aed'; // Púrpura para Markdown
-			default: return '#6b7280'; // Gris para otros
+			case 'docx':
+				return '#2563eb'; // Azul para Word
+			case 'txt':
+				return '#059669'; // Verde para texto
+			case 'md':
+				return '#7c3aed'; // Púrpura para Markdown
+			default:
+				return '#6b7280'; // Gris para otros
 		}
 	}, [document.filePath]);
 
@@ -181,10 +186,7 @@ export function DocumentCard({
 									border: `2px solid ${primaryColor}40`,
 								}}
 							>
-								<FileTextIcon
-									className="h-12 w-12"
-									style={{ color: primaryColor }}
-								/>
+								<FileTextIcon className="h-12 w-12" style={{ color: primaryColor }} />
 
 								{/* Badge del tipo de archivo */}
 								<div
@@ -201,9 +203,7 @@ export function DocumentCard({
 
 						{/* Descripción */}
 						{document.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">
-								{document.description}
-							</div>
+							<div className="text-sm text-muted-foreground line-clamp-2 italic">{document.description}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}
@@ -252,9 +252,7 @@ export function DocumentCard({
 						</div>
 
 						{/* Fecha de modificación */}
-						<span className="text-muted-foreground">
-							{new Date(document.updatedAt).toLocaleDateString()}
-						</span>
+						<span className="text-muted-foreground">{new Date(document.updatedAt).toLocaleDateString()}</span>
 					</div>
 
 					{/* Barra de progreso estilo TCG */}
@@ -263,7 +261,7 @@ export function DocumentCard({
 							<div
 								className="h-full rounded-full transition-all duration-500"
 								style={{
-									width: `${Math.min(100, (document.size || 0) / (1024 * 1024) * 10)}%`,
+									width: `${Math.min(100, ((document.size || 0) / (1024 * 1024)) * 10)}%`,
 									backgroundColor: primaryColor,
 									boxShadow: `0 0 8px ${primaryColor}50`,
 								}}

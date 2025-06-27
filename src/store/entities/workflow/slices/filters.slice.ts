@@ -6,11 +6,11 @@
 
 import type { StateCreator } from 'zustand';
 import {
-    type WorkflowFilterActions,
-    type WorkflowFilterState,
-    type WorkflowFilters,
-    WorkflowSortCriteria,
-    type WorkflowStore,
+	type WorkflowFilterActions,
+	type WorkflowFilterState,
+	type WorkflowFilters,
+	WorkflowSortCriteria,
+	type WorkflowStore,
 } from '../types';
 
 const initialState: WorkflowFilterState = {
@@ -31,19 +31,19 @@ export const createWorkflowFilterSlice: StateCreator<
 	...initialState,
 
 	updateFilters: (newFilters: Partial<WorkflowFilters>) => {
-		set(state => {
+		set((state) => {
 			state.filters = { ...state.filters, ...newFilters };
 		});
 	},
 
-	setSortBy: sortBy => {
-		set(state => {
+	setSortBy: (sortBy) => {
+		set((state) => {
 			state.sortBy = sortBy;
 		});
 	},
 
 	clearFilters: () => {
-		set(state => {
+		set((state) => {
 			state.filters = initialState.filters;
 			state.sortBy = initialState.sortBy;
 		});

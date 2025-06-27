@@ -10,12 +10,12 @@
 import { logger } from '@/lib/logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
-    ImageCreateInput,
-    ImageMetadata,
-    ImageStatistics,
-    ImageUpdateInput,
-    ImageWithStats,
-    PrismaImageWithCounts,
+	ImageCreateInput,
+	ImageMetadata,
+	ImageStatistics,
+	ImageUpdateInput,
+	ImageWithStats,
+	PrismaImageWithCounts,
 } from '@/types/entities/image';
 
 /**
@@ -78,8 +78,19 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 	} = prismaImage._count;
 
 	// Conteos base
-	const totalAssociations = albums + collections + tags + characters + places +
-		worldItems + concepts + prompts + notes + wildcards + properties + groups;
+	const totalAssociations =
+		albums +
+		collections +
+		tags +
+		characters +
+		places +
+		worldItems +
+		concepts +
+		prompts +
+		notes +
+		wildcards +
+		properties +
+		groups;
 
 	// Métricas técnicas
 	const megapixels = Number(((prismaImage.width * prismaImage.height) / 1_000_000).toFixed(2));
@@ -160,14 +171,18 @@ function calculateQualityScore(image: PrismaImageWithCounts, totalAssociations: 
 
 	// Relación de aspecto (15 puntos)
 	const aspectRatio = image.width / image.height;
-	if (aspectRatio >= 0.8 && aspectRatio <= 1.25) score += 15; // Cuadrado
-	else if (aspectRatio >= 1.3 && aspectRatio <= 1.8) score += 12; // 16:9, 4:3
-	else if (aspectRatio >= 2.0 && aspectRatio <= 2.5) score += 10; // Panorámico
+	if (aspectRatio >= 0.8 && aspectRatio <= 1.25)
+		score += 15; // Cuadrado
+	else if (aspectRatio >= 1.3 && aspectRatio <= 1.8)
+		score += 12; // 16:9, 4:3
+	else if (aspectRatio >= 2.0 && aspectRatio <= 2.5)
+		score += 10; // Panorámico
 	else score += 8;
 
 	// Tamaño de archivo (15 puntos)
 	const fileSizeMB = image.size / (1024 * 1024);
-	if (fileSizeMB >= 5 && fileSizeMB <= 20) score += 15; // Óptimo
+	if (fileSizeMB >= 5 && fileSizeMB <= 20)
+		score += 15; // Óptimo
 	else if (fileSizeMB >= 2 && fileSizeMB <= 30) score += 12;
 	else if (fileSizeMB >= 1) score += 10;
 	else score += 5;
@@ -368,10 +383,13 @@ export function fromPrismaImagesWithCounts(prismaImages: PrismaImageWithCounts[]
  * 🔄 Función auxiliar para Record de imágenes (para stores)
  */
 export function imagesToRecord(images: ImageWithStats[]): Record<string, ImageWithStats> {
-	return images.reduce((record, image) => {
-		record[image.id] = image;
-		return record;
-	}, {} as Record<string, ImageWithStats>);
+	return images.reduce(
+		(record, image) => {
+			record[image.id] = image;
+			return record;
+		},
+		{} as Record<string, ImageWithStats>
+	);
 }
 
 /**

@@ -26,89 +26,89 @@ export const createPropertyUISlice: StateCreator<
 > = (set, get) => ({
 	...initialState,
 
-	selectProperty: id => {
+	selectProperty: (id) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.selectedId = id;
-			}),
+			})
 		);
 	},
 
-	startEditing: id => {
+	startEditing: (id) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.editingId = id;
 				if (id) {
 					draft.isEditModalOpen = true;
 				}
-			}),
+			})
 		);
 	},
 
-	highlightProperty: id => {
+	highlightProperty: (id) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.highlightedId = id;
-			}),
+			})
 		);
 	},
 
-	setViewMode: mode => {
+	setViewMode: (mode) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.viewMode = mode;
-			}),
+			})
 		);
 	},
 
 	openCreateModal: () => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.isCreateModalOpen = true;
-			}),
+			})
 		);
 	},
 
 	closeCreateModal: () => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.isCreateModalOpen = false;
-			}),
+			})
 		);
 	},
 
-	openEditModal: id => {
+	openEditModal: (id) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.editingId = id;
 				draft.isEditModalOpen = true;
-			}),
+			})
 		);
 	},
 
 	closeEditModal: () => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.editingId = null;
 				draft.isEditModalOpen = false;
-			}),
+			})
 		);
 	},
 
-	openDeleteModal: id => {
+	openDeleteModal: (id) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.selectedId = id; // O el ID que se va a borrar
 				draft.isDeleteModalOpen = true;
-			}),
+			})
 		);
 	},
 
 	closeDeleteModal: () => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.isDeleteModalOpen = false;
-			}),
+			})
 		);
 	},
 });

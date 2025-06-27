@@ -198,17 +198,20 @@ export function serializeFolderComplete(folder: FolderComplete): Record<string, 
 		updatedAt: folder.updatedAt.toISOString(),
 
 		// Relaciones (simplificadas)
-		parent: folder.parent ? {
-			id: folder.parent.id,
-			name: folder.parent.name,
-			path: folder.parent.path,
-		} : null,
+		parent: folder.parent
+			? {
+					id: folder.parent.id,
+					name: folder.parent.name,
+					path: folder.parent.path,
+				}
+			: null,
 
-		children: folder.children?.map(child => ({
-			id: child.id,
-			name: child.name,
-			path: child.path,
-		})) || [],
+		children:
+			folder.children?.map((child) => ({
+				id: child.id,
+				name: child.name,
+				path: child.path,
+			})) || [],
 
 		// Conteos
 		_count: folder._count,
