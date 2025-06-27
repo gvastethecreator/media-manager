@@ -2,8 +2,8 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/format.utils';
 import {
 	CalendarIcon,
 	CameraIcon,
@@ -184,12 +184,12 @@ export function ImageCardImproved({
 	const totalRelations =
 		showRelations && imageData._count
 			? (imageData._count.tags || 0) +
-				(imageData._count.albums || 0) +
-				(imageData._count.collections || 0) +
-				(imageData._count.characters || 0) +
-				(imageData._count.places || 0) +
-				(imageData._count.worldItems || 0) +
-				(imageData._count.notes || 0)
+			(imageData._count.albums || 0) +
+			(imageData._count.collections || 0) +
+			(imageData._count.characters || 0) +
+			(imageData._count.places || 0) +
+			(imageData._count.worldItems || 0) +
+			(imageData._count.notes || 0)
 			: 0;
 
 	// Contenido de la tarjeta

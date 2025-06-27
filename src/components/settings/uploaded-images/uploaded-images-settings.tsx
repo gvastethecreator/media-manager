@@ -28,7 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { UploadedImageStats } from '@/types/uploaded-images';
 import {
 	FileSpreadsheet,

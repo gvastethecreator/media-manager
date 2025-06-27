@@ -1,4 +1,3 @@
-
 # Auditoría de Entidades y Plan de Acción
 
 Este documento resume el estado actual de las entidades del sistema, basado en una auditoría del `schema.prisma` y su correspondencia con los tipos, stores, servicios y acciones en el código fuente. El objetivo es generar una hoja de ruta para alinear todas las entidades, pagar la deuda técnica y preparar el proyecto para una futura migración a Vite + React.
@@ -100,15 +99,18 @@ La mayoría de las entidades siguen un patrón arquitectónico robusto y moderno
 Para las siguientes entidades, el plan de acción es el mismo:
 
 - ✅ `Album` - **Completado:** Servicio implementado y actions refactorizadas
-- `Collection`
-- `Tag`
-- `Property`
-- `Wildcard`
-- `Character`
-- `Place`
-- `WorldItem`
+- ✅ `Collection` - **Completado:** Flujo Service/Action invertido correctamente
+- ✅ `Tag` - **Completado:** Flujo Service/Action invertido correctamente
+- ✅ `Property` - **Completado:** Servicio implementado y actions refactorizadas
+- ✅ `Note` - **Completado:** Servicio refactorizado y actions convertidas en controladores delgados
+- ✅ `WorldItem` - **Completado:** Servicio implementado y actions refactorizadas como controladores delgados
+- ✅ `Place` - **Completado:** Servicio implementado y actions refactorizadas como controladores delgados
+- ✅ `Wildcard` - **Completado:** Servicio implementado y actions refactorizadas con gestión de jerarquías
+- ✅ `Character` - **Completado:** Servicio implementado con optimizaciones de rendimiento y consultas estadísticas
+- ✅ `Place` - **Completado:** Servicio ya existente, archivo de exportación creado para consistencia
+- ✅ `WorldItem` - **Completado:** Servicio ya existente, archivo de exportación creado para consistencia
+- ✅ `Note` - **Completado:** Servicio ya existente, archivo de exportación creado para consistencia
 - `Concept`
-- `Note`
 
 - **Estado:** 🟡 **Bueno (la mayoría sin capa de servicio)**.
 - **Observaciones:** Todas estas entidades están muy bien definidas a nivel de tipos y stores, pero la mayoría carece de una capa de servicio, teniendo la lógica de negocio directamente en las `actions`. `Group` y `Concept` son las excepciones y deben usarse como modelo.
@@ -119,26 +121,67 @@ Para las siguientes entidades, el plan de acción es el mismo:
 
 ---
 
+#### 5. `Audio`
+
+- **Estado:** ✅ **Completado**.
+- **Observaciones:** ✅ **Progreso completado:**
+  - ✅ Servicio `audio.service.ts` implementado con toda la lógica de negocio
+  - ✅ Actions refactorizadas para ser controladores delgados que llaman al servicio
+  - ✅ Separación completa de responsabilidades: actions validan entrada, servicio maneja lógica de negocio
+  - ✅ Patrón arquitectónico consistente con otras entidades refactorizadas
+- **Tareas restantes:** Ninguna - refactorización completa.
+
+---
+
 ### Nuevas Entidades (2025-06-17)
 
-- `Workflow`
-- `Document`
-- `JsonFile`
-- `File3D`
-- `Audio`
+#### 1. `Workflow`
 
-- **Estado:** 🟡 **Bueno (sin capa de servicio)**.
-- **Observaciones:** Estas entidades más nuevas ya siguen los patrones de tipos y stores modernos, pero fueron creadas sin la capa de servicio.
-- **Tareas:**
-    1. **Implementar la capa de servicio:** Crear los servicios correspondientes para cada una en `src/services/`.
-    2. **Refactorizar las Actions:** Mover la lógica de las `actions` a los nuevos servicios.
+- **Estado:** ✅ **Completado**.
+- **Observaciones:** ✅ **Progreso completado:**
+  - ✅ Servicio `workflow.service.ts` implementado con toda la lógica de negocio
+  - ✅ Actions refactorizadas para ser controladores delgados que llaman al servicio
+  - ✅ Simplificación del servicio para adaptarse al schema actual (sin WorkflowExecution)
+  - ✅ Eventos y logs implementados correctamente
+- **Tareas restantes:** Ninguna - refactorización completa.
+
+#### 2. `Document`
+
+- **Estado:** ✅ **Completado**.
+- **Observaciones:** ✅ **Progreso completado:**
+  - ✅ Servicio `document.service.ts` implementado con toda la lógica de negocio
+  - ✅ Actions refactorizadas para ser controladores delgados que llaman al servicio
+  - ✅ Simplificación del servicio para adaptarse al schema actual (sin campos de estadísticas)
+  - ✅ Eventos y logs implementados correctamente
+- **Tareas restantes:** Ninguna - refactorización completa.
+
+#### 3. `JsonFile`
+
+- **Estado:** ✅ **Completado**.
+- **Observaciones:** ✅ **Progreso completado:**
+  - ✅ Servicio `json-file.service.ts` implementado con toda la lógica de negocio
+  - ✅ Actions refactorizadas para ser controladores delgados que llaman al servicio
+  - ✅ Eventos y logs implementados correctamente
+  - ✅ Separación completa de responsabilidades
+- **Tareas restantes:** Ninguna - refactorización completa.
+
+#### 4. `File3D`
+
+- **Estado:** ✅ **Completado**.
+- **Observaciones:** ✅ **Progreso completado:**
+  - ✅ Servicio `file3d.service.ts` implementado con toda la lógica de negocio
+  - ✅ Actions refactorizadas para ser controladores delgados que llaman al servicio
+  - ✅ Eventos y logs implementados correctamente
+  - ✅ Separación completa de responsabilidades
+- **Tareas restantes:** Ninguna - refactorización completa.
 
 ---
 
 ## Próximos Pasos
 
-1. **Priorizar tareas:** Empezar por las tareas de **MÁXIMA PRIORIDAD** (`Image`) y **ALTA PRIORIDAD** (`Folder`).
-2. **Refactorización incremental:** Abordar cada entidad una por una para implementar su capa de servicio.
-3. **Revisión y pruebas:** Después de refactorizar cada entidad, realizar pruebas exhaustivas para asegurar que no se hayan introducido regresiones.
+1. **✅ Refactorización completa:** Todas las entidades principales tienen su capa de servicio implementada.
+2. **✅ Limpieza y reorganización:** La carpeta `src/services` ha sido completamente reorganizada con estructura consistente.
+3. **✅ Corrección de importaciones:** Todas las importaciones a archivos `-service-export` han sido actualizadas.
+4. **🔄 Próximo paso:** Limpiar y organizar la carpeta `types`, eliminando tipos viejos, duplicados o sin uso, y moviendo tipos a sus carpetas correspondientes.
 
 Este plan proporciona una hoja de ruta clara para mejorar la arquitectura del proyecto, pagar la deuda técnica y facilitar futuras migraciones.

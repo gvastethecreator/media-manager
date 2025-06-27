@@ -3,21 +3,11 @@
  * @module transformers/metadata/mappers
  */
 
+import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataCreateInput, MetadataUpdateInput } from '@/types/entities/metadata';
 import type { Metadata, Prisma } from '@prisma/client';
 
-// Función para formatear bytes a formato legible
-export function formatBytes(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 B';
-
-	const k = 1024;
-	const dm = decimals < 0 ? 0 : decimals;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
-}
+// formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 
 // Mapear datos de Prisma a nuestro tipo extendido (ejemplo, se necesitará un tipo MetadataExtended)
 export function fromPrismaMetadata(metadata: Metadata): MetadataExtended {

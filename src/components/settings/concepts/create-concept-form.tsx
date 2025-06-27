@@ -3,7 +3,7 @@
 import { createConcept, updateConcept } from '@/app/actions/concepts/concept.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { ConceptComplete, ConceptCreateInput, ConceptExtended, ConceptUpdateInput } from '@/types/entities/concept';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';

@@ -6,7 +6,7 @@
  * @description Lógica de negocio y acceso a datos para los videos.
  */
 
-import { db } from '@/lib/db';
+import { db } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { fromPrismaVideosWithCounts, fromPrismaVideoWithCounts } from '@/transformers/video/transformer';
 import type {

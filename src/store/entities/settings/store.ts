@@ -2,8 +2,8 @@
 // Zustand store para preferencias de interfaz de usuario
 // 🗃️ Persistencia local y reactividad para settings de interfaz
 
-import { interfacePreferencesSchema } from '@/types/entities/settings/interface.schema';
-import type { InterfacePreferences, InterfaceSettingsState } from '@/types/entities/settings/types';
+import { interfacePreferencesSchema } from '@/types/ui/interface.schema';
+import type { InterfacePreferences, InterfaceSettingsState } from '@/types/ui/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

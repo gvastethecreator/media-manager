@@ -19,7 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import { WildcardPreview } from './wildcard-preview';
 
 // Importar el tipo de formulario que hemos definido

@@ -7,6 +7,7 @@
  * del servidor y mostrar estadísticas en tiempo real.
  */
 
+import { formatBytes } from '@/lib/utils/format.utils';
 import os from 'os';
 import { serverLogger } from '../logger/server-logger';
 
@@ -123,21 +124,7 @@ function getSystemStats(): SystemStats {
 	};
 }
 
-/**
- * Formatea bytes a una unidad legible
- * @param bytes Número de bytes
- * @param decimals Número de decimales
- * @returns Cadena formateada
- */
-function formatBytes(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 B';
-
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
-}
+// formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 
 /**
  * Formatea segundos a una unidad legible
@@ -283,7 +270,7 @@ export async function logSystemShutdown(): Promise<void> {
 export async function getSystemMonitorHelpers() {
 	return {
 		getSystemStats,
-		formatBytes,
+		// formatBytes ahora se importa desde @/lib/utils/format.utils
 		formatUptime,
 		logSystemStats,
 	};

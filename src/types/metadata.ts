@@ -4,7 +4,83 @@
  */
 
 import { z } from 'zod';
-import type { EntityId, JSONString } from '@/utils/types/utility-types';
+
+/**
+ * Metadatos base que comparten todas las entidades
+ */
+export interface BaseMetadata {
+	totalSize: number;
+	itemCount: number;
+	lastModified: Date;
+	customFields?: Record<string, unknown>;
+}
+
+/**
+ * Metadatos de localización
+ */
+export interface LocationMetadata {
+	name: string;
+	latitude: number;
+	longitude: number;
+	count: number;
+}
+
+/**
+ * Metadatos específicos de archivos
+ */
+export interface FileMetadata extends BaseMetadata {
+	format: string;
+	width?: number;
+	height?: number;
+	duration?: number;
+	fileSize: number;
+	mimeType: string;
+	encoding?: string;
+	hash?: string;
+}
+
+/**
+ * Metadatos de EXIF para fotografías
+ */
+export interface ExifMetadata {
+	make?: string;
+	model?: string;
+	exposureTime?: string | number;
+	fNumber?: number;
+	iso?: number;
+	focalLength?: string | number;
+	lensModel?: string;
+	dateTimeOriginal?: string;
+	gpsLatitude?: number;
+	gpsLongitude?: number;
+	orientation?: number;
+	[key: string]: unknown;
+}
+
+/**
+ * Metadatos de IA generativa
+ */
+export interface AIMetadata {
+	model?: string;
+	prompt?: string;
+	negativePrompt?: string;
+	seed?: number;
+	samplingSteps?: number;
+	cfgScale?: number;
+	samplingMethod?: string;
+	extraParameters?: Record<string, unknown>;
+}
+
+/**
+ * Metadatos completos de medios (integra todos los tipos)
+ */
+export interface MediaMetadata extends FileMetadata {
+	exif?: ExifMetadata;
+	iptc?: Record<string, unknown>;
+	xmp?: Record<string, unknown>;
+	icc?: Record<string, unknown>;
+	ai?: AIMetadata;
+}
 
 /**
  * Tipo de metadato
@@ -40,53 +116,6 @@ export enum MetadataPropertyType {
 	DATE = 'date',
 	ARRAY = 'array',
 	OBJECT = 'object',
-}
-
-/**
- * Metadatos de medios
- */
-export interface MediaMetadata {
-	// Propiedades básicas
-	title?: string;
-	description?: string;
-	dateCreated?: Date;
-	dateModified?: Date;
-	authors?: string[];
-	copyright?: string;
-
-	// Propiedades técnicas
-	dimensions?: {
-		width: number;
-		height: number;
-		resolution: number;
-	};
-	format?: string;
-	colorSpace?: string;
-	compression?: string;
-	duration?: number;
-
-	// Propiedades de cámara/captura
-	camera?: {
-		make?: string;
-		model?: string;
-		lens?: string;
-		focalLength?: number;
-		aperture?: string;
-		shutterSpeed?: string;
-		iso?: number;
-	};
-
-	// Propiedades de ubicación
-	location?: {
-		latitude?: number;
-		longitude?: number;
-		altitude?: number;
-		place?: string;
-		country?: string;
-	};
-
-	// Propiedades personalizadas
-	custom?: JSONString<Record<string, unknown>>;
 }
 
 /**

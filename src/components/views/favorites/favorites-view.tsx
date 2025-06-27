@@ -7,7 +7,7 @@ import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
 import type { FileItem } from '@/types/files';
 

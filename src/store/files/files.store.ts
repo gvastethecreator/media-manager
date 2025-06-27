@@ -1,8 +1,8 @@
 import { getFavoriteImages, getImages } from '@/app/actions/images/image-crud.actions';
 import { getTags } from '@/app/actions/tags/query.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { getCollections } from '@/services/collection/collection.service';
-import { getFolders } from '@/services/folder/folder.service';
+import { getCollections } from '@/services/collection';
+import { getFolders } from '@/services/folder';
 import type { FolderComplete } from '@/types/entities/folder';
 import type { ImageComplete } from '@/types/entities/image';
 import type { TagComplete } from '@/types/entities/tag';

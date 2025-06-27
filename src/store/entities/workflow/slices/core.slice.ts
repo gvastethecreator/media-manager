@@ -6,7 +6,7 @@
 
 import * as actions from '@/app/actions/workflow/workflow.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
 import type { WorkflowCoreActions, WorkflowCoreState, WorkflowStore } from '../types';

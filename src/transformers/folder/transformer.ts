@@ -5,14 +5,13 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
-	FolderBase,
-	FolderComplete,
-	FolderExtended,
-	FolderExtendedComplete,
-	FolderStatistics,
-	FolderWithStats,
-	PrismaFolderWithCounts
+    FolderComplete,
+    FolderExtended,
+    FolderExtendedComplete,
+    FolderStatistics,
+    FolderWithStats
 } from '@/types/entities/folder';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -205,18 +204,7 @@ function calculateFolderStatistics(
 	};
 }
 
-/**
- * 📁 Formatea el tamaño de archivo en formato legible
- */
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 B';
-
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-}
+// formatFileSize se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 
 /**
  * 🔄 Transforma un objeto Folder de Prisma a FolderWithStats (FUNCIÓN PRINCIPAL)

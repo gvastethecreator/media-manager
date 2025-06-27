@@ -4,9 +4,9 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
     createGroup,
     deleteGroup,

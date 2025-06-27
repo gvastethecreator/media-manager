@@ -8,7 +8,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import albumService, { type CreateAlbumInput, type GetAlbumsOptions, type UpdateAlbumInput } from '@/services/album-service-export';
+import albumService from '@/services/album';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { Prisma } from '@prisma/client';
 
@@ -17,7 +17,7 @@ const logger = serverLogger.withContext('AlbumActions');
 /**
  * Obtiene todos los álbumes con sus estadísticas.
  */
-export async function getAlbums(options?: GetAlbumsOptions): Promise<AlbumWithStats[]> {
+export async function getAlbums(options?: object): Promise<AlbumWithStats[]> {
 	try {
 		logger.info('🎞️ Obteniendo álbumes via action');
 		const result = await albumService.getAlbums(options);
@@ -44,7 +44,7 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 /**
  * Crea un nuevo álbum.
  */
-export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStats> {
+export async function createAlbum(data: Prisma.AlbumCreateInput): Promise<AlbumWithStats> {
 	try {
 		logger.info('📝 Creando álbum via action', { name: data.name });
 		return await albumService.createAlbum(data);

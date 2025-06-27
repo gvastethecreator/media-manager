@@ -8,7 +8,7 @@
 
 import * as actions from '@/app/actions/properties/property.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import { PropertyWithStats } from '@/types/entities/property';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';

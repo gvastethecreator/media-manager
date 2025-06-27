@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type { GroupWithStats } from '@/types/entities/group';
 import { Prisma } from '@prisma/client';
 import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';

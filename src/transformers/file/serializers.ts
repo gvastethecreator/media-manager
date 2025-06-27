@@ -15,21 +15,8 @@ import { toFileListItem } from './mappers';
 
 const serializersLogger = serverLogger.withContext('File:Serializers');
 
-/**
- * Formatea el tamaño de un archivo a un string legible
- * @param bytes Tamaño en bytes
- * @param decimals Decimales a mostrar
- * @returns String con tamaño formateado
- */
-export function formatFileSize(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 Bytes';
-
-	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
-}
+// formatFileSize se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
+// Importar desde allí: import { formatFileSize } from '@/lib/utils/format.utils';
 
 /**
  * Serializa un resultado de operación de directorio para la UI

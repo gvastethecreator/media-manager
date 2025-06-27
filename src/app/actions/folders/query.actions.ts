@@ -9,7 +9,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { fromPrismaFolders, mapFolderSearchOptionsToPrisma } from '@/transformers/folder';
 import type { FolderComplete, FolderSearchOptions } from '@/types/entities/folder';
 

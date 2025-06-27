@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/ui/theme-provider';
 import { ToastProvider } from '@/components/ui/toast';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { ReactScanProvider } from '@/lib/react-scan';
+import { ReactScanProvider } from '@/lib/dev/react-scan';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/providers/app-provider';
 import '@/styles/form-animations.css';

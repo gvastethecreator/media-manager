@@ -1,5 +1,11 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { useSettings } from '@/lib/contexts';
 import {
 	Bookmark,
 	Command,
@@ -16,13 +22,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { useSettings } from '@/lib/contexts';
-import type { Settings } from '@/lib/types';
 
 const shortcutCategories = [
 	{
@@ -61,7 +60,7 @@ interface ShortcutSettings {
 	shortcuts: Record<string, string>;
 }
 
-interface ExtendedSettings extends Settings {
+interface ExtendedSettings extends InterfacePreferences {
 	shortcuts?: Record<string, string>;
 }
 

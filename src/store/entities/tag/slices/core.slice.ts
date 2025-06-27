@@ -10,7 +10,7 @@ import {
 } from '@/app/actions/tags/crud.actions';
 import { getTags as getTagsAction } from '@/app/actions/tags/query.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type { TagWithStats } from '@/types/entities/tag';
 import type { Prisma } from '@prisma/client';
 import { StateCreator } from 'zustand';

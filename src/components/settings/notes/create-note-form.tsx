@@ -9,7 +9,7 @@ import { createNote, updateNote } from '@/app/actions/notes/note.actions';
 import { DynamicCreateForm, type FormField } from '@/components/settings/common/dynamic-create-form';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
 import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note/types';
 

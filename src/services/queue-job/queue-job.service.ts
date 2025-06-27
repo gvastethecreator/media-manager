@@ -3,18 +3,18 @@
  * @module services/queue-job
  */
 
+import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { serializeQueueJobMetadata, transformQueueJob, transformQueueJobs } from '@/transformers/queue-job';
 import {
-	QueueJobStatus,
-	type CreateQueueJobInput,
-	type PaginatedQueueJobs,
-	type QueueJobExtended,
-	type QueueJobFilters,
-	type QueueJobPaginationOptions,
-	type QueueStats,
-	type UpdateQueueJobInput,
+    type CreateQueueJobInput,
+    type PaginatedQueueJobs,
+    type QueueJobExtended,
+    type QueueJobFilters,
+    type QueueJobPaginationOptions,
+    QueueJobStatus,
+    type QueueStats,
+    type UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
 import { getPaginationInfo } from '@/utils/pagination';
 import type { Prisma } from '@prisma/client';

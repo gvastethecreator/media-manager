@@ -4,61 +4,40 @@
  * @description Exporta todos los servicios del sistema para su uso centralizado
  */
 
-/**
- * @file services/index.ts
- * @module services
- * @description Exporta todos los servicios del sistema para su uso centralizado
- */
-
-// Entidades organizacionales - Solo las que existen
+// Entidades base
 export * from './album/index';
-export * from './collection/index';
-// Servicios individuales que existen
-export * from './concept.service';
-// Servicios del sistema - Solo los que existen
 export * from './file/index';
-// Entidades base - Solo las que existen
 export * from './folder/index';
 export * from './group/index';
 export * from './image/index';
-export * from './note.service';
-export * from './profile/index';
-export * from './prompt.service';
-export * from './settings/index';
-export * from './stats.service';
 export * from './tag/index';
-export * from './task.service';
-// export * from './thumbnail.service'; // ❌ DISABLED: Conflicto con ./image/index - usar image/index
-export * from './toast.service';
 export * from './video/index';
-// export * from './stats/index'; // ❌ DISABLED: archivo no existe
 
-/**
- * Objeto centralizado de servicios para un acceso más limpio
- * Solo incluye servicios que realmente existen
- */
-export const services = {
-	// Entidades base
-	folder: require('./folder/index'),
-	image: require('./image/index'),
-	tag: require('./tag/index'),
-	video: require('./video/index'),
+// Entidades organizacionales
+export * from './collection/index';
+export * from './profile/index';
 
-	// Entidades organizacionales
-	album: require('./album/index'),
-	collection: require('./collection/index'),
-	group: require('./group/index'),
+// Entidades de contenido
+export * from './audio/index';
+export * from './concept/index';
+export * from './document/index';
+export * from './file3d/index';
+export * from './json-file/index';
+export * from './note/index';
+export * from './place/index';
+export * from './workflow/index';
+export * from './world-item/index';
 
-	// Servicios individuales
-	concept: require('./concept.service'),
-	note: require('./note.service'),
-	prompt: require('./prompt.service'),
-	stats: require('./stats.service'),
-	task: require('./task.service'),
-	toast: require('./toast.service'),
+// Servicios del sistema
+export * from './settings/index';
+export * from './stats/index';
+export * from './toast/index';
 
-	// Servicios del sistema
-	file: require('./file/index'),
-	profile: require('./profile/index'),
-	settings: require('./settings/index'),
-};
+// Servicios especializados
+export * from './activity/index';
+export * from './character/index';
+export * from './metadata/index';
+export * from './property/index';
+export * from './queue-job/index';
+export * from './uploaded-images/index';
+export * from './wildcard/index';

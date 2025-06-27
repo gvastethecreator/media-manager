@@ -13,7 +13,7 @@
  */
 
 // --- Tipos Canónicos ---
-export type { GroupBase, GroupStatistics, GroupWithStats } from './base';
+export type { GroupBase, GroupStatistics, GroupWithStats, GroupSortKey } from './base';
 
 // --- Esquemas de Validación ---
 export { CreateGroupSchema, UpdateGroupSchema } from './schema';

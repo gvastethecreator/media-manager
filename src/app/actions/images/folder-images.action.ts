@@ -1,6 +1,6 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileItem } from '@/types/files';
 import { toServiceError } from '@/utils/errors/service-errors';

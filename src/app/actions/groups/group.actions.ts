@@ -8,7 +8,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { toGroupWithStats } from '@/transformers/group';
 import type { GroupWithStats } from '@/types/entities/group';
 import { Prisma } from '@prisma/client';

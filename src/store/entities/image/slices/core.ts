@@ -13,7 +13,7 @@ import {
     updateImage as updateServerImage,
 } from '@/app/actions/images/image-crud.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';

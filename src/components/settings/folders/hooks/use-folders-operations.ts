@@ -3,7 +3,7 @@
 import { createFolder, deleteFolder, updateFolder } from '@/app/actions/folders';
 import { clearMetadataCache } from '@/app/actions/metadata';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type { FolderCreateInput } from '@/types/entities/folder';
 import { useCallback } from 'react';
 

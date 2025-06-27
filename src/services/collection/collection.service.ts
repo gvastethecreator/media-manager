@@ -1,29 +1,81 @@
 /**
  * @file Servicio para gestión de colecciones
  * @module services/collection
- * @description Implementación del servicio de gestión de colecciones
+ * @description Servicio centralizado para operaciones CRUD y lógica de negocio de colecciones
+ * @updated 2025-01-27
  */
 
-import {
-    createCollection as createCollectionAction,
-    deleteCollection as deleteCollectionAction,
-    getCollection as getCollectionAction,
-    getCollectionImages as getCollectionImagesAction,
-    getCollections as getCollectionsAction,
-    updateCollection as updateCollectionAction,
-} from '@/app/actions/collections/collection.actions';
+import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import {
+    toPrismaCollectionCreate,
+    toPrismaCollectionUpdate,
+} from '@/transformers/collection/serializers';
+import {
+    fromPrismaCollection,
+    fromPrismaCollections,
+} from '@/transformers/collection/transformer';
 import type {
     CollectionBase,
     CollectionCreateInput,
+    CollectionSearchOptions,
     CollectionUpdateInput,
     CollectionWithStats,
 } from '@/types/entities/collection';
+import { revalidatePath } from 'next/cache';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');
+
+// Constantes del servicio
+const REVALIDATE_PATHS = ['/collections', '/settings/collections'];
+
+// Selección optimizada para obtener solo los conteos
+const COLLECTION_SELECT_WITH_STATS = {
+	id: true,
+	name: true,
+	emoji: true,
+	color: true,
+	description: true,
+	shortcut: true,
+	category: true,
+	sortBy: true,
+	filters: true,
+	url: true,
+	alternativeUrl: true,
+	sourceImage: true,
+	platform: true,
+	price: true,
+	network: true,
+	tokenId: true,
+	tokenAddress: true,
+	contractAddress: true,
+	contractType: true,
+	editions: true,
+	featuredImage: true,
+	isFavorite: true,
+	createdAt: true,
+	updatedAt: true,
+	_count: {
+		select: {
+			images: true,
+			videos: true,
+			albums: true,
+			tags: true,
+			characters: true,
+			places: true,
+			worldItems: true,
+			concepts: true,
+			prompts: true,
+			notes: true,
+			wildcards: true,
+			properties: true,
+			groups: true,
+		},
+	},
+} as const;
 
 // Eventos del servicio de colecciones
 export const COLLECTION_EVENTS = {
@@ -51,8 +103,6 @@ export class CollectionServiceError extends Error {
 
 /**
  * Notifica cambios en las colecciones a través del sistema de eventos
- * @param action Tipo de acción realizada
- * @param collection Datos de la colección afectada
  */
 export const notifyCollectionChange = async (
 	action: 'create' | 'update' | 'delete' | 'items:add' | 'items:remove',
@@ -93,41 +143,113 @@ export const notifyCollectionChange = async (
 };
 
 /**
+ * Revalida las rutas de caché relacionadas con las colecciones
+ */
+const revalidateCollectionPaths = async (): Promise<void> => {
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+};
+
+/**
+ * Busca y obtiene colecciones según los criterios de búsqueda
+ */
+export const searchCollections = async (options: CollectionSearchOptions): Promise<CollectionWithStats[]> => {
+	try {
+		logger.info('🔍 Buscando colecciones', { options });
+		const prisma = await getPrismaClient();
+
+		// Construir query básica
+		const where: any = {};
+		if (options.filters?.search) {
+			where.OR = [
+				{ name: { contains: options.filters.search } },
+				{ description: { contains: options.filters.search } },
+			];
+		}
+		if (options.filters?.isFavorite !== undefined) {
+			where.isFavorite = options.filters.isFavorite;
+		}
+		if (options.filters?.category && options.filters.category.length > 0) {
+			where.category = { in: options.filters.category };
+		}
+
+		const collections = await prisma.collection.findMany({
+			where,
+			select: COLLECTION_SELECT_WITH_STATS,
+			skip: options.skip,
+			take: options.take,
+			orderBy: options.orderBy || { createdAt: 'desc' },
+		});
+
+		const result = fromPrismaCollections(collections);
+		logger.info(`✅ ${result.length} colecciones encontradas`);
+		return result;
+	} catch (error) {
+		logger.error('❌ Error al buscar colecciones', { error, options });
+		throw new CollectionServiceError(
+			`Error al buscar colecciones: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'SEARCH_COLLECTIONS_FAILED',
+			error
+		);
+	}
+};
+
+/**
  * Obtiene todas las colecciones
- * @returns Lista de colecciones con estadísticas
  */
 export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
-		logger.info('📚 Obteniendo colecciones');
-		const collections = await getCollectionsAction();
-		logger.info(`✅ ${collections.length} colecciones obtenidas`);
-		return collections;
+		logger.info('📚 Obteniendo todas las colecciones');
+		const prisma = await getPrismaClient();
+
+		const collections = await prisma.collection.findMany({
+			select: COLLECTION_SELECT_WITH_STATS,
+			orderBy: { createdAt: 'desc' },
+		});
+
+		const result = fromPrismaCollections(collections);
+		logger.info(`✅ ${result.length} colecciones obtenidas`);
+		return result;
 	} catch (error) {
-		logger.error('❌ Error al obtener colecciones:', error);
-		throw new CollectionServiceError('Error al obtener colecciones', 'GET_COLLECTIONS_FAILED', error);
+		logger.error('❌ Error al obtener colecciones', { error });
+		throw new CollectionServiceError(
+			`Error al obtener colecciones: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'GET_COLLECTIONS_FAILED',
+			error
+		);
 	}
 };
 
 /**
  * Obtiene una colección por su ID
- * @param id ID de la colección
- * @returns Detalles de la colección
  */
-export const getCollection = async (id: string): Promise<CollectionWithStats> => {
+export const getCollection = async (id: string): Promise<CollectionWithStats | null> => {
 	try {
-		logger.info(`🔍 Buscando colección: ${id}`);
-		const collection = await getCollectionAction(id);
+		logger.info(`🔍 Obteniendo colección por ID: ${id}`);
+		const prisma = await getPrismaClient();
+
+		const collection = await prisma.collection.findUnique({
+			where: { id },
+			select: COLLECTION_SELECT_WITH_STATS,
+		});
 
 		if (!collection) {
-			throw new CollectionServiceError(`Colección no encontrada: ${id}`, 'COLLECTION_NOT_FOUND');
+			logger.warn(`Colección no encontrada: ${id}`);
+			return null;
 		}
 
-		logger.info(`✅ Colección encontrada: ${collection.name}`);
-		return collection;
+		const result = fromPrismaCollection(collection);
+		if (!result) {
+			throw new CollectionServiceError('Error al transformar la colección', 'TRANSFORM_FAILED');
+		}
+
+		logger.info(`✅ Colección encontrada: ${result.name}`);
+		return result;
 	} catch (error) {
-		logger.error(`❌ Error al obtener colección ${id}:`, error);
+		logger.error(`❌ Error al obtener colección ${id}`, { error });
 		throw new CollectionServiceError(
-			`Error al obtener colección: ${error instanceof Error ? error.message : String(error)}`,
+			`Error al obtener colección: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			'GET_COLLECTION_FAILED',
 			error
 		);
@@ -136,24 +258,35 @@ export const getCollection = async (id: string): Promise<CollectionWithStats> =>
 
 /**
  * Crea una nueva colección
- * @param data Datos para la creación de la colección
- * @returns La colección creada
  */
 export const createCollection = async (data: CollectionCreateInput): Promise<CollectionWithStats> => {
 	try {
-		logger.info('✨ Creando nueva colección:', { name: data.name });
+		logger.info('✨ Creando nueva colección', { name: data.name });
+		const prisma = await getPrismaClient();
 
-		const collection = await createCollectionAction(data);
+		const prismaData = toPrismaCollectionCreate(data);
+		const newCollection = await prisma.collection.create({
+			data: prismaData,
+			select: COLLECTION_SELECT_WITH_STATS,
+		});
+
+		// Revalidar rutas
+		await revalidateCollectionPaths();
+
+		const result = fromPrismaCollection(newCollection);
+		if (!result) {
+			throw new CollectionServiceError('Error al transformar la colección recién creada', 'TRANSFORM_FAILED');
+		}
 
 		// Notificar creación
-		await notifyCollectionChange('create', collection);
+		await notifyCollectionChange('create', result);
 
-		logger.info(`✅ Colección creada: ${collection.name}`, { id: collection.id });
-		return collection;
+		logger.info(`✅ Colección creada exitosamente: ${result.name}`, { id: result.id });
+		return result;
 	} catch (error) {
-		logger.error('❌ Error al crear colección:', error);
+		logger.error('❌ Error al crear colección', { error, data });
 		throw new CollectionServiceError(
-			`Error al crear colección: ${error instanceof Error ? error.message : String(error)}`,
+			`Error al crear colección: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			'CREATE_COLLECTION_FAILED',
 			error
 		);
@@ -162,25 +295,37 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 
 /**
  * Actualiza una colección existente
- * @param id ID de la colección
- * @param data Datos a actualizar
- * @returns La colección actualizada
  */
 export const updateCollection = async (id: string, data: CollectionUpdateInput): Promise<CollectionWithStats> => {
 	try {
 		logger.info(`📝 Actualizando colección: ${id}`);
+		const prisma = await getPrismaClient();
 
-		const collection = await updateCollectionAction(id, data);
+		const prismaData = toPrismaCollectionUpdate(data);
+		const updatedCollection = await prisma.collection.update({
+			where: { id },
+			data: prismaData,
+			select: COLLECTION_SELECT_WITH_STATS,
+		});
+
+		// Revalidar rutas
+		await revalidateCollectionPaths();
+		revalidatePath(`/collections/${id}`);
+
+		const result = fromPrismaCollection(updatedCollection);
+		if (!result) {
+			throw new CollectionServiceError('Error al transformar la colección actualizada', 'TRANSFORM_FAILED');
+		}
 
 		// Notificar actualización
-		await notifyCollectionChange('update', collection);
+		await notifyCollectionChange('update', result);
 
-		logger.info(`✅ Colección actualizada: ${collection.name}`, { id });
-		return collection;
+		logger.info(`✅ Colección actualizada exitosamente: ${result.name}`, { id });
+		return result;
 	} catch (error) {
-		logger.error(`❌ Error al actualizar colección ${id}:`, error);
+		logger.error(`❌ Error al actualizar colección ${id}`, { error, data });
 		throw new CollectionServiceError(
-			`Error al actualizar colección: ${error instanceof Error ? error.message : String(error)}`,
+			`Error al actualizar colección: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			'UPDATE_COLLECTION_FAILED',
 			error
 		);
@@ -189,22 +334,27 @@ export const updateCollection = async (id: string, data: CollectionUpdateInput):
 
 /**
  * Elimina una colección
- * @param id ID de la colección a eliminar
  */
 export const deleteCollection = async (id: string): Promise<void> => {
 	try {
 		logger.info(`🗑️ Eliminando colección: ${id}`);
+		const prisma = await getPrismaClient();
 
 		// Notificar antes de eliminar
 		await notifyCollectionChange('delete', { id });
 
-		await deleteCollectionAction(id);
+		await prisma.collection.delete({
+			where: { id }
+		});
 
-		logger.info(`✅ Colección eliminada: ${id}`);
+		// Revalidar rutas
+		await revalidateCollectionPaths();
+
+		logger.info(`✅ Colección eliminada exitosamente: ${id}`);
 	} catch (error) {
-		logger.error(`❌ Error al eliminar colección ${id}:`, error);
+		logger.error(`❌ Error al eliminar colección ${id}`, { error });
 		throw new CollectionServiceError(
-			`Error al eliminar colección: ${error instanceof Error ? error.message : String(error)}`,
+			`Error al eliminar colección: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			'DELETE_COLLECTION_FAILED',
 			error
 		);
@@ -213,21 +363,103 @@ export const deleteCollection = async (id: string): Promise<void> => {
 
 /**
  * Obtiene las imágenes asociadas a una colección
- * @param id ID de la colección
- * @returns Lista de imágenes
  */
 export const getCollectionImages = async (id: string): Promise<{ id: string; name: string; path: string }[]> => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes de la colección: ${id}`);
-		const images = await getCollectionImagesAction(id);
+		const prisma = await getPrismaClient();
+
+		const images = await prisma.image.findMany({
+			where: {
+				collections: {
+					some: {
+						id: id,
+					},
+				},
+			},
+			select: {
+				id: true,
+				name: true,
+				path: true,
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+		});
+
 		logger.info(`✅ ${images.length} imágenes obtenidas de la colección: ${id}`);
 		return images;
 	} catch (error) {
-		logger.error(`❌ Error al obtener imágenes de la colección ${id}:`, error);
+		logger.error(`❌ Error al obtener imágenes de la colección ${id}`, { error });
 		throw new CollectionServiceError(
-			`Error al obtener imágenes de la colección: ${error instanceof Error ? error.message : String(error)}`,
+			`Error al obtener imágenes de la colección: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			'GET_COLLECTION_IMAGES_FAILED',
 			error
 		);
 	}
 };
+
+/**
+ * Cambia el estado de favorito de una colección
+ */
+export const toggleCollectionFavorite = async (id: string): Promise<CollectionWithStats> => {
+	try {
+		logger.info(`⭐ Cambiando estado de favorito de la colección: ${id}`);
+		const prisma = await getPrismaClient();
+
+		// Obtener estado actual
+		const currentCollection = await prisma.collection.findUnique({
+			where: { id },
+			select: { isFavorite: true },
+		});
+
+		if (!currentCollection) {
+			throw new CollectionServiceError('Colección no encontrada', 'COLLECTION_NOT_FOUND');
+		}
+
+		const updatedCollection = await prisma.collection.update({
+			where: { id },
+			data: { isFavorite: !currentCollection.isFavorite },
+			select: COLLECTION_SELECT_WITH_STATS,
+		});
+
+		// Revalidar rutas
+		await revalidateCollectionPaths();
+		revalidatePath(`/collections/${id}`);
+
+		const result = fromPrismaCollection(updatedCollection);
+		if (!result) {
+			throw new CollectionServiceError('Error al transformar la colección', 'TRANSFORM_FAILED');
+		}
+
+		// Notificar actualización
+		await notifyCollectionChange('update', result);
+
+		logger.info(`✅ Estado de favorito cambiado: ${id} -> ${result.isFavorite}`);
+		return result;
+	} catch (error) {
+		logger.error(`❌ Error al cambiar estado de favorito de la colección ${id}`, { error });
+		throw new CollectionServiceError(
+			`Error al cambiar estado de favorito: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'TOGGLE_FAVORITE_FAILED',
+			error
+		);
+	}
+};
+
+// Servicio principal
+const collectionService = {
+	searchCollections,
+	getCollections,
+	getCollection,
+	createCollection,
+	updateCollection,
+	deleteCollection,
+	getCollectionImages,
+	toggleCollectionFavorite,
+	notifyCollectionChange,
+	COLLECTION_EVENTS,
+	CollectionServiceError,
+};
+
+export default collectionService;

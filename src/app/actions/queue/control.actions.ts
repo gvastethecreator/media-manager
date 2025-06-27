@@ -5,7 +5,7 @@
  * @module app/actions/queue/control.actions
  */
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	cancelQueueJob as cancelQueueJobService,
