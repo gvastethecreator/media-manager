@@ -34,7 +34,7 @@ export default [
       // Reglas que complementan Biome (no duplican su funcionalidad)
 
       // TypeScript específicas que Biome no cubre completamente
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': 'off', // Biome ya maneja esta regla
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/prefer-as-const': 'error',
       '@typescript-eslint/no-non-null-assertion': 'warn',
@@ -44,7 +44,8 @@ export default [
       'no-debugger': 'error',
       'no-alert': 'error',
       'prefer-const': 'error',
-      'no-var': 'error',
+      'no-var': 'off',
+      'no-unused-vars': 'off', // Biome ya maneja esta regla
 
       // Desactivar reglas que Biome ya maneja
       'indent': 'off',

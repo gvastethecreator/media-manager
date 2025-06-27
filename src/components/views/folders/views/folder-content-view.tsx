@@ -18,12 +18,12 @@ const logger = clientLogger.withContext('FolderContentView');
 
 const MemoizedEntityCard = React.memo(
 	({ image, onImageClick }: { image: ImageWithStats & { entityType: 'image' }; onImageClick: () => void }) => (
-		<EntityCard item={image} onClick={onImageClick} className="h-full" />
+		<EntityCard entity={image} onClick={onImageClick} className="h-full" />
 	),
 	(prevProps, nextProps) =>
 		prevProps.image.id === nextProps.image.id &&
 		prevProps.image.name === nextProps.image.name &&
-		prevProps.image.updatedAt === nextProps.image.updatedAt,
+		prevProps.image.updatedAt === nextProps.image.updatedAt
 );
 MemoizedEntityCard.displayName = 'MemoizedEntityCard';
 
@@ -175,7 +175,9 @@ export function FolderContentView() {
 			</div>
 
 			<ScrollArea className="h-full">
-				<div className="container mx-auto p-6 pt-16"> {/* pt-16 para dar espacio a los controles */}
+				<div className="container mx-auto p-6 pt-16">
+					{' '}
+					{/* pt-16 para dar espacio a los controles */}
 					{/* Header con información de la carpeta */}
 					<div className="mb-6">
 						<h2 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
@@ -189,7 +191,6 @@ export function FolderContentView() {
 							<p className="text-sm text-muted-foreground mt-1">{currentItem.description}</p>
 						)}
 					</div>
-
 					{/* Grid de imágenes */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
 						{folderImages.map((image, index) => {
@@ -212,7 +213,6 @@ export function FolderContentView() {
 							);
 						})}
 					</div>
-
 					{/* Footer con información adicional */}
 					{folderImages.length > 0 && (
 						<div className="mt-8 pt-6 border-t border-border">

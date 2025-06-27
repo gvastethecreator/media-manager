@@ -2,7 +2,7 @@
 
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowserV2 } from '@/components/features/file-browser/file-browser-v2';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -50,12 +50,7 @@ export function SearchView(_props: ViewProps) {
 	});
 
 	// ✅ MIGRADO: Usar store específico de imágenes
-	const {
-		images: imagesRecord,
-		isLoading,
-		getSortedImages,
-		loadImages
-	} = useImageStore();
+	const { images: imagesRecord, isLoading, getSortedImages, loadImages } = useImageStore();
 
 	const { openViewer } = useImageViewer();
 
@@ -74,23 +69,20 @@ export function SearchView(_props: ViewProps) {
 		}
 	}, [filters, loadImages]);
 
-	const handleItemSelect = useCallback(
-		(item: EntityWithStats) => {
-			// TODO: Implementar selección con el nuevo sistema
-			console.log('Item seleccionado:', item.id);
-		},
-		[]
-	);
+	const handleItemSelect = useCallback((item: EntityWithStats) => {
+		// TODO: Implementar selección con el nuevo sistema
+		console.log('Item seleccionado:', item.id);
+	}, []);
 
 	const handleItemDoubleClick = useCallback(
 		(item: EntityWithStats) => {
 			// ✅ MIGRADO: Usar EntityWithStats en lugar de FileItem
 			if (item.type === 'image') {
-				const imageItems = items.filter(i => i.type === 'image');
-				const currentIndex = imageItems.findIndex(i => i.id === item.id);
+				const imageItems = items.filter((i) => i.type === 'image');
+				const currentIndex = imageItems.findIndex((i) => i.id === item.id);
 
 				// Convertir EntityWithStats a formato compatible con viewer
-				const viewerItems = imageItems.map(img => ({
+				const viewerItems = imageItems.map((img) => ({
 					id: img.id,
 					name: img.name || '',
 					src: img.thumbnailUrl || `/api/images/${img.id}/content`,
@@ -150,11 +142,7 @@ export function SearchView(_props: ViewProps) {
 				{isLoading ? (
 					<LoadingScreen />
 				) : items && items.length > 0 ? (
-					<FileBrowserV2
-						entityType="image"
-						onItemSelect={handleItemSelect}
-						onItemDoubleClick={handleItemDoubleClick}
-					/>
+					<FileBrowser entityType="image" onItemSelect={handleItemSelect} onItemDoubleClick={handleItemDoubleClick} />
 				) : filters.query ? (
 					<EmptyState
 						icon={Search}

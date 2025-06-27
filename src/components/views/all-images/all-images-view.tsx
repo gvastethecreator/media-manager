@@ -1,6 +1,6 @@
 'use client';
 
-import { EntityCardV2 } from '@/components/cards/entity-card-v2';
+import { EntityCard } from '@/components/cards/entity-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,12 +16,12 @@ const viewLogger = clientLogger.withContext('AllImagesView');
 
 const MemoizedEntityCard = React.memo(
 	({ image, onImageClick }: { image: ImageWithStats; onImageClick: () => void }) => (
-		<EntityCardV2 entity={image} onClick={onImageClick} className="h-full" />
+		<EntityCard entity={image} onClick={onImageClick} className="h-full" />
 	),
 	(prevProps, nextProps) =>
 		prevProps.image.id === nextProps.image.id &&
 		prevProps.image.name === nextProps.image.name &&
-		prevProps.image.updatedAt === nextProps.image.updatedAt,
+		prevProps.image.updatedAt === nextProps.image.updatedAt
 );
 MemoizedEntityCard.displayName = 'MemoizedEntityCard';
 
@@ -85,9 +85,7 @@ export function AllImagesView(_props: ViewProps) {
 			<div className="container mx-auto p-6">
 				{/* Header con estadísticas */}
 				<div className="mb-6">
-					<h2 className="text-2xl font-bold text-foreground mb-2">
-						Todas las Imágenes
-					</h2>
+					<h2 className="text-2xl font-bold text-foreground mb-2">Todas las Imágenes</h2>
 					<p className="text-muted-foreground">
 						{sortedImages.length} {sortedImages.length === 1 ? 'imagen' : 'imágenes'} en total
 					</p>

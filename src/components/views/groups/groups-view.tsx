@@ -1,6 +1,7 @@
 'use client';
 
 import { type GroupWithStats } from '@/app/actions/groups/group.actions';
+import { GroupCard } from '@/components/cards/group-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -13,7 +14,6 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect } from 'react';
 import type { ViewProps } from '../types';
-import { GroupCard } from './group-card';
 
 const viewLogger = clientLogger.withContext('GroupsView');
 

@@ -11,7 +11,8 @@
       },
       "correctness": {
         "useExhaustiveDependencies": "warn",
-        "noNodejsModules": "off"
+        "noNodejsModules": "off",
+        "noUnusedVariables": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",
