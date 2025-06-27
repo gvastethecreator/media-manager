@@ -26,14 +26,10 @@ export function sortCollections(
 			return clonedCollections.sort((a, b) => b.name.localeCompare(a.name));
 
 		case CollectionSortOption.DATE_ASC:
-			return clonedCollections.sort(
-				(a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-			);
+			return clonedCollections.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
 		case CollectionSortOption.DATE_DESC:
-			return clonedCollections.sort(
-				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-			);
+			return clonedCollections.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
 		case CollectionSortOption.ITEMS_ASC:
 			return clonedCollections.sort((a, b) => (a.stats?.totalItems || 0) - (b.stats?.totalItems || 0));
@@ -58,10 +54,7 @@ export function sortCollections(
  * @param filters Objeto con criterios de filtrado
  * @returns Array de colecciones filtradas
  */
-export function filterCollections(
-	collections: CollectionWithStats[],
-	filters: any
-): CollectionWithStats[] {
+export function filterCollections(collections: CollectionWithStats[], filters: any): CollectionWithStats[] {
 	if (!collections || collections.length === 0) {
 		return [];
 	}

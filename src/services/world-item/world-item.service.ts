@@ -12,20 +12,20 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-    fromPrismaWorldItem,
-    mapCreateWorldItemDataToPrisma,
-    mapUpdateWorldItemDataToPrisma,
-    mapWorldItemSearchOptionsToPrisma,
-    toWorldItemWithStats,
-    worldItemPayload,
+	fromPrismaWorldItem,
+	mapCreateWorldItemDataToPrisma,
+	mapUpdateWorldItemDataToPrisma,
+	mapWorldItemSearchOptionsToPrisma,
+	toWorldItemWithStats,
+	worldItemPayload,
 } from '@/transformers/world-item';
 import type { ImageComplete } from '@/types/entities/image';
 import type {
-    WorldItemComplete,
-    WorldItemCreateInput,
-    WorldItemSearchOptions,
-    WorldItemUpdateInput,
-    WorldItemWithStats,
+	WorldItemComplete,
+	WorldItemCreateInput,
+	WorldItemSearchOptions,
+	WorldItemUpdateInput,
+	WorldItemWithStats,
 } from '@/types/entities/world-item';
 
 const worldItemLogger = serverLogger.withContext('WorldItemService');
@@ -54,7 +54,7 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 
 		// Transformar a WorldItemWithStats
 		return worldItems
-			.map(item => {
+			.map((item) => {
 				const complete = fromPrismaWorldItem(item);
 				return complete ? toWorldItemWithStats(complete) : null;
 			})
@@ -96,7 +96,11 @@ export async function getWorldItemWithStatsById(id: string): Promise<WorldItemWi
 		return worldItem ? toWorldItemWithStats(worldItem) : null;
 	} catch (error) {
 		worldItemLogger.error(`Error al obtener world item con stats ${id}:`, error);
-		throw createWorldItemError('Error al obtener objeto del mundo con estadísticas', EntityErrorCode.OPERATION_FAILED, error);
+		throw createWorldItemError(
+			'Error al obtener objeto del mundo con estadísticas',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -252,10 +256,7 @@ export async function getWorldItemImages(worldItemId: string): Promise<{ images:
 						size: true,
 						createdAt: true,
 					},
-					orderBy: [
-						{ isFavorite: 'desc' },
-						{ createdAt: 'desc' },
-					],
+					orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
 				},
 			},
 		});

@@ -6,26 +6,26 @@
 import { formatFileSize } from '@/lib/utils/format.utils';
 // Importaciones explícitas desde mappers
 import {
-    applyFileFilters,
-    determineFileType,
-    determineMimeType,
-    generateFileId,
-    getColorForFileType,
-    getIconForFileType,
-    mapStatsToFileInfo,
-    toEnhancedDirectory,
-    toEnhancedImageFile,
-    toFileListItem, // Mantenemos esta que sí existe
+	applyFileFilters,
+	determineFileType,
+	determineMimeType,
+	generateFileId,
+	getColorForFileType,
+	getIconForFileType,
+	mapStatsToFileInfo,
+	toEnhancedDirectory,
+	toEnhancedImageFile,
+	toFileListItem, // Mantenemos esta que sí existe
 } from './mappers';
 // Importaciones explícitas desde serializers
 import {
-    deserializeImageMetadata,
-    // formatFileSize se ha movido a @/lib/utils/format.utils.ts
-    pathsToTreeStructure,
-    serializeDirectoryContents,
-    serializeFileListForUI,
-    serializeFileOperationResult,
-    serializeImageMetadata,
+	deserializeImageMetadata,
+	// formatFileSize se ha movido a @/lib/utils/format.utils.ts
+	pathsToTreeStructure,
+	serializeDirectoryContents,
+	serializeFileListForUI,
+	serializeFileOperationResult,
+	serializeImageMetadata,
 } from './serializers';
 
 /**
@@ -49,25 +49,25 @@ export function transformFiles(files: any[]): any[] {
 
 // Reexportaciones explícitas
 export {
-    applyFileFilters,
-    // Desde serializers
-    deserializeImageMetadata,
-    determineFileType,
-    determineMimeType,
-    formatFileSize,
-    // Desde mappers
-    generateFileId,
-    getColorForFileType,
-    getIconForFileType,
-    mapStatsToFileInfo,
-    pathsToTreeStructure,
-    serializeDirectoryContents,
-    serializeFileListForUI,
-    serializeFileOperationResult,
-    serializeImageMetadata,
-    toEnhancedDirectory,
-    toEnhancedImageFile,
-    toFileListItem
+	applyFileFilters,
+	// Desde serializers
+	deserializeImageMetadata,
+	determineFileType,
+	determineMimeType,
+	formatFileSize,
+	// Desde mappers
+	generateFileId,
+	getColorForFileType,
+	getIconForFileType,
+	mapStatsToFileInfo,
+	pathsToTreeStructure,
+	serializeDirectoryContents,
+	serializeFileListForUI,
+	serializeFileOperationResult,
+	serializeImageMetadata,
+	toEnhancedDirectory,
+	toEnhancedImageFile,
+	toFileListItem,
 };
 
 // Objeto consolidado (opcional, pero mantenido por compatibilidad)

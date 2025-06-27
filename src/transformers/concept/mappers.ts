@@ -36,19 +36,19 @@ export function toCreateData(input: ConceptCreateInput): Prisma.ConceptCreateInp
 		emoji: input.emoji || '💡',
 		color: input.color || '#3b82f6',
 		category: input.category || 'general',
-		images: imageIds ? { connect: imageIds.map(id => ({ id })) } : undefined,
-		videos: videoIds ? { connect: videoIds.map(id => ({ id })) } : undefined,
-		albums: albumIds ? { connect: albumIds.map(id => ({ id })) } : undefined,
-		collections: collectionIds ? { connect: collectionIds.map(id => ({ id })) } : undefined,
-		tagEntities: tagIds ? { connect: tagIds.map(id => ({ id })) } : undefined,
-		characters: characterIds ? { connect: characterIds.map(id => ({ id })) } : undefined,
-		places: placeIds ? { connect: placeIds.map(id => ({ id })) } : undefined,
-		worldItems: worldItemIds ? { connect: worldItemIds.map(id => ({ id })) } : undefined,
-		prompts: promptIds ? { connect: promptIds.map(id => ({ id })) } : undefined,
-		notes: noteIds ? { connect: noteIds.map(id => ({ id })) } : undefined,
-		wildcards: wildcardIds ? { connect: wildcardIds.map(id => ({ id })) } : undefined,
-		properties: propertyIds ? { connect: propertyIds.map(id => ({ id })) } : undefined,
-		groups: groupIds ? { connect: groupIds.map(id => ({ id })) } : undefined,
+		images: imageIds ? { connect: imageIds.map((id) => ({ id })) } : undefined,
+		videos: videoIds ? { connect: videoIds.map((id) => ({ id })) } : undefined,
+		albums: albumIds ? { connect: albumIds.map((id) => ({ id })) } : undefined,
+		collections: collectionIds ? { connect: collectionIds.map((id) => ({ id })) } : undefined,
+		tagEntities: tagIds ? { connect: tagIds.map((id) => ({ id })) } : undefined,
+		characters: characterIds ? { connect: characterIds.map((id) => ({ id })) } : undefined,
+		places: placeIds ? { connect: placeIds.map((id) => ({ id })) } : undefined,
+		worldItems: worldItemIds ? { connect: worldItemIds.map((id) => ({ id })) } : undefined,
+		prompts: promptIds ? { connect: promptIds.map((id) => ({ id })) } : undefined,
+		notes: noteIds ? { connect: noteIds.map((id) => ({ id })) } : undefined,
+		wildcards: wildcardIds ? { connect: wildcardIds.map((id) => ({ id })) } : undefined,
+		properties: propertyIds ? { connect: propertyIds.map((id) => ({ id })) } : undefined,
+		groups: groupIds ? { connect: groupIds.map((id) => ({ id })) } : undefined,
 	};
 }
 
@@ -77,19 +77,19 @@ export function toUpdateData(input: ConceptUpdateInput): Prisma.ConceptUpdateInp
 
 	const data: Prisma.ConceptUpdateInput = { ...rest };
 
-	if (imageIds !== undefined) data.images = { set: imageIds?.map(id => ({ id })) ?? [] };
-	if (videoIds !== undefined) data.videos = { set: videoIds?.map(id => ({ id })) ?? [] };
-	if (albumIds !== undefined) data.albums = { set: albumIds?.map(id => ({ id })) ?? [] };
-	if (collectionIds !== undefined) data.collections = { set: collectionIds?.map(id => ({ id })) ?? [] };
-	if (tagIds !== undefined) data.tagEntities = { set: tagIds?.map(id => ({ id })) ?? [] };
-	if (characterIds !== undefined) data.characters = { set: characterIds?.map(id => ({ id })) ?? [] };
-	if (placeIds !== undefined) data.places = { set: placeIds?.map(id => ({ id })) ?? [] };
-	if (worldItemIds !== undefined) data.worldItems = { set: worldItemIds?.map(id => ({ id })) ?? [] };
-	if (promptIds !== undefined) data.prompts = { set: promptIds?.map(id => ({ id })) ?? [] };
-	if (noteIds !== undefined) data.notes = { set: noteIds?.map(id => ({ id })) ?? [] };
-	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map(id => ({ id })) ?? [] };
-	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map(id => ({ id })) ?? [] };
-	if (groupIds !== undefined) data.groups = { set: groupIds?.map(id => ({ id })) ?? [] };
+	if (imageIds !== undefined) data.images = { set: imageIds?.map((id) => ({ id })) ?? [] };
+	if (videoIds !== undefined) data.videos = { set: videoIds?.map((id) => ({ id })) ?? [] };
+	if (albumIds !== undefined) data.albums = { set: albumIds?.map((id) => ({ id })) ?? [] };
+	if (collectionIds !== undefined) data.collections = { set: collectionIds?.map((id) => ({ id })) ?? [] };
+	if (tagIds !== undefined) data.tagEntities = { set: tagIds?.map((id) => ({ id })) ?? [] };
+	if (characterIds !== undefined) data.characters = { set: characterIds?.map((id) => ({ id })) ?? [] };
+	if (placeIds !== undefined) data.places = { set: placeIds?.map((id) => ({ id })) ?? [] };
+	if (worldItemIds !== undefined) data.worldItems = { set: worldItemIds?.map((id) => ({ id })) ?? [] };
+	if (promptIds !== undefined) data.prompts = { set: promptIds?.map((id) => ({ id })) ?? [] };
+	if (noteIds !== undefined) data.notes = { set: noteIds?.map((id) => ({ id })) ?? [] };
+	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map((id) => ({ id })) ?? [] };
+	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map((id) => ({ id })) ?? [] };
+	if (groupIds !== undefined) data.groups = { set: groupIds?.map((id) => ({ id })) ?? [] };
 
 	return data;
 }
@@ -99,9 +99,7 @@ export function toUpdateData(input: ConceptUpdateInput): Prisma.ConceptUpdateInp
  * @param options - Opciones de búsqueda que contienen el `orderBy`.
  * @returns El objeto `orderBy` para Prisma.
  */
-export function createOrderBy(
-	options: ConceptSearchOptions = {}
-): Prisma.ConceptOrderByWithRelationInput | undefined {
+export function createOrderBy(options: ConceptSearchOptions = {}): Prisma.ConceptOrderByWithRelationInput | undefined {
 	if (options.orderBy) {
 		return options.orderBy as Prisma.ConceptOrderByWithRelationInput;
 	}

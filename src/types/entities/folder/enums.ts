@@ -63,9 +63,9 @@ export enum FolderViewMode {
  */
 export enum FolderQualityLevel {
 	EXCELLENT = 'excellent', // A: 85-100
-	GOOD = 'good',          // B: 70-84
-	FAIR = 'fair',          // C: 50-69
-	POOR = 'poor',          // D: 0-49
+	GOOD = 'good', // B: 70-84
+	FAIR = 'fair', // C: 50-69
+	POOR = 'poor', // D: 0-49
 }
 
 /**

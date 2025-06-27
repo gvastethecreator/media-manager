@@ -49,13 +49,7 @@ export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderF
 	},
 
 	applyFilters: (folders: FolderWithStats[]) => {
-		const {
-			searchQuery,
-			showOnlyFavorites,
-			minOrganizationScore,
-			showEmptyFolders,
-			maxDepth,
-		} = get();
+		const { searchQuery, showOnlyFavorites, minOrganizationScore, showEmptyFolders, maxDepth } = get();
 
 		return folders.filter((folder) => {
 			// Filtrado por búsqueda
@@ -64,9 +58,7 @@ export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderF
 				const matchesName = folder.name.toLowerCase().includes(query);
 				const matchesDescription = folder.description?.toLowerCase().includes(query);
 				const matchesPath = folder.path.toLowerCase().includes(query);
-				const matchesTags = folder.statistics.autoTags.some(tag =>
-					tag.toLowerCase().includes(query)
-				);
+				const matchesTags = folder.statistics.autoTags.some((tag) => tag.toLowerCase().includes(query));
 
 				if (!matchesName && !matchesDescription && !matchesPath && !matchesTags) {
 					return false;

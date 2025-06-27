@@ -40,9 +40,7 @@ export async function getRecentFolderImages(folderId: string, limit = 4): Promis
 			take: limit,
 		});
 
-		const imageUrls = images
-			.map(img => img.thumbnailUrl)
-			.filter((url): url is string => url !== null);
+		const imageUrls = images.map((img) => img.thumbnailUrl).filter((url): url is string => url !== null);
 
 		folderCardLogger.info(`✅ Obtenidas ${imageUrls.length} URLs de imágenes para FolderCard`);
 		return imageUrls;
@@ -161,7 +159,7 @@ export async function getFoldersForCards(folderIds: string[]): Promise<FolderWit
 
 		// Transformar todas las carpetas usando el transformer optimizado
 		const transformedFolders = folders
-			.map(folder => fromPrismaFolderWithCounts(folder))
+			.map((folder) => fromPrismaFolderWithCounts(folder))
 			.filter((folder): folder is FolderWithStats => folder !== null);
 
 		return transformedFolders;

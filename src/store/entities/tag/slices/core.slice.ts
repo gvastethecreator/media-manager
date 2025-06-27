@@ -4,9 +4,9 @@
  */
 
 import {
-    createTag as createTagAction,
-    deleteTag as deleteTagAction,
-    updateTag as updateTagAction
+	createTag as createTagAction,
+	deleteTag as deleteTagAction,
+	updateTag as updateTagAction,
 } from '@/app/actions/tags/crud.actions';
 import { getTags as getTagsAction } from '@/app/actions/tags/query.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -60,10 +60,13 @@ export interface TagCoreActions {
  * @returns Record de tags indexado por ID
  */
 const tagsToRecord = (tags: TagWithStats[]): Record<string, TagWithStats> => {
-	return tags.reduce((acc, tag) => {
-		acc[tag.id] = tag;
-		return acc;
-	}, {} as Record<string, TagWithStats>);
+	return tags.reduce(
+		(acc, tag) => {
+			acc[tag.id] = tag;
+			return acc;
+		},
+		{} as Record<string, TagWithStats>
+	);
 };
 
 /**

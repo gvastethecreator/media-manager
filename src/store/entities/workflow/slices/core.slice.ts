@@ -30,36 +30,39 @@ export const createWorkflowCoreSlice: StateCreator<
 
 	loadWorkflows: async () => {
 		if (get().isLoading) return;
-		set(state => {
+		set((state) => {
 			state.isLoading = true;
 			state.error = null;
 		});
 
 		try {
 			const workflows = await actions.getWorkflows();
-			set(state => {
-				state.workflows = workflows.reduce((acc, wf) => {
-					acc[wf.id] = wf;
-					return acc;
-				}, {} as Record<string, typeof workflows[0]>);
+			set((state) => {
+				state.workflows = workflows.reduce(
+					(acc, wf) => {
+						acc[wf.id] = wf;
+						return acc;
+					},
+					{} as Record<string, (typeof workflows)[0]>
+				);
 				state.lastUpdated = Date.now();
 			});
 			logger.info(`✅ ${workflows.length} workflows cargados.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al cargar los workflows.';
 			logger.error(errorMsg, error);
-			set(state => {
+			set((state) => {
 				state.error = errorMsg;
 			});
 			toastService.error(errorMsg);
 		} finally {
-			set(state => {
+			set((state) => {
 				state.isLoading = false;
 			});
 		}
 	},
 
-	createWorkflow: async data => {
+	createWorkflow: async (data) => {
 		try {
 			await actions.createWorkflow(data);
 			toastService.success(`Workflow "${data.name}" creado.`);
@@ -83,12 +86,12 @@ export const createWorkflowCoreSlice: StateCreator<
 		}
 	},
 
-	deleteWorkflow: async id => {
+	deleteWorkflow: async (id) => {
 		const workflowName = get().workflows[id]?.name ?? id;
 		set(
-			produce(draft => {
+			produce((draft) => {
 				delete draft.workflows[id];
-			}),
+			})
 		);
 		try {
 			await actions.deleteWorkflow(id);

@@ -138,12 +138,7 @@ export async function getProperty(id: string): Promise<PropertyWithStats | null>
  */
 export async function getProperties(options: GetPropertiesOptions = {}): Promise<GetPropertiesResult> {
 	try {
-		const {
-			search,
-			orderBy = 'name',
-			orderDirection = 'asc',
-			onlyFavorites = false
-		} = options;
+		const { search, orderBy = 'name', orderDirection = 'asc', onlyFavorites = false } = options;
 
 		logger.info('🏷️ Obteniendo propiedades', { options });
 
@@ -166,9 +161,8 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 			prisma.property.findMany({
 				where,
 				include: propertyCounts,
-				orderBy: orderBy === 'name'
-					? [{ isFavorite: 'desc' }, { name: orderDirection }]
-					: { [orderBy]: orderDirection },
+				orderBy:
+					orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
 			}),
 			prisma.property.count({ where }),
 		]);
@@ -307,7 +301,7 @@ export async function deleteProperty(id: string): Promise<void> {
 		}
 
 		await prisma.property.delete({
-			where: { id }
+			where: { id },
 		});
 
 		// Revalidar rutas
@@ -385,10 +379,7 @@ export async function searchProperties(query: string): Promise<PropertyWithStats
 				],
 			},
 			include: propertyCounts,
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ name: 'asc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
 		});
 
 		const result = properties.map(toPropertyWithStats);

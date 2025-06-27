@@ -27,7 +27,10 @@ export function charactersToRecord(characters: CharacterWithStats[]): Record<str
  * @param id ID del personaje
  * @returns Personaje encontrado o undefined
  */
-export function getCharacterById(characters: Record<string, CharacterWithStats>, id: string): CharacterWithStats | undefined {
+export function getCharacterById(
+	characters: Record<string, CharacterWithStats>,
+	id: string
+): CharacterWithStats | undefined {
 	return characters[id];
 }
 

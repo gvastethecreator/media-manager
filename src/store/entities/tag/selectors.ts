@@ -138,9 +138,7 @@ export const useTagsStats = () => {
 		categoriesCount: new Set(tags.map((tag) => tag.category || 'general')).size,
 		mostUsedTag:
 			tags.length > 0
-				? tags.reduce((prev, current) =>
-						current.stats.totalRelations > prev.stats.totalRelations ? current : prev
-				  )
+				? tags.reduce((prev, current) => (current.stats.totalRelations > prev.stats.totalRelations ? current : prev))
 				: null,
 	};
 };

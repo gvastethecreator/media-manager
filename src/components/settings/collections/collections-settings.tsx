@@ -76,7 +76,7 @@ export function CollectionsSettings() {
 				matches &&
 				Boolean(
 					collection.name.toLowerCase().includes(normalizedQuery) ||
-					collection.description?.toLowerCase().includes(normalizedQuery)
+						collection.description?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -447,7 +447,7 @@ export function CollectionsSettings() {
 													style={{
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
-															(previewData?.category || selectedCollection?.category) as CollectionCategory
+																(previewData?.category || selectedCollection?.category) as CollectionCategory
 															] || '#3b82f6',
 													}}
 												>

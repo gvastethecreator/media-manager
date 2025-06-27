@@ -9,20 +9,14 @@ import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import {
-    toPrismaCollectionCreate,
-    toPrismaCollectionUpdate,
-} from '@/transformers/collection/serializers';
-import {
-    fromPrismaCollection,
-    fromPrismaCollections,
-} from '@/transformers/collection/transformer';
+import { toPrismaCollectionCreate, toPrismaCollectionUpdate } from '@/transformers/collection/serializers';
+import { fromPrismaCollection, fromPrismaCollections } from '@/transformers/collection/transformer';
 import type {
-    CollectionBase,
-    CollectionCreateInput,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
-    CollectionWithStats,
+	CollectionBase,
+	CollectionCreateInput,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
+	CollectionWithStats,
 } from '@/types/entities/collection';
 import { revalidatePath } from 'next/cache';
 
@@ -344,7 +338,7 @@ export const deleteCollection = async (id: string): Promise<void> => {
 		await notifyCollectionChange('delete', { id });
 
 		await prisma.collection.delete({
-			where: { id }
+			where: { id },
 		});
 
 		// Revalidar rutas

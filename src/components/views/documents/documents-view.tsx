@@ -21,7 +21,7 @@ const MemoizedDocumentCard = React.memo(
 	(prevProps, nextProps) =>
 		prevProps.document.id === nextProps.document.id &&
 		prevProps.document.name === nextProps.document.name &&
-		prevProps.document.updatedAt === nextProps.document.updatedAt,
+		prevProps.document.updatedAt === nextProps.document.updatedAt
 );
 MemoizedDocumentCard.displayName = 'MemoizedDocumentCard';
 

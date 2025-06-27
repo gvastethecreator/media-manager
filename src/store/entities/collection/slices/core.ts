@@ -3,11 +3,7 @@
  * @module store/entities/collection/slices/core
  */
 
-import type {
-	CollectionCreateInput,
-	CollectionUpdateInput,
-	CollectionWithStats,
-} from '@/types/entities/collection';
+import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
 import {
 	createCollection,
@@ -42,7 +38,10 @@ export interface CollectionCoreSlice {
 	fetchCollection: (id: string) => Promise<CollectionWithStats | undefined>;
 	fetchCollections: () => Promise<CollectionWithStats[]>;
 	createCollectionServer: (data: CollectionCreateInput) => Promise<CollectionWithStats | undefined>;
-	updateCollectionServer: (id: string, data: Partial<CollectionUpdateInput>) => Promise<CollectionWithStats | undefined>;
+	updateCollectionServer: (
+		id: string,
+		data: Partial<CollectionUpdateInput>
+	) => Promise<CollectionWithStats | undefined>;
 	removeCollectionServer: (id: string) => Promise<boolean>;
 }
 

@@ -21,8 +21,6 @@ export interface SettingsResponse {
 	data?: Settings;
 }
 
-
-
 /**
  * Obtiene la configuración global del sistema
  */

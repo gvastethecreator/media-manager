@@ -6,12 +6,12 @@
  */
 
 import type {
-    VideoCreateInput,
-    VideoPlayState,
-    VideoSortCriteria,
-    VideoUpdateInput,
-    VideoViewMode,
-    VideoWithStats
+	VideoCreateInput,
+	VideoPlayState,
+	VideoSortCriteria,
+	VideoUpdateInput,
+	VideoViewMode,
+	VideoWithStats,
 } from '@/types/entities/video';
 
 /**
@@ -180,10 +180,13 @@ export type VideoStore = VideoState & VideoActions;
  * 🔄 Funciones auxiliares para Record optimizado
  */
 export function videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats> {
-	return videos.reduce((acc, video) => {
-		acc[video.id] = video;
-		return acc;
-	}, {} as Record<string, VideoWithStats>);
+	return videos.reduce(
+		(acc, video) => {
+			acc[video.id] = video;
+			return acc;
+		},
+		{} as Record<string, VideoWithStats>
+	);
 }
 
 export function getVideoById(videos: Record<string, VideoWithStats>, id: string): VideoWithStats | undefined {
@@ -195,7 +198,7 @@ export function getAllVideos(videos: Record<string, VideoWithStats>): VideoWithS
 }
 
 export function getVideosByFolder(videos: Record<string, VideoWithStats>, folderId: string): VideoWithStats[] {
-	return Object.values(videos).filter(video => video.folderId === folderId);
+	return Object.values(videos).filter((video) => video.folderId === folderId);
 }
 
 // 🟢 Documentación:

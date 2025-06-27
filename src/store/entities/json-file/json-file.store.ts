@@ -5,10 +5,10 @@
  */
 
 import {
-    createJsonFile,
-    deleteJsonFile,
-    getJsonFiles,
-    updateJsonFile,
+	createJsonFile,
+	deleteJsonFile,
+	getJsonFiles,
+	updateJsonFile,
 } from '@/app/actions/json-file/json-file.actions';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { createSelectors } from '@/lib/utils/store/create-selectors';

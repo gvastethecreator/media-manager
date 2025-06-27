@@ -15,13 +15,11 @@ import type { CompleteFolderStore } from './types';
  */
 export const useFolderStore = create<CompleteFolderStore>()(
 	devtools(
-		subscribeWithSelector(
-			(...args) => ({
-				...createFolderCoreSlice(...args),
-				...createFolderFiltersSlice(...args),
-				...createFolderNavigationSlice(...args),
-			})
-		),
+		subscribeWithSelector((...args) => ({
+			...createFolderCoreSlice(...args),
+			...createFolderFiltersSlice(...args),
+			...createFolderNavigationSlice(...args),
+		})),
 		{
 			name: 'folder-store',
 		}
@@ -30,10 +28,10 @@ export const useFolderStore = create<CompleteFolderStore>()(
 
 // Exportar tipos para uso externo
 export type {
-    CompleteFolderStore,
-    FolderFiltersSlice,
-    FolderNavigationSlice,
-    FolderStore
+	CompleteFolderStore,
+	FolderFiltersSlice,
+	FolderNavigationSlice,
+	FolderStore,
 } from './types';
 
 // Exportar funciones auxiliares
@@ -43,13 +41,12 @@ export const folderStoreHelpers = {
 	 */
 	searchFolders: (folders: Record<string, any>, query: string) => {
 		const searchTerm = query.toLowerCase();
-		return Object.values(folders).filter(folder =>
-			folder.name.toLowerCase().includes(searchTerm) ||
-			folder.description?.toLowerCase().includes(searchTerm) ||
-			folder.path.toLowerCase().includes(searchTerm) ||
-			folder.statistics.autoTags.some((tag: string) =>
-				tag.toLowerCase().includes(searchTerm)
-			)
+		return Object.values(folders).filter(
+			(folder) =>
+				folder.name.toLowerCase().includes(searchTerm) ||
+				folder.description?.toLowerCase().includes(searchTerm) ||
+				folder.path.toLowerCase().includes(searchTerm) ||
+				folder.statistics.autoTags.some((tag: string) => tag.toLowerCase().includes(searchTerm))
 		);
 	},
 
@@ -57,9 +54,7 @@ export const folderStoreHelpers = {
 	 * 📊 Filtra por score de organización
 	 */
 	filterByOrganization: (folders: Record<string, any>, minScore: number) => {
-		return Object.values(folders).filter(folder =>
-			folder.statistics.organizationScore >= minScore
-		);
+		return Object.values(folders).filter((folder) => folder.statistics.organizationScore >= minScore);
 	},
 
 	/**
@@ -87,7 +82,7 @@ export const folderStoreHelpers = {
 		const toPath = folderStoreHelpers.buildBreadcrumbs(folders, toId);
 
 		// Retornar IDs del camino
-		return [...fromPath.map(f => f.id), ...toPath.map(f => f.id)];
+		return [...fromPath.map((f) => f.id), ...toPath.map((f) => f.id)];
 	},
 };
 

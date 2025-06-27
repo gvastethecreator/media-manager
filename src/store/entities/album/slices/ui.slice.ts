@@ -7,11 +7,6 @@ import type { AlbumStore, AlbumUIActions, AlbumUIState } from '../types';
 
 const initialState: AlbumUIState = {};
 
-export const createAlbumUISlice: StateCreator<
-	AlbumStore,
-	[],
-	[],
-	AlbumUIState & AlbumUIActions
-> = () => ({
+export const createAlbumUISlice: StateCreator<AlbumStore, [], [], AlbumUIState & AlbumUIActions> = () => ({
 	...initialState,
 });

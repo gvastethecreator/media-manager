@@ -268,4 +268,3 @@ export const selectAdvanced = (state: SettingsState) => state.settings?.advanced
 
 export const selectTheme = (state: SettingsState) => state.settings?.appearance.theme || 'system';
 export const selectLanguage = (state: SettingsState) => state.settings?.appearance.language || 'es';
-

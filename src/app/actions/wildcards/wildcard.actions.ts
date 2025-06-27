@@ -9,11 +9,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import wildcardService, { type GetWildcardsOptions } from '@/services/wildcard/wildcard.service';
-import type {
-    WildcardCreateInput,
-    WildcardUpdateInput,
-    WildcardWithStats,
-} from '@/types/entities/wildcard';
+import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 
 const logger = serverLogger.withContext('WildcardActions');
 

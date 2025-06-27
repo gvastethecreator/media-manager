@@ -16,14 +16,14 @@ export type JsonFileBase = JsonFile;
  * Estas métricas se enfocan en la estructura y validez del contenido JSON.
  */
 export interface JsonFileStatistics {
-  /** Tamaño del archivo en bytes */
-  size: number;
-  /** Profundidad máxima de anidamiento del JSON */
-  nestingDepth: number;
-  /** Indica si el contenido JSON es válido y parseable */
-  isValid: boolean;
-  /** Número total de claves en el objeto JSON */
-  keyCount: number;
+	/** Tamaño del archivo en bytes */
+	size: number;
+	/** Profundidad máxima de anidamiento del JSON */
+	nestingDepth: number;
+	/** Indica si el contenido JSON es válido y parseable */
+	isValid: boolean;
+	/** Número total de claves en el objeto JSON */
+	keyCount: number;
 }
 
 /**
@@ -31,5 +31,5 @@ export interface JsonFileStatistics {
  * Este es el tipo canónico para usar en la aplicación.
  */
 export interface JsonFileWithStats extends JsonFileBase {
-  stats: JsonFileStatistics;
+	stats: JsonFileStatistics;
 }

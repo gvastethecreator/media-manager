@@ -7,12 +7,7 @@
  */
 
 import { safeJsonParse } from '@/lib/utils/json';
-import {
-    PlaceCreateInput,
-    PlaceUpdateInput,
-    PlaceWithStats,
-    PrismaPlaceWithCounts,
-} from '@/types/entities/place/base';
+import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats, PrismaPlaceWithCounts } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import type { Prisma } from '@prisma/client';
@@ -23,9 +18,7 @@ import type { Prisma } from '@prisma/client';
  * @param place - El objeto de la base de datos, incluyendo los `_count` de relaciones.
  * @returns Un objeto PlaceWithStats con campos JSON parseados y estadísticas calculadas.
  */
-export function toPlaceWithStats(
-	place: PrismaPlaceWithCounts,
-): PlaceWithStats {
+export function toPlaceWithStats(place: PrismaPlaceWithCounts): PlaceWithStats {
 	const { _count, ...rest } = place;
 
 	// Campos que contribuyen a la puntuación de completitud
@@ -99,10 +92,10 @@ export function toCreateData(input: PlaceCreateInput): Prisma.PlaceCreateInput {
 		characters: characters ? { connect: characters.map((id: string) => ({ id })) } : undefined,
 		collections: collections ? { connect: collections.map((id: string) => ({ id })) } : undefined,
 		concepts: concepts ? { connect: concepts.map((id: string) => ({ id })) } : undefined,
-		prompts: promptIds ? { connect: promptIds.map(id => ({ id })) } : undefined,
-		wildcards: wildcardIds ? { connect: wildcardIds.map(id => ({ id })) } : undefined,
-		properties: propertyIds ? { connect: propertyIds.map(id => ({ id })) } : undefined,
-		groups: groupIds ? { connect: groupIds.map(id => ({ id })) } : undefined,
+		prompts: promptIds ? { connect: promptIds.map((id) => ({ id })) } : undefined,
+		wildcards: wildcardIds ? { connect: wildcardIds.map((id) => ({ id })) } : undefined,
+		properties: propertyIds ? { connect: propertyIds.map((id) => ({ id })) } : undefined,
+		groups: groupIds ? { connect: groupIds.map((id) => ({ id })) } : undefined,
 	};
 }
 
@@ -135,14 +128,14 @@ export function toUpdateData(input: PlaceUpdateInput): Prisma.PlaceUpdateInput {
 
 	if (images !== undefined) data.images = { set: images?.map((id: string) => ({ id })) ?? [] };
 	if (notes !== undefined) data.notes = { set: notes?.map((id: string) => ({ id })) ?? [] };
-	if (tags !== undefined) data.tags = { set: tags?.map((id:string) => ({ id })) ?? [] };
+	if (tags !== undefined) data.tags = { set: tags?.map((id: string) => ({ id })) ?? [] };
 	if (characters !== undefined) data.characters = { set: characters?.map((id: string) => ({ id })) ?? [] };
 	if (collections !== undefined) data.collections = { set: collections?.map((id: string) => ({ id })) ?? [] };
 	if (concepts !== undefined) data.concepts = { set: concepts?.map((id: string) => ({ id })) ?? [] };
-	if (promptIds !== undefined) data.prompts = { set: promptIds?.map(id => ({ id })) ?? [] };
-	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map(id => ({ id })) ?? [] };
-	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map(id => ({ id })) ?? [] };
-	if (groupIds !== undefined) data.groups = { set: groupIds?.map(id => ({ id })) ?? [] };
+	if (promptIds !== undefined) data.prompts = { set: promptIds?.map((id) => ({ id })) ?? [] };
+	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map((id) => ({ id })) ?? [] };
+	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map((id) => ({ id })) ?? [] };
+	if (groupIds !== undefined) data.groups = { set: groupIds?.map((id) => ({ id })) ?? [] };
 
 	return data;
 }
@@ -152,9 +145,7 @@ export function toUpdateData(input: PlaceUpdateInput): Prisma.PlaceUpdateInput {
  * @param options - Opciones de búsqueda que contienen el `orderBy`.
  * @returns El objeto `orderBy` para Prisma.
  */
-export function createOrderBy(
-	options: PlaceSearchOptions = {}
-): Prisma.PlaceOrderByWithRelationInput | undefined {
+export function createOrderBy(options: PlaceSearchOptions = {}): Prisma.PlaceOrderByWithRelationInput | undefined {
 	if (options.orderBy) {
 		return options.orderBy as Prisma.PlaceOrderByWithRelationInput;
 	}

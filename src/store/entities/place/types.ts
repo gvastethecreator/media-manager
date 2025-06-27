@@ -4,11 +4,11 @@
  */
 
 import type {
-    PlaceCategory,
-    PlaceSearchOptions,
-    PlaceType,
-    PlaceViewMode,
-    PlaceWithStats,
+	PlaceCategory,
+	PlaceSearchOptions,
+	PlaceType,
+	PlaceViewMode,
+	PlaceWithStats,
 } from '@/types/entities/place';
 import type { StateCreator } from 'zustand';
 

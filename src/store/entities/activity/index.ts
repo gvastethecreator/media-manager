@@ -5,10 +5,10 @@
  */
 
 import {
-    createActivity as createActivityAction,
-    deleteActivity as deleteActivityAction,
-    getActivityById,
-    getFilteredActivities,
+	createActivity as createActivityAction,
+	deleteActivity as deleteActivityAction,
+	getActivityById,
+	getFilteredActivities,
 } from '@/app/actions/activity';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { extendActivities, extendActivity } from '@/transformers/activity';
@@ -54,54 +54,54 @@ export interface ActivityState {
  * Store completo de actividades con todas las operaciones
  */
 export interface ActivityStore extends ActivityState {
-    // Getters
-    getActivity: (id: string) => ActivityComplete | undefined;
-    getActivities: () => ActivityComplete[];
-    getActivitiesByImageId: (imageId: string) => ActivityComplete[];
+	// Getters
+	getActivity: (id: string) => ActivityComplete | undefined;
+	getActivities: () => ActivityComplete[];
+	getActivitiesByImageId: (imageId: string) => ActivityComplete[];
 
-    // Operaciones
-    addActivity: (activity: ActivityBase) => void;
-    addActivities: (activities: ActivityBase[]) => void;
-    deleteActivity: (id: string) => void;
-    clearActivities: () => void;
+	// Operaciones
+	addActivity: (activity: ActivityBase) => void;
+	addActivities: (activities: ActivityBase[]) => void;
+	deleteActivity: (id: string) => void;
+	clearActivities: () => void;
 
-    // Estado de carga
-    setLoading: (isLoading: boolean) => void;
-    setError: (error: string | null) => void;
+	// Estado de carga
+	setLoading: (isLoading: boolean) => void;
+	setError: (error: string | null) => void;
 
-    // Acciones asíncronas
-    fetchActivity: (id: string) => Promise<ActivityComplete | undefined>;
-    fetchActivities: (filters?: ActivityFilters) => Promise<ActivityListResponse | undefined>;
-    createActivity: (data: {
-        type: string;
-        description?: string;
-        imageId?: string;
-        metadata?: Record<string, any>;
-    }) => Promise<ActivityComplete | undefined>;
-    removeActivity: (id: string) => Promise<boolean>;
+	// Acciones asíncronas
+	fetchActivity: (id: string) => Promise<ActivityComplete | undefined>;
+	fetchActivities: (filters?: ActivityFilters) => Promise<ActivityListResponse | undefined>;
+	createActivity: (data: {
+		type: string;
+		description?: string;
+		imageId?: string;
+		metadata?: Record<string, any>;
+	}) => Promise<ActivityComplete | undefined>;
+	removeActivity: (id: string) => Promise<boolean>;
 
-    // UI Actions
-    selectActivity: (id: string) => void;
-    unselectActivity: (id: string) => void;
-    toggleSelectActivity: (id: string) => void;
-    selectMultipleActivities: (ids: string[]) => void;
-    clearSelection: () => void;
-    expandActivity: (id: string) => void;
-    collapseActivity: (id: string) => void;
-    toggleExpandActivity: (id: string) => void;
-    setHighlightedActivity: (id: string | null) => void;
-    openDetailModal: (id: string) => void;
-    closeDetailModal: () => void;
-    toggleGroupByDate: () => void;
+	// UI Actions
+	selectActivity: (id: string) => void;
+	unselectActivity: (id: string) => void;
+	toggleSelectActivity: (id: string) => void;
+	selectMultipleActivities: (ids: string[]) => void;
+	clearSelection: () => void;
+	expandActivity: (id: string) => void;
+	collapseActivity: (id: string) => void;
+	toggleExpandActivity: (id: string) => void;
+	setHighlightedActivity: (id: string | null) => void;
+	openDetailModal: (id: string) => void;
+	closeDetailModal: () => void;
+	toggleGroupByDate: () => void;
 
-    // Filter Actions
-    setSortBy: (sortBy: ActivitySortCriteria) => void;
-    setSearchQuery: (query: string) => void;
-    setSelectedCategories: (categories: string[]) => void;
-    toggleOnlyAlerts: () => void;
-    setDateRange: (from: Date | null, to: Date | null) => void;
-    setFilterByImageId: (imageId: string | null) => void;
-    clearFilters: () => void;
+	// Filter Actions
+	setSortBy: (sortBy: ActivitySortCriteria) => void;
+	setSearchQuery: (query: string) => void;
+	setSelectedCategories: (categories: string[]) => void;
+	toggleOnlyAlerts: () => void;
+	setDateRange: (from: Date | null, to: Date | null) => void;
+	setFilterByImageId: (imageId: string | null) => void;
+	clearFilters: () => void;
 }
 
 // Estado inicial para el store
@@ -144,358 +144,358 @@ export const useActivityStore = create<ActivityStore>()(
 				return {
 					...initialState,
 
-                    // Getters
-                    getActivity: (id: string) => {
-                        return get().activities[id];
-                    },
+					// Getters
+					getActivity: (id: string) => {
+						return get().activities[id];
+					},
 
-                    getActivities: () => {
-                        return Object.values(get().activities);
-                    },
+					getActivities: () => {
+						return Object.values(get().activities);
+					},
 
-                    getActivitiesByImageId: (imageId: string) => {
-                        return Object.values(get().activities).filter((activity) => activity.imageId === imageId);
-                    },
+					getActivitiesByImageId: (imageId: string) => {
+						return Object.values(get().activities).filter((activity) => activity.imageId === imageId);
+					},
 
-                    // Operaciones síncronas
-                    addActivity: (activity: ActivityBase) => {
-                        const extendedActivity = extendActivity(activity);
-                        set((state) => ({
-                            activities: {
-                                ...state.activities,
-                                [activity.id]: extendedActivity,
-                            },
-                            lastUpdated: Date.now(),
-                        }));
-                    },
+					// Operaciones síncronas
+					addActivity: (activity: ActivityBase) => {
+						const extendedActivity = extendActivity(activity);
+						set((state) => ({
+							activities: {
+								...state.activities,
+								[activity.id]: extendedActivity,
+							},
+							lastUpdated: Date.now(),
+						}));
+					},
 
-                    addActivities: (activities: ActivityBase[]) => {
-                        const extendedActivities = extendActivities(activities);
-                        const activitiesMap = extendedActivities.reduce(
-                            (acc, activity) => {
-                                acc[activity.id] = activity;
-                                return acc;
-                            },
-                            {} as Record<string, ActivityComplete>
-                        );
+					addActivities: (activities: ActivityBase[]) => {
+						const extendedActivities = extendActivities(activities);
+						const activitiesMap = extendedActivities.reduce(
+							(acc, activity) => {
+								acc[activity.id] = activity;
+								return acc;
+							},
+							{} as Record<string, ActivityComplete>
+						);
 
-                        set((state) => ({
-                            activities: {
-                                ...state.activities,
-                                ...activitiesMap,
-                            },
-                            lastUpdated: Date.now(),
-                        }));
-                    },
+						set((state) => ({
+							activities: {
+								...state.activities,
+								...activitiesMap,
+							},
+							lastUpdated: Date.now(),
+						}));
+					},
 
-                    deleteActivity: (id: string) => {
-                        set((state) => {
-                            const newActivities = { ...state.activities };
-                            delete newActivities[id];
+					deleteActivity: (id: string) => {
+						set((state) => {
+							const newActivities = { ...state.activities };
+							delete newActivities[id];
 
-                            return {
-                                activities: newActivities,
-                                lastUpdated: Date.now(),
-                            };
-                        });
-                    },
+							return {
+								activities: newActivities,
+								lastUpdated: Date.now(),
+							};
+						});
+					},
 
-                    clearActivities: () => {
-                        set(() => ({
-                            activities: {},
-                            lastUpdated: Date.now(),
-                        }));
-                    },
+					clearActivities: () => {
+						set(() => ({
+							activities: {},
+							lastUpdated: Date.now(),
+						}));
+					},
 
-                    // Estado de carga
-                    setLoading: (isLoading: boolean) => {
-                        set(() => ({
-                            isLoading,
-                        }));
-                    },
+					// Estado de carga
+					setLoading: (isLoading: boolean) => {
+						set(() => ({
+							isLoading,
+						}));
+					},
 
-                    setError: (error: string | null) => {
-                        set(() => ({
-                            error,
-                        }));
-                    },
+					setError: (error: string | null) => {
+						set(() => ({
+							error,
+						}));
+					},
 
-                    // Operaciones asíncronas
-                    fetchActivity: async (id: string) => {
-                        try {
-                            set(() => ({
-                                isLoading: true,
-                                error: null,
-                            }));
+					// Operaciones asíncronas
+					fetchActivity: async (id: string) => {
+						try {
+							set(() => ({
+								isLoading: true,
+								error: null,
+							}));
 
-                            const activity = await getActivityById(id);
-                            if (activity) {
-                                const extendedActivity = extendActivity(activity);
-                                set((state) => ({
-                                    activities: {
-                                        ...state.activities,
-                                        [activity.id]: extendedActivity,
-                                    },
-                                    lastUpdated: Date.now(),
-                                }));
-                            }
-                            return activity ? extendActivity(activity) : undefined;
-                        } catch (error) {
-                            set(() => ({
-                                error: error instanceof Error ? error.message : 'Error desconocido',
-                            }));
-                            return undefined;
-                        } finally {
-                            set(() => ({
-                                isLoading: false,
-                            }));
-                        }
-                    },
+							const activity = await getActivityById(id);
+							if (activity) {
+								const extendedActivity = extendActivity(activity);
+								set((state) => ({
+									activities: {
+										...state.activities,
+										[activity.id]: extendedActivity,
+									},
+									lastUpdated: Date.now(),
+								}));
+							}
+							return activity ? extendActivity(activity) : undefined;
+						} catch (error) {
+							set(() => ({
+								error: error instanceof Error ? error.message : 'Error desconocido',
+							}));
+							return undefined;
+						} finally {
+							set(() => ({
+								isLoading: false,
+							}));
+						}
+					},
 
-                    fetchActivities: async (filters?: ActivityFilters) => {
-                        try {
-                            set(() => ({
-                                isLoading: true,
-                                error: null,
-                            }));
+					fetchActivities: async (filters?: ActivityFilters) => {
+						try {
+							set(() => ({
+								isLoading: true,
+								error: null,
+							}));
 
-                            const result = await getFilteredActivities(filters ?? {});
-                            if (result) {
-                                const extendedActivities = extendActivities(result.activities);
-                                const activitiesMap = extendedActivities.reduce(
-                                    (acc, activity) => {
-                                        acc[activity.id] = activity;
-                                        return acc;
-                                    },
-                                    {} as Record<string, ActivityComplete>
-                                );
+							const result = await getFilteredActivities(filters ?? {});
+							if (result) {
+								const extendedActivities = extendActivities(result.activities);
+								const activitiesMap = extendedActivities.reduce(
+									(acc, activity) => {
+										acc[activity.id] = activity;
+										return acc;
+									},
+									{} as Record<string, ActivityComplete>
+								);
 
-                                set((state) => ({
-                                    activities: {
-                                        ...state.activities,
-                                        ...activitiesMap,
-                                    },
-                                    lastUpdated: Date.now(),
-                                }));
-                                return result;
-                            }
-                            return undefined;
-                        } catch (error) {
-                            set(() => ({
-                                error: error instanceof Error ? error.message : 'Error desconocido',
-                            }));
-                            return undefined;
-                        } finally {
-                            set(() => ({
-                                isLoading: false,
-                            }));
-                        }
-                    },
+								set((state) => ({
+									activities: {
+										...state.activities,
+										...activitiesMap,
+									},
+									lastUpdated: Date.now(),
+								}));
+								return result;
+							}
+							return undefined;
+						} catch (error) {
+							set(() => ({
+								error: error instanceof Error ? error.message : 'Error desconocido',
+							}));
+							return undefined;
+						} finally {
+							set(() => ({
+								isLoading: false,
+							}));
+						}
+					},
 
-                    createActivity: async (data: {
-                        type: string;
-                        description?: string;
-                        imageId?: string;
-                        metadata?: Record<string, any>;
-                    }) => {
-                        try {
-                            set(() => ({
-                                isLoading: true,
-                                error: null,
-                            }));
+					createActivity: async (data: {
+						type: string;
+						description?: string;
+						imageId?: string;
+						metadata?: Record<string, any>;
+					}) => {
+						try {
+							set(() => ({
+								isLoading: true,
+								error: null,
+							}));
 
-                            const createdActivity = await createActivityAction(data.type, data.metadata ?? {}, data.imageId);
-                            const extendedActivity = extendActivity(createdActivity);
+							const createdActivity = await createActivityAction(data.type, data.metadata ?? {}, data.imageId);
+							const extendedActivity = extendActivity(createdActivity);
 
-                            set((state) => ({
-                                activities: {
-                                    ...state.activities,
-                                    [createdActivity.id]: extendedActivity,
-                                },
-                                lastUpdated: Date.now(),
-                            }));
+							set((state) => ({
+								activities: {
+									...state.activities,
+									[createdActivity.id]: extendedActivity,
+								},
+								lastUpdated: Date.now(),
+							}));
 
-                            return extendedActivity;
-                        } catch (error) {
-                            set(() => ({
-                                error: error instanceof Error ? error.message : 'Error desconocido',
-                            }));
-                            return undefined;
-                        } finally {
-                            set(() => ({
-                                isLoading: false,
-                            }));
-                        }
-                    },
+							return extendedActivity;
+						} catch (error) {
+							set(() => ({
+								error: error instanceof Error ? error.message : 'Error desconocido',
+							}));
+							return undefined;
+						} finally {
+							set(() => ({
+								isLoading: false,
+							}));
+						}
+					},
 
-                    removeActivity: async (id: string) => {
-                        try {
-                            set(() => ({
-                                isLoading: true,
-                                error: null,
-                            }));
+					removeActivity: async (id: string) => {
+						try {
+							set(() => ({
+								isLoading: true,
+								error: null,
+							}));
 
-                            const result = await deleteActivityAction(id);
-                            if (result) {
-                                set((state) => {
-                                    const newActivities = { ...state.activities };
-                                    delete newActivities[id];
+							const result = await deleteActivityAction(id);
+							if (result) {
+								set((state) => {
+									const newActivities = { ...state.activities };
+									delete newActivities[id];
 
-                                    return {
-                                        activities: newActivities,
-                                        lastUpdated: Date.now(),
-                                    };
-                                });
-                            }
-                            return result;
-                        } catch (error) {
-                            set(() => ({
-                                error: error instanceof Error ? error.message : 'Error desconocido',
-                            }));
-                            return false;
-                        } finally {
-                            set(() => ({
-                                isLoading: false,
-                            }));
-                        }
-                    },
+									return {
+										activities: newActivities,
+										lastUpdated: Date.now(),
+									};
+								});
+							}
+							return result;
+						} catch (error) {
+							set(() => ({
+								error: error instanceof Error ? error.message : 'Error desconocido',
+							}));
+							return false;
+						} finally {
+							set(() => ({
+								isLoading: false,
+							}));
+						}
+					},
 
-                    // UI Actions
-                    selectActivity: (id: string) => {
-                        set((state) => ({
-                            selectedIds: [...state.selectedIds, id],
-                        }));
-                    },
+					// UI Actions
+					selectActivity: (id: string) => {
+						set((state) => ({
+							selectedIds: [...state.selectedIds, id],
+						}));
+					},
 
-                    unselectActivity: (id: string) => {
-                        set((state) => ({
-                            selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id),
-                        }));
-                    },
+					unselectActivity: (id: string) => {
+						set((state) => ({
+							selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id),
+						}));
+					},
 
-                    toggleSelectActivity: (id: string) => {
-                        set((state) => {
-                            const isSelected = state.selectedIds.includes(id);
-                            return {
-                                selectedIds: isSelected
-                                    ? state.selectedIds.filter((selectedId) => selectedId !== id)
-                                    : [...state.selectedIds, id],
-                            };
-                        });
-                    },
+					toggleSelectActivity: (id: string) => {
+						set((state) => {
+							const isSelected = state.selectedIds.includes(id);
+							return {
+								selectedIds: isSelected
+									? state.selectedIds.filter((selectedId) => selectedId !== id)
+									: [...state.selectedIds, id],
+							};
+						});
+					},
 
-                    selectMultipleActivities: (ids: string[]) => {
-                        set(() => ({
-                            selectedIds: ids,
-                        }));
-                    },
+					selectMultipleActivities: (ids: string[]) => {
+						set(() => ({
+							selectedIds: ids,
+						}));
+					},
 
-                    clearSelection: () => {
-                        set(() => ({
-                            selectedIds: [],
-                        }));
-                    },
+					clearSelection: () => {
+						set(() => ({
+							selectedIds: [],
+						}));
+					},
 
-                    expandActivity: (id: string) => {
-                        set((state) => ({
-                            expandedIds: [...state.expandedIds, id],
-                        }));
-                    },
+					expandActivity: (id: string) => {
+						set((state) => ({
+							expandedIds: [...state.expandedIds, id],
+						}));
+					},
 
-                    collapseActivity: (id: string) => {
-                        set((state) => ({
-                            expandedIds: state.expandedIds.filter((expandedId) => expandedId !== id),
-                        }));
-                    },
+					collapseActivity: (id: string) => {
+						set((state) => ({
+							expandedIds: state.expandedIds.filter((expandedId) => expandedId !== id),
+						}));
+					},
 
-                    toggleExpandActivity: (id: string) => {
-                        set((state) => {
-                            const isExpanded = state.expandedIds.includes(id);
-                            return {
-                                expandedIds: isExpanded
-                                    ? state.expandedIds.filter((expandedId) => expandedId !== id)
-                                    : [...state.expandedIds, id],
-                            };
-                        });
-                    },
+					toggleExpandActivity: (id: string) => {
+						set((state) => {
+							const isExpanded = state.expandedIds.includes(id);
+							return {
+								expandedIds: isExpanded
+									? state.expandedIds.filter((expandedId) => expandedId !== id)
+									: [...state.expandedIds, id],
+							};
+						});
+					},
 
-                    setHighlightedActivity: (id: string | null) => {
-                        set(() => ({
-                            highlightedId: id,
-                        }));
-                    },
+					setHighlightedActivity: (id: string | null) => {
+						set(() => ({
+							highlightedId: id,
+						}));
+					},
 
-                    openDetailModal: (id: string) => {
-                        set(() => ({
-                            detailActivityId: id,
-                            isDetailModalOpen: true,
-                        }));
-                    },
+					openDetailModal: (id: string) => {
+						set(() => ({
+							detailActivityId: id,
+							isDetailModalOpen: true,
+						}));
+					},
 
-                    closeDetailModal: () => {
-                        set(() => ({
-                            isDetailModalOpen: false,
-                        }));
-                    },
+					closeDetailModal: () => {
+						set(() => ({
+							isDetailModalOpen: false,
+						}));
+					},
 
-                    toggleGroupByDate: () => {
-                        set((state) => ({
-                            groupByDate: !state.groupByDate,
-                        }));
-                    },
+					toggleGroupByDate: () => {
+						set((state) => ({
+							groupByDate: !state.groupByDate,
+						}));
+					},
 
-                    // Filter Actions
-                    setSortBy: (sortBy: ActivitySortCriteria) => {
-                        set(() => ({
-                            sortBy,
-                        }));
-                    },
+					// Filter Actions
+					setSortBy: (sortBy: ActivitySortCriteria) => {
+						set(() => ({
+							sortBy,
+						}));
+					},
 
-                    setSearchQuery: (query: string) => {
-                        set(() => ({
-                            searchQuery: query,
-                        }));
-                    },
+					setSearchQuery: (query: string) => {
+						set(() => ({
+							searchQuery: query,
+						}));
+					},
 
-                    setSelectedCategories: (categories: string[]) => {
-                        set(() => ({
-                            selectedCategories: categories,
-                        }));
-                    },
+					setSelectedCategories: (categories: string[]) => {
+						set(() => ({
+							selectedCategories: categories,
+						}));
+					},
 
-                    toggleOnlyAlerts: () => {
-                        set((state) => ({
-                            onlyAlerts: !state.onlyAlerts,
-                        }));
-                    },
+					toggleOnlyAlerts: () => {
+						set((state) => ({
+							onlyAlerts: !state.onlyAlerts,
+						}));
+					},
 
-                    setDateRange: (from: Date | null, to: Date | null) => {
-                        set(() => ({
-                            dateRange: {
-                                from,
-                                to,
-                            },
-                        }));
-                    },
+					setDateRange: (from: Date | null, to: Date | null) => {
+						set(() => ({
+							dateRange: {
+								from,
+								to,
+							},
+						}));
+					},
 
-                    setFilterByImageId: (imageId: string | null) => {
-                        set(() => ({
-                            filterByImageId: imageId,
-                        }));
-                    },
+					setFilterByImageId: (imageId: string | null) => {
+						set(() => ({
+							filterByImageId: imageId,
+						}));
+					},
 
-                    clearFilters: () => {
-                        set(() => ({
-                            searchQuery: '',
-                            selectedCategories: [],
-                            onlyAlerts: false,
-                            dateRange: {
-                                from: null,
-                                to: null,
-                            },
-                            filterByImageId: null,
-                        }));
-                    },
+					clearFilters: () => {
+						set(() => ({
+							searchQuery: '',
+							selectedCategories: [],
+							onlyAlerts: false,
+							dateRange: {
+								from: null,
+								to: null,
+							},
+							filterByImageId: null,
+						}));
+					},
 				};
 			},
 			{
@@ -520,4 +520,3 @@ export * from './selectors';
 
 // Exportar todo desde types para facilitar el uso
 export * from './types';
-

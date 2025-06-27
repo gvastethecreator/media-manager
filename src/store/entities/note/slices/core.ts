@@ -1,8 +1,8 @@
 import {
-    createNote as createNoteAction,
-    deleteNote as deleteNoteAction,
-    getNotes as getNotesAction,
-    updateNote as updateNoteAction,
+	createNote as createNoteAction,
+	deleteNote as deleteNoteAction,
+	getNotes as getNotesAction,
+	updateNote as updateNoteAction,
 } from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
@@ -36,39 +36,62 @@ export interface CoreSlice {
 
 function getPriorityLabel(priority: number): string {
 	switch (priority) {
-		case 4: return 'Crítica';
-		case 3: return 'Alta';
-		case 2: return 'Media';
-		case 1: return 'Baja';
-		case 0: return 'Mínima';
-		default: return 'Sin definir';
+		case 4:
+			return 'Crítica';
+		case 3:
+			return 'Alta';
+		case 2:
+			return 'Media';
+		case 1:
+			return 'Baja';
+		case 0:
+			return 'Mínima';
+		default:
+			return 'Sin definir';
 	}
 }
 
 function getStatusLabel(status: string): string {
 	switch (status) {
-		case 'active': return 'Activa';
-		case 'draft': return 'Borrador';
-		case 'completed': return 'Completada';
-		case 'archived': return 'Archivada';
-		case 'pending': return 'Pendiente';
-		default: return 'Sin estado';
+		case 'active':
+			return 'Activa';
+		case 'draft':
+			return 'Borrador';
+		case 'completed':
+			return 'Completada';
+		case 'archived':
+			return 'Archivada';
+		case 'pending':
+			return 'Pendiente';
+		default:
+			return 'Sin estado';
 	}
 }
 
 function getCategoryLabel(category: string): string {
 	switch (category) {
-		case 'general': return 'General';
-		case 'story': return 'Historia';
-		case 'lore': return 'Lore';
-		case 'mechanics': return 'Mecánicas';
-		case 'character': return 'Personaje';
-		case 'place': return 'Lugar';
-		case 'world_item': return 'Objeto';
-		case 'prompt': return 'Prompt';
-		case 'idea': return 'Idea';
-		case 'todo': return 'Tarea';
-		default: return 'Sin categoría';
+		case 'general':
+			return 'General';
+		case 'story':
+			return 'Historia';
+		case 'lore':
+			return 'Lore';
+		case 'mechanics':
+			return 'Mecánicas';
+		case 'character':
+			return 'Personaje';
+		case 'place':
+			return 'Lugar';
+		case 'world_item':
+			return 'Objeto';
+		case 'prompt':
+			return 'Prompt';
+		case 'idea':
+			return 'Idea';
+		case 'todo':
+			return 'Tarea';
+		default:
+			return 'Sin categoría';
 	}
 }
 

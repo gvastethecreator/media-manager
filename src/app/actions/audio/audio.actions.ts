@@ -2,11 +2,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    createAudio as createAudioService,
-    deleteAudio as deleteAudioService,
-    getAudioById as getAudioByIdService,
-    getAudios as getAudiosService,
-    updateAudio as updateAudioService,
+	createAudio as createAudioService,
+	deleteAudio as deleteAudioService,
+	getAudioById as getAudioByIdService,
+	getAudios as getAudiosService,
+	updateAudio as updateAudioService,
 } from '@/services/audio';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { Prisma } from '@prisma/client';

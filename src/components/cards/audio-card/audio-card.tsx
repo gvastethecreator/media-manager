@@ -58,12 +58,18 @@ export function AudioCard({
 	const primaryColor = useMemo(() => {
 		const format = audio.format?.toLowerCase();
 		switch (format) {
-			case 'mp3': return '#f59e0b'; // Amarillo para MP3
-			case 'wav': return '#3b82f6'; // Azul para WAV
-			case 'flac': return '#8b5cf6'; // Púrpura para FLAC
-			case 'ogg': return '#10b981'; // Verde para OGG
-			case 'm4a': return '#ef4444'; // Rojo para M4A
-			default: return '#6b7280'; // Gris para otros
+			case 'mp3':
+				return '#f59e0b'; // Amarillo para MP3
+			case 'wav':
+				return '#3b82f6'; // Azul para WAV
+			case 'flac':
+				return '#8b5cf6'; // Púrpura para FLAC
+			case 'ogg':
+				return '#10b981'; // Verde para OGG
+			case 'm4a':
+				return '#ef4444'; // Rojo para M4A
+			default:
+				return '#6b7280'; // Gris para otros
 		}
 	}, [audio.format]);
 
@@ -95,25 +101,31 @@ export function AudioCard({
 	}, [audio.size]);
 
 	// Handlers del reproductor
-	const togglePlay = useCallback((e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (!audioRef.current) return;
+	const togglePlay = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			if (!audioRef.current) return;
 
-		if (isPlaying) {
-			audioRef.current.pause();
-		} else {
-			audioRef.current.play();
-		}
-		setIsPlaying(!isPlaying);
-	}, [isPlaying]);
+			if (isPlaying) {
+				audioRef.current.pause();
+			} else {
+				audioRef.current.play();
+			}
+			setIsPlaying(!isPlaying);
+		},
+		[isPlaying]
+	);
 
-	const toggleMute = useCallback((e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (!audioRef.current) return;
+	const toggleMute = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			if (!audioRef.current) return;
 
-		audioRef.current.muted = !isMuted;
-		setIsMuted(!isMuted);
-	}, [isMuted]);
+			audioRef.current.muted = !isMuted;
+			setIsMuted(!isMuted);
+		},
+		[isMuted]
+	);
 
 	const handleTimeUpdate = useCallback(() => {
 		if (!audioRef.current) return;
@@ -234,10 +246,7 @@ export function AudioCard({
 									border: `2px solid ${primaryColor}40`,
 								}}
 							>
-								<MusicIcon
-									className="h-12 w-12"
-									style={{ color: primaryColor }}
-								/>
+								<MusicIcon className="h-12 w-12" style={{ color: primaryColor }} />
 
 								{/* Badge del formato */}
 								<div
@@ -271,9 +280,7 @@ export function AudioCard({
 
 						{/* Descripción */}
 						{audio.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">
-								{audio.description}
-							</div>
+							<div className="text-sm text-muted-foreground line-clamp-2 italic">{audio.description}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}
@@ -329,11 +336,7 @@ export function AudioCard({
 								style={{ color: primaryColor }}
 								title={isPlaying ? 'Pausar' : 'Reproducir'}
 							>
-								{isPlaying ? (
-									<PauseIcon className="h-4 w-4" />
-								) : (
-									<PlayIcon className="h-4 w-4" />
-								)}
+								{isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
 							</button>
 
 							{/* Botón mute */}
@@ -344,18 +347,12 @@ export function AudioCard({
 								style={{ color: primaryColor }}
 								title={isMuted ? 'Activar sonido' : 'Silenciar'}
 							>
-								{isMuted ? (
-									<VolumeXIcon className="h-3.5 w-3.5" />
-								) : (
-									<Volume2Icon className="h-3.5 w-3.5" />
-								)}
+								{isMuted ? <VolumeXIcon className="h-3.5 w-3.5" /> : <Volume2Icon className="h-3.5 w-3.5" />}
 							</button>
 						</div>
 
 						{/* Fecha de modificación */}
-						<span className="text-xs text-muted-foreground">
-							{new Date(audio.updatedAt).toLocaleDateString()}
-						</span>
+						<span className="text-xs text-muted-foreground">{new Date(audio.updatedAt).toLocaleDateString()}</span>
 					</div>
 				</div>
 			</div>

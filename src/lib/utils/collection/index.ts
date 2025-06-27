@@ -136,7 +136,10 @@ export function groupCollections(
  * @param searchTerm Término de búsqueda
  * @returns Array de colecciones filtradas
  */
-export function filterCollectionsBySearch(collections: CollectionWithStats[], searchTerm: string): CollectionWithStats[] {
+export function filterCollectionsBySearch(
+	collections: CollectionWithStats[],
+	searchTerm: string
+): CollectionWithStats[] {
 	if (!searchTerm.trim()) {
 		return collections;
 	}

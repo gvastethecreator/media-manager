@@ -2,17 +2,17 @@
 
 import { prisma } from '@/lib/database/prisma';
 import {
-    conceptPayload,
-    fromPrismaConcept,
-    mapConceptSearchOptionsToPrisma,
-    mapCreateConceptDataToPrisma,
-    mapUpdateConceptDataToPrisma,
+	conceptPayload,
+	fromPrismaConcept,
+	mapConceptSearchOptionsToPrisma,
+	mapCreateConceptDataToPrisma,
+	mapUpdateConceptDataToPrisma,
 } from '@/transformers/concept';
 import type {
-    ConceptComplete,
-    ConceptCreateInput,
-    ConceptSearchOptions,
-    ConceptUpdateInput,
+	ConceptComplete,
+	ConceptCreateInput,
+	ConceptSearchOptions,
+	ConceptUpdateInput,
 } from '@/types/entities/concept/types';
 import { revalidatePath } from 'next/cache';
 

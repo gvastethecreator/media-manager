@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CharacterCreateInput,
-    CharacterFilters,
-    CharacterSearchOptions,
-    CharacterUpdateInput,
+	CharacterCreateInput,
+	CharacterFilters,
+	CharacterSearchOptions,
+	CharacterUpdateInput,
 } from '@/types/entities/character';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';

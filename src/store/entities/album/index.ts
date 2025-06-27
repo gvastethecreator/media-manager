@@ -23,6 +23,6 @@ export const useAlbumStore = create<AlbumStore>()(
 			...createAlbumUISlice(...a),
 			...createAlbumFilterSlice(...a),
 		})),
-		{ name: 'AlbumStore' },
-	),
+		{ name: 'AlbumStore' }
+	)
 );

@@ -22,12 +22,12 @@ export const useWorkflowStore = create<WorkflowStore>()(
 			})),
 			{
 				name: 'workflow-store-v2',
-				partialize: state => ({
+				partialize: (state) => ({
 					filters: state.filters,
 					sortBy: state.sortBy,
 				}),
-			},
+			}
 		),
-		{ name: 'WorkflowStore' },
-	),
+		{ name: 'WorkflowStore' }
+	)
 );

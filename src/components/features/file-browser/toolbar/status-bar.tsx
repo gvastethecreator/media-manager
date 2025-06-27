@@ -14,11 +14,7 @@ interface StatusBarProps {
  * Barra de estado para el navegador de archivos
  * Muestra información sobre los elementos seleccionados y el total de elementos
  */
-export const StatusBar = memo<StatusBarProps>(function StatusBar({
-	totalItems,
-	selectedCount,
-	entityType
-}) {
+export const StatusBar = memo<StatusBarProps>(function StatusBar({ totalItems, selectedCount, entityType }) {
 	const { searchQuery } = useViewOptionsStore();
 
 	// Obtener el nombre plural del tipo de entidad
@@ -59,11 +55,7 @@ export const StatusBar = memo<StatusBarProps>(function StatusBar({
 				{totalItems} {itemsLabel}
 			</div>
 
-			{selectedCount > 0 && (
-				<div>
-					Seleccionados: {selectedCount}
-				</div>
-			)}
+			{selectedCount > 0 && <div>Seleccionados: {selectedCount}</div>}
 
 			<div>{new Date().toLocaleTimeString()}</div>
 		</div>

@@ -49,4 +49,3 @@ export type DocumentStore = DocumentCoreState &
 	DocumentUIActions &
 	DocumentFilterState &
 	DocumentFilterActions;
-

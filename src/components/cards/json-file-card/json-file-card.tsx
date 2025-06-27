@@ -85,13 +85,13 @@ export function JsonFileCard({
 				isValid: true,
 				keys,
 				size,
-				type: Array.isArray(parsed) ? 'Array' : typeof parsed
+				type: Array.isArray(parsed) ? 'Array' : typeof parsed,
 			};
 		} catch {
 			return {
 				isValid: false,
 				keys: 0,
-				size: jsonFile.content ? new Blob([jsonFile.content]).size : 0
+				size: jsonFile.content ? new Blob([jsonFile.content]).size : 0,
 			};
 		}
 	}, [jsonFile.content]);
@@ -124,10 +124,13 @@ export function JsonFileCard({
 	const handleMouseEnter = useCallback(() => setIsHovered(true), []);
 	const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
-	const togglePreview = useCallback((e: React.MouseEvent) => {
-		e.stopPropagation();
-		setShowPreview(!showPreview);
-	}, [showPreview]);
+	const togglePreview = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			setShowPreview(!showPreview);
+		},
+		[showPreview]
+	);
 
 	return (
 		<CardContainer
@@ -216,10 +219,7 @@ export function JsonFileCard({
 									border: `2px solid ${primaryColor}40`,
 								}}
 							>
-								<FileJsonIcon
-									className="h-12 w-12"
-									style={{ color: primaryColor }}
-								/>
+								<FileJsonIcon className="h-12 w-12" style={{ color: primaryColor }} />
 
 								{/* Badge de validez */}
 								<div
@@ -229,11 +229,7 @@ export function JsonFileCard({
 										color: 'white',
 									}}
 								>
-									{jsonStats.isValid ? (
-										<CheckIcon className="h-3 w-3" />
-									) : (
-										<XIcon className="h-3 w-3" />
-									)}
+									{jsonStats.isValid ? <CheckIcon className="h-3 w-3" /> : <XIcon className="h-3 w-3" />}
 								</div>
 							</div>
 						</div>
@@ -246,17 +242,13 @@ export function JsonFileCard({
 								exit={{ opacity: 0, height: 0 }}
 								className="bg-muted/30 rounded-lg p-3 text-xs font-mono overflow-auto max-h-32"
 							>
-								<pre className="whitespace-pre-wrap text-muted-foreground">
-									{jsonPreview}
-								</pre>
+								<pre className="whitespace-pre-wrap text-muted-foreground">{jsonPreview}</pre>
 							</motion.div>
 						)}
 
 						{/* Descripción */}
 						{jsonFile.description && !showPreview && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">
-								{jsonFile.description}
-							</div>
+							<div className="text-sm text-muted-foreground line-clamp-2 italic">{jsonFile.description}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}
@@ -323,9 +315,7 @@ export function JsonFileCard({
 							>
 								{jsonStats.isValid ? 'Válido' : 'Inválido'}
 							</span>
-							<span className="text-muted-foreground">
-								{new Date(jsonFile.updatedAt).toLocaleDateString()}
-							</span>
+							<span className="text-muted-foreground">{new Date(jsonFile.updatedAt).toLocaleDateString()}</span>
 						</div>
 					</div>
 

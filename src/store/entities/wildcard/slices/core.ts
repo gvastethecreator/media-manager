@@ -4,20 +4,16 @@
  */
 
 import {
-    createWildcard as createWildcardAction,
-    deleteWildcard as deleteWildcardAction,
-    getWildcard as getWildcardAction,
-    getWildcards as getWildcardsAction,
-    moveWildcard as moveWildcardAction,
-    updateWildcard as updateWildcardAction,
+	createWildcard as createWildcardAction,
+	deleteWildcard as deleteWildcardAction,
+	getWildcard as getWildcardAction,
+	getWildcards as getWildcardsAction,
+	moveWildcard as moveWildcardAction,
+	updateWildcard as updateWildcardAction,
 } from '@/app/actions/wildcards';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
-import type {
-    WildcardCreateInput,
-    WildcardUpdateInput,
-    WildcardWithStats,
-} from '@/types/entities/wildcard';
+import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { arrayToRecord } from '@/lib/utils/array.utils';
 import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
@@ -56,12 +52,10 @@ export interface WildcardCoreSlice {
 	moveWildcard: (id: string, newParentId: string | null) => Promise<boolean>;
 }
 
-export const createWildcardCoreSlice: StateCreator<
-	WildcardState & WildcardCoreSlice,
-	[],
-	[],
-	WildcardCoreSlice
-> = (set, get) => ({
+export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreSlice, [], [], WildcardCoreSlice> = (
+	set,
+	get
+) => ({
 	// --- Getters ---
 	getWildcard: (id) => get().core.wildcards[id],
 	getWildcards: () => Object.values(get().core.wildcards),
@@ -267,4 +261,3 @@ export const createWildcardCoreSlice: StateCreator<
 		}
 	},
 });
-

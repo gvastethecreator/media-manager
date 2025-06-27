@@ -14,29 +14,18 @@ interface VideoCardHeaderProps {
 /**
  * 🎬 Header del VideoCard con nombre, duración y indicadores
  */
-export function VideoCardHeader({
-	video,
-	primaryColor,
-	tcgMode = true,
-	compact = false,
-}: VideoCardHeaderProps) {
+export function VideoCardHeader({ video, primaryColor, tcgMode = true, compact = false }: VideoCardHeaderProps) {
 	const { name, statistics, isFavorite } = video;
 	const { formattedDuration, qualityLabel, technicalGrade } = statistics;
 
 	return (
-		<div
-			className={cn(
-				'border-b relative z-10',
-				compact ? 'p-2' : 'p-3'
-			)}
-			style={{ borderColor: `${primaryColor}30` }}
-		>
+		<div className={cn('border-b relative z-10', compact ? 'p-2' : 'p-3')} style={{ borderColor: `${primaryColor}30` }}>
 			{/* Fondo decorativo TCG */}
 			{tcgMode && (
 				<div
 					className="absolute inset-0 opacity-20"
 					style={{
-						background: `linear-gradient(135deg, ${primaryColor}40, transparent 70%)`
+						background: `linear-gradient(135deg, ${primaryColor}40, transparent 70%)`,
 					}}
 				/>
 			)}
@@ -44,10 +33,7 @@ export function VideoCardHeader({
 			<div className="relative z-10 flex items-start justify-between gap-2">
 				{/* Lado izquierdo: Nombre y duración */}
 				<div className="flex-1 min-w-0">
-					<h3 className={cn(
-						'font-bold text-foreground truncate',
-						compact ? 'text-sm' : 'text-base'
-					)}>
+					<h3 className={cn('font-bold text-foreground truncate', compact ? 'text-sm' : 'text-base')}>
 						{name || 'Video sin título'}
 					</h3>
 
@@ -63,7 +49,7 @@ export function VideoCardHeader({
 								className="text-xs px-1.5 py-0.5 rounded font-medium"
 								style={{
 									backgroundColor: `${primaryColor}20`,
-									color: primaryColor
+									color: primaryColor,
 								}}
 							>
 								{technicalGrade}
@@ -75,11 +61,7 @@ export function VideoCardHeader({
 				{/* Lado derecho: Indicadores */}
 				<div className="flex items-center gap-1">
 					{/* Indicador de favorito */}
-					{isFavorite && (
-						<Star
-							className="w-4 h-4 fill-yellow-400 text-yellow-400"
-						/>
-					)}
+					{isFavorite && <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />}
 
 					{/* Badge de calidad para TCG */}
 					{tcgMode && !compact && (
@@ -88,7 +70,7 @@ export function VideoCardHeader({
 							style={{
 								backgroundColor: `${primaryColor}10`,
 								borderColor: `${primaryColor}40`,
-								color: primaryColor
+								color: primaryColor,
 							}}
 						>
 							{qualityLabel.split(' ')[0]} {/* Solo la primera parte */}

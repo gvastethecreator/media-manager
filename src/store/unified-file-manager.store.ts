@@ -280,7 +280,10 @@ const transformToEntityWithStats = (rawItem: any): EntityWithStats => {
 				totalWildcards: rawItem._count?.wildcards || 0,
 				totalProperties: rawItem._count?.properties || 0,
 				totalGroups: rawItem._count?.groups || 0,
-				totalAssociations: Object.values(rawItem._count || {}).reduce((sum: number, count: any) => sum + (count || 0), 0),
+				totalAssociations: Object.values(rawItem._count || {}).reduce(
+					(sum: number, count: any) => sum + (count || 0),
+					0
+				),
 				megapixels: Number(((rawItem.width * rawItem.height) / 1_000_000).toFixed(2)),
 				aspectRatio: Number((rawItem.width / rawItem.height).toFixed(2)),
 				fileSize: Number((rawItem.size / (1024 * 1024)).toFixed(2)),
@@ -319,7 +322,6 @@ const transformToEntityWithStats = (rawItem: any): EntityWithStats => {
 			createdAt: rawItem.createdAt instanceof Date ? rawItem.createdAt : new Date(rawItem.createdAt || Date.now()),
 			updatedAt: rawItem.updatedAt instanceof Date ? rawItem.updatedAt : new Date(rawItem.updatedAt || Date.now()),
 		} as EntityWithStats;
-
 	} catch (error) {
 		fileManagerLogger.error('❌ Error transformando item a EntityWithStats:', error);
 		throw new Error(`Error transformando item: ${error instanceof Error ? error.message : 'Error desconocido'}`);

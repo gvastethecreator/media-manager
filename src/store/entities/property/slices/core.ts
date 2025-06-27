@@ -36,24 +36,24 @@ export const createPropertyCoreSlice: StateCreator<
 	loadProperties: async () => {
 		if (get().isLoading) return [];
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.isLoading = true;
 				draft.error = null;
-			}),
+			})
 		);
 		try {
 			const properties = await actions.getProperties();
 			set(
-				produce(draft => {
+				produce((draft) => {
 					draft.properties = properties.reduce(
 						(acc, p) => {
 							acc[p.id] = p;
 							return acc;
 						},
-						{} as Record<string, PropertyWithStats>,
+						{} as Record<string, PropertyWithStats>
 					);
 					draft.lastUpdated = Date.now();
-				}),
+				})
 			);
 			logger.info(`✅ ${properties.length} propiedades cargadas.`);
 			return properties;
@@ -61,34 +61,34 @@ export const createPropertyCoreSlice: StateCreator<
 			const errorMsg = '❌ Error al cargar las propiedades.';
 			logger.error(errorMsg, error);
 			set(
-				produce(draft => {
+				produce((draft) => {
 					draft.error = errorMsg;
-				}),
+				})
 			);
 			toastService.error(errorMsg);
 			return [];
 		} finally {
 			set(
-				produce(draft => {
+				produce((draft) => {
 					draft.isLoading = false;
-				}),
+				})
 			);
 		}
 	},
 
-	createProperty: async data => {
+	createProperty: async (data) => {
 		if (get().isLoading) return null;
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.isLoading = true;
-			}),
+			})
 		);
 		try {
 			const newProperty = await actions.createProperty(data);
 			set(
-				produce(draft => {
+				produce((draft) => {
 					draft.properties[newProperty.id] = newProperty;
-				}),
+				})
 			);
 			toastService.success(`Propiedad "${newProperty.name}" creada.`);
 			logger.info(`✅ Propiedad "${newProperty.name}" creada.`);
@@ -97,37 +97,37 @@ export const createPropertyCoreSlice: StateCreator<
 			const errorMsg = `❌ Error al crear la propiedad "${data.name}".`;
 			logger.error(errorMsg, error);
 			set(
-				produce(draft => {
+				produce((draft) => {
 					draft.error = errorMsg;
-				}),
+				})
 			);
 			toastService.error(errorMsg);
 			return null;
 		} finally {
 			set(
-				produce(draft => {
+				produce((draft) => {
 					draft.isLoading = false;
-				}),
+				})
 			);
 		}
 	},
 
 	updateProperty: async (id, data) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				const originalProperty = draft.properties[id];
 				if (originalProperty) {
 					// Optimistic update
 					draft.properties[id] = { ...originalProperty, ...data, updatedAt: new Date() };
 				}
-			}),
+			})
 		);
 		try {
 			const updatedProperty = await actions.updateProperty(id, data);
 			set(
-				produce(draft => {
+				produce((draft) => {
 					draft.properties[updatedProperty.id] = updatedProperty;
-				}),
+				})
 			);
 			toastService.success(`Propiedad "${updatedProperty.name}" actualizada.`);
 			logger.info(`✅ Propiedad "${updatedProperty.name}" actualizada.`);
@@ -139,14 +139,14 @@ export const createPropertyCoreSlice: StateCreator<
 		}
 	},
 
-	deleteProperty: async id => {
+	deleteProperty: async (id) => {
 		const propertyToDelete = get().properties[id];
 		if (!propertyToDelete) return;
 
 		set(
-			produce(draft => {
+			produce((draft) => {
 				delete draft.properties[id];
-			}),
+			})
 		);
 		try {
 			await actions.deleteProperty(id);
@@ -156,26 +156,26 @@ export const createPropertyCoreSlice: StateCreator<
 			const errorMsg = '❌ Error al eliminar la propiedad.';
 			logger.error(errorMsg, { id, error });
 			set(
-				produce(draft => {
+				produce((draft) => {
 					// Revert
 					draft.properties[id] = propertyToDelete;
-				}),
+				})
 			);
 			toastService.error(errorMsg);
 		}
 	},
 
-	setProperties: properties => {
+	setProperties: (properties) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.properties = properties.reduce(
 					(acc, p) => {
 						acc[p.id] = p;
 						return acc;
 					},
-					{} as Record<string, PropertyWithStats>,
+					{} as Record<string, PropertyWithStats>
 				);
-			}),
+			})
 		);
 	},
 });

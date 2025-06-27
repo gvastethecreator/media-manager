@@ -2,22 +2,22 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    addImageToWorldItem as addImageToWorldItemService,
-    createWorldItem as createWorldItemService,
-    deleteWorldItem as deleteWorldItemService,
-    getWorldItemImages as getWorldItemImagesService,
-    getWorldItems as getWorldItemsService,
-    getWorldItemWithStatsById as getWorldItemWithStatsByIdService,
-    removeImageFromWorldItem as removeImageFromWorldItemService,
-    updateWorldItem as updateWorldItemService,
+	addImageToWorldItem as addImageToWorldItemService,
+	createWorldItem as createWorldItemService,
+	deleteWorldItem as deleteWorldItemService,
+	getWorldItemImages as getWorldItemImagesService,
+	getWorldItems as getWorldItemsService,
+	getWorldItemWithStatsById as getWorldItemWithStatsByIdService,
+	removeImageFromWorldItem as removeImageFromWorldItemService,
+	updateWorldItem as updateWorldItemService,
 } from '@/services/world-item';
 import type { ImageComplete } from '@/types/entities/image';
 import type {
-    WorldItemComplete,
-    WorldItemCreateInput,
-    WorldItemSearchOptions,
-    WorldItemUpdateInput,
-    WorldItemWithStats,
+	WorldItemComplete,
+	WorldItemCreateInput,
+	WorldItemSearchOptions,
+	WorldItemUpdateInput,
+	WorldItemWithStats,
 } from '@/types/entities/world-item';
 import { revalidatePath } from 'next/cache';
 

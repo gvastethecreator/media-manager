@@ -95,7 +95,7 @@ export function sortNotes(notes: NoteWithStats[], sortBy: NoteSortOption): NoteW
  */
 export function groupNotes(
 	notes: NoteWithStats[],
-	groupBy: keyof Pick<NoteWithStats, 'category' | 'status' | 'priority'>,
+	groupBy: keyof Pick<NoteWithStats, 'category' | 'status' | 'priority'>
 ): Record<string, NoteWithStats[]> {
 	return notes.reduce(
 		(groups, note) => {
@@ -150,8 +150,15 @@ export function searchNotes(notes: NoteWithStats[], searchTerm: string): NoteWit
 		const matchesStatusLabel = note.statusLabel.toLowerCase().includes(term);
 		const matchesCategoryLabel = note.categoryLabel.toLowerCase().includes(term);
 
-		return matchesTitle || matchesContent || matchesExcerpt || matchesCategory ||
-			   matchesPriorityLabel || matchesStatusLabel || matchesCategoryLabel;
+		return (
+			matchesTitle ||
+			matchesContent ||
+			matchesExcerpt ||
+			matchesCategory ||
+			matchesPriorityLabel ||
+			matchesStatusLabel ||
+			matchesCategoryLabel
+		);
 	});
 }
 
@@ -176,36 +183,39 @@ export function getNotesAggregateStats(notes: NoteWithStats[]) {
 		};
 	}
 
-	const stats = notes.reduce((acc, note) => {
-		acc.totalWords += note.statistics.wordCount;
-		acc.totalCharacters += note.statistics.characterCount;
-		acc.totalReadingTime += note.statistics.readingTime;
-		acc.totalCompletionScore += note.statistics.completionScore;
-		acc.totalRelations += note.statistics.totalItems;
+	const stats = notes.reduce(
+		(acc, note) => {
+			acc.totalWords += note.statistics.wordCount;
+			acc.totalCharacters += note.statistics.characterCount;
+			acc.totalReadingTime += note.statistics.readingTime;
+			acc.totalCompletionScore += note.statistics.completionScore;
+			acc.totalRelations += note.statistics.totalItems;
 
-		if (note.isFavorite) acc.favoriteCount++;
+			if (note.isFavorite) acc.favoriteCount++;
 
-		// Conteos por categoría
-		acc.categoryCounts[note.category] = (acc.categoryCounts[note.category] || 0) + 1;
+			// Conteos por categoría
+			acc.categoryCounts[note.category] = (acc.categoryCounts[note.category] || 0) + 1;
 
-		// Conteos por estado
-		acc.statusCounts[note.status] = (acc.statusCounts[note.status] || 0) + 1;
+			// Conteos por estado
+			acc.statusCounts[note.status] = (acc.statusCounts[note.status] || 0) + 1;
 
-		// Conteos por prioridad
-		acc.priorityCounts[note.priority] = (acc.priorityCounts[note.priority] || 0) + 1;
+			// Conteos por prioridad
+			acc.priorityCounts[note.priority] = (acc.priorityCounts[note.priority] || 0) + 1;
 
-		return acc;
-	}, {
-		totalWords: 0,
-		totalCharacters: 0,
-		totalReadingTime: 0,
-		totalCompletionScore: 0,
-		totalRelations: 0,
-		favoriteCount: 0,
-		categoryCounts: {} as Record<string, number>,
-		statusCounts: {} as Record<string, number>,
-		priorityCounts: {} as Record<number, number>,
-	});
+			return acc;
+		},
+		{
+			totalWords: 0,
+			totalCharacters: 0,
+			totalReadingTime: 0,
+			totalCompletionScore: 0,
+			totalRelations: 0,
+			favoriteCount: 0,
+			categoryCounts: {} as Record<string, number>,
+			statusCounts: {} as Record<string, number>,
+			priorityCounts: {} as Record<number, number>,
+		}
+	);
 
 	return {
 		totalNotes,
@@ -233,9 +243,15 @@ export function compareNotes(noteA: NoteWithStats, noteB: NoteWithStats) {
 		statusChanged: noteA.status !== noteB.status,
 		favoriteChanged: noteA.isFavorite !== noteB.isFavorite,
 		relationsChanged: noteA.statistics.totalItems !== noteB.statistics.totalItems,
-		hasSignificantChanges: function() {
-			return this.titleChanged || this.contentChanged || this.categoryChanged ||
-				   this.priorityChanged || this.statusChanged || this.favoriteChanged;
+		hasSignificantChanges: function () {
+			return (
+				this.titleChanged ||
+				this.contentChanged ||
+				this.categoryChanged ||
+				this.priorityChanged ||
+				this.statusChanged ||
+				this.favoriteChanged
+			);
 		},
 	};
 }
@@ -246,10 +262,10 @@ export function compareNotes(noteA: NoteWithStats, noteB: NoteWithStats) {
 export function findRelatedNotes(targetNote: NoteWithStats, allNotes: NoteWithStats[], limit = 5): NoteWithStats[] {
 	if (allNotes.length <= 1) return [];
 
-	const otherNotes = allNotes.filter(note => note.id !== targetNote.id);
+	const otherNotes = allNotes.filter((note) => note.id !== targetNote.id);
 
 	// Calcular puntuación de similitud
-	const scoredNotes = otherNotes.map(note => {
+	const scoredNotes = otherNotes.map((note) => {
 		let score = 0;
 
 		// Misma categoría (+30 puntos)
@@ -264,13 +280,13 @@ export function findRelatedNotes(targetNote: NoteWithStats, allNotes: NoteWithSt
 		// Similitud en título (hasta 25 puntos)
 		const titleWords = targetNote.title.toLowerCase().split(/\s+/);
 		const noteWords = note.title.toLowerCase().split(/\s+/);
-		const commonTitleWords = titleWords.filter(word => noteWords.includes(word));
+		const commonTitleWords = titleWords.filter((word) => noteWords.includes(word));
 		score += Math.min(25, commonTitleWords.length * 5);
 
 		// Similitud en contenido (hasta 10 puntos)
 		const targetWords = targetNote.content.toLowerCase().split(/\s+/).slice(0, 50);
 		const noteContentWords = note.content.toLowerCase().split(/\s+/).slice(0, 50);
-		const commonContentWords = targetWords.filter(word => noteContentWords.includes(word));
+		const commonContentWords = targetWords.filter((word) => noteContentWords.includes(word));
 		score += Math.min(10, commonContentWords.length);
 
 		return { note, score };
@@ -278,8 +294,8 @@ export function findRelatedNotes(targetNote: NoteWithStats, allNotes: NoteWithSt
 
 	// Ordenar por puntuación y retornar las mejores
 	return scoredNotes
-		.filter(item => item.score > 0)
+		.filter((item) => item.score > 0)
 		.sort((a, b) => b.score - a.score)
 		.slice(0, limit)
-		.map(item => item.note);
+		.map((item) => item.note);
 }

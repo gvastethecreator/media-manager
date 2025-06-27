@@ -5,11 +5,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    type DirectoryReadResult,
-    type FileBase,
-    type FileInfo,
-    type FileListItem,
-    type FileOperationResult
+	type DirectoryReadResult,
+	type FileBase,
+	type FileInfo,
+	type FileListItem,
+	type FileOperationResult,
 } from '@/types/entities/file';
 import { toFileListItem } from './mappers';
 

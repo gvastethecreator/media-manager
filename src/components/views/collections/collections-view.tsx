@@ -19,13 +19,7 @@ const MemoizedCollectionCard = memo(CollectionCard);
 
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const {
-		getCollections,
-		isLoading,
-		error,
-		fetchCollections,
-		selectCollection
-	} = useCollectionStore();
+	const { getCollections, isLoading, error, fetchCollections, selectCollection } = useCollectionStore();
 
 	// Obtener las colecciones del store
 	const collections = getCollections();
@@ -79,10 +73,7 @@ export function CollectionsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<MemoizedCollectionCard
-								collection={collection}
-								onClick={() => handleCollectionClick(collection)}
-							/>
+							<MemoizedCollectionCard collection={collection} onClick={() => handleCollectionClick(collection)} />
 						</motion.div>
 					))}
 				</div>

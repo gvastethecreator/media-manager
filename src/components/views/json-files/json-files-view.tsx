@@ -21,7 +21,7 @@ const MemoizedJsonFileCard = React.memo(
 	(prevProps, nextProps) =>
 		prevProps.jsonFile.id === nextProps.jsonFile.id &&
 		prevProps.jsonFile.name === nextProps.jsonFile.name &&
-		prevProps.jsonFile.updatedAt === nextProps.jsonFile.updatedAt,
+		prevProps.jsonFile.updatedAt === nextProps.jsonFile.updatedAt
 );
 MemoizedJsonFileCard.displayName = 'MemoizedJsonFileCard';
 
@@ -67,9 +67,9 @@ export function JsonFilesView(_props: ViewProps) {
 	}
 
 	// Lógica de ordenamiento simple (por fecha de actualización, más recientes primero)
-	const sortedJsonFiles = Array.isArray(jsonFilesRecord) ? jsonFilesRecord.sort((a, b) =>
-		new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-	) : [];
+	const sortedJsonFiles = Array.isArray(jsonFilesRecord)
+		? jsonFilesRecord.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+		: [];
 
 	if (sortedJsonFiles.length === 0) {
 		return (

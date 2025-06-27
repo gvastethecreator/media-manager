@@ -125,9 +125,7 @@ function generateExcerpt(content: string, maxLength = 150): string {
 	const truncated = cleaned.substring(0, maxLength);
 	const lastSpace = truncated.lastIndexOf(' ');
 
-	return lastSpace > maxLength * 0.8
-		? truncated.substring(0, lastSpace) + '...'
-		: truncated + '...';
+	return lastSpace > maxLength * 0.8 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
 }
 
 /**
@@ -146,7 +144,7 @@ function formatDate(date: Date): string {
 	return date.toLocaleDateString('es-ES', {
 		year: 'numeric',
 		month: 'short',
-		day: 'numeric'
+		day: 'numeric',
 	});
 }
 
@@ -155,12 +153,18 @@ function formatDate(date: Date): string {
  */
 function getPriorityLabel(priority: number): string {
 	switch (priority) {
-		case NotePriority.HIGHEST: return 'Crítica';
-		case NotePriority.HIGH: return 'Alta';
-		case NotePriority.MEDIUM: return 'Media';
-		case NotePriority.LOW: return 'Baja';
-		case NotePriority.LOWEST: return 'Mínima';
-		default: return 'Sin definir';
+		case NotePriority.HIGHEST:
+			return 'Crítica';
+		case NotePriority.HIGH:
+			return 'Alta';
+		case NotePriority.MEDIUM:
+			return 'Media';
+		case NotePriority.LOW:
+			return 'Baja';
+		case NotePriority.LOWEST:
+			return 'Mínima';
+		default:
+			return 'Sin definir';
 	}
 }
 
@@ -169,12 +173,18 @@ function getPriorityLabel(priority: number): string {
  */
 function getStatusLabel(status: string): string {
 	switch (status) {
-		case NoteStatus.ACTIVE: return 'Activa';
-		case NoteStatus.DRAFT: return 'Borrador';
-		case NoteStatus.COMPLETED: return 'Completada';
-		case NoteStatus.ARCHIVED: return 'Archivada';
-		case NoteStatus.PENDING: return 'Pendiente';
-		default: return 'Sin estado';
+		case NoteStatus.ACTIVE:
+			return 'Activa';
+		case NoteStatus.DRAFT:
+			return 'Borrador';
+		case NoteStatus.COMPLETED:
+			return 'Completada';
+		case NoteStatus.ARCHIVED:
+			return 'Archivada';
+		case NoteStatus.PENDING:
+			return 'Pendiente';
+		default:
+			return 'Sin estado';
 	}
 }
 
@@ -183,16 +193,27 @@ function getStatusLabel(status: string): string {
  */
 function getCategoryLabel(category: string): string {
 	switch (category) {
-		case NoteCategory.GENERAL: return 'General';
-		case NoteCategory.STORY: return 'Historia';
-		case NoteCategory.LORE: return 'Lore';
-		case NoteCategory.MECHANICS: return 'Mecánicas';
-		case NoteCategory.CHARACTER: return 'Personaje';
-		case NoteCategory.PLACE: return 'Lugar';
-		case NoteCategory.WORLD_ITEM: return 'Objeto';
-		case NoteCategory.PROMPT: return 'Prompt';
-		case NoteCategory.IDEA: return 'Idea';
-		case NoteCategory.TODO: return 'Tarea';
-		default: return 'Sin categoría';
+		case NoteCategory.GENERAL:
+			return 'General';
+		case NoteCategory.STORY:
+			return 'Historia';
+		case NoteCategory.LORE:
+			return 'Lore';
+		case NoteCategory.MECHANICS:
+			return 'Mecánicas';
+		case NoteCategory.CHARACTER:
+			return 'Personaje';
+		case NoteCategory.PLACE:
+			return 'Lugar';
+		case NoteCategory.WORLD_ITEM:
+			return 'Objeto';
+		case NoteCategory.PROMPT:
+			return 'Prompt';
+		case NoteCategory.IDEA:
+			return 'Idea';
+		case NoteCategory.TODO:
+			return 'Tarea';
+		default:
+			return 'Sin categoría';
 	}
 }

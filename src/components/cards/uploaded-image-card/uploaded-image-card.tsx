@@ -54,13 +54,20 @@ export function UploadedImageCard({
 	const primaryColor = useMemo(() => {
 		const category = uploadedImage.category?.toLowerCase();
 		switch (category) {
-			case 'avatar': return '#8b5cf6'; // Púrpura para avatars
-			case 'background': return '#3b82f6'; // Azul para fondos
-			case 'icon': return '#f59e0b'; // Amarillo para iconos
-			case 'photo': return '#10b981'; // Verde para fotos
-			case 'artwork': return '#ec4899'; // Rosa para artwork
-			case 'screenshot': return '#6b7280'; // Gris para screenshots
-			default: return '#ef4444'; // Rojo para otros
+			case 'avatar':
+				return '#8b5cf6'; // Púrpura para avatars
+			case 'background':
+				return '#3b82f6'; // Azul para fondos
+			case 'icon':
+				return '#f59e0b'; // Amarillo para iconos
+			case 'photo':
+				return '#10b981'; // Verde para fotos
+			case 'artwork':
+				return '#ec4899'; // Rosa para artwork
+			case 'screenshot':
+				return '#6b7280'; // Gris para screenshots
+			default:
+				return '#ef4444'; // Rojo para otros
 		}
 	}, [uploadedImage.category]);
 
@@ -208,10 +215,7 @@ export function UploadedImageCard({
 									/>
 								) : (
 									<div className="w-full h-full flex items-center justify-center">
-										<ImageIcon
-											className="h-8 w-8"
-											style={{ color: primaryColor }}
-										/>
+										<ImageIcon className="h-8 w-8" style={{ color: primaryColor }} />
 									</div>
 								)}
 
@@ -263,9 +267,7 @@ export function UploadedImageCard({
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Hash</span>
-									<span className="font-bold font-mono text-xs">
-										{uploadedImage.hash?.substring(0, 8) || 'N/A'}
-									</span>
+									<span className="font-bold font-mono text-xs">{uploadedImage.hash?.substring(0, 8) || 'N/A'}</span>
 								</div>
 							</div>
 						)}
@@ -314,9 +316,7 @@ export function UploadedImageCard({
 							>
 								{uploadedImage.imageId ? 'Procesado' : 'Pendiente'}
 							</span>
-							<span className="text-muted-foreground">
-								{new Date(uploadedImage.createdAt).toLocaleDateString()}
-							</span>
+							<span className="text-muted-foreground">{new Date(uploadedImage.createdAt).toLocaleDateString()}</span>
 						</div>
 					</div>
 

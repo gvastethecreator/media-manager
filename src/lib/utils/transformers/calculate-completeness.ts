@@ -37,42 +37,39 @@ export function calculateCompleteness(fields: unknown[]): number;
  */
 export function calculateCompleteness(obj: Record<string, unknown>, fieldNames: string[]): number;
 
-export function calculateCompleteness(
-  fieldsOrObj: unknown[] | Record<string, unknown>,
-  fieldNames?: string[]
-): number {
-  // Si es un array directo (primera sobrecarga)
-  if (Array.isArray(fieldsOrObj)) {
-    const fields = fieldsOrObj;
-    if (fields.length === 0) {
-      return 100; // Si no se esperan campos, está 100% completo.
-    }
+export function calculateCompleteness(fieldsOrObj: unknown[] | Record<string, unknown>, fieldNames?: string[]): number {
+	// Si es un array directo (primera sobrecarga)
+	if (Array.isArray(fieldsOrObj)) {
+		const fields = fieldsOrObj;
+		if (fields.length === 0) {
+			return 100; // Si no se esperan campos, está 100% completo.
+		}
 
-    const filledCount = fields.filter(field => {
-      if (field === null || field === undefined) {
-        return false;
-      }
-      if (typeof field === 'string' && field.trim() === '') {
-        return false;
-      }
-      if (Array.isArray(field) && field.length === 0) {
-        return false;
-      }
-      if (typeof field === 'object' && Object.keys(field).length === 0) {
-        return false;
-      }
-      return true;
-    }).length;
+		const filledCount = fields.filter((field) => {
+			if (field === null || field === undefined) {
+				return false;
+			}
+			if (typeof field === 'string' && field.trim() === '') {
+				return false;
+			}
+			if (Array.isArray(field) && field.length === 0) {
+				return false;
+			}
+			if (typeof field === 'object' && Object.keys(field).length === 0) {
+				return false;
+			}
+			return true;
+		}).length;
 
-    return Math.round((filledCount / fields.length) * 100);
-  }
+		return Math.round((filledCount / fields.length) * 100);
+	}
 
-  // Si es un objeto con fieldNames (segunda sobrecarga)
-  if (fieldNames && fieldNames.length > 0) {
-    const values = fieldNames.map(fieldName => fieldsOrObj[fieldName]);
-    return calculateCompleteness(values);
-  }
+	// Si es un objeto con fieldNames (segunda sobrecarga)
+	if (fieldNames && fieldNames.length > 0) {
+		const values = fieldNames.map((fieldName) => fieldsOrObj[fieldName]);
+		return calculateCompleteness(values);
+	}
 
-  // Fallback: objeto vacío o sin fieldNames
-  return 100;
+	// Fallback: objeto vacío o sin fieldNames
+	return 100;
 }

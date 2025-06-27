@@ -23,7 +23,10 @@ export const CHARACTER_KEY_PREFIX = 'character_';
  * @param sortOption Opción de ordenamiento
  * @returns Array de personajes ordenados
  */
-export function sortCharacters(characters: CharacterWithStats[], sortOption: CharacterSortOption): CharacterWithStats[] {
+export function sortCharacters(
+	characters: CharacterWithStats[],
+	sortOption: CharacterSortOption
+): CharacterWithStats[] {
 	const sortedCharacters = [...characters];
 
 	switch (sortOption) {
@@ -124,9 +127,7 @@ export function filterCharactersBySearch(characters: CharacterWithStats[], searc
 
 	const normalizedTerm = searchTerm.toLowerCase().trim();
 
-	return characters.filter(character =>
-		matchesCharacterSearch(character, normalizedTerm)
-	);
+	return characters.filter((character) => matchesCharacterSearch(character, normalizedTerm));
 }
 
 /**
@@ -136,18 +137,18 @@ export function filterCharactersBySearch(characters: CharacterWithStats[], searc
  */
 export function getCharacterStats(characters: CharacterWithStats[]) {
 	const totalCharacters = characters.length;
-	const totalFavorites = characters.filter(c => c.isFavorite).length;
+	const totalFavorites = characters.filter((c) => c.isFavorite).length;
 
 	// Distribución por clase
 	const classCounts: Record<string, number> = {};
-	characters.forEach(character => {
+	characters.forEach((character) => {
 		const characterClass = character.class || 'unknown';
 		classCounts[characterClass] = (classCounts[characterClass] || 0) + 1;
 	});
 
 	// Distribución por raza
 	const raceCounts: Record<string, number> = {};
-	characters.forEach(character => {
+	characters.forEach((character) => {
 		const race = character.race || 'unknown';
 		raceCounts[race] = (raceCounts[race] || 0) + 1;
 	});
@@ -161,7 +162,7 @@ export function getCharacterStats(characters: CharacterWithStats[]) {
 		'20+': 0,
 	};
 
-	characters.forEach(character => {
+	characters.forEach((character) => {
 		const level = character.level;
 		if (level <= 5) levelRanges['1-5']++;
 		else if (level <= 10) levelRanges['6-10']++;
@@ -171,16 +172,18 @@ export function getCharacterStats(characters: CharacterWithStats[]) {
 	});
 
 	// Estadísticas de asociaciones usando las estadísticas pre-calculadas
-	const totalAssociations = characters.reduce((sum, character) =>
-		sum + (character.statistics?.totalAssociations || 0), 0
+	const totalAssociations = characters.reduce(
+		(sum, character) => sum + (character.statistics?.totalAssociations || 0),
+		0
 	);
 
 	const avgAssociations = totalCharacters > 0 ? totalAssociations / totalCharacters : 0;
 
 	// Power level promedio
-	const avgPowerLevel = totalCharacters > 0
-		? characters.reduce((sum, character) => sum + (character.statistics?.powerLevel || 0), 0) / totalCharacters
-		: 0;
+	const avgPowerLevel =
+		totalCharacters > 0
+			? characters.reduce((sum, character) => sum + (character.statistics?.powerLevel || 0), 0) / totalCharacters
+			: 0;
 
 	// Distribución por rareza
 	const rarityDistribution: Record<string, number> = {
@@ -191,7 +194,7 @@ export function getCharacterStats(characters: CharacterWithStats[]) {
 		legendary: 0,
 	};
 
-	characters.forEach(character => {
+	characters.forEach((character) => {
 		const rarity = character.statistics?.rarityLevel || 'common';
 		rarityDistribution[rarity]++;
 	});

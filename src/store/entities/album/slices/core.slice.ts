@@ -30,36 +30,39 @@ export const createAlbumCoreSlice: StateCreator<
 
 	loadAlbums: async () => {
 		if (get().isLoading) return;
-		set(state => {
+		set((state) => {
 			state.isLoading = true;
 			state.error = null;
 		});
 
 		try {
 			const albums = await actions.getAlbums();
-			set(state => {
-				state.albums = albums.reduce((acc, album) => {
-					acc[album.id] = album;
-					return acc;
-				}, {} as Record<string, typeof albums[0]>);
+			set((state) => {
+				state.albums = albums.reduce(
+					(acc, album) => {
+						acc[album.id] = album;
+						return acc;
+					},
+					{} as Record<string, (typeof albums)[0]>
+				);
 				state.lastUpdated = Date.now();
 			});
 			logger.info(`✅ ${albums.length} álbumes cargados.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al cargar los álbumes.';
 			logger.error(errorMsg, error);
-			set(state => {
+			set((state) => {
 				state.error = errorMsg;
 			});
 			toastService.error(errorMsg);
 		} finally {
-			set(state => {
+			set((state) => {
 				state.isLoading = false;
 			});
 		}
 	},
 
-	createAlbum: async data => {
+	createAlbum: async (data) => {
 		try {
 			await actions.createAlbum(data);
 			toastService.success(`Álbum "${data.name}" creado.`);
@@ -83,12 +86,12 @@ export const createAlbumCoreSlice: StateCreator<
 		}
 	},
 
-	deleteAlbum: async id => {
+	deleteAlbum: async (id) => {
 		const albumName = get().albums[id]?.name ?? id;
 		set(
-			produce(draft => {
+			produce((draft) => {
 				delete draft.albums[id];
-			}),
+			})
 		);
 		try {
 			await actions.deleteAlbum(id);

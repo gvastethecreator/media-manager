@@ -43,7 +43,7 @@ export const useImageViewerStore = create<ImageViewerState>((set, get) => ({
 		viewerLogger.info('Abriendo visor de imágenes', {
 			totalEntities: images.length,
 			validImages: imageEntities.length,
-			initialIndex
+			initialIndex,
 		});
 
 		// Ajustar el índice inicial si es necesario

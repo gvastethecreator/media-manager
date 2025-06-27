@@ -14,11 +14,11 @@ export type EntityWithStats<T, S> = T & { stats: S };
  * @see Prisma.PlaceCreateInput
  */
 export type PlaceBase = Prisma.PlaceGetPayload<{
-  include: {
-    images: true;
-    tags: true;
-    notes: true;
-  };
+	include: {
+		images: true;
+		tags: true;
+		notes: true;
+	};
 }>;
 
 /**
@@ -28,14 +28,14 @@ export type PlaceBase = Prisma.PlaceGetPayload<{
  * Estas estadísticas proporcionan una visión más profunda del contexto y la relevancia del lugar.
  */
 export interface PlaceStatistics {
-  /** Relevancia espacial calculada (ej: cercanía a otros puntos de interés) */
-  spatialRelevance: number;
-  /** Puntuación de la completitud de la información del lugar */
-  completenessScore: number;
-  /** Nivel de contexto geográfico (ej: cuánta información de los alrededores se tiene) */
-  geoContextLevel: number;
-  /** Popularidad basada en el número de entidades relacionadas */
-  popularity: number;
+	/** Relevancia espacial calculada (ej: cercanía a otros puntos de interés) */
+	spatialRelevance: number;
+	/** Puntuación de la completitud de la información del lugar */
+	completenessScore: number;
+	/** Nivel de contexto geográfico (ej: cuánta información de los alrededores se tiene) */
+	geoContextLevel: number;
+	/** Popularidad basada en el número de entidades relacionadas */
+	popularity: number;
 }
 
 /**
@@ -45,14 +45,14 @@ export interface PlaceStatistics {
  * Optimizado para consultas eficientes que solo necesitan los conteos, no los datos completos.
  */
 export type PrismaPlaceWithCounts = PlaceBase & {
-  _count: {
-    images?: number;
-    tags?: number;
-    notes?: number;
-    characters?: number;
-    collections?: number;
-    concepts?: number;
-  };
+	_count: {
+		images?: number;
+		tags?: number;
+		notes?: number;
+		characters?: number;
+		collections?: number;
+		concepts?: number;
+	};
 };
 
 /**
@@ -85,9 +85,6 @@ export type PlaceUpdateInput = Prisma.PlaceUncheckedUpdateInput;
  *
  * Tipo para previsualizaciones de lugares, con un subconjunto de campos.
  */
-export type PlacePreview = Pick<
-  PlaceBase,
-  'id' | 'name' | 'description' | 'createdAt' | 'updatedAt'
-> & {
-  imageUrl?: string;
+export type PlacePreview = Pick<PlaceBase, 'id' | 'name' | 'description' | 'createdAt' | 'updatedAt'> & {
+	imageUrl?: string;
 };

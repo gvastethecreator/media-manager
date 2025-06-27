@@ -4,7 +4,6 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
-
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { ConceptComplete, ConceptWithStats, PrismaConceptWithCounts } from '@/types/entities/concept';
 import type { Prisma } from '@prisma/client';
@@ -57,9 +56,20 @@ export function fromPrismaConcept(concept: PrismaConceptWithCounts): ConceptWith
 	const totalNotes = concept._count?.notes || 0;
 	const totalWildcards = concept._count?.wildcards || 0;
 
-	const totalAssociations = totalImages + totalVideos + totalTags + totalGroups +
-		totalProperties + totalCollections + totalAlbums + totalPlaces +
-		totalWorldItems + totalCharacters + totalPrompts + totalNotes + totalWildcards;
+	const totalAssociations =
+		totalImages +
+		totalVideos +
+		totalTags +
+		totalGroups +
+		totalProperties +
+		totalCollections +
+		totalAlbums +
+		totalPlaces +
+		totalWorldItems +
+		totalCharacters +
+		totalPrompts +
+		totalNotes +
+		totalWildcards;
 
 	return {
 		...concept,
@@ -92,8 +102,7 @@ export function fromPrismaConceptWithRelations(concept: any): ConceptComplete {
 	return {
 		...concept,
 		// Transformar relaciones usando transformers específicos
-		characters:
-			concept.characters?.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null) || [],
+		characters: concept.characters?.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null) || [],
 		notes: concept.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
 		// ... existing code for other relations ...
 	};

@@ -31,36 +31,39 @@ export const createGroupCoreSlice: StateCreator<
 
 	loadGroups: async () => {
 		if (get().isLoading) return;
-		set(state => {
+		set((state) => {
 			state.isLoading = true;
 			state.error = null;
 		});
 
 		try {
 			const groups = await actions.getGroups();
-			set(state => {
-				state.groups = groups.reduce((acc, group) => {
-					acc[group.id] = group;
-					return acc;
-				}, {} as Record<string, typeof groups[0]>);
+			set((state) => {
+				state.groups = groups.reduce(
+					(acc, group) => {
+						acc[group.id] = group;
+						return acc;
+					},
+					{} as Record<string, (typeof groups)[0]>
+				);
 				state.lastUpdated = Date.now();
 			});
 			logger.info(`✅ ${groups.length} grupos cargados.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al cargar los grupos.';
 			logger.error(errorMsg, error);
-			set(state => {
+			set((state) => {
 				state.error = errorMsg;
 			});
 			toastService.error(errorMsg);
 		} finally {
-			set(state => {
+			set((state) => {
 				state.isLoading = false;
 			});
 		}
 	},
 
-	createGroup: async data => {
+	createGroup: async (data) => {
 		try {
 			await actions.createGroup(data);
 			toastService.success(`Grupo "${data.name}" creado.`);
@@ -84,12 +87,12 @@ export const createGroupCoreSlice: StateCreator<
 		}
 	},
 
-	deleteGroup: async id => {
+	deleteGroup: async (id) => {
 		const groupName = get().groups[id]?.name ?? id;
 		set(
-			produce(draft => {
+			produce((draft) => {
 				delete draft.groups[id];
-			}),
+			})
 		);
 		try {
 			await actions.deleteGroup(id);

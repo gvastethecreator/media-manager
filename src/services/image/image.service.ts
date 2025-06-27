@@ -49,11 +49,11 @@ import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-    createEntityNotFoundError,
-    createFileNotFoundError,
-    createServiceError,
-    ServiceErrorCode,
-    toServiceError,
+	createEntityNotFoundError,
+	createFileNotFoundError,
+	createServiceError,
+	ServiceErrorCode,
+	toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
