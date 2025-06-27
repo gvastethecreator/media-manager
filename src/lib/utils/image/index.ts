@@ -1,6 +1,6 @@
 /**
- * @file Utilidades para imágenes
- * @module utils/image
+ * @file Exportaciones de utilidades de imágenes
+ * @module lib/utils/image
  */
 
 export * from './helpers';

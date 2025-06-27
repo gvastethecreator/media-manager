@@ -10,7 +10,7 @@ import {
     ThumbnailStats,
     ThumbnailWithStats,
 } from '@/types/entities/thumbnail';
-import { formatBytes, formatDate } from '@/utils/formatters';
+import { formatBytes, formatDate } from '@/lib/utils/formatters';
 
 interface TransformThumbnailOptions {
 	includeMetadata?: boolean;

@@ -6,7 +6,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { PrismaPropertyWithCounts, PropertyBase, PropertyStatistics, PropertyWithStats } from '@/types/entities/property';
-import { calculateCompleteness } from '@/utils/transformers';
+import { calculateCompleteness } from '@/lib/utils/transformers';
 
 const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer');
 

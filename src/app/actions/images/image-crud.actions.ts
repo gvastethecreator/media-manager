@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 // Importamos tipos optimizados
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
-import { toServiceError } from '@/utils/errors/service-errors';
+import { toServiceError } from '@/lib/utils/errors/service-errors';
 import type { GetImagesOptions, GetImagesResult } from './image-types.actions';
 
 const SERVER_ACTION_NAME = 'ImageCRUD';

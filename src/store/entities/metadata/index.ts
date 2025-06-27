@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { createSelectors } from '@/utils/store-selectors';
+import { createSelectors } from '@/lib/utils/store-selectors.utils';
 
 // Importar slices
 import { CoreActions, CoreState, createCoreSlice } from './slices/core.slice';
@@ -47,3 +47,4 @@ export const useMetadataStore = createSelectors(useMetadataStoreBase);
 export * from './slices/core.slice';
 export * from './slices/filters.slice';
 export * from './slices/ui.slice';
+

@@ -5,7 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 
 const logger = serverLogger.withContext('CharacterSerializers');
 

@@ -1,10 +1,39 @@
 import { cn } from '../utils';
 
+export * from './activity';
+// Re-exportar utilidades de entidades específicas
+export * from './album';
+// Utilidades consolidadas desde src/utils
+export * from './array.utils';
+export * from './character';
+export * from './collection';
+export * from './concept';
+// Utilidades principales
 export * from './entity.utils';
+export * from './errors';
+// Utilidades por categoría
+export * from './file';
+export * from './folder';
 export * from './format.utils';
 export * from './id.utils';
+export * from './image';
+export * from './image-utils';
+export * from './json';
+export * from './note';
 export * from './object-utils';
+export * from './place';
+export * from './prompt';
+export * from './server-events.utils';
+export * from './store';
+export * from './store-selectors.utils';
+export * from './string.utils';
+export * from './tag';
 export * from './text.utils';
+export * from './transformers';
+export * from './types';
+export * from './video';
+export * from './wildcard';
+export * from './world-item';
 
 export { cn };
 

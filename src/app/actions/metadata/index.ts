@@ -7,7 +7,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getPrismaClient } from '@/lib/database/db';
-import type { FileMetadata } from '@/types/metadata.types';
+import type { FileMetadata } from '@/types/metadata';
 import * as MetadataActions from './metadata.actions';
 import * as MetadataErrorsActions from './metadata-errors.actions';
 import * as MetadataExtractorsActions from './metadata-extractors.actions';

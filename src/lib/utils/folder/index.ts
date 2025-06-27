@@ -1,6 +1,6 @@
 /**
- * @file Exportaciones de utilidades para la entidad Folder
- * @module utils/folder
+ * @file Exportaciones de utilidades de carpetas
+ * @module lib/utils/folder
  */
 
 // Exportar todos los helpers

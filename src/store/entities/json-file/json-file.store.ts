@@ -11,7 +11,7 @@ import {
     updateJsonFile,
 } from '@/app/actions/json-file/json-file.actions';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
-import { createSelectors } from '@/utils/store/create-selectors';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
 import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';

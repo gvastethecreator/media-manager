@@ -18,7 +18,7 @@ import type {
     WildcardUpdateInput,
     WildcardWithStats,
 } from '@/types/entities/wildcard';
-import { arrayToRecord } from '@/utils/array';
+import { arrayToRecord } from '@/lib/utils/array.utils';
 import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
@@ -267,3 +267,4 @@ export const createWildcardCoreSlice: StateCreator<
 		}
 	},
 });
+

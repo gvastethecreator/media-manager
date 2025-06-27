@@ -5,8 +5,8 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
+import { calculateCompleteness } from '@/lib/utils/transformers';
 import type { PrismaTagWithCounts, TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
-import { calculateCompleteness } from '@/utils/transformers';
 
 const tagTransformerLogger = clientLogger.withContext('TagTransformer');
 
@@ -95,12 +95,12 @@ export const TagTransformer = {
 
 /**
  * Alias para compatibilidad con código legacy.
- * @deprecated Usar fromPrismaTag directamente.
+ * @deprecated Usar fromPrismaTag directamente. SERÁ ELIMINADO EN v2.0
  */
 export const transformTag = TagTransformer.fromPrismaTag;
 
 /**
  * Tipo de compatibilidad para código legacy que espera TagComplete.
- * @deprecated Usar TagWithStats directamente.
+ * @deprecated Usar TagWithStats directamente. SERÁ ELIMINADO EN v2.0
  */
 export type TagComplete = TagWithStats;

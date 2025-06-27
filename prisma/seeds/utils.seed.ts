@@ -1,7 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
-import { logger } from '../../src/lib/logger/logger';
 
-export const seedLogger = logger.withContext('Seed');
+export const seedLogger = serverLogger.withContext('Seed');
 
 /**
  * Comprueba si una tabla existe en la base de datos
