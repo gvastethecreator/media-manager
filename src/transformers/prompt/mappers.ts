@@ -5,14 +5,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    PromptBase,
-    PromptComplete,
-    PromptCreateInput,
-    PromptFilters,
-    PromptStatistics,
-    PromptUpdateInput,
-    PromptWithRelations,
-    PromptWithStats
+	PromptBase,
+	PromptComplete,
+	PromptCreateInput,
+	PromptFilters,
+	PromptStatistics,
+	PromptUpdateInput,
+	PromptWithRelations,
+	PromptWithStats,
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt';
 import type { Prisma } from '@prisma/client';
@@ -317,12 +317,9 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 	const { _count, ...rest } = prompt;
 
 	// Deserializar campos JSON
-	const deserializedParameters = typeof rest.parameters === 'string'
-		? deserializeParameters(rest.parameters)
-		: rest.parameters || [];
-	const deserializedTags = typeof rest.tags === 'string'
-		? JSON.parse(rest.tags)
-		: rest.tags || [];
+	const deserializedParameters =
+		typeof rest.parameters === 'string' ? deserializeParameters(rest.parameters) : rest.parameters || [];
+	const deserializedTags = typeof rest.tags === 'string' ? JSON.parse(rest.tags) : rest.tags || [];
 
 	// Calcular conteos básicos
 	const counts = {
@@ -360,12 +357,13 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 	const hasDescription = Boolean(rest.description?.trim());
 	const hasFeaturedImage = Boolean(rest.featuredImage);
 	const isWellStructured = parametersCount > 0 && tagsCount > 0;
-	const qualityScore = Math.min(100,
+	const qualityScore = Math.min(
+		100,
 		(hasDescription ? 25 : 0) +
-		(hasFeaturedImage ? 15 : 0) +
-		(isWellStructured ? 30 : 0) +
-		(contentLength > 50 ? 20 : contentLength > 20 ? 10 : 0) +
-		(totalRelations > 0 ? 10 : 0)
+			(hasFeaturedImage ? 15 : 0) +
+			(isWellStructured ? 30 : 0) +
+			(contentLength > 50 ? 20 : contentLength > 20 ? 10 : 0) +
+			(totalRelations > 0 ? 10 : 0)
 	);
 
 	const statistics: PromptStatistics = {

@@ -6,35 +6,35 @@
  */
 
 export type {
-    ImageAIMetadata,
-    ImageAnalysis,
-    ImageBase,
-    ImageComplete,
-    ImageCreateInput,
-    ImageEXIFData,
-    ImageFilters,
-    ImageMetadata,
-    ImageRelations,
-    ImageSearchOptions,
-    ImageSearchResult,
-    ImageStatistics,
-    ImageThumbnail,
-    ImageTransformerOptions,
-    ImageUI,
-    ImageUpdateInput,
-    ImageValidated,
-    ImageViewConfig,
-    ImageWithStats,
-    PrismaImageWithCounts,
-    RelatedImage
+	ImageAIMetadata,
+	ImageAnalysis,
+	ImageBase,
+	ImageComplete,
+	ImageCreateInput,
+	ImageEXIFData,
+	ImageFilters,
+	ImageMetadata,
+	ImageRelations,
+	ImageSearchOptions,
+	ImageSearchResult,
+	ImageStatistics,
+	ImageThumbnail,
+	ImageTransformerOptions,
+	ImageUI,
+	ImageUpdateInput,
+	ImageValidated,
+	ImageViewConfig,
+	ImageWithStats,
+	PrismaImageWithCounts,
+	RelatedImage,
 } from './types';
 
 export {
-    IMAGE_SORT_PROPERTY_MAP,
-    ImageSchema,
-    ImageSortCriteria,
-    ImageSortOption,
-    ImageViewMode
+	IMAGE_SORT_PROPERTY_MAP,
+	ImageSchema,
+	ImageSortCriteria,
+	ImageSortOption,
+	ImageViewMode,
 } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

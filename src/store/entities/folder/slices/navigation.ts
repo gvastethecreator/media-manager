@@ -108,7 +108,7 @@ export const createFolderNavigationSlice: StateCreator<FolderStore, [], [], Fold
 		const { getFolderPath } = get();
 
 		const path = getFolderPath(folderId);
-		const breadcrumbs = path.map(folder => ({
+		const breadcrumbs = path.map((folder) => ({
 			id: folder.id,
 			name: folder.name,
 			path: folder.path,

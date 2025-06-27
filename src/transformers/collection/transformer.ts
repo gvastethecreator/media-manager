@@ -5,10 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	CollectionWithStats,
-	PrismaCollectionWithCounts,
-} from '@/types/entities/collection';
+import type { CollectionWithStats, PrismaCollectionWithCounts } from '@/types/entities/collection';
 
 const logger = serverLogger.withContext('CollectionTransformer');
 
@@ -18,9 +15,7 @@ const logger = serverLogger.withContext('CollectionTransformer');
  * @param prismaCollection - El objeto Collection obtenido de Prisma con conteos.
  * @returns Un objeto CollectionWithStats compatible con nuestra aplicación, o null.
  */
-export function fromPrismaCollection(
-	prismaCollection: PrismaCollectionWithCounts | null,
-): CollectionWithStats | null {
+export function fromPrismaCollection(prismaCollection: PrismaCollectionWithCounts | null): CollectionWithStats | null {
 	if (!prismaCollection) {
 		return null;
 	}
@@ -89,10 +84,6 @@ export function fromPrismaCollection(
  * @param prismaCollections - Un array de objetos Collection de Prisma.
  * @returns Un array de objetos CollectionWithStats.
  */
-export function fromPrismaCollections(
-	prismaCollections: PrismaCollectionWithCounts[],
-): CollectionWithStats[] {
-	return prismaCollections
-		.map(fromPrismaCollection)
-		.filter((c): c is CollectionWithStats => c !== null);
+export function fromPrismaCollections(prismaCollections: PrismaCollectionWithCounts[]): CollectionWithStats[] {
+	return prismaCollections.map(fromPrismaCollection).filter((c): c is CollectionWithStats => c !== null);
 }

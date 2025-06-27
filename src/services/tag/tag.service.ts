@@ -140,13 +140,7 @@ export async function getTag(id: string): Promise<TagWithStats | null> {
  */
 export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResult> {
 	try {
-		const {
-			includeArchived = true,
-			search,
-			orderBy = 'name',
-			orderDirection = 'asc',
-			onlyFavorites = false
-		} = options;
+		const { includeArchived = true, search, orderBy = 'name', orderDirection = 'asc', onlyFavorites = false } = options;
 
 		logger.info('🏷️ Obteniendo etiquetas', { options });
 
@@ -173,9 +167,8 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 			prisma.tag.findMany({
 				where,
 				include: tagCounts,
-				orderBy: orderBy === 'name'
-					? [{ isFavorite: 'desc' }, { name: orderDirection }]
-					: { [orderBy]: orderDirection },
+				orderBy:
+					orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
 			}),
 			prisma.tag.count({ where }),
 		]);

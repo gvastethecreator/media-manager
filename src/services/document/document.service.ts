@@ -66,7 +66,7 @@ export async function getDocumentById(id: string): Promise<Document | null> {
 export async function createDocument(data: Prisma.DocumentCreateInput): Promise<DocumentWithStats> {
 	try {
 		const newDocument = await prisma.document.create({
-			data
+			data,
 		});
 
 		// Emitir eventos con el nuevo sistema
@@ -95,7 +95,7 @@ export async function updateDocument(id: string, data: Prisma.DocumentUpdateInpu
 	try {
 		const updatedDocument = await prisma.document.update({
 			where: { id },
-			data
+			data,
 		});
 
 		// Emitir eventos con el nuevo sistema
@@ -123,7 +123,7 @@ export async function updateDocument(id: string, data: Prisma.DocumentUpdateInpu
 export async function deleteDocument(id: string): Promise<void> {
 	try {
 		await prisma.document.delete({
-			where: { id }
+			where: { id },
 		});
 
 		// Emitir eventos con el nuevo sistema

@@ -10,12 +10,12 @@ import { db } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { fromPrismaVideosWithCounts, fromPrismaVideoWithCounts } from '@/transformers/video/transformer';
 import type {
-    VideoCreateInput,
-    VideoFilters,
-    VideoPaginationOptions,
-    VideoStats,
-    VideoUpdateInput,
-    VideoWithStats,
+	VideoCreateInput,
+	VideoFilters,
+	VideoPaginationOptions,
+	VideoStats,
+	VideoUpdateInput,
+	VideoWithStats,
 } from '@/types/entities/video';
 import { revalidatePath } from 'next/cache';
 
@@ -73,7 +73,7 @@ export async function getVideo(id: string): Promise<VideoWithStats | null> {
 		logger.info('✅ Video obtenido y transformado', {
 			id,
 			name: transformedVideo.name,
-			qualityScore: transformedVideo.statistics.qualityScore
+			qualityScore: transformedVideo.statistics.qualityScore,
 		});
 
 		return transformedVideo;
@@ -88,10 +88,9 @@ export async function getVideo(id: string): Promise<VideoWithStats | null> {
  * @param options Opciones de búsqueda y paginación
  * @returns Videos con estadísticas
  */
-export async function findVideos(options: {
-	filters?: VideoFilters;
-	pagination?: VideoPaginationOptions;
-} = {}): Promise<VideoWithStats[]> {
+export async function findVideos(
+	options: { filters?: VideoFilters; pagination?: VideoPaginationOptions } = {}
+): Promise<VideoWithStats[]> {
 	try {
 		const { filters = {}, pagination = {} } = options;
 		logger.info('🔍 Buscando videos con filtros', { filters, pagination });
@@ -193,7 +192,8 @@ export async function findVideos(options: {
 
 		logger.info('✅ Videos encontrados y transformados', {
 			count: transformedVideos.length,
-			avgQualityScore: transformedVideos.reduce((sum, v) => sum + v.statistics.qualityScore, 0) / transformedVideos.length
+			avgQualityScore:
+				transformedVideos.reduce((sum, v) => sum + v.statistics.qualityScore, 0) / transformedVideos.length,
 		});
 
 		return transformedVideos;
@@ -245,7 +245,7 @@ export async function createVideo(data: VideoCreateInput): Promise<VideoWithStat
 		logger.info('✅ Video creado exitosamente', {
 			id: transformedVideo.id,
 			name: transformedVideo.name,
-			qualityScore: transformedVideo.statistics.qualityScore
+			qualityScore: transformedVideo.statistics.qualityScore,
 		});
 
 		return transformedVideo;
@@ -294,7 +294,7 @@ export async function updateVideo(id: string, data: VideoUpdateInput): Promise<V
 		logger.info('✅ Video actualizado exitosamente', {
 			id: transformedVideo.id,
 			name: transformedVideo.name,
-			qualityScore: transformedVideo.statistics.qualityScore
+			qualityScore: transformedVideo.statistics.qualityScore,
 		});
 
 		return transformedVideo;
@@ -365,7 +365,7 @@ export async function toggleVideoFavorite(id: string, isFavorite: boolean): Prom
 
 		logger.info('✅ Estado de favorito actualizado', {
 			id: transformedVideo.id,
-			isFavorite: transformedVideo.isFavorite
+			isFavorite: transformedVideo.isFavorite,
 		});
 
 		return transformedVideo;
@@ -413,7 +413,7 @@ export async function setVideoVisibility(id: string, isPublic: boolean): Promise
 
 		logger.info('✅ Visibilidad actualizada', {
 			id: transformedVideo.id,
-			isPublic: transformedVideo.isPublic
+			isPublic: transformedVideo.isPublic,
 		});
 
 		return transformedVideo;
@@ -461,7 +461,7 @@ export async function moveVideoToFolder(id: string, folderId: string): Promise<V
 
 		logger.info('✅ Video movido a carpeta', {
 			id: transformedVideo.id,
-			folderId: transformedVideo.folderId
+			folderId: transformedVideo.folderId,
 		});
 
 		return transformedVideo;

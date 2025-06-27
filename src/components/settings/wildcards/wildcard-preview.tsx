@@ -30,19 +30,14 @@ interface WildcardPreviewProps {
 	isDeleting?: boolean;
 }
 
-export function WildcardPreview({
-	wildcard,
-	onEdit,
-	onDelete,
-	isDeleting = false,
-}: WildcardPreviewProps) {
+export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false }: WildcardPreviewProps) {
 	// Convertir el string JSON de children a array
 	const children = wildcard.children !== 'empty_array' ? JSON.parse(wildcard.children) : [];
 
 	const totalElements = wildcard._count
 		? Object.entries(wildcard._count)
-			.filter(([key]) => key !== 'childWildcards')
-			.reduce((a, [_, b]) => a + b, 0)
+				.filter(([key]) => key !== 'childWildcards')
+				.reduce((a, [_, b]) => a + b, 0)
 		: 0;
 
 	return (
@@ -191,7 +186,13 @@ export function WildcardPreview({
 					<div className="space-y-2">
 						<h3 className="text-sm font-medium">Imagen destacada</h3>
 						<div className="relative w-full h-32 bg-muted rounded-md overflow-hidden">
-							<Image src={wildcard.featuredImage} alt={wildcard.name} className="w-full h-full object-cover" width={400} height={400} />
+							<Image
+								src={wildcard.featuredImage}
+								alt={wildcard.name}
+								className="w-full h-full object-cover"
+								width={400}
+								height={400}
+							/>
 						</div>
 					</div>
 				)}

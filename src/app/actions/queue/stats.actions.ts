@@ -7,12 +7,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    countCompletedJobs,
-    countFailedJobs,
-    countTotalJobs,
-    findQueueJobsByStatus,
-    getQueueStatsByQueue as getQueueStatsByQueueService,
-    getQueueStats as getQueueStatsService,
+	countCompletedJobs,
+	countFailedJobs,
+	countTotalJobs,
+	findQueueJobsByStatus,
+	getQueueStatsByQueue as getQueueStatsByQueueService,
+	getQueueStats as getQueueStatsService,
 } from '@/services/queue-job/queue-job.service';
 import type { QueueStats } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job';

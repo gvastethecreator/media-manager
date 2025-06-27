@@ -10,11 +10,11 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
-    PrismaVideoWithCounts,
-    VideoComplete,
-    VideoQuality,
-    VideoStatistics,
-    VideoWithStats
+	PrismaVideoWithCounts,
+	VideoComplete,
+	VideoQuality,
+	VideoStatistics,
+	VideoWithStats,
 } from '@/types/entities/video/types';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -86,15 +86,25 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 		const propertiesCount = counts.properties || 0;
 		const groupsCount = counts.groups || 0;
 
-		const totalRelations = albumsCount + collectionsCount + tagsCount + charactersCount +
-			placesCount + worldItemsCount + conceptsCount + promptsCount + notesCount +
-			wildcardsCount + propertiesCount + groupsCount;
+		const totalRelations =
+			albumsCount +
+			collectionsCount +
+			tagsCount +
+			charactersCount +
+			placesCount +
+			worldItemsCount +
+			conceptsCount +
+			promptsCount +
+			notesCount +
+			wildcardsCount +
+			propertiesCount +
+			groupsCount;
 
 		// 🎥 Calcular métricas técnicas de video
-		const durationMinutes = Math.round((baseData.duration || 0) / 60 * 100) / 100;
-		const durationHours = Math.round(durationMinutes / 60 * 100) / 100;
-		const megabytes = Math.round((baseData.size || 0) / (1024 * 1024) * 100) / 100;
-		const gigabytes = Math.round(megabytes / 1024 * 100) / 100;
+		const durationMinutes = Math.round(((baseData.duration || 0) / 60) * 100) / 100;
+		const durationHours = Math.round((durationMinutes / 60) * 100) / 100;
+		const megabytes = Math.round(((baseData.size || 0) / (1024 * 1024)) * 100) / 100;
+		const gigabytes = Math.round((megabytes / 1024) * 100) / 100;
 
 		// 📐 Calcular aspectRatio y resolución
 		const aspectRatio = calculateAspectRatio(baseData.width, baseData.height);
@@ -109,7 +119,7 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 			size: baseData.size,
 			hasMetadata: !!baseData.metadata,
 			hasThumbnail: !!baseData.thumbnail,
-			totalRelations
+			totalRelations,
 		});
 
 		// 📈 Determinar technical grade
@@ -129,7 +139,7 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 			hasAudio,
 			hasSubtitles,
 			aspectRatio,
-			megabytes
+			megabytes,
 		});
 
 		// 🔍 Detección de duplicados (simulada por ahora)
@@ -186,7 +196,7 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 			displayName: baseData.name || 'Video sin título',
 			formattedSize: formatFileSize(baseData.size),
 			formattedDuration: formatDuration(baseData.duration),
-			qualityLabel: getQualityLabel(qualityLevel, technicalGrade)
+			qualityLabel: getQualityLabel(qualityLevel, technicalGrade),
 		};
 
 		return {
@@ -205,9 +215,8 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 				properties: propertiesCount,
 				groups: groupsCount,
 			},
-			statistics
+			statistics,
 		};
-
 	} catch (error) {
 		logger.error('❌ Error transformando video desde Prisma', {
 			error,
@@ -309,10 +318,13 @@ export function fromPrismaVideosWithCounts(videos: PrismaVideoWithCounts[]): Vid
  * 🔄 Convierte array de VideoWithStats a Record para store optimizado
  */
 export function videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats> {
-	return videos.reduce((acc, video) => {
-		acc[video.id] = video;
-		return acc;
-	}, {} as Record<string, VideoWithStats>);
+	return videos.reduce(
+		(acc, video) => {
+			acc[video.id] = video;
+			return acc;
+		},
+		{} as Record<string, VideoWithStats>
+	);
 }
 
 /**
@@ -337,7 +349,7 @@ export function getAllVideos(videos: Record<string, VideoWithStats>): VideoWithS
 function calculateAspectRatio(width: number | null, height: number | null): string {
 	if (!width || !height) return 'unknown';
 
-	const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
+	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 	const divisor = gcd(width, height);
 	const ratioWidth = width / divisor;
 	const ratioHeight = height / divisor;
@@ -368,7 +380,7 @@ function determineQualityLevel(width: number | null, height: number | null): Vid
 	const pixels = width * height;
 
 	if (pixels >= 2073600) return VideoQuality.ULTRA; // 1920x1080 o superior
-	if (pixels >= 921600) return VideoQuality.HIGH;   // 1280x720
+	if (pixels >= 921600) return VideoQuality.HIGH; // 1280x720
 	if (pixels >= 307200) return VideoQuality.MEDIUM; // 640x480
 	return VideoQuality.LOW;
 }
@@ -389,19 +401,24 @@ function calculateQualityScore(params: {
 
 	// Resolución (30 puntos)
 	const pixels = (params.width || 0) * (params.height || 0);
-	if (pixels >= 2073600) score += 30; // 1080p+
-	else if (pixels >= 921600) score += 25; // 720p
-	else if (pixels >= 307200) score += 15; // 480p
+	if (pixels >= 2073600)
+		score += 30; // 1080p+
+	else if (pixels >= 921600)
+		score += 25; // 720p
+	else if (pixels >= 307200)
+		score += 15; // 480p
 	else if (pixels > 0) score += 5; // Cualquier resolución
 
 	// Duración (20 puntos)
 	const minutes = params.duration / 60;
-	if (minutes >= 1 && minutes <= 120) score += 20; // Duración razonable
+	if (minutes >= 1 && minutes <= 120)
+		score += 20; // Duración razonable
 	else if (minutes > 0) score += 10; // Cualquier duración
 
 	// Tamaño vs duración (15 puntos)
-	const mbPerMinute = (params.size / (1024 * 1024)) / minutes;
-	if (mbPerMinute >= 5 && mbPerMinute <= 50) score += 15; // Bitrate razonable
+	const mbPerMinute = params.size / (1024 * 1024) / minutes;
+	if (mbPerMinute >= 5 && mbPerMinute <= 50)
+		score += 15; // Bitrate razonable
 	else if (mbPerMinute > 0) score += 5;
 
 	// Metadatos (15 puntos)
@@ -517,7 +534,7 @@ function getQualityLabel(qualityLevel: VideoQuality, technicalGrade: string): st
 		[VideoQuality.HIGH]: 'HD',
 		[VideoQuality.MEDIUM]: 'SD',
 		[VideoQuality.LOW]: 'Baja',
-		[VideoQuality.UNKNOWN]: 'Desconocida'
+		[VideoQuality.UNKNOWN]: 'Desconocida',
 	};
 
 	return `${qualityMap[qualityLevel]} (${technicalGrade})`;

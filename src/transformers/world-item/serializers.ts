@@ -5,12 +5,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    WorldItemAttribute,
-    WorldItemEffect,
-    WorldItemFilter,
-    WorldItemProperty,
-    WorldItemRequirement,
-    WorldItemStat
+	WorldItemAttribute,
+	WorldItemEffect,
+	WorldItemFilter,
+	WorldItemProperty,
+	WorldItemRequirement,
+	WorldItemStat,
 } from '@/types/entities/world-item';
 import { safeJsonParse } from '@/lib/utils/safe-json-parse';
 
@@ -27,21 +27,23 @@ const serializeArray = <T>(data: T[] | string, fieldName: string): string => {
 };
 
 const deserializeArray = <T>(jsonString: string | null | undefined, fieldName: string): T[] => {
-    return safeJsonParse<T[]>(jsonString, `deserializando ${fieldName}`).unwrapOr([]);
+	return safeJsonParse<T[]>(jsonString, `deserializando ${fieldName}`).unwrapOr([]);
 };
-
 
 // Attributes
 export const serializeAttributes = (data: WorldItemAttribute[] | string): string => serializeArray(data, 'attributes');
-export const deserializeAttributes = (json: string | null): WorldItemAttribute[] => deserializeArray(json, 'attributes');
+export const deserializeAttributes = (json: string | null): WorldItemAttribute[] =>
+	deserializeArray(json, 'attributes');
 
 // Effects
 export const serializeEffects = (data: WorldItemEffect[] | string): string => serializeArray(data, 'effects');
 export const deserializeEffects = (json: string | null): WorldItemEffect[] => deserializeArray(json, 'effects');
 
 // Requirements
-export const serializeRequirements = (data: WorldItemRequirement[] | string): string => serializeArray(data, 'requirements');
-export const deserializeRequirements = (json: string | null): WorldItemRequirement[] => deserializeArray(json, 'requirements');
+export const serializeRequirements = (data: WorldItemRequirement[] | string): string =>
+	serializeArray(data, 'requirements');
+export const deserializeRequirements = (json: string | null): WorldItemRequirement[] =>
+	deserializeArray(json, 'requirements');
 
 // Stats
 export const serializeStats = (data: WorldItemStat[] | string): string => serializeArray(data, 'stats');

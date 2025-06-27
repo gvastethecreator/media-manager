@@ -145,4 +145,3 @@ function calculateEstimatedTimeRemaining(job: QueueJob): string | undefined {
 	const duration = intervalToDuration({ start: 0, end: remainingMs });
 	return formatDuration(duration, { locale: es });
 }
-

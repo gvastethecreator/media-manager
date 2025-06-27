@@ -35,10 +35,7 @@ type CollectionCounts = {
  * @param counts Los conteos de las relaciones de la colección.
  * @returns Un objeto CollectionWithStats.
  */
-export function toCollectionWithStats(
-	collection: Collection,
-	counts: CollectionCounts['_count'],
-): CollectionWithStats {
+export function toCollectionWithStats(collection: Collection, counts: CollectionCounts['_count']): CollectionWithStats {
 	const stats: CollectionStatistics = {
 		imageCount: counts.images,
 		videoCount: counts.videos,

@@ -30,8 +30,8 @@ export async function getTagThumbnails(tagId: string, limit = 6): Promise<Thumbn
 		const images = await prisma.image.findMany({
 			where: {
 				tags: {
-					some: { id: tagId }
-				}
+					some: { id: tagId },
+				},
 			},
 			select: {
 				id: true,
@@ -42,7 +42,7 @@ export async function getTagThumbnails(tagId: string, limit = 6): Promise<Thumbn
 			take: limit,
 		});
 
-		const thumbnails = images.map(image => ({
+		const thumbnails = images.map((image) => ({
 			id: image.id,
 			name: image.name,
 			thumbnailUrl: image.thumbnailUrl,
@@ -198,12 +198,14 @@ export async function searchTags(query = '', limit = 100): Promise<TagWithStats[
 		const prisma = getPrismaClient();
 
 		const tags = await prisma.tag.findMany({
-			where: query ? {
-				OR: [
-					{ name: { contains: query, mode: 'insensitive' } },
-					{ description: { contains: query, mode: 'insensitive' } },
-				],
-			} : {},
+			where: query
+				? {
+						OR: [
+							{ name: { contains: query, mode: 'insensitive' } },
+							{ description: { contains: query, mode: 'insensitive' } },
+						],
+					}
+				: {},
 			select: {
 				id: true,
 				name: true,
@@ -234,15 +236,12 @@ export async function searchTags(query = '', limit = 100): Promise<TagWithStats[
 					},
 				},
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ name: 'asc' }
-			],
+			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
 			take: limit,
 		});
 
 		// Convertir a TagWithStats
-		const tagsWithStats = tags.map(tag => {
+		const tagsWithStats = tags.map((tag) => {
 			const totalImages = tag._count.images;
 			const totalVideos = tag._count.videos;
 			const totalAssociations = Object.values(tag._count).reduce((sum, count) => sum + count, 0);

@@ -39,7 +39,6 @@ export async function getTagsAction(...args: Parameters<typeof CrudActions.getTa
 	return CrudActions.getTags(...args);
 }
 
-
 // === EXPORTACIONES DE CONSULTAS ===
 
 /** @see {@link QueryActions.searchTags} */
@@ -49,19 +48,18 @@ export async function searchTagsAction(...args: Parameters<typeof QueryActions.s
 
 /** @see {@link QueryActions.getPopularTags} */
 export async function getPopularTagsAction(...args: Parameters<typeof QueryActions.getPopularTags>) {
-    return QueryActions.getPopularTags(...args);
+	return QueryActions.getPopularTags(...args);
 }
 
 /** @see {@link QueryActions.getTagsByCategory} */
 export async function getTagsByCategoryAction(...args: Parameters<typeof QueryActions.getTagsByCategory>) {
-    return QueryActions.getTagsByCategory(...args);
+	return QueryActions.getTagsByCategory(...args);
 }
 
 /** @see {@link QueryActions.getTagImages} */
 export async function getTagImagesAction(...args: Parameters<typeof QueryActions.getTagImages>) {
-    return QueryActions.getTagImages(...args);
+	return QueryActions.getTagImages(...args);
 }
-
 
 // === EXPORTACIONES DE RELACIONES ===
 
@@ -89,4 +87,3 @@ export async function updateImageTagsAction(...args: Parameters<typeof RelationA
 export async function addImageToTagAction(...args: Parameters<typeof RelationActions.addImageToTag>) {
 	return RelationActions.addImageToTag(...args);
 }
-

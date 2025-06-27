@@ -188,4 +188,3 @@ export const selectActivitiesByCategory = (state: ActivityStore) => {
 	const activities = selectSortedActivities(state);
 	return groupBy(activities, 'category');
 };
-

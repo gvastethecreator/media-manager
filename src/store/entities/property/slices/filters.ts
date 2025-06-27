@@ -25,17 +25,17 @@ export const createPropertyFilterSlice: StateCreator<
 
 	updateFilters: (newFilters: Partial<PropertyFilters>) => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.filters = { ...draft.filters, ...newFilters };
-			}),
+			})
 		);
 	},
 
 	clearFilters: () => {
 		set(
-			produce(draft => {
+			produce((draft) => {
 				draft.filters = initialState;
-			}),
+			})
 		);
 	},
 });

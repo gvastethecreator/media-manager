@@ -21,7 +21,7 @@ const MemoizedFile3DCard = React.memo(
 	(prevProps, nextProps) =>
 		prevProps.file3d.id === nextProps.file3d.id &&
 		prevProps.file3d.name === nextProps.file3d.name &&
-		prevProps.file3d.updatedAt === nextProps.file3d.updatedAt,
+		prevProps.file3d.updatedAt === nextProps.file3d.updatedAt
 );
 MemoizedFile3DCard.displayName = 'MemoizedFile3DCard';
 
@@ -67,9 +67,9 @@ export function File3DView(_props: ViewProps) {
 	}
 
 	// Lógica de ordenamiento simple (por fecha de actualización, más recientes primero)
-	const sortedFile3Ds = Array.isArray(file3dsRecord) ? file3dsRecord.sort((a, b) =>
-		new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-	) : [];
+	const sortedFile3Ds = Array.isArray(file3dsRecord)
+		? file3dsRecord.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+		: [];
 
 	if (sortedFile3Ds.length === 0) {
 		return (

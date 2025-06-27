@@ -8,10 +8,10 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers actualizados
 import {
-    fromPrismaPrompt,
-    mapCreatePromptDataToPrisma,
-    mapUpdatePromptDataToPrisma,
-    toPromptWithStats,
+	fromPrismaPrompt,
+	mapCreatePromptDataToPrisma,
+	mapUpdatePromptDataToPrisma,
+	toPromptWithStats,
 } from '@/transformers/prompt';
 import { deserializeParameters } from '@/transformers/prompt/serializers';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';

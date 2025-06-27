@@ -27,28 +27,15 @@ export function VideoCardThumbnail({
 	compact = false,
 }: VideoCardThumbnailProps) {
 	const { statistics } = video;
-	const {
-		thumbnailUrl,
-		resolution,
-		hasAudio,
-		formattedSize
-	} = statistics;
+	const { thumbnailUrl, resolution, hasAudio, formattedSize } = statistics;
 
 	// Placeholder si no hay thumbnail
 	const placeholderGradient = `linear-gradient(135deg, ${primaryColor}40, ${primaryColor}80)`;
 
 	return (
-		<div className={cn(
-			'relative overflow-hidden bg-black/10',
-			compact ? 'h-20' : 'h-32'
-		)}>
+		<div className={cn('relative overflow-hidden bg-black/10', compact ? 'h-20' : 'h-32')}>
 			{/* Fondo decorativo para TCG */}
-			{tcgMode && (
-				<div
-					className="absolute inset-0 opacity-30"
-					style={{ background: placeholderGradient }}
-				/>
-			)}
+			{tcgMode && <div className="absolute inset-0 opacity-30" style={{ background: placeholderGradient }} />}
 
 			{/* Thumbnail o placeholder */}
 			{thumbnailUrl ? (
@@ -60,10 +47,7 @@ export function VideoCardThumbnail({
 					sizes="(max-width: 768px) 100vw, 300px"
 				/>
 			) : (
-				<div
-					className="w-full h-full flex items-center justify-center"
-					style={{ background: placeholderGradient }}
-				>
+				<div className="w-full h-full flex items-center justify-center" style={{ background: placeholderGradient }}>
 					<Play className="w-8 h-8 text-white/80" />
 				</div>
 			)}
@@ -73,26 +57,16 @@ export function VideoCardThumbnail({
 				{/* Información técnica en la esquina inferior */}
 				<div className="absolute bottom-1 left-1 flex flex-col gap-1">
 					{/* Resolución */}
-					<div className="text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
-						{resolution}
-					</div>
+					<div className="text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">{resolution}</div>
 
 					{/* Tamaño del archivo */}
-					{!compact && (
-						<div className="text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
-							{formattedSize}
-						</div>
-					)}
+					{!compact && <div className="text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">{formattedSize}</div>}
 				</div>
 
 				{/* Indicadores en la esquina superior derecha */}
 				<div className="absolute top-1 right-1 flex gap-1">
 					{/* Indicador de audio */}
-					{hasAudio ? (
-						<Volume2 className="w-4 h-4 text-white/80" />
-					) : (
-						<VolumeX className="w-4 h-4 text-white/60" />
-					)}
+					{hasAudio ? <Volume2 className="w-4 h-4 text-white/80" /> : <VolumeX className="w-4 h-4 text-white/60" />}
 				</div>
 
 				{/* Botón de play centrado */}
@@ -102,7 +76,7 @@ export function VideoCardThumbnail({
 						initial={{ scale: 0.8, opacity: 0.6 }}
 						animate={{
 							scale: isHovered ? 1.1 : 0.8,
-							opacity: isHovered ? 1 : 0.6
+							opacity: isHovered ? 1 : 0.6,
 						}}
 						transition={{ duration: 0.2 }}
 					>
@@ -123,7 +97,7 @@ export function VideoCardThumbnail({
 						className="absolute inset-0"
 						style={{
 							background: `linear-gradient(45deg, transparent, ${primaryColor}60, transparent)`,
-							animation: 'shimmer 2s infinite'
+							animation: 'shimmer 2s infinite',
 						}}
 					/>
 				</motion.div>
@@ -131,7 +105,8 @@ export function VideoCardThumbnail({
 
 			{/* Marco decorativo para rareza mítica */}
 			{tcgMode && rarityLevel >= 9 && (
-				<div className="absolute inset-0 border-2 border-dashed opacity-40 pointer-events-none animate-pulse"
+				<div
+					className="absolute inset-0 border-2 border-dashed opacity-40 pointer-events-none animate-pulse"
 					style={{ borderColor: primaryColor }}
 				/>
 			)}

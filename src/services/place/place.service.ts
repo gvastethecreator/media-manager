@@ -12,17 +12,17 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-    mapCreatePlaceDataToPrisma,
-    mapPlaceSearchOptionsToPrisma,
-    mapUpdatePlaceDataToPrisma,
-    toPlaceWithStats,
+	mapCreatePlaceDataToPrisma,
+	mapPlaceSearchOptionsToPrisma,
+	mapUpdatePlaceDataToPrisma,
+	toPlaceWithStats,
 } from '@/transformers/place';
 import type {
-    PlaceCreateInput,
-    PlaceSearchOptions,
-    PlaceUpdateInput,
-    PlaceWithStats,
-    PrismaPlaceWithCounts,
+	PlaceCreateInput,
+	PlaceSearchOptions,
+	PlaceUpdateInput,
+	PlaceWithStats,
+	PrismaPlaceWithCounts,
 } from '@/types/entities/place';
 import type { Prisma } from '@prisma/client';
 
@@ -64,7 +64,7 @@ export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithS
 			include: placeIncludeWithCounts,
 		});
 
-		return places.map(place => toPlaceWithStats(place as PrismaPlaceWithCounts));
+		return places.map((place) => toPlaceWithStats(place as PrismaPlaceWithCounts));
 	} catch (error) {
 		placeLogger.error('Error al obtener places:', error);
 		throw createPlaceError('Error al obtener lugares', EntityErrorCode.OPERATION_FAILED, error);
@@ -111,7 +111,10 @@ export async function createPlace(input: PlaceCreateInput): Promise<PlaceWithSta
 		// Volvemos a buscar para obtener los _counts actualizados
 		const createdPlaceWithStats = await getPlaceById(newPlace.id);
 		if (!createdPlaceWithStats) {
-			throw createPlaceError('No se pudo recuperar el lugar recién creado con sus estadísticas', EntityErrorCode.OPERATION_FAILED);
+			throw createPlaceError(
+				'No se pudo recuperar el lugar recién creado con sus estadísticas',
+				EntityErrorCode.OPERATION_FAILED
+			);
 		}
 
 		placeLogger.info('✅ Place creado:', createdPlaceWithStats.name);
@@ -148,7 +151,10 @@ export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<
 		// Volvemos a buscar para obtener los _counts actualizados
 		const updatedPlaceWithStats = await getPlaceById(id);
 		if (!updatedPlaceWithStats) {
-			throw createPlaceError('No se pudo recuperar el lugar actualizado con sus estadísticas', EntityErrorCode.OPERATION_FAILED);
+			throw createPlaceError(
+				'No se pudo recuperar el lugar actualizado con sus estadísticas',
+				EntityErrorCode.OPERATION_FAILED
+			);
 		}
 
 		placeLogger.info('✅ Place actualizado:', updatedPlaceWithStats.name);

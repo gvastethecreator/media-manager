@@ -5,7 +5,12 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { PrismaPropertyWithCounts, PropertyBase, PropertyStatistics, PropertyWithStats } from '@/types/entities/property';
+import type {
+	PrismaPropertyWithCounts,
+	PropertyBase,
+	PropertyStatistics,
+	PropertyWithStats,
+} from '@/types/entities/property';
 import { calculateCompleteness } from '@/lib/utils/transformers';
 
 const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer');
@@ -17,9 +22,7 @@ const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer'
  * @param prismaProperty El objeto Property de Prisma, puede incluir conteos de relaciones
  * @returns Un objeto PropertyWithStats con estadísticas calculadas o null si el input es inválido
  */
-function fromPrismaProperty(
-	prismaProperty: PrismaPropertyWithCounts | PropertyBase | null
-): PropertyWithStats | null {
+function fromPrismaProperty(prismaProperty: PrismaPropertyWithCounts | PropertyBase | null): PropertyWithStats | null {
 	if (!prismaProperty) {
 		propertyTransformerLogger.warn('⚠️ Property de Prisma nulo o indefinido');
 		return null;
@@ -37,15 +40,11 @@ function fromPrismaProperty(
 
 			// Calcular estadísticas
 			const totalRelations = Object.values(_count).reduce((sum, count) => sum + count, 0);
-			const usageDiversity = Object.values(_count).filter(count => count > 0).length;
+			const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
 			const totalPossibleRelations = Object.keys(_count).length;
 			const diversityRatio = totalPossibleRelations > 0 ? usageDiversity / totalPossibleRelations : 0;
 			const popularity = Math.log1p(totalRelations) * diversityRatio;
-			const completenessScore = calculateCompleteness(baseProperty, [
-				'name',
-				'description',
-				'category',
-			]);
+			const completenessScore = calculateCompleteness(baseProperty, ['name', 'description', 'category']);
 
 			const stats: PropertyStatistics = {
 				totalRelations,
@@ -53,30 +52,26 @@ function fromPrismaProperty(
 				popularity: Number.parseFloat(popularity.toFixed(2)),
 				completenessScore,
 			};
+			return {
+				...baseProperty,
+				stats,
+			};
+		}
+
+		// Si no tiene conteos, crear estadísticas vacías
+		const completenessScore = calculateCompleteness(prismaProperty, ['name', 'description', 'category']);
+
+		const stats: PropertyStatistics = {
+			totalRelations: 0,
+			usageDiversity: 0,
+			popularity: 0,
+			completenessScore,
+		};
+
 		return {
-			...baseProperty,
+			...prismaProperty,
 			stats,
 		};
-	}
-
-	// Si no tiene conteos, crear estadísticas vacías
-	const completenessScore = calculateCompleteness(prismaProperty, [
-		'name',
-		'description',
-		'category',
-	]);
-
-	const stats: PropertyStatistics = {
-		totalRelations: 0,
-		usageDiversity: 0,
-		popularity: 0,
-		completenessScore,
-	};
-
-	return {
-		...prismaProperty,
-		stats,
-	};
 	} catch (error) {
 		propertyTransformerLogger.error('❌ Error transformando property:', error);
 		return null;
@@ -90,7 +85,7 @@ function fromPrismaProperty(
  * PropertyTransformer - Namespace que contiene todas las funciones de transformación para properties
  */
 export const PropertyTransformer = {
-	fromPrismaProperty
+	fromPrismaProperty,
 } as const;
 
 /**

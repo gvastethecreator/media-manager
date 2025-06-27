@@ -138,8 +138,4 @@ export interface FolderNavigationSlice extends FolderNavigationState {
 /**
  * 📁 Store completo de Folder
  */
-export interface CompleteFolderStore extends
-	FolderStore,
-	FolderFiltersSlice,
-	FolderNavigationSlice {
-}
+export interface CompleteFolderStore extends FolderStore, FolderFiltersSlice, FolderNavigationSlice {}

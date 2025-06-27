@@ -5,4 +5,3 @@
 
 export { useFile3DStore } from './file-3d.store';
 export type { File3DState } from './file-3d.store';
-

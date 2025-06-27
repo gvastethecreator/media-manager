@@ -14,19 +14,18 @@
  */
 
 export type {
-    PrismaTagWithCounts,
-    TagBase,
-    TagStatistics,
-    TagWithStats
+	PrismaTagWithCounts,
+	TagBase,
+	TagStatistics,
+	TagWithStats,
 } from './base';
 // --- Tipos Canónicos (NUEVO) ---
 export { TAG_COUNTS_RELATIONS, tagCounts } from './base';
 
 // --- Esquemas de Validación ---
 export {
-    RelatedTagSchema,
-    TagFiltersSchema,
-    TagImageRelationSchema,
-    TagSchema
+	RelatedTagSchema,
+	TagFiltersSchema,
+	TagImageRelationSchema,
+	TagSchema,
 } from './schema';
-

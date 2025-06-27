@@ -20,4 +20,3 @@ export { ListView } from './views/list-view';
 export { MasonryView } from './views/masonry-view';
 export { SimpleGridView } from './views/simple-grid-view';
 export { VirtualizerWrapper } from './views/virtualizer-wrapper';
-

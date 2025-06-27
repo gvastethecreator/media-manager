@@ -9,7 +9,7 @@ import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats 
 import {
 	COLLECTION_CATEGORY_COLORS,
 	COLLECTION_CATEGORY_EMOJIS,
-	CollectionCategory
+	CollectionCategory,
 } from '@/types/entities/collection/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';

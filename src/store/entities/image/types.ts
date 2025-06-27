@@ -121,10 +121,13 @@ export interface ImageStoreStats {
  * 🔄 Funciones auxiliares para manipular Record de imágenes
  */
 export function imagesToRecord(images: ImageWithStats[]): Record<string, ImageWithStats> {
-	return images.reduce((record, image) => {
-		record[image.id] = image;
-		return record;
-	}, {} as Record<string, ImageWithStats>);
+	return images.reduce(
+		(record, image) => {
+			record[image.id] = image;
+			return record;
+		},
+		{} as Record<string, ImageWithStats>
+	);
 }
 
 export function getImageById(images: Record<string, ImageWithStats>, id: string): ImageWithStats | undefined {

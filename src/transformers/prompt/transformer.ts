@@ -105,9 +105,12 @@ export function fromPrismaPrompt(promptFromPrisma: PromptFromPrisma | null): Pro
 			videos: promptFromPrisma.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
 			tags: promptFromPrisma.tags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],
 			notes: promptFromPrisma.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
-			wildcards: promptFromPrisma.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
-			properties: promptFromPrisma.properties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
-			worldItems: promptFromPrisma.worldItems?.map(fromPrismaWorldItem).filter((w): w is WorldItemComplete => w !== null) || [],
+			wildcards:
+				promptFromPrisma.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
+			properties:
+				promptFromPrisma.properties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
+			worldItems:
+				promptFromPrisma.worldItems?.map(fromPrismaWorldItem).filter((w): w is WorldItemComplete => w !== null) || [],
 
 			// Conteos
 			_count: promptFromPrisma._count || {

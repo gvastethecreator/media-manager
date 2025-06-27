@@ -95,4 +95,10 @@ export interface WorkflowFilterActions {
 /**
  * 📦 Tipo del store completo de Workflow
  */
-export interface WorkflowStore extends WorkflowCoreState, WorkflowCoreActions, WorkflowUIState, WorkflowUIActions, WorkflowFilterState, WorkflowFilterActions {}
+export interface WorkflowStore
+	extends WorkflowCoreState,
+		WorkflowCoreActions,
+		WorkflowUIState,
+		WorkflowUIActions,
+		WorkflowFilterState,
+		WorkflowFilterActions {}
