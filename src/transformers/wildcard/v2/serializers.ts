@@ -170,8 +170,8 @@ export function fromPrismaWildcard<T extends WildcardBase>(
 		}
 
 		// Agregar conteos si están presentes y se solicitan estadísticas
-		if (includeStats && (wildcard as any)._count) {
-			result._count = (wildcard as any)._count;
+		if (includeStats && '_count' in wildcard) {
+			result._count = wildcard._count;
 		}
 
 		// Agregar propiedades de UI si se solicitan

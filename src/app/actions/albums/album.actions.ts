@@ -3,55 +3,28 @@
 /**
  * @file Server Actions para la entidad Album
  * @module app/actions/albums/album.actions
- * @description Acciones CRUD y de gestión de relaciones para los álbumes.
+ * @description Controladores delgados que llaman al servicio de álbumes
  * @updated 2025-01-27
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { toAlbumWithStats } from '@/transformers/album';
+import albumService, { type CreateAlbumInput, type GetAlbumsOptions, type UpdateAlbumInput } from '@/services/album-service-export';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('AlbumActions');
-
-const revalidatePaths = ['/albums']; // Ajustar a rutas reales de la UI
-
-const albumWithStatsInclude = {
-	_count: {
-		select: {
-			images: true,
-			videos: true,
-			collections: true,
-			tags: true,
-			characters: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			properties: true,
-			groups: true,
-		},
-	},
-};
 
 /**
  * Obtiene todos los álbumes con sus estadísticas.
  */
-export async function getAlbums(): Promise<AlbumWithStats[]> {
+export async function getAlbums(options?: GetAlbumsOptions): Promise<AlbumWithStats[]> {
 	try {
-		logger.info('🎞️ Obteniendo todos los álbumes');
-		const albums = await prisma.album.findMany({
-			include: albumWithStatsInclude,
-			orderBy: { name: 'asc' },
-		});
-		return albums.map(album => toAlbumWithStats(album, album._count));
+		logger.info('🎞️ Obteniendo álbumes via action');
+		const result = await albumService.getAlbums(options);
+		return result.albums;
 	} catch (error) {
-		logger.error('❌ Error al obtener los álbumes.', { error });
-		throw new Error('No se pudieron obtener los álbumes.');
+		logger.error('❌ Error en action getAlbums', { error });
+		throw error;
 	}
 }
 
@@ -60,58 +33,37 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
  */
 export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 	try {
-		logger.info(`🔍 Obteniendo álbum por ID: ${id}`);
-		const album = await prisma.album.findUnique({
-			where: { id },
-			include: albumWithStatsInclude,
-		});
-
-		if (!album) {
-			logger.warn(`Álbum no encontrado: ${id}`);
-			return null;
-		}
-		return toAlbumWithStats(album, album._count);
+		logger.info(`🔍 Obteniendo álbum ${id} via action`);
+		return await albumService.getAlbum(id);
 	} catch (error) {
-		logger.error(`❌ Error al obtener el álbum ${id}.`, { error });
-		throw new Error(`No se pudo obtener el álbum.`);
+		logger.error(`❌ Error en action getAlbum: ${id}`, { error });
+		throw error;
 	}
 }
 
 /**
  * Crea un nuevo álbum.
  */
-export async function createAlbum(data: Prisma.AlbumCreateInput): Promise<AlbumWithStats> {
+export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStats> {
 	try {
-		logger.info('📝 Creando nuevo álbum:', { name: data.name });
-		const newAlbum = await prisma.album.create({
-			data,
-			include: albumWithStatsInclude,
-		});
-		revalidatePaths.forEach(path => revalidatePath(path));
-		return toAlbumWithStats(newAlbum, newAlbum._count);
+		logger.info('📝 Creando álbum via action', { name: data.name });
+		return await albumService.createAlbum(data);
 	} catch (error) {
-		logger.error('❌ Error al crear el álbum.', { error, data });
-		throw new Error('No se pudo crear el álbum.');
+		logger.error('❌ Error en action createAlbum', { error, data });
+		throw error;
 	}
 }
 
 /**
  * Actualiza un álbum existente.
  */
-export async function updateAlbum(id: string, data: Prisma.AlbumUpdateInput): Promise<AlbumWithStats> {
+export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<AlbumWithStats> {
 	try {
-		logger.info(`🔄 Actualizando álbum: ${id}`);
-		const updatedAlbum = await prisma.album.update({
-			where: { id },
-			data,
-			include: albumWithStatsInclude,
-		});
-		revalidatePaths.forEach(path => revalidatePath(path));
-		revalidatePath(`/albums/${id}`); // Ruta específica del detalle
-		return toAlbumWithStats(updatedAlbum, updatedAlbum._count);
+		logger.info(`🔄 Actualizando álbum ${id} via action`);
+		return await albumService.updateAlbum(id, data);
 	} catch (error) {
-		logger.error(`❌ Error al actualizar el álbum ${id}.`, { error, data });
-		throw new Error('No se pudo actualizar el álbum.');
+		logger.error(`❌ Error en action updateAlbum: ${id}`, { error, data });
+		throw error;
 	}
 }
 
@@ -120,12 +72,11 @@ export async function updateAlbum(id: string, data: Prisma.AlbumUpdateInput): Pr
  */
 export async function deleteAlbum(id: string): Promise<void> {
 	try {
-		logger.warn(`🗑️ Eliminando álbum: ${id}`);
-		await prisma.album.delete({ where: { id } });
-		revalidatePaths.forEach(path => revalidatePath(path));
+		logger.warn(`🗑️ Eliminando álbum ${id} via action`);
+		await albumService.deleteAlbum(id);
 	} catch (error) {
-		logger.error(`❌ Error al eliminar el álbum ${id}.`, { error });
-		throw new Error('No se pudo eliminar el álbum.');
+		logger.error(`❌ Error en action deleteAlbum: ${id}`, { error });
+		throw error;
 	}
 }
 
@@ -134,28 +85,83 @@ export async function deleteAlbum(id: string): Promise<void> {
  */
 export async function getAlbumImages(albumId: string): Promise<{ id: string; name: string; path: string }[]> {
 	try {
-		logger.info(`🖼️ Obteniendo imágenes del álbum: ${albumId}`);
-		const images = await prisma.image.findMany({
-			where: {
-				albums: {
-					some: {
-						id: albumId,
-					},
-				},
-			},
-			select: {
-				id: true,
-				name: true,
-				path: true,
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
-
-		return images;
+		logger.info(`🖼️ Obteniendo imágenes del álbum ${albumId} via action`);
+		return await albumService.getAlbumImages(albumId);
 	} catch (error) {
-		logger.error(`❌ Error al obtener imágenes del álbum ${albumId}.`, { error });
-		throw new Error('No se pudieron obtener las imágenes del álbum.');
+		logger.error(`❌ Error en action getAlbumImages: ${albumId}`, { error });
+		throw error;
 	}
+}
+
+/**
+ * Agrega una imagen a un álbum
+ */
+export async function addImageToAlbum(albumId: string, imageId: string): Promise<void> {
+	try {
+		logger.info(`🔗 Agregando imagen ${imageId} al álbum ${albumId} via action`);
+		await albumService.addImageToAlbum(albumId, imageId);
+	} catch (error) {
+		logger.error(`❌ Error en action addImageToAlbum`, { error, albumId, imageId });
+		throw error;
+	}
+}
+
+/**
+ * Remueve una imagen de un álbum
+ */
+export async function removeImageFromAlbum(albumId: string, imageId: string): Promise<void> {
+	try {
+		logger.info(`🔗 Removiendo imagen ${imageId} del álbum ${albumId} via action`);
+		await albumService.removeImageFromAlbum(albumId, imageId);
+	} catch (error) {
+		logger.error(`❌ Error en action removeImageFromAlbum`, { error, albumId, imageId });
+		throw error;
+	}
+}
+
+/**
+ * Cambia el estado de archivo de un álbum
+ */
+export async function toggleAlbumArchive(id: string): Promise<AlbumWithStats> {
+	try {
+		logger.info(`📦 Cambiando estado de archivo del álbum ${id} via action`);
+		return await albumService.toggleAlbumArchive(id);
+	} catch (error) {
+		logger.error(`❌ Error en action toggleAlbumArchive: ${id}`, { error });
+		throw error;
+	}
+}
+
+/**
+ * Cambia la visibilidad de un álbum
+ */
+export async function toggleAlbumPrivacy(id: string): Promise<AlbumWithStats> {
+	try {
+		logger.info(`🔒 Cambiando visibilidad del álbum ${id} via action`);
+		return await albumService.toggleAlbumPrivacy(id);
+	} catch (error) {
+		logger.error(`❌ Error en action toggleAlbumPrivacy: ${id}`, { error });
+		throw error;
+	}
+}
+
+// Mantener compatibilidad con código legacy que usa Prisma types
+export async function createAlbumLegacy(data: Prisma.AlbumCreateInput): Promise<AlbumWithStats> {
+	const albumInput: CreateAlbumInput = {
+		name: data.name,
+		description: data.description || undefined,
+		isPrivate: data.isPrivate || false,
+		isArchived: data.isArchived || false,
+	};
+	return createAlbum(albumInput);
+}
+
+export async function updateAlbumLegacy(id: string, data: Prisma.AlbumUpdateInput): Promise<AlbumWithStats> {
+	const albumInput: UpdateAlbumInput = {};
+	if (data.name !== undefined) albumInput.name = data.name as string;
+	if (data.description !== undefined) albumInput.description = data.description as string | undefined;
+	if (data.isPrivate !== undefined) albumInput.isPrivate = data.isPrivate as boolean;
+	if (data.isArchived !== undefined) albumInput.isArchived = data.isArchived as boolean;
+
+	return updateAlbum(id, albumInput);
 }

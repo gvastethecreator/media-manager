@@ -185,3 +185,112 @@ El sistema ahora puede compilar sin errores relacionados con los imports de `Pro
 **Fecha**: 23 de junio de 2025
 **Prioridad**: [CRÍTICO]
 **Complejidad**: [PEQUEÑO]
+
+# [007] Implementación de Capa de Servicio - Entidades Restantes
+
+## Contexto
+
+Continuando con la auditoría de entidades (`AUDITORIA_ENTIDADES.md`), necesitamos implementar la capa de servicio para todas las entidades que actualmente carecen de ella. El objetivo es aplicar el patrón arquitectónico consistente donde las Server Actions son controladores delgados que llaman a servicios que encapsulan la lógica de negocio.
+
+## Subtareas
+
+### ✅ Entidades Completadas
+
+- [x] [HIGH] [SMALL] `Image` - Servicio refactorizado y actions convertidas ⬅️ COMPLETADO
+- [x] [HIGH] [SMALL] `Settings` - Flujo Service/Action invertido correctamente ⬅️ COMPLETADO
+- [x] [HIGH] [SMALL] `Folder` - `as any` eliminado y tipos corregidos ⬅️ COMPLETADO
+- [x] [MEDIUM] [MEDIUM] `Video` - Servicio implementado y actions refactorizadas ⬅️ COMPLETADO
+
+### 🔄 Entidades Principales (Sin Capa de Servicio)
+
+- [x] [HIGH] [MEDIUM] `Album` - Servicio implementado y actions refactorizadas ⬅️ COMPLETADO
+- [ ] [HIGH] [MEDIUM] `Collection` - Implementar servicio y refactorizar actions ⬅️ ACTIVA
+- [ ] [HIGH] [MEDIUM] `Tag` - Implementar servicio y refactorizar actions
+- [ ] [HIGH] [MEDIUM] `Property` - Implementar servicio y refactorizar actions
+- [ ] [HIGH] [MEDIUM] `Wildcard` - Implementar servicio y refactorizar actions
+- [ ] [HIGH] [MEDIUM] `Character` - Implementar servicio y refactorizar actions
+- [ ] [HIGH] [MEDIUM] `Place` - Implementar servicio y refactorizar actions
+- [ ] [HIGH] [MEDIUM] `WorldItem` - Implementar servicio y refactorizar actions
+- [ ] [HIGH] [MEDIUM] `Note` - Implementar servicio y refactorizar actions
+
+### 🆕 Entidades Nuevas (Sin Capa de Servicio)
+
+- [ ] [MEDIUM] [MEDIUM] `Workflow` - Implementar servicio y refactorizar actions
+- [ ] [MEDIUM] [MEDIUM] `Document` - Implementar servicio y refactorizar actions
+- [ ] [MEDIUM] [MEDIUM] `JsonFile` - Implementar servicio y refactorizar actions
+- [ ] [MEDIUM] [MEDIUM] `File3D` - Implementar servicio y refactorizar actions
+- [ ] [MEDIUM] [MEDIUM] `Audio` - Implementar servicio y refactorizar actions
+
+### 🔍 Entidades con Tareas Menores
+
+- [ ] [LOW] [SMALL] `QueueJob` - Investigar tipos duplicados
+- [ ] [LOW] [SMALL] `Profile` - Clarificar `profile/client.ts`
+- [ ] [LOW] [SMALL] `UploadedImage` - Consolidar tipos
+- [ ] [LOW] [SMALL] `ImageStats` - Limpiar menciones al campo `downloads`
+- [ ] [LOW] [SMALL] `Activity` - Consolidar flujo Action -> Service
+
+## Especificaciones Técnicas
+
+### Patrón a Seguir por Entidad
+
+1. **Crear Servicio** (`src/services/[entidad]/[entidad].service.ts`):
+   - Mover toda la lógica de negocio desde actions
+   - Implementar métodos CRUD: `get`, `find`, `create`, `update`, `delete`
+   - Agregar métodos específicos según la entidad (toggle, move, etc.)
+   - Usar transformadores para conversión de tipos Prisma
+   - Implementar logging y revalidación de rutas
+
+2. **Refactorizar Actions** (`src/app/actions/[entidad]/`):
+   - Convertir en controladores delgados
+   - Validar entrada y llamar al servicio correspondiente
+   - Mantener manejo de errores básico
+   - Preservar interfaz pública existente
+
+3. **Actualizar Exportaciones** (`src/services/[entidad]-service-export.ts`):
+   - Crear/actualizar archivo de exportación
+   - Exportar servicio con nombre consistente
+   - Mantener compatibilidad con código existente
+
+### Criterios de Completitud
+
+- ✅ Servicio implementado con todos los métodos CRUD
+- ✅ Actions refactorizadas como controladores delgados
+- ✅ Exportaciones actualizadas
+- ✅ No errores de compilación TypeScript
+- ✅ Patrón arquitectónico consistente aplicado
+- ✅ Auditoría actualizada con progreso
+
+## Diagrama de Flujo
+
+```mermaid
+graph TD
+    A[Client Request] --> B[Server Action]
+    B --> C{Validate Input}
+    C -->|Invalid| D[Return Error]
+    C -->|Valid| E[Call Service Method]
+    E --> F[Service Business Logic]
+    F --> G[Prisma Database Operations]
+    G --> H[Transform Data]
+    H --> I[Revalidate Paths]
+    I --> J[Return Result]
+    J --> B
+    B --> K[Return to Client]
+```
+
+## Estado Actual
+
+- **Entidades Completadas**: 5/22 (23%)
+- **Entidades Principales Pendientes**: 8/22 (36%)
+- **Entidades Nuevas Pendientes**: 5/22 (23%)
+- **Tareas Menores Pendientes**: 4/22 (18%)
+
+## Próximo Paso
+
+Continuar con la entidad `Collection` implementando el servicio completo y refactorizando las actions correspondientes.
+
+---
+
+**Prioridad**: [HIGH]
+**Complejidad**: [BIG]
+**Estimación**: 2-3 horas por entidad principal
+**Impacto**: Arquitectura consistente y preparación para migración Vite + React

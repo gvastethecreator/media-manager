@@ -87,13 +87,13 @@ export const selectWorldItemSummary = () => {
 	// Calcular elementos con imágenes y notas usando _count si está disponible
 	const withImages = worldItems.filter((item) => {
 		// Si tiene _count, usar eso; si no, asumir 0
-		const imageCount = (item as any)?._count?.images || 0;
+		const imageCount = item._count?.images || 0;
 		return imageCount > 0;
 	}).length;
 
 	const withNotes = worldItems.filter((item) => {
 		// Si tiene _count, usar eso; si no, asumir 0
-		const noteCount = (item as any)?._count?.notes || 0;
+		const noteCount = item._count?.notes || 0;
 		return noteCount > 0;
 	}).length;
 

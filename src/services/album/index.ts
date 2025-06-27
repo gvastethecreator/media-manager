@@ -2,7 +2,9 @@
  * @file Exportaciones del servicio de Album
  * @module services/album
  * @description Punto de entrada para el servicio de álbumes
+ * @updated 2025-01-27
  */
 
-// TODO: Implementar album.service.ts según la documentación en README.md
-// export * from './album.service';
+export * from './album.service';
+export { default } from './album.service';
+
