@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { ConceptComplete, ConceptExtended } from '@/types/entities/concept';
 import { calculateConceptsStats } from '@/utils/concept/helpers';
 import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';

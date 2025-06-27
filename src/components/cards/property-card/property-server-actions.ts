@@ -1,6 +1,6 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import type { PropertyComplete as Property } from '@/types/prisma';
 
 export interface PropertyCardData extends Property {

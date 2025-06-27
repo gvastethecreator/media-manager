@@ -6,7 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { Prisma } from '@prisma/client';

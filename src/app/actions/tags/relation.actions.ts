@@ -5,7 +5,7 @@
  * @module app/actions/tags/relation.actions
  */
 
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/database/db';
 import { revalidatePath } from 'next/cache';
 // import { notifyStatChange } from '@/lib/events'; // Comentado, usar serverEmit
 import { emit as serverEmit } from '@/lib/events/server'; // Importar serverEmit correctamente

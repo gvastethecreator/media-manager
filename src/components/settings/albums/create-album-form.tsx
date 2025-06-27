@@ -5,7 +5,7 @@ import { EmojiPicker } from '@/components/core/emojis/emoji-picker';
 import { DynamicCreateForm } from '@/components/settings/common/dynamic-create-form';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';

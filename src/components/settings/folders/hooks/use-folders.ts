@@ -5,7 +5,7 @@ import type {
     ProcessStatus
 } from '@/app/actions/folders/types';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { useCallback, useEffect, useState } from 'react';
 import { type ExtendedProcessStatus, initialGlobalReindexStatus } from '../folder-types';

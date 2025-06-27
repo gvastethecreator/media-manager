@@ -8,6 +8,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
     ImageCreateInput,
     ImageMetadata,
@@ -290,21 +291,7 @@ function calculateDerivedFields(image: PrismaImageWithCounts, statistics: ImageS
 	};
 }
 
-/**
- * 📏 Formatea el tamaño del archivo
- */
-function formatFileSize(bytes: number): string {
-	if (bytes >= 1024 * 1024 * 1024) {
-		return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
-	}
-	if (bytes >= 1024 * 1024) {
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-	}
-	if (bytes >= 1024) {
-		return `${(bytes / 1024).toFixed(1)} KB`;
-	}
-	return `${bytes} bytes`;
-}
+// formatFileSize se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 
 /**
  * 📐 Obtiene etiqueta de relación de aspecto

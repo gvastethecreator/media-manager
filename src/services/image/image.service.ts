@@ -43,7 +43,7 @@
 import { extractMetadata } from '@/app/actions/metadata';
 import { imageConfig } from '@/lib/config';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';

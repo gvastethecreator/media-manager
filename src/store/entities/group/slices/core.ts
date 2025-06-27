@@ -7,7 +7,7 @@
 
 import * as actions from '@/app/actions/groups/group.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
 import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';

@@ -8,10 +8,10 @@
  */
 'use server';
 
-import { thumbnailCache } from '@/lib/cache';
-import { getPrismaClient } from '@/lib/db';
+import { thumbnailCache } from '@/lib/database/cache';
+import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { imageService } from '@/services/image-service-export';
+import { imageService } from '@/services/image';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
 	createEntityNotFoundError,

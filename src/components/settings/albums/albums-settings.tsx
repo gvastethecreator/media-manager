@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { formatBytes } from '@/utils/file/helpers';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Trash } from 'lucide-react';

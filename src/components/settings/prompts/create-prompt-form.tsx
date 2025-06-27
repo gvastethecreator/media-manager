@@ -8,7 +8,7 @@ import { createPrompt, updatePrompt } from '@/app/actions/prompts/prompt.actions
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { DynamicCreateForm } from '../common/dynamic-create-form';

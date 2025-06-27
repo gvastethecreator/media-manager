@@ -1,5 +1,5 @@
 import type { Profile } from '@prisma/client';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
 	Language,

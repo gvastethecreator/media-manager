@@ -1,6 +1,6 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import type { CharacterBase } from '@/types/entities/character';
 
 export interface CharacterCardData extends CharacterBase {

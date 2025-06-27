@@ -1,7 +1,10 @@
 /**
- * @file Exportaciones del servicio de Tag
+ * @file Punto de entrada para el servicio de etiquetas
  * @module services/tag
- * @description Punto de entrada para el servicio de etiquetas
+ * @description Exporta todas las funcionalidades del servicio de etiquetas
+ * @updated 2025-01-27
  */
 
 export * from './tag.service';
+export { default } from './tag.service';
+

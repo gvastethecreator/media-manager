@@ -1,11 +1,18 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { fromPrismaNote, toCreateNoteData, toUpdateNoteData } from '@/transformers/note';
-import type { CreateNoteData, NoteBase, NoteComplete } from '@/types/entities/note';
+import { noteService } from '@/services/note';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import type {
+    CreateNoteData,
+    NoteBase,
+    NoteComplete,
+    NoteCreateInput,
+    NoteUpdateInput,
+    NoteWithStats
+} from '@/types/entities/note';
 import type { FileItem } from '@/types/files';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
 import { revalidatePath } from 'next/cache';
@@ -41,60 +48,30 @@ export interface NoteWithImages extends NoteBase {
 	images: FileItem[];
 }
 
-// Interfaz para notas con estadísticas
-export interface NoteWithStats extends NoteComplete {
-	_count: {
-		images: number;
-		concepts: number;
-		prompts: number;
-		characters: number;
-		places: number;
-		worldItems: number;
+// Función para conversión de CreateNoteData a NoteCreateInput
+function mapCreateNoteDataToInput(data: CreateNoteData): NoteCreateInput {
+	return {
+		title: data.title,
+		content: data.content || '',
+		category: data.category || 'general',
+		priority: data.priority || 0,
+		status: data.status || 'draft',
+		color: data.color,
+		emoji: data.emoji,
+		featuredImage: data.featuredImage,
+		isFavorite: data.isFavorite || false,
+		presetId: data.presetId,
 	};
-	lastUpdated: Date;
 }
 
-// Funciones exportadas
+// Funciones exportadas refactorizadas para usar el servicio
 export async function getNotes(): Promise<NoteWithStats[]> {
 	try {
 		noteLogger.info('📝 Obteniendo notas con estadísticas');
-		const prisma = await getPrismaClient();
-		const notes = await prisma.note.findMany({
-			include: {
-				_count: {
-					select: {
-						concepts: true,
-						prompts: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-					},
-				},
-			},
-			orderBy: {
-				updatedAt: 'desc',
-			},
-		});
+		const result = await noteService.getNotesWithStats();
 
-		// Procesamos los campos serializados y transformamos con los nuevos transformadores
-		return notes.map((note) => {
-			// Transformar con el nuevo transformador
-			const noteComplete = fromPrismaNote(note, {
-				includeRelations: true,
-				includeUI: true,
-				deserializeFields: true,
-			});
-
-			return {
-				...noteComplete,
-				_count: {
-					...note._count,
-					images: 0, // Añadimos este campo para cumplir con NoteStats
-				},
-				// Mantenemos lastUpdated para compatibilidad
-				lastUpdated: note.updatedAt,
-			};
-		});
+		noteLogger.info(`✅ Obtenidas ${result.length} notas`);
+		return result;
 	} catch (error) {
 		noteLogger.error('❌ Error al obtener notas', error);
 		throw createNoteError('No se pudieron obtener las notas', NoteErrorCode.OPERATION_FAILED, error);
@@ -104,41 +81,14 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 export async function getNote(id: string): Promise<NoteComplete> {
 	try {
 		noteLogger.info('🔍 Obteniendo nota:', id);
-		const prisma = await getPrismaClient();
-		const note = await prisma.note.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-						albums: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						groups: true,
-						properties: true,
-						wildcards: true,
-					},
-				},
-			},
-		});
+		const note = await noteService.getNote(id);
 
 		if (!note) {
 			throw createNoteError('Nota no encontrada', NoteErrorCode.NOT_FOUND);
 		}
 
-		// Transformar con el nuevo transformador
-		const noteComplete = fromPrismaNote(note, {
-			includeRelations: true,
-			includeUI: true,
-			deserializeFields: true,
-		});
-
-		noteLogger.info('✅ Nota obtenida:', noteComplete.title);
-		return noteComplete;
+		noteLogger.info('✅ Nota obtenida:', note.title);
+		return note;
 	} catch (error) {
 		noteLogger.error('❌ Error al obtener nota:', error);
 		if (error instanceof Error && error.name === 'NoteError') {
@@ -159,22 +109,13 @@ export async function createNote(data: CreateNoteData): Promise<NoteComplete> {
 			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
 		}
 
-		// Preparar datos con el nuevo transformador
-		const createData = toCreateNoteData(data);
+		// Mapear datos al formato del servicio
+		const createInput = mapCreateNoteDataToInput(data);
 
-		// Crear la nota
-		const prisma = await getPrismaClient();
-		const note = await prisma.note.create({
-			data: createData,
-		});
+		// Usar el servicio para crear la nota
+		const noteComplete = await noteService.createNote(createInput);
 
-		// Transformar resultado
-		const noteComplete = fromPrismaNote(note, {
-			includeRelations: true,
-			includeUI: true,
-			deserializeFields: true,
-		});
-
+		// Emitir eventos adicionales para compatibilidad
 		await emit({
 			type: 'notes:modified',
 			data: { action: 'create', note: noteComplete },
@@ -202,23 +143,24 @@ export async function updateNote(id: string, data: Partial<CreateNoteData>): Pro
 			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
 		}
 
-		// Preparar datos con el nuevo transformador
-		const updateResult = toUpdateNoteData(id, data);
+		// Mapear datos parciales para actualización
+		const updateInput: NoteUpdateInput = {
+			title: data.title,
+			content: data.content,
+			category: data.category,
+			priority: data.priority,
+			status: data.status,
+			color: data.color,
+			emoji: data.emoji,
+			featuredImage: data.featuredImage,
+			isFavorite: data.isFavorite,
+			presetId: data.presetId,
+		};
 
-		const prisma = await getPrismaClient();
-		const note = await prisma.note.update({
-			where: { id },
-			data: updateResult.data,
-			include: updateResult.include,
-		});
+		// Usar el servicio para actualizar la nota
+		const noteComplete = await noteService.updateNote(id, updateInput);
 
-		// Transformar resultado
-		const noteComplete = fromPrismaNote(note, {
-			includeRelations: true,
-			includeUI: true,
-			deserializeFields: true,
-		});
-
+		// Emitir eventos adicionales para compatibilidad
 		await emit({
 			type: 'notes:modified',
 			id,
@@ -239,43 +181,20 @@ export async function deleteNote(id: string): Promise<void> {
 	try {
 		noteLogger.info('🗑️ Eliminando nota:', id);
 
-		const prisma = await getPrismaClient();
-		// Verificar si la nota existe
-		const note = await prisma.note.findUnique({
-			where: { id },
-		});
-
-		if (!note) {
+		// Verificar si la nota existe antes de eliminar
+		const existingNote = await noteService.getNote(id);
+		if (!existingNote) {
 			throw createNoteError('Nota no encontrada', NoteErrorCode.NOT_FOUND);
 		}
 
-		// Primero desconectar todas las relaciones
-		await prisma.$transaction([
-			prisma.note.update({
-				where: { id },
-				data: {
-					images: { set: [] },
-					albums: { set: [] },
-					collections: { set: [] },
-					characters: { set: [] },
-					places: { set: [] },
-					worldItems: { set: [] },
-					concepts: { set: [] },
-					prompts: { set: [] },
-					groups: { set: [] },
-					properties: { set: [] },
-					wildcards: { set: [] },
-				},
-			}),
-			prisma.note.delete({
-				where: { id },
-			}),
-		]);
+		// Usar el servicio para eliminar la nota
+		await noteService.deleteNote(id);
 
+		// Emitir eventos adicionales para compatibilidad
 		await emit({
 			type: 'notes:modified',
 			id,
-			data: { action: 'delete', id },
+			data: { action: 'delete', noteId: id },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
@@ -283,6 +202,9 @@ export async function deleteNote(id: string): Promise<void> {
 		await revalidateAllPaths();
 	} catch (error) {
 		noteLogger.error('❌ Error al eliminar nota:', error);
+		if (error instanceof Error && error.name === 'NoteError') {
+			throw error;
+		}
 		throw createNoteError('No se pudo eliminar la nota', NoteErrorCode.OPERATION_FAILED, error);
 	}
 }

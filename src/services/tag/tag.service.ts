@@ -1,380 +1,433 @@
 /**
- * @file Servicio de Tag con enfoque funcional
- * @module services/tag
- * @description Implementación funcional del servicio de etiquetas
+ * @file Servicio de gestión de etiquetas
+ * @module services/tag/tag.service
+ * @description Servicio centralizado para operaciones CRUD y lógica de negocio de etiquetas
+ * @updated 2025-01-27
  */
 
-import type { ErrorResponse } from '@/app/actions/folders';
-import {
-    createTag as createTagAction,
-    deleteTag as deleteTagAction,
-    getTags as getTagsAction,
-    updateTag as updateTagAction,
-} from '@/app/actions/tags';
+import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { toTagWithStats } from '@/transformers/tag';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
+import { tagCounts } from '@/types/entities/tag';
+import { Prisma } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 
-// Logger específico para el servicio de etiquetas
-const tagLogger = serverLogger.withContext('TagService');
+// Logger específico para el servicio
+const logger = serverLogger.withContext('TagService');
 
-// Eventos que puede emitir el servicio de etiquetas
-export enum TAG_EVENTS {
-	CREATED = 'tag:created',
-	UPDATED = 'tag:updated',
-	DELETED = 'tag:deleted',
-	ERROR = 'tag:error',
-	STATS = 'tag:stats',
+// Constantes del servicio
+const REVALIDATE_PATHS = ['/dashboard/tags', '/dashboard/images', '/dashboard/stats', '/api/tags'];
+
+// Eventos del servicio de etiquetas
+export const TAG_EVENTS = {
+	CREATED: 'tag:created',
+	UPDATED: 'tag:updated',
+	DELETED: 'tag:deleted',
+	STATS_UPDATED: 'tag:stats:updated',
+	ERROR: 'tag:error',
+} as const;
+
+// Tipos de entrada
+export interface GetTagsOptions {
+	includeArchived?: boolean;
+	search?: string;
+	orderBy?: 'name' | 'createdAt' | 'updatedAt';
+	orderDirection?: 'asc' | 'desc';
+	onlyFavorites?: boolean;
 }
 
-// Tipos para callbacks
-type TagCallback = (tag: TagWithStats) => void;
-type TagsCallback = (tags: TagWithStats[]) => void;
-type ErrorCallback = (error: ErrorResponse) => void;
-
-// Estado interno del servicio
-const state = {
-	operationsInProgress: new Map<string, Promise<any>>(),
-	eventCallbacks: new Map<string, Set<Function>>(),
-};
+export interface GetTagsResult {
+	tags: TagWithStats[];
+	total: number;
+}
 
 /**
- * Implementa control de concurrencia para evitar operaciones duplicadas
- * @param operationKey Clave única para la operación
- * @param operation Función a ejecutar
- * @returns Resultado de la operación
+ * Clase de error personalizada para operaciones de Tag
  */
-const withConcurrencyControl = async <T>(operationKey: string, operation: () => Promise<T>): Promise<T> => {
-	// Si ya hay una operación en progreso con la misma clave, esperar a que termine
-	const existingOperation = state.operationsInProgress.get(operationKey);
-	if (existingOperation) {
-		tagLogger.debug(`⏳ Esperando operación en progreso: ${operationKey}`);
-		return existingOperation;
+export class TagServiceError extends Error {
+	constructor(
+		message: string,
+		public code?: string,
+		public cause?: unknown
+	) {
+		super(message);
+		this.name = 'TagServiceError';
 	}
-
-	// Ejecutar la operación y manejar el estado
-	const operationPromise = operation()
-		.finally(() => {
-			// Limpiar del estado cuando termine (éxito o error)
-			state.operationsInProgress.delete(operationKey);
-		});
-
-	// Guardar la promesa en el estado
-	state.operationsInProgress.set(operationKey, operationPromise);
-
-	return operationPromise;
-};
+}
 
 /**
- * Emite un evento a todos los callbacks registrados y al sistema central
- * @param event Nombre del evento
- * @param args Argumentos a pasar al callback
+ * Notifica cambios en las etiquetas a través del sistema de eventos
  */
-const emitEvent = async (event: string, ...args: unknown[]): Promise<void> => {
+export const notifyTagChange = async (
+	action: 'create' | 'update' | 'delete',
+	tag: TagWithStats | { id: string }
+): Promise<void> => {
 	try {
-		// Obtener los callbacks para este evento
-		const callbacks = state.eventCallbacks.get(event);
-		if (callbacks && callbacks.size > 0) {
-			// Invocar cada callback
-			for (const callback of callbacks) {
-				try {
-					if (typeof callback === 'function') {
-						await callback(...args);
-					}
-				} catch (error) {
-					tagLogger.error(`Error en callback de evento ${event}:`, error);
-				}
-			}
-		}
-
-		// Mapeo de eventos locales a eventos del sistema central
-		let serverEventType: string | null = null;
-		switch (event) {
-			case TAG_EVENTS.CREATED:
-				serverEventType = 'tags:modified';
+		let eventType: string;
+		switch (action) {
+			case 'create':
+				eventType = TAG_EVENTS.CREATED;
 				break;
-			case TAG_EVENTS.UPDATED:
-				serverEventType = 'tags:modified';
+			case 'update':
+				eventType = TAG_EVENTS.UPDATED;
 				break;
-			case TAG_EVENTS.DELETED:
-				serverEventType = 'tags:modified';
-				break;
-			case TAG_EVENTS.ERROR:
-				serverEventType = 'tag:error';
-				break;
-			case TAG_EVENTS.STATS:
-				serverEventType = 'tag:stats';
+			case 'delete':
+				eventType = TAG_EVENTS.DELETED;
 				break;
 			default:
-				serverEventType = null;
+				eventType = 'tag:modified';
 		}
 
-		// Emitir al sistema central si hay mapeo
-		if (serverEventType) {
-			try {
-				await emit({
-					type: serverEventType,
-					data: args[0],
-				});
-				tagLogger.debug(`Evento ${event} emitido al sistema central como ${serverEventType}`);
-			} catch (emitError) {
-				tagLogger.error(`Error al emitir evento ${event} al sistema central:`, emitError);
-			}
-		}
+		// Emitir evento al sistema central
+		await emit({
+			type: 'tags:modified',
+			data: { action, tag },
+		});
+
+		// Notificar a estadísticas
+		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
+
+		logger.info(`🔔 Notificado cambio en etiqueta: ${action}`, { tagId: tag.id });
 	} catch (error) {
-		tagLogger.error(`Error emitiendo evento ${event}:`, error);
+		logger.error(`❌ Error al notificar cambio en etiqueta: ${action}`, { error, tagId: tag.id });
 	}
 };
 
 /**
- * Añade un callback para un evento específico
- * @param event Nombre del evento
- * @param callback Función callback
+ * Revalida las rutas de caché relacionadas con las etiquetas
  */
-const addCallback = (event: string, callback: Function): void => {
-	if (!state.eventCallbacks.has(event)) {
-		state.eventCallbacks.set(event, new Set());
-	}
-	state.eventCallbacks.get(event)!.add(callback);
-};
-
-/**
- * Elimina un callback para un evento específico
- * @param event Nombre del evento
- * @param callback Función callback a eliminar
- */
-const removeCallback = (event: string, callback: Function): void => {
-	const callbacks = state.eventCallbacks.get(event);
-	if (callbacks) {
-		callbacks.delete(callback);
+const revalidateTagPaths = async (): Promise<void> => {
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
 	}
 };
 
-// 🚀 Funciones públicas del servicio
-
 /**
- * Obtiene todas las etiquetas del sistema
- * @returns Lista de etiquetas con estadísticas
+ * Obtiene una etiqueta por su ID
  */
-export const getTags = async (): Promise<TagWithStats[]> => {
-	return withConcurrencyControl('getTags', async () => {
-		try {
-			tagLogger.info('🏷️ Obteniendo lista de etiquetas...');
-			const tags = await getTagsAction();
+export async function getTag(id: string): Promise<TagWithStats | null> {
+	try {
+		logger.info(`🔍 Obteniendo etiqueta por ID: ${id}`);
 
-			tagLogger.info(`✅ ${tags.length} etiquetas obtenidas`);
-			await emitEvent(TAG_EVENTS.STATS, { totalTags: tags.length });
-			return tags;
-		} catch (error) {
-			const errorResponse: ErrorResponse = {
-				message: error instanceof Error ? error.message : 'Error obteniendo etiquetas',
-				details: error instanceof Error ? error.stack : String(error),
-				timestamp: Date.now(),
-			};
-			tagLogger.error('❌ Error getting tags:', errorResponse);
-			await emitEvent(TAG_EVENTS.ERROR, errorResponse);
-			throw errorResponse;
+		const tag = await prisma.tag.findUnique({
+			where: { id },
+			include: tagCounts,
+		});
+
+		if (!tag) {
+			logger.warn(`Etiqueta no encontrada: ${id}`);
+			return null;
 		}
-	});
-};
+
+		const result = toTagWithStats(tag);
+		logger.info(`✅ Etiqueta encontrada: ${result.name}`);
+		return result;
+	} catch (error) {
+		logger.error(`❌ Error al obtener etiqueta ${id}`, { error });
+		throw new TagServiceError(
+			`Error al obtener etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'GET_TAG_FAILED',
+			error
+		);
+	}
+}
+
+/**
+ * Obtiene etiquetas con opciones de filtrado
+ */
+export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResult> {
+	try {
+		const {
+			includeArchived = true,
+			search,
+			orderBy = 'name',
+			orderDirection = 'asc',
+			onlyFavorites = false
+		} = options;
+
+		logger.info('🏷️ Obteniendo etiquetas', { options });
+
+		// Construir filtros
+		const where: Prisma.TagWhereInput = {};
+
+		if (!includeArchived) {
+			where.isArchived = false;
+		}
+
+		if (onlyFavorites) {
+			where.isFavorite = true;
+		}
+
+		if (search) {
+			where.OR = [
+				{ name: { contains: search, mode: 'insensitive' } },
+				{ description: { contains: search, mode: 'insensitive' } },
+			];
+		}
+
+		// Obtener etiquetas
+		const [tags, total] = await Promise.all([
+			prisma.tag.findMany({
+				where,
+				include: tagCounts,
+				orderBy: orderBy === 'name'
+					? [{ isFavorite: 'desc' }, { name: orderDirection }]
+					: { [orderBy]: orderDirection },
+			}),
+			prisma.tag.count({ where }),
+		]);
+
+		const transformedTags = tags.map(toTagWithStats);
+
+		logger.info(`✅ ${transformedTags.length} etiquetas obtenidas`);
+		return {
+			tags: transformedTags,
+			total,
+		};
+	} catch (error) {
+		logger.error('❌ Error al obtener etiquetas', { error, options });
+		throw new TagServiceError(
+			`Error al obtener etiquetas: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'GET_TAGS_FAILED',
+			error
+		);
+	}
+}
 
 /**
  * Crea una nueva etiqueta
- * @param data Datos de la etiqueta a crear
- * @returns Etiqueta creada con estadísticas
  */
-export const createTag = async (data: TagCreateInput): Promise<TagWithStats> => {
-	return withConcurrencyControl('createTag', async () => {
-		try {
-			tagLogger.info('➕ Creando nueva etiqueta:', data);
+export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
+	try {
+		logger.info('📝 Creando nueva etiqueta', { name: data.name });
 
-			const tag = await createTagAction(data);
+		const tagData: Prisma.TagCreateInput = {
+			name: data.name,
+			description: data.description,
+			color: data.color,
+			emoji: data.emoji,
+			isPrivate: data.isPrivate ?? false,
+			isArchived: data.isArchived ?? false,
+			isFavorite: data.isFavorite ?? false,
+		};
 
-			if (!tag || !tag.id) {
-				throw new Error('Respuesta inválida al crear etiqueta');
-			}
+		const newTag = await prisma.tag.create({
+			data: tagData,
+			include: tagCounts,
+		});
 
-			tagLogger.info('✅ Etiqueta creada:', tag);
-			await emitEvent(TAG_EVENTS.CREATED, tag);
+		// Revalidar rutas
+		await revalidateTagPaths();
 
-			return tag;
-		} catch (error) {
-			const errorResponse: ErrorResponse = {
-				message: error instanceof Error ? error.message : 'Error creando etiqueta',
-				details: error instanceof Error ? error.stack : String(error),
-				timestamp: Date.now(),
-			};
-			tagLogger.error('❌ Error creating tag:', errorResponse);
-			await emitEvent(TAG_EVENTS.ERROR, errorResponse);
-			throw errorResponse;
-		}
-	});
-};
+		const result = toTagWithStats(newTag);
+
+		// Notificar creación
+		await notifyTagChange('create', result);
+
+		logger.info(`✅ Etiqueta creada exitosamente: ${result.name}`, { id: result.id });
+		return result;
+	} catch (error) {
+		logger.error('❌ Error al crear etiqueta', { error, data });
+		throw new TagServiceError(
+			`Error al crear etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'CREATE_TAG_FAILED',
+			error
+		);
+	}
+}
 
 /**
  * Actualiza una etiqueta existente
- * @param id ID de la etiqueta a actualizar
- * @param data Datos a actualizar
- * @returns Etiqueta actualizada con estadísticas
  */
-export const updateTag = async (id: string, data: TagUpdateInput): Promise<TagWithStats> => {
-	return withConcurrencyControl(`updateTag:${id}`, async () => {
-		try {
-			tagLogger.info('🔄 Actualizando etiqueta:', { id, data });
+export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWithStats> {
+	try {
+		logger.info(`📝 Actualizando etiqueta: ${id}`);
 
-			const tag = await updateTagAction(id, data);
+		// Verificar si la etiqueta existe
+		const existingTag = await prisma.tag.findUnique({
+			where: { id },
+			select: { id: true },
+		});
 
-			if (!tag || !tag.id) {
-				throw new Error('Respuesta inválida al actualizar etiqueta');
+		if (!existingTag) {
+			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
+		}
+
+		const tagData: Prisma.TagUpdateInput = {};
+
+		if (data.name !== undefined) tagData.name = data.name;
+		if (data.description !== undefined) tagData.description = data.description;
+		if (data.color !== undefined) tagData.color = data.color;
+		if (data.emoji !== undefined) tagData.emoji = data.emoji;
+		if (data.isPrivate !== undefined) tagData.isPrivate = data.isPrivate;
+		if (data.isArchived !== undefined) tagData.isArchived = data.isArchived;
+		if (data.isFavorite !== undefined) tagData.isFavorite = data.isFavorite;
+
+		const updatedTag = await prisma.tag.update({
+			where: { id },
+			data: tagData,
+			include: tagCounts,
+		});
+
+		// Revalidar rutas
+		await revalidateTagPaths();
+
+		const result = toTagWithStats(updatedTag);
+
+		// Notificar actualización
+		await notifyTagChange('update', result);
+
+		logger.info(`✅ Etiqueta actualizada exitosamente: ${result.name}`, { id });
+		return result;
+	} catch (error) {
+		logger.error(`❌ Error al actualizar etiqueta ${id}`, { error, data });
+		throw new TagServiceError(
+			`Error al actualizar etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'UPDATE_TAG_FAILED',
+			error
+		);
+	}
+}
+
+/**
+ * Elimina una etiqueta
+ */
+export async function deleteTag(id: string): Promise<void> {
+	try {
+		logger.info(`🗑️ Eliminando etiqueta: ${id}`);
+
+		// Usar transacción para asegurar consistencia
+		await prisma.$transaction(async (tx) => {
+			const tag = await tx.tag.findUnique({
+				where: { id },
+				select: { id: true, name: true },
+			});
+
+			if (!tag) {
+				throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
 			}
 
-			tagLogger.info('✅ Etiqueta actualizada:', tag);
-			await emitEvent(TAG_EVENTS.UPDATED, tag);
+			await tx.tag.delete({ where: { id } });
 
-			return tag;
-		} catch (error) {
-			const errorResponse: ErrorResponse = {
-				message: error instanceof Error ? error.message : 'Error actualizando etiqueta',
-				details: error instanceof Error ? error.stack : String(error),
-				timestamp: Date.now(),
-				tagId: id,
-			};
-			tagLogger.error('❌ Error updating tag:', errorResponse);
-			await emitEvent(TAG_EVENTS.ERROR, errorResponse);
-			throw errorResponse;
+			// Notificar eliminación
+			await notifyTagChange('delete', { id });
+		});
+
+		// Revalidar rutas
+		await revalidateTagPaths();
+
+		logger.info(`✅ Etiqueta eliminada exitosamente: ${id}`);
+	} catch (error) {
+		logger.error(`❌ Error al eliminar etiqueta ${id}`, { error });
+		throw new TagServiceError(
+			`Error al eliminar etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'DELETE_TAG_FAILED',
+			error
+		);
+	}
+}
+
+/**
+ * Cambia el estado de favorito de una etiqueta
+ */
+export async function toggleTagFavorite(id: string): Promise<TagWithStats> {
+	try {
+		logger.info(`⭐ Cambiando estado de favorito de la etiqueta: ${id}`);
+
+		// Obtener estado actual
+		const currentTag = await prisma.tag.findUnique({
+			where: { id },
+			select: { isFavorite: true },
+		});
+
+		if (!currentTag) {
+			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
 		}
-	});
-};
+
+		const updatedTag = await prisma.tag.update({
+			where: { id },
+			data: { isFavorite: !currentTag.isFavorite },
+			include: tagCounts,
+		});
+
+		// Revalidar rutas
+		await revalidateTagPaths();
+
+		const result = toTagWithStats(updatedTag);
+
+		// Notificar actualización
+		await notifyTagChange('update', result);
+
+		logger.info(`✅ Estado de favorito cambiado: ${id} -> ${result.isFavorite}`);
+		return result;
+	} catch (error) {
+		logger.error(`❌ Error al cambiar estado de favorito de la etiqueta ${id}`, { error });
+		throw new TagServiceError(
+			`Error al cambiar estado de favorito: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'TOGGLE_FAVORITE_FAILED',
+			error
+		);
+	}
+}
 
 /**
- * Elimina una etiqueta existente
- * @param id ID de la etiqueta a eliminar
+ * Cambia el estado de archivo de una etiqueta
  */
-export const deleteTag = async (id: string): Promise<void> => {
-	return withConcurrencyControl(`deleteTag:${id}`, async () => {
-		try {
-			tagLogger.info('🗑️ Eliminando etiqueta:', id);
+export async function toggleTagArchive(id: string): Promise<TagWithStats> {
+	try {
+		logger.info(`📦 Cambiando estado de archivo de la etiqueta: ${id}`);
 
-			await deleteTagAction(id);
+		// Obtener estado actual
+		const currentTag = await prisma.tag.findUnique({
+			where: { id },
+			select: { isArchived: true },
+		});
 
-			tagLogger.info('✅ Etiqueta eliminada:', id);
-			await emitEvent(TAG_EVENTS.DELETED, { id });
-		} catch (error) {
-			const errorResponse: ErrorResponse = {
-				message: error instanceof Error ? error.message : 'Error eliminando etiqueta',
-				details: error instanceof Error ? error.stack : String(error),
-				timestamp: Date.now(),
-				tagId: id,
-			};
-			tagLogger.error('❌ Error deleting tag:', errorResponse);
-			await emitEvent(TAG_EVENTS.ERROR, errorResponse);
-			throw errorResponse;
+		if (!currentTag) {
+			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
 		}
-	});
+
+		const updatedTag = await prisma.tag.update({
+			where: { id },
+			data: { isArchived: !currentTag.isArchived },
+			include: tagCounts,
+		});
+
+		// Revalidar rutas
+		await revalidateTagPaths();
+
+		const result = toTagWithStats(updatedTag);
+
+		// Notificar actualización
+		await notifyTagChange('update', result);
+
+		logger.info(`✅ Estado de archivo cambiado: ${id} -> ${result.isArchived}`);
+		return result;
+	} catch (error) {
+		logger.error(`❌ Error al cambiar estado de archivo de la etiqueta ${id}`, { error });
+		throw new TagServiceError(
+			`Error al cambiar estado de archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'TOGGLE_ARCHIVE_FAILED',
+			error
+		);
+	}
+}
+
+// Servicio principal
+const tagService = {
+	getTag,
+	getTags,
+	createTag,
+	updateTag,
+	deleteTag,
+	toggleTagFavorite,
+	toggleTagArchive,
+	notifyTagChange,
+	TAG_EVENTS,
+	TagServiceError,
 };
 
-// 🎯 Funciones de gestión de eventos
-
-/**
- * Registra un callback para cuando se crea una etiqueta
- * @param callback Función a ejecutar cuando se cree una etiqueta
- */
-export const onCreated = (callback: TagCallback): void => {
-	addCallback(TAG_EVENTS.CREATED, callback);
-};
-
-/**
- * Elimina un callback para cuando se crea una etiqueta
- * @param callback Función a eliminar
- */
-export const offCreated = (callback: TagCallback): void => {
-	removeCallback(TAG_EVENTS.CREATED, callback);
-};
-
-/**
- * Registra un callback para cuando se actualiza una etiqueta
- * @param callback Función a ejecutar cuando se actualice una etiqueta
- */
-export const onUpdated = (callback: TagCallback): void => {
-	addCallback(TAG_EVENTS.UPDATED, callback);
-};
-
-/**
- * Elimina un callback para cuando se actualiza una etiqueta
- * @param callback Función a eliminar
- */
-export const offUpdated = (callback: TagCallback): void => {
-	removeCallback(TAG_EVENTS.UPDATED, callback);
-};
-
-/**
- * Registra un callback para cuando se elimina una etiqueta
- * @param callback Función a ejecutar cuando se elimine una etiqueta
- */
-export const onDeleted = (callback: (data: { id: string }) => void): void => {
-	addCallback(TAG_EVENTS.DELETED, callback);
-};
-
-/**
- * Elimina un callback para cuando se elimina una etiqueta
- * @param callback Función a eliminar
- */
-export const offDeleted = (callback: (data: { id: string }) => void): void => {
-	removeCallback(TAG_EVENTS.DELETED, callback);
-};
-
-/**
- * Registra un callback para errores del servicio
- * @param callback Función a ejecutar cuando ocurra un error
- */
-export const onError = (callback: ErrorCallback): void => {
-	addCallback(TAG_EVENTS.ERROR, callback);
-};
-
-/**
- * Elimina un callback para errores del servicio
- * @param callback Función a eliminar
- */
-export const offError = (callback: ErrorCallback): void => {
-	removeCallback(TAG_EVENTS.ERROR, callback);
-};
-
-/**
- * Registra un callback para estadísticas del servicio
- * @param callback Función a ejecutar cuando se actualicen las estadísticas
- */
-export const onStats = (callback: (stats: { totalTags: number }) => void): void => {
-	addCallback(TAG_EVENTS.STATS, callback);
-};
-
-/**
- * Elimina un callback para estadísticas del servicio
- * @param callback Función a eliminar
- */
-export const offStats = (callback: (stats: { totalTags: number }) => void): void => {
-	removeCallback(TAG_EVENTS.STATS, callback);
-};
-
-// 🔧 Funciones de utilidad
-
-/**
- * Obtiene información sobre el estado actual del servicio
- * @returns Información de estado del servicio
- */
-export const getServiceStatus = () => {
-	return {
-		operationsInProgress: state.operationsInProgress.size,
-		registeredCallbacks: Array.from(state.eventCallbacks.entries()).map(([event, callbacks]) => ({
-			event,
-			callbackCount: callbacks.size,
-		})),
-	};
-};
-
-/**
- * Limpia todos los callbacks registrados (útil para testing)
- */
-export const clearAllCallbacks = (): void => {
-	state.eventCallbacks.clear();
-	tagLogger.debug('🧹 Todos los callbacks han sido limpiados');
-};
+export default tagService;

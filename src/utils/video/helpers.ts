@@ -4,7 +4,6 @@
  */
 
 import { type Video, VideoFormat, type VideoMetadata } from '../../types/entities/video';
-import { formatImageSize } from '../image/helpers';
 
 /**
  * Formatea la duración de un video en segundos a formato legible
@@ -59,7 +58,7 @@ export function generateVideoThumbnailUrl(
  */
 export function formatVideoSize(metadata?: VideoMetadata): string {
 	if (!metadata || metadata.size === undefined) return 'Desconocido';
-	return formatImageSize(metadata.size);
+	return formatBytes(metadata.size);
 }
 
 /**

@@ -1,11 +1,7 @@
 'use server';
 
-import {
-    getPrismaClient,
-    handlePrismaError,
-    handlePrismaNotFoundError,
-} from '@/lib/db-utils';
-import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
+import { getPrismaClient } from '@/lib/database/db';
+import { createEntityErrorObject, EntityErrorCode, handlePrismaError, handlePrismaNotFoundError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { fromPrismaConcept } from '@/transformers/concept';
 import type { ConceptComplete } from '@/types/entities/concept';

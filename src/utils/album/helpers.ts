@@ -3,9 +3,9 @@
  * @module utils/album/helpers
  */
 
+import { formatBytes } from '@/lib/utils/format.utils';
 import { AlbumWithRelations as Album, AlbumMetadata } from '../../types/entities/album';
 import { AlbumType } from '../../types/entities/album/enums';
-import { formatImageSize } from '../image/helpers';
 
 /**
  * Genera una URL para la miniatura de un álbum
@@ -34,7 +34,7 @@ export function generateAlbumThumbnailUrl(album: Album | string, width?: number,
  */
 export function formatAlbumSize(metadata?: AlbumMetadata): string {
 	if (!metadata || metadata.totalSize === undefined) return 'Desconocido';
-	return formatImageSize(metadata.totalSize);
+	return formatBytes(metadata.totalSize);
 }
 
 /**

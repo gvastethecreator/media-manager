@@ -3,7 +3,7 @@
  * @module services/profile
  */
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import {
 	type ProfileCreateInput,
 	type ProfileExtended,

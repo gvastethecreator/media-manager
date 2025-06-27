@@ -3,7 +3,7 @@
 import { existsSync } from 'fs';
 import sharp from 'sharp';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { createEntityNotFoundError, createFileNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 import type { ImageProcessingOptions } from './image-types.actions';
 

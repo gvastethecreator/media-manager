@@ -8,7 +8,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { videoService } from '@/services/video-service-export';
+import { videoService } from '@/services/video';
 import type {
     VideoCreateInput,
     VideoFilters,

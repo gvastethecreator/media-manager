@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
-import os from 'os';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { systemMonitor } from '@/lib/server/system-monitor';
+import { formatBytes } from '@/lib/utils/format.utils';
+import { NextResponse } from 'next/server';
+import os from 'os';
 
 // Logger específico para esta ruta
 const logger = serverLogger.withContext('SystemStatsAPI');
@@ -59,21 +60,7 @@ export async function GET() {
 	}
 }
 
-/**
- * Formatea bytes a una unidad legible
- * @param bytes Número de bytes
- * @param decimals Número de decimales
- * @returns Cadena formateada
- */
-function formatBytes(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 Bytes';
-
-	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
-}
+// formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 
 /**
  * Formatea segundos a una unidad legible

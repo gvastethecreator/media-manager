@@ -10,7 +10,7 @@ import {
 	updateWorldItem as updateServerWorldItem,
 } from '@/app/actions/world-items/world-item.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type { CreateWorldItemData, UpdateWorldItemData, WorldItem } from '@/types/entities/world-item';
 import type { StateCreator } from 'zustand';
 import type { WorldItemActions, WorldItemState } from '../types';

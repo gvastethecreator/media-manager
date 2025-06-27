@@ -106,21 +106,8 @@ export async function getSystemInfo(): Promise<SystemInfo> {
 	};
 }
 
-/**
- * Formatea bytes a una unidad legible
- * @param bytes Número de bytes
- * @param decimals Número de decimales
- * @returns Cadena formateada
- */
-export function formatBytes(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 B';
-
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
-}
+// formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
+// Importar desde allí si se necesita: import { formatBytes } from '@/lib/utils/format.utils';
 
 /**
  * Formatea segundos a una unidad legible

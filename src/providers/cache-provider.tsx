@@ -10,7 +10,7 @@ import {
 	statsCache,
 	thumbnailCache,
 	worldItemsCache,
-} from '@/lib/cache';
+} from '@/lib/database/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const cacheProviderLogger = serverLogger.withContext('CacheProvider');

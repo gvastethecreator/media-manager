@@ -15,14 +15,14 @@
  * ✅ Selección multi-item eficiente
  */
 
-import { create } from 'zustand';
 import { getFolderImages } from '@/app/actions/folders';
+import { create } from 'zustand';
 // 🚀 Importaciones de acciones optimizadas - CORREGIDAS
 import type { ViewMode } from '@/components/navigation/types';
-// 🎯 Cache y throttling optimizados
-import { throttleEvent } from '@/lib/event-throttler';
-import { folderResponseCache as folderCache } from '@/lib/folder-cache';
+import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
+// 🎯 Cache y throttling optimizados
+import { throttleEvent } from '@/lib/system/event-throttler';
 import { type FileItem, FileProcessingStatus, FileType } from '@/types/files';
 
 const fileManagerLogger = clientLogger.withContext('UnifiedFileManager');
