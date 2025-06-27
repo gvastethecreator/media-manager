@@ -15,8 +15,8 @@ import {
     WildcardUpdateInput,
     WildcardWithStats,
 } from '@/types/entities/wildcard';
-import { calculateCompleteness } from '@/utils/transformers/calculate-completeness';
-import { TransformerError } from '@/utils/transformers/errors';
+import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('WildcardMappers');

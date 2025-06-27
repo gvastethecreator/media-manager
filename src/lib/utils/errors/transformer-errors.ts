@@ -4,7 +4,7 @@
  * @description Códigos de error y utilidades para manejar errores en transformadores
  */
 
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 
 /**
  * 🔢 Códigos de error para transformadores

@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toServiceError } from '@/utils/errors/service-errors';
+import { toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'ImagesRandom';
 const randomImageLogger = serverLogger.withContext(SERVER_ACTION_NAME);

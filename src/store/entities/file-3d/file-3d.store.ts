@@ -11,7 +11,7 @@ import {
     updateFile3D,
 } from '@/app/actions/file3d/file-3d.actions';
 import type { File3DWithStats } from '@/types/entities/file3d';
-import { createSelectors } from '@/utils/store/create-selectors';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
 import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';

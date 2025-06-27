@@ -1,14 +1,14 @@
 'use client';
 
-import { FolderIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser';
+import { FileBrowserV2 } from '@/components/features/file-browser/file-browser-v2';
 import BlurFade from '@/components/ui/blur-fade';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/migration';
+import { FolderIcon } from 'lucide-react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useContentView } from './content-view-provider';
 
 const baseLogger = clientLogger.withContext('BaseContentView');
@@ -28,6 +28,12 @@ const getMetadata = (metadata: string | null) => {
 	}
 };
 
+/**
+ * ✅ MIGRADO: BaseContentView ahora usa FileBrowserV2 con EntityWithStats
+ * - FileBrowser → FileBrowserV2
+ * - FileItem → EntityWithStats
+ * - Adaptado para usar el nuevo sistema de stores por entidad
+ */
 export function BaseContentView({ className }: BaseContentViewProps) {
 	const {
 		items,
@@ -102,18 +108,20 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 		};
 	}, []);
 
-	const handleItemClick = useCallback(
-		(item: FileItem) => {
+	const handleItemSelect = useCallback(
+		(item: EntityWithStats) => {
+			// ✅ MIGRADO: Adaptar para EntityWithStats
 			// Usar el manejador personalizado si está disponible
 			if (customItemClickHandler) {
-				customItemClickHandler(item);
+				// TODO: Adaptar customItemClickHandler para EntityWithStats
+				customItemClickHandler(item as any);
 				return;
 			}
 
 			// De lo contrario, usar el manejador predeterminado
 			if (toggleItemSelection) {
 				try {
-					toggleItemSelection(item, false);
+					toggleItemSelection(item as any, false);
 				} catch (error) {
 					baseLogger.error('❌ Error al seleccionar item:', {
 						itemId: item.id,
@@ -126,10 +134,12 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 	);
 
 	const handleItemDoubleClick = useCallback(
-		(item: FileItem) => {
+		(item: EntityWithStats) => {
+			// ✅ MIGRADO: Adaptar para EntityWithStats
 			// Usar el manejador personalizado si está disponible
 			if (customItemDoubleClickHandler) {
-				customItemDoubleClickHandler(item);
+				// TODO: Adaptar customItemDoubleClickHandler para EntityWithStats
+				customItemDoubleClickHandler(item as any);
 				return;
 			}
 
@@ -139,14 +149,30 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 			}
 
 			try {
-				const metadata = getMetadata(item.metadata);
-				if (item.type === 'image' || metadata?.mimeType?.startsWith('image/')) {
-					const imageItems = items.filter((i) => {
-						const meta = getMetadata(i.metadata);
-						return i.type === 'image' || meta?.mimeType?.startsWith('image/');
-					});
-					const currentIndex = imageItems.findIndex((i) => i.id === item.id);
-					openViewer(imageItems, currentIndex);
+				if (item.type === 'image') {
+					// Filtrar solo imágenes del contexto actual
+					const imageItems = (items as EntityWithStats[]).filter(i => i.type === 'image');
+					const currentIndex = imageItems.findIndex(i => i.id === item.id);
+
+					// Convertir EntityWithStats a formato compatible con viewer
+					const viewerItems = imageItems.map(img => ({
+						id: img.id,
+						name: img.name || '',
+						src: img.thumbnailUrl || `/api/images/${img.id}/content`,
+						alt: img.name || '',
+						width: 'width' in img ? img.width : 0,
+						height: 'height' in img ? img.height : 0,
+						thumbnail: img.thumbnailUrl || null,
+						type: 'image',
+						path: img.path || '',
+						size: 'size' in img ? img.size : 0,
+						mimeType: 'mimeType' in img ? img.mimeType : '',
+						metadata: null,
+						url: img.thumbnailUrl || `/api/images/${img.id}/content`,
+						parsedMetadata: undefined,
+					}));
+
+					openViewer(viewerItems, currentIndex);
 					baseLogger.info('🖼️ Abriendo visor de imágenes:', {
 						itemId: item.id,
 						itemIndex: currentIndex,
@@ -189,17 +215,14 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 		<div className={`h-full w-full flex overflow-hidden ${className || ''}`}>
 			<div className="h-full w-full overflow-auto">
 				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
-					{' '}
-					<FileBrowser
-						items={items}
-						onItemSelect={handleItemClick}
+					{/* ✅ MIGRADO: FileBrowser → FileBrowserV2 */}
+					<FileBrowserV2
+						entityType="image" // Por ahora solo imágenes, expandir según necesidad
+						onItemSelect={handleItemSelect}
 						onItemDoubleClick={handleItemDoubleClick}
-						// Pasar funciones opcionales para cargar más items si existen en el contexto
-						loadMoreItems={
-							// Pasar callback para cargar más items si está disponible
-							// Esto se implementará en futuras versiones
-							undefined
-						}
+						// TODO: Implementar filtros específicos por contenedor
+						filterId={currentContainerId}
+						filterType="folder" // Asumir carpeta por defecto
 					/>
 				</BlurFade>
 			</div>

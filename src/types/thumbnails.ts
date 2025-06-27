@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import type { JSONString } from '@/utils/types/utility-types';
+import type { JSONString } from '@/lib/utils/types/utility-types';
 
 /**
  * Calidad de thumbnail

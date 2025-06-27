@@ -14,7 +14,7 @@ import {
     PrismaPlaceWithCounts,
 } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
-import { calculateCompleteness } from '@/utils/transformers/calculate-completeness';
+import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import type { Prisma } from '@prisma/client';
 
 /**

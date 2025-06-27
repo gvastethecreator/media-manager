@@ -1,4 +1,4 @@
-import type { AIMetadata, FileMetadata } from '@/types/metadata.types';
+import type { AIMetadata, FileMetadata } from '@/types/metadata';
 import type { Image } from '@prisma/client';
 import type sharp from 'sharp';
 

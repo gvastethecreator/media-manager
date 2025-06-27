@@ -8,7 +8,7 @@ import toastService from '@/services/toast';
 import type { TagUpdateInput } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagBase as UITag } from '@/types/entities/tag/types';
-import { generateTagColor } from '@/utils/string-utils';
+import { generateTagColor } from '@/lib/utils/string.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -208,3 +208,4 @@ export function CreateTagForm({
 		/>
 	);
 }
+

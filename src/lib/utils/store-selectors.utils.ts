@@ -2,8 +2,8 @@
  * @file Utilidad para crear selectores de tiendas Zustand
  * @module utils/store-selectors
  * @description Este archivo existe para mantener compatibilidad con importaciones antiguas.
- * Se debe migrar a usar @/utils/store/create-selectors.ts directamente en el futuro.
- * @deprecated Use @/utils/store/create-selectors.ts instead
+ * Se debe migrar a usar @/lib/utils/store/create-selectors.ts directamente en el futuro.
+ * @deprecated Use @/lib/utils/store/create-selectors.ts instead
  */
 
 import { createSelectors as create } from './store/create-selectors';
@@ -15,7 +15,7 @@ import { createSelectors as create } from './store/create-selectors';
  *
  * @param store La tienda Zustand para la que crear selectores
  * @returns Una versión de la tienda con selectores automáticos
- * @deprecated Use @/utils/store/create-selectors.ts instead
+ * @deprecated Use @/lib/utils/store/create-selectors.ts instead
  */
 export const createSelectors = create;
 

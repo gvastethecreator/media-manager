@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
-import { safeJsonParse } from '@/utils/safe-json-parse';
+import { safeJsonParse } from '@/lib/utils/safe-json-parse';
 import type { Workflow } from '@prisma/client';
 
 /**

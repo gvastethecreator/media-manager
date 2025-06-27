@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast';
 import type { ConceptComplete, ConceptExtended } from '@/types/entities/concept';
-import { calculateConceptsStats } from '@/utils/concept/helpers';
+import { calculateConceptsStats } from '@/lib/utils/concept/helpers';
 import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { CreateConceptForm } from './create-concept-form';

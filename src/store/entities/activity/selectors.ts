@@ -5,7 +5,7 @@
  */
 
 import { ActivityCategory, ActivityComplete } from '@/types/entities/activity';
-import { groupBy } from '@/utils/array';
+import { groupBy } from '@/lib/utils/array.utils';
 import type { ActivityStore } from './index';
 
 /**
@@ -188,3 +188,4 @@ export const selectActivitiesByCategory = (state: ActivityStore) => {
 	const activities = selectSortedActivities(state);
 	return groupBy(activities, 'category');
 };
+

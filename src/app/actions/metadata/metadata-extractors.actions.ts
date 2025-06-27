@@ -2,7 +2,7 @@
 
 import { CacheManager } from '@/lib/database/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { MediaMetadata } from '@/types/metadata.types';
+import type { MediaMetadata } from '@/types/metadata';
 import { type Stats } from 'fs';
 import * as fs from 'fs/promises';
 import sharp from 'sharp';

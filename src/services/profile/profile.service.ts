@@ -13,7 +13,7 @@ import {
 	profileFiltersSchema,
 	profilePaginationSchema,
 } from '@/types/entities/profile';
-import { toServiceError } from '@/utils/errors/service-errors';
+import { toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVICE_NAME = 'ProfileService';
 

@@ -54,7 +54,7 @@ import {
     createServiceError,
     ServiceErrorCode,
     toServiceError,
-} from '@/utils/errors/service-errors';
+} from '@/lib/utils/errors/service-errors';
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';

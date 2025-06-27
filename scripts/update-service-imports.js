@@ -15,11 +15,11 @@ const serviceReplacements = [
   { old: '@/services/file3d.service', new: '@/services/file3d' },
   { old: '@/services/place.service', new: '@/services/place' },
   { old: '@/services/world-item.service', new: '@/services/world-item' },
-  
+
   // Servicios que se movieron de ubicación
   { old: '@/services/collection-events.service', new: '@/services/collection/events.service' },
   { old: '@/services/image-converter.service', new: '@/services/image/converter.service' },
-  
+
   // Servicios que ya están en carpetas pero se referenciaban mal
   { old: 'from \'@/services/collection/collection.service\'', new: 'from \'@/services/collection\'' },
   { old: 'from \'@/services/folder/folder.service\'', new: 'from \'@/services/folder\'' },
@@ -27,22 +27,22 @@ const serviceReplacements = [
 
 async function updateImports() {
   console.log('🔍 Buscando archivos TypeScript...');
-  
-  const files = await glob('src/**/*.{ts,tsx}', { 
+
+  const files = await glob('src/**/*.{ts,tsx}', {
     cwd: process.cwd(),
     ignore: ['node_modules/**', 'dist/**', 'build/**']
   });
-  
+
   console.log(`📁 Encontrados ${files.length} archivos`);
-  
+
   let totalReplacements = 0;
-  
+
   for (const file of files) {
     const filePath = path.join(process.cwd(), file);
     const content = fs.readFileSync(filePath, 'utf8');
     let newContent = content;
     let fileReplacements = 0;
-    
+
     for (const replacement of serviceReplacements) {
       const regex = new RegExp(replacement.old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
       const matches = newContent.match(regex);
@@ -52,13 +52,13 @@ async function updateImports() {
         totalReplacements += matches.length;
       }
     }
-    
+
     if (fileReplacements > 0) {
       fs.writeFileSync(filePath, newContent);
       console.log(`✅ ${file}: ${fileReplacements} reemplazos`);
     }
   }
-  
+
   console.log(`\n🎉 Completado! Total de reemplazos: ${totalReplacements}`);
 }
 

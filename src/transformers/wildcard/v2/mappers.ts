@@ -13,7 +13,7 @@ import type {
 	WildcardSearchFilters,
 	WildcardSearchOptions,
 } from '@/types/entities/wildcard';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
 
 // Logger específico para este módulo
