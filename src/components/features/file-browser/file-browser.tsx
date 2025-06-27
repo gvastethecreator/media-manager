@@ -1,230 +1,162 @@
+/**
+ * @file FileBrowser V2 - Usando tipos optimizados WithStats
+ * @module components/features/file-browser/file-browser-v2
+ * @description Nueva versión del FileBrowser que usa stores específicos por entidad
+ * y tipos optimizados WithStats en lugar de FileItem legacy.
+ *
+ * MIGRACIÓN: Este componente reemplazará a file-browser.tsx
+ */
 'use client';
 
 import { EmptyState } from '@/components/core/data-display';
-import { type ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
+import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { AnyEntity } from '@/types/entities';
-import { FileItem } from '@/types/files';
+import type { EntityStatsType, EntityWithStats } from '@/types/migration';
 import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useFilteredData } from './hooks/use-filtered-data';
-import './styles/scrollbar.css';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { StatusBar } from './toolbar/status-bar';
 import { CardsView } from './views/cards-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 import { SimpleGridView } from './views/simple-grid-view';
-// ⚠️ LEGACY: Funciones de conversión inline (archivo file-converters.ts eliminado)
-const fileItemsToImageItems = (files: FileItem[]) => {
-	return files.map(file => ({
-		id: file.id,
-		name: file.name || '',
-		src: file.thumbnail || `/api/images/${file.id}/content`,
-		alt: file.name || '',
-		width: 0,
-		height: 0,
-		thumbnail: file.thumbnail || null,
-		type: file.type || 'image',
-		path: file.path || '',
-		size: file.size || 0,
-		mimeType: file.mimeType || '',
-		metadata: file.metadata || null,
-		url: file.thumbnail || `/api/images/${file.id}/content`,
-		parsedMetadata: undefined,
-	}));
-};
-
-const fileItemsToAnyEntities = (files: FileItem[]): AnyEntity[] => {
-	return files.map(file => {
-		let entityType: AnyEntity['entityType'] = 'image';
-		let basePath = 'images';
-
-		if (file.type?.startsWith('video/')) {
-			entityType = 'video';
-			basePath = 'videos';
-		} else if (file.type === 'folder') {
-			entityType = 'folder';
-			basePath = 'folders';
-		} else if (file.type?.startsWith('audio/')) {
-			entityType = 'audio';
-			basePath = 'audios';
-		} else if (file.type === 'application/pdf') {
-			entityType = 'document';
-			basePath = 'documents';
-		}
-
-		return {
-			id: file.id,
-			entityType: entityType,
-			name: file.name,
-			thumbnail: file.thumbnail || `/${basePath}/${file.id}/thumbnail`,
-			href: `/${basePath}/${file.id}`,
-			isFavorite: file.isFavorite || false,
-			tags: [],
-			createdAt: file.createdAt || new Date().toISOString(),
-			updatedAt: file.updatedAt || new Date().toISOString(),
-			...(file.metadata || {}),
-		} as AnyEntity;
-	});
-};
 
 const logger = clientLogger.withContext('FileBrowser');
 
 interface FileBrowserProps {
-	items: FileItem[];
-	onItemSelect?: (item: FileItem) => void;
-	onItemDoubleClick?: (item: FileItem) => void;
+	/** Tipo de entidad a mostrar */
+	entityType: EntityStatsType;
+	/** Callback cuando se selecciona un item */
+	onItemSelect?: (item: EntityWithStats) => void;
+	/** Callback cuando se hace doble click en un item */
+	onItemDoubleClick?: (item: EntityWithStats) => void;
+	/** Clase CSS adicional */
 	className?: string;
-	isLoading?: boolean;
-	isReindexing?: boolean;
-	reindexProgress?: number;
-	loadMoreItems?: () => void;
+	/** ID de carpeta/colección/etc para filtrar */
+	filterId?: string;
+	/** Tipo de filtro (folder, collection, tag, etc) */
+	filterType?: 'folder' | 'collection' | 'tag' | 'album';
 }
 
-const _FALLBACK_WIDTH = 1200;
+const FALLBACK_WIDTH = 1200;
 
 export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
-	items,
+	entityType,
 	onItemSelect,
 	onItemDoubleClick,
 	className,
-	isLoading = false,
-	isReindexing = false,
-	reindexProgress = 0,
-	loadMoreItems,
+	filterId,
+	filterType,
 }) {
-	const [_containerWidth, setContainerWidth] = useState<number>(0);
-	const [_isViewerOpen, setIsViewerOpen] = useState(false);
-	const [_viewerImages, setViewerImages] = useState<ImageItem[]>([]);
-	const [_viewerInitialIndex, setViewerInitialIndex] = useState(0);
-	const lastSelectedItemIndexRef = useRef<number | null>(null);
-	const [contextMenuFile, setContextMenuFile] = useState<FileItem | null>(null);
-	const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
-
-	const viewMode = useViewOptionsStore((state) => state.viewMode);
-	const itemSize = useViewOptionsStore((state) => state.itemSize);
-	const { searchQuery, sortOptions, filterOptions } = useViewOptionsStore();
-
+	const [containerWidth, setContainerWidth] = useState<number>(0);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const measurementAttemptsRef = useRef(0);
 
+	// Estados globales
+	const viewMode = useViewOptionsStore((state) => state.viewMode);
+	const itemSize = useViewOptionsStore((state) => state.itemSize);
 	const { selectedIds, setSelectedIds, clearSelection } = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 
-	const filteredData = useFilteredData(items, { searchQuery, sortOptions, filterOptions });
-	const imageItems = useMemo(() => fileItemsToImageItems(filteredData), [filteredData]);
-	const entityItems = useMemo(() => fileItemsToAnyEntities(filteredData), [filteredData]);
+	// Por ahora solo soportamos imágenes, expandir según necesidad
+	const { images: imagesRecord, isLoading, error, loadImages, getSortedImages } = useImageStore();
 
-	const handleContextMenu = useCallback(
-		(item: AnyEntity | FileItem, e?: React.MouseEvent) => {
-			const originalFileItem = filteredData.find((f) => f.id === item.id);
-			if (!originalFileItem) return;
+	// Cargar datos al montar o cuando cambian los filtros
+	useEffect(() => {
+		if (entityType === 'image') {
+			loadImages();
+		}
+		// TODO: Añadir otros tipos cuando se implementen sus stores
+	}, [entityType, filterId, filterType, loadImages]);
 
-			if (e) {
-				e.preventDefault();
-				e.stopPropagation();
-				setContextMenuPosition({ x: e.clientX, y: e.clientY });
-			}
-			setContextMenuFile(originalFileItem);
-		},
-		[filteredData]
-	);
+	// Obtener items según el tipo de entidad
+	const items = (() => {
+		switch (entityType) {
+			case 'image':
+				return getSortedImages();
+			// TODO: Añadir otros casos según se implementen
+			default:
+				return [];
+		}
+	})();
 
-	const _measureContainer = useCallback((element: HTMLDivElement) => {
+	// Medir contenedor
+	const measureContainer = useCallback((element: HTMLDivElement) => {
 		const attempt = ++measurementAttemptsRef.current;
-		logger.debug(`[FileBrowser] Intento medición ${attempt}`);
+		logger.debug(`[FileBrowserV2] Intento medición ${attempt}`);
 
 		const measure = () => {
 			const width = element.offsetWidth;
 			if (width > 0) {
-				logger.info(`[FileBrowser] ✅ Medición exitosa: ${width}px`);
+				logger.info(`[FileBrowserV2] ✅ Medición exitosa: ${width}px`);
 				setContainerWidth(width);
 				return true;
 			}
 			return false;
 		};
+
 		if (measure()) return;
+
 		requestAnimationFrame(() => {
 			if (measure()) return;
 			setTimeout(() => {
 				if (measure()) return;
-				logger.warn(`[FileBrowser] ⚠️ Falló medición, usando fallback: ${_FALLBACK_WIDTH}px`);
-				setContainerWidth(_FALLBACK_WIDTH);
+				logger.warn(`[FileBrowserV2] ⚠️ Falló medición, usando fallback: ${FALLBACK_WIDTH}px`);
+				setContainerWidth(FALLBACK_WIDTH);
 			}, 100);
 		});
 	}, []);
 
 	const containerCallbackRef = useCallback(
-		(element: HTMLButtonElement | null) => {
+		(element: HTMLDivElement | null) => {
 			if (element && containerRef.current !== element) {
-				containerRef.current = element as HTMLDivElement;
-				_measureContainer(element as HTMLDivElement);
+				containerRef.current = element;
+				measureContainer(element);
 			}
 		},
-		[_measureContainer]
+		[measureContainer]
 	);
 
+	// Manejar click en item
 	const handleItemClick = useCallback(
-		(item: AnyEntity | FileItem, e: React.MouseEvent) => {
-			const originalFileItem = filteredData.find((f) => f.id === item.id);
-			if (!originalFileItem) return;
-
-			const itemIndex = filteredData.indexOf(originalFileItem);
+		(item: EntityWithStats, e: React.MouseEvent) => {
 			const isShiftClick = e.shiftKey;
 			const isCtrlClick = e.ctrlKey || e.metaKey;
 
-			if (isShiftClick && lastSelectedItemIndexRef.current !== null) {
-				const start = Math.min(lastSelectedItemIndexRef.current, itemIndex);
-				const end = Math.max(lastSelectedItemIndexRef.current, itemIndex);
-				const rangeIds = filteredData.slice(start, end + 1).map((i) => i.id);
-				setSelectedIds(rangeIds);
+			if (isShiftClick) {
+				// TODO: Implementar selección por rango
+				setSelectedIds([item.id]);
 			} else if (isCtrlClick) {
 				const newSelection = new Set(selectedIds);
-				if (newSelection.has(originalFileItem.id)) {
-					newSelection.delete(originalFileItem.id);
+				if (newSelection.has(item.id)) {
+					newSelection.delete(item.id);
 				} else {
-					newSelection.add(originalFileItem.id);
+					newSelection.add(item.id);
 				}
 				setSelectedIds(Array.from(newSelection));
 			} else {
-				setSelectedIds([originalFileItem.id]);
+				setSelectedIds([item.id]);
 			}
 
-			lastSelectedItemIndexRef.current = itemIndex;
-			onItemSelect?.(originalFileItem);
+			onItemSelect?.(item);
 		},
-		[selectedIds, setSelectedIds, onItemSelect, filteredData]
+		[selectedIds, setSelectedIds, onItemSelect]
 	);
 
-	const handleListItemClick = useCallback(
-		(item: FileItem, e: React.MouseEvent) => {
-			handleItemClick(item, e);
-		},
-		[handleItemClick]
-	);
-
+	// Manejar doble click
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntity | FileItem) => {
-			const originalFileItem = filteredData.find((f) => f.id === item.id);
-			if (!originalFileItem) return;
-
-			const itemIndex = imageItems.findIndex((i) => i.id === item.id);
-			if (itemIndex !== -1) {
-				setViewerImages(imageItems);
-				setViewerInitialIndex(itemIndex);
-				setIsViewerOpen(true);
-			}
-			onItemDoubleClick?.(originalFileItem);
+		(item: EntityWithStats) => {
+			onItemDoubleClick?.(item);
 		},
-		[imageItems, onItemDoubleClick, filteredData]
+		[onItemDoubleClick]
 	);
 
+	// Actualizar panel de detalles cuando cambia la selección
 	useEffect(() => {
 		if (selectedIds.length > 0) {
 			const selectedItems = items.filter((item) => selectedIds.includes(item.id));
@@ -235,8 +167,21 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 	}, [selectedIds, items, setDetailsPanelItems, setDetailsPanelVisible]);
 
+	// Añadir efecto para escuchar Escape globalmente
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				clearSelection();
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [clearSelection]);
+
+	// Renderizar contenido según el estado
 	const renderContent = () => {
-		if (isLoading) {
+		if (isLoading && items.length === 0) {
 			return (
 				<div className="flex h-full w-full items-center justify-center">
 					<Spinner />
@@ -244,75 +189,71 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			);
 		}
 
-		if (filteredData.length === 0) {
+		if (error) {
 			return (
-				<EmptyState
-					icon={<FileTextIcon />}
-					title={searchQuery ? 'Sin resultados' : 'Carpeta vacía'}
-					description={searchQuery ? 'Intenta con otra búsqueda.' : 'Esta carpeta no contiene archivos.'}
-				/>
+				<div className="flex h-full w-full items-center justify-center">
+					<p className="text-destructive">Error: {error}</p>
+				</div>
 			);
 		}
 
+		if (items.length === 0) {
+			return <EmptyState icon={<FileTextIcon />} title="Sin elementos" description="No hay elementos para mostrar." />;
+		}
+
 		const commonViewProps = {
+			items,
 			itemSize,
 			selectedIds,
-			containerWidth: _containerWidth,
+			containerWidth,
+			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
-			onContextMenu: handleContextMenu,
 		};
 
 		switch (viewMode) {
 			case 'list':
-				return (
-					<ListView
-						{...commonViewProps}
-						items={filteredData}
-						onItemClick={handleListItemClick}
-					/>
-				);
+				return <ListView {...commonViewProps} />;
 			case 'grid':
-				return <CardsView {...commonViewProps} items={entityItems} onItemClick={handleItemClick} />;
+			case 'cards':
+				return <CardsView {...commonViewProps} />;
 			case 'simple-grid':
-				return <SimpleGridView {...commonViewProps} items={entityItems} onItemClick={handleItemClick} />;
+				return <SimpleGridView {...commonViewProps} />;
 			case 'masonry':
-				return (
-					<MasonryView
-						{...commonViewProps}
-						items={entityItems}
-						onItemClick={handleItemClick}
-						imageItems={imageItems}
-					/>
-				);
+				return <MasonryView {...commonViewProps} />;
 			default:
-				return <CardsView {...commonViewProps} items={entityItems} onItemClick={handleItemClick} />;
+				return <CardsView {...commonViewProps} />;
 		}
 	};
 
 	return (
 		<div className={cn('flex h-full w-full flex-col bg-background', className)}>
-			<button
+			<div
 				ref={containerCallbackRef}
-				type="button"
-				className="relative h-full w-full flex-grow overflow-y-auto bg-transparent cursor-default p-0 text-left border-0 focus:outline-none"
-				onClick={(e) => {
-					if (e.target === e.currentTarget) {
-						clearSelection();
-					}
-				}}
+				className="relative h-full w-full flex-grow overflow-y-auto bg-transparent cursor-default"
 			>
 				<AnimatePresence>
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						className="h-full w-full"
-					>
-						{_containerWidth > 0 ? renderContent() : <Spinner />}
+					<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+						{containerWidth > 0 ? renderContent() : <Spinner />}
 					</motion.div>
 				</AnimatePresence>
-			</button>
-			<StatusBar items={filteredData} />
+			</div>
+			<StatusBar totalItems={items.length} selectedCount={selectedIds.length} entityType={entityType} />
 		</div>
 	);
 });
+
+/**
+ * 📝 Documentación de migración:
+ *
+ * Cambios principales respecto a file-browser.tsx:
+ * 1. Usa EntityWithStats en lugar de FileItem
+ * 2. Usa stores específicos por entidad (useImageStore, etc)
+ * 3. Props simplificadas - recibe entityType en lugar de items
+ * 4. Gestión de datos interna usando stores Zustand
+ * 5. Sin conversiones de tipos - usa tipos nativos WithStats
+ *
+ * Para migrar:
+ * 1. Cambiar import de FileBrowser a FileBrowserV2
+ * 2. Pasar entityType en lugar de items
+ * 3. Los datos se cargan automáticamente desde los stores
+ */

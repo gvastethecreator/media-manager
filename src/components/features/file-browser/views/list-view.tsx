@@ -1,212 +1,182 @@
+/**
+ * @file Vista de lista V2 usando EntityWithStats
+ * @module components/features/file-browser/views/list-view-v2
+ */
 'use client';
 
-import { Calendar, File, FileText, Heart, Image, Video } from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { memo, useCallback, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { FileItem } from '@/types/files';
-import { ImageRenderer } from '../image-renderer';
-import { VirtualizerWrapper } from './virtualizer-wrapper';
+import type { EntityWithStats } from '@/types/migration';
+import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
+import {
+	FileIcon,
+	FileTextIcon,
+	FolderIcon,
+	HashIcon,
+	ImageIcon,
+	MapPinIcon,
+	MusicIcon,
+	PackageIcon,
+	TagIcon,
+	UsersIcon,
+	VideoIcon,
+} from 'lucide-react';
+import { memo, useMemo } from 'react';
 
-interface ListItemProps {
-	item: FileItem;
-	isSelected?: boolean;
-	isActive?: boolean;
-	onClick?: (item: FileItem, e: React.MouseEvent) => void;
-	onDoubleClick?: (item: FileItem) => void;
-	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
+interface ListViewProps {
+	items: EntityWithStats[];
+	itemSize: number;
+	selectedIds: string[];
+	containerWidth: number;
+	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: EntityWithStats) => void;
 }
 
-const getMetadata = (metadata: string | null) => {
-	if (!metadata) {
-		return null;
-	}
-	try {
-		return JSON.parse(metadata);
-	} catch {
-		return null;
-	}
+// Mapeo de tipos a iconos
+const typeIcons: Record<string, React.ComponentType<any>> = {
+	image: ImageIcon,
+	video: VideoIcon,
+	folder: FolderIcon,
+	audio: MusicIcon,
+	document: FileTextIcon,
+	album: PackageIcon,
+	collection: PackageIcon,
+	tag: TagIcon,
+	character: UsersIcon,
+	place: MapPinIcon,
+	concept: HashIcon,
+	// Añadir más según necesidad
 };
 
-function formatBytes(bytes: number): string {
-	if (bytes === 0) {
-		return '0 B';
-	}
+export const ListView = memo<ListViewProps>(function ListView({
+	items,
+	itemSize,
+	selectedIds,
+	containerWidth,
+	onItemClick,
+	onItemDoubleClick,
+}) {
+	// Preparar datos de la tabla con información adicional
+	const tableData = useMemo(() => {
+		return items.map((item) => {
+			const type = getEntityStatsType(item);
+			const stats = getEntityStatistics(item);
+			const Icon = typeIcons[type] || FileIcon;
+
+			// Obtener tamaño si está disponible
+			let size = '-';
+			if ('size' in item) {
+				size = formatFileSize(item.size);
+			} else if (stats?.fileSize) {
+				size = `${stats.fileSize.toFixed(1)} MB`;
+			}
+
+			// Obtener fecha de modificación
+			let modifiedDate = new Date();
+			if ('updatedAt' in item) {
+				modifiedDate = new Date(item.updatedAt);
+			}
+
+			return {
+				item,
+				type,
+				Icon,
+				size,
+				modifiedDate,
+				stats,
+			};
+		});
+	}, [items]);
+
+	return (
+		<div className="w-full h-full overflow-auto">
+			<table className="w-full border-collapse">
+				<thead className="sticky top-0 bg-background border-b">
+					<tr className="text-left text-sm text-muted-foreground">
+						<th className="p-2 font-medium">Nombre</th>
+						<th className="p-2 font-medium w-24">Tipo</th>
+						<th className="p-2 font-medium w-24">Tamaño</th>
+						<th className="p-2 font-medium w-40">Modificado</th>
+						<th className="p-2 font-medium w-24">Elementos</th>
+					</tr>
+				</thead>
+				<tbody>
+					{tableData.map(({ item, type, Icon, size, modifiedDate, stats }) => {
+						const isSelected = selectedIds.includes(item.id);
+
+						return (
+							<tr
+								key={item.id}
+								className={cn(
+									'border-b transition-colors cursor-pointer',
+									'hover:bg-muted/50',
+									isSelected && 'bg-primary/10 hover:bg-primary/15'
+								)}
+								onClick={(e) => {
+									e.stopPropagation();
+									onItemClick(item, e);
+								}}
+								onDoubleClick={(e) => {
+									e.stopPropagation();
+									onItemDoubleClick(item);
+								}}
+							>
+								<td className="p-2">
+									<div className="flex items-center gap-2">
+										<Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+										<span className="truncate">{item.name || 'Sin nombre'}</span>
+										{'isFavorite' in item && item.isFavorite && <span className="text-yellow-500">★</span>}
+									</div>
+								</td>
+								<td className="p-2 text-sm text-muted-foreground capitalize">{type}</td>
+								<td className="p-2 text-sm text-muted-foreground">{size}</td>
+								<td className="p-2 text-sm text-muted-foreground">{formatDate(modifiedDate)}</td>
+								<td className="p-2 text-sm text-muted-foreground text-center">
+									{stats?.totalAssociations || stats?.totalItems || '-'}
+								</td>
+							</tr>
+						);
+					})}
+				</tbody>
+			</table>
+
+			{items.length === 0 && (
+				<div className="flex items-center justify-center h-40 text-muted-foreground">No hay elementos para mostrar</div>
+			)}
+		</div>
+	);
+});
+
+// Funciones auxiliares
+function formatFileSize(bytes: number): string {
+	if (bytes === 0) return '0 B';
 	const k = 1024;
 	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
 }
 
-export const ListItem = memo(function ListItem({
-	item,
-	isSelected,
-	isActive,
-	onClick,
-	onDoubleClick,
-	onContextMenu,
-}: ListItemProps) {
-	const _metadata = getMetadata(item.metadata);
-	const _buttonRef = useRef<HTMLButtonElement>(null);
+function formatDate(date: Date): string {
+	const now = new Date();
+	const diff = now.getTime() - date.getTime();
+	const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-	// Memoizamos los handlers para evitar recreaciones
-	const handleClick = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			onClick?.(item, e);
-		},
-		[onClick, item]
-	);
-
-	const handleDoubleClick = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			onDoubleClick?.(item);
-		},
-		[onDoubleClick, item]
-	);
-
-	const handleContextMenu = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			onContextMenu?.(item, e);
-		},
-		[onContextMenu, item]
-	);
-
-	// Memoizamos la clase para evitar recálculos
-	const rowClassName = useMemo(() => {
-		return cn(
-			'flex items-center px-4 py-2 hover:bg-accent/50 cursor-pointer transition-colors',
-			isSelected && 'bg-primary/10 dark:bg-primary/20',
-			isActive && 'bg-secondary/10 dark:bg-secondary/20'
-		);
-	}, [isSelected, isActive]);
-
-	// Obtener URL de la miniatura
-	const thumbnailUrl = item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
-
-	// Determinar si es una imagen
-	const isImage =
-		item.type?.startsWith('image/') || item.type === 'image' || item.mimeType?.startsWith('image/') || false;
-
-	// Determinar el icono según el tipo de archivo
-	const getFileIcon = () => {
-		if (isImage) {
-			return <Image className="h-4 w-4 text-blue-500" />;
-		}
-		if (item.type?.startsWith('video/') || item.mimeType?.startsWith('video/')) {
-			return <Video className="h-4 w-4 text-red-500" />;
-		}
-		if (item.type?.startsWith('text/') || item.mimeType?.startsWith('text/')) {
-			return <FileText className="h-4 w-4 text-yellow-500" />;
-		}
-		return <File className="h-4 w-4 text-gray-500" />;
-	};
-
-	// Formatear fecha
-	const formatDate = (dateString: string) => {
-		try {
-			const date = new Date(dateString);
-			return date.toLocaleDateString();
-		} catch (_e) {
-			return 'Fecha desconocida';
-		}
-	};
-
-	return (
-		<motion.div
-			className={rowClassName}
-			onClick={handleClick}
-			onDoubleClick={handleDoubleClick}
-			onContextMenu={handleContextMenu}
-			whileHover={{ backgroundColor: 'rgba(var(--accent), 0.2)' }}
-			whileTap={{ backgroundColor: 'rgba(var(--accent), 0.3)' }}
-			layout
-		>
-			{/* Miniatura para imágenes */}
-			{isImage ? (
-				<div className="w-10 h-10 mr-3 rounded-md overflow-hidden flex-shrink-0">
-					<ImageRenderer src={thumbnailUrl} alt={item.name} className="h-full w-full object-cover" />
-				</div>
-			) : (
-				<div className="w-10 h-10 mr-3 flex items-center justify-center flex-shrink-0">{getFileIcon()}</div>
-			)}
-
-			<div className="flex items-center gap-3 flex-1">
-				<div className="flex items-center gap-2">
-					<span className="font-medium">{item.name}</span>
-					{item.isFavorite && <Heart className="h-3 w-3 text-yellow-500 fill-current" />}
-				</div>
-			</div>
-			<div className="flex items-center gap-4">
-				<span className="text-xs text-muted-foreground w-20 text-right">{formatBytes(item.size)}</span>
-				<div className="flex items-center gap-1 w-32">
-					<Calendar className="h-3 w-3 text-muted-foreground" />
-					<span className="text-xs text-muted-foreground">
-						{formatDate(
-							item.modifiedAt ||
-								(item.updatedAt instanceof Date ? item.updatedAt.toISOString() : item.updatedAt) ||
-								(item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt)
-						)}
-					</span>
-				</div>
-			</div>
-		</motion.div>
-	);
-});
-
-export interface ListViewProps {
-	items: FileItem[];
-	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
-	onItemDoubleClick?: (item: FileItem) => void;
-	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
-	className?: string;
+	if (days === 0) {
+		return 'Hoy';
+	}
+	if (days === 1) {
+		return 'Ayer';
+	}
+	if (days < 7) {
+		return `Hace ${days} días`;
+	}
+	return date.toLocaleDateString();
 }
 
-export const ListView = memo(function ListView({
-	items,
-	onItemClick,
-	onItemDoubleClick,
-	onContextMenu,
-	className,
-}: ListViewProps) {
-	const { selectedIds, activeId } = useSelectionStore();
-	const { itemSize } = useViewOptionsStore();
-
-	const renderItem = useCallback(
-		(_index: number, item: FileItem) => {
-			const isSelected = selectedIds.includes(item.id);
-			const isActive = activeId === item.id;
-
-			return (
-				<ListItem
-					key={item.id}
-					item={item}
-					isSelected={isSelected}
-					isActive={isActive}
-					onClick={onItemClick}
-					onDoubleClick={onItemDoubleClick}
-					onContextMenu={onContextMenu}
-				/>
-			);
-		},
-		[selectedIds, activeId, onItemClick, onItemDoubleClick, onContextMenu]
-	);
-
-	return (
-		<VirtualizerWrapper
-			type="list"
-			data={items}
-			itemContent={renderItem}
-			listClassName={cn('w-full h-full', className)}
-			layoutId="list-view"
-		/>
-	);
-});
+/**
+ * 📝 Características:
+ * - Vista de tabla con columnas informativas
+ * - Iconos específicos por tipo de entidad
+ * - Formateo inteligente de fechas y tamaños
+ * - Selección visual clara
+ * - Información de estadísticas cuando está disponible
+ */

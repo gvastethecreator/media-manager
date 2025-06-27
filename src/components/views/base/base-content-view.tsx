@@ -2,7 +2,7 @@
 
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowserV2 } from '@/components/features/file-browser/file-browser-v2';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import BlurFade from '@/components/ui/blur-fade';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -151,11 +151,11 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 			try {
 				if (item.type === 'image') {
 					// Filtrar solo imágenes del contexto actual
-					const imageItems = (items as EntityWithStats[]).filter(i => i.type === 'image');
-					const currentIndex = imageItems.findIndex(i => i.id === item.id);
+					const imageItems = (items as EntityWithStats[]).filter((i) => i.type === 'image');
+					const currentIndex = imageItems.findIndex((i) => i.id === item.id);
 
 					// Convertir EntityWithStats a formato compatible con viewer
-					const viewerItems = imageItems.map(img => ({
+					const viewerItems = imageItems.map((img) => ({
 						id: img.id,
 						name: img.name || '',
 						src: img.thumbnailUrl || `/api/images/${img.id}/content`,
@@ -216,7 +216,7 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 			<div className="h-full w-full overflow-auto">
 				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
 					{/* ✅ MIGRADO: FileBrowser → FileBrowserV2 */}
-					<FileBrowserV2
+					<FileBrowser
 						entityType="image" // Por ahora solo imágenes, expandir según necesidad
 						onItemSelect={handleItemSelect}
 						onItemDoubleClick={handleItemDoubleClick}

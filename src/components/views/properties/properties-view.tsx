@@ -1,6 +1,7 @@
 'use client';
 
 import { getProperties } from '@/app/actions/properties/property.actions';
+import { PropertyCard } from '@/components/cards/property-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -14,7 +15,6 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
-import { PropertyCard } from './property-card';
 
 // Definir el tipo extendido para propiedades con estadísticas de asociaciones
 export type PropertyWithStats = PropertyWithStatsBase & {

@@ -1,76 +1,90 @@
 /**
- * @file Vista de tarjetas para el explorador de archivos.
- * @module components/features/file-browser/views/cards-view
- * @description Este componente renderiza una cuadrícula de entidades utilizando el despachador EntityCard.
+ * @file Vista de tarjetas V2 usando EntityWithStats
+ * @module components/features/file-browser/views/cards-view-v2
  */
 'use client';
 
-import type { FC } from 'react';
-import { memo, useCallback } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import type { AnyEntity } from '@/types/entities';
-import { VirtualizerWrapper } from './virtualizer-wrapper';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
+import { motion } from 'motion/react';
+import { memo } from 'react';
 
-interface CardsViewProps {
-	items: AnyEntity[];
-	onItemClick?: (item: AnyEntity, e: React.MouseEvent) => void;
-	onItemDoubleClick?: (item: AnyEntity) => void;
-	onContextMenu?: (item: AnyEntity, e: React.MouseEvent) => void;
-	className?: string;
+interface CardsViewV2Props {
+	items: EntityWithStats[];
+	itemSize: number;
+	selectedIds: string[];
+	containerWidth: number;
+	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: EntityWithStats) => void;
 }
 
-export const CardsView: FC<CardsViewProps> = memo(function CardsView({
+export const CardsView = memo<CardsViewProps>(function CardsView({
 	items,
+	itemSize,
+	selectedIds,
+	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
-	onContextMenu,
-	className,
 }) {
-	const { selectedIds, activeId } = useSelectionStore();
-
-	const handleItemClick = useCallback(
-		(item: AnyEntity) => (e: React.MouseEvent) => {
-			onItemClick?.(item, e);
-		},
-		[onItemClick]
-	);
-
-	const handleItemDoubleClick = useCallback(
-		(item: AnyEntity) => () => {
-			onItemDoubleClick?.(item);
-		},
-		[onItemDoubleClick]
-	);
-
-	const handleContextMenu = useCallback(
-		(item: AnyEntity) => (e: React.MouseEvent) => {
-			onContextMenu?.(item, e);
-		},
-		[onContextMenu]
-	);
+	// Calcular columnas basado en el ancho del contenedor y tamaño de item
+	const minCardWidth = itemSize || 200;
+	const gap = 16;
+	const padding = 24;
+	const availableWidth = containerWidth - padding * 2;
+	const columns = Math.max(1, Math.floor((availableWidth + gap) / (minCardWidth + gap)));
+	const cardWidth = (availableWidth - gap * (columns - 1)) / columns;
 
 	return (
-		<VirtualizerWrapper
-			items={items}
-			className={className}
-			renderItem={(item, { isScrolling, shouldLoad }) => {
-				const isSelected = selectedIds.includes(item.id);
-				const isActive = activeId === item.id;
+		<div className="p-6">
+			<div
+				className="grid gap-4"
+				style={{
+					gridTemplateColumns: `repeat(${columns}, 1fr)`,
+				}}
+			>
+				{items.map((item, index) => {
+					const isSelected = selectedIds.includes(item.id);
 
-				return (
-					<EntityCard
-						item={item}
-						isSelected={isSelected}
-						isActive={isActive}
-						isScrolling={isScrolling}
-						shouldLoad={shouldLoad}
-						onClick={handleItemClick(item)}
-						onDoubleClick={handleItemDoubleClick(item)}
-						onContextMenu={handleContextMenu(item)}
-					/>
-				);
-			}}
-		/>
+					return (
+						<motion.div
+							key={item.id}
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{
+								delay: Math.min(index * 0.02, 0.3),
+								duration: 0.3,
+							}}
+							className={cn(
+								'relative cursor-pointer transition-all duration-200',
+								'hover:z-10',
+								isSelected && 'ring-2 ring-primary ring-offset-2'
+							)}
+							onClick={(e) => {
+								e.stopPropagation();
+								onItemClick(item, e);
+							}}
+							onDoubleClick={(e) => {
+								e.stopPropagation();
+								onItemDoubleClick(item);
+							}}
+							style={{
+								width: `${cardWidth}px`,
+							}}
+						>
+							<EntityCard entity={item} isSelected={isSelected} compact={itemSize < 150} className="h-full" />
+						</motion.div>
+					);
+				})}
+			</div>
+		</div>
 	);
 });
+
+/**
+ * 📝 Cambios respecto a cards-view.tsx:
+ * - Usa EntityWithStats en lugar de AnyEntity
+ * - Usa EntityCardV2 en lugar de EntityCard
+ * - Props simplificadas y más tipo-seguras
+ * - Animaciones mejoradas con motion/react
+ */

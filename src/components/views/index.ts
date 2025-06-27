@@ -8,11 +8,8 @@
 // Exportar vistas de entidades
 export * from './albums/album-content-view';
 export * from './albums/albums-view';
-// Exportar vistas especiales
 export * from './all-images/all-images-view';
-// Exportar nuevas vistas de entidades
 export * from './audio/audio-view';
-// Exportar vistas base
 export * from './base';
 export * from './characters/character-content-view';
 export * from './characters/characters-view';
@@ -38,13 +35,12 @@ export * from './properties/property-content-view';
 export * from './search/search-view';
 export * from './tags/tag-content-view';
 export * from './tags/tags-view';
-// Exportar tipos
 export * from './types';
 export * from './uploaded-images/uploaded-images-view';
-// Exportar vista principal
 export * from './view-container';
 export * from './wildcards/wildcard-content-view';
 export * from './wildcards/wildcards-view';
 export * from './workflows/workflows-view';
 export * from './world-items/world-item-content-view';
 export * from './world-items/world-items-view';
+
