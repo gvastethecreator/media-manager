@@ -39,24 +39,25 @@
  * El servicio utiliza Sharp para el procesamiento eficiente de imágenes,
  * permitiendo redimensionar, cambiar formato y optimizar imágenes.
  */
-import { createHash } from 'crypto';
-import { promises as fs } from 'fs';
-import sharp from 'sharp';
 
 import { extractMetadata } from '@/app/actions/metadata';
 import { imageConfig } from '@/lib/config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
+import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-	createEntityNotFoundError,
-	createFileNotFoundError,
-	createServiceError,
-	ServiceErrorCode,
-	toServiceError,
+    createEntityNotFoundError,
+    createFileNotFoundError,
+    createServiceError,
+    ServiceErrorCode,
+    toServiceError,
 } from '@/utils/errors/service-errors';
-import { statsService } from '../stats.service';
+import { createHash } from 'crypto';
+import { promises as fs } from 'fs';
+import sharp from 'sharp';
 
 const SERVICE_NAME = 'ImageService';
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
@@ -216,7 +217,7 @@ class ImageService {
 		}
 	}
 
-	async createImage(data: CreateImageInput): Promise<any> {
+	async createImage(data: CreateImageInput): Promise<ImageWithStats> {
 		try {
 			// Crear el registro en la base de datos
 			const dbImage = await prisma.image.create({
@@ -235,18 +236,50 @@ class ImageService {
 				},
 				include: {
 					tags: true,
+					albums: true,
+					collections: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					notes: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+					folder: { select: { id: true, name: true, path: true } },
+					_count: {
+						select: {
+							tags: true,
+							albums: true,
+							collections: true,
+							characters: true,
+							places: true,
+							worldItems: true,
+							concepts: true,
+							prompts: true,
+							notes: true,
+							wildcards: true,
+							properties: true,
+							groups: true,
+						},
+					},
+				},
+			});
+
+			// Crear estadísticas iniciales
+			await prisma.imageStats.create({
+				data: {
+					imageId: dbImage.id,
+					views: 0,
 				},
 			});
 
 			// Generar thumbnail automáticamente
 			await this.generateThumbnail(dbImage.id);
 
-			// Inicializar estadísticas
-			await statsService.getOrCreateImageStats(dbImage.id);
-
-			// Usar el transformer para convertir a entidad
-			// const result = transformImageToExtended(dbImage);
-			const result = dbImage; // Temporal: devolver el objeto tal cual
+			// Usar el transformer para convertir a ImageWithStats
+			const result = fromPrismaImageWithCounts(dbImage);
 
 			// Emitir evento de creación
 			await this.emitEvent(IMAGE_EVENTS.IMAGE_CREATED, result);
@@ -259,6 +292,279 @@ class ImageService {
 				message: 'Error al crear imagen',
 				context: { data },
 				serviceName: SERVICE_NAME,
+			});
+		}
+	}
+
+	/**
+	 * Obtiene una imagen por su ID con estadísticas optimizadas
+	 */
+	async getImage(id: string): Promise<ImageWithStats | null> {
+		try {
+			imageLogger.info('🔍 Obteniendo imagen:', id);
+
+			const image = await prisma.image.findUnique({
+				where: { id },
+				include: {
+					tags: true,
+					albums: true,
+					collections: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					notes: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+					folder: { select: { id: true, name: true, path: true } },
+					_count: {
+						select: {
+							tags: true,
+							albums: true,
+							collections: true,
+							characters: true,
+							places: true,
+							worldItems: true,
+							concepts: true,
+							prompts: true,
+							notes: true,
+							wildcards: true,
+							properties: true,
+							groups: true,
+						},
+					},
+				},
+			});
+
+			if (!image) {
+				imageLogger.warn('⚠️ Imagen no encontrada:', id);
+				return null;
+			}
+
+			const result = fromPrismaImageWithCounts(image);
+			imageLogger.info('✅ Imagen obtenida correctamente');
+			return result;
+		} catch (error) {
+			imageLogger.error('❌ Error obteniendo imagen:', error);
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'No se pudo obtener la imagen',
+			});
+		}
+	}
+
+	/**
+	 * Actualiza una imagen existente
+	 */
+	async updateImage(id: string, data: ImageUpdateInput): Promise<ImageWithStats> {
+		try {
+			imageLogger.info('📝 Actualizando imagen:', id);
+
+			// Verificar que la imagen exista
+			const existingImage = await prisma.image.findUnique({
+				where: { id },
+			});
+
+			if (!existingImage) {
+				throw createEntityNotFoundError('Imagen', id, SERVICE_NAME);
+			}
+
+			// Preparar datos para actualización
+			const updateData: any = {};
+			if (data.name !== undefined) updateData.name = data.name;
+			if (data.description !== undefined) updateData.description = data.description;
+			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+			if (data.metadata !== undefined) updateData.metadata = data.metadata;
+
+			const updated = await prisma.image.update({
+				where: { id },
+				data: updateData,
+				include: {
+					tags: true,
+					albums: true,
+					collections: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					notes: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+					folder: { select: { id: true, name: true, path: true } },
+					_count: {
+						select: {
+							tags: true,
+							albums: true,
+							collections: true,
+							characters: true,
+							places: true,
+							worldItems: true,
+							concepts: true,
+							prompts: true,
+							notes: true,
+							wildcards: true,
+							properties: true,
+							groups: true,
+						},
+					},
+				},
+			});
+
+			const result = fromPrismaImageWithCounts(updated);
+
+			// Emitir evento de actualización
+			await this.emitEvent(IMAGE_EVENTS.IMAGE_UPDATED, result);
+			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'update', image: result });
+
+			imageLogger.info('✅ Imagen actualizada correctamente');
+			return result;
+		} catch (error) {
+			imageLogger.error('❌ Error actualizando imagen:', error);
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'No se pudo actualizar la imagen',
+			});
+		}
+	}
+
+	/**
+	 * Elimina una imagen
+	 */
+	async deleteImage(id: string): Promise<void> {
+		try {
+			imageLogger.info('🗑️ Eliminando imagen:', id);
+
+			// Verificar que la imagen exista
+			const existingImage = await prisma.image.findUnique({
+				where: { id },
+				select: { id: true },
+			});
+
+			if (!existingImage) {
+				throw createEntityNotFoundError('Imagen', id, SERVICE_NAME);
+			}
+
+			await prisma.image.delete({
+				where: { id },
+			});
+
+			// Emitir eventos
+			await this.emitEvent(IMAGE_EVENTS.IMAGE_DELETED, { id });
+			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'delete', imageId: id });
+
+			imageLogger.info('✅ Imagen eliminada correctamente');
+		} catch (error) {
+			imageLogger.error('❌ Error eliminando imagen:', error);
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'No se pudo eliminar la imagen',
+			});
+		}
+	}
+
+	/**
+	 * Obtiene múltiples imágenes con paginación y filtros
+	 */
+	async getImages(options: GetImagesOptions = {}): Promise<GetImagesResult> {
+		try {
+			const {
+				search,
+				folderId,
+				tagIds,
+				isFavorite,
+				pageSize = 50,
+				page = 1,
+				sortBy = 'updatedAt',
+				sortOrder = 'desc',
+			} = options;
+
+			// Construir filtros
+			const where: any = {};
+
+			if (search) {
+				where.OR = [
+					{ name: { contains: search, mode: 'insensitive' } },
+					{ description: { contains: search, mode: 'insensitive' } },
+				];
+			}
+
+			if (folderId) {
+				where.folderId = folderId;
+			}
+
+			if (isFavorite !== undefined) {
+				where.isFavorite = isFavorite;
+			}
+
+			if (tagIds && tagIds.length > 0) {
+				where.tags = {
+					some: {
+						id: { in: tagIds },
+					},
+				};
+			}
+
+			// Obtener total y imágenes
+			const [total, images] = await Promise.all([
+				prisma.image.count({ where }),
+				prisma.image.findMany({
+					where,
+					include: {
+						tags: true,
+						albums: true,
+						collections: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
+						properties: true,
+						groups: true,
+						folder: { select: { id: true, name: true, path: true } },
+						_count: {
+							select: {
+								tags: true,
+								albums: true,
+								collections: true,
+								characters: true,
+								places: true,
+								worldItems: true,
+								concepts: true,
+								prompts: true,
+								notes: true,
+								wildcards: true,
+								properties: true,
+								groups: true,
+							},
+						},
+					},
+					orderBy: { [sortBy]: sortOrder },
+					skip: (page - 1) * pageSize,
+					take: pageSize,
+				}),
+			]);
+
+			return {
+				images: images.map(fromPrismaImageWithCounts),
+				pagination: {
+					page,
+					pageSize,
+					total,
+					totalPages: Math.ceil(total / pageSize),
+					hasNext: page * pageSize < total,
+					hasPrev: page > 1,
+				},
+			};
+		} catch (error) {
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'No se pudieron obtener las imágenes',
 			});
 		}
 	}

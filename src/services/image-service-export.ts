@@ -6,12 +6,10 @@
 
 // Exportar transformadores para facilitar su uso
 export {
-	transformImage,
-	transformImages,
-	transformImagesToComplete,
-	transformImagesToExtended,
-	transformImageToComplete,
-	transformImageToExtended,
+    transformImage, transformImageToComplete,
+    transformImageToExtended, transformImages,
+    transformImagesToComplete,
+    transformImagesToExtended
 } from '@/transformers/image/transformer';
 /**
  * Re-exportación de tipos y constantes relacionados con imágenes
@@ -20,10 +18,19 @@ export {
  * Re-exportación de la instancia singleton del servicio funcional de imágenes
  */
 export {
-	type CreateImageInput, // Exportar tipos de input/options
-	IMAGE_EVENTS,
-	type ImageProcessingOptions,
-	imageService,
-	THUMBNAIL_QUALITY_CONFIG, // Exportar la config
-	type ThumbnailQuality, // Exportar el tipo
+    IMAGE_EVENTS, type CreateImageInput, type ImageProcessingOptions, // Exportar la configimageService, THUMBNAIL_QUALITY_CONFIG, 
+    type ThumbnailQuality
 } from './image/image.service';
+
+// Exportar métodos específicos del servicio para facilitar su uso
+export const {
+	getImage,
+	getImages,
+	updateImage,
+	deleteImage,
+	createImage,
+	generateThumbnail,
+	getThumbnail,
+	getOriginalImage,
+	getImageMetadata,
+} = imageService;

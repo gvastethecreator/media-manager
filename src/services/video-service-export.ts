@@ -5,13 +5,13 @@
  */
 
 // Importar el servicio
-import { VideoService } from './video.service';
+import { videoService } from './video/video.service';
 
 // Exportar todo del servicio
-export * from './video.service';
+export * from './video/video.service';
 
 // Exportar la instancia del servicio con nombre consistente
-export const videoService = VideoService;
+export { videoService };
 
 // Alias para mantener compatibilidad con código existente
-export default VideoService;
+export default videoService;

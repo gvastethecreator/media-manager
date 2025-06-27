@@ -115,10 +115,9 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		try {
 			const image = await getImage(id);
 			if (image) {
-				// TODO: Convertir ImageExtended a ImageWithStats cuando se migre el server action
-				const imageWithStats = image as any as ImageWithStats;
-				get().addImage(imageWithStats);
-				return imageWithStats;
+				// ✅ Server action ya devuelve ImageWithStats - conversión directa
+				get().addImage(image);
+				return image;
 			}
 			return undefined;
 		} catch (e: unknown) {
@@ -138,11 +137,10 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			}
 
 			const result = await getImages(options);
-			// TODO: Convertir GetImagesResult a ImageWithStats[] cuando se migre el server action
+			// ✅ Server action ya devuelve GetImagesResult con ImageWithStats[] - extracción directa
 			const images = Array.isArray(result) ? result : result.images || [];
-			const imagesWithStats = images as any as ImageWithStats[];
-			get().addImages(imagesWithStats);
-			return imagesWithStats;
+			get().addImages(images);
+			return images;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch images';
 			imageLogger.error(errorMessage, { error: e });
@@ -169,11 +167,10 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			};
 			const image = await createServerImage(adaptedData);
 			if (image) {
-				// TODO: Convertir ImageBase a ImageWithStats cuando se migre el server action
-				const imageWithStats = image as any as ImageWithStats;
-				get().addImage(imageWithStats);
+				// ✅ Server action ya devuelve ImageWithStats - conversión directa
+				get().addImage(image);
 				toastService.success('Imagen creada');
-				return imageWithStats;
+				return image;
 			}
 			return undefined;
 		} catch (e: unknown) {
@@ -191,11 +188,10 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		try {
 			const image = await updateServerImage(id, data);
 			if (image) {
-				// TODO: Convertir ImageBase a ImageWithStats cuando se migre el server action
-				const imageWithStats = image as any as ImageWithStats;
-				get().addImage(imageWithStats);
+				// ✅ Server action ya devuelve ImageWithStats - conversión directa
+				get().addImage(image);
 				toastService.success('Imagen actualizada');
-				return imageWithStats;
+				return image;
 			}
 			return undefined;
 		} catch (e: unknown) {

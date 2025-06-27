@@ -1,14 +1,12 @@
 'use server';
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
-// Importamos el transformer optimizado
-import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
+// Importamos el servicio de imagen
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 // Importamos tipos optimizados
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
-import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
+import { toServiceError } from '@/utils/errors/service-errors';
 import type { GetImagesOptions, GetImagesResult } from './image-types.actions';
 
 const SERVER_ACTION_NAME = 'ImageCRUD';
@@ -19,51 +17,7 @@ const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
  */
 export async function getImage(id: string): Promise<ImageWithStats | null> {
 	try {
-		imageLogger.info('🔍 Obteniendo imagen:', id);
-
-		const image = await prisma.image.findUnique({
-			where: { id },
-			include: {
-				tags: true,
-				albums: true,
-				collections: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				prompts: true,
-				notes: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-				folder: { select: { id: true, name: true, path: true } },
-				_count: {
-					select: {
-						tags: true,
-						albums: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		});
-
-		if (!image) {
-			imageLogger.warn('⚠️ Imagen no encontrada:', id);
-			return null;
-		}
-
-		const result = fromPrismaImageWithCounts(image);
-		imageLogger.info('✅ Imagen obtenida correctamente');
-		return result;
+		return await imageService.getImage(id);
 	} catch (error) {
 		imageLogger.error('❌ Error obteniendo imagen:', error);
 		throw toServiceError(error, {
@@ -162,66 +116,12 @@ export async function createImage(data: ImageCreateInput): Promise<ImageWithStat
  */
 export async function updateImage(id: string, data: ImageUpdateInput): Promise<ImageWithStats> {
 	try {
-		imageLogger.info('📝 Actualizando imagen:', id);
-
-		// Verificar que la imagen exista
-		const existingImage = await prisma.image.findUnique({
-			where: { id },
-		});
-
-		if (!existingImage) {
-			throw createEntityNotFoundError('Imagen', id, SERVER_ACTION_NAME);
-		}
-
-		// Preparar datos para actualización
-		const updateData: any = {};
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-		if (data.metadata !== undefined) updateData.metadata = data.metadata;
-
-		const updated = await prisma.image.update({
-			where: { id },
-			data: updateData,
-			include: {
-				tags: true,
-				albums: true,
-				collections: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				prompts: true,
-				notes: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-				folder: { select: { id: true, name: true, path: true } },
-				_count: {
-					select: {
-						tags: true,
-						albums: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		});
+		const result = await imageService.updateImage(id, data);
 
 		// Revalidar rutas
 		revalidatePath('/');
 		revalidatePath(`/images/${id}`);
 
-		const result = fromPrismaImageWithCounts(updated);
-		imageLogger.info('✅ Imagen actualizada correctamente');
 		return result;
 	} catch (error) {
 		imageLogger.error('❌ Error actualizando imagen:', error);
@@ -420,21 +320,7 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
  */
 export async function deleteImage(id: string): Promise<void> {
 	try {
-		imageLogger.info('🗑️ Eliminando imagen:', id);
-
-		// Verificar que la imagen exista
-		const existingImage = await prisma.image.findUnique({
-			where: { id },
-			select: { id: true },
-		});
-
-		if (!existingImage) {
-			throw createEntityNotFoundError('Imagen', id, SERVER_ACTION_NAME);
-		}
-
-		await prisma.image.delete({
-			where: { id },
-		});
+		await imageService.deleteImage(id);
 
 		// Revalidar rutas
 		revalidatePath('/');
@@ -442,7 +328,6 @@ export async function deleteImage(id: string): Promise<void> {
 
 		// Emitir eventos
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
-		imageLogger.info('✅ Imagen eliminada correctamente');
 	} catch (error) {
 		imageLogger.error('❌ Error eliminando imagen:', error);
 		throw toServiceError(error, {

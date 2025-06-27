@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeTags } from '@/transformers/concept';
-import type { ConceptBase, ConceptExtended, ConceptStats } from '@/types/entities/concept';
+import type { ConceptBase, ConceptExtended } from '@/types/entities/concept';
 import { ConceptCategory } from '@/types/entities/concept';
 
 const helpersLogger = serverLogger.withContext('ConceptHelpers');
@@ -90,7 +90,7 @@ export function calculateConceptsStats(concepts: ConceptBase[]): {
 
 			// Si hay recuento disponible
 			if ('_count' in concept) {
-				const count = (concept as any)._count as ConceptStats;
+				const count = concept._count;
 
 				if (count?.images && count.images > 0) {
 					withImages++;
