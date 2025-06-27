@@ -2,8 +2,8 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/format.utils';
 import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';

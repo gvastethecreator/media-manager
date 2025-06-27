@@ -1,6 +1,6 @@
 'use server';
 
-import { CacheManager } from '@/lib/cache';
+import { CacheManager } from '@/lib/database/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { MediaMetadata } from '@/types/metadata.types';
 import { type Stats } from 'fs';

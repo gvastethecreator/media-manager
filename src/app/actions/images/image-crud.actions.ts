@@ -3,7 +3,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from 'next/cache';
 // Importamos el servicio de imagen
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 // Importamos tipos optimizados
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { toServiceError } from '@/utils/errors/service-errors';

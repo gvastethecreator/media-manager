@@ -1,6 +1,6 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 
 /**
  * Representa los datos de un prompt para la tarjeta

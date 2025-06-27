@@ -1,6 +1,6 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 
 export interface WildcardCardData {
 	id: string;

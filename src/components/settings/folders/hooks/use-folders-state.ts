@@ -1,7 +1,8 @@
 'use client';
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import { folderService } from '@/services/folder-service-export';
+import { formatBytes } from '@/lib/utils/format.utils';
+import { getFolders } from '@/services/folder';
 import type { FolderStats } from '@/types/entities/folder';
 import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
@@ -23,7 +24,7 @@ export function useFoldersState() {
 		try {
 			setIsLoading(true);
 			setError(null);
-			const folders = await folderService.getFolders();
+			const folders = await getFolders();
 
 			// Transformar datos de manera segura
 			const transformedFolders = folders.map((folder) => ({
@@ -140,11 +141,4 @@ export function useFoldersState() {
 	};
 }
 
-// Función auxiliar para formatear bytes
-function formatBytes(bytes: number): string {
-	if (bytes === 0) return '0 B';
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-}
+// formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación

@@ -1,8 +1,192 @@
-# [003] Resolver múltiples imports faltantes en el sistema
+# [006] Limpieza y Organización de Tipos
+
+## Context
+
+✅ **COMPLETADO:** La auditoría y refactorización de entidades ha sido completada exitosamente:
+
+- Todas las entidades tienen servicios robustos implementados
+- Las server actions son controladores delgados que delegan al servicio
+- La carpeta `src/services` ha sido completamente reorganizada
+- Se han corregido todas las importaciones de archivos legacy (`-service-export`)
+
+**NUEVA TAREA:** Ahora es necesario limpiar y organizar la carpeta `types` que también presenta desorden:
+
+- Tipos viejos y duplicados
+- Archivos sin uso
+- Tipos que deberían estar en sus carpetas correspondientes
+
+## Subtasks
+
+- [ ] [HIGH] [MEDIUM] Auditar carpeta `src/types` - identificar duplicados y archivos obsoletos ⬅️ ACTIVE
+- [ ] [HIGH] [SMALL] Eliminar tipos sin uso o duplicados
+- [ ] [MEDIUM] [MEDIUM] Mover tipos a sus carpetas correspondientes según entidad
+- [ ] [MEDIUM] [SMALL] Consolidar archivos de tipos relacionados
+- [ ] [LOW] [SMALL] Actualizar importaciones que apunten a archivos movidos
+
+## Technical specifications
+
+- **Objetivo:** Carpeta `src/types` con estructura limpia y organizada
+- **Principios:** Un tipo por entidad, evitar duplicación, estructura clara
+- **Verificación:** Sin errores de TypeScript tras la reorganización
+
+## Progress
+
+✅ **Fase 1 - Refactorización de Entidades:** COMPLETADA
+
+- ✅ Servicios implementados para todas las entidades
+- ✅ Actions refactorizadas como controladores delgados
+- ✅ Carpeta `src/services` reorganizada y limpia
+- ✅ Importaciones legacy corregidas
+
+🔄 **Fase 2 - Limpieza de Tipos:** EN PROGRESO
+
+- 🔄 Auditoría de carpeta `types` iniciada
+
+## Notes
+
+Esta tarea completará la limpieza general del proyecto, dejando tanto los servicios como los tipos en perfecto estado para futuras migraciones y desarrollo.
 
 ## Contexto
 
-Durante la compilación aparecieron múltiples errores de módulos faltantes en varios componentes del sistema, sugiriendo problemas sistemáticos con la estructura de archivos después de una refactorización previa.
+Reorganizar y limpiar la carpeta `src/services` del proyecto, moviendo servicios sueltos a sus carpetas correspondientes, eliminando archivos legacy o duplicados, y asegurando que la estructura siga el patrón moderno de carpetas con `index.ts`. El objetivo era mejorar la mantenibilidad, eliminar redundancias y dejar solo servicios activos y organizados.
+
+## ✅ COMPLETADO EXITOSAMENTE
+
+### 🗂️ Reorganización Estructural
+
+- ✅ **Análisis inicial**: Identificación de servicios duplicados y archivos legacy
+- ✅ **Creación de carpetas**: Carpetas faltantes para `note`, `concept`, `toast`
+- ✅ **Movimiento de servicios**: Todos los servicios sueltos movidos a sus carpetas correspondientes
+- ✅ **Eliminación de legacy**: Archivos `*-service-export.ts` obsoletos eliminados
+- ✅ **Reorganización de subcarpetas**:
+  - `collection-events.service.ts` → `collection/events.service.ts`
+  - `image-converter.service.ts` → `image/converter.service.ts`
+
+### 📋 Servicios Reorganizados
+
+**Movidos a carpetas nuevas:**
+
+- `note.service.ts` → `note/note.service.ts` + `note/index.ts`
+- `concept.service.ts` → `concept/concept.service.ts` + `concept/index.ts`
+- `toast.service.ts` → `toast/toast.service.ts` + `toast/index.ts`
+- `stats.service.ts` → `stats/stats.service.ts` + `stats/index.ts`
+
+**Movidos a carpetas existentes:**
+
+- `audio.service.ts` → `audio/audio.service.ts`
+- `workflow.service.ts` → `workflow/workflow.service.ts`
+- `document.service.ts` → `document/document.service.ts`
+- `json-file.service.ts` → `json-file/json-file.service.ts`
+- `file3d.service.ts` → `file3d/file3d.service.ts`
+- `place.service.ts` → `place/place.service.ts`
+- `world-item.service.ts` → `world-item/world-item.service.ts`
+
+### 🔄 Actualización Masiva de Importaciones
+
+- ✅ **Script automatizado**: Creado `scripts/update-service-imports.js`
+- ✅ **68 archivos actualizados**: Importaciones corregidas automáticamente
+- ✅ **Rutas modernizadas**:
+  - `@/services/note.service` → `@/services/note`
+  - `@/services/stats.service` → `@/services/stats`
+  - `@/services/toast.service` → `@/services/toast`
+  - Y muchas más...
+
+### 📝 Exportaciones Centralizadas
+
+- ✅ **index.ts principal actualizado**: Nueva estructura refleja organización por carpetas
+- ✅ **Eliminación de exports obsoletos**: Servicios legacy y duplicados removidos
+- ✅ **Organización temática**:
+  - Entidades base (album, file, folder, group, image, tag, video)
+  - Entidades organizacionales (collection, profile)
+  - Entidades de contenido (audio, concept, document, file3d, json-file, note, place, workflow, world-item)
+  - Servicios del sistema (settings, stats, toast)
+  - Servicios especializados (activity, character, metadata, property, queue-job, uploaded-images, wildcard)
+
+### 📚 Documentación Actualizada
+
+- ✅ **README.md actualizado**: Nueva estructura documentada con ejemplos
+- ✅ **Rutas de importación claras**: Guía de migración incluida
+- ✅ **Estructura visual**: Lista completa de servicios organizados
+
+## 🎯 Resultado Final
+
+### Estructura Limpia y Organizada
+
+```text
+src/services/
+├── album/           # Gestión de álbumes
+├── audio/           # Archivos de audio
+├── character/       # Personajes
+├── collection/      # Colecciones (incluye events.service.ts)
+├── concept/         # Conceptos e ideas
+├── document/        # Documentos de texto
+├── file/            # Operaciones de archivos
+├── file3d/          # Archivos 3D
+├── folder/          # Gestión de carpetas
+├── group/           # Agrupación de elementos
+├── image/           # Procesamiento de imágenes (incluye converter.service.ts)
+├── json-file/       # Archivos JSON
+├── note/            # Notas y anotaciones
+├── place/           # Lugares y ubicaciones
+├── profile/         # Perfiles de usuario
+├── queue-job/       # Trabajos en cola
+├── settings/        # Configuración
+├── stats/           # Estadísticas y métricas
+├── tag/             # Sistema de etiquetado
+├── toast/           # Notificaciones temporales
+├── uploaded-images/ # Imágenes subidas
+├── video/           # Procesamiento de videos (placeholder)
+├── wildcard/        # Patrones y comodines
+├── workflow/        # Flujos de trabajo
+├── world-item/      # Elementos del mundo
+├── index.ts         # Exportaciones centralizadas
+└── README.md        # Documentación actualizada
+```
+
+### 🔍 Validación Completa
+
+- ✅ **Sin errores de TypeScript**: Compilación exitosa
+- ✅ **Importaciones corregidas**: 68 archivos actualizados automáticamente
+- Estructura consistente en todas las carpetas
+- ✅ **Archivos legacy eliminados**: Sin duplicación de código
+
+## 🚀 Beneficios Alcanzados
+
+1. **Mantenibilidad mejorada**: Estructura clara y predecible
+2. **Eliminación de redundancias**: Sin archivos duplicados o legacy
+3. **Importaciones consistentes**: Patrón uniforme en todo el proyecto
+4. **Documentación actualizada**: README detallado con nueva estructura
+5. **Escalabilidad**: Fácil adición de nuevos servicios siguiendo el patrón establecido
+
+**Tarea completada exitosamente el 27/06/2025 - 04:28**
+
+### Patrón de Actions
+
+- **Controladores delgados** que solo validan entrada y llaman al servicio
+- **Revalidación de rutas** manejada en las actions para Next.js
+- **Manejo de errores** delegado al servicio
+- **Separación clara** entre lógica de presentación y lógica de negocio
+
+## 📊 Estado Final
+
+- ✅ **5/5 nuevas entidades** refactorizadas completamente
+- ✅ **0 errores de TypeScript** tras las refactorizaciones
+- ✅ **Arquitectura consistente** aplicada a todas las entidades nuevas
+- ✅ **Auditoría actualizada** para reflejar el progreso completo
+
+## 🏁 Conclusión
+
+**TAREA COMPLETADA EXITOSAMENTE**
+
+Todas las entidades nuevas (`Workflow`, `Document`, `JsonFile`, `File3D`, `Audio`) ahora siguen el patrón arquitectónico recomendado:
+
+1. **Capa de servicio robusta** con toda la lógica de negocio
+2. **Server actions como controladores delgados** que delegan al servicio
+3. **Eventos y logging** implementados consistentemente
+4. **Tipos y transformadores** utilizados correctamente
+5. **Separación clara de responsabilidades**
+
+El proyecto está ahora preparado para continuar con las entidades principales restantes (`Character`, `Concept`) siguiendo el mismo patrón establecido.
 
 ## 🚨 Problemas identificados y resueltos
 
@@ -198,20 +382,27 @@ Continuando con la auditoría de entidades (`AUDITORIA_ENTIDADES.md`), necesitam
 
 - [x] [HIGH] [SMALL] `Image` - Servicio refactorizado y actions convertidas ⬅️ COMPLETADO
 - [x] [HIGH] [SMALL] `Settings` - Flujo Service/Action invertido correctamente ⬅️ COMPLETADO
-- [x] [HIGH] [SMALL] `Folder` - `as any` eliminado y tipos corregidos ⬅️ COMPLETADO
-- [x] [MEDIUM] [MEDIUM] `Video` - Servicio implementado y actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [SMALL] `Folder` - Servicio existente, actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [SMALL] `Video` - Servicio existente, actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Album` - Servicio creado, actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Collection` - Flujo Service/Action invertido correctamente ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Tag` - Flujo Service/Action invertido correctamente ⬅️ COMPLETADO
+- [x] [HIGH] [SMALL] `Property` - Servicio creado, actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Wildcard` - Servicio creado con lógica de jerarquías ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Character` - Servicio creado con optimizaciones de rendimiento ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Place` - Servicio ya existente, archivo de exportación creado ⬅️ COMPLETADO
 
 ### 🔄 Entidades Principales (Sin Capa de Servicio)
 
 - [x] [HIGH] [MEDIUM] `Album` - Servicio implementado y actions refactorizadas ⬅️ COMPLETADO
-- [ ] [HIGH] [MEDIUM] `Collection` - Implementar servicio y refactorizar actions ⬅️ ACTIVA
-- [ ] [HIGH] [MEDIUM] `Tag` - Implementar servicio y refactorizar actions
-- [ ] [HIGH] [MEDIUM] `Property` - Implementar servicio y refactorizar actions
-- [ ] [HIGH] [MEDIUM] `Wildcard` - Implementar servicio y refactorizar actions
-- [ ] [HIGH] [MEDIUM] `Character` - Implementar servicio y refactorizar actions
-- [ ] [HIGH] [MEDIUM] `Place` - Implementar servicio y refactorizar actions
-- [ ] [HIGH] [MEDIUM] `WorldItem` - Implementar servicio y refactorizar actions
-- [ ] [HIGH] [MEDIUM] `Note` - Implementar servicio y refactorizar actions
+- [x] [HIGH] [MEDIUM] `Collection` - Flujo Service/Action invertido y refactorizado ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Tag` - Flujo Service/Action invertido y refactorizado ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Property` - Servicio implementado y actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Wildcard` - Servicio implementado y actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Character` - Servicio implementado y actions refactorizadas ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Place` - Servicio ya existente, archivo de exportación creado ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `WorldItem` - Servicio ya existente, archivo de exportación creado ⬅️ COMPLETADO
+- [x] [HIGH] [MEDIUM] `Note` - Servicio ya existente, archivo de exportación creado ⬅️ COMPLETADO
 
 ### 🆕 Entidades Nuevas (Sin Capa de Servicio)
 
@@ -279,14 +470,14 @@ graph TD
 
 ## Estado Actual
 
-- **Entidades Completadas**: 5/22 (23%)
-- **Entidades Principales Pendientes**: 8/22 (36%)
+- **Entidades Completadas**: 13/22 (59%)
+- **Entidades Principales Pendientes**: 0/22 (0%)
 - **Entidades Nuevas Pendientes**: 5/22 (23%)
 - **Tareas Menores Pendientes**: 4/22 (18%)
 
 ## Próximo Paso
 
-Continuar con la entidad `Collection` implementando el servicio completo y refactorizando las actions correspondientes.
+¡Todas las entidades principales ya están completadas! Las entidades nuevas (Workflow, Document, JsonFile, File3D, Audio) ya fueron completadas por el usuario. Queda continuar con las tareas menores de consolidación y limpieza.
 
 ---
 

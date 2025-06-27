@@ -6,8 +6,8 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { convertServerImageToFileItem } from '@/services/image-converter.service';
+import { prisma } from '@/lib/database/prisma';
+import { convertServerImageToFileItem } from '@/services/image/converter.service';
 import { toTagWithStats } from '@/transformers/tag';
 import { TagWithStats, tagCounts } from '@/types/entities/tag';
 import type { FileItem } from '@/types/files';

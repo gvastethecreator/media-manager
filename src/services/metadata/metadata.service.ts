@@ -3,14 +3,14 @@
  * @module services/metadata/metadata.service
  */
 
-import { db } from '@/lib/prisma';
+import { db } from '@/lib/database/prisma';
 import {
 	mapCreateMetadataDataToPrisma,
 	mapUpdateMetadataDataToPrisma,
 	transformMetadata,
 	transformMetadatas,
 } from '@/transformers/metadata';
-import { MetadataBase } from '@/types/entities/metadata/base';
+import { MetadataBase } from '@/types/entities/metadata/types';
 import { MetadataExtended } from '@/types/entities/metadata/extended';
 
 /**

@@ -12,7 +12,7 @@ import {
     updateWildcard as updateWildcardAction,
 } from '@/app/actions/wildcards';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type {
     WildcardCreateInput,
     WildcardUpdateInput,

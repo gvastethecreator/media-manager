@@ -4,7 +4,7 @@ import { createCollection, updateCollection } from '@/app/actions/collections/co
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,

@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 
 // Tipo para estadísticas del sistema
 interface SystemData {
