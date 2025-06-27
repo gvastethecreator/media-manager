@@ -8,47 +8,18 @@ export interface User {
 	updatedAt: Date;
 }
 
-export interface Collection {
-	id: string;
-	title: string;
-	emoji: string;
-	description?: string;
-	itemCount: number;
-	createdAt: Date;
-	updatedAt: Date;
-}
+// Collection types moved to @/types/entities/collection/types.ts
+// Use: import { CollectionBase, CollectionWithStats } from '@/types/entities/collection/types';
 
-export interface Folder {
-	id: string;
-	title: string;
-	path: string;
-	itemCount: number;
-	children?: Folder[];
-	createdAt: Date;
-	updatedAt: Date;
-}
+// Folder types moved to @/types/entities/folder/types.ts
+// Use: import { FolderBase, FolderWithStats } from '@/types/entities/folder/types';
 
-export interface Tag {
-	id: string;
-	title: string;
-	color: string;
-	itemCount: number;
-	createdAt: Date;
-	updatedAt: Date;
-}
+// Tag types moved to @/types/entities/tag/types.ts
+// Use: import { TagBase, TagWithStats } from '@/types/entities/tag/types';
 
-export interface Settings {
-	theme: 'light' | 'dark' | 'system';
-	language: 'es' | 'en';
-	notifications: boolean;
-	thumbnailQuality: 'low' | 'medium' | 'high';
-	autoBackup: boolean;
-	compressUploads: boolean;
-	defaultView: 'grid' | 'list';
-	defaultSort: 'name' | 'date' | 'size';
-	defaultSortOrder: 'asc' | 'desc';
-	defaultThumbnailSize: 'small' | 'medium' | 'large';
-}
+// Settings types moved to @/types/settings.ts (global) and @/types/ui/ (interface)
+// Use: import { Settings } from '@/types/settings';
+// Use: import { InterfacePreferences } from '@/types/ui/types';
 
 export interface ImageMetadata {
 	width: number;

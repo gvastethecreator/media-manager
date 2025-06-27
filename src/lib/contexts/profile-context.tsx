@@ -1,7 +1,7 @@
 'use client';
 
+import type { User } from '@/lib/types';
 import { createContext, type ReactNode, useContext, useState } from 'react';
-import type { Collection, Folder, Tag, User } from '@/lib/types';
 
 type ViewType = 'files' | 'collections' | 'folders' | 'tags';
 
@@ -9,9 +9,9 @@ type ProfileContextType = {
 	currentUser: User;
 	openProfileSettings: () => void;
 	openSettingsTab: (tab: string) => void;
-	collections: Collection[];
-	folders: Folder[];
-	tags: Tag[];
+	collections: CollectionBase[];
+	folders: FolderBase[];
+	tags: TagBase[];
 	currentView: ViewType;
 	setCurrentView: (view: ViewType) => void;
 };
@@ -30,8 +30,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		},
-		openProfileSettings: () => {},
-		openSettingsTab: () => {},
+		openProfileSettings: () => { },
+		openSettingsTab: () => { },
 		collections: [],
 		folders: [],
 		tags: [],

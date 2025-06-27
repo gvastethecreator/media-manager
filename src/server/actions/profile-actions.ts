@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { validateProfilePreferences } from '@/lib/utils/profile/profile-utils';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {

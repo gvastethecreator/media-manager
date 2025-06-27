@@ -15,35 +15,83 @@ flowchart TD
     B --> C[Prisma/DB]
 ```
 
-## Organización y convenciones
+## Estructura Actual (Reorganizada)
 
-- Cada servicio agrupa las operaciones CRUD y utilidades relacionadas con su entidad.
-- Las funciones exportadas están pensadas para ser consumidas desde las Server Actions.
-- Los servicios no deben importar código que dependa del cliente.
+### Entidades Base
 
-### Estructura típica
+- `album/` - Gestión de álbumes de imágenes
+- `file/` - Operaciones de archivos del sistema
+- `folder/` - Gestión de carpetas
+- `group/` - Agrupación de elementos
+- `image/` - Procesamiento de imágenes
+- `tag/` - Sistema de etiquetado
+- `video/` - Procesamiento de videos (placeholder)
+
+### Entidades Organizacionales
+
+- `collection/` - Colecciones de elementos
+- `profile/` - Perfiles de usuario
+
+### Entidades de Contenido
+
+- `audio/` - Archivos de audio
+- `concept/` - Conceptos y ideas
+- `document/` - Documentos de texto
+- `file3d/` - Archivos 3D
+- `json-file/` - Archivos JSON
+- `note/` - Notas y anotaciones
+- `place/` - Lugares y ubicaciones
+- `workflow/` - Flujos de trabajo
+- `world-item/` - Elementos del mundo
+
+### Servicios del Sistema
+
+- `settings/` - Configuración de la aplicación
+- `stats/` - Estadísticas y métricas
+- `toast/` - Notificaciones temporales
+
+### Servicios Especializados
+
+- `activity/` - Registro de actividades
+- `character/` - Personajes
+- `metadata/` - Metadatos de archivos
+- `property/` - Propiedades personalizadas
+- `queue-job/` - Trabajos en cola
+- `uploaded-images/` - Imágenes subidas
+- `wildcard/` - Patrones y comodines
+
+## Estructura de Cada Servicio
 
 ```text
 src/services/<entidad>/
 ├── <entidad>.service.ts   # Implementación principal
 ├── index.ts               # Exportaciones públicas
-└── README.md              # Documentación del módulo
+└── README.md              # Documentación específica (opcional)
 ```
 
-### Ejemplo de uso
+### Servicios Especiales
+
+Algunos servicios tienen archivos adicionales:
+
+- `collection/events.service.ts` - Eventos específicos de colecciones
+- `image/converter.service.ts` - Conversión de imágenes
+
+## Importación
 
 ```typescript
-import { imageService } from '@/services';
+// ✅ Correcto - Importar desde la carpeta
+import { noteService } from '@/services/note';
+import { statsEventEmitter } from '@/services/stats';
 
-// Subir una imagen y notificar progreso
-const img = await imageService.createImage({
-  file,
-  folderId: 'folder-1',
-});
+// ❌ Incorrecto - Rutas legacy eliminadas
+import { noteService } from '@/services/note.service';
+import { statsEventEmitter } from '@/services/stats.service';
 ```
 
-## Buenas prácticas
+## Migración Completada
 
-- Documenta cada función exportada con comentarios JSDoc.
-- Usa helpers de `src/lib` para operaciones comunes (cache, logger, eventos).
-- Mantén las firmas de las funciones estables para facilitar el versionado.
+- ✅ Movimiento de servicios sueltos a carpetas organizadas
+- ✅ Eliminación de archivos legacy (`*-service-export.ts`)
+- ✅ Actualización de exportaciones en `index.ts`
+- ✅ Actualización automática de todas las importaciones (68 archivos)
+- ✅ Validación de errores de TypeScript

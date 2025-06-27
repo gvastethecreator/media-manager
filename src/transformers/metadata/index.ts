@@ -3,9 +3,9 @@
  * @module transformers/metadata
  */
 
+import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataBase, MetadataExtended } from '@/types/entities/metadata';
 import {
-    formatBytes,
     fromPrismaMetadata,
     mapCreateInputToPrisma,
     mapUpdateInputToPrisma,
@@ -43,7 +43,7 @@ export const transformMetadatas = (metadataArray: MetadataBase[] | null): Metada
 // Exportar todas las funciones útiles
 export {
     fromPrismaMetadata as extendMetadata,
-    formatBytes,
+    formatBytes, // Re-exportar desde @/lib/utils/format.utils
     mapCreateInputToPrisma as mapCreateMetadataDataToPrisma,
     mapUpdateInputToPrisma as mapUpdateMetadataDataToPrisma
 };

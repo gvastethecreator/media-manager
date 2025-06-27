@@ -5,7 +5,7 @@ import {
     updateNote as updateNoteAction,
 } from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import { adaptNoteCompleteToWithStats, adaptNotesCompleteToWithStats } from '@/transformers/note/note-adapter';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import { StateCreator } from 'zustand';

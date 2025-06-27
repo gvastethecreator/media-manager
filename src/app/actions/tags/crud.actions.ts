@@ -3,218 +3,133 @@
 /**
  * @file Acciones CRUD específicas para Tag
  * @module app/actions/tags/crud.actions
+ * @description Controladores delgados que llaman al servicio de etiquetas
+ * @updated 2025-01-27
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { toTagWithStats } from '@/transformers/tag';
-import { TagWithStats, tagCounts } from '@/types/entities/tag';
+import tagService, { type GetTagsOptions } from '@/services/tag/tag.service';
+import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
 
 // Configuración y logging
-const tagLogger = serverLogger.withContext('TagCrudActions');
-
-// Rutas para revalidar después de operaciones
-const REVALIDATE_PATHS = ['/dashboard/tags', '/dashboard/images', '/dashboard/stats', '/api/tags'];
-
-// Manejo de errores - enfoque funcional
-enum TagErrorCode {
-	NOT_FOUND = 'NOT_FOUND',
-	VALIDATION_ERROR = 'VALIDATION_ERROR',
-	OPERATION_FAILED = 'OPERATION_FAILED',
-}
-
-const createTagError = (message: string, code: TagErrorCode = TagErrorCode.OPERATION_FAILED, cause?: unknown) => {
-	const error = new Error(message);
-	error.name = 'TagError';
-	Object.assign(error, { code, cause });
-	return error;
-};
-
-// Notificar cambios en etiquetas
-const notifyTagChange = async (action: 'create' | 'update' | 'delete', tag: TagWithStats | { id: string }) => {
-	// Emitir eventos usando el sistema del servidor
-	await emit({
-		type: 'tags:modified',
-		data: { action, tag },
-	});
-
-	// Emitir evento de estadísticas
-	statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
-};
+const logger = serverLogger.withContext('TagActions');
 
 /**
- * 📊 Obtiene un tag por ID con estadísticas calculadas
- * @param id - ID del tag
- * @returns Tag con estadísticas o null si no existe
+ * Obtiene un tag por ID con estadísticas calculadas
  */
 export async function getTag(id: string): Promise<TagWithStats | null> {
 	try {
-		tagLogger.info('🔍 Obteniendo tag:', id);
-
-		const tag = await prisma.tag.findUnique({
-			where: { id },
-			include: tagCounts,
-		});
-
-		if (!tag) {
-			tagLogger.warn('⚠️ Tag no encontrado:', id);
-			return null;
-		}
-
-		const transformedTag = toTagWithStats(tag);
-		tagLogger.info('✅ Tag obtenido:', { id: tag.id, name: tag.name });
-		return transformedTag;
+		logger.info(`🔍 Obteniendo tag ${id} via action`);
+		return await tagService.getTag(id);
 	} catch (error) {
-		tagLogger.error('❌ Error al obtener tag:', { id, error });
-		throw createTagError(`No se pudo obtener el tag: ${id}`, TagErrorCode.OPERATION_FAILED, error);
+		logger.error(`❌ Error en action getTag: ${id}`, { error });
+		throw error;
 	}
 }
 
 /**
- * 📊 Obtiene todos los tags con estadísticas calculadas
- * @returns Array de tags con estadísticas
+ * Obtiene todos los tags con estadísticas calculadas
  */
-export async function getTags(): Promise<TagWithStats[]> {
+export async function getTags(options?: GetTagsOptions): Promise<TagWithStats[]> {
 	try {
-		tagLogger.info('📋 Obteniendo todos los tags...');
-
-		const tags = await prisma.tag.findMany({
-			include: tagCounts,
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ name: 'asc' }
-			],
-		});
-
-		const transformedTags = tags.map(toTagWithStats);
-		tagLogger.info(`✅ ${transformedTags.length} tags obtenidos`);
-		return transformedTags;
+		logger.info('📋 Obteniendo tags via action', { options });
+		const result = await tagService.getTags(options);
+		return result.tags;
 	} catch (error) {
-		tagLogger.error('❌ Error al obtener tags:', error);
-		throw createTagError('No se pudieron obtener los tags', TagErrorCode.OPERATION_FAILED, error);
+		logger.error('❌ Error en action getTags', { error, options });
+		throw error;
 	}
 }
 
 /**
- * ➕ Crea un nuevo tag en la base de datos
- * @param data - Datos del tag a crear, compatibles con Prisma.TagCreateInput
- * @returns Tag creado con estadísticas
+ * Crea un nuevo tag en la base de datos
  */
-export async function createTag(data: Prisma.TagCreateInput): Promise<TagWithStats> {
+export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 	try {
-		tagLogger.info('📝 Creando etiqueta:', data.name);
-
-		const tag = await prisma.tag.create({
-			data,
-			include: tagCounts,
-		});
-
-		const transformedTag = toTagWithStats(tag);
-
-		// Notificar cambio y revalidar rutas
-		await notifyTagChange('create', transformedTag);
-		for (const path of REVALIDATE_PATHS) {
-			revalidatePath(path);
-		}
-
-		tagLogger.info('✅ Etiqueta creada:', { id: tag.id, name: tag.name });
-		return transformedTag;
+		logger.info('📝 Creando tag via action', { name: data.name });
+		return await tagService.createTag(data);
 	} catch (error) {
-		tagLogger.error('❌ Error al crear etiqueta:', { data, error });
-		throw createTagError('No se pudo crear la etiqueta', TagErrorCode.OPERATION_FAILED, error);
+		logger.error('❌ Error en action createTag', { error, data });
+		throw error;
 	}
 }
 
 /**
- * 🔄 Actualiza un tag existente
- * @param id - ID del tag a actualizar
- * @param data - Datos a actualizar, compatibles con Prisma.TagUpdateInput
- * @returns Tag actualizado con estadísticas
+ * Actualiza un tag existente
  */
-export async function updateTag(id: string, data: Prisma.TagUpdateInput): Promise<TagWithStats> {
+export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWithStats> {
 	try {
-		tagLogger.info('📝 Actualizando etiqueta:', { tagId: id, ...data });
-
-		// Verificar si la etiqueta existe para evitar errores en producción.
-		const existingTag = await prisma.tag.findUnique({
-			where: { id },
-			select: { id: true },
-		});
-
-		if (!existingTag) {
-			tagLogger.warn('⚠️ Etiqueta no encontrada para actualizar:', id);
-			throw createTagError(`Etiqueta no encontrada: ${id}`, TagErrorCode.NOT_FOUND);
-		}
-
-		const tag = await prisma.tag.update({
-			where: { id },
-			data,
-			include: tagCounts,
-		});
-
-		const transformedTag = toTagWithStats(tag);
-
-		// Notificar cambio y revalidar rutas
-		await notifyTagChange('update', transformedTag);
-		for (const path of REVALIDATE_PATHS) {
-			revalidatePath(path);
-		}
-
-		tagLogger.info('✅ Etiqueta actualizada:', { id: tag.id, name: tag.name });
-		return transformedTag;
+		logger.info(`📝 Actualizando tag ${id} via action`);
+		return await tagService.updateTag(id, data);
 	} catch (error) {
-		tagLogger.error('❌ Error al actualizar etiqueta:', { id, data, error });
-
-		if (error instanceof Error && error.name === 'TagError') {
-			throw error;
-		}
-
-		throw createTagError(`No se pudo actualizar la etiqueta: ${id}`, TagErrorCode.OPERATION_FAILED, error);
+		logger.error(`❌ Error en action updateTag: ${id}`, { error, data });
+		throw error;
 	}
 }
 
 /**
- * 🗑️ Elimina un tag existente
- * @param id - ID del tag a eliminar
+ * Elimina un tag existente
  */
 export async function deleteTag(id: string): Promise<void> {
 	try {
-		tagLogger.info('🗑️ Eliminando etiqueta:', id);
-
-		// Usamos una transacción para asegurar que la notificación solo ocurra si la eliminación es exitosa.
-		await prisma.$transaction(async (tx) => {
-			const tag = await tx.tag.findUnique({
-				where: { id },
-				select: { id: true, name: true },
-			});
-
-			if (!tag) {
-				tagLogger.warn('⚠️ Etiqueta no encontrada para eliminar:', id);
-				throw createTagError(`Etiqueta no encontrada: ${id}`, TagErrorCode.NOT_FOUND);
-			}
-
-			await tx.tag.delete({ where: { id } });
-
-			// Notificar cambio después de eliminar
-			await notifyTagChange('delete', { id });
-		});
-
-		for (const path of REVALIDATE_PATHS) {
-			revalidatePath(path);
-		}
-
-		tagLogger.info('✅ Etiqueta eliminada:', id);
+		logger.info(`🗑️ Eliminando tag ${id} via action`);
+		await tagService.deleteTag(id);
 	} catch (error) {
-		tagLogger.error('❌ Error al eliminar etiqueta:', { id, error });
-
-		if (error instanceof Error && error.name === 'TagError') {
-			throw error;
-		}
-
-		throw createTagError(`No se pudo eliminar la etiqueta: ${id}`, TagErrorCode.OPERATION_FAILED, error);
+		logger.error(`❌ Error en action deleteTag: ${id}`, { error });
+		throw error;
 	}
+}
+
+/**
+ * Cambia el estado de favorito de un tag
+ */
+export async function toggleTagFavorite(id: string): Promise<TagWithStats> {
+	try {
+		logger.info(`⭐ Cambiando favorito de tag ${id} via action`);
+		return await tagService.toggleTagFavorite(id);
+	} catch (error) {
+		logger.error(`❌ Error en action toggleTagFavorite: ${id}`, { error });
+		throw error;
+	}
+}
+
+/**
+ * Cambia el estado de archivo de un tag
+ */
+export async function toggleTagArchive(id: string): Promise<TagWithStats> {
+	try {
+		logger.info(`📦 Cambiando archivo de tag ${id} via action`);
+		return await tagService.toggleTagArchive(id);
+	} catch (error) {
+		logger.error(`❌ Error en action toggleTagArchive: ${id}`, { error });
+		throw error;
+	}
+}
+
+// Mantener compatibilidad con código legacy que usa Prisma types
+export async function createTagLegacy(data: Prisma.TagCreateInput): Promise<TagWithStats> {
+	const tagInput: TagCreateInput = {
+		name: data.name,
+		description: data.description || undefined,
+		color: data.color || undefined,
+		emoji: data.emoji || undefined,
+		isPrivate: data.isPrivate || false,
+		isArchived: data.isArchived || false,
+		isFavorite: data.isFavorite || false,
+	};
+	return createTag(tagInput);
+}
+
+export async function updateTagLegacy(id: string, data: Prisma.TagUpdateInput): Promise<TagWithStats> {
+	const tagInput: TagUpdateInput = {};
+	if (data.name !== undefined) tagInput.name = data.name as string;
+	if (data.description !== undefined) tagInput.description = data.description as string | undefined;
+	if (data.color !== undefined) tagInput.color = data.color as string | undefined;
+	if (data.emoji !== undefined) tagInput.emoji = data.emoji as string | undefined;
+	if (data.isPrivate !== undefined) tagInput.isPrivate = data.isPrivate as boolean;
+	if (data.isArchived !== undefined) tagInput.isArchived = data.isArchived as boolean;
+	if (data.isFavorite !== undefined) tagInput.isFavorite = data.isFavorite as boolean;
+
+	return updateTag(id, tagInput);
 }

@@ -8,7 +8,7 @@ import { getImageUrl } from '@/app/actions/images';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import { useImageResources } from '@/store/image-resources.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 

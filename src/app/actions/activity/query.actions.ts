@@ -6,7 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 
 import { extendActivities, extendActivity, mapActivityFiltersToPrisma } from '@/transformers/activity';
 import {

@@ -5,7 +5,7 @@
  */
 import * as actions from '@/app/actions/document/document.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
 import type { DocumentCoreActions, DocumentCoreState, DocumentStore } from '../types';

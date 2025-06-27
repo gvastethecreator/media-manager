@@ -20,7 +20,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
 import { Plus, Search, Star, Trash2 } from 'lucide-react';

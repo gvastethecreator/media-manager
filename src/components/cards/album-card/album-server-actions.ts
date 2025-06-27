@@ -1,6 +1,6 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 import type { AlbumWithStats } from '@/types/entities/album';

@@ -1,12 +1,10 @@
 'use client';
 
-import { AnimatePresence, motion } from 'motion/react';
-import { memo, useEffect, useRef, useState } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
+import { AnimatePresence, motion } from 'motion/react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
-import { FolderContentView } from '../folders/views/folder-content-view';
-import { FoldersView } from '../folders/views/folders-view';
 import { AlbumContentView } from './albums/album-content-view';
 import { AlbumsView } from './albums/albums-view';
 import { AllImagesView } from './all-images/all-images-view';
@@ -21,6 +19,8 @@ import { DevelopmentView } from './development/development-view';
 import { DocumentsView } from './documents/documents-view';
 import { FavoritesView } from './favorites/favorites-view';
 import { File3DView } from './file3d/file3d-view';
+import { FolderContentView } from './folders/views/folder-content-view';
+import { FoldersView } from './folders/views/folders-view';
 import { GroupContentView } from './groups/group-content-view';
 import { GroupsView } from './groups/groups-view';
 import { JsonFilesView } from './json-files/json-files-view';

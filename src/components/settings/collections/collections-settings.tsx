@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import toastService from '@/services/toast.service';
+import toastService from '@/services/toast';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,

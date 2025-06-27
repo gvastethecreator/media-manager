@@ -4,16 +4,16 @@ import { serverLogger } from './logger/server-logger';
 // Re-exportar TransformerError y otras clases de error relacionadas desde utils/transformers/errors
 // para mantener compatibilidad con el código existente
 export {
-	handleTransformerError,
-	MappingError,
-	MetadataError,
-	RelationError,
-	SearchError,
-	SerializationError,
-	TransformerError,
-	TypeMismatchError,
-	UIError,
-	ValidationError,
+    handleTransformerError,
+    MappingError,
+    MetadataError,
+    RelationError,
+    SearchError,
+    SerializationError,
+    TransformerError,
+    TypeMismatchError,
+    UIError,
+    ValidationError
 } from '@/utils/transformers/errors';
 
 const _errorLogger = serverLogger.withContext('ErrorHandler');
@@ -138,26 +138,32 @@ export function createEntityErrorObject(
 	};
 }
 
-export function handlePrismaError(error: unknown): never {
+export function handlePrismaError(error: unknown, customMessage?: string): never {
+	const baseMessage = customMessage || 'Error en operación de base de datos';
+
 	if (error instanceof Prisma.PrismaClientKnownRequestError) {
 		// Errores conocidos de Prisma
 		switch (error.code) {
 			case 'P2002':
-				throw new StatsError('Error de unicidad en la base de datos', error);
+				throw new StatsError(`${baseMessage}: Error de unicidad en la base de datos`, error);
 			case 'P2025':
-				throw new StatsError('Registro no encontrado', error);
+				throw new StatsError(`${baseMessage}: Registro no encontrado`, error);
 			default:
-				throw new StatsError(`Error de base de datos (${error.code}): ${error.message}`, error);
+				throw new StatsError(`${baseMessage}: Error de base de datos (${error.code}): ${error.message}`, error);
 		}
 	}
 	if (error instanceof Prisma.PrismaClientValidationError) {
-		throw new StatsError('Error de validación en la base de datos', error);
+		throw new StatsError(`${baseMessage}: Error de validación en la base de datos`, error);
 	}
 	if (error instanceof Prisma.PrismaClientInitializationError) {
-		throw new StatsError('Error al inicializar la base de datos', error);
+		throw new StatsError(`${baseMessage}: Error al inicializar la base de datos`, error);
 	}
 	if (error instanceof Error) {
-		throw new StatsError(error.message, error);
+		throw new StatsError(`${baseMessage}: ${error.message}`, error);
 	}
-	throw new StatsError('Error desconocido en el servicio de estadísticas', error);
+	throw new StatsError(`${baseMessage}: Error desconocido en el servicio de estadísticas`, error);
+}
+
+export function handlePrismaNotFoundError(message: string): never {
+	throw createEntityErrorObject('NotFoundError', message, EntityErrorCode.NOT_FOUND);
 }

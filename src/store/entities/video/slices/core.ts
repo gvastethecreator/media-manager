@@ -12,7 +12,7 @@ import {
 	getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
+import { toastService } from '@/services/toast';
 import type {
 	VideoCreateInput,
 	VideoUpdateInput,

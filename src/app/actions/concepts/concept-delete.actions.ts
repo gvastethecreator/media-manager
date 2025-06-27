@@ -1,10 +1,10 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { revalidatePath } from 'next/cache';
 
 // Logger dedicado

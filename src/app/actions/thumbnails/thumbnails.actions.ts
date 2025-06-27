@@ -3,10 +3,11 @@
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { generateThumbnail } from '@/lib/thumbnail';
-import type { ProcessOptions } from '@/services/thumbnail-service-export';
-import { thumbnailService } from '@/services/thumbnail-service-export';
+import { prisma } from '@/lib/database/prisma';
+import { generateThumbnail } from '@/lib/image/thumbnail';
+// import type { ProcessOptions } from '@/services/thumbnail-service-export';
+// import { thumbnailService } from '@/services/thumbnail-service-export';
+// TODO: Implementar servicio de thumbnails o usar servicio de imágenes
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
 
 const thumbLogger = serverLogger.withContext('ThumbnailActions');

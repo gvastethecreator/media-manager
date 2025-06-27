@@ -1,6 +1,6 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { getPrismaClient } from '@/lib/database/db';
 import type { GroupBase } from '@/types/entities/group/types';
 
 export interface GroupCardData extends Omit<GroupBase, 'filters'> {
