@@ -16,11 +16,63 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFilteredData } from './hooks/use-filtered-data';
 import './styles/scrollbar.css';
 import { StatusBar } from './toolbar/status-bar';
-import { fileItemsToAnyEntities, fileItemsToImageItems } from './utils/file-converters';
 import { CardsView } from './views/cards-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 import { SimpleGridView } from './views/simple-grid-view';
+// ⚠️ LEGACY: Funciones de conversión inline (archivo file-converters.ts eliminado)
+const fileItemsToImageItems = (files: FileItem[]) => {
+	return files.map(file => ({
+		id: file.id,
+		name: file.name || '',
+		src: file.thumbnail || `/api/images/${file.id}/content`,
+		alt: file.name || '',
+		width: 0,
+		height: 0,
+		thumbnail: file.thumbnail || null,
+		type: file.type || 'image',
+		path: file.path || '',
+		size: file.size || 0,
+		mimeType: file.mimeType || '',
+		metadata: file.metadata || null,
+		url: file.thumbnail || `/api/images/${file.id}/content`,
+		parsedMetadata: undefined,
+	}));
+};
+
+const fileItemsToAnyEntities = (files: FileItem[]): AnyEntity[] => {
+	return files.map(file => {
+		let entityType: AnyEntity['entityType'] = 'image';
+		let basePath = 'images';
+
+		if (file.type?.startsWith('video/')) {
+			entityType = 'video';
+			basePath = 'videos';
+		} else if (file.type === 'folder') {
+			entityType = 'folder';
+			basePath = 'folders';
+		} else if (file.type?.startsWith('audio/')) {
+			entityType = 'audio';
+			basePath = 'audios';
+		} else if (file.type === 'application/pdf') {
+			entityType = 'document';
+			basePath = 'documents';
+		}
+
+		return {
+			id: file.id,
+			entityType: entityType,
+			name: file.name,
+			thumbnail: file.thumbnail || `/${basePath}/${file.id}/thumbnail`,
+			href: `/${basePath}/${file.id}`,
+			isFavorite: file.isFavorite || false,
+			tags: [],
+			createdAt: file.createdAt || new Date().toISOString(),
+			updatedAt: file.updatedAt || new Date().toISOString(),
+			...(file.metadata || {}),
+		} as AnyEntity;
+	});
+};
 
 const logger = clientLogger.withContext('FileBrowser');
 

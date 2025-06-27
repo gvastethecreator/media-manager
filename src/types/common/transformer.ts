@@ -1,4 +1,4 @@
-import type { MetadataFields, UIFields } from '@/utils/transformers/common';
+import type { MetadataFields, UIFields } from '@/lib/utils/transformers/common';
 import { z } from 'zod';
 
 /**

@@ -4,7 +4,7 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import { createSelectors } from '@/utils/store-selectors';
+import { createSelectors } from '@/lib/utils/store-selectors.utils';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -59,3 +59,4 @@ export const useFavoriteStore = createSelectors(useFavoriteStoreBase);
 // Re-exportar tipos y constantes
 export * from './constants';
 export * from './types';
+

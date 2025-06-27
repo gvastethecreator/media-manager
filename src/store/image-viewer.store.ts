@@ -1,17 +1,18 @@
-import { create } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/migration';
+import { isImageWithStats } from '@/types/migration';
+import { create } from 'zustand';
 
 const viewerLogger = clientLogger.withContext('ImageViewer');
 
-// Interfaz para el estado del visor
+// Interfaz para el estado del visor - MIGRADO A EntityWithStats
 interface ImageViewerState {
 	isOpen: boolean;
-	images: FileItem[];
+	images: EntityWithStats[];
 	currentIndex: number;
 	zoom: number;
 	rotation: number;
-	openViewer: (images: FileItem[], initialIndex?: number) => void;
+	openViewer: (images: EntityWithStats[], initialIndex?: number) => void;
 	closeViewer: () => void;
 	nextImage: () => void;
 	previousImage: () => void;
@@ -20,7 +21,7 @@ interface ImageViewerState {
 	setRotation: (rotation: number) => void;
 }
 
-// Crear el store
+// Crear el store - MIGRADO A EntityWithStats
 export const useImageViewerStore = create<ImageViewerState>((set, get) => ({
 	// Estado inicial
 	isOpen: false,
@@ -30,13 +31,28 @@ export const useImageViewerStore = create<ImageViewerState>((set, get) => ({
 	rotation: 0,
 
 	// Acciones
-	openViewer: (images: FileItem[], initialIndex = 0) => {
-		viewerLogger.info('Abriendo visor de imágenes', { filesCount: images.length, initialIndex });
+	openViewer: (images: EntityWithStats[], initialIndex = 0) => {
+		// Filtrar solo imágenes válidas
+		const imageEntities = images.filter(isImageWithStats);
+
+		if (imageEntities.length === 0) {
+			viewerLogger.warn('No se encontraron imágenes válidas para abrir el visor');
+			return;
+		}
+
+		viewerLogger.info('Abriendo visor de imágenes', {
+			totalEntities: images.length,
+			validImages: imageEntities.length,
+			initialIndex
+		});
+
+		// Ajustar el índice inicial si es necesario
+		const adjustedIndex = Math.min(initialIndex, imageEntities.length - 1);
 
 		set({
-			images,
+			images: imageEntities,
 			isOpen: true,
-			currentIndex: initialIndex,
+			currentIndex: adjustedIndex,
 			zoom: 1,
 			rotation: 0,
 		});
@@ -111,7 +127,7 @@ export const useImageViewerStore = create<ImageViewerState>((set, get) => ({
 	},
 }));
 
-// Hook personalizado para facilitar el uso
+// Hook personalizado para facilitar el uso - ACTUALIZADO
 export const useImageViewer = () => {
 	const store = useImageViewerStore();
 

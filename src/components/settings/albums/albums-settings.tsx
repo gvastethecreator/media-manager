@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
-import { formatBytes } from '@/utils/file/helpers';
+import { formatBytes } from '@/lib/utils/file/helpers';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';

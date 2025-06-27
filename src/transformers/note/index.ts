@@ -15,7 +15,7 @@ import type {
     NoteSearchResult,
     NoteUpdateInput,
 } from '@/types/entities/note/types';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import {
     mapCreateNoteDataToPrisma,
     mapNoteFiltersToPrisma,

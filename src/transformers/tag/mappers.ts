@@ -9,7 +9,7 @@ import {
     TagStatistics,
     TagWithStats,
 } from '@/types/entities/tag';
-import { calculateCompleteness } from '@/utils/transformers';
+import { calculateCompleteness } from '@/lib/utils/transformers';
 
 /**
  * Convierte un objeto Tag de Prisma (con conteos) a un objeto TagWithStats.

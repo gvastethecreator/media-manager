@@ -11,7 +11,7 @@ import {
     CharacterRace,
     CharacterSortOption,
 } from '@/types/entities/character';
-import { matchesCharacterSearch, sortCharacters } from '@/utils/character';
+import { matchesCharacterSearch, sortCharacters } from '@/lib/utils/character';
 import type { StateCreator } from 'zustand';
 import type { CharacterFiltersSlice, CharacterState } from '../types';
 

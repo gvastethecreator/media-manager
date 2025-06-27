@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast';
 import type { WorldItem } from '@/types/entities/world-item';
-import { formatBytes } from '@/utils/file/helpers';
+import { formatBytes } from '@/lib/utils/file/helpers';
 import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { CreateWorldItemForm } from './create-world-item-form';

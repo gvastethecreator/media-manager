@@ -1,22 +1,22 @@
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { EntityWithStats } from '@/types/migration';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { clientLogger } from '@/lib/logger/client-logger';
-import type { FileItem } from '@/types/files';
 
 const selectionLogger = clientLogger.withContext('SelectionStore');
 
 /**
- * Interfaz para el estado del store de selección
+ * Interfaz para el estado del store de selección - MIGRADO A EntityWithStats
  */
 export interface SelectionState {
 	// Estado
-	selectedItems: FileItem[];
-	lastSelectedItem: FileItem | null;
+	selectedItems: EntityWithStats[];
+	lastSelectedItem: EntityWithStats | null;
 	isMultiSelectMode: boolean;
 
 	// Acciones
-	toggleSelection: (id: string, item: FileItem) => void;
-	selectItem: (item: FileItem) => void;
+	toggleSelection: (id: string, item: EntityWithStats) => void;
+	selectItem: (item: EntityWithStats) => void;
 	deselectItem: (id: string) => void;
 	clearSelection: () => void;
 	setMultiSelectMode: (enabled: boolean) => void;
@@ -26,8 +26,9 @@ export interface SelectionState {
 }
 
 /**
- * Store central para la selección de archivos y entidades
+ * Store central para la selección de archivos y entidades - MIGRADO A EntityWithStats
  * Reemplaza la funcionalidad de selección de useFileManager
+ * ✅ Actualizado para usar EntityWithStats en lugar de FileItem
  */
 export const useSelectionStore = create<SelectionState>()(
 	devtools(
@@ -38,7 +39,7 @@ export const useSelectionStore = create<SelectionState>()(
 			isMultiSelectMode: false,
 
 			// Acciones
-			toggleSelection: (id: string, item: FileItem) => {
+			toggleSelection: (id: string, item: EntityWithStats) => {
 				const { selectedItems, isMultiSelectMode } = get();
 				const isSelected = selectedItems.some((item) => item.id === id);
 
@@ -73,7 +74,7 @@ export const useSelectionStore = create<SelectionState>()(
 				}
 			},
 
-			selectItem: (item: FileItem) => {
+			selectItem: (item: EntityWithStats) => {
 				const { isMultiSelectMode, selectedItems } = get();
 
 				// En modo multi-selección, añadir a selección existente

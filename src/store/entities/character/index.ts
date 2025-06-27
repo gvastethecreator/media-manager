@@ -5,7 +5,7 @@
 
 import type { CharacterViewConfig, CharacterWithStats } from '@/types/entities/character';
 import { CharacterSortOption } from '@/types/entities/character/enums';
-import { CHARACTER_KEY_PREFIX } from '@/utils/character';
+import { CHARACTER_KEY_PREFIX } from '@/lib/utils/character';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { createCharacterCoreSlice } from './slices/core';

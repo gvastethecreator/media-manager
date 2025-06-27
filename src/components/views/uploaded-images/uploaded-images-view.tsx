@@ -40,7 +40,7 @@ import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
 import { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';
-import type { EntityId, JSONString } from '@/utils/types/utility-types';
+import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 

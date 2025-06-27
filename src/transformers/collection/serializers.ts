@@ -12,7 +12,7 @@ import type {
     CollectionSortBy,
     CollectionUpdateInput,
 } from '@/types/entities/collection';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('CollectionSerializers');

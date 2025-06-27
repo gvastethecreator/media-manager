@@ -9,7 +9,7 @@ import { immer } from 'zustand/middleware/immer';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { settingsService } from '@/services/settings';
 import type { Settings, SettingsUpdate } from '@/types/settings';
-import { createSelectors } from '@/utils/store-selectors';
+import { createSelectors } from '@/lib/utils/store-selectors.utils';
 
 // Logger para el store
 const logger = clientLogger.withContext('SettingsStore');
@@ -268,3 +268,4 @@ export const selectAdvanced = (state: SettingsState) => state.settings?.advanced
 
 export const selectTheme = (state: SettingsState) => state.settings?.appearance.theme || 'system';
 export const selectLanguage = (state: SettingsState) => state.settings?.appearance.language || 'es';
+

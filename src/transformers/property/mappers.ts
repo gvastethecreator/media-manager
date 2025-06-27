@@ -9,7 +9,7 @@ import {
     PropertyStatistics,
     PropertyWithStats,
 } from '@/types/entities/property';
-import { calculateCompleteness } from '@/utils/transformers';
+import { calculateCompleteness } from '@/lib/utils/transformers';
 
 /**
  * Convierte un objeto Property de Prisma (con conteos) a un objeto PropertyWithStats.

@@ -6,7 +6,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { WildcardBase, WildcardChild, WildcardComplete, WildcardDeserialized } from '@/types/entities/wildcard';
 import { WildcardSchema } from '@/types/entities/wildcard';
-import { TransformerError } from '@/utils/transformers/errors';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext({ module: 'WildcardTransformer:Serializers' });

@@ -16,7 +16,7 @@ import type {
     UploadedImageResults,
     UploadedImageStats,
 } from '@/types/uploaded-images';
-import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/utils/errors/service-errors';
+import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVICE_NAME = 'UploadedImagesService';
 const uploadedImagesLogger = serverLogger.withContext(SERVICE_NAME);

@@ -16,7 +16,7 @@ import {
     type QueueStats,
     type UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
-import { getPaginationInfo } from '@/utils/pagination';
+import { getPaginationInfo } from '@/lib/utils/pagination';
 import type { Prisma } from '@prisma/client';
 
 // Logger específico para el servicio
