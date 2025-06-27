@@ -12,7 +12,7 @@ import { folderService } from '@/services/folder-service-export';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
-import { DatabaseIcon, FolderIcon, XCircle } from 'lucide-react';
+import { DatabaseIcon, FolderIcon, RefreshCw, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -32,7 +32,7 @@ type FolderEntity = FolderWithStats & {
 
 const MemoizedEntityCard = React.memo(
 	({ folder, onFolderClick }: { folder: FolderEntity; onFolderClick: () => void }) => (
-		<EntityCard item={folder} onClick={onFolderClick} className="h-full" />
+		<EntityCard entity={folder} onClick={onFolderClick} className="h-full" />
 	),
 	(prevProps, nextProps) =>
 		prevProps.folder.id === nextProps.folder.id &&
@@ -40,7 +40,7 @@ const MemoizedEntityCard = React.memo(
 		prevProps.folder.updatedAt === nextProps.folder.updatedAt &&
 		(prevProps.folder._count?.images || 0) === (nextProps.folder._count?.images || 0) &&
 		prevProps.folder.totalSize === nextProps.folder.totalSize &&
-		prevProps.folder.totalFiles === nextProps.folder.totalFiles,
+		prevProps.folder.totalFiles === nextProps.folder.totalFiles
 );
 MemoizedEntityCard.displayName = 'MemoizedEntityCard';
 
@@ -238,9 +238,7 @@ export function FoldersView(_props: ViewProps) {
 			<div className="container mx-auto p-6">
 				{/* Header con estadísticas */}
 				<div className="mb-6">
-					<h2 className="text-2xl font-bold text-foreground mb-2">
-						Carpetas
-					</h2>
+					<h2 className="text-2xl font-bold text-foreground mb-2">Carpetas</h2>
 					<p className="text-muted-foreground">
 						{optimisticFolders.length} {optimisticFolders.length === 1 ? 'carpeta' : 'carpetas'} indexadas
 					</p>
