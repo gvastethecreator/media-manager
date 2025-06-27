@@ -4,12 +4,7 @@
  * @description Store Zustand para gestionar el estado de audios
  */
 
-import {
-    createAudio,
-    deleteAudio,
-    getAudios,
-    updateAudio,
-} from '@/app/actions/audio/audio.actions';
+import { createAudio, deleteAudio, getAudios, updateAudio } from '@/app/actions/audio/audio.actions';
 import type { AudioWithStats } from '@/types/entities/audio';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
 import type { Prisma } from '@prisma/client';

@@ -16,16 +16,16 @@ export type AudioBase = Audio;
  * Estas métricas se enfocan en las características técnicas y de calidad del audio.
  */
 export interface AudioStatistics {
-  /** Duración del audio en segundos */
-  duration: number;
-  /** Formato del archivo (por ejemplo, 'mp3', 'wav') */
-  format: string;
-  /** Tasa de bits en kbps, una medida de la calidad */
-  bitrate: number;
-  /** Un array de los picos de volumen para visualización */
-  volumePeaks: number[];
-  /** Tasa de muestreo en Hz */
-  sampleRate: number;
+	/** Duración del audio en segundos */
+	duration: number;
+	/** Formato del archivo (por ejemplo, 'mp3', 'wav') */
+	format: string;
+	/** Tasa de bits en kbps, una medida de la calidad */
+	bitrate: number;
+	/** Un array de los picos de volumen para visualización */
+	volumePeaks: number[];
+	/** Tasa de muestreo en Hz */
+	sampleRate: number;
 }
 
 /**
@@ -33,5 +33,5 @@ export interface AudioStatistics {
  * Este es el tipo canónico para usar en la aplicación.
  */
 export interface AudioWithStats extends AudioBase {
-  stats: AudioStatistics;
+	stats: AudioStatistics;
 }

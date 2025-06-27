@@ -16,9 +16,7 @@ const tagTransformerLogger = clientLogger.withContext('TagTransformer');
  * @param prismaTag El objeto Tag de Prisma, puede incluir conteos de relaciones
  * @returns Un objeto TagWithStats con estadísticas calculadas o null si el input es inválido
  */
-function fromPrismaTag(
-	prismaTag: PrismaTagWithCounts | TagBase | null
-): TagWithStats | null {
+function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): TagWithStats | null {
 	if (!prismaTag) {
 		tagTransformerLogger.warn('⚠️ Tag de Prisma nulo o indefinido');
 		return null;
@@ -36,15 +34,11 @@ function fromPrismaTag(
 
 			// Calcular estadísticas
 			const totalRelations = Object.values(_count).reduce((sum, count) => sum + count, 0);
-			const usageDiversity = Object.values(_count).filter(count => count > 0).length;
+			const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
 			const totalPossibleRelations = Object.keys(_count).length;
 			const diversityRatio = totalPossibleRelations > 0 ? usageDiversity / totalPossibleRelations : 0;
 			const popularity = Math.log1p(totalRelations) * diversityRatio;
-			const completenessScore = calculateCompleteness(baseTag, [
-				'name',
-				'description',
-				'category',
-			]);
+			const completenessScore = calculateCompleteness(baseTag, ['name', 'description', 'category']);
 
 			const stats: TagStatistics = {
 				totalRelations,
@@ -60,11 +54,7 @@ function fromPrismaTag(
 		}
 
 		// Si no tiene conteos, crear estadísticas vacías
-		const completenessScore = calculateCompleteness(prismaTag, [
-			'name',
-			'description',
-			'category',
-		]);
+		const completenessScore = calculateCompleteness(prismaTag, ['name', 'description', 'category']);
 
 		const stats: TagStatistics = {
 			totalRelations: 0,
@@ -90,7 +80,7 @@ function fromPrismaTag(
  * TagTransformer - Namespace que contiene todas las funciones de transformación para tags
  */
 export const TagTransformer = {
-	fromPrismaTag
+	fromPrismaTag,
 } as const;
 
 /**

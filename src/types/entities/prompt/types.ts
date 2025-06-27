@@ -140,4 +140,3 @@ export interface PromptSearchOptions {
 	};
 	includeRelations?: boolean;
 }
-

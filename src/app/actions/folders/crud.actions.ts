@@ -160,15 +160,7 @@ export async function findFolders(options: {
 }): Promise<{ folders: FolderWithStats[]; total: number }> {
 	logger.info('🔍 Finding folders with options:', options);
 
-	const {
-		search,
-		parentId,
-		isFavorite,
-		skip = 0,
-		take = 50,
-		orderBy = 'name',
-		order = 'asc',
-	} = options;
+	const { search, parentId, isFavorite, skip = 0, take = 50, orderBy = 'name', order = 'asc' } = options;
 
 	// Construir where clause
 	const where: any = {};
@@ -227,10 +219,7 @@ export async function findFolders(options: {
 /**
  * 📁 Mueve una carpeta a un nuevo padre
  */
-export async function moveFolder(
-	folderId: string,
-	newParentId: string | null
-): Promise<FolderWithStats> {
+export async function moveFolder(folderId: string, newParentId: string | null): Promise<FolderWithStats> {
 	logger.info(`📁 Moving folder ${folderId} to parent ${newParentId}`);
 
 	// Validar que no se cree un ciclo

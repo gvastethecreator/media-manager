@@ -59,7 +59,7 @@ export function RelatedEntities({ item }: ItemComponentProps) {
 		},
 	];
 
-	const availableRelations = relations.filter(rel => hasRelation(rel.key));
+	const availableRelations = relations.filter((rel) => hasRelation(rel.key));
 
 	if (availableRelations.length === 0) {
 		return null;
@@ -69,7 +69,7 @@ export function RelatedEntities({ item }: ItemComponentProps) {
 		<div className="flex flex-col gap-2">
 			<h3 className="text-xs font-medium text-muted-foreground">Entidades relacionadas</h3>
 			<div className="flex flex-col gap-1.5">
-				{availableRelations.map(rel => {
+				{availableRelations.map((rel) => {
 					const count = item[rel.key as keyof typeof item].length;
 					return (
 						<InfoItem

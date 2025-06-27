@@ -7,4 +7,3 @@
  */
 
 export { toAlbumWithStats } from './mappers';
-

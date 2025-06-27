@@ -85,7 +85,7 @@ export const usePlaceStore = create<PlaceStore>()(
 			selectPlace: (placeId) => set({ selectedPlaceId: placeId }),
 			getSelectedPlace: () => {
 				const { selectedPlaceId, places } = get();
-				return selectedPlaceId ? places.find(p => p.id === selectedPlaceId) || null : null;
+				return selectedPlaceId ? places.find((p) => p.id === selectedPlaceId) || null : null;
 			},
 
 			// Implementación del FiltersSlice
@@ -153,9 +153,7 @@ export const usePlaceStore = create<PlaceStore>()(
 					if (valB === null || valB === undefined) return -1;
 
 					if (typeof valA === 'string' && typeof valB === 'string') {
-						return sortOrder === 'asc'
-							? valA.localeCompare(valB)
-							: valB.localeCompare(valA);
+						return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
 					}
 
 					if (typeof valA === 'number' && typeof valB === 'number') {
@@ -163,9 +161,7 @@ export const usePlaceStore = create<PlaceStore>()(
 					}
 
 					if (valA instanceof Date && valB instanceof Date) {
-						return sortOrder === 'asc'
-							? valA.getTime() - valB.getTime()
-							: valB.getTime() - valA.getTime();
+						return sortOrder === 'asc' ? valA.getTime() - valB.getTime() : valB.getTime() - valA.getTime();
 					}
 
 					return 0;
@@ -233,4 +229,3 @@ export const usePlaceStore = create<PlaceStore>()(
 // Re-exportar tipos y constantes
 export * from './constants';
 export * from './types';
-

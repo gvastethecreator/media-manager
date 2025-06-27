@@ -2,16 +2,8 @@ import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromPrismaNote } from '@/transformers/note';
-import {
-    mapCreateNoteDataToPrisma,
-    mapUpdateNoteDataToPrisma
-} from '@/transformers/note/mappers';
-import type {
-    NoteComplete,
-    NoteCreateInput,
-    NoteUpdateInput,
-    NoteWithStats
-} from '@/types/entities/note';
+import { mapCreateNoteDataToPrisma, mapUpdateNoteDataToPrisma } from '@/transformers/note/mappers';
+import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import type { Prisma } from '@prisma/client';
 
 const noteLogger = serverLogger.withContext('NoteService');
@@ -293,7 +285,7 @@ export const NoteService = {
 						wordCount: noteComplete.content.split(/\s+/).length,
 						characterCount: noteComplete.content.length,
 						readingTime: Math.ceil(noteComplete.content.split(/\s+/).length / 200), // aprox. 200 palabras por minuto
-						completionScore: Math.min(100, Math.max(0, (totalItems * 10) + (noteComplete.content.length / 10))),
+						completionScore: Math.min(100, Math.max(0, totalItems * 10 + noteComplete.content.length / 10)),
 						lastUpdated: noteComplete.updatedAt,
 					},
 					excerpt: noteComplete.content.substring(0, 150) + (noteComplete.content.length > 150 ? '...' : ''),
@@ -327,7 +319,7 @@ export const NoteService = {
 			draft: 'Borrador',
 			published: 'Publicada',
 			archived: 'Archivada',
-			pending: 'Pendiente'
+			pending: 'Pendiente',
 		};
 		return labels[status as keyof typeof labels] || status;
 	},
@@ -343,7 +335,7 @@ export const NoteService = {
 			world_item: 'Objeto del Mundo',
 			prompt: 'Prompt',
 			idea: 'Idea',
-			todo: 'Por Hacer'
+			todo: 'Por Hacer',
 		};
 		return labels[category as keyof typeof labels] || category;
 	},

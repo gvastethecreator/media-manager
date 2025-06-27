@@ -34,10 +34,7 @@ type GroupCounts = {
  * @param counts Los conteos de las relaciones del grupo.
  * @returns Un objeto GroupWithStats.
  */
-export function toGroupWithStats(
-	group: Group,
-	counts: GroupCounts['_count'],
-): GroupWithStats {
+export function toGroupWithStats(group: Group, counts: GroupCounts['_count']): GroupWithStats {
 	const stats: GroupStatistics = {
 		imageCount: counts.images,
 		videoCount: counts.videos,

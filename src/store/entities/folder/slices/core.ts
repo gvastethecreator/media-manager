@@ -5,12 +5,7 @@
 
 import type { StateCreator } from 'zustand';
 import type { FolderWithStats } from '@/types/entities/folder';
-import {
-	foldersToRecord,
-	getAllFolders,
-	getFolderById,
-	fromPrismaFoldersWithCounts
-} from '@/transformers/folder';
+import { foldersToRecord, getAllFolders, getFolderById, fromPrismaFoldersWithCounts } from '@/transformers/folder';
 import type { FolderStore } from '../types';
 
 // Estado inicial
@@ -33,7 +28,7 @@ const initialState = {
 function buildParentIndex(folders: Record<string, FolderWithStats>): Record<string, string[]> {
 	const index: Record<string, string[]> = {};
 
-	Object.values(folders).forEach(folder => {
+	Object.values(folders).forEach((folder) => {
 		const parentKey = folder.parentId || 'root';
 		if (!index[parentKey]) {
 			index[parentKey] = [];
@@ -56,18 +51,18 @@ function buildTreeIndex(folders: Record<string, FolderWithStats>): Record<string
 		visited.add(folderId);
 
 		const directChildren = Object.values(folders)
-			.filter(f => f.parentId === folderId)
-			.map(f => f.id);
+			.filter((f) => f.parentId === folderId)
+			.map((f) => f.id);
 
 		const allDescendants = [...directChildren];
-		directChildren.forEach(childId => {
+		directChildren.forEach((childId) => {
 			allDescendants.push(...getDescendants(childId, visited));
 		});
 
 		return allDescendants;
 	}
 
-	Object.keys(folders).forEach(folderId => {
+	Object.keys(folders).forEach((folderId) => {
 		tree[folderId] = getDescendants(folderId);
 	});
 
@@ -79,8 +74,8 @@ function buildTreeIndex(folders: Record<string, FolderWithStats>): Record<string
  */
 function findRootFolders(folders: Record<string, FolderWithStats>): string[] {
 	return Object.values(folders)
-		.filter(folder => !folder.parentId)
-		.map(folder => folder.id);
+		.filter((folder) => !folder.parentId)
+		.map((folder) => folder.id);
 }
 
 /**
@@ -96,12 +91,12 @@ export const createFolderCoreSlice: StateCreator<FolderStore, [], [], FolderStor
 		const { folders, foldersByParent } = get();
 		const key = parentId || 'root';
 		const childIds = foldersByParent[key] || [];
-		return childIds.map(id => folders[id]).filter(Boolean);
+		return childIds.map((id) => folders[id]).filter(Boolean);
 	},
 
 	getRootFolders: () => {
 		const { folders, rootFolders } = get();
-		return rootFolders.map(id => folders[id]).filter(Boolean);
+		return rootFolders.map((id) => folders[id]).filter(Boolean);
 	},
 
 	getFolderPath: (id: string) => {
@@ -188,7 +183,7 @@ export const createFolderCoreSlice: StateCreator<FolderStore, [], [], FolderStor
 	getDescendants: (folderId: string) => {
 		const { folders, folderTree } = get();
 		const descendantIds = folderTree[folderId] || [];
-		return descendantIds.map(id => folders[id]).filter(Boolean);
+		return descendantIds.map((id) => folders[id]).filter(Boolean);
 	},
 
 	getAncestors: (folderId: string) => {
@@ -219,7 +214,7 @@ export const createFolderCoreSlice: StateCreator<FolderStore, [], [], FolderStor
 		const { expandedFolders } = get();
 		const newExpanded = new Set(expandedFolders);
 
-		path.forEach(id => newExpanded.add(id));
+		path.forEach((id) => newExpanded.add(id));
 
 		set({
 			expandedFolders: newExpanded,

@@ -5,9 +5,9 @@
  */
 
 import {
-    type UploadedImageBase,
-    type UploadedImageDimensions,
-    type UploadedImageExtended,
+	type UploadedImageBase,
+	type UploadedImageDimensions,
+	type UploadedImageExtended,
 } from '@/types/entities/uploaded-image/types';
 import type { Prisma } from '@prisma/client';
 
@@ -37,9 +37,7 @@ export function transformToUploadedImage(uploadedImage: UploadedImageBaseFromPri
  * @param uploadedImage - The Prisma object, including relations.
  * @returns The canonical UploadedImageExtended.
  */
-export function transformToUploadedImageWithRelations(
-	uploadedImage: UploadedImageFromPrisma,
-): UploadedImageExtended {
+export function transformToUploadedImageWithRelations(uploadedImage: UploadedImageFromPrisma): UploadedImageExtended {
 	const dimensions: UploadedImageDimensions = {
 		width: uploadedImage.width,
 		height: uploadedImage.height,

@@ -5,11 +5,7 @@
 
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataBase, MetadataExtended } from '@/types/entities/metadata';
-import {
-    fromPrismaMetadata,
-    mapCreateInputToPrisma,
-    mapUpdateInputToPrisma,
-} from './mappers';
+import { fromPrismaMetadata, mapCreateInputToPrisma, mapUpdateInputToPrisma } from './mappers';
 
 /**
  * Transforma un objeto Metadata a su versión extendida con propiedades calculadas
@@ -42,9 +38,8 @@ export const transformMetadatas = (metadataArray: MetadataBase[] | null): Metada
 
 // Exportar todas las funciones útiles
 export {
-    fromPrismaMetadata as extendMetadata,
-    formatBytes, // Re-exportar desde @/lib/utils/format.utils
-    mapCreateInputToPrisma as mapCreateMetadataDataToPrisma,
-    mapUpdateInputToPrisma as mapUpdateMetadataDataToPrisma
+	fromPrismaMetadata as extendMetadata,
+	formatBytes, // Re-exportar desde @/lib/utils/format.utils
+	mapCreateInputToPrisma as mapCreateMetadataDataToPrisma,
+	mapUpdateInputToPrisma as mapUpdateMetadataDataToPrisma,
 };
-

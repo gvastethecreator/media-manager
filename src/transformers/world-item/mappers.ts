@@ -5,59 +5,62 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    WorldItemComplete,
-    WorldItemCreateInput,
-    WorldItemFilters,
-    WorldItemSearchOptions,
-    WorldItemStatistics,
-    WorldItemUpdateInput,
-    WorldItemWithStats
+	WorldItemComplete,
+	WorldItemCreateInput,
+	WorldItemFilters,
+	WorldItemSearchOptions,
+	WorldItemStatistics,
+	WorldItemUpdateInput,
+	WorldItemWithStats,
 } from '@/types/entities/world-item';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 import {
-    serializeAttributes,
-    serializeEffects,
-    serializeFilters,
-    serializeProperties,
-    serializeRequirements,
-    serializeStats,
-    serializeTags,
+	serializeAttributes,
+	serializeEffects,
+	serializeFilters,
+	serializeProperties,
+	serializeRequirements,
+	serializeStats,
+	serializeTags,
 } from './serializers';
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext('WorldItemMappers');
 
 const relationMap: Record<string, string> = {
-    imageIds: 'images',
-    videoIds: 'videos',
-    albumIds: 'albums',
-    collectionIds: 'collections',
-    tagIds: 'tags',
-    characterIds: 'characters',
-    placeIds: 'places',
-    conceptIds: 'concepts',
-    promptIds: 'prompts',
-    noteIds: 'notes',
-    wildcardIds: 'wildcards',
-    propertyIds: 'properties',
-    groupIds: 'groups',
+	imageIds: 'images',
+	videoIds: 'videos',
+	albumIds: 'albums',
+	collectionIds: 'collections',
+	tagIds: 'tags',
+	characterIds: 'characters',
+	placeIds: 'places',
+	conceptIds: 'concepts',
+	promptIds: 'prompts',
+	noteIds: 'notes',
+	wildcardIds: 'wildcards',
+	propertyIds: 'properties',
+	groupIds: 'groups',
 };
 
-function connectRelations(input: Partial<WorldItemCreateInput>, operation: 'connect' | 'set'): Prisma.WorldItemUpdateInput['images'] {
-    const relations: any = {};
-    for (const key in relationMap) {
-        if (key in input && Array.isArray((input as any)[key])) {
-            const prismaKey = relationMap[key];
-            const ids = (input as any)[key];
-            if (ids.length > 0) {
-                relations[prismaKey] = { [operation]: ids.map((id: string) => ({ id })) };
-            } else {
-                relations[prismaKey] = { [operation]: [] };
-            }
-        }
-    }
-    return relations;
+function connectRelations(
+	input: Partial<WorldItemCreateInput>,
+	operation: 'connect' | 'set'
+): Prisma.WorldItemUpdateInput['images'] {
+	const relations: any = {};
+	for (const key in relationMap) {
+		if (key in input && Array.isArray((input as any)[key])) {
+			const prismaKey = relationMap[key];
+			const ids = (input as any)[key];
+			if (ids.length > 0) {
+				relations[prismaKey] = { [operation]: ids.map((id: string) => ({ id })) };
+			} else {
+				relations[prismaKey] = { [operation]: [] };
+			}
+		}
+	}
+	return relations;
 }
 
 /**
@@ -65,12 +68,19 @@ function connectRelations(input: Partial<WorldItemCreateInput>, operation: 'conn
  */
 export function mapCreateWorldItemDataToPrisma(input: WorldItemCreateInput): Prisma.WorldItemCreateInput {
 	try {
-		const {
-			attributes, effects, requirements, stats, properties, filters, tags,
-			...rest
-		} = input;
+		const { attributes, effects, requirements, stats, properties, filters, tags, ...rest } = input;
 
-		const baseData = rest as Omit<WorldItemCreateInput, 'attributes' | 'effects' | 'requirements' | 'stats' | 'properties' | 'filters' | 'tags' | keyof ReturnType<typeof connectRelations>>;
+		const baseData = rest as Omit<
+			WorldItemCreateInput,
+			| 'attributes'
+			| 'effects'
+			| 'requirements'
+			| 'stats'
+			| 'properties'
+			| 'filters'
+			| 'tags'
+			| keyof ReturnType<typeof connectRelations>
+		>;
 
 		const prismaData: Prisma.WorldItemCreateInput = {
 			...baseData,
@@ -81,7 +91,7 @@ export function mapCreateWorldItemDataToPrisma(input: WorldItemCreateInput): Pri
 			properties: serializeProperties(properties || []),
 			filters: serializeFilters(filters || []),
 			tags: serializeTags(tags || []),
-            ...connectRelations(input, 'connect'),
+			...connectRelations(input, 'connect'),
 		};
 
 		return prismaData;
@@ -96,12 +106,19 @@ export function mapCreateWorldItemDataToPrisma(input: WorldItemCreateInput): Pri
  */
 export function mapUpdateWorldItemDataToPrisma(input: WorldItemUpdateInput): Prisma.WorldItemUpdateInput {
 	try {
-        const {
-			attributes, effects, requirements, stats, properties, filters, tags,
-			...rest
-		} = input;
+		const { attributes, effects, requirements, stats, properties, filters, tags, ...rest } = input;
 
-        const baseData = rest as Omit<WorldItemUpdateInput, 'attributes' | 'effects' | 'requirements' | 'stats' | 'properties' | 'filters' | 'tags' | keyof ReturnType<typeof connectRelations>>;
+		const baseData = rest as Omit<
+			WorldItemUpdateInput,
+			| 'attributes'
+			| 'effects'
+			| 'requirements'
+			| 'stats'
+			| 'properties'
+			| 'filters'
+			| 'tags'
+			| keyof ReturnType<typeof connectRelations>
+		>;
 
 		const prismaData: Prisma.WorldItemUpdateInput = { ...baseData };
 
@@ -113,7 +130,7 @@ export function mapUpdateWorldItemDataToPrisma(input: WorldItemUpdateInput): Pri
 		if (filters) prismaData.filters = serializeFilters(filters);
 		if (tags) prismaData.tags = serializeTags(tags);
 
-        Object.assign(prismaData, connectRelations(input, 'set'));
+		Object.assign(prismaData, connectRelations(input, 'set'));
 
 		return prismaData;
 	} catch (error) {
@@ -205,21 +222,21 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	};
 
 	// Deserializar campos JSON si es necesario
-	const attributes = typeof worldItem.attributes === 'string'
-		? (JSON.parse(worldItem.attributes || '[]') as any[])
-		: (worldItem.attributes || []);
+	const attributes =
+		typeof worldItem.attributes === 'string'
+			? (JSON.parse(worldItem.attributes || '[]') as any[])
+			: worldItem.attributes || [];
 
-	const effects = typeof worldItem.effects === 'string'
-		? (JSON.parse(worldItem.effects || '[]') as any[])
-		: (worldItem.effects || []);
+	const effects =
+		typeof worldItem.effects === 'string' ? (JSON.parse(worldItem.effects || '[]') as any[]) : worldItem.effects || [];
 
-	const requirements = typeof worldItem.requirements === 'string'
-		? (JSON.parse(worldItem.requirements || '[]') as any[])
-		: (worldItem.requirements || []);
+	const requirements =
+		typeof worldItem.requirements === 'string'
+			? (JSON.parse(worldItem.requirements || '[]') as any[])
+			: worldItem.requirements || [];
 
-	const statsData = typeof worldItem.stats === 'string'
-		? (JSON.parse(worldItem.stats || '[]') as any[])
-		: (worldItem.stats || []);
+	const statsData =
+		typeof worldItem.stats === 'string' ? (JSON.parse(worldItem.stats || '[]') as any[]) : worldItem.stats || [];
 
 	// Calcular métricas temporales
 	const now = new Date();
@@ -230,33 +247,35 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 
 	// Calcular poder basado en stats, efectos y rareza
 	const powerLevel = Math.round(
-		(statsData.length * 10) +
-		(effects.length * 15) +
-		(rarityScores[worldItem.rarity?.toLowerCase() || 'common'] || 10) +
-		(worldItem.isFavorite ? 5 : 0)
+		statsData.length * 10 +
+			effects.length * 15 +
+			(rarityScores[worldItem.rarity?.toLowerCase() || 'common'] || 10) +
+			(worldItem.isFavorite ? 5 : 0)
 	);
 
 	// Calcular completitud
 	const completenessScore = Math.round(
-		((worldItem.description ? 20 : 0) +
-		(attributes.length > 0 ? 20 : 0) +
-		(effects.length > 0 ? 20 : 0) +
-		(requirements.length > 0 ? 10 : 0) +
-		(statsData.length > 0 ? 15 : 0) +
-		(worldItem.featuredImage ? 15 : 0))
+		(worldItem.description ? 20 : 0) +
+			(attributes.length > 0 ? 20 : 0) +
+			(effects.length > 0 ? 20 : 0) +
+			(requirements.length > 0 ? 10 : 0) +
+			(statsData.length > 0 ? 15 : 0) +
+			(worldItem.featuredImage ? 15 : 0)
 	);
 
 	// Calcular popularidad basada en relaciones
 	const totalRelations =
-		(_count?.images || 0) + (_count?.videos || 0) +
-		(_count?.characters || 0) + (_count?.places || 0) +
-		(_count?.notes || 0) + (_count?.concepts || 0);
+		(_count?.images || 0) +
+		(_count?.videos || 0) +
+		(_count?.characters || 0) +
+		(_count?.places || 0) +
+		(_count?.notes || 0) +
+		(_count?.concepts || 0);
 
-	const popularityScore = Math.min(100, Math.round(
-		(totalRelations * 2) +
-		(worldItem.isFavorite ? 20 : 0) +
-		(daysSinceLastUpdate < 7 ? 10 : 0)
-	));
+	const popularityScore = Math.min(
+		100,
+		Math.round(totalRelations * 2 + (worldItem.isFavorite ? 20 : 0) + (daysSinceLastUpdate < 7 ? 10 : 0))
+	);
 
 	const stats: WorldItemStatistics = {
 		// Conteos de relaciones

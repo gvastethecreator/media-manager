@@ -7,4 +7,3 @@
  */
 
 export { toDocumentWithStats } from './mappers';
-

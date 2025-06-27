@@ -1,9 +1,6 @@
 'use client';
 
-import type {
-    ErrorResponse,
-    ProcessStatus
-} from '@/app/actions/folders/types';
+import type { ErrorResponse, ProcessStatus } from '@/app/actions/folders/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { FolderWithStats } from '@/types/entities/folder';
@@ -231,7 +228,7 @@ export function useFolders() {
 		folderLogger.info('🔄 Iniciando reindexación global');
 
 		try {
-			setGlobalReindexStatus(prev => ({
+			setGlobalReindexStatus((prev) => ({
 				...prev,
 				isProcessing: true,
 				progress: 0,
@@ -242,7 +239,7 @@ export function useFolders() {
 
 			// TODO: Implementar reindexAllFolders cuando esté disponible
 			// Por ahora solo simulamos
-			await new Promise(resolve => setTimeout(resolve, 2000));
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			folderLogger.info('✅ Reindexación global completada');
 			toastService.success('Reindexación completada correctamente');
@@ -253,7 +250,7 @@ export function useFolders() {
 			folderLogger.error('❌ Error en reindexación global:', error);
 			toastService.error('Error en la reindexación global');
 		} finally {
-			setGlobalReindexStatus(prev => ({
+			setGlobalReindexStatus((prev) => ({
 				...prev,
 				isProcessing: false,
 				endTime: Date.now(),

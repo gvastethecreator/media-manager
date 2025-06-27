@@ -104,6 +104,11 @@ export interface PropertyFilterActions {
 /**
  * 📦 Tipo del store completo de Property
  */
-export interface PropertyStore extends PropertyCoreState, PropertyCoreActions, PropertyUIState, PropertyUIActions, PropertyFilterActions {
+export interface PropertyStore
+	extends PropertyCoreState,
+		PropertyCoreActions,
+		PropertyUIState,
+		PropertyUIActions,
+		PropertyFilterActions {
 	filters: PropertyFilters;
 }

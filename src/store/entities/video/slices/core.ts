@@ -13,12 +13,7 @@ import {
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
-import type {
-	VideoCreateInput,
-	VideoUpdateInput,
-	VideoWithStats,
-	VideoFilters
-} from '@/types/entities/video';
+import type { VideoCreateInput, VideoUpdateInput, VideoWithStats, VideoFilters } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoStore } from '..';
 
@@ -81,101 +76,126 @@ export interface VideoCoreSlice extends VideoCoreState {
 
 // --- Implementación del Slice ---
 
-export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSlice> =
-	(set, get) => ({
-		...initialCoreState,
+export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSlice> = (set, get) => ({
+	...initialCoreState,
 
-		// --- Getters Optimizados ---
-		getVideo: (id) => get().videos[id],
+	// --- Getters Optimizados ---
+	getVideo: (id) => get().videos[id],
 
-		getVideos: () => Object.values(get().videos),
+	getVideos: () => Object.values(get().videos),
 
-		getVideosByFolder: (folderId) => {
-			const videoIds = get().folderVideos[folderId] || [];
-			const videos = get().videos;
-			return videoIds.map(id => videos[id]).filter(Boolean);
-		},
+	getVideosByFolder: (folderId) => {
+		const videoIds = get().folderVideos[folderId] || [];
+		const videos = get().videos;
+		return videoIds.map((id) => videos[id]).filter(Boolean);
+	},
 
-		// --- Selectores Avanzados ---
-		selectVideos: (options = {}) => {
-			const videos = Object.values(get().videos);
-			let filtered = videos;
+	// --- Selectores Avanzados ---
+	selectVideos: (options = {}) => {
+		const videos = Object.values(get().videos);
+		let filtered = videos;
 
-			// Aplicar filtros si se proporcionan
-			if (options.filters) {
-				const { filters } = options;
+		// Aplicar filtros si se proporcionan
+		if (options.filters) {
+			const { filters } = options;
 
-				filtered = videos.filter(video => {
-					// Filtro de búsqueda
-					if (filters.search) {
-						const searchLower = filters.search.toLowerCase();
-						const matchesName = video.name.toLowerCase().includes(searchLower);
-						const matchesDescription = video.description?.toLowerCase().includes(searchLower);
-						if (!matchesName && !matchesDescription) return false;
-					}
+			filtered = videos.filter((video) => {
+				// Filtro de búsqueda
+				if (filters.search) {
+					const searchLower = filters.search.toLowerCase();
+					const matchesName = video.name.toLowerCase().includes(searchLower);
+					const matchesDescription = video.description?.toLowerCase().includes(searchLower);
+					if (!matchesName && !matchesDescription) return false;
+				}
 
-					// Filtro de favoritos
-					if (filters.isFavorite !== undefined && video.isFavorite !== filters.isFavorite) {
-						return false;
-					}
+				// Filtro de favoritos
+				if (filters.isFavorite !== undefined && video.isFavorite !== filters.isFavorite) {
+					return false;
+				}
 
-					// Filtro de público/privado
-					if (filters.isPublic !== undefined && video.isPublic !== filters.isPublic) {
-						return false;
-					}
+				// Filtro de público/privado
+				if (filters.isPublic !== undefined && video.isPublic !== filters.isPublic) {
+					return false;
+				}
 
-					// Filtros de duración
-					if (filters.minDuration && video.duration < filters.minDuration) return false;
-					if (filters.maxDuration && video.duration > filters.maxDuration) return false;
+				// Filtros de duración
+				if (filters.minDuration && video.duration < filters.minDuration) return false;
+				if (filters.maxDuration && video.duration > filters.maxDuration) return false;
 
-					// Filtros de tamaño
-					if (filters.minSize && video.size < filters.minSize) return false;
-					if (filters.maxSize && video.size > filters.maxSize) return false;
+				// Filtros de tamaño
+				if (filters.minSize && video.size < filters.minSize) return false;
+				if (filters.maxSize && video.size > filters.maxSize) return false;
 
-					// Filtros de resolución
-					if (filters.minWidth && (!video.width || video.width < filters.minWidth)) return false;
-					if (filters.maxWidth && (!video.width || video.width > filters.maxWidth)) return false;
-					if (filters.minHeight && (!video.height || video.height < filters.minHeight)) return false;
-					if (filters.maxHeight && (!video.height || video.height > filters.maxHeight)) return false;
+				// Filtros de resolución
+				if (filters.minWidth && (!video.width || video.width < filters.minWidth)) return false;
+				if (filters.maxWidth && (!video.width || video.width > filters.maxWidth)) return false;
+				if (filters.minHeight && (!video.height || video.height < filters.minHeight)) return false;
+				if (filters.maxHeight && (!video.height || video.height > filters.maxHeight)) return false;
 
-					// Filtros técnicos
-					if (filters.hasMetadata !== undefined) {
-						const hasMetadata = !!video.metadata;
-						if (hasMetadata !== filters.hasMetadata) return false;
-					}
+				// Filtros técnicos
+				if (filters.hasMetadata !== undefined) {
+					const hasMetadata = !!video.metadata;
+					if (hasMetadata !== filters.hasMetadata) return false;
+				}
 
-					if (filters.hasThumbnail !== undefined) {
-						const hasThumbnail = !!video.thumbnail;
-						if (hasThumbnail !== filters.hasThumbnail) return false;
-					}
+				if (filters.hasThumbnail !== undefined) {
+					const hasThumbnail = !!video.thumbnail;
+					if (hasThumbnail !== filters.hasThumbnail) return false;
+				}
 
-					return true;
-				});
+				return true;
+			});
+		}
+
+		// Aplicar ordenación
+		if (options.sortBy) {
+			const { sortBy, sortDirection = 'asc' } = options;
+			filtered.sort((a, b) => {
+				const aVal = a[sortBy];
+				const bVal = b[sortBy];
+
+				if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+				if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+				return 0;
+			});
+		}
+
+		return filtered;
+	},
+
+	// --- Operaciones Síncronas ---
+	addVideo: (video) => {
+		set((state) => {
+			const newVideos = { ...state.videos, [video.id]: video };
+
+			// Actualizar índice por folder
+			const folderVideos = { ...state.folderVideos };
+			const folderId = video.folderId;
+			if (!folderVideos[folderId]) {
+				folderVideos[folderId] = [];
+			}
+			if (!folderVideos[folderId].includes(video.id)) {
+				folderVideos[folderId] = [...folderVideos[folderId], video.id];
 			}
 
-			// Aplicar ordenación
-			if (options.sortBy) {
-				const { sortBy, sortDirection = 'asc' } = options;
-				filtered.sort((a, b) => {
-					const aVal = a[sortBy];
-					const bVal = b[sortBy];
+			return {
+				videos: newVideos,
+				folderVideos,
+				lastUpdated: new Date(),
+			};
+		});
+	},
 
-					if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-					if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-					return 0;
-				});
-			}
+	addVideos: (videos) => {
+		set((state) => {
+			// Convertir array a Record optimizado
+			const newVideos: Record<string, VideoWithStats> = { ...state.videos };
+			const folderVideos = { ...state.folderVideos };
 
-			return filtered;
-		},
-
-		// --- Operaciones Síncronas ---
-		addVideo: (video) => {
-			set((state) => {
-				const newVideos = { ...state.videos, [video.id]: video };
+			videos.forEach((video) => {
+				newVideos[video.id] = video;
 
 				// Actualizar índice por folder
-				const folderVideos = { ...state.folderVideos };
 				const folderId = video.folderId;
 				if (!folderVideos[folderId]) {
 					folderVideos[folderId] = [];
@@ -183,158 +203,132 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 				if (!folderVideos[folderId].includes(video.id)) {
 					folderVideos[folderId] = [...folderVideos[folderId], video.id];
 				}
-
-				return {
-					videos: newVideos,
-					folderVideos,
-					lastUpdated: new Date(),
-				};
 			});
-		},
 
-		addVideos: (videos) => {
-			set((state) => {
-				// Convertir array a Record optimizado
-				const newVideos: Record<string, VideoWithStats> = { ...state.videos };
-				const folderVideos = { ...state.folderVideos };
+			return {
+				videos: newVideos,
+				folderVideos,
+				lastUpdated: new Date(),
+			};
+		});
+	},
 
-				videos.forEach(video => {
-					newVideos[video.id] = video;
+	updateVideo: (id, data) => {
+		set((state) => {
+			const existingVideo = state.videos[id];
+			if (!existingVideo) return state;
 
-					// Actualizar índice por folder
-					const folderId = video.folderId;
-					if (!folderVideos[folderId]) {
-						folderVideos[folderId] = [];
-					}
-					if (!folderVideos[folderId].includes(video.id)) {
-						folderVideos[folderId] = [...folderVideos[folderId], video.id];
-					}
-				});
+			const updatedVideo = { ...existingVideo, ...data };
 
-				return {
-					videos: newVideos,
-					folderVideos,
-					lastUpdated: new Date(),
-				};
-			});
-		},
+			return {
+				videos: {
+					...state.videos,
+					[id]: updatedVideo,
+				},
+				lastUpdated: new Date(),
+			};
+		});
+	},
 
-		updateVideo: (id, data) => {
-			set((state) => {
-				const existingVideo = state.videos[id];
-				if (!existingVideo) return state;
+	deleteVideo: (id) => {
+		set((state) => {
+			const video = state.videos[id];
+			if (!video) return state;
 
-				const updatedVideo = { ...existingVideo, ...data };
+			// Eliminar del Record principal
+			const { [id]: _, ...remainingVideos } = state.videos;
 
-				return {
-					videos: {
-						...state.videos,
-						[id]: updatedVideo,
-					},
-					lastUpdated: new Date(),
-				};
-			});
-		},
-
-		deleteVideo: (id) => {
-			set((state) => {
-				const video = state.videos[id];
-				if (!video) return state;
-
-				// Eliminar del Record principal
-				const { [id]: _, ...remainingVideos } = state.videos;
-
-				// Eliminar del índice de folder
-				const folderVideos = { ...state.folderVideos };
-				const folderId = video.folderId;
-				if (folderVideos[folderId]) {
-					folderVideos[folderId] = folderVideos[folderId].filter(videoId => videoId !== id);
-				}
-
-				return {
-					videos: remainingVideos,
-					folderVideos,
-					lastUpdated: new Date(),
-				};
-			});
-		},
-
-		// --- Estado de carga y errores ---
-		setLoading: (isLoading) => set({ isLoading }),
-		setError: (error) => set({ error }),
-
-		// --- Acciones Asíncronas ---
-		fetchVideo: async (id) => {
-			get().setLoading(true);
-			try {
-				const video = await getServerVideo(id);
-				if (video) {
-					get().addVideo(video);
-				}
-				return video;
-			} catch (e) {
-				videoLogger.error('Failed to fetch video', { error: e });
-				const errorMessage = e instanceof Error ? e.message : 'Failed to fetch video';
-				get().setError(errorMessage);
-				return undefined;
-			} finally {
-				get().setLoading(false);
+			// Eliminar del índice de folder
+			const folderVideos = { ...state.folderVideos };
+			const folderId = video.folderId;
+			if (folderVideos[folderId]) {
+				folderVideos[folderId] = folderVideos[folderId].filter((videoId) => videoId !== id);
 			}
-		},
 
-		fetchVideos: async (folderIds) => {
-			get().setLoading(true);
-			try {
-				const videos = await findVideos({ folderIds });
-				if (videos && videos.length > 0) {
-					get().addVideos(videos);
-				}
-				return videos || [];
-			} catch (e) {
-				videoLogger.error('Failed to fetch videos', { error: e });
-				const errorMessage = e instanceof Error ? e.message : 'Failed to fetch videos';
-				get().setError(errorMessage);
-				return [];
-			} finally {
-				get().setLoading(false);
-			}
-		},
+			return {
+				videos: remainingVideos,
+				folderVideos,
+				lastUpdated: new Date(),
+			};
+		});
+	},
 
-		createVideo: async (data) => {
-			get().setLoading(true);
-			try {
-				const video = await createServerVideo(data);
-				if (video) {
-					get().addVideo(video);
-					toastService.success('Video creado');
-				}
-				return video;
-			} catch (e) {
-				videoLogger.error('Failed to create video', { error: e });
-				const errorMessage = e instanceof Error ? e.message : 'Error creating video';
-				toastService.error(errorMessage);
-				get().setError(errorMessage);
-				return undefined;
-			} finally {
-				get().setLoading(false);
-			}
-		},
+	// --- Estado de carga y errores ---
+	setLoading: (isLoading) => set({ isLoading }),
+	setError: (error) => set({ error }),
 
-		removeVideo: async (id) => {
-			get().setLoading(true);
-			try {
-				await deleteServerVideo(id);
-				get().deleteVideo(id);
-				toastService.success('Video eliminado');
-				return true;
-			} catch (e) {
-				videoLogger.error('Failed to delete video', { error: e });
-				const errorMessage = e instanceof Error ? e.message : 'Error deleting video';
-				toastService.error(errorMessage);
-				get().setError(errorMessage);
-				return false;
-			} finally {
-				get().setLoading(false);
+	// --- Acciones Asíncronas ---
+	fetchVideo: async (id) => {
+		get().setLoading(true);
+		try {
+			const video = await getServerVideo(id);
+			if (video) {
+				get().addVideo(video);
 			}
-		},
-	});
+			return video;
+		} catch (e) {
+			videoLogger.error('Failed to fetch video', { error: e });
+			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch video';
+			get().setError(errorMessage);
+			return undefined;
+		} finally {
+			get().setLoading(false);
+		}
+	},
+
+	fetchVideos: async (folderIds) => {
+		get().setLoading(true);
+		try {
+			const videos = await findVideos({ folderIds });
+			if (videos && videos.length > 0) {
+				get().addVideos(videos);
+			}
+			return videos || [];
+		} catch (e) {
+			videoLogger.error('Failed to fetch videos', { error: e });
+			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch videos';
+			get().setError(errorMessage);
+			return [];
+		} finally {
+			get().setLoading(false);
+		}
+	},
+
+	createVideo: async (data) => {
+		get().setLoading(true);
+		try {
+			const video = await createServerVideo(data);
+			if (video) {
+				get().addVideo(video);
+				toastService.success('Video creado');
+			}
+			return video;
+		} catch (e) {
+			videoLogger.error('Failed to create video', { error: e });
+			const errorMessage = e instanceof Error ? e.message : 'Error creating video';
+			toastService.error(errorMessage);
+			get().setError(errorMessage);
+			return undefined;
+		} finally {
+			get().setLoading(false);
+		}
+	},
+
+	removeVideo: async (id) => {
+		get().setLoading(true);
+		try {
+			await deleteServerVideo(id);
+			get().deleteVideo(id);
+			toastService.success('Video eliminado');
+			return true;
+		} catch (e) {
+			videoLogger.error('Failed to delete video', { error: e });
+			const errorMessage = e instanceof Error ? e.message : 'Error deleting video';
+			toastService.error(errorMessage);
+			get().setError(errorMessage);
+			return false;
+		} finally {
+			get().setLoading(false);
+		}
+	},
+});

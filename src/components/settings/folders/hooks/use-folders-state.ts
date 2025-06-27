@@ -47,7 +47,10 @@ export function useFoldersState() {
 			setFolders(transformedFolders);
 
 			// Calcular estadísticas básicas a partir de las carpetas usando FolderStatistics
-			const totalFiles = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f.totalFiles || f._count.images || 0), 0);
+			const totalFiles = transformedFolders.reduce(
+				(acc: number, f: ExtendedFolder) => acc + (f.totalFiles || f._count.images || 0),
+				0
+			);
 			const totalSize = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f.totalSize || 0), 0);
 			const imageCount = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f._count.images || 0), 0);
 

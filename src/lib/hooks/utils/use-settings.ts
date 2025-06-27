@@ -3,7 +3,21 @@
  * @module hooks/use-settings
  */
 
-import { selectActiveProfileId, selectAdvanced, selectAppearance, selectError, selectIsInitialized, selectIsLoading, selectIsSaving, selectLanguage, selectNotifications, selectPrivacy, selectSettings, selectTheme, useSettingsStore } from '@/store/settings.store';
+import {
+	selectActiveProfileId,
+	selectAdvanced,
+	selectAppearance,
+	selectError,
+	selectIsInitialized,
+	selectIsLoading,
+	selectIsSaving,
+	selectLanguage,
+	selectNotifications,
+	selectPrivacy,
+	selectSettings,
+	selectTheme,
+	useSettingsStore,
+} from '@/store/settings.store';
 import { useEffect } from 'react';
 
 /**

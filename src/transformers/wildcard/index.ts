@@ -5,11 +5,10 @@
  */
 
 export {
-    mapCreateWildcardDataToPrisma,
-    mapUpdateWildcardDataToPrisma,
-    mapWildcardSearchOptionsToPrisma,
-    toWildcardWithStats
+	mapCreateWildcardDataToPrisma,
+	mapUpdateWildcardDataToPrisma,
+	mapWildcardSearchOptionsToPrisma,
+	toWildcardWithStats,
 } from './mappers';
 
 export { fromPrismaWildcard, transformWildcard, type WildcardComplete } from './transformer';
-

@@ -6,11 +6,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CollectionCreateInput,
-    CollectionEdition,
-    CollectionFilter,
-    CollectionSortBy,
-    CollectionUpdateInput,
+	CollectionCreateInput,
+	CollectionEdition,
+	CollectionFilter,
+	CollectionSortBy,
+	CollectionUpdateInput,
 } from '@/types/entities/collection';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -133,9 +133,7 @@ export function serializeEditions(data: CollectionEdition[] | null | undefined):
 /**
  * 🔄 Serializa los datos para crear una colección en Prisma.
  */
-export function toPrismaCollectionCreate(
-	data: CollectionCreateInput,
-): Prisma.CollectionCreateInput {
+export function toPrismaCollectionCreate(data: CollectionCreateInput): Prisma.CollectionCreateInput {
 	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
 	const prismaData: Prisma.CollectionCreateInput = {
 		...rest,
@@ -164,9 +162,7 @@ export function toPrismaCollectionCreate(
 /**
  * 🔄 Serializa los datos para actualizar una colección en Prisma.
  */
-export function toPrismaCollectionUpdate(
-	data: CollectionUpdateInput,
-): Prisma.CollectionUpdateInput {
+export function toPrismaCollectionUpdate(data: CollectionUpdateInput): Prisma.CollectionUpdateInput {
 	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
 	const prismaData: Prisma.CollectionUpdateInput = {
 		...rest,

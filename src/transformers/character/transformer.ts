@@ -16,9 +16,7 @@ const logger = serverLogger.withContext('CharacterTransformer');
  * @param prismaCharacter - Character de Prisma con conteos
  * @returns CharacterWithStats con estadísticas pre-calculadas
  */
-export function fromPrismaCharacter(
-	prismaCharacter: PrismaCharacterWithCounts | null,
-): CharacterWithStats | null {
+export function fromPrismaCharacter(prismaCharacter: PrismaCharacterWithCounts | null): CharacterWithStats | null {
 	if (!prismaCharacter) {
 		return null;
 	}
@@ -44,10 +42,22 @@ export function fromPrismaCharacter(
 		const totalRelatedCharacters = _count?.relatedCharacters ?? 0;
 		const totalRelatedTo = _count?.relatedTo ?? 0;
 
-		const totalAssociations = totalImages + totalVideos + totalTags + totalGroups +
-			totalProperties + totalCollections + totalAlbums + totalPlaces +
-			totalWorldItems + totalConcepts + totalPrompts + totalNotes +
-			totalWildcards + totalRelatedCharacters + totalRelatedTo;
+		const totalAssociations =
+			totalImages +
+			totalVideos +
+			totalTags +
+			totalGroups +
+			totalProperties +
+			totalCollections +
+			totalAlbums +
+			totalPlaces +
+			totalWorldItems +
+			totalConcepts +
+			totalPrompts +
+			totalNotes +
+			totalWildcards +
+			totalRelatedCharacters +
+			totalRelatedTo;
 
 		// Calcular power level basado en nivel y asociaciones
 		const powerLevel = calculatePowerLevel(baseData.level, totalAssociations);
@@ -109,12 +119,8 @@ export function fromPrismaCharacter(
  * @param prismaCharacters - Array de personajes de Prisma
  * @returns Array de CharacterWithStats
  */
-export function fromPrismaCharacters(
-	prismaCharacters: PrismaCharacterWithCounts[],
-): CharacterWithStats[] {
-	return prismaCharacters
-		.map(fromPrismaCharacter)
-		.filter((c): c is CharacterWithStats => c !== null);
+export function fromPrismaCharacters(prismaCharacters: PrismaCharacterWithCounts[]): CharacterWithStats[] {
+	return prismaCharacters.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null);
 }
 
 /**

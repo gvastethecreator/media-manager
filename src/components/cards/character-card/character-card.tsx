@@ -287,7 +287,12 @@ export function CharacterCard({
 					{!compact && (
 						<>
 							{/* Galería de imágenes */}
-							<CharacterCardImages images={cardMedia.map((m) => m.thumbnailUrl)} emoji={character.emoji} tcgMode={tcgMode} compact={false} />
+							<CharacterCardImages
+								images={cardMedia.map((m) => m.thumbnailUrl)}
+								emoji={character.emoji}
+								tcgMode={tcgMode}
+								compact={false}
+							/>
 
 							{/* Contenido con descripción y contadores */}
 							<CharacterCardContent

@@ -114,12 +114,7 @@ function Carousel({
 				canScrollNext,
 			}}
 		>
-			<section
-				onKeyDownCapture={handleKeyDown}
-				className={cn('relative', className)}
-				data-slot="carousel"
-				{...props}
-			>
+			<section onKeyDownCapture={handleKeyDown} className={cn('relative', className)} data-slot="carousel" {...props}>
 				{children}
 			</section>
 		</CarouselContext.Provider>
@@ -211,4 +206,3 @@ function CarouselNext({
 }
 
 export { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi };
-

@@ -5,11 +5,10 @@
 
 // Exportar desde helpers
 export {
-    buildPlaceTree,
-    calculatePlaceStats,
-    filterPlaces,
-    findPlaceById,
-    findPlacesByIds,
-    sortPlaces
+	buildPlaceTree,
+	calculatePlaceStats,
+	filterPlaces,
+	findPlaceById,
+	findPlacesByIds,
+	sortPlaces,
 } from './helpers';
-

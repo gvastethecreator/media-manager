@@ -68,7 +68,7 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 export async function createJsonFile(data: Prisma.JsonFileCreateInput): Promise<JsonFileWithStats> {
 	try {
 		const newJsonFile = await prisma.jsonFile.create({
-			data
+			data,
 		});
 
 		// Emitir eventos con el nuevo sistema
@@ -97,7 +97,7 @@ export async function updateJsonFile(id: string, data: Prisma.JsonFileUpdateInpu
 	try {
 		const updatedJsonFile = await prisma.jsonFile.update({
 			where: { id },
-			data
+			data,
 		});
 
 		// Emitir eventos con el nuevo sistema
@@ -125,7 +125,7 @@ export async function updateJsonFile(id: string, data: Prisma.JsonFileUpdateInpu
 export async function deleteJsonFile(id: string): Promise<void> {
 	try {
 		await prisma.jsonFile.delete({
-			where: { id }
+			where: { id },
 		});
 
 		// Emitir eventos con el nuevo sistema

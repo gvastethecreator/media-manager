@@ -40,22 +40,22 @@ export function VideoCard({
 	const [isHovered, setIsHovered] = useState(false);
 
 	// Extraer datos del video
-	const {
-		id,
-		name,
-		statistics,
-		_count
-	} = video;
+	const { id, name, statistics, _count } = video;
 
 	// Calcular colores basados en la calidad técnica
 	const primaryColor = useMemo(() => {
 		const grade = statistics.technicalGrade;
 		switch (grade) {
-			case 'A': return '#10b981'; // Verde esmeralda - Ultra calidad
-			case 'B': return '#3b82f6'; // Azul - Alta calidad
-			case 'C': return '#f59e0b'; // Ámbar - Calidad media
-			case 'D': return '#ef4444'; // Rojo - Baja calidad
-			default: return '#6b7280'; // Gris - Desconocida
+			case 'A':
+				return '#10b981'; // Verde esmeralda - Ultra calidad
+			case 'B':
+				return '#3b82f6'; // Azul - Alta calidad
+			case 'C':
+				return '#f59e0b'; // Ámbar - Calidad media
+			case 'D':
+				return '#ef4444'; // Rojo - Baja calidad
+			default:
+				return '#6b7280'; // Gris - Desconocida
 		}
 	}, [statistics.technicalGrade]);
 
@@ -78,10 +78,10 @@ export function VideoCard({
 	const rarityLevel = useMemo(() => {
 		const score = statistics.qualityScore;
 		if (score >= 90) return 10; // Mítico
-		if (score >= 80) return 9;  // Legendario
-		if (score >= 70) return 7;  // Épico
-		if (score >= 60) return 5;  // Raro
-		if (score >= 50) return 3;  // Poco común
+		if (score >= 80) return 9; // Legendario
+		if (score >= 70) return 7; // Épico
+		if (score >= 60) return 5; // Raro
+		if (score >= 50) return 3; // Poco común
 		return 1; // Común
 	}, [statistics.qualityScore]);
 
@@ -141,12 +141,7 @@ export function VideoCard({
 			>
 				<div className="flex flex-col h-full relative z-10">
 					{/* Header con nombre, duración y calidad */}
-					<VideoCardHeader
-						video={video}
-						primaryColor={primaryColor}
-						tcgMode={tcgMode}
-						compact={compact}
-					/>
+					<VideoCardHeader video={video} primaryColor={primaryColor} tcgMode={tcgMode} compact={compact} />
 
 					{/* Thumbnail del video */}
 					<VideoCardThumbnail

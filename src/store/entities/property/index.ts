@@ -25,13 +25,13 @@ export const usePropertyStore = create<PropertyStore>()(
 			})),
 			{
 				name: 'property-store-v2', // Versión actualizada
-				partialize: state => ({
+				partialize: (state) => ({
 					// Solo persistir lo que no es dato de sesión
 					filters: state.filters,
 					viewMode: state.viewMode,
 				}),
-			},
+			}
 		),
-		{ name: 'PropertyStore' },
-	),
+		{ name: 'PropertyStore' }
+	)
 );

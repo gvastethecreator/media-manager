@@ -13,31 +13,14 @@ interface VideoCardContentProps {
 /**
  * 🎬 Contenido principal del VideoCard con estadísticas y metadatos
  */
-export function VideoCardContent({
-	video,
-	primaryColor,
-	secondaryColor,
-	tcgMode = true,
-}: VideoCardContentProps) {
+export function VideoCardContent({ video, primaryColor, secondaryColor, tcgMode = true }: VideoCardContentProps) {
 	const { description, statistics } = video;
-	const {
-		qualityScore,
-		technicalGrade,
-		autoTags,
-		aspectRatio,
-		bitrate,
-		frameRate,
-		hasSubtitles
-	} = statistics;
+	const { qualityScore, technicalGrade, autoTags, aspectRatio, bitrate, frameRate, hasSubtitles } = statistics;
 
 	return (
 		<div className="flex-1 p-3 space-y-3">
 			{/* Descripción si existe */}
-			{description && (
-				<p className="text-sm text-muted-foreground line-clamp-2">
-					{description}
-				</p>
-			)}
+			{description && <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>}
 
 			{/* Estadísticas técnicas */}
 			<div className="space-y-2">
@@ -45,14 +28,12 @@ export function VideoCardContent({
 				<div className="flex items-center justify-between">
 					<span className="text-sm font-medium">Calidad</span>
 					<div className="flex items-center gap-2">
-						<div
-							className="h-2 w-16 bg-gray-200 rounded-full overflow-hidden"
-						>
+						<div className="h-2 w-16 bg-gray-200 rounded-full overflow-hidden">
 							<div
 								className="h-full transition-all duration-300"
 								style={{
 									width: `${qualityScore}%`,
-									backgroundColor: primaryColor
+									backgroundColor: primaryColor,
 								}}
 							/>
 						</div>
@@ -109,17 +90,14 @@ export function VideoCardContent({
 								style={{
 									backgroundColor: `${primaryColor}15`,
 									color: primaryColor,
-									borderColor: `${primaryColor}30`
+									borderColor: `${primaryColor}30`,
 								}}
 							>
 								{tag}
 							</Badge>
 						))}
 						{autoTags.length > 4 && (
-							<Badge
-								variant="outline"
-								className="text-xs px-1.5 py-0.5"
-							>
+							<Badge variant="outline" className="text-xs px-1.5 py-0.5">
 								+{autoTags.length - 4}
 							</Badge>
 						)}

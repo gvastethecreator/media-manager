@@ -6,12 +6,12 @@ import { emit } from '@/lib/server/events.server';
 import { noteService } from '@/services/note';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
-    CreateNoteData,
-    NoteBase,
-    NoteComplete,
-    NoteCreateInput,
-    NoteUpdateInput,
-    NoteWithStats
+	CreateNoteData,
+	NoteBase,
+	NoteComplete,
+	NoteCreateInput,
+	NoteUpdateInput,
+	NoteWithStats,
 } from '@/types/entities/note';
 import type { FileItem } from '@/types/files';
 import { createNoteSchema, updateNoteSchema } from '@/lib/utils/note/validators';
