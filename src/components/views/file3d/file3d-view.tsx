@@ -5,11 +5,11 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFile3DStore } from '@/store/entities/file-3d';
+import { useFile3DStore } from '@/store/entities/file3d';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('File3DView');
@@ -27,23 +27,18 @@ MemoizedFile3DCard.displayName = 'MemoizedFile3DCard';
 
 /**
  * Vista de archivos 3D
- * Muestra una lista de archivos 3D con cards TCG y soporte para previsualización interactiva.
+ * Muestra una lista de archivos 3D con cards TCG y soporte para visualización.
  */
 export function File3DView(_props: ViewProps) {
-	const {
-		file3Ds: file3dsRecord,
-		loading: isLoading,
-		error,
-		fetchFile3Ds: loadFile3Ds,
-	} = useFile3DStore((s) => ({
-		file3Ds: s.file3Ds,
-		loading: s.loading,
-		error: s.error,
-		fetchFile3Ds: s.fetchFile3Ds,
-	}));
+	// Usar selectores individuales para evitar recrear objetos
+	const file3dsRecord = useFile3DStore((s) => s.file3ds);
+	const isLoading = useFile3DStore((s) => s.isLoading);
+	const error = useFile3DStore((s) => s.error);
+	const loadFile3Ds = useFile3DStore((s) => s.loadFile3Ds);
+	const getSortedFile3Ds = useFile3DStore((s) => s.getSortedFile3Ds);
 
 	useEffect(() => {
-		if (Array.isArray(file3dsRecord) && file3dsRecord.length === 0) {
+		if (Object.keys(file3dsRecord).length === 0) {
 			viewLogger.info('Store de archivos 3D vacío, cargando desde el servidor...');
 			loadFile3Ds();
 		}
@@ -54,6 +49,11 @@ export function File3DView(_props: ViewProps) {
 		// Lógica de navegación o apertura de visor 3D aquí
 	}, []);
 
+	// Cachear el resultado de getSortedFile3Ds
+	const sortedFile3Ds = useMemo(() => {
+		return getSortedFile3Ds();
+	}, [getSortedFile3Ds, file3dsRecord]);
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -62,21 +62,16 @@ export function File3DView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading && (!Array.isArray(file3dsRecord) || file3dsRecord.length === 0)) {
+	if (isLoading && Object.keys(file3dsRecord).length === 0) {
 		return <LoadingScreen />;
 	}
-
-	// Lógica de ordenamiento simple (por fecha de actualización, más recientes primero)
-	const sortedFile3Ds = Array.isArray(file3dsRecord)
-		? file3dsRecord.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-		: [];
 
 	if (sortedFile3Ds.length === 0) {
 		return (
 			<EmptyState
 				icon={Box}
 				title="No hay archivos 3D"
-				description="Sube archivos 3D para comenzar a usar el visor interactivo."
+				description="Sube archivos 3D para comenzar a usar el visor."
 			/>
 		);
 	}
