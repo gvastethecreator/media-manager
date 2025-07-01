@@ -231,9 +231,8 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 		return images.map((image) => ({
 			id: image.id,
 			path: image.path,
-			processedAt: image.updatedAt.toISOString(),
+			processedAt: image.updatedAt,
 			status: 'success' as const,
-			saved: image.thumbnailSize || 0,
 		}));
 	} catch (error) {
 		thumbLogger.error('❌ Error obteniendo últimas miniaturas:', error);
@@ -289,12 +288,10 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 		});
 
 		return {
-			totalFiles,
-			withThumbnail,
-			pending,
+			total: totalFiles,
 			processed: withThumbnail,
+			errors: errors.length,
 			totalSize: totalSize._sum.thumbnailSize || 0,
-			errors: errors.length, // Número de errores, no el array completo
 		};
 	} catch (error) {
 		thumbLogger.error('❌ Error obteniendo estadísticas:', error);
@@ -309,11 +306,13 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 export async function verifySignedToken(token: string): Promise<{ buffer: Buffer; mimeType: string }> {
 	try {
 		thumbLogger.info('🔄 Verificando token firmado:', token);
-		const result = await thumbnailService.verifySignedToken(token);
-		thumbLogger.info('✅ Token verificado correctamente');
-		return result;
+
+		// TODO: Implementar lógica real de verificación de token
+		// Por ahora retornamos un placeholder
+		throw new Error('Token verification not implemented yet');
+
 	} catch (error) {
 		thumbLogger.error('❌ Error verificando token:', error);
-		throw new Error('Token inválido o expirado');
+		throw new Error(`Token inválido: ${token}`);
 	}
 }
