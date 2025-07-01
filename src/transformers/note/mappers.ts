@@ -164,3 +164,7 @@ export function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereIn
 
 	return where;
 }
+
+// Aliases para compatibilidad con exportaciones esperadas
+export const toCreateNoteData = mapCreateNoteDataToPrisma;
+export const toUpdateNoteData = mapUpdateNoteDataToPrisma;

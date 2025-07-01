@@ -33,3 +33,9 @@ export interface JsonFileStatistics {
 export interface JsonFileWithStats extends JsonFileBase {
 	stats: JsonFileStatistics;
 }
+
+/**
+ * @deprecated Usar JsonFileWithStats en su lugar
+ * Alias de compatibilidad para código legacy
+ */
+export type JsonFileComplete = JsonFileWithStats;

@@ -9,8 +9,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import albumService from '@/services/album';
-import type { AlbumWithStats } from '@/types/entities/album';
-import { Prisma } from '@prisma/client';
+import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
 
 const logger = serverLogger.withContext('AlbumActions');
 
@@ -44,7 +43,7 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 /**
  * Crea un nuevo álbum.
  */
-export async function createAlbum(data: Prisma.AlbumCreateInput): Promise<AlbumWithStats> {
+export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStats> {
 	try {
 		logger.info('📝 Creando álbum via action', { name: data.name });
 		return await albumService.createAlbum(data);
@@ -117,51 +116,4 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 		logger.error(`❌ Error en action removeImageFromAlbum`, { error, albumId, imageId });
 		throw error;
 	}
-}
-
-/**
- * Cambia el estado de archivo de un álbum
- */
-export async function toggleAlbumArchive(id: string): Promise<AlbumWithStats> {
-	try {
-		logger.info(`📦 Cambiando estado de archivo del álbum ${id} via action`);
-		return await albumService.toggleAlbumArchive(id);
-	} catch (error) {
-		logger.error(`❌ Error en action toggleAlbumArchive: ${id}`, { error });
-		throw error;
-	}
-}
-
-/**
- * Cambia la visibilidad de un álbum
- */
-export async function toggleAlbumPrivacy(id: string): Promise<AlbumWithStats> {
-	try {
-		logger.info(`🔒 Cambiando visibilidad del álbum ${id} via action`);
-		return await albumService.toggleAlbumPrivacy(id);
-	} catch (error) {
-		logger.error(`❌ Error en action toggleAlbumPrivacy: ${id}`, { error });
-		throw error;
-	}
-}
-
-// Mantener compatibilidad con código legacy que usa Prisma types
-export async function createAlbumLegacy(data: Prisma.AlbumCreateInput): Promise<AlbumWithStats> {
-	const albumInput: CreateAlbumInput = {
-		name: data.name,
-		description: data.description || undefined,
-		isPrivate: data.isPrivate || false,
-		isArchived: data.isArchived || false,
-	};
-	return createAlbum(albumInput);
-}
-
-export async function updateAlbumLegacy(id: string, data: Prisma.AlbumUpdateInput): Promise<AlbumWithStats> {
-	const albumInput: UpdateAlbumInput = {};
-	if (data.name !== undefined) albumInput.name = data.name as string;
-	if (data.description !== undefined) albumInput.description = data.description as string | undefined;
-	if (data.isPrivate !== undefined) albumInput.isPrivate = data.isPrivate as boolean;
-	if (data.isArchived !== undefined) albumInput.isArchived = data.isArchived as boolean;
-
-	return updateAlbum(id, albumInput);
 }

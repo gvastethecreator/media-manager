@@ -4,6 +4,8 @@
  */
 
 import { prisma } from '@/lib/database/prisma';
+import { toServiceError } from '@/lib/utils/errors/service-errors';
+import { transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
 	type ProfileCreateInput,
 	type ProfileExtended,
@@ -13,7 +15,7 @@ import {
 	profileFiltersSchema,
 	profilePaginationSchema,
 } from '@/types/entities/profile';
-import { toServiceError } from '@/lib/utils/errors/service-errors';
+import { CreateProfileInput, UpdateProfileInput } from './client';
 
 const SERVICE_NAME = 'ProfileService';
 
@@ -65,7 +67,7 @@ class ProfileServiceImpl {
 				take: limit,
 			});
 
-			return toEntities(profiles) || profiles;
+			return transformProfiles(profiles);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,

@@ -27,9 +27,18 @@ export const WildcardStatsSchema = z.object({
 });
 
 /**
+ * Tipo para hijos de comodín (recursivo)
+ */
+export type WildcardChild = {
+	id: string;
+	name: string;
+	children?: WildcardChild[];
+};
+
+/**
  * Esquema para hijos de comodín (estructura anidada)
  */
-export const WildcardChildSchema = z.object({
+export const WildcardChildSchema: z.ZodType<WildcardChild> = z.object({
 	id: z.string(),
 	name: z.string(),
 	children: z.array(z.lazy(() => WildcardChildSchema)).optional(),

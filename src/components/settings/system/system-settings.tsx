@@ -1,8 +1,5 @@
 'use client';
 
-import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import { getSystemStats, repairSystem, resetDatabase } from '@/app/actions/system';
 import {
 	AlertDialog,
@@ -21,6 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import toastService from '@/services/toast';
+import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Tipo para estadísticas del sistema
 interface SystemData {
@@ -56,18 +56,16 @@ export function SystemSettings() {
 			const stats = await getSystemStats();
 			setSystemData(stats);
 		} catch (error) {
-			console.error('Error al cargar estadísticas del sistema:', error);
 			toastService.error('No se pudieron cargar las estadísticas del sistema');
 		} finally {
 			setIsLoading(false);
 		}
 	}, []);
 
-	// Cargar datos inicialmente
 	useEffect(() => {
 		loadSystemStats();
 
-		// Actualizar estadísticas cada minuto
+		// Actualizar estadísticas cada minuto (solo en cliente)
 		const intervalId = setInterval(() => {
 			loadSystemStats();
 		}, 60000);
@@ -83,14 +81,12 @@ export function SystemSettings() {
 
 			if (result.success) {
 				toastService.success(result.message);
-
 				// Recargar estadísticas tras la reparación
 				loadSystemStats();
 			} else {
 				toastService.error(result.message);
 			}
 		} catch (error) {
-			console.error('Error al reparar el sistema:', error);
 			toastService.error('No se pudo completar la reparación del sistema');
 		} finally {
 			setIsRepairing(false);
@@ -105,14 +101,12 @@ export function SystemSettings() {
 
 			if (result.success) {
 				toastService.success(result.message);
-
 				// Recargar estadísticas tras el reseteo
 				loadSystemStats();
 			} else {
 				toastService.error(result.message);
 			}
 		} catch (error) {
-			console.error('Error al resetear la base de datos:', error);
 			toastService.error('No se pudo completar el reseteo de la base de datos');
 		} finally {
 			setIsResetting(false);

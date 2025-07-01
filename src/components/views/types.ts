@@ -53,8 +53,13 @@ export type ViewType =
 	| 'wildcard-content'
 	| 'entity-cards'
 	| 'development'
-	| 'document'
-	| 'audio'
-	| 'json-file'
-	| 'workflow'
-	| 'file3d';
+	| 'documents'
+	| 'document-content'
+	| 'audios'
+	| 'audio-content'
+	| 'json-files'
+	| 'json-file-content'
+	| 'workflows'
+	| 'workflow-content'
+	| 'file-3ds'
+	| 'file-3d-content';

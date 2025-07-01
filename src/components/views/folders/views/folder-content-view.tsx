@@ -1,92 +1,81 @@
 'use client';
 
-import { EntityCard } from '@/components/cards/entity-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
-import type { ImageWithStats } from '@/types/entities/image';
+import type { EntityWithStats } from '@/types/migration';
 import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { useCallback } from 'react';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
 
-const MemoizedEntityCard = React.memo(
-	({ image, onImageClick }: { image: ImageWithStats & { entityType: 'image' }; onImageClick: () => void }) => (
-		<EntityCard entity={image} onClick={onImageClick} className="h-full" />
-	),
-	(prevProps, nextProps) =>
-		prevProps.image.id === nextProps.image.id &&
-		prevProps.image.name === nextProps.image.name &&
-		prevProps.image.updatedAt === nextProps.image.updatedAt
-);
-MemoizedEntityCard.displayName = 'MemoizedEntityCard';
+interface FolderContentViewProps {
+	folderId?: string;
+}
 
-export function FolderContentView() {
-	// 📂 Obtener información de la carpeta actual desde navigation store
+export function FolderContentView({ folderId: propFolderId }: FolderContentViewProps = {}) {
+	// 📂 Obtener información de la carpeta actual desde navigation store o props
 	const { currentItem } = useNavigationStore();
-	const currentFolderId = currentItem?.id || null;
+	const currentFolderId = propFolderId || currentItem?.id || null;
 
-	// 📂 Usar el store de imágenes para obtener las imágenes de la carpeta
-	const {
-		images: imagesRecord,
-		isLoading,
-		error,
-		loadImages,
-		getSortedImages,
-	} = useImageStore((s) => ({
-		images: s.images,
-		isLoading: s.isLoading,
-		error: s.error,
-		loadImages: s.loadImages,
-		getSortedImages: s.getSortedImages,
-	}));
+	// 📂 Usar selectores específicos para evitar re-renders innecesarios
+	const isLoading = useImageStore((s) => s.isLoading);
+	const error = useImageStore((s) => s.error);
 
-	// 📂 Filtrar imágenes por carpeta actual
-	const folderImages = useMemo(() => {
-		const allImages = getSortedImages();
-		// TODO: Implementar filtro real por folderId cuando esté disponible en el schema
-		// Por ahora retornamos todas las imágenes como placeholder
-		return allImages.map((image): ImageWithStats & { entityType: 'image' } => ({
-			...image,
-			entityType: 'image',
-		}));
-	}, [getSortedImages]);
+	const handleImageSelect = useCallback((image: EntityWithStats) => {
+		logger.info('🖱️ Imagen seleccionada:', image.name);
+		// Lógica de selección aquí
+	}, []);
 
-	const handleImageClick = useCallback((image: ImageWithStats) => {
-		logger.info('🖱️ Click en imagen:', image.name);
-		// Lógica de navegación o apertura de visor aquí
+	const handleImageDoubleClick = useCallback((image: EntityWithStats) => {
+		logger.info('🖱️ Doble click en imagen:', image.name);
+		// Lógica de apertura de visor aquí
 	}, []);
 
 	const handleForceRefresh = useCallback(async () => {
+		if (!currentFolderId) return;
+
 		logger.info('🔄 Forzando recarga de imágenes');
 		try {
-			await loadImages();
+			// Usar getState para obtener la función de forma estable
+			const { loadImages } = useImageStore.getState();
+			await loadImages({ folderId: currentFolderId, refresh: true });
 		} catch (refreshError) {
 			logger.error('❌ Error al forzar recarga:', refreshError);
 		}
-	}, [loadImages]);
+	}, [currentFolderId]);
 
 	const handleScanFolder = useCallback(async () => {
-		logger.warn('⚠️ Función de escaneo directo temporalmente deshabilitada');
-		// TODO: Implementar escaneo directo de carpeta
-	}, []);
-
-	// 🚀 Cargar imágenes cuando cambie currentFolderId
-	useEffect(() => {
-		if (currentFolderId) {
-			logger.info(`🔄 Cargando imágenes de carpeta: ${currentFolderId}`);
-			// TODO: Implementar filtro por carpeta en loadImages
-			loadImages();
+		if (!currentFolderId) {
+			logger.warn('⚠️ No hay carpeta seleccionada para escanear');
+			return;
 		}
-	}, [currentFolderId, loadImages]);
 
-	// 🛡️ Validación: verificar que hay una carpeta seleccionada
+		try {
+			logger.info(`🔄 Iniciando escaneo de carpeta: ${currentFolderId}`);
+
+			// Importar y ejecutar la función de reindexación
+			const { reindexFolder } = await import('@/app/actions/folders/crud.actions');
+			await reindexFolder(currentFolderId);
+
+			logger.info('✅ Escaneo completado, recargando imágenes...');
+
+			// Recargar las imágenes después del escaneo
+			const { loadImages } = useImageStore.getState();
+			await loadImages({ folderId: currentFolderId, refresh: true });
+
+			logger.info('✅ Escaneo y recarga completados');
+		} catch (error) {
+			logger.error('❌ Error durante el escaneo:', error);
+		}
+	}, [currentFolderId]);
+
+	// ️ Validación: verificar que hay una carpeta seleccionada
 	if (!currentFolderId) {
 		logger.warn('⚠️ No hay carpeta seleccionada');
 		return (
@@ -130,36 +119,7 @@ export function FolderContentView() {
 		);
 	}
 
-	// Mostrar estado vacío si no hay imágenes
-	if (!folderImages || folderImages.length === 0) {
-		logger.debug('📭 Mostrando estado vacío - No hay imágenes');
-		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
-				<EmptyState
-					icon={Folder}
-					title="No hay imágenes"
-					description={
-						currentItem?.count && currentItem.count > 0
-							? `Esta carpeta debería tener ${currentItem.count} imágenes pero no se pudieron cargar.`
-							: 'Esta carpeta está vacía o no se han indexado imágenes aún.'
-					}
-				/>
-
-				<div className="flex gap-2">
-					<Button variant="outline" size="sm" onClick={handleForceRefresh}>
-						<RefreshCw className="h-4 w-4 mr-2" />
-						Recargar
-					</Button>
-					<Button variant="outline" size="sm" onClick={handleScanFolder}>
-						<FolderSearch className="h-4 w-4 mr-2" />
-						Escanear Carpeta
-					</Button>
-				</div>
-			</div>
-		);
-	}
-
-	// Renderizar galería de imágenes con EntityCard
+	// Renderizar galería de imágenes usando FileBrowser
 	return (
 		<div className="relative h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			{/* Controles en la esquina superior derecha */}
@@ -174,67 +134,35 @@ export function FolderContentView() {
 				</Button>
 			</div>
 
-			<ScrollArea className="h-full">
-				<div className="container mx-auto p-6 pt-16">
-					{' '}
-					{/* pt-16 para dar espacio a los controles */}
-					{/* Header con información de la carpeta */}
-					<div className="mb-6">
-						<h2 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
-							{currentItem?.emoji && <span className="text-3xl">{currentItem.emoji}</span>}
-							{currentItem?.name || 'Carpeta'}
-						</h2>
-						<p className="text-muted-foreground">
-							{folderImages.length} {folderImages.length === 1 ? 'imagen' : 'imágenes'} en esta carpeta
-						</p>
-						{currentItem?.description && (
-							<p className="text-sm text-muted-foreground mt-1">{currentItem.description}</p>
-						)}
-					</div>
-					{/* Grid de imágenes */}
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-						{folderImages.map((image, index) => {
-							const onImageClick = () => handleImageClick(image);
-							return (
-								<motion.div
-									key={image.id}
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.05, duration: 0.3 }}
-									className="perspective-1000"
-								>
-									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-										data-image-id={image.id}
-									>
-										<MemoizedEntityCard image={image} onImageClick={onImageClick} />
-									</div>
-								</motion.div>
-							);
-						})}
-					</div>
-					{/* Footer con información adicional */}
-					{folderImages.length > 0 && (
-						<div className="mt-8 pt-6 border-t border-border">
-							<p className="text-sm text-muted-foreground text-center">
-								Mostrando {folderImages.length} {folderImages.length === 1 ? 'imagen' : 'imágenes'} de la carpeta
-							</p>
-						</div>
-					)}
-				</div>
-			</ScrollArea>
+			{/* Header con información de la carpeta */}
+			<div className="p-6 pb-4 border-b border-border bg-background/50 backdrop-blur-sm">
+				<h2 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
+					{currentItem?.emoji && <span className="text-3xl">{currentItem.emoji}</span>}
+					{currentItem?.name || 'Carpeta'}
+				</h2>
+				{currentItem?.description && <p className="text-muted-foreground">{currentItem.description}</p>}
+			</div>
+			{/* FileBrowser con filtrado por carpeta */}
+			<div className="flex-1 overflow-hidden">
+				<FileBrowser
+					entityType="image"
+					filterId={currentFolderId}
+					filterType="folder"
+					onItemSelect={handleImageSelect}
+					onItemDoubleClick={handleImageDoubleClick}
+					className="h-full"
+				/>
+			</div>
 		</div>
 	);
 }
 
 /**
  * 📝 Documentación:
- * - Vista optimizada que usa EntityCard TCG con efectos holográficos
- * - Reemplaza FileBrowser por sistema de cards consistente
+ * - Vista optimizada que usa FileBrowser para mostrar imágenes con thumbnails
  * - Integra store Zustand para gestión eficiente de estado
- * - Grid responsivo que se adapta a diferentes tamaños de pantalla
- * - Animaciones escalonadas para carga suave
- * - Lazy loading y memoización para rendimiento óptimo
+ * - Filtrado automático por carpeta usando filterId
  * - Controles de recarga y escaneo integrados
  * - Información contextual de la carpeta
+ * - UI consistente con el resto del sistema
  */

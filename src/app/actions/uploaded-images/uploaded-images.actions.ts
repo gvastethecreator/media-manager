@@ -94,10 +94,10 @@ export async function uploadImages(formData: FormData) {
 						size: file.size,
 					},
 					dimensions,
-					metadata: JSON.stringify({
+					metadata: {
 						originalName: file.name,
 						mimeType: file.type,
-					}),
+					},
 				});
 
 				// El service devuelve un tipo base. La URL se construye en el cliente.

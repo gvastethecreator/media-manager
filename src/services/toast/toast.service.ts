@@ -12,11 +12,11 @@ export interface ToastOptions extends Omit<ExternalToast, 'description'> {
 	description?: React.ReactNode;
 	action?: {
 		label: string;
-		onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+		onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 	};
 	cancel?: {
 		label: string;
-		onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+		onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 	};
 }
 

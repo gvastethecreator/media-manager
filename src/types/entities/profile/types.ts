@@ -62,6 +62,12 @@ export interface ProfileCreateInput {
 export type ProfileUpdateInput = Partial<Omit<ProfileBase, 'id' | 'createdAt' | 'updatedAt'>>;
 
 /**
+ * Alias de compatibilidad para código legacy
+ */
+export type CreateProfileInput = ProfileCreateInput;
+export type UpdateProfileInput = ProfileUpdateInput;
+
+/**
  * Tipo extendido para UI con información adicional
  */
 export interface ProfileExtended extends ProfileBase {

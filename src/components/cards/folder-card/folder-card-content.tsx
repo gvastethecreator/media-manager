@@ -1,5 +1,5 @@
-import { FolderOutputIcon, HardDriveIcon, TimerResetIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { FolderOutputIcon, HardDriveIcon, TimerResetIcon } from 'lucide-react';
 
 interface FolderCardContentProps {
 	description?: string | null;
@@ -29,7 +29,8 @@ export function FolderCardContent({
 	tcgMode = true,
 }: FolderCardContentProps) {
 	// Debug log para ver los valores recibidos
-	console.log('FolderCardContent props:', { totalFiles, totalSize, childrenCount });
+	// Remover console.log que genera ruido en los logs
+	// console.log('FolderCardContent props:', { totalFiles, totalSize, childrenCount });
 
 	// Formatear el tamaño en bytes a una unidad más legible
 	const formattedSize = formatBytes(totalSize);
@@ -37,12 +38,12 @@ export function FolderCardContent({
 	// Formatear la fecha de última indexación
 	const formattedLastIndexed = lastIndexed
 		? new Intl.DateTimeFormat('es', {
-				day: '2-digit',
-				month: '2-digit',
-				year: '2-digit',
-				hour: '2-digit',
-				minute: '2-digit',
-			}).format(new Date(lastIndexed))
+			day: '2-digit',
+			month: '2-digit',
+			year: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+		}).format(new Date(lastIndexed))
 		: 'Nunca';
 
 	// Calcular puntaje de "poder" para la carpeta (estilo TCG)
@@ -101,9 +102,9 @@ export function FolderCardContent({
 					style={
 						!tcgMode
 							? {
-									borderColor: `${primaryColor}30`,
-									backgroundColor: `${primaryColor}15`,
-								}
+								borderColor: `${primaryColor}30`,
+								backgroundColor: `${primaryColor}15`,
+							}
 							: {}
 					}
 				>

@@ -3,8 +3,8 @@
  * @module utils/video/validators
  */
 
+import { VideoFormat, VideoPrivacyLevel, VideoType } from '@/types/entities/video/enums';
 import { z } from 'zod';
-import { VideoFormat, VideoPrivacyLevel, VideoType } from '../../types/entities/video';
 
 /**
  * Determina si un formato de video es válido

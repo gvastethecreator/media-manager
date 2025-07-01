@@ -40,7 +40,7 @@ import { ConceptCard } from './concept-card/concept-card';
 import { DocumentCard } from './document-card/document-card';
 import { FolderCard } from './folder-card/folder-card';
 import { GroupCard } from './group-card/group-card';
-import { ImageCard } from './image-card/image-card-improved';
+import { ImageCard } from './image-card';
 import { NoteCard } from './note-card/note-card';
 import { PlaceCard } from './place-card/place-card';
 import { PromptCard } from './prompt-card/prompt-card';
@@ -74,19 +74,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 }) => {
 	// Renderizar componente específico basado en type guards
 	if (isImageWithStats(entity)) {
-		return (
-			<ImageCard
-				image={entity}
-				onClick={onClick}
-				onDoubleClick={onDoubleClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
-			/>
-		);
+		return <ImageCard imageId={entity.id} onClick={() => onClick?.()} className={className} {...props} />;
 	}
 
 	if (isVideoWithStats(entity)) {

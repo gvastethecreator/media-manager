@@ -1,4 +1,4 @@
-# REGLAS OBLIGATORIAS PARA EL WORKFLOW - cada una de estas reglas debe respetarse de forma consistente.
+# REGLAS OBLIGATORIAS PARA EL WORKFLOW - cada una de estas reglas debe respetarse de forma consistente
 
 ## 🌐 Base Configuration
 
@@ -20,7 +20,7 @@
 
 ### Configuración Obligatoria (Solo cuando MCP esté disponible)
 
-- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 4444)
+- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 3000)
 - **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
 - **Scripts integrados** - Usar `pnpm test:e2e` (con logs automáticos) para testing formal
 - **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua cuando esté disponible
@@ -105,7 +105,7 @@
 pnpm dev                           # Servidor en 4444
 
 # 2. Validación continua con MCP
-# browser_navigate → http://localhost:4444
+# browser_navigate → http://localhost:3000
 # browser_snapshot → Revisar estructura
 # browser_console_messages → Detectar errores
 # browser_take_screenshot → Documentar estado

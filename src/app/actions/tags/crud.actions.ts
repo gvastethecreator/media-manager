@@ -114,8 +114,9 @@ export async function createTagLegacy(data: Prisma.TagCreateInput): Promise<TagW
 		description: data.description || undefined,
 		color: data.color || undefined,
 		emoji: data.emoji || undefined,
-		isPrivate: data.isPrivate || false,
-		isArchived: data.isArchived || false,
+		category: data.category || undefined,
+		shortcut: data.shortcut || undefined,
+		featuredImage: data.featuredImage || undefined,
 		isFavorite: data.isFavorite || false,
 	};
 	return createTag(tagInput);
@@ -127,8 +128,9 @@ export async function updateTagLegacy(id: string, data: Prisma.TagUpdateInput): 
 	if (data.description !== undefined) tagInput.description = data.description as string | undefined;
 	if (data.color !== undefined) tagInput.color = data.color as string | undefined;
 	if (data.emoji !== undefined) tagInput.emoji = data.emoji as string | undefined;
-	if (data.isPrivate !== undefined) tagInput.isPrivate = data.isPrivate as boolean;
-	if (data.isArchived !== undefined) tagInput.isArchived = data.isArchived as boolean;
+	if (data.category !== undefined) tagInput.category = data.category as string | undefined;
+	if (data.shortcut !== undefined) tagInput.shortcut = data.shortcut as string | undefined;
+	if (data.featuredImage !== undefined) tagInput.featuredImage = data.featuredImage as string | undefined;
 	if (data.isFavorite !== undefined) tagInput.isFavorite = data.isFavorite as boolean;
 
 	return updateTag(id, tagInput);

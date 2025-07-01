@@ -1,12 +1,13 @@
 'use client';
 
-import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
-import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import type { ViewMode } from '@/components/navigation/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
-import { ViewType } from '@/types/files';
+import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
+import type React from 'react';
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 
 export type CategoryChild = {
 	id: string;
@@ -205,12 +206,8 @@ const CategoryItems = memo(
 			return handlers;
 		}, [items, categoryId, stableOnItemClick]);
 
-		if (items.length === 0) {
-			return <div className="px-0 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
-		}
-
-		// Envolver la función renderItems en useCallback para evitar recreaciones
-		const renderItems = useCallback(() => {
+		// Memoizamos directamente los items renderizados sin useCallback adicional
+		const renderedItems = useMemo(() => {
 			// Renderizar elementos especiales para etiquetas
 			if (categoryId === 'tags') {
 				return (
@@ -336,8 +333,9 @@ const CategoryItems = memo(
 			isItemSelected,
 		]);
 
-		// Memoizamos los items renderizados
-		const renderedItems = useMemo(() => renderItems(), [renderItems]);
+		if (items.length === 0) {
+			return <div className="px-0 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
+		}
 
 		return <div className={containerClassName}>{renderedItems}</div>;
 	},

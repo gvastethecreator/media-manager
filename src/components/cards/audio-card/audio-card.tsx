@@ -8,7 +8,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
-interface AudioCardProps {
+export interface AudioCardProps {
 	/** Datos del audio a mostrar */
 	audio: AudioWithStats;
 	/** Tamaño compacto con menos información */

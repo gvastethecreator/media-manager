@@ -13,19 +13,25 @@
  * @updated 2025-01-27
  */
 
+// --- Enums y constantes del store ---
+export { TagCategory } from '@/store/entities/tag/types';
 export type {
-	PrismaTagWithCounts,
-	TagBase,
-	TagStatistics,
-	TagWithStats,
+    PrismaTagWithCounts,
+    TagBase,
+    TagCreateInput,
+    TagStatistics,
+    TagUpdateInput,
+    TagWithStats
 } from './base';
 // --- Tipos Canónicos (NUEVO) ---
 export { TAG_COUNTS_RELATIONS, tagCounts } from './base';
-
 // --- Esquemas de Validación ---
 export {
-	RelatedTagSchema,
-	TagFiltersSchema,
-	TagImageRelationSchema,
-	TagSchema,
+    RelatedTagSchema,
+    TagFiltersSchema,
+    TagImageRelationSchema,
+    TagSchema
 } from './schema';
+// --- Tipos Complete ---
+export type { TagComplete, TagPreview } from './types';
+

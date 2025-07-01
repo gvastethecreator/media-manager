@@ -4,25 +4,25 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	WorldItemComplete,
-	WorldItemCreateInput,
-	WorldItemFilters,
-	WorldItemSearchOptions,
-	WorldItemStatistics,
-	WorldItemUpdateInput,
-	WorldItemWithStats,
-} from '@/types/entities/world-item';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import type {
+    WorldItemComplete,
+    WorldItemCreateInput,
+    WorldItemFilters,
+    WorldItemSearchOptions,
+    WorldItemStatistics,
+    WorldItemUpdateInput,
+    WorldItemWithStats,
+} from '@/types/entities/world-item';
 import type { Prisma } from '@prisma/client';
 import {
-	serializeAttributes,
-	serializeEffects,
-	serializeFilters,
-	serializeProperties,
-	serializeRequirements,
-	serializeStats,
-	serializeTags,
+    serializeAttributes,
+    serializeEffects,
+    serializeFilters,
+    serializeProperties,
+    serializeRequirements,
+    serializeStats,
+    serializeTags,
 } from './serializers';
 
 // Logger específico para este módulo
@@ -156,8 +156,8 @@ function mapWorldItemFiltersToPrisma(filters: WorldItemFilters): Prisma.WorldIte
 	const where: Prisma.WorldItemWhereInput = {};
 	if (filters.query) {
 		where.OR = [
-			{ name: { contains: filters.query, mode: 'insensitive' } },
-			{ description: { contains: filters.query, mode: 'insensitive' } },
+			{ name: { contains: filters.query } },
+			{ description: { contains: filters.query } },
 		];
 	}
 	if (filters.type?.length) where.type = { in: filters.type };

@@ -1,4 +1,5 @@
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { ViewType } from '@/components/views/types';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -11,7 +12,6 @@ import { usePropertyStore } from '@/store/entities/property';
 import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { ViewType } from '@/types/files';
 import { useCallback } from 'react';
 
 /**
@@ -47,10 +47,23 @@ export function useCategoryHandlers() {
 	const selectNote = noteStore.selectNote || (() => console.log('selectNote not available'));
 
 	// Funciones locales para entidades sin selectores implementados
-	const selectFolder = useCallback((folderId: string | null) => {
-		// TODO: Implementar store de folder
-		console.log('Folder selected:', folderId);
-	}, []);
+	const { setCurrentItem } = useNavigationStore();
+
+	const selectFolder = useCallback(
+		(folderId: string | null) => {
+			if (folderId) {
+				// Establecer el currentItem en la navigation store
+				setCurrentItem({
+					id: folderId,
+					itemType: 'folder',
+				});
+				console.log('Folder selected:', folderId);
+			} else {
+				setCurrentItem(null);
+			}
+		},
+		[setCurrentItem]
+	);
 
 	const selectGroup = useCallback((groupId: string | null) => {
 		// TODO: Implementar selector en GroupStore
@@ -142,12 +155,18 @@ export function useCategoryHandlers() {
 	// Función para manejar el clic en una carpeta
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
+			console.log('🔄 Navegando a carpeta:', folderId);
+
 			// Limpiar otras selecciones
 			clearAllSelections();
 
-			// Establecer vista y carpeta actual
-			setCurrentView('folder-content');
+			// Establecer carpeta actual primero
 			selectFolder(folderId);
+
+			// Luego cambiar la vista
+			setCurrentView('folder-content');
+
+			console.log('✅ Vista cambiada a folder-content para carpeta:', folderId);
 		},
 		[clearAllSelections, setCurrentView, selectFolder]
 	);

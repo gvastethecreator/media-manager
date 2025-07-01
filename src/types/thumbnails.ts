@@ -3,8 +3,8 @@
  * @module types/thumbnails
  */
 
-import { z } from 'zod';
 import type { JSONString } from '@/lib/utils/types/utility-types';
+import { z } from 'zod';
 
 /**
  * Calidad de thumbnail
@@ -81,6 +81,56 @@ export interface ThumbnailResult {
 	path: string;
 	url: string;
 	metadata: JSONString<ThumbnailMetadata>;
+}
+
+/**
+ * Estadísticas de thumbnails
+ */
+export interface ThumbnailStats {
+	total: number;
+	processed: number;
+	errors: number;
+	totalSize: number;
+	lastProcessed?: Date;
+}
+
+/**
+ * Último thumbnail procesado
+ */
+export interface LastProcessedThumbnail {
+	id: string;
+	path: string;
+	processedAt: Date;
+	status: 'success' | 'error';
+	error?: string;
+}
+
+/**
+ * Opciones de procesamiento
+ */
+export interface ProcessOptions {
+	forceRegenerate?: boolean;
+	quality?: ThumbnailQuality;
+	maxConcurrency?: number;
+	logProgress?: boolean;
+}
+
+/**
+ * Estados de procesamiento
+ */
+export enum ProcessStatus {
+	PENDING = 'pending',
+	PROCESSING = 'processing',
+	COMPLETED = 'completed',
+	FAILED = 'failed',
+}
+
+/**
+ * Errores de thumbnail
+ */
+export interface ThumbnailError extends Error {
+	code?: string;
+	details?: Record<string, unknown>;
 }
 
 // Validaciones Zod

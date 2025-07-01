@@ -5,8 +5,8 @@
  * @module app/actions/tags/query.actions
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem } from '@/services/image/converter.service';
 import { toTagWithStats } from '@/transformers/tag';
 import { TagWithStats, tagCounts } from '@/types/entities/tag';
@@ -56,9 +56,9 @@ export async function searchTags(
 				query.trim()
 					? {
 							OR: [
-								{ name: { contains: query, mode: 'insensitive' } },
-								{ description: { contains: query, mode: 'insensitive' } },
-								{ category: { contains: query, mode: 'insensitive' } },
+								{ name: { contains: query } },
+								{ description: { contains: query } },
+								{ category: { contains: query } },
 							],
 						}
 					: {},

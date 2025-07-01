@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 import { NavPanel } from '@/components/navigation/navigation-panel';
@@ -8,10 +7,11 @@ import { RightPanel } from '@/components/panels/right-panel/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ViewContainer } from '@/components/views/view-container';
-import { useLocalStorage } from '@/lib/hooks/use-local-storage';
+import { useLocalStorage } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageViewer } from '@/store/image-viewer.store';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Estilos para el panel colapsado
 import './nav-panel-collapsed.css';
@@ -166,13 +166,33 @@ export function MainLayout() {
 	// Cargar datos de navegación
 	useEffect(() => {
 		let isMounted = true;
-		getNavigationData().then((data) => {
-			if (isMounted) {
-				setNavData(data);
+
+		const loadNavData = async () => {
+			try {
+				const data = await getNavigationData();
+
+				if (isMounted) {
+					setNavData(data);
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.error('❌ [MainLayout] Error cargando datos de navegación:', error);
 			}
-		});
+		};
+
+		// Carga inicial inmediata
+		loadNavData();
+
+		// Refresco adicional después de 2 segundos para capturar datos que se cargan más tarde
+		const refreshTimer = setTimeout(() => {
+			if (isMounted) {
+				loadNavData();
+			}
+		}, 2000);
+
 		return () => {
 			isMounted = false;
+			clearTimeout(refreshTimer);
 		};
 	}, []);
 
@@ -277,15 +297,16 @@ export function MainLayout() {
 	// Optimizar el cálculo de tamaños por defecto
 	const defaultSizes = useMemo<PanelSizes>(() => {
 		const nav = isNavPanelCollapsed ? PANEL_CONFIG.nav.collapsedSize : navPanelSize;
-		const right = isVisible ? (isRightPanelCollapsed ? PANEL_CONFIG.right.collapsedSize : rightPanelSize) : 0;
-		const content = 100 - nav - (isVisible ? right : 0);
+		// Siempre incluir el panel derecho en el cálculo
+		const right = isRightPanelCollapsed ? PANEL_CONFIG.right.collapsedSize : rightPanelSize;
+		const content = 100 - nav - right;
 
 		return {
 			nav,
 			content,
 			right,
 		};
-	}, [isNavPanelCollapsed, navPanelSize, isRightPanelCollapsed, rightPanelSize, isVisible]);
+	}, [isNavPanelCollapsed, navPanelSize, isRightPanelCollapsed, rightPanelSize]);
 
 	// Crear estilos de los paneles sólo cuando sus dependencias realmente cambien
 	const navPanelStyleDeps = useMemo(() => [isResizing, isNavPanelCollapsed], [isResizing, isNavPanelCollapsed]);
@@ -344,9 +365,9 @@ export function MainLayout() {
 		() => ({
 			isRightPanelCollapsed,
 			toggleRightPanelCollapse,
-			isRightPanelVisible: isVisible,
+			isRightPanelVisible: true, // El panel derecho siempre está visible
 		}),
-		[isRightPanelCollapsed, toggleRightPanelCollapse, isVisible]
+		[isRightPanelCollapsed, toggleRightPanelCollapse]
 	);
 
 	// Callback para manejar el layout
@@ -360,13 +381,13 @@ export function MainLayout() {
 					setNavPanelSize(nav);
 				});
 			}
-			if (right && !isRightPanelCollapsed && isVisible) {
+			if (right && !isRightPanelCollapsed) {
 				requestAnimationFrame(() => {
 					setRightPanelSize(right);
 				});
 			}
 		},
-		[isNavPanelCollapsed, isRightPanelCollapsed, isVisible, setNavPanelSize, setRightPanelSize]
+		[isNavPanelCollapsed, isRightPanelCollapsed, setNavPanelSize, setRightPanelSize]
 	);
 
 	// Clases memoizadas para el ResizableHandle
@@ -421,8 +442,15 @@ export function MainLayout() {
 					onExpand={handleNavPanelExpand}
 					onResize={handleNavPanelResize}
 				>
-					{/* Solo renderizamos NavPanel cuando no estamos redimensionando para ahorrar CPU */}
-					{!isResizing && navData && <MemoizedNavPanel initialData={navData} {...navPanelProps} />}
+					{/* Panel de navegación real con datos */}
+					{!isResizing && navData && (
+						<MemoizedNavPanel
+							key={`navpanel-${navData.folders?.length || 0}-${navData.collections?.length || 0}`}
+							initialData={navData}
+							isCollapsed={isNavPanelCollapsed}
+							onToggleCollapse={toggleNavPanelCollapse}
+						/>
+					)}
 				</ResizablePanel>
 
 				{/* Separador para panel de navegación */}
@@ -437,28 +465,24 @@ export function MainLayout() {
 					{renderViewContent}
 				</CentralPanel>
 
-				{/* Panel derecho optimizado */}
-				{isVisible && (
-					<>
-						<ResizerHandle className={rightHandleClassName} onDragging={handleDragging} />
-						<ResizablePanel
-							defaultSize={defaultSizes.right}
-							minSize={isRightPanelCollapsed ? PANEL_CONFIG.right.collapsedSize : PANEL_CONFIG.right.minSize}
-							maxSize={PANEL_CONFIG.right.maxSize}
-							className={rightPanelClassName}
-							style={rightPanelStyle}
-							collapsible
-							collapsedSize={PANEL_CONFIG.right.collapsedSize}
-							isCollapsed={isRightPanelCollapsed}
-							onCollapse={handleRightPanelCollapse}
-							onExpand={handleRightPanelExpand}
-							onResize={handleRightPanelResize}
-						>
-							{/* Solo renderizamos RightPanel cuando no estamos redimensionando */}
-							{!isResizing && <MemoizedRightPanel {...rightPanelProps} />}
-						</ResizablePanel>
-					</>
-				)}
+				{/* Panel derecho siempre visible */}
+				<ResizerHandle className={rightHandleClassName} onDragging={handleDragging} />
+				<ResizablePanel
+					defaultSize={defaultSizes.right}
+					minSize={isRightPanelCollapsed ? PANEL_CONFIG.right.collapsedSize : PANEL_CONFIG.right.minSize}
+					maxSize={PANEL_CONFIG.right.maxSize}
+					className={rightPanelClassName}
+					style={rightPanelStyle}
+					collapsible
+					collapsedSize={PANEL_CONFIG.right.collapsedSize}
+					isCollapsed={isRightPanelCollapsed}
+					onCollapse={handleRightPanelCollapse}
+					onExpand={handleRightPanelExpand}
+					onResize={handleRightPanelResize}
+				>
+					{/* Solo renderizamos RightPanel cuando no estamos redimensionando */}
+					{!isResizing && <MemoizedRightPanel {...rightPanelProps} />}
+				</ResizablePanel>
 			</ResizablePanelGroup>
 
 			{isOpen && !isResizing && (

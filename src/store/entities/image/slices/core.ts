@@ -6,11 +6,11 @@
  */
 
 import {
-	createImage as createServerImage,
-	deleteImage as deleteServerImage,
-	getImage,
-	getImages,
-	updateImage as updateServerImage,
+    createImage as createServerImage,
+    deleteImage as deleteServerImage,
+    getImage,
+    getImages,
+    updateImage as updateServerImage,
 } from '@/app/actions/images/image-crud.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
@@ -28,6 +28,7 @@ export interface ImageCoreState {
 	// Getters
 	getImage: (id: string) => ImageWithStats | undefined;
 	getImages: () => ImageWithStats[];
+	getSortedImages: () => ImageWithStats[];
 	getImagesByFolder: (folderId: string) => ImageWithStats[];
 	getImageByPath: (path: string) => ImageWithStats | undefined;
 
@@ -42,6 +43,7 @@ export interface ImageCoreState {
 	// Acciones asíncronas
 	fetchImage: (id: string) => Promise<ImageWithStats | undefined>;
 	fetchImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
+	loadImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
 	createImage: (data: ImageCreateInput) => Promise<ImageWithStats | undefined>;
 	updateImage: (id: string, data: ImageUpdateInput) => Promise<ImageWithStats | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
@@ -55,6 +57,11 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	// --- Getters ---
 	getImage: (id) => get().images[id],
 	getImages: () => Object.values(get().images),
+	getSortedImages: () => {
+		const images = Object.values(get().images);
+		// Ordenar por fecha de actualización descendente por defecto
+		return images.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+	},
 	getImagesByFolder: (folderId) => Object.values(get().images).filter((image) => image.folderId === folderId),
 	getImageByPath: (path) => Object.values(get().images).find((image) => image.path === path),
 
@@ -130,25 +137,68 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		}
 	},
 	fetchImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
+		const state = get();
+
+		// Evitar múltiples llamadas simultáneas
+		if (state.isLoading && !options.refresh) {
+			imageLogger.debug('⚠️ Ya hay una carga en progreso, saltando...');
+			return Object.values(state.images);
+		}
+
 		set({ isLoading: true, error: null });
 		try {
 			if (options.refresh) {
 				get().clearImages();
 			}
 
+			imageLogger.info('🔄 Obteniendo imágenes con opciones:', options);
 			const result = await getImages(options);
-			// ✅ Server action ya devuelve GetImagesResult con ImageWithStats[] - extracción directa
+
+			imageLogger.debug('📦 Respuesta del servidor:', {
+				result,
+				type: typeof result,
+				isArray: Array.isArray(result),
+				keys: result ? Object.keys(result) : 'null/undefined',
+			});
+
+			// Verificar que result tiene la estructura esperada
+			if (!result || typeof result !== 'object') {
+				throw new Error(`Respuesta del servidor inválida: ${typeof result}`);
+			}
+
+			// Extraer imágenes del resultado
 			const images = Array.isArray(result) ? result : result.images || [];
+			imageLogger.info(`✅ ${images.length} imágenes obtenidas`);
+
 			get().addImages(images);
+			set({ isLoading: false, error: null });
 			return images;
 		} catch (e: unknown) {
-			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch images';
-			imageLogger.error(errorMessage, { error: e });
-			set({ error: errorMessage });
+			// Manejo más robusto de errores
+			let errorMessage = 'Failed to fetch images';
+
+			if (e instanceof Error) {
+				errorMessage = e.message;
+			} else if (typeof e === 'string') {
+				errorMessage = e;
+			} else if (e && typeof e === 'object' && 'message' in e) {
+				errorMessage = String(e.message);
+			}
+
+			imageLogger.error('❌ Error obteniendo imágenes:', {
+				error: e,
+				errorMessage,
+				errorType: typeof e,
+				errorConstructor: e?.constructor?.name,
+			});
+
+			set({ error: errorMessage, isLoading: false });
 			return [];
-		} finally {
-			set({ isLoading: false });
 		}
+	},
+	// Alias para fetchImages para compatibilidad con componentes existentes
+	loadImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
+		return get().fetchImages(options);
 	},
 	createImage: async (data) => {
 		set({ isLoading: true, error: null });
