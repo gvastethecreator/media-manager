@@ -4,117 +4,117 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
 
 export interface GroupFilters {
-  search?: string;
-  limit?: number;
-  offset?: number;
-  sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
-  sortOrder?: 'asc' | 'desc';
+	search?: string;
+	limit?: number;
+	offset?: number;
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortOrder?: 'asc' | 'desc';
 }
 
 export interface GroupCreateInput {
-  name: string;
-  description?: string;
-  color?: string;
-  emoji?: string;
-  isPrivate?: boolean;
+	name: string;
+	description?: string;
+	color?: string;
+	emoji?: string;
+	isPrivate?: boolean;
 }
 
 export interface GroupUpdateInput {
-  name?: string;
-  description?: string;
-  color?: string;
-  emoji?: string;
-  isPrivate?: boolean;
+	name?: string;
+	description?: string;
+	color?: string;
+	emoji?: string;
+	isPrivate?: boolean;
 }
 
 export interface GroupsResponse {
-  data: GroupWithStats[];
-  pagination: {
-    total: number;
-    limit: number;
-    offset: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-  };
+	data: GroupWithStats[];
+	pagination: {
+		total: number;
+		limit: number;
+		offset: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	};
 }
 
 // Query keys
 export const groupKeys = {
-  all: ['groups'] as const,
-  lists: () => [...groupKeys.all, 'list'] as const,
-  list: (filters: GroupFilters) => [...groupKeys.lists(), filters] as const,
-  details: () => [...groupKeys.all, 'detail'] as const,
-  detail: (id: string) => [...groupKeys.details(), id] as const,
-  images: (id: string) => [...groupKeys.detail(id), 'images'] as const,
+	all: ['groups'] as const,
+	lists: () => [...groupKeys.all, 'list'] as const,
+	list: (filters: GroupFilters) => [...groupKeys.lists(), filters] as const,
+	details: () => [...groupKeys.all, 'detail'] as const,
+	detail: (id: string) => [...groupKeys.details(), id] as const,
+	images: (id: string) => [...groupKeys.detail(id), 'images'] as const,
 };
 
 // Hooks
 export function useGroups(filters: GroupFilters = {}) {
-  return useQuery<GroupsResponse, Error>({
-    queryKey: groupKeys.list(filters),
-    queryFn: () => {
-      const params = new URLSearchParams();
-      for (const [key, value] of Object.entries(filters)) {
-        if (value !== undefined && value !== null) {
-          params.append(key, String(value));
-        }
-      }
-      return api.get<GroupsResponse>(`/groups?${params.toString()}`);
-    },
-    staleTime: 1000 * 60, // 1 minuto
-  });
+	return useQuery<GroupsResponse, Error>({
+		queryKey: groupKeys.list(filters),
+		queryFn: () => {
+			const params = new URLSearchParams();
+			for (const [key, value] of Object.entries(filters)) {
+				if (value !== undefined && value !== null) {
+					params.append(key, String(value));
+				}
+			}
+			return api.get<GroupsResponse>(`/groups?${params.toString()}`);
+		},
+		staleTime: 1000 * 60, // 1 minuto
+	});
 }
 
 export function useGroup(id: string) {
-  return useQuery<GroupWithStats, Error>({
-    queryKey: groupKeys.detail(id),
-    queryFn: () => api.get<GroupWithStats>(`/groups/${id}`),
-    enabled: !!id,
-    staleTime: 1000 * 60, // 1 minuto
-  });
+	return useQuery<GroupWithStats, Error>({
+		queryKey: groupKeys.detail(id),
+		queryFn: () => api.get<GroupWithStats>(`/groups/${id}`),
+		enabled: !!id,
+		staleTime: 1000 * 60, // 1 minuto
+	});
 }
 
 export function useGroupImages(id: string) {
-  return useQuery<ImageWithStats[], Error>({
-    queryKey: groupKeys.images(id),
-    queryFn: () => api.get<ImageWithStats[]>(`/groups/${id}/images`),
-    enabled: !!id,
-    staleTime: 1000 * 30, // 30 segundos
-  });
+	return useQuery<ImageWithStats[], Error>({
+		queryKey: groupKeys.images(id),
+		queryFn: () => api.get<ImageWithStats[]>(`/groups/${id}/images`),
+		enabled: !!id,
+		staleTime: 1000 * 30, // 30 segundos
+	});
 }
 
 export function useCreateGroup() {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation<GroupWithStats, Error, GroupCreateInput>({
-    mutationFn: (data) => api.post<GroupWithStats>('/groups', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
-    },
-  });
+	return useMutation<GroupWithStats, Error, GroupCreateInput>({
+		mutationFn: (data) => api.post<GroupWithStats>('/groups', data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
+		},
+	});
 }
 
 export function useUpdateGroup() {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation<GroupWithStats, Error, { id: string; data: GroupUpdateInput }>({
-    mutationFn: ({ id, data }) => api.put<GroupWithStats>(`/groups/${id}`, data),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
-      queryClient.setQueryData(groupKeys.detail(data.id), data);
-    },
-  });
+	return useMutation<GroupWithStats, Error, { id: string; data: GroupUpdateInput }>({
+		mutationFn: ({ id, data }) => api.put<GroupWithStats>(`/groups/${id}`, data),
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
+			queryClient.setQueryData(groupKeys.detail(data.id), data);
+		},
+	});
 }
 
 export function useDeleteGroup() {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation<void, Error, string>({
-    mutationFn: (id) => api.delete(`/groups/${id}`),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
-      queryClient.removeQueries({ queryKey: groupKeys.detail(id) });
-      queryClient.removeQueries({ queryKey: groupKeys.images(id) });
-    },
-  });
+	return useMutation<void, Error, string>({
+		mutationFn: (id) => api.delete(`/groups/${id}`),
+		onSuccess: (_, id) => {
+			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
+			queryClient.removeQueries({ queryKey: groupKeys.detail(id) });
+			queryClient.removeQueries({ queryKey: groupKeys.images(id) });
+		},
+	});
 }

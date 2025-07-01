@@ -12,86 +12,77 @@ export { formatBytes, formatDate, formatRelativeTime, formatNumber, formatPercen
  * Formatea información de thumbnail
  */
 export function formatThumbnailInfo(width?: number, height?: number, size?: number): string {
-  const parts: string[] = [];
+	const parts: string[] = [];
 
-  if (width && height) {
-    parts.push(`${width}x${height}`);
-  }
+	if (width && height) {
+		parts.push(`${width}x${height}`);
+	}
 
-  if (size) {
-    parts.push(formatBytes(size));
-  }
+	if (size) {
+		parts.push(formatBytes(size));
+	}
 
-  return parts.join(' • ');
+	return parts.join(' • ');
 }
 
 /**
  * Formatea información de imagen
  */
-export function formatImageInfo(
-  width?: number,
-  height?: number,
-  size?: number,
-  format?: string
-): string {
-  const parts: string[] = [];
+export function formatImageInfo(width?: number, height?: number, size?: number, format?: string): string {
+	const parts: string[] = [];
 
-  if (width && height) {
-    parts.push(`${width}x${height}`);
-  }
+	if (width && height) {
+		parts.push(`${width}x${height}`);
+	}
 
-  if (format) {
-    parts.push(format.toUpperCase());
-  }
+	if (format) {
+		parts.push(format.toUpperCase());
+	}
 
-  if (size) {
-    parts.push(formatBytes(size));
-  }
+	if (size) {
+		parts.push(formatBytes(size));
+	}
 
-  return parts.join(' • ');
+	return parts.join(' • ');
 }
 
 /**
  * Formatea un path de archivo para mostrar
  */
 export function formatPath(path: string, maxLength = 50): string {
-  if (path.length <= maxLength) return path;
+	if (path.length <= maxLength) return path;
 
-  const parts = path.split(/[/\\]/);
-  if (parts.length <= 2) return path;
+	const parts = path.split(/[/\\]/);
+	if (parts.length <= 2) return path;
 
-  const fileName = parts[parts.length - 1];
-  const firstDir = parts[0];
+	const fileName = parts[parts.length - 1];
+	const firstDir = parts[0];
 
-  return `${firstDir}/.../${fileName}`;
+	return `${firstDir}/.../${fileName}`;
 }
 
 /**
  * Formatea el estado de un proceso
  */
-export function formatProcessStatus(
-  processed: number,
-  total: number,
-  errors: number = 0
-): string {
-  const percentage = formatPercentage(processed, total);
-  const errorText = errors > 0 ? ` (${errors} errores)` : '';
+export function formatProcessStatus(processed: number, total: number, errors: number = 0): string {
+	const percentage = formatPercentage(processed, total);
+	const errorText = errors > 0 ? ` (${errors} errores)` : '';
 
-  return `${processed}/${total} (${percentage})${errorText}`;
+	return `${processed}/${total} (${percentage})${errorText}`;
 }
 
 /**
  * Formatea tags para mostrar
  */
 export function formatTags(tags: string[], maxTags = 3): string {
-  if (tags.length === 0) return 'Sin tags';
+	if (tags.length === 0) return 'Sin tags';
 
-  if (tags.length <= maxTags) {
-    return tags.join(', ');
-  }
+	if (tags.length <= maxTags) {
+		return tags.join(', ');
+	}
 
-  const visibleTags = tags.slice(0, maxTags);
-  const remainingCount = tags.length - maxTags;
+	const visibleTags = tags.slice(0, maxTags);
+	const remainingCount = tags.length - maxTags;
 
-  return `${visibleTags.join(', ')} +${remainingCount} más`;
+	return `${visibleTags.join(', ')} +${remainingCount} más`;
 }

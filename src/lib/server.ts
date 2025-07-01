@@ -15,17 +15,17 @@ export const isClient = !isServer;
  * Ejecuta código solo en el servidor
  */
 export function serverOnly<T>(fn: () => T): T | undefined {
-  return isServer ? fn() : undefined;
+	return isServer ? fn() : undefined;
 }
 
 /**
  * Variables de entorno del servidor
  */
 export const serverEnv = {
-  NODE_ENV: process.env.NODE_ENV || 'development',
-  DATABASE_URL: process.env.DATABASE_URL,
-  PORT: process.env.PORT || '3000',
-  HOST: process.env.HOST || 'localhost',
+	NODE_ENV: process.env.NODE_ENV || 'development',
+	DATABASE_URL: process.env.DATABASE_URL,
+	PORT: process.env.PORT || '3000',
+	HOST: process.env.HOST || 'localhost',
 } as const;
 
 /**

@@ -63,7 +63,9 @@ export function PlaceContentView() {
 	}
 
 	if (error || placeError) {
-		return <div className="flex items-center justify-center p-8 text-red-500">Error: {error || placeError?.message}</div>;
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || placeError?.message}</div>
+		);
 	}
 
 	if (!items || items.length === 0) {

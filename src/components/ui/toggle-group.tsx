@@ -39,22 +39,25 @@ function ToggleGroup({
 
 	const currentValue = value !== undefined ? value : internalValue;
 
-	const handleValueChange = React.useCallback((itemValue: string) => {
-		if (type === 'multiple') {
-			const newValue = Array.isArray(currentValue)
-				? currentValue.includes(itemValue)
-					? currentValue.filter(v => v !== itemValue)
-					: [...currentValue, itemValue]
-				: [itemValue];
+	const handleValueChange = React.useCallback(
+		(itemValue: string) => {
+			if (type === 'multiple') {
+				const newValue = Array.isArray(currentValue)
+					? currentValue.includes(itemValue)
+						? currentValue.filter((v) => v !== itemValue)
+						: [...currentValue, itemValue]
+					: [itemValue];
 
-			setInternalValue(newValue);
-			onValueChange?.(newValue);
-		} else {
-			const newValue = currentValue === itemValue ? '' : itemValue;
-			setInternalValue(newValue);
-			onValueChange?.(newValue);
-		}
-	}, [currentValue, type, onValueChange]);
+				setInternalValue(newValue);
+				onValueChange?.(newValue);
+			} else {
+				const newValue = currentValue === itemValue ? '' : itemValue;
+				setInternalValue(newValue);
+				onValueChange?.(newValue);
+			}
+		},
+		[currentValue, type, onValueChange]
+	);
 
 	return (
 		<fieldset
@@ -74,9 +77,10 @@ function ToggleGroup({
 						return React.cloneElement(child, {
 							...child.props,
 							onValueChange: handleValueChange,
-							isPressed: type === 'multiple'
-								? Array.isArray(currentValue) && currentValue.includes(child.props.value)
-								: currentValue === child.props.value,
+							isPressed:
+								type === 'multiple'
+									? Array.isArray(currentValue) && currentValue.includes(child.props.value)
+									: currentValue === child.props.value,
 							disabled: disabled || child.props.disabled,
 							key: child.props.value || index,
 						});
@@ -134,4 +138,3 @@ function ToggleGroupItem({
 }
 
 export { ToggleGroup, ToggleGroupItem };
-

@@ -9,13 +9,7 @@ interface AspectRatioProps extends React.HTMLAttributes<HTMLDivElement> {
 	children?: React.ReactNode;
 }
 
-function AspectRatio({
-	className,
-	ratio = 1,
-	children,
-	style,
-	...props
-}: AspectRatioProps) {
+function AspectRatio({ className, ratio = 1, children, style, ...props }: AspectRatioProps) {
 	return (
 		<div
 			data-slot="aspect-ratio"
@@ -32,4 +26,3 @@ function AspectRatio({
 }
 
 export { AspectRatio };
-

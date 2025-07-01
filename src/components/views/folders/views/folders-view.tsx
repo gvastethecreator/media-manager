@@ -64,76 +64,79 @@ export function FoldersView(_props: ViewProps) {
 	const [isManualRetry, setIsManualRetry] = useState(false);
 	const maxRetries = 3;
 
-	const loadFolders = useCallback(async (isManual = false) => {
-		try {
-			if (isManual) {
-				setIsManualRetry(true);
+	const loadFolders = useCallback(
+		async (isManual = false) => {
+			try {
+				if (isManual) {
+					setIsManualRetry(true);
+				}
+				setIsLoading(true);
+				viewLogger.info('🔄 Cargando carpetas...');
+				const data = await folderService.getFoldersWithStats();
+
+				// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
+				if (Array.isArray(data)) {
+					const transformedData = data.map((folderData: FolderWithStats): FolderEntity => {
+						return {
+							...folderData,
+							entityType: 'folder', // 🆕 Requerido para EntityCard
+							lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
+							createdAt: new Date(folderData.createdAt),
+							updatedAt: new Date(folderData.updatedAt),
+							// Las estadísticas ya vienen del servicio, no necesitamos modificarlas
+							// _count ya viene del transformer
+							// totalSize y totalFiles ya vienen del transformer
+						};
+					});
+
+					setFolders(transformedData);
+					setRetryCount(0);
+					setError(null);
+					viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
+				} else {
+					throw new Error('Respuesta del servicio no es un array válido');
+				}
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+
+				// Gestionar los casos de errores de concurrencia o transitorios solo en carga automática
+				const isTransientError =
+					(errorMessage.includes('Operación') && errorMessage.includes('en progreso')) ||
+					errorMessage.includes('ECONNREFUSED') ||
+					errorMessage.includes('timeout') ||
+					errorMessage.includes('network');
+
+				if (isTransientError && retryCount < maxRetries && !isManual) {
+					// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
+					const retryDelay = 300 * 3 ** retryCount;
+					viewLogger.debug(
+						`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
+					);
+
+					// Incrementar contador de reintentos y programar un nuevo intento
+					setRetryCount((prev) => prev + 1);
+					setTimeout(() => {
+						loadFolders(false);
+					}, retryDelay);
+					return;
+				}
+
+				// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
+				if (retryCount >= maxRetries && !isManual) {
+					viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
+				}
+
+				viewLogger.error('❌ Error cargando carpetas:', error);
+				setError(errorMessage);
+			} finally {
+				setIsLoading(false);
+				if (isManual) {
+					setIsManualRetry(false);
+				}
 			}
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando carpetas...');
-			const data = await folderService.getFoldersWithStats();
-
-			// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
-			if (Array.isArray(data)) {
-				const transformedData = data.map((folderData: FolderWithStats): FolderEntity => {
-					return {
-						...folderData,
-						entityType: 'folder', // 🆕 Requerido para EntityCard
-						lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
-						createdAt: new Date(folderData.createdAt),
-						updatedAt: new Date(folderData.updatedAt),
-						// Las estadísticas ya vienen del servicio, no necesitamos modificarlas
-						// _count ya viene del transformer
-						// totalSize y totalFiles ya vienen del transformer
-					};
-				});
-
-				setFolders(transformedData);
-				setRetryCount(0);
-				setError(null);
-				viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
-			} else {
-				throw new Error('Respuesta del servicio no es un array válido');
-			}
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-
-			// Gestionar los casos de errores de concurrencia o transitorios solo en carga automática
-			const isTransientError =
-				(errorMessage.includes('Operación') && errorMessage.includes('en progreso')) ||
-				errorMessage.includes('ECONNREFUSED') ||
-				errorMessage.includes('timeout') ||
-				errorMessage.includes('network');
-
-			if (isTransientError && retryCount < maxRetries && !isManual) {
-				// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
-				const retryDelay = 300 * 3 ** retryCount;
-				viewLogger.debug(
-					`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
-				);
-
-				// Incrementar contador de reintentos y programar un nuevo intento
-				setRetryCount((prev) => prev + 1);
-				setTimeout(() => {
-					loadFolders(false);
-				}, retryDelay);
-				return;
-			}
-
-			// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
-			if (retryCount >= maxRetries && !isManual) {
-				viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
-			}
-
-			viewLogger.error('❌ Error cargando carpetas:', error);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-			if (isManual) {
-				setIsManualRetry(false);
-			}
-		}
-	}, [retryCount, isManualRetry]);
+		},
+		[retryCount, isManualRetry]
+	);
 
 	useEffect(() => {
 		viewLogger.debug('🟢 FoldersView Montado');

@@ -7,73 +7,73 @@ import type { Prisma } from '@prisma/client';
 
 // Re-exportar tipos de Prisma comúnmente utilizados
 export type {
-  Prisma,
-  Image,
-  Tag,
-  Collection,
-  Album,
-  Character,
-  Place,
-  WorldItem,
-  Concept,
-  Prompt,
-  Note,
-  Group,
-  Property,
-  Wildcard,
-  File3D,
-  QueueJob,
+	Prisma,
+	Image,
+	Tag,
+	Collection,
+	Album,
+	Character,
+	Place,
+	WorldItem,
+	Concept,
+	Prompt,
+	Note,
+	Group,
+	Property,
+	Wildcard,
+	File3D,
+	QueueJob,
 } from '@prisma/client';
 
 // Tipos de consultas comúnmente utilizados
 export type ImageWithRelations = Prisma.ImageGetPayload<{
-  include: {
-    tags: true;
-    collections: true;
-    albums: true;
-    characters: true;
-    places: true;
-    worldItems: true;
-    concepts: true;
-    prompts: true;
-    notes: true;
-    groups: true;
-    properties: true;
-    wildcards: true;
-  };
+	include: {
+		tags: true;
+		collections: true;
+		albums: true;
+		characters: true;
+		places: true;
+		worldItems: true;
+		concepts: true;
+		prompts: true;
+		notes: true;
+		groups: true;
+		properties: true;
+		wildcards: true;
+	};
 }>;
 
 export type TagWithCounts = Prisma.TagGetPayload<{
-  include: {
-    _count: {
-      select: {
-        images: true;
-        albums: true;
-        collections: true;
-        characters: true;
-      };
-    };
-  };
+	include: {
+		_count: {
+			select: {
+				images: true;
+				albums: true;
+				collections: true;
+				characters: true;
+			};
+		};
+	};
 }>;
 
 export type CollectionWithCounts = Prisma.CollectionGetPayload<{
-  include: {
-    _count: {
-      select: {
-        images: true;
-      };
-    };
-  };
+	include: {
+		_count: {
+			select: {
+				images: true;
+			};
+		};
+	};
 }>;
 
 export type AlbumWithCounts = Prisma.AlbumGetPayload<{
-  include: {
-    _count: {
-      select: {
-        images: true;
-      };
-    };
-  };
+	include: {
+		_count: {
+			select: {
+				images: true;
+			};
+		};
+	};
 }>;
 
 // Tipos de operaciones de Prisma

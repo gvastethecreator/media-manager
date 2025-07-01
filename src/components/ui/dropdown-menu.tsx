@@ -83,11 +83,7 @@ function DropdownMenuCheckboxItem({
 	);
 }
 
-function DropdownMenuRadioItem({
-	className,
-	children,
-	...props
-}: React.ComponentProps<typeof MenuPrimitive.Item>) {
+function DropdownMenuRadioItem({ className, children, ...props }: React.ComponentProps<typeof MenuPrimitive.Item>) {
 	return (
 		<MenuPrimitive.Item
 			data-slot="dropdown-menu-radio-item"
@@ -124,13 +120,7 @@ function DropdownMenuLabel({
 
 // Crear componente personalizado para Separator ya que Base UI no lo incluye
 function DropdownMenuSeparator({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-	return (
-		<div
-			data-slot="dropdown-menu-separator"
-			className={cn('-mx-1 my-1 h-px bg-muted', className)}
-			{...props}
-		/>
-	);
+	return <div data-slot="dropdown-menu-separator" className={cn('-mx-1 my-1 h-px bg-muted', className)} {...props} />;
 }
 
 function DropdownMenuShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
@@ -167,10 +157,7 @@ function DropdownMenuSubTrigger({
 	);
 }
 
-function DropdownMenuSubContent({
-	className,
-	...props
-}: React.ComponentProps<typeof MenuPrimitive.Popup>) {
+function DropdownMenuSubContent({ className, ...props }: React.ComponentProps<typeof MenuPrimitive.Popup>) {
 	return (
 		<MenuPrimitive.Portal>
 			<MenuPrimitive.Positioner>
@@ -221,4 +208,3 @@ export {
 	DropdownMenuSubTrigger,
 	DropdownMenuRadioGroup,
 };
-

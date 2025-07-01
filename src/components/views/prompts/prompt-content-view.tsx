@@ -18,9 +18,9 @@ export function PromptContentView() {
 		data: images = [],
 		isLoading,
 		error,
-		refetch: loadPromptImages
+		refetch: loadPromptImages,
 	} = usePromptImages(selectedPrompt?.id || '', {
-		enabled: !!selectedPrompt?.id
+		enabled: !!selectedPrompt?.id,
 	});
 
 	const toggleItemSelection = useCallback((item) => {
@@ -40,12 +40,13 @@ export function PromptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedPrompt?.id ?? null,
 		containerName: selectedPrompt?.name ?? null,
-		setCurrentContainer: () => { }, // No es necesario en el nuevo enfoque
+		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Terminal,
 			title: 'Prompt vacío',
-			description: `No se encontraron imágenes en ${selectedPrompt?.name || 'este prompt'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				selectedPrompt?.name || 'este prompt'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: handleRefresh,
 	};

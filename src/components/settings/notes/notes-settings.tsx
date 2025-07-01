@@ -78,19 +78,22 @@ export function NotesSettings() {
 	}, [notes, selectedCategory, onlyFavorites]);
 
 	// Manejar eliminación de nota
-	const handleDeleteNote = useCallback(async (id: string) => {
-		try {
-			await deleteNoteMutation.mutateAsync(id);
-			setSelectedNote(null);
-			setIsEditing(false);
-			toastService.success('Nota eliminada');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar la nota', {
-				description: errorMessage,
-			});
-		}
-	}, [deleteNoteMutation]);
+	const handleDeleteNote = useCallback(
+		async (id: string) => {
+			try {
+				await deleteNoteMutation.mutateAsync(id);
+				setSelectedNote(null);
+				setIsEditing(false);
+				toastService.success('Nota eliminada');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar la nota', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteNoteMutation]
+	);
 
 	// Manejar edición de nota
 	const handleEditNote = useCallback((note: NoteWithStats) => {
@@ -410,7 +413,8 @@ export function NotesSettings() {
 													<div
 														className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
 														style={{
-															backgroundColor: previewData?.color || (selectedNote as NoteWithStats)?.color || '#3b82f6',
+															backgroundColor:
+																previewData?.color || (selectedNote as NoteWithStats)?.color || '#3b82f6',
 														}}
 													>
 														{previewData?.emoji || (selectedNote as NoteWithStats)?.emoji || '📝'}

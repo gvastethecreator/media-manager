@@ -7,11 +7,7 @@ import { Activity } from './activity';
 
 export function RecentActivity() {
 	// Usar React Query hook en lugar de server action
-	const {
-		data: stats,
-		isLoading,
-		error
-	} = useStats();
+	const { data: stats, isLoading, error } = useStats();
 
 	if (isLoading) {
 		return (

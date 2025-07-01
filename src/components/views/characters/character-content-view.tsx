@@ -22,7 +22,11 @@ export function CharacterContentView() {
 	const [currentCharacterId, setCurrentCharacterId] = useState(selectedCharacterId);
 
 	// React Query hook must be at top level
-	const { data: characterImages, isLoading: isLoadingImages, error: characterError } = useCharacterImages(currentCharacterId);
+	const {
+		data: characterImages,
+		isLoading: isLoadingImages,
+		error: characterError,
+	} = useCharacterImages(currentCharacterId);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
@@ -65,17 +69,17 @@ export function CharacterContentView() {
 		containerName: currentCharacter?.name ?? null,
 		emptyState: !selectedCharacterId
 			? {
-				icon: Users,
-				title: 'No hay personaje seleccionado',
-				description: 'Selecciona un personaje para ver su contenido.',
-			}
+					icon: Users,
+					title: 'No hay personaje seleccionado',
+					description: 'Selecciona un personaje para ver su contenido.',
+				}
 			: {
-				icon: Users,
-				title: 'Personaje sin imágenes',
-				description: currentCharacter
-					? `${currentCharacter.name} no tiene imágenes asociadas.`
-					: 'Este personaje no tiene imágenes asociadas.',
-			},
+					icon: Users,
+					title: 'Personaje sin imágenes',
+					description: currentCharacter
+						? `${currentCharacter.name} no tiene imágenes asociadas.`
+						: 'Este personaje no tiene imágenes asociadas.',
+				},
 	};
 
 	if (isLoading || isLoadingImages) {
@@ -83,7 +87,9 @@ export function CharacterContentView() {
 	}
 
 	if (error || characterError) {
-		return <div className="flex items-center justify-center p-8 text-red-500">Error: {error || characterError?.message}</div>;
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || characterError?.message}</div>
+		);
 	}
 
 	if (!items || items.length === 0) {

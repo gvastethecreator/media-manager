@@ -4,17 +4,23 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // Lazy loading de componentes principales existentes
-const FoldersView = lazy(() => import('@/components/views/folders/views/folders-view').then(m => ({ default: m.FoldersView })));
-const FolderContentView = lazy(() => import('@/components/views/folders/views/folder-content-view').then(m => ({ default: m.FolderContentView })));
-const DatabaseDiagnostics = lazy(() => import('@/components/views/folders/diagnostics/folder-diagnostics').then(m => ({ default: m.FolderDiagnostics })));
-const TestFoldersPage = lazy(() => import('@/components/settings/folders/folders-settings').then(m => ({ default: m.FoldersSettings })));
+const FoldersView = lazy(() =>
+	import('@/components/views/folders/views/folders-view').then((m) => ({ default: m.FoldersView }))
+);
+const FolderContentView = lazy(() =>
+	import('@/components/views/folders/views/folder-content-view').then((m) => ({ default: m.FolderContentView }))
+);
+const DatabaseDiagnostics = lazy(() =>
+	import('@/components/views/folders/diagnostics/folder-diagnostics').then((m) => ({ default: m.FolderDiagnostics }))
+);
+const TestFoldersPage = lazy(() =>
+	import('@/components/settings/folders/folders-settings').then((m) => ({ default: m.FoldersSettings }))
+);
 const DebugMainPage = lazy(() => import('./pages/debug/debug-main-page'));
 
 // Componente wrapper para lazy loading
 const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
-	<Suspense fallback={<LoadingSpinner />}>
-		{children}
-	</Suspense>
+	<Suspense fallback={<LoadingSpinner />}>{children}</Suspense>
 );
 
 // Componente Home que renderiza MainLayout
@@ -31,7 +37,9 @@ const NotFoundPage = () => {
 			<div className="max-w-md w-full border rounded-lg p-6 text-center">
 				<h1 className="text-2xl font-bold mb-4">Página no encontrada</h1>
 				<p className="text-muted-foreground mb-4">La página que estás buscando no existe o ha sido movida.</p>
-				<a href="/" className="text-primary hover:underline">Volver al inicio</a>
+				<a href="/" className="text-primary hover:underline">
+					Volver al inicio
+				</a>
 			</div>
 		</div>
 	);
@@ -42,13 +50,9 @@ const DebugPageLayout = ({ children }: { children: React.ReactNode }) => (
 	<div className="flex min-h-screen flex-col">
 		<div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
 			<aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block">
-				<div className="h-full py-6 pr-2 md:py-8">
-					{/* Debug navigation component */}
-				</div>
+				<div className="h-full py-6 pr-2 md:py-8">{/* Debug navigation component */}</div>
 			</aside>
-			<main className="flex w-full flex-col overflow-hidden py-6 md:py-8">
-				{children}
-			</main>
+			<main className="flex w-full flex-col overflow-hidden py-6 md:py-8">{children}</main>
 		</div>
 	</div>
 );
