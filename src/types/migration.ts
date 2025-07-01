@@ -240,6 +240,6 @@ export function getEntityStatistics(entity: EntityWithStats): unknown {
 		fileCount: 0,
 		size: 0,
 		lastModified: new Date(),
-		entityType: entity.entityType || 'unknown'
+		entityType: entity.entityType || 'unknown',
 	};
 }

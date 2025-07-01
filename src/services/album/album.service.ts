@@ -93,10 +93,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		const where: Prisma.AlbumWhereInput = {};
 
 		if (search) {
-			where.OR = [
-				{ name: { contains: search } },
-				{ description: { contains: search } },
-			];
+			where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
 		}
 
 		// Obtener álbumes

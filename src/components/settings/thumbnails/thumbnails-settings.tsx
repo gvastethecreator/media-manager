@@ -16,7 +16,7 @@ import { useSettings } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ProcessOptions } from '@/services/thumbnail-service-export';
-import { toastService } from '@/services/toast/toast.service';
+import toastService from '@/services/toast';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import type { LastProcessedThumbnail, ThumbnailCallbacks } from '@/types/thumbnails';
 import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';

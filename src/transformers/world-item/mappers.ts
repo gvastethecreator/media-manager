@@ -6,23 +6,23 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-    WorldItemComplete,
-    WorldItemCreateInput,
-    WorldItemFilters,
-    WorldItemSearchOptions,
-    WorldItemStatistics,
-    WorldItemUpdateInput,
-    WorldItemWithStats,
+	WorldItemComplete,
+	WorldItemCreateInput,
+	WorldItemFilters,
+	WorldItemSearchOptions,
+	WorldItemStatistics,
+	WorldItemUpdateInput,
+	WorldItemWithStats,
 } from '@/types/entities/world-item';
 import type { Prisma } from '@prisma/client';
 import {
-    serializeAttributes,
-    serializeEffects,
-    serializeFilters,
-    serializeProperties,
-    serializeRequirements,
-    serializeStats,
-    serializeTags,
+	serializeAttributes,
+	serializeEffects,
+	serializeFilters,
+	serializeProperties,
+	serializeRequirements,
+	serializeStats,
+	serializeTags,
 } from './serializers';
 
 // Logger específico para este módulo
@@ -155,10 +155,7 @@ export function mapWorldItemSearchOptionsToPrisma(options: WorldItemSearchOption
 function mapWorldItemFiltersToPrisma(filters: WorldItemFilters): Prisma.WorldItemWhereInput {
 	const where: Prisma.WorldItemWhereInput = {};
 	if (filters.query) {
-		where.OR = [
-			{ name: { contains: filters.query } },
-			{ description: { contains: filters.query } },
-		];
+		where.OR = [{ name: { contains: filters.query } }, { description: { contains: filters.query } }];
 	}
 	if (filters.type?.length) where.type = { in: filters.type };
 	if (filters.category?.length) where.category = { in: filters.category };

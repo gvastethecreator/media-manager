@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatFileSize } from '@/lib/utils/format.utils';
-import { toastService } from '@/services/toast';
+import toastService from '@/services/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -137,13 +137,13 @@ export function AlbumsSettings() {
 	}
 
 	return (
-		<div className="grid grid-cols-12 gap-3">
+		<div className="grid grid-cols-12 gap-2">
 			{/* Panel izquierdo: Lista de álbumes */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-12rem)] flex flex-col">
+					<CardHeader className="space-y-0.5 py-1.5 px-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm">Álbumes ({albums.length})</CardTitle>
+							<CardTitle className="text-xs">Álbumes ({albums.length})</CardTitle>
 							<Button
 								onClick={() => {
 									setSelectedAlbum(null);
@@ -151,19 +151,19 @@ export function AlbumsSettings() {
 								}}
 								size="sm"
 								variant="ghost"
-								className="h-6 w-6 p-0"
+								className="h-5 w-5 p-0"
 							>
-								<PlusCircle className="h-3.5 w-3.5" />
+								<PlusCircle className="h-3 w-3" />
 							</Button>
 						</div>
-						<div className="flex gap-2 text-xs text-muted-foreground">
+						<div className="flex gap-1 text-[10px] text-muted-foreground">
 							<span>{stats.totalImages} imágenes</span>
 							<span>•</span>
 							<span>{formatFileSize(stats.totalSize)}</span>
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">
-						<ScrollArea className="h-full px-3 pb-3">
+						<ScrollArea className="h-full px-2 pb-2">
 							{albums.length === 0 ? (
 								<EmptyState
 									icon={AlbumIcon}
@@ -172,37 +172,41 @@ export function AlbumsSettings() {
 									className="py-6"
 								/>
 							) : (
-								<div className="space-y-1">
+								<div className="space-y-0.5">
 									{albums.map((album) => (
-										<button
+										<div
 											key={album.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditAlbum(album)}
-											aria-pressed={selectedAlbum?.id === album.id}
-											type="button"
+											className={`relative group/item flex items-center gap-1.5 p-1 rounded-sm transition-colors hover:bg-muted/50 w-full ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
 										>
-											<span className="text-base">{album.emoji}</span>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-xs font-medium truncate">{album.name}</h4>
-												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													<span>{album.stats.imageCount || 0} imágenes</span>
-													{album.category && (
-														<>
-															<span>•</span>
-															<span>{album.category}</span>
-														</>
-													)}
+											<button
+												className="flex items-center gap-1.5 w-full text-left cursor-pointer"
+												onClick={() => handleEditAlbum(album)}
+												aria-pressed={selectedAlbum?.id === album.id}
+												type="button"
+											>
+												<span className="text-sm">{album.emoji}</span>
+												<div className="flex-1 min-w-0">
+													<h4 className="text-[11px] font-medium truncate">{album.name}</h4>
+													<div className="flex items-center gap-1 text-[9px] text-muted-foreground">
+														<span>{album.stats.imageCount || 0} img</span>
+														{album.category && (
+															<>
+																<span>•</span>
+																<span className="truncate max-w-[60px]">{album.category}</span>
+															</>
+														)}
+													</div>
 												</div>
-											</div>
+											</button>
 											<Button
 												size="sm"
 												variant="ghost"
-												className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+												className="h-4 w-4 p-0 opacity-0 group-hover/item:opacity-100 absolute right-1"
 												onClick={(e) => _handleDeleteButtonClick(e, album.id)}
 											>
-												<Trash className="h-3 w-3" />
+												<Trash className="h-2.5 w-2.5" />
 											</Button>
-										</button>
+										</div>
 									))}
 								</div>
 							)}
@@ -213,16 +217,16 @@ export function AlbumsSettings() {
 
 			{/* Panel derecho: Formulario */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)]">
-					<CardHeader className="space-y-1 py-2 px-3">
-						<CardTitle className="text-sm">{isEditing ? 'Editar álbum' : 'Crear álbum'}</CardTitle>
-						<CardDescription className="text-xs">
+				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-12rem)]">
+					<CardHeader className="space-y-0.5 py-1.5 px-2">
+						<CardTitle className="text-xs">{isEditing ? 'Editar álbum' : 'Crear álbum'}</CardTitle>
+						<CardDescription className="text-[10px]">
 							{isEditing
 								? 'Modifica los detalles del álbum seleccionado'
 								: 'Crea un nuevo álbum para organizar tus imágenes'}
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="flex-1 p-3">
+					<CardContent className="flex-1 p-2">
 						<CreateAlbumForm
 							album={selectedAlbum}
 							isEditing={isEditing}
@@ -239,10 +243,10 @@ export function AlbumsSettings() {
 			{previewData && (
 				<div className="col-span-12">
 					<Card className="rounded-sm bg-muted/30 border-none">
-						<CardHeader className="space-y-1 py-2 px-3">
-							<CardTitle className="text-sm">Vista previa</CardTitle>
+						<CardHeader className="space-y-0.5 py-1.5 px-2">
+							<CardTitle className="text-xs">Vista previa</CardTitle>
 						</CardHeader>
-						<CardContent className="p-3">
+						<CardContent className="p-2">
 							<AlbumCard
 								album={{
 									...previewData,

@@ -115,14 +115,10 @@ export const VirtualizedMasonryView = memo<VirtualizedMasonryViewProps>(function
 								<div className="h-full flex flex-col">
 									<div className="flex-1 flex items-center justify-center bg-muted rounded mb-3">
 										<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-											<span className="text-lg font-semibold text-primary">
-												{item.name.charAt(0).toUpperCase()}
-											</span>
+											<span className="text-lg font-semibold text-primary">{item.name.charAt(0).toUpperCase()}</span>
 										</div>
 									</div>
-									<div className="text-sm font-medium text-center mb-1">
-										{item.name}
-									</div>
+									<div className="text-sm font-medium text-center mb-1">{item.name}</div>
 									<div className="text-xs text-muted-foreground text-center">
 										{item.entityType} • {item.stats?.imageCount || 0} imágenes
 									</div>
