@@ -188,3 +188,25 @@ Para evitar futuros loops infinitos en selectores Zustand:
 - ✅ Performance mejorada significativamente
 - ✅ Patrón consistente aplicado en toda la base de código
 - ✅ Error "The result of getSnapshot should be cached" eliminado
+
+---
+
+[015] Preparación definitiva del entorno de trabajo
+
+## Contexto
+
+Aplicar micro-mejoras detectadas en la fase de revisión documental para dejar el entorno listo antes de modificar código.
+
+## Subtareas
+
+- [ ] [HIGH] [SMALL] Crear `.env.example` base
+- [ ] [HIGH] [SMALL] Añadir plantillas `tsup.config.ts` y `vitest.config.ts`
+- [ ] [MEDIUM] [SMALL] Completar scripts faltantes en `package.json`
+- [ ] [MEDIUM] [SMALL] Actualizar `README.md` con requisitos y comandos rápidos
+- [ ] [LOW] [SMALL] Verificar renderizado Mermaid y linter docs
+
+## Criterio de aceptación
+
+- Repositorio compila con `pnpm dev:vite` sin warnings
+- `pnpm test` y `pnpm build:server` funcionan en Windows y Linux
+- Documentación actualizada y sin errores de linter
