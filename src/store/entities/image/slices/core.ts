@@ -155,14 +155,19 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			const result = await getImages(options);
 
 			imageLogger.debug('📦 Respuesta del servidor:', {
-				result,
+				result: result ? 'datos recibidos' : 'null/undefined',
 				type: typeof result,
 				isArray: Array.isArray(result),
-				keys: result ? Object.keys(result) : 'null/undefined',
 			});
 
 			// Verificar que result tiene la estructura esperada
-			if (!result || typeof result !== 'object') {
+			if (!result) {
+				imageLogger.info('ℹ️ No se encontraron imágenes para los criterios especificados');
+				set({ isLoading: false, error: null });
+				return [];
+			}
+
+			if (typeof result !== 'object') {
 				throw new Error(`Respuesta del servidor inválida: ${typeof result}`);
 			}
 
@@ -170,9 +175,15 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			const images = Array.isArray(result) ? result : result.images || [];
 			imageLogger.info(`✅ ${images.length} imágenes obtenidas`);
 
-			get().addImages(images);
+			// Validar que las imágenes tienen la estructura correcta
+			const validImages = images.filter(img => img && img.id && typeof img.id === 'string');
+			if (validImages.length !== images.length) {
+				imageLogger.warn(`⚠️ Se filtraron ${images.length - validImages.length} imágenes inválidas`);
+			}
+
+			get().addImages(validImages);
 			set({ isLoading: false, error: null });
-			return images;
+			return validImages;
 		} catch (e: unknown) {
 			// Manejo más robusto de errores
 			let errorMessage = 'Failed to fetch images';
@@ -185,12 +196,17 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				errorMessage = String(e.message);
 			}
 
-			imageLogger.error('❌ Error obteniendo imágenes:', {
-				error: e,
-				errorMessage,
-				errorType: typeof e,
-				errorConstructor: e?.constructor?.name,
-			});
+			// No logear errores vacíos como objetos vacíos
+			if (e && typeof e === 'object' && Object.keys(e).length === 0) {
+				errorMessage = 'Error de conexión o servidor no disponible';
+				imageLogger.error('❌ Error obteniendo imágenes: Error de conexión', { options });
+			} else {
+				imageLogger.error('❌ Error obteniendo imágenes:', {
+					error: errorMessage,
+					errorType: typeof e,
+					options,
+				});
+			}
 
 			set({ error: errorMessage, isLoading: false });
 			return [];

@@ -28,6 +28,13 @@ export const createAlbumCoreSlice: StateCreator<
 > = (set, get) => ({
 	...initialState,
 
+	// Getters
+	getSortedAlbums: () => {
+		const albums = Object.values(get().albums);
+		// Ordenar por fecha de actualización descendente por defecto
+		return albums.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+	},
+
 	loadAlbums: async () => {
 		if (get().isLoading) return;
 		set((state) => {
@@ -68,7 +75,7 @@ export const createAlbumCoreSlice: StateCreator<
 			toastService.success(`Álbum "${data.name}" creado.`);
 			await get().loadAlbums();
 		} catch (error) {
-			const errorMsg = `❌ Error al crear el álbum "${data.name}".`;
+			const errorMsg = '❌ Error al crear el álbum "' + data.name + '".';
 			logger.error(errorMsg, error);
 			toastService.error(errorMsg);
 		}

@@ -9,7 +9,7 @@ import { useAlbumStore } from '@/store/entities/album';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { Album as AlbumIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AlbumsView');
@@ -26,19 +26,12 @@ const MemoizedAlbumCard = React.memo(
 MemoizedAlbumCard.displayName = 'MemoizedAlbumCard';
 
 export function AlbumsView(_props: ViewProps) {
-	const {
-		albums: albumsRecord,
-		isLoading,
-		error,
-		loadAlbums,
-		getSortedAlbums,
-	} = useAlbumStore((s) => ({
-		albums: s.albums,
-		isLoading: s.isLoading,
-		error: s.error,
-		loadAlbums: s.loadAlbums,
-		getSortedAlbums: s.getSortedAlbums,
-	}));
+	// Usar selectores individuales para evitar recrear objetos
+	const albumsRecord = useAlbumStore((s) => s.albums);
+	const isLoading = useAlbumStore((s) => s.isLoading);
+	const error = useAlbumStore((s) => s.error);
+	const loadAlbums = useAlbumStore((s) => s.loadAlbums);
+	const getSortedAlbums = useAlbumStore((s) => s.getSortedAlbums);
 
 	useEffect(() => {
 		if (Object.keys(albumsRecord).length === 0) {
@@ -52,6 +45,11 @@ export function AlbumsView(_props: ViewProps) {
 		// Lógica de navegación o apertura de visor aquí
 	}, []);
 
+	// Cachear el resultado de getSortedAlbums
+	const sortedAlbums = useMemo(() => {
+		return getSortedAlbums();
+	}, [getSortedAlbums, albumsRecord]); // Dependencias para recalcular cuando cambien
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -63,8 +61,6 @@ export function AlbumsView(_props: ViewProps) {
 	if (isLoading && Object.keys(albumsRecord).length === 0) {
 		return <LoadingScreen />;
 	}
-
-	const sortedAlbums = getSortedAlbums();
 
 	if (sortedAlbums.length === 0) {
 		return (

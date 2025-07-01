@@ -7,30 +7,31 @@
  */
 
 export {
-	CharacterAlignment,
-	CharacterCategory,
-	CharacterClass,
-	CharacterRace,
-	CharacterSortOption,
+    CharacterAlignment,
+    CharacterCategory,
+    CharacterClass,
+    CharacterRace,
+    CharacterRelationshipType,
+    CharacterSortOption
 } from './enums';
 
 export type {
-	CharacterBase,
-	CharacterComplete,
-	CharacterCreateInput,
-	CharacterFilter,
-	CharacterFilterItem,
-	CharacterFilters,
-	CharacterRelations,
-	CharacterRelationship,
-	CharacterSearchOptions,
-	CharacterStats,
-	CharacterUpdateInput,
-	CharacterViewConfig,
-	CharacterWithStats,
-	CreateCharacterData,
-	PrismaCharacterWithCounts,
-	UpdateCharacterData,
+    CharacterBase,
+    CharacterComplete,
+    CharacterCreateInput,
+    CharacterFilter,
+    CharacterFilterItem,
+    CharacterFilters,
+    CharacterRelations,
+    CharacterRelationship,
+    CharacterSearchOptions,
+    CharacterStats,
+    CharacterUpdateInput,
+    CharacterViewConfig,
+    CharacterWithStats,
+    CreateCharacterData,
+    PrismaCharacterWithCounts,
+    UpdateCharacterData
 } from './types';
 
 // 📝 Documentación: Solo tipos canónicos y extendidos. Legacy removido.

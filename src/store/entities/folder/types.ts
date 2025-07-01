@@ -78,7 +78,9 @@ export interface FolderStoreHelpers {
  */
 export interface FolderFiltersState {
 	sortBy: FolderSortCriteria;
+	sortDirection: 'asc' | 'desc';
 	viewMode: FolderViewMode;
+	itemSize: 'small' | 'medium' | 'large';
 	searchQuery: string;
 	showOnlyFavorites: boolean;
 	minOrganizationScore: number;
@@ -92,12 +94,15 @@ export interface FolderFiltersState {
 export interface FolderFiltersSlice extends FolderFiltersState {
 	// Establecer filtros
 	setSortBy: (sortBy: FolderSortCriteria) => void;
+	setSortDirection: (direction: 'asc' | 'desc') => void;
 	setViewMode: (viewMode: FolderViewMode) => void;
+	setItemSize: (size: 'small' | 'medium' | 'large') => void;
 	setSearchQuery: (query: string) => void;
 	setShowOnlyFavorites: (show: boolean) => void;
 	setMinOrganizationScore: (score: number) => void;
 	setShowEmptyFolders: (show: boolean) => void;
 	setMaxDepth: (depth: number | null) => void;
+	toggleFavorites: () => void;
 	resetFilters: () => void;
 
 	// Obtener carpetas filtradas

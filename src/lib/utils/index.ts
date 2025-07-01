@@ -17,7 +17,7 @@ export * from './folder';
 export * from './format.utils';
 export * from './id.utils';
 export * from './image';
-export * from './image-utils';
+// export * from './image-utils'; // Conflicto con ./image - generateThumbnailUrl duplicado
 export * from './json';
 export * from './note';
 export * from './object-utils';
@@ -31,7 +31,16 @@ export * from './tag';
 export * from './text.utils';
 export * from './transformers';
 export * from './types';
-export * from './video';
+// Exportaciones específicas de video para evitar conflicto con hasCompleteMetadata de image
+export {
+    formatVideoDuration,
+    formatVideoSize,
+    getVideoMetadata,
+    getVideoThumbnailUrl,
+    hasCompleteMetadata as hasCompleteVideoMetadata,
+    isVideoFile,
+    validateVideoMetadata
+} from './video';
 export * from './wildcard';
 export * from './world-item';
 

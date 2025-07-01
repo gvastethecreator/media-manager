@@ -210,3 +210,32 @@ export async function getTagImages(tagId: string, limit = 50): Promise<FileItem[
 		throw createTagError(`No se pudieron obtener las imágenes del tag: ${tagId}`, TagErrorCode.OPERATION_FAILED, error);
 	}
 }
+
+/**
+ * 🏷️ Obtiene todos los tags con estadísticas
+ * @param options - Opciones de consulta
+ * @returns Array de todos los tags con estadísticas
+ */
+export async function getTags(options: {
+	limit?: number;
+	includeStats?: boolean;
+} = {}): Promise<TagWithStats[]> {
+	try {
+		const { limit = 1000, includeStats = true } = options;
+
+		tagLogger.info('🏷️ Obteniendo todos los tags:', { limit, includeStats });
+
+		const tags = await prisma.tag.findMany({
+			include: includeStats ? tagCounts : undefined,
+			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
+			take: limit,
+		});
+
+		const transformedTags = tags.map(toTagWithStats);
+		tagLogger.info(`✅ ${transformedTags.length} tags obtenidos`);
+		return transformedTags;
+	} catch (error) {
+		tagLogger.error('❌ Error al obtener todos los tags:', error);
+		throw createTagError('No se pudieron obtener los tags', TagErrorCode.OPERATION_FAILED, error);
+	}
+}

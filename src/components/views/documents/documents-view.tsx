@@ -9,7 +9,7 @@ import { useDocumentStore } from '@/store/entities/document';
 import type { DocumentWithStats } from '@/types/entities/document';
 import { FileText } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('DocumentsView');
@@ -30,19 +30,12 @@ MemoizedDocumentCard.displayName = 'MemoizedDocumentCard';
  * Muestra una lista de documentos con cards TCG y soporte para previsualización.
  */
 export function DocumentsView(_props: ViewProps) {
-	const {
-		documents: documentsRecord,
-		isLoading,
-		error,
-		loadDocuments,
-		getSortedDocuments,
-	} = useDocumentStore((s) => ({
-		documents: s.documents,
-		isLoading: s.isLoading,
-		error: s.error,
-		loadDocuments: s.loadDocuments,
-		getSortedDocuments: s.getSortedDocuments,
-	}));
+	// Usar selectores individuales para evitar recrear objetos
+	const documentsRecord = useDocumentStore((s) => s.documents);
+	const isLoading = useDocumentStore((s) => s.isLoading);
+	const error = useDocumentStore((s) => s.error);
+	const loadDocuments = useDocumentStore((s) => s.loadDocuments);
+	const getSortedDocuments = useDocumentStore((s) => s.getSortedDocuments);
 
 	useEffect(() => {
 		if (Object.keys(documentsRecord).length === 0) {
@@ -56,6 +49,11 @@ export function DocumentsView(_props: ViewProps) {
 		// Lógica de navegación o apertura de visor aquí
 	}, []);
 
+	// Cachear el resultado de getSortedDocuments
+	const sortedDocuments = useMemo(() => {
+		return getSortedDocuments();
+	}, [getSortedDocuments, documentsRecord]);
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -67,8 +65,6 @@ export function DocumentsView(_props: ViewProps) {
 	if (isLoading && Object.keys(documentsRecord).length === 0) {
 		return <LoadingScreen />;
 	}
-
-	const sortedDocuments = getSortedDocuments();
 
 	if (sortedDocuments.length === 0) {
 		return (

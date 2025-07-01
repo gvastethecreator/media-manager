@@ -249,15 +249,115 @@ export function SettingsView() {
 	return (
 		<div className="h-full w-full">
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-row">
-				{/* 🎨 Sidebar vertical con navegación de tabs - COMPACTO */}
-				<div className="w-48 flex-shrink-0 border-r border-border/20 bg-background/50 backdrop-blur-sm h-full overflow-y-auto">
+				{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
+				<div className="flex-1 h-full overflow-auto">
+					<TabsContent value="system" className="h-full w-full p-2 m-0 border-none">
+						<div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
+							<FoldersSettings />
+							<SystemSettings />
+							{/* 🎨 Nueva sección de interfaz */}
+							<InterfaceSection />
+						</div>
+					</TabsContent>
+
+					<TabsContent value="entities-cards" className="h-full w-full p-2 m-0 border-none">
+						{/* <EntitiesCardsSettings /> */} {/* TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE */}
+					</TabsContent>
+
+					<TabsContent value="albums" className="h-full w-full p-2 m-0 border-none">
+						<AlbumsSettings />
+					</TabsContent>
+
+					<TabsContent value="collections" className="h-full w-full p-2 m-0 border-none">
+						<CollectionsSettings />
+					</TabsContent>
+
+					<TabsContent value="tags" className="h-full w-full p-2 m-0 border-none">
+						<TagsSettings />
+					</TabsContent>
+
+					<TabsContent value="characters" className="h-full w-full p-2 m-0 border-none">
+						<CharactersSettings />
+					</TabsContent>
+
+					<TabsContent value="world-items" className="h-full w-full p-2 m-0 border-none">
+						<WorldItemsSettings />
+					</TabsContent>
+
+					<TabsContent value="places" className="h-full w-full p-2 m-0 border-none">
+						<PlacesSettings />
+					</TabsContent>
+
+					<TabsContent value="concepts" className="h-full w-full p-2 m-0 border-none">
+						<ConceptsSettings />
+					</TabsContent>
+
+					<TabsContent value="prompts" className="h-full w-full p-2 m-0 border-none">
+						<PromptSettings />
+					</TabsContent>
+
+					<TabsContent value="notes" className="h-full w-full p-2 m-0 border-none">
+						<NotesSettings />
+					</TabsContent>
+
+					<TabsContent value="uploaded-images" className="h-full w-full p-2 m-0 border-none">
+						<UploadedImagesSettings />
+					</TabsContent>
+
+					<TabsContent value="shortcuts" className="h-full w-full p-2 m-0 border-none">
+						<ShortcutsSettings />
+					</TabsContent>
+
+					<TabsContent value="profiles" className="h-full w-full p-2 m-0 border-none">
+						<ProfilesSettings />
+					</TabsContent>
+
+					<TabsContent value="properties" className="h-full w-full p-2 m-0 border-none">
+						<PropertiesSettings />
+					</TabsContent>
+
+					<TabsContent value="groups" className="h-full w-full p-2 m-0 border-none">
+						<GroupsSettings />
+					</TabsContent>
+
+					<TabsContent value="wildcards" className="h-full w-full p-2 m-0 border-none">
+						<WildcardsSettings />
+					</TabsContent>
+
+					<TabsContent value="thumbnails" className="h-full w-full p-2 m-0 border-none">
+						<ThumbnailsSettings />
+					</TabsContent>
+
+					<TabsContent value="document" className="h-full w-full p-2 m-0 border-none">
+						<DocumentSettings />
+					</TabsContent>
+
+					<TabsContent value="audio" className="h-full w-full p-2 m-0 border-none">
+						<AudioSettings />
+					</TabsContent>
+
+					<TabsContent value="json-file" className="h-full w-full p-2 m-0 border-none">
+						<JsonFileSettings />
+					</TabsContent>
+
+					<TabsContent value="workflow" className="h-full w-full p-2 m-0 border-none">
+						<WorkflowSettings />
+					</TabsContent>
+
+					<TabsContent value="file3d" className="h-full w-full p-2 m-0 border-none">
+						<File3DSettings />
+					</TabsContent>
+				</div>
+
+				{/* 🎨 Sidebar vertical con navegación de tabs - COMPACTO A LA DERECHA */}
+				<div className="w-44 flex-shrink-0 border-l border-border/20 bg-background/50 backdrop-blur-sm h-full overflow-y-auto">
 					<TabsList className="flex flex-col w-full h-auto bg-transparent rounded-none p-1 gap-0.5 justify-start">
 						{tabsData.map((tab) => (
 							<TabsTrigger
 								key={tab.id}
 								value={tab.id}
 								className={cn(
-									'flex items-center justify-start gap-2 px-2 py-2 w-full',
+									'flex items-center justify-start gap-2 px-2 py-1.5 w-full',
 									'text-xs font-medium border border-transparent rounded-md',
 									'cursor-pointer group transition-all duration-200',
 									'hover:bg-secondary/30 hover:border-border/20',
@@ -281,102 +381,6 @@ export function SettingsView() {
 							</TabsTrigger>
 						))}
 					</TabsList>
-				</div>
-
-				{/* 📋 Contenido de los tabs con área expandible - COMPACTO */}
-				<div className="flex-1 h-full overflow-auto">
-					<TabsContent value="system" className="h-full w-full p-3 m-0 border-none">
-						<div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
-							<FoldersSettings />
-							<SystemSettings />
-							{/* 🎨 Nueva sección de interfaz */}
-							<InterfaceSection />
-						</div>
-					</TabsContent>
-
-					<TabsContent value="entities-cards" className="h-full w-full p-3 m-0 border-none">
-						{/* <EntitiesCardsSettings /> */} {/* TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE */}
-					</TabsContent>
-
-					<TabsContent value="albums" className="h-full w-full p-3 m-0 border-none">
-						<AlbumsSettings />
-					</TabsContent>
-
-					<TabsContent value="collections" className="h-full w-full p-3 m-0 border-none">
-						<CollectionsSettings />
-					</TabsContent>
-
-					<TabsContent value="tags" className="h-full w-full p-3 m-0 border-none">
-						<TagsSettings />
-					</TabsContent>
-
-					<TabsContent value="characters" className="h-full w-full p-3 m-0 border-none">
-						<CharactersSettings />
-					</TabsContent>
-
-					<TabsContent value="world-items" className="h-full w-full p-3 m-0 border-none">
-						<WorldItemsSettings />
-					</TabsContent>
-
-					<TabsContent value="places" className="h-full w-full p-3 m-0 border-none">
-						<PlacesSettings />
-					</TabsContent>
-
-					<TabsContent value="concepts" className="h-full w-full p-3 m-0 border-none">
-						<ConceptsSettings />
-					</TabsContent>
-
-					<TabsContent value="prompts" className="h-full w-full p-3 m-0 border-none">
-						<PromptSettings />
-					</TabsContent>
-
-					<TabsContent value="notes" className="h-full w-full p-3 m-0 border-none">
-						<NotesSettings />
-					</TabsContent>
-
-					<TabsContent value="uploaded-images" className="h-full w-full p-3 m-0 border-none">
-						<UploadedImagesSettings />
-					</TabsContent>
-
-					<TabsContent value="shortcuts" className="h-full w-full p-3 m-0 border-none">
-						<ShortcutsSettings />
-					</TabsContent>
-
-					<TabsContent value="profiles" className="h-full w-full p-3 m-0 border-none">
-						<ProfilesSettings />
-					</TabsContent>
-
-					<TabsContent value="properties" className="h-full w-full p-3 m-0 border-none">
-						<PropertiesSettings />
-					</TabsContent>
-
-					<TabsContent value="groups" className="h-full w-full p-3 m-0 border-none">
-						<GroupsSettings />
-					</TabsContent>
-
-					<TabsContent value="wildcards" className="h-full w-full p-3 m-0 border-none">
-						<WildcardsSettings />
-					</TabsContent>
-
-					<TabsContent value="thumbnails" className="h-full w-full p-3 m-0 border-none">
-						<ThumbnailsSettings />
-					</TabsContent>
-
-					<TabsContent value="document" className="h-full w-full p-3 m-0 border-none">
-						<DocumentSettings />
-					</TabsContent>
-					<TabsContent value="audio" className="h-full w-full p-3 m-0 border-none">
-						<AudioSettings />
-					</TabsContent>
-					<TabsContent value="json-file" className="h-full w-full p-3 m-0 border-none">
-						<JsonFileSettings />
-					</TabsContent>
-					<TabsContent value="workflow" className="h-full w-full p-3 m-0 border-none">
-						<WorkflowSettings />
-					</TabsContent>
-					<TabsContent value="file3d" className="h-full w-full p-3 m-0 border-none">
-						<File3DSettings />
-					</TabsContent>
 				</div>
 			</Tabs>
 		</div>
