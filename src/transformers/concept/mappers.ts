@@ -5,7 +5,7 @@
  * (ej. desde formularios o actions) a los tipos que Prisma espera para las operaciones de BD.
  */
 
-import type { ConceptCreateInput, ConceptSearchOptions, ConceptUpdateInput } from '@/types/entities/concept';
+import type { ConceptBase, ConceptCreateInput, ConceptFilters, ConceptSearchOptions, ConceptSortOption, ConceptUpdateInput } from '@/types/entities/concept';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -150,4 +150,65 @@ export function toSearchOptions(options: ConceptSearchOptions = {}): Prisma.Conc
 		take: options.take,
 		include: options.includeRelations ? { _count: true } : undefined,
 	};
+}
+
+/**
+ * Procesa una lista de conceptos aplicando filtros, ordenamiento y paginación
+ * @param concepts - Lista de conceptos base
+ * @param filters - Filtros a aplicar
+ * @param sortBy - Criterio de ordenamiento
+ * @param page - Página actual
+ * @param pageSize - Tamaño de página
+ * @returns Objeto con los conceptos procesados y metadatos
+ */
+export function processConcepts(
+	concepts: ConceptBase[],
+	filters: ConceptFilters,
+	sortBy: ConceptSortOption,
+	page: number,
+	pageSize: number
+): { items: ConceptBase[]; total: number } {
+	let filteredConcepts = [...concepts];
+
+	// Aplicar filtros
+	if (filters.search) {
+		const searchTerm = filters.search.toLowerCase();
+		filteredConcepts = filteredConcepts.filter(
+			concept =>
+				concept.name.toLowerCase().includes(searchTerm) ||
+				concept.description?.toLowerCase().includes(searchTerm) ||
+				concept.content?.toLowerCase().includes(searchTerm)
+		);
+	}
+
+	if (filters.category) {
+		filteredConcepts = filteredConcepts.filter(concept => concept.category === filters.category);
+	}
+
+	if (filters.onlyFavorites) {
+		filteredConcepts = filteredConcepts.filter(concept => concept.isFavorite);
+	}
+
+	// Aplicar ordenamiento
+	filteredConcepts.sort((a, b) => {
+		switch (sortBy) {
+			case 'name':
+				return a.name.localeCompare(b.name);
+			case 'category':
+				return (a.category || '').localeCompare(b.category || '');
+			case 'createdAt':
+				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+			case 'updatedAt':
+			default:
+				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+		}
+	});
+
+	// Aplicar paginación
+	const total = filteredConcepts.length;
+	const startIndex = (page - 1) * pageSize;
+	const endIndex = startIndex + pageSize;
+	const items = filteredConcepts.slice(startIndex, endIndex);
+
+	return { items, total };
 }

@@ -31,6 +31,8 @@ export interface AlbumCoreActions {
 	createAlbum: (data: Prisma.AlbumCreateInput) => Promise<void>;
 	updateAlbum: (id: string, data: Prisma.AlbumUpdateInput) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
+	// Getters
+	getSortedAlbums: () => AlbumWithStats[];
 }
 
 export interface AlbumUIActions {

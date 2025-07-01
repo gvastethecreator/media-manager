@@ -9,7 +9,7 @@ import { useImageStore } from '@/store/entities/image';
 import type { ImageWithStats } from '@/types/entities/image';
 import { ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AllImagesView');
@@ -30,19 +30,12 @@ MemoizedEntityCard.displayName = 'MemoizedEntityCard';
  * Muestra una galería optimizada con EntityCard TCG y efectos holográficos.
  */
 export function AllImagesView(_props: ViewProps) {
-	const {
-		images: imagesRecord,
-		isLoading,
-		error,
-		loadImages,
-		getSortedImages,
-	} = useImageStore((s) => ({
-		images: s.images,
-		isLoading: s.isLoading,
-		error: s.error,
-		loadImages: s.loadImages,
-		getSortedImages: s.getSortedImages,
-	}));
+	// Usar selectores individuales para evitar recrear objetos
+	const imagesRecord = useImageStore((s) => s.images);
+	const isLoading = useImageStore((s) => s.isLoading);
+	const error = useImageStore((s) => s.error);
+	const loadImages = useImageStore((s) => s.loadImages);
+	const getSortedImages = useImageStore((s) => s.getSortedImages);
 
 	useEffect(() => {
 		if (Object.keys(imagesRecord).length === 0) {
@@ -56,6 +49,11 @@ export function AllImagesView(_props: ViewProps) {
 		// Lógica de navegación o apertura de visor aquí
 	}, []);
 
+	// Cachear el resultado de getSortedImages
+	const sortedImages = useMemo(() => {
+		return getSortedImages();
+	}, [getSortedImages, imagesRecord]);
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -67,8 +65,6 @@ export function AllImagesView(_props: ViewProps) {
 	if (isLoading && Object.keys(imagesRecord).length === 0) {
 		return <LoadingScreen />;
 	}
-
-	const sortedImages = getSortedImages();
 
 	if (sortedImages.length === 0) {
 		return (

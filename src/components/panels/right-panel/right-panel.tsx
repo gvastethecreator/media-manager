@@ -1,6 +1,7 @@
 'use client';
 
 import { DetailsPanel } from '@/components/features/file-browser/details/details-panel';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -59,13 +60,17 @@ interface RightPanelProps {
  */
 export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPanelProps) {
 	const { isVisible, setVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
+	const { currentView } = useNavigationStore();
 	const [mounted, setMounted] = useState(false);
 	const hasSelectedItems = selectedItems && selectedItems.length > 0;
 
+	// Ocultar el panel cuando estamos en la vista de settings
+	const isInSettingsView = currentView === 'settings';
+
 	// Determina si debemos mostrar el panel
-	const shouldShowPanel = isVisible || hasSelectedItems;
+	const shouldShowPanel = !isInSettingsView && (isVisible || hasSelectedItems);
 	// Determina si debemos mostrar las estadísticas
-	const shouldShowStats = !hasSelectedItems && showStatsWhenEmpty;
+	const shouldShowStats = !isInSettingsView && !hasSelectedItems && showStatsWhenEmpty;
 
 	// Al montar el componente, marcamos que estamos listos para renderizar
 	useEffect(() => {

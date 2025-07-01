@@ -61,10 +61,14 @@ export function FoldersView(_props: ViewProps) {
 	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderEntity[]>(folders);
 	// Mantener un contador de reintentos
 	const [retryCount, setRetryCount] = useState(0);
+	const [isManualRetry, setIsManualRetry] = useState(false);
 	const maxRetries = 3;
 
-	const loadFolders = useCallback(async () => {
+	const loadFolders = useCallback(async (isManual = false) => {
 		try {
+			if (isManual) {
+				setIsManualRetry(true);
+			}
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando carpetas...');
 			const data = await folderService.getFoldersWithStats();
@@ -94,14 +98,14 @@ export function FoldersView(_props: ViewProps) {
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 
-			// Gestionar los casos de errores de concurrencia o transitorios
+			// Gestionar los casos de errores de concurrencia o transitorios solo en carga automática
 			const isTransientError =
 				(errorMessage.includes('Operación') && errorMessage.includes('en progreso')) ||
 				errorMessage.includes('ECONNREFUSED') ||
 				errorMessage.includes('timeout') ||
 				errorMessage.includes('network');
 
-			if (isTransientError && retryCount < maxRetries) {
+			if (isTransientError && retryCount < maxRetries && !isManual) {
 				// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
 				const retryDelay = 300 * 3 ** retryCount;
 				viewLogger.debug(
@@ -111,13 +115,13 @@ export function FoldersView(_props: ViewProps) {
 				// Incrementar contador de reintentos y programar un nuevo intento
 				setRetryCount((prev) => prev + 1);
 				setTimeout(() => {
-					loadFolders();
+					loadFolders(false);
 				}, retryDelay);
 				return;
 			}
 
 			// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
-			if (retryCount >= maxRetries) {
+			if (retryCount >= maxRetries && !isManual) {
 				viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
 			}
 
@@ -125,17 +129,23 @@ export function FoldersView(_props: ViewProps) {
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
+			if (isManual) {
+				setIsManualRetry(false);
+			}
 		}
-	}, [retryCount]);
+	}, [retryCount, isManualRetry]);
 
 	useEffect(() => {
 		viewLogger.debug('🟢 FoldersView Montado');
-		loadFolders();
+		// Solo cargar automáticamente si no hay carpetas y no estamos cargando
+		if (folders.length === 0 && !isLoading) {
+			loadFolders(false);
+		}
 
 		return () => {
 			viewLogger.debug('🔴 FoldersView Desmontado');
 		};
-	}, [loadFolders]);
+	}, []); // Solo ejecutar una vez al montar
 
 	const handleFolderClick = useCallback(
 		(folder: FolderEntity) => {
@@ -189,6 +199,12 @@ export function FoldersView(_props: ViewProps) {
 		[setCurrentView, setCurrentItem, deselectAllFiles, selectFolder]
 	);
 
+	// Función para reintento manual
+	const handleManualRetry = useCallback(() => {
+		setRetryCount(0); // Resetear contador para reintento manual
+		loadFolders(true);
+	}, [loadFolders]);
+
 	if (error) {
 		return (
 			<div className="flex flex-col items-center justify-center h-full p-6">
@@ -201,7 +217,7 @@ export function FoldersView(_props: ViewProps) {
 						estructura de tablas.
 					</p>
 					<div className="flex flex-col gap-2">
-						<Button variant="outline" onClick={loadFolders}>
+						<Button variant="outline" onClick={handleManualRetry}>
 							<RefreshCw className="h-4 w-4 mr-2" />
 							Reintentar
 						</Button>
