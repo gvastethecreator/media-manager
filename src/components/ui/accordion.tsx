@@ -51,4 +51,3 @@ function AccordionContent({ className, children, ...props }: React.ComponentProp
 }
 
 export { Accordion, AccordionContent, AccordionItem, AccordionTrigger };
-

@@ -27,4 +27,3 @@ function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxP
 }
 
 export { Checkbox };
-

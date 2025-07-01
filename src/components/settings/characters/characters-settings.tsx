@@ -78,19 +78,22 @@ export function CharactersSettings() {
 	});
 
 	// Manejar eliminación de personaje
-	const handleDeleteCharacter = useCallback(async (id: string) => {
-		try {
-			await deleteCharacterMutation.mutateAsync(id);
-			setSelectedCharacter(null);
-			setIsEditing(false);
-			toastService.success('Personaje eliminado');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el personaje', {
-				description: errorMessage,
-			});
-		}
-	}, [deleteCharacterMutation]);
+	const handleDeleteCharacter = useCallback(
+		async (id: string) => {
+			try {
+				await deleteCharacterMutation.mutateAsync(id);
+				setSelectedCharacter(null);
+				setIsEditing(false);
+				toastService.success('Personaje eliminado');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar el personaje', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteCharacterMutation]
+	);
 
 	// Manejar edición de personaje
 	const handleEditCharacter = useCallback((character: CharacterWithStats) => {

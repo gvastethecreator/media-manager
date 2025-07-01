@@ -1,0 +1,7 @@
+Comando: npx biome format --write .
+Fecha: 2025-07-01T23:21:29.047Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+Formatted 1349 files in 1153ms. Fixed 158 files.

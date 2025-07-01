@@ -30,26 +30,33 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	const formId = useId();
 
 	// React Query hooks
-	const { data: tagsResponse, isLoading, error } = useTags({
+	const {
+		data: tagsResponse,
+		isLoading,
+		error,
+	} = useTags({
 		search: searchTerm,
-		limit: 1000
+		limit: 1000,
 	});
 	const deleteTagMutation = useDeleteTag();
 
 	const tags = tagsResponse?.data || [];
 
 	// 📊 Estadísticas calculadas
-	const stats = useMemo(() => ({
-		total: tags.length,
-		favorites: tags.filter((tag) => tag.isFavorite).length,
-		byCategory: Object.values(TagCategory).reduce(
-			(acc, category) => {
-				acc[category] = tags.filter((tag) => tag.category === category).length;
-				return acc;
-			},
-			{} as Record<TagCategory, number>
-		),
-	}), [tags]);
+	const stats = useMemo(
+		() => ({
+			total: tags.length,
+			favorites: tags.filter((tag) => tag.isFavorite).length,
+			byCategory: Object.values(TagCategory).reduce(
+				(acc, category) => {
+					acc[category] = tags.filter((tag) => tag.category === category).length;
+					return acc;
+				},
+				{} as Record<TagCategory, number>
+			),
+		}),
+		[tags]
+	);
 
 	// 🔍 Filtrar tags
 	const filteredTags = useMemo(() => {
@@ -62,17 +69,20 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	}, [tags, selectedCategory, showOnlyFavorites]);
 
 	// 🗑️ Eliminar tag
-	const handleDeleteTag = useCallback(async (tagId: string) => {
-		try {
-			await deleteTagMutation.mutateAsync(tagId);
-			toastService.success('Etiqueta eliminada correctamente');
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error('Error al eliminar etiqueta', {
-				description: errorMessage,
-			});
-		}
-	}, [deleteTagMutation]);
+	const handleDeleteTag = useCallback(
+		async (tagId: string) => {
+			try {
+				await deleteTagMutation.mutateAsync(tagId);
+				toastService.success('Etiqueta eliminada correctamente');
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+				toastService.error('Error al eliminar etiqueta', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteTagMutation]
+	);
 
 	// 📝 Manejar creación de tag
 	const handleTagCreated = useCallback((newTag: UITag) => {
@@ -136,8 +146,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 							<div className="text-sm">
 								{tags.length > 0
 									? tags.reduce((max, tag) =>
-										(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
-									).name
+											(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
+										).name
 									: 'N/A'}
 							</div>
 						</CardContent>

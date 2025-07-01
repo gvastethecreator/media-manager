@@ -26,4 +26,3 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
 }
 
 export { Switch };
-

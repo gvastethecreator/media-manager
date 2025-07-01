@@ -11,16 +11,16 @@ import { Toaster } from '@/components/ui/toaster';
 import { Router } from './router';
 
 export function App() {
-  return (
-    <BrowserRouter>
-      <ThemeProvider defaultTheme="system" storageKey="image-manager-theme">
-        <AppProvider>
-          <Router />
-          <Toaster />
-        </AppProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  );
+	return (
+		<BrowserRouter>
+			<ThemeProvider defaultTheme="system" storageKey="image-manager-theme">
+				<AppProvider>
+					<Router />
+					<Toaster />
+				</AppProvider>
+			</ThemeProvider>
+		</BrowserRouter>
+	);
 }
 
 export default App;

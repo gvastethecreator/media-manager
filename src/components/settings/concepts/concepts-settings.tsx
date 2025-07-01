@@ -82,19 +82,22 @@ export function ConceptsSettings() {
 	const filteredConcepts = useMemo(() => getFilteredConcepts(), [getFilteredConcepts]);
 
 	// Manejar eliminación de concepto
-	const handleDeleteConcept = useCallback(async (id: string) => {
-		try {
-			await deleteConceptMutation.mutateAsync(id);
-			setSelectedConcept(null);
-			setIsEditing(false);
-			toastService.success('Concepto eliminado');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el concepto', {
-				description: errorMessage,
-			});
-		}
-	}, [deleteConceptMutation]);
+	const handleDeleteConcept = useCallback(
+		async (id: string) => {
+			try {
+				await deleteConceptMutation.mutateAsync(id);
+				setSelectedConcept(null);
+				setIsEditing(false);
+				toastService.success('Concepto eliminado');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar el concepto', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteConceptMutation]
+	);
 
 	// Manejar edición de concepto
 	const handleEditConcept = useCallback((concept: ConceptWithStats) => {

@@ -313,23 +313,21 @@ export async function getTagImages(tagId: string, limit = 50): Promise<FileItem[
  * @param options - Opciones de consulta
  * @returns Array de todos los tags con estadísticas
  */
-export async function getTags(
-	includeStats = false,
-	includeImages = false,
-	limit?: number
-): Promise<TagWithStats[]> {
+export async function getTags(includeStats = false, includeImages = false, limit?: number): Promise<TagWithStats[]> {
 	try {
 		tagLogger.info('🔄 Obteniendo tags:', { includeStats, includeImages, limit });
 
 		const tags = await prisma.tag.findMany({
 			include: {
 				images: includeImages,
-				_count: includeStats ? {
-					images: true,
-					albums: true,
-					collections: true,
-					characters: true,
-				} : false,
+				_count: includeStats
+					? {
+							images: true,
+							albums: true,
+							collections: true,
+							characters: true,
+						}
+					: false,
 			},
 			orderBy: {
 				name: 'asc',
@@ -340,15 +338,18 @@ export async function getTags(
 		// Solo transformar si includeStats es true, de lo contrario devolver tags base con stats vacías
 		const transformedTags = includeStats
 			? tags.map(toTagWithStats)
-			: tags.map(tag => ({
-				...tag,
-				stats: {
-					totalRelations: 0,
-					usageDiversity: 0,
-					popularity: 0,
-					completenessScore: 0,
-				}
-			} as TagWithStats));
+			: tags.map(
+					(tag) =>
+						({
+							...tag,
+							stats: {
+								totalRelations: 0,
+								usageDiversity: 0,
+								popularity: 0,
+								completenessScore: 0,
+							},
+						}) as TagWithStats
+				);
 
 		tagLogger.info('✅ Tags obtenidos exitosamente:', transformedTags.length);
 		return transformedTags;

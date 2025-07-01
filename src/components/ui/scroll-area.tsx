@@ -78,11 +78,7 @@ interface ScrollBarProps extends React.HTMLAttributes<HTMLDivElement> {
 	orientation?: 'vertical' | 'horizontal';
 }
 
-const ScrollBar = React.memo(function ScrollBar({
-	className,
-	orientation = 'vertical',
-	...props
-}: ScrollBarProps) {
+const ScrollBar = React.memo(function ScrollBar({ className, orientation = 'vertical', ...props }: ScrollBarProps) {
 	// This is now handled by CSS, but we keep the component for API compatibility
 	return (
 		<div
@@ -100,4 +96,3 @@ const ScrollBar = React.memo(function ScrollBar({
 });
 
 export { ScrollArea, ScrollBar };
-

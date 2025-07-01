@@ -66,15 +66,15 @@ export function AlbumContentView() {
 		containerName: album?.name ?? null,
 		emptyState: !currentAlbumId
 			? {
-				icon: Album,
-				title: 'No hay álbum seleccionado',
-				description: 'Selecciona un álbum para ver su contenido.',
-			}
+					icon: Album,
+					title: 'No hay álbum seleccionado',
+					description: 'Selecciona un álbum para ver su contenido.',
+				}
 			: {
-				icon: Album,
-				title: 'Álbum sin imágenes',
-				description: 'Este álbum no tiene imágenes asociadas.',
-			},
+					icon: Album,
+					title: 'Álbum sin imágenes',
+					description: 'Este álbum no tiene imágenes asociadas.',
+				},
 		onRefresh: loadAlbumImages,
 	};
 
@@ -83,7 +83,9 @@ export function AlbumContentView() {
 	}
 
 	if (error || albumError) {
-		return <div className="flex items-center justify-center p-8 text-red-500">Error: {error || albumError?.message}</div>;
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || albumError?.message}</div>
+		);
 	}
 
 	if (!items || items.length === 0) {

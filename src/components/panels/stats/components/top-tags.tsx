@@ -6,11 +6,7 @@ import { AlertCircle, Tag } from 'lucide-react';
 import { TagUsage } from './tag-usage';
 
 export function TopTags() {
-	const {
-		data: stats,
-		isLoading,
-		error
-	} = useStats();
+	const { data: stats, isLoading, error } = useStats();
 
 	if (isLoading) {
 		return (

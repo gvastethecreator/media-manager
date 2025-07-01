@@ -26,11 +26,11 @@ export function PropertiesView({ isVisible }: ViewProps) {
 		data: properties = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = useProperties({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -79,13 +79,7 @@ export function PropertiesView({ isVisible }: ViewProps) {
 			? `No se encontraron propiedades que coincidan con "${localSearch}"`
 			: 'No hay propiedades disponibles';
 
-		return (
-			<EmptyState
-				icon={Settings}
-				title="Sin propiedades"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={Settings} title="Sin propiedades" description={emptyMessage} />;
 	}
 
 	return (

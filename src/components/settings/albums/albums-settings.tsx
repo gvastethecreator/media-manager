@@ -21,12 +21,7 @@ export function AlbumsSettings() {
 	const [previewData, setPreviewData] = useState<any>(null);
 
 	// Usar React Query hooks en lugar de server actions
-	const {
-		data: albums = [],
-		isLoading,
-		error,
-		refetch: loadAlbums
-	} = useAlbums();
+	const { data: albums = [], isLoading, error, refetch: loadAlbums } = useAlbums();
 
 	const deleteAlbumMutation = useDeleteAlbum();
 
@@ -39,19 +34,22 @@ export function AlbumsSettings() {
 	};
 
 	// Manejar eliminación de álbum
-	const handleDeleteAlbum = useCallback(async (id: string) => {
-		try {
-			await deleteAlbumMutation.mutateAsync(id);
-			setSelectedAlbum(null);
-			setIsEditing(false);
-			toastService.success('Álbum eliminado');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el álbum', {
-				description: errorMessage,
-			});
-		}
-	}, [deleteAlbumMutation]);
+	const handleDeleteAlbum = useCallback(
+		async (id: string) => {
+			try {
+				await deleteAlbumMutation.mutateAsync(id);
+				setSelectedAlbum(null);
+				setIsEditing(false);
+				toastService.success('Álbum eliminado');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar el álbum', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteAlbumMutation]
+	);
 
 	// Manejar edición de álbum
 	const handleEditAlbum = useCallback((album: AlbumWithStats) => {

@@ -35,8 +35,8 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 
 	const totalElements = wildcard._count
 		? Object.entries(wildcard._count)
-			.filter(([key]) => key !== 'childWildcards')
-			.reduce((a, [_, b]) => a + b, 0)
+				.filter(([key]) => key !== 'childWildcards')
+				.reduce((a, [_, b]) => a + b, 0)
 		: 0;
 
 	return (
@@ -185,11 +185,7 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 					<div className="space-y-2">
 						<h3 className="text-sm font-medium">Imagen destacada</h3>
 						<div className="relative w-full h-32 bg-muted rounded-md overflow-hidden">
-							<img
-								src={wildcard.featuredImage}
-								alt={wildcard.name}
-								className="w-full h-full object-cover"
-							/>
+							<img src={wildcard.featuredImage} alt={wildcard.name} className="w-full h-full object-cover" />
 						</div>
 					</div>
 				)}
