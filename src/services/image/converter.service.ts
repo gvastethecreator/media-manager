@@ -102,7 +102,7 @@ export interface ServerImage {
 	width: number | null;
 	height: number | null;
 	metadata: string | null;
-	thumbnail: Buffer | null;
+	thumbnail: Buffer | Uint8Array | null;
 	thumbnailSize: number | null;
 	thumbnailWidth: number | null;
 	thumbnailHeight: number | null;
@@ -127,7 +127,12 @@ export interface ServerImage {
 
 export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
 	try {
-		const thumbnail = image.thumbnail ? Buffer.from(image.thumbnail).toString('base64') : null;
+		// Manejar tanto Buffer (Node.js) como Uint8Array (navegador/Vite)
+		const thumbnail = image.thumbnail
+			? image.thumbnail instanceof Uint8Array
+				? btoa(String.fromCharCode(...image.thumbnail))
+				: Buffer.from(image.thumbnail).toString('base64')
+			: null;
 
 		return {
 			id: image.id,
