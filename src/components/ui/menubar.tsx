@@ -55,10 +55,7 @@ function MenubarContent({
 }: React.ComponentProps<typeof MenuPrimitive.Positioner>) {
 	return (
 		<MenubarPortal>
-			<MenuPrimitive.Positioner
-				data-slot="menubar-positioner"
-				{...props}
-			>
+			<MenuPrimitive.Positioner data-slot="menubar-positioner" {...props}>
 				<MenuPrimitive.Popup
 					data-slot="menubar-content"
 					className={cn(
@@ -208,9 +205,7 @@ function MenubarSubTrigger({
 function MenubarSubContent({ className, ...props }: React.ComponentProps<typeof MenuPrimitive.Positioner>) {
 	return (
 		<MenuPrimitive.Portal>
-			<MenuPrimitive.Positioner
-				{...props}
-			>
+			<MenuPrimitive.Positioner {...props}>
 				<MenuPrimitive.Popup
 					data-slot="menubar-sub-content"
 					className={cn(

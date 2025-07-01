@@ -26,11 +26,11 @@ export function ConceptsView({ isVisible }: ViewProps) {
 		data: concepts = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = useConcepts({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -79,13 +79,7 @@ export function ConceptsView({ isVisible }: ViewProps) {
 			? `No se encontraron conceptos que coincidan con "${localSearch}"`
 			: 'No hay conceptos disponibles';
 
-		return (
-			<EmptyState
-				icon={Lightbulb}
-				title="Sin conceptos"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={Lightbulb} title="Sin conceptos" description={emptyMessage} />;
 	}
 
 	return (

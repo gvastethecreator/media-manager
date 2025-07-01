@@ -36,15 +36,15 @@ export function WorldItemContentView() {
 		containerName: selectedWorldItem?.name ?? null,
 		emptyState: !selectedId
 			? {
-				icon: Box,
-				title: 'No hay objeto del mundo seleccionado',
-				description: 'Selecciona un objeto del mundo para ver su contenido.',
-			}
+					icon: Box,
+					title: 'No hay objeto del mundo seleccionado',
+					description: 'Selecciona un objeto del mundo para ver su contenido.',
+				}
 			: {
-				icon: Box,
-				title: 'Objeto del mundo sin imágenes',
-				description: 'Este objeto del mundo no tiene imágenes asociadas.',
-			},
+					icon: Box,
+					title: 'Objeto del mundo sin imágenes',
+					description: 'Este objeto del mundo no tiene imágenes asociadas.',
+				},
 		onRefresh: () => refetch(),
 	};
 

@@ -26,11 +26,11 @@ export function NotesView({ isVisible }: ViewProps) {
 		data: notes = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = useNotes({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -79,13 +79,7 @@ export function NotesView({ isVisible }: ViewProps) {
 			? `No se encontraron notas que coincidan con "${localSearch}"`
 			: 'No hay notas disponibles';
 
-		return (
-			<EmptyState
-				icon={FileText}
-				title="Sin notas"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={FileText} title="Sin notas" description={emptyMessage} />;
 	}
 
 	return (

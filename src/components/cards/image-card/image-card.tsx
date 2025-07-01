@@ -201,7 +201,7 @@ export function ImageCard({
 				onClick: handleClick,
 				onKeyDown: (e: React.KeyboardEvent) => e.key === 'Enter' && handleClick(),
 				tabIndex: 0,
-				role: 'button'
+				role: 'button',
 			})}
 		>
 			{/* Elementos decorativos TCG */}
@@ -466,9 +466,7 @@ export function ImageCard({
 	// Si no hay onClick, envolver en un Link (si route es proporcionado)
 	return (
 		<div className={className}>
-			<Link to={`/images/${imageId}`}>
-				{cardContent}
-			</Link>
+			<Link to={`/images/${imageId}`}>{cardContent}</Link>
 		</div>
 	);
 }

@@ -27,11 +27,11 @@ export function CharactersView({ isVisible }: ViewProps) {
 		data: characters = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = useCharacters({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -80,13 +80,7 @@ export function CharactersView({ isVisible }: ViewProps) {
 			? `No se encontraron personajes que coincidan con "${localSearch}"`
 			: 'No hay personajes disponibles';
 
-		return (
-			<EmptyState
-				icon={Users}
-				title="Sin personajes"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={Users} title="Sin personajes" description={emptyMessage} />;
 	}
 
 	return (

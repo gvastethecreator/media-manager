@@ -7,15 +7,15 @@ import './styles/globals.css';
 
 const container = document.getElementById('root');
 if (!container) {
-  throw new Error('No se encontró el elemento root');
+	throw new Error('No se encontró el elemento root');
 }
 
 const root = createRoot(container);
 
 root.render(
-  <StrictMode>
-    <div className="root">
-      <App />
-    </div>
-  </StrictMode>
+	<StrictMode>
+		<div className="root">
+			<App />
+		</div>
+	</StrictMode>
 );

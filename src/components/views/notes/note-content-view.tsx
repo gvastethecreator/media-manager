@@ -57,7 +57,9 @@ export function NoteContentView() {
 	}
 
 	if (error || noteError) {
-		return <div className="flex items-center justify-center p-8 text-red-500">Error: {error || noteError?.message}</div>;
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || noteError?.message}</div>
+		);
 	}
 
 	if (!items || items.length === 0) {
@@ -71,12 +73,13 @@ export function NoteContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedNote?.id ?? null,
 		containerName: selectedNote?.title ?? selectedNote?.name ?? null,
-		setCurrentContainer: () => { }, // No es necesario en el nuevo enfoque
+		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: ScrollText,
 			title: 'Nota vacía',
-			description: `No se encontraron imágenes en ${selectedNote?.title ?? selectedNote?.name ?? 'esta nota'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				selectedNote?.title ?? selectedNote?.name ?? 'esta nota'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadNoteImages,
 	};

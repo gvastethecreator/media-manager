@@ -16,20 +16,20 @@ export const isServer = !isClient;
  * Ejecuta código solo en el cliente
  */
 export function clientOnly<T>(fn: () => T): T | undefined {
-  return isClient ? fn() : undefined;
+	return isClient ? fn() : undefined;
 }
 
 /**
  * Hook para detectar si estamos en el cliente
  */
 export function useIsClient(): boolean {
-  const [mounted, setMounted] = React.useState(false);
+	const [mounted, setMounted] = React.useState(false);
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+	React.useEffect(() => {
+		setMounted(true);
+	}, []);
 
-  return mounted;
+	return mounted;
 }
 
 import React from 'react';

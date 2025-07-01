@@ -5,7 +5,14 @@
  * (ej. desde formularios o actions) a los tipos que Prisma espera para las operaciones de BD.
  */
 
-import type { ConceptBase, ConceptCreateInput, ConceptFilters, ConceptSearchOptions, ConceptSortOption, ConceptUpdateInput } from '@/types/entities/concept';
+import type {
+	ConceptBase,
+	ConceptCreateInput,
+	ConceptFilters,
+	ConceptSearchOptions,
+	ConceptSortOption,
+	ConceptUpdateInput,
+} from '@/types/entities/concept';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -174,7 +181,7 @@ export function processConcepts(
 	if (filters.search) {
 		const searchTerm = filters.search.toLowerCase();
 		filteredConcepts = filteredConcepts.filter(
-			concept =>
+			(concept) =>
 				concept.name.toLowerCase().includes(searchTerm) ||
 				concept.description?.toLowerCase().includes(searchTerm) ||
 				concept.content?.toLowerCase().includes(searchTerm)
@@ -182,11 +189,11 @@ export function processConcepts(
 	}
 
 	if (filters.category) {
-		filteredConcepts = filteredConcepts.filter(concept => concept.category === filters.category);
+		filteredConcepts = filteredConcepts.filter((concept) => concept.category === filters.category);
 	}
 
 	if (filters.onlyFavorites) {
-		filteredConcepts = filteredConcepts.filter(concept => concept.isFavorite);
+		filteredConcepts = filteredConcepts.filter((concept) => concept.isFavorite);
 	}
 
 	// Aplicar ordenamiento

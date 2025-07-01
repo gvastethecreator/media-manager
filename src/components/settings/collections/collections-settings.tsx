@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCollections, useDeleteCollection } from '@/lib/api/collections';
 import toastService from '@/services/toast';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import {
@@ -16,8 +17,8 @@ import {
 	COLLECTION_CATEGORY_EMOJIS,
 	CollectionCategory,
 } from '@/types/entities/collection/enums';
-import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { AlertCircle, Filter, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
 
 // Tipos seguros para preview data
@@ -47,12 +48,15 @@ export function CollectionsSettings() {
 	const collections = collectionsResponse?.collections || [];
 
 	// Calcular estadísticas generales usando useMemo para optimización
-	const stats = useMemo(() => ({
-		totalCollections: collections.length,
-		totalImages: collections.reduce((acc, collection) => acc + (collection.stats?.imageCount || 0), 0),
-		emptyCollections: collections.filter((collection) => (collection.stats?.imageCount || 0) === 0).length,
-		favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
-	}), [collections]);
+	const stats = useMemo(
+		() => ({
+			totalCollections: collections.length,
+			totalImages: collections.reduce((acc, collection) => acc + (collection.stats?.imageCount || 0), 0),
+			emptyCollections: collections.filter((collection) => (collection.stats?.imageCount || 0) === 0).length,
+			favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
+		}),
+		[collections]
+	);
 
 	// Filtrar colecciones basadas en los criterios seleccionados usando useMemo
 	const filteredCollections = useMemo(() => {
@@ -66,7 +70,7 @@ export function CollectionsSettings() {
 					matches &&
 					Boolean(
 						collection.name.toLowerCase().includes(normalizedQuery) ||
-						collection.description?.toLowerCase().includes(normalizedQuery)
+							collection.description?.toLowerCase().includes(normalizedQuery)
 					);
 			}
 
@@ -85,19 +89,22 @@ export function CollectionsSettings() {
 	}, [collections, searchQuery, selectedCategories, onlyFavorites]);
 
 	// Manejar eliminación de colección
-	const handleDeleteCollection = useCallback(async (id: string) => {
-		try {
-			await deleteCollectionMutation.mutateAsync(id);
-			setSelectedCollection(null);
-			setIsEditing(false);
-			toastService.success('Colección eliminada');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar la colección', {
-				description: errorMessage,
-			});
-		}
-	}, [deleteCollectionMutation]);
+	const handleDeleteCollection = useCallback(
+		async (id: string) => {
+			try {
+				await deleteCollectionMutation.mutateAsync(id);
+				setSelectedCollection(null);
+				setIsEditing(false);
+				toastService.success('Colección eliminada');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar la colección', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteCollectionMutation]
+	);
 
 	// Manejar edición de colección
 	const handleEditCollection = useCallback((collection: CollectionWithStats) => {
@@ -135,9 +142,7 @@ export function CollectionsSettings() {
 
 	// Extraer categorías únicas de las colecciones usando useMemo
 	const uniqueCategories = useMemo(() => {
-		return Array.from(
-			new Set(collections.map((collection) => collection.category).filter(Boolean))
-		) as string[];
+		return Array.from(new Set(collections.map((collection) => collection.category).filter(Boolean))) as string[];
 	}, [collections]);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
@@ -435,7 +440,7 @@ export function CollectionsSettings() {
 													style={{
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
-															(previewData?.category || selectedCollection?.category) as CollectionCategory
+																(previewData?.category || selectedCollection?.category) as CollectionCategory
 															] || '#3b82f6',
 													}}
 												>

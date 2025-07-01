@@ -80,17 +80,20 @@ export const PromptSettings = () => {
 		})) as PromptWithNullable[];
 	}, [promptsData]);
 
-	const handleDelete = useCallback(async (id: string) => {
-		try {
-			await deletePromptMutation.mutateAsync(id);
-			toastService.success('Prompt eliminado correctamente');
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toastService.error('Error al eliminar prompt', {
-				description: errorMessage,
-			});
-		}
-	}, [deletePromptMutation]);
+	const handleDelete = useCallback(
+		async (id: string) => {
+			try {
+				await deletePromptMutation.mutateAsync(id);
+				toastService.success('Prompt eliminado correctamente');
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+				toastService.error('Error al eliminar prompt', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deletePromptMutation]
+	);
 
 	const handleDeleteButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
@@ -127,7 +130,7 @@ export const PromptSettings = () => {
 		return prompts.filter((prompt) => {
 			const matchesSearch = searchTerm
 				? prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				prompt.description?.toLowerCase().includes(searchTerm.toLowerCase())
+					prompt.description?.toLowerCase().includes(searchTerm.toLowerCase())
 				: true;
 
 			const matchesCategory = categoryFilter && categoryFilter !== 'all' ? prompt.category === categoryFilter : true;

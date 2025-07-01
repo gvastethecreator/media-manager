@@ -147,21 +147,11 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 					description={`Ha ocurrido un error al cargar las imágenes. ${typeof error === 'string' ? error : 'Error desconocido'}`}
 				/>
 				<div className="flex gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleForceRefresh}
-						disabled={isRetrying}
-					>
+					<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
 						<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
 						{isRetrying ? 'Reintentando...' : 'Reintentar'}
 					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleScanFolder}
-						disabled={isRetrying}
-					>
+					<Button variant="outline" size="sm" onClick={handleScanFolder} disabled={isRetrying}>
 						<FolderSearch className="h-4 w-4 mr-2" />
 						{isRetrying ? 'Escaneando...' : 'Escanear Carpeta'}
 					</Button>
@@ -175,21 +165,11 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		<div className="relative h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			{/* Controles en la esquina superior derecha */}
 			<div className="absolute top-2 right-2 z-10 flex gap-2">
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleScanFolder}
-					disabled={isRetrying}
-				>
+				<Button variant="outline" size="sm" onClick={handleScanFolder} disabled={isRetrying}>
 					<FolderSearch className="h-4 w-4 mr-2" />
 					{isRetrying ? 'Escaneando...' : 'Escanear'}
 				</Button>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleForceRefresh}
-					disabled={isRetrying}
-				>
+				<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
 					<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
 					{isRetrying ? 'Recargando...' : 'Recargar'}
 				</Button>

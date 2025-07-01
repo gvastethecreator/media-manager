@@ -1,8 +1,4 @@
-import {
-    mapStatsToFileInfo,
-    serializeDirectoryContents,
-    serializeFileOperationResult,
-} from '@/transformers/file';
+import { mapStatsToFileInfo, serializeDirectoryContents, serializeFileOperationResult } from '@/transformers/file';
 import { Router } from 'express';
 import fs from 'fs/promises';
 import path from 'path';

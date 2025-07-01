@@ -39,4 +39,3 @@ function Toggle({
 }
 
 export { Toggle, toggleVariants };
-

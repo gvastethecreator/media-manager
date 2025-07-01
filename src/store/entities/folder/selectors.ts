@@ -40,15 +40,15 @@ export const selectFilteredFolders = (state: CompleteFolderStore) => {
 };
 
 export const selectFavoriteFolders = (state: CompleteFolderStore) => {
-	return Object.values(state.folders).filter(folder => folder.isFavorite);
+	return Object.values(state.folders).filter((folder) => folder.isFavorite);
 };
 
 export const selectFolderStats = (state: CompleteFolderStore) => {
 	const allFolders = Object.values(state.folders);
 	return {
 		total: allFolders.length,
-		favorites: allFolders.filter(f => f.isFavorite).length,
-		withImages: allFolders.filter(f => f.statistics.imageCount > 0).length,
-		empty: allFolders.filter(f => f.statistics.imageCount === 0).length,
+		favorites: allFolders.filter((f) => f.isFavorite).length,
+		withImages: allFolders.filter((f) => f.statistics.imageCount > 0).length,
+		empty: allFolders.filter((f) => f.statistics.imageCount === 0).length,
 	};
 };

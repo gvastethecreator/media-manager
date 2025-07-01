@@ -29,11 +29,11 @@ export function PromptsView({ isVisible }: ViewProps) {
 		data: prompts = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = usePrompts({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -86,10 +86,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 					<AlertTitle>Error al cargar prompts</AlertTitle>
 					<AlertDescription>
 						{error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-						<button
-							onClick={handleRetry}
-							className="ml-2 underline hover:no-underline"
-						>
+						<button onClick={handleRetry} className="ml-2 underline hover:no-underline">
 							Reintentar
 						</button>
 					</AlertDescription>
@@ -103,13 +100,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 			? `No se encontraron prompts que coincidan con "${localSearch}"`
 			: 'No hay prompts disponibles';
 
-		return (
-			<EmptyState
-				icon={MessageSquare}
-				title="Sin prompts"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={MessageSquare} title="Sin prompts" description={emptyMessage} />;
 	}
 
 	return (

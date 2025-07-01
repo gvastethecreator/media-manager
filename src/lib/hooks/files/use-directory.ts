@@ -7,9 +7,9 @@ import { useQuery } from '@tanstack/react-query';
  * @param path Ruta relativa al directorio base configurado en el servidor
  */
 export function useDirectory(path: string) {
-  return useQuery<DirectoryReadResult, Error>({
-    queryKey: ['directory', path],
-    queryFn: () => api.get<DirectoryReadResult>(`/files/list?path=${encodeURIComponent(path)}`),
-    staleTime: 1000 * 30, // 30s
-  });
+	return useQuery<DirectoryReadResult, Error>({
+		queryKey: ['directory', path],
+		queryFn: () => api.get<DirectoryReadResult>(`/files/list?path=${encodeURIComponent(path)}`),
+		staleTime: 1000 * 30, // 30s
+	});
 }

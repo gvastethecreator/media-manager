@@ -16,11 +16,11 @@ const ContextMenuContext = React.createContext<{
 	handleClose: () => void;
 }>({
 	open: false,
-	setOpen: () => { },
+	setOpen: () => {},
 	position: { x: 0, y: 0 },
-	setPosition: () => { },
-	handleContextMenu: () => { },
-	handleClose: () => { },
+	setPosition: () => {},
+	handleContextMenu: () => {},
+	handleClose: () => {},
 });
 
 // Hook personalizado para manejar context menu
@@ -60,11 +60,7 @@ function ContextMenu({ children, ...props }: { children: React.ReactNode }) {
 	);
 }
 
-function ContextMenuTrigger({
-	children,
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function ContextMenuTrigger({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	const { handleContextMenu } = React.useContext(ContextMenuContext);
 
 	return (
@@ -81,11 +77,7 @@ function ContextMenuTrigger({
 	);
 }
 
-function ContextMenuContent({
-	className,
-	children,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function ContextMenuContent({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	const { open, position, handleClose } = React.useContext(ContextMenuContext);
 	const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -289,13 +281,7 @@ function ContextMenuLabel({
 }
 
 function ContextMenuSeparator({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-	return (
-		<div
-			data-slot="context-menu-separator"
-			className={cn('-mx-1 my-1 h-px bg-border', className)}
-			{...props}
-		/>
-	);
+	return <div data-slot="context-menu-separator" className={cn('-mx-1 my-1 h-px bg-border', className)} {...props} />;
 }
 
 function ContextMenuShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
@@ -319,7 +305,11 @@ function ContextMenuPortal({ children }: { children: React.ReactNode }) {
 
 // Componentes de submenu (implementación simplificada)
 function ContextMenuSub({ children, ...props }: { children: React.ReactNode }) {
-	return <div data-slot="context-menu-sub" {...props}>{children}</div>;
+	return (
+		<div data-slot="context-menu-sub" {...props}>
+			{children}
+		</div>
+	);
 }
 
 function ContextMenuSubTrigger({
@@ -346,10 +336,7 @@ function ContextMenuSubTrigger({
 	);
 }
 
-function ContextMenuSubContent({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function ContextMenuSubContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
 			data-slot="context-menu-sub-content"
@@ -363,13 +350,27 @@ function ContextMenuSubContent({
 }
 
 function ContextMenuRadioGroup({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-	return <div data-slot="context-menu-radio-group" {...props}>{children}</div>;
+	return (
+		<div data-slot="context-menu-radio-group" {...props}>
+			{children}
+		</div>
+	);
 }
 
 export {
-	ContextMenu, ContextMenuCheckboxItem, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuLabel, ContextMenuPortal, ContextMenuRadioGroup, ContextMenuRadioItem, ContextMenuSeparator,
-	ContextMenuShortcut, ContextMenuSub,
+	ContextMenu,
+	ContextMenuCheckboxItem,
+	ContextMenuContent,
+	ContextMenuGroup,
+	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuPortal,
+	ContextMenuRadioGroup,
+	ContextMenuRadioItem,
+	ContextMenuSeparator,
+	ContextMenuShortcut,
+	ContextMenuSub,
 	ContextMenuSubContent,
-	ContextMenuSubTrigger, ContextMenuTrigger
+	ContextMenuSubTrigger,
+	ContextMenuTrigger,
 };
-

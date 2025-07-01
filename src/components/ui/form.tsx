@@ -19,7 +19,11 @@ const Slot = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement> & {
 		if (React.isValidElement(children)) {
 			return React.cloneElement(children, { ...props, ref } as any);
 		}
-		return <span ref={ref as any} {...props}>{children}</span>;
+		return (
+			<span ref={ref as any} {...props}>
+				{children}
+			</span>
+		);
 	}
 );
 Slot.displayName = 'Slot';
@@ -144,4 +148,3 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
 }
 
 export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };
-

@@ -15,24 +15,11 @@
     "incremental": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "types": [
-      "vite/client",
-      "vitest/globals",
-      "node",
-      "@types/react",
-      "@types/react-dom"
-    ],
+    "types": ["vite/client", "vitest/globals", "node", "@types/react", "@types/react-dom"],
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "tsup.config.ts",
-    "src/**/*.d.ts"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "vitest.config.ts", "tsup.config.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules", "dist", "build"]
 }

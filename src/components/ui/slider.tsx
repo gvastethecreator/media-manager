@@ -54,4 +54,3 @@ function Slider({
 }
 
 export { Slider };
-
