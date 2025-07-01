@@ -1,14 +1,13 @@
 'use server';
 
-import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
 import { generateThumbnail } from '@/lib/image/thumbnail';
-// import type { ProcessOptions } from '@/services/thumbnail-service-export';
-// import { thumbnailService } from '@/services/thumbnail-service-export';
-// TODO: Implementar servicio de thumbnails o usar servicio de imágenes
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { ProcessOptions } from '@/services/thumbnail';
+import { thumbnailService } from '@/services/thumbnail';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
+import { existsSync } from 'fs';
 
 const thumbLogger = serverLogger.withContext('ThumbnailActions');
 
@@ -229,10 +228,11 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 			},
 		});
 
-		return images.map((image: any) => ({
+		return images.map((image) => ({
 			id: image.id,
 			path: image.path,
 			processedAt: image.updatedAt.toISOString(),
+			status: 'success' as const,
 			saved: image.thumbnailSize || 0,
 		}));
 	} catch (error) {
@@ -294,12 +294,7 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 			pending,
 			processed: withThumbnail,
 			totalSize: totalSize._sum.thumbnailSize || 0,
-			errors: errors.map((error: any) => ({
-				imageId: error.id,
-				imagePath: error.path,
-				error: error.thumbnailError || 'Error desconocido',
-				timestamp: error.updatedAt,
-			})),
+			errors: errors.length, // Número de errores, no el array completo
 		};
 	} catch (error) {
 		thumbLogger.error('❌ Error obteniendo estadísticas:', error);

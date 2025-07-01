@@ -5,13 +5,13 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
+import { calculateCompleteness } from '@/lib/utils/transformers';
 import type {
 	PrismaPropertyWithCounts,
 	PropertyBase,
 	PropertyStatistics,
 	PropertyWithStats,
 } from '@/types/entities/property';
-import { calculateCompleteness } from '@/lib/utils/transformers';
 
 const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer');
 
@@ -22,7 +22,9 @@ const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer'
  * @param prismaProperty El objeto Property de Prisma, puede incluir conteos de relaciones
  * @returns Un objeto PropertyWithStats con estadísticas calculadas o null si el input es inválido
  */
-function fromPrismaProperty(prismaProperty: PrismaPropertyWithCounts | PropertyBase | null): PropertyWithStats | null {
+export function fromPrismaProperty(
+	prismaProperty: PrismaPropertyWithCounts | PropertyBase | null
+): PropertyWithStats | null {
 	if (!prismaProperty) {
 		propertyTransformerLogger.warn('⚠️ Property de Prisma nulo o indefinido');
 		return null;

@@ -10,12 +10,12 @@ import { db } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { fromPrismaVideosWithCounts, fromPrismaVideoWithCounts } from '@/transformers/video/transformer';
 import type {
-	VideoCreateInput,
-	VideoFilters,
-	VideoPaginationOptions,
-	VideoStats,
-	VideoUpdateInput,
-	VideoWithStats,
+    VideoCreateInput,
+    VideoFilters,
+    VideoPaginationOptions,
+    VideoStats,
+    VideoUpdateInput,
+    VideoWithStats,
 } from '@/types/entities/video';
 import { revalidatePath } from 'next/cache';
 
@@ -100,8 +100,8 @@ export async function findVideos(
 
 		if (filters.search) {
 			where.OR = [
-				{ name: { contains: filters.search, mode: 'insensitive' } },
-				{ description: { contains: filters.search, mode: 'insensitive' } },
+				{ name: { contains: filters.search } },
+				{ description: { contains: filters.search } },
 			];
 		}
 

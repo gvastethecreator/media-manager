@@ -4,38 +4,37 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
-import type { AlbumWithStats } from '@/types/entities/album';
+import { CharacterWithStats } from '@/types/entities/character';
+import type { Prisma } from '@prisma/client';
+// import type { AlbumWithStats } from '@/types/entities/album'; // No usado - transformer comentado
 import type { CollectionComplete } from '@/types/entities/collection';
 import type { ConceptComplete } from '@/types/entities/concept';
-import type { GroupWithStats } from '@/types/entities/group';
+// import type { GroupWithStats } from '@/types/entities/group'; // No usado - transformer comentado
 import type { ImageWithStats } from '@/types/entities/image';
-import type { PlaceComplete } from '@/types/entities/place';
+// import type { PlaceComplete } from '@/types/entities/place'; // No usado - transformer comentado
 import type { PromptComplete } from '@/types/entities/prompt';
-import type { PropertyComplete } from '@/types/entities/property';
-import type { TagComplete } from '@/types/entities/tag';
 import type { VideoComplete } from '@/types/entities/video';
 import type { WildcardComplete } from '@/types/entities/wildcard';
 import type { WorldItemComplete } from '@/types/entities/world-item';
-import type { Prisma } from '@prisma/client';
-import { fromPrismaAlbum } from '../album/transformer';
+// import { fromPrismaAlbum } from '../album/transformer';
 import { fromPrismaCharacter } from '../character/transformer';
 import { fromPrismaCollection } from '../collection/transformer';
 import { fromPrismaConcept } from '../concept/transformer';
-import { fromPrismaGroup } from '../group/transformer';
+// import { fromPrismaGroup } from '../group/transformer'; // No existe transformer.ts
 import { fromPrismaImageWithCounts } from '../image/transformer';
 import { fromPrismaNote } from '../note/transformer';
-import { fromPrismaPlace } from '../place/transformer';
+// import { fromPrismaPlace } from '../place/transformer'; // No existe transformer.ts
 import { fromPrismaPrompt } from '../prompt/transformer';
-import { fromPrismaProperty } from '../property/transformer';
-import { fromPrismaTag } from '../tag/transformer';
+import { fromPrismaProperty, PropertyComplete } from '../property/transformer';
+import { fromPrismaTag, TagComplete } from '../tag/transformer';
 import { fromPrismaVideo } from '../video/transformer';
 import { fromPrismaWildcard } from '../wildcard/transformer';
 import {
-	deserializeAttributes,
-	deserializeEffects,
-	deserializeFilters,
-	deserializeRequirements,
-	deserializeStats,
+    deserializeAttributes,
+    deserializeEffects,
+    deserializeFilters,
+    deserializeRequirements,
+    deserializeStats,
 } from './serializers';
 
 // --- TIPO DE PAYLOAD DE PRISMA ---
@@ -135,16 +134,16 @@ export function fromPrismaWorldItem(worldItem: WorldItemFromPrisma | null): Worl
 		// Mapeo de relaciones - usando transformer optimizado para imágenes y videos
 		images: worldItem.images?.map(fromPrismaImageWithCounts).filter((i): i is ImageWithStats => i !== null) || [],
 		videos: worldItem.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
-		albums: worldItem.albums?.map(fromPrismaAlbum).filter((a): a is AlbumWithStats => a !== null) || [],
+		// albums: worldItem.albums?.map(fromPrismaAlbum).filter((a): a is AlbumWithStats => a !== null) || [], // No existe transformer
 		collections:
 			worldItem.collections?.map(fromPrismaCollection).filter((c): c is CollectionComplete => c !== null) || [],
 		characters: worldItem.characters?.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null) || [],
-		places: worldItem.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [],
+		// places: worldItem.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [], // No existe transformer
 		concepts: worldItem.concepts?.map(fromPrismaConcept).filter((c): c is ConceptComplete => c !== null) || [],
 		prompts: worldItem.prompts?.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null) || [],
 		notes: worldItem.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
 		wildcards: worldItem.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
-		groups: worldItem.groups?.map(fromPrismaGroup).filter((g): g is GroupWithStats => g !== null) || [],
+		// groups: worldItem.groups?.map(fromPrismaGroup).filter((g): g is GroupWithStats => g !== null) || [], // No existe transformer
 
 		// Asignación correcta de relaciones
 		tags: relationTags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],

@@ -8,6 +8,7 @@
 
 export {
 	ConceptCategory,
+	ConceptSortOption,
 	ConceptStatus,
 	ConceptViewMode,
 } from './enums';

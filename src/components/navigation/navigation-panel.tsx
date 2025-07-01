@@ -2,9 +2,9 @@
 
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { type ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
-import { type ViewType } from '@/types/files';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { NavCategoryWithChildren } from './components/nav-category-with-children';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
@@ -13,10 +13,102 @@ import { useCategoryCollapse, useCategoryHandlers, useCategoryStats, useMainNavi
 
 export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }: NavPanelProps) {
 	const { isCategoryCollapsed, handleCollapseToggle, expandCategory } = useCategoryCollapse();
-	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId } = useCategoryHandlers();
+	const {
+		currentView,
+		handleCategoryClick,
+		handleFolderClick,
+		handleCollectionClick,
+		handleTagClick,
+		handleAlbumClick,
+		handleCharacterClick,
+		handlePlaceClick,
+		handleWorldItemClick,
+		handleConceptClick,
+		handlePromptClick,
+		handleNoteClick,
+		handleGroupClick,
+		handlePropertyClick,
+		handleWildcardClick,
+	} = useCategoryHandlers();
 	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats } = useCategoryStats(initialData);
 	const { handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, handleMainNavigate } = useMainNavigation();
 	const [categoryViewModes, setCategoryViewModes] = useState<Record<string, 'list' | 'grid'>>({});
+
+	// Implementaciones temporales para las funciones faltantes
+	const getSelectedChildId = useCallback((_id: ViewType): string | null => {
+		// Implementación temporal - retorna null para todas las categorías
+		return null;
+	}, []);
+
+	const getItemClickHandler = useCallback(
+		(categoryId: ViewType) => {
+			return (childId: string) => {
+				// Mapear cada categoría a su handler específico
+				switch (categoryId) {
+					case 'folders':
+						handleFolderClick(childId);
+						break;
+					case 'collections':
+						handleCollectionClick(childId);
+						break;
+					case 'tags':
+						handleTagClick(childId);
+						break;
+					case 'albums':
+						handleAlbumClick(childId);
+						break;
+					case 'characters':
+						handleCharacterClick(childId);
+						break;
+					case 'places':
+						handlePlaceClick(childId);
+						break;
+					case 'world-items':
+						handleWorldItemClick(childId);
+						break;
+					case 'concepts':
+						handleConceptClick(childId);
+						break;
+					case 'prompts':
+						handlePromptClick(childId);
+						break;
+					case 'notes':
+						handleNoteClick(childId);
+						break;
+					case 'groups':
+						handleGroupClick(childId);
+						break;
+					case 'properties':
+						handlePropertyClick(childId);
+						break;
+					case 'wildcards':
+						handleWildcardClick(childId);
+						break;
+					default:
+						// Log silencioso en desarrollo - no mostrar en producción
+						if (process.env.NODE_ENV === 'development') {
+							// eslint-disable-next-line no-console
+							console.warn(`No se encontró handler para la categoría: ${categoryId}`);
+						}
+				}
+			};
+		},
+		[
+			handleFolderClick,
+			handleCollectionClick,
+			handleTagClick,
+			handleAlbumClick,
+			handleCharacterClick,
+			handlePlaceClick,
+			handleWorldItemClick,
+			handleConceptClick,
+			handlePromptClick,
+			handleNoteClick,
+			handleGroupClick,
+			handlePropertyClick,
+			handleWildcardClick,
+		]
+	);
 
 	useEffect(() => {
 		if (!currentView) return;
@@ -108,15 +200,16 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 		() => ({
 			onNavigate: handleMainNavigate,
 			isCollapsed,
+			currentView: currentView || '',
 		}),
-		[handleMainNavigate, isCollapsed]
+		[handleMainNavigate, isCollapsed, currentView]
 	);
 
 	return (
 		<aside
 			className={cn(
-				'flex flex-col h-full bg-card border-r transition-all duration-300 ease-in-out',
-				isCollapsed ? 'w-16' : 'w-64'
+				'flex flex-col h-full w-full bg-card border-r transition-all duration-300 ease-in-out',
+				isCollapsed && 'min-w-[35px] max-w-[35px]'
 			)}
 		>
 			<NavPanelHeader {...headerProps} />

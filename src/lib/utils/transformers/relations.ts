@@ -1,3 +1,4 @@
+import { Logger } from '@/lib/logger';
 import { RELATION_TYPES } from './constants';
 import { RelationError } from './errors';
 

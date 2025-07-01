@@ -1,25 +1,15 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import { AlertCircle, EraserIcon, Folder, FolderIcon, Info, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { ReindexConfirmationDialog } from '@/components/settings/folders/reindex-confirmation-dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
 import { FolderCard } from './folder-card';
 import { FolderForm } from './folder-form';
 import { getFolderIndexStatus } from './folder-utils';
@@ -39,18 +29,13 @@ export function FoldersSettings() {
 		processStatus,
 		selectedFolder,
 		globalReindexStatus,
-		showReindexDialog,
-		reindexAllDialogOpen,
 		handleAddFolder,
 		handleReindexFolder,
 		handleFolderClick,
-		handleReindexAll,
-		handleConfirmReindexAll,
+		reindexAll,
 		handleAutoReindexToggle,
 		handleClearCache,
 		loadStats,
-		setShowReindexDialog,
-		setReindexAllDialogOpen,
 		setError,
 	} = useFolders();
 
@@ -119,7 +104,7 @@ export function FoldersSettings() {
 							type="button"
 							variant="outline"
 							size="sm"
-							onClick={handleReindexAll}
+							onClick={() => reindexAll()}
 							className="h-7 text-xs"
 							disabled={isLoading || isGloballyProcessing}
 						>
@@ -139,84 +124,58 @@ export function FoldersSettings() {
 					{/* Formulario para agregar carpetas */}
 					<FolderForm isProcessing={isProcessing} isLoading={isLoading} onAddFolder={handleAddFolder} />
 
-					{/* Lista de carpetas */}
-					<div className="grid grid-cols-2 gap-2">
-						{folders.map((folder) => (
-							<FolderCard
-								key={folder.id}
-								folder={folder}
-								selectedFolder={selectedFolder}
-								isProcessing={isProcessing}
-								processStatus={processStatus}
-								isGloballyProcessing={isGloballyProcessing}
-								onReindex={handleReindexFolder}
-								onToggleAutoReindex={handleAutoReindexToggle}
-								onFolderClick={handleFolderClick}
-								getFolderIndexStatus={getFolderIndexStatus}
-							/>
-						))}
+					{/* Lista de carpetas con scroll compacto */}
+					<ScrollArea className="h-[300px] w-full">
+						<div className="grid grid-cols-2 gap-2 pr-3">
+							{folders.map((folder) => (
+								<FolderCard
+									key={folder.id}
+									folder={folder}
+									selectedFolder={selectedFolder}
+									isProcessing={isProcessing}
+									processStatus={processStatus}
+									isGloballyProcessing={isGloballyProcessing}
+									onReindex={handleReindexFolder}
+									onToggleAutoReindex={handleAutoReindexToggle}
+									onFolderClick={handleFolderClick}
+									getFolderIndexStatus={getFolderIndexStatus}
+								/>
+							))}
 
-						{folders.length === 0 && (
-							<motion.div
-								animate={{
-									opacity: [0, 1],
-									y: [20, 0],
-								}}
-								className="py-4 text-center"
-							>
-								<Folder className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-								<p className="text-xs text-muted-foreground">No hay carpetas indexadas</p>
-								<p className="text-[10px] mt-1 text-muted-foreground/75">
-									Agrega una carpeta para comenzar a indexar imágenes
-								</p>
-							</motion.div>
-						)}
-					</div>
+							{folders.length === 0 && (
+								<div className="col-span-2">
+									<motion.div
+										animate={{
+											opacity: [0, 1],
+											y: [20, 0],
+										}}
+										className="py-8 text-center"
+									>
+										<Folder className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+										<p className="text-sm text-muted-foreground">No hay carpetas indexadas</p>
+										<p className="text-xs mt-1 text-muted-foreground/75">
+											Agrega una carpeta para comenzar a indexar imágenes
+										</p>
+									</motion.div>
+								</div>
+							)}
+						</div>
+					</ScrollArea>
 
 					{/* Estadísticas */}
 					<FoldersStats stats={stats} />
 
+					{/* Progress bar para reindexado global */}
 					{globalReindexStatus.isProcessing && (
 						<div className="mt-2">
-							<Progress value={globalReindexStatus.progress} className="h-1.5" />
+							<Progress value={globalReindexStatus.progress} className="h-2" />
+							<p className="text-xs text-muted-foreground mt-1 text-center">
+								Reindexando... {Math.round(globalReindexStatus.progress)}%
+							</p>
 						</div>
 					)}
 				</div>
 			</CardContent>
-
-			<ReindexConfirmationDialog
-				open={showReindexDialog}
-				onOpenChange={setShowReindexDialog}
-				onConfirm={handleConfirmReindexAll}
-				isProcessing={globalReindexStatus.isProcessing}
-				progress={globalReindexStatus.progress}
-			/>
-
-			<Dialog open={reindexAllDialogOpen} onOpenChange={setReindexAllDialogOpen}>
-				<DialogContent className="sm:max-w-md">
-					<DialogHeader>
-						<DialogTitle>Reindexar todas las carpetas</DialogTitle>
-						<DialogDescription>
-							Este proceso analizará todas las carpetas y actualizará la base de datos con nuevos archivos. Podría tomar
-							varios minutos dependiendo de la cantidad de archivos.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="flex items-center space-x-2 py-4">
-						<Switch id="clear-cache" checked={false} onCheckedChange={() => {}} />
-						<Label htmlFor="clear-cache" className="text-sm font-normal cursor-pointer">
-							Limpiar caché de metadatos (recomendado si hay problemas)
-						</Label>
-					</div>
-					<DialogFooter className="flex flex-row justify-between sm:justify-between gap-2">
-						<Button type="button" variant="outline" onClick={() => setReindexAllDialogOpen(false)}>
-							Cancelar
-						</Button>
-						<Button type="button" onClick={handleConfirmReindexAll} disabled={isLoading}>
-							Reindexar todas
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 		</Card>
 	);
 }

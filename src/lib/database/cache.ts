@@ -1,5 +1,5 @@
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileMetadata } from '@/types/metadata';
-import { serverLogger } from './logger/server-logger';
 
 const cacheLogger = serverLogger.withContext('Cache');
 

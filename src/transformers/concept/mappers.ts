@@ -118,9 +118,9 @@ export function createFilter(filters: ConceptSearchOptions['filters'] = {}): Pri
 		const search = filters.search.trim();
 		conditions.push({
 			OR: [
-				{ name: { contains: search, mode: 'insensitive' } },
-				{ description: { contains: search, mode: 'insensitive' } },
-				{ content: { contains: search, mode: 'insensitive' } },
+				{ name: { contains: search } },
+				{ description: { contains: search } },
+				{ content: { contains: search } },
 			],
 		});
 	}

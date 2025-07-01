@@ -8,7 +8,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { folderService } from '@/services/folder-service-export';
+import * as folderService from '@/services/folder/folder.service';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
@@ -48,9 +48,7 @@ export function FoldersView(_props: ViewProps) {
 	const { setCurrentView, setCurrentItem } = useNavigationStore();
 
 	// 🆕 Usar los nuevos stores específicos
-	const {
-		coreActions: { fetchFolderById: setCurrentFolderId, setCurrentFolder },
-	} = useFolderStore();
+	const { selectFolder, getFolder } = useFolderStore();
 
 	// 🧹 Para limpiar selección - usar el hook base directamente
 	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
@@ -69,22 +67,20 @@ export function FoldersView(_props: ViewProps) {
 		try {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando carpetas...');
-			const data = await folderService.getFolders();
+			const data = await folderService.getFoldersWithStats();
 
-			// ✅ Transformar datos para EntityCard
+			// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
 			if (Array.isArray(data)) {
-				const transformedData = data.map((folderData: any): FolderEntity => {
+				const transformedData = data.map((folderData: FolderWithStats): FolderEntity => {
 					return {
 						...folderData,
 						entityType: 'folder', // 🆕 Requerido para EntityCard
 						lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
 						createdAt: new Date(folderData.createdAt),
 						updatedAt: new Date(folderData.updatedAt),
-						// Asegurarnos de que _count existe y preservar datos importantes
-						_count: folderData._count || { images: folderData.imageCount || 0 },
-						// Asegurar que estos campos se preservan
-						totalSize: folderData.totalSize || 0,
-						totalFiles: folderData.totalFiles || 0,
+						// Las estadísticas ya vienen del servicio, no necesitamos modificarlas
+						// _count ya viene del transformer
+						// totalSize y totalFiles ya vienen del transformer
 					};
 				});
 
@@ -158,10 +154,10 @@ export function FoldersView(_props: ViewProps) {
 				deselectAllFiles();
 				viewLogger.debug('✅ Selecciones limpiadas.');
 
-				viewLogger.debug('🔄 Actualizando el store de carpetas (setCurrentFolderId)...');
+				viewLogger.debug('🔄 Actualizando el store de carpetas (selectFolder)...');
 				// 🔄 Actualizar el store de carpetas PRIMERO
-				setCurrentFolderId(folder.id);
-				viewLogger.debug(`✅ setCurrentFolderId llamado con ID: ${folder.id}`);
+				selectFolder(folder.id);
+				viewLogger.debug(`✅ selectFolder llamado con ID: ${folder.id}`);
 
 				viewLogger.debug('📋 Estableciendo elemento actual en navigation store...');
 				// 📋 Establecer el elemento actual en el navigation store
@@ -190,7 +186,7 @@ export function FoldersView(_props: ViewProps) {
 				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
 			}
 		},
-		[setCurrentView, setCurrentItem, deselectAllFiles, setCurrentFolderId]
+		[setCurrentView, setCurrentItem, deselectAllFiles, selectFolder]
 	);
 
 	if (error) {

@@ -16,7 +16,7 @@ const tagTransformerLogger = clientLogger.withContext('TagTransformer');
  * @param prismaTag El objeto Tag de Prisma, puede incluir conteos de relaciones
  * @returns Un objeto TagWithStats con estadísticas calculadas o null si el input es inválido
  */
-function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): TagWithStats | null {
+export function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): TagWithStats | null {
 	if (!prismaTag) {
 		tagTransformerLogger.warn('⚠️ Tag de Prisma nulo o indefinido');
 		return null;

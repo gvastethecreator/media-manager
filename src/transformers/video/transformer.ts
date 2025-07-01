@@ -5,18 +5,16 @@
  * Última refactorización: 2025-01-27
  */
 
-'use server';
-
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
-import type {
-	PrismaVideoWithCounts,
-	VideoComplete,
-	VideoQuality,
-	VideoStatistics,
-	VideoWithStats,
-} from '@/types/entities/video/types';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import type {
+    PrismaVideoWithCounts,
+    VideoComplete,
+    VideoStatistics,
+    VideoWithStats,
+} from '@/types/entities/video/types';
+import { VideoQuality } from '@/types/entities/video/types';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('VideoTransformer');

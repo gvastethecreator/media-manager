@@ -22,7 +22,7 @@ export type NavigationCategory =
 	| 'audios'
 	| 'documents'
 	| 'json-files'
-	| 'file-3d'
+	| 'file-3ds'
 	| 'workflows';
 
 /**

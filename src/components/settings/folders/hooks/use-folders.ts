@@ -21,11 +21,14 @@ export function useFolders() {
 	// Estados locales específicos de este hook
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [processProgress, setProcessProgress] = useState(0);
-	const [processStatus, setProcessStatus] = useState<ExtendedProcessStatus>({});
+	const [processStatus, setProcessStatus] = useState<ExtendedProcessStatus>({
+		folderId: '',
+		status: 'completed',
+		progress: 0,
+	});
 	const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
 	const [globalReindexStatus, setGlobalReindexStatus] = useState(initialGlobalReindexStatus);
-	const [showReindexDialog, setShowReindexDialog] = useState(false);
-	const [reindexAllDialogOpen, setReindexAllDialogOpen] = useState(false);
+	// Estados de diálogos eliminados - reindexado directo sin confirmación
 
 	// Estado básico
 	const {
@@ -57,7 +60,7 @@ export function useFolders() {
 			setProcessStatus((prev: ExtendedProcessStatus) => ({
 				...prev,
 				phase: 'complete',
-				status: 'Proceso completado',
+				status: 'completed',
 				progress: 100,
 				folderId: folderId,
 			}));
@@ -76,7 +79,11 @@ export function useFolders() {
 					// Solo limpiar si el folderId aún coincide (evita limpiar un proceso diferente)
 					if (prev.folderId === folderId) {
 						folderLogger.info('🧹 Limpiando estado de proceso para carpeta:', folderId);
-						return {};
+						return {
+							folderId: '',
+							status: 'completed',
+							progress: 0,
+						};
 					}
 					return prev;
 				});
@@ -108,7 +115,11 @@ export function useFolders() {
 
 				// Si estamos procesando esa carpeta específicamente, limpiar su estado
 				if (processStatus.folderId === errorData.folderId) {
-					setProcessStatus({});
+					setProcessStatus({
+						folderId: '',
+						status: 'completed',
+						progress: 0,
+					});
 					setProcessProgress(0);
 				}
 			}
@@ -188,7 +199,7 @@ export function useFolders() {
 		setIsProcessing(true);
 		setProcessStatus({
 			folderId,
-			status: 'Iniciando proceso...',
+			status: 'processing',
 			progress: 0,
 			phase: 'starting',
 			startTime: Date.now(),
@@ -215,7 +226,13 @@ export function useFolders() {
 		onStartProcessing: startProcessing,
 		onLoadData: loadFolders,
 		onError: (error) => setError(error.toString()),
-		onReindexAllStart: () => setShowReindexDialog(true),
+		onReindexAllStart: () => {
+			folderLogger.info('🔄 Ejecutando reindexación global directa');
+			// Ejecutar la función de reindexado directamente
+			void (async () => {
+				await reindexAll();
+			})();
+		},
 	});
 
 	const foldersPolling = useFoldersPolling({
@@ -237,12 +254,17 @@ export function useFolders() {
 				startTime: Date.now(),
 			}));
 
-			// TODO: Implementar reindexAllFolders cuando esté disponible
-			// Por ahora solo simulamos
-			await new Promise((resolve) => setTimeout(resolve, 2000));
+			// Usar la nueva función de reindexado
+			const { reindexAllFolders } = await import('@/app/actions/folders/crud.actions');
+			const result = await reindexAllFolders();
 
-			folderLogger.info('✅ Reindexación global completada');
-			toastService.success('Reindexación completada correctamente');
+			folderLogger.info('✅ Reindexación global completada:', result);
+
+			if (result.errors.length > 0) {
+				toastService.error(`Reindexación completada con ${result.errors.length} errores`);
+			} else {
+				toastService.success(`Reindexación completada correctamente. ${result.processed} carpetas procesadas`);
+			}
 
 			// Recargar datos
 			await Promise.all([loadFolders(), loadStats()]);
@@ -330,9 +352,7 @@ export function useFolders() {
 		processStatus,
 		globalReindexStatus,
 
-		// Estados de UI
-		showReindexDialog,
-		reindexAllDialogOpen,
+		// Estados de UI eliminados - no más diálogos de confirmación
 
 		// Acciones principales
 		reindexFolder,
@@ -340,14 +360,21 @@ export function useFolders() {
 		toggleAutoReindex,
 		selectFolder,
 
-		// Funciones de UI
-		setShowReindexDialog,
-		setReindexAllDialogOpen,
+		// Operaciones desde foldersOperations
+		handleAddFolder: foldersOperations.handleAddFolder,
+		handleReindexFolder: foldersOperations.handleReindexFolder,
+		handleReindexAll: foldersOperations.handleReindexAll,
+		handleAutoReindexToggle: foldersOperations.handleAutoReindexToggle,
+		handleClearCache: foldersOperations.handleClearCache,
+		handleFolderClick: selectFolder,
+
+		// Funciones de UI eliminadas - no más diálogos de confirmación
 
 		// Funciones de datos
 		loadFolders,
 		loadStats,
 		updateFolder: updateSpecificFolder,
+		setError: setError, // desde useFoldersState
 
 		// Funciones de utilidad
 		startProcessing,

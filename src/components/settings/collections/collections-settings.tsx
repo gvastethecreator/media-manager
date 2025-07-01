@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import {
@@ -20,8 +21,14 @@ import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-
 import { useCallback, useEffect, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
 
-// Definir tipo para el event handler
-type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
+// Tipos seguros para preview data
+interface PreviewData {
+	name?: string;
+	description?: string;
+	category?: CollectionCategory;
+	color?: string;
+	isFavorite?: boolean;
+}
 
 export function CollectionsSettings() {
 	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
@@ -29,7 +36,7 @@ export function CollectionsSettings() {
 	const [error, setError] = useState<string | null>(null);
 	const [selectedCollection, setSelectedCollection] = useState<CollectionWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
-	const [previewData, setPreviewData] = useState<any>(null);
+	const [previewData, setPreviewData] = useState<PreviewData | null>(null);
 
 	// Filtros
 	const [searchQuery, setSearchQuery] = useState('');
@@ -60,8 +67,8 @@ export function CollectionsSettings() {
 	// Calcular estadísticas generales
 	const stats = {
 		totalCollections: collections.length,
-		totalImages: collections.reduce((acc, collection) => acc + (collection._count?.images || 0), 0),
-		emptyCollections: collections.filter((collection) => (collection._count?.images || 0) === 0).length,
+		totalImages: collections.reduce((acc, collection) => acc + (collection.stats?.imageCount || 0), 0),
+		emptyCollections: collections.filter((collection) => (collection.stats?.imageCount || 0) === 0).length,
 		favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
 	};
 
@@ -76,7 +83,7 @@ export function CollectionsSettings() {
 				matches &&
 				Boolean(
 					collection.name.toLowerCase().includes(normalizedQuery) ||
-						collection.description?.toLowerCase().includes(normalizedQuery)
+					collection.description?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -140,7 +147,7 @@ export function CollectionsSettings() {
 	}, []);
 
 	// Manejar la previsualización en tiempo real
-	const handlePreview = useCallback((data: any) => {
+	const handlePreview = useCallback((data: PreviewData) => {
 		setPreviewData(data);
 	}, []);
 
@@ -157,13 +164,9 @@ export function CollectionsSettings() {
 	) as string[];
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const _handleDeleteButtonClick = useCallback<ButtonClickHandler>(
-		(e) => {
-			const id = (e.currentTarget as HTMLButtonElement).dataset.id;
-			if (id) {
-				e.stopPropagation();
-				handleDeleteCollection(id);
-			}
+	const handleDeleteButtonClick = useCallback(
+		(collectionId: string) => {
+			handleDeleteCollection(collectionId);
 		},
 		[handleDeleteCollection]
 	);
@@ -190,7 +193,7 @@ export function CollectionsSettings() {
 						icon={Info}
 						title="Error al cargar colecciones"
 						description={error}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
+						actions={<Button onClick={() => globalThis.location?.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -306,7 +309,7 @@ export function CollectionsSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">
-						<div className="h-full px-3 pb-3 overflow-auto">
+						<ScrollArea className="h-full px-3 pb-3">
 							{filteredCollections.length === 0 ? (
 								<EmptyState
 									icon={Library}
@@ -349,10 +352,10 @@ export function CollectionsSettings() {
 												<h4 className="text-xs font-medium truncate">{collection.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
 													{collection.category && <span>{collection.category}</span>}
-													{(collection._count?.images || 0) > 0 && (
+													{(collection.stats?.imageCount || 0) > 0 && (
 														<>
 															<span>•</span>
-															<span>{collection._count?.images || 0} imágenes</span>
+															<span>{collection.stats?.imageCount || 0} imágenes</span>
 														</>
 													)}
 													{collection.isFavorite && (
@@ -368,11 +371,9 @@ export function CollectionsSettings() {
 												size="icon"
 												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={() => {
-													// Capturar el evento de clic en línea
-													const e = window.event as MouseEvent;
-													if (e) e.stopPropagation();
-													handleDeleteCollection(collection.id);
+												onClick={(e) => {
+													e.stopPropagation();
+													handleDeleteButtonClick(collection.id);
 												}}
 											>
 												<Trash className="h-3 w-3" />
@@ -381,7 +382,7 @@ export function CollectionsSettings() {
 									))}
 								</div>
 							)}
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>
@@ -424,7 +425,7 @@ export function CollectionsSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="p-3 flex-1 overflow-hidden">
-						<div className="h-full pr-3 overflow-auto">
+						<ScrollArea className="h-full pr-3">
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
 								<div className="space-y-3">
 									<CreateCollectionForm
@@ -447,7 +448,7 @@ export function CollectionsSettings() {
 													style={{
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
-																(previewData?.category || selectedCollection?.category) as CollectionCategory
+															(previewData?.category || selectedCollection?.category) as CollectionCategory
 															] || '#3b82f6',
 													}}
 												>
@@ -477,9 +478,9 @@ export function CollectionsSettings() {
 													)}
 												</div>
 
-												{selectedCollection?._count?.images ? (
+												{selectedCollection?.stats?.imageCount ? (
 													<p className="mt-4 text-xs text-muted-foreground">
-														{selectedCollection._count.images} imágenes asociadas
+														{selectedCollection.stats.imageCount} imágenes asociadas
 													</p>
 												) : null}
 											</div>
@@ -492,7 +493,7 @@ export function CollectionsSettings() {
 									</div>
 								</div>
 							</div>
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>

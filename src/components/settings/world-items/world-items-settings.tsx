@@ -9,10 +9,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast';
-import type { WorldItem } from '@/types/entities/world-item';
-import { formatBytes } from '@/lib/utils/file/helpers';
+import type { WorldItemComplete } from '@/types/entities/world-item';
+import { formatBytes } from '@/lib/utils/format.utils';
 import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { CreateWorldItemForm } from './create-world-item-form';
@@ -21,15 +22,18 @@ export function WorldItemsSettings() {
 	const [worldItems, setWorldItems] = useState<WorldItemWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedItem, setSelectedItem] = useState<WorldItem | null>(null);
+	const [selectedItem, setSelectedItem] = useState<WorldItemComplete | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
-	const [previewData, setPreviewData] = useState<WorldItem | null>(null);
+	const [previewData, setPreviewData] = useState<WorldItemComplete | null>(null);
 
 	// Filtros
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filterTypes, setFilterTypes] = useState<string[]>([]);
 	const [filterRarities, setFilterRarities] = useState<string[]>([]);
 	const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+	
+	// Hook useId debe estar fuera de condiciones
+	const idShowFavorites = useId();
 
 	// Cargar objetos al montar el componente
 	useEffect(() => {
@@ -140,21 +144,21 @@ export function WorldItemsSettings() {
 	);
 
 	// Manejar edición de objeto
-	const handleEditItem = useCallback((item: WorldItem) => {
+	const handleEditItem = useCallback((item: WorldItemComplete) => {
 		setSelectedItem(item);
 		setIsEditing(true);
 		setPreviewData(item);
 	}, []);
 
 	// Manejar creación exitosa
-	const handleItemCreated = useCallback((newItem: WorldItem) => {
+	const handleItemCreated = useCallback((newItem: WorldItemComplete) => {
 		setWorldItems((prev) => [...prev, newItem as unknown as WorldItemWithStats]);
 		toastService.worldItem.created();
 		setPreviewData(null);
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleItemUpdated = useCallback((updatedItem: WorldItem) => {
+	const handleItemUpdated = useCallback((updatedItem: WorldItemComplete) => {
 		setWorldItems((prev) =>
 			prev.map((item) => (item.id === updatedItem.id ? ({ ...item, ...updatedItem } as WorldItemWithStats) : item))
 		);
@@ -172,7 +176,7 @@ export function WorldItemsSettings() {
 	}, []);
 
 	// Manejar vista previa
-	const handlePreview = useCallback((data: WorldItem) => {
+	const handlePreview = useCallback((data: WorldItemComplete) => {
 		setPreviewData(data);
 	}, []);
 
@@ -260,14 +264,12 @@ export function WorldItemsSettings() {
 						icon={Info}
 						title="Error al cargar objetos"
 						description={error}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
+						actions={<Button onClick={() => globalThis?.location?.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
 		);
 	}
-
-	const idShowFavorites = useId();
 
 	return (
 		<div className="grid grid-cols-12 gap-4">
@@ -423,7 +425,7 @@ export function WorldItemsSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">
-						<div className="h-full px-4 pb-4 overflow-auto">
+						<ScrollArea className="h-full px-4 pb-4">
 							{filteredItemsList.length === 0 ? (
 								<EmptyState
 									icon={Package}
@@ -444,7 +446,7 @@ export function WorldItemsSettings() {
 												'group flex items-center gap-2 p-2 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left',
 												selectedItem?.id === item.id ? 'bg-muted' : ''
 											)}
-											onClick={() => handleEditItem(item as unknown as WorldItem)}
+											onClick={() => handleEditItem(item as unknown as WorldItemComplete)}
 											type="button"
 											aria-pressed={selectedItem?.id === item.id}
 										>
@@ -491,7 +493,7 @@ export function WorldItemsSettings() {
 									))}
 								</div>
 							)}
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>
@@ -509,17 +511,19 @@ export function WorldItemsSettings() {
 					</CardHeader>
 					<CardContent className="flex-1 p-4 overflow-hidden">
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
-							<div className="space-y-4 overflow-auto pr-2">
-								<CreateWorldItemForm
-									key={selectedItem?.id || 'new-item'}
-									worldItem={selectedItem}
-									isEditing={isEditing}
-									onCreated={handleItemCreated}
-									onUpdated={handleItemUpdated}
-									onCancel={handleReset}
-									onPreview={handlePreview}
-								/>
-							</div>
+							<ScrollArea className="space-y-4 pr-2">
+								<div className="space-y-4">
+									<CreateWorldItemForm
+										key={selectedItem?.id || 'new-item'}
+										worldItem={selectedItem}
+										isEditing={isEditing}
+										onCreated={handleItemCreated}
+										onUpdated={handleItemUpdated}
+										onCancel={handleReset}
+										onPreview={handlePreview}
+									/>
+								</div>
+							</ScrollArea>
 							<div className="hidden lg:flex flex-col items-center justify-start pt-4">
 								<h3 className="text-sm font-medium mb-2">Vista Previa</h3>
 								<div className="transition-all duration-300">

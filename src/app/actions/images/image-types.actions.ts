@@ -3,13 +3,17 @@
  * @module app/actions/images/image-types
  */
 
-import type { ImageResult } from '@/transformers/image';
-import type { CreateImageData, ImageBase, ImageExtended } from '@/types/entities/image';
+import type { ImageBase, ImageCreateInput, ImageWithStats } from '@/types/entities/image';
 
 /**
  * Re-exportamos los tipos principales desde el módulo de tipos
  */
-export type { CreateImageData, ImageBase, ImageExtended, ImageResult };
+export type { ImageBase, ImageCreateInput, ImageWithStats };
+
+/**
+ * Resultado de una operación con imágenes
+ */
+export type ImageResult = ImageWithStats;
 
 /**
  * Datos de entrada para crear una imagen
@@ -57,7 +61,7 @@ export type GetImagesOptions = {
  * Resultado de la operación de obtener imágenes
  */
 export type GetImagesResult = {
-	images: ImageResult[];
+	images: ImageWithStats[];
 	total: number;
 	page: number;
 	pageSize: number;

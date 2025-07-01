@@ -1,18 +1,18 @@
 import type { CategoryItem } from '@/components/navigation/types';
 import {
-	BookImage,
-	Box,
-	Camera,
-	Database,
-	FolderIcon,
-	FolderKanban,
-	Lightbulb,
-	MapPin,
-	StickyNote,
-	TagIcon,
-	Terminal,
-	User2,
-	WandSparkles,
+    BookImage,
+    Box,
+    Camera,
+    Database,
+    FolderIcon,
+    FolderKanban,
+    Lightbulb,
+    MapPin,
+    StickyNote,
+    TagIcon,
+    Terminal,
+    User2,
+    WandSparkles,
 } from 'lucide-react';
 
 /**
@@ -123,7 +123,7 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		color: '#a3e635',
 	},
 	{
-		id: 'file-3d',
+		id: 'file-3ds',
 		icon: Box,
 		label: '3D',
 		color: '#818cf8',

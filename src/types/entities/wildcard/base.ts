@@ -1,7 +1,5 @@
 import type { Prisma } from '@prisma/client';
 
-import type { EntityWithStats } from '@/types/entities/entity.types';
-import type { WithCounts } from '@/types/prisma.types';
 
 // ----------------------------------------------------------------
 
@@ -40,7 +38,15 @@ export interface WildcardStatistics {
  *
  * Extiende el tipo de Prisma para incluir los conteos de relaciones de forma eficiente.
  */
-export type PrismaWildcardWithCounts = WithCounts<WildcardBase, 'tags' | 'images' | 'characters' | 'places' | 'notes'>;
+export interface PrismaWildcardWithCounts extends WildcardBase {
+	_count: {
+		tags: number;
+		images: number;
+		characters: number;
+		places: number;
+		notes: number;
+	};
+}
 
 /**
  * 🃏 WILDCARD WITH STATS
@@ -49,7 +55,16 @@ export type PrismaWildcardWithCounts = WithCounts<WildcardBase, 'tags' | 'images
  * Combina el tipo base con las estadísticas calculadas. Este es el tipo que se
  * debe usar en toda la UI y la lógica de negocio.
  */
-export type WildcardWithStats = EntityWithStats<WildcardBase, WildcardStatistics>;
+export interface WildcardWithStats extends WildcardBase {
+	statistics: WildcardStatistics;
+	_count: {
+		tags: number;
+		images: number;
+		characters: number;
+		places: number;
+		notes: number;
+	};
+}
 
 /**
  * 🃏 WILDCARD CREATE INPUT
@@ -70,6 +85,6 @@ export type WildcardUpdateInput = Prisma.WildcardUncheckedUpdateInput;
  *
  * Tipo para previsualizaciones de wildcards, con un subconjunto de campos.
  */
-export type WildcardPreview = Pick<WildcardBase, 'id' | 'name' | 'description' | 'createdAt' | 'updatedAt' | 'type'> & {
+export type WildcardPreview = Pick<WildcardBase, 'id' | 'name' | 'description' | 'createdAt' | 'updatedAt'> & {
 	imageUrl?: string;
 };

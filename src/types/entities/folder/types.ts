@@ -102,8 +102,9 @@ export interface FolderWithStats extends FolderBase {
 		children: number;
 		images: number;
 		videos: number;
-		notes: number;
-		documents: number;
+		// ⚠️ CORREGIDO: Removidas notes y documents que no existen en el modelo
+		// notes: number;
+		// documents: number;
 	};
 }
 

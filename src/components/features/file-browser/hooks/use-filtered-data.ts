@@ -19,14 +19,6 @@ export function useFilteredData<T extends FileItem[]>(
 	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
 
 	return useMemo(() => {
-		// Agregar un console.log para depuración
-		console.log('[useFilteredData]', {
-			dataLength: data?.length || 0,
-			filterOptions,
-			sortOptions,
-			searchQuery,
-		});
-
 		if (!data || data.length === 0) {
 			return [] as unknown as T;
 		}
@@ -58,9 +50,9 @@ export function useFilteredData<T extends FileItem[]>(
 						case 'neq':
 							return value !== filter.value;
 						case 'gt':
-							return value > filter.value!;
+							return filter.value !== null && filter.value !== undefined && value > filter.value;
 						case 'lt':
-							return value < filter.value!;
+							return filter.value !== null && filter.value !== undefined && value < filter.value;
 						case 'contains':
 							return typeof value === 'string' && value.toLowerCase().includes(String(filter.value).toLowerCase());
 						case 'startsWith':
@@ -112,7 +104,6 @@ export function useFilteredData<T extends FileItem[]>(
 			});
 		}
 
-		console.log('[useFilteredData] Resultado:', filteredData.length);
 		return filteredData as T;
 	}, [data, filterOptions, sortOptions, searchQuery, searchFields]);
 }

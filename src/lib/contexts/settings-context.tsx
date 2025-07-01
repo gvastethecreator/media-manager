@@ -1,10 +1,10 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { profileClient } from '@/services/profile/client';
 import { type ProfileCreate, type ProfileUpdate, type ProfileWithStats } from '@/services/profile-service-export';
-import { toastService } from '@/services/toast-service-export';
+import { profileClient } from '@/services/profile/client';
+import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 export interface Settings {
 	// Configuraciones básicas

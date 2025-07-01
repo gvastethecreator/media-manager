@@ -7,7 +7,10 @@
  * Última actualización: 2025-01-27
  */
 
-import { logger } from '@/lib/logger';
+import { clientLogger } from '@/lib/logger/client-logger';
+
+const logger = clientLogger.withContext('ImageTransformer');
+
 import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
 	ImageCreateInput,
@@ -62,19 +65,45 @@ export function fromPrismaImageWithCounts(prismaImage: PrismaImageWithCounts): I
  * 📊 Calcula estadísticas de la imagen
  */
 function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStatistics {
+	// Verificar que _count existe y tiene la estructura esperada
+	if (!prismaImage._count || typeof prismaImage._count !== 'object') {
+		logger.warn('⚠️ Image sin _count válido, usando valores por defecto', {
+			imageId: prismaImage.id,
+			countValue: prismaImage._count,
+		});
+
+		// Valores por defecto si _count no existe
+		const defaultCount = {
+			albums: 0,
+			collections: 0,
+			tags: 0,
+			characters: 0,
+			places: 0,
+			worldItems: 0,
+			concepts: 0,
+			prompts: 0,
+			notes: 0,
+			wildcards: 0,
+			properties: 0,
+			groups: 0,
+		};
+
+		prismaImage._count = defaultCount;
+	}
+
 	const {
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
+		albums = 0,
+		collections = 0,
+		tags = 0,
+		characters = 0,
+		places = 0,
+		worldItems = 0,
+		concepts = 0,
+		prompts = 0,
+		notes = 0,
+		wildcards = 0,
+		properties = 0,
+		groups = 0,
 	} = prismaImage._count;
 
 	// Conteos base
@@ -92,10 +121,14 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 		properties +
 		groups;
 
-	// Métricas técnicas
-	const megapixels = Number(((prismaImage.width * prismaImage.height) / 1_000_000).toFixed(2));
-	const aspectRatio = Number((prismaImage.width / prismaImage.height).toFixed(2));
-	const fileSize = Number((prismaImage.size / (1024 * 1024)).toFixed(2)); // MB
+	// Métricas técnicas con protección para valores nulos
+	const width = prismaImage.width || 0;
+	const height = prismaImage.height || 0;
+	const size = prismaImage.size || 0;
+
+	const megapixels = Number(((width * height) / 1_000_000).toFixed(2));
+	const aspectRatio = height > 0 ? Number((width / height).toFixed(2)) : 0;
+	const fileSize = Number((size / (1024 * 1024)).toFixed(2)); // MB
 
 	// Análisis de calidad
 	const qualityScore = calculateQualityScore(prismaImage, totalAssociations);
@@ -404,4 +437,20 @@ export function getImageById(images: Record<string, ImageWithStats>, id: string)
  */
 export function getAllImages(images: Record<string, ImageWithStats>): ImageWithStats[] {
 	return Object.values(images);
+}
+
+/**
+ * 🎨 Transforma imágenes para mostrar en tarjetas - función básica de compatibilidad
+ */
+export function transformImagesForCard(images: any[]): any[] {
+	if (!images || !Array.isArray(images)) {
+		return [];
+	}
+	return images.map((img) => ({
+		id: img.id,
+		name: img.name,
+		path: img.path,
+		thumbnailPath: img.thumbnailPath,
+		...img,
+	}));
 }

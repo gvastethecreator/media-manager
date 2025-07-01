@@ -73,3 +73,31 @@ export interface TagStatistics {
 export interface TagWithStats extends TagBase {
 	stats: TagStatistics;
 }
+
+/**
+ * 📝 Datos para crear un Tag
+ */
+export interface TagCreateInput {
+	name: string;
+	description?: string | null;
+	emoji?: string;
+	color?: string;
+	category?: string | null;
+	shortcut?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+}
+
+/**
+ * 📝 Datos para actualizar un Tag
+ */
+export interface TagUpdateInput {
+	name?: string;
+	description?: string | null;
+	emoji?: string;
+	color?: string;
+	category?: string | null;
+	shortcut?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+}

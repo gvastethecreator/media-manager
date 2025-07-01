@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ViewProps } from '../types';
 import { FeatureCard, IssueCard, MetricCard, ProcessingMetricCard, ServiceCard } from './cards';
+import { FoldersSettings } from '@/components/settings/folders/folders-settings';
 import {
 	FileDistributionChart,
 	IndexingActivityChart,
@@ -181,14 +182,7 @@ export function DevelopmentView(_props: ViewProps) {
 					</TabsContent>
 
 					<TabsContent value="folders" className="mt-4">
-						<Card className="border-2 border-primary/10">
-							<CardContent className="p-4">
-								<div className="p-4">
-									<h3 className="text-lg font-medium">Carpetas</h3>
-									<p className="text-muted-foreground">Gestión de carpetas en desarrollo</p>
-								</div>
-							</CardContent>
-						</Card>
+						<FoldersSettings />
 					</TabsContent>
 
 					<TabsContent value="tags" className="mt-4">

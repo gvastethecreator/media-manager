@@ -4,4 +4,4 @@
  * @description Exporta todas las funcionalidades del servicio de imágenes subidas
  */
 
-export * from '../uploaded-images.service';
+export * from './uploaded-images.service';

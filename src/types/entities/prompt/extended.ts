@@ -3,7 +3,7 @@
  * @module types/entities/prompt/extended
  */
 
-import type { PromptBase } from './types';
+import type { PromptBase } from './base';
 
 /**
  * Interfaz extendida para prompt con propiedades adicionales para UI

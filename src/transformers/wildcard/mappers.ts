@@ -8,15 +8,15 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { safeJsonParse } from '@/lib/utils/json';
-import {
-	PrismaWildcardWithCounts,
-	WildcardCreateInput,
-	WildcardSearchOptions,
-	WildcardUpdateInput,
-	WildcardWithStats,
-} from '@/types/entities/wildcard';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import {
+    PrismaWildcardWithCounts,
+    WildcardCreateInput,
+    WildcardSearchOptions,
+    WildcardUpdateInput,
+    WildcardWithStats,
+} from '@/types/entities/wildcard';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('WildcardMappers');
@@ -131,8 +131,8 @@ function mapWildcardFiltersToPrisma(filters: NonNullable<WildcardSearchOptions['
 
 	if (filters.searchQuery) {
 		where.OR = [
-			{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
-			{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+			{ name: { contains: filters.searchQuery } },
+			{ description: { contains: filters.searchQuery } },
 		];
 	}
 

@@ -1,8 +1,8 @@
 /**
- * @file FileBrowser V2 - Usando tipos optimizados WithStats
+ * @file FileBrowser V2 - Usando tipos optimizados WithStats y virtualización
  * @module components/features/file-browser/file-browser-v2
- * @description Nueva versión del FileBrowser que usa stores específicos por entidad
- * y tipos optimizados WithStats en lugar de FileItem legacy.
+ * @description Nueva versión del FileBrowser que usa stores específicos por entidad,
+ * tipos optimizados WithStats, virtualización con TanStack Virtual y mantiene el panel derecho visible.
  *
  * MIGRACIÓN: Este componente reemplazará a file-browser.tsx
  */
@@ -19,12 +19,12 @@ import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { EntityStatsType, EntityWithStats } from '@/types/migration';
 import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { StatusBar } from './toolbar/status-bar';
-import { CardsView } from './views/cards-view';
-import { ListView } from './views/list-view';
-import { MasonryView } from './views/masonry-view';
-import { SimpleGridView } from './views/simple-grid-view';
+import { VirtualizedCardsView } from './views/virtualized-cards-view';
+import { VirtualizedListView } from './views/virtualized-list-view';
+import { VirtualizedMasonryView } from './views/virtualized-masonry-view';
+import { VirtualizedSimpleGridView } from './views/virtualized-simple-grid-view';
 
 const logger = clientLogger.withContext('FileBrowser');
 
@@ -54,8 +54,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	filterType,
 }) {
 	const [containerWidth, setContainerWidth] = useState<number>(0);
-	const containerRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<any>(null);
 	const measurementAttemptsRef = useRef(0);
+	const lastMeasuredElementRef = useRef<unknown>(null);
 
 	// Estados globales
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
@@ -64,20 +65,69 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 
 	// Por ahora solo soportamos imágenes, expandir según necesidad
-	const { images: imagesRecord, isLoading, error, loadImages, getSortedImages } = useImageStore();
+	const { images: imagesRecord, isLoading, error, loadImages, getSortedImages, getImagesByFolder } = useImageStore();
 
-	// Cargar datos al montar o cuando cambian los filtros
+	// Cargar datos al montar o cuando cambian los filtros (con optimizaciones)
+	const lastLoadParamsRef = useRef<string>('');
+	const isLoadingRef = useRef<boolean>(false);
+
 	useEffect(() => {
 		if (entityType === 'image') {
-			loadImages();
+			const { loadImages: storeLoadImages, isLoading: currentlyLoading, getImagesByFolder } = useImageStore.getState();
+
+			const loadParams: Parameters<typeof storeLoadImages>[0] = {};
+
+			// Si hay filtro de carpeta, incluirlo en los parámetros
+			if (filterId && filterType === 'folder') {
+				loadParams.folderId = filterId;
+			}
+
+			// Crear una clave única para estos parámetros
+			const paramsKey = JSON.stringify({ entityType, filterId, filterType });
+
+			// Si los parámetros no han cambiado, no hacer nada
+			if (lastLoadParamsRef.current === paramsKey) {
+				return;
+			}
+
+			// Evitar múltiples cargas simultáneas usando ref
+			if (isLoadingRef.current || currentlyLoading) {
+				logger.debug('⚠️ Carga ya en progreso, saltando llamada del FileBrowser');
+				return;
+			}
+
+			// Si hay filtro de carpeta, verificar si ya tenemos datos
+			if (filterId && filterType === 'folder') {
+				const existingImages = getImagesByFolder(filterId);
+				if (existingImages.length > 0) {
+					logger.debug('📋 Ya hay imágenes cargadas para esta carpeta, saltando carga');
+					lastLoadParamsRef.current = paramsKey;
+					return;
+				}
+			}
+
+			// Actualizar la referencia de los últimos parámetros
+			lastLoadParamsRef.current = paramsKey;
+			isLoadingRef.current = true;
+
+			logger.debug('🔄 FileBrowser iniciando carga de imágenes', loadParams);
+
+			// Llamar a la función del store directamente
+			storeLoadImages(loadParams).finally(() => {
+				isLoadingRef.current = false;
+			});
 		}
 		// TODO: Añadir otros tipos cuando se implementen sus stores
-	}, [entityType, filterId, filterType, loadImages]);
+	}, [entityType, filterId, filterType]); // Mantener estas dependencias pero con la optimización del ref
 
 	// Obtener items según el tipo de entidad
 	const items = (() => {
 		switch (entityType) {
 			case 'image':
+				// Si hay filtro por carpeta, usar getImagesByFolder
+				if (filterId && filterType === 'folder') {
+					return getImagesByFolder(filterId);
+				}
 				return getSortedImages();
 			// TODO: Añadir otros casos según se implementen
 			default:
@@ -85,16 +135,22 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 	})();
 
-	// Medir contenedor
-	const measureContainer = useCallback((element: HTMLDivElement) => {
+	// Medir contenedor con optimización para evitar re-mediciones
+	const measureContainer = useCallback((element: any) => {
+		// Evitar múltiples mediciones del mismo elemento
+		if (lastMeasuredElementRef.current === element) {
+			return;
+		}
+
 		const attempt = ++measurementAttemptsRef.current;
 		logger.debug(`[FileBrowserV2] Intento medición ${attempt}`);
 
 		const measure = () => {
-			const width = element.offsetWidth;
+			const width = element?.offsetWidth;
 			if (width > 0) {
 				logger.info(`[FileBrowserV2] ✅ Medición exitosa: ${width}px`);
 				setContainerWidth(width);
+				lastMeasuredElementRef.current = element;
 				return true;
 			}
 			return false;
@@ -102,18 +158,19 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		if (measure()) return;
 
-		requestAnimationFrame(() => {
+		(globalThis as any).requestAnimationFrame(() => {
 			if (measure()) return;
-			setTimeout(() => {
+			(globalThis as any).setTimeout(() => {
 				if (measure()) return;
 				logger.warn(`[FileBrowserV2] ⚠️ Falló medición, usando fallback: ${FALLBACK_WIDTH}px`);
 				setContainerWidth(FALLBACK_WIDTH);
+				lastMeasuredElementRef.current = element;
 			}, 100);
 		});
 	}, []);
 
 	const containerCallbackRef = useCallback(
-		(element: HTMLDivElement | null) => {
+		(element: any) => {
 			if (element && containerRef.current !== element) {
 				containerRef.current = element;
 				measureContainer(element);
@@ -159,7 +216,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Actualizar panel de detalles cuando cambia la selección
 	useEffect(() => {
 		if (selectedIds.length > 0) {
-			const selectedItems = items.filter((item) => selectedIds.includes(item.id));
+			const selectedItems = items.filter((item: EntityWithStats) => selectedIds.includes(item.id));
 			setDetailsPanelItems(selectedItems);
 			setDetailsPanelVisible(true);
 		} else {
@@ -169,14 +226,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Añadir efecto para escuchar Escape globalmente
 	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
+		const handleKeyDown = (e: any) => {
+			if (e?.key === 'Escape') {
 				clearSelection();
 			}
 		};
 
-		window.addEventListener('keydown', handleKeyDown);
-		return () => window.removeEventListener('keydown', handleKeyDown);
+		if (typeof window !== 'undefined') {
+			window.addEventListener('keydown', handleKeyDown);
+			return () => window.removeEventListener('keydown', handleKeyDown);
+		}
 	}, [clearSelection]);
 
 	// Renderizar contenido según el estado
@@ -198,7 +257,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		if (items.length === 0) {
-			return <EmptyState icon={<FileTextIcon />} title="Sin elementos" description="No hay elementos para mostrar." />;
+			return <EmptyState icon={FileTextIcon} title="Sin elementos" description="No hay elementos para mostrar." />;
 		}
 
 		const commonViewProps = {
@@ -212,16 +271,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		switch (viewMode) {
 			case 'list':
-				return <ListView {...commonViewProps} />;
+				return <VirtualizedListView {...commonViewProps} />;
 			case 'grid':
 			case 'cards':
-				return <CardsView {...commonViewProps} />;
+				return <VirtualizedCardsView {...commonViewProps} />;
 			case 'simple-grid':
-				return <SimpleGridView {...commonViewProps} />;
+				return <VirtualizedSimpleGridView {...commonViewProps} />;
 			case 'masonry':
-				return <MasonryView {...commonViewProps} />;
+				return <VirtualizedMasonryView {...commonViewProps} />;
 			default:
-				return <CardsView {...commonViewProps} />;
+				return <VirtualizedCardsView {...commonViewProps} />;
 		}
 	};
 
@@ -251,9 +310,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
  * 3. Props simplificadas - recibe entityType en lugar de items
  * 4. Gestión de datos interna usando stores Zustand
  * 5. Sin conversiones de tipos - usa tipos nativos WithStats
+ * 6. Integración completa con TanStack Virtual para rendimiento mejorado
+ * 7. Mantiene el panel derecho siempre visible en lugar de ocultarlo
  *
  * Para migrar:
  * 1. Cambiar import de FileBrowser a FileBrowserV2
  * 2. Pasar entityType en lugar de items
  * 3. Los datos se cargan automáticamente desde los stores
+ * 4. El panel derecho se mantiene siempre visible para consistencia
  */

@@ -30,14 +30,14 @@
 9. **Archive completed tasks** - Move finished tasks to an archive folder with clear naming: [ID]-descriptive-name.md
 10. **Mandatory diagrams by context** - Include Mermaid diagrams for code/technical flows, or mind maps for knowledge management
 
-### Priority System:
+### Priority System
 
 - `[LOW]` - Can wait without consequences, doesn't block any other work
 - `[MEDIUM]` - Important for progress but not urgent in the short term
 - `[HIGH]` - Needs to be resolved soon because it may block other work
 - `[CRITICAL]` - Critical blocker that must be resolved immediately
 
-### Complexity Categories:
+### Complexity Categories
 
 - `[SMALL]` - Simple and localized change in few places
 - `[MEDIUM]` - Moderate complexity requiring careful analysis
@@ -71,13 +71,13 @@
 
 ## 📚 Documentation
 
-### For code projects:
+### For code projects
 
 27. **Contextual and useful README** - Create or update READMEs that actually help understand and use the code
 28. **Document tech stack** - List all main dependencies with their versions and purpose
 29. **Clear and complete configuration** - Document all available scripts, necessary environment variables, and setup steps
 
-### For knowledge bases:
+### For knowledge bases
 
 - **Abundant bidirectional links** - Connect related concepts using [[]] to create a knowledge network
 - **Descriptive semantic tags** - Use #tags that facilitate future search and categorization
@@ -85,7 +85,7 @@
 - **Atomic and focused notes** - One main idea per note for easy reuse and linking
 - **Maps of Content (MOCs)** - Create thematic indices that organize and connect related notes
 
-### Emoji usage:
+### Emoji usage
 
 - Use moderately in code projects to not distract
 - Use creatively in knowledge documentation to improve readability
@@ -101,7 +101,7 @@
 
 ## 📝 Adaptable Templates
 
-### For development:
+### For development
 
 ````markdown
 [001] Implement authentication system
@@ -139,7 +139,7 @@ F --> G[Authenticated requests]
 \```
 ````
 
-### For knowledge:
+### For knowledge
 
 ```markdown
 # Microservices Architecture
@@ -189,7 +189,7 @@ approach contrasts with traditional monolithic architectures...
 
 ## 🎨 Contextual Quality
 
-### In code:
+### In code
 
 40. **Complete and robust error handling** - Appropriate try/catch, useful error messages, and graceful fallbacks
 41. **Strategic and useful logs** - Only information that helps debug, don't pollute with unnecessary logs
@@ -197,7 +197,7 @@ approach contrasts with traditional monolithic architectures...
 43. **Accessibility from the start** - ARIA labels, keyboard navigation, and diverse user considerations
 44. **Native responsive design** - Mobile-first when appropriate, consistent experience on all devices
 
-### In knowledge:
+### In knowledge
 
 40. **Adaptive depth** - From executive summaries to deep academic analysis according to need
 41. **Multiple perspectives explored** - Consider different schools of thought and alternative approaches
@@ -219,7 +219,7 @@ approach contrasts with traditional monolithic architectures...
 51. **Simplified log structure** - Logs in `/logs` with `command_timestamp.log` format.
 52. **Integrated error analysis** - Scripts to analyze and filter logs by tool and date.
 
-### Logging Commands:
+### Logging Commands
 
 - `pnpm <script>`: Runs a task (e.g., `pnpm lint`) and saves its log.
 - `pnpm logs [action] [value]`: Manages logs. `list [num]` to view, `clean [days]` to clean.
@@ -320,7 +320,7 @@ approach contrasts with traditional monolithic architectures...
 pnpm dev                           # Server on 4444
 
 # 2. Continuous validation with MCP
-# browser_navigate → http://localhost:4444
+# browser_navigate → http://localhost:3000
 # browser_snapshot → Review structure
 # browser_console_messages → Detect errors
 # browser_take_screenshot → Document state

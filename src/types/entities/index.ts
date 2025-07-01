@@ -13,7 +13,7 @@ export * from './favorite';
 export * from './file';
 export * from './folder';
 // Nuevas entidades
-export * from './group/types';
+export * from './group';
 export * from './image';
 export * from './metadata';
 export * from './note';
@@ -28,3 +28,4 @@ export * from './uploaded-image';
 export * from './video';
 export * from './wildcard';
 export * from './world-item';
+

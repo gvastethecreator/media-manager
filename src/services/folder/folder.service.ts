@@ -6,15 +6,17 @@
  * @description Lógica de negocio y acceso a datos para las carpetas.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
+	folderWithCountsPayload,
 	fromPrismaFolder,
 	fromPrismaFolders,
+	fromPrismaFoldersWithCounts,
 	mapCreateFolderDataToPrisma,
 	mapUpdateFolderDataToPrisma,
 } from '@/transformers/folder';
-import type { FolderComplete, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
+import type { FolderComplete, FolderCreateInput, FolderUpdateInput, FolderWithStats } from '@/types/entities/folder';
 import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('FolderService');
@@ -153,6 +155,26 @@ export async function deleteFolder(id: string): Promise<void> {
 		logger.error(`❌ Error al eliminar la carpeta ${id}`, { error });
 		const errorMessage = error instanceof Error ? error.message : 'No se pudo eliminar la carpeta.';
 		throw new Error(errorMessage);
+	}
+}
+
+/**
+ * Obtiene todas las carpetas con estadísticas avanzadas, opcionalmente filtrando por un ID de padre.
+ * @param parentId - ID de la carpeta padre para obtener sus hijos.
+ * @returns Una promesa que se resuelve con un array de carpetas con estadísticas.
+ */
+export async function getFoldersWithStats(parentId?: string): Promise<FolderWithStats[]> {
+	logger.info('📂 Obteniendo carpetas con estadísticas', { parentId });
+	try {
+		const folders = await prisma.folder.findMany({
+			where: { parentId: parentId === undefined ? null : parentId },
+			orderBy: { name: 'asc' },
+			...folderWithCountsPayload,
+		});
+		return fromPrismaFoldersWithCounts(folders);
+	} catch (error) {
+		logger.error('❌ Error al obtener carpetas con estadísticas', { error });
+		throw new Error('No se pudieron obtener las carpetas con estadísticas.');
 	}
 }
 

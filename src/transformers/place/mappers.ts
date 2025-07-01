@@ -7,9 +7,9 @@
  */
 
 import { safeJsonParse } from '@/lib/utils/json';
+import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats, PrismaPlaceWithCounts } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
-import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -163,10 +163,10 @@ export function createFilter(filters: PlaceSearchOptions['filters'] = {}): Prism
 	if (filters?.search) {
 		const search = filters.search.trim();
 		where.OR = [
-			{ name: { contains: search, mode: 'insensitive' } },
-			{ description: { contains: search, mode: 'insensitive' } },
-			{ lore: { contains: search, mode: 'insensitive' } },
-			{ history: { contains: search, mode: 'insensitive' } },
+			{ name: { contains: search } },
+			{ description: { contains: search } },
+			{ lore: { contains: search } },
+			{ history: { contains: search } },
 		];
 	}
 

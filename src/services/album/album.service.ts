@@ -5,10 +5,10 @@
  * @updated 2025-01-27
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { toAlbumWithStats } from '@/transformers/album';
-import type { AlbumWithStats } from '@/types/entities/album';
+import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
@@ -36,21 +36,6 @@ const ALBUM_WITH_STATS_INCLUDE = {
 		},
 	},
 } as const;
-
-// Tipos de entrada
-export interface CreateAlbumInput {
-	name: string;
-	description?: string;
-	isPrivate?: boolean;
-	isArchived?: boolean;
-}
-
-export interface UpdateAlbumInput {
-	name?: string;
-	description?: string;
-	isPrivate?: boolean;
-	isArchived?: boolean;
-}
 
 export interface GetAlbumsOptions {
 	includeArchived?: boolean;
@@ -107,18 +92,10 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		// Construir filtros
 		const where: Prisma.AlbumWhereInput = {};
 
-		if (!includeArchived) {
-			where.isArchived = false;
-		}
-
-		if (!includePrivate) {
-			where.isPrivate = false;
-		}
-
 		if (search) {
 			where.OR = [
-				{ name: { contains: search, mode: 'insensitive' } },
-				{ description: { contains: search, mode: 'insensitive' } },
+				{ name: { contains: search } },
+				{ description: { contains: search } },
 			];
 		}
 
@@ -155,9 +132,15 @@ export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStat
 
 		const albumData: Prisma.AlbumCreateInput = {
 			name: data.name,
-			description: data.description,
-			isPrivate: data.isPrivate ?? false,
-			isArchived: data.isArchived ?? false,
+			emoji: data.emoji || '📸',
+			color: data.color || '#3b82f6',
+			description: data.description || null,
+			shortcut: data.shortcut || null,
+			category: data.category || 'general',
+			sortBy: data.sortBy || 'name',
+			filters: data.filters || '[]',
+			featuredImage: data.featuredImage || null,
+			isFavorite: data.isFavorite || false,
 		};
 
 		const newAlbum = await prisma.album.create({
@@ -190,9 +173,15 @@ export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<A
 		const albumData: Prisma.AlbumUpdateInput = {};
 
 		if (data.name !== undefined) albumData.name = data.name;
+		if (data.emoji !== undefined) albumData.emoji = data.emoji;
+		if (data.color !== undefined) albumData.color = data.color;
 		if (data.description !== undefined) albumData.description = data.description;
-		if (data.isPrivate !== undefined) albumData.isPrivate = data.isPrivate;
-		if (data.isArchived !== undefined) albumData.isArchived = data.isArchived;
+		if (data.shortcut !== undefined) albumData.shortcut = data.shortcut;
+		if (data.category !== undefined) albumData.category = data.category;
+		if (data.sortBy !== undefined) albumData.sortBy = data.sortBy;
+		if (data.filters !== undefined) albumData.filters = data.filters;
+		if (data.featuredImage !== undefined) albumData.featuredImage = data.featuredImage;
+		if (data.isFavorite !== undefined) albumData.isFavorite = data.isFavorite;
 
 		const updatedAlbum = await prisma.album.update({
 			where: { id },
@@ -332,84 +321,6 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 	}
 }
 
-/**
- * Cambia el estado de archivo de un álbum
- */
-export async function toggleAlbumArchive(id: string): Promise<AlbumWithStats> {
-	try {
-		logger.info(`📦 Cambiando estado de archivo del álbum: ${id}`);
-
-		// Obtener estado actual
-		const currentAlbum = await prisma.album.findUnique({
-			where: { id },
-			select: { isArchived: true },
-		});
-
-		if (!currentAlbum) {
-			throw new Error('Álbum no encontrado');
-		}
-
-		const updatedAlbum = await prisma.album.update({
-			where: { id },
-			data: { isArchived: !currentAlbum.isArchived },
-			include: ALBUM_WITH_STATS_INCLUDE,
-		});
-
-		// Revalidar rutas
-		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
-		revalidatePath(`/albums/${id}`);
-
-		const result = toAlbumWithStats(updatedAlbum, updatedAlbum._count);
-		logger.info(`✅ Estado de archivo cambiado: ${id} -> ${result.isArchived}`);
-
-		return result;
-	} catch (error) {
-		logger.error(`❌ Error al cambiar estado de archivo del álbum ${id}`, { error });
-		throw new Error(
-			`No se pudo cambiar el estado del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
-		);
-	}
-}
-
-/**
- * Cambia la visibilidad de un álbum
- */
-export async function toggleAlbumPrivacy(id: string): Promise<AlbumWithStats> {
-	try {
-		logger.info(`🔒 Cambiando visibilidad del álbum: ${id}`);
-
-		// Obtener estado actual
-		const currentAlbum = await prisma.album.findUnique({
-			where: { id },
-			select: { isPrivate: true },
-		});
-
-		if (!currentAlbum) {
-			throw new Error('Álbum no encontrado');
-		}
-
-		const updatedAlbum = await prisma.album.update({
-			where: { id },
-			data: { isPrivate: !currentAlbum.isPrivate },
-			include: ALBUM_WITH_STATS_INCLUDE,
-		});
-
-		// Revalidar rutas
-		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
-		revalidatePath(`/albums/${id}`);
-
-		const result = toAlbumWithStats(updatedAlbum, updatedAlbum._count);
-		logger.info(`✅ Visibilidad cambiada: ${id} -> ${result.isPrivate ? 'privado' : 'público'}`);
-
-		return result;
-	} catch (error) {
-		logger.error(`❌ Error al cambiar visibilidad del álbum ${id}`, { error });
-		throw new Error(
-			`No se pudo cambiar la visibilidad del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
-		);
-	}
-}
-
 // Servicio principal
 const albumService = {
 	getAlbum,
@@ -420,8 +331,6 @@ const albumService = {
 	getAlbumImages,
 	addImageToAlbum,
 	removeImageFromAlbum,
-	toggleAlbumArchive,
-	toggleAlbumPrivacy,
 };
 
 export default albumService;

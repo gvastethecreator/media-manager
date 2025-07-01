@@ -1,14 +1,16 @@
 'use client';
 
-import { type ViewType } from '@/types/files';
+import type { LucideIcon } from 'lucide-react';
+import type React from 'react';
 import { memo, useCallback } from 'react';
+import { ViewType } from '@/components/views/types';
 import type { CategoryChild } from '../types';
 import { NavCategoryChildren } from './nav-category-children';
 import { NavCategoryItem } from './nav-category-item';
 
 const MemoizedNavCategoryChildren = memo(NavCategoryChildren);
 
-export const CategoryWithChildren = memo(function CategoryWithChildren({
+export const NavCategoryWithChildren = memo(function NavCategoryWithChildren({
 	id,
 	label,
 	color,
@@ -30,7 +32,7 @@ export const CategoryWithChildren = memo(function CategoryWithChildren({
 	id: ViewType;
 	label: string;
 	color: string;
-	icon: React.ElementType;
+	icon: LucideIcon;
 	isCollapsed: boolean;
 	isCurrent: boolean;
 	itemCount: number;
@@ -38,19 +40,18 @@ export const CategoryWithChildren = memo(function CategoryWithChildren({
 	isNavCollapsed: boolean;
 	viewMode: 'list' | 'grid';
 	getCategoryItems: (id: ViewType) => CategoryChild[];
-	onToggleCollapse: (e: React.MouseEvent) => void;
+	onToggleCollapse: (e: React.MouseEvent | React.KeyboardEvent) => void;
 	onCategoryClick: () => void;
 	onToggleViewMode: (mode: 'list' | 'grid') => void;
 	getSelectedChildId: (id: ViewType) => string | null;
 	getItemClickHandler: (id: ViewType) => (childId: string) => void;
 	currentView: string;
 }) {
-	const handleViewModeToggle = useCallback(
-		(mode: 'list' | 'grid') => {
-			onToggleViewMode(mode);
-		},
-		[onToggleViewMode]
-	);
+	const handleViewModeToggle = useCallback(() => {
+		// Alternar entre grid y list
+		const newMode = viewMode === 'list' ? 'grid' : 'list';
+		onToggleViewMode(newMode);
+	}, [viewMode, onToggleViewMode]);
 
 	return (
 		<div key={id}>

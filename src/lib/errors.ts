@@ -1,5 +1,5 @@
+import { serverLogger } from '@/lib/logger/server-logger';
 import { Prisma } from '@prisma/client';
-import { serverLogger } from './logger/server-logger';
 
 // Re-exportar TransformerError y otras clases de error relacionadas desde utils/transformers/errors
 // para mantener compatibilidad con el código existente

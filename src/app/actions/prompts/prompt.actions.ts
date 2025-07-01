@@ -8,10 +8,10 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers actualizados
 import {
-	fromPrismaPrompt,
-	mapCreatePromptDataToPrisma,
-	mapUpdatePromptDataToPrisma,
-	toPromptWithStats,
+    fromPrismaPrompt,
+    mapCreatePromptDataToPrisma,
+    mapUpdatePromptDataToPrisma,
+    toPromptWithStats,
 } from '@/transformers/prompt';
 import { deserializeParameters } from '@/transformers/prompt/serializers';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
@@ -70,7 +70,11 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 			},
 		});
 
-		return prompts.map((p) => toPromptWithStats({ ...p, parameters: deserializeParameters(p.parameters) }));
+		return prompts.map((p) => toPromptWithStats({
+			...p,
+			parameters: deserializeParameters(p.parameters),
+			tags: JSON.parse(p.tags || '[]') // Deserializar tags de string a string[]
+		}));
 	} catch (error) {
 		promptLogger.error('Error al obtener prompts:', error);
 		throw createPromptError('Error al obtener prompts', EntityErrorCode.OPERATION_FAILED, error);
@@ -80,7 +84,7 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 /**
  * Obtiene un prompt específico por su ID
  */
-export async function getPrompt(id: string): Promise<ExtendedPrompt> {
+export async function getPrompt(id: string): Promise<PromptWithStats> {
 	try {
 		promptLogger.info('🔍 Obteniendo prompt:', id);
 		const prisma = await getPrismaClient();
@@ -108,7 +112,13 @@ export async function getPrompt(id: string): Promise<ExtendedPrompt> {
 		}
 
 		promptLogger.info('✅ Prompt obtenido:', prompt.name);
-		return fromPrismaPrompt(prompt as any);
+		// Deserializar tags antes de transformar
+		const promptWithParsedTags = {
+			...prompt,
+			tags: JSON.parse(prompt.tags || '[]'),
+			parameters: deserializeParameters(prompt.parameters)
+		};
+		return toPromptWithStats(promptWithParsedTags);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt:', error);
 		if (error instanceof PromptError) {
@@ -197,7 +207,50 @@ export async function getPromptWithRelations(id: string): Promise<ExtendedPrompt
 		}
 
 		promptLogger.info('✅ Prompt con relaciones obtenido:', prompt.name);
-		return fromPrismaPrompt(prompt as any);
+		const promptComplete = fromPrismaPrompt(prompt);
+		if (!promptComplete) {
+			throw createPromptError('Error al transformar prompt', EntityErrorCode.OPERATION_FAILED);
+		}
+
+		// Convertir a ExtendedPrompt con _count requerido
+		const counts = promptComplete._count || {};
+		const extendedPrompt: ExtendedPrompt = {
+			// Usar campos base de PromptBase (con strings serializados)
+			id: promptComplete.id,
+			name: promptComplete.name,
+			emoji: promptComplete.emoji,
+			color: promptComplete.color,
+			description: promptComplete.description,
+			content: promptComplete.content,
+			purpose: promptComplete.purpose,
+			category: promptComplete.category,
+			parameters: JSON.stringify(promptComplete.parameters || []), // Serializar parámetros
+			tags: JSON.stringify(promptComplete.tags || []), // Serializar tags
+			featuredImage: promptComplete.featuredImage,
+			isFavorite: promptComplete.isFavorite,
+			createdAt: promptComplete.createdAt,
+			updatedAt: promptComplete.updatedAt,
+			// Campos extendidos
+			_count: {
+				images: counts.images || 0,
+				videos: counts.videos || 0,
+				albums: counts.albums || 0,
+				collections: counts.collections || 0,
+				tags: counts.tagEntities || 0, // Mapear tagEntities a tags
+				characters: counts.characters || 0,
+				places: counts.places || 0,
+				worldItems: counts.worldItems || 0,
+				concepts: counts.concepts || 0,
+				notes: counts.notes || 0,
+				wildcards: counts.wildcards || 0,
+				properties: counts.properties || 0,
+				groups: counts.groups || 0,
+			},
+			parsedTags: Array.isArray(promptComplete.tags) ? promptComplete.tags : [],
+			parsedParameters: promptComplete.parameters || {},
+		};
+
+		return extendedPrompt;
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt con relaciones:', error);
 		if (error instanceof PromptError) {

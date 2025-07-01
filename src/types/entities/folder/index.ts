@@ -24,10 +24,12 @@ export type {
 	FolderFilters,
 	FolderRelations,
 	FolderSearchOptions,
+	FolderStatistics,
 	FolderStats,
 	FolderUIProps,
 	FolderUpdateInput,
 	FolderWithRelations,
+	FolderWithStats,
 	UpdateFolderData,
 } from './types';
 
