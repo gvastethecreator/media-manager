@@ -10,9 +10,9 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-    mapCreateWildcardDataToPrisma,
-    mapUpdateWildcardDataToPrisma,
-    toWildcardWithStats,
+	mapCreateWildcardDataToPrisma,
+	mapUpdateWildcardDataToPrisma,
+	toWildcardWithStats,
 } from '@/transformers/wildcard';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { Prisma } from '@prisma/client';

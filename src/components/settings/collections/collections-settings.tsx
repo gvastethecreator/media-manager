@@ -83,7 +83,7 @@ export function CollectionsSettings() {
 				matches &&
 				Boolean(
 					collection.name.toLowerCase().includes(normalizedQuery) ||
-					collection.description?.toLowerCase().includes(normalizedQuery)
+						collection.description?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -331,46 +331,50 @@ export function CollectionsSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredCollections.map((collection) => (
-										<button
+										<div
 											key={collection.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedCollection?.id === collection.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditCollection(collection)}
-											type="button"
-											aria-pressed={selectedCollection?.id === collection.id}
-											aria-label={`Editar colección ${collection.name}`}
+											className={`relative group/item flex items-center gap-2 p-1.5 rounded-md transition-colors hover:bg-muted/50 w-full ${selectedCollection?.id === collection.id ? 'bg-muted' : ''}`}
 										>
-											<div
-												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{
-													backgroundColor:
-														COLLECTION_CATEGORY_COLORS[collection.category as CollectionCategory] || '#3b82f6',
-												}}
+											<button
+												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												onClick={() => handleEditCollection(collection)}
+												type="button"
+												aria-pressed={selectedCollection?.id === collection.id}
+												aria-label={`Editar colección ${collection.name}`}
 											>
-												{COLLECTION_CATEGORY_EMOJIS[collection.category as CollectionCategory] || '📚'}
-											</div>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-xs font-medium truncate">{collection.name}</h4>
-												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{collection.category && <span>{collection.category}</span>}
-													{(collection.stats?.imageCount || 0) > 0 && (
-														<>
-															<span>•</span>
-															<span>{collection.stats?.imageCount || 0} imágenes</span>
-														</>
-													)}
-													{collection.isFavorite && (
-														<>
-															<span>•</span>
-															<span className="text-yellow-500">★</span>
-														</>
-													)}
+												<div
+													className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
+													style={{
+														backgroundColor:
+															COLLECTION_CATEGORY_COLORS[collection.category as CollectionCategory] || '#3b82f6',
+													}}
+												>
+													{COLLECTION_CATEGORY_EMOJIS[collection.category as CollectionCategory] || '📚'}
 												</div>
-											</div>
+												<div className="flex-1 min-w-0">
+													<h4 className="text-xs font-medium truncate">{collection.name}</h4>
+													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+														{collection.category && <span>{collection.category}</span>}
+														{(collection.stats?.imageCount || 0) > 0 && (
+															<>
+																<span>•</span>
+																<span>{collection.stats?.imageCount || 0} imágenes</span>
+															</>
+														)}
+														{collection.isFavorite && (
+															<>
+																<span>•</span>
+																<span className="text-yellow-500">★</span>
+															</>
+														)}
+													</div>
+												</div>
+											</button>
 											<Button
 												variant="ghost"
 												size="icon"
 												type="button"
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
+												className="h-5 w-5 opacity-0 group-hover/item:opacity-100 absolute right-1"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteButtonClick(collection.id);
@@ -378,7 +382,7 @@ export function CollectionsSettings() {
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
-										</button>
+										</div>
 									))}
 								</div>
 							)}
@@ -448,7 +452,7 @@ export function CollectionsSettings() {
 													style={{
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
-															(previewData?.category || selectedCollection?.category) as CollectionCategory
+																(previewData?.category || selectedCollection?.category) as CollectionCategory
 															] || '#3b82f6',
 													}}
 												>

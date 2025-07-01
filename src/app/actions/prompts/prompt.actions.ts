@@ -8,10 +8,10 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers actualizados
 import {
-    fromPrismaPrompt,
-    mapCreatePromptDataToPrisma,
-    mapUpdatePromptDataToPrisma,
-    toPromptWithStats,
+	fromPrismaPrompt,
+	mapCreatePromptDataToPrisma,
+	mapUpdatePromptDataToPrisma,
+	toPromptWithStats,
 } from '@/transformers/prompt';
 import { deserializeParameters } from '@/transformers/prompt/serializers';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
@@ -70,11 +70,13 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 			},
 		});
 
-		return prompts.map((p) => toPromptWithStats({
-			...p,
-			parameters: deserializeParameters(p.parameters),
-			tags: JSON.parse(p.tags || '[]') // Deserializar tags de string a string[]
-		}));
+		return prompts.map((p) =>
+			toPromptWithStats({
+				...p,
+				parameters: deserializeParameters(p.parameters),
+				tags: JSON.parse(p.tags || '[]'), // Deserializar tags de string a string[]
+			})
+		);
 	} catch (error) {
 		promptLogger.error('Error al obtener prompts:', error);
 		throw createPromptError('Error al obtener prompts', EntityErrorCode.OPERATION_FAILED, error);
@@ -116,7 +118,7 @@ export async function getPrompt(id: string): Promise<PromptWithStats> {
 		const promptWithParsedTags = {
 			...prompt,
 			tags: JSON.parse(prompt.tags || '[]'),
-			parameters: deserializeParameters(prompt.parameters)
+			parameters: deserializeParameters(prompt.parameters),
 		};
 		return toPromptWithStats(promptWithParsedTags);
 	} catch (error) {

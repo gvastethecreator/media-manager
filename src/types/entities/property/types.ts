@@ -12,7 +12,7 @@ export type {
 	PrismaPropertyWithCounts,
 	PropertyBase,
 	PropertyStatistics,
-	PropertyWithStats
+	PropertyWithStats,
 } from './base';
 
 // Tipos legacy - usar PropertyWithStats en su lugar

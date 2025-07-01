@@ -5,14 +5,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    PromptBase,
-    PromptComplete,
-    PromptCreateInput,
-    PromptFilters,
-    PromptStatistics,
-    PromptUpdateInput,
-    PromptWithRelations,
-    PromptWithStats,
+	PromptBase,
+	PromptComplete,
+	PromptCreateInput,
+	PromptFilters,
+	PromptStatistics,
+	PromptUpdateInput,
+	PromptWithRelations,
+	PromptWithStats,
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt';
 import type { Prisma } from '@prisma/client';
@@ -137,11 +137,7 @@ export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): Prisma.Pr
 
 	if (filters.searchQuery) {
 		const query = filters.searchQuery;
-		where.OR = [
-			{ name: { contains: query } },
-			{ description: { contains: query } },
-			{ content: { contains: query } },
-		];
+		where.OR = [{ name: { contains: query } }, { description: { contains: query } }, { content: { contains: query } }];
 	}
 
 	if (filters.categories?.length) {

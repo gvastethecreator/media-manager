@@ -138,12 +138,8 @@ export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(fu
 														{item.name.charAt(0).toUpperCase()}
 													</span>
 												</div>
-												<div className="text-xs font-medium truncate w-full px-1">
-													{item.name}
-												</div>
-												<div className="text-xs text-muted-foreground">
-													{item.stats?.imageCount || 0}
-												</div>
+												<div className="text-xs font-medium truncate w-full px-1">{item.name}</div>
+												<div className="text-xs text-muted-foreground">{item.stats?.imageCount || 0}</div>
 											</div>
 										</motion.div>
 									);
