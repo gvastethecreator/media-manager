@@ -16,6 +16,7 @@ export default [
 				},
 			},
 			globals: {
+				// Node.js globals
 				console: 'readonly',
 				process: 'readonly',
 				Buffer: 'readonly',
@@ -25,6 +26,90 @@ export default [
 				module: 'readonly',
 				require: 'readonly',
 				exports: 'readonly',
+
+				// Browser globals
+				window: 'readonly',
+				document: 'readonly',
+				navigator: 'readonly',
+				localStorage: 'readonly',
+				sessionStorage: 'readonly',
+				fetch: 'readonly',
+				alert: 'readonly',
+				confirm: 'readonly',
+				prompt: 'readonly',
+				crypto: 'readonly',
+				performance: 'readonly',
+
+				// Timing functions
+				setTimeout: 'readonly',
+				clearTimeout: 'readonly',
+				setInterval: 'readonly',
+				clearInterval: 'readonly',
+				requestAnimationFrame: 'readonly',
+				cancelAnimationFrame: 'readonly',
+
+				// DOM types
+				HTMLElement: 'readonly',
+				HTMLDivElement: 'readonly',
+				HTMLButtonElement: 'readonly',
+				HTMLInputElement: 'readonly',
+				HTMLImageElement: 'readonly',
+				HTMLCanvasElement: 'readonly',
+				HTMLSelectElement: 'readonly',
+				HTMLTextAreaElement: 'readonly',
+				HTMLParagraphElement: 'readonly',
+				HTMLHeadingElement: 'readonly',
+				HTMLSpanElement: 'readonly',
+				HTMLAudioElement: 'readonly',
+
+				// Events
+				MouseEvent: 'readonly',
+				KeyboardEvent: 'readonly',
+				Event: 'readonly',
+				CustomEvent: 'readonly',
+
+				// Web APIs
+				URL: 'readonly',
+				URLSearchParams: 'readonly',
+				FormData: 'readonly',
+				FileList: 'readonly',
+				File: 'readonly',
+				Blob: 'readonly',
+				FileReader: 'readonly',
+				Image: 'readonly',
+				Headers: 'readonly',
+				Request: 'readonly',
+				Response: 'readonly',
+
+				// Observers
+				ResizeObserver: 'readonly',
+				IntersectionObserver: 'readonly',
+				MutationObserver: 'readonly',
+
+				// Streams
+				ReadableStream: 'readonly',
+				WritableStreamDefaultWriter: 'readonly',
+				TransformStream: 'readonly',
+				CanvasRenderingContext2D: 'readonly',
+
+				// Other APIs
+				ClipboardItem: 'readonly',
+				EventListener: 'readonly',
+				MediaQueryListEvent: 'readonly',
+				TextEncoder: 'readonly',
+				Element: 'readonly',
+				Node: 'readonly',
+
+				// Testing globals (for Vitest)
+				vi: 'readonly',
+				describe: 'readonly',
+				it: 'readonly',
+				expect: 'readonly',
+				test: 'readonly',
+				beforeEach: 'readonly',
+				afterEach: 'readonly',
+				beforeAll: 'readonly',
+				afterAll: 'readonly',
 			},
 		},
 		plugins: {
@@ -46,6 +131,7 @@ export default [
 			'prefer-const': 'error',
 			'no-var': 'off',
 			'no-unused-vars': 'off', // Biome ya maneja esta regla
+			'no-undef': 'error', // Activamos esta regla para detectar variables no definidas
 
 			// Desactivar reglas que Biome ya maneja
 			indent: 'off',

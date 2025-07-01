@@ -645,7 +645,75 @@ Para cada componente:
 - Mantener consistencia con `data-slot` attributes
 - Seguir nomenclatura establecida en fases anteriores
 
-## 🚀 Siguientes Fases
+## 📊 Resumen Fase 4 Completada ✅
 
-- **Fase 5**: 52 componentes restantes
-- **Fase 6**: Auditoría final y optimización
+**Componentes migrados/verificados:**
+
+1. **input.tsx** → Base UI Input (única migración real)
+2. **calendar.tsx** → Mantenido con `react-day-picker`
+3. **table.tsx** → Mantenido con HTML nativo + data-slot
+4. **data-table.tsx** → Mantenido con `@tanstack/react-table`
+5. **data-table-column-header.tsx** → Funcionando con dropdown-menu migrado
+6. **data-table-pagination.tsx** → Funcionando con select migrado + button mantenido
+7. **data-table-view-options.tsx** → Funcionando con dropdown-menu migrado
+8. **data-table-row-actions.tsx** → Funcionando con dropdown-menu migrado
+9. **data-table-toolbar.tsx** → Funcionando con input migrado + button mantenido
+
+### Decisiones Técnicas Clave
+
+- **Button**: Mantenido (Base UI no tiene Button independiente, solo Toolbar.Button)
+- **Input**: Migrado exitosamente a Base UI con API idéntica
+- **Librerías externas**: Mantenidas cuando no hay equivalente en Base UI
+- **Data Tables**: Funcionan perfectamente con componentes migrados
+
+### Patrones Establecidos
+
+- Mantener librerías externas de calidad cuando Base UI no tiene equivalente
+- Verificar compatibilidad de componentes dependientes tras migraciones
+- Preservar API externa identical tras migración
+
+## 🎯 Siguientes Fases
+
+### ⚙️ Fase 5 Actual: Componentes Restantes (52 componentes)
+
+**Componentes YA MIGRADOS (Total: 26):**
+
+- ✅ **Base UI migrados**: tabs, form, accordion, popover, tooltip, switch, checkbox, dialog, dropdown-menu, context-menu, hover-card, navigation-menu, menubar, sheet, alert-dialog, collapsible, radio-group, slider, progress, toggle, toggle-group, input, select, avatar
+- ✅ **Mantenidos**: command (cmdk), scroll-area (CSS), separator (CSS), aspect-ratio (CSS), resizable (react-resizable-panels), sidebar (Slot personalizado), calendar (react-day-picker), table (HTML), data-table (tanstack), button (CVA personalizado)
+
+**✅ BLOQUE 1 COMPLETADO - Componentes básicos de UI (12 componentes):**
+
+1. ✅ **avatar.tsx** → Base UI Avatar (MIGRADO)
+2. ✅ **badge.tsx** → CVA personalizado (MANTENIDO - Base UI no tiene Badge)
+3. ✅ **breadcrumb.tsx** → HTML nativo + Slot (MANTENIDO - Base UI no tiene Breadcrumb)
+4. ✅ **card.tsx** → HTML nativo + data-slot (MANTENIDO - Base UI no tiene Card)
+5. ✅ **alert.tsx** → CVA personalizado (MANTENIDO - Base UI solo tiene AlertDialog)
+6. ✅ **label.tsx** → Base UI Field.Label (YA MIGRADO)
+7. ✅ **textarea.tsx** → HTML nativo (MANTENIDO - implementación óptima)
+8. ✅ **skeleton.tsx** → CSS animate-pulse (MANTENIDO - Base UI no tiene Skeleton)
+9. ✅ **spinner.tsx** → Lucide React (MANTENIDO - Base UI no tiene Spinner)
+10. ✅ **loading-spinner.tsx** → Lucide React (MANTENIDO - duplicado de spinner)
+11. ✅ **pagination.tsx** → HTML nativo + buttonVariants (MANTENIDO - Base UI no tiene Pagination)
+12. ✅ **carousel.tsx** → Embla Carousel (MANTENIDO - librería externa independiente)
+
+**⚙️ BLOQUE 2 EN PROGRESO - Componentes de navegación y layout (8 componentes):**
+13. **drawer.tsx** → Verificar si existe
+14. **sonner.tsx** → Base UI Toast vs Sonner
+15. **toast.tsx** → Base UI Toast (MIGRAR)
+16. **toaster.tsx** → Base UI Toast (MIGRAR)
+17. **date-picker.tsx** → Verificar implementación
+18. **date-range-picker.tsx** → Verificar implementación
+19. **time-picker.tsx** → Verificar implementación
+20. **multi-select.tsx** → Verificar implementación
+
+**📋 BLOQUES RESTANTES:**
+
+- **Bloque 3**: Componentes de formulario avanzado (8 componentes)
+- **Bloque 4**: Componentes de datos y visualización (8 componentes)
+- **Bloque 5**: Componentes diversos y utilidades (16 componentes)
+
+### 📊 Progreso Actual
+
+- ✅ **38/86 componentes completados (44%)**
+- 🎯 **Bloque 1: 12/12 completado (100%)**
+- ⚙️ **Bloque 2: 0/8 en progreso**
