@@ -1,5 +1,5 @@
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type Prisma, PrismaClient } from '@prisma/client';
-import { serverLogger } from './logger/server-logger';
 
 // Tipos para la configuración de la base de datos
 interface DatabaseConfig {

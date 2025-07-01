@@ -8,9 +8,9 @@ import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
 import { motion } from 'motion/react';
-import { memo } from 'react';
+import React, { memo } from 'react';
 
-interface CardsViewV2Props {
+interface CardsViewProps {
 	items: EntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];

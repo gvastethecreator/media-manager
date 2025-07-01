@@ -111,12 +111,11 @@ export async function createPropertyLegacy(data: Prisma.PropertyCreateInput): Pr
 	const propertyInput: PropertyCreateInput = {
 		name: data.name,
 		description: data.description || undefined,
-		value: data.value || undefined,
-		type: data.type || undefined,
-		unit: data.unit || undefined,
+		emoji: data.emoji || undefined,
+		color: data.color || undefined,
+		shortcut: data.shortcut || undefined,
 		category: data.category || undefined,
-		isRequired: data.isRequired || false,
-		isPrivate: data.isPrivate || false,
+		featuredImage: data.featuredImage || undefined,
 		isFavorite: data.isFavorite || false,
 	};
 	return createProperty(propertyInput);
@@ -126,12 +125,11 @@ export async function updatePropertyLegacy(id: string, data: Prisma.PropertyUpda
 	const propertyInput: PropertyUpdateInput = {};
 	if (data.name !== undefined) propertyInput.name = data.name as string;
 	if (data.description !== undefined) propertyInput.description = data.description as string | undefined;
-	if (data.value !== undefined) propertyInput.value = data.value as string | undefined;
-	if (data.type !== undefined) propertyInput.type = data.type as string | undefined;
-	if (data.unit !== undefined) propertyInput.unit = data.unit as string | undefined;
+	if (data.emoji !== undefined) propertyInput.emoji = data.emoji as string;
+	if (data.color !== undefined) propertyInput.color = data.color as string;
+	if (data.shortcut !== undefined) propertyInput.shortcut = data.shortcut as string | undefined;
 	if (data.category !== undefined) propertyInput.category = data.category as string | undefined;
-	if (data.isRequired !== undefined) propertyInput.isRequired = data.isRequired as boolean;
-	if (data.isPrivate !== undefined) propertyInput.isPrivate = data.isPrivate as boolean;
+	if (data.featuredImage !== undefined) propertyInput.featuredImage = data.featuredImage as string | undefined;
 	if (data.isFavorite !== undefined) propertyInput.isFavorite = data.isFavorite as boolean;
 
 	return updateProperty(id, propertyInput);

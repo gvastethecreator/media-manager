@@ -1,8 +1,8 @@
+import { cn } from '@/lib/utils';
+import { TagRarity } from '@/store/entities/tag/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Clock, Heart, Image, Video } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { TagRarity } from '@/types/entities/tag';
 
 interface TagCardFooterProps {
 	createdAt: Date | string;
@@ -42,7 +42,7 @@ export function TagCardFooter({
 		[TagRarity.COMMON]: { glow: 0, text: 'Común' },
 		[TagRarity.UNCOMMON]: { glow: 3, text: 'Poco común' },
 		[TagRarity.RARE]: { glow: 5, text: 'Rara' },
-		[TagRarity.EPIC]: { glow: 7, text: 'Épica' },
+		[TagRarity.VERY_RARE]: { glow: 7, text: 'Muy Rara' },
 		[TagRarity.LEGENDARY]: { glow: 10, text: 'Legendaria' },
 	};
 

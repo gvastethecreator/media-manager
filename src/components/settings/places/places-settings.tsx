@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toastService } from '@/services/toast';
-import type { PlaceComplete } from '@/types/entities/place/types';
+import type { PlaceWithStats } from '@/types/entities/place';
 import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreatePlaceForm } from './create-place-form';
@@ -19,10 +19,10 @@ import { CreatePlaceForm } from './create-place-form';
 type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function PlacesSettings() {
-	const [places, setPlaces] = useState<PlaceComplete[]>([]);
+	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedPlace, setSelectedPlace] = useState<PlaceComplete | null>(null);
+	const [selectedPlace, setSelectedPlace] = useState<PlaceWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -37,7 +37,7 @@ export function PlacesSettings() {
 		const loadPlaces = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getPlaces();
+				const data = await getPlaces({});
 				setPlaces(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -72,8 +72,8 @@ export function PlacesSettings() {
 				matches &&
 				Boolean(
 					place.name.toLowerCase().includes(normalizedQuery) ||
-						place.description?.toLowerCase().includes(normalizedQuery) ||
-						place.region?.toLowerCase().includes(normalizedQuery)
+					place.description?.toLowerCase().includes(normalizedQuery) ||
+					place.region?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -112,18 +112,18 @@ export function PlacesSettings() {
 	}, []);
 
 	// Manejar edición de lugar
-	const handleEditPlace = useCallback((place: PlaceComplete) => {
+	const handleEditPlace = useCallback((place: PlaceWithStats) => {
 		setSelectedPlace(place);
 	}, []);
 
 	// Manejar creación exitosa
-	const handlePlaceCreated = useCallback((newPlace: PlaceComplete) => {
+	const handlePlaceCreated = useCallback((newPlace: PlaceWithStats) => {
 		setPlaces((prev) => [...prev, newPlace]);
 		toastService.success('Lugar creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handlePlaceUpdated = useCallback((updatedPlace: PlaceComplete) => {
+	const handlePlaceUpdated = useCallback((updatedPlace: PlaceWithStats) => {
 		setPlaces((prev) => prev.map((place) => (place.id === updatedPlace.id ? { ...place, ...updatedPlace } : place)));
 		toastService.success('Lugar actualizado');
 	}, []);
@@ -313,7 +313,7 @@ export function PlacesSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">
-						<div className="h-full px-3 pb-3 overflow-auto">
+						<div className="h-full max-h-[400px] px-3 pb-3 overflow-y-auto">
 							{filteredPlaces.length === 0 ? (
 								<EmptyState
 									icon={MapPin}
@@ -424,7 +424,7 @@ export function PlacesSettings() {
 								<div className="space-y-3">
 									<CreatePlaceForm
 										key={selectedPlace?.id || 'new-place'}
-										place={selectedPlace}
+										place={selectedPlace || undefined}
 										isEditing={isEditing}
 										onCreated={handlePlaceCreated}
 										onUpdated={handlePlaceUpdated}

@@ -5,7 +5,7 @@
  * como 'parameters' y 'tags', para su almacenamiento en la base de datos como strings JSON.
  */
 
-import { serverLogger } from '@/lib/logger/server';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { PromptParameter } from '@/types/entities/prompt';
 
 const logger = serverLogger.withContext('PromptSerializers');

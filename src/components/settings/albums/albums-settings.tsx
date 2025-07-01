@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import toastService from '@/services/toast';
+import { formatFileSize } from '@/lib/utils/format.utils';
+import { toastService } from '@/services/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
-import { formatBytes } from '@/lib/utils/file/helpers';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
@@ -159,7 +159,7 @@ export function AlbumsSettings() {
 						<div className="flex gap-2 text-xs text-muted-foreground">
 							<span>{stats.totalImages} imágenes</span>
 							<span>•</span>
-							<span>{formatBytes(stats.totalSize)}</span>
+							<span>{formatFileSize(stats.totalSize)}</span>
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">

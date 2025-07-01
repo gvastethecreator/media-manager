@@ -12,11 +12,25 @@
  * @updated 2025-01-27
  */
 
+import type { z } from 'zod';
+import type { AlbumWithStats } from './base';
+import { CreateAlbumSchema, UpdateAlbumSchema } from './schema';
+
 // --- Tipos Canónicos ---
 export type { AlbumBase, AlbumStatistics, AlbumWithStats } from './base';
 
+// --- Alias de Compatibilidad ---
+export type Album = AlbumWithStats;
+
 // --- Esquemas de Validación ---
-export { AlbumCreateSchema, AlbumUpdateSchema } from './schema';
+export { CreateAlbumSchema, UpdateAlbumSchema } from './schema';
+
+// --- Tipos inferidos de esquemas ---
+export type CreateAlbumInput = z.infer<typeof CreateAlbumSchema>;
+export type UpdateAlbumInput = z.infer<typeof UpdateAlbumSchema>;
+
+// --- Tipos de compatibilidad legacy ---
+export type AlbumComplete = AlbumWithStats;
 
 // --- Tipos Legacy (OBSOLETOS) ---
 /**

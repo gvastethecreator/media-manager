@@ -13,7 +13,7 @@ export const QueueJobSchema = z.object({
 	id: z.string(),
 	queue: z.string(),
 	data: z.string(),
-	status: z.enum(Object.values(QueueJobStatus) as [string, ...string[]]),
+	status: z.nativeEnum(QueueJobStatus),
 	attempts: z.number(),
 	maxAttempts: z.number(),
 	error: z.string().nullable().optional(),
@@ -50,7 +50,7 @@ export const createQueueJobSchema = z.object({
 // Esquema para actualizar un trabajo
 export const updateQueueJobSchema = z
 	.object({
-		status: z.enum(Object.values(QueueJobStatus) as [string, ...string[]]).optional(),
+		status: z.nativeEnum(QueueJobStatus).optional(),
 		attempts: z.number().int().min(0).optional(),
 		error: z.string().optional(),
 		progress: z.number().int().min(0).max(100).optional(),
@@ -64,7 +64,7 @@ export const updateQueueJobSchema = z
 // Esquema para filtros de búsqueda
 export const queueJobFiltersSchema = z.object({
 	queue: z.string().optional(),
-	status: z.enum(Object.values(QueueJobStatus) as [string, ...string[]]).optional(),
+	status: z.nativeEnum(QueueJobStatus).optional(),
 	priority: z.number().int().min(0).max(10).optional(),
 	createdAfter: z.date().optional(),
 	createdBefore: z.date().optional(),

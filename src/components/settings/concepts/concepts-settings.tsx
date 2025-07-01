@@ -9,12 +9,24 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { calculateConceptsStats } from '@/lib/utils/concept/helpers';
 import toastService from '@/services/toast';
 import type { ConceptComplete, ConceptExtended } from '@/types/entities/concept';
-import { calculateConceptsStats } from '@/lib/utils/concept/helpers';
 import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { CreateConceptForm } from './create-concept-form';
+
+// Tipos seguros para preview data
+interface PreviewData {
+	name?: string;
+	description?: string;
+	content?: string;
+	color?: string;
+	emoji?: string;
+	category?: string;
+	isFavorite?: boolean;
+}
 
 export function ConceptsSettings() {
 	const [concepts, setConcepts] = useState<ConceptComplete[]>([]);
@@ -22,7 +34,7 @@ export function ConceptsSettings() {
 	const [error, setError] = useState<string | null>(null);
 	const [selectedConcept, setSelectedConcept] = useState<ConceptExtended | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
-	const [previewData, setPreviewData] = useState<any>(null);
+	const [previewData, setPreviewData] = useState<PreviewData | null>(null);
 
 	// Filtros
 	const [searchQuery, setSearchQuery] = useState('');
@@ -70,8 +82,8 @@ export function ConceptsSettings() {
 					matches &&
 					Boolean(
 						concept.name.toLowerCase().includes(normalizedQuery) ||
-							concept.description?.toLowerCase().includes(normalizedQuery) ||
-							concept.content?.toLowerCase().includes(normalizedQuery)
+						concept.description?.toLowerCase().includes(normalizedQuery) ||
+						concept.content?.toLowerCase().includes(normalizedQuery)
 					);
 			}
 
@@ -115,10 +127,9 @@ export function ConceptsSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const _handleDeleteButtonClick = useCallback(
-		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
-			e.stopPropagation();
-			handleDeleteConcept(id);
+	const handleDeleteButtonClick = useCallback(
+		(conceptId: string) => {
+			handleDeleteConcept(conceptId);
 		},
 		[handleDeleteConcept]
 	);
@@ -159,7 +170,7 @@ export function ConceptsSettings() {
 	}, []);
 
 	// Manejar la previsualización en tiempo real
-	const handlePreview = useCallback((data: any) => {
+	const handlePreview = useCallback((data: PreviewData) => {
 		setPreviewData(data);
 	}, []);
 
@@ -195,7 +206,7 @@ export function ConceptsSettings() {
 						icon={Info}
 						title="Error al cargar conceptos"
 						description={error}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
+						actions={<Button onClick={() => globalThis.location?.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -308,7 +319,7 @@ export function ConceptsSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">
-						<div className="h-full px-3 pb-3 overflow-auto">
+						<ScrollArea className="h-full px-3 pb-3">
 							{filteredConcepts.length === 0 ? (
 								<EmptyState
 									icon={LightbulbIcon}
@@ -373,7 +384,7 @@ export function ConceptsSettings() {
 									))}
 								</div>
 							)}
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>
@@ -416,7 +427,7 @@ export function ConceptsSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="p-3 flex-1 overflow-hidden">
-						<div className="h-full pr-3 overflow-auto">
+						<ScrollArea className="h-full pr-3">
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
 								<div className="space-y-3">
 									<CreateConceptForm
@@ -473,7 +484,7 @@ export function ConceptsSettings() {
 									</div>
 								</div>
 							</div>
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>

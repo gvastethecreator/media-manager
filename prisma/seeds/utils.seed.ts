@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
+import { serverLogger } from '../../src/lib/logger/server-logger.js';
 
 export const seedLogger = serverLogger.withContext('Seed');
 

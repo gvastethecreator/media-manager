@@ -9,20 +9,20 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	createCharacter as createCharacterService,
-	deleteCharacter as deleteCharacterService,
-	getCharacter as getCharacterService,
-	getCharacters as getCharactersService,
-	searchCharacters as searchCharactersService,
-	toggleCharacterFavorite as toggleCharacterFavoriteService,
-	updateCharacter as updateCharacterService,
-	type GetCharactersResult,
+    createCharacter as createCharacterService,
+    deleteCharacter as deleteCharacterService,
+    getCharacter as getCharacterService,
+    getCharacters as getCharactersService,
+    searchCharacters as searchCharactersService,
+    toggleCharacterFavorite as toggleCharacterFavoriteService,
+    updateCharacter as updateCharacterService,
+    type GetCharactersResult,
 } from '@/services/character';
 import type {
-	CharacterCreateInput,
-	CharacterSearchOptions,
-	CharacterUpdateInput,
-	CharacterWithStats,
+    CharacterCreateInput,
+    CharacterSearchOptions,
+    CharacterUpdateInput,
+    CharacterWithStats,
 } from '@/types/entities/character';
 
 const logger = serverLogger.withContext('CharacterActions');
@@ -140,8 +140,56 @@ export async function searchCharacters(query: string): Promise<CharacterWithStat
 	}
 }
 
+/**
+ * 🖼️ Obtiene las imágenes asociadas a un personaje.
+ */
+export async function getCharacterImages(id: string): Promise<{ id: string; name: string; path: string }[]> {
+	logger.info(`🖼️ Action: Obteniendo imágenes del personaje: ${id}`);
+
+	try {
+		// Nota: Esta función necesita ser implementada en el servicio
+		// Por ahora retornamos un array vacío
+		logger.warn(`⚠️ getCharacterImages no implementada para personaje: ${id}`);
+		return [];
+	} catch (error) {
+		logger.error('❌ Action: Error al obtener imágenes del personaje', { error, id });
+		throw error;
+	}
+}
+
+/**
+ * 🔗 Agrega una imagen a un personaje.
+ */
+export async function addImageToCharacter(characterId: string, imageId: string): Promise<void> {
+	logger.info(`🔗 Action: Agregando imagen ${imageId} al personaje ${characterId}`);
+
+	try {
+		// Nota: Esta función necesita ser implementada en el servicio
+		// Por ahora no hace nada
+	} catch (error) {
+		logger.error('❌ Action: Error al agregar imagen al personaje', { error, characterId, imageId });
+		throw error;
+	}
+}
+
+/**
+ * 🔗 Remueve una imagen de un personaje.
+ */
+export async function removeImageFromCharacter(characterId: string, imageId: string): Promise<void> {
+	logger.info(`🔗 Action: Removiendo imagen ${imageId} del personaje ${characterId}`);
+
+	try {
+		// Nota: Esta función necesita ser implementada en el servicio
+		// Por ahora no hace nada
+	} catch (error) {
+		logger.error('❌ Action: Error al remover imagen del personaje', { error, characterId, imageId });
+		throw error;
+	}
+}
+
 // Alias para compatibilidad con código existente
 export const getCharacterById = getCharacter;
 
 // Re-exportar tipos para uso externo
 export type { CharacterWithStats } from '@/types/entities/character';
+

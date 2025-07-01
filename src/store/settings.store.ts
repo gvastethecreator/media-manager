@@ -3,13 +3,13 @@
  * @module store/settings
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+import { createSelectors } from '@/lib/utils/store-selectors.utils';
+import { settingsClient } from '@/services/settings/settings.client';
+import type { Settings, SettingsUpdate } from '@/types/settings';
 import { create } from 'zustand';
 import { devtools, persist as zustandPersist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { settingsService } from '@/services/settings';
-import type { Settings, SettingsUpdate } from '@/types/settings';
-import { createSelectors } from '@/lib/utils/store-selectors.utils';
 
 // Logger para el store
 const logger = clientLogger.withContext('SettingsStore');
@@ -86,7 +86,7 @@ const useSettingsStoreBase = create<SettingsStore>()(
 					});
 
 					try {
-						const settings = await settingsService.getSystemSettings();
+						const settings = await settingsClient.getSystemSettings();
 
 						set((state) => {
 							state.settings = settings;
@@ -112,7 +112,7 @@ const useSettingsStoreBase = create<SettingsStore>()(
 					});
 
 					try {
-						const settings = await settingsService.getProfileSettings(profileId);
+						const settings = await settingsClient.getProfileSettings(profileId);
 
 						if (!settings) {
 							throw new Error(`No se encontró configuración para el perfil ${profileId}`);
@@ -126,7 +126,7 @@ const useSettingsStoreBase = create<SettingsStore>()(
 
 						logger.info('✅ Configuración del perfil cargada correctamente', { profileId });
 					} catch (error) {
-						logger.error('❌ Error al cargar configuración del perfil:', error, { profileId });
+						logger.error('❌ Error al cargar configuración del perfil:', error);
 						set((state) => {
 							state.error =
 								error instanceof Error
@@ -150,12 +150,12 @@ const useSettingsStoreBase = create<SettingsStore>()(
 
 						// Si hay un perfil activo, actualizar la configuración del perfil
 						if (profileId) {
-							updatedSettings = await settingsService.updateProfileSettings(profileId, data);
+							updatedSettings = await settingsClient.updateProfileSettings(profileId, data as Partial<Settings>);
 							logger.info('✅ Configuración del perfil actualizada', { profileId });
 						}
 						// Si no, actualizar la configuración global
 						else {
-							updatedSettings = await settingsService.updateSystemSettings(data);
+							updatedSettings = await settingsClient.updateSystemSettings(data as Partial<Settings>);
 							logger.info('✅ Configuración global actualizada');
 						}
 
@@ -184,14 +184,14 @@ const useSettingsStoreBase = create<SettingsStore>()(
 
 						// Si hay un perfil activo, resetear la configuración del perfil
 						if (profileId) {
-							await settingsService.resetProfileSettings(profileId);
+							await settingsClient.resetProfileSettings(profileId);
 							// Después de resetear, cargar la configuración global para el perfil
 							await get().loadProfileSettings(profileId);
 							logger.info('✅ Configuración del perfil reseteada a valores globales', { profileId });
 						}
 						// Si no, resetear la configuración global
 						else {
-							const defaultSettings = await settingsService.resetSystemSettings();
+							const defaultSettings = await settingsClient.resetSystemSettings();
 							set((state) => {
 								state.settings = defaultSettings;
 							});

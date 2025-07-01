@@ -93,8 +93,8 @@ export interface PromptCounts {
  * 🎯 Tipo principal optimizado de Prompt con estadísticas pre-calculadas
  * Sigue el patrón EntityWithStats para máximo rendimiento
  */
-export interface PromptWithStats extends PromptBase, PromptCounts {
-	// Campos JSON deserializados
+export interface PromptWithStats extends Omit<PromptBase, 'parameters' | 'tags'>, PromptCounts {
+	// Campos JSON deserializados (override de los campos string)
 	parameters: Array<{
 		name: string;
 		type: 'string' | 'number' | 'boolean' | 'array' | 'object';
@@ -159,7 +159,7 @@ export const PrismaPromptWithCounts = {
 /**
  * 📋 Tipo derivado de la consulta de Prisma
  */
-export type PrismaPromptWithCounts = {
+export type PrismaPromptWithCountsType = {
 	id: string;
 	name: string;
 	emoji: string;

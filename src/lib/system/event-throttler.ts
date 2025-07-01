@@ -4,7 +4,7 @@
  * @description Optimiza los eventos evitando spam y mejorando el rendimiento ⚡
  */
 
-import { serverLogger } from './logger/server-logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Logger específico para el throttler
 const throttlerLogger = serverLogger.withContext('EventThrottler');

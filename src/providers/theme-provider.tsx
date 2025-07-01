@@ -41,14 +41,19 @@ function ThemeDebugger() {
 	return null;
 }
 
-// Componente para forzar la aplicación del tema actual
+// Componente para forzar la aplicación del tema actual (solo una vez)
 function ThemeEnforcer() {
 	const { theme } = useTheme();
 
 	useEffect(() => {
-		if (theme && typeof document !== 'undefined') {
-			console.log(`Forzando aplicación del tema: ${theme}`);
-			document.documentElement.setAttribute('data-theme', theme);
+		// Solo aplicar si el tema cambió realmente y no está ya aplicado
+		if (theme && typeof globalThis !== 'undefined' && globalThis.document) {
+			const currentTheme = globalThis.document.documentElement.getAttribute('data-theme');
+
+			// Verificar si realmente necesitamos cambiar el tema
+			if (currentTheme !== theme) {
+				globalThis.document.documentElement.setAttribute('data-theme', theme);
+			}
 		}
 	}, [theme]);
 

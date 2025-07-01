@@ -3,7 +3,8 @@
  * @module types/store
  */
 
-import type { EntityId, JSONString } from './utils/types/utility-types';
+import type { JSONString } from '@/lib/utils/types/utility-types';
+import type { EntityId } from './utils/types/utility-types';
 
 /**
  * Interfaz base para todas las entidades

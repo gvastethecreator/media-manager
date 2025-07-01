@@ -10,10 +10,10 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import collectionService from '@/services/collection';
 import type {
-	CollectionCreateInput,
-	CollectionSearchOptions,
-	CollectionUpdateInput,
-	CollectionWithStats,
+    CollectionCreateInput,
+    CollectionSearchOptions,
+    CollectionUpdateInput,
+    CollectionWithStats,
 } from '@/types/entities/collection';
 
 const logger = serverLogger.withContext('CollectionActions');
@@ -118,6 +118,62 @@ export async function toggleCollectionFavorite(id: string): Promise<CollectionWi
 		return await collectionService.toggleCollectionFavorite(id);
 	} catch (error) {
 		logger.error(`❌ Error en action toggleCollectionFavorite: ${id}`, { error });
+		throw error;
+	}
+}
+
+/**
+ * Agrega una imagen a una colección.
+ */
+export async function addImageToCollection(collectionId: string, imageId: string): Promise<void> {
+	try {
+		logger.info(`🔗 Agregando imagen ${imageId} a colección ${collectionId} via action`);
+		// Nota: Esta función necesita ser implementada en el servicio
+		logger.warn(`⚠️ addImageToCollection no implementada para ${collectionId}-${imageId}`);
+	} catch (error) {
+		logger.error('❌ Error en action addImageToCollection', { error, collectionId, imageId });
+		throw error;
+	}
+}
+
+/**
+ * Remueve una imagen de una colección.
+ */
+export async function removeImageFromCollection(collectionId: string, imageId: string): Promise<void> {
+	try {
+		logger.info(`🔗 Removiendo imagen ${imageId} de colección ${collectionId} via action`);
+		// Nota: Esta función necesita ser implementada en el servicio
+		logger.warn(`⚠️ removeImageFromCollection no implementada para ${collectionId}-${imageId}`);
+	} catch (error) {
+		logger.error('❌ Error en action removeImageFromCollection', { error, collectionId, imageId });
+		throw error;
+	}
+}
+
+/**
+ * Agrega una colección a una imagen.
+ */
+export async function addCollectionToImage(imageId: string, collectionId: string): Promise<void> {
+	try {
+		logger.info(`🔗 Agregando colección ${collectionId} a imagen ${imageId} via action`);
+		// Nota: Esta función necesita ser implementada en el servicio
+		logger.warn(`⚠️ addCollectionToImage no implementada para ${imageId}-${collectionId}`);
+	} catch (error) {
+		logger.error('❌ Error en action addCollectionToImage', { error, imageId, collectionId });
+		throw error;
+	}
+}
+
+/**
+ * Remueve una colección de una imagen.
+ */
+export async function removeCollectionFromImage(imageId: string, collectionId: string): Promise<void> {
+	try {
+		logger.info(`🔗 Removiendo colección ${collectionId} de imagen ${imageId} via action`);
+		// Nota: Esta función necesita ser implementada en el servicio
+		logger.warn(`⚠️ removeCollectionFromImage no implementada para ${imageId}-${collectionId}`);
+	} catch (error) {
+		logger.error('❌ Error en action removeCollectionFromImage', { error, imageId, collectionId });
 		throw error;
 	}
 }

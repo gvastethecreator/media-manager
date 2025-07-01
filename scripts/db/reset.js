@@ -2,9 +2,15 @@
  * Script mejorado para resetear la base de datos
  * Incluye mejor manejo de errores y más información de depuración
  */
-const fs = require('fs');
-const path = require('path');
-const { execSync, spawnSync } = require('child_process');
+
+import { spawnSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Obtener __dirname en módulos ES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Función para mostrar mensajes con colores
 function log(message, type = 'info') {

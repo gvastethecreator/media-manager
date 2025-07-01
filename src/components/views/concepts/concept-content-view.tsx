@@ -1,13 +1,13 @@
 'use client';
 
-import { Lightbulb } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { getConceptImages } from '@/app/actions/concepts/concept.actions';
+import { getConceptImages } from '@/app/actions/concepts';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { selectSelectedConcept, useConceptStore } from '@/store/entities/concept';
+import { Lightbulb } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 const viewLogger = clientLogger.withContext('ConceptContentView');
 
@@ -55,13 +55,12 @@ export function ConceptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedConcept?.id ?? null,
 		containerName: selectedConcept?.name ?? null,
-		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
+		setCurrentContainer: () => { }, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Lightbulb,
 			title: 'Concepto vacío',
-			description: `No se encontraron imágenes en ${
-				selectedConcept?.name || 'este concepto'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${selectedConcept?.name || 'este concepto'
+				}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadConceptImages,
 	};

@@ -1,13 +1,13 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ViewType } from '@/components/views/types';
+import { cn } from '@/lib/utils';
 import { ChevronRight, Grid, List, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { memo, useCallback, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import { ViewType } from '@/types/files';
 
 // Componente memoizado para el indicador de colapso
 const CollapseIndicator = memo(function CollapseIndicator({

@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/services/toast';
-import type { PlaceBase, PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place';
+import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 // Opciones para los selects que antes eran enums
 const placeTypes = ['CITY', 'TOWN', 'VILLAGE', 'REGION', 'PLANET', 'OTHER'] as const;
@@ -54,19 +54,23 @@ type PlaceFormValues = z.infer<typeof placeFormSchema>;
 
 /**
  * Props para el formulario de creación/edición de lugares
- * @param place Lugar a editar (PlaceComplete), si existe
- * @param onSuccess Callback al crear/editar exitosamente (PlaceBase)
+ * @param place Lugar a editar (PlaceWithStats), si existe
+ * @param isEditing Indica si está en modo edición
+ * @param onCreated Callback al crear exitosamente
+ * @param onUpdated Callback al actualizar exitosamente
  * @param onCancel Callback para cancelar
+ * @param onPreview Callback para vista previa
  */
 interface CreatePlaceFormProps {
-	place?: PlaceComplete;
-	onSuccess?: (place: PlaceBase) => void;
+	place?: PlaceWithStats;
+	isEditing?: boolean;
+	onCreated?: (place: PlaceWithStats) => void;
+	onUpdated?: (place: PlaceWithStats) => void;
 	onCancel?: () => void;
+	onPreview?: (data: any) => void;
 }
 
-export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormProps) {
-	const isEditing = !!place;
-
+export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCancel, onPreview }: CreatePlaceFormProps) {
 	const form = useForm<PlaceFormValues>({
 		resolver: zodResolver(placeFormSchema) as any, // Forzamos el tipo para evitar conflicto de opcionales
 		defaultValues: placeFormSchema.parse({}),
@@ -120,6 +124,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 				};
 				result = await updatePlace(place.id, updateData);
 				toast(`Lugar actualizado: ${result.name}`);
+				onUpdated?.(result as PlaceWithStats);
 			} else {
 				const createData: PlaceCreateInput = {
 					...values,
@@ -138,8 +143,8 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 				result = await createPlace(createData);
 				toast(`Lugar creado: ${result.name}`);
 				form.reset();
+				onCreated?.(result as PlaceWithStats);
 			}
-			onSuccess?.(result);
 		} catch (error) {
 			toast(error instanceof Error ? error.message : 'No se pudo guardar el lugar.');
 		}

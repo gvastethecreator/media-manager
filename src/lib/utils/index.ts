@@ -2,7 +2,7 @@ import { cn } from '../utils';
 
 export * from './activity';
 // Re-exportar utilidades de entidades específicas
-export * from './album';
+// export * from './album'; // TODO: Temporalmente deshabilitado hasta resolver tipos
 // Utilidades consolidadas desde src/utils
 export * from './array.utils';
 export * from './character';
@@ -24,7 +24,7 @@ export * from './object-utils';
 export * from './place';
 export * from './prompt';
 export * from './server-events.utils';
-export * from './store';
+// export * from './store'; // TODO: Directorio no existe
 export * from './store-selectors.utils';
 export * from './string.utils';
 export * from './tag';

@@ -131,6 +131,8 @@ pnpm prisma db seed
 pnpm dev
 ```
 
+La aplicación estará disponible en `http://localhost:3000`
+
 ## Entidades del Sistema
 
 El sistema gestiona las siguientes entidades principales:

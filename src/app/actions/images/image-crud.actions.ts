@@ -1,12 +1,16 @@
 'use server';
 
+import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { toServiceError } from '@/lib/utils/errors/service-errors';
+import { imageService } from '@/services/image/image.service';
+import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 // Importamos el servicio de imagen
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
 // Importamos tipos optimizados
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
-import { toServiceError } from '@/lib/utils/errors/service-errors';
 import type { GetImagesOptions, GetImagesResult } from './image-types.actions';
 
 const SERVER_ACTION_NAME = 'ImageCRUD';
@@ -35,7 +39,7 @@ export async function createImage(data: ImageCreateInput): Promise<ImageWithStat
 		imageLogger.info('🆕 Creando imagen:', data.name);
 
 		// Construir el objeto de datos para Prisma
-		const prismaImageData: any = {
+		const prismaImageData: Prisma.ImageCreateInput = {
 			name: data.name || 'Sin nombre',
 			path: data.path,
 			hash: data.hash,
@@ -45,12 +49,8 @@ export async function createImage(data: ImageCreateInput): Promise<ImageWithStat
 			description: data.description || null,
 			metadata: data.metadata || null,
 			isFavorite: false,
+			folder: { connect: { id: data.folderId } },
 		};
-
-		// Manejar folderId
-		if (data.folderId) {
-			prismaImageData.folder = { connect: { id: data.folderId } };
-		}
 
 		const image = await prisma.image.create({
 			data: prismaImageData,
@@ -220,7 +220,7 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 		const {
 			search,
 			folderId,
-			tags,
+			tagIds,
 			isFavorite,
 			pageSize = 50,
 			page = 1,
@@ -228,14 +228,13 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 			sortOrder = 'desc',
 		} = options;
 
+		imageLogger.info('🔍 Iniciando consulta getImages con opciones:', options);
+
 		// Construir filtros
-		const where: any = {};
+		const where: Prisma.ImageWhereInput = {};
 
 		if (search) {
-			where.OR = [
-				{ name: { contains: search, mode: 'insensitive' } },
-				{ description: { contains: search, mode: 'insensitive' } },
-			];
+			where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
 		}
 
 		if (folderId) {
@@ -246,13 +245,15 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 			where.isFavorite = isFavorite;
 		}
 
-		if (tags && tags.length > 0) {
+		if (tagIds && tagIds.length > 0) {
 			where.tags = {
 				some: {
-					id: { in: tags },
+					id: { in: tagIds },
 				},
 			};
 		}
+
+		imageLogger.info('🔍 Ejecutando consulta Prisma con where:', where);
 
 		// Obtener total y imágenes
 		const [total, images] = await Promise.all([
@@ -260,18 +261,6 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 			prisma.image.findMany({
 				where,
 				include: {
-					tags: true,
-					albums: true,
-					collections: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
 					folder: { select: { id: true, name: true, path: true } },
 					_count: {
 						select: {
@@ -296,18 +285,50 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 			}),
 		]);
 
+		imageLogger.info(`📊 Consulta Prisma completada: ${images.length} imágenes encontradas de ${total} total`);
+
+		// Verificar datos antes del transformer
+		imageLogger.debug('🔍 Validando datos de imágenes antes del transformer:', {
+			totalImages: images.length,
+			sampleImage: images[0]
+				? {
+						id: images[0].id,
+						name: images[0].name,
+						hasCount: !!images[0]._count,
+						countKeys: images[0]._count ? Object.keys(images[0]._count) : 'sin _count',
+					}
+				: 'sin imágenes',
+		});
+
+		const transformedImages = images.map((image, index) => {
+			try {
+				return fromPrismaImageWithCounts(image);
+			} catch (transformError) {
+				imageLogger.error(`❌ Error transformando imagen ${index} (${image.id}):`, {
+					error: transformError,
+					imageData: {
+						id: image.id,
+						name: image.name,
+						hasCount: !!image._count,
+						count: image._count,
+					},
+				});
+				throw transformError;
+			}
+		});
+
 		return {
-			images: images.map(fromPrismaImageWithCounts),
-			pagination: {
-				page,
-				pageSize,
-				total,
-				totalPages: Math.ceil(total / pageSize),
-				hasNext: page * pageSize < total,
-				hasPrev: page > 1,
-			},
+			images: transformedImages,
+			total,
+			page,
+			pageSize,
 		};
 	} catch (error) {
+		imageLogger.error('❌ Error en getImages:', {
+			error,
+			errorMessage: error instanceof Error ? error.message : 'Error desconocido',
+			errorStack: error instanceof Error ? error.stack : 'Sin stack',
+		});
 		throw toServiceError(error, {
 			serviceName: SERVER_ACTION_NAME,
 			message: 'No se pudieron obtener las imágenes',

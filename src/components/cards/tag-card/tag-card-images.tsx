@@ -1,10 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { TagRarity } from '@/types/entities/tag';
+import { TagRarity } from '@/store/entities/tag/types';
 import { ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getRecentTagImages } from './tag-server-actions';
+import { getTagThumbnails } from './tag-server-actions';
 
 interface TagCardImagesProps {
 	tagId: string;
@@ -42,14 +42,15 @@ export function TagCardImages({
 	const [error, setError] = useState<string | null>(null);
 
 	// Conseguir un factor de brillo basado en la rareza para efectos visuales
-	const rarityBrightness =
-		{
-			[TagRarity.COMMON]: 1,
-			[TagRarity.UNCOMMON]: 1.2,
-			[TagRarity.RARE]: 1.5,
-			[TagRarity.EPIC]: 1.8,
-			[TagRarity.LEGENDARY]: 2.2,
-		}[rarity as keyof typeof rarityBrightness] || 1;
+	const rarityBrightnessMap = {
+		[TagRarity.COMMON]: 1,
+		[TagRarity.UNCOMMON]: 1.2,
+		[TagRarity.RARE]: 1.5,
+		[TagRarity.VERY_RARE]: 1.8,
+		[TagRarity.LEGENDARY]: 2.2,
+	} as const;
+
+	const rarityBrightness: number = rarityBrightnessMap[rarity as keyof typeof rarityBrightnessMap] || 1;
 
 	// Cargar imágenes al montar el componente
 	useEffect(() => {
@@ -57,7 +58,7 @@ export function TagCardImages({
 			try {
 				setLoading(true);
 				// Si hay una imagen destacada, usarla primero
-				const fetchedImages = await getRecentTagImages(tagId);
+				const fetchedImages = await getTagThumbnails(tagId);
 
 				// Si hay una imagen destacada, asegurarse de que aparezca primero
 				if (featuredImage && fetchedImages.length > 0) {

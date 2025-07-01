@@ -11,16 +11,16 @@ export async function seedFolders(prisma: PrismaClient): Promise<void> {
 	try {
 		// Verificar si la tabla Folder existe
 		if (await tableExists(prisma, 'Folder')) {
-			// Definir carpetas de ejemplo con sus metadatos
+			// Definir carpetas de ejemplo con sus metadatos (sin datos falsos)
 			const sampleFolders = [
 				{
 					name: 'Cartoons',
 					description: 'Cartoons',
 					path: 'D:\\Pictures\\Cartoons',
 					emoji: '🏞️',
-					totalFiles: 45,
-					totalSize: 230000000, // 230MB en bytes
-					lastIndexed: new Date(),
+					totalFiles: 0, // Será actualizado por el reindexado
+					totalSize: 0, // Será actualizado por el reindexado
+					lastIndexed: null, // No indexado inicialmente
 					autoReindex: true,
 					color: '#3b82f6',
 					isFavorite: true,
@@ -30,9 +30,9 @@ export async function seedFolders(prisma: PrismaClient): Promise<void> {
 					description: 'Fondos de pantalla',
 					path: 'D:\\Pictures\\Wallpapers',
 					emoji: '🖼️',
-					totalFiles: 120,
-					totalSize: 800000000, // 800MB
-					lastIndexed: new Date(),
+					totalFiles: 0, // Será actualizado por el reindexado
+					totalSize: 0, // Será actualizado por el reindexado
+					lastIndexed: null, // No indexado inicialmente
 					autoReindex: false,
 					color: '#ef4444',
 					isFavorite: false,
@@ -42,9 +42,9 @@ export async function seedFolders(prisma: PrismaClient): Promise<void> {
 					description: 'Fotografías personales',
 					path: 'D:\\Pictures\\Photography',
 					emoji: '📷',
-					totalFiles: 350,
-					totalSize: 2100000000, // 2.1GB
-					lastIndexed: new Date(),
+					totalFiles: 0, // Será actualizado por el reindexado
+					totalSize: 0, // Será actualizado por el reindexado
+					lastIndexed: null, // No indexado inicialmente
 					autoReindex: true,
 					color: '#10b981',
 					isFavorite: false,
@@ -54,9 +54,9 @@ export async function seedFolders(prisma: PrismaClient): Promise<void> {
 					description: 'Colección de memes',
 					path: 'D:\\Pictures\\Memes',
 					emoji: '😂',
-					totalFiles: 80,
-					totalSize: 400000000, // 400MB
-					lastIndexed: new Date(),
+					totalFiles: 0, // Será actualizado por el reindexado
+					totalSize: 0, // Será actualizado por el reindexado
+					lastIndexed: null, // No indexado inicialmente
 					autoReindex: false,
 					color: '#eab308',
 					isFavorite: true,

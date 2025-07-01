@@ -259,7 +259,7 @@ export async function start(
 	logAppStats();
 
 	// Configurar intervalo para estadísticas de la aplicación
-	const appTimer = setInterval(() => {
+	const appTimer = globalThis.setInterval(() => {
 		logAppStats();
 	}, interval);
 
@@ -271,7 +271,7 @@ export async function start(
 
 	// Devolver función para detener ambos monitores
 	return () => {
-		clearInterval(appTimer);
+		globalThis.clearInterval(appTimer);
 		if (stopSystemMonitor) {
 			stopSystemMonitor();
 		}
@@ -346,6 +346,7 @@ export const appMonitor = {
 	trackDatabaseQuery,
 	trackCacheAccess,
 	getAppStats,
+	getStats: getAppStats, // Alias para compatibilidad
 	start,
 	logStatsOnce: logAppStatsOnce,
 	logStartup: logAppStartup,

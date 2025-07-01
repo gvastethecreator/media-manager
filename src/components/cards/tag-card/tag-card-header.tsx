@@ -1,7 +1,6 @@
-import { BookOpen, Heart, Sparkles, TagBase as TagIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TagCategory } from '@/types/entities/tag';
-import { TagRarity } from '@/types/entities/tag';
+import { TagCategory, TagRarity } from '@/store/entities/tag/types';
+import { BookOpen, Heart, Sparkles, Tag as TagIcon } from 'lucide-react';
 
 export interface TagCardHeaderProps {
 	name: string;
@@ -33,7 +32,7 @@ export function TagCardHeader({
 		[TagRarity.COMMON]: 'Común',
 		[TagRarity.UNCOMMON]: 'Poco común',
 		[TagRarity.RARE]: 'Rara',
-		[TagRarity.EPIC]: 'Épica',
+		[TagRarity.VERY_RARE]: 'Muy Rara',
 		[TagRarity.LEGENDARY]: 'Legendaria',
 	};
 

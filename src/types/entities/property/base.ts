@@ -73,3 +73,31 @@ export interface PropertyStatistics {
 export interface PropertyWithStats extends PropertyBase {
 	stats: PropertyStatistics;
 }
+
+/**
+ * 📝 Datos para crear una Property
+ */
+export interface PropertyCreateInput {
+	name: string;
+	description?: string | null;
+	emoji?: string;
+	color?: string;
+	shortcut?: string | null;
+	category?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+}
+
+/**
+ * 📝 Datos para actualizar una Property
+ */
+export interface PropertyUpdateInput {
+	name?: string;
+	description?: string | null;
+	emoji?: string;
+	color?: string;
+	shortcut?: string | null;
+	category?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+}

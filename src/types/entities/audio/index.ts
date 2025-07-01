@@ -9,15 +9,16 @@
 // Re-export from Prisma for compatibility
 export type { Audio } from '@prisma/client';
 export type {
-	AudioBase,
-	AudioStatistics,
-	AudioWithStats,
+    AudioBase,
+    AudioStatistics,
+    AudioWithStats
 } from './base';
 
 // export * from './audio.schema'; // Descomentar cuando se creen los esquemas Zod
 
-export {
-	AUDIO_SORT_PROPERTY_MAP,
-	AudioSortCriteria,
-	AudioViewMode,
-} from './types';
+// Los enums y constantes se crearán en el futuro cuando sean necesarios
+// export {
+// 	AUDIO_SORT_PROPERTY_MAP,
+// 	AudioSortCriteria,
+// 	AudioViewMode,
+// } from './types';

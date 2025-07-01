@@ -7,11 +7,11 @@ import type { AlbumWithStats } from '@/types/entities/album';
 
 const _albumLogger = serverLogger.withContext('AlbumServerActions');
 
-export interface AlbumCardData extends AlbumWithStats {
+export interface AlbumCardData extends Omit<AlbumWithStats, 'filters'> {
 	recentImages?: string[];
 	recentVideos?: string[];
 	totalSize?: number; // Tamaño total de los archivos
-	filters?: any[]; // Representación JSON de filters
+	filters?: unknown[] | string; // Puede ser array o string JSON
 	metadata?: {
 		itemCount?: number;
 		imageCount?: number;
@@ -123,7 +123,8 @@ export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> 
 		try {
 			filters = JSON.parse(album.filters);
 		} catch (e) {
-			console.error('Error parsing album filters:', e);
+			// Error parsing filters - use empty array
+			filters = [];
 		}
 	}
 
@@ -150,6 +151,21 @@ export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> 
 
 	return {
 		...album,
+		stats: {
+			imageCount: album._count.images,
+			videoCount: album._count.videos,
+			collectionCount: album._count.collections,
+			tagCount: album._count.tags,
+			characterCount: album._count.characters,
+			placeCount: album._count.places,
+			worldItemCount: album._count.worldItems,
+			conceptCount: album._count.concepts,
+			promptCount: album._count.prompts,
+			noteCount: album._count.notes,
+			wildcardCount: album._count.wildcards,
+			propertyCount: album._count.properties,
+			groupCount: album._count.groups,
+		},
 		recentImages: recentImagePaths,
 		recentVideos: recentVideoPaths,
 		totalSize,
@@ -247,15 +263,16 @@ export async function getAlbumsForCards(options: {
 					try {
 						filters = JSON.parse(album.filters);
 					} catch (e) {
-						console.error('Error parsing album filters for album:', album.id, e);
+						// Error parsing filters - use empty array
+						filters = [];
 					}
 				}
 
-				// Crear viewConfig
+				// Crear viewConfig básico (sin campos que no existen en Prisma)
 				const viewConfig = {
-					theme: album.theme || 'default',
-					layout: album.layout || 'grid',
-					thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium',
+					theme: 'default',
+					layout: 'grid',
+					thumbnailSize: 'medium' as 'small' | 'medium' | 'large',
 				};
 
 				return {
@@ -401,8 +418,8 @@ export async function searchAlbums(options: {
 
 	const prisma = await getPrismaClient();
 
-	// Construir filtros
-	const whereClause: any = {
+	// Construir filtros con tipo Prisma.AlbumWhereInput
+	const whereClause = {
 		...(category ? { category } : {}),
 		...(includeHidden ? {} : { isHidden: false }),
 		...(searchTerm

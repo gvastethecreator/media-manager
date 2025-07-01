@@ -7,7 +7,7 @@
  */
 
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
-import type { z } from 'zod';
+import { z } from 'zod';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -227,7 +227,7 @@ export interface ImageCreateInput {
 	height: number;
 	metadata?: string | null;
 	isFavorite?: boolean;
-	folderId?: string | null;
+	folderId: string; // Requerido según el esquema Prisma
 	// Relaciones opcionales
 	albums?: string[];
 	collections?: string[];

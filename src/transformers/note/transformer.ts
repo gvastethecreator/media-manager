@@ -262,3 +262,6 @@ export function toPrismaNoteUpdate(input: NoteUpdateInput) {
 
 	return updateData;
 }
+
+// Alias para compatibilidad con importaciones esperadas
+export const fromPrismaNote = fromPrismaNoteWithCounts;

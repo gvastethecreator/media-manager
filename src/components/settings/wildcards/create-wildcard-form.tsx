@@ -9,8 +9,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createWildcardSchema } from '@/types/entities/wildcard/schema';
 import type { WildcardBase } from '@/types/entities/wildcard/types';
+import { createWildcardSchema } from '@/types/validations/wildcard';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';

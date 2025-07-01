@@ -3,18 +3,20 @@
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { createNoteSchema, updateNoteSchema } from '@/lib/utils/note/validators';
 import { noteService } from '@/services/note';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
-	CreateNoteData,
-	NoteBase,
-	NoteComplete,
-	NoteCreateInput,
-	NoteUpdateInput,
-	NoteWithStats,
+    CreateNoteData,
+    NoteBase,
+    NoteComplete,
+    NoteCreateInput,
+    NoteFilters,
+    NoteSearchOptions,
+    NoteUpdateInput,
+    NoteWithStats,
 } from '@/types/entities/note';
 import type { FileItem } from '@/types/files';
-import { createNoteSchema, updateNoteSchema } from '@/lib/utils/note/validators';
 import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
@@ -380,4 +382,10 @@ export async function removeImageFromNote(noteId: string, imageId: string): Prom
 		noteLogger.error('❌ Error al eliminar imagen de nota:', error);
 		throw createNoteError('No se pudo eliminar la imagen de la nota', NoteErrorCode.OPERATION_FAILED, error);
 	}
+}
+
+// Función wrapper async para compatibilidad con "use server"
+export async function searchNotes(filters: NoteFilters = {}, options: NoteSearchOptions = {}) {
+	const { searchNotes: searchNotesImpl } = await import('@/transformers/note');
+	return searchNotesImpl(filters, options);
 }

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { ImageFormat } from '../../types/entities/image';
+import { ImageFormat } from '@/types/entities/image/enums';
 
 /**
  * Determina si un formato de imagen es válido

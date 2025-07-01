@@ -10,18 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Toggle } from '@/components/ui/toggle';
 import { toastService } from '@/services/toast';
 import type { GroupWithStats } from '@/types/entities/group';
+import { GroupSortCriteria } from '@/types/entities/group';
 import { Prisma } from '@prisma/client';
 import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
-
-// Definir enum local para los criterios de ordenación
-enum GroupSortCriteria {
-	NAME_ASC = 'NAME_ASC',
-	CATEGORY_ASC = 'CATEGORY_ASC',
-	DATE_CREATED_DESC = 'DATE_CREATED_DESC',
-}
 
 const SORT_OPTIONS = [
 	{ label: 'Nombre', value: GroupSortCriteria.NAME_ASC },
@@ -164,9 +158,47 @@ export function GroupsSettings() {
 	);
 
 	const stats = useMemo(() => {
-		const totalElements = state.groups.reduce((acc, group) => acc + (group.stats?.totalItems ?? 0), 0);
+		const totalElements = state.groups.reduce((acc, group) => {
+			const stats = group.stats;
+			if (!stats) return acc;
+			return (
+				acc +
+				stats.imageCount +
+				stats.videoCount +
+				stats.albumCount +
+				stats.collectionCount +
+				stats.tagCount +
+				stats.characterCount +
+				stats.placeCount +
+				stats.worldItemCount +
+				stats.conceptCount +
+				stats.promptCount +
+				stats.noteCount +
+				stats.wildcardCount +
+				stats.propertyCount
+			);
+		}, 0);
 
-		const emptyGroups = state.groups.filter((group) => (group.stats?.totalItems ?? 0) === 0).length;
+		const emptyGroups = state.groups.filter((group) => {
+			const stats = group.stats;
+			if (!stats) return true;
+			return (
+				stats.imageCount +
+					stats.videoCount +
+					stats.albumCount +
+					stats.collectionCount +
+					stats.tagCount +
+					stats.characterCount +
+					stats.placeCount +
+					stats.worldItemCount +
+					stats.conceptCount +
+					stats.promptCount +
+					stats.noteCount +
+					stats.wildcardCount +
+					stats.propertyCount ===
+				0
+			);
+		}).length;
 
 		return {
 			totalGroups: state.groups.length,

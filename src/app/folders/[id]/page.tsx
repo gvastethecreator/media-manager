@@ -1,6 +1,7 @@
-import { getFolder } from '@/app/actions/folders';
+import { getFolder } from '@/app/actions/folders/crud.actions';
 import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
+import { FolderContentView } from '@/components/views/folders/views/folder-content-view';
+import { formatDate, formatFileSize } from '@/lib/utils/format.utils';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import DeleteFolderButton from './delete-button';
@@ -91,18 +92,8 @@ export default async function FolderPage({ params }: FolderPageProps) {
 
 			<div className="border-t pt-6">
 				<h2 className="text-xl font-medium mb-4">Contenido</h2>
-				<p className="text-gray-500">No hay contenido para mostrar.</p>
+				<FolderContentView folderId={folder.id} />
 			</div>
 		</div>
 	);
-}
-
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 Bytes';
-
-	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }

@@ -8,11 +8,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	createPlace as createPlaceService,
-	deletePlace as deletePlaceService,
-	getPlaceById as getPlaceByIdService,
-	getPlaces as getPlacesService,
-	updatePlace as updatePlaceService,
+    createPlace as createPlaceService,
+    deletePlace as deletePlaceService,
+    getPlaceById as getPlaceByIdService,
+    getPlaces as getPlacesService,
+    updatePlace as updatePlaceService,
 } from '@/services/place';
 import type { PlaceCreateInput, PlaceSearchOptions, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 import { revalidatePath } from 'next/cache';
@@ -57,4 +57,16 @@ export async function deletePlace(id: string): Promise<boolean> {
 	const result = await deletePlaceService(id);
 	await revalidatePlacePaths();
 	return result;
+}
+
+/**
+ * Obtiene las imágenes asociadas a un lugar específico
+ * @param placeId - El ID del lugar
+ * @param options - Opciones para la consulta de imágenes
+ * @returns Promise con el array de imágenes del lugar
+ */
+export async function getPlaceImages(placeId: string, options?: unknown): Promise<unknown[]> {
+	placeLogger.info(`🖼️ Obteniendo imágenes para lugar: ${placeId}`);
+	// Función stub - devuelve array vacío por ahora
+	return [];
 }
