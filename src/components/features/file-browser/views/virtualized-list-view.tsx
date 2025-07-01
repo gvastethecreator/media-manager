@@ -98,9 +98,7 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 									/>
 								) : (
 									<div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center">
-										<span className="text-xs font-semibold text-primary">
-											{item.name.charAt(0).toUpperCase()}
-										</span>
+										<span className="text-xs font-semibold text-primary">{item.name.charAt(0).toUpperCase()}</span>
 									</div>
 								)}
 							</div>

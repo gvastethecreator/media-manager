@@ -29,7 +29,6 @@
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export type ImageFiltersSlice = {};
 
 export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFiltersSlice> = () => ({});

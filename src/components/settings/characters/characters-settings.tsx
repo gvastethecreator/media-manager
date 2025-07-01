@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toastService } from '@/services/toast';
+import toastService from '@/services/toast';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
 import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
@@ -67,53 +67,53 @@ export function CharactersSettings() {
 	// Calcular estadísticas generales - 📊 Verificar que characters sea un array válido
 	const stats = Array.isArray(characters)
 		? {
-			totalCharacters: characters.length,
-			totalImages: characters.reduce((acc, character) => acc + (character.statistics?.totalImages || 0), 0),
-			totalSize: characters.reduce((acc, character) => acc + (character.statistics?.totalAssociations || 0), 0),
-			unusedCharacters: characters.filter((character) => (character.statistics?.totalImages || 0) === 0).length,
-			favoriteCharacters: characters.filter((character) => character.isFavorite).length,
-		}
+				totalCharacters: characters.length,
+				totalImages: characters.reduce((acc, character) => acc + (character.statistics?.totalImages || 0), 0),
+				totalSize: characters.reduce((acc, character) => acc + (character.statistics?.totalAssociations || 0), 0),
+				unusedCharacters: characters.filter((character) => (character.statistics?.totalImages || 0) === 0).length,
+				favoriteCharacters: characters.filter((character) => character.isFavorite).length,
+			}
 		: {
-			totalCharacters: 0,
-			totalImages: 0,
-			totalSize: 0,
-			unusedCharacters: 0,
-			favoriteCharacters: 0,
-		};
+				totalCharacters: 0,
+				totalImages: 0,
+				totalSize: 0,
+				unusedCharacters: 0,
+				favoriteCharacters: 0,
+			};
 
 	// Filtrar personajes basados en los criterios seleccionados - 🔍 Verificar que characters sea un array
 	const filteredCharacters = Array.isArray(characters)
 		? characters.filter((character) => {
-			let matches = true;
+				let matches = true;
 
-			// Filtrar por búsqueda
-			if (searchQuery) {
-				const normalizedQuery = searchQuery.toLowerCase();
-				matches =
-					matches &&
-					Boolean(
-						character.name.toLowerCase().includes(normalizedQuery) ||
-						character.description?.toLowerCase().includes(normalizedQuery)
-					);
-			}
+				// Filtrar por búsqueda
+				if (searchQuery) {
+					const normalizedQuery = searchQuery.toLowerCase();
+					matches =
+						matches &&
+						Boolean(
+							character.name.toLowerCase().includes(normalizedQuery) ||
+								character.description?.toLowerCase().includes(normalizedQuery)
+						);
+				}
 
-			// Filtrar por categorías
-			if (selectedCategories.length > 0) {
-				matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
-			}
+				// Filtrar por categorías
+				if (selectedCategories.length > 0) {
+					matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
+				}
 
-			// Filtrar por clases
-			if (selectedClasses.length > 0) {
-				matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
-			}
+				// Filtrar por clases
+				if (selectedClasses.length > 0) {
+					matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
+				}
 
-			// Filtrar por favoritos
-			if (onlyFavorites) {
-				matches = matches && !!character.isFavorite;
-			}
+				// Filtrar por favoritos
+				if (onlyFavorites) {
+					matches = matches && !!character.isFavorite;
+				}
 
-			return matches;
-		})
+				return matches;
+			})
 		: [];
 
 	// Manejar eliminación de personaje
@@ -371,43 +371,47 @@ export function CharactersSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredCharacters.map((character) => (
-										<button
+										<div
 											key={character.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedCharacter?.id === character.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditCharacter(character)}
-											type="button"
-											aria-pressed={selectedCharacter?.id === character.id}
-											aria-label={`Editar personaje ${character.name}`}
+											className={`relative group/item flex items-center gap-2 p-1.5 rounded-md transition-colors hover:bg-muted/50 w-full ${selectedCharacter?.id === character.id ? 'bg-muted' : ''}`}
 										>
-											<div
-												className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-white"
-												style={{ backgroundColor: character.color }}
+											<button
+												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												onClick={() => handleEditCharacter(character)}
+												type="button"
+												aria-pressed={selectedCharacter?.id === character.id}
+												aria-label={`Editar personaje ${character.name}`}
 											>
-												<span className="text-xs">{character.emoji || character.name.charAt(0).toUpperCase()}</span>
-											</div>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-xs font-medium truncate">{character.name}</h4>
-												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{character.race && <span>{character.race}</span>}
-													{character.class && (
-														<>
-															<span>•</span>
-															<span>{character.class}</span>
-														</>
-													)}
-													{character.isFavorite && (
-														<>
-															<span>•</span>
-															<span className="text-yellow-500">★</span>
-														</>
-													)}
+												<div
+													className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-white"
+													style={{ backgroundColor: character.color }}
+												>
+													<span className="text-xs">{character.emoji || character.name.charAt(0).toUpperCase()}</span>
 												</div>
-											</div>
+												<div className="flex-1 min-w-0">
+													<h4 className="text-xs font-medium truncate">{character.name}</h4>
+													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+														{character.race && <span>{character.race}</span>}
+														{character.class && (
+															<>
+																<span>•</span>
+																<span>{character.class}</span>
+															</>
+														)}
+														{character.isFavorite && (
+															<>
+																<span>•</span>
+																<span className="text-yellow-500">★</span>
+															</>
+														)}
+													</div>
+												</div>
+											</button>
 											<Button
 												variant="ghost"
 												size="icon"
 												type="button"
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
+												className="h-5 w-5 opacity-0 group-hover/item:opacity-100 absolute right-1"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteCharacter(character.id);
@@ -415,7 +419,7 @@ export function CharactersSettings() {
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
-										</button>
+										</div>
 									))}
 								</div>
 							)}

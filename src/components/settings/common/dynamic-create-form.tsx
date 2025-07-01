@@ -4,8 +4,8 @@
 // ⚠️ No usar para carpetas (folders)
 
 import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import React, { useState } from 'react';
 
@@ -91,25 +91,19 @@ export function DynamicCreateForm({
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
-			<FormField
-				name="name"
-				render={() => (
-					<FormItem>
-						<FormLabel>Nombre</FormLabel>
-						<FormControl>
-							<Input
-								value={formData.name || ''}
-								onChange={handleNameChange}
-								placeholder="Nombre de la entidad"
-								required
-								className={error ? 'border-red-500' : ''}
-								disabled={isSubmitting}
-							/>
-						</FormControl>
-						{error && <FormMessage>{error}</FormMessage>}
-					</FormItem>
-				)}
-			/>
+			<div className="space-y-2">
+				<Label htmlFor="name">Nombre</Label>
+				<Input
+					id="name"
+					value={formData.name || ''}
+					onChange={handleNameChange}
+					placeholder="Nombre de la entidad"
+					required
+					className={error ? 'border-red-500' : ''}
+					disabled={isSubmitting}
+				/>
+				{error && <p className="text-sm text-red-500">{error}</p>}
+			</div>
 
 			{/* Selector para agregar campos opcionales */}
 			{availableFields.length > 0 && (
@@ -137,21 +131,13 @@ export function DynamicCreateForm({
 				const field = optionalFields.find((f) => f.name === fieldName);
 				if (!field) return null;
 				return (
-					<FormField
-						key={fieldName}
-						name={fieldName}
-						render={() => (
-							<FormItem>
-								<FormLabel>{field.label}</FormLabel>
-								<FormControl>
-									{field.render({
-										value: formData[fieldName],
-										onChange: (v) => handleFieldChange(fieldName, v),
-									})}
-								</FormControl>
-							</FormItem>
-						)}
-					/>
+					<div key={fieldName} className="space-y-2">
+						<Label>{field.label}</Label>
+						{field.render({
+							value: formData[fieldName],
+							onChange: (v) => handleFieldChange(fieldName, v),
+						})}
+					</div>
 				);
 			})}
 

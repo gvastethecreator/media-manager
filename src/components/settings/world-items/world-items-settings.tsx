@@ -11,9 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
 import toastService from '@/services/toast';
 import type { WorldItemComplete } from '@/types/entities/world-item';
-import { formatBytes } from '@/lib/utils/format.utils';
 import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { CreateWorldItemForm } from './create-world-item-form';
@@ -31,7 +31,7 @@ export function WorldItemsSettings() {
 	const [filterTypes, setFilterTypes] = useState<string[]>([]);
 	const [filterRarities, setFilterRarities] = useState<string[]>([]);
 	const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-	
+
 	// Hook useId debe estar fuera de condiciones
 	const idShowFavorites = useId();
 
@@ -440,46 +440,50 @@ export function WorldItemsSettings() {
 							) : (
 								<div className="space-y-2 pt-2">
 									{filteredItemsList.map((item) => (
-										<button
+										<div
 											key={item.id}
 											className={cn(
-												'group flex items-center gap-2 p-2 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left',
+												'relative group/item flex items-center gap-2 p-2 rounded-md transition-colors hover:bg-muted/50 w-full',
 												selectedItem?.id === item.id ? 'bg-muted' : ''
 											)}
-											onClick={() => handleEditItem(item as unknown as WorldItemComplete)}
-											type="button"
-											aria-pressed={selectedItem?.id === item.id}
 										>
-											<div
-												className="w-5 h-5 rounded-full flex items-center justify-center"
-												style={{ backgroundColor: item.color || generateTypeColor(item.type) }}
+											<button
+												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												onClick={() => handleEditItem(item as unknown as WorldItemComplete)}
+												type="button"
+												aria-pressed={selectedItem?.id === item.id}
 											>
-												<span className="text-[12px]">{item.emoji || '📦'}</span>
-											</div>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-sm font-medium truncate">{item.name}</h4>
-												<div className="flex items-center gap-1 text-xs text-muted-foreground">
-													<span>{item._count?.images || 0} imágenes</span>
-													{item.type && (
-														<>
-															<span>•</span>
-															<span>{item.type}</span>
-														</>
-													)}
-													{item.isFavorite && (
-														<>
-															<span>•</span>
-															<Badge variant="outline" className="h-4 text-[10px] px-1">
-																Favorito
-															</Badge>
-														</>
-													)}
+												<div
+													className="w-5 h-5 rounded-full flex items-center justify-center"
+													style={{ backgroundColor: item.color || generateTypeColor(item.type) }}
+												>
+													<span className="text-[12px]">{item.emoji || '📦'}</span>
 												</div>
-											</div>
+												<div className="flex-1 min-w-0">
+													<h4 className="text-sm font-medium truncate">{item.name}</h4>
+													<div className="flex items-center gap-1 text-xs text-muted-foreground">
+														<span>{item._count?.images || 0} imágenes</span>
+														{item.type && (
+															<>
+																<span>•</span>
+																<span>{item.type}</span>
+															</>
+														)}
+														{item.isFavorite && (
+															<>
+																<span>•</span>
+																<Badge variant="outline" className="h-4 text-[10px] px-1">
+																	Favorito
+																</Badge>
+															</>
+														)}
+													</div>
+												</div>
+											</button>
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-6 w-6 opacity-0 group-hover:opacity-100"
+												className="h-6 w-6 opacity-0 group-hover/item:opacity-100 absolute right-1"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteItem(item.id);
@@ -489,7 +493,7 @@ export function WorldItemsSettings() {
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
-										</button>
+										</div>
 									))}
 								</div>
 							)}

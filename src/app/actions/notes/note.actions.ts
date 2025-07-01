@@ -7,14 +7,14 @@ import { createNoteSchema, updateNoteSchema } from '@/lib/utils/note/validators'
 import { noteService } from '@/services/note';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
-    CreateNoteData,
-    NoteBase,
-    NoteComplete,
-    NoteCreateInput,
-    NoteFilters,
-    NoteSearchOptions,
-    NoteUpdateInput,
-    NoteWithStats,
+	CreateNoteData,
+	NoteBase,
+	NoteComplete,
+	NoteCreateInput,
+	NoteFilters,
+	NoteSearchOptions,
+	NoteUpdateInput,
+	NoteWithStats,
 } from '@/types/entities/note';
 import type { FileItem } from '@/types/files';
 import { revalidatePath } from 'next/cache';

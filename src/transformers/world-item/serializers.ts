@@ -8,11 +8,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { safeJsonParse } from '@/lib/utils/json';
-import type {
-    WorldItemEffect,
-    WorldItemProperty,
-    WorldItemRequirement
-} from '@/types/entities/world-item';
+import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement } from '@/types/entities/world-item';
 
 // Tipos para serializers compatibles
 type WorldItemAttribute = {
@@ -47,6 +43,20 @@ const serializeArray = <T>(data: T[] | string, fieldName: string): string => {
 
 const deserializeArray = <T>(jsonString: string | null | undefined, fieldName: string): T[] => {
 	if (!jsonString) return [];
+
+	// Si el string no parece JSON válido (no empieza con [ o {), tratarlo como array de strings
+	const trimmed = jsonString.trim();
+	if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
+		// Tratar como string simple o lista separada por comas
+		if (trimmed.includes(',')) {
+			return trimmed
+				.split(',')
+				.map((item) => item.trim())
+				.filter(Boolean) as T[];
+		}
+		return [trimmed] as T[];
+	}
+
 	return safeJsonParse<T[]>(jsonString, []);
 };
 

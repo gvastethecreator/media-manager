@@ -9,7 +9,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toastService } from '@/services/toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import toastService from '@/services/toast';
 import type { PlaceWithStats } from '@/types/entities/place';
 import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -72,8 +73,8 @@ export function PlacesSettings() {
 				matches &&
 				Boolean(
 					place.name.toLowerCase().includes(normalizedQuery) ||
-					place.description?.toLowerCase().includes(normalizedQuery) ||
-					place.region?.toLowerCase().includes(normalizedQuery)
+						place.description?.toLowerCase().includes(normalizedQuery) ||
+						place.region?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -313,7 +314,7 @@ export function PlacesSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">
-						<div className="h-full max-h-[400px] px-3 pb-3 overflow-y-auto">
+						<ScrollArea className="h-full max-h-[400px] px-3 pb-3">
 							{filteredPlaces.length === 0 ? (
 								<EmptyState
 									icon={MapPin}
@@ -333,38 +334,42 @@ export function PlacesSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredPlaces.map((place) => (
-										<button
+										<div
 											key={place.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedPlace?.id === place.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditPlace(place)}
-											type="button"
-											aria-pressed={selectedPlace?.id === place.id}
+											className={`relative group/item flex items-center gap-2 p-1.5 rounded-md transition-colors hover:bg-muted/50 w-full ${selectedPlace?.id === place.id ? 'bg-muted' : ''}`}
 										>
-											<div
-												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{
-													backgroundColor: place.color || '#888',
-												}}
+											<button
+												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												onClick={() => handleEditPlace(place)}
+												type="button"
+												aria-pressed={selectedPlace?.id === place.id}
 											>
-												<span className="text-xs">{place.emoji}</span>
-											</div>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-xs font-medium truncate">{place.name}</h4>
-												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													<span>{place._count?.images || 0} imágenes</span>
-													{place.region && (
-														<>
-															<span>•</span>
-															<span>{place.region}</span>
-														</>
-													)}
+												<div
+													className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
+													style={{
+														backgroundColor: place.color || '#888',
+													}}
+												>
+													<span className="text-xs">{place.emoji}</span>
 												</div>
-											</div>
+												<div className="flex-1 min-w-0">
+													<h4 className="text-xs font-medium truncate">{place.name}</h4>
+													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+														<span>{place._count?.images || 0} imágenes</span>
+														{place.region && (
+															<>
+																<span>•</span>
+																<span>{place.region}</span>
+															</>
+														)}
+													</div>
+												</div>
+											</button>
 											<Button
 												variant="ghost"
 												size="icon"
 												type="button"
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
+												className="h-5 w-5 opacity-0 group-hover/item:opacity-100 absolute right-1"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeletePlace(place.id);
@@ -372,11 +377,11 @@ export function PlacesSettings() {
 											>
 												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
 											</Button>
-										</button>
+										</div>
 									))}
 								</div>
 							)}
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>

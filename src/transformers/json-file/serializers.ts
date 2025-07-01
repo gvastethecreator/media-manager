@@ -31,7 +31,7 @@ export function validateJsonFile(input: unknown): JsonFileWithStats {
 
 	// Crear JsonFile basándose en el schema de Prisma
 	const jsonFile: JsonFileWithStats = {
-		id: data.id as string || generateId(),
+		id: (data.id as string) || generateId(),
 		name: data.name as string,
 		filePath: (data.filePath as string) || '',
 		content: content,
@@ -43,7 +43,7 @@ export function validateJsonFile(input: unknown): JsonFileWithStats {
 			nestingDepth: calculateNestingDepth(data.content),
 			isValid: true,
 			keyCount: calculateKeyCount(data.content),
-		}
+		},
 	};
 
 	return jsonFile;
@@ -114,7 +114,7 @@ function generateHash(content: string): string {
 	let hash = 0;
 	for (let i = 0; i < content.length; i++) {
 		const char = content.charCodeAt(i);
-		hash = ((hash << 5) - hash) + char;
+		hash = (hash << 5) - hash + char;
 		hash = hash & hash; // Convert to 32bit integer
 	}
 	return Math.abs(hash).toString(16);

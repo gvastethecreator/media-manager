@@ -6,4 +6,3 @@
 
 export * from './toast.service';
 export { default, default as toastService } from './toast.service';
-

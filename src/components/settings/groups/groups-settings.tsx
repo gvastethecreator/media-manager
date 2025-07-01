@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import { toastService } from '@/services/toast';
+import toastService from '@/services/toast';
 import type { GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria } from '@/types/entities/group';
 import { Prisma } from '@prisma/client';
@@ -302,28 +302,34 @@ export function GroupsSettings() {
 						<ScrollArea className="h-full">
 							<div className="space-y-1 p-2">
 								{sortedGroups.map((group) => (
-									<Button
+									<div
 										key={group.id}
-										variant={state.selectedGroup?.id === group.id ? 'secondary' : 'ghost'}
-										className="w-full justify-start h-12 relative group/button"
-										onClick={() => dispatch({ type: 'SELECT_GROUP', payload: group })}
+										className={`relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
+											state.selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
+										}`}
 									>
-										<div className="flex items-center gap-2">
-											<span role="img" aria-label="emoji">
-												{group.emoji}
-											</span>
-											<div className="flex flex-col items-start">
-												<span className="font-medium">{group.name}</span>
-												<span className="text-xs opacity-50">
-													{group.stats ? group.stats.imageCount + group.stats.videoCount : 0} elementos
+										<Button
+											variant="ghost"
+											className="w-full justify-start h-12 relative"
+											onClick={() => dispatch({ type: 'SELECT_GROUP', payload: group })}
+										>
+											<div className="flex items-center gap-2">
+												<span role="img" aria-label="emoji">
+													{group.emoji}
 												</span>
+												<div className="flex flex-col items-start">
+													<span className="font-medium">{group.name}</span>
+													<span className="text-xs opacity-50">
+														{group.stats ? group.stats.imageCount + group.stats.videoCount : 0} elementos
+													</span>
+												</div>
 											</div>
-										</div>
-										{group.isFavorite && <StarIcon className="h-3 w-3 absolute right-2 top-2" />}
+											{group.isFavorite && <StarIcon className="h-3 w-3 absolute right-8 top-2" />}
+										</Button>
 										<Button
 											variant="ghost"
 											size="icon"
-											className="absolute right-1 opacity-0 group-hover/button:opacity-100"
+											className="absolute right-1 top-1 opacity-0 group-hover/item:opacity-100 h-10 w-10"
 											onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 												e.stopPropagation();
 												handleDeleteGroup(group.id);
@@ -331,7 +337,7 @@ export function GroupsSettings() {
 										>
 											<Trash className="h-4 w-4" />
 										</Button>
-									</Button>
+									</div>
 								))}
 							</div>
 						</ScrollArea>

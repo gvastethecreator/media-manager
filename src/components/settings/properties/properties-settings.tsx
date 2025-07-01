@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast';
@@ -188,152 +189,154 @@ export function PropertiesSettings() {
 	};
 
 	return (
-		<div className="grid grid-cols-12 gap-3">
-			{/* Panel izquierdo: Lista de propiedades */}
-			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
-						<div className="flex items-center justify-between">
-							<div>
-								<CardTitle className="text-xl font-bold">Propiedades</CardTitle>
-								<p className="text-xs text-muted-foreground">
-									{stats.totalProperties} propiedades, {stats.favoriteProperties} favoritas
-								</p>
+		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
+			<div className="grid grid-cols-12 gap-3">
+				{/* Panel izquierdo: Lista de propiedades */}
+				<div className="col-span-12 md:col-span-5 lg:col-span-4">
+					<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
+						<CardHeader className="space-y-1 py-2 px-3">
+							<div className="flex items-center justify-between">
+								<div>
+									<CardTitle className="text-xl font-bold">Propiedades</CardTitle>
+									<p className="text-xs text-muted-foreground">
+										{stats.totalProperties} propiedades, {stats.favoriteProperties} favoritas
+									</p>
+								</div>
+								<Button
+									size="sm"
+									variant="ghost"
+									onClick={() => setIsCreateDialogOpen(true)}
+									title="Crear nueva propiedad"
+								>
+									<Plus className="h-4 w-4" />
+								</Button>
 							</div>
-							<Button
-								size="sm"
-								variant="ghost"
-								onClick={() => setIsCreateDialogOpen(true)}
-								title="Crear nueva propiedad"
-							>
-								<Plus className="h-4 w-4" />
-							</Button>
-						</div>
 
-						<div className="flex gap-2">
-							<div className="relative w-full">
-								<Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-								<Input
-									placeholder="Buscar propiedades..."
-									value={filters.searchQuery}
-									onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
-									className="h-8 pl-8"
-								/>
+							<div className="flex gap-2">
+								<div className="relative w-full">
+									<Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+									<Input
+										placeholder="Buscar propiedades..."
+										value={filters.searchQuery}
+										onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
+										className="h-8 pl-8"
+									/>
+								</div>
 							</div>
-						</div>
-						<div className="flex gap-2">
-							<Select
-								value={filters.sortBy}
-								onValueChange={(value) => setFilters({ ...filters, sortBy: value as typeof filters.sortBy })}
-							>
-								<SelectTrigger className="h-8">
-									<SelectValue placeholder="Ordenar por..." />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="name">Nombre</SelectItem>
-									<SelectItem value="category">Categoría</SelectItem>
-									<SelectItem value="createdAt">Fecha</SelectItem>
-								</SelectContent>
-							</Select>
-							<Toggle
-								pressed={filters.onlyFavorites}
-								onPressedChange={(pressed) => setFilters({ ...filters, onlyFavorites: pressed })}
-								size="sm"
-							>
-								<Star className="h-4 w-4" />
-							</Toggle>
-						</div>
-					</CardHeader>
-					<CardContent className="flex-1 p-0">
-						<ScrollArea className="h-full">
-							<div className="space-y-1 p-2">
-								{isLoading ? (
-									<div className="flex justify-center p-4">
-										<p className="text-sm opacity-70">Cargando propiedades...</p>
-									</div>
-								) : sortedProperties.length === 0 ? (
-									<div className="flex flex-col items-center justify-center py-8">
-										<Search className="h-8 w-8 opacity-20 mb-2" />
-										<p className="text-sm opacity-50">
-											{filters.searchQuery || filters.onlyFavorites || (filters.categories?.length ?? 0) > 0
-												? 'No se encontraron propiedades con los filtros aplicados'
-												: 'No hay propiedades creadas'}
-										</p>
-										<Button variant="ghost" size="sm" className="mt-2" onClick={() => setIsCreateDialogOpen(true)}>
-											Crear propiedad
-										</Button>
-									</div>
-								) : (
-									sortedProperties.map((property) => (
-										<Button
-											key={property.id}
-											variant={selectedProperty?.id === property.id ? 'secondary' : 'ghost'}
-											className="w-full justify-start h-12 relative group"
-											onClick={() => setSelectedProperty(property)}
-										>
-											<div className="flex items-center gap-2">
-												<span role="img" aria-label="emoji">
-													{property.emoji}
-												</span>
-												<div className="flex flex-col items-start">
-													<span className="font-medium">{property.name}</span>
-													<span className="text-xs opacity-50">{property.totalAssociations} elementos</span>
-												</div>
-											</div>
-											{property.isFavorite && <Star className="h-3 w-3 absolute right-2 top-2 text-yellow-500" />}
-											<Button
-												variant="ghost"
-												size="icon"
-												className="absolute right-1 opacity-0 group-hover:opacity-100"
-												onClick={() => handlePropertyDelete(property.id)}
-											>
-												<Trash2 className="h-4 w-4" />
+							<div className="flex gap-2">
+								<Select
+									value={filters.sortBy}
+									onValueChange={(value) => setFilters({ ...filters, sortBy: value as typeof filters.sortBy })}
+								>
+									<SelectTrigger className="h-8">
+										<SelectValue placeholder="Ordenar por..." />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="name">Nombre</SelectItem>
+										<SelectItem value="category">Categoría</SelectItem>
+										<SelectItem value="createdAt">Fecha</SelectItem>
+									</SelectContent>
+								</Select>
+								<Toggle
+									pressed={filters.onlyFavorites}
+									onPressedChange={(pressed) => setFilters({ ...filters, onlyFavorites: pressed })}
+									size="sm"
+								>
+									<Star className="h-4 w-4" />
+								</Toggle>
+							</div>
+						</CardHeader>
+						<CardContent className="flex-1 p-0">
+							<ScrollArea className="h-full">
+								<div className="space-y-1 p-2">
+									{isLoading ? (
+										<div className="flex justify-center p-4">
+											<p className="text-sm opacity-70">Cargando propiedades...</p>
+										</div>
+									) : sortedProperties.length === 0 ? (
+										<div className="flex flex-col items-center justify-center py-8">
+											<Search className="h-8 w-8 opacity-20 mb-2" />
+											<p className="text-sm opacity-50">
+												{filters.searchQuery || filters.onlyFavorites || (filters.categories?.length ?? 0) > 0
+													? 'No se encontraron propiedades con los filtros aplicados'
+													: 'No hay propiedades creadas'}
+											</p>
+											<Button variant="ghost" size="sm" className="mt-2" onClick={() => setIsCreateDialogOpen(true)}>
+												Crear propiedad
 											</Button>
-										</Button>
-									))
-								)}
-							</div>
-						</ScrollArea>
-					</CardContent>
-				</Card>
-			</div>
+										</div>
+									) : (
+										sortedProperties.map((property) => (
+											<Button
+												key={property.id}
+												variant={selectedProperty?.id === property.id ? 'secondary' : 'ghost'}
+												className="w-full justify-start h-12 relative group"
+												onClick={() => setSelectedProperty(property)}
+											>
+												<div className="flex items-center gap-2">
+													<span role="img" aria-label="emoji">
+														{property.emoji}
+													</span>
+													<div className="flex flex-col items-start">
+														<span className="font-medium">{property.name}</span>
+														<span className="text-xs opacity-50">{property.totalAssociations} elementos</span>
+													</div>
+												</div>
+												{property.isFavorite && <Star className="h-3 w-3 absolute right-2 top-2 text-yellow-500" />}
+												<Button
+													variant="ghost"
+													size="icon"
+													className="absolute right-1 opacity-0 group-hover:opacity-100"
+													onClick={() => handlePropertyDelete(property.id)}
+												>
+													<Trash2 className="h-4 w-4" />
+												</Button>
+											</Button>
+										))
+									)}
+								</div>
+							</ScrollArea>
+						</CardContent>
+					</Card>
+				</div>
 
-			{/* Panel derecho: Vista detalle o formulario */}
-			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					{selectedProperty ? (
-						isEditMode ? (
-							<CreatePropertyForm
-								property={selectedProperty}
-								onSubmit={(data) => handleUpdateProperty(selectedProperty.id, data)}
-								onCancel={() => setIsEditMode(false)}
-							/>
+				{/* Panel derecho: Vista detalle o formulario */}
+				<div className="col-span-12 md:col-span-7 lg:col-span-8">
+					<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
+						{selectedProperty ? (
+							isEditMode ? (
+								<CreatePropertyForm
+									property={selectedProperty}
+									onSubmit={(data) => handleUpdateProperty(selectedProperty.id, data)}
+									onCancel={() => setIsEditMode(false)}
+								/>
+							) : (
+								<PropertyPreview
+									property={selectedProperty}
+									onEdit={() => setIsEditMode(true)}
+									onDelete={() => handleDeleteProperty(selectedProperty.id)}
+									onFavoriteToggle={() => handleToggleFavorite(selectedProperty)}
+									onContinue={() => {
+										setIsEditMode(false);
+										setSelectedProperty(null);
+									}}
+									isDeleting={isDeleting}
+								/>
+							)
 						) : (
-							<PropertyPreview
-								property={selectedProperty}
-								onEdit={() => setIsEditMode(true)}
-								onDelete={() => handleDeleteProperty(selectedProperty.id)}
-								onFavoriteToggle={() => handleToggleFavorite(selectedProperty)}
-								onContinue={() => {
-									setIsEditMode(false);
-									setSelectedProperty(null);
-								}}
-								isDeleting={isDeleting}
-							/>
-						)
-					) : (
-						<div className="flex flex-col items-center justify-center h-full">
-							<Search className="h-12 w-12 opacity-20" />
-							<p className="text-sm opacity-50 mt-2">Selecciona una propiedad para ver sus detalles</p>
-						</div>
-					)}
-				</Card>
-			</div>
+							<div className="flex flex-col items-center justify-center h-full">
+								<Search className="h-12 w-12 opacity-20" />
+								<p className="text-sm opacity-50 mt-2">Selecciona una propiedad para ver sus detalles</p>
+							</div>
+						)}
+					</Card>
+				</div>
 
-			{/* Dialog para crear nueva propiedad */}
-			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-				<CreatePropertyForm onSubmit={handleCreateProperty} onCancel={() => setIsCreateDialogOpen(false)} />
-			</Dialog>
-		</div>
+				{/* Dialog para crear nueva propiedad */}
+				<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+					<CreatePropertyForm onSubmit={handleCreateProperty} onCancel={() => setIsCreateDialogOpen(false)} />
+				</Dialog>
+			</div>
+		</ScrollArea>
 	);
 }

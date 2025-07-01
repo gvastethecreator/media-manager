@@ -156,10 +156,7 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 		}
 
 		if (search) {
-			where.OR = [
-				{ name: { contains: search } },
-				{ description: { contains: search } },
-			];
+			where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
 		}
 
 		// Obtener etiquetas

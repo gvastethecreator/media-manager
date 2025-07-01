@@ -1,18 +1,18 @@
 import type { CategoryItem } from '@/components/navigation/types';
 import {
-    BookImage,
-    Box,
-    Camera,
-    Database,
-    FolderIcon,
-    FolderKanban,
-    Lightbulb,
-    MapPin,
-    StickyNote,
-    TagIcon,
-    Terminal,
-    User2,
-    WandSparkles,
+	BookImage,
+	Box,
+	Camera,
+	Database,
+	FolderIcon,
+	FolderKanban,
+	Lightbulb,
+	MapPin,
+	StickyNote,
+	TagIcon,
+	Terminal,
+	User2,
+	WandSparkles,
 } from 'lucide-react';
 
 /**

@@ -9,20 +9,20 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    createCharacter as createCharacterService,
-    deleteCharacter as deleteCharacterService,
-    getCharacter as getCharacterService,
-    getCharacters as getCharactersService,
-    searchCharacters as searchCharactersService,
-    toggleCharacterFavorite as toggleCharacterFavoriteService,
-    updateCharacter as updateCharacterService,
-    type GetCharactersResult,
+	createCharacter as createCharacterService,
+	deleteCharacter as deleteCharacterService,
+	getCharacter as getCharacterService,
+	getCharacters as getCharactersService,
+	searchCharacters as searchCharactersService,
+	toggleCharacterFavorite as toggleCharacterFavoriteService,
+	updateCharacter as updateCharacterService,
+	type GetCharactersResult,
 } from '@/services/character';
 import type {
-    CharacterCreateInput,
-    CharacterSearchOptions,
-    CharacterUpdateInput,
-    CharacterWithStats,
+	CharacterCreateInput,
+	CharacterSearchOptions,
+	CharacterUpdateInput,
+	CharacterWithStats,
 } from '@/types/entities/character';
 
 const logger = serverLogger.withContext('CharacterActions');
@@ -192,4 +192,3 @@ export const getCharacterById = getCharacter;
 
 // Re-exportar tipos para uso externo
 export type { CharacterWithStats } from '@/types/entities/character';
-

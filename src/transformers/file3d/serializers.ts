@@ -12,20 +12,20 @@ export function validateFile3D(input: unknown): File3DWithStats {
 
 	// Crear File3D básico basándose en el schema de Prisma
 	const file3D: File3DWithStats = {
-		id: data.id as string || generateId(),
-		name: data.name as string || 'Sin nombre',
-		filePath: data.filePath as string || '',
-		format: data.format as string || 'unknown',
-		size: data.size as number || 0,
+		id: (data.id as string) || generateId(),
+		name: (data.name as string) || 'Sin nombre',
+		filePath: (data.filePath as string) || '',
+		format: (data.format as string) || 'unknown',
+		size: (data.size as number) || 0,
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		stats: {
 			polygonCount: 0,
 			textureSize: 0,
-			format: data.format as string || 'unknown',
+			format: (data.format as string) || 'unknown',
 			vertexCount: 0,
 			materialCount: 0,
-		}
+		},
 	};
 
 	return file3D;

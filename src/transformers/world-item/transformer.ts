@@ -30,11 +30,11 @@ import { fromPrismaTag, TagComplete } from '../tag/transformer';
 import { fromPrismaVideo } from '../video/transformer';
 import { fromPrismaWildcard } from '../wildcard/transformer';
 import {
-    deserializeAttributes,
-    deserializeEffects,
-    deserializeFilters,
-    deserializeRequirements,
-    deserializeStats,
+	deserializeAttributes,
+	deserializeEffects,
+	deserializeFilters,
+	deserializeRequirements,
+	deserializeStats,
 } from './serializers';
 
 // --- TIPO DE PAYLOAD DE PRISMA ---

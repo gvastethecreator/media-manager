@@ -82,8 +82,8 @@ export function ConceptsSettings() {
 					matches &&
 					Boolean(
 						concept.name.toLowerCase().includes(normalizedQuery) ||
-						concept.description?.toLowerCase().includes(normalizedQuery) ||
-						concept.content?.toLowerCase().includes(normalizedQuery)
+							concept.description?.toLowerCase().includes(normalizedQuery) ||
+							concept.content?.toLowerCase().includes(normalizedQuery)
 					);
 			}
 
@@ -341,38 +341,42 @@ export function ConceptsSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredConcepts.map((concept) => (
-										<button
+										<div
 											key={concept.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditConcept(concept)}
-											type="button"
-											aria-pressed={selectedConcept?.id === concept.id}
+											className={`relative group/item flex items-center gap-2 p-1.5 rounded-md transition-colors hover:bg-muted/50 w-full ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
 										>
-											<div
-												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{
-													backgroundColor: concept.color,
-												}}
+											<button
+												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												onClick={() => handleEditConcept(concept)}
+												type="button"
+												aria-pressed={selectedConcept?.id === concept.id}
 											>
-												<span className="text-xs">{concept.emoji}</span>
-											</div>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-xs font-medium truncate">{concept.name}</h4>
-												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													<span>{concept._count?.images || 0} imágenes</span>
-													{concept.category && (
-														<>
-															<span>•</span>
-															<span>{concept.category}</span>
-														</>
-													)}
+												<div
+													className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
+													style={{
+														backgroundColor: concept.color,
+													}}
+												>
+													<span className="text-xs">{concept.emoji}</span>
 												</div>
-											</div>
+												<div className="flex-1 min-w-0">
+													<h4 className="text-xs font-medium truncate">{concept.name}</h4>
+													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+														<span>{concept._count?.images || 0} imágenes</span>
+														{concept.category && (
+															<>
+																<span>•</span>
+																<span>{concept.category}</span>
+															</>
+														)}
+													</div>
+												</div>
+											</button>
 											<Button
 												variant="ghost"
 												size="icon"
 												type="button"
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
+												className="h-5 w-5 opacity-0 group-hover/item:opacity-100 absolute right-1"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteConcept(concept.id);
@@ -380,7 +384,7 @@ export function ConceptsSettings() {
 											>
 												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
 											</Button>
-										</button>
+										</div>
 									))}
 								</div>
 							)}

@@ -183,8 +183,8 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Comodín padre</FormLabel>
 									<Select
-										value={field.value || ''}
-										onValueChange={(value) => field.onChange(value === '' ? null : value)}
+										value={field.value || 'none'}
+										onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
 									>
 										<FormControl>
 											<SelectTrigger>
@@ -192,7 +192,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="">Sin padre (comodín raíz)</SelectItem>
+											<SelectItem value="none">Sin padre (comodín raíz)</SelectItem>
 											{eligibleParents.map((parent) => (
 												<SelectItem key={parent.id} value={parent.id}>
 													{parent.emoji} {parent.name}

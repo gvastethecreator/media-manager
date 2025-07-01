@@ -7,9 +7,9 @@
 
 // Re-exportar los tipos canónicos desde base.ts
 export type {
-    AudioBase,
-    AudioStatistics,
-    AudioWithStats
+	AudioBase,
+	AudioStatistics,
+	AudioWithStats,
 } from './base';
 
 // Tipos legacy - usar AudioWithStats en su lugar
@@ -25,7 +25,4 @@ export interface AudioPreview extends Pick<AudioBase, 'id' | 'name' | 'format' |
 }
 
 // Import types for legacy compatibility
-import type {
-    AudioBase,
-    AudioStatistics
-} from './base';
+import type { AudioBase, AudioStatistics } from './base';
