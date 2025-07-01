@@ -182,6 +182,102 @@ export async function getTagImages(tagId: string, limit = 50): Promise<FileItem[
 						color: true,
 					},
 				},
+				collections: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
+				albums: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
+				characters: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+						level: true,
+						class: true,
+						race: true,
+					},
+				},
+				places: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+						region: true,
+						type: true,
+						climate: true,
+					},
+				},
+				worldItems: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+						type: true,
+						rarity: true,
+					},
+				},
+				concepts: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
+				prompts: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
+				notes: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
+				groups: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
+				properties: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
+				wildcards: {
+					select: {
+						id: true,
+						name: true,
+						emoji: true,
+						color: true,
+					},
+				},
 			},
 			orderBy: { createdAt: 'desc' },
 			take: limit,
@@ -191,7 +287,8 @@ export async function getTagImages(tagId: string, limit = 50): Promise<FileItem[
 		const fileItems: FileItem[] = [];
 		for (const image of images) {
 			try {
-				const fileItem = await convertServerImageToFileItem(image);
+				// Cast seguro: la consulta incluye todos los campos necesarios para ServerImage
+				const fileItem = convertServerImageToFileItem(image as any);
 				fileItems.push(fileItem);
 			} catch (conversionError) {
 				tagLogger.warn('⚠️ Error convirtiendo imagen a FileItem:', { imageId: image.id, error: conversionError });
@@ -216,26 +313,47 @@ export async function getTagImages(tagId: string, limit = 50): Promise<FileItem[
  * @param options - Opciones de consulta
  * @returns Array de todos los tags con estadísticas
  */
-export async function getTags(options: {
-	limit?: number;
-	includeStats?: boolean;
-} = {}): Promise<TagWithStats[]> {
+export async function getTags(
+	includeStats = false,
+	includeImages = false,
+	limit?: number
+): Promise<TagWithStats[]> {
 	try {
-		const { limit = 1000, includeStats = true } = options;
-
-		tagLogger.info('🏷️ Obteniendo todos los tags:', { limit, includeStats });
+		tagLogger.info('🔄 Obteniendo tags:', { includeStats, includeImages, limit });
 
 		const tags = await prisma.tag.findMany({
-			include: includeStats ? tagCounts : undefined,
-			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
+			include: {
+				images: includeImages,
+				_count: includeStats ? {
+					images: true,
+					albums: true,
+					collections: true,
+					characters: true,
+				} : false,
+			},
+			orderBy: {
+				name: 'asc',
+			},
 			take: limit,
 		});
 
-		const transformedTags = tags.map(toTagWithStats);
-		tagLogger.info(`✅ ${transformedTags.length} tags obtenidos`);
+		// Solo transformar si includeStats es true, de lo contrario devolver tags base con stats vacías
+		const transformedTags = includeStats
+			? tags.map(toTagWithStats)
+			: tags.map(tag => ({
+				...tag,
+				stats: {
+					totalRelations: 0,
+					usageDiversity: 0,
+					popularity: 0,
+					completenessScore: 0,
+				}
+			} as TagWithStats));
+
+		tagLogger.info('✅ Tags obtenidos exitosamente:', transformedTags.length);
 		return transformedTags;
 	} catch (error) {
-		tagLogger.error('❌ Error al obtener todos los tags:', error);
-		throw createTagError('No se pudieron obtener los tags', TagErrorCode.OPERATION_FAILED, error);
+		tagLogger.error('❌ Error obteniendo tags:', error);
+		throw new Error(`Error obteniendo tags: ${error instanceof Error ? error.message : 'Error desconocido'}`);
 	}
 }
