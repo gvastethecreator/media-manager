@@ -68,11 +68,7 @@ export function File3DView(_props: ViewProps) {
 
 	if (sortedFile3Ds.length === 0) {
 		return (
-			<EmptyState
-				icon={Box}
-				title="No hay archivos 3D"
-				description="Sube archivos 3D para comenzar a usar el visor."
-			/>
+			<EmptyState icon={Box} title="No hay archivos 3D" description="Sube archivos 3D para comenzar a usar el visor." />
 		);
 	}
 

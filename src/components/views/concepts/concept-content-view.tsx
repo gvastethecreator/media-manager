@@ -55,12 +55,13 @@ export function ConceptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedConcept?.id ?? null,
 		containerName: selectedConcept?.name ?? null,
-		setCurrentContainer: () => { }, // No es necesario en el nuevo enfoque
+		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Lightbulb,
 			title: 'Concepto vacío',
-			description: `No se encontraron imágenes en ${selectedConcept?.name || 'este concepto'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				selectedConcept?.name || 'este concepto'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadConceptImages,
 	};
@@ -70,7 +71,9 @@ export function ConceptContentView() {
 	}
 
 	if (error || conceptError) {
-		return <div className="flex items-center justify-center p-8 text-red-500">Error: {error || conceptError?.message}</div>;
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || conceptError?.message}</div>
+		);
 	}
 
 	if (!items || items.length === 0) {

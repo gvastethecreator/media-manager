@@ -26,11 +26,11 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		data: wildcards = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = useWildcards({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -79,13 +79,7 @@ export function WildcardsView({ isVisible }: ViewProps) {
 			? `No se encontraron wildcards que coincidan con "${localSearch}"`
 			: 'No hay wildcards disponibles';
 
-		return (
-			<EmptyState
-				icon={Sparkles}
-				title="Sin wildcards"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={Sparkles} title="Sin wildcards" description={emptyMessage} />;
 	}
 
 	return (

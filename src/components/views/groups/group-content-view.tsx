@@ -21,9 +21,9 @@ export function GroupContentView(_props: ViewProps) {
 	const {
 		data: group,
 		isLoading,
-		error
+		error,
 	} = useGroup(groupId || '', {
-		enabled: !!groupId
+		enabled: !!groupId,
 	});
 
 	if (isLoading) {
@@ -33,9 +33,7 @@ export function GroupContentView(_props: ViewProps) {
 	if (error || !group) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">
-					Error: {error instanceof Error ? error.message : 'Grupo no encontrado'}
-				</p>
+				<p className="text-destructive">Error: {error instanceof Error ? error.message : 'Grupo no encontrado'}</p>
 			</div>
 		);
 	}

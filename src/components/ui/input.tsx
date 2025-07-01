@@ -22,4 +22,3 @@ function Input({ className, type, ...props }: React.ComponentProps<typeof InputP
 }
 
 export { Input };
-

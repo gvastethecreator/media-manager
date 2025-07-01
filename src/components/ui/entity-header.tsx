@@ -232,11 +232,7 @@ export function EntityHeader({
 							<React.Fragment key={`${item.label}-${item.href || index}`}>
 								{(backUrl || index > 0) && <BreadcrumbSeparator />}
 								<BreadcrumbItem>
-									{item.href ? (
-										<BreadcrumbLink to={item.href}>{item.label}</BreadcrumbLink>
-									) : (
-										<span>{item.label}</span>
-									)}
+									{item.href ? <BreadcrumbLink to={item.href}>{item.label}</BreadcrumbLink> : <span>{item.label}</span>}
 								</BreadcrumbItem>
 							</React.Fragment>
 						))}
@@ -316,7 +312,7 @@ export function EntityHeader({
 												className={cn(
 													'cursor-pointer',
 													action.variant === 'destructive' &&
-													'text-destructive focus:text-destructive hover:text-destructive'
+														'text-destructive focus:text-destructive hover:text-destructive'
 												)}
 											>
 												{action.icon && <span className="mr-2">{action.icon}</span>}

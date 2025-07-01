@@ -310,7 +310,6 @@ export async function verifySignedToken(token: string): Promise<{ buffer: Buffer
 		// TODO: Implementar lógica real de verificación de token
 		// Por ahora retornamos un placeholder
 		throw new Error('Token verification not implemented yet');
-
 	} catch (error) {
 		thumbLogger.error('❌ Error verificando token:', error);
 		throw new Error(`Token inválido: ${token}`);

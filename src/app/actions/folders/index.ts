@@ -11,4 +11,3 @@ export { getLatestFolderImages as getFolderImages } from '../images/folder-image
 export * from './crud.actions';
 // ✅ Re-exportar acciones de búsqueda y consulta
 export * from './query.actions';
-

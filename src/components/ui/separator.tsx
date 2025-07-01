@@ -9,12 +9,7 @@ interface SeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
 	decorative?: boolean;
 }
 
-function Separator({
-	className,
-	orientation = 'horizontal',
-	decorative = true,
-	...props
-}: SeparatorProps) {
+function Separator({ className, orientation = 'horizontal', decorative = true, ...props }: SeparatorProps) {
 	return (
 		<div
 			data-slot="separator"
@@ -32,4 +27,3 @@ function Separator({
 }
 
 export { Separator };
-

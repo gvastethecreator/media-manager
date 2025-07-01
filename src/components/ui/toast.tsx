@@ -49,11 +49,7 @@ function useToast() {
 
 // Provider component
 function ToastProvider({ children }: { children: React.ReactNode }) {
-	return (
-		<ToastPrimitive.Provider toastManager={toastManager}>
-			{children}
-		</ToastPrimitive.Provider>
-	);
+	return <ToastPrimitive.Provider toastManager={toastManager}>{children}</ToastPrimitive.Provider>;
 }
 
 // Viewport component
@@ -91,11 +87,7 @@ const toastVariants = cva(
 // Toast root component
 function Toast({ className, variant, title, description, action, ...props }: ToastProps) {
 	return (
-		<ToastPrimitive.Root
-			data-slot="toast"
-			className={cn(toastVariants({ variant }), className)}
-			{...props}
-		>
+		<ToastPrimitive.Root data-slot="toast" className={cn(toastVariants({ variant }), className)} {...props}>
 			<div className="grid gap-1">
 				{title && <ToastTitle>{title}</ToastTitle>}
 				{description && <ToastDescription>{description}</ToastDescription>}
@@ -138,13 +130,7 @@ function ToastClose({ className, ...props }: React.ComponentProps<typeof ToastPr
 
 // Toast title component
 function ToastTitle({ className, ...props }: React.ComponentProps<typeof ToastPrimitive.Title>) {
-	return (
-		<ToastPrimitive.Title
-			data-slot="toast-title"
-			className={cn('text-sm font-semibold', className)}
-			{...props}
-		/>
-	);
+	return <ToastPrimitive.Title data-slot="toast-title" className={cn('text-sm font-semibold', className)} {...props} />;
 }
 
 // Toast description component

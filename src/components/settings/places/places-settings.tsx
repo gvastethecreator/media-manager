@@ -35,12 +35,15 @@ export function PlacesSettings() {
 	const deletePlace = useDeletePlace();
 
 	// Calcular estadísticas generales usando useMemo para optimización
-	const stats = useMemo(() => ({
-		totalPlaces: places.length,
-		totalImages: places.reduce((acc, place) => acc + (place._count?.images || 0), 0),
-		unusedPlaces: places.filter((place) => (place._count?.images || 0) === 0).length,
-		favoritePlaces: places.filter((place) => place.isFavorite).length,
-	}), [places]);
+	const stats = useMemo(
+		() => ({
+			totalPlaces: places.length,
+			totalImages: places.reduce((acc, place) => acc + (place._count?.images || 0), 0),
+			unusedPlaces: places.filter((place) => (place._count?.images || 0) === 0).length,
+			favoritePlaces: places.filter((place) => place.isFavorite).length,
+		}),
+		[places]
+	);
 
 	// Filtrar lugares basados en los criterios seleccionados usando useMemo
 	const filteredPlaces = useMemo(() => {
@@ -54,8 +57,8 @@ export function PlacesSettings() {
 					matches &&
 					Boolean(
 						place.name.toLowerCase().includes(normalizedQuery) ||
-						place.description?.toLowerCase().includes(normalizedQuery) ||
-						place.region?.toLowerCase().includes(normalizedQuery)
+							place.description?.toLowerCase().includes(normalizedQuery) ||
+							place.region?.toLowerCase().includes(normalizedQuery)
 					);
 			}
 
@@ -79,19 +82,22 @@ export function PlacesSettings() {
 	}, [places, searchQuery, selectedTypes, selectedRegions, onlyFavorites]);
 
 	// Manejar eliminación de lugar
-	const handleDeletePlace = useCallback(async (id: string) => {
-		try {
-			await deletePlace.mutateAsync(id);
-			setSelectedPlace(null);
-			setIsEditing(false);
-			toastService.success('Lugar eliminado');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el lugar', {
-				description: errorMessage,
-			});
-		}
-	}, [deletePlace]);
+	const handleDeletePlace = useCallback(
+		async (id: string) => {
+			try {
+				await deletePlace.mutateAsync(id);
+				setSelectedPlace(null);
+				setIsEditing(false);
+				toastService.success('Lugar eliminado');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar el lugar', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deletePlace]
+	);
 
 	// Manejar edición de lugar
 	const handleEditPlace = useCallback((place: PlaceWithStats) => {
@@ -128,12 +134,12 @@ export function PlacesSettings() {
 	}, []);
 
 	// Extraer tipos y regiones únicos de los lugares usando useMemo
-	const uniqueTypes = useMemo(() =>
-		Array.from(new Set(places.map((place) => place.type).filter(Boolean))) as string[],
+	const uniqueTypes = useMemo(
+		() => Array.from(new Set(places.map((place) => place.type).filter(Boolean))) as string[],
 		[places]
 	);
-	const uniqueRegions = useMemo(() =>
-		Array.from(new Set(places.map((place) => place.region).filter(Boolean))) as string[],
+	const uniqueRegions = useMemo(
+		() => Array.from(new Set(places.map((place) => place.region).filter(Boolean))) as string[],
 		[places]
 	);
 

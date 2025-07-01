@@ -82,10 +82,10 @@ export function ServerStats() {
 		data: statsData,
 		isLoading: loading,
 		error,
-		refetch: fetchStats
+		refetch: fetchStats,
 	} = useSystemStats({
 		refetchInterval: 30000, // Actualizar cada 30 segundos
-		refetchIntervalInBackground: false
+		refetchIntervalInBackground: false,
 	});
 
 	// Extraer datos del response
@@ -396,7 +396,9 @@ export function ServerStats() {
 					) : (
 						<Card>
 							<CardContent className="pt-6">
-								<p className="text-center text-muted-foreground">No se pudieron cargar las estadísticas de la aplicación</p>
+								<p className="text-center text-muted-foreground">
+									No se pudieron cargar las estadísticas de la aplicación
+								</p>
 							</CardContent>
 						</Card>
 					)}
@@ -405,5 +407,3 @@ export function ServerStats() {
 		</div>
 	);
 }
-
-

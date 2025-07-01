@@ -26,11 +26,11 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		data: favorites = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = useFavorites({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -79,13 +79,7 @@ export function FavoritesView({ isVisible }: ViewProps) {
 			? `No se encontraron favoritos que coincidan con "${localSearch}"`
 			: 'No hay favoritos disponibles';
 
-		return (
-			<EmptyState
-				icon={Heart}
-				title="Sin favoritos"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={Heart} title="Sin favoritos" description={emptyMessage} />;
 	}
 
 	return (

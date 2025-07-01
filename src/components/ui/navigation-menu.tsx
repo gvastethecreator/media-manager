@@ -121,10 +121,7 @@ function NavigationMenuLink({ className, ...props }: React.ComponentProps<typeof
 	);
 }
 
-function NavigationMenuIndicator({
-	className,
-	...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Arrow>) {
+function NavigationMenuIndicator({ className, ...props }: React.ComponentProps<typeof NavigationMenuPrimitive.Arrow>) {
 	return (
 		<NavigationMenuPrimitive.Arrow
 			data-slot="navigation-menu-indicator"
@@ -148,6 +145,5 @@ export {
 	NavigationMenuList,
 	NavigationMenuTrigger,
 	navigationMenuTriggerStyle,
-	NavigationMenuViewport
+	NavigationMenuViewport,
 };
-

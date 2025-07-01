@@ -26,11 +26,11 @@ export function PlacesView({ isVisible }: ViewProps) {
 		data: places = [],
 		isLoading,
 		error,
-		refetch
+		refetch,
 	} = usePlaces({
 		search: localSearch,
 		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc'
+		sortOrder: sortOrder as 'asc' | 'desc',
 	});
 
 	// Sincronizar búsqueda local con store de navegación
@@ -79,13 +79,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 			? `No se encontraron lugares que coincidan con "${localSearch}"`
 			: 'No hay lugares disponibles';
 
-		return (
-			<EmptyState
-				icon={MapPin}
-				title="Sin lugares"
-				description={emptyMessage}
-			/>
-		);
+		return <EmptyState icon={MapPin} title="Sin lugares" description={emptyMessage} />;
 	}
 
 	return (

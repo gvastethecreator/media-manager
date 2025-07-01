@@ -21,7 +21,11 @@ export function CollectionContentView() {
 	const [loadingImages, setLoadingImages] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const { data: collectionImagesData, isLoading: isLoadingImages, error: collectionError } = useCollectionImages(selectedCollectionId);
+	const {
+		data: collectionImagesData,
+		isLoading: isLoadingImages,
+		error: collectionError,
+	} = useCollectionImages(selectedCollectionId);
 
 	useEffect(() => {
 		if (!selectedCollectionId) {
@@ -110,7 +114,11 @@ export function CollectionContentView() {
 	}
 
 	if (error || collectionError) {
-		return <div className="flex items-center justify-center p-8 text-red-500">Error: {error || collectionError?.message}</div>;
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">
+				Error: {error || collectionError?.message}
+			</div>
+		);
 	}
 
 	if (!collectionImages || collectionImages.length === 0) {

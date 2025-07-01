@@ -176,7 +176,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			imageLogger.info(`✅ ${images.length} imágenes obtenidas`);
 
 			// Validar que las imágenes tienen la estructura correcta
-			const validImages = images.filter(img => img && img.id && typeof img.id === 'string');
+			const validImages = images.filter((img) => img && img.id && typeof img.id === 'string');
 			if (validImages.length !== images.length) {
 				imageLogger.warn(`⚠️ Se filtraron ${images.length - validImages.length} imágenes inválidas`);
 			}

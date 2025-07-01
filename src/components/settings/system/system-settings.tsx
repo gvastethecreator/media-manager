@@ -49,7 +49,7 @@ export function SystemSettings() {
 			hostname: '',
 		} as SystemData,
 		isLoading,
-		refetch: loadSystemStats
+		refetch: loadSystemStats,
 	} = useSystemStats();
 
 	const repairSystemMutation = useRepairSystem();
@@ -97,7 +97,13 @@ export function SystemSettings() {
 						<span className="flex items-center gap-2 h-7">
 							<Activity className="h-5 w-5" /> Estado del Sistema
 						</span>
-						<Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => loadSystemStats()} disabled={isLoading}>
+						<Button
+							variant="ghost"
+							size="sm"
+							className="h-7 w-7 p-0"
+							onClick={() => loadSystemStats()}
+							disabled={isLoading}
+						>
 							<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
 							<span className="sr-only">Actualizar</span>
 						</Button>
@@ -211,8 +217,8 @@ export function SystemSettings() {
 											¿Resetear la base de datos?
 										</AlertDialogTitle>
 										<AlertDialogDescription>
-											Esta acción eliminará todos los datos de la base de datos y no se puede deshacer.
-											Todos los álbumes, imágenes, etiquetas y configuraciones se perderán permanentemente.
+											Esta acción eliminará todos los datos de la base de datos y no se puede deshacer. Todos los
+											álbumes, imágenes, etiquetas y configuraciones se perderán permanentemente.
 										</AlertDialogDescription>
 									</AlertDialogHeader>
 									<AlertDialogFooter>

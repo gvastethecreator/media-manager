@@ -18,4 +18,3 @@ function Label({ className, ...props }: React.ComponentProps<typeof BaseUILabel>
 }
 
 export { Label };
-

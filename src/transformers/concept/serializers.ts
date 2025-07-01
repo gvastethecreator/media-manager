@@ -15,7 +15,7 @@ export function deserializeTags(jsonString: string | undefined | null): string[]
 	try {
 		const parsed = JSON.parse(jsonString);
 		if (Array.isArray(parsed)) {
-			return parsed.filter(tag => typeof tag === 'string');
+			return parsed.filter((tag) => typeof tag === 'string');
 		}
 		return [];
 	} catch (error) {
