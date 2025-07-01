@@ -26,6 +26,31 @@ import type { WorldItemComplete } from './entities/world-item';
 export type ViewType = 'grid' | 'list' | 'masonry' | 'table';
 
 /**
+ * Tipos de archivo
+ */
+export enum FileType {
+	IMAGE = 'image',
+	VIDEO = 'video',
+	AUDIO = 'audio',
+	DOCUMENT = 'document',
+	ARCHIVE = 'archive',
+	DIRECTORY = 'directory',
+	FILE = 'file',
+	OTHER = 'other',
+}
+
+/**
+ * Estados de procesamiento de archivos
+ */
+export enum FileProcessingStatus {
+	PENDING = 'pending',
+	PROCESSING = 'processing',
+	COMPLETED = 'completed',
+	FAILED = 'failed',
+	CANCELLED = 'cancelled',
+}
+
+/**
  * Representa cualquier entidad que puede ser mostrada como un item en el explorador de archivos.
  * Es una unión de todos los tipos `...Complete` de las entidades principales.
  */

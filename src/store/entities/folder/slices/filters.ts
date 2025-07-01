@@ -10,7 +10,9 @@ import type { FolderFiltersSlice, FolderStore } from '../types';
 
 export interface FolderFiltersState {
 	sortBy: FolderSortCriteria;
+	sortDirection: 'asc' | 'desc';
 	viewMode: FolderViewMode;
+	itemSize: 'small' | 'medium' | 'large';
 	searchQuery: string;
 	showOnlyFavorites: boolean;
 	minOrganizationScore: number;
@@ -20,7 +22,9 @@ export interface FolderFiltersState {
 
 export const initialFiltersState: FolderFiltersState = {
 	sortBy: FolderSortCriteria.NAME_ASC,
+	sortDirection: 'asc',
 	viewMode: FolderViewMode.GRID,
+	itemSize: 'medium',
 	searchQuery: '',
 	showOnlyFavorites: false,
 	minOrganizationScore: 0,
@@ -34,12 +38,15 @@ export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderF
 
 	// Establecer filtros
 	setSortBy: (sortBy) => set({ sortBy }),
+	setSortDirection: (direction) => set({ sortDirection: direction }),
 	setViewMode: (viewMode) => set({ viewMode }),
+	setItemSize: (size) => set({ itemSize: size }),
 	setSearchQuery: (query) => set({ searchQuery: query }),
 	setShowOnlyFavorites: (show) => set({ showOnlyFavorites: show }),
 	setMinOrganizationScore: (score) => set({ minOrganizationScore: score }),
 	setShowEmptyFolders: (show) => set({ showEmptyFolders: show }),
 	setMaxDepth: (depth) => set({ maxDepth: depth }),
+	toggleFavorites: () => set((state) => ({ showOnlyFavorites: !state.showOnlyFavorites })),
 	resetFilters: () => set(initialFiltersState),
 
 	// Obtener carpetas filtradas
@@ -124,14 +131,16 @@ export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderF
 				case FolderSortCriteria.DEPTH_DESC:
 					return b.statistics.hierarchyDepth - a.statistics.hierarchyDepth;
 
-				case FolderSortCriteria.ACTIVITY_ASC:
+				case FolderSortCriteria.ACTIVITY_ASC: {
 					const aActivity = a.statistics.lastActivity?.getTime() || 0;
 					const bActivity = b.statistics.lastActivity?.getTime() || 0;
 					return aActivity - bActivity;
-				case FolderSortCriteria.ACTIVITY_DESC:
+				}
+				case FolderSortCriteria.ACTIVITY_DESC: {
 					const aActivityDesc = a.statistics.lastActivity?.getTime() || 0;
 					const bActivityDesc = b.statistics.lastActivity?.getTime() || 0;
 					return bActivityDesc - aActivityDesc;
+				}
 
 				default:
 					return 0;

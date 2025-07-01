@@ -7,9 +7,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
-import { FileJson } from 'lucide-react';
+import { Braces } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('JsonFilesView');
@@ -27,23 +27,18 @@ MemoizedJsonFileCard.displayName = 'MemoizedJsonFileCard';
 
 /**
  * Vista de archivos JSON
- * Muestra una lista de archivos JSON con cards TCG y soporte para edición/visualización.
+ * Muestra una lista de archivos JSON con cards TCG y soporte para edición.
  */
 export function JsonFilesView(_props: ViewProps) {
-	const {
-		jsonFiles: jsonFilesRecord,
-		loading: isLoading,
-		error,
-		fetchJsonFiles: loadJsonFiles,
-	} = useJsonFileStore((s) => ({
-		jsonFiles: s.jsonFiles,
-		loading: s.loading,
-		error: s.error,
-		fetchJsonFiles: s.fetchJsonFiles,
-	}));
+	// Usar selectores individuales para evitar recrear objetos
+	const jsonFilesRecord = useJsonFileStore((s) => s.jsonFiles);
+	const isLoading = useJsonFileStore((s) => s.isLoading);
+	const error = useJsonFileStore((s) => s.error);
+	const loadJsonFiles = useJsonFileStore((s) => s.loadJsonFiles);
+	const getSortedJsonFiles = useJsonFileStore((s) => s.getSortedJsonFiles);
 
 	useEffect(() => {
-		if (Array.isArray(jsonFilesRecord) && jsonFilesRecord.length === 0) {
+		if (Object.keys(jsonFilesRecord).length === 0) {
 			viewLogger.info('Store de archivos JSON vacío, cargando desde el servidor...');
 			loadJsonFiles();
 		}
@@ -51,8 +46,13 @@ export function JsonFilesView(_props: ViewProps) {
 
 	const handleJsonFileClick = useCallback((jsonFile: JsonFileWithStats) => {
 		viewLogger.info('🖱️ Click en archivo JSON:', jsonFile.name);
-		// Lógica de navegación o apertura de editor JSON aquí
+		// Lógica de navegación o apertura de editor aquí
 	}, []);
+
+	// Cachear el resultado de getSortedJsonFiles
+	const sortedJsonFiles = useMemo(() => {
+		return getSortedJsonFiles();
+	}, [getSortedJsonFiles, jsonFilesRecord]);
 
 	if (error) {
 		return (
@@ -62,21 +62,16 @@ export function JsonFilesView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading && (!Array.isArray(jsonFilesRecord) || jsonFilesRecord.length === 0)) {
+	if (isLoading && Object.keys(jsonFilesRecord).length === 0) {
 		return <LoadingScreen />;
 	}
-
-	// Lógica de ordenamiento simple (por fecha de actualización, más recientes primero)
-	const sortedJsonFiles = Array.isArray(jsonFilesRecord)
-		? jsonFilesRecord.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-		: [];
 
 	if (sortedJsonFiles.length === 0) {
 		return (
 			<EmptyState
-				icon={FileJson}
+				icon={Braces}
 				title="No hay archivos JSON"
-				description="Sube archivos JSON para comenzar a usar el editor y visor."
+				description="Sube archivos JSON para comenzar a usar el editor."
 			/>
 		);
 	}

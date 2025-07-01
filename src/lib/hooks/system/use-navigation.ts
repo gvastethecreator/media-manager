@@ -180,8 +180,8 @@ export const useNavigation = () => {
 	};
 };
 
-// 📂 Hook especializado para carpetas
-export const useFolder = () => {
+// 📂 Hook especializado para carpetas (navegación)
+export const useNavigationFolder = () => {
 	const store = useUnifiedFileManager();
 
 	return {

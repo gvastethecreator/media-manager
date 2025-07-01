@@ -9,7 +9,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import type { EntityWithStats } from '@/types/migration';
 import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
@@ -26,6 +26,16 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	// 📂 Usar selectores específicos para evitar re-renders innecesarios
 	const isLoading = useImageStore((s) => s.isLoading);
 	const error = useImageStore((s) => s.error);
+	const getImages = useImageStore((s) => s.getImages);
+
+	// Cachear el resultado de getImages para evitar loops infinitos
+	const images = useMemo(() => {
+		return getImages();
+	}, [getImages]);
+
+	// Estado local para controlar cargas y evitar loops
+	const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+	const [isRetrying, setIsRetrying] = useState(false);
 
 	const handleImageSelect = useCallback((image: EntityWithStats) => {
 		logger.info('🖱️ Imagen seleccionada:', image.name);
@@ -38,8 +48,9 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	}, []);
 
 	const handleForceRefresh = useCallback(async () => {
-		if (!currentFolderId) return;
+		if (!currentFolderId || isRetrying) return;
 
+		setIsRetrying(true);
 		logger.info('🔄 Forzando recarga de imágenes');
 		try {
 			// Usar getState para obtener la función de forma estable
@@ -47,15 +58,18 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 			await loadImages({ folderId: currentFolderId, refresh: true });
 		} catch (refreshError) {
 			logger.error('❌ Error al forzar recarga:', refreshError);
+		} finally {
+			setIsRetrying(false);
 		}
-	}, [currentFolderId]);
+	}, [currentFolderId, isRetrying]);
 
 	const handleScanFolder = useCallback(async () => {
-		if (!currentFolderId) {
-			logger.warn('⚠️ No hay carpeta seleccionada para escanear');
+		if (!currentFolderId || isRetrying) {
+			logger.warn('⚠️ No hay carpeta seleccionada para escanear o ya hay una operación en curso');
 			return;
 		}
 
+		setIsRetrying(true);
 		try {
 			logger.info(`🔄 Iniciando escaneo de carpeta: ${currentFolderId}`);
 
@@ -72,7 +86,34 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 			logger.info('✅ Escaneo y recarga completados');
 		} catch (error) {
 			logger.error('❌ Error durante el escaneo:', error);
+		} finally {
+			setIsRetrying(false);
 		}
+	}, [currentFolderId, isRetrying]);
+
+	// Efecto para cargar imágenes solo una vez por carpeta
+	useEffect(() => {
+		if (!currentFolderId) {
+			setHasAttemptedLoad(false);
+			return;
+		}
+
+		// Solo cargar si no hemos intentado cargar para esta carpeta y no estamos cargando
+		if (!hasAttemptedLoad && !isLoading) {
+			setHasAttemptedLoad(true);
+			logger.info(`📂 Cargando imágenes para carpeta: ${currentFolderId}`);
+
+			const { loadImages } = useImageStore.getState();
+			loadImages({ folderId: currentFolderId }).catch((loadError) => {
+				logger.error('❌ Error al cargar imágenes:', loadError);
+			});
+		}
+	}, [currentFolderId, hasAttemptedLoad, isLoading]);
+
+	// Resetear estado cuando cambia la carpeta
+	useEffect(() => {
+		setHasAttemptedLoad(false);
+		setIsRetrying(false);
 	}, [currentFolderId]);
 
 	// ️ Validación: verificar que hay una carpeta seleccionada
@@ -90,13 +131,13 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	}
 
 	// Mostrar estado de carga
-	if (isLoading) {
+	if (isLoading && !hasAttemptedLoad) {
 		logger.debug('⏳ Mostrando estado de carga');
 		return <LoadingScreen />;
 	}
 
-	// Mostrar estado de error
-	if (error) {
+	// Mostrar estado de error solo si hay error y hemos intentado cargar
+	if (error && hasAttemptedLoad) {
 		logger.error('❌ Error al cargar imágenes:', error);
 		return (
 			<div className="flex flex-col items-center justify-center h-full gap-4">
@@ -106,13 +147,23 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 					description={`Ha ocurrido un error al cargar las imágenes. ${typeof error === 'string' ? error : 'Error desconocido'}`}
 				/>
 				<div className="flex gap-2">
-					<Button variant="outline" size="sm" onClick={handleForceRefresh}>
-						<RefreshCw className="h-4 w-4 mr-2" />
-						Reintentar
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleForceRefresh}
+						disabled={isRetrying}
+					>
+						<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+						{isRetrying ? 'Reintentando...' : 'Reintentar'}
 					</Button>
-					<Button variant="outline" size="sm" onClick={handleScanFolder}>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleScanFolder}
+						disabled={isRetrying}
+					>
 						<FolderSearch className="h-4 w-4 mr-2" />
-						Escanear Carpeta
+						{isRetrying ? 'Escaneando...' : 'Escanear Carpeta'}
 					</Button>
 				</div>
 			</div>
@@ -124,13 +175,23 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		<div className="relative h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			{/* Controles en la esquina superior derecha */}
 			<div className="absolute top-2 right-2 z-10 flex gap-2">
-				<Button variant="outline" size="sm" onClick={handleScanFolder}>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={handleScanFolder}
+					disabled={isRetrying}
+				>
 					<FolderSearch className="h-4 w-4 mr-2" />
-					Escanear
+					{isRetrying ? 'Escaneando...' : 'Escanear'}
 				</Button>
-				<Button variant="outline" size="sm" onClick={handleForceRefresh}>
-					<RefreshCw className="h-4 w-4 mr-2" />
-					Recargar
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={handleForceRefresh}
+					disabled={isRetrying}
+				>
+					<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+					{isRetrying ? 'Recargando...' : 'Recargar'}
 				</Button>
 			</div>
 
@@ -165,4 +226,5 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
  * - Controles de recarga y escaneo integrados
  * - Información contextual de la carpeta
  * - UI consistente con el resto del sistema
+ * - Previene loops infinitos con estado local de control
  */

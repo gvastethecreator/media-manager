@@ -9,7 +9,7 @@ import { useAudioStore } from '@/store/entities/audio';
 import type { AudioWithStats } from '@/types/entities/audio';
 import { Music } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AudioView');
@@ -30,19 +30,12 @@ MemoizedAudioCard.displayName = 'MemoizedAudioCard';
  * Muestra una lista de audios con cards TCG y soporte para reproducción.
  */
 export function AudioView(_props: ViewProps) {
-	const {
-		audios: audiosRecord,
-		isLoading,
-		error,
-		loadAudios,
-		getSortedAudios,
-	} = useAudioStore((s) => ({
-		audios: s.audios,
-		isLoading: s.isLoading,
-		error: s.error,
-		loadAudios: s.loadAudios,
-		getSortedAudios: s.getSortedAudios,
-	}));
+	// Usar selectores individuales para evitar recrear objetos
+	const audiosRecord = useAudioStore((s) => s.audios);
+	const isLoading = useAudioStore((s) => s.isLoading);
+	const error = useAudioStore((s) => s.error);
+	const loadAudios = useAudioStore((s) => s.loadAudios);
+	const getSortedAudios = useAudioStore((s) => s.getSortedAudios);
 
 	useEffect(() => {
 		if (Object.keys(audiosRecord).length === 0) {
@@ -56,6 +49,11 @@ export function AudioView(_props: ViewProps) {
 		// Lógica de navegación o apertura de reproductor aquí
 	}, []);
 
+	// Cachear el resultado de getSortedAudios
+	const sortedAudios = useMemo(() => {
+		return getSortedAudios();
+	}, [getSortedAudios, audiosRecord]);
+
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -67,8 +65,6 @@ export function AudioView(_props: ViewProps) {
 	if (isLoading && Object.keys(audiosRecord).length === 0) {
 		return <LoadingScreen />;
 	}
-
-	const sortedAudios = getSortedAudios();
 
 	if (sortedAudios.length === 0) {
 		return (

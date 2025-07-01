@@ -1,5 +1,13 @@
 'use client';
 
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { useDetailsPanel } from '@/store/details-panel.store';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import {
 	Archive,
 	ArrowDown,
@@ -34,14 +42,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { useDetailsPanel } from '@/store/details-panel.store';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
 
 export interface ViewToolbarProps {
@@ -92,6 +92,9 @@ export function ViewToolbar({
 	];
 
 	const showDetailsButton = viewsWithDetails.includes(currentView);
+
+	// Determinar si estamos en la vista de settings para ocultar controles innecesarios
+	const isInSettingsView = currentView === 'settings';
 
 	// 🔄 Acciones para archivos seleccionados
 	const handleDeleteSelected = useCallback(() => {
@@ -477,13 +480,13 @@ export function ViewToolbar({
 			</div>
 
 			<div className="flex items-center gap-2">
-				{renderSearchInput()}
-				{renderSortButtons()}
-				{renderViewButtons()}
-				{renderSizeControls()}
-				{renderContextActions()}
+				{!isInSettingsView && renderSearchInput()}
+				{!isInSettingsView && renderSortButtons()}
+				{!isInSettingsView && renderViewButtons()}
+				{!isInSettingsView && renderSizeControls()}
+				{!isInSettingsView && renderContextActions()}
 
-				{showDetailsButton && (
+				{!isInSettingsView && showDetailsButton && (
 					<Button
 						variant="ghost"
 						size="icon"
@@ -495,7 +498,7 @@ export function ViewToolbar({
 					</Button>
 				)}
 
-				{isRightPanelVisible && (
+				{!isInSettingsView && isRightPanelVisible && (
 					<Button
 						variant="ghost"
 						size="icon"
