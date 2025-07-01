@@ -1,19 +1,16 @@
 'use client';
 
-import { Box } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
-
-import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
-import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
+import { useWorldItems } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
+import { Box } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('WorldItemsView');
@@ -21,36 +18,12 @@ const viewLogger = clientLogger.withContext('WorldItemsView');
 export function WorldItemsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const selectWorldItem = useWorldItemStore((state) => state.selectWorldItem);
-	const [worldItems, setWorldItems] = useState<WorldItemWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticWorldItems, _addEvent] = clientEvents.useEvents<WorldItemWithStats[]>(worldItems);
-
-	const fetchWorldItems = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando objetos del mundo...');
-			const data = await getWorldItems();
-			setWorldItems(data);
-			viewLogger.info(`✅ ${data.length} objetos del mundo cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando objetos del mundo:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		// Cargar objetos inicialmente
-		fetchWorldItems();
-	}, [fetchWorldItems]);
+	const { data: worldItemsResponse, isLoading, error } = useWorldItems();
+	const worldItems = worldItemsResponse?.data || [];
 
 	const handleWorldItemClick = useCallback(
-		(worldItem: WorldItemWithStats) => {
+		(worldItem: any) => {
 			viewLogger.info('🖱️ Click en objeto del mundo:', worldItem.name);
 			setCurrentView('world-item-content');
 			selectWorldItem(worldItem.id);
@@ -58,20 +31,10 @@ export function WorldItemsView(_props: ViewProps) {
 		[setCurrentView, selectWorldItem]
 	);
 
-	const _handleEditWorldItem = useCallback((worldItem: WorldItemWithStats) => {
-		viewLogger.info('✏️ Editando objeto del mundo:', worldItem.name);
-		// Implementar lógica de edición
-	}, []);
-
-	const _handleDeleteWorldItem = useCallback((id: string) => {
-		viewLogger.info('🗑️ Eliminando objeto del mundo:', id);
-		// Implementar lógica de eliminación
-	}, []);
-
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
+				<p className="text-destructive">Error: {error.message}</p>
 			</div>
 		);
 	}
@@ -80,7 +43,7 @@ export function WorldItemsView(_props: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!optimisticWorldItems || optimisticWorldItems.length === 0) {
+	if (!worldItems || worldItems.length === 0) {
 		return (
 			<EmptyState
 				icon={Box}
@@ -94,7 +57,7 @@ export function WorldItemsView(_props: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticWorldItems.map((worldItem, index) => (
+					{worldItems.map((worldItem, index) => (
 						<motion.div
 							key={worldItem.id}
 							initial={{ opacity: 0, y: 20 }}

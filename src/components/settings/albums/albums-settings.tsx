@@ -1,49 +1,34 @@
 'use client';
 
-import { deleteAlbum, getAlbums } from '@/app/actions/albums/album.actions';
-import { AlbumCard } from '@/components/cards/album-card/album-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAlbums, useDeleteAlbum } from '@/lib/api/albums';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import toastService from '@/services/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
 
 // Agregar tipo para manejar el onClick
 type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function AlbumsSettings() {
-	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 	const [selectedAlbum, setSelectedAlbum] = useState<AlbumWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
-	// Cargar álbumes al montar el componente
-	useEffect(() => {
-		const loadAlbums = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getAlbums();
-				setAlbums(data);
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				setError(errorMessage);
-				toastService.error('Error al cargar los álbumes', {
-					description: errorMessage,
-				});
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	// Usar React Query hooks en lugar de server actions
+	const {
+		data: albums = [],
+		isLoading,
+		error,
+		refetch: loadAlbums
+	} = useAlbums();
 
-		loadAlbums();
-	}, []);
+	const deleteAlbumMutation = useDeleteAlbum();
 
 	// Calcular estadísticas generales
 	const stats = {
@@ -56,8 +41,7 @@ export function AlbumsSettings() {
 	// Manejar eliminación de álbum
 	const handleDeleteAlbum = useCallback(async (id: string) => {
 		try {
-			await deleteAlbum(id);
-			setAlbums((prev) => prev.filter((album) => album.id !== id));
+			await deleteAlbumMutation.mutateAsync(id);
 			setSelectedAlbum(null);
 			setIsEditing(false);
 			toastService.success('Álbum eliminado');
@@ -67,7 +51,7 @@ export function AlbumsSettings() {
 				description: errorMessage,
 			});
 		}
-	}, []);
+	}, [deleteAlbumMutation]);
 
 	// Manejar edición de álbum
 	const handleEditAlbum = useCallback((album: AlbumWithStats) => {
@@ -86,13 +70,13 @@ export function AlbumsSettings() {
 
 	// Manejar creación exitosa
 	const handleAlbumCreated = useCallback((newAlbum: AlbumWithStats) => {
-		setAlbums((prev) => [...prev, newAlbum]);
+		// React Query actualizará automáticamente la cache
 		toastService.success('Álbum creado');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleAlbumUpdated = useCallback((updatedAlbum: AlbumWithStats) => {
-		setAlbums((prev) => prev.map((album) => (album.id === updatedAlbum.id ? { ...album, ...updatedAlbum } : album)));
+		// React Query actualizará automáticamente la cache
 		toastService.success('Álbum actualizado');
 	}, []);
 
@@ -128,8 +112,8 @@ export function AlbumsSettings() {
 					<EmptyState
 						icon={Info}
 						title="Error al cargar álbumes"
-						description={error}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
+						description={error instanceof Error ? error.message : 'Error desconocido'}
+						actions={<Button onClick={() => loadAlbums()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -199,12 +183,13 @@ export function AlbumsSettings() {
 												</div>
 											</button>
 											<Button
-												size="sm"
 												variant="ghost"
-												className="h-4 w-4 p-0 opacity-0 group-hover/item:opacity-100 absolute right-1"
+												size="sm"
 												onClick={(e) => _handleDeleteButtonClick(e, album.id)}
+												disabled={deleteAlbumMutation.isPending}
+												className="opacity-0 group-hover/item:opacity-100 h-5 w-5 p-0 text-destructive hover:text-destructive"
 											>
-												<Trash className="h-2.5 w-2.5" />
+												<Trash className="h-3 w-3" />
 											</Button>
 										</div>
 									))}
@@ -215,69 +200,30 @@ export function AlbumsSettings() {
 				</Card>
 			</div>
 
-			{/* Panel derecho: Formulario */}
+			{/* Panel derecho: Formulario de creación/edición */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
 				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-12rem)]">
 					<CardHeader className="space-y-0.5 py-1.5 px-2">
-						<CardTitle className="text-xs">{isEditing ? 'Editar álbum' : 'Crear álbum'}</CardTitle>
+						<CardTitle className="text-xs">
+							{selectedAlbum ? (isEditing ? 'Editar álbum' : 'Vista previa') : 'Crear álbum'}
+						</CardTitle>
 						<CardDescription className="text-[10px]">
-							{isEditing
-								? 'Modifica los detalles del álbum seleccionado'
-								: 'Crea un nuevo álbum para organizar tus imágenes'}
+							{selectedAlbum
+								? `${selectedAlbum.stats.imageCount || 0} imágenes asociadas`
+								: 'Completa los campos para crear un nuevo álbum'}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 p-2">
 						<CreateAlbumForm
 							album={selectedAlbum}
-							isEditing={isEditing}
-							onCreated={handleAlbumCreated}
-							onUpdated={handleAlbumUpdated}
-							onReset={handleReset}
+							onSubmit={selectedAlbum ? handleAlbumUpdated : handleAlbumCreated}
+							onCancel={handleReset}
 							onPreview={handlePreview}
+							isEditing={isEditing}
 						/>
 					</CardContent>
 				</Card>
 			</div>
-
-			{/* Panel de vista previa (opcional) */}
-			{previewData && (
-				<div className="col-span-12">
-					<Card className="rounded-sm bg-muted/30 border-none">
-						<CardHeader className="space-y-0.5 py-1.5 px-2">
-							<CardTitle className="text-xs">Vista previa</CardTitle>
-						</CardHeader>
-						<CardContent className="p-2">
-							<AlbumCard
-								album={{
-									...previewData,
-									id: 'preview',
-									createdAt: new Date(),
-									updatedAt: new Date(),
-									userId: null,
-									sortBy: previewData.sortBy || null,
-									filters: previewData.filters || null,
-									stats: {
-										imageCount: 0,
-										videoCount: 0,
-										collectionCount: 0,
-										tagCount: 0,
-										characterCount: 0,
-										placeCount: 0,
-										worldItemCount: 0,
-										conceptCount: 0,
-										promptCount: 0,
-										noteCount: 0,
-										wildcardCount: 0,
-										propertyCount: 0,
-										groupCount: 0,
-									},
-								}}
-								className="max-w-sm"
-							/>
-						</CardContent>
-					</Card>
-				</div>
-			)}
 		</div>
 	);
 }

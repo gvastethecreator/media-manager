@@ -1,6 +1,5 @@
 'use client';
 
-import { createConcept, updateConcept } from '@/app/actions/concepts/concept.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import toastService from '@/services/toast';
@@ -48,6 +47,10 @@ export function CreateConceptForm({
 }: CreateConceptFormProps) {
 	const [_isSubmitting, setIsSubmitting] = useState(false);
 
+	// React Query hooks
+	const createConceptMutation = useCreateConcept();
+	const updateConceptMutation = useUpdateConcept();
+
 	// Configurar react-hook-form
 	const form = useForm<ConceptForm>({
 		resolver: zodResolver(conceptSchema),
@@ -94,20 +97,22 @@ export function CreateConceptForm({
 
 			if (isEditing && concept) {
 				// Actualizar concepto existente con el ID
-				const updatedConcept = await updateConcept(concept.id, {
+				const updateData: ConceptUpdateInput = {
 					...data,
 					content: data.content || '',
-				} as ConceptUpdateInput);
+				};
+				const updatedConcept = await updateConceptMutation.mutateAsync({ id: concept.id, data: updateData });
 				if (onUpdated) {
 					onUpdated(updatedConcept);
 				}
 				toastService.success('Concepto actualizado correctamente');
 			} else {
 				// Crear nuevo concepto
-				const newConcept = await createConcept({
+				const createData: ConceptCreateInput = {
 					...data,
 					content: data.content || '',
-				} as ConceptCreateInput);
+				};
+				const newConcept = await createConceptMutation.mutateAsync(createData);
 				if (onCreated) {
 					onCreated(newConcept);
 				}

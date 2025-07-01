@@ -3,10 +3,10 @@
  * @module components/ui/page-heading
  */
 
-import Link from 'next/link';
-import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 interface PageHeadingProps {
 	title: string;
@@ -39,7 +39,7 @@ export default function PageHeading({
 				<div className="space-y-1">
 					{backLink && (
 						<Button variant="link" className="pl-0 text-muted-foreground" asChild>
-							<Link href={backLink}>← Volver</Link>
+							<Link to={backLink}>← Volver</Link>
 						</Button>
 					)}
 					<h1 className={cn('text-3xl font-bold tracking-tight', titleClassName)}>{title}</h1>

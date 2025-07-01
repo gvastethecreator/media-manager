@@ -5,10 +5,10 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { createNote, updateNote } from '@/app/actions/notes/note.actions';
 import { DynamicCreateForm, type FormField } from '@/components/settings/common/dynamic-create-form';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
 import toastService from '@/services/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
 import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note/types';
@@ -36,6 +36,9 @@ interface CreateNoteFormProps {
 }
 
 export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel }: CreateNoteFormProps) {
+	const createNoteMutation = useCreateNote();
+	const updateNoteMutation = useUpdateNote();
+
 	const form = useForm<NoteFormData>({
 		resolver: zodResolver(noteSchema),
 		defaultValues: {
@@ -67,11 +70,11 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel }:
 			let result: NoteBase;
 			if (isEditing && note?.id) {
 				const updateData: NoteUpdateInput = { ...data };
-				result = await updateNote(note.id, updateData);
+				result = await updateNoteMutation.mutateAsync({ id: note.id, data: updateData });
 				toastService.success('Nota actualizada correctamente');
 			} else {
 				const createData: NoteCreateInput = { ...data };
-				result = await createNote(createData);
+				result = await createNoteMutation.mutateAsync(createData);
 				toastService.success('Nota creada correctamente');
 				form.reset(); // Limpiar el formulario después de crear
 			}
@@ -105,13 +108,15 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel }:
 		// Aquí puedes agregar el campo de tags si tienes un componente para ello
 	];
 
+	const isSubmitting = createNoteMutation.isPending || updateNoteMutation.isPending;
+
 	return (
 		<DynamicCreateForm<NoteFormData>
 			form={form}
 			fields={fields}
 			optionalFields={optionalFields}
 			onSubmit={onSubmit}
-			isSubmitting={form.formState.isSubmitting}
+			isSubmitting={isSubmitting}
 			submitLabel={isEditing ? 'Guardar Cambios' : 'Crear Nota'}
 			onCancel={onCancel}
 		/>

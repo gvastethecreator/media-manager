@@ -10,7 +10,6 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { createPlace, updatePlace } from '@/app/actions/places/place.actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -71,6 +70,9 @@ interface CreatePlaceFormProps {
 }
 
 export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCancel, onPreview }: CreatePlaceFormProps) {
+	const createPlaceMutation = useCreatePlace();
+	const updatePlaceMutation = useUpdatePlace();
+
 	const form = useForm<PlaceFormValues>({
 		resolver: zodResolver(placeFormSchema) as any, // Forzamos el tipo para evitar conflicto de opcionales
 		defaultValues: placeFormSchema.parse({}),
@@ -122,7 +124,7 @@ export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCanc
 					featuredImage: normalize(values.featuredImage),
 					shortcut: normalize(values.shortcut),
 				};
-				result = await updatePlace(place.id, updateData);
+				result = await updatePlaceMutation.mutateAsync({ id: place.id, data: updateData });
 				toast(`Lugar actualizado: ${result.name}`);
 				onUpdated?.(result as PlaceWithStats);
 			} else {
@@ -140,7 +142,7 @@ export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCanc
 					shortcut: normalize(values.shortcut),
 					isFavorite: !!values.isFavorite,
 				};
-				result = await createPlace(createData);
+				result = await createPlaceMutation.mutateAsync(createData);
 				toast(`Lugar creado: ${result.name}`);
 				form.reset();
 				onCreated?.(result as PlaceWithStats);
@@ -457,7 +459,9 @@ export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCanc
 							Cancelar
 						</Button>
 					)}
-					<Button type="submit">{isEditing ? 'Guardar Cambios' : 'Crear Lugar'}</Button>
+					<Button type="submit" disabled={createPlaceMutation.isPending || updatePlaceMutation.isPending}>
+						{isEditing ? 'Guardar Cambios' : 'Crear Lugar'}
+					</Button>
 				</div>
 			</form>
 		</Form>

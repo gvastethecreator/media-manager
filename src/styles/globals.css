@@ -1,3 +1,11 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+/* Base UI Portal Configuration */
+.root {
+	isolation: isolate;
+}
+
 /* Importar estilos de tarjetas de entidades */
 @import "../components/features/entity-cards/styles/character-card.css";
 @import "../components/features/entity-cards/styles/place-card.css";

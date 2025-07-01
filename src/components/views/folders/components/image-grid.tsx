@@ -4,14 +4,13 @@
  */
 'use client';
 
-import { Image as ImageIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import Image from 'next/image';
-import { memo, useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import type { ImageWithStats } from '@/types/entities/image';
+import { Image as ImageIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useMemo } from 'react';
 
 const logger = clientLogger.withContext('ImageGrid');
 
@@ -43,8 +42,7 @@ const ImageCard = memo(function ImageCard({
 				{image.path ? (
 					<div
 						className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-200"
-						style={{ backgroundImage: `/api/images/thumbnail/${image.id}` }}
-						aria-label={`Thumbnail de ${image.name}`}
+						style={{ backgroundImage: `url(/api/images/thumbnail/${image.id})` }}
 					>
 						{/* Fallback content en caso de error */}
 						<div className="hidden w-full h-full flex-col items-center justify-center text-muted-foreground">

@@ -7,14 +7,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { PanelRightClose, X } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { memo, Suspense, useCallback, useEffect, useState } from 'react';
+import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react';
 
-// Lazy load del StatsPanel para reducir carga inicial
-const StatsPanel = dynamic(() => import('../stats/stats-panel'), {
-	ssr: false,
-	loading: () => <div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>,
-});
+// Carga perezosa del StatsPanel compatible con Vite/React 19
+const StatsPanel = lazy(() => import('../stats/stats-panel'));
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = memo(function LazyStatsPanel() {

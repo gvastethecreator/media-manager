@@ -1,15 +1,14 @@
 'use client';
 
-import { Box } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
-import { clientEvents } from '@/lib/client/events.client';
+import { useWorldItemImages } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useSelectionStore } from '@/store/selection.store';
 import type { FileItem } from '@/types/files';
+import { Box } from 'lucide-react';
+import { useCallback } from 'react';
 
 const viewLogger = clientLogger.withContext('WorldItemContentView');
 
@@ -18,37 +17,7 @@ export function WorldItemContentView() {
 	const selectedWorldItem = useWorldItemStore((state) => state.worldItems.find((item) => item.id === selectedId));
 	const { toggleSelection } = useSelectionStore();
 
-	const [items, setItems] = useState<FileItem[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
-
-	const loadWorldItemImages = useCallback(async () => {
-		if (!selectedId) {
-			return;
-		}
-
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando imágenes del objeto del mundo...');
-			const data = await getWorldItemImages(selectedId);
-			setItems(data as unknown as FileItem[]);
-			viewLogger.info('✅ Imágenes cargadas');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando imágenes:', errorMessage);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [selectedId]);
-
-	useEffect(() => {
-		// Cargar imágenes inicialmente
-		loadWorldItemImages();
-	}, [loadWorldItemImages]);
+	const { data: images = [], isLoading, error, refetch } = useWorldItemImages(selectedId || '');
 
 	const handleItemSelection = useCallback(
 		(item: FileItem) => {
@@ -59,24 +28,24 @@ export function WorldItemContentView() {
 	);
 
 	const contentProps: BaseContentProps = {
-		items: optimisticItems,
+		items: images as unknown as FileItem[],
 		isLoading,
-		error,
+		error: error ? error.message : null,
 		toggleItemSelection: handleItemSelection,
 		currentContainerId: selectedId ?? null,
 		containerName: selectedWorldItem?.name ?? null,
 		emptyState: !selectedId
 			? {
-					icon: Box,
-					title: 'No hay objeto del mundo seleccionado',
-					description: 'Selecciona un objeto del mundo para ver su contenido.',
-				}
+				icon: Box,
+				title: 'No hay objeto del mundo seleccionado',
+				description: 'Selecciona un objeto del mundo para ver su contenido.',
+			}
 			: {
-					icon: Box,
-					title: 'Objeto del mundo sin imágenes',
-					description: 'Este objeto del mundo no tiene imágenes asociadas.',
-				},
-		onRefresh: loadWorldItemImages,
+				icon: Box,
+				title: 'Objeto del mundo sin imágenes',
+				description: 'Este objeto del mundo no tiene imágenes asociadas.',
+			},
+		onRefresh: () => refetch(),
 	};
 
 	return (

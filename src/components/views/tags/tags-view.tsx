@@ -1,16 +1,16 @@
 'use client';
 
-import { Tag } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback, useEffect, useState } from 'react';
-import { getTagsAction } from '@/app/actions/tags';
 import { TagCard, type TagWithStats } from '@/components/cards/tag-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTags } from '@/lib/api/tags';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useTagStore } from '@/store/entities/tag';
+import { Tag } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('TagsView');
@@ -40,43 +40,9 @@ export function TagsView({ className }: ViewProps) {
 		selectedId: state.selectedId,
 		setSelectedId: (id: string) => state.setSelectedId(id),
 	}));
-	const [tags, setTags] = useState<TagWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 
-	// Cargar etiquetas al montar el componente
-	useEffect(() => {
-		async function loadTags() {
-			try {
-				setIsLoading(true);
-				viewLogger.info('🔄 Cargando etiquetas...');
-				const fetchedTags = await getTagsAction();
-
-				if (!fetchedTags) {
-					throw new Error('La acción de obtener etiquetas no devolvió resultados.');
-				}
-
-				// FIXME: Las fechas vienen serializadas como strings. La corrección
-				// debe hacerse en la capa de datos/serialización.
-				const transformedTags = fetchedTags.map((tag) => ({
-					...tag,
-					createdAt: new Date(tag.createdAt),
-					updatedAt: new Date(tag.updatedAt),
-				}));
-
-				setTags(transformedTags);
-				viewLogger.info(`✅ ${transformedTags.length} etiquetas cargadas`);
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-				viewLogger.error('❌ Error cargando etiquetas:', error);
-				setError(errorMessage);
-			} finally {
-				setIsLoading(false);
-			}
-		}
-
-		loadTags();
-	}, []);
+	const { data: tagsResponse, isLoading, error } = useTags();
+	const tags = tagsResponse?.data || [];
 
 	// Manejar el clic en una etiqueta
 	const handleTagClick = useCallback(
@@ -106,7 +72,7 @@ export function TagsView({ className }: ViewProps) {
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
+				<p className="text-destructive">Error: {error.message}</p>
 			</div>
 		);
 	}
