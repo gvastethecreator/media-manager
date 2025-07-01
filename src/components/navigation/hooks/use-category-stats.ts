@@ -51,7 +51,7 @@ export function useCategoryStats(initialData: NavigationData) {
 	const getImagesForCategory = useCallback(
 		(categoryId: NavigationCategory): number => {
 			const items = categoryDataMap[categoryId as keyof typeof categoryDataMap] as NavItem[] | undefined;
-			if (!items) return 0;
+			if (!items || !Array.isArray(items)) return 0;
 
 			return items.reduce((sum, item) => {
 				const count = item._count?.images ?? item.imageCount ?? 0;
@@ -63,7 +63,8 @@ export function useCategoryStats(initialData: NavigationData) {
 
 	const getCategoryItems = useCallback(
 		(categoryId: NavigationCategory): CategoryChild[] => {
-			const items = (categoryDataMap[categoryId as keyof typeof categoryDataMap] as NavItem[]) || [];
+			const items = categoryDataMap[categoryId as keyof typeof categoryDataMap] as NavItem[] | undefined;
+			if (!items || !Array.isArray(items)) return [];
 
 			return items.map(
 				(item): CategoryChild => ({

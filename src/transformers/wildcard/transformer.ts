@@ -16,14 +16,14 @@ const wildcardTransformerLogger = clientLogger.withContext('WildcardTransformer'
  * @param prismaWildcard El objeto Wildcard de Prisma
  * @returns Un objeto WildcardWithStats con estadísticas calculadas o null si el input es inválido
  */
-function fromPrismaWildcard(prismaWildcard: any | null): WildcardWithStats | null {
+export function fromPrismaWildcard(prismaWildcard: object | null): WildcardWithStats | null {
 	if (!prismaWildcard) {
 		wildcardTransformerLogger.warn('⚠️ Wildcard de Prisma nulo o indefinido');
 		return null;
 	}
 
 	try {
-		wildcardTransformerLogger.debug(`🔄 Transformando wildcard: ${prismaWildcard.id}`);
+		wildcardTransformerLogger.debug('🔄 Transformando wildcard');
 
 		// Usar el mapper existente toWildcardWithStats
 		return toWildcardWithStats(prismaWildcard);

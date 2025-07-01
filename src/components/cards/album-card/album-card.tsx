@@ -52,24 +52,24 @@ export function AlbumCard({
 	isSelected = false,
 	tcgMode = false,
 }: AlbumCardProps) {
-	// Calcular valores derivados
-	const imagesCount = album._count?.images || 0;
-	const videosCount = album._count?.videos || 0;
+	// Calcular valores derivados - usar stats en lugar de _count
+	const imagesCount = album.stats?.imageCount || 0;
+	const videosCount = album.stats?.videoCount || 0;
 	const totalMedia = imagesCount + videosCount;
 
-	// Calcular total de entidades relacionadas
+	// Calcular total de entidades relacionadas - usar stats en lugar de _count
 	const totalEntities =
-		(album._count?.collections || 0) +
-		(album._count?.tags || 0) +
-		(album._count?.characters || 0) +
-		(album._count?.places || 0) +
-		(album._count?.worldItems || 0) +
-		(album._count?.concepts || 0) +
-		(album._count?.prompts || 0) +
-		(album._count?.notes || 0) +
-		(album._count?.wildcards || 0) +
-		(album._count?.properties || 0) +
-		(album._count?.groups || 0);
+		(album.stats?.collectionCount || 0) +
+		(album.stats?.tagCount || 0) +
+		(album.stats?.characterCount || 0) +
+		(album.stats?.placeCount || 0) +
+		(album.stats?.worldItemCount || 0) +
+		(album.stats?.conceptCount || 0) +
+		(album.stats?.promptCount || 0) +
+		(album.stats?.noteCount || 0) +
+		(album.stats?.wildcardCount || 0) +
+		(album.stats?.propertyCount || 0) +
+		(album.stats?.groupCount || 0);
 
 	// Calcular color primario y secundario
 	const primaryColor = useMemo(() => album.color || '#8b5cf6', [album.color]);

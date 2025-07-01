@@ -3,8 +3,8 @@
  * @module utils/tag/validators
  */
 
+import { TagCategory, TagRarity } from '@/store/entities/tag/types';
 import { z } from 'zod';
-import { TagCategory, TagRarity } from '../../types/entities/tag';
 
 /**
  * Esquema de validación para crear una etiqueta

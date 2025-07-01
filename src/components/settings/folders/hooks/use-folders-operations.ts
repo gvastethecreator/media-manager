@@ -68,11 +68,12 @@ export function useFoldersOperations({
 				// Notificar inicio de procesamiento
 				onStartProcessing(folderId);
 
-				// TODO: Implementar reindex cuando esté disponible
-				// Por ahora solo actualizamos la fecha
-				await updateFolder(folderId, { lastIndexed: new Date() });
+				// Usar la nueva función de reindexado
+				const { reindexFolder } = await import('@/app/actions/folders/crud.actions');
+				await reindexFolder(folderId);
 
-				operationsLogger.info('✅ Reindexación iniciada');
+				operationsLogger.info('✅ Reindexación completada');
+				toastService.success('Carpeta reindexada correctamente');
 			} catch (error) {
 				operationsLogger.error('❌ Error al reindexar carpeta:', error);
 
@@ -135,12 +136,10 @@ export function useFoldersOperations({
 	// Reindexar todas las carpetas
 	const handleReindexAll = useCallback(async () => {
 		try {
-			operationsLogger.info('🔄 Iniciando reindexación global');
+			operationsLogger.info('🔄 Iniciando reindexación global directa');
 
-			// Notificar inicio del proceso global
+			// Iniciar directamente el proceso de reindexado sin diálogo
 			onReindexAllStart();
-
-			// La acción real se ejecutará en handleConfirmReindexAll en useFolders
 		} catch (error) {
 			operationsLogger.error('❌ Error al iniciar reindexación global:', error);
 

@@ -38,6 +38,11 @@ export enum FolderSortCriteria {
 }
 
 /**
+ * 📂 Alias para compatibilidad con código legacy
+ */
+export const FolderSortBy = FolderSortCriteria;
+
+/**
  * 📂 Tipos de Folder
  */
 export enum FolderType {

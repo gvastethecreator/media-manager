@@ -1,18 +1,37 @@
 /**
- * @file Serializadores para la entidad WorldItem
+ * @file Serializadoreconst deserializeArray = <T>(jsonString: string | null, fieldName: string): T[] => {
+	if (!jsonString) return [];
+	return safeJsonParse<T[]>(jsonString, []);
+};ara la entidad WorldItem
  * @module transformers/world-item/serializers
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { safeJsonParse } from '@/lib/utils/json';
 import type {
-	WorldItemAttribute,
-	WorldItemEffect,
-	WorldItemFilter,
-	WorldItemProperty,
-	WorldItemRequirement,
-	WorldItemStat,
+    WorldItemEffect,
+    WorldItemProperty,
+    WorldItemRequirement
 } from '@/types/entities/world-item';
-import { safeJsonParse } from '@/lib/utils/safe-json-parse';
+
+// Tipos para serializers compatibles
+type WorldItemAttribute = {
+	name: string;
+	value: string | number;
+	description?: string;
+};
+
+type WorldItemFilter = {
+	property: string;
+	operator: string;
+	value: unknown;
+};
+
+type WorldItemStat = {
+	name: string;
+	value: number;
+	type?: string;
+};
 
 const logger = serverLogger.withContext('WorldItemSerializers');
 
@@ -27,7 +46,8 @@ const serializeArray = <T>(data: T[] | string, fieldName: string): string => {
 };
 
 const deserializeArray = <T>(jsonString: string | null | undefined, fieldName: string): T[] => {
-	return safeJsonParse<T[]>(jsonString, `deserializando ${fieldName}`).unwrapOr([]);
+	if (!jsonString) return [];
+	return safeJsonParse<T[]>(jsonString, []);
 };
 
 // Attributes
@@ -60,3 +80,24 @@ export const deserializeFilters = (json: string | null): WorldItemFilter[] => de
 // Tags
 export const serializeTags = (data: string[] | string): string => serializeArray(data, 'tags');
 export const deserializeTags = (json: string | null): string[] => deserializeArray(json, 'tags');
+
+/**
+ * Extiende un WorldItem con datos adicionales
+ */
+export function extendWorldItem(item: Record<string, unknown>): Record<string, unknown> {
+	if (!item) return item;
+
+	return {
+		...item,
+		// Agregar extensiones aquí según sea necesario
+	};
+}
+
+/**
+ * Extiende múltiples WorldItems con datos adicionales
+ */
+export function extendWorldItems(items: Record<string, unknown>[]): Record<string, unknown>[] {
+	if (!items || !Array.isArray(items)) return [];
+
+	return items.map(extendWorldItem);
+}

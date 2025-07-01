@@ -1,4 +1,4 @@
-# REGLAS OBLIGATORIAS PARA EL WORKFLOW - cada una de estas reglas debe respetarse de forma consistente.
+# REGLAS OBLIGATORIAS PARA EL WORKFLOW - cada una de estas reglas debe respetarse de forma consistente
 
 1. **Español obligatorio** - Todas las respuestas, comentarios, documentación, etc. deben estar completamente en español.
 2. **Windows SIEMPRE** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell Core (pwsh) como terminal por defecto.
@@ -35,14 +35,14 @@
 - **Archivar tareas completadas** - Mover las tareas terminadas a una carpeta de archivo con nomenclatura clara: [ID]-nombre-descriptivo.md
 - **Diagramas obligatorios según contexto** - Incluir diagramas Mermaid para código/flujos técnicos, o mapas mentales para gestión de conocimiento
 
-### Sistema de Prioridades:
+### Sistema de Prioridades
 
 - `[LOW]` - Puede esperar sin consecuencias, no bloquea ningún otro trabajo
 - `[MEDIUM]` - Importante para el progreso pero no urgente en el corto plazo
 - `[HIGH]` - Necesita resolverse pronto porque puede bloquear otros trabajos
 - `[CRITICAL]` - Bloqueante crítico que debe resolverse inmediatamente
 
-### Categorías de Complejidad:
+### Categorías de Complejidad
 
 - `[SMALL]` - Cambio simple y localizado en pocos lugares
 - `[MEDIUM]` - Complejidad moderada que requiere análisis cuidadoso
@@ -84,7 +84,7 @@
 - **Documentar stack tecnológico** - Listar todas las dependencias principales con sus versiones y propósito
 - **Configuración clara y completa** - Documentar todos los scripts disponibles, variables de entorno necesarias, y pasos de setup
 
-### Para bases de conocimiento:
+### Para bases de conocimiento
 
 - **Enlaces bidireccionales abundantes** - Conectar conceptos relacionados usando [[]] para crear una red de conocimiento
 - **Tags semánticos descriptivos** - Usar #tags que faciliten la búsqueda y categorización futura
@@ -92,7 +92,7 @@
 - **Notas atómicas y enfocadas** - Una idea principal por nota para facilitar reutilización y vinculación
 - **Mapas de Contenido (MOCs)** - Crear índices temáticos que organicen y conecten notas relacionadas
 
-### Uso de emojis:
+### Uso de emojis
 
 - Usar con moderación en proyectos de código para no distraer
 - Usar creativamente en documentación de conocimiento para mejorar legibilidad
@@ -108,7 +108,7 @@
 
 ## 📝 Plantillas Adaptables
 
-### Para desarrollo:
+### Para desarrollo
 
 ````markdown
 [001] Implementar sistema de autenticación
@@ -146,7 +146,7 @@ F --> G[Requests autenticadas]
 \```
 ````
 
-### Para conocimiento:
+### Para conocimiento
 
 ```markdown
 # Arquitectura de Microservicios
@@ -196,7 +196,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 ## 🎨 Calidad Contextual
 
-### En código:
+### En código
 
 40. **Manejo de errores completo y robusto** - Try/catch apropiados, mensajes de error útiles, y fallbacks elegantes
 41. **Logs estratégicos y útiles** - Solo información que ayude a debug, no contaminar con logs innecesarios
@@ -204,7 +204,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 43. **Accesibilidad desde el inicio** - ARIA labels, navegación por teclado, y consideraciones de usuarios diversos
 44. **Diseño responsive nativo** - Mobile-first cuando sea apropiado, experiencia consistente en todos los dispositivos
 
-### En conocimiento:
+### En conocimiento
 
 40. **Profundidad adaptativa** - Desde resúmenes ejecutivos hasta análisis académicos profundos según necesidad
 41. **Múltiples perspectivas exploradas** - Considerar diferentes escuelas de pensamiento y enfoques alternativos
@@ -250,7 +250,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 ### Configuración Obligatoria
 
-- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 4444)
+- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 3000)
 - **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
 - **Scripts integrados** - Usar `pnpm test:e2e` (con logs automáticos) para testing formal
 - **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua
@@ -334,7 +334,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 pnpm dev                           # Servidor en 4444
 
 # 2. Validación continua con MCP
-# browser_navigate → http://localhost:4444
+# browser_navigate → http://localhost:3000
 # browser_snapshot → Revisar estructura
 # browser_console_messages → Detectar errores
 # browser_take_screenshot → Documentar estado

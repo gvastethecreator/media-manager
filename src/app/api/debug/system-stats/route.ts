@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { systemMonitor } from '@/lib/server/system-monitor';
+import { getSystemMonitorHelpers } from '@/lib/server/system-monitor';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { NextResponse } from 'next/server';
 import os from 'os';
@@ -17,8 +17,11 @@ export async function GET() {
 	try {
 		logger.info('Solicitud de estadísticas del sistema recibida');
 
+		// Obtener helpers del sistema
+		const { getSystemStats } = await getSystemMonitorHelpers();
+
 		// Obtener estadísticas del sistema
-		const stats = systemMonitor.getStats();
+		const stats = await getSystemStats();
 
 		// Formatear estadísticas para la API
 		const formattedStats = {

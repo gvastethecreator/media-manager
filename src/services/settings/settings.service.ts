@@ -3,14 +3,15 @@
  * @module services/settings
  */
 
+import { createSettingsError } from '@/app/actions/system/settings.errors';
+import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
+import { settingsSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
 
 // Logger específico para el servicio de configuración
 const logger = serverLogger.withContext('SettingsService');
-
-// Rutas que deben ser revalidadas cuando las configuraciones cambian
-const REVALIDATE_PATHS = ['/settings', '/profiles', '/'] as const;
 
 /**
  * Interfaz para operaciones de configuración global
@@ -48,21 +49,11 @@ export interface SettingsService {
 }
 
 /**
- * Convierte Record<string, unknown> a InputJsonValue para Prisma
+ * Convierte Record<string, unknown> a object para Prisma
  */
-function toInputJsonValue(data: Record<string, unknown>): InputJsonValue {
-	return JSON.parse(JSON.stringify(data)) as InputJsonValue;
+function toInputJsonValue(data: Record<string, unknown>): object {
+	return JSON.parse(JSON.stringify(data));
 }
-
-/**
- * Revalida todas las rutas relevantes cuando cambian las configuraciones
- */
-const revalidateAllPaths = async () => {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
-	}
-	logger.info('🔄 Rutas relacionadas con configuración revalidadas');
-};
 
 /**
  * Crea el objeto de datos predeterminados para la configuración
@@ -226,7 +217,6 @@ export const settingsService: SettingsService = {
 				},
 			});
 
-			await revalidateAllPaths();
 			logger.info('✅ Configuración global actualizada exitosamente');
 
 			return validationResult.data;
@@ -271,7 +261,6 @@ export const settingsService: SettingsService = {
 				},
 			});
 
-			await revalidateAllPaths();
 			logger.info('✅ Configuración global reseteada exitosamente');
 
 			return deserializeSettings(defaultData);
@@ -361,7 +350,6 @@ export const settingsService: SettingsService = {
 				},
 			});
 
-			await revalidateAllPaths();
 			logger.info(`✅ Configuración del perfil ${profileId} actualizada exitosamente`);
 
 			return validationResult.data;
@@ -394,7 +382,6 @@ export const settingsService: SettingsService = {
 				where: { profileId },
 			});
 
-			await revalidateAllPaths();
 			logger.info(`✅ Configuración del perfil ${profileId} reseteada exitosamente`);
 		} catch (error) {
 			logger.error(`❌ Error al resetear configuración del perfil ${profileId}:`, error);

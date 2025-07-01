@@ -3,8 +3,8 @@
  * @module utils/activity/helpers
  */
 
-import { getActivityCategory } from '../../transformers/activity/serializers';
-import { type Activity, ActivityCategory, ActivityType } from '../../types/entities/activity';
+import { getActivityCategory } from '@/transformers/activity/serializers';
+import { type Activity, ActivityCategory, ActivityType } from '@/types/entities/activity';
 
 /**
  * Obtiene un título descriptivo para la actividad

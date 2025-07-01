@@ -9,16 +9,25 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import toastService from '@/services/toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { toastService } from '@/services/toast';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
 import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateCharacterForm } from './create-character-form';
 
-// Eliminar la referencia a avatar (ya arreglado) y actualizar la sección traits
-// Agregar una declaración de tipo seguro para el manejador de eventos
-type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
+// Tipos seguros para el manejo de eventos y datos de preview
+interface PreviewData {
+	name?: string;
+	description?: string;
+	color?: string;
+	emoji?: string;
+	race?: string;
+	class?: string;
+	category?: string;
+	isFavorite?: boolean;
+}
 
 export function CharactersSettings() {
 	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
@@ -26,7 +35,7 @@ export function CharactersSettings() {
 	const [error, setError] = useState<string | null>(null);
 	const [selectedCharacter, setSelectedCharacter] = useState<CharacterWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
-	const [previewData, setPreviewData] = useState<any>(null);
+	const [previewData, setPreviewData] = useState<PreviewData | null>(null);
 
 	// Filtros
 	const [searchQuery, setSearchQuery] = useState('');
@@ -39,7 +48,7 @@ export function CharactersSettings() {
 		const loadCharacters = async () => {
 			try {
 				setIsLoading(true);
-				const data = await searchCharacters({});
+				const data = await searchCharacters('');
 				setCharacters(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -58,53 +67,53 @@ export function CharactersSettings() {
 	// Calcular estadísticas generales - 📊 Verificar que characters sea un array válido
 	const stats = Array.isArray(characters)
 		? {
-				totalCharacters: characters.length,
-				totalImages: characters.reduce((acc, character) => acc + (character.statistics?.totalImages || 0), 0),
-				totalSize: characters.reduce((acc, character) => acc + (character.statistics?.totalAssociations || 0), 0),
-				unusedCharacters: characters.filter((character) => (character.statistics?.totalImages || 0) === 0).length,
-				favoriteCharacters: characters.filter((character) => character.isFavorite).length,
-			}
+			totalCharacters: characters.length,
+			totalImages: characters.reduce((acc, character) => acc + (character.statistics?.totalImages || 0), 0),
+			totalSize: characters.reduce((acc, character) => acc + (character.statistics?.totalAssociations || 0), 0),
+			unusedCharacters: characters.filter((character) => (character.statistics?.totalImages || 0) === 0).length,
+			favoriteCharacters: characters.filter((character) => character.isFavorite).length,
+		}
 		: {
-				totalCharacters: 0,
-				totalImages: 0,
-				totalSize: 0,
-				unusedCharacters: 0,
-				favoriteCharacters: 0,
-			};
+			totalCharacters: 0,
+			totalImages: 0,
+			totalSize: 0,
+			unusedCharacters: 0,
+			favoriteCharacters: 0,
+		};
 
 	// Filtrar personajes basados en los criterios seleccionados - 🔍 Verificar que characters sea un array
 	const filteredCharacters = Array.isArray(characters)
 		? characters.filter((character) => {
-				let matches = true;
+			let matches = true;
 
-				// Filtrar por búsqueda
-				if (searchQuery) {
-					const normalizedQuery = searchQuery.toLowerCase();
-					matches =
-						matches &&
-						Boolean(
-							character.name.toLowerCase().includes(normalizedQuery) ||
-								character.description?.toLowerCase().includes(normalizedQuery)
-						);
-				}
+			// Filtrar por búsqueda
+			if (searchQuery) {
+				const normalizedQuery = searchQuery.toLowerCase();
+				matches =
+					matches &&
+					Boolean(
+						character.name.toLowerCase().includes(normalizedQuery) ||
+						character.description?.toLowerCase().includes(normalizedQuery)
+					);
+			}
 
-				// Filtrar por categorías
-				if (selectedCategories.length > 0) {
-					matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
-				}
+			// Filtrar por categorías
+			if (selectedCategories.length > 0) {
+				matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
+			}
 
-				// Filtrar por clases
-				if (selectedClasses.length > 0) {
-					matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
-				}
+			// Filtrar por clases
+			if (selectedClasses.length > 0) {
+				matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
+			}
 
-				// Filtrar por favoritos
-				if (onlyFavorites) {
-					matches = matches && !!character.isFavorite;
-				}
+			// Filtrar por favoritos
+			if (onlyFavorites) {
+				matches = matches && !!character.isFavorite;
+			}
 
-				return matches;
-			})
+			return matches;
+		})
 		: [];
 
 	// Manejar eliminación de personaje
@@ -130,10 +139,9 @@ export function CharactersSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const _handleDeleteButtonClick = useCallback(
-		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
-			e.stopPropagation();
-			handleDeleteCharacter(id);
+	const handleDeleteButtonClick = useCallback(
+		(characterId: string) => {
+			handleDeleteCharacter(characterId);
 		},
 		[handleDeleteCharacter]
 	);
@@ -161,7 +169,7 @@ export function CharactersSettings() {
 	}, []);
 
 	// Manejar la previsualización en tiempo real
-	const handlePreview = useCallback((data: any) => {
+	const handlePreview = useCallback((data: PreviewData) => {
 		setPreviewData(data);
 	}, []);
 
@@ -201,7 +209,7 @@ export function CharactersSettings() {
 						icon={Info}
 						title="Error al cargar personajes"
 						description={error}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
+						actions={<Button onClick={() => globalThis.location?.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -341,7 +349,7 @@ export function CharactersSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="flex-1 p-0">
-						<div className="h-full px-3 pb-3 overflow-auto">
+						<ScrollArea className="h-full px-3 pb-3">
 							{filteredCharacters.length === 0 ? (
 								<EmptyState
 									icon={Users}
@@ -400,10 +408,8 @@ export function CharactersSettings() {
 												size="icon"
 												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={() => {
-													// Capturar el evento de clic en línea
-													const e = window.event as MouseEvent;
-													if (e) e.stopPropagation();
+												onClick={(e) => {
+													e.stopPropagation();
 													handleDeleteCharacter(character.id);
 												}}
 											>
@@ -413,7 +419,7 @@ export function CharactersSettings() {
 									))}
 								</div>
 							)}
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>
@@ -456,7 +462,7 @@ export function CharactersSettings() {
 						</div>
 					</CardHeader>
 					<CardContent className="p-3 flex-1 overflow-hidden">
-						<div className="h-full pr-3 overflow-auto">
+						<ScrollArea className="h-full pr-3">
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
 								<div className="space-y-3">
 									<CreateCharacterForm
@@ -519,7 +525,7 @@ export function CharactersSettings() {
 									</div>
 								</div>
 							</div>
-						</div>
+						</ScrollArea>
 					</CardContent>
 				</Card>
 			</div>

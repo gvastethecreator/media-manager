@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils';
+import { TagRarity } from '@/store/entities/tag/types';
 import {
 	Album,
 	BookOpen,
@@ -11,12 +13,11 @@ import {
 	MessageSquare,
 	Package,
 	PanelTop,
-	TagBase as TagIcon,
+	Tag as TagIcon,
 	UserSquare,
 	Video,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { TagRarity } from '@/types/entities/tag';
+import React from 'react';
 
 interface TagCardContentProps {
 	description?: string | null;
@@ -80,14 +81,15 @@ export function TagCardContent({
 		groupsCount > 0;
 
 	// Conseguir un factor de brillo basado en la rareza para efectos visuales
-	const rarityBrightness =
-		{
-			[TagRarity.COMMON]: 1,
-			[TagRarity.UNCOMMON]: 1.2,
-			[TagRarity.RARE]: 1.5,
-			[TagRarity.EPIC]: 1.8,
-			[TagRarity.LEGENDARY]: 2.2,
-		}[rarity as keyof typeof rarityBrightness] || 1;
+	const rarityBrightnessMap = {
+		[TagRarity.COMMON]: 1,
+		[TagRarity.UNCOMMON]: 1.2,
+		[TagRarity.RARE]: 1.5,
+		[TagRarity.VERY_RARE]: 1.8,
+		[TagRarity.LEGENDARY]: 2.2,
+	} as const;
+
+	const rarityBrightness: number = rarityBrightnessMap[rarity as keyof typeof rarityBrightnessMap] || 1;
 
 	// Renderizar una barra de stats para TCG mode
 	const renderStatBar = (icon: React.ReactNode, count: number, label: string, color: string = primaryColor) => {

@@ -2,12 +2,12 @@ import { prisma } from '@/lib/database/prisma';
 import { validateProfilePreferences } from '@/lib/utils/profile/profile-utils';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
-	type CreateProfileInput,
-	Language,
-	type ProfileFilters,
-	type ProfilePaginationOptions,
-	ThemeMode,
-	type UpdateProfileInput,
+    type CreateProfileInput,
+    Language,
+    type ProfileFilters,
+    type ProfilePaginationOptions,
+    ThemeMode,
+    type UpdateProfileInput,
 } from '@/types/entities/profile/types';
 
 /**
@@ -186,11 +186,12 @@ export async function updateProfile(id: string, data: UpdateProfileInput) {
 		const updateData: Record<string, unknown> = {};
 
 		if (data.name !== undefined) updateData.name = data.name.trim();
-		if (data.description !== undefined) updateData.description = data.description.trim();
+		if (data.description !== undefined && data.description !== null) updateData.description = data.description.trim();
 		if (data.emoji !== undefined) updateData.emoji = data.emoji;
 		if (data.color !== undefined) updateData.color = data.color;
-		if (data.theme !== undefined) updateData.theme = data.theme;
-		if (data.language !== undefined) updateData.language = data.language;
+		// theme y language no existen en el modelo Profile
+		// if (data.theme !== undefined) updateData.theme = data.theme;
+		// if (data.language !== undefined) updateData.language = data.language;
 
 		// Si se está activando, desactivar los demás
 		if (data.isActive === true && !profile.isActive) {
@@ -343,8 +344,6 @@ export async function ensureDefaultProfile() {
 					name: 'Perfil por defecto',
 					emoji: '👤',
 					color: '#3b82f6',
-					theme: ThemeMode.SYSTEM,
-					language: Language.SPANISH,
 					isActive: true,
 				},
 			});

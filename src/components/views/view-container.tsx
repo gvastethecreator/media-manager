@@ -3,7 +3,7 @@
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
 import { AnimatePresence, motion } from 'motion/react';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
 import { AlbumContentView } from './albums/album-content-view';
 import { AlbumsView } from './albums/albums-view';
@@ -155,42 +155,32 @@ interface ViewContainerProps {
 
 export function ViewContainer({ isResizing }: ViewContainerProps) {
 	const { currentView, navigationDirection } = useNavigationStore();
-	// Usar un ref para controlar el montaje del preloader y evitar ciclos infinitos
-	const preloaderMountedRef = useRef(false);
-	const [showPreloader, setShowPreloader] = useState(!preloaderMountedRef.current);
+	// Usar una variable estática para controlar el montaje único del preloader
+	const [hasInitialized, setHasInitialized] = useState(false);
 
-	// Efectuar el montaje único del preloader
+	// Efecto que se ejecuta solo una vez al montar el componente
 	useEffect(() => {
-		// Si ya está marcado como montado, no hacer nada
-		if (preloaderMountedRef.current) {
+		// Si ya se ha inicializado globalmente, no hacer nada
+		if (typeof window !== 'undefined' && window.entityPreloadComplete) {
+			setHasInitialized(true);
 			return;
 		}
 
-		// Marcar como montado para evitar futuros montajes
-		preloaderMountedRef.current = true;
-
-		// Después de 5 segundos, forzar a false para garantizar que no quede montado indefinidamente
-		// Este es un mecanismo de seguridad
-		const timer = setTimeout(() => {
-			setShowPreloader(false);
-		}, 5000);
-
-		return () => {
-			clearTimeout(timer);
-		};
-	}, []);
+		// Si no está inicializado, proceder con la inicialización
+		if (!hasInitialized) {
+			setHasInitialized(true);
+		}
+	}, []); // Sin dependencias para que se ejecute solo una vez
 
 	return (
 		<div className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
-			{/* Solo montar el EntityPreloader una vez al inicio */}
-			{showPreloader && (
+			{/* Solo montar el EntityPreloader si no se ha inicializado globalmente */}
+			{!hasInitialized && typeof window !== 'undefined' && !window.entityPreloadComplete && (
 				<EntityPreloader
 					mode="all"
 					respectGlobalState={false}
 					onPreloadComplete={() => {
-						// Una vez completada la precarga, desmontamos el componente
-						setShowPreloader(false);
-						console.log('Todas las entidades precargadas con éxito');
+						setHasInitialized(true);
 					}}
 				/>
 			)}

@@ -4,20 +4,20 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	CreateWildcardData,
-	UpdateWildcardData,
-	WildcardBase,
-	WildcardBulkUpdateData,
-	WildcardRelated,
-	WildcardSearchFilters,
-	WildcardSearchOptions,
-} from '@/types/entities/wildcard';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import type {
+    CreateWildcardData,
+    UpdateWildcardData,
+    WildcardBase,
+    WildcardBulkUpdateData,
+    WildcardRelated,
+    WildcardSearchFilters,
+    WildcardSearchOptions,
+} from '@/types/entities/wildcard';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
 
 // Logger específico para este módulo
-const logger = serverLogger.withContext({ module: 'WildcardTransformer:Mappers' });
+const logger = serverLogger.withContext('WildcardTransformer:Mappers');
 
 /**
  * Mapea datos de creación de wildcard a formato Prisma

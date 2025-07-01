@@ -4,8 +4,6 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
-'use server';
-
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PromptComplete, PromptFromPrisma } from '@/types/entities/prompt';
 import type { PropertyComplete } from '@/types/entities/property';

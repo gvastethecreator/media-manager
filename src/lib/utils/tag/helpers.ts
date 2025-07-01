@@ -3,14 +3,15 @@
  * @module utils/tag/helpers
  */
 
-import { type Tag, TagCategory, TagSortCriteria } from '../../types/entities/tag';
-import { generateTagColor, generateTagEmoji } from '../string-utils';
+import { TagCategory, TagSortCriteria } from '@/store/entities/tag/types';
+import { type TagBase } from '@/types/entities/tag';
+import { generateTagColor, generateTagEmoji } from '../string.utils';
 
 /**
  * Tipo local para etiquetas que incluyen el conteo de relaciones de Prisma.
  * @dev Se usa para evitar contaminar el tipo canónico `Tag` con propiedades de ORM.
  */
-type TagWithCount = Tag & {
+type TagWithCount = TagBase & {
 	_count?: {
 		images?: number;
 	};
@@ -22,7 +23,7 @@ type TagWithCount = Tag & {
  * @param searchTerm Término de búsqueda
  * @returns Lista de etiquetas filtradas
  */
-export function searchTags(tags: Tag[], searchTerm: string): Tag[] {
+export function searchTags(tags: TagBase[], searchTerm: string): TagBase[] {
 	const normalizedTerm = searchTerm.toLowerCase().trim();
 	if (!normalizedTerm) return tags;
 
@@ -75,8 +76,8 @@ export function sortTags(tags: TagWithCount[], sortBy: TagSortCriteria): TagWith
  * @param tags Lista de etiquetas
  * @returns Mapa de etiquetas agrupadas por categoría
  */
-export function groupTagsByCategory(tags: Tag[]): Record<string, Tag[]> {
-	const groups: Record<string, Tag[]> = {};
+export function groupTagsByCategory(tags: TagBase[]): Record<string, TagBase[]> {
+	const groups: Record<string, TagBase[]> = {};
 
 	// Inicializar grupos para todas las categorías
 	for (const category of Object.values(TagCategory)) {
@@ -111,7 +112,7 @@ export function getMostUsedTags(tags: TagWithCount[], limit = 10): TagWithCount[
  * @param existingTags Etiquetas existentes
  * @returns Verdadero si la etiqueta es válida
  */
-export function isValidTagName(name: string, existingTags: Tag[] = []): boolean {
+export function isValidTagName(name: string, existingTags: TagBase[] = []): boolean {
 	if (!name || name.trim().length < 2) return false;
 
 	// Verificar que no exista una etiqueta con el mismo nombre
@@ -124,7 +125,7 @@ export function isValidTagName(name: string, existingTags: Tag[] = []): boolean 
  * @param category Categoría opcional
  * @returns Nueva etiqueta temporal
  */
-export function createTemporaryTag(name: string, category?: string): Tag {
+export function createTemporaryTag(name: string, category?: string): TagBase {
 	// 🎨 Genera una etiqueta temporal para la UI, sin persistencia.
 	// No se incluyen campos como rarity o estados de UI que no están en el tipo canónico.
 	return {

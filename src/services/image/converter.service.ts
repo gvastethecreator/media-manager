@@ -106,7 +106,7 @@ export interface ServerImage {
 	thumbnailSize: number | null;
 	thumbnailWidth: number | null;
 	thumbnailHeight: number | null;
-	isPublic: boolean;
+	isPublic?: boolean; // Campo opcional - no existe en todos los modelos
 	isFavorite: boolean;
 	folderId: string;
 	createdAt: Date;

@@ -1,5 +1,5 @@
 import { CardContent, CardFooter } from '@/components/ui/card';
-import { formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/format.utils';
 import type { GroupWithStats } from '@/types/entities/group';
 import { GroupDetails } from './components/group-details';
 import { GroupFilters } from './components/group-filters';

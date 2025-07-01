@@ -7,7 +7,7 @@ import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { getDocuments } from '@/app/actions/document/document.actions';
 import { getFile3Ds } from '@/app/actions/file3d/file-3d.actions';
-import { getFolders } from '@/app/actions/folders/';
+import { getAllFolders } from '@/app/actions/folders/';
 import { getGroups } from '@/app/actions/groups/group.actions';
 import { getJsonFiles } from '@/app/actions/json-file/json-file.actions';
 import { getNotes } from '@/app/actions/notes/note.actions';
@@ -60,7 +60,7 @@ export async function revalidateNavigation() {
 }
 
 export interface NavigationData {
-	folders: Awaited<ReturnType<typeof getFolders>>;
+	folders: Awaited<ReturnType<typeof getAllFolders>>;
 	collections: Awaited<ReturnType<typeof getCollections>>;
 	tags: Awaited<ReturnType<typeof getTagsAction>>;
 	albums: Awaited<ReturnType<typeof getAlbums>>;
@@ -90,7 +90,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 		navLogger.info('🧭 Obteniendo datos de navegación');
 
 		const results = await Promise.allSettled([
-			getFolders(),
+			getAllFolders(),
 			getCollections(),
 			getTagsAction(),
 			getAlbums(),
@@ -111,6 +111,13 @@ export async function getNavigationData(): Promise<NavigationData> {
 			getSystemStats(),
 		]);
 
+		// Debug temporal: Ver resultados de folders
+		navLogger.info('🔍 [Debug] Resultado de getAllFolders:', {
+			status: results[0].status,
+			value: results[0].status === 'fulfilled' ? results[0].value : null,
+			error: results[0].status === 'rejected' ? results[0].reason : null,
+		});
+
 		navLogger.info('✅ Datos de navegación obtenidos exitosamente');
 
 		const defaultStats: SystemStats = {
@@ -122,19 +129,11 @@ export async function getNavigationData(): Promise<NavigationData> {
 			totalCharacters: 0,
 			totalPlaces: 0,
 			totalWorldItems: 0,
-			totalGroups: 0,
-			totalProperties: 0,
-			totalWildcards: 0,
 			totalFavorites: 0,
 			totalActivities: 0,
 			totalSize: 0,
 			totalViews: 0,
 			totalDownloads: 0,
-			totalAudios: 0,
-			totalDocuments: 0,
-			totalJsonFiles: 0,
-			totalFile3Ds: 0,
-			totalWorkflows: 0,
 			topTags: [],
 			recentActivity: [],
 		};

@@ -1,6 +1,6 @@
 'use client';
 
-import { DetailsPanelV2 } from '@/components/features/file-browser/details/details-panel-v2';
+import { DetailsPanel } from '@/components/features/file-browser/details/details-panel';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -117,7 +117,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				(hasSelectedItems ? (
 					<ScrollArea className="flex-1">
 						<div className="p-2">
-							<DetailsPanelV2 selectedItems={selectedItems} />
+							<DetailsPanel selectedItems={selectedItems} />
 						</div>
 					</ScrollArea>
 				) : (

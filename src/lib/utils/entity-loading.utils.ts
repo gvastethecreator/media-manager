@@ -1,5 +1,5 @@
 import { ENTITY_DISPLAY_NAMES, type EntityType } from '@/constants/entities';
-import { serverLogger } from './logger/server-logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Logger para las utilidades de entidades
 const entityUtilsLogger = serverLogger.withContext('EntityUtils');

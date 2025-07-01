@@ -3,7 +3,12 @@
  * @module utils/video/helpers
  */
 
-import { type Video, VideoFormat, type VideoMetadata } from '../../types/entities/video';
+import { formatBytes } from '@/lib/utils/format.utils';
+import { type VideoBase, VideoFormat } from '@/types/entities/video';
+import { VideoMetadataSchema } from '@/types/entities/video/schema';
+import { z } from 'zod';
+
+type VideoMetadata = z.infer<typeof VideoMetadataSchema>;
 
 /**
  * Formatea la duración de un video en segundos a formato legible
@@ -33,7 +38,7 @@ export function formatVideoDuration(durationSeconds?: number): string {
  * @returns URL para la miniatura
  */
 export function generateVideoThumbnailUrl(
-	video: Video | string,
+	video: VideoBase | string,
 	width?: number,
 	height?: number,
 	timestamp?: number
@@ -180,7 +185,7 @@ export function extractVideoTagSuggestions(metadata?: VideoMetadata): string[] {
  * @param video Objeto de video
  * @returns true si tiene metadatos completos
  */
-export function hasCompleteMetadata(video: Video): boolean {
+export function hasCompleteMetadata(video: VideoBase): boolean {
 	if (!video.metadata) return false;
 
 	const metadata: VideoMetadata = typeof video.metadata === 'string' ? JSON.parse(video.metadata) : video.metadata;
@@ -196,7 +201,7 @@ export function hasCompleteMetadata(video: Video): boolean {
  * @returns URL para streaming
  */
 export function generateVideoStreamUrl(
-	video: Video | string,
+	video: VideoBase | string,
 	quality: 'auto' | 'high' | 'medium' | 'low' = 'auto'
 ): string {
 	const videoId = typeof video === 'string' ? video : video.id;
@@ -215,7 +220,7 @@ export function generateVideoStreamUrl(
  * @param filename Nombre opcional para el archivo
  * @returns URL para descarga
  */
-export function generateVideoDownloadUrl(video: Video | string, filename?: string): string {
+export function generateVideoDownloadUrl(video: VideoBase | string, filename?: string): string {
 	const videoId = typeof video === 'string' ? video : video.id;
 	let url = `/api/videos/${videoId}/download`;
 
