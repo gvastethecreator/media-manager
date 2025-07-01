@@ -9,10 +9,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-    PrismaVideoWithCounts,
-    VideoComplete,
-    VideoStatistics,
-    VideoWithStats,
+	PrismaVideoWithCounts,
+	VideoComplete,
+	VideoStatistics,
+	VideoWithStats,
 } from '@/types/entities/video/types';
 import { VideoQuality } from '@/types/entities/video/types';
 import type { Prisma } from '@prisma/client';

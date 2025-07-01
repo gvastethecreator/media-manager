@@ -4,7 +4,7 @@ import { createCharacter, updateCharacter } from '@/app/actions/characters/chara
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toastService } from '@/services/toast';
+import toastService from '@/services/toast';
 import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } from '@/types/entities/character';
 import {
 	CHARACTER_CLASS_COLORS,

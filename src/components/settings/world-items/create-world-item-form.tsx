@@ -4,10 +4,6 @@
 // Ahora solo el campo "name" es obligatorio, el resto se agrega dinámicamente.
 // Validación y tipos corregidos para compatibilidad con el patrón reusable.
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createWorldItem, updateWorldItem } from '@/app/actions/world-items/world-item.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
@@ -17,6 +13,10 @@ import toastService from '@/services/toast';
 import type { WorldItemCreateInput } from '@/types/entities/world-item';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
 import type { WorldItemComplete } from '@/types/entities/world-item/extended';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)
@@ -167,7 +167,7 @@ export function CreateWorldItemForm({
 						<SelectValue placeholder="Seleccionar tipo" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="">Ninguno</SelectItem>
+						<SelectItem value="none">Ninguno</SelectItem>
 						{Object.values(WorldItemType).map((type) => (
 							<SelectItem key={type} value={String(type)}>
 								{String(type)}
@@ -186,7 +186,7 @@ export function CreateWorldItemForm({
 						<SelectValue placeholder="Seleccionar categoría" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="">Ninguna</SelectItem>
+						<SelectItem value="none">Ninguna</SelectItem>
 						{Object.values(WorldItemCategory).map((cat) => (
 							<SelectItem key={cat} value={String(cat)}>
 								{String(cat)}
@@ -205,7 +205,7 @@ export function CreateWorldItemForm({
 						<SelectValue placeholder="Seleccionar rareza" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="">Ninguna</SelectItem>
+						<SelectItem value="none">Ninguna</SelectItem>
 						{Object.values(WorldItemRarity).map((rarity) => (
 							<SelectItem key={rarity} value={String(rarity)}>
 								{String(rarity)}

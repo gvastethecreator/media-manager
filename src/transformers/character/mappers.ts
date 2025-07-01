@@ -4,13 +4,13 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
 	CharacterCreateInput,
 	CharacterFilters,
 	CharacterSearchOptions,
 	CharacterUpdateInput,
 } from '@/types/entities/character';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -97,7 +97,7 @@ export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOption
 function mapCharacterFiltersToPrisma(filters: CharacterFilters): Prisma.CharacterWhereInput {
 	const where: Prisma.CharacterWhereInput = {};
 
-	if (filters.search) {
+	if (filters.search && typeof filters.search === 'string' && filters.search.trim()) {
 		where.OR = [
 			{ name: { contains: filters.search } },
 			{ description: { contains: filters.search } },

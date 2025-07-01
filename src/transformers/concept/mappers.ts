@@ -117,11 +117,7 @@ export function createFilter(filters: ConceptSearchOptions['filters'] = {}): Pri
 	if (filters?.search) {
 		const search = filters.search.trim();
 		conditions.push({
-			OR: [
-				{ name: { contains: search } },
-				{ description: { contains: search } },
-				{ content: { contains: search } },
-			],
+			OR: [{ name: { contains: search } }, { description: { contains: search } }, { content: { contains: search } }],
 		});
 	}
 

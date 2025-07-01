@@ -11,11 +11,11 @@ import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import {
-    PrismaWildcardWithCounts,
-    WildcardCreateInput,
-    WildcardSearchOptions,
-    WildcardUpdateInput,
-    WildcardWithStats,
+	PrismaWildcardWithCounts,
+	WildcardCreateInput,
+	WildcardSearchOptions,
+	WildcardUpdateInput,
+	WildcardWithStats,
 } from '@/types/entities/wildcard';
 import type { Prisma } from '@prisma/client';
 
@@ -130,10 +130,7 @@ function mapWildcardFiltersToPrisma(filters: NonNullable<WildcardSearchOptions['
 	const where: Prisma.WildcardWhereInput = {};
 
 	if (filters.searchQuery) {
-		where.OR = [
-			{ name: { contains: filters.searchQuery } },
-			{ description: { contains: filters.searchQuery } },
-		];
+		where.OR = [{ name: { contains: filters.searchQuery } }, { description: { contains: filters.searchQuery } }];
 	}
 
 	if (filters.categories && filters.categories.length > 0) {

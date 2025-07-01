@@ -11,7 +11,7 @@ export enum AlbumType {
 	SMART = 'smart',
 	FAVORITES = 'favorites',
 	RECENT = 'recent',
-	ARCHIVE = 'archive'
+	ARCHIVE = 'archive',
 }
 
 /**
@@ -21,7 +21,7 @@ export enum AlbumViewMode {
 	GRID = 'grid',
 	LIST = 'list',
 	MASONRY = 'masonry',
-	SLIDES = 'slides'
+	SLIDES = 'slides',
 }
 
 /**
@@ -30,7 +30,7 @@ export enum AlbumViewMode {
 export enum AlbumDisplayState {
 	COLLAPSED = 'collapsed',
 	EXPANDED = 'expanded',
-	MINIMIZED = 'minimized'
+	MINIMIZED = 'minimized',
 }
 
 /**
@@ -40,7 +40,7 @@ export enum AlbumPrivacyLevel {
 	PRIVATE = 'private',
 	PUBLIC = 'public',
 	UNLISTED = 'unlisted',
-	FRIENDS = 'friends'
+	FRIENDS = 'friends',
 }
 
 /**
@@ -56,5 +56,5 @@ export enum AlbumSortCriteria {
 	SIZE_ASC = 'size_asc',
 	SIZE_DESC = 'size_desc',
 	POPULARITY_ASC = 'popularity_asc',
-	POPULARITY_DESC = 'popularity_desc'
+	POPULARITY_DESC = 'popularity_desc',
 }

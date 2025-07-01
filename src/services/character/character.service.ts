@@ -22,7 +22,6 @@ import type {
 	CharacterUpdateInput,
 	CharacterWithStats,
 } from '@/types/entities/character';
-import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Logger específico para el servicio
@@ -417,9 +416,10 @@ export async function searchCharacters(query: string): Promise<CharacterWithStat
 		logger.info(`🔍 Buscando personajes: "${query}"`);
 
 		const searchOptions: CharacterSearchOptions = {
-			search: query,
-			orderBy: 'name',
-			orderDirection: 'asc',
+			filters: {
+				search: query,
+			},
+			orderBy: { name: 'asc' },
 		};
 
 		const result = await getCharacters(searchOptions);
@@ -443,9 +443,10 @@ export async function getCharactersByCategory(category: string): Promise<Charact
 		logger.info(`🔍 Obteniendo personajes por categoría: ${category}`);
 
 		const searchOptions: CharacterSearchOptions = {
-			category,
-			orderBy: 'name',
-			orderDirection: 'asc',
+			filters: {
+				category: [category],
+			},
+			orderBy: { name: 'asc' },
 		};
 
 		const result = await getCharacters(searchOptions);
@@ -469,9 +470,10 @@ export async function getFavoriteCharacters(): Promise<CharacterWithStats[]> {
 		logger.info('⭐ Obteniendo personajes favoritos');
 
 		const searchOptions: CharacterSearchOptions = {
-			onlyFavorites: true,
-			orderBy: 'name',
-			orderDirection: 'asc',
+			filters: {
+				isFavorite: true,
+			},
+			orderBy: { name: 'asc' },
 		};
 
 		const result = await getCharacters(searchOptions);

@@ -19,12 +19,12 @@ export type { CollectionBase, CollectionStatistics, CollectionWithStats } from '
 
 // --- Enumeraciones ---
 export {
-    COLLECTION_CATEGORY_COLORS,
-    COLLECTION_CATEGORY_EMOJIS,
-    CollectionCategory,
-    CollectionPlatform,
-    CollectionRarity,
-    CollectionSortOption
+	COLLECTION_CATEGORY_COLORS,
+	COLLECTION_CATEGORY_EMOJIS,
+	CollectionCategory,
+	CollectionPlatform,
+	CollectionRarity,
+	CollectionSortOption,
 } from './enums';
 
 // --- Esquemas de Validación (si existen) ---

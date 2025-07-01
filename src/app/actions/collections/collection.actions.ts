@@ -10,10 +10,10 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import collectionService from '@/services/collection';
 import type {
-    CollectionCreateInput,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
-    CollectionWithStats,
+	CollectionCreateInput,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
+	CollectionWithStats,
 } from '@/types/entities/collection';
 
 const logger = serverLogger.withContext('CollectionActions');

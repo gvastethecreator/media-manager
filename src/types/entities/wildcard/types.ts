@@ -90,8 +90,8 @@ export interface WildcardBulkUpdateData {
 export interface WildcardRelated {
 	id?: string;
 	name?: string;
-	properties: Array<{ id: string; name: string; }>;
-	tags: Array<{ id: string; name: string; }>;
+	properties: Array<{ id: string; name: string }>;
+	tags: Array<{ id: string; name: string }>;
 }
 
 export interface WildcardSearchFilters {
@@ -106,9 +106,9 @@ export interface WildcardDeserialized {
 	name: string;
 	description?: string | null;
 	category?: string | null;
-	properties: Array<{ id: string; name: string; value?: unknown; }>;
-	children: Array<{ id: string; name: string; }>;
-	tags: Array<{ id: string; name: string; }>;
+	properties: Array<{ id: string; name: string; value?: unknown }>;
+	children: Array<{ id: string; name: string }>;
+	tags: Array<{ id: string; name: string }>;
 	createdAt: Date;
 	updatedAt: Date;
 }
