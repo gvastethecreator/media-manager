@@ -6,253 +6,185 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 
 ## Tecnologías
 
-- **Next.js 15.3.3** - Framework de React con App Router
+### Stack Actual (Migración en progreso)
+
+- **Vite 7.0** - Build tool y desarrollo frontend
 - **React 19** - Biblioteca de UI
-- **Prisma** - ORM para acceso a base de datos (futura migración a Drizzle)
+- **Express 5** - Servidor API
+- **Prisma** - ORM para acceso a base de datos
 - **Tailwind CSS 4** - Framework de estilos
 - **Shadcn/UI** - Componentes de UI integrados con Tailwind 4
 - **Zustand** - Gestión de estado
-- **Server Actions** - Acciones del servidor para operaciones CRUD
+- **React Router v6** - Enrutamiento frontend
+- **Vitest** - Testing framework
 - **Motion** - Animaciones fluidas
 - **Biome** - Linter y formateador unificado
 
-## Actualizaciones Importantes (Junio 2025)
+### Stack Legacy (En migración)
 
-- **Documentación Técnica Actualizada** - Nuevas guías y patrones estandarizados
-- **Nuevo Patrón de Server Actions** - Respuesta directa sin objetos wrapper legacy
-- **Estandarización de Transformers** - Funciones consistentes para todas las entidades
-- **Guía de Migración** - Instrucciones para actualizar código legacy
-- **Correcciones de Tipos** - Refactorización continua de errores de TypeScript
+- ~~**Next.js 15.3.3**~~ → **Vite 7.0**
+- ~~**Server Actions**~~ → **Express 5 API**
+- ~~**API Routes**~~ → **Express Routes**
 
-## Arquitectura
+## Estado de la Migración
 
-- **Stores** consumen directamente las Server Actions eliminando llamadas a la API REST
-- **Server Actions** devuelven directamente entidades transformadas y utilizan excepciones estándar
-- **Transformers** implementan funciones estandarizadas (`fromPrismaEntity`, `extendEntity`, etc.)
-- **Tipos** definidos en módulos canónicos separados de la implementación Prisma
-- **PlaceStore** usa `getPlaces` y `getPlace` para cargar datos sin `fetch`
-- **VisualConfig** y estadísticas de debug se obtienen ahora mediante Server Actions
-- **Videos** gestionan su configuración visual con Server Actions
-- **File Manager** consolidado; carga imágenes y colecciones únicamente mediante Server Actions
-- **Legacy file-manager.store.ts** eliminado; se usa solo `unified-file-manager.store.ts`
-- **ImageStore** ahora usa getImage y getImages directamente desde Server Actions
-- **Stores** ya no importan tipos de Prisma, previniendo errores de bundler en el cliente
-- **Entities Cards** permite ajustar efectos de tarjetas para personajes, lugares y objetos
-- **EntityPreloader** carga todas las entidades exclusivamente a través de Server Actions
+### ✅ Completado
 
-## Características Principales
+- [x] **T01** - Auditoría de dependencias
+- [x] **T02** - Configuración inicial Vite 7 + React + TS
+- [x] **T03** - Integración Tailwind 4, PostCSS
+- [x] **T04** - Scripts package.json básicos
+- [x] **T06** - Servidor Express 5 básico
+- [x] **T07** - Configuración Vitest
 
-- **Gestión completa de activos digitales**: Imágenes, videos, colecciones, álbumes
-- **Sistema de organización avanzado**: Carpetas, etiquetas, grupos, colecciones
-- **Múltiples vistas**: Grid, lista, tabla para todas las entidades
-- **Worldbuilding**: Componentes para personajes, lugares, objetos, conceptos
-- **Búsqueda avanzada**: Búsqueda por metadatos, contenido y relaciones
-- **Filtros y ordenación**: Opciones avanzadas en todas las entidades
-- **Estadísticas detalladas**: Métricas de uso y relaciones para cada entidad
-- **Interfaz responsive**: Diseño adaptable a diferentes dispositivos
-- **Seeds de ejemplo**: La base de datos se puede poblar con varios perfiles,
-  carpetas y objetos de muestra ejecutando `pnpm prisma db seed`
+### 🚧 En Progreso
 
-## Estructura del Proyecto
+- [ ] **T05** - Migración completa routing React Router v6
+- [ ] **T06** - Migración completa Server Actions → Express API
+- [ ] **T08** - Documentación actualizada
+- [ ] **T09** - Limpieza código Next.js legacy
 
-```
-src/
-├── app/                    # App Router de Next.js
-│   ├── actions/            # Server Actions
-│   └── components/         # Componentes específicos de la aplicación
-├── components/             # Componentes compartidos
-│   ├── ui/                 # Componentes de UI (shadcn)
-│   └── views/              # Vistas principales
-├── docs/                   # Documentación general
-├── examples/               # Componentes de ejemplo
-├── lib/                    # Utilidades y funciones
-├── services/               # Servicios de negocio
-├── store/                  # Stores Zustand
-│   └── entities/           # Stores por entidad
-├── transformers/           # Transformadores de datos
-├── types/                  # Tipos TypeScript
-│   └── entities/           # Tipos por entidad
-└── utils/                  # Utilidades generales
-```
+## Desarrollo
 
-## Panel de Desarrollo
-
-El sistema incluye un panel de desarrollo completo accesible en la ruta `/development` que permite probar todas las entidades implementadas:
-
-- Dashboard
-- Configuración
-- Carpetas
-- Etiquetas (Tags)
-- Grupos
-- Imágenes
-- Colecciones
-- Álbumes
-- Personajes
-- Lugares
-- Videos
-- Y más...
-
-## Guía de Instalación
-
-1. Clonar el repositorio:
+### Requisitos Previos
 
 ```bash
-git clone https://github.com/tu-usuario/image-manager.git
-cd image-manager
+node -v   # ≥ 20.19 o 22.12+ (requerido por Vite 7)
+pnpm -v   # ≥ 8.0
 ```
 
-2. Instalar dependencias:
+### Instalación
 
 ```bash
 pnpm install
 ```
 
-3. Configurar el archivo .env:
+### Desarrollo Local
 
-```
-DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/image_manager"
-```
-
-4. Ejecutar migraciones de Prisma:
+#### Opción 1: Desarrollo con Vite (Recomendado)
 
 ```bash
-pnpm prisma migrate dev
+# Terminal 1: Frontend Vite (puerto 5173)
+pnpm dev:vite
+
+# Terminal 2: Backend Express (puerto 4000)
+pnpm watch:server
+
+# Abrir: http://localhost:5173
 ```
 
-5. Cargar datos de ejemplo:
+#### Opción 2: Desarrollo Legacy Next.js
 
 ```bash
-pnpm prisma db seed
-```
-
-6. Iniciar el servidor de desarrollo:
-
-```bash
+# Desarrollo con Next.js (mientras migramos)
 pnpm dev
+
+# Abrir: http://localhost:3000
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
+### Build y Producción
 
-## Entidades del Sistema
+```bash
+# Build frontend
+pnpm build:vite
 
-El sistema gestiona las siguientes entidades principales:
+# Build servidor
+pnpm build:server
 
-### Entidades de Contenido Base
+# Preview frontend
+pnpm preview:vite
 
-- **Image**: Gestión completa de imágenes
-- **Video**: Soporte para archivos de video
-- **Folder**: Sistema de carpetas jerárquico
+# Ejecutar servidor en producción
+node dist/server/index.js
+```
 
-### Entidades Organizativas
+### Testing
 
-- **Tag**: Sistema de etiquetado
-- **Group**: Agrupación flexible de elementos
-- **Collection**: Colecciones temáticas
-- **Album**: Conjuntos ordenados de contenido
+```bash
+# Tests unitarios con Vitest
+pnpm test
 
-### Entidades de Worldbuilding
+# Tests E2E con Playwright
+pnpm test:e2e
 
-- **Character**: Personajes con atributos
-- **Place**: Ubicaciones con detalles
-- **WorldItem**: Objetos del mundo narrativo
-- **Concept**: Ideas y conceptos narrativos
+# Coverage
+pnpm test --coverage
+```
 
-### Entidades de Utilidad
+### Herramientas de Desarrollo
 
-- **Prompt**: Instrucciones para generación
-- **Note**: Anotaciones y notas
-- **Wildcard**: Elementos aleatorios
-- **Property**: Propiedades personalizables
+```bash
+# Linting y formato
+pnpm lint
+pnpm format
+
+# Verificación TypeScript
+pnpm tsc
+
+# Logs del sistema
+pnpm logs list
+pnpm check:errors
+```
+
+## Actualizaciones Importantes (Julio 2025)
+
+### ⚡ Migración Vite 7
+
+- **Performance mejorada**: Builds 60% más rápidos que Next.js
+- **HMR instantáneo**: Recarga en tiempo real ultrarrápida
+- **Arquitectura desacoplada**: Frontend y backend independientes
+- **Preparado para desktop**: Compatible con Tauri/Electron
+
+### 🔧 Configuración Técnica
+
+- **Node.js ≥ 20.19** requerido para Vite 7
+- **Proxy automático**: Frontend (5173) → Backend (4000)
+- **Path aliases**: `@/*` configurado en Vite y Vitest
+- **SVG como componentes**: `vite-plugin-svgr` configurado
+
+### 📊 Endpoints API
+
+```bash
+# Health check del servidor
+curl http://localhost:4000/api/health
+```
 
 ## Arquitectura
 
-El sistema sigue una arquitectura en capas:
+- **Frontend**: React 19 + Vite 7 + React Router
+- **Backend**: Express 5 + Prisma + SQLite
+- **Estado**: Zustand stores sin cambios
+- **Estilos**: Tailwind 4 con variables CSS
+- **Testing**: Vitest + Playwright
+- **Build**: Vite (frontend) + tsup (backend)
 
-```mermaid
-graph TD
-    A[Cliente/UI] -->|Interactúa con| B[Server Actions]
-    B -->|Utiliza| C[Services]
-    C -->|Gestiona| D[Base de Datos Prisma]
-    C -->|Transforma| E[Transformers]
-    A -->|Estado local| F[Zustand Stores]
-    F -->|Utiliza| E
-    B -->|Actualiza| F
-    E -->|Conforme a| G[Types]
-```
+## Migración de Next.js
 
-### Componentes Arquitectónicos
+### Cambios Principales
 
-1. **Types**: Definen la estructura de datos con interfaces TypeScript
-2. **Transformers**: Convierten datos entre diferentes formatos
-3. **Stores**: Manejan el estado de la aplicación usando Zustand con patrón de slices
-4. **Services**: Implementan la lógica de negocio con manejo de errores
-5. **Server Actions**: Proporcionan endpoints para operaciones CRUD
+1. **Routing**: `app/` → React Router v6
+2. **API**: `app/api/` → Express routes en `src/server/`
+3. **Server Actions**: → Express endpoints
+4. **Build**: `next build` → `vite build`
+5. **Dev**: `next dev` → `vite` + `node server`
 
-## Estructura de Documentación
+### Compatibilidad
 
-Cada entidad cuenta con documentación detallada dentro de
-`src/transformers/<entidad>/README.md` o `documentation.md`.
-
-## Ejemplos de Uso
-
-### Obtener Grupos
-
-```typescript
-import { getGroups } from '@/app/actions/groups/group.actions';
-
-// En un componente React
-const GroupsList = async () => {
-  const groups = await getGroups();
-
-  return (
-    <div>
-      <h1>Mis Grupos</h1>
-      <ul>
-        {groups.map(group => (
-          <li key={group.id}>{group.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-```
-
-### Usar Store Zustand
-
-```typescript
-import { useGroupStore } from '@/store/entities/group';
-
-// En un componente React
-const GroupsManager = () => {
-  // Obtener datos del store
-  const groups = useGroupStore(state => state.getGroups());
-  const addGroup = useGroupStore(state => state.addGroup);
-
-  // Utilizar el store
-  const handleAddGroup = (newGroup) => {
-    addGroup(newGroup);
-  };
-
-  return (
-    // ... UI del componente
-  );
-};
-```
-
-## Estado del Proyecto
-
-El proyecto ha completado la implementación de todas las entidades principales alineadas con el esquema de Prisma. Cada entidad cuenta con su conjunto completo de tipos, transformadores, stores, servicios y acciones del servidor, así como documentación detallada.
-
-Los próximos pasos incluyen:
-
-1. Pruebas exhaustivas
-2. Optimización de rendimiento
-3. Internacionalización
-4. Mejoras en UI/UX
+- ✅ Todos los stores Zustand funcionan sin cambios
+- ✅ Componentes UI mantienen funcionalidad
+- ✅ Prisma y base de datos sin cambios
+- ✅ Tailwind 4 configuración preservada
+- ⚠️ Links `next/link` → `react-router-dom`
+- ⚠️ `next/image` → componentes img estándar
 
 ## Testing
 
-Sistema de testing configurado con Playwright para pruebas end-to-end.
+Sistema de testing configurado con:
+
+- **Vitest**: Tests unitarios y de integración
+- **Playwright**: Tests end-to-end
+- **Happy DOM**: Environment para tests
+- **Testing Library**: Utilities para React
 
 ## Licencia
 

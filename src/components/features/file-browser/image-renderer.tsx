@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-import React from 'react';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 interface ImageRendererProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 	width?: number;
@@ -124,7 +123,7 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 		} = rest;
 
 		return (
-			<Image
+			<img
 				src={src}
 				alt={alt}
 				width={width || 300}

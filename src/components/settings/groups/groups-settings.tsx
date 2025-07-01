@@ -184,18 +184,18 @@ export function GroupsSettings() {
 			if (!stats) return true;
 			return (
 				stats.imageCount +
-					stats.videoCount +
-					stats.albumCount +
-					stats.collectionCount +
-					stats.tagCount +
-					stats.characterCount +
-					stats.placeCount +
-					stats.worldItemCount +
-					stats.conceptCount +
-					stats.promptCount +
-					stats.noteCount +
-					stats.wildcardCount +
-					stats.propertyCount ===
+				stats.videoCount +
+				stats.albumCount +
+				stats.collectionCount +
+				stats.tagCount +
+				stats.characterCount +
+				stats.placeCount +
+				stats.worldItemCount +
+				stats.conceptCount +
+				stats.promptCount +
+				stats.noteCount +
+				stats.wildcardCount +
+				stats.propertyCount ===
 				0
 			);
 		}).length;
@@ -304,9 +304,8 @@ export function GroupsSettings() {
 								{sortedGroups.map((group) => (
 									<div
 										key={group.id}
-										className={`relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
-											state.selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
-										}`}
+										className={`relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${state.selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
+											}`}
 									>
 										<Button
 											variant="ghost"

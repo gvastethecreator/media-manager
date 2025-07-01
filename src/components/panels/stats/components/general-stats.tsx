@@ -1,13 +1,29 @@
-import { AlertCircle, BarChart } from 'lucide-react';
-import { getSystemStatsExtended } from '@/app/actions/stats/stats.actions';
+'use client';
+
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useStats } from '@/lib/api/stats';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { AlertCircle, BarChart } from 'lucide-react';
 import { StatCard } from './stat-card';
 
-export async function GeneralStats() {
-	const stats = await getSystemStatsExtended();
+export function GeneralStats() {
+	// Usar React Query hook en lugar de server action
+	const {
+		data: stats,
+		isLoading,
+		error
+	} = useStats();
 
-	if (!stats) {
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center p-4 gap-2">
+				<BarChart className="h-4 w-4 animate-pulse" />
+				<span>Cargando estadísticas...</span>
+			</div>
+		);
+	}
+
+	if (error || !stats) {
 		return (
 			<div className="flex items-center justify-center p-4 text-destructive gap-2">
 				<AlertCircle className="h-4 w-4" />

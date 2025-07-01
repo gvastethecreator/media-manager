@@ -1,5 +1,9 @@
 'use client';
 
+// NOTE: This component uses 'react-resizable-panels' library instead of Base UI
+// as Base UI doesn't provide a resizable panels component.
+// 'react-resizable-panels' is a high-quality, independent library that works well with Base UI.
+
 import { GripVerticalIcon } from 'lucide-react';
 import * as React from 'react';
 import * as ResizablePrimitive from 'react-resizable-panels';

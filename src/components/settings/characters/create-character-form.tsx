@@ -1,9 +1,9 @@
 'use client';
 
-import { createCharacter, updateCharacter } from '@/app/actions/characters/character.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCreateCharacter, useUpdateCharacter } from '@/lib/api/characters';
 import toastService from '@/services/toast';
 import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } from '@/types/entities/character';
 import {
@@ -72,6 +72,10 @@ export function CreateCharacterForm({
 	onCancel,
 }: CreateCharacterFormProps) {
 	const [_isSubmitting, setIsSubmitting] = useState(false);
+
+	// React Query hooks
+	const createCharacterMutation = useCreateCharacter();
+	const updateCharacterMutation = useUpdateCharacter();
 
 	// Inicializar formulario con valores por defecto
 	const form = useForm<FormValues>({
@@ -209,18 +213,21 @@ export function CreateCharacterForm({
 
 			// Crear o actualizar personaje
 			if (isEditing && character) {
-				const updated = await updateCharacter(character.id, {
+				const updateData: CharacterUpdateInput = {
 					...characterData,
 					backstory: data.backstory,
 					psychologicalProfile: data.psychologicalProfile,
 					socialProfile: data.socialProfile,
 					isFavorite: data.isFavorite,
-				} as CharacterUpdateInput);
+				};
+				const updated = await updateCharacterMutation.mutateAsync({ id: character.id, data: updateData });
 				onUpdated?.(updated);
+				toastService.success('Personaje actualizado correctamente');
 			} else {
-				const created = await createCharacter(characterData);
+				const created = await createCharacterMutation.mutateAsync(characterData);
 				onCreated?.(created);
 				form.reset();
+				toastService.success('Personaje creado correctamente');
 			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';

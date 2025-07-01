@@ -1,15 +1,13 @@
 'use client';
 
-import { getGroup } from '@/app/actions/groups/group.actions';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useGroup } from '@/lib/api/groups';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useGroupStore } from '@/store/entities/group';
 import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('GroupContentView');
@@ -18,53 +16,15 @@ export function GroupContentView(_props: ViewProps) {
 	const params = useParams();
 	const groupId = typeof params.id === 'string' ? params.id : null;
 	const { setCurrentView } = useNavigationStore();
-	const { getGroup: getGroupFromStore, addGroup } = useGroupStore();
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 
-	// Obtener grupo del store o del servidor
-	const fetchGroupData = useCallback(async () => {
-		if (!groupId) {
-			setError('ID de grupo no válido');
-			setIsLoading(false);
-			return;
-		}
-
-		try {
-			setIsLoading(true);
-			// Intentar obtener del store primero
-			let groupData = getGroupFromStore(groupId);
-
-			// Si no existe en el store, obtener del servidor
-			if (!groupData) {
-				logger.info('🔄 Obteniendo grupo del servidor:', groupId);
-				groupData = await getGroup(groupId);
-				// Actualizar el store con el grupo obtenido
-				if (groupData) {
-					addGroup(groupData);
-				}
-			} else {
-				logger.info('✅ Grupo obtenido del store:', groupId);
-			}
-
-			if (!groupData) {
-				throw new Error('No se pudo obtener el grupo');
-			}
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			logger.error('❌ Error obteniendo grupo:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [groupId, getGroupFromStore, addGroup]);
-
-	useEffect(() => {
-		fetchGroupData();
-	}, [fetchGroupData]);
-
-	// Obtener el grupo actual del store
-	const group = groupId ? getGroupFromStore(groupId) : null;
+	// Usar React Query hook en lugar de server action
+	const {
+		data: group,
+		isLoading,
+		error
+	} = useGroup(groupId || '', {
+		enabled: !!groupId
+	});
 
 	if (isLoading) {
 		return <LoadingScreen />;
@@ -73,7 +33,9 @@ export function GroupContentView(_props: ViewProps) {
 	if (error || !group) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error || 'Grupo no encontrado'}</p>
+				<p className="text-destructive">
+					Error: {error instanceof Error ? error.message : 'Grupo no encontrado'}
+				</p>
 			</div>
 		);
 	}

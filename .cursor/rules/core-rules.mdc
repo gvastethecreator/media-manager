@@ -15,7 +15,7 @@ alwaysApply: true
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
 7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
 8. **Priorizar herramientas internas o mcp antes que comandos de terminal**
-9.
+9. **No me dés la razón ni me adules en todo**- si me confundo o no estas de acuerdo me lo dices enseguida.
 
 ## 🎭 Operation Modes
 

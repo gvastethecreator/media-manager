@@ -15,9 +15,7 @@ import {
 	ZoomInIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getImageCardData, type ImageCardData } from './image-server-actions';
 
 interface ImageCardProps {
@@ -37,7 +35,7 @@ interface ImageCardProps {
 /**
  * Componente Card mejorado para mostrar una imagen con sus metadatos principales.
  * Incluye múltiples variantes de diseño y características avanzadas como:
- * - Optimización de imágenes con next/image
+ * - Optimización de imágenes con img nativo
  * - Animaciones con motion
  * - Diseño responsivo
  * - Modo oscuro integrado
@@ -184,12 +182,12 @@ export function ImageCardImproved({
 	const totalRelations =
 		showRelations && imageData._count
 			? (imageData._count.tags || 0) +
-				(imageData._count.albums || 0) +
-				(imageData._count.collections || 0) +
-				(imageData._count.characters || 0) +
-				(imageData._count.places || 0) +
-				(imageData._count.worldItems || 0) +
-				(imageData._count.notes || 0)
+			(imageData._count.albums || 0) +
+			(imageData._count.collections || 0) +
+			(imageData._count.characters || 0) +
+			(imageData._count.places || 0) +
+			(imageData._count.worldItems || 0) +
+			(imageData._count.notes || 0)
 			: 0;
 
 	// Contenido de la tarjeta
@@ -215,13 +213,11 @@ export function ImageCardImproved({
 			{/* Imagen principal */}
 			<div className="relative w-full h-0 pb-[75%]">
 				{imageData.thumbnailUrl ? (
-					<Image
+					<img
 						src={imageData.thumbnailUrl}
 						alt={imageData.name || 'Imagen'}
-						fill
-						sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-						className="object-cover rounded-t-lg"
-						priority={priority}
+						className="w-full h-full object-cover"
+						loading="lazy"
 					/>
 				) : (
 					<div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
@@ -389,7 +385,7 @@ export function ImageCardImproved({
 	// Si no hay onClick, envolver en un Link para navegación
 	if (!onClick) {
 		return (
-			<Link href={`/images/${imageData.id}`} className="block h-full">
+			<Link to={`/images/${imageData.id}`} className="block h-full">
 				{cardContent}
 			</Link>
 		);

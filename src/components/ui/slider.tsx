@@ -1,6 +1,6 @@
 'use client';
 
-import { Slider as SliderPrimitive } from 'radix-ui';
+import { Slider as SliderPrimitive } from '@base-ui-components/react/slider';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -42,10 +42,10 @@ function Slider({
 					className={cn('bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full')}
 				/>
 			</SliderPrimitive.Track>
-			{Array.from({ length: _values.length }, (_, index) => (
+			{_values.map((val) => (
 				<SliderPrimitive.Thumb
 					data-slot="slider-thumb"
-					key={index}
+					key={`thumb-${val}`}
 					className="border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
 				/>
 			))}
@@ -54,3 +54,4 @@ function Slider({
 }
 
 export { Slider };
+

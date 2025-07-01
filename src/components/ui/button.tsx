@@ -1,5 +1,4 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Slot as SlotPrimitive } from 'radix-ui';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -32,19 +31,35 @@ const buttonVariants = cva(
 	}
 );
 
-function Button({
-	className,
-	variant,
-	size,
-	asChild = false,
-	...props
-}: React.ComponentProps<'button'> &
-	VariantProps<typeof buttonVariants> & {
-		asChild?: boolean;
-	}) {
-	const Comp = asChild ? SlotPrimitive.Slot : 'button';
-
-	return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+interface ButtonProps
+	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+	VariantProps<typeof buttonVariants> {
+	asChild?: boolean;
 }
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+	({ className, variant, size, asChild = false, ...props }, ref) => {
+		if (asChild) {
+			// Cuando asChild es true, renderizamos solo el primer hijo con las clases aplicadas
+			const child = React.Children.only(props.children as React.ReactElement);
+			return React.cloneElement(child, {
+				...child.props,
+				className: cn(buttonVariants({ variant, size }), className, child.props.className),
+				'data-slot': 'button',
+			});
+		}
+
+		return (
+			<button
+				className={cn(buttonVariants({ variant, size, className }))}
+				data-slot="button"
+				ref={ref}
+				{...props}
+			/>
+		);
+	}
+);
+
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };

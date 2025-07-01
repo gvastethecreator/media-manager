@@ -14,8 +14,8 @@ import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { DatabaseIcon, FolderIcon, RefreshCw, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { ViewProps } from '../../types';
 
 const viewLogger = clientLogger.withContext('FoldersView');
@@ -221,7 +221,7 @@ export function FoldersView(_props: ViewProps) {
 							<RefreshCw className="h-4 w-4 mr-2" />
 							Reintentar
 						</Button>
-						<Link href="/diagnostics/database" className={buttonVariants({ variant: 'default' })}>
+						<Link to="/diagnostics/database" className={buttonVariants({ variant: 'default' })}>
 							<DatabaseIcon className="h-4 w-4 mr-2" />
 							Ejecutar diagnóstico
 						</Link>

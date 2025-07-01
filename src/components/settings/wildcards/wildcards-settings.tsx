@@ -1,9 +1,5 @@
 'use client';
 
-import type { WildcardComplete as Wildcard } from '@prisma/client';
-import { ChevronRight, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash, WandIcon } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useState } from 'react';
 import {
 	createWildcard,
 	deleteWildcard,
@@ -20,6 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast';
+import type { WildcardComplete as Wildcard } from '@prisma/client';
+import { ChevronRight, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash, WandIcon } from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { WildcardPreview } from './wildcard-preview';
 
 // Importar el tipo de formulario que hemos definido
@@ -36,10 +35,8 @@ type CreateWildcardFormValues = {
 	isFavorite: boolean;
 };
 
-// Importación dinámica para evitar problemas con SSR
-const CreateWildcardForm = dynamic(() => import('./create-wildcard-form').then((mod) => mod.CreateWildcardForm), {
-	ssr: false,
-});
+// Carga perezosa del formulario
+const CreateWildcardForm = lazy(() => import('./create-wildcard-form').then((mod) => ({ default: mod.CreateWildcardForm })));
 
 interface WildcardWithRelations extends Omit<Wildcard, 'children'> {
 	id: string;
@@ -481,12 +478,18 @@ export function WildcardsSettings() {
 				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
 					{selectedWildcard ? (
 						isEditMode ? (
-							<CreateWildcardForm
-								wildcard={selectedWildcard}
-								parentWildcards={wildcards.filter((w) => w.id !== selectedWildcard.id)}
-								onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
-								onCancel={() => setIsEditMode(false)}
-							/>
+							<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+								<DialogContent className="max-w-3xl p-0 overflow-hidden">
+									<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+										<CreateWildcardForm
+											onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
+											onClose={() => setIsCreateDialogOpen(false)}
+											parentId={currentParentId}
+											wildcard={selectedWildcard}
+										/>
+									</Suspense>
+								</DialogContent>
+							</Dialog>
 						) : (
 							<WildcardPreview
 								wildcard={selectedWildcard}
@@ -505,12 +508,15 @@ export function WildcardsSettings() {
 
 			{/* Dialog para crear nuevo comodín */}
 			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-				<DialogContent>
-					<CreateWildcardForm
-						parentWildcards={wildcards}
-						onSubmit={handleCreateWildcard}
-						onCancel={() => setIsCreateDialogOpen(false)}
-					/>
+				<DialogContent className="max-w-3xl p-0 overflow-hidden">
+					<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+						<CreateWildcardForm
+							onSubmit={handleCreateWildcard}
+							onClose={() => setIsCreateDialogOpen(false)}
+							parentId={currentParentId}
+							wildcard={undefined}
+						/>
+					</Suspense>
 				</DialogContent>
 			</Dialog>
 		</div>

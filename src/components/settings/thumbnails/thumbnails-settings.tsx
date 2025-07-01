@@ -21,7 +21,6 @@ import { useThumbnailStore } from '@/store/thumbnails.store';
 import type { LastProcessedThumbnail, ThumbnailCallbacks } from '@/types/thumbnails';
 import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import Image from 'next/image';
 import * as React from 'react';
 import { useId } from 'react';
 import { ThumbnailError } from './thumbnail-error';
@@ -81,10 +80,9 @@ function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index:
 			) : (
 				thumbnail && (
 					<>
-						<Image
+						<img
 							src={thumbnail}
 							alt={image.path}
-							fill
 							className="object-cover transition-transform group-hover:scale-105"
 						/>
 						<motion.div

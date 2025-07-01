@@ -5,8 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
 import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getImageCardData, type ImageCardData } from './image-server-actions';
 
 interface ImageCardProps {
@@ -193,15 +193,16 @@ export function ImageCard({
 				getAspectRatioClass(),
 				getVariantClasses(),
 				isHovered ? 'shadow-lg scale-[1.02]' : 'hover:shadow-lg hover:scale-[1.02]',
-				onClick && 'cursor-pointer',
-				className
+				onClick && 'cursor-pointer'
 			)}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
-			onClick={handleClick}
-			onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-			tabIndex={onClick ? 0 : -1}
-			role={onClick ? 'button' : undefined}
+			{...(onClick && {
+				onClick: handleClick,
+				onKeyDown: (e: React.KeyboardEvent) => e.key === 'Enter' && handleClick(),
+				tabIndex: 0,
+				role: 'button'
+			})}
 		>
 			{/* Elementos decorativos TCG */}
 			{tcgMode && (
@@ -464,8 +465,10 @@ export function ImageCard({
 
 	// Si no hay onClick, envolver en un Link (si route es proporcionado)
 	return (
-		<Link href={`/images/${imageId}`} passHref>
-			{cardContent}
-		</Link>
+		<div className={className}>
+			<Link to={`/images/${imageId}`}>
+				{cardContent}
+			</Link>
+		</div>
 	);
 }

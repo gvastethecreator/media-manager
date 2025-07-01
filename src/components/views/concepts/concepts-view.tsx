@@ -1,115 +1,117 @@
 'use client';
 
-import { LightbulbIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
-import { getConcepts } from '@/app/actions/concepts/concept.actions';
-import { MemoizedConceptCard } from '@/components/cards/concept-card';
+import { ConceptCard } from '@/components/cards/concept-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useConcepts } from '@/lib/api/concepts';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useConceptStore } from '@/store/entities/concept';
+import { Lightbulb } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('ConceptsView');
 
-export function ConceptsView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
-	const { selectConcept } = useConceptStore();
-	const router = useRouter();
-	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function ConceptsView({ isVisible }: ViewProps) {
+	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
+	const { selectedConceptId, setSelectedConceptId } = useConceptStore();
+	const [localSearch, setLocalSearch] = useState(searchTerm || '');
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticConcepts, _addEvent] = clientEvents.useEvents<ConceptWithStats[]>(concepts);
+	// Usar React Query hook en lugar de server action
+	const {
+		data: concepts = [],
+		isLoading,
+		error,
+		refetch
+	} = useConcepts({
+		search: localSearch,
+		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
+		sortOrder: sortOrder as 'asc' | 'desc'
+	});
 
-	const fetchConcepts = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando conceptos...');
-			const data = await getConcepts();
-			setConcepts(data);
-			viewLogger.info(`✅ ${data.length} conceptos cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando conceptos:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
-
+	// Sincronizar búsqueda local con store de navegación
 	useEffect(() => {
-		// Cargar conceptos inicialmente
-		fetchConcepts();
-	}, [fetchConcepts]);
+		if (searchTerm !== localSearch) {
+			setLocalSearch(searchTerm || '');
+		}
+	}, [searchTerm, localSearch]);
 
-	const handleConceptClick = useCallback(
-		(concept: ConceptWithStats) => {
-			viewLogger.info('🖱️ Click en concepto:', concept.name);
-			setCurrentView('concept-content');
-			selectConcept(concept);
+	const handleConceptSelect = useCallback(
+		(conceptId: string) => {
+			viewLogger.info('💡 Seleccionando concept', { conceptId });
+			setSelectedConceptId(conceptId);
+			clientEvents.emit('concept:selected', { conceptId });
 		},
-		[setCurrentView, selectConcept]
+		[setSelectedConceptId]
 	);
 
-	const _handleEditConcept = useCallback(
-		(concept: ConceptWithStats) => {
-			viewLogger.info('⚙️ Editando concepto:', concept.name);
-			router.push(`/settings/concepts?id=${concept.id}`);
-		},
-		[router]
-	);
+	const handleRetry = useCallback(() => {
+		viewLogger.info('🔄 Reintentando cargar concepts');
+		refetch();
+	}, [refetch]);
 
-	const _handleDeleteConcept = useCallback((id: string) => {
-		viewLogger.info('🗑️ Eliminando concepto:', id);
-		// Implementar lógica de eliminación
-	}, []);
+	if (!isVisible) return null;
+
+	if (isLoading) {
+		return <LoadingScreen message="Cargando conceptos..." />;
+	}
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
+			<EmptyState
+				icon={Lightbulb}
+				title="Error al cargar conceptos"
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				action={{
+					label: 'Reintentar',
+					onClick: handleRetry,
+				}}
+			/>
 		);
 	}
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
+	if (!concepts.length) {
+		const emptyMessage = localSearch
+			? `No se encontraron conceptos que coincidan con "${localSearch}"`
+			: 'No hay conceptos disponibles';
 
-	if (!optimisticConcepts || optimisticConcepts.length === 0) {
 		return (
 			<EmptyState
-				icon={LightbulbIcon}
-				title="No hay conceptos"
-				description="Los conceptos te ayudan a organizar tus ideas y proyectos. Crea un nuevo concepto desde el panel de configuración."
+				icon={Lightbulb}
+				title="Sin conceptos"
+				description={emptyMessage}
 			/>
 		);
 	}
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticConcepts.map((concept, index) => (
+		<ScrollArea className="flex-1">
+			<div className="p-6">
+				<motion.div
+					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.3 }}
+				>
+					{concepts.map((concept, index) => (
 						<motion.div
 							key={concept.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: index * 0.1 }}
-							className="cursor-pointer"
+							transition={{ duration: 0.3, delay: index * 0.05 }}
 						>
-							<MemoizedConceptCard concept={concept} onClick={() => handleConceptClick(concept)} className="h-full" />
+							<ConceptCard
+								concept={concept}
+								isSelected={concept.id === selectedConceptId}
+								onSelect={() => handleConceptSelect(concept.id)}
+							/>
 						</motion.div>
 					))}
-				</div>
+				</motion.div>
 			</div>
 		</ScrollArea>
 	);
