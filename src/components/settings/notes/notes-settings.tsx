@@ -1,6 +1,5 @@
 'use client';
 
-import { deleteNote, searchNotes } from '@/app/actions/notes/note.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,72 +9,59 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useDeleteNote, useNotes } from '@/lib/api/notes';
 import toastService from '@/services/toast';
-import type { NoteComplete } from '@/types/entities/note';
-import { FileText, Filter, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { NoteWithStats } from '@/types/entities/note';
+import { Filter, Loader2, NotebookPen, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { CreateNoteForm } from './create-note-form';
 
+// Tipos seguros para preview data
+interface PreviewData {
+	name?: string;
+	content?: string;
+	color?: string;
+	emoji?: string;
+	category?: string;
+	isFavorite?: boolean;
+}
+
 export function NotesSettings() {
-	const [notes, setNotes] = useState<NoteComplete[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [selectedNote, setSelectedNote] = useState<NoteComplete | null>(null);
+	const [selectedNote, setSelectedNote] = useState<NoteWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
-	const [previewData, setPreviewData] = useState<any>(null);
+	const [previewData, setPreviewData] = useState<PreviewData | null>(null);
 
 	// Filtros
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
-	// Cargar notas al montar el componente
-	useEffect(() => {
-		const loadNotes = async () => {
-			try {
-				setIsLoading(true);
-				const data = await searchNotes({});
-				setNotes(data);
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				setError(errorMessage);
-				toastService.error('Error al cargar las notas', {
-					description: errorMessage,
-				});
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	// Generar IDs únicos
+	const searchInputId = useId();
+	const categorySelectId = useId();
+	const favoritesCheckboxId = useId();
 
-		loadNotes();
-	}, []);
+	// React Query hooks
+	const { data: notesResponse, isLoading, error } = useNotes({ search: searchQuery });
+	const deleteNoteMutation = useDeleteNote();
+
+	const notes = notesResponse?.data || [];
 
 	// Calcular estadísticas generales
-	const stats = useMemo(
-		() => ({
-			total: notes.length,
-			favorites: notes.filter((note) => note.isFavorite).length,
-			withRelations: notes.filter(
-				(note) => (note._count?.images || 0) > 0 || (note._count?.concepts || 0) > 0 || (note._count?.prompts || 0) > 0
-			).length,
-		}),
-		[notes]
-	);
+	const stats = useMemo(() => {
+		return {
+			totalNotes: notes.length,
+			totalImages: notes.reduce((acc, note) => acc + (note.statistics?.totalImages || 0), 0),
+			totalAssociations: notes.reduce((acc, note) => acc + (note.statistics?.totalAssociations || 0), 0),
+			unusedNotes: notes.filter((note) => (note.statistics?.totalImages || 0) === 0).length,
+			favoriteNotes: notes.filter((note) => note.isFavorite).length,
+		};
+	}, [notes]);
 
-	// Filtrar notas basados en los criterios seleccionados
-	const getFilteredNotes = useCallback(() => {
+	// Filtrar notas basadas en los criterios seleccionados
+	const filteredNotes = useMemo(() => {
 		return notes.filter((note) => {
 			let matches = true;
-
-			// Filtrar por búsqueda
-			if (searchQuery) {
-				const normalizedQuery = searchQuery.toLowerCase();
-				matches =
-					matches &&
-					Boolean(
-						note.title.toLowerCase().includes(normalizedQuery) || note.content?.toLowerCase().includes(normalizedQuery)
-					);
-			}
 
 			// Filtrar por categoría
 			if (selectedCategory) {
@@ -89,16 +75,12 @@ export function NotesSettings() {
 
 			return matches;
 		});
-	}, [notes, searchQuery, selectedCategory, onlyFavorites]);
-
-	// Memoizar los resultados filtrados para evitar cálculos repetidos
-	const filteredNotes = useMemo(() => getFilteredNotes(), [getFilteredNotes]);
+	}, [notes, selectedCategory, onlyFavorites]);
 
 	// Manejar eliminación de nota
 	const handleDeleteNote = useCallback(async (id: string) => {
 		try {
-			await deleteNote(id);
-			setNotes((prev) => prev.filter((note) => note.id !== id));
+			await deleteNoteMutation.mutateAsync(id);
 			setSelectedNote(null);
 			setIsEditing(false);
 			toastService.success('Nota eliminada');
@@ -108,23 +90,29 @@ export function NotesSettings() {
 				description: errorMessage,
 			});
 		}
-	}, []);
+	}, [deleteNoteMutation]);
 
 	// Manejar edición de nota
-	const handleEditNote = useCallback((note: NoteComplete) => {
+	const handleEditNote = useCallback((note: NoteWithStats) => {
 		setSelectedNote(note);
 		setIsEditing(true);
 	}, []);
 
+	// Manejar la eliminación desde el botón con detención de propagación de eventos
+	const handleDeleteButtonClick = useCallback(
+		(noteId: string) => {
+			handleDeleteNote(noteId);
+		},
+		[handleDeleteNote]
+	);
+
 	// Manejar creación exitosa
-	const handleNoteCreated = useCallback((newNote: NoteComplete) => {
-		setNotes((prev) => [newNote, ...prev]);
+	const handleNoteCreated = useCallback((newNote: NoteWithStats) => {
 		toastService.success('Nota creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleNoteUpdated = useCallback((updatedNote: NoteComplete) => {
-		setNotes((prev) => prev.map((note) => (note.id === updatedNote.id ? { ...note, ...updatedNote } : note)));
+	const handleNoteUpdated = useCallback((updatedNote: NoteWithStats) => {
 		toastService.success('Nota actualizada');
 	}, []);
 
@@ -135,7 +123,7 @@ export function NotesSettings() {
 	}, []);
 
 	// Manejar la previsualización en tiempo real
-	const handlePreview = useCallback((data: any) => {
+	const handlePreview = useCallback((data: PreviewData) => {
 		setPreviewData(data);
 	}, []);
 
@@ -147,29 +135,7 @@ export function NotesSettings() {
 	}, []);
 
 	// Extraer categorías únicas de las notas
-	const uniqueCategories = useMemo(
-		() => Array.from(new Set(notes.map((note) => note.category).filter(Boolean))) as string[],
-		[notes]
-	);
-
-	// Componente de botón de eliminación
-	const DeleteButton = ({ noteId }: { noteId: string }) => {
-		return (
-			<Button
-				variant="ghost"
-				size="icon"
-				className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-				onClick={(e) => {
-					e.stopPropagation();
-					handleDeleteNote(noteId);
-				}}
-				type="button"
-				aria-label="Eliminar nota"
-			>
-				<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
-			</Button>
-		);
-	};
+	const uniqueCategories = Array.from(new Set(notes.map((note) => note.category))).filter(Boolean) as string[];
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -189,12 +155,9 @@ export function NotesSettings() {
 		return (
 			<Card className="rounded-sm bg-muted/30 border-none">
 				<CardContent>
-					<EmptyState
-						icon={Info}
-						title="Error al cargar notas"
-						description={error}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
-					/>
+					<div className="flex items-center justify-center gap-2 p-3">
+						<p className="text-sm text-destructive">Error al cargar notas: {error.message}</p>
+					</div>
 				</CardContent>
 			</Card>
 		);
@@ -290,17 +253,29 @@ export function NotesSettings() {
 							</div>
 						</div>
 						<div className="flex gap-2 text-xs text-muted-foreground">
-							<span>{stats.total} notas</span>
-							{stats.favorites > 0 && (
+							<span>{stats.totalNotes} notas</span>
+							{stats.favoriteNotes > 0 && (
 								<>
 									<span>•</span>
-									<span>{stats.favorites} favoritas</span>
+									<span>{stats.favoriteNotes} favoritas</span>
 								</>
 							)}
-							{stats.withRelations > 0 && (
+							{stats.totalImages > 0 && (
 								<>
 									<span>•</span>
-									<span>{stats.withRelations} con relaciones</span>
+									<span>{stats.totalImages} imágenes</span>
+								</>
+							)}
+							{stats.totalAssociations > 0 && (
+								<>
+									<span>•</span>
+									<span>{stats.totalAssociations} asociaciones</span>
+								</>
+							)}
+							{stats.unusedNotes > 0 && (
+								<>
+									<span>•</span>
+									<span>{stats.unusedNotes} sin imágenes</span>
 								</>
 							)}
 						</div>
@@ -309,7 +284,7 @@ export function NotesSettings() {
 						<ScrollArea className="h-full px-3 pb-3">
 							{filteredNotes.length === 0 ? (
 								<EmptyState
-									icon={FileText}
+									icon={NotebookPen}
 									title="No hay notas"
 									description={
 										notes.length > 0 ? 'No se encontraron notas con los filtros aplicados' : 'Crea tu primera nota'
@@ -353,7 +328,19 @@ export function NotesSettings() {
 													)}
 												</div>
 											</div>
-											<DeleteButton noteId={note.id} />
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
+												onClick={(e) => {
+													e.stopPropagation();
+													handleDeleteButtonClick(note.id);
+												}}
+												type="button"
+												aria-label="Eliminar nota"
+											>
+												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
+											</Button>
 										</button>
 									))}
 								</div>
@@ -423,14 +410,14 @@ export function NotesSettings() {
 													<div
 														className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
 														style={{
-															backgroundColor: previewData?.color || (selectedNote as NoteComplete)?.color || '#3b82f6',
+															backgroundColor: previewData?.color || (selectedNote as NoteWithStats)?.color || '#3b82f6',
 														}}
 													>
-														{previewData?.emoji || (selectedNote as NoteComplete)?.emoji || '📝'}
+														{previewData?.emoji || (selectedNote as NoteWithStats)?.emoji || '📝'}
 													</div>
 													<div className="flex-1">
 														<h3 className="text-md font-medium">
-															{previewData?.title || selectedNote?.title || 'Nueva Nota'}
+															{previewData?.name || selectedNote?.title || 'Nueva Nota'}
 														</h3>
 														{(previewData?.category || selectedNote?.category) && (
 															<p className="text-xs text-muted-foreground">
@@ -440,9 +427,9 @@ export function NotesSettings() {
 													</div>
 												</div>
 
-												{(previewData?.summary || (selectedNote as NoteComplete)?.summary) && (
+												{(previewData?.content || (selectedNote as NoteWithStats)?.summary) && (
 													<p className="text-muted-foreground text-sm mb-3">
-														{previewData?.summary || (selectedNote as NoteComplete)?.summary}
+														{previewData?.content || (selectedNote as NoteWithStats)?.summary}
 													</p>
 												)}
 
@@ -464,7 +451,7 @@ export function NotesSettings() {
 											</div>
 										) : (
 											<div className="flex flex-col items-center justify-center h-[300px] bg-muted/50 rounded-lg border border-dashed">
-												<FileText className="h-7 w-7 text-muted-foreground/50" />
+												<NotebookPen className="h-7 w-7 text-muted-foreground/50" />
 												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}

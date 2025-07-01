@@ -1,8 +1,8 @@
 'use client';
 
-import { Label as LabelPrimitive, Slot as SlotPrimitive } from 'radix-ui';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import * as React from 'react';
-
 import {
 	Controller,
 	type ControllerProps,
@@ -12,8 +12,17 @@ import {
 	useFormContext,
 	useFormState,
 } from 'react-hook-form';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+
+// Implementación simple de Slot para reemplazar Radix UI
+const Slot = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }>(
+	({ children, ...props }, ref) => {
+		if (React.isValidElement(children)) {
+			return React.cloneElement(children, { ...props, ref } as any);
+		}
+		return <span ref={ref as any} {...props}>{children}</span>;
+	}
+);
+Slot.displayName = 'Slot';
 
 const Form = FormProvider;
 
@@ -78,7 +87,7 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
 	);
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
 	const { error, formItemId } = useFormField();
 
 	return (
@@ -92,11 +101,11 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
 	);
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof SlotPrimitive.Slot>) {
+function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
 	const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
 	return (
-		<SlotPrimitive.Slot
+		<Slot
 			data-slot="form-control"
 			id={formItemId}
 			aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
@@ -134,4 +143,5 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
 	);
 }
 
-export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };
+export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };
+

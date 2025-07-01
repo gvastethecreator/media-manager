@@ -1,115 +1,117 @@
 'use client';
 
-import { ScrollText } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import type { NoteWithStats } from '@/app/actions/notes/note.actions';
-import { getNotes } from '@/app/actions/notes/note.actions';
-import { MemoizedNoteCard } from '@/components/cards/note-card';
+import { NoteCard } from '@/components/cards/note-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useNotes } from '@/lib/api/notes';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
+import { FileText } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('NotesView');
 
-export function NotesView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
-	const { selectNote } = useNoteStore();
-	const router = useRouter();
-	const [notes, setNotes] = useState<NoteWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function NotesView({ isVisible }: ViewProps) {
+	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
+	const { selectedNoteId, setSelectedNoteId } = useNoteStore();
+	const [localSearch, setLocalSearch] = useState(searchTerm || '');
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticNotes, _addEvent] = clientEvents.useEvents<NoteWithStats[]>(notes);
+	// Usar React Query hook en lugar de server action
+	const {
+		data: notes = [],
+		isLoading,
+		error,
+		refetch
+	} = useNotes({
+		search: localSearch,
+		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
+		sortOrder: sortOrder as 'asc' | 'desc'
+	});
 
-	const fetchNotes = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando notas...');
-			const data = await getNotes();
-			setNotes(data);
-			viewLogger.info(`✅ ${data.length} notas cargadas`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando notas:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
-
+	// Sincronizar búsqueda local con store de navegación
 	useEffect(() => {
-		// Cargar notas inicialmente
-		fetchNotes();
-	}, [fetchNotes]);
+		if (searchTerm !== localSearch) {
+			setLocalSearch(searchTerm || '');
+		}
+	}, [searchTerm, localSearch]);
 
-	const handleNoteClick = useCallback(
-		(note: NoteWithStats) => {
-			viewLogger.info('🖱️ Click en nota:', note.title);
-			setCurrentView('note-content');
-			selectNote(note);
+	const handleNoteSelect = useCallback(
+		(noteId: string) => {
+			viewLogger.info('📝 Seleccionando note', { noteId });
+			setSelectedNoteId(noteId);
+			clientEvents.emit('note:selected', { noteId });
 		},
-		[setCurrentView, selectNote]
+		[setSelectedNoteId]
 	);
 
-	const _handleEditNote = useCallback(
-		(note: NoteWithStats) => {
-			viewLogger.info('⚙️ Editando nota:', note.title);
-			router.push(`/settings/notes?id=${note.id}`);
-		},
-		[router]
-	);
+	const handleRetry = useCallback(() => {
+		viewLogger.info('🔄 Reintentando cargar notes');
+		refetch();
+	}, [refetch]);
 
-	const _handleDeleteNote = useCallback((id: string) => {
-		viewLogger.info('🗑️ Eliminando nota:', id);
-		// Implementar lógica de eliminación
-	}, []);
+	if (!isVisible) return null;
+
+	if (isLoading) {
+		return <LoadingScreen message="Cargando notas..." />;
+	}
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
+			<EmptyState
+				icon={FileText}
+				title="Error al cargar notas"
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				action={{
+					label: 'Reintentar',
+					onClick: handleRetry,
+				}}
+			/>
 		);
 	}
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
+	if (!notes.length) {
+		const emptyMessage = localSearch
+			? `No se encontraron notas que coincidan con "${localSearch}"`
+			: 'No hay notas disponibles';
 
-	if (!optimisticNotes || optimisticNotes.length === 0) {
 		return (
 			<EmptyState
-				icon={ScrollText}
-				title="No hay notas"
-				description="Las notas te ayudan a organizar tus ideas y proyectos. Crea una nueva nota desde el panel de configuración."
+				icon={FileText}
+				title="Sin notas"
+				description={emptyMessage}
 			/>
 		);
 	}
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticNotes.map((note, index) => (
+		<ScrollArea className="flex-1">
+			<div className="p-6">
+				<motion.div
+					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.3 }}
+				>
+					{notes.map((note, index) => (
 						<motion.div
 							key={note.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: index * 0.1 }}
-							className="cursor-pointer"
+							transition={{ duration: 0.3, delay: index * 0.05 }}
 						>
-							<MemoizedNoteCard note={note} onClick={() => handleNoteClick(note)} className="h-full" />
+							<NoteCard
+								note={note}
+								isSelected={note.id === selectedNoteId}
+								onSelect={() => handleNoteSelect(note.id)}
+							/>
 						</motion.div>
 					))}
-				</div>
+				</motion.div>
 			</div>
 		</ScrollArea>
 	);

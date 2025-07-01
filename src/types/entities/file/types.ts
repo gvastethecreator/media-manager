@@ -59,10 +59,13 @@ export type FileFilterOptions = {
  */
 export type DirectoryReadResult = {
 	path: string;
+	items: FileBase[]; // mezcla de archivos y carpetas
 	files: FileInfo[];
 	directories: DirectoryInfo[];
-	totalCount: number;
-	totalSize: number;
+	totalItems: number;
+	hasMore: boolean;
+	// Campos agregados opcionalmente por el servidor
+	totalSize?: number;
 };
 
 /**

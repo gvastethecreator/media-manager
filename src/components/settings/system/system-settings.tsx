@@ -1,6 +1,5 @@
 'use client';
 
-import { getSystemStats, repairSystem, resetDatabase } from '@/app/actions/system';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,12 +15,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { useRepairSystem, useResetDatabase, useSystemStats } from '@/lib/api/system';
 import toastService from '@/services/toast';
 import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCallback } from 'react';
 
 // Tipo para estadísticas del sistema
 interface SystemData {
@@ -36,49 +36,29 @@ interface SystemData {
 }
 
 export function SystemSettings() {
-	const [systemData, setSystemData] = useState<SystemData>({
-		cpuUsage: 0,
-		memoryUsage: 0,
-		cacheSize: 0,
-		dbSize: 0,
-		totalEntities: 0,
-		uptime: 0,
-		nodeVersion: '',
-		hostname: '',
-	});
-	const [isLoading, setIsLoading] = useState(true);
-	const [isRepairing, setIsRepairing] = useState(false);
-	const [isResetting, setIsResetting] = useState(false);
+	// Usar React Query hooks en lugar de server actions
+	const {
+		data: systemData = {
+			cpuUsage: 0,
+			memoryUsage: 0,
+			cacheSize: 0,
+			dbSize: 0,
+			totalEntities: 0,
+			uptime: 0,
+			nodeVersion: '',
+			hostname: '',
+		} as SystemData,
+		isLoading,
+		refetch: loadSystemStats
+	} = useSystemStats();
 
-	// Función para cargar estadísticas del sistema
-	const loadSystemStats = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			const stats = await getSystemStats();
-			setSystemData(stats);
-		} catch (error) {
-			toastService.error('No se pudieron cargar las estadísticas del sistema');
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		loadSystemStats();
-
-		// Actualizar estadísticas cada minuto (solo en cliente)
-		const intervalId = setInterval(() => {
-			loadSystemStats();
-		}, 60000);
-
-		return () => clearInterval(intervalId);
-	}, [loadSystemStats]);
+	const repairSystemMutation = useRepairSystem();
+	const resetDatabaseMutation = useResetDatabase();
 
 	// Manejar reparación del sistema
-	const handleRepair = async () => {
+	const handleRepair = useCallback(async () => {
 		try {
-			setIsRepairing(true);
-			const result = await repairSystem();
+			const result = await repairSystemMutation.mutateAsync();
 
 			if (result.success) {
 				toastService.success(result.message);
@@ -89,16 +69,13 @@ export function SystemSettings() {
 			}
 		} catch (error) {
 			toastService.error('No se pudo completar la reparación del sistema');
-		} finally {
-			setIsRepairing(false);
 		}
-	};
+	}, [repairSystemMutation, loadSystemStats]);
 
 	// Manejar reseteo de la base de datos
-	const handleReset = async () => {
+	const handleReset = useCallback(async () => {
 		try {
-			setIsResetting(true);
-			const result = await resetDatabase();
+			const result = await resetDatabaseMutation.mutateAsync();
 
 			if (result.success) {
 				toastService.success(result.message);
@@ -109,10 +86,8 @@ export function SystemSettings() {
 			}
 		} catch (error) {
 			toastService.error('No se pudo completar el reseteo de la base de datos');
-		} finally {
-			setIsResetting(false);
 		}
-	};
+	}, [resetDatabaseMutation, loadSystemStats]);
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
@@ -122,7 +97,7 @@ export function SystemSettings() {
 						<span className="flex items-center gap-2 h-7">
 							<Activity className="h-5 w-5" /> Estado del Sistema
 						</span>
-						<Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={loadSystemStats} disabled={isLoading}>
+						<Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => loadSystemStats()} disabled={isLoading}>
 							<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
 							<span className="sr-only">Actualizar</span>
 						</Button>
@@ -204,88 +179,54 @@ export function SystemSettings() {
 
 						<Separator className="my-2" />
 
-						<motion.div
-							animate={{
-								opacity: [0, 1],
-								y: [20, 0],
-							}}
-							className="space-y-1.5"
-						>
-							<div className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-accent transition-colors group">
-								<div className="flex items-center gap-2">
-									<RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
-									<div>
-										<span className="text-xs font-medium">Reparar sistema</span>
-										<p className="text-[10px] text-muted-foreground">Corrige problemas comunes</p>
-									</div>
-								</div>
-								<Button
-									variant="outline"
-									size="sm"
-									className="h-7 text-xs"
-									onClick={handleRepair}
-									disabled={isRepairing}
-								>
-									{isRepairing ? (
-										<>
-											<RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-											Reparando...
-										</>
-									) : (
-										'Reparar'
-									)}
-								</Button>
-							</div>
+						{/* Acciones del sistema */}
+						<div className="space-y-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleRepair}
+								disabled={repairSystemMutation.isPending}
+								className="w-full justify-start"
+							>
+								<RefreshCw className={`h-4 w-4 mr-2 ${repairSystemMutation.isPending ? 'animate-spin' : ''}`} />
+								{repairSystemMutation.isPending ? 'Reparando...' : 'Reparar Sistema'}
+							</Button>
 
 							<AlertDialog>
 								<AlertDialogTrigger asChild>
-									<motion.div
-										animate={{ scale: 1 }}
-										className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer group"
+									<Button
+										variant="destructive"
+										size="sm"
+										disabled={resetDatabaseMutation.isPending}
+										className="w-full justify-start"
 									>
-										<div className="flex items-center gap-2">
-											<Trash2 className="h-3.5 w-3.5 text-destructive" />
-											<div>
-												<span className="text-xs font-medium">Resetear base de datos</span>
-												<p className="text-[10px] text-muted-foreground">Elimina todos los datos</p>
-											</div>
-										</div>
-										<Button variant="destructive" size="sm" className="h-7 text-xs">
-											Resetear
-										</Button>
-									</motion.div>
+										<Trash2 className="h-4 w-4 mr-2" />
+										Resetear Base de Datos
+									</Button>
 								</AlertDialogTrigger>
-								<AlertDialogContent className="sm:max-w-[425px]">
+								<AlertDialogContent>
 									<AlertDialogHeader>
-										<AlertDialogTitle className="text-base flex items-center gap-2">
+										<AlertDialogTitle className="flex items-center gap-2">
 											<AlertCircle className="h-5 w-5 text-destructive" />
-											¿Estás seguro?
+											¿Resetear la base de datos?
 										</AlertDialogTitle>
-										<AlertDialogDescription className="text-xs">
-											Esta acción no se puede deshacer. Se eliminarán permanentemente todos los datos de la base de
-											datos.
+										<AlertDialogDescription>
+											Esta acción eliminará todos los datos de la base de datos y no se puede deshacer.
+											Todos los álbumes, imágenes, etiquetas y configuraciones se perderán permanentemente.
 										</AlertDialogDescription>
 									</AlertDialogHeader>
 									<AlertDialogFooter>
-										<AlertDialogCancel className="h-8 text-xs">Cancelar</AlertDialogCancel>
+										<AlertDialogCancel>Cancelar</AlertDialogCancel>
 										<AlertDialogAction
-											className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
 											onClick={handleReset}
-											disabled={isResetting}
+											className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 										>
-											{isResetting ? (
-												<>
-													<RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-													Eliminando...
-												</>
-											) : (
-												'Eliminar'
-											)}
+											{resetDatabaseMutation.isPending ? 'Reseteando...' : 'Resetear'}
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>
 							</AlertDialog>
-						</motion.div>
+						</div>
 					</div>
 				</CardContent>
 			</Card>

@@ -1,62 +1,223 @@
-# [012] Migración a Vite + React 19
+# Migración Next.js → Vite: Overview Completo
 
-## Contexto
+## Estado Actual - AUDITORÍA EXHAUSTIVA COMPLETADA ✅
 
-Actualmente el proyecto utiliza **Next.js 15** como framework principal. **Todos los equipos deben usar Node.js ≥ 20.19 (o 22.12) tal como exige Vite 7**. Queremos sustituirlo por **Vite + React 19** para obtener:
+### Descubrimiento Crítico
 
-- Arranque y recarga ultrarrápidos gracias a Vite.
-- Mejor control fino del bundler (esbuild + Rollup).
-- Menor lock-in a convenciones de Next.js.
-- Simplificar despliegues como aplicación SPA/MPA + servidor API independiente.
+La auditoría reveló que la migración está **significativamente menos avanzada** de lo estimado:
 
-## Objetivo
+- **Estado real**: **15% completado** (no 95% como se pensaba)
+- **Componentes totales**: **353 archivos TSX** en `src/components`
+- **Archivos dependientes UI**: **177 archivos** afectados por migración UI
+- **Tiempo real restante**: **21-29 días** (no 3-5 días)
 
-Completar la migración sin interrumpir la operación normal, preservando 100 % de funcionalidad y pruebas.
+### Progreso Real por Área
 
-Para visión ejecutiva de alto nivel consulta también el documento «[Resumen Ejecutivo](./EXECUTIVE-SUMMARY.md)».
+| Área | Estado Inicial | Estado Real | Completitud |
+|------|----------------|-------------|-------------|
+| **Server Actions → React Query** | 43% | 100% ✅ | Completado |
+| **UI Components → Base UI** | 27% | 9% ❌ | 8/86 migrados |
+| **APIs y SDKs** | 86% | 95% ✅ | Casi completado |
+| **Build System** | 0% | 0% ❌ | No iniciado |
+| **Testing & QA** | 0% | 0% ❌ | No iniciado |
 
-## Roadmap resumido
+**Completitud General**: **15%** (no 60% como se estimó inicialmente)
 
-```mermaid
-flowchart TD
-    A[Análisis inicial] --> B[Configuración base Vite]
-    B --> C[Refactor scripts & tooling]
-    C --> D[Migración Frontend]
-    D --> E[Migración API/Server Actions]
-    E --> F[Testing & QA]
-    F --> G[Despliegue & Cleanup]
+## Componentes Completados ✅
+
+### 1. Server Actions → React Query (100%)
+
+#### Settings Components Migrados
+
+- ✅ **prompts-settings.tsx** → `usePrompts`, `useDeletePrompt`
+- ✅ **collections-settings.tsx** → `useCollections`, `useDeleteCollection`
+- ✅ **concepts-settings.tsx** → Ya migrado
+- ✅ **characters-settings.tsx** → Ya migrado
+- ✅ **places-settings.tsx** → Ya migrado
+- ✅ **tags-settings.tsx** → Ya migrado
+- ✅ **notes-settings.tsx** → Ya migrado
+
+#### Create Forms Migrados
+
+- ✅ **create-character-form.tsx** → `useCreateCharacter`, `useUpdateCharacter`
+- ✅ **create-concept-form.tsx** → `useCreateConcept`, `useUpdateConcept`
+- ✅ **create-tag-form.tsx** → `useCreateTag`, `useUpdateTag`
+- ✅ **create-note-form.tsx** → `useCreateNote`, `useUpdateNote`
+- ✅ **create-place-form.tsx** → `useCreatePlace`, `useUpdatePlace`
+
+#### Patrón Establecido
+
+```ts
+const createMutation = useCreateEntity();
+const updateMutation = useUpdateEntity();
+const onSubmit = async (data) => {
+  const result = await createMutation.mutateAsync(data);
+};
+const isSubmitting = createMutation.isPending || updateMutation.isPending;
 ```
 
-## Subtareas
+### 2. UI Components Críticos (8/86)
 
-- [ ] [HIGH] [SMALL] **T01 – Auditoría de dependencias** <small>(ver 01-dependencies-analysis.md)</small>
-- [ ] [HIGH] [MEDIUM] **T02 – Configuración inicial de Vite + React + TS**
-- [ ] [HIGH] [SMALL] **T03 – Integrar Tailwind 4, PostCSS y plugins**
-- [ ] [HIGH] [SMALL] **T04 – Refactorizar scripts `package.json`**
-- [ ] [MEDIUM] [MEDIUM] **T05 – Migrar routing a React Router v6**
-- [ ] [MEDIUM] [MEDIUM] **T06 – Reemplazar Server Actions & API Routes**
-- [ ] [MEDIUM] [SMALL] **T07 – Adaptar Playwright & Vitest**
-- [ ] [LOW] [SMALL] **T08 – Actualizar documentación y guidelines**
-- [ ] [LOW] [SMALL] **T09 – Limpieza de código dead/legacy Next**
+#### Componentes Migrados a Base UI
 
-> El avance de cada tarea se seguirá mediante _pull requests_ vinculados a este documento.
+- ✅ **tabs.tsx** → Base UI (error crítico resuelto)
+- ✅ **form.tsx** → Base UI (Slot implementado)
+- ✅ **accordion.tsx** → Base UI
+- ✅ **popover.tsx** → Base UI
+- ✅ **tooltip.tsx** → Base UI
+- ✅ **switch.tsx** → Base UI
+- ✅ **checkbox.tsx** → Base UI
+- ✅ **dialog.tsx** → Base UI
 
-## Métricas de éxito
+## Componentes Pendientes ❌
 
-| Métrica | Objetivo |
-|---------|----------|
-| 🚦 Lint/TS Errors | 0 errores al finalizar cada fase |
-| 🧪 Pruebas end-to-end | 100 % de tests existentes deben pasar |
-| ⏱️ Tiempos de build | `pnpm build` ≤ 30 s en máquina local |
-| 📦 Bundle size | No exceder +10 % respecto al tamaño actual |
+### UI Components con Radix UI (24/86)
 
-## Riesgos y mitigaciones
+#### Fase 1: Críticos (9) - IN PROGRESS
 
-1. **Dependencias tight-coupled a Next.js** → Identificadas en **T01** y sustituidas.
-2. **SSR/ISR inexistente en Vite** → Revisar si realmente usamos SSR; de ser así, evaluar Vite SSR o Astro híbrido.
-3. **Rutas API** → Externalizar a Express/Fastify con la misma lógica.
-4. **Deployment** → Ajustar workflow CD para servir archivos estáticos + api.
+- ❌ **dropdown-menu.tsx** → Radix UI
+- ❌ **context-menu.tsx** → Radix UI
+- ❌ **hover-card.tsx** → Radix UI
+- ❌ **navigation-menu.tsx** → Radix UI
+- ❌ **menubar.tsx** → Radix UI
+- ❌ **sheet.tsx** → Radix UI (Dialog)
+- ❌ **alert-dialog.tsx** → Radix UI
+- ❌ **collapsible.tsx** → Radix UI
+- ❌ **command.tsx** → CMDK
 
-## Próximo paso inmediato
+#### Fase 2: Formulario (5)
 
-Ejecutar **T01 – Auditoría de dependencias** y generar plan de eliminación/reemplazo.
+- ❌ **radio-group.tsx** → Radix UI
+- ❌ **slider.tsx** → Radix UI
+- ❌ **progress.tsx** → Radix UI
+- ❌ **toggle.tsx** → Radix UI
+- ❌ **toggle-group.tsx** → Radix UI
+
+#### Fase 3: Layout (5)
+
+- ❌ **scroll-area.tsx** → Radix UI
+- ❌ **separator.tsx** → Radix UI
+- ❌ **aspect-ratio.tsx** → Radix UI
+- ❌ **resizable.tsx** → Radix UI
+- ❌ **sidebar.tsx** → Radix UI (Slot)
+
+#### Fase 4: Restantes (5)
+
+- ❌ **avatar.tsx** → Radix UI
+- ❌ **badge.tsx** → Radix UI (Slot)
+- ❌ **breadcrumb.tsx** → Radix UI (Slot)
+- ❌ **select.tsx** → Base UI (parcialmente)
+- ❌ **drawer.tsx** → Vaul
+
+### Archivos Dependientes (177)
+
+**177 archivos** importan desde `@/components/ui/` y serán afectados por la migración UI.
+
+## Roadmap Actualizado
+
+### Fase Actual: UI Migration Fase 1 (4-5 días)
+
+- 🔄 Migrar 9 componentes críticos
+- 🔄 Testing de 177 archivos dependientes
+- 🔄 Resolución de breaking changes
+
+### Próximas Fases
+
+#### Fase 2: UI Migration Fase 2 (3-4 días)
+
+- ⏳ Migrar 5 componentes de formulario
+- ⏳ Testing incremental
+
+#### Fase 3: UI Migration Fase 3 (3-4 días)
+
+- ⏳ Migrar 5 componentes de layout
+- ⏳ Testing incremental
+
+#### Fase 4: UI Migration Fase 4 (3-4 días)
+
+- ⏳ Migrar componentes restantes
+- ⏳ Testing incremental
+
+#### Fase 5: Testing Exhaustivo (5-7 días)
+
+- ⏳ Testing de 177 archivos dependientes
+- ⏳ Testing de integración completo
+- ⏳ Resolución de breaking changes
+
+#### Fase 6: Build System Migration (3-5 días)
+
+- ⏳ Configuración Vite
+- ⏳ Migración de scripts
+- ⏳ Optimizaciones
+
+#### Fase 7: Final QA (2-3 días)
+
+- ⏳ Testing completo
+- ⏳ Performance validation
+- ⏳ Documentación final
+
+## Riesgos Críticos Identificados
+
+### Alto Riesgo
+
+1. **177 archivos dependientes** pueden fallar durante migración UI
+2. **APIs incompatibles** entre Radix UI y Base UI
+3. **Componentes sin equivalente** en Base UI
+4. **Efectos en cascada** por dependencias transitivas
+5. **Performance degradation** con nuevos componentes
+
+### Mitigación
+
+1. **Testing incremental** después de cada componente
+2. **Adaptadores de compatibilidad** cuando sea necesario
+3. **Rollback strategy** para cada fase
+4. **Monitoring continuo** de performance y funcionalidad
+
+## Criterios de Éxito
+
+### Migración UI Completa
+
+- [ ] **24/24 componentes Radix UI** migrados a Base UI
+- [ ] **177 archivos dependientes** funcionando correctamente
+- [ ] **0 referencias a Radix UI** en el código
+- [ ] **Funcionalidad preservada** al 100%
+- [ ] **TypeScript sin errores**
+- [ ] **Performance optimizada**
+
+### Migración Vite Completa
+
+- [ ] **Build system** completamente migrado
+- [ ] **Development server** funcionando
+- [ ] **Production builds** optimizados
+- [ ] **Testing pipeline** actualizado
+- [ ] **CI/CD** configurado
+
+## Estimación Total Actualizada
+
+| Fase | Tiempo | Estado |
+|------|--------|--------|
+| Server Actions | - | ✅ Completado |
+| UI Fase 1 | 4-5 días | 🔄 In Progress |
+| UI Fase 2-4 | 9-12 días | ⏳ Pending |
+| UI Testing | 5-7 días | ⏳ Pending |
+| Build System | 3-5 días | ⏳ Pending |
+| Final QA | 2-3 días | ⏳ Pending |
+| **Total** | **23-32 días** | **15% completado** |
+
+## Documentación
+
+- ✅ [Server Actions Migration](02-server-actions-migration.md) - Completado
+- 🔄 [UI Components Migration](03-ui-components-migration.md) - En progreso
+- ⏳ [Build System Migration](04-build-system-migration.md) - Pendiente
+- ⏳ [Testing Strategy](05-testing-strategy.md) - Pendiente
+
+## Conclusión
+
+La migración es **significativamente más compleja** de lo estimado inicialmente:
+
+- **353 archivos TSX** requieren revisión
+- **177 archivos dependientes** de componentes UI
+- **24 componentes** con Radix UI directo
+- **Efecto cascada masivo** en todo el proyecto
+
+**Estado real**: 15% completado, requiere enfoque sistemático y 21-29 días adicionales para completar la migración UI completa antes de poder continuar con Vite.

@@ -1,7 +1,7 @@
 'use client';
 
+import { RadioGroup as RadioGroupPrimitive } from '@base-ui-components/react/radio-group';
 import { CircleIcon } from 'lucide-react';
-import { RadioGroup as RadioGroupPrimitive } from 'radix-ui';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -31,3 +31,4 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
 }
 
 export { RadioGroup, RadioGroupItem };
+

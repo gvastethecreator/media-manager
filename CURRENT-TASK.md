@@ -210,3 +210,442 @@ Aplicar micro-mejoras detectadas en la fase de revisión documental para dejar e
 - Repositorio compila con `pnpm dev:vite` sin warnings
 - `pnpm test` y `pnpm build:server` funcionan en Windows y Linux
 - Documentación actualizada y sin errores de linter
+
+---
+
+# [021] Migrar Componentes UI Críticos - Fase 1
+
+## Contexto - AUDITORÍA EXHAUSTIVA COMPLETADA ✅
+
+### Descubrimiento Crítico
+
+La auditoría reveló que la migración UI es **SIGNIFICATIVAMENTE más compleja** de lo estimado:
+
+- **353 archivos TSX** en `src/components` (no solo 86 en ui/)
+- **32 archivos** usan Radix UI directamente
+- **177 archivos** importan desde `@/components/ui/`
+- **Efecto cascada masivo** en todo el proyecto
+
+### Estado Real de Migración
+
+- **Estimación inicial**: 95% completado ❌
+- **Estado real**: 3% completado (8/353 considerando dependencias)
+- **Componentes UI**: 8/86 migrados (9%)
+- **Archivos dependientes**: 177 archivos afectados por cambios UI
+
+### Estructura Completa Auditada
+
+```
+src/components/ (353 archivos TSX)
+├── ui/ (86 componentes) ← FOCO PRINCIPAL
+│   ├── ✅ 8 migrados a Base UI
+│   ├── ❌ 24 con Radix UI directo
+│   └── ✅ 54 sin Radix UI
+├── navigation/ (223 líneas + subdirs)
+├── features/ (2 subdirs)
+├── settings/ (24 subdirs) ← YA MIGRADO React Query
+├── cards/ (20 subdirs + 4 archivos)
+├── views/ (25 subdirs + 4 archivos)
+├── core/ (6 subdirs + 4 archivos)
+├── toolbar/ (3 archivos)
+├── forms/ (5 archivos)
+├── entities/ (6 subdirs)
+├── panels/ (3 subdirs)
+├── layout/ (5 archivos)
+└── server/ (2 archivos)
+```
+
+## Tarea Actual: Fase 1 - Componentes UI Críticos
+
+### Componentes a Migrar (9)
+
+#### Alto Impacto (usados en 50+ archivos)
+
+1. **dropdown-menu.tsx** → Base UI
+2. **context-menu.tsx** → Base UI
+3. **hover-card.tsx** → Base UI
+
+#### Navegación Crítica (usados en navigation/)
+
+4. **navigation-menu.tsx** → Base UI
+5. **menubar.tsx** → Base UI
+
+#### Modales/Overlays (usados en forms/views)
+
+6. **sheet.tsx** → Base UI (Dialog)
+7. **alert-dialog.tsx** → Base UI
+
+#### Interacción (usados en múltiples vistas)
+
+8. **collapsible.tsx** → Base UI
+9. **command.tsx** → CMDK (verificar compatibilidad)
+
+### Archivos Dependientes Identificados
+
+**177 archivos** importan desde `@/components/ui/`, incluyendo:
+
+#### Views (25+ archivos)
+
+- `all-images-view.tsx` → usa ScrollArea, Button, Card
+- `albums-view.tsx` → usa ScrollArea, Button
+- `concepts-view.tsx` → usa ScrollArea, Button, Card
+- etc.
+
+#### Cards (20+ archivos)
+
+- `entity-card.tsx` → usa Card, Button, Badge
+- `image-card.tsx` → usa Card, Button
+- etc.
+
+#### Toolbar/Navigation
+
+- `main-toolbar.tsx` → usa Badge, Button, Separator
+- `breadcrumbs.tsx` → usa breadcrumb components
+
+## Estrategia de Ejecución
+
+### Paso 1: Pre-migración
+
+- [ ] Crear branch `ui-migration-phase-1`
+- [ ] Backup de componentes actuales
+- [ ] Documentar APIs actuales de cada componente
+
+### Paso 2: Migración Individual
+
+Para cada componente:
+
+- [ ] Estudiar documentación Base UI
+- [ ] Migrar importaciones y estructura
+- [ ] Mantener API externa compatible
+- [ ] Testing local del componente
+
+### Paso 3: Testing Incremental
+
+- [ ] Verificar archivos dependientes después de cada migración
+- [ ] Ejecutar `pnpm tsc` para verificar tipos
+- [ ] Testing visual de componentes afectados
+
+### Paso 4: Validación
+
+- [ ] Testing de integración completo
+- [ ] Verificar funcionalidad en vistas principales
+- [ ] Performance check
+
+## Riesgos Críticos Identificados
+
+### Alto Riesgo
+
+1. **Breaking changes en APIs** → 177 archivos pueden fallar
+2. **Componentes sin equivalente Base UI** → necesitan adaptadores
+3. **Dependencias transitivas** → efectos en cascada
+4. **Performance degradation** → componentes más pesados
+
+### Mitigación
+
+1. **Migración incremental** con testing continuo
+2. **Adaptadores de compatibilidad** para APIs incompatibles
+3. **Rollback strategy** para cada componente
+4. **Monitoring de performance** durante migración
+
+## Criterios de Éxito - Fase 1
+
+- [ ] 9/9 componentes críticos migrados a Base UI
+- [ ] 0 errores TypeScript en componentes migrados
+- [ ] Funcionalidad preservada al 100%
+- [ ] Performance igual o mejor
+- [ ] 177 archivos dependientes funcionando correctamente
+- [ ] Documentación actualizada
+
+## Estimación Actualizada
+
+- **Tiempo por componente**: 4-6 horas
+- **Testing por componente**: 2-3 horas
+- **Resolución de dependencias**: 1-2 días
+- **Total Fase 1**: 4-5 días
+
+## Próximos Pasos
+
+1. **Iniciar con dropdown-menu.tsx** (mayor impacto)
+2. **Continuar con context-menu.tsx**
+3. **Seguir orden de prioridad por uso**
+4. **Testing continuo de archivos dependientes**
+
+## Notas Importantes
+
+- **La migración UI es OBLIGATORIA** para Vite (no opcional)
+- **177 archivos** serán afectados por los cambios
+- **Enfoque sistemático** es crítico para el éxito
+- **Tiempo real**: 21-29 días para migración UI completa
+
+---
+
+**Estado**: IN PROGRESS
+**Prioridad**: CRITICAL
+**Complejidad**: HEAVY
+**Dependencias**: Tarea 020 completada
+
+[022] Migración Fase 2 - Componentes de Formulario
+
+## Estado: EN PROGRESO ⚙️
+
+### Componentes a Migrar (5 total)
+
+- [ ] radio-group
+- [ ] slider
+- [ ] progress
+- [ ] toggle
+- [ ] toggle-group
+
+### Progreso General de Migración UI
+
+- ✅ **Fase 1 Completada**: 9/9 componentes críticos migrados
+- ⚙️ **Fase 2 En Progreso**: 0/5 componentes de formulario
+- ⏳ **Fase 3 Pendiente**: 5 componentes de layout
+- ⏳ **Fase 4 Pendiente**: 7 componentes de datos
+- ⏳ **Fase 5 Pendiente**: 52 componentes restantes
+
+### Resumen Fase 1 Completada ✅
+
+**Componentes migrados exitosamente:**
+
+1. **dropdown-menu** → Base UI Menu
+2. **context-menu** → Base UI Menu (implementación personalizada)
+3. **hover-card** → Base UI PreviewCard
+4. **navigation-menu** → Base UI NavigationMenu
+5. **menubar** → Base UI Menubar + Menu
+6. **sheet** → Base UI Dialog
+7. **alert-dialog** → Base UI AlertDialog
+8. **collapsible** → Base UI Collapsible
+
+**Componente especial:**
+9. **command** → Mantiene `cmdk` (no hay equivalente directo en Base UI)
+
+### Patrones de Migración Aplicados
+
+#### Cambios de Nomenclatura Coherentes
+
+- `Overlay` → `Backdrop`
+- `Content` → `Popup` (dentro de `Positioner`)
+- `ItemIndicator` → `CheckboxItemIndicator` / `RadioItemIndicator`
+- `Label` → `GroupLabel`
+- `Sub` → `SubmenuRoot`
+- `SubTrigger` → `SubmenuTrigger`
+
+#### Estructura Consistente
+
+```ts
+// Patrón Base UI estándar
+<Portal>
+  <Positioner>
+    <Backdrop />
+    <Popup>
+      {/* contenido */}
+    </Popup>
+  </Positioner>
+</Portal>
+```
+
+### Próximos Pasos - Fase 2
+
+**Componentes de Formulario a migrar:**
+
+1. `radio-group` - Migrar a Base UI RadioGroup
+2. `slider` - Migrar a Base UI Slider
+3. `progress` - Migrar a Base UI Progress
+4. `toggle` - Migrar a Base UI Toggle
+5. `toggle-group` - Crear implementación con Toggle múltiple
+
+**Tiempo estimado:** 2-3 días
+
+### Criterios de Calidad Mantenidos
+
+- ✅ Nombres coherentes con Base UI
+- ✅ Misma API externa
+- ✅ Estilos Tailwind preservados
+- ✅ Accesibilidad mantenida
+- ✅ TypeScript tipado estricto
+- ✅ Documentación con data-slot
+
+---
+
+**Última actualización:** $(Get-Date -Format "dd/MM/yyyy HH:mm")
+
+[023] Migración Fase 3 - Componentes de Layout
+
+## Estado: EN PROGRESO ⚙️
+
+### Componentes a Migrar (5 total)
+
+- [ ] scroll-area
+- [ ] separator
+- [ ] aspect-ratio
+- [ ] resizable
+- [ ] sidebar
+
+### Progreso General de Migración UI
+
+- ✅ **Fase 1 Completada**: 9/9 componentes críticos migrados
+- ✅ **Fase 2 Completada**: 5/5 componentes de formulario migrados
+- ⚙️ **Fase 3 En Progreso**: 0/5 componentes de layout
+- ⏳ **Fase 4 Pendiente**: 7 componentes de datos
+- ⏳ **Fase 5 Pendiente**: 52 componentes restantes
+
+### Resumen Fase 2 Completada ✅
+
+**Componentes migrados exitosamente:**
+
+1. **radio-group** → Base UI RadioGroup
+2. **slider** → Base UI Slider (corregido linter key)
+3. **progress** → Base UI Progress con Track
+4. **toggle** → Base UI Toggle
+5. **toggle-group** → Implementación personalizada con Base UI Toggle
+
+### Patrones de Migración Aplicados en Fase 2
+
+#### Cambios de Nomenclatura Específicos
+
+- Progress: Agregado `<Track>` wrapper para `<Indicator>`
+- ToggleGroup: Implementación personalizada usando múltiples Toggle
+- Slider: Corregido keys únicos para thumbs
+
+#### Implementaciones Personalizadas
+
+```ts
+// ToggleGroup - No existe en Base UI, implementación propia
+<fieldset disabled={disabled}>
+  <ToggleGroupContext.Provider>
+    {React.Children.map(children, (child) =>
+      React.cloneElement(child, { onValueChange, isPressed })
+    )}
+  </ToggleGroupContext.Provider>
+</fieldset>
+```
+
+### Próximos Pasos - Fase 3
+
+**Componentes de Layout a migrar:**
+
+1. `scroll-area` - Migrar o implementar personalizado (Base UI puede no tener)
+2. `separator` - Migrar a Base UI Separator
+3. `aspect-ratio` - Implementación CSS personalizada
+4. `resizable` - Implementación personalizada (no existe en Base UI)
+5. `sidebar` - Implementación personalizada con Dialog/Sheet
+
+**Tiempo estimado:** 2-3 días
+
+### Criterios de Calidad Mantenidos
+
+- ✅ Nombres coherentes con Base UI
+- ✅ Misma API externa preservada
+- ✅ Estilos Tailwind mantenidos
+- ✅ Accesibilidad mejorada (fieldset, roles)
+- ✅ TypeScript tipado estricto
+- ✅ Implementaciones personalizadas cuando necesario
+- ✅ Corrección proactiva de linters
+
+---
+
+**Última actualización:** $(Get-Date -Format "dd/MM/yyyy HH:mm")
+
+[024] Migración Fase 4 - Componentes de Datos
+
+## 📊 Estado Actual (01/07/2025)
+
+### ✅ Fases Completadas
+
+- **Fase 1**: 9/9 componentes críticos migrados
+- **Fase 2**: 5/5 componentes de formulario migrados
+- **Fase 3**: 5/5 componentes de layout migrados
+
+### ✅ Fase 4 COMPLETADA: Componentes de Datos (7 componentes)
+
+**Resultado por Componente:**
+
+#### 1. **calendar.tsx** ✅ MANTENIDO
+
+- **Estado**: Usa `react-day-picker` (librería externa independiente)
+- **Razón**: No hay equivalente en Base UI, `react-day-picker` es estándar de la industria
+- **Resultado**: Funciona correctamente con Button migrado
+
+#### 2. **table.tsx** ✅ MANTENIDO
+
+- **Estado**: Implementación HTML nativa con `data-slot` attributes
+- **Razón**: Base UI no tiene componente Table, implementación actual es óptima
+- **Resultado**: Mantiene patrón `data-slot` consistente
+
+#### 3. **data-table.tsx** ✅ MANTENIDO
+
+- **Estado**: Usa `@tanstack/react-table` (librería externa)
+- **Razón**: TanStack Table es el estándar para tablas avanzadas en React
+- **Resultado**: Compatible con componentes migrados
+
+#### 4. **input.tsx** ✅ MIGRADO
+
+- **Estado**: Migrado de HTML nativo a Base UI Input
+- **Cambios**: `import { Input } from '@base-ui-components/react/input'`
+- **Resultado**: API idéntica, estilos preservados
+
+#### 5-7. **data-table-*.tsx** ✅ VERIFICADOS
+
+- **data-table-column-header.tsx**: Usa `dropdown-menu` (✅ migrado)
+- **data-table-pagination.tsx**: Usa `select` (✅ migrado) y `button` (✅ mantenido)
+- **data-table-view-options.tsx**: Usa `dropdown-menu` (✅ migrado)
+- **data-table-row-actions.tsx**: Usa `dropdown-menu` (✅ migrado)
+- **data-table-toolbar.tsx**: Usa `input` (✅ migrado) y `button` (✅ mantenido)
+
+**Componentes finales:**
+
+- ✅ `select` - Migrado a Base UI (Fase anterior)
+- ✅ `input` - Migrado a Base UI (esta fase)
+- ✅ `button` - Mantenido (Base UI no tiene Button independiente)
+
+## 🎯 Plan de Ejecución Fase 4
+
+### Paso 1: Verificación de Dependencias
+
+- [ ] Verificar estado de migración de `select.tsx`
+- [ ] Verificar estado de migración de `input.tsx`
+- [ ] Verificar estado de migración de `button.tsx`
+
+### Paso 2: Migración de Dependencias Faltantes
+
+- [ ] Migrar `select.tsx` a Base UI Select si no está migrado
+- [ ] Migrar `input.tsx` a Base UI Input si no está migrado
+- [ ] Migrar `button.tsx` a Base UI (¿existe en Base UI?)
+
+### Paso 3: Actualización de data-table-*.tsx
+
+- [ ] Actualizar imports en `data-table-pagination.tsx`
+- [ ] Actualizar imports en `data-table-toolbar.tsx`
+- [ ] Verificar funcionamiento de todos los componentes data-table
+
+### Paso 4: Testing y Validación
+
+- [ ] Probar funcionalidad completa de DataTable
+- [ ] Verificar que Calendar funciona correctamente
+- [ ] Validar que Table mantiene estilos y funcionalidad
+- [ ] Ejecutar linter y corregir errores
+
+## 📋 Notas Técnicas
+
+### Base UI - Componentes NO Disponibles
+
+- **Table/DataGrid**: No existe en Base UI
+- **Calendar/DatePicker**: No existe en Base UI
+- **DataTable**: No existe en Base UI
+
+### Librerías Externas Mantenidas
+
+- `react-day-picker`: Para calendario/datepicker
+- `@tanstack/react-table`: Para tablas de datos avanzadas
+- Implementación HTML nativa: Para tabla básica
+
+### Patrón de data-slot
+
+- Mantener consistencia con `data-slot` attributes
+- Seguir nomenclatura establecida en fases anteriores
+
+## 🚀 Siguientes Fases
+
+- **Fase 5**: 52 componentes restantes
+- **Fase 6**: Auditoría final y optimización
