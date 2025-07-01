@@ -1,6 +1,5 @@
 'use client';
 
-import { deletePlace, getPlaces } from '@/app/actions/places/place.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,19 +9,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useDeletePlace, usePlaces } from '@/lib/api/places';
 import toastService from '@/services/toast';
 import type { PlaceWithStats } from '@/types/entities/place';
 import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { CreatePlaceForm } from './create-place-form';
 
 // Agregar type para manejar el onClick
 type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function PlacesSettings() {
-	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 	const [selectedPlace, setSelectedPlace] = useState<PlaceWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
@@ -33,74 +30,58 @@ export function PlacesSettings() {
 	const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
-	// Cargar lugares al montar el componente
-	useEffect(() => {
-		const loadPlaces = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getPlaces({});
-				setPlaces(data);
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				setError(errorMessage);
-				toastService.error('Error al cargar los lugares', {
-					description: errorMessage,
-				});
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	// React Query hooks
+	const { data: places = [], isLoading, error } = usePlaces({});
+	const deletePlace = useDeletePlace();
 
-		loadPlaces();
-	}, []);
-
-	// Calcular estadísticas generales
-	const stats = {
+	// Calcular estadísticas generales usando useMemo para optimización
+	const stats = useMemo(() => ({
 		totalPlaces: places.length,
 		totalImages: places.reduce((acc, place) => acc + (place._count?.images || 0), 0),
 		unusedPlaces: places.filter((place) => (place._count?.images || 0) === 0).length,
 		favoritePlaces: places.filter((place) => place.isFavorite).length,
-	};
+	}), [places]);
 
-	// Filtrar lugares basados en los criterios seleccionados
-	const filteredPlaces = places.filter((place) => {
-		let matches = true;
+	// Filtrar lugares basados en los criterios seleccionados usando useMemo
+	const filteredPlaces = useMemo(() => {
+		return places.filter((place) => {
+			let matches = true;
 
-		// Filtrar por búsqueda
-		if (searchQuery) {
-			const normalizedQuery = searchQuery.toLowerCase();
-			matches =
-				matches &&
-				Boolean(
-					place.name.toLowerCase().includes(normalizedQuery) ||
+			// Filtrar por búsqueda
+			if (searchQuery) {
+				const normalizedQuery = searchQuery.toLowerCase();
+				matches =
+					matches &&
+					Boolean(
+						place.name.toLowerCase().includes(normalizedQuery) ||
 						place.description?.toLowerCase().includes(normalizedQuery) ||
 						place.region?.toLowerCase().includes(normalizedQuery)
-				);
-		}
+					);
+			}
 
-		// Filtrar por tipos
-		if (selectedTypes.length > 0) {
-			matches = matches && (place.type ? selectedTypes.includes(place.type) : false);
-		}
+			// Filtrar por tipos
+			if (selectedTypes.length > 0) {
+				matches = matches && (place.type ? selectedTypes.includes(place.type) : false);
+			}
 
-		// Filtrar por regiones
-		if (selectedRegions.length > 0) {
-			matches = matches && (place.region ? selectedRegions.includes(place.region) : false);
-		}
+			// Filtrar por regiones
+			if (selectedRegions.length > 0) {
+				matches = matches && (place.region ? selectedRegions.includes(place.region) : false);
+			}
 
-		// Filtrar por favoritos
-		if (onlyFavorites) {
-			matches = matches && !!place.isFavorite;
-		}
+			// Filtrar por favoritos
+			if (onlyFavorites) {
+				matches = matches && !!place.isFavorite;
+			}
 
-		return matches;
-	});
+			return matches;
+		});
+	}, [places, searchQuery, selectedTypes, selectedRegions, onlyFavorites]);
 
 	// Manejar eliminación de lugar
 	const handleDeletePlace = useCallback(async (id: string) => {
 		try {
-			await deletePlace(id);
-			setPlaces((prev) => prev.filter((place) => place.id !== id));
+			await deletePlace.mutateAsync(id);
 			setSelectedPlace(null);
 			setIsEditing(false);
 			toastService.success('Lugar eliminado');
@@ -110,7 +91,7 @@ export function PlacesSettings() {
 				description: errorMessage,
 			});
 		}
-	}, []);
+	}, [deletePlace]);
 
 	// Manejar edición de lugar
 	const handleEditPlace = useCallback((place: PlaceWithStats) => {
@@ -119,13 +100,11 @@ export function PlacesSettings() {
 
 	// Manejar creación exitosa
 	const handlePlaceCreated = useCallback((newPlace: PlaceWithStats) => {
-		setPlaces((prev) => [...prev, newPlace]);
 		toastService.success('Lugar creado');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handlePlaceUpdated = useCallback((updatedPlace: PlaceWithStats) => {
-		setPlaces((prev) => prev.map((place) => (place.id === updatedPlace.id ? { ...place, ...updatedPlace } : place)));
 		toastService.success('Lugar actualizado');
 	}, []);
 
@@ -148,9 +127,15 @@ export function PlacesSettings() {
 		setOnlyFavorites(false);
 	}, []);
 
-	// Extraer tipos y regiones únicos de los lugares
-	const uniqueTypes = Array.from(new Set(places.map((place) => place.type).filter(Boolean))) as string[];
-	const uniqueRegions = Array.from(new Set(places.map((place) => place.region).filter(Boolean))) as string[];
+	// Extraer tipos y regiones únicos de los lugares usando useMemo
+	const uniqueTypes = useMemo(() =>
+		Array.from(new Set(places.map((place) => place.type).filter(Boolean))) as string[],
+		[places]
+	);
+	const uniqueRegions = useMemo(() =>
+		Array.from(new Set(places.map((place) => place.region).filter(Boolean))) as string[],
+		[places]
+	);
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -173,7 +158,7 @@ export function PlacesSettings() {
 					<EmptyState
 						icon={Info}
 						title="Error al cargar lugares"
-						description={error}
+						description={error instanceof Error ? error.message : 'Error desconocido'}
 						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
@@ -198,7 +183,7 @@ export function PlacesSettings() {
 							</CardTitle>
 							<div className="flex items-center gap-1">
 								<Popover>
-									<PopoverTrigger asChild>
+									<PopoverTrigger>
 										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>

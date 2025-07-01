@@ -1,6 +1,5 @@
 'use client';
 
-import { type CharacterWithStats, searchCharacters } from '@/app/actions/characters/character.actions';
 import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -10,6 +9,7 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCharacters } from '@/lib/api/characters';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCharacterStore } from '@/store/entities/character';
@@ -17,82 +17,102 @@ import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('CharactersView');
 
-export function CharactersView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
-	const { selectCharacter } = useCharacterStore();
-	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function CharactersView({ isVisible }: ViewProps) {
+	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
+	const { selectedCharacterId, setSelectedCharacterId } = useCharacterStore();
+	const [localSearch, setLocalSearch] = useState(searchTerm || '');
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithStats[]>(characters);
+	// Usar React Query hook en lugar de server action
+	const {
+		data: characters = [],
+		isLoading,
+		error,
+		refetch
+	} = useCharacters({
+		search: localSearch,
+		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
+		sortOrder: sortOrder as 'asc' | 'desc'
+	});
 
-	const loadCharacters = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando personajes...');
-			const data = await searchCharacters({});
-			setCharacters(data);
-			viewLogger.info(`✅ ${data.length} personajes cargados`);
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando personajes:', error);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
-
+	// Sincronizar búsqueda local con store de navegación
 	useEffect(() => {
-		loadCharacters();
-	}, [loadCharacters]);
+		if (searchTerm !== localSearch) {
+			setLocalSearch(searchTerm || '');
+		}
+	}, [searchTerm, localSearch]);
 
-	const handleCharacterClick = useCallback(
-		(character: CharacterWithStats) => {
-			viewLogger.info('🖱️ Click en personaje:', character.name);
-			setCurrentView('character-content');
-			selectCharacter(character.id);
+	const handleCharacterSelect = useCallback(
+		(characterId: string) => {
+			viewLogger.info('🎭 Seleccionando character', { characterId });
+			setSelectedCharacterId(characterId);
+			clientEvents.emit('character:selected', { characterId });
 		},
-		[setCurrentView, selectCharacter]
+		[setSelectedCharacterId]
 	);
+
+	const handleRetry = useCallback(() => {
+		viewLogger.info('🔄 Reintentando cargar characters');
+		refetch();
+	}, [refetch]);
+
+	if (!isVisible) return null;
+
+	if (isLoading) {
+		return <LoadingScreen message="Cargando personajes..." />;
+	}
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
+			<EmptyState
+				icon={Users}
+				title="Error al cargar personajes"
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				action={{
+					label: 'Reintentar',
+					onClick: handleRetry,
+				}}
+			/>
 		);
 	}
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
+	if (!characters.length) {
+		const emptyMessage = localSearch
+			? `No se encontraron personajes que coincidan con "${localSearch}"`
+			: 'No hay personajes disponibles';
 
-	if (!optimisticCharacters || optimisticCharacters.length === 0) {
 		return (
 			<EmptyState
 				icon={Users}
-				title="No hay personajes creados"
-				description="Crea personajes para organizar tus imágenes por personaje."
+				title="Sin personajes"
+				description={emptyMessage}
 			/>
 		);
 	}
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticCharacters.map((character, index) => (
+		<ScrollArea className="flex-1">
+			<div className="p-6">
+				<motion.div
+					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.3 }}
+				>
+					{characters.map((character, index) => (
 						<motion.div
 							key={character.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: index * 0.1 }}
+							transition={{ duration: 0.3, delay: index * 0.05 }}
 						>
-							<CharacterCard character={character} onClick={() => handleCharacterClick(character)} className="h-full" />
+							<CharacterCard
+								character={character}
+								isSelected={character.id === selectedCharacterId}
+								onSelect={() => handleCharacterSelect(character.id)}
+							/>
 						</motion.div>
 					))}
-				</div>
+				</motion.div>
 			</div>
 		</ScrollArea>
 	);

@@ -1,14 +1,13 @@
 'use client';
 
-import { createTagAction, updateTagAction } from '@/app/actions/tags';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { generateTagColor } from '@/lib/utils/string.utils';
 import toastService from '@/services/toast';
 import type { TagUpdateInput } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagBase as UITag } from '@/types/entities/tag/types';
-import { generateTagColor } from '@/lib/utils/string.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -60,6 +59,10 @@ export function CreateTagForm({
 	onCancel,
 	onPreview,
 }: CreateTagFormProps) {
+	// React Query hooks
+	const createTagMutation = useCreateTag();
+	const updateTagMutation = useUpdateTag();
+
 	// Inicializar formulario con valores por defecto
 	const form = useForm<FormValues>({
 		resolver: zodResolver(createTagSchema),
@@ -96,40 +99,22 @@ export function CreateTagForm({
 				description: data.description,
 				color: data.color,
 				emoji: data.emoji,
-				shortcut: undefined,
+				category: data.category,
+				isFavorite: data.isFavorite,
 			};
 
 			// Crear o actualizar etiqueta
 			if (isEditing && tag) {
-				// Añadir el id para actualizar
-				const updateData: TagUpdateInput = {
-					...tagData,
-				};
-
-				const updated = await updateTagAction(tag.id, updateData);
-				// Convertir el tipo de retorno a UITag para la interfaz
-				const uiUpdated = {
-					...updated,
-					emoji: data.emoji,
-					category: data.category,
-					isFavorite: data.isFavorite,
-				} as unknown as UITag;
-
-				onUpdated?.(uiUpdated);
-				onPreview?.(uiUpdated);
+				const updated = await updateTagMutation.mutateAsync({ id: tag.id, data: tagData });
+				onUpdated?.(updated as UITag);
+				onPreview?.(updated);
+				toastService.success('Etiqueta actualizada correctamente');
 			} else {
-				const created = await createTagAction(tagData);
-				// Convertir el tipo de retorno a UITag para la interfaz
-				const uiCreated = {
-					...created,
-					emoji: data.emoji,
-					category: data.category,
-					isFavorite: data.isFavorite,
-				} as unknown as UITag;
-
-				onCreated?.(uiCreated);
-				onPreview?.(uiCreated);
+				const created = await createTagMutation.mutateAsync(tagData);
+				onCreated?.(created as UITag);
+				onPreview?.(created);
 				form.reset();
+				toastService.success('Etiqueta creada correctamente');
 			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -195,15 +180,7 @@ export function CreateTagForm({
 	return (
 		<DynamicCreateForm
 			optionalFields={optionalFields}
-			onSubmit={async (data) => {
-				if (isEditing && tag) {
-					await updateTagAction(tag.id, data);
-					onUpdated?.({ ...tag, ...data });
-				} else {
-					const created = await createTagAction(data);
-					onCreated?.(created);
-				}
-			}}
+			onSubmit={onSubmit}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear etiqueta'}
 		/>
 	);

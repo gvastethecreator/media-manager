@@ -1,12 +1,27 @@
-import { AlertCircle, Tag } from 'lucide-react';
-import { getSystemStats } from '@/app/actions/stats/stats.actions';
+'use client';
+
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useStats } from '@/lib/api/stats';
+import { AlertCircle, Tag } from 'lucide-react';
 import { TagUsage } from './tag-usage';
 
-export async function TopTags() {
-	const stats = await getSystemStats();
+export function TopTags() {
+	const {
+		data: stats,
+		isLoading,
+		error
+	} = useStats();
 
-	if (!stats) {
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center p-4 gap-2">
+				<Tag className="h-4 w-4 animate-pulse" />
+				<span>Cargando etiquetas...</span>
+			</div>
+		);
+	}
+
+	if (error || !stats) {
 		return (
 			<div className="flex items-center justify-center p-4 text-destructive gap-2">
 				<AlertCircle className="h-4 w-4" />
