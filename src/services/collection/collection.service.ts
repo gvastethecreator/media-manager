@@ -18,7 +18,7 @@ import type {
 	CollectionUpdateInput,
 	CollectionWithStats,
 } from '@/types/entities/collection';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');

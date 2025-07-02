@@ -2,8 +2,7 @@ import { getFolder } from '@/app/actions/folders/crud.actions';
 import { Button } from '@/components/ui/button';
 import { FolderContentView } from '@/components/views/folders/views/folder-content-view';
 import { formatDate, formatFileSize } from '@/lib/utils/format.utils';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { Link, Navigate } from 'react-router-dom';
 import DeleteFolderButton from './delete-button';
 
 interface FolderPageProps {
@@ -14,11 +13,11 @@ interface FolderPageProps {
 
 export default async function FolderPage({ params }: FolderPageProps) {
 	const { id } = params;
-	const folder = await getFolder(id);
+        const folder = await getFolder(id);
 
-	if (!folder) {
-		notFound();
-	}
+        if (!folder) {
+                return <Navigate to="/404" replace />;
+        }
 
 	return (
 		<div className="p-8">
@@ -32,7 +31,7 @@ export default async function FolderPage({ params }: FolderPageProps) {
 					<p className="text-sm text-gray-500">Ruta: {folder.path}</p>
 				</div>
 				<div className="flex gap-2">
-					<Link href={`/folders/${id}/edit`}>
+                                <Link to={`/folders/${id}/edit`}>
 						<Button variant="outline">Editar</Button>
 					</Link>
 					<DeleteFolderButton id={id} />

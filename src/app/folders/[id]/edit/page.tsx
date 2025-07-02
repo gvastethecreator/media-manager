@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 interface EditFolderPageProps {
@@ -17,7 +17,7 @@ interface EditFolderPageProps {
 
 export default function EditFolderPage({ params }: EditFolderPageProps) {
 	const { id } = params;
-	const router = useRouter();
+        const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -65,8 +65,7 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 			});
 
 			// Si llegamos aquí, la actualización fue exitosa
-			router.push(`/folders/${id}`);
-			router.refresh();
+                        navigate(`/folders/${id}`);
 		} catch (err) {
 			setError('Error al actualizar la carpeta');
 			console.error(err);
@@ -89,7 +88,7 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 				<h1 className="text-2xl font-bold mb-6">Error</h1>
 				<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>
 				<div className="mt-4">
-					<Button onClick={() => router.back()}>Volver</Button>
+                                        <Button onClick={() => navigate(-1)}>Volver</Button>
 				</div>
 			</div>
 		);
@@ -100,7 +99,7 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 			<div className="p-8 max-w-2xl mx-auto">
 				<h1 className="text-2xl font-bold mb-6">Carpeta no encontrada</h1>
 				<div className="mt-4">
-					<Button onClick={() => router.back()}>Volver</Button>
+                                        <Button onClick={() => navigate(-1)}>Volver</Button>
 				</div>
 			</div>
 		);
@@ -146,7 +145,7 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 				</div>
 
 				<div className="flex justify-end gap-4">
-					<Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
+                                        <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isSubmitting}>
 						Cancelar
 					</Button>
 					<Button type="submit" disabled={isSubmitting}>

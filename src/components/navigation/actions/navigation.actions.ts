@@ -20,7 +20,7 @@ import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorkflows } from '@/app/actions/workflow/workflow.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const navLogger = serverLogger.withContext('NavActions');
 
