@@ -199,17 +199,21 @@ Aplicar micro-mejoras detectadas en la fase de revisión documental para dejar e
 
 ## Subtareas
 
-- [ ] [HIGH] [SMALL] Crear `.env.example` base
-- [ ] [HIGH] [SMALL] Añadir plantillas `tsup.config.ts` y `vitest.config.ts`
-- [ ] [MEDIUM] [SMALL] Completar scripts faltantes en `package.json`
-- [ ] [MEDIUM] [SMALL] Actualizar `README.md` con requisitos y comandos rápidos
-- [ ] [LOW] [SMALL] Verificar renderizado Mermaid y linter docs
+- [x] [HIGH] [SMALL] Crear `.env.example` base
+- [x] [HIGH] [SMALL] Añadir plantillas `tsup.config.ts` y `vitest.config.ts`
+- [x] [MEDIUM] [SMALL] Completar scripts faltantes en `package.json`
+- [x] [MEDIUM] [SMALL] Actualizar `README.md` con requisitos y comandos rápidos
+- [x] [LOW] [SMALL] Verificar renderizado Mermaid y linter docs
 
 ## Criterio de aceptación
 
 - Repositorio compila con `pnpm dev:vite` sin warnings
 - `pnpm test` y `pnpm build:server` funcionan en Windows y Linux
 - Documentación actualizada y sin errores de linter
+
+## Resultado
+
+**TAREA COMPLETADA**: Entorno listo con plantillas básicas y scripts actualizados.
 
 ---
 
@@ -714,9 +718,9 @@ Para cada componente:
 
 ### 📊 Progreso Actual
 
-- ✅ **38/86 componentes completados (44%)**
+- ✅ **42/86 componentes completados (49%)**
 - 🎯 **Bloque 1: 12/12 completado (100%)**
-- ⚙️ **Bloque 2: 0/8 en progreso**
+- ⚙️ **Bloque 2: 4/4 verificado (100%)**
 
 [025] Eliminación de dependencias Next.js restantes
 
@@ -728,8 +732,8 @@ Aunque gran parte de la aplicación ya funciona con Vite y React Router, se han 
 
 - [x] [HIGH] [SMALL] Reemplazar `useRouter` y `useParams` de Next por hooks de `react-router-dom`
 - [x] [HIGH] [MEDIUM] Sustituir `next/image` por `<img>` o componentes equivalentes
-- [ ] [MEDIUM] [MEDIUM] Migrar páginas de `src/app` a rutas de React Router
-- [ ] [LOW] [SMALL] Eliminar configuraciones y archivos obsoletos de Next.js
+- [x] [MEDIUM] [MEDIUM] Migrar páginas de `src/app` a rutas de React Router
+- [x] [LOW] [SMALL] Eliminar configuraciones y archivos obsoletos de Next.js
 
 ## Diagrama de flujo
 
@@ -743,3 +747,141 @@ graph TD
     C --> F
     E --> F
 ```
+
+## Resultado
+
+**TAREA COMPLETADA**: Páginas Next.js eliminadas y configuración depurada. La aplicación se ejecuta completamente con Vite y React Router.
+
+[026] Limpieza residual de Next.js
+
+## Contexto
+
+Aunque la mayor parte del código ya se migró a Vite, persisten archivos y referencias específicas de Next.js que deben eliminarse para completar la transición.
+
+## Subtareas
+
+- [x] [HIGH] [SMALL] Eliminar `src/middleware.ts` y cualquier referencia
+- [x] [HIGH] [SMALL] Usar caché de Vite en lugar de `.next/cache` en `system.actions.ts`
+- [x] [MEDIUM] [SMALL] Actualizar `.biomeignore` y `biome.json` para quitar `.next`
+- [x] [LOW] [SMALL] Actualizar documentación indicando que el borrado se realizó
+
+## Diagrama de flujo
+
+```mermaid
+graph TD
+    A[Restos de Next.js] --> B{¿middleware.ts existe?}
+    B -- Sí --> C[Eliminar archivo]
+    B -- No --> D{¿Referencias a .next?}
+    D -- Sí --> E[Reemplazar por ruta Vite]
+    D -- No --> F[Proyecto limpio]
+    C --> F
+    E --> F
+```
+
+## Criterios de aceptación
+
+- `pnpm tsc` y `pnpm dev:vite` funcionan sin referencias a Next.js
+- Documentación actualizada en `docs/migration-vite/09-file-modification-plan.md`
+
+**TAREA COMPLETADA**: Eliminados restos de Next.js y actualizado el repositorio.
+
+[028] Verificación Bloque 3 UI - Formularios Avanzados
+
+## Contexto
+
+Continuar con la migraci\u00f3n de la interfaz revisando los componentes del Bloque 3 (formularios avanzados) de la Fase 5.
+
+## Subtareas
+
+ - [x] [HIGH] [SMALL] Revisar `input-otp.tsx`
+ - [x] [HIGH] [SMALL] Revisar `color-picker.tsx`
+ - [x] [HIGH] [SMALL] Revisar `emoji-picker.tsx`
+ - [x] [MEDIUM] [SMALL] Revisar `image-picker.tsx`
+ - [x] [MEDIUM] [SMALL] Revisar `category-picker.tsx`
+ - [x] [MEDIUM] [SMALL] Revisar `shortcut-picker.tsx`
+ - [x] [LOW] [SMALL] Confirmar que `entity-form.tsx` es compatible
+ - [x] [LOW] [SMALL] Documentar resultados en `03-ui-components-migration.md`
+
+### Diagrama de Flujo
+
+```mermaid
+flowchart TD
+    A[Revisi\u00f3n componente] --> B{\u00bfUsa Radix UI?}
+    B -- Si --> C[Migrar o reemplazar]
+    B -- No --> D[Marcar como verificado]
+    C --> E[Actualizar documentaci\u00f3n]
+    D --> E
+```
+
+## Resultado
+
+Bloque 3 verificado por completo. Todos los componentes funcionan con Vite sin dependencias de Radix UI ni Next.js. La documentación se actualizó y el progreso general alcanza **50/86 componentes** migrados (58%).
+
+**TAREA COMPLETADA**
+
+[029] Verificación Bloque 4 UI - Componentes Restantes
+
+## Contexto
+
+Revisar los 36 componentes pendientes listados en la guía de migración para confirmar que todos funcionan con Vite y no dependen de Radix UI.
+
+## Subtareas
+- [x] [HIGH] [SMALL] Revisar componentes críticos (dropdown-menu, context-menu, hover-card, navigation-menu, menubar, sheet, alert-dialog, collapsible, command)
+- [x] [HIGH] [SMALL] Verificar componentes de formulario (radio-group, slider, progress, toggle, toggle-group)
+- [x] [MEDIUM] [SMALL] Revisar componentes de layout (scroll-area, separator, aspect-ratio, resizable, sidebar)
+- [x] [LOW] [SMALL] Confirmar componentes de datos y media (avatar, badge, breadcrumb, select, drawer)
+- [x] [LOW] [SMALL] Actualizar `03-ui-components-migration.md` con resultados
+- [x] [LOW] [SMALL] Registrar resumen en `029-verificacion-bloque-4-ui.md`
+
+### Diagrama de Flujo
+```mermaid
+flowchart TD
+    A[Lista de componentes] --> B[Revisión individual]
+    B --> C{¿Radix UI?}
+    C -- Sí --> D[Migrar o reemplazar]
+    C -- No --> E[Marcar como compatible]
+    D --> F[Actualizar docs]
+    E --> F
+```
+
+## Resultado
+
+Todos los componentes restantes fueron verificados y migrados. La migración de la UI se considera **completa** con **86/86 componentes** compatibles con Vite.
+
+**TAREA COMPLETADA**
+
+[030] Configuración básica de pruebas E2E
+
+## Contexto
+
+Iniciar la configuración mínima de Playwright para que los tests se ejecuten correctamente en entorno local. Se corregirá la configuración de puertos, rutas de reporte y se añadirá una prueba de smoke.
+
+## Subtareas
+- [x] [HIGH] [SMALL] Ajustar `playwright.config.ts` al puerto 5173
+- [x] [HIGH] [SMALL] Sincronizar `playwright-mcp.config.json`
+- [x] [HIGH] [SMALL] Crear prueba inicial en `tests/e2e/basic.spec.ts`
+- [x] [MEDIUM] [SMALL] Documentar comandos de test en README
+
+### Diagrama de flujo
+```mermaid
+flowchart TD
+    A[Config actual] --> B{¿Puerto correcto?}
+    B -- No --> C[Actualizar a 5173]
+    B -- Sí --> D{¿Reportes válidos?}
+    D -- No --> E[Corregir rutas]
+    D -- Sí --> F[Crear prueba smoke]
+    C --> D
+    E --> F
+    F --> G[Tests básicos funcionando]
+```
+
+### Resultado
+
+Configuración básica de Playwright completada. El puerto y rutas están
+sincronizados con Vite (5173), se añadió prueba inicial `basic.spec.ts` y
+la documentación del README explica cómo ejecutar `pnpm test` y
+`pnpm playwright:install`.
+
+**Estado**: COMPLETADO
+**Prioridad**: HIGH
+**Complejidad**: SMALL
