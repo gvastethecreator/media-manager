@@ -26,7 +26,7 @@ import {
 	queueJobPaginationSchema,
 	updateQueueJobSchema,
 } from '@/types/entities/queue-job/schema';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('QueueActions:crud');
 

@@ -17,7 +17,7 @@ import {
 	mapUpdateFolderDataToPrisma,
 } from '@/transformers/folder';
 import type { FolderComplete, FolderCreateInput, FolderUpdateInput, FolderWithStats } from '@/types/entities/folder';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('FolderService');
 

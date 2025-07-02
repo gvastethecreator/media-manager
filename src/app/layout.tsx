@@ -10,16 +10,7 @@ import { ReactScanProvider } from '@/lib/dev/react-scan';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/providers/app-provider';
 import '@/styles/form-animations.css';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import type React from 'react';
-
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-	title: 'Image Manager',
-	description: 'Administrador de imágenes',
-};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -30,11 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			</head>
 			<body
-				className={cn(
-					inter.className,
-					'min-h-screen bg-background text-foreground antialiased',
-					'selection:bg-primary selection:text-primary-foreground'
-				)}
+                                className={cn(
+                                        'min-h-screen bg-background text-foreground antialiased',
+                                        'selection:bg-primary selection:text-primary-foreground'
+                                )}
 			>
 				<ToastProvider>
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem>

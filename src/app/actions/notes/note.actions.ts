@@ -17,7 +17,7 @@ import type {
 	NoteWithStats,
 } from '@/types/entities/note';
 import type { FileItem } from '@/types/files';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 // Utilidades y logging
 const noteLogger = serverLogger.withContext('NoteActions');
