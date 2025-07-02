@@ -1,5 +1,3 @@
-'use client';
-
 import { createFolder, deleteFolder, updateFolder } from '@/app/actions/folders';
 import { clearMetadataCache } from '@/app/actions/metadata';
 import { clientLogger } from '@/lib/logger/client-logger';

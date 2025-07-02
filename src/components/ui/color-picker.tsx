@@ -1,5 +1,3 @@
-'use client';
-
 import { Check, Palette } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';

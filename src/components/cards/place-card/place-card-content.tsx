@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertTriangleIcon, CircleDollarSignIcon, ShieldIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';

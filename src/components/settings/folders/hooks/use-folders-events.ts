@@ -1,5 +1,3 @@
-'use client';
-
 import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/app/actions/folders/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCallback, useEffect } from 'react';

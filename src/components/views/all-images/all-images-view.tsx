@@ -1,5 +1,3 @@
-'use client';
-
 import { EntityCard } from '@/components/cards/entity-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';

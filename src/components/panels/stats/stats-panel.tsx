@@ -4,8 +4,6 @@
  * Delega la lógica de datos al StatsContent (Server Component)
  */
 
-'use client';
-
 import { memo } from 'react';
 // Importamos el wrapper de estadísticas de manera estática ya que ahora es un componente cliente
 import StatsWrapper from './components/stats-wrapper';

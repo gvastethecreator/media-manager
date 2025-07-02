@@ -1,5 +1,3 @@
-'use client';
-
 import { DetailsPanel } from '@/components/features/file-browser/details/details-panel';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';

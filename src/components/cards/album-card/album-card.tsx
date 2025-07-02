@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { motion } from 'motion/react';

@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { FolderComplete, FolderWithStats } from '@/types/entities/folder';
 import { memo, useCallback, useMemo } from 'react';

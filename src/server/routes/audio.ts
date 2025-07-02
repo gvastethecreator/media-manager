@@ -158,12 +158,10 @@ router.get('/', async (req, res) => {
 		});
 	} catch (error) {
 		console.error('Error al obtener archivos de audio:', error);
-		res
-			.status(500)
-			.json({
-				error: 'Error interno del servidor',
-				message: error instanceof Error ? error.message : 'Error desconocido',
-			});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
@@ -187,12 +185,10 @@ router.get('/:id', async (req, res) => {
 		res.json(audio);
 	} catch (error) {
 		console.error('Error al obtener archivo de audio:', error);
-		res
-			.status(500)
-			.json({
-				error: 'Error interno del servidor',
-				message: error instanceof Error ? error.message : 'Error desconocido',
-			});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
@@ -240,12 +236,10 @@ router.post('/', async (req, res) => {
 		res.status(201).json(newAudio);
 	} catch (error) {
 		console.error('Error al crear archivo de audio:', error);
-		res
-			.status(500)
-			.json({
-				error: 'Error interno del servidor',
-				message: error instanceof Error ? error.message : 'Error desconocido',
-			});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
@@ -306,12 +300,10 @@ router.put('/:id', async (req, res) => {
 		res.json(updatedAudio);
 	} catch (error) {
 		console.error('Error al actualizar archivo de audio:', error);
-		res
-			.status(500)
-			.json({
-				error: 'Error interno del servidor',
-				message: error instanceof Error ? error.message : 'Error desconocido',
-			});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
@@ -346,12 +338,10 @@ router.delete('/:id', async (req, res) => {
 		});
 	} catch (error) {
 		console.error('Error al eliminar archivo de audio:', error);
-		res
-			.status(500)
-			.json({
-				error: 'Error interno del servidor',
-				message: error instanceof Error ? error.message : 'Error desconocido',
-			});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
@@ -377,12 +367,10 @@ router.get('/stats/formats', async (req, res) => {
 		});
 	} catch (error) {
 		console.error('Error al obtener estadísticas de formatos:', error);
-		res
-			.status(500)
-			.json({
-				error: 'Error interno del servidor',
-				message: error instanceof Error ? error.message : 'Error desconocido',
-			});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
@@ -403,12 +391,10 @@ router.get('/stats/genres', async (req, res) => {
 		});
 	} catch (error) {
 		console.error('Error al obtener estadísticas de géneros:', error);
-		res
-			.status(500)
-			.json({
-				error: 'Error interno del servidor',
-				message: error instanceof Error ? error.message : 'Error desconocido',
-			});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 

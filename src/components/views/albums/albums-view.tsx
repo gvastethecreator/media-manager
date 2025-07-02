@@ -1,5 +1,3 @@
-'use client';
-
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

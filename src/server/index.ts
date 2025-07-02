@@ -95,10 +95,10 @@ app.listen(PORT, () => {
 	console.log(`\n📁 APIs de Entidades:`);
 	console.log(`   📁 Folders: http://localhost:${PORT}/api/folders`);
 	console.log(`   🖼️  Images: http://localhost:${PORT}/api/images`);
-        console.log(`   📂 Files: http://localhost:${PORT}/api/files`);
-        console.log(`   📸 Albums: http://localhost:${PORT}/api/albums`);
-        console.log(`   📥 Download: http://localhost:${PORT}/api/download`);
-        console.log(`   🏷️  Tags: http://localhost:${PORT}/api/tags`);
+	console.log(`   📂 Files: http://localhost:${PORT}/api/files`);
+	console.log(`   📸 Albums: http://localhost:${PORT}/api/albums`);
+	console.log(`   📥 Download: http://localhost:${PORT}/api/download`);
+	console.log(`   🏷️  Tags: http://localhost:${PORT}/api/tags`);
 	console.log(`   👤 Characters: http://localhost:${PORT}/api/characters`);
 	console.log(`   🌟 Collections: http://localhost:${PORT}/api/collections`);
 	console.log(`   📍 Places: http://localhost:${PORT}/api/places`);
@@ -111,16 +111,16 @@ app.listen(PORT, () => {
 	console.log(`   📝 Notes: http://localhost:${PORT}/api/notes`);
 	console.log(`   ⚙️  Properties: http://localhost:${PORT}/api/properties`);
 	console.log(`   👥 Groups: http://localhost:${PORT}/api/groups`);
-        console.log(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
-        console.log(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
-        console.log(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
+	console.log(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
+	console.log(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
+	console.log(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
 
 	console.log(`\n🔧 APIs de Sistema:`);
 	console.log(`   🖥️  System: http://localhost:${PORT}/api/system`);
 	console.log(`   🔍 Search: http://localhost:${PORT}/api/search`);
 	console.log(`   📋 Metadata: http://localhost:${PORT}/api/metadata`);
-        console.log(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
-        console.log(`   📊 Stats: http://localhost:${PORT}/api/stats`);
+	console.log(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
+	console.log(`   📊 Stats: http://localhost:${PORT}/api/stats`);
 
 	console.log(`\n🩺 Health check: http://localhost:${PORT}/health`);
 });
