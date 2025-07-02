@@ -84,15 +84,15 @@ export async function getSystemStats(): Promise<SystemStats> {
 				const freeMem = os.freemem();
 				const memoryUsage = Math.round(((totalMem - freeMem) / totalMem) * 100);
 
-				// Obtener tamaño de caché (simulado con tamaño de directorio temporal de Next.js)
-				let cacheSize = 0;
-				try {
-					const nextCachePath = path.join(process.cwd(), '.next/cache');
-					const cacheStats = await fs.stat(nextCachePath).catch(() => ({ size: 0 }));
-					cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
-				} catch (error) {
-					systemLogger.warn('⚠️ Error al obtener tamaño de caché:', error);
-				}
+                                // Obtener tamaño de caché (simulado con el directorio de Vite)
+                                let cacheSize = 0;
+                                try {
+                                    const viteCachePath = path.join(process.cwd(), 'node_modules/.vite');
+                                    const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
+                                    cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
+                                } catch (error) {
+                                    systemLogger.warn('⚠️ Error al obtener tamaño de caché:', error);
+                                }
 
 				// Obtener tamaño de base de datos (conteo de entidades)
 				const [totalImages, totalCollections, totalTags, totalAlbums, totalNotes] = await Promise.all([
@@ -157,7 +157,7 @@ export async function repairSystem(): Promise<SystemResponse> {
 	try {
 		systemLogger.info('🔧 Iniciando reparación del sistema');
 
-		// 1. Limpiar caché de Next.js (simulado)
+                // 1. Limpiar caché de Vite (simulado)
 		await new Promise((resolve) => setTimeout(resolve, 500));
 
 		// 2. Verificar integridad de la base de datos (simulado)
