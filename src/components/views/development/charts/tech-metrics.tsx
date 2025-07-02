@@ -1,5 +1,3 @@
-'use client';
-
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Cpu, Database, HardDrive, Loader2 } from 'lucide-react';

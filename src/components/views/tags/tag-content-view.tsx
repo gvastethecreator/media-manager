@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useEffect, useState } from 'react';
 // import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
 import { useTagStore } from '@/store/entities/tag';

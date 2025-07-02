@@ -1,5 +1,3 @@
-'use client';
-
 import { Album, Code, Image, Settings, Target, UserSquare } from 'lucide-react';
 import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';

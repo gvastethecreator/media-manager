@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertCircle, CircleAlert, CircleCheckBig, CircleDashed, TimerReset } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';

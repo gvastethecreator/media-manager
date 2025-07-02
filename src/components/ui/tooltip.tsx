@@ -1,5 +1,3 @@
-'use client';
-
 import { Tooltip as TooltipPrimitive } from '@base-ui-components/react/tooltip';
 import * as React from 'react';
 

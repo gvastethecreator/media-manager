@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
 import { MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from 'lucide-react';

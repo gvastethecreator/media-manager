@@ -2,7 +2,6 @@
  * @file Panel de detalles - Usa EntityWithStats
  * @module components/features/file-browser/details/details-panel
  */
-'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

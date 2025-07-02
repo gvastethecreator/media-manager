@@ -1,5 +1,3 @@
-'use client';
-
 // TODO: Refactorizar para usar el tipo canónico `PropertyWithStats`.
 // Este componente actualmente define su propio tipo extendido para la prop `property`,
 // lo que causa inconsistencias. Debería recibir una prop `property` del tipo `PropertyWithStats`
@@ -118,11 +116,11 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 	}
 
 	// Si no hay onClick, lo envolvemos en Link para navegar a la página de la propiedad
-        return (
-                <Link to={`/dashboard/properties/${property.id}`} className="block">
-                        {cardContent}
-                </Link>
-        );
+	return (
+		<Link to={`/dashboard/properties/${property.id}`} className="block">
+			{cardContent}
+		</Link>
+	);
 }
 
 // Exportar también un componente memorizado si es necesario

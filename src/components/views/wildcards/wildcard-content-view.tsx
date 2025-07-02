@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertCircle, Check, Edit3, Filter, Globe, Hash, Plus, Search, Star, Trash2, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';

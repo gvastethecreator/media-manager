@@ -1,5 +1,3 @@
-'use client';
-
 import { RadioGroup as RadioGroupPrimitive } from '@base-ui-components/react/radio-group';
 import { CircleIcon } from 'lucide-react';
 import * as React from 'react';

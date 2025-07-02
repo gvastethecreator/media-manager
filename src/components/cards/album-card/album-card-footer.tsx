@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { Album } from '@/types/entities/album';
 

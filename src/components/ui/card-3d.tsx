@@ -1,5 +1,3 @@
-'use client';
-
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';

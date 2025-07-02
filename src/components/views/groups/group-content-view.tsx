@@ -1,5 +1,3 @@
-'use client';
-
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';

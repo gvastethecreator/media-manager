@@ -1,5 +1,3 @@
-'use client';
-
 import { Icons } from '@/components/core/icons';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';

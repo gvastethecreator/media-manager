@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertTriangle, Check, Database, RefreshCcw, X } from 'lucide-react';
 import { useState } from 'react';
 // import { runAllDiagnostics } from '@/app/actions/folders/diagnostics.actions'; // TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE

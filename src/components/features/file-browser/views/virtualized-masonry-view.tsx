@@ -2,7 +2,6 @@
  * @file Vista masonry virtualizada usando TanStack Virtual
  * @module components/features/file-browser/views/virtualized-masonry-view
  */
-'use client';
 
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';

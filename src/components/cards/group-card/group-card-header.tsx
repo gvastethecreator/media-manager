@@ -1,5 +1,3 @@
-'use client';
-
 import { FolderIcon, FolderTreeIcon, LibraryBigIcon, PackageOpenIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

@@ -1,5 +1,3 @@
-'use client';
-
 import { DocumentCard } from '@/components/cards/document-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

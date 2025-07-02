@@ -175,7 +175,7 @@ Componente para mostrar una imagen individual con sus metadatos. Optimizado para
 
 - **Múltiples variantes visuales:** default, minimal, polaroid, tcg, gallery
 - **Gestión de estados:** carga, error, hover, selección
-- **Optimización de imágenes:** integración con next/image para mejor rendimiento
+- **Optimización de imágenes:** precarga eficiente y formatos adaptativos
 - **Controles de aspecto:** soporta múltiples relaciones de aspecto
 - **Animaciones:** efectos de transición con motion/react
 - **Modo oscuro integrado:** diseño adaptado para light/dark mode
@@ -345,7 +345,6 @@ Ambos componentes soportan personalización a través de:
 ## Dependencias
 
 - `motion/react`: Para animaciones y transiciones
-- `next/image`: Para optimización de carga de imágenes
 - `shadcn/ui`: Componentes base (Button, Badge, etc.)
 - `tailwindcss`: Sistema de estilos
 - `clsx` / `tailwind-merge`: Utilidades para clases condicionales

@@ -1,5 +1,3 @@
-'use client';
-
 import { WildcardCard } from '@/components/cards/wildcard-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
