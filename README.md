@@ -42,8 +42,13 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - [ ] **T05** - Migración completa routing React Router v6
 - [ ] **T06** - Migración completa Server Actions → Express API
 - [ ] **T08** - Documentación actualizada
-- [ ] **T09** - Limpieza código Next.js legacy
+- [x] **T09** - Limpieza código Next.js legacy
+- [x] **T26** - Limpieza residual de Next.js
+- [x] **T27** - Bloque 2 UI verificado
+- [x] **T28** - Bloque 3 UI verificado
 
+- [x] **T29** - Bloque 4 UI verificado
+- [x] **T30** - Configuración básica de pruebas E2E
 ## Desarrollo
 
 ### Requisitos Previos
@@ -57,6 +62,7 @@ pnpm -v   # ≥ 8.0
 
 ```bash
 pnpm install
+cp env.example .env # Ajustar variables según entorno
 ```
 
 ### Desarrollo Local
@@ -73,14 +79,6 @@ pnpm watch:server
 # Abrir: http://localhost:5173
 ```
 
-#### Opción 2: Desarrollo Legacy Next.js
-
-```bash
-# Desarrollo con Next.js (mientras migramos)
-pnpm dev
-
-# Abrir: http://localhost:3000
-```
 
 ### Build y Producción
 
@@ -101,11 +99,11 @@ node dist/server/index.js
 ### Testing
 
 ```bash
-# Tests unitarios con Vitest
-pnpm test
+# Instalación de navegadores
+pnpm playwright:install
 
-# Tests E2E con Playwright
-pnpm test:e2e
+# Ejecutar pruebas E2E (Playwright)
+pnpm test
 
 # Coverage
 pnpm test --coverage
