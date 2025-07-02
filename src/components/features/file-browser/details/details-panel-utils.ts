@@ -1,5 +1,3 @@
-'use client';
-
 import type { FileMetadata } from '@/types/metadata';
 
 // Logger dedicado para metadata

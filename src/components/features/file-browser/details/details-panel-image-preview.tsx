@@ -1,5 +1,3 @@
-'use client';
-
 import { Loader2, XCircle } from 'lucide-react';
 // No importamos Image de Next.js ya que está causando problemas
 import * as React from 'react';

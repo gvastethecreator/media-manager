@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { getAlbums } from '@/app/actions/albums/album.actions';
 import { searchCharacters } from '@/app/actions/characters/character.actions';

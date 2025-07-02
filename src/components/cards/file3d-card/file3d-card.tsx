@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import { BoxIcon, DownloadIcon, EyeIcon, RotateCcwIcon, ZoomInIcon } from 'lucide-react';

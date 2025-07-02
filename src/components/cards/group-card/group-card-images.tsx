@@ -1,5 +1,3 @@
-'use client';
-
 import { motion } from 'framer-motion';
 import { FolderIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -162,19 +160,19 @@ export function GroupCardImages({
 							key={`media-${index}-${media.substring(media.lastIndexOf('/') + 1)}`}
 							className="relative overflow-hidden bg-black/10"
 						>
-                                                        <img
-                                                                src={media}
-                                                                alt={`Group content ${index + 1}`}
-                                                                className={cn(
-                                                                        'absolute inset-0 w-full h-full object-cover',
-                                                                        rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
-                                                                )}
-                                                                style={{
-                                                                        ...holographicStyle,
-                                                                        transformStyle: 'preserve-3d',
-                                                                        opacity: 0.9,
-                                                                }}
-                                                        />
+							<img
+								src={media}
+								alt={`Group content ${index + 1}`}
+								className={cn(
+									'absolute inset-0 w-full h-full object-cover',
+									rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
+								)}
+								style={{
+									...holographicStyle,
+									transformStyle: 'preserve-3d',
+									opacity: 0.9,
+								}}
+							/>
 
 							{/* Overlay para dar uniformidad */}
 							<div

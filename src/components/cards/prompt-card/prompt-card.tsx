@@ -1,5 +1,3 @@
-'use client';
-
 import { MessageSquareQuote, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo, useState } from 'react';

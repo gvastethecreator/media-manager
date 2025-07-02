@@ -1,5 +1,3 @@
-'use client';
-
 import { ArrowLeft, Database, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo } from 'react';

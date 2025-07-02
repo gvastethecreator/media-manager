@@ -1,5 +1,3 @@
-'use client';
-
 import { ImageIcon } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';

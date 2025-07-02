@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
 import type { TagWithStats } from '@/types/entities/tag';
