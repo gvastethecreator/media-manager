@@ -3,7 +3,8 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFile3DStore } from '@/store/entities/file3d';
+// Store de archivos 3D se expone desde la carpeta file-3d
+import { useFile3DStore } from '@/store/entities/file-3d';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';

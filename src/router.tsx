@@ -16,7 +16,12 @@ const DatabaseDiagnostics = lazy(() =>
 const TestFoldersPage = lazy(() =>
 	import('@/components/settings/folders/folders-settings').then((m) => ({ default: m.FoldersSettings }))
 );
-const DebugMainPage = lazy(() => import('./pages/debug/debug-main-page'));
+// Ruta de debug principal ahora reutiliza DevelopmentView
+const DebugMainPage = lazy(() =>
+        import('@/components/views/development/development-view').then((m) => ({
+                default: m.DevelopmentView,
+        }))
+);
 
 // Componente wrapper para lazy loading
 const LazyWrapper = ({ children }: { children: React.ReactNode }) => (
