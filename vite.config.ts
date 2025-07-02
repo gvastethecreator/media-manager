@@ -34,7 +34,6 @@ export default defineConfig({
 				manualChunks: {
 					react: ['react', 'react-dom'],
 					vendor: ['@tanstack/react-query', 'zustand'],
-					ui: ['@radix-ui/react-label', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
 				},
 			},
 		},
@@ -45,15 +44,7 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		exclude: ['fs', 'path', 'crypto', 'sharp'], // Excluir módulos de Node.js
-		include: [
-			'react',
-			'react-dom',
-			'react-router-dom',
-			'@radix-ui/react-label',
-			'@radix-ui/react-dialog',
-			'framer-motion',
-			'motion',
-		],
+		include: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'motion'],
 	},
 	resolve: {
 		alias: {
