@@ -6,7 +6,6 @@
  *
  * MIGRACIÓN: Este componente reemplazará a entity-card.tsx una vez completada la migración.
  */
-'use client';
 
 import {
 	type EntityWithStats,

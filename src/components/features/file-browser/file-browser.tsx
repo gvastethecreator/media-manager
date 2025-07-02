@@ -6,7 +6,6 @@
  *
  * MIGRACIÓN: Este componente reemplazará a file-browser.tsx
  */
-'use client';
 
 import { EmptyState } from '@/components/core/data-display';
 import { Spinner } from '@/components/ui/spinner';

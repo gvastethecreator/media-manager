@@ -1,5 +1,3 @@
-'use client';
-
 import { BookOpen, ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';

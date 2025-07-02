@@ -1,5 +1,3 @@
-'use client';
-
 import { Toast as ToastPrimitive } from '@base-ui-components/react/toast';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';

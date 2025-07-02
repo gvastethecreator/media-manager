@@ -2,7 +2,6 @@
  * @file Vista de tarjetas virtualizada usando TanStack Virtual
  * @module components/features/file-browser/views/virtualized-cards-view
  */
-'use client';
 
 import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';

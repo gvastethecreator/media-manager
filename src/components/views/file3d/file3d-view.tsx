@@ -1,5 +1,3 @@
-'use client';
-
 import { File3DCard } from '@/components/cards/file3d-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

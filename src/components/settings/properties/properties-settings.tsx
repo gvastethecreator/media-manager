@@ -1,5 +1,3 @@
-'use client';
-
 // TODO: Refactorizar para mover la lógica de transformación de datos a la capa de server actions.
 // Actualmente, la lógica de `loadProperties`, `handleCreateProperty`, etc., transforma los datos
 // de Prisma a un tipo `PropertyWithStats` local. Esto debería hacerse en un transformador

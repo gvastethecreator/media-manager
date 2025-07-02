@@ -1,5 +1,3 @@
-'use client';
-
 import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';

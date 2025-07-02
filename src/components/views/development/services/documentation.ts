@@ -6,7 +6,7 @@
 export async function loadDocumentationFile(filename: string): Promise<string> {
 	try {
 		// En un entorno de servidor real, podríamos leer el sistema de archivos directamente
-		// Para Next.js, usamos fetch para obtener el archivo desde la carpeta pública
+		// Usamos fetch para obtener el archivo desde la carpeta pública
 
 		const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/docs/${filename}`, {
 			cache: 'no-store',

@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
 import type * as React from 'react';

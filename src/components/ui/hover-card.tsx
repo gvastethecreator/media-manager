@@ -1,5 +1,3 @@
-'use client';
-
 import { PreviewCard as PreviewCardPrimitive } from '@base-ui-components/react/preview-card';
 import * as React from 'react';
 

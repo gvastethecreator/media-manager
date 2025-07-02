@@ -2,7 +2,6 @@
  * @file Vista masonry V2 - Layout tipo Pinterest
  * @module components/features/file-browser/views/masonry-view-v2
  */
-'use client';
 
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';

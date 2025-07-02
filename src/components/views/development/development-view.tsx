@@ -1,5 +1,3 @@
-'use client';
-
 import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';

@@ -1,5 +1,3 @@
-'use client';
-
 // 🛠️ Refactor: DynamicCreateForm para WorldItem
 // Ahora solo el campo "name" es obligatorio, el resto se agrega dinámicamente.
 // Validación y tipos corregidos para compatibilidad con el patrón reusable.

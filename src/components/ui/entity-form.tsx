@@ -1,5 +1,3 @@
-'use client';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
@@ -205,7 +203,7 @@ export function EntityForm({
 	formStyle = 'default',
 	className,
 }: EntityFormProps) {
-    const navigate = useNavigate();
+	const navigate = useNavigate();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -369,9 +367,9 @@ export function EntityForm({
 				toastService.success(successMessage);
 			}
 
-                        if (redirectUrl) {
-                                navigate(redirectUrl);
-                        }
+			if (redirectUrl) {
+				navigate(redirectUrl);
+			}
 		} catch (error: any) {
 			toastService.error(error.message || 'Error al guardar los cambios');
 		} finally {

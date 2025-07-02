@@ -1,5 +1,3 @@
-'use client';
-
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { useConceptImages } from '@/lib/api/concepts';

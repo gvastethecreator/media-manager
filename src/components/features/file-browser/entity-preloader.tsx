@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_ENTITIES, PRIORITY_ENTITIES } from '@/constants/entities';
 import { clientLogger } from '@/lib/logger/client-logger';

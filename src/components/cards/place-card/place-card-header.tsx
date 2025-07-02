@@ -1,5 +1,3 @@
-'use client';
-
 import { Building2, Cloud, Compass, Droplets, Mountain, Palmtree, Sparkles, Sprout, Star, Trees } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

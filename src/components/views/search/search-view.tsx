@@ -1,5 +1,3 @@
-'use client';
-
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';

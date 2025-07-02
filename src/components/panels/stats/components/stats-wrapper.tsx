@@ -1,5 +1,3 @@
-'use client';
-
 import { memo } from 'react';
 import { ClientGeneralStats, ClientRecentActivity, ClientTopTags } from '../stats-client-components';
 

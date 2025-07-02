@@ -1,5 +1,3 @@
-'use client';
-
 import { TagCard, type TagWithStats } from '@/components/cards/tag-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

@@ -1,5 +1,3 @@
-'use client';
-
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStats } from '@/lib/api/stats';
 import { AlertCircle, Tag } from 'lucide-react';

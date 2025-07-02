@@ -4,7 +4,7 @@
 
 Este módulo contiene el hook principal `useFolders` y los hooks auxiliares para la gestión de carpetas en la configuración de la aplicación. Gestiona el estado, operaciones CRUD, reindexado, polling, eventos en tiempo real y sincronización con el backend.
 
-- **Stack:** Next.js 15, React 19, Zustand, React Query, Server Actions, Zod, eventos custom.
+- **Stack:** Vite, React 19, Zustand, React Query, Server Actions, Zod, eventos custom.
 - **Ubicación:** `src/components/settings/folders/hooks/`
 
 ## Hooks incluidos

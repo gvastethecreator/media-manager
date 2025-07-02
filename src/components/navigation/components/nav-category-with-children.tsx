@@ -1,5 +1,3 @@
-'use client';
-
 import type { LucideIcon } from 'lucide-react';
 import type React from 'react';
 import { memo, useCallback } from 'react';

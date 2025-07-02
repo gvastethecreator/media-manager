@@ -1,5 +1,3 @@
-'use client';
-
 import { Badge } from '@/components/ui/badge';
 import type { VideoWithStats } from '@/types/entities/video';
 

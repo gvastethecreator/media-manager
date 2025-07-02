@@ -1,5 +1,3 @@
-'use client';
-
 import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';

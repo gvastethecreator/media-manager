@@ -1,5 +1,3 @@
-'use client';
-
 import { CollectionCard } from '@/components/cards/collection-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
