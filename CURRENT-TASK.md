@@ -967,3 +967,29 @@ Eliminar paquetes obsoletos de Radix UI y ajustar la configuración de Vite para
 - [x] [MEDIUM] [SMALL] Ajustar `vite.config.ts` para quitar manualChunks e includes de Radix
 - [x] [MEDIUM] [SMALL] Actualizar `PROGRESO-ACTUAL.md` y `PROYECTO-COMPLETADO.md`
 - [x] [LOW] [SMALL] Ejecutar formatos y pruebas
+
+
+[034] Auditoría final de documentación Vite – EN PROGRESO
+
+## Contexto
+Tras completar la eliminación de paquetes Radix UI, es necesario actualizar toda la documentación de la migración a Vite para reflejar el estado final.
+
+## Subtareas
+- [ ] [MEDIUM] [SMALL] Actualizar `PROGRESO-ACTUAL.md` con la fecha de cierre
+- [ ] [MEDIUM] [SMALL] Completar `TRABAJO-COMPLETADO.md` con el resumen final
+- [ ] [LOW] [SMALL] Ajustar `EXECUTIVE-SUMMARY.md` con el progreso definitivo
+- [ ] [LOW] [SMALL] Ejecutar `pnpm format` y `pnpm lint`
+
+### Diagrama de flujo
+```mermaid
+flowchart TD
+    A[Docs desactualizadas] --> B[Actualizar PROGRESO]
+    B --> C[Resumir trabajo]
+    C --> D[Modificar Executive Summary]
+    D --> E[Format & lint]
+```
+
+**Estado**: EN PROGRESO
+**Prioridad**: MEDIUM
+**Complejidad**: SMALL
+
