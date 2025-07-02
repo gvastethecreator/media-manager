@@ -1,5 +1,3 @@
-'use client';
-
 import { clientLogger } from '@/lib/logger/client-logger';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { getFolders } from '@/services/folder';

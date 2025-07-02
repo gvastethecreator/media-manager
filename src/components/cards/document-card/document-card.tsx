@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { DocumentWithStats } from '@/types/entities/document';
 import { DownloadIcon, EyeIcon, FileTextIcon } from 'lucide-react';

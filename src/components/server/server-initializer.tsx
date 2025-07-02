@@ -1,5 +1,3 @@
-'use client';
-
 import { useSystemInit } from '@/lib/api/system';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useEffect } from 'react';

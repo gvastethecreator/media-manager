@@ -1,5 +1,3 @@
-'use client';
-
 import { PropertyCard } from '@/components/cards/property-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

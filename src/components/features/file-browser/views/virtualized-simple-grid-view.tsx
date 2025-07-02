@@ -2,7 +2,6 @@
  * @file Vista de grid simple virtualizada usando TanStack Virtual
  * @module components/features/file-browser/views/virtualized-simple-grid-view
  */
-'use client';
 
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';

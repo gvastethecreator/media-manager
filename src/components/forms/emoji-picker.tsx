@@ -1,5 +1,3 @@
-'use client';
-
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';

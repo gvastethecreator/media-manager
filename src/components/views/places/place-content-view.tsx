@@ -1,5 +1,3 @@
-'use client';
-
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { usePlaceImages } from '@/lib/api/places';
 import { usePlaceStore } from '@/store/entities/place';

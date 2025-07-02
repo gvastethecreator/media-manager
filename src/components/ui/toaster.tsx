@@ -1,5 +1,3 @@
-'use client';
-
 import { ToastViewport, toastManager } from '@/components/ui/toast';
 import { Toast as ToastPrimitive } from '@base-ui-components/react/toast';
 

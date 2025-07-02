@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { ConceptComplete } from '@/types/entities/concept';
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
