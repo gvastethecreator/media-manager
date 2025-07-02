@@ -87,11 +87,11 @@ export async function getSystemStats(): Promise<SystemStats> {
                                 // Obtener tamaño de caché (simulado con el directorio de Vite)
                                 let cacheSize = 0;
                                 try {
-                                    const viteCachePath = path.join(process.cwd(), 'node_modules/.vite');
-                                    const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
-                                    cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
+                                	const viteCachePath = path.join(process.cwd(), 'node_modules/.vite');
+                                	const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
+                                	cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
                                 } catch (error) {
-                                    systemLogger.warn('⚠️ Error al obtener tamaño de caché:', error);
+                                	systemLogger.warn('⚠️ Error al obtener tamaño de caché:', error);
                                 }
 
 				// Obtener tamaño de base de datos (conteo de entidades)
