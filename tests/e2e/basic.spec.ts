@@ -4,6 +4,5 @@ import { test, expect } from '@playwright/test';
 
 test('carga la página principal', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.waitForLoadState('domcontentloaded');
     await expect(page).toHaveTitle(/Sistema de Gestión de Imágenes/);
 });
