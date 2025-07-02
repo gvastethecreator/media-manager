@@ -1,5 +1,3 @@
-'use client';
-
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';

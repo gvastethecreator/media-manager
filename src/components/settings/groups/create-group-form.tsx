@@ -1,5 +1,3 @@
-'use client';
-
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import type { GroupWithStats } from '@/types/entities/group';

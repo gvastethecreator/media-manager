@@ -1,0 +1,39 @@
+Comando: npx playwright test
+Fecha: 2025-07-02T06:03:50.864Z
+Directorio: /workspace/image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.
+
+Running 1 test using 1 worker
+
+[2m[WebServer] [22m[2m6:03:57 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to resolve import "./pages/debug/debug-main-page" from "src/router.tsx". Does the file exist?
+[2m[WebServer] [22m  Plugin: [35mvite:import-analysis[39m
+[2m[WebServer] [22m  File: [36m/workspace/image-manager/src/router.tsx[39m:19:40
+[2m[WebServer] [22m[33m  35 |  );
+[2m[WebServer] [22m  36 |  _c8 = TestFoldersPage;
+[2m[WebServer] [22m  37 |  const DebugMainPage = lazy(_c9 = () => import("./pages/debug/debug-main-page"));
+[2m[WebServer] [22m     |                                                ^
+[2m[WebServer] [22m  38 |  _c0 = DebugMainPage;
+[2m[WebServer] [22m  39 |  const LazyWrapper = ({ children }) => /* @__PURE__ */ jsxDEV(Suspense, { fallback: /* @__PURE__ */ jsxDEV(LoadingSpinner, {}, void 0, false, {[39m
+  ✘  1 [chromium] › tests/e2e/basic.spec.ts:5:1 › carga la página principal (4ms)
+
+
+  1) [chromium] › tests/e2e/basic.spec.ts:5:1 › carga la página principal ──────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1179/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  1 failed
+    [chromium] › tests/e2e/basic.spec.ts:5:1 › carga la página principal ───────────────────────────
+
+[36m  Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.[39m

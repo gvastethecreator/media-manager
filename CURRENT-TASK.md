@@ -885,3 +885,74 @@ la documentación del README explica cómo ejecutar `pnpm test` y
 **Estado**: COMPLETADO
 **Prioridad**: HIGH
 **Complejidad**: SMALL
+
+[031] Auditoría Carpeta Features - Eliminación de Restos Next.js
+
+## Contexto
+
+Revisar todos los componentes dentro de `src/components/features` para
+confirmar que no queden restos de Next.js y ajustarlos a la configuración
+de Vite. Se detectaron varias directivas `'use client'` heredadas de Next.js
+que ya no son necesarias.
+
+## Subtareas
+
+- [x] [MEDIUM] [SMALL] Remover directivas `'use client'` en 39 archivos
+- [x] [LOW] [SMALL] Actualizar documentación de `ImageRenderer` eliminando
+  referencias a Next.js
+- [x] [LOW] [SMALL] Registrar resumen en `docs/archived/031-auditoria-features.md`
+
+### Diagrama de Flujo
+
+```mermaid
+flowchart TD
+    A[Escaneo de archivos] --> B{¿Usa 'use client'?}
+    B -- Sí --> C[Eliminar directiva]
+    B -- No --> D[Sin cambios]
+    C --> E{¿Comentarios sobre Next.js?}
+    D --> E
+    E -- Sí --> F[Actualizar comentarios]
+    E -- No --> G[Archivo verificado]
+    F --> G
+```
+
+### Resultado
+
+- Todos los archivos de `features/` libres de directivas Next.js
+- Comentarios actualizados en `ImageRenderer`
+- Documentación de la auditoría archivada
+
+**Estado**: COMPLETADO
+**Prioridad**: MEDIUM
+**Complejidad**: SMALL
+
+[032] Auditoría Componentes Restantes - Eliminación de Directivas Next.js
+
+## Contexto
+Continuar con la migración a Vite revisando todas las carpetas de `src/components` excepto `features`. Se deben eliminar las directivas `'use client'` y referencias a Next.js.
+
+## Subtareas
+- [x] [MEDIUM] [SMALL] Remover `'use client'` en 264 archivos
+- [x] [LOW] [SMALL] Actualizar comentarios y readmes que mencionaban Next.js
+- [x] [LOW] [SMALL] Registrar resumen en `docs/archived/032-auditoria-componentes-restantes.md`
+
+### Diagrama de Flujo
+```mermaid
+flowchart TD
+    A[Escaneo de carpetas] --> B{¿use client?}
+    B -- Sí --> C[Eliminar línea]
+    B -- No --> D[Sin cambios]
+    C --> E{¿mención Next.js?}
+    D --> E
+    E -- Sí --> F[Actualizar docs]
+    E -- No --> G[Componente limpio]
+    F --> G
+```
+
+### Resultado
+
+Todos los componentes de `src/components` están libres de referencias a Next.js.
+
+**Estado**: COMPLETADO
+**Prioridad**: MEDIUM
+**Complejidad**: SMALL

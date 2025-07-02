@@ -1,5 +1,3 @@
-'use client';
-
 import { memo, useMemo } from 'react';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { EntityStatsType } from '@/types/migration';

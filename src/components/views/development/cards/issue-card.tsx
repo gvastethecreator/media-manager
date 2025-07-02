@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from './status-badge';

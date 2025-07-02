@@ -1,5 +1,3 @@
-'use client';
-
 import { truncateText } from '@/lib/utils/format';
 import type { InfoItemProps } from './details-panel-types';
 

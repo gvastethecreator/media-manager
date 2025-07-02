@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
 import { Heart, Image, Tag, Users } from 'lucide-react';

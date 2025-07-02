@@ -1,5 +1,3 @@
-'use client';
-
 import { ImageIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
