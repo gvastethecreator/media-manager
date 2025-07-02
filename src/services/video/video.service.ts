@@ -17,7 +17,7 @@ import type {
 	VideoUpdateInput,
 	VideoWithStats,
 } from '@/types/entities/video';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('VideoService');
 

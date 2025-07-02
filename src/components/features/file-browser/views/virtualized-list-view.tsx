@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import Image from 'next/image';
 import React, { memo, useRef } from 'react';
 
 interface VirtualizedListViewProps {
@@ -88,15 +87,15 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 						>
 							{/* Thumbnail o icono */}
 							<div className="w-12 h-12 bg-muted rounded flex-shrink-0 flex items-center justify-center">
-								{item.entityType === 'image' && item.path ? (
-									<Image
-										src={item.path}
-										alt={item.name}
-										width={48}
-										height={48}
-										className="w-12 h-12 object-cover rounded"
-									/>
-								) : (
+                                                                {item.entityType === 'image' && item.path ? (
+                                                                        <img
+                                                                                src={item.path}
+                                                                                alt={item.name}
+                                                                                width={48}
+                                                                                height={48}
+                                                                                className="w-12 h-12 object-cover rounded"
+                                                                        />
+                                                                ) : (
 									<div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center">
 										<span className="text-xs font-semibold text-primary">{item.name.charAt(0).toUpperCase()}</span>
 									</div>

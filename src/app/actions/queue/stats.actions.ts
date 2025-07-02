@@ -16,7 +16,7 @@ import {
 } from '@/services/queue-job/queue-job.service';
 import type { QueueStats } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job';
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from '@/lib/server/revalidate';
 
 // Logger específico para acciones de estadísticas
 const logger = serverLogger.withContext('QueueActions:stats');

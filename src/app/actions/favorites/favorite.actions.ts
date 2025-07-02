@@ -10,7 +10,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
 import { fromPrismaFavorites } from '@/transformers/favorite';
 import { type FavoriteComplete, FavoriteEntityType } from '@/types/entities/favorite';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('FavoriteActions');
 

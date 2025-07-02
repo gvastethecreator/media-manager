@@ -1,13 +1,5 @@
-import type { Metadata } from 'next';
 import { DebugNav } from '@/components/views/development/debug-nav';
 
-export const metadata: Metadata = {
-	title: {
-		template: '%s | Herramientas de Depuración',
-		default: 'Herramientas de Depuración',
-	},
-	description: 'Herramientas para depuración y monitoreo de la aplicación',
-};
 
 interface DebugLayoutProps {
 	children: React.ReactNode;

@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'motion/react';
-import Image from 'next/image';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -152,21 +151,18 @@ export function PlaceCardImages({
 					}}
 				>
 					{/* Imagen del lugar */}
-					<Image
-						src={displayImage as string}
-						alt="Place image"
-						fill
-						sizes="(max-width: 640px) 300px, 320px"
-						priority={true}
-						className={cn(
-							'object-cover',
-							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
-						)}
-						style={{
-							...holographicStyle,
-							transformStyle: 'preserve-3d',
-						}}
-					/>
+                                        <img
+                                                src={displayImage as string}
+                                                alt="Place image"
+                                                className={cn(
+                                                        'object-cover w-full h-full',
+                                                        rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
+                                                )}
+                                                style={{
+                                                        ...holographicStyle,
+                                                        transformStyle: 'preserve-3d',
+                                                }}
+                                        />
 
 					{/* Efecto holográfico de brillo */}
 					{tcgMode && holographicEffect && rarityLevel >= 3 && (

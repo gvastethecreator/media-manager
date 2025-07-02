@@ -11,7 +11,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
 import { Group as GroupIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import React, { useCallback, useEffect } from 'react';
 import type { ViewProps } from '../types';
 
@@ -44,7 +44,7 @@ MemoizedGroupCard.displayName = 'MemoizedGroupCard';
 
 export function GroupsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const router = useRouter();
+        const navigate = useNavigate();
 
 	// Leer el estado y las acciones directamente del store de Zustand
 	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
@@ -71,9 +71,9 @@ export function GroupsView(_props: ViewProps) {
 			// Actualizar la información del grupo en el store
 			addGroup(group);
 			// Navegar a la vista de detalle del grupo
-			router.push(`/groups/${group.id}`);
+                        navigate(`/groups/${group.id}`);
 		},
-		[setCurrentView, addGroup, router]
+                [setCurrentView, addGroup, navigate]
 	);
 
 	if (error) {

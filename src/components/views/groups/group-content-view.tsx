@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGroup } from '@/lib/api/groups';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { useParams } from 'react-router-dom';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('GroupContentView');

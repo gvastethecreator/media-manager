@@ -19,7 +19,7 @@ import type {
 	WorldItemUpdateInput,
 	WorldItemWithStats,
 } from '@/types/entities/world-item';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const worldItemLogger = serverLogger.withContext('WorldItemActions');
 

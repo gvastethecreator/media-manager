@@ -14,7 +14,7 @@ import type {
 	ConceptSearchOptions,
 	ConceptUpdateInput,
 } from '@/types/entities/concept/types';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const REVALIDATE_PATHS = ['/settings/concepts', '/library/concepts'];
 

@@ -1,12 +1,8 @@
-import type { Metadata } from 'next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DebugConsole } from '@/components/views/development/debug-console';
 import { ServerStats } from '@/components/views/development/server-stats';
 
-export const metadata: Metadata = {
-	title: 'Consola de Depuración',
-	description: 'Herramienta para visualizar y depurar logs de la aplicación',
-};
+
 
 export default function DebugPage() {
 	return (

@@ -1,4 +1,4 @@
-import type { NextRequest, NextResponse } from 'next/server';
+import type { Request, Response } from 'express';
 import { serverLogger } from '../logger/server-logger';
 
 // Interfaz para las opciones del logger de API
@@ -48,122 +48,91 @@ export const apiLogger = {
 		};
 
 		// Función para filtrar headers sensibles
-		const filterHeaders = (headers: Headers): Record<string, string> => {
-			const headersObj: Record<string, string> = {};
-			for (const [key, value] of headers.entries()) {
-				if (options.sensitiveHeaders?.includes(key.toLowerCase())) {
-					headersObj[key] = '[REDACTED]';
-				} else {
-					headersObj[key] = value;
-				}
-			}
-			return headersObj;
-		};
+                const filterHeaders = (headers: Record<string, string | string[] | undefined>): Record<string, string> => {
+                        const headersObj: Record<string, string> = {};
+                        for (const [key, value] of Object.entries(headers)) {
+                                const headerValue = Array.isArray(value) ? value.join(', ') : value ?? '';
+                                if (options.sensitiveHeaders?.includes(key.toLowerCase())) {
+                                        headersObj[key] = '[REDACTED]';
+                                } else {
+                                        headersObj[key] = headerValue;
+                                }
+                        }
+                        return headersObj;
+                };
 
 		return {
 			/**
 			 * Registra una solicitud entrante
-			 * @param req Objeto NextRequest
-			 */
-			logRequest: (req: NextRequest) => {
-				const requestId = req.headers.get('x-request-id') || `req_${Date.now()}`;
-				const startTime = Date.now();
+                        * @param req Objeto Request
+                         */
+                        logRequest: (req: Request) => {
+                                const requestId = (req.headers['x-request-id'] as string | undefined) ?? `req_${Date.now()}`;
+                                const startTime = Date.now();
 
-				const logData: Record<string, unknown> = {
-					method: req.method,
-					url: req.url,
-					requestId,
-				};
+                                const logData: Record<string, unknown> = {
+                                        method: req.method,
+                                        url: req.originalUrl || req.url,
+                                        requestId,
+                                };
 
-				if (options.showQuery) {
-					logData.query = Object.fromEntries(new URL(req.url).searchParams.entries());
-				}
+                                if (options.showQuery) {
+                                        logData.query = req.query;
+                                }
 
-				if (options.showHeaders) {
-					logData.headers = filterHeaders(req.headers);
-				}
+                                if (options.showHeaders) {
+                                        logData.headers = filterHeaders(req.headers as Record<string, string | string[] | undefined>);
+                                }
 
-				// Intentar obtener y registrar el cuerpo si es JSON
-				if (options.showBody && req.body) {
-					try {
-						// Clonar la solicitud para no consumir el cuerpo original
-						req
-							.clone()
-							.json()
-							.then((body) => {
-								logData.body = filterSensitiveData(body, options.sensitiveBodyFields || []);
-								logger.http(
-									`Solicitud recibida: ${req.method} ${new URL(req.url).pathname}`,
-									logData,
-									requestId,
-									startTime
-								);
-							})
-							.catch(() => {
-								logData.body = '[No se pudo analizar el cuerpo como JSON]';
-								logger.http(
-									`Solicitud recibida: ${req.method} ${new URL(req.url).pathname}`,
-									logData,
-									requestId,
-									startTime
-								);
-							});
-					} catch (_error) {
-						logData.body = '[Error al procesar el cuerpo]';
-						logger.http(
-							`Solicitud recibida: ${req.method} ${new URL(req.url).pathname}`,
-							logData,
-							requestId,
-							startTime
-						);
-					}
-				} else {
-					logger.http(`Solicitud recibida: ${req.method} ${new URL(req.url).pathname}`, logData, requestId, startTime);
-				}
+                                if (options.showBody && req.body) {
+                                        logData.body = filterSensitiveData(req.body as Record<string, unknown>, options.sensitiveBodyFields || []);
+                                }
 
-				return { requestId, startTime };
-			},
+                                logger.http(`Solicitud recibida: ${req.method} ${req.path}`, logData, requestId, startTime);
+
+                                return { requestId, startTime, path: req.path };
+                        },
 
 			/**
 			 * Registra una respuesta saliente
-			 * @param res Objeto NextResponse
+                        * @param res Objeto Response
 			 * @param requestInfo Información de la solicitud original
 			 */
-			logResponse: (res: NextResponse, requestInfo: { requestId: string; startTime: number; path?: string }) => {
+                        logResponse: (res: Response, requestInfo: { requestId: string; startTime: number; path?: string }) => {
 				const { requestId, startTime, path } = requestInfo;
 				const responseTime = Date.now() - startTime;
 
-				const logData: Record<string, unknown> = {
-					status: res.status,
-					statusText: res.statusText,
+                                const logData: Record<string, unknown> = {
+                                        status: res.statusCode,
+                                        statusText: res.statusMessage,
 					responseTime: `${responseTime}ms`,
 					requestId,
 				};
 
-				if (options.showHeaders) {
-					logData.headers = filterHeaders(res.headers);
+                                if (options.showHeaders) {
+                                        logData.headers = filterHeaders(res.getHeaders() as Record<string, string | string[] | undefined>);
 				}
 
 				// Determinar el nivel de log basado en el código de estado
-				const statusCode = res.status;
-				if (statusCode >= 500) {
-					logger.error(
-						`Respuesta enviada: ${statusCode} ${res.statusText || ''} (${responseTime}ms)`,
-						logData,
-						requestId
-					);
-				} else if (statusCode >= 400) {
-					logger.warn(
-						`Respuesta enviada: ${statusCode} ${res.statusText || ''} (${responseTime}ms)`,
-						logData,
-						requestId
-					);
-				} else {
-					logger.info(
-						`Respuesta enviada: ${statusCode} ${res.statusText || ''} (${responseTime}ms)`,
-						logData,
-						requestId
-					);
+                                const statusCode = res.statusCode;
+                                if (statusCode >= 500) {
+                                        logger.error(
+                                                `Respuesta enviada: ${statusCode} ${res.statusMessage || ''} (${responseTime}ms)`,
+                                                logData,
+                                                requestId
+                                        );
+                                } else if (statusCode >= 400) {
+                                        logger.warn(
+                                                `Respuesta enviada: ${statusCode} ${res.statusMessage || ''} (${responseTime}ms)`,
+                                                logData,
+                                                requestId
+                                        );
+                                } else {
+                                        logger.info(
+                                                `Respuesta enviada: ${statusCode} ${res.statusMessage || ''} (${responseTime}ms)`,
+                                                logData,
+                                                requestId
+                                        );
 				}
 
 				return responseTime;

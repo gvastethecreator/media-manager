@@ -13,7 +13,7 @@ import { toPropertyWithStats } from '@/transformers/property';
 import type { PropertyCreateInput, PropertyUpdateInput, PropertyWithStats } from '@/types/entities/property';
 import { propertyCounts } from '@/types/entities/property';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('PropertyService');

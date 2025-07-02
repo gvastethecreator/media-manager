@@ -6,7 +6,7 @@
 'use server';
 
 import fs from 'fs/promises';
-import { revalidatePath, unstable_cache } from 'next/cache';
+import { revalidatePath, unstable_cache } from '@/lib/server/revalidate';
 import os from 'os';
 import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';

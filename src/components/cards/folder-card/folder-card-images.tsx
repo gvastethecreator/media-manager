@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 export interface FolderCardImagesProps {
@@ -27,14 +26,11 @@ export function FolderCardImages({
 		return (
 			<div className={cn('relative w-full h-40 overflow-hidden', tcgMode ? 'border-b border-white/10' : '')}>
 				{/* Imagen principal */}
-				<Image
-					src={featuredImage}
-					alt="Imagen destacada"
-					fill
-					sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-					className="object-cover"
-					priority
-				/>
+                                <img
+                                        src={featuredImage}
+                                        alt="Imagen destacada"
+                                        className="object-cover w-full h-full"
+                                />
 
 				{/* Overlay para TCG mode */}
 				{tcgMode && (
@@ -80,13 +76,11 @@ export function FolderCardImages({
 			>
 				{images.map((image, index) => (
 					<div key={`recent-image-${generateImageKey(image, index)}`} className="relative overflow-hidden">
-						<Image
-							src={image}
-							alt={`Imagen reciente ${index + 1}`}
-							fill
-							sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 15vw"
-							className="object-cover"
-						/>
+                                                <img
+                                                        src={image}
+                                                        alt={`Imagen reciente ${index + 1}`}
+                                                        className="object-cover w-full h-full"
+                                                />
 
 						{/* Overlay para TCG mode */}
 						{tcgMode && (

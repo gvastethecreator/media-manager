@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 // 📝 Importar desde el índice centralizado de acciones de carpetas
 import { createFolder } from '@/app/actions/folders';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 export default function CreateFolderPage() {
-	const router = useRouter();
+        const navigate = useNavigate();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -37,8 +37,7 @@ export default function CreateFolderPage() {
 			});
 
 			// La función devuelve FolderComplete directamente si tiene éxito
-			router.push('/folders');
-			router.refresh();
+                        navigate('/folders');
 		} catch (err) {
 			setError('Error al crear la carpeta');
 			console.error(err);
@@ -82,7 +81,7 @@ export default function CreateFolderPage() {
 				</div>
 
 				<div className="flex justify-end gap-4">
-					<Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
+                                        <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isSubmitting}>
 						Cancelar
 					</Button>
 					<Button type="submit" disabled={isSubmitting}>
