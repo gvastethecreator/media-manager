@@ -1,6 +1,5 @@
 # Directorios generados
 node_modules/
-.next/
 dist/
 build/
 coverage/
@@ -13,7 +12,6 @@ coverage/
 public/assets/
 
 # Archivos generados
-next-env.d.ts
 *.d.ts
 *.tsbuildinfo
 
