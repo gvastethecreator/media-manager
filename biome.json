@@ -57,7 +57,6 @@
       "**/*.jsx",
       "**/*.json",
       "!**/node_modules/**",
-      "!**/.next/**",
       "!**/dist/**",
       "!**/build/**",
       "!**/coverage/**",
