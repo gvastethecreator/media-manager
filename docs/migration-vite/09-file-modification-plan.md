@@ -13,7 +13,7 @@
 
 ## 2. Eliminación de dependencias Next.js
 
-- Borrar: `next.config.js`, `middleware.ts`, `.next/`.
+- **Borrado realizado**: `next.config.js`, `middleware.ts`, `.next/` y reglas en `.gitignore`.
 
 ## 3. Actualizar imports
 
