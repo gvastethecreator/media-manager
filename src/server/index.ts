@@ -10,6 +10,9 @@ import { filesRouter } from './routes/files.js';
 import { foldersRouter } from './routes/folders.js';
 import groupsRouter from './routes/groups';
 import { imagesRouter } from './routes/images.js';
+import debugRouter from './routes/debug.js';
+import downloadRouter from './routes/download.js';
+import localFilesRouter from './routes/local-files.js';
 import metadataRouter from './routes/metadata';
 import notesRouter from './routes/notes';
 import placesRouter from './routes/places';
@@ -42,6 +45,7 @@ app.use('/api/folders', foldersRouter);
 app.use('/api/images', imagesRouter);
 app.use('/api/files', filesRouter);
 app.use('/api/albums', albumsRouter);
+app.use('/api/download', downloadRouter);
 app.use('/api/tags', tagsRouter);
 app.use('/api/characters', charactersRouter);
 app.use('/api/collections', collectionsRouter);
@@ -56,6 +60,8 @@ app.use('/api/notes', notesRouter);
 app.use('/api/properties', propertiesRouter);
 app.use('/api/groups', groupsRouter);
 app.use('/api/favorites', favoritesRouter);
+app.use('/api/local-files', localFilesRouter);
+app.use('/api/debug', debugRouter);
 
 // API Routes - Sistema y utilidades
 app.use('/api/system', systemRouter);
@@ -89,9 +95,10 @@ app.listen(PORT, () => {
 	console.log(`\n📁 APIs de Entidades:`);
 	console.log(`   📁 Folders: http://localhost:${PORT}/api/folders`);
 	console.log(`   🖼️  Images: http://localhost:${PORT}/api/images`);
-	console.log(`   📂 Files: http://localhost:${PORT}/api/files`);
-	console.log(`   📸 Albums: http://localhost:${PORT}/api/albums`);
-	console.log(`   🏷️  Tags: http://localhost:${PORT}/api/tags`);
+        console.log(`   📂 Files: http://localhost:${PORT}/api/files`);
+        console.log(`   📸 Albums: http://localhost:${PORT}/api/albums`);
+        console.log(`   📥 Download: http://localhost:${PORT}/api/download`);
+        console.log(`   🏷️  Tags: http://localhost:${PORT}/api/tags`);
 	console.log(`   👤 Characters: http://localhost:${PORT}/api/characters`);
 	console.log(`   🌟 Collections: http://localhost:${PORT}/api/collections`);
 	console.log(`   📍 Places: http://localhost:${PORT}/api/places`);
@@ -104,14 +111,16 @@ app.listen(PORT, () => {
 	console.log(`   📝 Notes: http://localhost:${PORT}/api/notes`);
 	console.log(`   ⚙️  Properties: http://localhost:${PORT}/api/properties`);
 	console.log(`   👥 Groups: http://localhost:${PORT}/api/groups`);
-	console.log(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
+        console.log(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
+        console.log(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
+        console.log(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
 
 	console.log(`\n🔧 APIs de Sistema:`);
 	console.log(`   🖥️  System: http://localhost:${PORT}/api/system`);
 	console.log(`   🔍 Search: http://localhost:${PORT}/api/search`);
 	console.log(`   📋 Metadata: http://localhost:${PORT}/api/metadata`);
-	console.log(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
-	console.log(`   📊 Stats: http://localhost:${PORT}/api/stats`);
+        console.log(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
+        console.log(`   📊 Stats: http://localhost:${PORT}/api/stats`);
 
 	console.log(`\n🩺 Health check: http://localhost:${PORT}/health`);
 });

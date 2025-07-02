@@ -3,7 +3,7 @@
 import * as WorkflowService from '@/services/workflow';
 import { WorkflowWithStats } from '@/types/entities/workflow';
 import { Prisma, Workflow } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 /**
  * 🌊 Server Actions para la entidad Workflow

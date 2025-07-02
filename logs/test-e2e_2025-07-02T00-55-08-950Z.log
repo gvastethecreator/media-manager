@@ -1,0 +1,437 @@
+Comando: npx playwright test
+Fecha: 2025-07-02T00:55:08.952Z
+Directorio: /workspace/image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.
+[2m[WebServer] [22m<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (128kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+[2m[WebServer] [22m [31m[1m⨯[22m[39m ./node_modules/.pnpm/@prisma+client@6.10.1_prisma@6.10.1_typescript@5.8.3__typescript@5.8.3/node_modules/@prisma/client/index-browser.js:1:1
+[2m[WebServer] [22m[31m[1mModule not found[22m[39m: Can't resolve '[32m.prisma/client/index-browser[39m'
+[2m[WebServer] [22m> 1 | const prisma = require('.prisma/client/index-browser')
+[2m[WebServer] [22m    | ^
+[2m[WebServer] [22m  2 |
+[2m[WebServer] [22m  3 | module.exports = prisma
+[2m[WebServer] [22m  4 |
+[2m[WebServer] [22m
+[2m[WebServer] [22mhttps://nextjs.org/docs/messages/module-not-found
+[2m[WebServer] [22m
+[2m[WebServer] [22mImport trace for requested module:
+[2m[WebServer] [22m./src/lib/database/prisma.ts
+[2m[WebServer] [22m./src/lib/utils/profile/profile-utils.ts
+[2m[WebServer] [22m./src/store/entities/profile/profile-store.ts
+[2m[WebServer] [22m./src/lib/hooks/utils/use-profile-theme.tsx
+[2m[WebServer] [22m./src/lib/hooks/index.ts
+[2m[WebServer] [22m./src/components/layout/main-layout.tsx
+[2m[WebServer] [22m./src/app/page.tsx
+Error: Timed out waiting 120000ms from config.webServer.
+[31mConfiguration Error: HTML reporter output folder clashes with the tests output folder:[39m
+
+    html reporter folder: [1m/workspace/image-manager/test-results/html-report[22m
+    test results folder: [1m/workspace/image-manager/test-results[22m
+
+HTML reporter will clear its output directory prior to being generated, which will lead to the artifact loss.
+
+
+
+To open last HTML report run:
+[36m[39m
+[36m  pnpm exec playwright show-report test-results/html-report[39m
+[36m[39m

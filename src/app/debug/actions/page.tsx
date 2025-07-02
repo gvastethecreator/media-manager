@@ -1,12 +1,8 @@
-import type { Metadata } from 'next';
 import { errorAction, sensitiveDataAction, successAction } from '@/app/actions/logger-test';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-export const metadata: Metadata = {
-	title: 'Prueba de Server Actions',
-	description: 'Página para probar los Server Actions con el sistema de logging',
-};
+
 
 export default function ActionTestPage() {
 	return (

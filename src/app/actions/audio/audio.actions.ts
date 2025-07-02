@@ -10,7 +10,7 @@ import {
 } from '@/services/audio';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const audioLogger = serverLogger.withContext('AudioActions');
 

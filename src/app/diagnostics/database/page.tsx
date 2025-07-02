@@ -1,10 +1,6 @@
 import { FolderDiagnostics } from '@/components/views/folders/diagnostics/folder-diagnostics';
-import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-	title: 'Diagnóstico de Base de Datos',
-	description: 'Herramienta para diagnosticar problemas con la base de datos',
-};
+
 
 export default function DatabaseDiagnosticsPage() {
 	return (

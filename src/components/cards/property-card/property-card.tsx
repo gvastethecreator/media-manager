@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { Microscope } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import React, { useMemo } from 'react';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
@@ -118,11 +118,11 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 	}
 
 	// Si no hay onClick, lo envolvemos en Link para navegar a la página de la propiedad
-	return (
-		<Link href={`/dashboard/properties/${property.id}`} className="block">
-			{cardContent}
-		</Link>
-	);
+        return (
+                <Link to={`/dashboard/properties/${property.id}`} className="block">
+                        {cardContent}
+                </Link>
+        );
 }
 
 // Exportar también un componente memorizado si es necesario

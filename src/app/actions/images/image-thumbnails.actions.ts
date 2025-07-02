@@ -20,7 +20,7 @@ import {
 	toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import fs from 'fs/promises';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 import sharp from 'sharp';
 import type { CleanupThumbnailsResult, ReprocessThumbnailsResult, ThumbnailStatsResult } from './image-types.actions';
 

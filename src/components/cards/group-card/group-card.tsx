@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { GroupCardContent } from './group-card-content';
@@ -225,16 +225,16 @@ export function GroupCard({
 	}
 
 	// Si no hay onClick, lo envolvemos en un Link para navegar a la página del grupo
-	return (
-		<Link
-			href={`/dashboard/groups/${group.id}`}
-			className="block"
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
-		>
-			{cardContent}
-		</Link>
-	);
+        return (
+                <Link
+                        to={`/dashboard/groups/${group.id}`}
+                        className="block"
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                >
+                        {cardContent}
+                </Link>
+        );
 }
 
 // Exportar también un componente memorizado
