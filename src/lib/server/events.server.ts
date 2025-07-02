@@ -2,7 +2,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ProcessStatus } from '@/types/process';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const eventsLogger = serverLogger.withContext('ServerEvents');
 

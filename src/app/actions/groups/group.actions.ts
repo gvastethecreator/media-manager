@@ -12,7 +12,7 @@ import { prisma } from '@/lib/database/prisma';
 import { toGroupWithStats } from '@/transformers/group';
 import type { GroupWithStats } from '@/types/entities/group';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('GroupActions');
 

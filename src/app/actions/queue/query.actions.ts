@@ -19,7 +19,7 @@ import {
 	type QueueJobPaginationOptions,
 	QueueJobStatus,
 } from '@/types/entities/queue-job';
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from '@/lib/server/revalidate';
 
 // Logger específico para acciones de consulta
 const logger = serverLogger.withContext('QueueActions:query');

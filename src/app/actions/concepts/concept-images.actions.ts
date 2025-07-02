@@ -5,7 +5,7 @@ import { createEntityErrorObject, EntityErrorCode, handlePrismaError, handlePris
 import { serverLogger } from '@/lib/logger/server-logger';
 import { fromPrismaConcept } from '@/transformers/concept';
 import type { ConceptComplete } from '@/types/entities/concept';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger dedicado
 const conceptImagesLogger = serverLogger.withContext('ConceptImagesActions');
