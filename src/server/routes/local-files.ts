@@ -21,7 +21,6 @@ router.get('/*', async (req, res) => {
       console.error('Archivo no encontrado:', { filePath, fullPath });
       return res.status(404).send('Archivo no encontrado');
     }
-    const buffer = await fs.readFile(fullPath);
     const ext = path.extname(fullPath).toLowerCase();
     const mimeTypes: Record<string, string> = {
       '.jpg': 'image/jpeg',
