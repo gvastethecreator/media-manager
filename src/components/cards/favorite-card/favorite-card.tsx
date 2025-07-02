@@ -16,7 +16,7 @@ interface FavoriteCardProps {
 export function FavoriteCard({ favorite, onSelect, isSelected, className }: FavoriteCardProps) {
     const primaryColor = favorite.entityColor || '#eab308';
     const content = (
-        <CardContainer primaryColor={primaryColor} className={cn(className, 'transition-colors', isSelected && 'ring-2 ring-primary')}> 
+        <CardContainer primaryColor={primaryColor} className={cn(className, 'transition-colors', isSelected ? 'ring-2 ring-primary' : '')}>
             <CardHeader
                 title={favorite.entityName || favorite.entityType}
                 subtitle={favorite.entityType}
