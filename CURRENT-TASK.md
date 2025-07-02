@@ -956,3 +956,14 @@ Todos los componentes de `src/components` están libres de referencias a Next.js
 **Estado**: COMPLETADO
 **Prioridad**: MEDIUM
 **Complejidad**: SMALL
+
+[033] Limpieza final de dependencias Radix UI y configuraciones
+
+## Contexto
+Eliminar paquetes obsoletos de Radix UI y ajustar la configuración de Vite para reflejar la migración completa. Se actualiza la documentación de progreso.
+
+## Subtareas
+- [x] [HIGH] [SMALL] Eliminar paquetes `@radix-ui/react-*` del `package.json`
+- [x] [MEDIUM] [SMALL] Ajustar `vite.config.ts` para quitar manualChunks e includes de Radix
+- [x] [MEDIUM] [SMALL] Actualizar `PROGRESO-ACTUAL.md` y `PROYECTO-COMPLETADO.md`
+- [x] [LOW] [SMALL] Ejecutar formatos y pruebas
