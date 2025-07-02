@@ -3,7 +3,7 @@
 import * as DocumentService from '@/services/document';
 import { DocumentWithStats } from '@/types/entities/document';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 /**
  * 📄 Server Actions para la entidad Document

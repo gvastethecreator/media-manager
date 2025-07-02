@@ -717,3 +717,29 @@ Para cada componente:
 - ✅ **38/86 componentes completados (44%)**
 - 🎯 **Bloque 1: 12/12 completado (100%)**
 - ⚙️ **Bloque 2: 0/8 en progreso**
+
+[025] Eliminación de dependencias Next.js restantes
+
+## Contexto
+
+Aunque gran parte de la aplicación ya funciona con Vite y React Router, se han detectado archivos que siguen usando APIs de Next.js (`next/navigation`, `next/image`). Estos restos impiden una migración completa y generan dependencias innecesarias.
+
+## Subtareas
+
+- [x] [HIGH] [SMALL] Reemplazar `useRouter` y `useParams` de Next por hooks de `react-router-dom`
+- [x] [HIGH] [MEDIUM] Sustituir `next/image` por `<img>` o componentes equivalentes
+- [ ] [MEDIUM] [MEDIUM] Migrar páginas de `src/app` a rutas de React Router
+- [ ] [LOW] [SMALL] Eliminar configuraciones y archivos obsoletos de Next.js
+
+## Diagrama de flujo
+
+```mermaid
+graph TD
+    A[Componentes con Next.js] --> B{¿Usan next/navigation?}
+    B -- Sí --> C[Reemplazar por react-router-dom]
+    B -- No --> D{¿Usan next/image?}
+    D -- Sí --> E[Reemplazar por img]
+    D -- No --> F[Componente listo]
+    C --> F
+    E --> F
+```

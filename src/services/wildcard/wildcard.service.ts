@@ -16,7 +16,7 @@ import {
 } from '@/transformers/wildcard';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('WildcardService');

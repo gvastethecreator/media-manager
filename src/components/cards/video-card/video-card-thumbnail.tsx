@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
 import { Play, Volume2, VolumeX } from 'lucide-react';
 import { motion } from 'motion/react';
-import Image from 'next/image';
 
 interface VideoCardThumbnailProps {
 	video: VideoWithStats;
@@ -38,14 +37,12 @@ export function VideoCardThumbnail({
 			{tcgMode && <div className="absolute inset-0 opacity-30" style={{ background: placeholderGradient }} />}
 
 			{/* Thumbnail o placeholder */}
-			{thumbnailUrl ? (
-				<Image
-					src={thumbnailUrl}
-					alt={`Thumbnail de ${video.name}`}
-					fill
-					className="object-cover"
-					sizes="(max-width: 768px) 100vw, 300px"
-				/>
+                        {thumbnailUrl ? (
+                                <img
+                                        src={thumbnailUrl}
+                                        alt={`Thumbnail de ${video.name}`}
+                                        className="object-cover w-full h-full"
+                                />
 			) : (
 				<div className="w-full h-full flex items-center justify-center" style={{ background: placeholderGradient }}>
 					<Play className="w-8 h-8 text-white/80" />

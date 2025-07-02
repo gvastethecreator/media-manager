@@ -9,7 +9,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { profileService } from '@/services/profile/profile.service';
 import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '@/types/entities/profile/types';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const profileLogger = serverLogger.withContext('ProfileActions');
 const REVALIDATE_PATHS = ['/settings', '/profiles', '/profiles/[id]', '/'] as const;
