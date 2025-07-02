@@ -5,17 +5,18 @@ import path from 'path';
 
 const router = express.Router();
 
+const BASE_DIRECTORY = path.resolve('/allowed/base/directory');
+
 router.get('/*', async (req, res) => {
   try {
-    let filePath = req.params[0];
-    if (filePath.startsWith('g/') || filePath.startsWith('G/')) {
-      filePath = `G:${filePath.substring(1)}`;
-    } else if (filePath.startsWith('d/') || filePath.startsWith('D/')) {
-      filePath = `D:${filePath.substring(1)}`;
-    } else if (filePath.startsWith('c/') || filePath.startsWith('C/')) {
-      filePath = `C:${filePath.substring(1)}`;
+    const rawPath = req.params[0];
+    const sanitizedPath = rawPath.replace(/^\.\.[\/\\]/, ''); // Remove leading traversal sequences
+    const fullPath = path.resolve(BASE_DIRECTORY, sanitizedPath);
+
+    if (!fullPath.startsWith(BASE_DIRECTORY)) {
+      console.error('Acceso denegado: ruta fuera del directorio permitido', { rawPath, fullPath });
+      return res.status(403).send('Acceso denegado');
     }
-    const fullPath = filePath.split('/').join(path.sep);
     if (!existsSync(fullPath)) {
       console.error('Archivo no encontrado:', { filePath, fullPath });
       return res.status(404).send('Archivo no encontrado');
