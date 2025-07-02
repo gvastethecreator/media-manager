@@ -1,7 +1,7 @@
 'use server';
 
 import fs, { stat } from 'fs/promises';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';

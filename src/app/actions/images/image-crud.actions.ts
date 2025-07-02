@@ -5,7 +5,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { imageService } from '@/services/image/image.service';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 // Importamos el servicio de imagen
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';

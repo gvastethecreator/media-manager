@@ -13,7 +13,7 @@ import {
 } from '@/services/queue-job/queue-job.service';
 import type { QueueJobExtended } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job/types';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para acciones de control
 const logger = serverLogger.withContext('QueueActions:control');

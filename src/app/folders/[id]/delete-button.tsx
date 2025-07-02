@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { deleteFolder } from '@/app/actions/folders';
 import {
@@ -21,7 +21,7 @@ interface DeleteFolderButtonProps {
 }
 
 export default function DeleteFolderButton({ id }: DeleteFolderButtonProps) {
-	const router = useRouter();
+        const navigate = useNavigate();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -35,8 +35,7 @@ export default function DeleteFolderButton({ id }: DeleteFolderButtonProps) {
 
 			if (result.success) {
 				setIsOpen(false);
-				router.push('/folders');
-				router.refresh();
+                                navigate('/folders');
 			} else {
 				setError(result.error || 'Error al eliminar la carpeta');
 			}

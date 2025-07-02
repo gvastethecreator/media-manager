@@ -11,7 +11,7 @@ import {
 	retryQueueJob as retryQueueJobService,
 } from '@/services/queue-job/queue-job.service';
 import type { QueueJobExtended } from '@/types/entities/queue-job';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('QueueActions:process');
 

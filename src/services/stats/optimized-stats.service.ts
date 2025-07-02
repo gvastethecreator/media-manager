@@ -2,7 +2,7 @@
 // filepath: d:\DEV\image-manager\src\services\stats\optimized-stats.service.ts
 
 import { PrismaClient } from '@prisma/client';
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from '@/lib/server/revalidate';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 /**

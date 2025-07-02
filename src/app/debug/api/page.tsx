@@ -1,13 +1,9 @@
-import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export const metadata: Metadata = {
-	title: 'Prueba de API Logger',
-	description: 'Página para probar el sistema de logging para rutas API',
-};
+
 
 export default function ApiLoggerTestPage() {
 	return (

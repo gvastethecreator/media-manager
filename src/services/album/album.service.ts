@@ -10,7 +10,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
 import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('AlbumService');
 

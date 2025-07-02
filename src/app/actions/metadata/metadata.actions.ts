@@ -4,7 +4,7 @@ import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import type { Image } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { createMetadataError as createMetadataErrorAction } from './index';
 import type { ImageMetadata, ImageWithMetadata, UpdateMetadataInput } from './metadata-types.actions';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,11 +40,11 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 						<RefreshCw className="mr-2 h-4 w-4" />
 						Reintentar
 					</Button>
-					<Button className="w-full sm:w-auto" asChild>
-						<Link href="/">
-							<Home className="mr-2 h-4 w-4" />
-							Ir al inicio
-						</Link>
+                                        <Button className="w-full sm:w-auto" asChild>
+                                                <Link to="/">
+                                                        <Home className="mr-2 h-4 w-4" />
+                                                        Ir al inicio
+                                                </Link>
 					</Button>
 				</CardFooter>
 			</Card>
