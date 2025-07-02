@@ -1,4 +1,7 @@
-import { Label as BaseUILabel } from '@base-ui-components/react/label';
+// Base UI no expone un componente 'label' directamente. Se utiliza el
+// paquete `field` y se extrae `Field.Label`.
+import { Field } from '@base-ui-components/react/field';
+const BaseUILabel = Field.Label;
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
