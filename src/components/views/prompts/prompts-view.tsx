@@ -12,14 +12,14 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
 import { AlertCircle, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('PromptsView');
 
 export function PromptsView({ isVisible }: ViewProps) {
-	const router = useRouter();
+        const navigate = useNavigate();
 	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
 	const { selectedPromptId, setSelectedPromptId } = usePromptStore();
 	const [localSearch, setLocalSearch] = useState(searchTerm || '');
@@ -52,13 +52,13 @@ export function PromptsView({ isVisible }: ViewProps) {
 		[setSelectedPromptId]
 	);
 
-	const handlePromptEdit = useCallback(
-		(promptId: string) => {
-			viewLogger.info('✏️ Editando prompt', { promptId });
-			router.push(`/prompts/${promptId}/edit`);
-		},
-		[router]
-	);
+        const handlePromptEdit = useCallback(
+                (promptId: string) => {
+                        viewLogger.info('✏️ Editando prompt', { promptId });
+                        navigate(`/prompts/${promptId}/edit`);
+                },
+                [navigate]
+        );
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar prompts');

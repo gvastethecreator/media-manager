@@ -3,7 +3,7 @@
 import * as File3DService from '@/services/file3d';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import type { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 /**
  * 🧊 Server Actions para la entidad File3D

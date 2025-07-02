@@ -17,7 +17,7 @@ import {
 import type { FolderCreateInput, FolderUpdateInput, FolderWithStats } from '@/types/entities/folder';
 import { CreateFolderSchema, UpdateFolderSchema } from '@/types/entities/folder/schema';
 import fs from 'fs/promises';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('FolderActions');
 

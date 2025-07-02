@@ -1,13 +1,12 @@
 'use client';
 
 import { ArrowLeft, FileQuestion, Home } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function NotFound() {
-	const router = useRouter();
+        const navigate = useNavigate();
 
 	return (
 		<div className="flex items-center justify-center min-h-screen bg-background/80 p-4">
@@ -23,12 +22,12 @@ export default function NotFound() {
 					<p>Verifica la URL o regresa a la página principal para continuar navegando.</p>
 				</CardContent>
 				<CardFooter className="flex flex-col sm:flex-row gap-2 pt-2">
-					<Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => router.back()}>
+                                        <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => navigate(-1)}>
 						<ArrowLeft className="mr-2 h-4 w-4" />
 						Volver atrás
 					</Button>
-					<Button className="w-full sm:w-auto" asChild>
-						<Link href="/">
+                                        <Button className="w-full sm:w-auto" asChild>
+                                                <Link to="/">
 							<Home className="mr-2 h-4 w-4" />
 							Ir al inicio
 						</Link>
