@@ -1,5 +1,3 @@
-'use client';
-
 import { Plus } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';

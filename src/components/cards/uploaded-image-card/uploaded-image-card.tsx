@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { UploadedImageWithStats } from '@/types/entities/uploaded-image';
 import { CheckCircleIcon, DownloadIcon, EyeIcon, ImageIcon, InfoIcon } from 'lucide-react';
@@ -203,13 +201,13 @@ export function UploadedImageCard({
 									height: '80px',
 								}}
 							>
-                                                                {!imageError && shouldLoad ? (
-                                                                        <img
-                                                                                src={imageUrl}
-                                                                                alt={uploadedImage.name || 'Imagen subida'}
-                                                                                className="object-cover w-full h-full"
-                                                                                onError={handleImageError}
-                                                                        />
+								{!imageError && shouldLoad ? (
+									<img
+										src={imageUrl}
+										alt={uploadedImage.name || 'Imagen subida'}
+										className="object-cover w-full h-full"
+										onError={handleImageError}
+									/>
 								) : (
 									<div className="w-full h-full flex items-center justify-center">
 										<ImageIcon className="h-8 w-8" style={{ color: primaryColor }} />

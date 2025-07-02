@@ -1,5 +1,3 @@
-'use client';
-
 import type { ViewMode } from '@/components/navigation/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';

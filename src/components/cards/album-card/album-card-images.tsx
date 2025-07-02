@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 
 interface AlbumCardImagesProps {
@@ -61,11 +59,7 @@ export function AlbumCardImages({
 					key={`album-img-${imgSrc.substring(imgSrc.lastIndexOf('/') + 1)}`}
 					className={cn('relative rounded overflow-hidden bg-background/20', index < 3 && 'border-b border-white/10')}
 				>
-                                        <img
-                                                src={imgSrc}
-                                                alt={`Imagen de álbum ${index + 1}`}
-                                                className="object-cover w-full h-full"
-                                        />
+					<img src={imgSrc} alt={`Imagen de álbum ${index + 1}`} className="object-cover w-full h-full" />
 					{/* Indicador de video */}
 					{recentVideos.includes(imgSrc) && (
 						<div className="absolute top-1 right-1 bg-black/50 rounded-full w-4 h-4 flex items-center justify-center">

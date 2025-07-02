@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { GeneralStats } from '@/app/actions/stats/stats.actions';

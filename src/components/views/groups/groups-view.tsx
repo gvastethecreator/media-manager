@@ -1,5 +1,3 @@
-'use client';
-
 import { type GroupWithStats } from '@/app/actions/groups/group.actions';
 import { GroupCard } from '@/components/cards/group-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -44,7 +42,7 @@ MemoizedGroupCard.displayName = 'MemoizedGroupCard';
 
 export function GroupsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-        const navigate = useNavigate();
+	const navigate = useNavigate();
 
 	// Leer el estado y las acciones directamente del store de Zustand
 	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
@@ -71,9 +69,9 @@ export function GroupsView(_props: ViewProps) {
 			// Actualizar la información del grupo en el store
 			addGroup(group);
 			// Navegar a la vista de detalle del grupo
-                        navigate(`/groups/${group.id}`);
+			navigate(`/groups/${group.id}`);
 		},
-                [setCurrentView, addGroup, navigate]
+		[setCurrentView, addGroup, navigate]
 	);
 
 	if (error) {

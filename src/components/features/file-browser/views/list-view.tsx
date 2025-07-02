@@ -2,7 +2,6 @@
  * @file Vista de lista V2 usando EntityWithStats
  * @module components/features/file-browser/views/list-view-v2
  */
-'use client';
 
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';

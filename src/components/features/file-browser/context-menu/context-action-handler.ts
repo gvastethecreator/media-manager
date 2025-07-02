@@ -1,5 +1,3 @@
-'use client';
-
 // Importaciones de server actions para entidades
 // TODO: addImageToAlbum no está implementada aún
 // import { addImageToAlbum } from '@/app/actions/albums/album.actions';

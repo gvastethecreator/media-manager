@@ -1,5 +1,3 @@
-'use client';
-
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
 import { useCollectionImages } from '@/lib/api/collections';

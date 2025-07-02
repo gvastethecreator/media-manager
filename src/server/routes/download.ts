@@ -7,45 +7,45 @@ const router = express.Router();
 const downloadLogger = serverLogger.withContext('DownloadAPI');
 
 router.post('/', async (req, res) => {
-  try {
-    const filePath = req.body.path as string | undefined;
-    if (!filePath) {
-      downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
-      return res.status(400).json({ error: 'Se requiere una ruta de archivo' });
-    }
-    let fileInfo: Awaited<ReturnType<typeof getFileInfo>>;
-    try {
-      fileInfo = await getFileInfo(filePath);
-    } catch (error) {
-      downloadLogger.error(`❌ Error al obtener información del archivo: ${filePath}`, error);
-      return res.status(404).json({ error: 'Archivo no encontrado o inaccesible' });
-    }
-    try {
-      const fileBuffer = await fs.readFile(fileInfo.path);
-      res.set({
-        'Content-Type': fileInfo.mimeType,
-        'Content-Disposition': `attachment; filename="${fileInfo.name}"`,
-        'Content-Length': fileInfo.size.toString(),
-      });
-      downloadLogger.info(`✅ Enviando archivo para descarga: ${fileInfo.name} (${fileInfo.mimeType})`);
-      res.send(fileBuffer);
-    } catch (error) {
-      downloadLogger.error(`❌ Error al leer el archivo: ${fileInfo.path}`, error);
-      res.status(500).json({ error: 'Error al leer el archivo' });
-    }
-  } catch (error) {
-    downloadLogger.error('❌ Error inesperado en la descarga de archivo:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
+	try {
+		const filePath = req.body.path as string | undefined;
+		if (!filePath) {
+			downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
+			return res.status(400).json({ error: 'Se requiere una ruta de archivo' });
+		}
+		let fileInfo: Awaited<ReturnType<typeof getFileInfo>>;
+		try {
+			fileInfo = await getFileInfo(filePath);
+		} catch (error) {
+			downloadLogger.error(`❌ Error al obtener información del archivo: ${filePath}`, error);
+			return res.status(404).json({ error: 'Archivo no encontrado o inaccesible' });
+		}
+		try {
+			const fileBuffer = await fs.readFile(fileInfo.path);
+			res.set({
+				'Content-Type': fileInfo.mimeType,
+				'Content-Disposition': `attachment; filename="${fileInfo.name}"`,
+				'Content-Length': fileInfo.size.toString(),
+			});
+			downloadLogger.info(`✅ Enviando archivo para descarga: ${fileInfo.name} (${fileInfo.mimeType})`);
+			res.send(fileBuffer);
+		} catch (error) {
+			downloadLogger.error(`❌ Error al leer el archivo: ${fileInfo.path}`, error);
+			res.status(500).json({ error: 'Error al leer el archivo' });
+		}
+	} catch (error) {
+		downloadLogger.error('❌ Error inesperado en la descarga de archivo:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
 router.get('/', (req, res) => {
-  const filePath = req.query.path as string | undefined;
-  if (!filePath) {
-    downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
-    return res.status(400).json({ error: 'Se requiere una ruta de archivo' });
-  }
-  res.send(`<!DOCTYPE html>
+	const filePath = req.query.path as string | undefined;
+	if (!filePath) {
+		downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
+		return res.status(400).json({ error: 'Se requiere una ruta de archivo' });
+	}
+	res.send(`<!DOCTYPE html>
 <html>
   <head>
     <title>Descargando archivo...</title>

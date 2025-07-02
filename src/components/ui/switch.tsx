@@ -1,5 +1,3 @@
-'use client';
-
 import { Switch as SwitchPrimitive } from '@base-ui-components/react/switch';
 import * as React from 'react';
 

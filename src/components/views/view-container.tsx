@@ -1,5 +1,3 @@
-'use client';
-
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
 import { AnimatePresence, motion } from 'motion/react';

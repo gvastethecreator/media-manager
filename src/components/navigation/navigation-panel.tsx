@@ -1,5 +1,3 @@
-'use client';
-
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { type ViewType } from '@/components/views/types';

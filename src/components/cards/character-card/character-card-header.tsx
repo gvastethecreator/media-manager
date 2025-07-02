@@ -1,5 +1,3 @@
-'use client';
-
 import { Heart, Shield, Sparkles, Sword, Wand } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

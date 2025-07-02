@@ -1,5 +1,3 @@
-'use client';
-
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -160,18 +158,18 @@ export function CharacterCardImages({
 					}}
 				>
 					{/* Imagen del personaje */}
-                                        <img
-                                                src={displayImage as string}
-                                                alt="Character image"
-                                                className={cn(
-                                                        'object-cover w-full h-full',
-                                                        rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
-                                                )}
-                                                style={{
-                                                        ...holographicStyle,
-                                                        transformStyle: 'preserve-3d',
-                                                }}
-                                        />
+					<img
+						src={displayImage as string}
+						alt="Character image"
+						className={cn(
+							'object-cover w-full h-full',
+							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
+						)}
+						style={{
+							...holographicStyle,
+							transformStyle: 'preserve-3d',
+						}}
+					/>
 
 					{/* Efecto holográfico de brillo */}
 					{tcgMode && holographicEffect && rarityLevel >= 3 && (

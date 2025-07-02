@@ -1,5 +1,3 @@
-'use client';
-
 import type { ErrorResponse, ProcessStatus } from '@/app/actions/folders/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';

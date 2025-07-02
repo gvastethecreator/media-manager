@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
 import { Smile } from 'lucide-react';

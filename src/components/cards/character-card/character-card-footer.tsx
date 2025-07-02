@@ -1,5 +1,3 @@
-'use client';
-
 import { Heart, ImageIcon, Scroll, Shield, Sparkles, Star, Swords, Video, Wand } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React from 'react';

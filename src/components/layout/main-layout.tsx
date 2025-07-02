@@ -1,5 +1,3 @@
-'use client';
-
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 import { NavPanel } from '@/components/navigation/navigation-panel';

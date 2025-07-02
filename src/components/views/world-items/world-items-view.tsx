@@ -1,5 +1,3 @@
-'use client';
-
 import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

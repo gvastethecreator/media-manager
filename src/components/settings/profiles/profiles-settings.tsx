@@ -1,5 +1,3 @@
-'use client';
-
 import { Check, Smile, UserCog, UserPlus, Users, UserX } from 'lucide-react';
 import { CompactPicker } from 'react-color';
 import { Button } from '@/components/ui/button';

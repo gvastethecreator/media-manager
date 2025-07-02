@@ -1,5 +1,3 @@
-'use client';
-
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { clientLogger } from '@/lib/logger/client-logger';

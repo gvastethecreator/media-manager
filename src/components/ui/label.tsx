@@ -1,5 +1,3 @@
-'use client';
-
 import { Label as BaseUILabel } from '@base-ui-components/react/label';
 import * as React from 'react';
 

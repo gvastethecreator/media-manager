@@ -1,5 +1,3 @@
-'use client';
-
 import type { GeneralStats } from '@/app/actions/stats/stats.actions';
 import { getSystemStats } from '@/app/actions/stats/stats.actions';
 import { MOCK_STATS } from '@/lib/mock/stats.mock';

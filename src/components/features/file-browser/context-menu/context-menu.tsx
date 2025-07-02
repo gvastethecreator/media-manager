@@ -1,5 +1,3 @@
-'use client';
-
 import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
 import { Separator } from '@/components/ui/separator';
 import { useAlbumStore } from '@/store/entities/album';

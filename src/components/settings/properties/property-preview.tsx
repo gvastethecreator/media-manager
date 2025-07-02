@@ -1,5 +1,3 @@
-'use client';
-
 import { PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
