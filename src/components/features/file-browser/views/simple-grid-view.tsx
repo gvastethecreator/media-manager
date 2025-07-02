@@ -2,7 +2,6 @@
  * @file Vista de grid simple V2 - Miniaturas optimizadas
  * @module components/features/file-browser/views/simple-grid-view-v2
  */
-'use client';
 
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';

@@ -2,10 +2,10 @@ import { PrismaClient } from '@prisma/client';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
-        getOriginalImage,
-        getImageThumbnailBuffer,
-        generateThumbnailWithForce,
-        verifySignedToken,
+	getOriginalImage,
+	getImageThumbnailBuffer,
+	generateThumbnailWithForce,
+	verifySignedToken,
 } from '@/app/actions/images';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 
@@ -171,70 +171,70 @@ router.get('/', async (req, res) => {
 // GET /api/images/:id - Obtener una imagen por ID
 // GET /api/images/:id/content - Servir la imagen original
 router.get('/:id/content', async (req, res) => {
-        try {
-                const { id } = req.params;
-                const { buffer, mimeType } = await getOriginalImage(id);
-                res.set({
-                        'Content-Type': mimeType,
-                        'Content-Length': buffer.length.toString(),
-                        'Cache-Control': 'public, max-age=31536000',
-                });
-                res.send(buffer);
-        } catch (error) {
-                console.error('Error serving image:', error);
-                res.status(500).send('Error serving image');
-        }
+	try {
+		const { id } = req.params;
+		const { buffer, mimeType } = await getOriginalImage(id);
+		res.set({
+			'Content-Type': mimeType,
+			'Content-Length': buffer.length.toString(),
+			'Cache-Control': 'public, max-age=31536000',
+		});
+		res.send(buffer);
+	} catch (error) {
+		console.error('Error serving image:', error);
+		res.status(500).send('Error serving image');
+	}
 });
 
 // GET /api/images/:id/thumbnail - Servir thumbnail
 router.get('/:id/thumbnail', async (req, res) => {
-        try {
-                const { id } = req.params;
-                const { buffer, mimeType } = await getImageThumbnailBuffer(id);
-                if (!buffer) {
-                        return res.status(404).send('Thumbnail not found');
-                }
-                res.set({
-                        'Content-Type': mimeType,
-                        'Content-Length': buffer.length.toString(),
-                        'Cache-Control': 'public, max-age=31536000',
-                });
-                res.send(buffer);
-        } catch (error) {
-                console.error('Error serving thumbnail:', error);
-                res.status(500).send('Error serving thumbnail');
-        }
+	try {
+		const { id } = req.params;
+		const { buffer, mimeType } = await getImageThumbnailBuffer(id);
+		if (!buffer) {
+			return res.status(404).send('Thumbnail not found');
+		}
+		res.set({
+			'Content-Type': mimeType,
+			'Content-Length': buffer.length.toString(),
+			'Cache-Control': 'public, max-age=31536000',
+		});
+		res.send(buffer);
+	} catch (error) {
+		console.error('Error serving thumbnail:', error);
+		res.status(500).send('Error serving thumbnail');
+	}
 });
 
 // POST /api/images/:id/thumbnail/generate - Generar thumbnail
 router.post('/:id/thumbnail/generate', async (req, res) => {
-        try {
-                const { id } = req.params;
-                const { quality: requestedQuality = 'medium', force = false } = req.body || {};
-                const quality = normalizeQuality(requestedQuality);
-                await generateThumbnailWithForce(id, quality, force);
-                res.json({ status: 'success', quality });
-        } catch (error) {
-                console.error('Error generating thumbnail:', error);
-                res.status(500).json({ error: 'Error generating thumbnail' });
-        }
+	try {
+		const { id } = req.params;
+		const { quality: requestedQuality = 'medium', force = false } = req.body || {};
+		const quality = normalizeQuality(requestedQuality);
+		await generateThumbnailWithForce(id, quality, force);
+		res.json({ status: 'success', quality });
+	} catch (error) {
+		console.error('Error generating thumbnail:', error);
+		res.status(500).json({ error: 'Error generating thumbnail' });
+	}
 });
 
 // GET /api/images/signed/:token - Servir imagen firmada
 router.get('/signed/:token', async (req, res) => {
-        try {
-                const { token } = req.params;
-                const { buffer, mimeType } = await verifySignedToken(token);
-                res.set({
-                        'Content-Type': mimeType,
-                        'Cache-Control': 'public, max-age=3600, must-revalidate',
-                        'Content-Length': buffer.length.toString(),
-                });
-                res.send(buffer);
-        } catch (error) {
-                console.error('Error serving signed image:', error);
-                res.status(500).send('Error al servir la imagen');
-        }
+	try {
+		const { token } = req.params;
+		const { buffer, mimeType } = await verifySignedToken(token);
+		res.set({
+			'Content-Type': mimeType,
+			'Cache-Control': 'public, max-age=3600, must-revalidate',
+			'Content-Length': buffer.length.toString(),
+		});
+		res.send(buffer);
+	} catch (error) {
+		console.error('Error serving signed image:', error);
+		res.status(500).send('Error al servir la imagen');
+	}
 });
 
 // GET /api/images/:id - Obtener una imagen por ID

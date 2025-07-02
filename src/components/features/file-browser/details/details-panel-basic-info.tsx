@@ -1,5 +1,3 @@
-'use client';
-
 import { Calendar, FileImage, Folder, HardDrive, ImageIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { updateImageMetadata } from '@/app/actions/images/metadata.actions';

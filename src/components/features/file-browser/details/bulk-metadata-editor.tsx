@@ -1,5 +1,3 @@
-'use client';
-
 import { updateMultipleImagesMetadata } from '@/app/actions/images/metadata.actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

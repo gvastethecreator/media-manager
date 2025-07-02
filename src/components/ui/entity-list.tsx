@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * @component EntityList
  * @description Un componente avanzado para visualizar listas de entidades con funcionalidades de

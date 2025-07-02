@@ -2,7 +2,6 @@
  * @file ImageGrid - Componente especializado para mostrar imágenes de una carpeta
  * @module components/views/folders/components/image-grid
  */
-'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';

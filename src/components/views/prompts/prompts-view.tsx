@@ -1,5 +1,3 @@
-'use client';
-
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -19,7 +17,7 @@ import type { ViewProps } from '../types';
 const viewLogger = clientLogger.withContext('PromptsView');
 
 export function PromptsView({ isVisible }: ViewProps) {
-        const navigate = useNavigate();
+	const navigate = useNavigate();
 	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
 	const { selectedPromptId, setSelectedPromptId } = usePromptStore();
 	const [localSearch, setLocalSearch] = useState(searchTerm || '');
@@ -52,13 +50,13 @@ export function PromptsView({ isVisible }: ViewProps) {
 		[setSelectedPromptId]
 	);
 
-        const handlePromptEdit = useCallback(
-                (promptId: string) => {
-                        viewLogger.info('✏️ Editando prompt', { promptId });
-                        navigate(`/prompts/${promptId}/edit`);
-                },
-                [navigate]
-        );
+	const handlePromptEdit = useCallback(
+		(promptId: string) => {
+			viewLogger.info('✏️ Editando prompt', { promptId });
+			navigate(`/prompts/${promptId}/edit`);
+		},
+		[navigate]
+	);
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar prompts');

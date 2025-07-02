@@ -1,5 +1,3 @@
-'use client';
-
 import type { ThemeProviderProps } from 'next-themes';
 import { ThemeProvider as NextThemeProvider, useTheme } from 'next-themes';
 import { useEffect } from 'react';

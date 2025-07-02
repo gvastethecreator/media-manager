@@ -3,7 +3,6 @@
 // Revisar si hay cambios futuros en la API de shadcn/ui para evitar este tipo de errores.
 // 🛠️ Fix biome/TS: Reemplazo de useToast por toast de services/toast.service y ajuste de tipos para PlaceCreateInput/PlaceUpdateInput
 // Todos los valores null se transforman a undefined antes de enviar a las acciones. population siempre es number o undefined.
-'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';

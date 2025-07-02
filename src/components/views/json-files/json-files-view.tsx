@@ -1,5 +1,3 @@
-'use client';
-
 import { JsonFileCard } from '@/components/cards/json-file-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

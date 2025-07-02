@@ -1,5 +1,3 @@
-'use client';
-
 import { Input as InputPrimitive } from '@base-ui-components/react/input';
 import * as React from 'react';
 

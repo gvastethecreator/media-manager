@@ -1,5 +1,3 @@
-'use client';
-
 // TODO: Refactorizar para usar un tipo canónico `CollectionWithStats`.
 // Este componente, al igual que los otros componentes de tarjeta, sufre de inconsistencias
 // de tipo porque la prop `collection` no garantiza la existencia de `_count`.

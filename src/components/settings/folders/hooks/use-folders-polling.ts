@@ -1,5 +1,3 @@
-'use client';
-
 import type { ProcessStatus } from '@/app/actions/folders/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';

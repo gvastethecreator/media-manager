@@ -1,5 +1,3 @@
-'use client';
-
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { type RefObject, useCallback, useMemo, useRef } from 'react';
 import type { FileItem } from '@/types/files';

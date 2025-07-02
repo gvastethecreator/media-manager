@@ -59,29 +59,29 @@ router.get('/:id', async (req, res) => {
 
 // GET /collections/:id/images - Obtener imágenes de una colección
 router.get('/:id/images', async (req, res) => {
-        try {
-                const { id } = req.params;
-                const images = await collectionService.getCollectionImages(id);
-                const transformedImages = images.map(toImageWithStats);
+	try {
+		const { id } = req.params;
+		const images = await collectionService.getCollectionImages(id);
+		const transformedImages = images.map(toImageWithStats);
 
-                res.json(transformedImages);
-        } catch (error) {
-                console.error('Error getting collection images:', error);
-                res.status(500).json({ error: 'Error interno del servidor' });
-        }
+		res.json(transformedImages);
+	} catch (error) {
+		console.error('Error getting collection images:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
 // GET /collections/:id/images/all - Compatibilidad con Next.js
 router.get('/:id/images/all', async (req, res) => {
-        try {
-                const { id } = req.params;
-                const images = await collectionService.getCollectionImages(id);
-                const transformedImages = images.map(toImageWithStats);
-                res.json({ items: transformedImages });
-        } catch (error) {
-                console.error('Error getting collection images:', error);
-                res.status(500).json({ error: 'Error interno del servidor' });
-        }
+	try {
+		const { id } = req.params;
+		const images = await collectionService.getCollectionImages(id);
+		const transformedImages = images.map(toImageWithStats);
+		res.json({ items: transformedImages });
+	} catch (error) {
+		console.error('Error getting collection images:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
 // POST /collections - Crear nueva colección

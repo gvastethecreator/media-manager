@@ -1,5 +1,3 @@
-'use client';
-
 import { nanoid } from 'nanoid';
 import { useTheme } from 'next-themes';
 import React, { useMemo } from 'react';

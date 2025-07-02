@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * Convierte cualquier valor a string de forma segura
  */

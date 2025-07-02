@@ -1,5 +1,3 @@
-'use client';
-
 import { Collapsible as CollapsiblePrimitive } from '@base-ui-components/react/collapsible';
 import * as React from 'react';
 
