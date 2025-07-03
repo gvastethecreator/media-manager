@@ -1,5 +1,5 @@
 // Debug temporal para probar getAllFolders
-import { getAllFolders } from '@/app/actions/folders/';
+import { getAllFolders } from '@/services/folder/folder.service';
 
 export async function testGetAllFolders() {
 	try {

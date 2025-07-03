@@ -5,8 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/app/actions/file3d/file-3d.actions';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
+import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/services/file3d/file3d.service';
 import type {
     File3DCreateInput,
     File3DUpdateInput,

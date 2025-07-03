@@ -5,16 +5,16 @@
  * Última refactorización: 2025-01-27
  */
 
-import type { StateCreator } from 'zustand';
-import {
-	createVideo as createServerVideo,
-	deleteVideo as deleteServerVideo,
-	findVideos,
-	getVideo as getServerVideo,
-} from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
-import type { VideoCreateInput, VideoFilters, VideoUpdateInput, VideoWithStats } from '@/types/entities/video';
+import {
+    createVideo as createServerVideo,
+    deleteVideo as deleteServerVideo,
+    findVideos,
+    getVideo as getServerVideo,
+} from '@/services/video/video.service';
+import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
+import type { StateCreator } from 'zustand';
 import type { VideoStore } from '..';
 
 export interface VideoCoreState {

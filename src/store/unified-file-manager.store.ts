@@ -22,13 +22,13 @@
  */
 
 import { create } from 'zustand';
-import { getFolderImages } from '@/app/actions/folders';
 // 🚀 Importaciones actualizadas - MIGRADAS A EntityWithStats
 import type { ViewMode } from '@/components/navigation/types';
 import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
 // 🎯 Cache y throttling optimizados
 import { throttleEvent } from '@/lib/system/event-throttler';
+import { getFolderImages } from '@/services/folder/folder.service';
 import type { EntityStatsType, EntityWithStats } from '@/types/migration';
 import { isFolderWithStats, isImageWithStats, isVideoWithStats } from '@/types/migration';
 
