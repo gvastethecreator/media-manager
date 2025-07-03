@@ -4,7 +4,7 @@
  * @description
  *   Centraliza la exportación del tipo canónico **`GroupWithStats`**.
  *
- *   - `GroupBase`: Tipo base de Prisma.
+ *   - `GroupBase`: Tipo base de Drizzle.
  *   - `GroupStatistics`: Interfaz para las estadísticas de conteo.
  *   - `GroupWithStats`: El tipo enriquecido que se debe usar en la app.
  *

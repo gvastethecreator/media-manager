@@ -1,7 +1,7 @@
+import { formatBytes } from '@/lib/utils/format.utils';
+import { updateMetadata } from '@/services/metadata/metadata.service';
 import { Calendar, FileImage, Folder, HardDrive, ImageIcon } from 'lucide-react';
 import { useCallback } from 'react';
-import { updateImageMetadata } from '@/app/actions/images/metadata.actions';
-import { formatBytes } from '@/lib/utils/format.utils';
 import { InfoItem } from './details-panel-info-item';
 import type { BasicInfoProps } from './details-panel-types';
 import { EditableMetadata } from './editable-metadata';
@@ -45,7 +45,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 
 	// Función para actualizar metadatos
 	const handleUpdateMetadata = useCallback(async (id: string, data: { title?: string; description?: string }) => {
-		return updateImageMetadata(id, {
+		return updateMetadata(id, {
 			title: data.title,
 			description: data.description,
 		});

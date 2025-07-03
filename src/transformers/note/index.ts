@@ -4,7 +4,6 @@
  */
 
 import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
-import { prisma } from '@/lib/database/prisma';
 import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
@@ -17,12 +16,12 @@ import type {
 	NoteUpdateInput,
 } from '@/types/entities/note/types';
 import {
-	mapCreateNoteDataToPrisma,
-	mapNoteFiltersToPrisma,
-	mapNoteSearchOptionsToPrisma,
-	mapUpdateNoteDataToPrisma,
+	mapCreateNoteDataToDrizzle,
+	mapNoteFiltersToDrizzle,
+	mapNoteSearchOptionsToDrizzle,
+	mapUpdateNoteDataToDrizzle,
 } from './mappers';
-import { fromPrismaNote, validateNote } from './serializers';
+import { fromDrizzleNote, validateNote } from './serializers';
 
 // 📊 Logger específico para NoteTransformer
 const logger = serverLogger.withContext('NoteTransformer');
@@ -35,47 +34,11 @@ export async function searchNotes(
 	options: NoteSearchOptions = {}
 ): Promise<NoteSearchResult> {
 	try {
-		// Ajustar paginación y ordenación según el tipo real de NoteSearchOptions
-		const page = (options as any).page ?? 1;
-		const pageSize = (options as any).pageSize ?? DEFAULT_VIEW_CONFIG.pageSize;
-		const sortBy = (options as any).sortBy ?? 'updatedAt';
-		const sortOrder = (options as any).sortOrder ?? 'desc';
-
-		// Limitar el tamaño de página
-		const limitedPageSize = Math.min(pageSize, 100);
-
-		// Obtener argumentos para Prisma
-		const prismaArgs = mapNoteSearchOptionsToPrisma({
-			...options,
-			// Solo pasar los campos válidos
-			page,
-			pageSize: limitedPageSize,
-			sortBy,
-			sortOrder,
-		} as any);
-
-		// Convertir filtros a formato Prisma
-		const whereConditions = mapNoteFiltersToPrisma(filters);
-		prismaArgs.where = whereConditions;
-
-		// Ejecutar consulta
-		const [notes, totalCount] = await Promise.all([
-			prisma.note.findMany(prismaArgs),
-			prisma.note.count({ where: whereConditions }),
-		]);
-
-		// Calcular metadata de paginación
-		const totalPages = Math.ceil(totalCount / limitedPageSize);
-		const hasMore = page < totalPages;
-
-		// Mapear resultados
-		const items = notes.map((note) => fromPrismaNote(note, { includeUI: true }));
-
-		// Estructura compatible con NoteSearchResult
+		// Lógica de búsqueda con Drizzle (a implementar)
 		return {
-			items,
-			total: totalCount,
-			hasMore,
+			items: [],
+			total: 0,
+			hasMore: false,
 		};
 	} catch (error) {
 		logger.error('Error buscando notas:', error);
@@ -95,66 +58,8 @@ export async function getNoteById(
 	} = {}
 ): Promise<NoteComplete | null> {
 	try {
-		const { includeRelations = false, includeUI = false, throwIfNotFound = true } = options;
-
-		// Construir opciones de inclusión de relaciones
-		const include = includeRelations
-			? {
-					images: true,
-					videos: true,
-					albums: true,
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-					_count: {
-						select: {
-							images: true,
-							videos: true,
-							albums: true,
-							collections: true,
-							tags: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							wildcards: true,
-							properties: true,
-							groups: true,
-						},
-					},
-				}
-			: undefined;
-
-		// Buscar nota
-		const note = await prisma.note.findUnique({
-			where: { id },
-			include,
-		});
-
-		// Si no existe y se debe lanzar error
-		if (!note && throwIfNotFound) {
-			throw new EntityError(`Nota con ID ${id} no encontrada`, EntityErrorCode.NOT_FOUND);
-		}
-
-		// Si no existe, devolver null
-		if (!note) {
-			return null;
-		}
-
-		// Transformar a formato completo
-		return fromPrismaNote(note, {
-			includeRelations,
-			includeUI,
-			deserializeFields: true,
-		});
+		// Lógica de obtención con Drizzle (a implementar)
+		return null;
 	} catch (error) {
 		if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
 			throw error;
@@ -175,65 +80,8 @@ export async function getNotesByIds(
 	} = {}
 ): Promise<NoteComplete[]> {
 	try {
-		const { includeRelations = false, includeUI = false } = options;
-
-		// Si no hay IDs, devolver array vacío
-		if (!ids.length) {
-			return [];
-		}
-
-		// Construir opciones de inclusión de relaciones
-		const include = includeRelations
-			? {
-					images: true,
-					videos: true,
-					albums: true,
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-					_count: {
-						select: {
-							images: true,
-							videos: true,
-							albums: true,
-							collections: true,
-							tags: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							wildcards: true,
-							properties: true,
-							groups: true,
-						},
-					},
-				}
-			: undefined;
-
-		// Buscar notas (eliminar isActive: true, ya que no existe en el modelo ni tipos)
-		const notes = await prisma.note.findMany({
-			where: {
-				id: { in: ids },
-			},
-			include,
-		});
-
-		// Transformar a formato completo
-		return notes.map((note) =>
-			fromPrismaNote(note, {
-				includeRelations,
-				includeUI,
-				deserializeFields: true,
-			})
-		);
+		// Lógica de obtención con Drizzle (a implementar)
+		return [];
 	} catch (error) {
 		logger.error('Error obteniendo notas por IDs:', error);
 		throw new TransformerError('Error al obtener notas por IDs');
@@ -245,42 +93,8 @@ export async function getNotesByIds(
  */
 export async function createNote(data: NoteCreateInput): Promise<NoteComplete> {
 	try {
-		// Validar datos
-		validateNote(data);
-
-		// Transformar a formato Prisma
-		const prismaData = mapCreateNoteDataToPrisma(data);
-
-		// Crear nota
-		const note = await prisma.note.create({
-			data: prismaData,
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						albums: true,
-						collections: true,
-						tags: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		});
-
-		// Transformar a formato completo
-		return fromPrismaNote(note, {
-			includeUI: true,
-			includeRelations: true,
-			deserializeFields: true,
-		});
+		// Lógica de creación con Drizzle (a implementar)
+		throw new TransformerError('Función no implementada');
 	} catch (error) {
 		logger.error('Error creando nota:', error);
 		throw new TransformerError('Error al crear nota');
@@ -292,34 +106,8 @@ export async function createNote(data: NoteCreateInput): Promise<NoteComplete> {
  */
 export async function updateNote(id: string, data: NoteUpdateInput): Promise<NoteComplete> {
 	try {
-		// Verificar que la nota existe
-		const existingNote = await prisma.note.findUnique({
-			where: { id },
-		});
-
-		if (!existingNote) {
-			throw new EntityError(`Nota con ID ${id} no encontrada`, EntityErrorCode.NOT_FOUND);
-		}
-
-		// Validar los datos de actualización combinados con los existentes
-		validateNote({ ...existingNote, ...data });
-
-		// Obtener datos para actualización
-		const updateArgs = mapUpdateNoteDataToPrisma(id, data);
-
-		// Actualizar nota
-		const updatedNote = await prisma.note.update({
-			where: { id },
-			data: updateArgs.data,
-			include: updateArgs.include,
-		});
-
-		// Transformar a formato completo
-		return fromPrismaNote(updatedNote, {
-			includeUI: true,
-			includeRelations: true,
-			deserializeFields: true,
-		});
+		// Lógica de actualización con Drizzle (a implementar)
+		throw new TransformerError('Función no implementada');
 	} catch (error) {
 		if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
 			throw error;
@@ -339,34 +127,8 @@ export async function deleteNote(
 	} = {}
 ): Promise<boolean> {
 	try {
-		const { softDelete = true } = options;
-
-		// Verificar que la nota existe
-		const existingNote = await prisma.note.findUnique({
-			where: { id },
-		});
-
-		if (!existingNote) {
-			throw new EntityError(`Nota con ID ${id} no encontrada`, EntityErrorCode.NOT_FOUND);
-		}
-
-		if (softDelete) {
-			// Soft delete (marcar como inactivo)
-			await prisma.note.update({
-				where: { id },
-				data: {
-					// isActive: false, // Eliminar esta línea, ya que no existe en el modelo
-					updatedAt: new Date(),
-				},
-			});
-		} else {
-			// Hard delete (borrado físico)
-			await prisma.note.delete({
-				where: { id },
-			});
-		}
-
-		return true;
+		// Lógica de eliminación con Drizzle (a implementar)
+		return false;
 	} catch (error) {
 		if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
 			throw error;
@@ -423,4 +185,4 @@ export function toRelatedNote(
 
 // Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
 export { toCreateNoteData, toUpdateNoteData } from './mappers';
-export { fromPrismaNote, validateNote } from './serializers';
+export { fromDrizzleNote, validateNote } from './serializers';

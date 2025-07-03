@@ -49,15 +49,14 @@ import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
 
-interface EntityCardProps {
+// Importar el nuevo sistema de layouts
+import type { BaseCardProps } from './types/card-layout.types';
+import { useCardLayout } from './hooks/use-card-layout';
+
+interface EntityCardProps extends BaseCardProps {
 	entity: EntityWithStats;
-	onClick?: () => void;
-	onDoubleClick?: () => void;
-	isSelected?: boolean;
-	isActive?: boolean;
-	className?: string;
-	compact?: boolean;
-	tcgMode?: boolean;
+	/** Preset de layout específico para el contexto */
+	preset?: string;
 }
 
 export const EntityCard: FC<EntityCardProps> = ({
@@ -67,27 +66,73 @@ export const EntityCard: FC<EntityCardProps> = ({
 	isSelected,
 	isActive,
 	className,
+	// Props del nuevo sistema de layouts
+	layoutConfig,
+	layout,
+	size,
+	variant,
+	preset,
+	// Props legacy para compatibilidad
 	compact,
-	tcgMode = true,
+	tcgMode,
 	...props
 }) => {
+	// Usar el hook de layout para obtener la configuración
+	const { config } = useCardLayout({
+		layoutConfig,
+		layout,
+		size,
+		variant,
+		className,
+		isSelected,
+		isActive,
+		onClick,
+		onDoubleClick,
+		compact,
+		tcgMode,
+	}, preset);
+
+	// Props comunes para todas las cards
+	const commonProps = {
+		onClick,
+		onDoubleClick,
+		isSelected,
+		isActive,
+		className,
+		// Pasar las nuevas props de layout
+		layoutConfig: config,
+		layout: config.layout,
+		size: config.size,
+		variant: config.variant,
+		// Mantener compatibilidad con props legacy
+		compact: config.layout === 'compact' || config.size === 'sm',
+		tcgMode: config.variant === 'tcg',
+		// Props adicionales del layout
+		showTags: config.showTags,
+		showDetails: config.showDetails,
+		showStats: config.showStats,
+		showMetadata: config.showMetadata,
+		showActions: config.showActions,
+		...props,
+	};
+
 	// Renderizar componente específico basado en type guards
 	if (isImageWithStats(entity)) {
-		return <ImageCard imageId={entity.id} onClick={() => onClick?.()} className={className} {...props} />;
+		return (
+			<ImageCard
+				imageId={entity.id}
+				{...commonProps}
+				// Props específicas de ImageCard
+				aspectRatio={config.aspectRatio as string}
+			/>
+		);
 	}
 
 	if (isVideoWithStats(entity)) {
 		return (
 			<VideoCard
 				video={entity}
-				onClick={onClick}
-				onDoubleClick={onDoubleClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -96,14 +141,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<AlbumCard
 				album={entity}
-				onClick={onClick}
-				onDoubleClick={onDoubleClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -112,14 +150,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<CollectionCard
 				collection={entity}
-				onClick={onClick}
-				onDoubleClick={onDoubleClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -128,14 +159,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<CharacterCard
 				character={entity}
-				onClick={onClick}
-				onDoubleClick={onDoubleClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -144,13 +168,9 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<FolderCard
 				folder={entity}
-				onClick={onClick}
-				onDoubleClick={onDoubleClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				{...props}
+				{...commonProps}
+				// Props específicas de FolderCard
+				interactive={!!onClick}
 			/>
 		);
 	}
@@ -159,13 +179,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<AudioCard
 				audio={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -174,13 +188,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<DocumentCard
 				document={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -189,12 +197,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<TagCard
 				tag={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -203,13 +206,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<NoteCard
 				note={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -218,13 +215,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<PlaceCard
 				place={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -233,28 +224,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<WorldItemCard
 				worldItem={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
-			/>
-		);
-	}
-
-	if (isPromptWithStats(entity)) {
-		return (
-			<PromptCard
-				prompt={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -263,27 +233,16 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<ConceptCard
 				concept={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
 
-	if (isWildcardWithStats(entity)) {
+	if (isPromptWithStats(entity)) {
 		return (
-			<WildcardCard
-				wildcard={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				{...props}
+			<PromptCard
+				prompt={entity}
+				{...commonProps}
 			/>
 		);
 	}
@@ -292,12 +251,7 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<PropertyCard
 				property={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
@@ -306,29 +260,23 @@ export const EntityCard: FC<EntityCardProps> = ({
 		return (
 			<GroupCard
 				group={entity}
-				onClick={onClick}
-				isSelected={isSelected}
-				isActive={isActive}
-				className={className}
-				compact={compact}
-				tcgMode={tcgMode}
-				{...props}
+				{...commonProps}
 			/>
 		);
 	}
 
-	// Fallback para tipos no reconocidos
-	const entityType = getEntityStatsType(entity);
-	console.warn(`No card component found for entity type: ${entityType}`, entity);
+	if (isWildcardWithStats(entity)) {
+		return (
+			<WildcardCard
+				wildcard={entity}
+				{...commonProps}
+			/>
+		);
+	}
 
-	return (
-		<div className="border rounded-lg p-4 bg-destructive/10 text-destructive-foreground">
-			<p>Unsupported entity type: {entityType}</p>
-			<pre className="text-xs mt-2 overflow-hidden text-ellipsis">
-				{JSON.stringify(entity, null, 2).slice(0, 200)}...
-			</pre>
-		</div>
-	);
+	// Fallback para entidades no reconocidas
+	console.warn('EntityCard: Tipo de entidad no reconocido:', getEntityStatsType(entity));
+	return null;
 };
 
 /**

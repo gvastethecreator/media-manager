@@ -1,6 +1,6 @@
 import { PanelRightClose, X } from 'lucide-react';
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react';
-import { DetailsPanel } from '@/components/panels/details-panel/details-panel';
+import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -52,7 +52,7 @@ interface RightPanelProps {
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
-export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPanelProps) {
+export const RightPanel = memo(function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPanelProps) {
 	const { isVisible, setVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const { currentView } = useNavigationStore();
 	const [mounted, setMounted] = useState(false);
@@ -116,7 +116,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				(hasSelectedItems ? (
 					<ScrollArea className="flex-1">
 						<div className="p-2">
-							<DetailsPanel selectedItems={selectedItems} />
+							<DetailsPanelV2 selectedItems={selectedItems} />
 						</div>
 					</ScrollArea>
 				) : (
@@ -124,7 +124,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				))}
 		</div>
 	);
-}
+});
 
 /**
  * 📝 Actualizado para usar DetailsPanelV2

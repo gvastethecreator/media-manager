@@ -1,12 +1,12 @@
 import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/loading';
+import { IntegratedFileBrowser } from '@/components/features/file-browser';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
+import { useReindexFolder } from '@/lib/api/folder';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useReindexFolder } from '@/lib/api/folders';
 import { useImageStore } from '@/store/entities/image';
 import type { EntityWithStats } from '@/types/migration';
 
@@ -62,8 +62,10 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		}
 	}, [currentFolderId, isRetrying]);
 
+	// Hook para reindexar carpeta
+	const reindexFolderMutation = useReindexFolder();
+
 	const handleScanFolder = useCallback(async () => {
-		const reindexFolderMutation = useReindexFolder();
 		if (!currentFolderId || isRetrying) {
 			logger.warn('⚠️ No hay carpeta seleccionada para escanear o ya hay una operación en curso');
 			return;
@@ -159,7 +161,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		);
 	}
 
-	// Renderizar galería de imágenes usando FileBrowser
+	// Renderizar galería de imágenes usando IntegratedFileBrowser
 	return (
 		<div className="relative h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			{/* Controles en la esquina superior derecha */}
@@ -182,14 +184,20 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 				</h2>
 				{currentItem?.description && <p className="text-muted-foreground">{currentItem.description}</p>}
 			</div>
-			{/* FileBrowser con filtrado por carpeta */}
+
+			{/* IntegratedFileBrowser con toolbar integrado */}
 			<div className="flex-1 overflow-hidden">
-				<FileBrowser
+				<IntegratedFileBrowser
 					entityType="image"
 					filterId={currentFolderId}
 					filterType="folder"
 					onItemSelect={handleImageSelect}
 					onItemDoubleClick={handleImageDoubleClick}
+					showToolbar={true}
+					toolbarProps={{
+						isRightPanelVisible: true,
+						// TODO: Conectar con el estado del panel derecho
+					}}
 					className="h-full"
 				/>
 			</div>
@@ -199,11 +207,12 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 
 /**
  * 📝 Documentación:
- * - Vista optimizada que usa FileBrowser para mostrar imágenes con thumbnails
- * - Integra store Zustand para gestión eficiente de estado
+ * - Vista optimizada que usa IntegratedFileBrowser para una experiencia completa
+ * - Toolbar integrado con controles de vista, búsqueda y selección
  * - Filtrado automático por carpeta usando filterId
- * - Controles de recarga y escaneo integrados
+ * - Controles de recarga y escaneo integrados en overlay
  * - Información contextual de la carpeta
  * - UI consistente con el resto del sistema
  * - Previene loops infinitos con estado local de control
+ * - Experiencia unificada de navegación de archivos
  */

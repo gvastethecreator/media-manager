@@ -7,27 +7,33 @@
 import type { BaseEntity } from '@/types/common/base';
 
 /**
- * 🎯 Tipo base para WorldItem derivado del schema de Prisma
+ * 🎯 Tipo base para WorldItem derivado del schema de Drizzle
  */
 export interface WorldItemBase extends BaseEntity {
+	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 	description: string | null;
-	type: string;
-	rarity: string;
+	emoji: string | null;
+	color: string | null;
 	category: string | null;
-	size: string;
-	origin: string;
-	attributes: string; // JSON serializado
-	effects: string; // JSON serializado
-	requirements: string; // JSON serializado
-	stats: string; // JSON serializado
-	properties: string; // JSON serializado
-	sortBy: string;
-	filters: string; // JSON serializado
-	featuredImage: string | null;
+	isPublic: boolean;
 	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	rarity: string | null;
+	value: string | null;
+	weight: string | null;
+	materials: string | null;
+	origin: string | null;
+	properties: string | null;
+	uses: string | null;
+	history: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -84,30 +90,5 @@ export interface WorldItemWithStats extends WorldItemBase {
 	_stats: WorldItemStatistics;
 }
 
-/**
- * 📦 Conteos de Prisma
- */
-export interface WorldItemCounts {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-}
 
-/**
- * 🔍 Consulta optimizada de Prisma con conteos
- */
-export interface PrismaWorldItemWithCounts extends WorldItemBase {
-	_count: WorldItemCounts['_count'];
-}
+

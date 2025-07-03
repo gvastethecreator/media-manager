@@ -2,24 +2,41 @@
  * @file Tipos base para la entidad Document.
  * @module types/entities/document/base
  * @description Define los tipos canónicos para la entidad Document, incluyendo el tipo
- *              base, el tipo con estadísticas y el tipo de Prisma.
+ *              base y el tipo con estadísticas.
  */
-
-import type { Document } from '@prisma/client';
-
-// --- TIPO BASE DE PRISMA ---
-/**
- * Tipo base de Document directamente desde el schema de Prisma.
- * @typedef {Document} DocumentBase
- */
-export type DocumentBase = Document;
 
 /**
- * Alias para el tipo de Prisma para mantener consistencia.
- * En este caso, no hay relaciones para contar, por lo que es igual a DocumentBase.
- * @typedef {Document} PrismaDocument
+ * Tipo base de Document directamente desde el schema de Drizzle.
  */
-export type PrismaDocument = Document;
+export type DocumentBase = {
+    id: string;
+    name: string;
+    path: string;
+    size: number;
+    hash: string;
+    mimeType: string;
+    extension: string;
+    folderId: string;
+    isFavorite: boolean;
+    isArchived: boolean;
+    pageCount: number | null;
+    wordCount: number | null;
+    language: string | null;
+    title: string | null;
+    author: string | null;
+    subject: string | null;
+    keywords: string | null;
+    creator: string | null;
+    producer: string | null;
+    creationDate: Date | null;
+    modificationDate: Date | null;
+    encrypted: boolean | null;
+    version: string | null;
+    content: string | null;
+    summary: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+};
 
 // --- TIPOS CON ESTADÍSTICAS ---
 
@@ -42,7 +59,6 @@ export interface DocumentStatistics {
 /**
  * Tipo enriquecido de Document que incluye estadísticas.
  * Este es el tipo canónico para usar en la aplicación.
- * @typedef {DocumentBase & { stats: DocumentStatistics }} DocumentWithStats
  */
 export interface DocumentWithStats extends DocumentBase {
 	stats: DocumentStatistics;

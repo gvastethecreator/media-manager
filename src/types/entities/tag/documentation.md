@@ -36,19 +36,16 @@ graph TD
 
 ## ✨ Tipos Principales (Canonical Types)
 
-- `TagBase`: El tipo base generado por Prisma.
+- `TagBase`: El tipo base generado por Drizzle.
 - `TagWithStats`: El tipo canónico para la aplicación. Extiende `TagBase` con un objeto `stats` que contiene métricas calculadas.
-- `PrismaTagWithCounts`: Tipo interno que representa un tag con los `_count` de sus relaciones, usado por el mapper.
-- `tagCounts`: Objeto de Prisma para incluir eficientemente los conteos en las consultas.
 
 ## 🚀 Ejemplo de Uso (Server Actions)
 
 ```typescript
 import { createTag, getTags } from '@/app/actions/tags/crud.actions';
-import { Prisma } from '@prisma/client';
 
 // 1. Crear un nuevo tag
-const newTagData: Prisma.TagCreateInput = {
+const newTagData = {
   name: 'Estilo Artístico',
   emoji: '🎨',
   color: '#8b5cf6',
@@ -66,22 +63,22 @@ const allTags = await getTags(); // Retorna Promise<TagWithStats[]>
 
 ## 🌊 Flujo de Datos
 
-El flujo sigue un patrón `Server Action -> Mapper -> Prisma`.
+El flujo sigue un patrón `Server Action -> Mapper -> Drizzle`.
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant ServerAction
     participant Mapper
-    participant Prisma
+    participant Drizzle
     participant DB
 
     Client->>+ServerAction: Llama a getTag("some-id")
-    ServerAction->>+Prisma: findUnique({ where: {id}, include: tagCounts })
-    Prisma->>+DB: SELECT con _count de relaciones
-    DB-->>-Prisma: Retorna datos del tag con conteos
-    Prisma-->>-ServerAction: Retorna PrismaTagWithCounts
-    ServerAction->>+Mapper: Llama a toTagWithStats(prismaData)
+    ServerAction->>+Drizzle: select().from().where().with(relations)
+    Drizzle->>+DB: SELECT con conteos de relaciones
+    DB-->>-Drizzle: Retorna datos del tag con conteos
+    Drizzle-->>-ServerAction: Retorna TagWithCounts
+    ServerAction->>+Mapper: Llama a toTagWithStats(drizzleData)
     Mapper-->>-ServerAction: Retorna TagWithStats (con stats calculadas)
     ServerAction-->>-Client: Retorna Promise<TagWithStats>
 ```
@@ -90,13 +87,13 @@ sequenceDiagram
 
 - **Usar `TagWithStats`**: Es el tipo de dato principal que debe fluir por la aplicación.
 - **Server Actions**: Toda la lógica de negocio y acceso a datos debe realizarse a través de las server actions refactorizadas.
-- **Consultas Eficientes**: Utilizar siempre `include: tagCounts` en las consultas de Prisma para obtener los datos necesarios para las estadísticas sin cargar las relaciones completas.
-- **Tipos de Input de Prisma**: Para crear o actualizar, usar los tipos `Prisma.TagCreateInput` y `Prisma.TagUpdateInput`.
+- **Consultas Eficientes**: Utilizar siempre `with(relations)` en las consultas de Drizzle para obtener los datos necesarios para las estadísticas sin cargar las relaciones completas.
+- **Tipos de Input de Drizzle**: Para crear o actualizar, usar los tipos `TagCreateInput` y `TagUpdateInput`.
 - **Estado en el cliente**: El store de Zustand (`useTagStore`) está optimizado para manejar `TagWithStats`.
 
 ## 🔄 Estado de la Migración
 
-✅ **COMPLETADO**: La entidad `Tag` ha sido completamente refactorizada al patrón `EntityWithStats`. Se han actualizado tipos, transformadores, server actions y el store de Zustand. Se eliminaron los archivos legacy.
+✅ **COMPLETADO**: La entidad `Tag` ha sido completamente refactorizada al patrón `EntityWithStats` y migrada a Drizzle. Se han actualizado tipos, transformadores, server actions y el store de Zustand. Se eliminaron los archivos legacy.
 
 ---
 

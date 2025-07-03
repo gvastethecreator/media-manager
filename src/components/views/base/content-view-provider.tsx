@@ -1,6 +1,6 @@
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import type React from 'react';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import type { FileItem } from '@/types/files';
 import type { BaseContentProps } from './types';
 
 type ContentViewContextProps = BaseContentProps;
@@ -26,7 +26,7 @@ export function ContentViewProvider({
 	onRefresh,
 }: ContentViewProviderProps) {
 	const handleToggleItemSelection = useCallback(
-		(item: FileItem, isMultiSelect: boolean) => {
+		(item: EntityWithStats, isMultiSelect: boolean) => {
 			if (toggleItemSelection) {
 				toggleItemSelection(item, isMultiSelect);
 			}

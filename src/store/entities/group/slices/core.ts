@@ -5,11 +5,11 @@
  * @updated 2025-01-27
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+import * as actions from '@/services/group/group.service';
+import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
-import * as actions from '@/app/actions/groups/group.actions';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
 import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';
 
 const logger = clientLogger.withContext('GroupCoreSlice');

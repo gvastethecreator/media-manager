@@ -1,24 +1,49 @@
-// ELIMINADO: interface ImageBase duplicada aquí. Usar solo la de types.ts
-
 /**
- * 🎨 Configuración visual asociada a una imagen
+ * @file Tipos base para la entidad Image.
+ * @module types/entities/image/base
+ * @description Define los tipos canónicos para la entidad Image, siguiendo el nuevo patrón de `...WithStats`.
  */
-export interface ImageVisualConfigBase {
-	id: string;
-	imageId: string;
-	config: string;
-}
 
 /**
- * 📊 Estadísticas base de una imagen
- * NOTA: Campo downloads eliminado - no existe en el esquema Prisma ImageStats
+ * 🖼️ Tipo base de Image directamente desde el schema de Drizzle.
+ */
+export type ImageBase = {
+    id: string;
+    name: string;
+    description: string | null;
+    path: string;
+    hash: string;
+    size: number;
+    width: number;
+    height: number;
+    metadata: string | null;
+    thumbnail: string | null;
+    thumbnailSize: number | null;
+    thumbnailWidth: number | null;
+    thumbnailHeight: number | null;
+    thumbnailMimeType: string | null;
+    thumbnailError: string | null;
+    thumbnailErrorAt: Date | null;
+    thumbnailOptimizedAt: Date | null;
+    isFavorite: boolean;
+    folderId: string;
+    noteId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    addedAt: Date;
+};
+
+/**
+ * 📊 Estadísticas base de una imagen, directamente desde el esquema de Drizzle.
  */
 export interface ImageStatsBase {
 	id: string;
 	imageId: string;
 	views: number;
+	downloads: number;
 	likes: number;
-	// downloads: number; // ❌ ELIMINADO - No existe en esquema Prisma
+	comments: number;
+	updatedAt: Date;
 }
 
 /**
@@ -90,5 +115,3 @@ export interface ImageAIMetadata {
 	samplingMethod?: string;
 	extraParameters?: Record<string, unknown>;
 }
-
-// ✅ Tipos revisados y documentados. Listos para uso seguro en frontend y backend.

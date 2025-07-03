@@ -3,21 +3,18 @@
  * @module types/entities/group/types
  */
 
-import type { Group, Image } from '@prisma/client';
+import type { ImageBase } from '../image/base';
 
-export interface GroupBase extends Group {
+export interface GroupBase {
 	id: string;
 	name: string;
 	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	type?: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
 export interface GroupWithImages extends GroupBase {
-	images: Image[];
+	images: ImageBase[];
 }
 
 export interface GroupWithStats extends GroupBase {
@@ -30,7 +27,7 @@ export interface GroupWithStats extends GroupBase {
 }
 
 export interface GroupWithRelations extends GroupBase {
-	images: Image[];
+	images: ImageBase[];
 	_count: {
 		images: number;
 	};
@@ -39,22 +36,15 @@ export interface GroupWithRelations extends GroupBase {
 export interface CreateGroupInput {
 	name: string;
 	description?: string;
-	emoji?: string;
-	color?: string;
-	type?: string;
 }
 
 export interface UpdateGroupInput {
 	name?: string;
 	description?: string;
-	emoji?: string;
-	color?: string;
-	type?: string;
 }
 
 export interface GroupFilters {
 	search?: string;
-	type?: string;
 	hasImages?: boolean;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
 	sortOrder?: 'asc' | 'desc';

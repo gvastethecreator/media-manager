@@ -6,7 +6,7 @@ import { useAlbumImages } from '@/lib/api/albums';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 const viewLogger = clientLogger.withContext('AlbumContentView');
 
@@ -14,7 +14,7 @@ export function AlbumContentView() {
 	const currentAlbumId = useAlbumStore((state) => state.ui.currentAlbumId);
 	const album = useAlbumStore((state) => (currentAlbumId ? state.core.albums[currentAlbumId] : null));
 
-	const [items, setItems] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +22,7 @@ export function AlbumContentView() {
 	const { data: albumImages, isLoading: isLoadingImages, error: albumError } = useAlbumImages(currentAlbumId);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
+	const [optimisticItems, _addEvent] = clientEvents.useEvents<EntityWithStats[]>(items);
 
 	const loadAlbumImages = useCallback(async () => {
 		if (!currentAlbumId) {
@@ -34,7 +34,7 @@ export function AlbumContentView() {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando imágenes del álbum...');
 			if (albumImages) {
-				setItems(albumImages as unknown as FileItem[]);
+				setItems(albumImages as EntityWithStats[]);
 			}
 			viewLogger.info('✅ Imágenes cargadas');
 		} catch (err) {
@@ -51,7 +51,7 @@ export function AlbumContentView() {
 		loadAlbumImages();
 	}, [loadAlbumImages]);
 
-	const handleItemSelection = useCallback((item: FileItem) => {
+	const handleItemSelection = useCallback((item: EntityWithStats) => {
 		viewLogger.info('🖱️ Item seleccionado:', item.name);
 	}, []);
 

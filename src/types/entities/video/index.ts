@@ -9,7 +9,7 @@
 // 📊 Estadísticas y estado
 export type {
 	PaginatedVideos,
-	PrismaVideoWithCounts,
+	
 	VideoBase,
 	VideoComplete,
 	VideoCreateInput,
@@ -36,4 +36,3 @@ export {
 // 🟢 Documentación:
 // - VideoWithStats es el tipo principal para toda la aplicación
 // - VideoComplete solo para casos especiales con relaciones completas
-// - PrismaVideoWithCounts para consultas optimizadas con _count

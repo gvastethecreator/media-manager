@@ -66,64 +66,7 @@
   "powermode.combo.counterEnabled": "hide",
   "powermode.combo.timerEnabled": "hide",
   "powermode.shake.enabled": false,
-  "prisma.scriptRunner": "pnpm",
-  "editor.inlayHints.fontSize": 9,
-  "notebook.output.fontSize": 8,
-  "notebook.markup.fontSize": 8,
-  "gitlens.currentLine.fontSize": 9,
-  "gitlens.blame.fontSize": 9,
-  "chat.editor.fontSize": 12,
-  "markdown.preview.fontSize": 12,
-  "markdown.preview.fontFamily": "Archivo, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif",
-  "editor.minimap.sectionHeaderFontSize": 6,
-  "debug.console.fontSize": 12,
-  "scm.inputFontSize": 12,
-  "workbench.colorCustomizations": {},
-  "workbench.panel.showLabels": true,
-  "editor.codeActions.triggerOnFocusChange": true,
-  "editor.experimentalEditContextEnabled": true,
-  "diffEditor.experimental.showMoves": true,
-  "diffEditor.experimental.useTrueInlineView": true,
-  "workbench.commandPalette.experimental.suggestCommands": true,
-  "workbench.panel.defaultLocation": "right",
-  "workbench.startupEditor": "none",
-  "workbench.iconTheme": "bearded-icons",
-  "workbench.view.showQuietly": {
-    "workbench.panel.output": true
-  },
-  "workbench.editor.preferHistoryBasedLanguageDetection": true,
-  "explorer.incrementalNaming": "smart",
-  "problems.showCurrentInStatus": true,
-  "git.confirmSync": false,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "emmet.showExpandedAbbreviation": "never",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "CodeGPT.apiKey": "Ollama",
-  "[markdown]": {
-    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
-  },
-  "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
-  },
+  ,
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": true,
   "files.autoSaveDelay": 1000,

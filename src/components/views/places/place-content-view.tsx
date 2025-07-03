@@ -1,17 +1,20 @@
 import { MapPin } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { usePlaceImages } from '@/lib/api/places';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { usePlaceStore } from '@/store/entities/place';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import { BaseContentView } from '../base/base-content-view';
 import { ContentViewProvider } from '../base/content-view-provider';
 
-export function PlaceContentView() {
+const viewLogger = clientLogger.withContext('PlaceContentView');
+
+export const PlaceContentView = memo(function PlaceContentView() {
 	const selectedPlaceId = usePlaceStore((state) => state.selectedPlaceId);
 	const selectedPlace = usePlaceStore((state) => (selectedPlaceId ? state.getPlaceById(selectedPlaceId) : null));
 
-	const [items, setItems] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [currentPlaceId, setCurrentPlaceId] = useState(selectedPlaceId);
@@ -26,7 +29,7 @@ export function PlaceContentView() {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando imágenes del lugar...');
 			if (placeImages) {
-				setItems(placeImages as unknown as FileItem[]);
+				setItems(placeImages as EntityWithStats[]);
 			}
 			viewLogger.info('✅ Imágenes cargadas');
 		} catch (err) {
@@ -42,18 +45,26 @@ export function PlaceContentView() {
 		loadPlaceImages();
 	}, [loadPlaceImages]);
 
-	const handleItemSelection = useCallback((item: FileItem) => {
+	const handleItemSelection = useCallback((item: EntityWithStats) => {
 		console.log('Item seleccionado:', item.name);
 	}, []);
 
+	const emptyStateConfig = useMemo(() => ({
+		icon: MapPin,
+		title: 'No hay imágenes en este lugar',
+		description: 'Este lugar no tiene imágenes asociadas',
+	}), []);
+
+	const noSelectionEmptyState = useMemo(() => (
+		<EmptyState
+			icon={MapPin}
+			title="No hay lugar seleccionado"
+			description="Selecciona un lugar para ver su contenido"
+		/>
+	), []);
+
 	if (!selectedPlaceId) {
-		return (
-			<EmptyState
-				icon={MapPin}
-				title="No hay lugar seleccionado"
-				description="Selecciona un lugar para ver su contenido"
-			/>
-		);
+		return noSelectionEmptyState;
 	}
 
 	if (isLoading || isLoadingImages) {
@@ -78,14 +89,10 @@ export function PlaceContentView() {
 			toggleItemSelection={handleItemSelection}
 			currentContainerId={selectedPlaceId}
 			containerName={selectedPlace?.name ?? 'lugar'}
-			emptyState={{
-				icon: MapPin,
-				title: 'No hay imágenes en este lugar',
-				description: 'Este lugar no tiene imágenes asociadas',
-			}}
+			emptyState={emptyStateConfig}
 			onRefresh={loadPlaceImages}
 		>
 			<BaseContentView />
 		</ContentViewProvider>
 	);
-}
+});

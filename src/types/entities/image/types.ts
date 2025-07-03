@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad Image
  * @module types/entities/image/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Image. Todos los campos clave son obligatorios.
  * Última migración: 2025-01-27
  */
@@ -95,26 +94,6 @@ export interface ImageRelations {
 	wildcards?: WildcardComplete[];
 	properties?: PropertyComplete[];
 	groups?: GroupWithStats[];
-}
-
-/**
- * 📊 Consulta optimizada de Prisma con conteos
- */
-export interface PrismaImageWithCounts extends ImageBase {
-	_count: {
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
 }
 
 /**
@@ -227,7 +206,7 @@ export interface ImageCreateInput {
 	height: number;
 	metadata?: string | null;
 	isFavorite?: boolean;
-	folderId: string; // Requerido según el esquema Prisma
+	folderId: string;
 	// Relaciones opcionales
 	albums?: string[];
 	collections?: string[];
@@ -533,10 +512,10 @@ export const IMAGE_SORT_PROPERTY_MAP: Record<ImageSortCriteria, string> = {
 	[ImageSortCriteria.DIMENSIONS_DESC]: 'width',
 	[ImageSortCriteria.QUALITY_ASC]: 'statistics.qualityScore',
 	[ImageSortCriteria.QUALITY_DESC]: 'statistics.qualityScore',
-	[ImageSortCriteria.VIEWS_ASC]: 'statistics.views',
-	[ImageSortCriteria.VIEWS_DESC]: 'statistics.views',
-	[ImageSortCriteria.LIKES_ASC]: 'statistics.likes',
-	[ImageSortCriteria.LIKES_DESC]: 'statistics.likes',
+	[ImageSortCriteria.VIEWS_ASC]: 'views',
+	[ImageSortCriteria.VIEWS_DESC]: 'views',
+	[ImageSortCriteria.LIKES_ASC]: 'likes',
+	[ImageSortCriteria.LIKES_DESC]: 'likes',
 };
 
 // Tipos inferidos de Zod

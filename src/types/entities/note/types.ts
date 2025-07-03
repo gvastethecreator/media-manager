@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad Note
  * @module types/entities/note/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Note. Todos los campos clave son obligatorios.
  * Última migración: 2025-06-18
  */
@@ -58,27 +57,6 @@ export interface NoteRelations {
 	videos?: VideoComplete[];
 	wildcards?: WildcardComplete[];
 	worldItems?: WorldItemComplete[];
-}
-
-/**
- * 📊 Tipo Prisma con conteos para transformación optimizada
- */
-export interface PrismaNoteWithCounts extends NoteBase {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
 }
 
 /**

@@ -1,17 +1,20 @@
 /**
- * 🛠️ Utilidades para trabajar con la base de datos a través de Prisma
+ * 🛠️ Utilidades para trabajar con la base de datos a través de Drizzle
  */
-import { Prisma } from '@prisma/client';
-import { prisma } from './prisma';
+import { db } from '@/lib/drizzle';
+import { eq } from 'drizzle-orm';
+import * as schema from './schema';
+
+type DrizzleTransactionClient = typeof db._;
 
 /**
- * 🔄 Ejecuta una transacción de Prisma con reintentos en caso de error
+ * 🔄 Ejecuta una transacción de Drizzle con reintentos en caso de error
  * @param fn Función que contiene las operaciones de la transacción
  * @param maxRetries Número máximo de reintentos (por defecto: 3)
  * @param retryDelay Tiempo de espera entre reintentos en ms (por defecto: 300ms)
  */
 export async function withTransaction<T>(
-	fn: (tx: Prisma.TransactionClient) => Promise<T>,
+	fn: (tx: DrizzleTransactionClient) => Promise<T>,
 	maxRetries = 3,
 	retryDelay = 300
 ): Promise<T> {
@@ -19,7 +22,7 @@ export async function withTransaction<T>(
 
 	while (true) {
 		try {
-			return await prisma.$transaction(fn);
+			return await db.transaction(async (tx) => fn(tx as DrizzleTransactionClient));
 		} catch (error) {
 			if (retries >= maxRetries) {
 				throw error;
@@ -41,7 +44,7 @@ export async function withTransaction<T>(
 export async function testDatabaseConnection(): Promise<boolean> {
 	try {
 		// Ejecutar una consulta simple para verificar la conexión
-		await prisma.$queryRaw`SELECT 1`;
+		await db.select({ one: sql`1` }).from(schema.folders).limit(1);
 		return true;
 	} catch (error) {
 		console.error('❌ Error al conectar con la base de datos:', error);
@@ -53,20 +56,20 @@ export async function testDatabaseConnection(): Promise<boolean> {
  * 📊 Obtiene estadísticas básicas de la base de datos
  */
 export async function getDatabaseStats() {
-	const [imageCount, folderCount, tagCount, albumCount, collectionCount] = await Promise.all([
-		prisma.image.count(),
-		prisma.folder.count(),
-		prisma.tag.count(),
-		prisma.album.count(),
-		prisma.collection.count(),
+	const [imageCountResult, folderCountResult, tagCountResult, albumCountResult, collectionCountResult] = await Promise.all([
+		db.select({ count: sql<number>`count(*)` }).from(schema.images),
+		db.select({ count: sql<number>`count(*)` }).from(schema.folders),
+		db.select({ count: sql<number>`count(*)` }).from(schema.tags),
+		db.select({ count: sql<number>`count(*)` }).from(schema.albums),
+		db.select({ count: sql<number>`count(*)` }).from(schema.collections),
 	]);
 
 	return {
-		imageCount,
-		folderCount,
-		tagCount,
-		albumCount,
-		collectionCount,
+		imageCount: imageCountResult[0].count,
+		folderCount: folderCountResult[0].count,
+		tagCount: tagCountResult[0].count,
+		albumCount: albumCountResult[0].count,
+		collectionCount: collectionCountResult[0].count,
 		timestamp: new Date(),
 	};
 }
@@ -77,22 +80,14 @@ export async function getDatabaseStats() {
 export async function cleanupOrphanedRecords() {
 	return withTransaction(async (tx) => {
 		// Eliminar imágenes sin carpeta asociada
-		const deletedImages = await tx.image.deleteMany({
-			where: {
-				folder: null,
-			},
-		});
+		const deletedImages = await tx.delete(schema.images).where(eq(schema.images.folderId, null)).execute();
 
 		// Eliminar estadísticas de imágenes sin imagen asociada
-		const deletedStats = await tx.imageStats.deleteMany({
-			where: {
-				image: null,
-			},
-		});
+		const deletedStats = await tx.delete(schema.imageStats).where(eq(schema.imageStats.imageId, null)).execute();
 
 		return {
-			deletedImages: deletedImages.count,
-			deletedStats: deletedStats.count,
+			deletedImages: deletedImages.rowsAffected,
+			deletedStats: deletedStats.rowsAffected,
 		};
 	});
 }

@@ -1,0 +1,2131 @@
+Comando: npx eslint . --max-warnings 0 src/components/settings/
+Fecha: 2025-07-03T16:38:33.998Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+
+D:\DEV\image-manager\src\adapters\folder\index.ts
+  15:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\app\actions\metadata\metadata-extractors.actions.ts
+  185:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  186:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  187:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  188:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  189:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  190:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+D:\DEV\image-manager\src\app\actions\metadata\metadata-parsers.actions.ts
+  193:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\app\actions\system\settings.errors.ts
+  32:85  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\app\actions\system\system.errors.ts
+  32:85  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\cards\album-card\album-card-content.tsx
+  110:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\cards\audio-card\audio-card.tsx
+   14:10  error  'React' is not defined  no-undef
+   92:7   error  'React' is not defined  no-undef
+  107:7   error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\card-container.tsx
+   4:38  error  'React' is not defined  no-undef
+  14:10  error  'React' is not defined  no-undef
+  16:12  error  'React' is not defined  no-undef
+  33:25  error  'React' is not defined  no-undef
+  42:20  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\character-card\character-card-adapter.ts
+  25:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  82:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  91:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\cards\character-card\character-card-images.tsx
+  88:30  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\concept-card\concept-card-content.tsx
+  72:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\cards\concept-card\concept-card-images.tsx
+  35:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\cards\concept-card\concept-card.tsx
+   16:10  error  'React' is not defined  no-undef
+  135:7   error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\entity-card.tsx
+  278:2  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\cards\examples\card-layout-showcase.tsx
+  157:23  warning  Unexpected console statement  no-console
+  158:29  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\cards\file3d-card\file3d-card.tsx
+  119:7  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\folder-card\folder-card.tsx
+  35:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\cards\group-card\group-card-images.tsx
+  83:30  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\group-card\group-card.tsx
+  92:22  error  'useCallback' is not defined  no-undef
+  98:24  error  'useCallback' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\hooks\use-card-layout.ts
+   24:19  error  'React' is not defined  no-undef
+  263:38  error  'React' is not defined  no-undef
+  264:17  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\image-card\image-card-improved.tsx
+  56:36  error    'useState' is not defined     no-undef
+  57:36  error    'useState' is not defined     no-undef
+  58:28  error    'useState' is not defined     no-undef
+  59:36  error    'useState' is not defined     no-undef
+  64:2   error    'useEffect' is not defined    no-undef
+  71:5   warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\cards\image-card\image-card.tsx
+   69:6   error  'getAspectRatioClass' is not defined         no-undef
+   70:6   error  'getVariantClasses' is not defined           no-undef
+   85:6   error  'getAspectRatioClass' is not defined         no-undef
+   86:6   error  'getVariantClasses' is not defined           no-undef
+  131:5   error  'getAspectRatioClass' is not defined         no-undef
+  132:5   error  'getVariantClasses' is not defined           no-undef
+  140:20  error  'React' is not defined                       no-undef
+  244:17  error  'getHumanReadableDimensions' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\image-card\image-gallery-example.tsx
+  167:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\cards\json-file-card\json-file-card.tsx
+  155:7  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\note-card\note-card.tsx
+   16:10  error  'React' is not defined  no-undef
+  120:7   error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\place-card\place-card-images.tsx
+  79:30  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\cards\place-card\place-card.tsx
+   23:24  error  'PlaceWithStats' is not defined  no-undef
+  148:7   error  'React' is not defined           no-undef
+
+D:\DEV\image-manager\src\components\cards\prompt-card\prompt-card-content.tsx
+   10:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  229:8   error    'React' is not defined                    no-undef
+
+D:\DEV\image-manager\src\components\cards\prompt-card\prompt-card-grid.tsx
+  63:5   warning  Unexpected console statement  no-console
+  81:33  error    'React' is not defined        no-undef
+
+D:\DEV\image-manager\src\components\cards\prompt-card\prompt-card.tsx
+  213:0  error  Parsing error: '}' expected
+
+D:\DEV\image-manager\src\components\cards\wildcard-card\wildcard-server-actions.ts
+  19:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:4   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\cards\world-item-card\world-item-card-images.tsx
+  30:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\cards\world-item-card\world-item-card.tsx
+   14:28  error  'WorldItemWithStats' is not defined  no-undef
+   16:10  error  'React' is not defined               no-undef
+  132:22  error  'React' is not defined               no-undef
+  212:7   error  'React' is not defined               no-undef
+
+D:\DEV\image-manager\src\components\core\error-boundary.tsx
+  24:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\core\forms\base\text-input\component.tsx
+  10:41  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\core\forms\fields\text-input\component.tsx
+   2:3   error    'label' is not defined                    no-undef
+   2:13  error    'Label' is not defined                    no-undef
+   2:28  error    'id' is not defined                       no-undef
+   2:33  error    'label' is not defined                    no-undef
+   2:41  error    'Label' is not defined                    no-undef
+   3:3   error    'BaseTextInput' is not defined            no-undef
+   4:7   error    'id' is not defined                       no-undef
+   5:9   error    'name' is not defined                     no-undef
+   6:10  error    'value' is not defined                    no-undef
+   7:13  error    'onChange' is not defined                 no-undef
+   8:16  error    'placeholder' is not defined              no-undef
+   9:9   error    'type' is not defined                     no-undef
+  10:14  error    'maxLength' is not defined                no-undef
+  11:13  error    'required' is not defined                 no-undef
+  12:13  error    'disabled' is not defined                 no-undef
+  13:14  error    'className' is not defined                no-undef
+  14:8   error    'props' is not defined                    no-undef
+  14:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:3   error    'error' is not defined                    no-undef
+  16:54  error    'error' is not defined                    no-undef
+
+D:\DEV\image-manager\src\components\core\global-error-handler.tsx
+  13:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\entities\profile\ProfileControls.tsx
+  36:7  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\components\grid-item.tsx
+  32:16  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\context-menu\components\enhanced-submenu.tsx
+  28:8  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\context-menu\components\entity-submenu.tsx
+   43:35  error    'React' is not defined                    no-undef
+  176:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:68  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\context-menu\components\submenu-search.tsx
+  24:7  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\context-menu\context-action-handler.ts
+  206:9  error    Unexpected confirm            no-alert
+  239:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\features\file-browser\context-menu\hooks\use-entity-loader.ts
+  125:17  error  'NodeJS' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\context-menu\types.ts
+  124:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\entity-preloader.tsx
+  205:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  220:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\file-browser.tsx
+   81:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:21  error    'filterType' is not defined               no-undef
+  123:56  error    'filterType' is not defined               no-undef
+  137:21  error    'filterType' is not defined               no-undef
+  159:41  error    'filterType' is not defined               no-undef
+  176:23  error    'filterType' is not defined               no-undef
+  199:21  error    'filterType' is not defined               no-undef
+  267:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  289:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  291:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  301:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  357:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\filters\filter-panel.tsx
+  54:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\filters\search-bar.tsx
+  49:39  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\hooks\use-grid-virtualizer.ts
+   25:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\views\list-view.tsx
+  29:42  error    'React' is not defined                    no-undef
+  34:33  error    'React' is not defined                    no-undef
+  34:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\views\masonry-view.tsx
+  18:42  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\views\simple-grid-view.tsx
+  18:42  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\features\file-browser\views\virtualized-cards-view.tsx
+  30:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\views\virtualized-list-view.tsx
+  27:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\views\virtualized-masonry-view.tsx
+  29:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\views\virtualized-simple-grid-view.tsx
+  29:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-browser\views\virtualizer-wrapper.tsx
+   93:44  error    'NodeJS' is not defined                   no-undef
+  123:4   warning  Unexpected console statement              no-console
+  148:3   warning  Unexpected console statement              no-console
+  198:6   warning  Unexpected console statement              no-console
+  357:4   warning  Unexpected console statement              no-console
+  410:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  411:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  443:5   warning  Unexpected console statement              no-console
+  449:5   warning  Unexpected console statement              no-console
+  466:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  467:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  519:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  519:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  520:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  521:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  522:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  524:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  525:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\features\file-viewer\file-viewer.tsx
+  328:4  warning  Unexpected console statement  no-console
+  363:8  warning  Unexpected console statement  no-console
+  374:5  warning  Unexpected console statement  no-console
+  425:4  warning  Unexpected console statement  no-console
+  465:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\navigation\actions\navigation.actions.temp.ts
+   9:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  10:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:8   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  12:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  13:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  14:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\navigation\components\nav-category-item.tsx
+  105:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\navigation\components\nav-panel-header.tsx
+  169:8  error    'React' is not defined        no-undef
+  243:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\navigation\hooks\navigation.utils.ts
+   76:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\panels\details-panel\actions-system.tsx
+   42:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   48:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   79:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   89:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  201:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  410:3   warning  Unexpected console statement              no-console
+  417:3   warning  Unexpected console statement              no-console
+  426:3   warning  Unexpected console statement              no-console
+  432:3   warning  Unexpected console statement              no-console
+  439:3   warning  Unexpected console statement              no-console
+  446:3   warning  Unexpected console statement              no-console
+  452:3   warning  Unexpected console statement              no-console
+  459:3   warning  Unexpected console statement              no-console
+  464:3   warning  Unexpected console statement              no-console
+  473:3   warning  Unexpected console statement              no-console
+  483:3   warning  Unexpected console statement              no-console
+  489:3   warning  Unexpected console statement              no-console
+  495:3   warning  Unexpected console statement              no-console
+  501:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\bulk-metadata-editor.tsx
+  62:7  warning  Unexpected console statement  no-console
+  79:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\details-panel-ai-generation-info.tsx
+  63:7  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\details-panel-ai-generation-utils.ts
+  40:3  warning  Unexpected console statement  no-console
+  43:3  warning  Unexpected console statement  no-console
+  46:3  warning  Unexpected console statement  no-console
+  49:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\details-panel-basic-info.tsx
+  41:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\details-panel-metadata-sections.tsx
+   21:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  231:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  430:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  432:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  436:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  436:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  438:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  442:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  444:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  448:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  448:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  450:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\panels\details-panel\details-panel-utils.ts
+  5:45  warning  Unexpected console statement  no-console
+  6:45  warning  Unexpected console statement  no-console
+  7:46  warning  Unexpected console statement  no-console
+  8:46  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\details-panel.tsx
+  96:6  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\editable-metadata.tsx
+  58:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\enhanced-details-panel.tsx
+   31:97   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:105  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:65   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  182:3    warning  Unexpected console statement              no-console
+  203:5    warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\panels\details-panel\entities\collection-details.tsx
+  62:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\panels\details-panel\entities\folder-details.tsx
+   59:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  317:94  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\panels\details-panel\entities\image-details.tsx
+  40:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\panels\details-panel\entities\video-details.tsx
+   56:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:27  error    'HTMLVideoElement' is not defined         no-undef
+
+D:\DEV\image-manager\src\components\panels\details-panel\entity-details-registry.ts
+  21:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\panels\details-panel\integration-hook.ts
+   89:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:3   warning  Unexpected console statement              no-console
+   95:5   warning  Unexpected console statement              no-console
+  100:5   warning  Unexpected console statement              no-console
+  105:5   warning  Unexpected console statement              no-console
+  110:5   warning  Unexpected console statement              no-console
+  115:5   warning  Unexpected console statement              no-console
+  120:5   warning  Unexpected console statement              no-console
+  126:5   warning  Unexpected console statement              no-console
+  131:5   warning  Unexpected console statement              no-console
+  136:5   warning  Unexpected console statement              no-console
+  141:5   warning  Unexpected console statement              no-console
+  145:5   warning  Unexpected console statement              no-console
+  149:5   warning  Unexpected console statement              no-console
+  153:5   warning  Unexpected console statement              no-console
+  157:5   warning  Unexpected console statement              no-console
+  169:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\panels\details-panel\registry-setup.ts
+  33:7  error  Parsing error: '>' expected
+
+D:\DEV\image-manager\src\components\panels\stats-panel\stats-actions-client.ts
+  38:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\stats-panel\stats-client-components.tsx
+   48:6  warning  Unexpected console statement  no-console
+  205:6  warning  Unexpected console statement  no-console
+  273:6  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\panels\stats-panel\stats-client.tsx
+  6:70  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\albums\albums-settings.tsx
+  14:30  error    'React' is not defined                    no-undef
+  19:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  60:7   error    'React' is not defined                    no-undef
+  86:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\characters\create-character-form.tsx
+   62:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  244:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  251:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  256:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  269:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\collections\create-collection-form.tsx
+   56:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  223:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  230:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  235:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  248:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  265:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\common\dynamic-create-form.tsx
+  21:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  43:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  82:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\concepts\create-concept-form.tsx
+   35:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:32  error    'useCreateConcept' is not defined         no-undef
+   50:32  error    'useUpdateConcept' is not defined         no-undef
+  134:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  141:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  146:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\folders\folder-form.tsx
+  18:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\folders\folder-progress-details.tsx
+  27:31  error  'NodeJS' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\folders\hooks\use-folders-operations.ts
+  144:10  error  'reindexAllFoldersMutation' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\folders\hooks\use-folders-polling.ts
+  29:33  error  'NodeJS' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\folders\hooks\use-folders-state.ts
+  120:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\groups\components\group-filters.tsx
+  35:6  warning  Unexpected console statement  no-console
+  40:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\settings\groups\create-group-form.tsx
+  66:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  73:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  78:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\groups\groups-settings.tsx
+  260:25  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\interface-section.tsx
+  24:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:97  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\notes\notes-settings.tsx
+  323:33  error  'formatDate' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\places\create-place-form.tsx
+  68:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  72:30  error    'useCreatePlace' is not defined           no-undef
+  73:30  error    'useUpdatePlace' is not defined           no-undef
+  76:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\places\places-settings.tsx
+   18:30  error    'React' is not defined                    no-undef
+   23:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\prompts\create-prompt-form.tsx
+   44:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  141:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  146:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:6   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\settings\prompts\prompts-settings.tsx
+  96:38  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\properties\create-property-form.tsx
+   54:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   54:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:4   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\settings\properties\properties-settings.tsx
+  240:26  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\shortcuts\shortcuts-settings.tsx
+  62:36  error  'InterfacePreferences' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\settings\tags\create-tag-form.tsx
+   49:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:28  error    'useCreateTag' is not defined             no-undef
+   62:28  error    'useUpdateTag' is not defined             no-undef
+  139:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\settings\thumbnails\thumbnails-settings.tsx
+   42:52  error    'useThumbnail' is not defined             no-undef
+  117:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:6   warning  Unexpected console statement              no-console
+  163:4   warning  Unexpected console statement              no-console
+  181:4   warning  Unexpected console statement              no-console
+  191:4   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\settings\uploaded-images\uploaded-images-settings.tsx
+  55:53  error  'useUploadedImageStats' is not defined  no-undef
+  56:31  error  'useUploadImages' is not defined        no-undef
+
+D:\DEV\image-manager\src\components\settings\wildcards\create-wildcard-form.tsx
+  65:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\settings\wildcards\wildcards-settings.tsx
+  244:25  error  'WildcardCreateInput' is not defined  no-undef
+  267:25  error  'WildcardUpdateInput' is not defined  no-undef
+  300:36  error  'React' is not defined                no-undef
+  306:36  error  'React' is not defined                no-undef
+  330:27  error  'React' is not defined                no-undef
+  350:25  error  'React' is not defined                no-undef
+
+D:\DEV\image-manager\src\components\settings\world-items\create-world-item-form.tsx
+  143:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  148:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  166:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  185:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  204:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  223:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  236:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  242:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:6   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\settings\world-items\world-items-settings.tsx
+  391:26  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\toolbar\main-toolbar.tsx
+  105:7  error    Unexpected confirm            no-alert
+  124:3  warning  Unexpected console statement  no-console
+  125:3  error    Unexpected alert              no-alert
+
+D:\DEV\image-manager\src\components\ui\calendar.tsx
+   7:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\ui\color-picker.tsx
+  46:32  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\ui\empty-state.tsx
+  9:12  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\ui\entity-filter.tsx
+   65:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:9   error    'React' is not defined                    no-undef
+   94:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  185:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  200:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\ui\entity-form.tsx
+   98:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  126:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  212:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  215:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  313:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  320:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  373:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\ui\entity-header.tsx
+   30:9   error  'React' is not defined  no-undef
+   77:9   error  'React' is not defined  no-undef
+  140:17  error  'React' is not defined  no-undef
+  230:9   error  'React' is not defined  no-undef
+  235:10  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\ui\entity-list.tsx
+  62:15  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\ui\entity-stats.tsx
+  19:9  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\ui\form.tsx
+  18:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\ui\particles.tsx
+  10:10  error  'MousePosition' is already defined  no-redeclare
+  92:31  error  'NodeJS' is not defined             no-undef
+
+D:\DEV\image-manager\src\components\ui\scroll-area.tsx
+  20:34  error  'NodeJS' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\ui\skeleton.tsx
+  3:44  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\components\ui\sonner.tsx
+  22:35  error  'StorageEvent' is not defined  no-undef
+  47:10  error  'React' is not defined         no-undef
+
+D:\DEV\image-manager\src\components\ui\theme-provider.tsx
+   52:6   warning  Unexpected console statement              no-console
+   53:6   warning  Unexpected console statement              no-console
+   72:4   warning  Unexpected console statement              no-console
+  123:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\views\base\base-content-view.tsx
+  115:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\components\views\collections\collection-content-view.tsx
+  70:12  error  'removeImageFromCollection' is not defined  no-undef
+  76:33  error  'getCollectionImages' is not defined        no-undef
+
+D:\DEV\image-manager\src\components\views\development\debug-console.tsx
+  26:3  warning  Unexpected console statement  no-console
+  27:3  warning  Unexpected console statement  no-console
+  28:3  warning  Unexpected console statement  no-console
+  29:3  warning  Unexpected console statement  no-console
+  30:3  warning  Unexpected console statement  no-console
+  33:3  warning  Unexpected console statement  no-console
+  34:3  warning  Unexpected console statement  no-console
+  55:3  warning  Unexpected console statement  no-console
+  56:3  warning  Unexpected console statement  no-console
+  57:3  warning  Unexpected console statement  no-console
+  59:3  warning  Unexpected console statement  no-console
+  60:3  warning  Unexpected console statement  no-console
+  61:3  warning  Unexpected console statement  no-console
+  62:3  warning  Unexpected console statement  no-console
+  64:3  warning  Unexpected console statement  no-console
+  65:3  warning  Unexpected console statement  no-console
+  70:3  warning  Unexpected console statement  no-console
+  78:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\development\hooks\use-documentation.ts
+  19:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\development\hooks\use-features-issues.ts
+  77:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\development\hooks\use-system-stats.ts
+  132:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\development\hooks\use-tech-metrics.ts
+  32:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\development\services\documentation.ts
+  24:3  warning  Unexpected console statement  no-console
+  40:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\development\services\system-stats.ts
+   18:3  warning  Unexpected console statement  no-console
+   45:3  warning  Unexpected console statement  no-console
+   62:3  warning  Unexpected console statement  no-console
+   76:3  warning  Unexpected console statement  no-console
+   90:3  warning  Unexpected console statement  no-console
+  141:3  warning  Unexpected console statement  no-console
+  195:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\folders\diagnostics\folder-diagnostics.tsx
+   9:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:4   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\components\views\folders\views\folders-view.tsx
+  265:8  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\groups\groups-view.tsx
+  106:8  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\places\place-content-view.tsx
+  49:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\search\search-view.tsx
+  66:4  warning  Unexpected console statement  no-console
+  72:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\tags\tags-view.tsx
+  49:5  warning  Unexpected console statement  no-console
+  55:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\components\views\uploaded-images\uploaded-images-view.tsx
+  221:31  error    'FileItem' is not defined                 no-undef
+  233:12  error    Empty block statement                     no-empty
+  243:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:10  error    'FileItem' is not defined                 no-undef
+
+D:\DEV\image-manager\src\components\views\world-items\world-items-view.tsx
+  24:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\hooks\use-theme.ts
+  70:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\api\activity.ts
+  12:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\api\client.ts
+  13:39  error  'RequestInit' is not defined  no-undef
+  20:17  error  'HeadersInit' is not defined  no-undef
+  25:22  error  'RequestInit' is not defined  no-undef
+
+D:\DEV\image-manager\src\lib\api\notes.ts
+  3:30  error  Parsing error: 'from' expected
+
+D:\DEV\image-manager\src\lib\api\profiles.ts
+  49:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\api\services\files.ts
+  37:43  error  'API_bASE' is not defined  no-undef
+
+D:\DEV\image-manager\src\lib\api\thumbnails.ts
+  52:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  54:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\config\db.ts
+  46:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\config\index.ts
+  11:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\config\settings.ts
+  16:3  warning  Unexpected console statement  no-console
+  25:3  warning  Unexpected console statement  no-console
+  66:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\contexts\file-context-safe.tsx
+  118:4  warning  Unexpected console statement  no-console
+  142:4  warning  Unexpected console statement  no-console
+  156:6  warning  Unexpected console statement  no-console
+  173:6  warning  Unexpected console statement  no-console
+  189:6  warning  Unexpected console statement  no-console
+  206:6  warning  Unexpected console statement  no-console
+  222:6  warning  Unexpected console statement  no-console
+  241:4  warning  Unexpected console statement  no-console
+  244:4  warning  Unexpected console statement  no-console
+  261:4  warning  Unexpected console statement  no-console
+  264:4  warning  Unexpected console statement  no-console
+  280:4  warning  Unexpected console statement  no-console
+  283:4  warning  Unexpected console statement  no-console
+  303:4  warning  Unexpected console statement  no-console
+  306:4  warning  Unexpected console statement  no-console
+  317:4  warning  Unexpected console statement  no-console
+  320:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\contexts\file-context.tsx
+  124:5  warning  Unexpected console statement  no-console
+  237:4  warning  Unexpected console statement  no-console
+  257:5  warning  Unexpected console statement  no-console
+  306:5  warning  Unexpected console statement  no-console
+  341:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\contexts\profile-context.tsx
+  12:15  error  'CollectionBase' is not defined  no-undef
+  13:11  error  'FolderBase' is not defined      no-undef
+  14:8   error  'TagBase' is not defined         no-undef
+
+D:\DEV\image-manager\src\lib\contexts\settings-context-safe.tsx
+  143:4  warning  Unexpected console statement  no-console
+  170:5  warning  Unexpected console statement  no-console
+  181:4  warning  Unexpected console statement  no-console
+  233:4  warning  Unexpected console statement  no-console
+  257:4  warning  Unexpected console statement  no-console
+  285:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\contexts\settings-context.tsx
+   95:4  warning  Unexpected console statement  no-console
+  154:4  warning  Unexpected console statement  no-console
+  185:5  warning  Unexpected console statement  no-console
+  196:4  warning  Unexpected console statement  no-console
+  220:4  warning  Unexpected console statement  no-console
+  233:4  warning  Unexpected console statement  no-console
+  246:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\contexts\theme-provider.tsx
+   52:6   warning  Unexpected console statement              no-console
+   53:6   warning  Unexpected console statement              no-console
+   72:4   warning  Unexpected console statement              no-console
+  123:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\database\db-utils.ts
+  35:4   warning  Unexpected console statement  no-console
+  47:26  error    'sql' is not defined          no-undef
+  50:3   warning  Unexpected console statement  no-console
+  60:22  error    'sql' is not defined          no-undef
+  61:22  error    'sql' is not defined          no-undef
+  62:22  error    'sql' is not defined          no-undef
+  63:22  error    'sql' is not defined          no-undef
+  64:22  error    'sql' is not defined          no-undef
+
+D:\DEV\image-manager\src\lib\dev\react-scan.tsx
+   6:61  error    'React' is not defined        no-undef
+  20:6   warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\drizzle\index.ts
+  66:5  warning  Unexpected console statement  no-console
+  96:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\drizzle\seeds\index.ts
+  33:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:45  warning  Unexpected console statement              no-console
+  34:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  34:45  warning  Unexpected console statement              no-console
+  35:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:46  warning  Unexpected console statement              no-console
+  36:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:48  warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\lib\filesystem\folder-cache.ts
+   16:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   32:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   54:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\hooks\entities\concept\use-concept-actions.ts
+  28:4  warning  Unexpected console statement  no-console
+  40:5  warning  Unexpected console statement  no-console
+  54:5  warning  Unexpected console statement  no-console
+  68:5  warning  Unexpected console statement  no-console
+  82:5  warning  Unexpected console statement  no-console
+  96:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\hooks\entities\use-entity-conversion.ts
+  68:21  error    'formatFileSize' is not defined           no-undef
+  72:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  87:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  92:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\hooks\entities\useFilteredData.ts
+  4:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\hooks\system\use-console-capture.ts
+  47:38  warning  Unexpected console statement  no-console
+  50:4   warning  Unexpected console statement  no-console
+  99:5   warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\hooks\ui\use-selection.ts
+  140:27  error  'React' is not defined  no-undef
+  171:21  error  'React' is not defined  no-undef
+
+D:\DEV\image-manager\src\lib\hooks\ui\use-thumbnail-events.ts
+  23:25  error  'NodeJS' is not defined          no-undef
+  24:21  error  'NodeJS' is not defined          no-undef
+  92:32  error  'ProcessStatus' is not defined   no-undef
+  96:41  error  'ThumbnailError' is not defined  no-undef
+
+D:\DEV\image-manager\src\lib\hooks\use-console-capture.ts
+   9:8   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:8   warning  Unexpected console statement              no-console
+  18:9   warning  Unexpected console statement              no-console
+  19:10  warning  Unexpected console statement              no-console
+  20:9   warning  Unexpected console statement              no-console
+  23:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:3   warning  Unexpected console statement              no-console
+  40:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:3   warning  Unexpected console statement              no-console
+  45:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  50:3   warning  Unexpected console statement              no-console
+  50:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  55:3   warning  Unexpected console statement              no-console
+  55:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  66:3   warning  Unexpected console statement              no-console
+  67:3   warning  Unexpected console statement              no-console
+  68:3   warning  Unexpected console statement              no-console
+  69:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\lib\hooks\utils\use-local-storage.ts
+  31:4  warning  Unexpected console statement  no-console
+  49:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\hooks\utils\use-window-size.ts
+  27:18  error  'NodeJS' is not defined  no-undef
+
+D:\DEV\image-manager\src\lib\image\image-processing.ts
+   87:3  warning  Unexpected console statement  no-console
+  111:3  warning  Unexpected console statement  no-console
+  131:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\image\thumbnail.ts
+  235:3   warning  Unexpected console statement              no-console
+  277:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  333:4   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\lib\logger\client-logger.ts
+   70:4   warning  Unexpected console statement  no-console
+   76:4   warning  Unexpected console statement  no-console
+   82:4   warning  Unexpected console statement  no-console
+   88:4   warning  Unexpected console statement  no-console
+   94:4   warning  Unexpected console statement  no-console
+  100:41  warning  Unexpected console statement  no-console
+  101:4   warning  Unexpected console statement  no-console
+  106:41  warning  Unexpected console statement  no-console
+  107:4   warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\logger\server-logger.ts
+  193:4  warning  Unexpected console statement  no-console
+  199:4  warning  Unexpected console statement  no-console
+  205:4  warning  Unexpected console statement  no-console
+  219:4  warning  Unexpected console statement  no-console
+  225:4  warning  Unexpected console statement  no-console
+  231:4  warning  Unexpected console statement  no-console
+  237:4  warning  Unexpected console statement  no-console
+  243:4  warning  Unexpected console statement  no-console
+  249:4  warning  Unexpected console statement  no-console
+  256:4  warning  Unexpected console statement  no-console
+  262:4  warning  Unexpected console statement  no-console
+  268:4  warning  Unexpected console statement  no-console
+  282:4  warning  Unexpected console statement  no-console
+  294:4  warning  Unexpected console statement  no-console
+  300:4  warning  Unexpected console statement  no-console
+  307:4  warning  Unexpected console statement  no-console
+  324:4  warning  Unexpected console statement  no-console
+  331:4  warning  Unexpected console statement  no-console
+  338:4  warning  Unexpected console statement  no-console
+  352:4  warning  Unexpected console statement  no-console
+  359:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\server\events.server.ts
+  112:2  warning  Unexpected console statement  no-console
+  122:4  warning  Unexpected console statement  no-console
+  125:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\server\revalidate.ts
+  3:3   warning  Unexpected console statement              no-console
+  7:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  7:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  7:77  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\server\system-monitor.ts
+   56:3  warning  Unexpected console statement  no-console
+  119:2  warning  Unexpected console statement  no-console
+  122:2  warning  Unexpected console statement  no-console
+  129:2  warning  Unexpected console statement  no-console
+  137:2  warning  Unexpected console statement  no-console
+  145:2  warning  Unexpected console statement  no-console
+  151:2  warning  Unexpected console statement  no-console
+  153:2  warning  Unexpected console statement  no-console
+  162:2  warning  Unexpected console statement  no-console
+  171:3  warning  Unexpected console statement  no-console
+  186:2  warning  Unexpected console statement  no-console
+  194:2  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\server\system-utils.ts
+  52:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\system\event-throttler.ts
+   18:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   19:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   20:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   22:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   44:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   44:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   77:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  125:21  error    'NodeJS' is not defined                   no-undef
+  221:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  222:17  error    'NodeJS' is not defined                   no-undef
+
+D:\DEV\image-manager\src\lib\utils.ts
+  34:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\utils\album\validators.ts
+  182:29  error  'Album' is not defined  no-undef
+
+D:\DEV\image-manager\src\lib\utils\array.utils.ts
+   56:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\character\validators.ts
+  135:3  warning  Unexpected console statement  no-console
+  174:3  warning  Unexpected console statement  no-console
+  213:3  warning  Unexpected console statement  no-console
+  243:3  warning  Unexpected console statement  no-console
+  275:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\utils\collection\helpers.ts
+  57:80  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\collection\index.ts
+  26:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\entity-loading.utils.ts
+  16:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\format.utils.ts
+  67:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\utils\json.ts
+  27:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\utils\note\helpers.ts
+  86:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\utils\place\helpers.ts
+  116:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\profile\profile-utils.ts
+  123:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\utils\prompt\execution.ts
+  21:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  46:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  73:78  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\prompt\export.ts
+  40:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\prompt\formatters.ts
+  158:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\prompt\helpers.ts
+  12:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  79:86  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\prompt\templates.ts
+   35:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   36:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  192:89  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  261:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\prompt\validators.ts
+  72:77  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\store\create-selectors.ts
+  27:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\transformers\calculate-completeness.ts
+  38:17  error  'calculateCompleteness' is already defined  no-redeclare
+  40:17  error  'calculateCompleteness' is already defined  no-redeclare
+
+D:\DEV\image-manager\src\lib\utils\types\export-validator.ts
+  31:31  error    'Collection' is not defined   no-undef
+  33:27  error    'Folder' is not defined       no-undef
+  36:25  error    'Note' is not defined         no-undef
+  39:29  error    'Property' is not defined     no-undef
+  41:26  error    'Video' is not defined        no-undef
+  42:29  error    'Wildcard' is not defined     no-undef
+  51:2   warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\lib\utils\video\helpers.ts
+  238:68  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  260:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  261:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\lib\utils\video\validators.ts
+  157:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  157:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:3   warning  Unexpected console statement              no-console
+  235:3   warning  Unexpected console statement              no-console
+  254:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\lib\utils\world-item\helpers.ts
+  41:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\providers\profile-provider.tsx
+  63:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\providers\theme-provider.tsx
+  30:6  warning  Unexpected console statement        no-console
+  31:6  warning  Unexpected console statement        no-console
+  65:4  error    'NextThemeProvider' is not defined  no-undef
+  69:5  error    'NextThemeProvider' is not defined  no-undef
+
+D:\DEV\image-manager\src\server\index.ts
+   12:8   error    'favoritesRouter' is already defined      no-redeclare
+   90:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:2   warning  Unexpected console statement              no-console
+  110:2   warning  Unexpected console statement              no-console
+  111:2   warning  Unexpected console statement              no-console
+  112:2   warning  Unexpected console statement              no-console
+  113:2   warning  Unexpected console statement              no-console
+  114:2   warning  Unexpected console statement              no-console
+  115:2   warning  Unexpected console statement              no-console
+  116:2   warning  Unexpected console statement              no-console
+  117:2   warning  Unexpected console statement              no-console
+  118:2   warning  Unexpected console statement              no-console
+  119:2   warning  Unexpected console statement              no-console
+  120:2   warning  Unexpected console statement              no-console
+  121:2   warning  Unexpected console statement              no-console
+  122:2   warning  Unexpected console statement              no-console
+  123:2   warning  Unexpected console statement              no-console
+  124:2   warning  Unexpected console statement              no-console
+  125:2   warning  Unexpected console statement              no-console
+  126:2   warning  Unexpected console statement              no-console
+  127:2   warning  Unexpected console statement              no-console
+  128:2   warning  Unexpected console statement              no-console
+  129:2   warning  Unexpected console statement              no-console
+  130:2   warning  Unexpected console statement              no-console
+  131:2   warning  Unexpected console statement              no-console
+  132:2   warning  Unexpected console statement              no-console
+  133:2   warning  Unexpected console statement              no-console
+  135:2   warning  Unexpected console statement              no-console
+  136:2   warning  Unexpected console statement              no-console
+  137:2   warning  Unexpected console statement              no-console
+  138:2   warning  Unexpected console statement              no-console
+  139:2   warning  Unexpected console statement              no-console
+  140:2   warning  Unexpected console statement              no-console
+  141:2   warning  Unexpected console statement              no-console
+  142:2   warning  Unexpected console statement              no-console
+  144:2   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\server\routes\activity.ts
+   52:3   warning  Unexpected console statement              no-console
+  102:3   warning  Unexpected console statement              no-console
+  118:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:3   warning  Unexpected console statement              no-console
+  172:3   warning  Unexpected console statement              no-console
+  200:3   warning  Unexpected console statement              no-console
+  212:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  227:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\server\routes\albums.ts
+   89:3  warning  Unexpected console statement  no-console
+  114:3  warning  Unexpected console statement  no-console
+  153:3  warning  Unexpected console statement  no-console
+  177:3  warning  Unexpected console statement  no-console
+  204:3  warning  Unexpected console statement  no-console
+  220:3  warning  Unexpected console statement  no-console
+  241:3  warning  Unexpected console statement  no-console
+  262:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\audio.ts
+   13:3   warning  Unexpected console statement          no-console
+   33:3   warning  Unexpected console statement          no-console
+   47:3   warning  Unexpected console statement          no-console
+   62:3   warning  Unexpected console statement          no-console
+   81:3   warning  Unexpected console statement          no-console
+   92:29  error    'getAudioFormatStats' is not defined  no-undef
+   97:3   warning  Unexpected console statement          no-console
+  108:28  error    'getAudioGenreStats' is not defined   no-undef
+  113:3   warning  Unexpected console statement          no-console
+
+D:\DEV\image-manager\src\server\routes\characters.ts
+  10:3  warning  Unexpected console statement  no-console
+  12:3  warning  Unexpected console statement  no-console
+  15:3  warning  Unexpected console statement  no-console
+  27:3  warning  Unexpected console statement  no-console
+  35:3  warning  Unexpected console statement  no-console
+  38:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\collections.ts
+   38:3  warning  Unexpected console statement  no-console
+   55:3  warning  Unexpected console statement  no-console
+   69:3  warning  Unexpected console statement  no-console
+   82:3  warning  Unexpected console statement  no-console
+   96:3  warning  Unexpected console statement  no-console
+  119:3  warning  Unexpected console statement  no-console
+  143:3  warning  Unexpected console statement  no-console
+  161:3  warning  Unexpected console statement  no-console
+  174:3  warning  Unexpected console statement  no-console
+  187:3  warning  Unexpected console statement  no-console
+  199:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\concepts.ts
+   46:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   47:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   96:3   warning  Unexpected console statement              no-console
+  144:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\server\routes\documents.ts
+  13:3  warning  Unexpected console statement  no-console
+  28:3  warning  Unexpected console statement  no-console
+  40:3  warning  Unexpected console statement  no-console
+  53:3  warning  Unexpected console statement  no-console
+  65:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\favorites.ts
+  50:5  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\folders.ts
+   35:3  warning  Unexpected console statement  no-console
+   79:3  warning  Unexpected console statement  no-console
+   82:3  warning  Unexpected console statement  no-console
+  124:3  warning  Unexpected console statement  no-console
+  192:3  warning  Unexpected console statement  no-console
+  257:3  warning  Unexpected console statement  no-console
+  299:3  warning  Unexpected console statement  no-console
+  322:3  warning  Unexpected console statement  no-console
+  358:3  warning  Unexpected console statement  no-console
+  376:3  warning  Unexpected console statement  no-console
+  400:3  warning  Unexpected console statement  no-console
+  424:3  warning  Unexpected console statement  no-console
+  448:3  warning  Unexpected console statement  no-console
+  472:3  warning  Unexpected console statement  no-console
+  510:3  warning  Unexpected console statement  no-console
+  548:3  warning  Unexpected console statement  no-console
+  586:3  warning  Unexpected console statement  no-console
+  624:3  warning  Unexpected console statement  no-console
+  662:3  warning  Unexpected console statement  no-console
+  700:3  warning  Unexpected console statement  no-console
+  738:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\groups.ts
+   15:1   error    'router' is not defined                   no-undef
+   28:5   error    'like' is not defined                     no-undef
+   28:10  error    'groups' is not defined                   no-undef
+   32:47  error    'and' is not defined                      no-undef
+   36:6   error    'desc' is not defined                     no-undef
+   36:11  error    'groups' is not defined                   no-undef
+   36:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   37:6   error    'asc' is not defined                      no-undef
+   37:10  error    'groups' is not defined                   no-undef
+   37:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   41:4   error    'db' is not defined                       no-undef
+   42:9   error    'groups' is not defined                   no-undef
+   43:11  error    'groups' is not defined                   no-undef
+   44:18  error    'groups' is not defined                   no-undef
+   45:16  error    'groups' is not defined                   no-undef
+   46:16  error    'groups' is not defined                   no-undef
+   48:10  error    'groups' is not defined                   no-undef
+   54:4   error    'db' is not defined                       no-undef
+   54:23  error    'count' is not defined                    no-undef
+   55:10  error    'groups' is not defined                   no-undef
+   83:3   warning  Unexpected console statement              no-console
+   92:1   error    'router' is not defined                   no-undef
+  100:29  error    'db' is not defined                       no-undef
+  101:8   error    'groups' is not defined                   no-undef
+  102:10  error    'groups' is not defined                   no-undef
+  103:17  error    'groups' is not defined                   no-undef
+  104:15  error    'groups' is not defined                   no-undef
+  105:15  error    'groups' is not defined                   no-undef
+  107:9   error    'groups' is not defined                   no-undef
+  108:10  error    'eq' is not defined                       no-undef
+  108:13  error    'groups' is not defined                   no-undef
+  127:12  error    'toGroupWithStats' is not defined         no-undef
+  129:3   warning  Unexpected console statement              no-console
+  138:1   error    'router' is not defined                   no-undef
+  163:3   warning  Unexpected console statement              no-console
+  168:1   error    'router' is not defined                   no-undef
+  175:3   warning  Unexpected console statement              no-console
+  180:1   error    'router' is not defined                   no-undef
+  186:3   warning  Unexpected console statement              no-console
+  192:1   error    'router' is not defined                   no-undef
+  196:1   error    'router' is not defined                   no-undef
+  200:1   error    'router' is not defined                   no-undef
+  204:1   error    'router' is not defined                   no-undef
+  208:1   error    'router' is not defined                   no-undef
+  212:16  error    'router' is not defined                   no-undef
+
+D:\DEV\image-manager\src\server\routes\images.ts
+  116:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:3   warning  Unexpected console statement              no-console
+  270:3   warning  Unexpected console statement              no-console
+  290:3   warning  Unexpected console statement              no-console
+  310:3   warning  Unexpected console statement              no-console
+  324:3   warning  Unexpected console statement              no-console
+  333:38  error    'verifySignedToken' is not defined        no-undef
+  341:3   warning  Unexpected console statement              no-console
+  385:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\server\routes\json-files.ts
+  19:3  warning  Unexpected console statement  no-console
+  30:3  warning  Unexpected console statement  no-console
+  42:3  warning  Unexpected console statement  no-console
+  54:3  warning  Unexpected console statement  no-console
+  65:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\local-files.ts
+  17:4   warning  Unexpected console statement  no-console
+  21:4   warning  Unexpected console statement  no-console
+  21:46  error    'filePath' is not defined     no-undef
+  35:3   warning  Unexpected console statement  no-console
+  35:44  error    'filePath' is not defined     no-undef
+  35:70  error    'buffer' is not defined       no-undef
+  39:22  error    'buffer' is not defined       no-undef
+  41:12  error    'buffer' is not defined       no-undef
+  43:3   warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\metadata.ts
+   14:3   warning  Unexpected console statement                   no-console
+   26:3   warning  Unexpected console statement                   no-console
+   51:3   warning  Unexpected console statement                   no-console
+   69:3   warning  Unexpected console statement                   no-console
+   88:3   warning  Unexpected console statement                   no-console
+  104:24  error    'updateMultipleImagesMetadata' is not defined  no-undef
+  112:3   warning  Unexpected console statement                   no-console
+  139:3   warning  Unexpected console statement                   no-console
+
+D:\DEV\image-manager\src\server\routes\notes.ts
+   36:3  warning  Unexpected console statement  no-console
+   53:3  warning  Unexpected console statement  no-console
+   67:3  warning  Unexpected console statement  no-console
+   80:3  warning  Unexpected console statement  no-console
+   92:3  warning  Unexpected console statement  no-console
+  103:3  warning  Unexpected console statement  no-console
+  126:3  warning  Unexpected console statement  no-console
+  150:3  warning  Unexpected console statement  no-console
+  168:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\places.ts
+   36:3  warning  Unexpected console statement  no-console
+   53:3  warning  Unexpected console statement  no-console
+   67:3  warning  Unexpected console statement  no-console
+   81:3  warning  Unexpected console statement  no-console
+  105:3  warning  Unexpected console statement  no-console
+  130:3  warning  Unexpected console statement  no-console
+  148:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\profiles.ts
+   37:3  warning  Unexpected console statement  no-console
+   70:3  warning  Unexpected console statement  no-console
+  100:3  warning  Unexpected console statement  no-console
+  138:3  warning  Unexpected console statement  no-console
+  167:3  warning  Unexpected console statement  no-console
+  195:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\prompts.ts
+   56:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   57:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:3   warning  Unexpected console statement              no-console
+  187:3   warning  Unexpected console statement              no-console
+  203:3   warning  Unexpected console statement              no-console
+  215:3   warning  Unexpected console statement              no-console
+  226:3   warning  Unexpected console statement              no-console
+  241:3   warning  Unexpected console statement              no-console
+  260:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\server\routes\properties.ts
+   36:3  warning  Unexpected console statement  no-console
+   53:3  warning  Unexpected console statement  no-console
+   77:3  warning  Unexpected console statement  no-console
+  102:3  warning  Unexpected console statement  no-console
+  120:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\search.ts
+  33:3  warning  Unexpected console statement  no-console
+  58:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\stats.ts
+  12:3  warning  Unexpected console statement  no-console
+  23:3  warning  Unexpected console statement  no-console
+  36:3  warning  Unexpected console statement  no-console
+  49:3  warning  Unexpected console statement  no-console
+  89:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\system.ts
+    4:2  error    'getNavigationData' is already defined  no-redeclare
+   26:3  warning  Unexpected console statement            no-console
+   45:3  warning  Unexpected console statement            no-console
+   59:3  warning  Unexpected console statement            no-console
+   73:3  warning  Unexpected console statement            no-console
+   87:3  warning  Unexpected console statement            no-console
+  101:3  warning  Unexpected console statement            no-console
+  115:3  warning  Unexpected console statement            no-console
+  129:3  warning  Unexpected console statement            no-console
+  143:3  warning  Unexpected console statement            no-console
+  158:3  warning  Unexpected console statement            no-console
+  173:3  warning  Unexpected console statement            no-console
+  188:3  warning  Unexpected console statement            no-console
+  202:3  warning  Unexpected console statement            no-console
+
+D:\DEV\image-manager\src\server\routes\tags.ts
+   36:3  warning  Unexpected console statement  no-console
+   53:3  warning  Unexpected console statement  no-console
+   67:3  warning  Unexpected console statement  no-console
+   80:3  warning  Unexpected console statement  no-console
+   95:3  warning  Unexpected console statement  no-console
+  118:3  warning  Unexpected console statement  no-console
+  142:3  warning  Unexpected console statement  no-console
+  160:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\thumbnails.ts
+   13:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   16:3   warning  Unexpected console statement              no-console
+   27:3   warning  Unexpected console statement              no-console
+   42:3   warning  Unexpected console statement              no-console
+   58:24  error    'bulkGenerateThumbnails' is not defined   no-undef
+   61:3   warning  Unexpected console statement              no-console
+   70:24  error    'deleteThumbnail' is not defined          no-undef
+   73:3   warning  Unexpected console statement              no-console
+   84:3   warning  Unexpected console statement              no-console
+   95:3   warning  Unexpected console statement              no-console
+  106:3   warning  Unexpected console statement              no-console
+  117:3   warning  Unexpected console statement              no-console
+  171:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\server\routes\uploaded-images.ts
+  10:23  error    'getUploadedImage' is not defined         no-undef
+  28:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\server\routes\videos.ts
+    3:16  error    'Router' is not defined                   no-undef
+    5:7   error    'router' is already defined               no-redeclare
+    5:16  error    'Router' is not defined                   no-undef
+   14:3   warning  Unexpected console statement              no-console
+   29:3   warning  Unexpected console statement              no-console
+   43:3   warning  Unexpected console statement              no-console
+   58:3   warning  Unexpected console statement              no-console
+   77:3   warning  Unexpected console statement              no-console
+   90:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\server\routes\wildcards.ts
+   35:3  warning  Unexpected console statement  no-console
+   52:3  warning  Unexpected console statement  no-console
+   65:3  warning  Unexpected console statement  no-console
+   89:3  warning  Unexpected console statement  no-console
+  114:3  warning  Unexpected console statement  no-console
+  132:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\workflows.ts
+  13:3  warning  Unexpected console statement  no-console
+  28:3  warning  Unexpected console statement  no-console
+  40:3  warning  Unexpected console statement  no-console
+  53:3  warning  Unexpected console statement  no-console
+  65:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\routes\world-items.ts
+   36:3  warning  Unexpected console statement  no-console
+   53:3  warning  Unexpected console statement  no-console
+   67:3  warning  Unexpected console statement  no-console
+   80:3  warning  Unexpected console statement  no-console
+  104:3  warning  Unexpected console statement  no-console
+  129:3  warning  Unexpected console statement  no-console
+  147:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\server\services\uploaded-images.api.service.ts
+  257:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\server\services\video.server.service.ts
+   96:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  347:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  380:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  387:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  387:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\activity\activity.service.ts
+  126:4   warning  Unexpected console statement              no-console
+  162:4   warning  Unexpected console statement              no-console
+  219:4   warning  Unexpected console statement              no-console
+  238:4   warning  Unexpected console statement              no-console
+  259:4   warning  Unexpected console statement              no-console
+  269:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\album\album.service.ts
+   91:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  199:82  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  281:15  error    'sql' is not defined                      no-undef
+
+D:\DEV\image-manager\src\services\audio\audio.service.ts
+   95:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  158:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  201:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  226:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  391:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  393:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  426:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  429:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\character\character.service.ts
+  184:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  269:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  372:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  490:29  error    Redundant Boolean call                    no-extra-boolean-cast
+
+D:\DEV\image-manager\src\services\collection\collection.service.ts
+  118:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  286:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  367:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  445:77  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\concept\concept.service.ts
+  110:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  230:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  248:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\document\document.service.ts
+   32:42  error    'EventType' is not defined                no-undef
+  145:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  223:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\file3d\file3d.service.ts
+   76:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  183:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\file\file.service.ts
+  314:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  372:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\group\group.service.ts
+  192:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  235:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  236:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  396:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  755:5   warning  Unexpected console statement              no-console
+  842:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  862:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  900:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  917:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  936:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\image\converter.service.ts
+  133:7  error  'btoa' is not defined  no-undef
+
+D:\DEV\image-manager\src\services\image\image.service.ts
+  268:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  344:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  424:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  454:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  533:13  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+  534:13  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+  596:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  625:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  696:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\json-file\json-file.service.ts
+   89:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  145:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\metadata\metadata.service.ts
+   51:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:3   warning  Unexpected console statement              no-console
+   94:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   96:3   warning  Unexpected console statement              no-console
+  137:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:3   warning  Unexpected console statement              no-console
+  176:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:3   warning  Unexpected console statement              no-console
+  212:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  214:3   warning  Unexpected console statement              no-console
+  232:3   warning  Unexpected console statement              no-console
+  250:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\services\note\note.service.ts
+  313:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  314:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\place\place.service.ts
+  102:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  266:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\profile\profile.service.ts
+  30:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:3   warning  Unexpected console statement              no-console
+  42:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\services\prompt\prompt.service.ts
+  161:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  214:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  363:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\property\property.service.ts
+  115:33  error    'db' is not defined                       no-undef
+  117:9   error    'properties' is not defined               no-undef
+  118:11  error    'properties' is not defined               no-undef
+  119:18  error    'properties' is not defined               no-undef
+  120:12  error    'properties' is not defined               no-undef
+  121:12  error    'properties' is not defined               no-undef
+  122:15  error    'properties' is not defined               no-undef
+  123:15  error    'properties' is not defined               no-undef
+  124:20  error    'properties' is not defined               no-undef
+  125:17  error    'properties' is not defined               no-undef
+  126:16  error    'properties' is not defined               no-undef
+  127:16  error    'properties' is not defined               no-undef
+  129:10  error    'properties' is not defined               no-undef
+  130:14  error    'properties' is not defined               no-undef
+  180:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  183:23  error    'properties' is not defined               no-undef
+  189:11  error    'properties' is not defined               no-undef
+  190:11  error    'properties' is not defined               no-undef
+  203:23  error    'properties' is not defined               no-undef
+  205:23  error    'properties' is not defined               no-undef
+  210:15  error    'properties' is not defined               no-undef
+  210:44  error    'properties' is not defined               no-undef
+  211:15  error    'properties' is not defined               no-undef
+  211:43  error    'properties' is not defined               no-undef
+  217:4   error    'db' is not defined                       no-undef
+  219:10  error    'properties' is not defined               no-undef
+  220:12  error    'properties' is not defined               no-undef
+  221:19  error    'properties' is not defined               no-undef
+  222:13  error    'properties' is not defined               no-undef
+  223:13  error    'properties' is not defined               no-undef
+  224:16  error    'properties' is not defined               no-undef
+  225:16  error    'properties' is not defined               no-undef
+  226:21  error    'properties' is not defined               no-undef
+  227:18  error    'properties' is not defined               no-undef
+  228:17  error    'properties' is not defined               no-undef
+  229:17  error    'properties' is not defined               no-undef
+  231:11  error    'properties' is not defined               no-undef
+  234:4   error    'db' is not defined                       no-undef
+  236:11  error    'properties' is not defined               no-undef
+  283:31  error    'db' is not defined                       no-undef
+  283:41  error    'properties' is not defined               no-undef
+  343:34  error    'db' is not defined                       no-undef
+  344:14  error    'properties' is not defined               no-undef
+  352:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  364:35  error    'db' is not defined                       no-undef
+  364:45  error    'properties' is not defined               no-undef
+  364:82  error    'properties' is not defined               no-undef
+  411:34  error    'db' is not defined                       no-undef
+  412:14  error    'properties' is not defined               no-undef
+  420:9   error    'db' is not defined                       no-undef
+  420:19  error    'properties' is not defined               no-undef
+  420:40  error    'properties' is not defined               no-undef
+  447:33  error    'db' is not defined                       no-undef
+  448:14  error    'properties' is not defined               no-undef
+  456:35  error    'db' is not defined                       no-undef
+  456:45  error    'properties' is not defined               no-undef
+  458:15  error    'properties' is not defined               no-undef
+  504:35  error    'db' is not defined                       no-undef
+  505:8   error    'properties' is not defined               no-undef
+  506:10  error    'properties' is not defined               no-undef
+  507:17  error    'properties' is not defined               no-undef
+  508:11  error    'properties' is not defined               no-undef
+  509:11  error    'properties' is not defined               no-undef
+  510:14  error    'properties' is not defined               no-undef
+  511:14  error    'properties' is not defined               no-undef
+  512:19  error    'properties' is not defined               no-undef
+  513:16  error    'properties' is not defined               no-undef
+  514:15  error    'properties' is not defined               no-undef
+  515:15  error    'properties' is not defined               no-undef
+  516:11  error    'properties' is not defined               no-undef
+  518:9   error    'properties' is not defined               no-undef
+  519:9   error    'properties' is not defined               no-undef
+  521:17  error    'properties' is not defined               no-undef
+  521:45  error    'properties' is not defined               no-undef
+
+D:\DEV\image-manager\src\services\stats\optimized-stats.service.ts
+   93:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  157:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  170:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  224:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  293:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  327:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  380:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  380:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  410:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  461:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  461:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  510:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  582:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\tag\tag.service.ts
+  167:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  191:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  212:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  356:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  393:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  446:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  565:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  645:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\uploaded-images\uploaded-images.service.ts
+  321:21  error    'lte' is not defined                      no-undef
+  329:21  error    'lte' is not defined                      no-undef
+  335:21  error    'lte' is not defined                      no-undef
+  431:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  436:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\wildcard\wildcard.service.ts
+  124:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  401:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\workflow\workflow.service.ts
+   92:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:86  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  185:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\services\world-item\world-item.service.ts
+  306:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\activity\index.ts
+   85:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  305:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\audio\audio.store.ts
+  19:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\collection\slices\core.ts
+  143:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  145:4   warning  Unexpected console statement              no-console
+  158:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:4   warning  Unexpected console statement              no-console
+  173:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  175:4   warning  Unexpected console statement              no-console
+  188:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  190:4   warning  Unexpected console statement              no-console
+  203:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  205:4   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\store\entities\favorite\slices\filters.slice.ts
+  71:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\file-3d\file-3d.store.ts
+  19:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\file\slices\core.slice.ts
+  121:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:4   warning  Unexpected console statement              no-console
+  146:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  148:4   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\store\entities\folder\index.ts
+  44:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  65:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  66:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  81:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\group\types.ts
+  38:31  error  'GroupDisplayState' is not defined  no-undef
+
+D:\DEV\image-manager\src\store\entities\json-file\json-file.store.ts
+  24:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\note\slices\filters.ts
+  86:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  97:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\prompt\slices\core.ts
+   41:26  error  'getPrompts' is not defined    no-undef
+   66:10  error  'createPrompt' is not defined  no-undef
+   85:10  error  'updatePrompt' is not defined  no-undef
+  104:10  error  'deletePrompt' is not defined  no-undef
+
+D:\DEV\image-manager\src\store\entities\prompt\slices\relations.ts
+   35:10  error  'linkEntityToPrompt' is not defined      no-undef
+   53:10  error  'unlinkEntityFromPrompt' is not defined  no-undef
+   72:10  error  'linkEntityToPrompt' is not defined      no-undef
+   90:10  error  'unlinkEntityFromPrompt' is not defined  no-undef
+  108:10  error  'linkEntityToPrompt' is not defined      no-undef
+  126:10  error  'unlinkEntityFromPrompt' is not defined  no-undef
+  144:10  error  'linkEntityToPrompt' is not defined      no-undef
+  162:10  error  'unlinkEntityFromPrompt' is not defined  no-undef
+  182:12  error  'linkEntityToPrompt' is not defined      no-undef
+  187:12  error  'linkEntityToPrompt' is not defined      no-undef
+  192:12  error  'linkEntityToPrompt' is not defined      no-undef
+
+D:\DEV\image-manager\src\store\entities\tag\slices\core.slice.ts
+  37:18  error  'TagCoreActions' is already defined  no-redeclare
+
+D:\DEV\image-manager\src\store\entities\task\types.ts
+  89:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\wildcard\slices\core.ts
+  10:8  error  Parsing error: Invalid character
+
+D:\DEV\image-manager\src\store\entities\world-item\index.ts
+  50:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  51:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  57:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\world-item\slices\filters.ts
+  15:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\entities\world-item\types.ts
+  107:17  error    'RequestInit' is not defined              no-undef
+  112:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\image-resources.store.ts
+  109:23  error  'NodeJS' is not defined  no-undef
+
+D:\DEV\image-manager\src\store\places\index.ts
+  34:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\store\store.factory.ts
+  41:18  error  'StoreOptions' is already defined  no-redeclare
+
+D:\DEV\image-manager\src\store\unified-file-manager.store.ts
+   64:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  212:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  258:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  284:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  390:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\activity\mappers.ts
+  104:95  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\activity\serializers.ts
+  170:4   warning  Unexpected console statement              no-console
+  189:3   warning  Unexpected console statement              no-console
+  199:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  208:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  224:3   warning  Unexpected console statement              no-console
+  241:95  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  255:3   warning  Unexpected console statement              no-console
+  271:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  294:3   warning  Unexpected console statement              no-console
+  304:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  318:3   warning  Unexpected console statement              no-console
+  333:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  333:88  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  337:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\character\mappers.ts
+  83:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\character\transformer.ts
+  37:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\concept\mappers.ts
+  67:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\concept\serializers.ts
+  22:3  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\transformers\concept\transformer.ts
+  39:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\favorite\mappers.ts
+  94:3  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  98:3  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+D:\DEV\image-manager\src\transformers\file\index.ts
+  36:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\transformers\file\mappers.ts
+  211:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  214:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  217:81  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  220:81  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+D:\DEV\image-manager\src\transformers\folder\mappers.ts
+   65:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   71:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  226:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\folder\serializers.ts
+   71:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:81  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  224:78  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  231:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\folder\transformer.ts
+   26:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   26:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  220:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  269:19  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+  270:18  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+  274:21  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+  286:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  316:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\image\transformer.ts
+  376:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  396:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  397:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  445:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  445:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\metadata\index.ts
+  19:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\transformers\note\index.ts
+   43:18  error    Unreachable code                          no-unreachable
+   63:18  error    Unreachable code                          no-unreachable
+   85:18  error    Unreachable code                          no-unreachable
+  132:18  error    Unreachable code                          no-unreachable
+  145:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\note\serializers.ts
+   29:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   37:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   38:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   58:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  132:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  148:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  168:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\note\transformer.ts
+  250:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\place\mappers.ts
+  128:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  159:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\profile\profile-transformers.ts
+   77:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   86:6   warning  Unexpected console statement              no-console
+   90:5   warning  Unexpected console statement              no-console
+   95:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:5   warning  Unexpected console statement              no-console
+  109:4   warning  Unexpected console statement              no-console
+  116:3   warning  Unexpected console statement              no-console
+
+D:\DEV\image-manager\src\transformers\prompt\mappers.ts
+  230:42  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+  234:42  warning  Forbidden non-null assertion              @typescript-eslint/no-non-null-assertion
+  281:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  282:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\prompt\transformer.ts
+  27:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  50:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  84:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\property\transformer.ts
+  25:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\tag\transformer.ts
+  19:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\thumbnail\transformer.ts
+  74:4  warning  Unexpected console statement  no-console
+
+D:\DEV\image-manager\src\transformers\video\mappers.ts
+  159:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\video\transformer.ts
+   58:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   60:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   62:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   63:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   64:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   65:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   67:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   69:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  424:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\wildcard\mappers.ts
+  113:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\wildcard\v2\mappers.ts
+   27:80  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   29:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   55:80  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   57:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:88  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   93:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:86  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  217:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\wildcard\v2\serializers.ts
+   71:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  111:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  147:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  154:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  168:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  182:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  182:77  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  183:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\world-item\mappers.ts
+   93:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   96:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  276:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  280:85  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  284:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:81  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\transformers\world-item\transformer.ts
+  37:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  43:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  46:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  47:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\common\transformer.ts
+  129:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\activity\types.ts
+  25:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\character\schema.ts
+  89:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\entity.types.ts
+  20:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\favorite\types.ts
+  70:9  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\folder\types.ts
+  186:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  188:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\place\base.ts
+  86:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  87:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  88:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  89:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\prompt\extended.ts
+  28:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  67:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\thumbnail\types.ts
+  61:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  85:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\entities\video\types.ts
+  301:10  error  'VideoWithStats' is not defined  no-undef
+
+D:\DEV\image-manager\src\types\globals.d.ts
+   8:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\metadata.types.ts
+  15:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\DEV\image-manager\src\types\modules.d.ts
+  51:25  error  'Document' is not defined  no-undef
+
+D:\DEV\image-manager\src\types\stats.ts
+  79:18  error  'TagStats' is already defined  no-redeclare
+
+✖ 1453 problems (335 errors, 1118 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

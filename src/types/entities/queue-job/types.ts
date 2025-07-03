@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad QueueJob
  * @module types/entities/queue-job/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para QueueJob.
  * Última migración: 2025-06-18
  */
@@ -151,7 +150,6 @@ export interface QueueStats {
 	averageProcessingTime?: number; // Tiempo promedio de procesamiento en ms
 }
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con QueueJobSchema antes de persistir.
