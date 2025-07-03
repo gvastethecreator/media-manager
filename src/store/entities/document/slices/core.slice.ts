@@ -4,11 +4,11 @@
  * @description Gestiona el estado y las acciones CRUD para la entidad Document.
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+import * as actions from '@/services/document/document.service';
+import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
-import * as actions from '@/app/actions/document/document.actions';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
 import type { DocumentCoreActions, DocumentCoreState, DocumentStore } from '../types';
 
 const logger = clientLogger.withContext('DocumentCoreSlice');

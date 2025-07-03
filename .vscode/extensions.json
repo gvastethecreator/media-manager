@@ -3,7 +3,6 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
-    "Prisma.prisma",
     "mikestead.dotenv",
     "eamodio.gitlens",
     "Christian-Kohler.path-intellisense",

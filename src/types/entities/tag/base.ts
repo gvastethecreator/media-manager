@@ -1,8 +1,7 @@
 /**
- * 🏷️ TAG BASE TYPES - MIGRADO A DRIZZLE
+ * 🏷️ TAG BASE TYPES
  *
  * Tipos base para tags usando tipos locales de Drizzle.
- * Eliminadas todas las dependencias de @prisma/client.
  *
  * @updated 2025-01-27
  */
@@ -131,7 +130,4 @@ export interface TagUpdateInput {
 // TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
 // ----------------------------------------------------------------
 
-/**
- * @deprecated Usar TagWithCounts en su lugar
- */
-export type PrismaTagWithCounts = TagWithCounts;
+

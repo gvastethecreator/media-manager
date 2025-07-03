@@ -1,8 +1,8 @@
 import { ImageIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { memo, Suspense, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { getRecentNoteImages } from './note-server-actions';
+import { useRecentNoteImages } from '@/lib/api/notes';
 
 interface NoteCardImagesProps {
 	noteId: string;
@@ -12,38 +12,18 @@ interface NoteCardImagesProps {
 }
 
 /**
- * Componente para mostrar las imágenes recientes de una nota en una tarjeta.
- * Similar a la sección de ilustración de una carta TCG.
+ * Componente para mostrar las im?genes recientes de una nota en una tarjeta.
+ * Similar a la secci?n de ilustraci?n de una carta TCG.
  */
-export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode = true }: NoteCardImagesProps) {
-	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	// Generar un ID de renderizado único
+export const NoteCardImages = memo(function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode = true }: NoteCardImagesProps) {
+	// Generar un ID de renderizado ?nico
 	const renderKey = React.useMemo(() => nanoid(), []);
 
-	useEffect(() => {
-		const loadImages = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getRecentNoteImages(noteId);
-				// Filtrar solo imágenes con thumbnailUrl válida
-				const validImages = data.filter((img) => img.thumbnailUrl);
-				setImages(validImages);
-			} catch (err) {
-				console.error('Error cargando imágenes:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadImages();
-	}, [noteId]);
+	// Usar el hook para obtener im?genes recientes
+	const { data: images = [], isLoading, error } = useRecentNoteImages(noteId, 6);
 
 	// Obtener estilo de borde para modo TCG
-	const getBorderStyles = () => {
+	const getBorderStyles = useMemo(() => {
 		if (tcgMode) {
 			return {
 				borderBottom: `2px solid ${primaryColor}40`,
@@ -53,23 +33,25 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 		return {
 			borderBottom: `1px solid ${primaryColor}30`,
 		};
-	};
+	}, [tcgMode, primaryColor]);
+
+	const backgroundStyle = useMemo(() => ({
+		backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
+	}), [primaryColor, secondaryColor]);
 
 	return (
 		<div
 			className={cn('relative h-[150px] overflow-hidden border-b border-gray-400/30', tcgMode && 'pb-1')}
 			style={getBorderStyles()}
 		>
-			{/* Contenedor de imágenes con grid */}
+			{/* Contenedor de im?genes con grid */}
 			<div
 				className={cn(
 					'w-full h-full grid gap-0.5',
 					images.length >= 4 ? 'grid-cols-3 grid-rows-2' : 'grid-cols-2 grid-rows-2',
 					tcgMode && 'rounded-md overflow-hidden'
 				)}
-				style={{
-					backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
-				}}
+				style={backgroundStyle}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
 					{isLoading ? (
@@ -80,16 +62,16 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 					) : error ? (
 						// Mostrar mensaje de error
 						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
-							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error}
+							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error.message}
 						</div>
 					) : images.length === 0 ? (
-						// Mostrar mensaje si no hay imágenes
+						// Mostrar mensaje si no hay im?genes
 						<div className="col-span-full row-span-full flex flex-col items-center justify-center text-center p-4">
 							<ImageIcon className="h-8 w-8 opacity-30 mb-2" />
-							<p className="text-sm opacity-70">No hay imágenes</p>
+							<p className="text-sm opacity-70">No hay im?genes</p>
 						</div>
 					) : (
-						// Mostrar las imágenes disponibles
+						// Mostrar las im?genes disponibles
 						<>
 							{images.map((image, index) => (
 								<div
@@ -112,7 +94,7 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 									)}
 								</div>
 							))}
-							{/* Rellena con placeholders si hay menos de 6 imágenes */}
+							{/* Rellena con placeholders si hay menos de 6 im?genes */}
 							{images.length < 6 &&
 								[...Array(6 - images.length)].map((_, i) => (
 									<div
@@ -130,15 +112,15 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 				</Suspense>
 			</div>
 
-			{/* Decoración TCG por debajo de las imágenes */}
+			{/* Decoraci?n TCG por debajo de las im?genes */}
 			{tcgMode && (
 				<div className="absolute inset-x-0 -bottom-1 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 			)}
 		</div>
 	);
-}
+});
 
-// Componente para mostrar mientras se cargan las imágenes
+// Componente para mostrar mientras se cargan las im?genes
 function ImageLoading({ backgroundColor }: { backgroundColor: string }) {
 	return (
 		<div

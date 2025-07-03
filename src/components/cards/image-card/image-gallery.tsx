@@ -10,11 +10,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import type { ImageWithStats } from '@/types/entities/image';
 import { ImageCardImproved } from './image-card-improved';
-import { type ImageCardData } from './image-server-actions';
 
 interface ImageGalleryProps {
-	images: string[] | ImageCardData[];
+	images: string[] | ImageWithStats[];
 	title?: string;
 	className?: string;
 	emptyMessage?: string;
@@ -22,7 +22,7 @@ interface ImageGalleryProps {
 	selectable?: boolean;
 	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg' | 'gallery';
 	defaultLayout?: 'grid' | 'grid-dense' | 'list';
-	onImageClick?: (image: ImageCardData) => void;
+	onImageClick?: (image: ImageWithStats) => void;
 	onSelectionChange?: (selectedImages: string[]) => void;
 	aspectRatio?: 'square' | 'auto' | 'video' | string;
 	showControls?: boolean;
@@ -67,7 +67,7 @@ export function ImageGallery({
 	const [layout, setLayout] = useState(defaultLayout);
 	const [selectedImages, setSelectedImages] = useState<string[]>([]);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [_imagesData, setImagesData] = useState<ImageCardData[]>([]);
+	const [_imagesData, setImagesData] = useState<ImageWithStats[]>([]);
 
 	// Convertir IDs de imágenes a array de ImageCardData si es necesario
 	useEffect(() => {
@@ -78,7 +78,7 @@ export function ImageGallery({
 
 		// Si ya recibimos objetos ImageCardData
 		if (typeof images[0] !== 'string') {
-			setImagesData(images as ImageCardData[]);
+			setImagesData(images as ImageWithStats[]);
 		}
 		// Si solo tenemos IDs, los datos se cargarán en cada tarjeta
 	}, [images]);
@@ -102,7 +102,7 @@ export function ImageGallery({
 	const sortedImages = useMemo(() => {
 		if (typeof filteredImages[0] === 'string') return filteredImages; // No podemos ordenar IDs sin datos
 
-		const sorted = [...(filteredImages as ImageCardData[])].sort((a, b) => {
+		const sorted = [...(filteredImages as ImageWithStats[])].sort((a, b) => {
 			let comparison = 0;
 
 			switch (sortBy) {
@@ -133,7 +133,7 @@ export function ImageGallery({
 
 	// Manejar selección de imagen
 	const handleImageSelect = useCallback(
-		(image: ImageCardData) => {
+		(image: ImageWithStats) => {
 			if (!selectable) return;
 
 			setSelectedImages((prev) => {
@@ -153,7 +153,7 @@ export function ImageGallery({
 
 	// Manejar clic en imagen
 	const handleImageClick = useCallback(
-		(image: ImageCardData) => {
+		(image: ImageWithStats) => {
 			if (selectable) {
 				handleImageSelect(image);
 			} else if (onImageClick) {

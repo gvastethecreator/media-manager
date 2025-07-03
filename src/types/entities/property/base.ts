@@ -1,8 +1,7 @@
 /**
- * 🏠 PROPERTY BASE TYPES - MIGRADO A DRIZZLE
+ * 🏠 PROPERTY BASE TYPES
  *
  * Tipos base para properties usando tipos locales de Drizzle.
- * Eliminadas todas las dependencias de @prisma/client.
  *
  * @updated 2025-01-27
  */
@@ -131,7 +130,4 @@ export interface PropertyUpdateInput {
 // TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
 // ----------------------------------------------------------------
 
-/**
- * @deprecated Usar PropertyWithCounts en su lugar
- */
-export type PrismaPropertyWithCounts = PropertyWithCounts;
+

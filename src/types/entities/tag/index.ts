@@ -5,9 +5,8 @@
  *   Este archivo centraliza todas las exportaciones de tipos para la entidad Tag.
  *   El tipo canónico para usar en la aplicación es **`TagWithStats`**.
  *
- *   - `TagBase`: Tipo base de Prisma.
+ *   - `TagBase`: Tipo base de Drizzle.
  *   - `TagWithStats`: Tipo enriquecido con estadísticas calculadas.
- *   - `PrismaTagWithCounts`: Tipo de Prisma que incluye los conteos de relaciones.
  *
  * @see /src/types/entities/tag/base.ts
  * @updated 2025-01-27
@@ -16,7 +15,6 @@
 // --- Enums y constantes del store ---
 export { TagCategory } from '@/store/entities/tag/types';
 export type {
-	PrismaTagWithCounts,
 	TagBase,
 	TagCreateInput,
 	TagStatistics,

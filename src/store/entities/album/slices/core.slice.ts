@@ -6,7 +6,7 @@
 
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
-import * as actions from '@/app/actions/albums/album.actions';
+import * as actions from '@/services/album/album.service';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { AlbumCoreActions, AlbumCoreState, AlbumStore } from '../types';

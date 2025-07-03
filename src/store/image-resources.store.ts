@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { getImageUrl } from '@/app/actions/images';
-import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { getImageUrl } from '@/services/image/image.service';
+import { getThumbnail } from '@/services/thumbnail/thumbnail.service';
+import { create } from 'zustand';
 
 const resourceLogger = clientLogger.withContext('ImageResources');
 

@@ -1,4 +1,7 @@
-'use server';
+/**
+ * @file Estadísticas del sistema
+ * @description Compatible con Vite + React
+ */
 
 import { getPrismaClient } from '@/lib/database/db';
 import { formatBytes } from '@/lib/utils/format.utils';

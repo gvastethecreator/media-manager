@@ -16,6 +16,12 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { extendActivities, extendActivity } from '@/transformers/activity';
 import type { ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
 import { ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
+import {
+	createActivity as createActivityService,
+	deleteActivity as deleteActivityService,
+	getActivityById as getActivityByIdService,
+	getFilteredActivities as getFilteredActivitiesService,
+} from '@/services/activity/activity.service';
 
 // Logger para el store
 const storeLogger = clientLogger.withContext('ActivityStore');

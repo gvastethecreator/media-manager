@@ -4,7 +4,7 @@
  * @description
  *   Centraliza la exportación del tipo canónico **`AlbumWithStats`**.
  *
- *   - `AlbumBase`: Tipo base de Prisma.
+ *   - `AlbumBase`: Tipo base de Drizzle.
  *   - `AlbumStatistics`: Interfaz para las estadísticas de conteo.
  *   - `AlbumWithStats`: El tipo enriquecido que se debe usar en la app.
  *

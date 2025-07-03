@@ -1,5 +1,5 @@
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import type { LucideIcon } from 'lucide-react';
-import type { FileItem } from '@/types/files';
 
 /**
  * Props base para todas las vistas de contenido
@@ -8,7 +8,7 @@ export interface BaseContentProps {
 	/**
 	 * Los items a mostrar en la vista
 	 */
-	items?: FileItem[];
+	items?: EntityWithStats[];
 
 	/**
 	 * Estado de carga de la vista
@@ -23,7 +23,7 @@ export interface BaseContentProps {
 	/**
 	 * Función para alternar la selección de un item
 	 */
-	toggleItemSelection?: (item: FileItem, isMultiSelect: boolean) => void;
+	toggleItemSelection?: (item: EntityWithStats, isMultiSelect: boolean) => void;
 
 	/**
 	 * ID del contenedor actual (folder, collection, etc)
@@ -62,12 +62,12 @@ export interface BaseContentProps {
 	/**
 	 * Función personalizada para manejar el clic en un item
 	 */
-	onItemClick?: (item: FileItem) => void;
+	onItemClick?: (item: EntityWithStats) => void;
 
 	/**
 	 * Función personalizada para manejar el doble clic en un item
 	 */
-	onItemDoubleClick?: (item: FileItem) => void;
+	onItemDoubleClick?: (item: EntityWithStats) => void;
 }
 
 /**

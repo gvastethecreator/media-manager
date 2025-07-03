@@ -11,14 +11,14 @@ import { toWildcardWithStats } from './mappers';
 const wildcardTransformerLogger = clientLogger.withContext('WildcardTransformer');
 
 /**
- * Convierte un objeto Wildcard de Prisma a WildcardWithStats. * Esta función es compatible con el sistema legacy que esperaba WildcardComplete.
+ * Convierte un objeto Wildcard de Drizzle a WildcardWithStats. * Esta función es compatible con el sistema legacy que esperaba WildcardComplete.
  *
- * @param prismaWildcard El objeto Wildcard de Prisma
+ * @param drizzleWildcard El objeto Wildcard de Drizzle
  * @returns Un objeto WildcardWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromPrismaWildcard(prismaWildcard: object | null): WildcardWithStats | null {
-	if (!prismaWildcard) {
-		wildcardTransformerLogger.warn('⚠️ Wildcard de Prisma nulo o indefinido');
+export function fromDrizzleWildcard(drizzleWildcard: object | null): WildcardWithStats | null {
+	if (!drizzleWildcard) {
+		wildcardTransformerLogger.warn('⚠️ Wildcard de Drizzle nulo o indefinido');
 		return null;
 	}
 
@@ -26,7 +26,7 @@ export function fromPrismaWildcard(prismaWildcard: object | null): WildcardWithS
 		wildcardTransformerLogger.debug('🔄 Transformando wildcard');
 
 		// Usar el mapper existente toWildcardWithStats
-		return toWildcardWithStats(prismaWildcard);
+		return toWildcardWithStats(drizzleWildcard);
 	} catch (error) {
 		wildcardTransformerLogger.error('❌ Error transformando wildcard:', error);
 		return null;
@@ -34,7 +34,7 @@ export function fromPrismaWildcard(prismaWildcard: object | null): WildcardWithS
 }
 
 /**
- * Alias para compatibilidad con código legacy. * @deprecated Usar fromPrismaWildcard directamente.
+ * Alias para compatibilidad con código legacy. * @deprecated Usar fromDrizzleWildcard directamente.
  */
 
 // === NAMESPACE DE EXPORTACIÓN ===
@@ -44,10 +44,10 @@ export function fromPrismaWildcard(prismaWildcard: object | null): WildcardWithS
  * WildcardTransformer - Namespace que contiene todas las funciones de transformación para wildcards
  */
 export const WildcardTransformer = {
-	fromPrismaWildcard,
+	fromDrizzleWildcard,
 } as const;
 
-export const transformWildcard = WildcardTransformer.fromPrismaWildcard;
+export const transformWildcard = WildcardTransformer.fromDrizzleWildcard;
 
 /**
  * Tipo de compatibilidad para código legacy que espera WildcardComplete.

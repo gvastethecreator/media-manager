@@ -1,5 +1,5 @@
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { memo, useEffect, useState } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
@@ -151,10 +151,20 @@ interface ViewContainerProps {
 	isResizing?: boolean;
 }
 
-export function ViewContainer({ isResizing }: ViewContainerProps) {
+export const ViewContainer = memo(function ViewContainer({ isResizing }: ViewContainerProps) {
 	const { currentView, navigationDirection } = useNavigationStore();
 	// Usar una variable estática para controlar el montaje único del preloader
 	const [hasInitialized, setHasInitialized] = useState(false);
+
+	// Memoizar la condición del preloader para evitar recálculos
+	const shouldShowPreloader = useMemo(() => {
+		return !hasInitialized && typeof window !== 'undefined' && !window.entityPreloadComplete;
+	}, [hasInitialized]);
+
+	// Callback memoizado para el completion del preloader
+	const handlePreloadComplete = useCallback(() => {
+		setHasInitialized(true);
+	}, []);
 
 	// Efecto que se ejecuta solo una vez al montar el componente
 	useEffect(() => {
@@ -173,13 +183,11 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 	return (
 		<div className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			{/* Solo montar el EntityPreloader si no se ha inicializado globalmente */}
-			{!hasInitialized && typeof window !== 'undefined' && !window.entityPreloadComplete && (
+			{shouldShowPreloader && (
 				<EntityPreloader
 					mode="all"
 					respectGlobalState={false}
-					onPreloadComplete={() => {
-						setHasInitialized(true);
-					}}
+					onPreloadComplete={handlePreloadComplete}
 				/>
 			)}
 
@@ -197,4 +205,4 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 			</AnimatePresence>
 		</div>
 	);
-}
+});

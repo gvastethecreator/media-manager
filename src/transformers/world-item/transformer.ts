@@ -2,7 +2,6 @@
  * @file Transformador principal para la entidad WorldItem.
  * @module transformers/world-item/transformer
  * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
 import type { WorldItemComplete } from '@/types/entities/world-item';
@@ -14,7 +13,7 @@ import {
     deserializeStats,
 } from './serializers';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle
 type DrizzleWorldItemFromDrizzle = {
 	id: string;
 	name: string;
@@ -67,7 +66,6 @@ type DrizzleWorldItemFromDrizzle = {
 
 /**
  * 🔄 Transforma un objeto WorldItem de Drizzle a un WorldItemComplete.
- * ✅ MIGRADO A DRIZZLE
  * @param worldItem - El objeto WorldItem obtenido de Drizzle.
  * @returns Un objeto WorldItemComplete.
  */
@@ -124,95 +122,9 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 
 /**
  * 🔄 Transforma una lista de objetos WorldItem de Drizzle a un array de WorldItemComplete.
- * ✅ MIGRADO A DRIZZLE
  * @param worldItems - Los objetos WorldItem obtenidos de Drizzle.
  * @returns Un array de objetos WorldItemComplete.
  */
 export function fromDrizzleWorldItems(worldItems: DrizzleWorldItemFromDrizzle[]): WorldItemComplete[] {
 	return worldItems.map(fromDrizzleWorldItem).filter((w): w is WorldItemComplete => w !== null);
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar fromDrizzleWorldItem
- */
-export const fromPrismaWorldItem = fromDrizzleWorldItem;
-
-/**
- * @deprecated Usar fromDrizzleWorldItems
- */
-export const fromPrismaWorldItems = fromDrizzleWorldItems;
-
-// Mantener payload para compatibilidad (DEPRECATED)
-/**
- * @deprecated Drizzle maneja las relaciones de forma diferente
- */
-export const worldItemPayload = {
-	include: {
-		images: {
-			include: {
-				tags: true,
-				albums: true,
-				collections: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				prompts: true,
-				notes: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-				folder: { select: { id: true, name: true, path: true } },
-				_count: {
-					select: {
-						tags: true,
-						albums: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		},
-		videos: {
-			include: {
-				_count: {
-					select: {
-						albums: true,
-						collections: true,
-						tags: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		},
-		albums: true,
-		collections: true,
-		tags: true,
-		characters: true,
-		places: true,
-		concepts: true,
-		prompts: true,
-		notes: true,
-		wildcards: true,
-		properties: true,
-		groups: true,
-		_count: true,
-	},
-};

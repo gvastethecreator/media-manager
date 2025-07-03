@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { getPlaces, PlaceSearchOptions } from '@/app/actions/places';
+import { getPlaces, PlaceSearchOptions } from '@/services/place/place.service';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import { PlaceViewMode, PlaceWithStats } from '@/types/entities/place';

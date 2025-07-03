@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -28,8 +28,14 @@ const presetColors = [
 	'#64748b', // Slate
 ];
 
-export function ColorPicker({ value, onChange, className }: ColorPickerProps) {
+export const ColorPicker = memo(function ColorPicker({ value, onChange, className }: ColorPickerProps) {
 	const [open, setOpen] = useState(false);
+
+	// Callback memoizado para manejar selección de color
+	const handleColorSelect = useCallback((color: string) => {
+		onChange(color);
+		setOpen(false);
+	}, [onChange]);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -51,10 +57,7 @@ export function ColorPicker({ value, onChange, className }: ColorPickerProps) {
 							variant="outline"
 							className="h-8 w-8 p-0 flex items-center justify-center"
 							style={{ backgroundColor: color }}
-							onClick={() => {
-								onChange(color);
-								setOpen(false);
-							}}
+							onClick={() => handleColorSelect(color)}
 							title={`Color: ${color}`}
 						>
 							{value === color && <span className="text-white text-xs">✓</span>}
@@ -64,4 +67,4 @@ export function ColorPicker({ value, onChange, className }: ColorPickerProps) {
 			</PopoverContent>
 		</Popover>
 	);
-}
+});

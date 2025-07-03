@@ -3,21 +3,21 @@
  * @module types/entities/collection/types
  */
 
-import type { Collection, Image } from '@prisma/client';
+import type { ImageBase } from '../image/base';
 
-export interface CollectionBase extends Collection {
+export interface CollectionBase {
 	id: string;
 	name: string;
 	description?: string | null;
 	emoji?: string | null;
 	color?: string | null;
-	isPrivate: boolean;
+	isPublic: boolean; // Cambiado de isPrivate a isPublic
 	createdAt: Date;
 	updatedAt: Date;
 }
 
 export interface CollectionWithImages extends CollectionBase {
-	images: Image[];
+	images: ImageBase[];
 }
 
 export interface CollectionWithStats extends CollectionBase {
@@ -30,7 +30,7 @@ export interface CollectionWithStats extends CollectionBase {
 }
 
 export interface CollectionWithRelations extends CollectionBase {
-	images: Image[];
+	images: ImageBase[];
 	_count: {
 		images: number;
 	};
@@ -41,7 +41,7 @@ export interface CreateCollectionInput {
 	description?: string;
 	emoji?: string;
 	color?: string;
-	isPrivate?: boolean;
+	isPublic?: boolean; // Cambiado de isPrivate a isPublic
 }
 
 export interface UpdateCollectionInput {
@@ -49,12 +49,12 @@ export interface UpdateCollectionInput {
 	description?: string;
 	emoji?: string;
 	color?: string;
-	isPrivate?: boolean;
+	isPublic?: boolean; // Cambiado de isPrivate a isPublic
 }
 
 export interface CollectionFilters {
 	search?: string;
-	isPrivate?: boolean;
+	isPublic?: boolean; // Cambiado de isPrivate a isPublic
 	hasImages?: boolean;
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
 	sortOrder?: 'asc' | 'desc';

@@ -6,7 +6,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FavoriteWithImage } from '@/types/entities/favorite';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 // Tipos locales equivalentes a Prisma (migración a Drizzle)
 type DrizzleFavorite = {
@@ -65,14 +65,14 @@ interface MetadataContent {
 }
 
 /**
- * 🔄 Transforma una imagen en un FileItem para uso en componentes de UI
+ * 🔄 Transforma una imagen en un EntityWithStats para uso en componentes de UI
  * ✅ MIGRADO A DRIZZLE
  */
-export function transformImageToFileItem(image: DrizzleImage): FileItem {
+export function transformImageToEntityWithStats(image: DrizzleImage): EntityWithStats {
 	return {
 		id: image.id,
 		name: image.name || 'Untitled',
-		type: 'image' as const,
+		entityType: 'image' as const,
 		path: image.path,
 		size: image.size || 0,
 		width: image.width || 0,
@@ -105,13 +105,18 @@ export function transformImageToFileItem(image: DrizzleImage): FileItem {
 		groups: [],
 		properties: [],
 		wildcards: [],
-		stats: undefined,
+		stats: {
+			totalViews: 0,
+			totalLikes: 0,
+			totalComments: 0,
+			lastAccessedAt: image.addedAt || new Date(),
+		},
 	};
 }
 
 /**
  * Convierte un favorito con imagen en un formato FavoriteWithImage
- * ✅ MIGRADO A DRIZZLE
+ * ✅ MIGRADO A DRIZZLE - Actualizado para usar EntityWithStats
  * @param favorite Favorito base con imagen incluida
  * @returns Favorito con imagen transformada
  */
@@ -124,23 +129,26 @@ export function toFavoriteWithImage(favorite: DrizzleFavoriteWithImage): Favorit
 			userId: favorite.userId,
 			createdAt: favorite.createdAt,
 			updatedAt: favorite.updatedAt,
-			image: transformImageToFileItem(favorite.image),
+			image: transformImageToEntityWithStats(favorite.image),
 		};
 	} catch (error) {
 		serializersLogger.error('Error convirtiendo a favorito con imagen:', error);
 		return {
 			...favorite,
-			image: transformImageToFileItem(favorite.image || ({} as DrizzleImage)),
+			image: transformImageToEntityWithStats(favorite.image || ({} as DrizzleImage)),
 		} as FavoriteWithImage;
 	}
 }
 
 /**
  * Convierte una lista de favoritos con imágenes
- * ✅ MIGRADO A DRIZZLE
+ * ✅ MIGRADO A DRIZZLE - Actualizado para usar EntityWithStats
  * @param favorites Lista de favoritos con imágenes
  * @returns Lista de favoritos transformados
  */
 export function toFavoritesWithImages(favorites: DrizzleFavoriteWithImage[]): FavoriteWithImage[] {
 	return favorites.map(toFavoriteWithImage);
 }
+
+// Alias para compatibilidad con código legacy
+export const transformImageToFileItem = transformImageToEntityWithStats;

@@ -5,10 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 export interface EditableMetadataProps {
-	item: FileItem;
+	item: EntityWithStats;
 	onUpdate?: (id: string, data: { title?: string; description?: string }) => Promise<void>;
 }
 

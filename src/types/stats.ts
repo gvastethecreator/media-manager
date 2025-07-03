@@ -59,3 +59,35 @@ export interface PerformanceStats {
 	databaseSize: number;
 	lastUpdated: Date;
 }
+
+export interface GeneralStats {
+	totalImages: number;
+	totalFolders: number;
+	totalCollections: number;
+	totalTags: number;
+	totalAlbums: number;
+	totalCharacters: number;
+	totalPlaces: number;
+	totalWorldItems: number;
+	totalFavorites: number;
+	totalViews: number;
+	totalDownloads: number;
+	totalSize: number;
+	totalActivities: number;
+}
+
+export interface TagStats {
+	id: string;
+	name: string;
+	count: number;
+	percentage: number;
+}
+
+export interface ActivityStats {
+	id: string;
+	type: string;
+	description: string;
+	createdAt: Date;
+	entityType?: string;
+	entityId?: string;
+}

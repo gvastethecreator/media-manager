@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Prisma } from '@prisma/client';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -23,10 +22,21 @@ const groupFormSchema = z.object({
 
 type FormData = z.infer<typeof groupFormSchema>;
 
+// Tipos para la creación y actualización de grupos usando Drizzle
+interface GroupCreateInput {
+	name: string;
+	description?: string;
+}
+
+interface GroupUpdateInput {
+	name?: string;
+	description?: string;
+}
+
 interface CreateGroupFormProps {
 	group?: GroupWithStats;
 	isEditing?: boolean;
-	onSubmit: (data: Prisma.GroupCreateInput | Prisma.GroupUpdateInput) => Promise<void>;
+	onSubmit: (data: GroupCreateInput | GroupUpdateInput) => Promise<void>;
 	onCancel: () => void;
 	onPreview?: () => void;
 }

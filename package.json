@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "scripts": {
     "dev": "pnpm dev:vite",
     "build": "pnpm build:vite && pnpm build:server",
@@ -51,9 +48,7 @@
     "drizzle:debug-profile": "tsx scripts/db/debug-profile-settings.ts",
     "drizzle:debug-settings": "tsx scripts/db/debug-settings-data.ts",
     "drizzle:debug-join": "tsx scripts/db/debug-join-issue.ts",
-    "drizzle:debug-prisma": "tsx scripts/db/debug-prisma-structure.ts",
     "drizzle:debug-transformer": "tsx scripts/db/debug-transformer-structure.ts",
-    "drizzle:compare": "tsx scripts/db/compare-prisma-drizzle.ts",
     "drizzle:test-image": "tsx scripts/db/test-image-migration.ts",
     "drizzle:test-image-service": "tsx scripts/db/test-image-service-migration.ts",
     "drizzle:test-folders": "tsx scripts/db/test-folders-migration.ts",
@@ -91,7 +86,6 @@
     "@bull-board/express": "^6.10.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@libsql/client": "^0.15.9",
-    "@prisma/client": "^6.11.0",
     "@tanstack/react-query": "^5.81.5",
     "@tanstack/react-query-devtools": "^5.81.5",
     "@tanstack/react-table": "^8.21.3",
@@ -201,7 +195,6 @@
     "ignore-loader": "^0.1.2",
     "node-mocks-http": "^1.17.2",
     "postcss": "^8.5.6",
-    "prisma": "^6.11.0",
     "react-hook-form": "^7.59.0",
     "react-router-dom": "^7.6.3",
     "supertest": "^7.1.1",
@@ -220,14 +213,11 @@
   "pnpm": {
     "ignoredBuiltDependencies": [
       "@biomejs/biome",
-      "@prisma/client",
-      "@prisma/engines",
       "@tailwindcss/oxide",
       "better-sqlite3",
       "esbuild",
       "exifreader",
       "msgpackr-extract",
-      "prisma",
       "sharp",
       "unrs-resolver"
     ]

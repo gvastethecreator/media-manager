@@ -3,16 +3,16 @@
  * @module store/entities/world-item/slices/core
  */
 
-import type { StateCreator } from 'zustand';
-import {
-	createWorldItem as createServerWorldItem,
-	deleteWorldItem as deleteServerWorldItem,
-	getWorldItems,
-	updateWorldItem as updateServerWorldItem,
-} from '@/app/actions/world-items/world-item.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
+import {
+    createWorldItem as createServerWorldItem,
+    deleteWorldItem as deleteServerWorldItem,
+    getWorldItems,
+    updateWorldItem as updateServerWorldItem,
+} from '@/services/world-item/world-item.service';
 import type { CreateWorldItemData, UpdateWorldItemData, WorldItem } from '@/types/entities/world-item';
+import type { StateCreator } from 'zustand';
 import type { WorldItemActions, WorldItemState } from '../types';
 
 const worldItemLogger = clientLogger.withContext('WorldItemStoreCore');

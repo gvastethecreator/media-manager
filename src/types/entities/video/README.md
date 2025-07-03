@@ -21,19 +21,19 @@
 // TIPO PRINCIPAL - USAR ESTE
 export interface VideoWithStats extends VideoBase {
   statistics: VideoStatistics; // 25+ métricas pre-calculadas
-  _count?: VideoCountsFromPrisma;
+  _count?: VideoCountsFromDrizzle;
   relations?: Partial<VideoRelations>;
 }
 
 // Solo para casos especiales
 export interface VideoComplete extends VideoBase, VideoRelations {
-  _count?: VideoCountsFromPrisma;
+  _count?: VideoCountsFromDrizzle;
 }
 ```
 
 ### 2. **Transformer Avanzado** (`src/transformers/video/transformer.ts`)
 
-**Función principal**: `fromPrismaVideoWithCounts()`
+**Función principal**: `fromDrizzleVideoWithCounts()`
 
 **Análisis técnico implementado**:
 
@@ -99,10 +99,10 @@ interface VideoState {
 
 ```typescript
 // PRINCIPAL - Usar este
-fromPrismaVideoWithCounts(video: PrismaVideoWithCounts): VideoWithStats
+fromDrizzleVideoWithCounts(video: any): VideoWithStats
 
 // Legacy - Solo para compatibilidad
-fromPrismaVideo(video: VideoFromPrisma): VideoComplete
+fromDrizzleVideo(video: any): VideoComplete
 
 // Auxiliares
 videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats>

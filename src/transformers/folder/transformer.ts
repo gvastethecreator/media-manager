@@ -1,10 +1,9 @@
 /**
  * @file Transformador principal para la entidad Folder - Patrón EntityWithStats
  * @module transformers/folder/transformer
- * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos optimizados.
+ * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos optimizados.
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
@@ -18,38 +17,13 @@ import type {
 
 const logger = serverLogger.withContext('FolderTransformer');
 
-// Tipo de payload optimizado para consultas con conteos
-export const folderWithCountsPayload = {
-	include: {
-		parent: true,
-		children: {
-			select: {
-				id: true,
-				name: true,
-				path: true,
-				emoji: true,
-				parentId: true,
-			},
-		},
-		_count: {
-			select: {
-				children: true,
-				images: true,
-				videos: true,
-				// ⚠️ CORREGIDO: Removidas las relaciones que no existen en el modelo Folder
-				// notes: true,      // ❌ No existe en el modelo Folder
-				// documents: true,  // ❌ No existe en el modelo Folder
-			},
-		},
-	},
-} satisfies Prisma.FolderDefaultArgs;
-
-export type FolderFromPrisma = Prisma.FolderGetPayload<typeof folderWithCountsPayload>;
+// Este archivo ya no necesita tipos de Prisma, ya que la migración a Drizzle está completa.
+// Los tipos `FolderFromPrisma` y el payload `folderWithCountsPayload` se han eliminado.
 
 /**
  * 🔄 Calcula estadísticas avanzadas para una carpeta
  */
-function calculateFolderStatistics(folder: FolderFromPrisma, allFolders?: FolderFromPrisma[]): FolderStatistics {
+function calculateFolderStatistics(folder: any, allFolders?: any[]): FolderStatistics {
 	const { _count, path, name, totalFiles, totalSize, lastIndexed, parentId, children } = folder;
 
 	// Calcular profundidad de jerarquía
@@ -58,25 +32,19 @@ function calculateFolderStatistics(folder: FolderFromPrisma, allFolders?: Folder
 	// Conteos básicos
 	const imageCount = _count.images || 0;
 	const videoCount = _count.videos || 0;
-	// ⚠️ CORREGIDO: Removidos noteCount y documentCount ya que no existen en el modelo
-	// const noteCount = _count.notes || 0;
-	// const documentCount = _count.documents || 0;
 	const folderCount = _count.children || 0;
 	const directChildren = folderCount;
 
-	// Calcular total de items (sin notes y documents)
+	// Calcular total de items
 	const totalItems = imageCount + videoCount + folderCount;
 
-	// Calcular diversidad de contenido (0-100) - sin notes y documents
+	// Calcular diversidad de contenido (0-100)
 	const contentTypes = [
 		imageCount > 0 ? 1 : 0,
 		videoCount > 0 ? 1 : 0,
-		// ⚠️ CORREGIDO: Removidas referencias a noteCount y documentCount
-		// noteCount > 0 ? 1 : 0,
-		// documentCount > 0 ? 1 : 0,
 		folderCount > 0 ? 1 : 0,
 	].reduce((sum, has) => sum + has, 0);
-	const contentDiversity = totalItems > 0 ? Math.min(100, (contentTypes / 3) * 100) : 0; // Cambiado de /5 a /3
+	const contentDiversity = totalItems > 0 ? Math.min(100, (contentTypes / 3) * 100) : 0;
 
 	// Calcular organization score (0-100)
 	let organizationScore = 50; // Base score
@@ -108,7 +76,7 @@ function calculateFolderStatistics(folder: FolderFromPrisma, allFolders?: Folder
 	// Generar breadcrumbs
 	const pathParts = path.split('/').filter(Boolean);
 	const breadcrumbs = pathParts.map((part, index) => ({
-		id: `breadcrumb-${index}`, // Simplificado
+		id: `breadcrumb-${index}`,
 		name: part,
 		path: '/' + pathParts.slice(0, index + 1).join('/'),
 	}));
@@ -153,7 +121,7 @@ function calculateFolderStatistics(folder: FolderFromPrisma, allFolders?: Folder
 	const lastActivity = lastIndexed || folder.updatedAt;
 	const accessFrequency = totalItems > 0 ? Math.min(100, totalItems / 10) : 0;
 
-	// Total de relaciones (sin notes y documents)
+	// Total de relaciones
 	const totalRelations = imageCount + videoCount + folderCount;
 
 	return {
@@ -171,11 +139,11 @@ function calculateFolderStatistics(folder: FolderFromPrisma, allFolders?: Folder
 		accessFrequency,
 		lastActivity,
 
-		// Distribución de contenido (sin notes y documents)
+		// Distribución de contenido
 		imageCount,
 		videoCount,
-		noteCount: 0, // ⚠️ CORREGIDO: No existe en el modelo Folder pero requerido por el tipo
-		documentCount: 0, // ⚠️ CORREGIDO: No existe en el modelo Folder pero requerido por el tipo
+		noteCount: 0,
+		documentCount: 0,
 		folderCount,
 
 		// Métricas de tamaño
@@ -204,31 +172,23 @@ function calculateFolderStatistics(folder: FolderFromPrisma, allFolders?: Folder
 	};
 }
 
-// formatFileSize se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
-
 /**
- * 🔄 Transforma un objeto Folder de Prisma a FolderWithStats (FUNCIÓN PRINCIPAL)
+ * 🔄 Transforma un objeto Folder de Drizzle a FolderWithStats (FUNCIÓN PRINCIPAL)
  */
-export function fromPrismaFolderWithCounts(
-	folderFromPrisma: FolderFromPrisma | null,
-	allFolders?: FolderFromPrisma[]
+export function fromDrizzleFolderWithCounts(
+	folderFromDrizzle: any | null,
+	allFolders?: any[]
 ): FolderWithStats | null {
-	if (!folderFromPrisma) return null;
+	if (!folderFromDrizzle) return null;
 
 	try {
-		const { _count, children, parent, ...baseData } = folderFromPrisma;
+		const { _count, children, parent, ...baseData } = folderFromDrizzle;
 
-		// 🔧 HOTFIX: Si totalFiles es 0 pero hay imágenes indexadas, usar el conteo de imágenes
-		// Esto soluciona el problema temporal mientras se ejecuta updateAllFolderStats()
 		const totalFiles = baseData.totalFiles > 0 ? baseData.totalFiles : _count.images || 0;
-
-		// 🔧 HOTFIX: Estimar totalSize basado en un promedio si es 0
-		// Promedio aproximado de 2MB por imagen para mostrar algo más realista
 		const totalSize = baseData.totalSize > 0 ? baseData.totalSize : (_count.images || 0) * 2 * 1024 * 1024;
 
-		// Calcular estadísticas avanzadas con los valores corregidos
 		const correctedFolderData = {
-			...folderFromPrisma,
+			...folderFromDrizzle,
 			totalFiles,
 			totalSize,
 		};
@@ -236,33 +196,30 @@ export function fromPrismaFolderWithCounts(
 
 		return {
 			...baseData,
-			totalFiles, // 🔧 Usar valor corregido
-			totalSize, // 🔧 Usar valor corregido
+			totalFiles,
+			totalSize,
 			statistics,
 			_count: {
 				children: _count.children || 0,
 				images: _count.images || 0,
 				videos: _count.videos || 0,
-				// ⚠️ CORREGIDO: Removidas referencias a notes y documents que no existen
-				// notes: _count.notes || 0,
-				// documents: _count.documents || 0,
 			},
 		};
 	} catch (error) {
-		logger.error('Error transformando folder desde Prisma:', {
+		logger.error('Error transformando folder desde Drizzle:', {
 			error,
-			folderId: folderFromPrisma.id,
+			folderId: folderFromDrizzle.id,
 		});
 		throw new TransformerError(`Error al transformar la carpeta: ${(error as Error).message}`);
 	}
 }
 
 /**
- * 🔄 Transforma una lista de carpetas de Prisma a FolderWithStats[]
+ * 🔄 Transforma una lista de carpetas de Drizzle a FolderWithStats[]
  */
-export function fromPrismaFoldersWithCounts(prismaFolders: FolderFromPrisma[]): FolderWithStats[] {
-	return prismaFolders
-		.map((folder) => fromPrismaFolderWithCounts(folder, prismaFolders))
+export function fromDrizzleFoldersWithCounts(drizzleFolders: any[]): FolderWithStats[] {
+	return drizzleFolders
+		.map((folder) => fromDrizzleFolderWithCounts(folder, drizzleFolders))
 		.filter((folder): folder is FolderWithStats => folder !== null);
 }
 
@@ -324,13 +281,13 @@ export function buildFolderTree(folders: FolderWithStats[]): FolderWithStats[] {
 // --- FUNCIONES LEGACY PARA COMPATIBILIDAD ---
 
 /**
- * 🔄 Transforma un objeto Folder de Prisma a FolderComplete (LEGACY)
+ * 🔄 Transforma un objeto Folder de Drizzle a FolderComplete (LEGACY)
  */
-export function fromPrismaFolder(folderFromPrisma: FolderFromPrisma | null): FolderComplete | null {
-	if (!folderFromPrisma) return null;
+export function fromDrizzleFolder(folderFromDrizzle: any | null): FolderComplete | null {
+	if (!folderFromDrizzle) return null;
 
 	try {
-		const { _count, ...baseData } = folderFromPrisma;
+		const { _count, ...baseData } = folderFromDrizzle;
 
 		return {
 			...baseData,
@@ -342,25 +299,22 @@ export function fromPrismaFolder(folderFromPrisma: FolderFromPrisma | null): Fol
 				children: _count?.children ?? 0,
 				images: _count?.images ?? 0,
 				videos: _count?.videos ?? 0,
-				// ⚠️ CORREGIDO: Removidas referencias a notes y documents que no existen
-				// notes: _count?.notes ?? 0,
-				// documents: _count?.documents ?? 0,
 			},
 		};
 	} catch (error) {
-		logger.error('Error transformando folder desde Prisma (legacy):', {
+		logger.error('Error transformando folder desde Drizzle (legacy):', {
 			error,
-			folderId: folderFromPrisma.id,
+			folderId: folderFromDrizzle.id,
 		});
 		throw new TransformerError(`Error al transformar la carpeta: ${(error as Error).message}`);
 	}
 }
 
 /**
- * 🔄 Transforma una lista de carpetas de Prisma a FolderComplete[] (LEGACY)
+ * 🔄 Transforma una lista de carpetas de Drizzle a FolderComplete[] (LEGACY)
  */
-export function fromPrismaFolders(prismaFolders: FolderFromPrisma[]): FolderComplete[] {
-	return prismaFolders.map(fromPrismaFolder).filter((folder): folder is FolderComplete => folder !== null);
+export function fromDrizzleFolders(drizzleFolders: any[]): FolderComplete[] {
+	return drizzleFolders.map(fromDrizzleFolder).filter((folder): folder is FolderComplete => folder !== null);
 }
 
 /**
