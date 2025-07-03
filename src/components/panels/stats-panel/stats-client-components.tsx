@@ -1,14 +1,30 @@
-import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { GeneralStats } from '@/app/actions/stats/stats.actions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Activity } from './components/activity';
 import { StatCard } from './components/stat-card';
 import { TagUsage } from './components/tag-usage';
 
 // Función para obtener estadísticas cliente-side
 import { getStatsData } from './stats-actions-client';
+
+// Tipo local para estadísticas generales
+export interface GeneralStats {
+	totalImages: number;
+	totalFolders: number;
+	totalCollections: number;
+	totalTags: number;
+	totalAlbums: number;
+	totalCharacters: number;
+	totalPlaces: number;
+	totalWorldItems: number;
+	totalFavorites: number;
+	totalViews: number;
+	totalDownloads: number;
+	totalSize: number;
+	totalActivities: number;
+}
 
 // Componente cliente para estadísticas generales
 export function ClientGeneralStats() {

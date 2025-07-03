@@ -21,7 +21,6 @@ import type { WorldItemComplete } from '../world-item';
 /**
  * 🧑‍🎤 Tipo base para un personaje.
  * Contiene todos los campos primitivos y datos serializados en JSON.
- * ⚠️ Definición canónica sin dependencias de Prisma
  */
 export interface CharacterBase {
 	id: string;
@@ -37,7 +36,7 @@ export interface CharacterBase {
 	type: string | null;
 	alignment: string;
 	backstory: string;
-	// Campos JSON serializados como strings en Prisma
+	// Campos JSON serializados como strings
 	stats: string;
 	psychologicalProfile: string;
 	socialProfile: string;
@@ -57,30 +56,6 @@ export interface CharacterBase {
 	// Timestamps
 	createdAt: Date;
 	updatedAt: Date;
-}
-
-/**
- * 🧑‍🎤 Tipo de Character obtenido de Prisma con conteos optimizados.
- * Usado internamente para transformación eficiente.
- */
-export interface PrismaCharacterWithCounts extends CharacterBase {
-	_count?: {
-		images?: number;
-		videos?: number;
-		tags?: number;
-		groups?: number;
-		properties?: number;
-		collections?: number;
-		albums?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		relatedCharacters?: number;
-		relatedTo?: number;
-	};
 }
 
 /**

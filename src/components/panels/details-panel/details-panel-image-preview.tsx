@@ -1,9 +1,9 @@
 import { Loader2, XCircle } from 'lucide-react';
 // No importamos Image de Next.js ya que está causando problemas
-import * as React from 'react';
-import { getImageUrl } from '@/app/actions/images';
 import { cn } from '@/lib/utils';
+import { pathToUrl } from '@/lib/web/url-utils';
 import { useImageViewer } from '@/store/image-viewer.store';
+import * as React from 'react';
 import type { ItemComponentProps } from './details-panel-types';
 
 /**
@@ -53,7 +53,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 
 				// Intentar obtener la URL
 				try {
-					const url = await getImageUrl(item.id);
+					const url = await pathToUrl(item.id);
 
 					if (!isMountedRef.current) {
 						return;

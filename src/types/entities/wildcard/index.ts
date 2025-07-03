@@ -8,7 +8,6 @@
 // --- 🏗️ Tipos Base y Estadísticas (Nuevo Patrón) ---
 // Tipos canónicos que deben usarse en toda la aplicación nueva.
 export type {
-	PrismaWildcardWithCounts,
 	WildcardBase,
 	WildcardCreateInput,
 	WildcardPreview,

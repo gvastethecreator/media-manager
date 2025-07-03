@@ -14,7 +14,7 @@ export type {
 	PlaceStatistics,
 	PlaceUpdateInput,
 	PlaceWithStats,
-	PrismaPlaceWithCounts,
+	
 } from './base';
 
 // --- 📚 Tipos Adicionales ---

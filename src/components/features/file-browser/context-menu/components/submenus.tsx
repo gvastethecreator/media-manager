@@ -10,7 +10,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
 // Logger para el componente
@@ -24,8 +24,8 @@ const _submenuLogger = clientLogger.withContext('ContextSubmenu');
  * @param handleOpenChange Callback para apertura/cierre del submenú
  */
 interface SubmenuProps {
-	file: FileItem;
-	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
+	file: EntityWithStats;
+	onAction: (action: ContextMenuAction, file: EntityWithStats, data?: Record<string, unknown>) => void;
 	loadingStates: LoadingStates;
 	handleOpenChange: (entity: keyof LoadingStates, isOpen: boolean) => void;
 }

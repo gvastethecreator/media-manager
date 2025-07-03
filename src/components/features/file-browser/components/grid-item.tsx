@@ -2,13 +2,13 @@ import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback } from 'react';
-import { FileItem } from '@/types/files';
+import { EntityWithStats } from '@/types/common/entity-with-stats';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';
 
 // 📝 Tipo local para FileBrowser que soporta miniaturas serializables
-type FileBrowserFileItem = FileItem & {
+type FileBrowserFileItem = EntityWithStats & {
 	thumbnail?: string | null; // Siempre string o null, nunca Buffer/Uint8Array
 	createdAt: string; // ISO string, no Date
 	updatedAt: string; // ISO string, no Date
@@ -32,7 +32,7 @@ interface GridItemProps {
 	onClick: (e?: React.MouseEvent) => void;
 	onDoubleClick: () => void;
 	onContextMenu: () => void;
-	onContextAction: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextAction: (action: ContextMenuAction, item: EntityWithStats, data?: Record<string, unknown>) => void;
 }
 
 /**
@@ -57,7 +57,7 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 }) {
 	// 🎯 Función para manejar las acciones del menú contextual
 	const handleAction = useCallback(
-		(action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => {
+		(action: ContextMenuAction, file: EntityWithStats, data?: Record<string, unknown>) => {
 			onContextAction(action, file, data);
 		},
 		[onContextAction]

@@ -1,117 +1,62 @@
 /**
  * @file Transformador principal para la entidad Prompt.
  * @module transformers/prompt/transformer
- * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
+ * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptComplete, PromptFromPrisma } from '@/types/entities/prompt';
+import type { PromptComplete } from '@/types/entities/prompt';
 import type { PropertyComplete } from '@/types/entities/property';
 import type { TagComplete } from '@/types/entities/tag';
 import type { VideoComplete } from '@/types/entities/video';
 import type { WildcardComplete } from '@/types/entities/wildcard';
 import type { WorldItemComplete } from '@/types/entities/world-item';
 import { transformImagesForCard } from '../image/transformer';
-import { fromPrismaNote } from '../note/transformer';
-import { fromPrismaProperty } from '../property/transformer';
-import { fromPrismaTag } from '../tag/transformer';
-import { fromPrismaVideo } from '../video/transformer';
-import { fromPrismaWildcard } from '../wildcard/transformer';
-import { fromPrismaWorldItem } from '../world-item/transformer';
+import { fromDrizzleNote } from '../note/transformer';
+import { fromDrizzleProperty } from '../property/transformer';
+import { fromDrizzleTag } from '../tag/transformer';
+import { fromDrizzleVideo } from '../video/transformer';
+import { fromDrizzleWildcard } from '../wildcard/transformer';
+import { fromDrizzleWorldItem } from '../world-item/transformer';
 
 const promptTransformerLogger = serverLogger.withContext('PromptTransformer');
 
-// --- TIPO DE PAYLOAD DE PRISMA ---
-
-export const promptPayload = {
-	include: {
-		images: {
-			include: {
-				tags: true,
-				albums: true,
-				collections: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				prompts: true,
-				notes: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-				folder: { select: { id: true, name: true, path: true } },
-				_count: {
-					select: {
-						tags: true,
-						albums: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		},
-		videos: true,
-		albums: true,
-		collections: true,
-		tagEntities: true,
-		characters: true,
-		places: true,
-		worldItems: true,
-		concepts: true,
-		notes: true,
-		wildcards: true,
-		properties: true,
-		groups: true,
-		_count: true,
-	},
-};
-
-// export type PromptFromPrisma = Prisma.PromptGetPayload<typeof promptPayload>; // Comentado para evitar redeclaración
-
 /**
- * 🤖 Transforma un prompt de Prisma a PromptComplete
+ * 🤖 Transforma un prompt de Drizzle a PromptComplete
  */
-export function fromPrismaPrompt(promptFromPrisma: PromptFromPrisma | null): PromptComplete | null {
-	if (!promptFromPrisma) {
-		promptTransformerLogger.warn('⚠️ Prompt de Prisma nulo o indefinido');
+export function fromDrizzlePrompt(promptFromDrizzle: any | null): PromptComplete | null {
+	if (!promptFromDrizzle) {
+		promptTransformerLogger.warn('⚠️ Prompt de Drizzle nulo o indefinido');
 		return null;
 	}
 
 	try {
-		promptTransformerLogger.debug(`🔄 Transformando prompt: ${promptFromPrisma.id}`);
+		promptTransformerLogger.debug(`🔄 Transformando prompt: ${promptFromDrizzle.id}`);
 
 		const prompt: PromptComplete = {
-			id: promptFromPrisma.id,
-			name: promptFromPrisma.name,
-			description: promptFromPrisma.description,
-			content: promptFromPrisma.content,
-			isPublic: promptFromPrisma.isPublic,
-			isFavorite: promptFromPrisma.isFavorite,
-			createdAt: promptFromPrisma.createdAt,
-			updatedAt: promptFromPrisma.updatedAt,
+			id: promptFromDrizzle.id,
+			name: promptFromDrizzle.name,
+			description: promptFromDrizzle.description,
+			content: promptFromDrizzle.content,
+			isPublic: promptFromDrizzle.isPublic,
+			isFavorite: promptFromDrizzle.isFavorite,
+			createdAt: promptFromDrizzle.createdAt,
+			updatedAt: promptFromDrizzle.updatedAt,
 
 			// Relaciones transformadas
-			images: transformImagesForCard(promptFromPrisma.images || []),
-			videos: promptFromPrisma.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
-			tags: promptFromPrisma.tags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],
-			notes: promptFromPrisma.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
+			images: transformImagesForCard(promptFromDrizzle.images || []),
+			videos: promptFromDrizzle.videos?.map(fromDrizzleVideo).filter((v): v is VideoComplete => v !== null) || [],
+			tags: promptFromDrizzle.tags?.map(fromDrizzleTag).filter((t): t is TagComplete => t !== null) || [],
+			notes: promptFromDrizzle.notes?.map(fromDrizzleNote).filter((n): n is any => n !== null) || [],
 			wildcards:
-				promptFromPrisma.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
+				promptFromDrizzle.wildcards?.map(fromDrizzleWildcard).filter((w): w is WildcardComplete => w !== null) || [],
 			properties:
-				promptFromPrisma.properties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
+				promptFromDrizzle.properties?.map(fromDrizzleProperty).filter((p): p is PropertyComplete => p !== null) || [],
 			worldItems:
-				promptFromPrisma.worldItems?.map(fromPrismaWorldItem).filter((w): w is WorldItemComplete => w !== null) || [],
+				promptFromDrizzle.worldItems?.map(fromDrizzleWorldItem).filter((w): w is WorldItemComplete => w !== null) || [],
 
 			// Conteos
-			_count: promptFromPrisma._count || {
+			_count: promptFromDrizzle._count || {
 				images: 0,
 				videos: 0,
 				tags: 0,
@@ -125,21 +70,21 @@ export function fromPrismaPrompt(promptFromPrisma: PromptFromPrisma | null): Pro
 		promptTransformerLogger.debug(`✅ Prompt transformado: ${prompt.id}`);
 		return prompt;
 	} catch (error) {
-		promptTransformerLogger.error(`❌ Error transformando prompt ${promptFromPrisma.id}:`, error);
+		promptTransformerLogger.error(`❌ Error transformando prompt ${promptFromDrizzle.id}:`, error);
 		return null;
 	}
 }
 
 /**
- * 🔄 Transforma una lista de prompts de Prisma a una lista de PromptComplete.
+ * 🔄 Transforma una lista de prompts de Drizzle a una lista de PromptComplete.
  *
- * @param prismaPrompts - Un array de objetos Prompt de Prisma.
+ * @param drizzlePrompts - Un array de objetos Prompt de Drizzle.
  * @returns Un array de objetos PromptComplete.
  */
-export function fromPrismaPrompts(prismaPrompts: PromptFromPrisma[]): PromptComplete[] {
-	return prismaPrompts.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null);
+export function fromDrizzlePrompts(drizzlePrompts: any[]): PromptComplete[] {
+	return drizzlePrompts.map(fromDrizzlePrompt).filter((p): p is PromptComplete => p !== null);
 }
 
 // Alias para compatibilidad con código existente
-export const transformPrompt = fromPrismaPrompt;
-export const transformPrompts = fromPrismaPrompts;
+export const transformPrompt = fromDrizzlePrompt;
+export const transformPrompts = fromDrizzlePrompts;

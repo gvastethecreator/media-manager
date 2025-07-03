@@ -1,12 +1,9 @@
 /**
  * @file Tipos canónicos para la entidad Folder - Patrón EntityWithStats
  * @module types/entities/folder/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Folder siguiendo el patrón EntityWithStats.
  * Última migración: 2025-01-20
  */
-
-import type { Prisma } from '@prisma/client';
 
 /**
  * 📁 Tipo base para una carpeta - Campos principales
@@ -28,19 +25,6 @@ export interface FolderBase {
 	presetId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-}
-
-/**
- * 📁 Consulta Prisma optimizada con conteos para Folder
- */
-export interface PrismaFolderWithCounts extends FolderBase {
-	parent?: FolderBase | null;
-	children?: FolderBase[];
-	images?: unknown[]; // O un tipo más específico si ImageBase está disponible
-	_count: {
-		images: number;
-		children: number;
-	};
 }
 
 /**
@@ -102,9 +86,6 @@ export interface FolderWithStats extends FolderBase {
 		children: number;
 		images: number;
 		videos: number;
-		// ⚠️ CORREGIDO: Removidas notes y documents que no existen en el modelo
-		// notes: number;
-		// documents: number;
 	};
 }
 
@@ -202,9 +183,9 @@ export interface FolderFilters {
 export interface FolderSearchOptions {
 	skip?: number;
 	take?: number;
-	orderBy?: Prisma.FolderOrderByWithRelationInput;
+	orderBy?: Record<string, any>;
 	filters?: FolderFilters;
-	include?: Prisma.FolderInclude;
+	include?: Record<string, any>;
 }
 
 /**

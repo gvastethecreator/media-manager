@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
+import * as thumbnailActions from '@/services/thumbnail/thumbnail.service';
 import type { ThumbnailStats } from '@/types/thumbnails';
+import { create } from 'zustand';
 
 export interface ProcessStatus {
 	status: string;

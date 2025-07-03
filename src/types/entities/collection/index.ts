@@ -4,7 +4,7 @@
  * @description
  *   Centraliza la exportación del tipo canónico **`CollectionWithStats`**.
  *
- *   - `CollectionBase`: Tipo base de Prisma.
+ *   - `CollectionBase`: Tipo base de Drizzle.
  *   - `CollectionStatistics`: Interfaz para las estadísticas de conteo.
  *   - `CollectionWithStats`: El tipo enriquecido que se debe usar en la app.
  *

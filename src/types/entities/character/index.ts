@@ -30,7 +30,7 @@ export type {
 	CharacterViewConfig,
 	CharacterWithStats,
 	CreateCharacterData,
-	PrismaCharacterWithCounts,
+	
 	UpdateCharacterData,
 } from './types';
 

@@ -1,14 +1,14 @@
-import { StateCreator } from 'zustand';
-import {
-	createNote as createNoteAction,
-	deleteNote as deleteNoteAction,
-	getNotes as getNotesAction,
-	updateNote as updateNoteAction,
-} from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
+import {
+    createNote as createNoteAction,
+    deleteNote as deleteNoteAction,
+    getNotes as getNotesAction,
+    updateNote as updateNoteAction,
+} from '@/services/note/note.service';
 import { toastService } from '@/services/toast';
 import { adaptNoteCompleteToWithStats, adaptNotesCompleteToWithStats } from '@/transformers/note/note-adapter';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');

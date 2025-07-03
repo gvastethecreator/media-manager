@@ -7,7 +7,6 @@
 import { clientLogger } from '@/lib/logger/client-logger';
 import { calculateCompleteness } from '@/lib/utils/transformers';
 import type {
-	PrismaPropertyWithCounts,
 	PropertyBase,
 	PropertyStatistics,
 	PropertyWithStats,
@@ -16,32 +15,29 @@ import type {
 const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer');
 
 /**
- * Convierte un objeto Property de Prisma a PropertyWithStats.
+ * Convierte un objeto Property de Drizzle a PropertyWithStats.
  * Esta función es compatible con el sistema legacy que esperaba PropertyComplete.
  *
- * @param prismaProperty El objeto Property de Prisma, puede incluir conteos de relaciones
+ * @param drizzleProperty El objeto Property de Drizzle, puede incluir conteos de relaciones
  * @returns Un objeto PropertyWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromPrismaProperty(
-	prismaProperty: PrismaPropertyWithCounts | PropertyBase | null
+export function fromDrizzleProperty(
+	drizzleProperty: any | null
 ): PropertyWithStats | null {
-	if (!prismaProperty) {
-		propertyTransformerLogger.warn('⚠️ Property de Prisma nulo o indefinido');
+	if (!drizzleProperty) {
+		propertyTransformerLogger.warn('⚠️ Property de Drizzle nulo o indefinido');
 		return null;
 	}
 
 	try {
-		propertyTransformerLogger.debug(`🔄 Transformando property: ${prismaProperty.id}`);
+		propertyTransformerLogger.debug(`🔄 Transformando property: ${drizzleProperty.id}`);
 
-		// Verificar si el objeto tiene conteos (_count)
-		const hasCounts = '_count' in prismaProperty && prismaProperty._count;
+		const hasCounts = '_count' in drizzleProperty && drizzleProperty._count;
 
 		if (hasCounts) {
-			// Si tiene conteos, usar el transformador completo
-			const { _count, ...baseProperty } = prismaProperty as PrismaPropertyWithCounts;
+			const { _count, ...baseProperty } = drizzleProperty;
 
-			// Calcular estadísticas
-			const totalRelations = Object.values(_count).reduce((sum, count) => sum + count, 0);
+			const totalRelations = Object.values(_count).reduce((sum, count) => sum + (count as number), 0);
 			const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
 			const totalPossibleRelations = Object.keys(_count).length;
 			const diversityRatio = totalPossibleRelations > 0 ? usageDiversity / totalPossibleRelations : 0;
@@ -60,8 +56,7 @@ export function fromPrismaProperty(
 			};
 		}
 
-		// Si no tiene conteos, crear estadísticas vacías
-		const completenessScore = calculateCompleteness(prismaProperty, ['name', 'description', 'category']);
+		const completenessScore = calculateCompleteness(drizzleProperty, ['name', 'description', 'category']);
 
 		const stats: PropertyStatistics = {
 			totalRelations: 0,
@@ -71,7 +66,7 @@ export function fromPrismaProperty(
 		};
 
 		return {
-			...prismaProperty,
+			...(drizzleProperty as PropertyBase),
 			stats,
 		};
 	} catch (error) {
@@ -80,24 +75,10 @@ export function fromPrismaProperty(
 	}
 }
 
-// === NAMESPACE DE EXPORTACIÓN ===
-// Esta estructura evita que Next.js detecte el archivo como Server Action
-
-/**
- * PropertyTransformer - Namespace que contiene todas las funciones de transformación para properties
- */
 export const PropertyTransformer = {
-	fromPrismaProperty,
+	fromDrizzleProperty,
 } as const;
 
-/**
- * Alias para compatibilidad con código legacy.
- * @deprecated Usar fromPrismaProperty directamente.
- */
-export const transformProperty = PropertyTransformer.fromPrismaProperty;
+export const transformProperty = PropertyTransformer.fromDrizzleProperty;
 
-/**
- * Tipo de compatibilidad para código legacy que espera PropertyComplete.
- * @deprecated Usar PropertyWithStats directamente.
- */
 export type PropertyComplete = PropertyWithStats;

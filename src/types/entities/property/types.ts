@@ -1,19 +1,10 @@
 /**
  * @file Tipos para Property
  * @module types/entities/property/types
- * @deprecated Este archivo está siendo migrado hacia el patrón `...WithStats`
- * @see /src/types/entities/property/base.ts para los tipos canónicos
+ * @description Este archivo contiene tipos auxiliares para la entidad Property.
  */
 
-import type { PropertyBase, PropertyStatistics } from './base';
-
-// Re-exportar los tipos canónicos desde base.ts
-export type {
-	PrismaPropertyWithCounts,
-	PropertyBase,
-	PropertyStatistics,
-	PropertyWithStats,
-} from './base';
+import type { PropertyBase, PropertyStatistics, PropertyWithStats } from './base';
 
 // Tipos legacy - usar PropertyWithStats en su lugar
 export interface PropertyComplete extends PropertyBase {

@@ -1,4 +1,7 @@
-'use server';
+/**
+ * @file Servicios de documentación
+ * @description Compatible con Vite + React
+ */
 
 /**
  * Carga el contenido de un archivo markdown desde la carpeta docs

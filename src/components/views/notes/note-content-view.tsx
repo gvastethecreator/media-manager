@@ -5,13 +5,13 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { useNoteImages } from '@/lib/api/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 const viewLogger = clientLogger.withContext('NoteContentView');
 
 export function NoteContentView() {
 	const selectedNote = useNoteStore((state) => state.selectedNote);
-	const [items, setItems] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +29,7 @@ export function NoteContentView() {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando imágenes de la nota...');
 			if (noteImages) {
-				setItems(noteImages as unknown as FileItem[]);
+				setItems(noteImages as EntityWithStats[]);
 			}
 			viewLogger.info('✅ Imágenes cargadas');
 		} catch (err) {

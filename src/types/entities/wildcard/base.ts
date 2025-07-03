@@ -1,8 +1,7 @@
 /**
- * 🃏 WILDCARD BASE TYPES - MIGRADO A DRIZZLE
+ * 🃏 WILDCARD BASE TYPES
  *
  * Tipos base para wildcards usando tipos locales de Drizzle.
- * Eliminadas todas las dependencias de @prisma/client.
  *
  * @updated 2025-01-27
  */
@@ -147,7 +146,3 @@ export interface WildcardPreview {
 // TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
 // ----------------------------------------------------------------
 
-/**
- * @deprecated Usar WildcardWithCounts en su lugar
- */
-export type PrismaWildcardWithCounts = WildcardWithCounts;
