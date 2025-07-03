@@ -1,6 +1,8 @@
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { images } from '@/lib/drizzle/schema';
+import { eq, and, not, isNull, desc, sql, sum, count } from 'drizzle-orm';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto
@@ -42,9 +44,9 @@ export async function getThumbnail(
 
 		thumbLogger.info('🔄 Obteniendo thumbnail:', { id, quality: validQuality });
 
-		const image = await prisma.image.findUnique({
-			where: { id },
-			select: {
+		const image = await db.query.images.findFirst({
+			where: eq(images.id, id),
+			columns: {
 				id: true,
 				path: true,
 				thumbnail: true,
@@ -99,12 +101,9 @@ export async function getThumbnail(
 		if (!image.path || !existsSync(image.path)) {
 			const error = `Archivo no encontrado en ruta: ${image.path}`;
 			// Registrar el error en la base de datos
-			await prisma.image.update({
-				where: { id },
-				data: {
-					thumbnailError: error,
-				},
-			});
+			await db.update(images).set({
+				thumbnailError: error,
+			}).where(eq(images.id, id));
 			thumbLogger.error(`❌ ${error}`);
 			return {
 				thumbnailUrl: '',
@@ -123,17 +122,14 @@ export async function getThumbnail(
 			}
 
 			// Actualizar la imagen con el nuevo thumbnail
-			await prisma.image.update({
-				where: { id },
-				data: {
-					thumbnail: thumbnail.buffer,
-					thumbnailSize: thumbnail.buffer.length,
-					thumbnailWidth: thumbnail.width,
-					thumbnailHeight: thumbnail.height,
-					thumbnailError: null, // Limpiar error previo si existía
-					thumbnailMimeType: `image/${thumbnail.format}`,
-				},
-			});
+			await db.update(images).set({
+				thumbnail: thumbnail.buffer,
+				thumbnailSize: thumbnail.buffer.length,
+				thumbnailWidth: thumbnail.width,
+				thumbnailHeight: thumbnail.height,
+				thumbnailError: null, // Limpiar error previo si existía
+				thumbnailMimeType: `image/${thumbnail.format}`,
+			}).where(eq(images.id, id));
 
 			thumbLogger.info('✅ Nuevo thumbnail generado (servido por API):', {
 				id,
@@ -152,12 +148,9 @@ export async function getThumbnail(
 		} catch (genError) {
 			// Registrar el error en la imagen
 			const errorMessage = genError instanceof Error ? genError.message : 'Error desconocido';
-			await prisma.image.update({
-				where: { id },
-				data: {
-					thumbnailError: errorMessage,
-				},
-			});
+			await db.update(images).set({
+				thumbnailError: errorMessage,
+			}).where(eq(images.id, id));
 
 			thumbLogger.error('❌ Error generando thumbnail:', genError);
 			return {
@@ -209,16 +202,11 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 	try {
 		thumbLogger.info('🔄 Obteniendo últimas miniaturas procesadas:', { limit });
 
-		const images = await prisma.image.findMany({
-			where: {
-				thumbnail: { not: null },
-				thumbnailSize: { not: null },
-			},
-			orderBy: {
-				updatedAt: 'desc',
-			},
-			take: limit,
-			select: {
+		const imagesData = await db.query.images.findMany({
+			where: not(isNull(images.thumbnail)),
+			orderBy: desc(images.updatedAt),
+			limit: limit,
+			columns: {
 				id: true,
 				path: true,
 				updatedAt: true,
@@ -226,7 +214,7 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 			},
 		});
 
-		return images.map((image) => ({
+		return imagesData.map((image) => ({
 			id: image.id,
 			path: image.path,
 			processedAt: image.updatedAt,
@@ -245,51 +233,39 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 		// Verificar la conexión a la base de datos antes de continuar
 		try {
 			// Consulta simple para verificar la conexión
-			await prisma.$queryRaw`SELECT 1`;
+			await db.execute(sql`SELECT 1`);
 		} catch (dbError) {
 			thumbLogger.error('❌ Error de conexión a la base de datos:', dbError);
 			throw new Error('No se pudo conectar a la base de datos. Verifica tu conexión.');
 		}
 
-		const [totalFiles, withThumbnail, pending, errors] = await Promise.all([
-			prisma.image.count(),
-			prisma.image.count({
-				where: {
-					thumbnail: { not: null },
-				},
-			}),
-			prisma.image.count({
-				where: {
-					thumbnail: null,
-				},
-			}),
-			prisma.image.findMany({
-				where: {
-					thumbnailError: { not: null },
-				},
-				select: {
+		const [totalFilesResult, withThumbnailResult, pendingResult, errorsData, totalSizeResult] = await Promise.all([
+			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(images).where(not(isNull(images.thumbnail))),
+			db.select({ count: count() }).from(images).where(isNull(images.thumbnail)),
+			db.query.images.findMany({
+				where: not(isNull(images.thumbnailError)),
+				columns: {
 					id: true,
 					path: true,
 					thumbnailError: true,
 					updatedAt: true,
 				},
 			}),
+			db.select({ totalSize: sum(images.thumbnailSize) }).from(images).where(not(isNull(images.thumbnailSize))),
 		]);
 
-		const totalSize = await prisma.image.aggregate({
-			_sum: {
-				thumbnailSize: true,
-			},
-			where: {
-				thumbnailSize: { not: null },
-			},
-		});
+		const totalFiles = totalFilesResult[0].count;
+		const withThumbnail = withThumbnailResult[0].count;
+		const pending = pendingResult[0].count;
+		const errors = errorsData;
+		const totalSize = totalSizeResult[0].totalSize || 0;
 
 		return {
 			total: totalFiles,
 			processed: withThumbnail,
 			errors: errors.length,
-			totalSize: totalSize._sum.thumbnailSize || 0,
+			totalSize: totalSize,
 		};
 	} catch (error) {
 		thumbLogger.error('❌ Error obteniendo estadísticas:', error);
@@ -337,9 +313,9 @@ export async function deleteThumbnail(imageId: string): Promise<{ success: boole
 	try {
 		thumbLogger.info(`🗑️ Eliminando thumbnail para imagen: ${imageId}`);
 
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
-			select: { id: true, thumbnail: true },
+		const image = await db.query.images.findFirst({
+			where: eq(images.id, imageId),
+			columns: { id: true, thumbnail: true },
 		});
 
 		if (!image) {
@@ -350,17 +326,14 @@ export async function deleteThumbnail(imageId: string): Promise<{ success: boole
 			return { success: true, message: 'Thumbnail no existe para esta imagen' };
 		}
 
-		await prisma.image.update({
-			where: { id: imageId },
-			data: {
-				thumbnail: null,
-				thumbnailSize: null,
-				thumbnailWidth: null,
-				thumbnailHeight: null,
-				thumbnailMimeType: null,
-				thumbnailError: null,
-			},
-		});
+		await db.update(images).set({
+			thumbnail: null,
+			thumbnailSize: null,
+			thumbnailWidth: null,
+			thumbnailHeight: null,
+			thumbnailMimeType: null,
+			thumbnailError: null,
+		}).where(eq(images.id, imageId));
 
 		thumbLogger.info(`✅ Thumbnail eliminado para imagen: ${imageId}`);
 		return { success: true, message: 'Thumbnail eliminado exitosamente' };

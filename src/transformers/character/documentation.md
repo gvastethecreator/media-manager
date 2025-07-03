@@ -57,9 +57,9 @@ sequenceDiagram
     Client->>Actions: createCharacter(data)
     Actions->>Transformer: validateCharacter(data)
     Transformer-->>Actions: validatedData
-    Actions->>Transformer: mapCreateCharacterDataToPrisma(validatedData)
-    Transformer-->>Actions: prismaData
-    Actions->>DB: prisma.character.create(prismaData)
+    Actions->>Transformer: mapCreateCharacterDataToDrizzle(validatedData)
+    Transformer-->>Actions: drizzleData
+    Actions->>DB: drizzle.character.create(drizzleData)
     DB-->>Actions: createdCharacter
     Actions->>Transformer: transformCharacter(createdCharacter)
     Transformer-->>Actions: transformedCharacter
@@ -67,7 +67,7 @@ sequenceDiagram
     Actions-->>Client: transformedCharacter
 
     Client->>Actions: getCharacter(id)
-    Actions->>DB: prisma.character.findUnique({ where: { id } })
+    Actions->>DB: drizzle.character.findUnique({ where: { id } })
     DB-->>Actions: characterData
     Actions->>Transformer: transformCharacterToExtended(characterData)
     Transformer-->>Actions: extendedCharacter

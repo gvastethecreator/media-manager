@@ -9,26 +9,73 @@
 
 import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
-import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats, PrismaPlaceWithCounts } from '@/types/entities/place/base';
+import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle (sin dependencias de Prisma)
+type DrizzlePlaceWithCounts = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	location: string | null;
+	climate: string | null;
+	population: string | null;
+	government: string | null;
+	economy: string | null;
+	culture: string | null;
+	history: string | null;
+	geography: string | null;
+	landmarks: string | null;
+	dangers: string | null;
+	resources: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	_count?: {
+		images?: number;
+		tags?: number;
+		notes?: number;
+		characters?: number;
+		collections?: number;
+		concepts?: number;
+	};
+};
+
 type DrizzleCreatePlaceData = {
 	name: string;
 	description?: string | null;
-	region?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
 	type?: string | null;
+	location?: string | null;
 	climate?: string | null;
 	population?: string | null;
 	government?: string | null;
-	lore?: string | null;
+	economy?: string | null;
+	culture?: string | null;
 	history?: string | null;
+	geography?: string | null;
+	landmarks?: string | null;
 	dangers: string; // JSON
 	resources: string; // JSON
-	stats: string; // JSON
-	filters: string; // JSON
-	isFavorite?: boolean;
-	category?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 };
 
 type DrizzleUpdatePlaceData = Partial<DrizzleCreatePlaceData>;
@@ -42,11 +89,10 @@ type DrizzleWhereFilter = {
 	OR?: DrizzleWhereFilter[];
 	name?: { contains?: string; equals?: string };
 	description?: { contains?: string; equals?: string };
-	lore?: { contains?: string; equals?: string };
 	history?: { contains?: string; equals?: string };
 	category?: { equals?: string };
 	type?: { equals?: string };
-	region?: { equals?: string };
+	location?: { equals?: string };
 	isFavorite?: boolean;
 };
 
@@ -64,18 +110,17 @@ type DrizzleFindManyArgs = {
  * @param place - El objeto de la base de datos, incluyendo los `_count` de relaciones.
  * @returns Un objeto PlaceWithStats con campos JSON parseados y estadísticas calculadas.
  */
-export function toPlaceWithStats(place: PrismaPlaceWithCounts): PlaceWithStats {
+export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats {
 	const { _count, ...rest } = place;
 
 	// Campos que contribuyen a la puntuación de completitud
 	const completenessFields = [
 		rest.description,
-		rest.region,
+		rest.location,
 		rest.type,
 		rest.climate,
 		rest.population,
 		rest.government,
-		rest.lore,
 		rest.history,
 	];
 
@@ -91,8 +136,8 @@ export function toPlaceWithStats(place: PrismaPlaceWithCounts): PlaceWithStats {
 		...rest,
 		dangers: safeJsonParse(rest.dangers, []),
 		resources: safeJsonParse(rest.resources, []),
-		stats: safeJsonParse(rest.stats, null),
-		filters: safeJsonParse(rest.filters, null),
+		stats: null, // Placeholder para estadísticas adicionales
+		filters: null, // Placeholder para filtros adicionales
 		_stats: {
 			popularity,
 			completenessScore: calculateCompleteness(completenessFields),
@@ -100,7 +145,7 @@ export function toPlaceWithStats(place: PrismaPlaceWithCounts): PlaceWithStats {
 			spatialRelevance: 0,
 			geoContextLevel: 0,
 		},
-		_count,
+		_count: _count || {},
 	};
 
 	return stats;
@@ -131,8 +176,6 @@ export function toCreateDataForDrizzle(input: PlaceCreateInput): DrizzleCreatePl
 		...rest,
 		dangers: JSON.stringify(input.dangers || []),
 		resources: JSON.stringify(input.resources || []),
-		stats: input.stats ? JSON.stringify(input.stats) : '{}',
-		filters: input.filters ? JSON.stringify(input.filters) : '{}',
 		// Las relaciones se manejan por separado en Drizzle con junction tables
 	};
 }
@@ -162,8 +205,6 @@ export function toUpdateDataForDrizzle(input: PlaceUpdateInput): DrizzleUpdatePl
 
 	if (input.dangers !== undefined) data.dangers = JSON.stringify(input.dangers);
 	if (input.resources !== undefined) data.resources = JSON.stringify(input.resources);
-	if (input.stats !== undefined) data.stats = JSON.stringify(input.stats);
-	if (input.filters !== undefined) data.filters = JSON.stringify(input.filters);
 
 	// Las relaciones se manejan por separado en Drizzle con junction tables
 	return data;
@@ -196,34 +237,56 @@ export function createFilterForDrizzle(filters: PlaceSearchOptions['filters'] = 
 		where.OR = [
 			{ name: { contains: search } },
 			{ description: { contains: search } },
-			{ lore: { contains: search } },
 			{ history: { contains: search } },
 		];
 	}
 
-	if (filters?.category) where.category = { equals: filters.category };
-	if (filters?.type) where.type = { equals: filters.type };
-	if (filters?.region) where.region = { equals: filters.region };
-	if (filters?.isFavorite) where.isFavorite = true;
+	if (filters?.category) {
+		where.category = { equals: filters.category };
+	}
 
-	// Las relaciones se manejan con joins separados en Drizzle
+	if (filters?.type) {
+		where.type = { equals: filters.type };
+	}
+
+	if (filters?.location) {
+		where.location = { equals: filters.location };
+	}
+
+	if (filters?.isFavorite !== undefined) {
+		where.isFavorite = filters.isFavorite;
+	}
+
 	return where;
 }
 
 /**
- * Mapea las opciones de búsqueda de la aplicación a los argumentos de consulta de Drizzle.
+ * Convierte las opciones de búsqueda de la aplicación a un formato compatible con Drizzle.
  * ✅ MIGRADO A DRIZZLE
- * @param options - Opciones de búsqueda de la aplicación.
- * @returns Argumentos para consultas de Drizzle.
+ * @param options - Las opciones de búsqueda de la aplicación.
+ * @returns Un objeto con las opciones de consulta para Drizzle.
  */
 export function toSearchOptionsForDrizzle(options: PlaceSearchOptions = {}): DrizzleFindManyArgs {
-	return {
-		where: createFilterForDrizzle(options.filters),
-		orderBy: createOrderByForDrizzle(options),
-		skip: options.skip,
-		take: options.take,
-		// Los counts se manejan por separado en Drizzle
-	};
+	const args: DrizzleFindManyArgs = {};
+
+	if (options.filters) {
+		args.where = createFilterForDrizzle(options.filters);
+	}
+
+	if (options.orderBy) {
+		args.orderBy = createOrderByForDrizzle(options);
+	}
+
+	if (options.pagination) {
+		if (options.pagination.skip !== undefined) {
+			args.skip = options.pagination.skip;
+		}
+		if (options.pagination.take !== undefined) {
+			args.take = options.pagination.take;
+		}
+	}
+
+	return args;
 }
 
 // Mantener funciones legacy para compatibilidad (DEPRECATED)

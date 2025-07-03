@@ -1,5 +1,7 @@
 import { scanFolder } from './folder-scanner';
-import { prisma } from './prisma';
+import { db } from '@/lib/drizzle';
+import { folders, images } from '@/lib/drizzle/schema';
+import { eq } from 'drizzle-orm';
 
 /**
  * 🔧 FIXED: Actualiza estadísticas usando el mismo criterio que el reindexado
@@ -8,9 +10,9 @@ import { prisma } from './prisma';
  */
 export async function updateFolderStats(folderId: string) {
 	// Obtener la carpeta para acceder a su path
-	const folder = await prisma.folder.findUnique({
-		where: { id: folderId },
-		select: { path: true },
+	const folder = await db.query.folders.findFirst({
+		where: eq(folders.id, folderId),
+		columns: { path: true },
 	});
 
 	if (!folder) {
@@ -25,26 +27,26 @@ export async function updateFolderStats(folderId: string) {
 	});
 
 	// Actualizar con los mismos valores que usa el reindexado
-	await prisma.folder.update({
-		where: { id: folderId },
-		data: {
+	await db
+		.update(folders)
+		.set({
 			totalFiles: scanResult.totalFiles, // 🎯 Ahora usa el mismo criterio
 			totalSize: scanResult.totalSize, // 🎯 Ahora usa el mismo criterio
 			lastIndexed: new Date(),
-		},
-	});
+		})
+		.where(eq(folders.id, folderId));
 }
 
 export async function getFolderStats(folderId: string) {
-	const folder = await prisma.folder.findUnique({
-		where: { id: folderId },
-		select: {
+	const folder = await db.query.folders.findFirst({
+		where: eq(folders.id, folderId),
+		with: {
+			images: { columns: { id: true } },
+		},
+		columns: {
 			totalFiles: true,
 			totalSize: true,
 			lastIndexed: true,
-			_count: {
-				select: { images: true },
-			},
 		},
 	});
 
@@ -52,16 +54,16 @@ export async function getFolderStats(folderId: string) {
 		totalFiles: folder?.totalFiles || 0,
 		totalSize: folder?.totalSize || 0,
 		lastIndexed: folder?.lastIndexed,
-		imageCount: folder?._count.images || 0,
+		imageCount: folder?.images.length || 0,
 	};
 }
 
 export async function updateAllFolderStats() {
-	const folders = await prisma.folder.findMany({
-		select: { id: true },
+	const foldersData = await db.query.folders.findMany({
+		columns: { id: true },
 	});
 
-	for (const folder of folders) {
+	for (const folder of foldersData) {
 		await updateFolderStats(folder.id);
 	}
 }
