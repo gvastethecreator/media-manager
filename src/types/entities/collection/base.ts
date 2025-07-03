@@ -1,9 +1,24 @@
-import type { Collection } from '@prisma/client';
-
 /**
- * 🗿 Modelo base de Collection, tal como viene de Prisma.
+ * 🗿 Modelo base de Collection, basado en el esquema de Drizzle.
  */
-export type CollectionBase = Collection;
+export type CollectionBase = {
+    id: string;
+    name: string;
+    description: string | null;
+    emoji: string | null;
+    color: string | null;
+    featuredImage: string | null;
+    isPublic: boolean;
+    isFavorite: boolean;
+    totalImages: number;
+    totalVideos: number;
+    totalSize: number;
+    lastImageAddedAt: Date | null;
+    lastVideoAddedAt: Date | null;
+    parentId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+};
 
 /**
  * 📊 Estadísticas calculadas y derivadas para una Collection.

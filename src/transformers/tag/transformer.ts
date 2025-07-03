@@ -6,34 +6,31 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { calculateCompleteness } from '@/lib/utils/transformers';
-import type { PrismaTagWithCounts, TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
+import type { TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
 
 const tagTransformerLogger = clientLogger.withContext('TagTransformer');
 
 /**
- * Convierte un objeto Tag de Prisma a TagWithStats. * Esta función es compatible con el sistema legacy que esperaba TagComplete.
+ * Convierte un objeto Tag de Drizzle a TagWithStats. * Esta función es compatible con el sistema legacy que esperaba TagComplete.
  *
- * @param prismaTag El objeto Tag de Prisma, puede incluir conteos de relaciones
+ * @param drizzleTag El objeto Tag de Drizzle, puede incluir conteos de relaciones
  * @returns Un objeto TagWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): TagWithStats | null {
-	if (!prismaTag) {
-		tagTransformerLogger.warn('⚠️ Tag de Prisma nulo o indefinido');
+export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
+	if (!drizzleTag) {
+		tagTransformerLogger.warn('⚠️ Tag de Drizzle nulo o indefinido');
 		return null;
 	}
 
 	try {
-		tagTransformerLogger.debug(`🔄 Transformando tag: ${prismaTag.id}`);
+		tagTransformerLogger.debug(`🔄 Transformando tag: ${drizzleTag.id}`);
 
-		// Verificar si el objeto tiene conteos (_count)
-		const hasCounts = '_count' in prismaTag && prismaTag._count;
+		const hasCounts = '_count' in drizzleTag && drizzleTag._count;
 
 		if (hasCounts) {
-			// Si tiene conteos, usar el transformador completo
-			const { _count, ...baseTag } = prismaTag as PrismaTagWithCounts;
+			const { _count, ...baseTag } = drizzleTag;
 
-			// Calcular estadísticas
-			const totalRelations = Object.values(_count).reduce((sum, count) => sum + count, 0);
+			const totalRelations = Object.values(_count).reduce((sum, count) => sum + (count as number), 0);
 			const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
 			const totalPossibleRelations = Object.keys(_count).length;
 			const diversityRatio = totalPossibleRelations > 0 ? usageDiversity / totalPossibleRelations : 0;
@@ -53,8 +50,7 @@ export function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): 
 			};
 		}
 
-		// Si no tiene conteos, crear estadísticas vacías
-		const completenessScore = calculateCompleteness(prismaTag, ['name', 'description', 'category']);
+		const completenessScore = calculateCompleteness(drizzleTag, ['name', 'description', 'category']);
 
 		const stats: TagStatistics = {
 			totalRelations: 0,
@@ -64,7 +60,7 @@ export function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): 
 		};
 
 		return {
-			...prismaTag,
+			...(drizzleTag as TagBase),
 			stats,
 		};
 	} catch (error) {
@@ -73,24 +69,10 @@ export function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): 
 	}
 }
 
-// === NAMESPACE DE EXPORTACIÓN ===
-// Esta estructura evita que Next.js detecte el archivo como Server Action
-
-/**
- * TagTransformer - Namespace que contiene todas las funciones de transformación para tags
- */
 export const TagTransformer = {
-	fromPrismaTag,
+	fromDrizzleTag,
 } as const;
 
-/**
- * Alias para compatibilidad con código legacy.
- * @deprecated Usar fromPrismaTag directamente. SERÁ ELIMINADO EN v2.0
- */
-export const transformTag = TagTransformer.fromPrismaTag;
+export const transformTag = TagTransformer.fromDrizzleTag;
 
-/**
- * Tipo de compatibilidad para código legacy que espera TagComplete.
- * @deprecated Usar TagWithStats directamente. SERÁ ELIMINADO EN v2.0
- */
 export type TagComplete = TagWithStats;

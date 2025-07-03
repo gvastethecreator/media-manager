@@ -31,7 +31,7 @@ import {
 	X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,12 +49,12 @@ export interface ViewToolbarProps {
 	allItemIds?: string[]; // IDs de todos los elementos disponibles para selección
 }
 
-export function ViewToolbar({
+export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	isRightPanelCollapsed,
 	toggleRightPanelCollapse,
 	isRightPanelVisible,
 	allItemIds = [],
-}: ViewToolbarProps) {
+}) {
 	const { currentView, getCurrentItem } = useNavigationStore();
 
 	// 🔄 Usar los nuevos stores de Zustand
@@ -75,8 +75,8 @@ export function ViewToolbar({
 
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 
-	// Lista de vistas que requieren el panel de detalles
-	const viewsWithDetails = [
+	// Lista de vistas que requieren el panel de detalles - memoizada
+	const viewsWithDetails = useMemo(() => [
 		'all-images',
 		'favorites',
 		'search',
@@ -87,12 +87,15 @@ export function ViewToolbar({
 		'character-content',
 		'place-content',
 		'world-item-content',
-	];
+	], []);
 
-	const showDetailsButton = viewsWithDetails.includes(currentView);
+	const showDetailsButton = useMemo(() =>
+		viewsWithDetails.includes(currentView),
+		[viewsWithDetails, currentView]
+	);
 
 	// Determinar si estamos en la vista de settings para ocultar controles innecesarios
-	const isInSettingsView = currentView === 'settings';
+	const isInSettingsView = useMemo(() => currentView === 'settings', [currentView]);
 
 	// 🔄 Acciones para archivos seleccionados
 	const handleDeleteSelected = useCallback(() => {
@@ -510,4 +513,4 @@ export function ViewToolbar({
 			</div>
 		</div>
 	);
-}
+});

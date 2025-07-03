@@ -1,12 +1,10 @@
 /**
  * @file Tipos canónicos para la entidad Video
  * @module types/entities/video/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y optimizada para Video con patrón EntityWithStats.
  * Última refactorización: 2025-01-27
  */
 
-import type { Video as PrismaVideo } from '@prisma/client';
 import { z } from 'zod';
 
 // Imports optimizados usando tipos WithStats
@@ -77,26 +75,6 @@ export enum VideoViewMode {
 	LIST = 'list',
 	TIMELINE = 'timeline',
 }
-
-/**
- * 🎬 Consulta optimizada de Prisma con conteos
- */
-export type PrismaVideoWithCounts = PrismaVideo & {
-	_count?: {
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-};
 
 /**
  * 🔗 Relaciones de Video optimizadas (usando tipos WithStats)
@@ -197,47 +175,9 @@ export interface VideoBase {
 	updatedAt: Date;
 }
 
-/**
- * 🌟 Video con estadísticas calculadas y optimizado (TIPO PRINCIPAL)
- */
-export interface VideoWithStats extends VideoBase {
-	_count?: {
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-	relations?: Partial<VideoRelations>;
-	statistics: VideoStatistics;
-}
 
-/**
- * 🔍 Video completo con relaciones (solo para casos especiales)
- */
-export interface VideoComplete extends VideoBase, VideoRelations {
-	_count?: {
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
+
+
 
 /**
  * ➕ Input para crear un nuevo video
@@ -428,9 +368,3 @@ export const VideoSchema = z.object({
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
-
-// 🟢 Documentación y advertencia:
-// - Usar VideoWithStats como tipo principal en toda la aplicación
-// - VideoComplete solo para casos especiales que requieren relaciones completas
-// - Validar siempre con VideoSchema antes de persistir
-// - Usar PrismaVideoWithCounts para consultas optimizadas con _count

@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad Profile
  * @module types/entities/profile/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Profile.
  * Última migración: 2025-06-18
  */
@@ -148,7 +147,6 @@ export const ProfileSchema = z.object({
 	imageId: z.string().nullable().optional(),
 });
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con ProfileSchema antes de persistir.

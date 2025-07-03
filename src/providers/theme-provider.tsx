@@ -1,7 +1,7 @@
 'use client';
 
-import type { ThemeProviderProps } from 'next-themes';
-import { ThemeProvider as NextThemeProvider, useTheme } from 'next-themes';
+import { ThemeProvider as NativeThemeProvider, useTheme } from '@/lib/contexts/theme-context';
+import type { ThemeProviderProps } from '@/lib/contexts/theme-context';
 import { useEffect } from 'react';
 
 // Definimos los temas personalizados

@@ -5,8 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import { createAudio, deleteAudio, getAudios, updateAudio } from '@/app/actions/audio/audio.actions';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
+import { createAudio, deleteAudio, getAudios, updateAudio } from '@/services/audio/audio.service';
 import type {
     AudioCreateInput,
     AudioUpdateInput,

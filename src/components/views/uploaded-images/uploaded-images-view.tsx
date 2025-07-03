@@ -6,7 +6,7 @@ import {
 	deleteUploadedImage,
 	getUploadedImages,
 	uploadImages,
-} from '@/app/actions/uploaded-images/uploaded-images.actions';
+} from '@/services/uploaded-images/uploaded-images.service';
 import { MemoizedImageCard } from '@/components/cards/image-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -37,7 +37,7 @@ import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 import { toastService } from '@/services/toast';
 import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
 import { UploadedImageType } from '@/types/entities/uploaded-image/types';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import { FileProcessingStatus, FileType } from '@/types/files';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');

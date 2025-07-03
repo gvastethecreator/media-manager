@@ -1,15 +1,15 @@
-import { Check, Loader2, Pencil, X } from 'lucide-react';
-import { useCallback, useState, useTransition } from 'react';
-import { updateMultipleImagesMetadata } from '@/app/actions/images/metadata.actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import type { FileItem } from '@/types/files';
+import { updateMetadata } from '@/services/metadata/metadata.service';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import { Check, Loader2, Pencil, X } from 'lucide-react';
+import { useCallback, useState, useTransition } from 'react';
 
 export interface BulkMetadataEditorProps {
-	items: FileItem[];
+	items: EntityWithStats[];
 }
 
 /**
@@ -46,15 +46,27 @@ export function BulkMetadataEditor({ items }: BulkMetadataEditorProps) {
 
 		startTransition(async () => {
 			try {
-				const result = await updateMultipleImagesMetadata(itemIds, {
-					title: title || undefined,
-					description: description || undefined,
-				});
+				let successCount = 0;
 
-				if (result.success) {
+				// Actualizar metadatos para cada item individualmente
+				for (const itemId of itemIds) {
+					try {
+						const metadataUpdate = {
+							title: title || undefined,
+							description: description || undefined,
+						};
+
+						await updateMetadata(itemId, metadataUpdate);
+						successCount++;
+					} catch (error) {
+						console.error(`Error actualizando metadatos para item ${itemId}:`, error);
+					}
+				}
+
+				if (successCount > 0) {
 					toast({
 						title: 'Metadatos actualizados',
-						description: `Se han actualizado ${result.count} elementos correctamente`,
+						description: `Se han actualizado ${successCount} elementos correctamente`,
 					});
 
 					setIsEditing(false);

@@ -7,20 +7,33 @@
 import type { BaseEntity } from '@/types/common/base';
 
 /**
- * 🎯 Tipo base para Prompt derivado del schema de Prisma
+ * 🎯 Tipo base para Prompt derivado del schema de Drizzle
  */
 export interface PromptBase extends BaseEntity {
+	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 	description: string | null;
-	content: string;
-	purpose: string;
-	category: string;
-	parameters: string; // JSON serializado de PromptParameter[]
-	tags: string; // JSON serializado de string[]
-	featuredImage: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
 	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	content: string | null;
+	parameters: string | null;
+	style: string | null;
+	mood: string | null;
+	lighting: string | null;
+	composition: string | null;
+	technique: string | null;
+	inspiration: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -69,7 +82,7 @@ export interface PromptStatistics {
 }
 
 /**
- * 🔢 Conteos de Prisma para Prompt
+ * 🔢 Conteos de Drizzle para Prompt
  */
 export interface PromptCounts {
 	_count: {
@@ -77,7 +90,7 @@ export interface PromptCounts {
 		videos: number;
 		albums: number;
 		collections: number;
-		tagEntities: number;
+		tags: number;
 		characters: number;
 		places: number;
 		worldItems: number;
@@ -130,63 +143,3 @@ export interface PromptWithStats extends Omit<PromptBase, 'parameters' | 'tags'>
 		lastExecutionTimestamp?: Date;
 	};
 }
-
-/**
- * 🔍 Consulta optimizada de Prisma para PromptWithStats
- */
-export const PrismaPromptWithCounts = {
-	include: {
-		_count: {
-			select: {
-				images: true,
-				videos: true,
-				albums: true,
-				collections: true,
-				tagEntities: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				notes: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-			},
-		},
-	},
-} as const;
-
-/**
- * 📋 Tipo derivado de la consulta de Prisma
- */
-export type PrismaPromptWithCountsType = {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	content: string;
-	purpose: string;
-	category: string;
-	parameters: string;
-	tags: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tagEntities: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-};

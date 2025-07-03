@@ -1,9 +1,13 @@
-import type { Group } from '@prisma/client';
-
 /**
- * 🗿 Modelo base de Group, tal como viene de Prisma.
+ * 🗿 Modelo base de Group, basado en el esquema de Drizzle.
  */
-export type GroupBase = Group;
+export type GroupBase = {
+    id: string;
+    name: string;
+    description: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+};
 
 /**
  * 📊 Estadísticas calculadas y derivadas para un Group.

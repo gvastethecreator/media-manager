@@ -5,13 +5,13 @@
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
+import { createSelectors } from '@/lib/utils/store/create-selectors';
 import {
     createJsonFile,
     deleteJsonFile,
     getJsonFiles,
     updateJsonFile,
-} from '@/app/actions/json-file/json-file.actions';
-import { createSelectors } from '@/lib/utils/store/create-selectors';
+} from '@/services/json-file/json-file.service';
 import type {
     JsonFileCreateInput,
     JsonFileUpdateInput,

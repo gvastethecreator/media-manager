@@ -6,7 +6,7 @@
 
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+
 type DrizzleCreateActivityData = {
 	type: string;
 	description: string;
@@ -162,13 +162,4 @@ export function generateActivityDescription(type: ActivityType | string, data: R
 	return template.replace(/\${(\w+)}/g, (_, key) => data[key] || '[?]');
 }
 
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreateActivityDataToDrizzle
- */
-export const mapCreateActivityDataToPrisma = mapCreateActivityDataToDrizzle;
 
-/**
- * @deprecated Usar mapActivityFiltersToDrizzle
- */
-export const mapActivityFiltersToPrisma = mapActivityFiltersToDrizzle;

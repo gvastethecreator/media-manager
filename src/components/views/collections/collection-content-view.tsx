@@ -5,7 +5,7 @@ import type { CollectionContentProps } from '@/components/views/base/types';
 import { useCollectionImages } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 const logger = clientLogger.withContext('CollectionContentView');
 
@@ -15,7 +15,7 @@ export function CollectionContentView() {
 
 	const currentCollection = getSelectedCollection();
 
-	const [collectionImages, setCollectionImages] = useState<FileItem[]>([]);
+	const [collectionImages, setCollectionImages] = useState<EntityWithStats[]>([]);
 	const [loadingImages, setLoadingImages] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +36,7 @@ export function CollectionContentView() {
 				setLoadingImages(true);
 				logger.info(`🔄 Cargando imágenes para colección: ${selectedCollectionId}`);
 				if (collectionImagesData) {
-					setCollectionImages(collectionImagesData as unknown as FileItem[]);
+					setCollectionImages(collectionImagesData as EntityWithStats[]);
 				}
 				setError(null);
 				logger.info(`✅ ${collectionImagesData?.length || 0} imágenes cargadas para colección`);
@@ -54,7 +54,7 @@ export function CollectionContentView() {
 	}, [selectedCollectionId, collectionImagesData]);
 
 	const handleToggleItemSelection = useCallback(
-		async (item: FileItem) => {
+		async (item: EntityWithStats) => {
 			if (!selectedCollectionId) {
 				logger.warn('⚠️ No hay colección seleccionada para modificar');
 				return;

@@ -1,4 +1,9 @@
-import type { Prisma } from '@prisma/client';
+/**
+ * @file Tipos base para la entidad Place.
+ * @module types/entities/place/base
+ * @description Define los tipos canónicos para la entidad Place, incluyendo el tipo
+ *              base y el tipo con estadísticas.
+ */
 
 // TODO: Estos tipos genéricos deben moverse a un archivo centralizado, por ejemplo, src/types/common/entities.ts
 export type EntityWithStats<T, S> = T & { stats: S };
@@ -8,18 +13,38 @@ export type EntityWithStats<T, S> = T & { stats: S };
 /**
  * PLACE BASE TYPE
  *
- * Este es el tipo base para un lugar, derivado directamente del schema de Prisma.
+ * Este es el tipo base para un lugar, derivado directamente del schema de Drizzle.
  * Incluye todos los campos escalares y las relaciones básicas.
- *
- * @see Prisma.PlaceCreateInput
  */
-export type PlaceBase = Prisma.PlaceGetPayload<{
-	include: {
-		images: true;
-		tags: true;
-		notes: true;
-	};
-}>;
+export type PlaceBase = {
+    id: string;
+    name: string;
+    description: string | null;
+    emoji: string | null;
+    color: string | null;
+    category: string | null;
+    isPublic: boolean;
+    isFavorite: boolean;
+    totalImages: number;
+    totalVideos: number;
+    type: string | null;
+    location: string | null;
+    climate: string | null;
+    population: string | null;
+    government: string | null;
+    economy: string | null;
+    culture: string | null;
+    history: string | null;
+    geography: string | null;
+    landmarks: string | null;
+    dangers: string | null;
+    resources: string | null;
+    notes: string | null;
+    featuredImage: string | null;
+    parentId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+};
 
 /**
  * PLACE STATISTICS
@@ -39,23 +64,6 @@ export interface PlaceStatistics {
 }
 
 /**
- * PRISMA PLACE WITH COUNTS
- *
- * Extiende el tipo de Prisma para incluir los conteos de relaciones.
- * Optimizado para consultas eficientes que solo necesitan los conteos, no los datos completos.
- */
-export type PrismaPlaceWithCounts = PlaceBase & {
-	_count: {
-		images?: number;
-		tags?: number;
-		notes?: number;
-		characters?: number;
-		collections?: number;
-		concepts?: number;
-	};
-};
-
-/**
  * PLACE WITH STATS
  *
  * El tipo principal y enriquecido para la entidad Place.
@@ -65,7 +73,7 @@ export type PrismaPlaceWithCounts = PlaceBase & {
 export type PlaceWithStats = PlaceBase & {
 	/** Estadísticas calculadas de la entidad */
 	_stats: PlaceStatistics;
-	/** Conteos de relaciones desde Prisma */
+	/** Conteos de relaciones desde Drizzle */
 	_count: {
 		images?: number;
 		tags?: number;
@@ -85,17 +93,15 @@ export type PlaceWithStats = PlaceBase & {
  * PLACE CREATE INPUT
  *
  * Tipo para la creación de un nuevo lugar.
- * Se basa en PlaceUncheckedCreateInput pero puede ser extendido.
  */
-export type PlaceCreateInput = Prisma.PlaceUncheckedCreateInput;
+export type PlaceCreateInput = Omit<PlaceBase, 'id' | 'createdAt' | 'updatedAt'>;
 
 /**
  * PLACE UPDATE INPUT
  *
  * Tipo para la actualización de un lugar existente.
- * Se basa en PlaceUncheckedUpdateInput pero puede ser extendido.
  */
-export type PlaceUpdateInput = Prisma.PlaceUncheckedUpdateInput;
+export type PlaceUpdateInput = Partial<PlaceCreateInput>;
 
 /**
  * PLACE PREVIEW

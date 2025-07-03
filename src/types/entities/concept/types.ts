@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad Concept
  * @module types/entities/concept/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Concept.
  * Última migración: 2025-06-18
  */
@@ -220,7 +219,6 @@ export const ConceptSchema = z.object({
 	updatedAt: z.date(),
 });
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con ConceptSchema antes de persistir.

@@ -3,4 +3,4 @@
 export * from './cache';
 export * from './db';
 export * from './db-utils';
-export * from './prisma';
+export * from './schema';

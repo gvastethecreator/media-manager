@@ -25,7 +25,7 @@ export type {
 	ImageValidated,
 	ImageViewConfig,
 	ImageWithStats,
-	PrismaImageWithCounts,
+	
 	RelatedImage,
 } from './types';
 

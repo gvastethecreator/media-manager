@@ -11,7 +11,7 @@ import { toast } from '@/services/toast';
 // Importaciones de stores en entidades
 
 // Importaciones de actions de archivos
-import { deleteFile as deleteFileAction } from '@/app/actions/files/file.actions';
+import { deleteFile as deleteFileAction } from '@/services/file/file.service';
 
 // Importar el tipo local en lugar del tipo global
 import type { FileItem } from '@/types/files';

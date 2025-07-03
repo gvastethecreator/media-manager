@@ -5,7 +5,7 @@
  *   Este archivo centraliza las exportaciones de tipos para la entidad Document.
  *   El tipo canónico para usar en la aplicación es **`DocumentWithStats`**.
  *
- *   - `DocumentBase`: Tipo base de Prisma (modificado).
+ *   - `DocumentBase`: Tipo base de Drizzle.
  *   - `DocumentWithStats`: Tipo enriquecido con estadísticas de contenido.
  *
  * @see /src/types/entities/document/base.ts

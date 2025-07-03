@@ -5,17 +5,17 @@
  * Última actualización: 2025-01-27
  */
 
-import type { StateCreator } from 'zustand';
-import {
-	createImage as createServerImage,
-	deleteImage as deleteServerImage,
-	getImage,
-	getImages,
-	updateImage as updateServerImage,
-} from '@/app/actions/images/image-crud.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
+import {
+    createImage as createServerImage,
+    deleteImage as deleteServerImage,
+    getImage,
+    getImages,
+    updateImage as updateServerImage,
+} from '@/services/image/image.service';
 import { toastService } from '@/services/toast';
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
+import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
 const imageLogger = clientLogger.withContext('ImageStore');

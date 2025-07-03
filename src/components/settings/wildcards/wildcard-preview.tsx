@@ -1,28 +1,13 @@
-import type { WildcardComplete as Wildcard } from '@prisma/client';
 import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import type { WildcardWithStats } from '@/types/entities/wildcard/base';
 
 interface WildcardPreviewProps {
-	wildcard: Wildcard & {
-		_count?: {
-			images: number;
-			videos: number;
-			albums: number;
-			collections: number;
-			tags: number;
-			characters: number;
-			places: number;
-			worldItems: number;
-			concepts: number;
-			prompts: number;
-			notes: number;
-			properties: number;
-			childWildcards: number;
-		};
-		parent?: Wildcard | null;
-		childWildcards?: Wildcard[];
+	wildcard: WildcardWithStats & {
+		parent?: WildcardWithStats | null;
+		childWildcards?: WildcardWithStats[];
 	};
 	onEdit?: () => void;
 	onDelete?: () => void;
@@ -31,7 +16,7 @@ interface WildcardPreviewProps {
 
 export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false }: WildcardPreviewProps) {
 	// Convertir el string JSON de children a array
-	const children = wildcard.children !== 'empty_array' ? JSON.parse(wildcard.children) : [];
+	const children = wildcard.children && wildcard.children !== 'empty_array' ? JSON.parse(wildcard.children) : [];
 
 	const totalElements = wildcard._count
 		? Object.entries(wildcard._count)
@@ -45,7 +30,7 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<span role="img" aria-label="emoji" className="text-2xl">
-							{wildcard.emoji}
+							{wildcard.emoji || '🃏'}
 						</span>
 						<div className="flex flex-col">
 							<CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -98,8 +83,8 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 				<div className="space-y-2">
 					<h3 className="text-sm font-medium">Color</h3>
 					<div className="flex items-center gap-2">
-						<div className="w-4 h-4 rounded" style={{ backgroundColor: wildcard.color }} />
-						<span className="text-sm text-muted-foreground">{wildcard.color}</span>
+						<div className="w-4 h-4 rounded" style={{ backgroundColor: wildcard.color || '#3b82f6' }} />
+						<span className="text-sm text-muted-foreground">{wildcard.color || '#3b82f6'}</span>
 					</div>
 				</div>
 
@@ -109,7 +94,7 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 					<div className="grid grid-cols-2 gap-4">
 						<Card className="p-4 bg-muted/50">
 							<p className="text-sm font-medium">Hijos directos</p>
-							<p className="text-2xl font-bold">{wildcard._count?.childWildcards || 0}</p>
+							<p className="text-2xl font-bold">{wildcard.childWildcards?.length || 0}</p>
 						</Card>
 						<Card className="p-4 bg-muted/50">
 							<p className="text-sm font-medium">Valores</p>
@@ -133,7 +118,7 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 										)}
 									>
 										<span role="img" aria-label="emoji">
-											{child.emoji}
+											{child.emoji || '🃏'}
 										</span>
 										<span className="text-sm font-medium">{child.name}</span>
 									</div>
