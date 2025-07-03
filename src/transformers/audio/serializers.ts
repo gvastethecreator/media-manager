@@ -1,17 +1,55 @@
 // Serializers para Audio
+// ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
 
-import type { Audio as PrismaAudio } from '@prisma/client';
 import type { Audio, AudioCreateInput, AudioUpdateInput } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
 
+// Tipo local equivalente a Prisma (migración a Drizzle)
+type DrizzleAudio = {
+	id: string;
+	name: string;
+	filePath: string;
+	duration?: number | null;
+	format?: string | null;
+	size: number;
+	bitrate?: number | null;
+	sampleRate?: number | null;
+	channels?: number | null;
+	metadata?: string | null; // JSON
+	thumbnail?: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	folderId: string;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+/**
+ * Valida un objeto Audio usando el schema
+ * ✅ MIGRADO A DRIZZLE
+ */
 export function validateAudio(input: unknown): Audio {
 	return audioSchema.parse(input) as Audio;
 }
 
+/**
+ * Serializa datos de audio para operaciones de creación/actualización
+ * ✅ MIGRADO A DRIZZLE
+ */
 export function serializeAudio(data: AudioCreateInput | AudioUpdateInput): AudioCreateInput | AudioUpdateInput {
 	return data;
 }
 
-export function deserializeAudio(prismaAudio: PrismaAudio): Audio {
-	return audioSchema.parse(prismaAudio) as Audio;
+/**
+ * Deserializa un objeto Audio de Drizzle al tipo de la aplicación
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function deserializeAudio(drizzleAudio: DrizzleAudio): Audio {
+	return audioSchema.parse(drizzleAudio) as Audio;
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar deserializeAudio con tipos de Drizzle
+ */
+export const deserializeAudioFromPrisma = deserializeAudio;

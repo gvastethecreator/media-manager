@@ -13,7 +13,13 @@
  */
 
 // --- Tipos Canónicos (NUEVO) ---
-export type { DocumentBase, DocumentStatistics, DocumentWithStats } from './base';
+export type {
+    DocumentBase,
+    DocumentCreateInput,
+    DocumentStatistics,
+    DocumentUpdateInput,
+    DocumentWithStats
+} from './base';
 
 // --- Esquemas de Validación ---
 export { documentSchema } from './document.schema';

@@ -126,7 +126,7 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 		statsLogger.info('📊 Obteniendo estadísticas del sistema con optimizaciones');
 
 		// 🚀 Usar servicio optimizado para los conteos principales
-		const optimizedStatsService = OptimizedStatsService.getInstance(prisma);
+		const optimizedStatsService = OptimizedStatsService.getInstance();
 		const globalStats = await optimizedStatsService.getGlobalStatsOptimized();
 
 		// 📊 Obtener topTags y recentActivity por separado (optimización futura)

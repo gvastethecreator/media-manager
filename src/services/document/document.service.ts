@@ -6,7 +6,6 @@
  * @updated 2025-06-27
  */
 
-import type { Prisma } from '@prisma/client';
 import { db } from '@/lib/drizzle';
 import { documents } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -14,9 +13,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toDocumentWithStats } from '@/transformers/document';
-import type { DocumentWithStats } from '@/types/entities/document';
+import type { DocumentWithStats, DocumentCreateInput, DocumentUpdateInput } from '@/types/entities/document';
 // Drizzle imports
 import { eq, asc, desc, count } from 'drizzle-orm';
+import * as crypto from 'crypto';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 
@@ -152,101 +152,124 @@ export async function getDocumentById(id: string): Promise<DocumentWithStats | n
 /**
  * Crea un nuevo documento
  */
-export async function createDocument(data: Prisma.DocumentCreateInput): Promise<DocumentWithStats> {
+export async function createDocument(data: DocumentCreateInput): Promise<DocumentWithStats> {
 	try {
-		documentLogger.info('Creando documento:', data.name);
+		documentLogger.info('📝 Creando documento:', data.name);
 
-		const newDocument = await db.insert(documents).values({
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.insert(documents).values({
+			id: crypto.randomUUID(),
 			name: data.name,
-			description: data.description,
-			emoji: data.emoji,
-			color: data.color,
-			shortcut: data.shortcut,
-			category: data.category,
-			filePath: data.filePath,
-			fileName: data.fileName,
-			fileSize: data.fileSize,
+			path: data.path,
+			size: data.size,
+			hash: data.hash,
 			mimeType: data.mimeType,
-			pageCount: data.pageCount,
-			content: data.content,
-			tags: data.tags,
-			metadata: data.metadata,
-			sortBy: data.sortBy,
-			filters: data.filters,
-			featuredImage: data.featuredImage,
-			isFavorite: data.isFavorite,
-			createdAt: data.createdAt,
-			updatedAt: data.updatedAt,
+			extension: data.extension,
+			folderId: data.folderId,
+			isFavorite: data.isFavorite || false,
+			isArchived: data.isArchived || false,
+			pageCount: data.pageCount || null,
+			wordCount: data.wordCount || null,
+			language: data.language || null,
+			title: data.title || null,
+			author: data.author || null,
+			subject: data.subject || null,
+			keywords: data.keywords || null,
+			creator: data.creator || null,
+			producer: data.producer || null,
+			creationDate: data.creationDate || null,
+			modificationDate: data.modificationDate || null,
+			encrypted: data.encrypted || false,
+			version: data.version || null,
+			content: data.content || null,
+			summary: data.summary || null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		}).returning();
 
-		// Emitir eventos con el nuevo sistema
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_CREATED],
-			data: { action: 'create', entity: newDocument[0], eventType: EVENTS.DOCUMENT_CREATED },
-		});
+		const newDocument = result[0];
+		const documentWithStats = toDocumentWithStats(newDocument);
 
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENTS_CHANGED],
-			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
+			type: 'files:modified',
+			data: { action: 'create', document: newDocument },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		documentLogger.info('Documento creado:', newDocument[0].name);
-		return toDocumentWithStats(newDocument[0]);
+		documentLogger.info('✅ Documento creado:', documentWithStats.name);
+		return documentWithStats;
 	} catch (error) {
-		documentLogger.error('Error creando documento:', { data, error });
-		throw new Error('Error al crear documento');
+		documentLogger.error('❌ Error al crear documento:', error);
+		throw createDocumentError('No se pudo crear el documento', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
  * Actualiza un documento existente
  */
-export async function updateDocument(id: string, data: Prisma.DocumentUpdateInput): Promise<DocumentWithStats> {
+export async function updateDocument(id: string, data: DocumentUpdateInput): Promise<DocumentWithStats> {
 	try {
-		documentLogger.info('Actualizando documento:', id);
+		documentLogger.info('🔄 Actualizando documento:', id);
 
-		const updatedDocument = await db.update(documents)
-			.set({
-				name: data.name,
-				description: data.description,
-				emoji: data.emoji,
-				color: data.color,
-				shortcut: data.shortcut,
-				category: data.category,
-				filePath: data.filePath,
-				fileName: data.fileName,
-				fileSize: data.fileSize,
-				mimeType: data.mimeType,
-				pageCount: data.pageCount,
-				content: data.content,
-				tags: data.tags,
-				metadata: data.metadata,
-				sortBy: data.sortBy,
-				filters: data.filters,
-				featuredImage: data.featuredImage,
-				isFavorite: data.isFavorite,
-				createdAt: data.createdAt,
-				updatedAt: new Date(), // Actualizar timestamp
-			})
+		// Verificar que el documento existe
+		const exists = await documentExists(id);
+		if (!exists) {
+			throw createDocumentError('Documento no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+		}
+
+		// **MIGRACIÓN A DRIZZLE**
+		// Solo actualizar campos que están presentes en data
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
+
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.path !== undefined) updateData.path = data.path;
+		if (data.size !== undefined) updateData.size = data.size;
+		if (data.hash !== undefined) updateData.hash = data.hash;
+		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
+		if (data.extension !== undefined) updateData.extension = data.extension;
+		if (data.folderId !== undefined) updateData.folderId = data.folderId;
+		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
+		if (data.isArchived !== undefined) updateData.isArchived = Boolean(data.isArchived);
+		if (data.pageCount !== undefined) updateData.pageCount = data.pageCount;
+		if (data.wordCount !== undefined) updateData.wordCount = data.wordCount;
+		if (data.language !== undefined) updateData.language = data.language;
+		if (data.title !== undefined) updateData.title = data.title;
+		if (data.author !== undefined) updateData.author = data.author;
+		if (data.subject !== undefined) updateData.subject = data.subject;
+		if (data.keywords !== undefined) updateData.keywords = data.keywords;
+		if (data.creator !== undefined) updateData.creator = data.creator;
+		if (data.producer !== undefined) updateData.producer = data.producer;
+		if (data.creationDate !== undefined) updateData.creationDate = data.creationDate;
+		if (data.modificationDate !== undefined) updateData.modificationDate = data.modificationDate;
+		if (data.encrypted !== undefined) updateData.encrypted = Boolean(data.encrypted);
+		if (data.version !== undefined) updateData.version = data.version;
+		if (data.content !== undefined) updateData.content = data.content;
+		if (data.summary !== undefined) updateData.summary = data.summary;
+
+		const result = await db
+			.update(documents)
+			.set(updateData)
 			.where(eq(documents.id, id))
 			.returning();
 
-		// Emitir eventos con el nuevo sistema
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_UPDATED],
-			data: { action: 'update', entity: updatedDocument[0], eventType: EVENTS.DOCUMENT_UPDATED },
-		});
+		const updatedDocument = result[0];
+		const documentWithStats = toDocumentWithStats(updatedDocument);
 
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENTS_CHANGED],
-			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
+			type: 'files:modified',
+			data: { action: 'update', document: updatedDocument },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		documentLogger.info('Documento actualizado:', updatedDocument[0].name);
-		return toDocumentWithStats(updatedDocument[0]);
+		documentLogger.info('✅ Documento actualizado:', documentWithStats.name);
+		return documentWithStats;
 	} catch (error) {
-		documentLogger.error('Error actualizando documento:', { id, data, error });
-		throw new Error('Error al actualizar documento');
+		documentLogger.error('❌ Error al actualizar documento:', error);
+		throw createDocumentError('No se pudo actualizar el documento', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -255,27 +278,33 @@ export async function updateDocument(id: string, data: Prisma.DocumentUpdateInpu
  */
 export async function deleteDocument(id: string): Promise<void> {
 	try {
-		documentLogger.info('Eliminando documento:', id);
+		documentLogger.info('🗑️ Eliminando documento:', id);
 
-		const deletedDocument = await db.delete(documents)
+		// Verificar que el documento existe
+		const exists = await documentExists(id);
+		if (!exists) {
+			throw createDocumentError('Documento no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+		}
+
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.delete(documents)
 			.where(eq(documents.id, id))
 			.returning();
 
-		// Emitir eventos con el nuevo sistema
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_DELETED],
-			data: { action: 'delete', entity: { id }, eventType: EVENTS.DOCUMENT_DELETED },
-		});
+		const deletedDocument = result[0];
 
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENTS_CHANGED],
-			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
+			type: 'files:modified',
+			data: { action: 'delete', document: deletedDocument },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		documentLogger.info('Documento eliminado:', id);
+		documentLogger.info('✅ Documento eliminado:', deletedDocument.name);
 	} catch (error) {
-		documentLogger.error('Error eliminando documento:', { id, error });
-		throw new Error('Error al eliminar documento');
+		documentLogger.error('❌ Error al eliminar documento:', error);
+		throw createDocumentError('No se pudo eliminar el documento', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -284,13 +313,15 @@ export async function deleteDocument(id: string): Promise<void> {
  */
 export async function documentExists(id: string): Promise<boolean> {
 	try {
-		const result = await db.select({ id: documents.id })
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.select({ count: count() })
 			.from(documents)
-			.where(eq(documents.id, id))
-			.limit(1);
-		return result.length > 0;
+			.where(eq(documents.id, id));
+
+		return result[0].count > 0;
 	} catch (error) {
-		documentLogger.error('Error verificando existencia de documento:', { id, error });
+		documentLogger.error('❌ Error verificando existencia de documento:', { id, error });
 		return false;
 	}
 }
@@ -300,11 +331,14 @@ export async function documentExists(id: string): Promise<boolean> {
  */
 export async function getDocumentCount(): Promise<number> {
 	try {
-		const result = await db.select({ count: count() })
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.select({ count: count() })
 			.from(documents);
+
 		return result[0].count;
 	} catch (error) {
-		documentLogger.error('Error obteniendo conteo de documentos:', { error });
-		throw new Error('Error al obtener conteo de documentos');
+		documentLogger.error('❌ Error obteniendo conteo de documentos:', error);
+		throw createDocumentError('No se pudo obtener el conteo de documentos', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }

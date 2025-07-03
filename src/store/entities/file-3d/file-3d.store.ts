@@ -2,14 +2,18 @@
  * 📦 Store de File3D
  * @module store/entities/file-3d/file-3d.store
  * @description Store Zustand para gestionar el estado de archivos 3D
+ * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
 import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/app/actions/file3d/file-3d.actions';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { File3DWithStats } from '@/types/entities/file3d';
+import type {
+    File3DCreateInput,
+    File3DUpdateInput,
+    File3DWithStats
+} from '@/types/entities/file3d';
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type File3DFilters = Record<string, any>;
@@ -30,8 +34,8 @@ export interface File3DState {
 
 	// Acciones de datos
 	fetchFile3Ds: () => Promise<void>;
-	createFile3D: (data: Prisma.File3DCreateInput) => Promise<File3DWithStats | undefined>;
-	updateFile3D: (id: string, data: Prisma.File3DUpdateInput) => Promise<File3DWithStats | undefined>;
+	createFile3D: (data: File3DCreateInput) => Promise<File3DWithStats | undefined>;
+	updateFile3D: (id: string, data: File3DUpdateInput) => Promise<File3DWithStats | undefined>;
 	deleteFile3D: (id: string) => Promise<void>;
 
 	// Acciones de selección
@@ -70,7 +74,7 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			createFile3D: async (data: Prisma.File3DCreateInput) => {
+			createFile3D: async (data: File3DCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newFile3D = await createFile3D(data);
@@ -85,7 +89,7 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			updateFile3D: async (id: string, data: Prisma.File3DUpdateInput) => {
+			updateFile3D: async (id: string, data: File3DUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedFile3D = await updateFile3D(id, data);

@@ -3,7 +3,7 @@
  * @module services/profile
  */
 
-import { prisma } from '@/lib/database/prisma';
+
 import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Importar Drizzle para coexistencia
 import { db } from '@/lib/drizzle';
@@ -147,7 +147,7 @@ class ProfileServiceImpl {
 			// 5. Ejecutar consulta
 			const drizzleProfiles = await query;
 
-			// 6. Restructurar resultados para compatibilidad con Prisma
+			// 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
 			const drizzleResults = drizzleProfiles.map(raw => ({
 				id: raw.id,
 				name: raw.name,
@@ -159,7 +159,6 @@ class ProfileServiceImpl {
 				updatedAt: raw.updatedAt,
 				settingsId: raw.settingsId,
 				imageId: raw.imageId,
-				// Crear objeto settings compatible con Prisma
 				settings: raw.settingsRealId ? {
 					id: raw.settingsRealId,
 					theme: raw.settingsTheme,
@@ -169,35 +168,8 @@ class ProfileServiceImpl {
 				} : null,
 			}));
 
-			// 7. Validación con Prisma (solo en desarrollo)
-			if (process.env.NODE_ENV === 'development') {
-				// Construir where clause para Prisma
-				const prismaWhere: any = {};
-				if (search) {
-					prismaWhere.OR = [{ name: { contains: search } }, { description: { contains: search } }];
-				}
-				if (typeof isActive === 'boolean') prismaWhere.isActive = isActive;
-				if (theme) prismaWhere.settings = { theme };
-				if (language) prismaWhere.settings = { ...prismaWhere.settings, language };
-
-				const prismaProfiles = await prisma.profile.findMany({
-					where: prismaWhere,
-					include: { settings: true },
-					orderBy: { [sortBy]: sortDirection },
-					skip: (page - 1) * limit,
-					take: limit,
-				});
-
-				// Validar que ambas consultas devuelvan la misma cantidad de resultados
-				if (drizzleResults.length !== prismaProfiles.length) {
-					console.warn(`[PROFILE VALIDATION] getProfiles - Diferente cantidad de resultados: Drizzle=${drizzleResults.length}, Prisma=${prismaProfiles.length}`);
-				} else {
-					console.log(`[PROFILE VALIDATION] ✅ getProfiles - ${drizzleResults.length} resultados en ambos ORMs`);
-				}
-			}
-
-			// 8. Transformar y retornar resultados de Drizzle
-			return transformProfiles(drizzleResults);
+			// 7. Retornar resultados de Drizzle
+			return drizzleResults;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -211,8 +183,8 @@ class ProfileServiceImpl {
 	 */
 	async createProfile(data: ProfileCreateInput): Promise<ProfileExtended> {
 		try {
-			const profile = await prisma.profile.create({ data });
-			return transformProfile(profile);
+			const [newProfile] = await db.insert(profiles).values(data).returning();
+			return transformProfile(newProfile);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -227,11 +199,8 @@ class ProfileServiceImpl {
 	 */
 	async updateProfile(id: string, data: ProfileUpdateInput): Promise<ProfileExtended> {
 		try {
-			const profile = await prisma.profile.update({
-				where: { id },
-				data,
-			});
-			return transformProfile(profile);
+			const [updatedProfile] = await db.update(profiles).set(data).where(eq(profiles.id, id)).returning();
+			return transformProfile(updatedProfile);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -247,16 +216,10 @@ class ProfileServiceImpl {
 	async setActiveProfile(id: string): Promise<void> {
 		try {
 			// Desactivar todos los perfiles
-			await prisma.profile.updateMany({
-				where: { isActive: true },
-				data: { isActive: false },
-			});
+			await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
 
 			// Activar el perfil seleccionado
-			await prisma.profile.update({
-				where: { id },
-				data: { isActive: true },
-			});
+			await db.update(profiles).set({ isActive: true }).where(eq(profiles.id, id));
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -324,19 +287,7 @@ class ProfileServiceImpl {
 				};
 			}
 
-						// 2. Validación con Prisma (solo en desarrollo)
-			if (process.env.NODE_ENV === 'development') {
-				const prismaProfile = await prisma.profile.findFirst({
-					where: { isActive: true },
-					include: {
-						settings: true,
-					},
-				});
-
-				validateProfileResults(drizzleResult, prismaProfile, 'getActiveProfile');
-			}
-
-			// 3. Transformar y retornar resultado de Drizzle
+						// 2. Transformar y retornar resultado de Drizzle
 			return drizzleResult ? transformProfile(drizzleResult) : null;
 		} catch (error) {
 			throw toServiceError(error, {
@@ -404,19 +355,7 @@ class ProfileServiceImpl {
 				};
 			}
 
-						// 2. Validación con Prisma (solo en desarrollo)
-			if (process.env.NODE_ENV === 'development') {
-				const prismaProfile = await prisma.profile.findUnique({
-					where: { id },
-					include: {
-						settings: true,
-					},
-				});
-
-				validateProfileResults(drizzleResult, prismaProfile, `getById(${id})`);
-			}
-
-			// 3. Transformar y retornar resultado de Drizzle
+						// 2. Transformar y retornar resultado de Drizzle
 			return drizzleResult ? transformProfile(drizzleResult) : null;
 		} catch (error) {
 			throw toServiceError(error, {
@@ -432,9 +371,7 @@ class ProfileServiceImpl {
 	 */
 	async delete(id: string): Promise<void> {
 		try {
-			await prisma.profile.delete({
-				where: { id },
-			});
+			await db.delete(profiles).where(eq(profiles.id, id));
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,

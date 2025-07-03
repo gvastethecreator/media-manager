@@ -6,19 +6,15 @@
  */
 
 
-import { prisma } from '@/lib/database/prisma';
-import { Prisma } from '@prisma/client';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-// Drizzle imports
-import { db } from '@/lib/drizzle';
-import { properties } from '@/lib/drizzle/schema';
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { toPropertyWithStats } from '@/transformers/property';
+import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
 import type { PropertyCreateInput, PropertyUpdateInput, PropertyWithStats } from '@/types/entities/property';
-import { propertyCounts } from '@/types/entities/property';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import * as crypto from 'crypto';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('PropertyService');
@@ -139,11 +135,9 @@ export async function getProperty(id: string): Promise<PropertyWithStats | null>
 			return null;
 		}
 
-		// Transformar a formato compatible con Prisma
-		const transformedProperty = {
+		const result: PropertyWithStats = {
 			...drizzleProperty[0],
 			isFavorite: Boolean(drizzleProperty[0].isFavorite),
-			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
 				images: 0,
 				videos: 0,
@@ -160,31 +154,6 @@ export async function getProperty(id: string): Promise<PropertyWithStats | null>
 				groups: 0,
 			},
 		};
-
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const property = await prisma.property.findUnique({
-					where: { id },
-					include: propertyCounts,
-				});
-
-				if (property && transformedProperty) {
-					logger.info('✅ Validación dual exitosa getProperty:', { id });
-				} else if (!property && !transformedProperty) {
-					logger.info('✅ Validación dual exitosa getProperty (ambos null):', { id });
-				} else {
-					logger.warn('⚠️ Diferencia en getProperty:', {
-						drizzleFound: !!transformedProperty,
-						prismaFound: !!property
-					});
-				}
-			} catch (validationError) {
-				logger.error('❌ Error en validación dual getProperty:', validationError);
-			}
-		}
-
-		const result = toPropertyWithStats(transformedProperty as any);
 		logger.info(`✅ Propiedad encontrada: ${result.name}`);
 		return result;
 	} catch (error) {
@@ -269,11 +238,9 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 				.then(result => result[0]?.count || 0)
 		]);
 
-		// Transformar a formato compatible con Prisma
-		const transformedProperties = drizzleProperties.map((rawProperty) => ({
+		const result: PropertyWithStats[] = drizzleProperties.map((rawProperty) => ({
 			...rawProperty,
 			isFavorite: Boolean(rawProperty.isFavorite),
-			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
 				images: 0,
 				videos: 0,
@@ -290,50 +257,6 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 				groups: 0,
 			},
 		}));
-
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				// Construir filtros de Prisma
-				const where: Prisma.PropertyWhereInput = {};
-
-				if (onlyFavorites) {
-					where.isFavorite = true;
-				}
-
-				if (search) {
-					where.OR = [
-						{ name: { contains: search, mode: 'insensitive' } },
-						{ description: { contains: search, mode: 'insensitive' } },
-					];
-				}
-
-				const [prismaProperties, prismaTotal] = await Promise.all([
-					prisma.property.findMany({
-						where,
-						include: propertyCounts,
-						orderBy:
-							orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
-					}),
-					prisma.property.count({ where }),
-				]);
-
-				if (Math.abs(transformedProperties.length - prismaProperties.length) > 0 || totalCount !== prismaTotal) {
-					logger.warn('⚠️ Diferencia en conteo getProperties:', {
-						drizzle: { count: transformedProperties.length, total: totalCount },
-						prisma: { count: prismaProperties.length, total: prismaTotal }
-					});
-				} else {
-					logger.info('✅ Validación dual exitosa getProperties:', {
-						total: totalCount
-					});
-				}
-			} catch (validationError) {
-				logger.error('❌ Error en validación dual getProperties:', validationError);
-			}
-		}
-
-		const result = transformedProperties.map(toPropertyWithStats);
 
 		logger.info(`✅ ${result.length} propiedades obtenidas`);
 		return {
@@ -357,27 +280,42 @@ export async function createProperty(data: PropertyCreateInput): Promise<Propert
 	try {
 		logger.info('📝 Creando nueva propiedad', { name: data.name });
 
-		const propertyData: Prisma.PropertyCreateInput = {
+		const [newProperty] = await db.insert(properties).values({
+			id: crypto.randomUUID(),
 			name: data.name,
-			description: data.description,
-			value: data.value,
+			description: data.description || null,
+			value: data.value || null,
 			type: data.type,
-			unit: data.unit,
-			category: data.category,
+			unit: data.unit || null,
+			category: data.category || null,
 			isRequired: data.isRequired ?? false,
 			isPrivate: data.isPrivate ?? false,
 			isFavorite: data.isFavorite ?? false,
-		};
-
-		const newProperty = await prisma.property.create({
-			data: propertyData,
-			include: propertyCounts,
-		});
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}).returning();
 
 		// Revalidar rutas
 		await revalidatePropertyPaths();
 
-		const result = toPropertyWithStats(newProperty);
+		const result: PropertyWithStats = {
+			...newProperty,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				groups: 0,
+			},
+		};
 
 		// Notificar creación
 		await notifyPropertyChange('create', result);
@@ -402,37 +340,50 @@ export async function updateProperty(id: string, data: PropertyUpdateInput): Pro
 		logger.info(`📝 Actualizando propiedad: ${id}`);
 
 		// Verificar si la propiedad existe
-		const existingProperty = await prisma.property.findUnique({
-			where: { id },
-			select: { id: true },
+		const existingProperty = await db.query.properties.findFirst({
+			where: eq(properties.id, id),
+			columns: { id: true },
 		});
 
 		if (!existingProperty) {
 			throw new PropertyServiceError('Propiedad no encontrada', 'PROPERTY_NOT_FOUND');
 		}
 
-		const propertyData: Prisma.PropertyUpdateInput = {};
+		const updateData: any = {};
 
-		if (data.name !== undefined) propertyData.name = data.name;
-		if (data.description !== undefined) propertyData.description = data.description;
-		if (data.value !== undefined) propertyData.value = data.value;
-		if (data.type !== undefined) propertyData.type = data.type;
-		if (data.unit !== undefined) propertyData.unit = data.unit;
-		if (data.category !== undefined) propertyData.category = data.category;
-		if (data.isRequired !== undefined) propertyData.isRequired = data.isRequired;
-		if (data.isPrivate !== undefined) propertyData.isPrivate = data.isPrivate;
-		if (data.isFavorite !== undefined) propertyData.isFavorite = data.isFavorite;
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.value !== undefined) updateData.value = data.value;
+		if (data.type !== undefined) updateData.type = data.type;
+		if (data.unit !== undefined) updateData.unit = data.unit;
+		if (data.category !== undefined) updateData.category = data.category;
+		if (data.isRequired !== undefined) updateData.isRequired = data.isRequired;
+		if (data.isPrivate !== undefined) updateData.isPrivate = data.isPrivate;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
-		const updatedProperty = await prisma.property.update({
-			where: { id },
-			data: propertyData,
-			include: propertyCounts,
-		});
+		const [updatedProperty] = await db.update(properties).set(updateData).where(eq(properties.id, id)).returning();
 
 		// Revalidar rutas
 		await revalidatePropertyPaths();
 
-		const result = toPropertyWithStats(updatedProperty);
+		const result: PropertyWithStats = {
+			...updatedProperty,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				groups: 0,
+			},
+		};
 
 		// Notificar actualización
 		await notifyPropertyChange('update', result);
@@ -457,18 +408,16 @@ export async function deleteProperty(id: string): Promise<void> {
 		logger.info(`🗑️ Eliminando propiedad: ${id}`);
 
 		// Verificar si la propiedad existe
-		const existingProperty = await prisma.property.findUnique({
-			where: { id },
-			select: { id: true, name: true },
+		const existingProperty = await db.query.properties.findFirst({
+			where: eq(properties.id, id),
+			columns: { id: true, name: true },
 		});
 
 		if (!existingProperty) {
 			throw new PropertyServiceError('Propiedad no encontrada', 'PROPERTY_NOT_FOUND');
 		}
 
-		await prisma.property.delete({
-			where: { id },
-		});
+		await db.delete(properties).where(eq(properties.id, id));
 
 		// Revalidar rutas
 		await revalidatePropertyPaths();
@@ -495,25 +444,40 @@ export async function togglePropertyFavorite(id: string): Promise<PropertyWithSt
 		logger.info(`⭐ Cambiando estado de favorito de la propiedad: ${id}`);
 
 		// Obtener estado actual
-		const currentProperty = await prisma.property.findUnique({
-			where: { id },
-			select: { isFavorite: true },
+		const currentProperty = await db.query.properties.findFirst({
+			where: eq(properties.id, id),
+			columns: { isFavorite: true },
 		});
 
 		if (!currentProperty) {
 			throw new PropertyServiceError('Propiedad no encontrada', 'PROPERTY_NOT_FOUND');
 		}
 
-		const updatedProperty = await prisma.property.update({
-			where: { id },
-			data: { isFavorite: !currentProperty.isFavorite },
-			include: propertyCounts,
-		});
+		const [updatedProperty] = await db.update(properties).set({
+			isFavorite: !currentProperty.isFavorite,
+		}).where(eq(properties.id, id)).returning();
 
 		// Revalidar rutas
 		await revalidatePropertyPaths();
 
-		const result = toPropertyWithStats(updatedProperty);
+		const result: PropertyWithStats = {
+			...updatedProperty,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				groups: 0,
+			},
+		};
 
 		// Notificar actualización
 		await notifyPropertyChange('update', result);
@@ -537,18 +501,44 @@ export async function searchProperties(query: string): Promise<PropertyWithStats
 	try {
 		logger.info(`🔍 Buscando propiedades: "${query}"`);
 
-		const properties = await prisma.property.findMany({
-			where: {
-				OR: [
-					{ name: { contains: query, mode: 'insensitive' } },
-					{ description: { contains: query, mode: 'insensitive' } },
-				],
-			},
-			include: propertyCounts,
-			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
-		});
+		const drizzleProperties = await db.select({
+			id: properties.id,
+			name: properties.name,
+			description: properties.description,
+			emoji: properties.emoji,
+			color: properties.color,
+			category: properties.category,
+			shortcut: properties.shortcut,
+			featuredImage: properties.featuredImage,
+			isFavorite: properties.isFavorite,
+			createdAt: properties.createdAt,
+			updatedAt: properties.updatedAt,
+		}).from(properties)
+		.where(or(
+			like(properties.name, `%${query}%`),
+			like(properties.description, `%${query}%`)
+		))
+		.orderBy(desc(properties.isFavorite), asc(properties.name));
 
-		const result = properties.map(toPropertyWithStats);
+		const result: PropertyWithStats[] = drizzleProperties.map(p => ({
+			...p,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				groups: 0,
+			},
+		}));
+
 		logger.info(`✅ ${result.length} propiedades encontradas para "${query}"`);
 		return result;
 	} catch (error) {

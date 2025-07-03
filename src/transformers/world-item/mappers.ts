@@ -1,29 +1,72 @@
 /**
  * @file Mapeadores para la entidad WorldItem
  * @module transformers/world-item/mappers
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-	WorldItemComplete,
-	WorldItemCreateInput,
-	WorldItemFilters,
-	WorldItemSearchOptions,
-	WorldItemStatistics,
-	WorldItemUpdateInput,
-	WorldItemWithStats,
+    WorldItemComplete,
+    WorldItemCreateInput,
+    WorldItemFilters,
+    WorldItemSearchOptions,
+    WorldItemStatistics,
+    WorldItemUpdateInput,
+    WorldItemWithStats,
 } from '@/types/entities/world-item';
 import {
-	serializeAttributes,
-	serializeEffects,
-	serializeFilters,
-	serializeProperties,
-	serializeRequirements,
-	serializeStats,
-	serializeTags,
+    serializeAttributes,
+    serializeEffects,
+    serializeFilters,
+    serializeProperties,
+    serializeRequirements,
+    serializeStats,
+    serializeTags,
 } from './serializers';
+
+// Tipos locales equivalentes a Prisma (migración a Drizzle)
+type DrizzleWorldItemCreateInput = {
+	name: string;
+	description?: string | null;
+	type: string;
+	category: string;
+	rarity: string;
+	value?: number | null;
+	weight?: number | null;
+	featuredImage?: string | null;
+	attributes: string;
+	effects: string;
+	requirements: string;
+	stats: string;
+	properties: string;
+	filters: string;
+	tags: string;
+	isFavorite?: boolean;
+	// Las relaciones se manejan por separado en Drizzle
+};
+
+type DrizzleWorldItemUpdateInput = Partial<DrizzleWorldItemCreateInput>;
+
+type DrizzleWorldItemWhereInput = {
+	OR?: Array<{ name?: { contains?: string }; description?: { contains?: string } }>;
+	type?: { in?: string[] };
+	category?: { in?: string[] };
+	rarity?: { in?: string[] };
+	isFavorite?: boolean;
+	images?: { some?: {} } | { none?: {} };
+};
+
+type DrizzleWorldItemFindManyArgs = {
+	where?: DrizzleWorldItemWhereInput;
+	orderBy?: { [key: string]: 'asc' | 'desc' };
+	take?: number;
+	skip?: number;
+};
+
+type DrizzleWorldItemOrderByInput = {
+	[key: string]: 'asc' | 'desc';
+};
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext('WorldItemMappers');
@@ -47,16 +90,16 @@ const relationMap: Record<string, string> = {
 function connectRelations(
 	input: Partial<WorldItemCreateInput>,
 	operation: 'connect' | 'set'
-): Prisma.WorldItemUpdateInput['images'] {
+): Record<string, any> {
 	const relations: any = {};
 	for (const key in relationMap) {
 		if (key in input && Array.isArray((input as any)[key])) {
 			const prismaKey = relationMap[key];
 			const ids = (input as any)[key];
 			if (ids.length > 0) {
-				relations[prismaKey] = { [operation]: ids.map((id: string) => ({ id })) };
-			} else {
-				relations[prismaKey] = { [operation]: [] };
+				// En Drizzle, las relaciones se manejan de forma diferente
+				// Esto se maneja en el servicio, no en el mapper
+				relations[`${prismaKey}Ids`] = ids;
 			}
 		}
 	}
@@ -64,9 +107,10 @@ function connectRelations(
 }
 
 /**
- * �� Mapea un WorldItemCreateInput a un Prisma.WorldItemCreateInput.
+ * 🗺️ Mapea un WorldItemCreateInput a un Drizzle WorldItemCreateInput.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapCreateWorldItemDataToPrisma(input: WorldItemCreateInput): Prisma.WorldItemCreateInput {
+export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): DrizzleWorldItemCreateInput {
 	try {
 		const { attributes, effects, requirements, stats, properties, filters, tags, ...rest } = input;
 
@@ -82,8 +126,12 @@ export function mapCreateWorldItemDataToPrisma(input: WorldItemCreateInput): Pri
 			| keyof ReturnType<typeof connectRelations>
 		>;
 
-		const prismaData: Prisma.WorldItemCreateInput = {
+		const drizzleData: DrizzleWorldItemCreateInput = {
 			...baseData,
+			name: baseData.name || 'Nuevo Item',
+			type: baseData.type || 'item',
+			category: baseData.category || 'misc',
+			rarity: baseData.rarity || 'common',
 			attributes: serializeAttributes(attributes || []),
 			effects: serializeEffects(effects || []),
 			requirements: serializeRequirements(requirements || []),
@@ -91,10 +139,10 @@ export function mapCreateWorldItemDataToPrisma(input: WorldItemCreateInput): Pri
 			properties: serializeProperties(properties || []),
 			filters: serializeFilters(filters || []),
 			tags: serializeTags(tags || []),
-			...connectRelations(input, 'connect'),
+			// Las relaciones se manejan por separado en Drizzle
 		};
 
-		return prismaData;
+		return drizzleData;
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de WorldItem', { error, input });
 		throw new TransformerError('No se pudieron mapear los datos para crear el WorldItem.');
@@ -102,9 +150,10 @@ export function mapCreateWorldItemDataToPrisma(input: WorldItemCreateInput): Pri
 }
 
 /**
- * 🔄 Mapea un WorldItemUpdateInput a un Prisma.WorldItemUpdateInput.
+ * 🔄 Mapea un WorldItemUpdateInput a un Drizzle WorldItemUpdateInput.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapUpdateWorldItemDataToPrisma(input: WorldItemUpdateInput): Prisma.WorldItemUpdateInput {
+export function mapUpdateWorldItemDataToDrizzle(input: WorldItemUpdateInput): DrizzleWorldItemUpdateInput {
 	try {
 		const { attributes, effects, requirements, stats, properties, filters, tags, ...rest } = input;
 
@@ -120,19 +169,20 @@ export function mapUpdateWorldItemDataToPrisma(input: WorldItemUpdateInput): Pri
 			| keyof ReturnType<typeof connectRelations>
 		>;
 
-		const prismaData: Prisma.WorldItemUpdateInput = { ...baseData };
+		const drizzleData: DrizzleWorldItemUpdateInput = { ...baseData };
 
-		if (attributes) prismaData.attributes = serializeAttributes(attributes);
-		if (effects) prismaData.effects = serializeEffects(effects);
-		if (requirements) prismaData.requirements = serializeRequirements(requirements);
-		if (stats) prismaData.stats = serializeStats(stats);
-		if (properties) prismaData.properties = serializeProperties(properties);
-		if (filters) prismaData.filters = serializeFilters(filters);
-		if (tags) prismaData.tags = serializeTags(tags);
+		if (attributes) drizzleData.attributes = serializeAttributes(attributes);
+		if (effects) drizzleData.effects = serializeEffects(effects);
+		if (requirements) drizzleData.requirements = serializeRequirements(requirements);
+		if (stats) drizzleData.stats = serializeStats(stats);
+		if (properties) drizzleData.properties = serializeProperties(properties);
+		if (filters) drizzleData.filters = serializeFilters(filters);
+		if (tags) drizzleData.tags = serializeTags(tags);
 
-		Object.assign(prismaData, connectRelations(input, 'set'));
+		// Las relaciones se manejan por separado en Drizzle
+		// Object.assign(drizzleData, connectRelations(input, 'set'));
 
-		return prismaData;
+		return drizzleData;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de WorldItem', { error, input });
 		throw new TransformerError('No se pudieron mapear los datos para actualizar el WorldItem.');
@@ -140,20 +190,21 @@ export function mapUpdateWorldItemDataToPrisma(input: WorldItemUpdateInput): Pri
 }
 
 /**
- * 🔄 Mapea `WorldItemSearchOptions` a `Prisma.WorldItemFindManyArgs`.
+ * 🔄 Mapea `WorldItemSearchOptions` a `Drizzle WorldItemFindManyArgs`.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapWorldItemSearchOptionsToPrisma(options: WorldItemSearchOptions): Prisma.WorldItemFindManyArgs {
+export function mapWorldItemSearchOptionsToDrizzle(options: WorldItemSearchOptions): DrizzleWorldItemFindManyArgs {
 	const { filters, ...rest } = options;
-	const orderBy = mapSortByToPrisma(options.sortBy);
+	const orderBy = mapSortByToDrizzle(options.sortBy);
 	return {
 		...rest,
-		where: filters ? mapWorldItemFiltersToPrisma(filters) : undefined,
+		where: filters ? mapWorldItemFiltersToDrizzle(filters) : undefined,
 		orderBy,
 	};
 }
 
-function mapWorldItemFiltersToPrisma(filters: WorldItemFilters): Prisma.WorldItemWhereInput {
-	const where: Prisma.WorldItemWhereInput = {};
+function mapWorldItemFiltersToDrizzle(filters: WorldItemFilters): DrizzleWorldItemWhereInput {
+	const where: DrizzleWorldItemWhereInput = {};
 	if (filters.query) {
 		where.OR = [{ name: { contains: filters.query } }, { description: { contains: filters.query } }];
 	}
@@ -167,14 +218,14 @@ function mapWorldItemFiltersToPrisma(filters: WorldItemFilters): Prisma.WorldIte
 	return where;
 }
 
-function mapSortByToPrisma(sortBy?: string): Prisma.WorldItemOrderByWithRelationInput {
+function mapSortByToDrizzle(sortBy?: string): DrizzleWorldItemOrderByInput {
 	if (!sortBy) return { updatedAt: 'desc' };
 
 	const [field, order = 'desc'] = sortBy.split(':');
 	const validOrders = ['asc', 'desc'];
 	const sortOrder = validOrders.includes(order) ? order : 'desc';
 
-	// Mapear campos de UI a campos de Prisma si es necesario
+	// Mapear campos de UI a campos de Drizzle si es necesario
 	const fieldMap: Record<string, string> = {
 		name: 'name',
 		updatedAt: 'updatedAt',
@@ -182,13 +233,14 @@ function mapSortByToPrisma(sortBy?: string): Prisma.WorldItemOrderByWithRelation
 		rarity: 'rarity',
 	};
 
-	const prismaField = fieldMap[field] || 'updatedAt';
+	const drizzleField = fieldMap[field] || 'updatedAt';
 
-	return { [prismaField]: sortOrder };
+	return { [drizzleField]: sortOrder };
 }
 
 /**
  * 📊 Enriquece un WorldItem con sus estadísticas siguiendo el patrón EntityWithStats
+ * ✅ MIGRADO A DRIZZLE
  * @param worldItem El WorldItem completo a enriquecer
  * @returns El WorldItem con estadísticas calculadas
  */
@@ -323,3 +375,19 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		_stats: stats,
 	};
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar mapCreateWorldItemDataToDrizzle
+ */
+export const mapCreateWorldItemDataToPrisma = mapCreateWorldItemDataToDrizzle;
+
+/**
+ * @deprecated Usar mapUpdateWorldItemDataToDrizzle
+ */
+export const mapUpdateWorldItemDataToPrisma = mapUpdateWorldItemDataToDrizzle;
+
+/**
+ * @deprecated Usar mapWorldItemSearchOptionsToDrizzle
+ */
+export const mapWorldItemSearchOptionsToPrisma = mapWorldItemSearchOptionsToDrizzle;

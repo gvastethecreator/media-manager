@@ -47,3 +47,17 @@ export interface DocumentStatistics {
 export interface DocumentWithStats extends DocumentBase {
 	stats: DocumentStatistics;
 }
+
+// --- TIPOS PARA MUTACIONES ---
+
+/**
+ * 🆕 Tipo para crear un nuevo Document
+ * Omite campos autogenerados (id, timestamps)
+ */
+export type DocumentCreateInput = Omit<DocumentBase, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * ✏️ Tipo para actualizar un Document existente
+ * Todos los campos son opcionales excepto id
+ */
+export type DocumentUpdateInput = Partial<DocumentCreateInput>;

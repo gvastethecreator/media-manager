@@ -2,14 +2,18 @@
  * 🎵 Store de Audio
  * @module store/entities/audio/audio.store
  * @description Store Zustand para gestionar el estado de audios
+ * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
 import { createAudio, deleteAudio, getAudios, updateAudio } from '@/app/actions/audio/audio.actions';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { AudioWithStats } from '@/types/entities/audio';
+import type {
+    AudioCreateInput,
+    AudioUpdateInput,
+    AudioWithStats
+} from '@/types/entities/audio';
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type AudioFilters = Record<string, any>;
@@ -30,8 +34,8 @@ export interface AudioState {
 
 	// Acciones de datos
 	fetchAudios: () => Promise<void>;
-	createAudio: (data: Prisma.AudioCreateInput) => Promise<AudioWithStats | undefined>;
-	updateAudio: (id: string, data: Prisma.AudioUpdateInput) => Promise<AudioWithStats | undefined>;
+	createAudio: (data: AudioCreateInput) => Promise<AudioWithStats | undefined>;
+	updateAudio: (id: string, data: AudioUpdateInput) => Promise<AudioWithStats | undefined>;
 	deleteAudio: (id: string) => Promise<void>;
 
 	// Acciones de selección
@@ -70,7 +74,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			createAudio: async (data: Prisma.AudioCreateInput) => {
+			createAudio: async (data: AudioCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newAudio = await createAudio(data);
@@ -85,7 +89,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			updateAudio: async (id: string, data: Prisma.AudioUpdateInput) => {
+			updateAudio: async (id: string, data: AudioUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedAudio = await updateAudio(id, data);
