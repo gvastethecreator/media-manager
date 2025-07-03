@@ -140,3 +140,26 @@ export function useRemoveImageFromCollection() {
 		},
 	});
 }
+
+export function useToggleCollectionFavorite() {
+  const queryClient = useQueryClient();
+
+  return useMutation<CollectionWithStats, Error, string>({
+    mutationFn: async (id: string) => {
+      const response = await api.post<CollectionWithStats>(`/collections/${id}/favorite`, {});
+      return response;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+      queryClient.setQueryData(collectionKeys.detail(data.id), data);
+    },
+  });
+}
+
+export function useRecentCollectionMedia(collectionId: string, limit: number = 6) {
+  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
+    queryKey: [...collectionKeys.detail(collectionId), 'media', limit],
+    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/collections/${collectionId}/media?limit=${limit}`),
+    enabled: !!collectionId,
+  });
+}

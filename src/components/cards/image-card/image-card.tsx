@@ -1,15 +1,16 @@
 import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
-import { getImageCardData, type ImageCardData } from './image-server-actions';
+import { useImage } from '@/lib/api/images';
+import { ImageWithStats } from '@/types/entities/image';
 
 interface ImageCardProps {
 	imageId: string;
-	onClick?: (imageData: ImageCardData) => void;
+	onClick?: (imageData: ImageWithStats) => void;
 	className?: string;
 	showTags?: boolean;
 	showDetails?: boolean;
@@ -35,74 +36,13 @@ export function ImageCard({
 	tcgMode = false,
 	showRelations = false,
 }: ImageCardProps) {
-	const [imageData, setImageData] = useState<ImageCardData | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const { data: imageData, isLoading, error } = useImage(imageId);
 	const [isHovered, setIsHovered] = useState(false);
 
 	// Si variant es tcg, forzar tcgMode a true
 	if (variant === 'tcg') {
 		tcgMode = true;
 	}
-
-	useEffect(() => {
-		const loadImageData = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getImageCardData(imageId);
-				setImageData(data);
-			} catch (err) {
-				console.error('Error cargando datos de imagen:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		if (imageId) {
-			loadImageData();
-		}
-	}, [imageId]);
-
-	// Funciones para el aspecto ratio
-	const getAspectRatioClass = () => {
-		switch (aspectRatio) {
-			case 'square':
-				return 'aspect-square';
-			case 'video':
-				return 'aspect-video';
-			case 'auto':
-				return '';
-			default:
-				if (typeof aspectRatio === 'string' && aspectRatio.includes('/')) {
-					const [width, height] = aspectRatio.split('/');
-					return `aspect-[${width}/${height}]`;
-				}
-				return '';
-		}
-	};
-
-	// Función para calcular dimensiones legibles
-	const getHumanReadableDimensions = () => {
-		if (!imageData?.width || !imageData?.height) return '';
-		return `${imageData.width} × ${imageData.height}`;
-	};
-
-	// Obtener variante de diseño
-	const getVariantClasses = () => {
-		switch (variant) {
-			case 'minimal':
-				return 'border-0 shadow-none';
-			case 'polaroid':
-				return 'border-8 border-white bg-white shadow-md p-1 rotate-1';
-			case 'tcg':
-				return 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black';
-			default:
-				return tcgMode
-					? 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black'
-					: 'border border-gray-200 dark:border-gray-800';
-		}
-	};
 
 	const handleClick = () => {
 		if (onClick && imageData) {

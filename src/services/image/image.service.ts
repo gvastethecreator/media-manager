@@ -47,17 +47,22 @@ import { extractMetadata } from '@/app/actions/metadata';
 import { imageConfig } from '@/lib/config';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
+// Drizzle imports
+import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { images, folders } from '@/lib/drizzle/schema';
 import { type EventType, emit } from '@/lib/server/events.server';
 import {
-	createEntityNotFoundError,
-	createFileNotFoundError,
-	createServiceError,
-	ServiceErrorCode,
-	toServiceError,
+    createEntityNotFoundError,
+    createFileNotFoundError,
+    createServiceError,
+    ServiceErrorCode,
+    toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
+import type { GetImagesOptions, GetImagesResult } from '@/app/actions/images/image-types.actions';
 
 const SERVICE_NAME = 'ImageService';
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
@@ -482,76 +487,229 @@ class ImageService {
 				sortOrder = 'desc',
 			} = options;
 
-			// Construir filtros
-			const where: any = {};
+			// **MIGRACIÓN A DRIZZLE**
+			// Construir filtros dinámicamente
+			const conditions: any[] = [];
 
+			// Filtro de búsqueda por texto
 			if (search) {
-				where.OR = [
-					{ name: { contains: search, mode: 'insensitive' } },
-					{ description: { contains: search, mode: 'insensitive' } },
-				];
+				conditions.push(
+					or(
+						like(images.name, `%${search}%`),
+						like(images.description, `%${search}%`)
+					)
+				);
 			}
 
+			// Filtro por carpeta
 			if (folderId) {
-				where.folderId = folderId;
+				conditions.push(eq(images.folderId, folderId));
 			}
 
+			// Filtro por favorito
 			if (isFavorite !== undefined) {
-				where.isFavorite = isFavorite;
+				conditions.push(eq(images.isFavorite, isFavorite));
 			}
 
+			// TODO: Filtros por tagIds requieren JOINs con tablas de relación
+			// Por ahora los omitimos para simplificar la migración inicial
 			if (tagIds && tagIds.length > 0) {
-				where.tags = {
-					some: {
-						id: { in: tagIds },
+				imageLogger.warn('⚠️ Filtro por tagIds aún no implementado en Drizzle');
+			}
+
+			// Determinar el ordenamiento
+			const orderDirection = sortOrder === 'desc' ? desc : asc;
+			let orderByField: any;
+
+			switch (sortBy) {
+				case 'name':
+					orderByField = orderDirection(images.name);
+					break;
+				case 'createdAt':
+					orderByField = orderDirection(images.createdAt);
+					break;
+				case 'size':
+					orderByField = orderDirection(images.size);
+					break;
+				default:
+					orderByField = orderDirection(images.updatedAt);
+			}
+
+			// Consulta principal con JOIN a folder
+			const drizzleQuery = db
+				.select({
+					// Campos de la imagen
+					id: images.id,
+					name: images.name,
+					description: images.description,
+					path: images.path,
+					hash: images.hash,
+					size: images.size,
+					width: images.width,
+					height: images.height,
+					metadata: images.metadata,
+					thumbnail: images.thumbnail,
+					thumbnailSize: images.thumbnailSize,
+					thumbnailWidth: images.thumbnailWidth,
+					thumbnailHeight: images.thumbnailHeight,
+					thumbnailMimeType: images.thumbnailMimeType,
+					thumbnailError: images.thumbnailError,
+					thumbnailErrorAt: images.thumbnailErrorAt,
+					thumbnailOptimizedAt: images.thumbnailOptimizedAt,
+					isFavorite: images.isFavorite,
+					folderId: images.folderId,
+					noteId: images.noteId,
+					createdAt: images.createdAt,
+					updatedAt: images.updatedAt,
+					addedAt: images.addedAt,
+					// Campos del folder (JOIN)
+					folderRealId: folders.id,
+					folderName: folders.name,
+					folderPath: folders.path,
+				})
+				.from(images)
+				.leftJoin(folders, eq(images.folderId, folders.id));
+
+			// Aplicar filtros si existen
+			let queryWithFilters = drizzleQuery;
+			if (conditions.length > 0) {
+				queryWithFilters = drizzleQuery.where(and(...conditions));
+			}
+
+			// Aplicar ordenamiento y paginación
+			const drizzleImages = await queryWithFilters
+				.orderBy(orderByField)
+				.limit(pageSize)
+				.offset((page - 1) * pageSize);
+
+			// Consulta de conteo total (con los mismos filtros)
+			let countQuery = db.select({ count: count() }).from(images);
+
+			if (conditions.length > 0) {
+				countQuery = countQuery.where(and(...conditions));
+			}
+
+			const [{ count: total }] = await countQuery;
+
+			// Transformar resultados de Drizzle a formato compatible con Prisma
+			const transformedImages = drizzleImages.map((raw) => {
+				// Restructurar para que sea compatible con fromPrismaImageWithCounts
+				const drizzleResult = {
+					id: raw.id,
+					name: raw.name,
+					description: raw.description,
+					path: raw.path,
+					hash: raw.hash,
+					size: raw.size,
+					width: raw.width,
+					height: raw.height,
+					metadata: raw.metadata ? JSON.parse(raw.metadata) : null,
+					thumbnail: raw.thumbnail,
+					thumbnailSize: raw.thumbnailSize,
+					thumbnailWidth: raw.thumbnailWidth,
+					thumbnailHeight: raw.thumbnailHeight,
+					thumbnailMimeType: raw.thumbnailMimeType,
+					thumbnailError: raw.thumbnailError,
+					thumbnailErrorAt: raw.thumbnailErrorAt,
+					thumbnailOptimizedAt: raw.thumbnailOptimizedAt,
+					isFavorite: Boolean(raw.isFavorite),
+					folderId: raw.folderId,
+					noteId: raw.noteId,
+					createdAt: raw.createdAt,
+					updatedAt: raw.updatedAt,
+					addedAt: raw.addedAt,
+					// Folder como objeto anidado (como en Prisma)
+					folder: raw.folderRealId ? {
+						id: raw.folderRealId,
+						name: raw.folderName!,
+						path: raw.folderPath!,
+					} : null,
+					// Relaciones vacías por ahora (TODO: implementar JOINs)
+					tags: [],
+					albums: [],
+					collections: [],
+					characters: [],
+					places: [],
+					worldItems: [],
+					concepts: [],
+					prompts: [],
+					notes: [],
+					wildcards: [],
+					properties: [],
+					groups: [],
+					// Counts vacíos por ahora (TODO: implementar subqueries)
+					_count: {
+						tags: 0,
+						albums: 0,
+						collections: 0,
+						characters: 0,
+						places: 0,
+						worldItems: 0,
+						concepts: 0,
+						prompts: 0,
+						notes: 0,
+						wildcards: 0,
+						properties: 0,
+						groups: 0,
 					},
 				};
+
+				return fromPrismaImageWithCounts(drizzleResult as any);
+			});
+
+			// **VALIDACIÓN DUAL EN DESARROLLO** (como en ProfileService)
+			if (process.env.NODE_ENV === 'development') {
+				try {
+					// Construir filtros para Prisma (código original)
+					const where: any = {};
+
+					if (search) {
+						where.OR = [
+							{ name: { contains: search, mode: 'insensitive' } },
+							{ description: { contains: search, mode: 'insensitive' } },
+						];
+					}
+
+					if (folderId) {
+						where.folderId = folderId;
+					}
+
+					if (isFavorite !== undefined) {
+						where.isFavorite = isFavorite;
+					}
+
+					if (tagIds && tagIds.length > 0) {
+						where.tags = {
+							some: {
+								id: { in: tagIds },
+							},
+						};
+					}
+
+					const [prismaTotal] = await Promise.all([
+						prisma.image.count({ where }),
+					]);
+
+					// Comparar resultados básicos
+					if (Math.abs(total - prismaTotal) > 0) {
+						imageLogger.warn('⚠️ Diferencia en conteo total:', {
+							drizzle: total,
+							prisma: prismaTotal,
+							options
+						});
+					} else {
+						imageLogger.info('✅ Validación dual exitosa:', {
+							total,
+							images: transformedImages.length
+						});
+					}
+				} catch (validationError) {
+					imageLogger.error('❌ Error en validación dual:', validationError);
+				}
 			}
 
-			// Obtener total y imágenes
-			const [total, images] = await Promise.all([
-				prisma.image.count({ where }),
-				prisma.image.findMany({
-					where,
-					include: {
-						tags: true,
-						albums: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-						folder: { select: { id: true, name: true, path: true } },
-						_count: {
-							select: {
-								tags: true,
-								albums: true,
-								collections: true,
-								characters: true,
-								places: true,
-								worldItems: true,
-								concepts: true,
-								prompts: true,
-								notes: true,
-								wildcards: true,
-								properties: true,
-								groups: true,
-							},
-						},
-					},
-					orderBy: { [sortBy]: sortOrder },
-					skip: (page - 1) * pageSize,
-					take: pageSize,
-				}),
-			]);
-
 			return {
-				images: images.map(fromPrismaImageWithCounts),
+				images: transformedImages,
 				pagination: {
 					page,
 					pageSize,

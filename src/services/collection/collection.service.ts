@@ -5,7 +5,10 @@
  * @updated 2025-01-27
  */
 
+// Drizzle imports
 import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { collections } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -13,12 +16,13 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toPrismaCollectionCreate, toPrismaCollectionUpdate } from '@/transformers/collection/serializers';
 import { fromPrismaCollection, fromPrismaCollections } from '@/transformers/collection/transformer';
 import type {
-	CollectionBase,
-	CollectionCreateInput,
-	CollectionSearchOptions,
-	CollectionUpdateInput,
-	CollectionWithStats,
+    CollectionBase,
+    CollectionCreateInput,
+    CollectionSearchOptions,
+    CollectionUpdateInput,
+    CollectionWithStats,
 } from '@/types/entities/collection';
+import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');
@@ -150,33 +154,149 @@ const revalidateCollectionPaths = async (): Promise<void> => {
  */
 export const searchCollections = async (options: CollectionSearchOptions): Promise<CollectionWithStats[]> => {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info('🔍 Buscando colecciones', { options });
-		const prisma = await getPrismaClient();
 
-		// Construir query básica
-		const where: any = {};
+		// Construir condiciones de filtro
+		const conditions: any[] = [];
+
 		if (options.filters?.search) {
-			where.OR = [
-				{ name: { contains: options.filters.search } },
-				{ description: { contains: options.filters.search } },
-			];
+			conditions.push(
+				or(
+					like(collections.name, `%${options.filters.search}%`),
+					like(collections.description, `%${options.filters.search}%`)
+				)
+			);
 		}
+
 		if (options.filters?.isFavorite !== undefined) {
-			where.isFavorite = options.filters.isFavorite;
+			conditions.push(eq(collections.isFavorite, options.filters.isFavorite ? 1 : 0));
 		}
+
 		if (options.filters?.category && options.filters.category.length > 0) {
-			where.category = { in: options.filters.category };
+			const categoryConditions = options.filters.category.map(cat => eq(collections.category, cat));
+			conditions.push(or(...categoryConditions));
 		}
 
-		const collections = await prisma.collection.findMany({
-			where,
-			select: COLLECTION_SELECT_WITH_STATS,
-			skip: options.skip,
-			take: options.take,
-			orderBy: options.orderBy || { createdAt: 'desc' },
-		});
+		// Construir query
+		let query = db
+			.select({
+				id: collections.id,
+				name: collections.name,
+				emoji: collections.emoji,
+				color: collections.color,
+				description: collections.description,
+				shortcut: collections.shortcut,
+				category: collections.category,
+				sortBy: collections.sortBy,
+				filters: collections.filters,
+				url: collections.url,
+				alternativeUrl: collections.alternativeUrl,
+				sourceImage: collections.sourceImage,
+				platform: collections.platform,
+				price: collections.price,
+				network: collections.network,
+				tokenId: collections.tokenId,
+				tokenAddress: collections.tokenAddress,
+				contractAddress: collections.contractAddress,
+				contractType: collections.contractType,
+				editions: collections.editions,
+				featuredImage: collections.featuredImage,
+				isFavorite: collections.isFavorite,
+				createdAt: collections.createdAt,
+				updatedAt: collections.updatedAt,
+			})
+			.from(collections);
 
-		const result = fromPrismaCollections(collections);
+		// Aplicar filtros
+		if (conditions.length > 0) {
+			query = query.where(and(...conditions));
+		}
+
+		// Aplicar ordenamiento
+		const orderBy = options.orderBy || { createdAt: 'desc' };
+		if (orderBy.createdAt) {
+			query = query.orderBy(orderBy.createdAt === 'desc' ? desc(collections.createdAt) : asc(collections.createdAt));
+		} else if (orderBy.name) {
+			query = query.orderBy(orderBy.name === 'desc' ? desc(collections.name) : asc(collections.name));
+		}
+
+		// Aplicar paginación
+		if (options.skip) {
+			query = query.offset(options.skip);
+		}
+		if (options.take) {
+			query = query.limit(options.take);
+		}
+
+		const drizzleCollections = await query;
+
+		// Transformar a formato compatible con Prisma
+		const transformedCollections = drizzleCollections.map((rawCollection) => ({
+			...rawCollection,
+			isFavorite: Boolean(rawCollection.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+
+				// Construir query de Prisma para comparación
+				const where: any = {};
+				if (options.filters?.search) {
+					where.OR = [
+						{ name: { contains: options.filters.search } },
+						{ description: { contains: options.filters.search } },
+					];
+				}
+				if (options.filters?.isFavorite !== undefined) {
+					where.isFavorite = options.filters.isFavorite;
+				}
+				if (options.filters?.category && options.filters.category.length > 0) {
+					where.category = { in: options.filters.category };
+				}
+
+				const prismaCollections = await prisma.collection.findMany({
+					where,
+					select: COLLECTION_SELECT_WITH_STATS,
+					skip: options.skip,
+					take: options.take,
+					orderBy: options.orderBy || { createdAt: 'desc' },
+				});
+
+				if (Math.abs(transformedCollections.length - prismaCollections.length) > 0) {
+					logger.warn('⚠️ Diferencia en conteo searchCollections:', {
+						drizzle: transformedCollections.length,
+						prisma: prismaCollections.length
+					});
+				} else {
+					logger.info('✅ Validación dual exitosa searchCollections:', {
+						total: transformedCollections.length
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual searchCollections:', validationError);
+			}
+		}
+
+		const result = fromPrismaCollections(transformedCollections as any);
 		logger.info(`✅ ${result.length} colecciones encontradas`);
 		return result;
 	} catch (error) {
@@ -194,15 +314,87 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
  */
 export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info('📚 Obteniendo todas las colecciones');
-		const prisma = await getPrismaClient();
 
-		const collections = await prisma.collection.findMany({
-			select: COLLECTION_SELECT_WITH_STATS,
-			orderBy: { createdAt: 'desc' },
-		});
+		const drizzleCollections = await db
+			.select({
+				id: collections.id,
+				name: collections.name,
+				emoji: collections.emoji,
+				color: collections.color,
+				description: collections.description,
+				shortcut: collections.shortcut,
+				category: collections.category,
+				sortBy: collections.sortBy,
+				filters: collections.filters,
+				url: collections.url,
+				alternativeUrl: collections.alternativeUrl,
+				sourceImage: collections.sourceImage,
+				platform: collections.platform,
+				price: collections.price,
+				network: collections.network,
+				tokenId: collections.tokenId,
+				tokenAddress: collections.tokenAddress,
+				contractAddress: collections.contractAddress,
+				contractType: collections.contractType,
+				editions: collections.editions,
+				featuredImage: collections.featuredImage,
+				isFavorite: collections.isFavorite,
+				createdAt: collections.createdAt,
+				updatedAt: collections.updatedAt,
+			})
+			.from(collections)
+			.orderBy(desc(collections.createdAt));
 
-		const result = fromPrismaCollections(collections);
+		// Transformar a formato compatible con Prisma
+		const transformedCollections = drizzleCollections.map((rawCollection) => ({
+			...rawCollection,
+			isFavorite: Boolean(rawCollection.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+
+				const prismaCollections = await prisma.collection.findMany({
+					select: COLLECTION_SELECT_WITH_STATS,
+					orderBy: { createdAt: 'desc' },
+				});
+
+				if (Math.abs(transformedCollections.length - prismaCollections.length) > 0) {
+					logger.warn('⚠️ Diferencia en conteo getCollections:', {
+						drizzle: transformedCollections.length,
+						prisma: prismaCollections.length
+					});
+				} else {
+					logger.info('✅ Validación dual exitosa getCollections:', {
+						total: transformedCollections.length
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getCollections:', validationError);
+			}
+		}
+
+		const result = fromPrismaCollections(transformedCollections as any);
 		logger.info(`✅ ${result.length} colecciones obtenidas`);
 		return result;
 	} catch (error) {
@@ -220,20 +412,96 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
  */
 export const getCollection = async (id: string): Promise<CollectionWithStats | null> => {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info(`🔍 Obteniendo colección por ID: ${id}`);
-		const prisma = await getPrismaClient();
 
-		const collection = await prisma.collection.findUnique({
-			where: { id },
-			select: COLLECTION_SELECT_WITH_STATS,
-		});
+		const drizzleCollection = await db
+			.select({
+				id: collections.id,
+				name: collections.name,
+				emoji: collections.emoji,
+				color: collections.color,
+				description: collections.description,
+				shortcut: collections.shortcut,
+				category: collections.category,
+				sortBy: collections.sortBy,
+				filters: collections.filters,
+				url: collections.url,
+				alternativeUrl: collections.alternativeUrl,
+				sourceImage: collections.sourceImage,
+				platform: collections.platform,
+				price: collections.price,
+				network: collections.network,
+				tokenId: collections.tokenId,
+				tokenAddress: collections.tokenAddress,
+				contractAddress: collections.contractAddress,
+				contractType: collections.contractType,
+				editions: collections.editions,
+				featuredImage: collections.featuredImage,
+				isFavorite: collections.isFavorite,
+				createdAt: collections.createdAt,
+				updatedAt: collections.updatedAt,
+			})
+			.from(collections)
+			.where(eq(collections.id, id))
+			.limit(1);
 
-		if (!collection) {
+		if (drizzleCollection.length === 0) {
 			logger.warn(`Colección no encontrada: ${id}`);
 			return null;
 		}
 
-		const result = fromPrismaCollection(collection);
+		const rawCollection = drizzleCollection[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedCollection = {
+			...rawCollection,
+			isFavorite: Boolean(rawCollection.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaCollection = await prisma.collection.findUnique({
+					where: { id },
+					select: COLLECTION_SELECT_WITH_STATS,
+				});
+
+				if (prismaCollection && transformedCollection) {
+					logger.info('✅ Validación dual exitosa getCollection:', {
+						collectionName: transformedCollection.name
+					});
+				} else if (!prismaCollection && !transformedCollection) {
+					logger.info('✅ Validación dual exitosa getCollection: ambos null');
+				} else {
+					logger.warn('⚠️ Diferencia en getCollection:', {
+						drizzleFound: !!transformedCollection,
+						prismaFound: !!prismaCollection
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getCollection:', validationError);
+			}
+		}
+
+		const result = fromPrismaCollection(transformedCollection as any);
 		if (!result) {
 			throw new CollectionServiceError('Error al transformar la colección', 'TRANSFORM_FAILED');
 		}

@@ -1,8 +1,132 @@
-# Sistema de Gestión de Imágenes
+# Sistema de Gestión Multimedia
 
-## Descripción
+Sistema integral para la gestión inteligente de archivos multimedia, diseñado para manejar grandes volúmenes de contenido con alto rendimiento en uso local.
 
-Sistema completo para la gestión y organización de activos digitales, incluyendo imágenes, videos y metadatos asociados. Proporciona una interfaz moderna e intuitiva para administrar, categorizar y buscar todo tipo de contenido multimedia.
+## ¿Qué es?
+
+Nació como una solución para organizar grandes cantidades de imágenes generadas con IA, pero evolucionó hacia un organizador multimedia completo que no solo indexa archivos y extrae metadatos, sino que también permite crear sistemas de organización complejos y personalizables.
+
+La filosofía del sistema combina **organización física** (estructura de carpetas) con **organización digital** (base de datos con etiquetas, álbumes, relaciones) para crear una gestión flexible sin necesidad de mover archivos de su ubicación original.
+
+## 📂 Tipos de Archivo Soportados
+
+### Multimedia Principal
+
+- **Imágenes**: jpg, png, webp, gif
+- **Videos**: mp4, webm, mov, avi, mkv
+- **Audio**: wav, flac, mp3, ogg, m4a, aac, wma
+
+### Contenido Especializado
+
+- **Modelos 3D**: obj, fbx, glb (optimizados para web)
+- **Documentos**: md, txt, csv
+- **Datos estructurados**: json
+
+## 🏗️ Sistema de Organización
+
+### 📋 Entidades Básicas
+
+#### 🏷️ Tags
+
+- Etiquetas simples para categorización rápida
+- Sistema de colores y emojis personalizables
+- Relaciones flexibles con todo tipo de contenido
+
+#### 📸 Álbumes
+
+- Agrupaciones temáticas de archivos multimedia
+- Ideal para colecciones temporales o proyectos específicos
+- Metadata enriquecida con descripción y configuración visual
+
+#### 📂 Grupos
+
+- Meta-organizadores que permiten agrupar cualquier entidad
+- Sistema jerárquico para crear taxonomías complejas
+- Configuración avanzada de filtros y ordenamiento
+
+### 🎭 Entidades Dinámicas
+
+#### 🔧 Wildcards
+
+- Plantillas y variables dinámicas para automatización
+- Sistema jerárquico con relaciones padre-hijo
+- Generación de contenido parametrizable
+
+#### 🔍 Properties
+
+- Descriptores de características específicas (color, forma, estilo)
+- Sistema de metadatos granular para búsquedas avanzadas
+
+### 🌟 Colecciones NFT
+
+#### 💎 Collections
+
+- Organización específica para NFTs y arte digital
+- Metadatos blockchain: contratos, tokens, networks, pricing
+- Integración con plataformas y marketplaces
+- Gestión de ediciones y rareza
+
+### 🧠 Entidades Abstractas
+
+#### 💡 Concepts
+
+- Ideas, conceptos abstractos y referencias conceptuales
+- Sistema de conocimiento interconectado
+- Base para sistemas de IA y generación automática
+
+#### 📝 Notes
+
+- Sistema de anotaciones con prioridades y estados
+- Markdown compatible para documentación rica
+- Integración con flujos de trabajo
+
+#### 🎯 Prompts
+
+- Plantillas para generación de IA
+- Parametrización avanzada con wildcards
+- Versionado y optimización iterativa
+
+### 🗺️ Worldbuilding
+
+#### 👤 Characters
+
+- Personajes completos con stats, backstory, relaciones
+- Sistema de niveles, clases y alineamientos
+- Perfiles psicológicos y sociales detallados
+
+#### 📍 Places
+
+- Ubicaciones con clima, gobierno, población
+- Historia, peligros y recursos
+- Integración geográfica y narrativa
+
+#### 🎯 World Items
+
+- Objetos del mundo con atributos y efectos
+- Sistema de rareza y requisitos
+- Estadísticas y mecánicas de juego
+
+### 📚 Gestión Documental
+
+#### 📄 Documents
+
+- Archivos markdown y texto plano
+- Compatible con Obsidian vaults
+- Sistema de enlaces bidireccionales
+
+#### ⚙️ Workflows
+
+- Flujos de trabajo complejos en JSON
+- Automatización de procesos
+- Integración con herramientas externas
+
+### ⭐ Sistema de Favoritos Multi-Perfil
+
+- Favoritos personalizados por perfil de usuario
+- Cualquier entidad puede ser marcada como favorita
+- Sincronización inteligente entre perfiles
+
+
 
 ## Tecnologías
 
@@ -11,10 +135,12 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - **Vite 7.0** - Build tool y desarrollo frontend
 - **React 19** - Biblioteca de UI
 - **Express 5** - Servidor API
-- **Prisma** - ORM para acceso a base de datos
+- **Prisma** - ORM para acceso a base de datos ( a ser deprecada )
+- **Drizzle** - ORM para acceso a base de datos ( migrando desde Prisma)
 - **Tailwind CSS 4** - Framework de estilos
 - **Shadcn/UI** - Componentes de UI integrados con Tailwind 4
 - **Zustand** - Gestión de estado
+- **BaseUI** - Componentes de UI
 - **React Router v6** - Enrutamiento frontend
 - **Vitest** - Testing framework
 - **Motion** - Animaciones fluidas
@@ -25,6 +151,8 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - ~~**Next.js 15.3.3**~~ → **Vite 7.0**
 - ~~**Server Actions**~~ → **Express 5 API**
 - ~~**API Routes**~~ → **Express Routes**
+- ~~**Prisma**~~ → **Drizzle**
+- ~~**Radix UI**~~ → **BaseUI**
 
 ## Estado de la Migración
 
@@ -49,6 +177,7 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 
 - [x] **T29** - Bloque 4 UI verificado
 - [x] **T30** - Configuración básica de pruebas E2E
+
 ## Desarrollo
 
 ### Requisitos Previos
@@ -78,7 +207,6 @@ pnpm watch:server
 
 # Abrir: http://localhost:5173
 ```
-
 
 ### Build y Producción
 
@@ -183,11 +311,3 @@ Sistema de testing configurado con:
 - **Playwright**: Tests end-to-end
 - **Happy DOM**: Environment para tests
 - **Testing Library**: Utilities para React
-
-## Licencia
-
-Este proyecto está licenciado bajo [MIT License](LICENSE).
-
-## Contacto
-
-Para más información, contáctanos en [tu-email@ejemplo.com](mailto:tu-email@ejemplo.com).

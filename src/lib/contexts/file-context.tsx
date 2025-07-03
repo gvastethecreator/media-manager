@@ -1,6 +1,7 @@
 'use client';
 
 import { useLogActivity } from '@/lib/api/activity';
+import { useAddTags, useRemoveTags, useAddToCollection, useRemoveFromCollection, useToggleFavorite } from '@/lib/api/files';
 import { clientEvents } from '@/lib/client/events.client';
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 
@@ -172,99 +173,55 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	);
 
 	// Resto de métodos del contexto original en lib/contexts/file-context.tsx
+	const { mutate: toggleFavoriteMutate } = useToggleFavorite();
+
 	const toggleFavorite = useCallback(
 		(fileId: string) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (file.id === fileId) {
-						const newFile = {
-							...file,
-							isFavorite: !file.isFavorite,
-						};
-						addEvent({ type: 'favorites:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			toggleFavoriteMutate(fileId);
 		},
-		[addEvent]
+		[toggleFavoriteMutate]
 	);
+
+	const { mutate: addToCollectionMutate } = useAddToCollection();
+	const { mutate: removeFromCollectionMutate } = useRemoveFromCollection();
 
 	const addToCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							collections: [...(file.collections || []), collectionId],
-						};
-						addEvent({ type: 'collections:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			fileIds.forEach(fileId => {
+        addToCollectionMutate({ fileId, collectionId });
+      });
 		},
-		[addEvent]
+		[addToCollectionMutate]
 	);
 
 	const removeFromCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							collections: file.collections?.filter((id) => id !== collectionId),
-						};
-						addEvent({ type: 'collections:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			fileIds.forEach(fileId => {
+        removeFromCollectionMutate({ fileId, collectionId });
+      });
 		},
-		[addEvent]
+		[removeFromCollectionMutate]
 	);
+
+	const { mutate: addTagsMutate } = useAddTags();
+	const { mutate: removeTagsMutate } = useRemoveTags();
 
 	const addTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							tags: [...new Set([...(file.tags || []), ...tags])],
-						};
-						addEvent({ type: 'tags:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			fileIds.forEach(fileId => {
+        addTagsMutate({ fileId, tags });
+      });
 		},
-		[addEvent]
+		[addTagsMutate]
 	);
 
 	const removeTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							tags: file.tags?.filter((tag) => !tags.includes(tag)),
-						};
-						addEvent({ type: 'tags:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			fileIds.forEach(fileId => {
+        removeTagsMutate({ fileId, tags });
+      });
 		},
-		[addEvent]
+		[removeTagsMutate]
 	);
 
 	// Resto de funciones del contexto original

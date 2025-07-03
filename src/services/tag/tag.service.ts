@@ -6,7 +6,11 @@
  */
 
 import { Prisma } from '@prisma/client';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+// Drizzle imports
 import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { tags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -112,17 +116,83 @@ export async function getTag(id: string): Promise<TagWithStats | null> {
 	try {
 		logger.info(`🔍 Obteniendo etiqueta por ID: ${id}`);
 
-		const tag = await prisma.tag.findUnique({
-			where: { id },
-			include: tagCounts,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		const drizzleTag = await db
+			.select({
+				id: tags.id,
+				name: tags.name,
+				description: tags.description,
+				color: tags.color,
+				emoji: tags.emoji,
+				isFavorite: tags.isFavorite,
+				isArchived: tags.isArchived,
+				createdAt: tags.createdAt,
+				updatedAt: tags.updatedAt,
+			})
+			.from(tags)
+			.where(eq(tags.id, id))
+			.limit(1);
 
-		if (!tag) {
+		if (drizzleTag.length === 0) {
 			logger.warn(`Etiqueta no encontrada: ${id}`);
 			return null;
 		}
 
-		const result = toTagWithStats(tag);
+		const rawTag = drizzleTag[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedTag = {
+			...rawTag,
+			isFavorite: Boolean(rawTag.isFavorite),
+			isArchived: Boolean(rawTag.isArchived),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				documents: 0,
+				file3Ds: 0,
+				jsonFiles: 0,
+				audios: 0,
+				albums: 0,
+				collections: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prismaTag = await prisma.tag.findUnique({
+					where: { id },
+					include: tagCounts,
+				});
+
+				if (prismaTag && transformedTag) {
+					logger.info('✅ Validación dual exitosa getTag:', {
+						tagName: transformedTag.name
+					});
+				} else if (!prismaTag && !transformedTag) {
+					logger.info('✅ Validación dual exitosa getTag: ambos null');
+				} else {
+					logger.warn('⚠️ Diferencia en getTag:', {
+						drizzleFound: !!transformedTag,
+						prismaFound: !!prismaTag
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getTag:', validationError);
+			}
+		}
+
+		const result = toTagWithStats(transformedTag as any);
 		logger.info(`✅ Etiqueta encontrada: ${result.name}`);
 		return result;
 	} catch (error) {
@@ -144,37 +214,146 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 
 		logger.info('🏷️ Obteniendo etiquetas', { options });
 
-		// Construir filtros
-		const where: Prisma.TagWhereInput = {};
+		// **MIGRACIÓN A DRIZZLE**
+		// Construir filtros dinámicamente
+		const conditions: any[] = [];
 
 		if (!includeArchived) {
-			where.isArchived = false;
+			conditions.push(eq(tags.isArchived, false));
 		}
 
 		if (onlyFavorites) {
-			where.isFavorite = true;
+			conditions.push(eq(tags.isFavorite, true));
 		}
 
 		if (search) {
-			where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
+			conditions.push(
+				or(
+					like(tags.name, `%${search}%`),
+					like(tags.description, `%${search}%`)
+				)
+			);
 		}
 
-		// Obtener etiquetas
-		const [tags, total] = await Promise.all([
-			prisma.tag.findMany({
-				where,
-				include: tagCounts,
-				orderBy:
-					orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
-			}),
-			prisma.tag.count({ where }),
-		]);
+		// Determinar el ordenamiento
+		const orderDirection_fn = orderDirection === 'desc' ? desc : asc;
+		let orderByField: any;
 
-		const transformedTags = tags.map(toTagWithStats);
+		switch (orderBy) {
+			case 'createdAt':
+				orderByField = orderDirection_fn(tags.createdAt);
+				break;
+			case 'updatedAt':
+				orderByField = orderDirection_fn(tags.updatedAt);
+				break;
+			default: // 'name'
+				orderByField = orderDirection_fn(tags.name);
+		}
 
-		logger.info(`✅ ${transformedTags.length} etiquetas obtenidas`);
+		// Consulta principal
+		let drizzleQuery = db
+			.select({
+				id: tags.id,
+				name: tags.name,
+				description: tags.description,
+				color: tags.color,
+				emoji: tags.emoji,
+				isFavorite: tags.isFavorite,
+				isArchived: tags.isArchived,
+				createdAt: tags.createdAt,
+				updatedAt: tags.updatedAt,
+			})
+			.from(tags);
+
+		// Aplicar filtros si existen
+		if (conditions.length > 0) {
+			drizzleQuery = drizzleQuery.where(and(...conditions));
+		}
+
+		// Aplicar ordenamiento
+		const drizzleTags = await drizzleQuery.orderBy(orderByField);
+
+		// Consulta de conteo total (con los mismos filtros)
+		let countQuery = db.select({ count: count() }).from(tags);
+
+		if (conditions.length > 0) {
+			countQuery = countQuery.where(and(...conditions));
+		}
+
+		const [{ count: total }] = await countQuery;
+
+		// Transformar resultados de Drizzle a formato compatible con Prisma
+		const transformedTags = drizzleTags.map((rawTag) => ({
+			...rawTag,
+			isFavorite: Boolean(rawTag.isFavorite),
+			isArchived: Boolean(rawTag.isArchived),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				documents: 0,
+				file3Ds: 0,
+				jsonFiles: 0,
+				audios: 0,
+				albums: 0,
+				collections: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				// Construir filtros para Prisma (código original)
+				const where: Prisma.TagWhereInput = {};
+
+				if (!includeArchived) {
+					where.isArchived = false;
+				}
+
+				if (onlyFavorites) {
+					where.isFavorite = true;
+				}
+
+				if (search) {
+					where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
+				}
+
+				const [prismaTotal] = await Promise.all([
+					prisma.tag.count({ where }),
+				]);
+
+				// Comparar resultados básicos
+				if (Math.abs(total - prismaTotal) > 0) {
+					logger.warn('⚠️ Diferencia en conteo total getTags:', {
+						drizzle: total,
+						prisma: prismaTotal,
+						options
+					});
+				} else {
+					logger.info('✅ Validación dual exitosa getTags:', {
+						total,
+						tags: transformedTags.length
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getTags:', validationError);
+			}
+		}
+
+		const finalTags = transformedTags.map(toTagWithStats);
+
+		logger.info(`✅ ${finalTags.length} etiquetas obtenidas`);
 		return {
-			tags: transformedTags,
+			tags: finalTags,
 			total,
 		};
 	} catch (error) {

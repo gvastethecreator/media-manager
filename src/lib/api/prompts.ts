@@ -118,3 +118,11 @@ export function useDeletePrompt() {
 		},
 	});
 }
+
+export function useRecentPromptImages(promptId: string, limit: number = 6) {
+  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>, Error>({
+    queryKey: [...promptKeys.detail(promptId), 'recent-images', limit],
+    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/prompts/${promptId}/recent-images?limit=${limit}`),
+    enabled: !!promptId,
+  });
+}

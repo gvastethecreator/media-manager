@@ -116,3 +116,25 @@ export function useDeleteConcept() {
 		},
 	});
 }
+
+export function useRecentConceptImages(conceptId: string, limit: number = 6) {
+  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>, Error>({
+    queryKey: [...conceptKeys.detail(conceptId), 'recent-images', limit],
+    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/concepts/${conceptId}/recent-images?limit=${limit}`),
+    enabled: !!conceptId,
+  });
+}
+
+export function useConceptCounts(conceptId: string) {
+  return useQuery<{
+    images: number;
+    tags: number;
+  }, Error>({
+    queryKey: [...conceptKeys.detail(conceptId), 'counts'],
+    queryFn: () => api.get<{
+      images: number;
+      tags: number;
+    }>(`/concepts/${conceptId}/counts`),
+    enabled: !!conceptId,
+  });
+}

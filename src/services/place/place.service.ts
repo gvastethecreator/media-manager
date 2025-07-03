@@ -6,25 +6,26 @@
  * @updated 2025-07-01
  */
 
-import type { Prisma } from '@prisma/client';
-import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { places } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-	mapCreatePlaceDataToPrisma,
-	mapPlaceSearchOptionsToPrisma,
-	mapUpdatePlaceDataToPrisma,
-	toPlaceWithStats,
+    mapCreatePlaceDataToPrisma,
+    mapPlaceSearchOptionsToPrisma,
+    mapUpdatePlaceDataToPrisma,
+    toPlaceWithStats,
 } from '@/transformers/place';
 import type {
-	PlaceCreateInput,
-	PlaceSearchOptions,
-	PlaceUpdateInput,
-	PlaceWithStats,
-	PrismaPlaceWithCounts,
+    PlaceCreateInput,
+    PlaceSearchOptions,
+    PlaceUpdateInput,
+    PlaceWithStats
 } from '@/types/entities/place';
+import type { Prisma } from '@prisma/client';
+import { asc, eq } from 'drizzle-orm';
 
 const placeLogger = serverLogger.withContext('PlaceService');
 
@@ -56,15 +57,92 @@ const placeIncludeWithCounts = {
  */
 export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithStats[]> {
 	try {
-		const prisma = await getPrismaClient();
-		const findOptions = mapPlaceSearchOptionsToPrisma(options);
+		// **MIGRACIÓN A DRIZZLE**
+		placeLogger.info('🌍 Obteniendo places con opciones:', options);
 
-		const places = await prisma.place.findMany({
-			...findOptions,
-			include: placeIncludeWithCounts,
-		});
+		// Por ahora, implementación básica sin filtros complejos
+		const drizzlePlaces = await db
+			.select({
+				id: places.id,
+				name: places.name,
+				description: places.description,
+				emoji: places.emoji,
+				color: places.color,
+				shortcut: places.shortcut,
+				category: places.category,
+				location: places.location,
+				coordinates: places.coordinates,
+				climate: places.climate,
+				terrain: places.terrain,
+				population: places.population,
+				government: places.government,
+				economy: places.economy,
+				culture: places.culture,
+				history: places.history,
+				geography: places.geography,
+				landmarks: places.landmarks,
+				resources: places.resources,
+				threats: places.threats,
+				allies: places.allies,
+				enemies: places.enemies,
+				secrets: places.secrets,
+				rumors: places.rumors,
+				hooks: places.hooks,
+				notes: places.notes,
+				size: places.size,
+				importance: places.importance,
+				sortBy: places.sortBy,
+				filters: places.filters,
+				featuredImage: places.featuredImage,
+				isFavorite: places.isFavorite,
+				createdAt: places.createdAt,
+				updatedAt: places.updatedAt,
+			})
+			.from(places)
+			.orderBy(asc(places.name));
 
-		return places.map((place) => toPlaceWithStats(place as PrismaPlaceWithCounts));
+		// Transformar a formato compatible con Prisma
+		const transformedPlaces = drizzlePlaces.map((rawPlace) => ({
+			...rawPlace,
+			isFavorite: Boolean(rawPlace.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				notes: 0,
+				tags: 0,
+				characters: 0,
+				collections: 0,
+				concepts: 0,
+			},
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const findOptions = mapPlaceSearchOptionsToPrisma(options);
+
+				const prismaPlaces = await prisma.place.findMany({
+					...findOptions,
+					include: placeIncludeWithCounts,
+				});
+
+				if (Math.abs(transformedPlaces.length - prismaPlaces.length) > 0) {
+					placeLogger.warn('⚠️ Diferencia en conteo getPlaces:', {
+						drizzle: transformedPlaces.length,
+						prisma: prismaPlaces.length
+					});
+				} else {
+					placeLogger.info('✅ Validación dual exitosa getPlaces:', {
+						total: transformedPlaces.length
+					});
+				}
+			} catch (validationError) {
+				placeLogger.error('❌ Error en validación dual getPlaces:', validationError);
+			}
+		}
+
+		return transformedPlaces.map((place) => toPlaceWithStats(place as any));
 	} catch (error) {
 		placeLogger.error('Error al obtener places:', error);
 		throw createPlaceError('Error al obtener lugares', EntityErrorCode.OPERATION_FAILED, error);
@@ -76,13 +154,99 @@ export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithS
  */
 export async function getPlaceById(id: string): Promise<PlaceWithStats | null> {
 	try {
-		const prisma = await getPrismaClient();
-		const place = await prisma.place.findUnique({
-			where: { id },
-			include: placeIncludeWithCounts,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		placeLogger.info(`🔍 Obteniendo place por ID: ${id}`);
 
-		return place ? toPlaceWithStats(place as PrismaPlaceWithCounts) : null;
+		const drizzlePlace = await db
+			.select({
+				id: places.id,
+				name: places.name,
+				description: places.description,
+				emoji: places.emoji,
+				color: places.color,
+				shortcut: places.shortcut,
+				category: places.category,
+				location: places.location,
+				coordinates: places.coordinates,
+				climate: places.climate,
+				terrain: places.terrain,
+				population: places.population,
+				government: places.government,
+				economy: places.economy,
+				culture: places.culture,
+				history: places.history,
+				geography: places.geography,
+				landmarks: places.landmarks,
+				resources: places.resources,
+				threats: places.threats,
+				allies: places.allies,
+				enemies: places.enemies,
+				secrets: places.secrets,
+				rumors: places.rumors,
+				hooks: places.hooks,
+				notes: places.notes,
+				size: places.size,
+				importance: places.importance,
+				sortBy: places.sortBy,
+				filters: places.filters,
+				featuredImage: places.featuredImage,
+				isFavorite: places.isFavorite,
+				createdAt: places.createdAt,
+				updatedAt: places.updatedAt,
+			})
+			.from(places)
+			.where(eq(places.id, id))
+			.limit(1);
+
+		if (drizzlePlace.length === 0) {
+			placeLogger.warn(`Place no encontrado: ${id}`);
+			return null;
+		}
+
+		const rawPlace = drizzlePlace[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedPlace = {
+			...rawPlace,
+			isFavorite: Boolean(rawPlace.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				notes: 0,
+				tags: 0,
+				characters: 0,
+				collections: 0,
+				concepts: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaPlace = await prisma.place.findUnique({
+					where: { id },
+					include: placeIncludeWithCounts,
+				});
+
+				if (prismaPlace && transformedPlace) {
+					placeLogger.info('✅ Validación dual exitosa getPlaceById:', {
+						placeName: transformedPlace.name
+					});
+				} else if (!prismaPlace && !transformedPlace) {
+					placeLogger.info('✅ Validación dual exitosa getPlaceById: ambos null');
+				} else {
+					placeLogger.warn('⚠️ Diferencia en getPlaceById:', {
+						drizzleFound: !!transformedPlace,
+						prismaFound: !!prismaPlace
+					});
+				}
+			} catch (validationError) {
+				placeLogger.error('❌ Error en validación dual getPlaceById:', validationError);
+			}
+		}
+
+		return toPlaceWithStats(transformedPlace as any);
 	} catch (error) {
 		placeLogger.error(`Error al obtener place ${id}:`, error);
 		throw createPlaceError('Error al obtener lugar', EntityErrorCode.OPERATION_FAILED, error);

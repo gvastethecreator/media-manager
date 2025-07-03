@@ -69,6 +69,19 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
+// GET /world-items/:id/recent-images - Obtener imágenes recientes de un world item
+router.get('/:id/recent-images', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+		const images = await worldItemService.getRecentWorldItemImages(id, limit);
+		res.json(images);
+	} catch (error) {
+		console.error('Error getting recent world item images:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /world-items - Crear nuevo world item
 router.post('/', async (req, res) => {
 	try {

@@ -176,4 +176,29 @@ router.delete('/:id/images/:imageId', async (req, res) => {
 	}
 });
 
+// GET /groups/:id/media - Obtener imágenes y videos recientes de un grupo
+router.get('/:id/media', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+		const media = await groupService.getRecentGroupMediaService(id, limit);
+		res.json(media);
+	} catch (error) {
+		console.error('Error getting recent group media:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// GET /groups/:id/card-data - Obtener datos de un grupo para la tarjeta
+router.get('/:id/card-data', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const cardData = await groupService.getGroupCardDataService(id);
+		res.json(cardData);
+	} catch (error) {
+		console.error('Error getting group card data:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 export default router;

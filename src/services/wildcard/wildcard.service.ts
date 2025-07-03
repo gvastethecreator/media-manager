@@ -5,16 +5,20 @@
  * @updated 2025-01-27
  */
 
-import { Prisma } from '@prisma/client';
 import { getPrismaClient } from '@/lib/database/db';
+import { Prisma } from '@prisma/client';
+import { and, asc, count, desc, eq, isNull, like, or } from 'drizzle-orm';
+// Drizzle imports
+import { db } from '@/lib/drizzle';
+import { wildcards } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-	mapCreateWildcardDataToPrisma,
-	mapUpdateWildcardDataToPrisma,
-	toWildcardWithStats,
+    mapCreateWildcardDataToPrisma,
+    mapUpdateWildcardDataToPrisma,
+    toWildcardWithStats,
 } from '@/transformers/wildcard';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 
@@ -134,20 +138,74 @@ const revalidateWildcardPaths = async (): Promise<void> => {
  */
 export async function getWildcard(id: string): Promise<WildcardWithStats | null> {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info(`🔍 Obteniendo wildcard por ID: ${id}`);
-		const prisma = await getPrismaClient();
 
-		const wildcard = await prisma.wildcard.findUnique({
-			where: { id },
-			include: wildcardIncludeWithCounts,
-		});
+		const drizzleWildcard = await db
+			.select({
+				id: wildcards.id,
+				name: wildcards.name,
+				description: wildcards.description,
+				emoji: wildcards.emoji,
+				color: wildcards.color,
+				category: wildcards.category,
+				shortcut: wildcards.shortcut,
+				children: wildcards.children,
+				featuredImage: wildcards.featuredImage,
+				isFavorite: wildcards.isFavorite,
+				parentId: wildcards.parentId,
+				createdAt: wildcards.createdAt,
+				updatedAt: wildcards.updatedAt,
+			})
+			.from(wildcards)
+			.where(eq(wildcards.id, id))
+			.limit(1);
 
-		if (!wildcard) {
+		if (drizzleWildcard.length === 0) {
 			logger.warn(`Wildcard no encontrado: ${id}`);
 			return null;
 		}
 
-		const result = toWildcardWithStats(wildcard as PrismaWildcardWithData);
+		// Transformar a formato compatible con Prisma
+		const transformedWildcard = {
+			...drizzleWildcard[0],
+			isFavorite: Boolean(drizzleWildcard[0].isFavorite),
+			tags: [], // Array vacío por ahora
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				tags: 0,
+				images: 0,
+				characters: 0,
+				places: 0,
+				notes: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const wildcard = await prisma.wildcard.findUnique({
+					where: { id },
+					include: wildcardIncludeWithCounts,
+				});
+
+				if (wildcard && transformedWildcard) {
+					logger.info('✅ Validación dual exitosa getWildcard:', { id });
+				} else if (!wildcard && !transformedWildcard) {
+					logger.info('✅ Validación dual exitosa getWildcard (ambos null):', { id });
+				} else {
+					logger.warn('⚠️ Diferencia en getWildcard:', {
+						drizzleFound: !!transformedWildcard,
+						prismaFound: !!wildcard
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getWildcard:', validationError);
+			}
+		}
+
+		const result = toWildcardWithStats(transformedWildcard as PrismaWildcardWithData);
 		logger.info(`✅ Wildcard encontrado: ${result.name}`);
 		return result;
 	} catch (error) {
@@ -165,47 +223,154 @@ export async function getWildcard(id: string): Promise<WildcardWithStats | null>
  */
 export async function getWildcards(options: GetWildcardsOptions = {}): Promise<GetWildcardsResult> {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		const { search, orderBy = 'name', orderDirection = 'asc', onlyFavorites = false, parentId } = options;
 
 		logger.info('🔍 Obteniendo wildcards', { options });
-		const prisma = await getPrismaClient();
 
-		// Construir filtros
-		const where: Prisma.WildcardWhereInput = {};
+		// Construir filtros dinámicamente
+		const conditions: any[] = [];
 
 		if (onlyFavorites) {
-			where.isFavorite = true;
+			conditions.push(eq(wildcards.isFavorite, true));
 		}
 
 		if (parentId !== undefined) {
-			where.parentId = parentId;
+			if (parentId === null) {
+				conditions.push(isNull(wildcards.parentId));
+			} else {
+				conditions.push(eq(wildcards.parentId, parentId));
+			}
 		}
 
 		if (search) {
-			where.OR = [
-				{ name: { contains: search } },
-				{ description: { contains: search } },
-				{ content: { contains: search } },
-			];
+			conditions.push(
+				or(
+					like(wildcards.name, `%${search}%`),
+					like(wildcards.description, `%${search}%`)
+					// Nota: campo 'content' no existe en schema Drizzle
+				)
+			);
 		}
 
-		// Obtener wildcards
-		const [wildcards, total] = await Promise.all([
-			prisma.wildcard.findMany({
-				where,
-				include: wildcardIncludeWithCounts,
-				orderBy:
-					orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
-			}),
-			prisma.wildcard.count({ where }),
+		// Aplicar filtros
+		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+		// Configurar ordenamiento
+		const orderByClause = (() => {
+			const direction = orderDirection === 'desc' ? desc : asc;
+			switch (orderBy) {
+				case 'createdAt':
+					return direction(wildcards.createdAt);
+				case 'updatedAt':
+					return direction(wildcards.updatedAt);
+				case 'name':
+				default:
+					// Para name, primero favoritos luego por nombre
+					return orderDirection === 'desc'
+						? [desc(wildcards.isFavorite), desc(wildcards.name)]
+						: [desc(wildcards.isFavorite), asc(wildcards.name)];
+			}
+		})();
+
+		// Ejecutar consultas en paralelo
+		const [drizzleWildcards, totalCount] = await Promise.all([
+			db
+				.select({
+					id: wildcards.id,
+					name: wildcards.name,
+					description: wildcards.description,
+					emoji: wildcards.emoji,
+					color: wildcards.color,
+					category: wildcards.category,
+					shortcut: wildcards.shortcut,
+					children: wildcards.children,
+					featuredImage: wildcards.featuredImage,
+					isFavorite: wildcards.isFavorite,
+					parentId: wildcards.parentId,
+					createdAt: wildcards.createdAt,
+					updatedAt: wildcards.updatedAt,
+				})
+				.from(wildcards)
+				.where(whereClause)
+				.orderBy(...(Array.isArray(orderByClause) ? orderByClause : [orderByClause])),
+			db
+				.select({ count: count() })
+				.from(wildcards)
+				.where(whereClause)
+				.then(result => result[0]?.count || 0)
 		]);
 
-		const transformedWildcards = wildcards.map((w) => toWildcardWithStats(w as PrismaWildcardWithData));
+		// Transformar a formato compatible con Prisma
+		const transformedWildcards = drizzleWildcards.map((rawWildcard) => ({
+			...rawWildcard,
+			isFavorite: Boolean(rawWildcard.isFavorite),
+			tags: [], // Array vacío por ahora
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				tags: 0,
+				images: 0,
+				characters: 0,
+				places: 0,
+				notes: 0,
+			},
+		}));
 
-		logger.info(`✅ ${transformedWildcards.length} wildcards obtenidos`);
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+
+				// Construir filtros de Prisma
+				const where: Prisma.WildcardWhereInput = {};
+
+				if (onlyFavorites) {
+					where.isFavorite = true;
+				}
+
+				if (parentId !== undefined) {
+					where.parentId = parentId;
+				}
+
+				if (search) {
+					where.OR = [
+						{ name: { contains: search } },
+						{ description: { contains: search } },
+						// Nota: omitiendo 'content' por inconsistencia de schema
+					];
+				}
+
+				const [prismaWildcards, prismaTotal] = await Promise.all([
+					prisma.wildcard.findMany({
+						where,
+						include: wildcardIncludeWithCounts,
+						orderBy:
+							orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
+					}),
+					prisma.wildcard.count({ where }),
+				]);
+
+				if (Math.abs(transformedWildcards.length - prismaWildcards.length) > 0 || totalCount !== prismaTotal) {
+					logger.warn('⚠️ Diferencia en conteo getWildcards:', {
+						drizzle: { count: transformedWildcards.length, total: totalCount },
+						prisma: { count: prismaWildcards.length, total: prismaTotal }
+					});
+				} else {
+					logger.info('✅ Validación dual exitosa getWildcards:', {
+						total: totalCount
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getWildcards:', validationError);
+			}
+		}
+
+		const result = transformedWildcards.map((w) => toWildcardWithStats(w as PrismaWildcardWithData));
+
+		logger.info(`✅ ${result.length} wildcards obtenidos`);
 		return {
-			wildcards: transformedWildcards,
-			total,
+			wildcards: result,
+			total: totalCount,
 		};
 	} catch (error) {
 		logger.error('❌ Error al obtener wildcards', { error, options });

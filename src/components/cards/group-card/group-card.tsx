@@ -2,15 +2,16 @@ import { motion } from 'motion/react';
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useGroupCardData } from '@/lib/api/groups';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
-import type { GroupCardData } from './group-server-actions';
+import type { GroupWithStats } from '@/types/entities/group';
 
 export interface GroupCardProps {
-	group: GroupCardData;
-	onClick?: (group: GroupCardData) => void;
+	groupId: string;
+	onClick?: (groupData: GroupWithStats) => void;
 	className?: string;
 	tcgMode?: boolean;
 	compact?: boolean;
@@ -22,7 +23,7 @@ export interface GroupCardProps {
  * Card para mostrar un grupo en estilo TCG
  */
 export function GroupCard({
-	group,
+	groupId,
 	onClick,
 	className,
 	tcgMode = true,
@@ -30,19 +31,46 @@ export function GroupCard({
 	disabled = false,
 	isSelected = false,
 }: GroupCardProps) {
-	// Estado para el efecto de hover
+	const { data: group, isLoading, error } = useGroupCardData(groupId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Si no hay datos del grupo o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando grupo...</p>
+			</div>
+		);
+	}
+
+	if (error || !group) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Grupo no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Calcular colores
 	const primaryColor = useMemo(() => group.color || '#3b82f6', [group.color]);
-	const _secondaryColor = useMemo(() => {
+	const secondaryColor = useMemo(() => {
 		if (!group.color) return '#2563eb';
 
 		try {
 			// Convertir hex a RGB y oscurecer
-			const r = Number.parseInt(group.color.slice(1, 3), 16);
-			const g = Number.parseInt(group.color.slice(3, 5), 16);
-			const b = Number.parseInt(group.color.slice(5, 7), 16);
+			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
+			const g = Number.parseInt(primaryColor.slice(2, 4), 16);
+			const b = Number.parseInt(primaryColor.slice(4, 6), 16);
 
 			const darkenFactor = 0.7;
 			const darkerR = Math.floor(r * darkenFactor);
@@ -53,26 +81,26 @@ export function GroupCard({
 		} catch (_e) {
 			return '#2563eb';
 		}
-	}, [group.color]);
+	}, [primaryColor]);
 
 	// Preparar media para la galería
-	const _allMedia = useMemo(() => {
+	const allMedia = useMemo(() => {
 		return [...(group.recentImages || []), ...(group.recentVideos || [])];
 	}, [group.recentImages, group.recentVideos]);
 
 	// Función de manejadores de eventos
-	const handleClick = () => {
+	const handleClick = useCallback(() => {
 		if (onClick && !disabled) {
 			onClick(group);
 		}
-	};
+	}, [onClick, disabled, group]);
 
-	const handleKeyDown = (e: React.KeyboardEvent) => {
+	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
 		if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
 			e.preventDefault();
 			onClick(group);
 		}
-	};
+	}, [onClick, disabled, group]);
 
 	// Determinar el número total de entidades
 	const entityCounts = useMemo(
@@ -185,9 +213,9 @@ export function GroupCard({
 					animate={{
 						opacity: [0.1, 0.2, 0.1],
 						background: [
-							`linear-gradient(45deg, transparent, ${primaryColor}50, transparent)`,
-							`linear-gradient(45deg, transparent, ${primaryColor}80, transparent)`,
-							`linear-gradient(45deg, transparent, ${primaryColor}50, transparent)`,
+							`linear-gradient(45deg, ${primaryColor}50, transparent)`,
+							`linear-gradient(45deg, ${primaryColor}80, transparent)`,
+							`linear-gradient(45deg, ${primaryColor}50, transparent)`,
 						],
 					}}
 					transition={{
@@ -237,3 +265,4 @@ export function GroupCard({
 
 // Exportar también un componente memorizado
 export const MemoizedGroupCard = React.memo(GroupCard);
+

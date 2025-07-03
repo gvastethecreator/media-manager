@@ -1,179 +1,55 @@
-import express from 'express';
-import { FavoriteService } from '@/services/favorite/favorite.service';
-import { toFavoriteWithStats } from '@/transformers/favorite/favorite.transformer';
+import { Router } from 'express';
+import { z } from 'zod';
+import { prisma } from '@/lib/database/prisma';
+import { FavoriteEntityType } from '@/types/entities/favorite';
 
-const router = express.Router();
-const favoriteService = new FavoriteService();
+const router = Router();
 
-// GET /favorites - Listar favorites con filtros
-router.get('/', async (req, res) => {
-	try {
-		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc' } = req.query;
-
-		const filters = {
-			search: search as string,
-			limit: Number.parseInt(limit as string),
-			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-			sortOrder: sortOrder as 'asc' | 'desc',
-		};
-
-		const { favorites, total } = await favoriteService.getFavorites(filters);
-		const transformedFavorites = favorites.map(toFavoriteWithStats);
-
-		res.json({
-			data: transformedFavorites,
-			pagination: {
-				total,
-				limit: filters.limit,
-				offset: filters.offset,
-				hasNext: filters.offset + filters.limit < total,
-				hasPrev: filters.offset > 0,
-			},
-		});
-	} catch (error) {
-		console.error('Error getting favorites:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+const toggleFavoriteSchema = z.object({
+  entityType: z.nativeEnum(FavoriteEntityType),
+  entityId: z.string().min(1),
 });
 
-// GET /favorites/:id - Obtener favorite por ID
-router.get('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const favorite = await favoriteService.getFavoriteById(id);
+router.post('/toggle', async (req, res) => {
+  const validation = toggleFavoriteSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ error: 'Datos inválidos', details: validation.error.errors });
+  }
 
-		if (!favorite) {
-			return res.status(404).json({ error: 'Favorite no encontrado' });
-		}
+  const { entityType, entityId } = validation.data;
 
-		res.json(toFavoriteWithStats(favorite));
-	} catch (error) {
-		console.error('Error getting favorite:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+  try {
+    const existing = await prisma.favorite.findFirst({
+      where: { entityType, entityId },
+    });
 
-// GET /favorites/:id/images - Obtener imágenes del favorite
-router.get('/:id/images', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+    if (existing) {
+      await prisma.favorite.delete({ where: { id: existing.id } });
+      return res.json({ isFavorite: false });
+    }
 
-		const filters = {
-			limit: Number.parseInt(limit as string),
-			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-			sortOrder: sortOrder as 'asc' | 'desc',
-		};
+    const defaultProfile = await prisma.profile.findFirst({
+      where: { isActive: true },
+      select: { id: true },
+    });
 
-		const { images, total } = await favoriteService.getFavoriteImages(id, filters);
+    if (!defaultProfile) {
+      return res.status(400).json({ error: 'No se encontró un perfil activo' });
+    }
 
-		res.json({
-			data: images,
-			pagination: {
-				total,
-				limit: filters.limit,
-				offset: filters.offset,
-				hasNext: filters.offset + filters.limit < total,
-				hasPrev: filters.offset > 0,
-			},
-		});
-	} catch (error) {
-		console.error('Error getting favorite images:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
+    await prisma.favorite.create({
+      data: {
+        entityType,
+        entityId,
+        profile: { connect: { id: defaultProfile.id } },
+      },
+    });
 
-// POST /favorites - Crear nuevo favorite
-router.post('/', async (req, res) => {
-	try {
-		const { name, description, isPublic } = req.body;
-
-		if (!name) {
-			return res.status(400).json({ error: 'El nombre es requerido' });
-		}
-
-		const favorite = await favoriteService.createFavorite({
-			name,
-			description,
-			isPublic,
-		});
-
-		res.status(201).json(toFavoriteWithStats(favorite));
-	} catch (error) {
-		console.error('Error creating favorite:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// PUT /favorites/:id - Actualizar favorite
-router.put('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { name, description, isPublic } = req.body;
-
-		const favorite = await favoriteService.updateFavorite(id, {
-			name,
-			description,
-			isPublic,
-		});
-
-		if (!favorite) {
-			return res.status(404).json({ error: 'Favorite no encontrado' });
-		}
-
-		res.json(toFavoriteWithStats(favorite));
-	} catch (error) {
-		console.error('Error updating favorite:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// DELETE /favorites/:id - Eliminar favorite
-router.delete('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		const deleted = await favoriteService.deleteFavorite(id);
-
-		if (!deleted) {
-			return res.status(404).json({ error: 'Favorite no encontrado' });
-		}
-
-		res.status(204).send();
-	} catch (error) {
-		console.error('Error deleting favorite:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// POST /favorites/:id/images/:imageId - Agregar imagen al favorite
-router.post('/:id/images/:imageId', async (req, res) => {
-	try {
-		const { id, imageId } = req.params;
-
-		await favoriteService.addImageToFavorite(id, imageId);
-
-		res.status(201).json({ message: 'Imagen agregada a favoritos correctamente' });
-	} catch (error) {
-		console.error('Error adding image to favorite:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// DELETE /favorites/:id/images/:imageId - Remover imagen del favorite
-router.delete('/:id/images/:imageId', async (req, res) => {
-	try {
-		const { id, imageId } = req.params;
-
-		await favoriteService.removeImageFromFavorite(id, imageId);
-
-		res.status(204).send();
-	} catch (error) {
-		console.error('Error removing image from favorite:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+    return res.status(201).json({ isFavorite: true });
+  } catch (error) {
+    console.error(`Error al alternar favorito para ${entityType}:${entityId}:`, error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 export default router;

@@ -54,6 +54,19 @@ router.get('/:id', async (req, res) => {
 	}
 });
 
+// GET /wildcards/:id/recent-images - Obtener imágenes recientes de un wildcard
+router.get('/:id/recent-images', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 4;
+		const images = await wildcardService.getRecentWildcardImages(id, limit);
+		res.json(images);
+	} catch (error) {
+		console.error('Error getting recent wildcard images:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /wildcards - Crear nuevo wildcard
 router.post('/', async (req, res) => {
 	try {

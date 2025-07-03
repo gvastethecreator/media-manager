@@ -11,6 +11,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
+// Drizzle imports
+import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { albums } from '@/lib/drizzle/schema';
 
 const logger = serverLogger.withContext('AlbumService');
 
@@ -57,17 +61,82 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 	try {
 		logger.info(`🔍 Obteniendo álbum por ID: ${id}`);
 
-		const album = await prisma.album.findUnique({
-			where: { id },
-			include: ALBUM_WITH_STATS_INCLUDE,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		const drizzleAlbum = await db
+			.select({
+				id: albums.id,
+				name: albums.name,
+				emoji: albums.emoji,
+				color: albums.color,
+				description: albums.description,
+				shortcut: albums.shortcut,
+				category: albums.category,
+				sortBy: albums.sortBy,
+				filters: albums.filters,
+				featuredImage: albums.featuredImage,
+				isFavorite: albums.isFavorite,
+				createdAt: albums.createdAt,
+				updatedAt: albums.updatedAt,
+			})
+			.from(albums)
+			.where(eq(albums.id, id))
+			.limit(1);
 
-		if (!album) {
+		if (drizzleAlbum.length === 0) {
 			logger.warn(`Álbum no encontrado: ${id}`);
 			return null;
 		}
 
-		return toAlbumWithStats(album, album._count);
+		const rawAlbum = drizzleAlbum[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedAlbum = {
+			...rawAlbum,
+			isFavorite: Boolean(rawAlbum.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prismaAlbum = await prisma.album.findUnique({
+					where: { id },
+					include: ALBUM_WITH_STATS_INCLUDE,
+				});
+
+				if (prismaAlbum && transformedAlbum) {
+					logger.info('✅ Validación dual exitosa getAlbum:', {
+						albumName: transformedAlbum.name
+					});
+				} else if (!prismaAlbum && !transformedAlbum) {
+					logger.info('✅ Validación dual exitosa getAlbum: ambos null');
+				} else {
+					logger.warn('⚠️ Diferencia en getAlbum:', {
+						drizzleFound: !!transformedAlbum,
+						prismaFound: !!prismaAlbum
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getAlbum:', validationError);
+			}
+		}
+
+		return toAlbumWithStats(transformedAlbum as any, transformedAlbum._count);
 	} catch (error) {
 		logger.error(`❌ Error al obtener el álbum ${id}`, { error });
 		throw new Error(`No se pudo obtener el álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
@@ -89,27 +158,128 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 
 		logger.info('🎞️ Obteniendo álbumes', { options });
 
-		// Construir filtros
-		const where: Prisma.AlbumWhereInput = {};
+		// **MIGRACIÓN A DRIZZLE**
+		// Construir filtros dinámicamente
+		const conditions: any[] = [];
 
 		if (search) {
-			where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
+			conditions.push(
+				or(
+					like(albums.name, `%${search}%`),
+					like(albums.description, `%${search}%`)
+				)
+			);
 		}
 
-		// Obtener álbumes
-		const [albums, total] = await Promise.all([
-			prisma.album.findMany({
-				where,
-				include: ALBUM_WITH_STATS_INCLUDE,
-				orderBy: { [orderBy]: orderDirection },
-			}),
-			prisma.album.count({ where }),
-		]);
+		// Determinar el ordenamiento
+		const orderDirection_fn = orderDirection === 'desc' ? desc : asc;
+		let orderByField: any;
 
-		const transformedAlbums = albums.map((album) => toAlbumWithStats(album, album._count));
+		switch (orderBy) {
+			case 'createdAt':
+				orderByField = orderDirection_fn(albums.createdAt);
+				break;
+			case 'updatedAt':
+				orderByField = orderDirection_fn(albums.updatedAt);
+				break;
+			default: // 'name'
+				orderByField = orderDirection_fn(albums.name);
+		}
+
+		// Consulta principal
+		let drizzleQuery = db
+			.select({
+				id: albums.id,
+				name: albums.name,
+				emoji: albums.emoji,
+				color: albums.color,
+				description: albums.description,
+				shortcut: albums.shortcut,
+				category: albums.category,
+				sortBy: albums.sortBy,
+				filters: albums.filters,
+				featuredImage: albums.featuredImage,
+				isFavorite: albums.isFavorite,
+				createdAt: albums.createdAt,
+				updatedAt: albums.updatedAt,
+			})
+			.from(albums);
+
+		// Aplicar filtros si existen
+		if (conditions.length > 0) {
+			drizzleQuery = drizzleQuery.where(and(...conditions));
+		}
+
+		// Aplicar ordenamiento
+		const drizzleAlbums = await drizzleQuery.orderBy(orderByField);
+
+		// Consulta de conteo total (con los mismos filtros)
+		let countQuery = db.select({ count: count() }).from(albums);
+
+		if (conditions.length > 0) {
+			countQuery = countQuery.where(and(...conditions));
+		}
+
+		const [{ count: total }] = await countQuery;
+
+		// Transformar resultados de Drizzle a formato compatible con Prisma
+		const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
+			...rawAlbum,
+			isFavorite: Boolean(rawAlbum.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				// Construir filtros para Prisma (código original)
+				const where: Prisma.AlbumWhereInput = {};
+
+				if (search) {
+					where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
+				}
+
+				const [prismaTotal] = await Promise.all([
+					prisma.album.count({ where }),
+				]);
+
+				// Comparar resultados básicos
+				if (Math.abs(total - prismaTotal) > 0) {
+					logger.warn('⚠️ Diferencia en conteo total getAlbums:', {
+						drizzle: total,
+						prisma: prismaTotal,
+						options
+					});
+				} else {
+					logger.info('✅ Validación dual exitosa getAlbums:', {
+						total,
+						albums: transformedAlbums.length
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getAlbums:', validationError);
+			}
+		}
+
+		const finalAlbums = transformedAlbums.map((album) => toAlbumWithStats(album as any, album._count));
 
 		return {
-			albums: transformedAlbums,
+			albums: finalAlbums,
 			total,
 		};
 	} catch (error) {

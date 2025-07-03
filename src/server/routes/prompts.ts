@@ -69,6 +69,19 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
+// GET /prompts/:id/recent-images - Obtener imágenes recientes de un prompt
+router.get('/:id/recent-images', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+		const images = await promptService.getRecentPromptImages(id, limit);
+		res.json(images);
+	} catch (error) {
+		console.error('Error getting recent prompt images:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /prompts - Crear nuevo prompt
 router.post('/', async (req, res) => {
 	try {

@@ -1,8 +1,12 @@
 import type { Concept, Prisma } from '@prisma/client';
+// Drizzle imports
 import type { ConceptCreate } from '@/app/actions/concepts/concept.actions';
 import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { concepts } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 
@@ -122,9 +126,65 @@ export const ConceptService = {
 
 	async getConcept(id: string): Promise<Concept | null> {
 		try {
-			return await prisma.concept.findUnique({
-				where: { id },
-			});
+			// **MIGRACIÓN A DRIZZLE**
+			const drizzleConcept = await db
+				.select({
+					id: concepts.id,
+					name: concepts.name,
+					content: concepts.content,
+					description: concepts.description,
+					category: concepts.category,
+					emoji: concepts.emoji,
+					color: concepts.color,
+					shortcut: concepts.shortcut,
+					sortBy: concepts.sortBy,
+					filters: concepts.filters,
+					featuredImage: concepts.featuredImage,
+					isFavorite: concepts.isFavorite,
+					createdAt: concepts.createdAt,
+					updatedAt: concepts.updatedAt,
+				})
+				.from(concepts)
+				.where(eq(concepts.id, id))
+				.limit(1);
+
+			if (drizzleConcept.length === 0) {
+				return null;
+			}
+
+			const rawConcept = drizzleConcept[0];
+
+			// Transformar a formato compatible con Prisma
+			const transformedConcept = {
+				...rawConcept,
+				isFavorite: Boolean(rawConcept.isFavorite),
+			};
+
+			// **VALIDACIÓN DUAL EN DESARROLLO**
+			if (process.env.NODE_ENV === 'development') {
+				try {
+					const prismaConcept = await prisma.concept.findUnique({
+						where: { id },
+					});
+
+					if (prismaConcept && transformedConcept) {
+						conceptLogger.info('✅ Validación dual exitosa getConcept:', {
+							conceptName: transformedConcept.name
+						});
+					} else if (!prismaConcept && !transformedConcept) {
+						conceptLogger.info('✅ Validación dual exitosa getConcept: ambos null');
+					} else {
+						conceptLogger.warn('⚠️ Diferencia en getConcept:', {
+							drizzleFound: !!transformedConcept,
+							prismaFound: !!prismaConcept
+						});
+					}
+				} catch (validationError) {
+					conceptLogger.error('❌ Error en validación dual getConcept:', validationError);
+				}
+			}
+
+			return transformedConcept as Concept;
 		} catch (error) {
 			conceptLogger.error('Error getting concept:', { id, error });
 			throw new Error('Error al obtener concepto');
@@ -135,37 +195,128 @@ export const ConceptService = {
 		try {
 			const { category, search, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
 
-			// Construir where
-			const where: Prisma.ConceptWhereInput = {};
+			// **MIGRACIÓN A DRIZZLE**
+			// Construir filtros dinámicamente
+			const conditions: any[] = [];
+
 			if (category) {
-				where.category = category;
+				conditions.push(eq(concepts.category, category));
 			}
+
 			if (search) {
-				where.OR = [
-					{ name: { contains: search } },
-					{ content: { contains: search } },
-					{ description: { contains: search } },
-				];
+				conditions.push(
+					or(
+						like(concepts.name, `%${search}%`),
+						like(concepts.content, `%${search}%`),
+						like(concepts.description, `%${search}%`)
+					)
+				);
 			}
 
-			// Obtener total
-			const total = await prisma.concept.count({ where });
+			// Determinar el ordenamiento
+			const orderDirection_fn = sortOrder === 'desc' ? desc : asc;
+			let orderByField: any;
 
-			// Obtener conceptos
-			const concepts = await prisma.concept.findMany({
-				where,
-				orderBy: {
-					[sortBy]: sortOrder,
-				},
-				skip: page * pageSize,
-				take: pageSize,
-			});
+			switch (sortBy) {
+				case 'name':
+					orderByField = orderDirection_fn(concepts.name);
+					break;
+				case 'category':
+					orderByField = orderDirection_fn(concepts.category);
+					break;
+				default: // 'createdAt'
+					orderByField = orderDirection_fn(concepts.createdAt);
+			}
 
-			// Obtener estadísticas
+			// Consulta principal
+			let drizzleQuery = db
+				.select({
+					id: concepts.id,
+					name: concepts.name,
+					content: concepts.content,
+					description: concepts.description,
+					category: concepts.category,
+					emoji: concepts.emoji,
+					color: concepts.color,
+					shortcut: concepts.shortcut,
+					sortBy: concepts.sortBy,
+					filters: concepts.filters,
+					featuredImage: concepts.featuredImage,
+					isFavorite: concepts.isFavorite,
+					createdAt: concepts.createdAt,
+					updatedAt: concepts.updatedAt,
+				})
+				.from(concepts);
+
+			// Aplicar filtros si existen
+			if (conditions.length > 0) {
+				drizzleQuery = drizzleQuery.where(and(...conditions));
+			}
+
+			// Aplicar ordenamiento y paginación
+			const drizzleConcepts = await drizzleQuery
+				.orderBy(orderByField)
+				.limit(pageSize)
+				.offset(page * pageSize);
+
+			// Consulta de conteo total (con los mismos filtros)
+			let countQuery = db.select({ count: count() }).from(concepts);
+
+			if (conditions.length > 0) {
+				countQuery = countQuery.where(and(...conditions));
+			}
+
+			const [{ count: total }] = await countQuery;
+
+			// Transformar resultados de Drizzle a formato compatible con Prisma
+			const transformedConcepts = drizzleConcepts.map((rawConcept) => ({
+				...rawConcept,
+				isFavorite: Boolean(rawConcept.isFavorite),
+			}));
+
+			// **VALIDACIÓN DUAL EN DESARROLLO**
+			if (process.env.NODE_ENV === 'development') {
+				try {
+					// Construir filtros para Prisma (código original)
+					const where: Prisma.ConceptWhereInput = {};
+					if (category) {
+						where.category = category;
+					}
+					if (search) {
+						where.OR = [
+							{ name: { contains: search } },
+							{ content: { contains: search } },
+							{ description: { contains: search } },
+						];
+					}
+
+					const [prismaTotal] = await Promise.all([
+						prisma.concept.count({ where }),
+					]);
+
+					// Comparar resultados básicos
+					if (Math.abs(total - prismaTotal) > 0) {
+						conceptLogger.warn('⚠️ Diferencia en conteo total getConcepts:', {
+							drizzle: total,
+							prisma: prismaTotal,
+							filters
+						});
+					} else {
+						conceptLogger.info('✅ Validación dual exitosa getConcepts:', {
+							total,
+							concepts: transformedConcepts.length
+						});
+					}
+				} catch (validationError) {
+					conceptLogger.error('❌ Error en validación dual getConcepts:', validationError);
+				}
+			}
+
+			// Obtener estadísticas (mantener implementación original por ahora)
 			const stats = await this.getConceptStats();
 
 			return {
-				items: concepts,
+				items: transformedConcepts as Concept[],
 				total,
 				page,
 				pageSize,
