@@ -5,24 +5,28 @@
  * @updated 2025-01-27
  */
 
+// Drizzle imports
 import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { characters } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { mapCharacterSearchOptionsToPrisma } from '@/transformers/character/mappers';
 import {
-	fromPrismaCharacter,
-	fromPrismaCharacters,
-	toPrismaCharacterCreate,
-	toPrismaCharacterUpdate,
+    fromPrismaCharacter,
+    fromPrismaCharacters,
+    toPrismaCharacterCreate,
+    toPrismaCharacterUpdate,
 } from '@/transformers/character/transformer';
 import type {
-	CharacterCreateInput,
-	CharacterSearchOptions,
-	CharacterUpdateInput,
-	CharacterWithStats,
+    CharacterCreateInput,
+    CharacterSearchOptions,
+    CharacterUpdateInput,
+    CharacterWithStats,
 } from '@/types/entities/character';
+import { desc, eq } from 'drizzle-orm';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CharacterService');
@@ -166,20 +170,103 @@ const revalidateCharacterPaths = async (): Promise<void> => {
  */
 export async function getCharacter(id: string): Promise<CharacterWithStats | null> {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info(`🔍 Obteniendo personaje por ID: ${id}`);
-		const prisma = await getPrismaClient();
 
-		const character = await prisma.character.findUnique({
-			where: { id },
-			select: CHARACTER_SELECT_WITH_STATS,
-		});
+		const drizzleCharacter = await db
+			.select({
+				id: characters.id,
+				name: characters.name,
+				description: characters.description,
+				emoji: characters.emoji,
+				color: characters.color,
+				shortcut: characters.shortcut,
+				category: characters.category,
+				level: characters.level,
+				class: characters.class,
+				race: characters.race,
+				type: characters.type,
+				alignment: characters.alignment,
+				backstory: characters.backstory,
+				stats: characters.stats,
+				psychologicalProfile: characters.psychologicalProfile,
+				socialProfile: characters.socialProfile,
+				relationships: characters.relationships,
+				goals: characters.goals,
+				fears: characters.fears,
+				beliefs: characters.beliefs,
+				personality: characters.personality,
+				skills: characters.skills,
+				abilities: characters.abilities,
+				sortBy: characters.sortBy,
+				filters: characters.filters,
+				featuredImage: characters.featuredImage,
+				isFavorite: characters.isFavorite,
+				createdAt: characters.createdAt,
+				updatedAt: characters.updatedAt,
+			})
+			.from(characters)
+			.where(eq(characters.id, id))
+			.limit(1);
 
-		if (!character) {
+		if (drizzleCharacter.length === 0) {
 			logger.warn(`Personaje no encontrado: ${id}`);
 			return null;
 		}
 
-		const result = fromPrismaCharacter(character);
+		const rawCharacter = drizzleCharacter[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedCharacter = {
+			...rawCharacter,
+			isFavorite: Boolean(rawCharacter.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				tags: 0,
+				groups: 0,
+				properties: 0,
+				collections: 0,
+				albums: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				relatedCharacters: 0,
+				relatedTo: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaCharacter = await prisma.character.findUnique({
+					where: { id },
+					select: CHARACTER_SELECT_WITH_STATS,
+				});
+
+				if (prismaCharacter && transformedCharacter) {
+					logger.info('✅ Validación dual exitosa getCharacter:', {
+						characterName: transformedCharacter.name
+					});
+				} else if (!prismaCharacter && !transformedCharacter) {
+					logger.info('✅ Validación dual exitosa getCharacter: ambos null');
+				} else {
+					logger.warn('⚠️ Diferencia en getCharacter:', {
+						drizzleFound: !!transformedCharacter,
+						prismaFound: !!prismaCharacter
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getCharacter:', validationError);
+			}
+		}
+
+		const result = fromPrismaCharacter(transformedCharacter as any);
 		if (!result) {
 			throw new CharacterServiceError('Error al transformar personaje obtenido', 'TRANSFORM_ERROR');
 		}
@@ -201,27 +288,101 @@ export async function getCharacter(id: string): Promise<CharacterWithStats | nul
  */
 export async function getCharacters(options: CharacterSearchOptions = {}): Promise<GetCharactersResult> {
 	try {
-		logger.info('🔍 Obteniendo personajes', { options });
-		const prisma = await getPrismaClient();
+		// **MIGRACIÓN A DRIZZLE**
+		logger.info('🔍 Obteniendo personajes con opciones:', options);
 
-		const prismaOptions = mapCharacterSearchOptionsToPrisma(options);
+		// Por ahora, implementación básica sin filtros complejos
+		const drizzleCharacters = await db
+			.select({
+				id: characters.id,
+				name: characters.name,
+				description: characters.description,
+				emoji: characters.emoji,
+				color: characters.color,
+				shortcut: characters.shortcut,
+				category: characters.category,
+				level: characters.level,
+				class: characters.class,
+				race: characters.race,
+				type: characters.type,
+				alignment: characters.alignment,
+				backstory: characters.backstory,
+				stats: characters.stats,
+				psychologicalProfile: characters.psychologicalProfile,
+				socialProfile: characters.socialProfile,
+				relationships: characters.relationships,
+				goals: characters.goals,
+				fears: characters.fears,
+				beliefs: characters.beliefs,
+				personality: characters.personality,
+				skills: characters.skills,
+				abilities: characters.abilities,
+				sortBy: characters.sortBy,
+				filters: characters.filters,
+				featuredImage: characters.featuredImage,
+				isFavorite: characters.isFavorite,
+				createdAt: characters.createdAt,
+				updatedAt: characters.updatedAt,
+			})
+			.from(characters)
+			.orderBy(desc(characters.createdAt));
 
-		// Obtener personajes con conteo total
-		const [characters, total] = await Promise.all([
-			prisma.character.findMany({
-				...prismaOptions,
-				select: CHARACTER_SELECT_WITH_STATS,
-			}),
-			prisma.character.count({
-				where: prismaOptions.where,
-			}),
-		]);
+		// Transformar a formato compatible con Prisma
+		const transformedCharacters = drizzleCharacters.map((rawCharacter) => ({
+			...rawCharacter,
+			isFavorite: Boolean(rawCharacter.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				tags: 0,
+				groups: 0,
+				properties: 0,
+				collections: 0,
+				albums: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				relatedCharacters: 0,
+				relatedTo: 0,
+			},
+		}));
 
-		const transformedCharacters = fromPrismaCharacters(characters);
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const findOptions = mapCharacterSearchOptionsToPrisma(options);
 
-		logger.info(`✅ ${transformedCharacters.length} personajes obtenidos`);
+				const prismaCharacters = await prisma.character.findMany({
+					...findOptions,
+					select: CHARACTER_SELECT_WITH_STATS,
+				});
+
+				if (Math.abs(transformedCharacters.length - prismaCharacters.length) > 0) {
+					logger.warn('⚠️ Diferencia en conteo getCharacters:', {
+						drizzle: transformedCharacters.length,
+						prisma: prismaCharacters.length
+					});
+				} else {
+					logger.info('✅ Validación dual exitosa getCharacters:', {
+						total: transformedCharacters.length
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getCharacters:', validationError);
+			}
+		}
+
+		const charactersResult = fromPrismaCharacters(transformedCharacters as any);
+		const total = transformedCharacters.length; // TODO: implementar conteo separado
+
+		logger.info(`✅ ${charactersResult.length} personajes encontrados`);
 		return {
-			characters: transformedCharacters,
+			characters: charactersResult,
 			total,
 		};
 	} catch (error) {

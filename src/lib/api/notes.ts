@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { NoteWithStats } from '@/types/entities/note';
+import type { NoteWithStats } => from '@/types/entities/note';
 import { api } from './client';
 
 export interface NoteFilters {
@@ -115,4 +115,55 @@ export function useDeleteNote() {
 			queryClient.removeQueries({ queryKey: noteKeys.images(id) });
 		},
 	});
+}
+
+export function useRecentNoteImages(noteId: string, limit: number = 6) {
+  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>, Error>({
+    queryKey: [...noteKeys.detail(noteId), 'recent-images', limit],
+    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/notes/${noteId}/recent-images?limit=${limit}`),
+    enabled: !!noteId,
+  });
+}
+
+export function useNoteCounts(noteId: string) {
+  return useQuery<{
+    characters: number;
+    places: number;
+    worldItems: number;
+    concepts: number;
+    prompts: number;
+    images: number;
+    videos: number;
+    albums: number;
+    collections: number;
+    tags: number;
+    wildcards: number;
+    properties: number;
+    groups: number;
+  }, Error>({
+    queryKey: [...noteKeys.detail(noteId), 'counts'],
+    queryFn: () => api.get<{
+      characters: number;
+      places: number;
+      worldItems: number;
+      concepts: number;
+      prompts: number;
+      images: number;
+      videos: number;
+      albums: number;
+      collections: number;
+      tags: number;
+      wildcards: number;
+      properties: number;
+      groups: number;
+    }>(`/notes/${noteId}/counts`),
+    enabled: !!noteId,
+  });
+}
+
+export function useNoteStatuses() {
+  return useQuery<string[], Error>({
+    queryKey: [...noteKeys.all, 'statuses'],
+    queryFn: () => api.get<string[]>(`/notes/statuses`),
+  });
 }

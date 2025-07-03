@@ -1,8 +1,7 @@
 import { ImageIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { TagRarity } from '@/store/entities/tag/types';
-import { getTagThumbnails } from './tag-server-actions';
+import { useTagThumbnails } from '@/lib/api/tags';
 
 interface TagCardImagesProps {
 	tagId: string;
@@ -12,13 +11,6 @@ interface TagCardImagesProps {
 	featuredImage?: { id: string; thumbnailUrl: string; url?: string } | null;
 	tcgMode?: boolean;
 	compact?: boolean;
-}
-
-interface ThumbnailImage {
-	id: string;
-	name?: string | null;
-	thumbnailUrl: string;
-	url?: string;
 }
 
 /**
@@ -34,10 +26,10 @@ export function TagCardImages({
 	tcgMode = true,
 	compact = false,
 }: TagCardImagesProps) {
+	const { data: fetchedImages, isLoading: loading, error } = useTagThumbnails(tagId);
+
 	// Estado para almacenar las imágenes
-	const [images, setImages] = useState<ThumbnailImage[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const images = fetchedImages ? (featuredImage && fetchedImages.length > 0 ? [featuredImage, ...fetchedImages.filter((img) => img.id !== featuredImage.id)] : fetchedImages) : [];
 
 	// Conseguir un factor de brillo basado en la rareza para efectos visuales
 	const rarityBrightnessMap = {
@@ -49,34 +41,6 @@ export function TagCardImages({
 	} as const;
 
 	const rarityBrightness: number = rarityBrightnessMap[rarity as keyof typeof rarityBrightnessMap] || 1;
-
-	// Cargar imágenes al montar el componente
-	useEffect(() => {
-		async function loadImages() {
-			try {
-				setLoading(true);
-				// Si hay una imagen destacada, usarla primero
-				const fetchedImages = await getTagThumbnails(tagId);
-
-				// Si hay una imagen destacada, asegurarse de que aparezca primero
-				if (featuredImage && fetchedImages.length > 0) {
-					const filteredImages = fetchedImages.filter((img) => img.id !== featuredImage.id);
-					setImages([featuredImage as ThumbnailImage, ...filteredImages]);
-				} else {
-					setImages(fetchedImages);
-				}
-
-				setError(null);
-			} catch (err) {
-				console.error('Error loading tag images:', err);
-				setError('No se pudieron cargar las imágenes');
-			} finally {
-				setLoading(false);
-			}
-		}
-
-		loadImages();
-	}, [tagId, featuredImage]);
 
 	// Elemento placeholder para cuando no hay imágenes
 	const renderPlaceholder = () => (

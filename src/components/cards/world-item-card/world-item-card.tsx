@@ -2,15 +2,16 @@ import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from '
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { WorldItem, WorldItemRarity, WorldItemType } from '@/types/entities/world-item';
+import { WorldItemRarity, WorldItemType } from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';
+import { useWorldItem, useRecentWorldItemImages } from '@/lib/api/world-items';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
 import { WorldItemCardImages } from './world-item-card-images';
 
 export interface WorldItemCardProps {
-	worldItem: WorldItem;
-	onClick?: () => void;
+	worldItemId: string;
+	onClick?: (worldItemData: WorldItemWithStats) => void;
 	className?: string;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
@@ -26,7 +27,7 @@ export interface WorldItemCardProps {
  * visualmente atractivo.
  */
 export function WorldItemCard({
-	worldItem,
+	worldItemId,
 	onClick,
 	className,
 	style,
@@ -37,7 +38,36 @@ export function WorldItemCard({
 	interactive = true,
 	...rest
 }: WorldItemCardProps) {
+	const { data: worldItem, isLoading, error } = useWorldItem(worldItemId);
+	const { data: recentImagesData } = useRecentWorldItemImages(worldItemId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Si no hay datos del objeto del mundo o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando objeto del mundo...</p>
+			</div>
+		);
+	}
+
+	if (error || !worldItem) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Objeto del mundo no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Extraer propiedades básicas del objeto
 	const {
@@ -182,10 +212,10 @@ export function WorldItemCard({
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
 			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
 				e.preventDefault();
-				onClick();
+				onClick(worldItem);
 			}
 		},
-		[onClick, disabled]
+		[onClick, disabled, worldItem]
 	);
 
 	// Procesar propiedades si es un string o formato JSON
@@ -395,3 +425,4 @@ function darkenColor(color?: string | null): string | null {
 		return null;
 	}
 }
+

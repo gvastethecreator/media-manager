@@ -5,8 +5,13 @@
  * @updated 2025-01-27
  */
 
-import { Prisma } from '@prisma/client';
+
 import { prisma } from '@/lib/database/prisma';
+import { Prisma } from '@prisma/client';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+// Drizzle imports
+import { db } from '@/lib/drizzle';
+import { properties } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -108,19 +113,78 @@ const revalidatePropertyPaths = async (): Promise<void> => {
  */
 export async function getProperty(id: string): Promise<PropertyWithStats | null> {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info(`🔍 Obteniendo propiedad por ID: ${id}`);
 
-		const property = await prisma.property.findUnique({
-			where: { id },
-			include: propertyCounts,
-		});
+		const drizzleProperty = await db
+			.select({
+				id: properties.id,
+				name: properties.name,
+				description: properties.description,
+				emoji: properties.emoji,
+				color: properties.color,
+				category: properties.category,
+				shortcut: properties.shortcut,
+				featuredImage: properties.featuredImage,
+				isFavorite: properties.isFavorite,
+				createdAt: properties.createdAt,
+				updatedAt: properties.updatedAt,
+			})
+			.from(properties)
+			.where(eq(properties.id, id))
+			.limit(1);
 
-		if (!property) {
+		if (drizzleProperty.length === 0) {
 			logger.warn(`Propiedad no encontrada: ${id}`);
 			return null;
 		}
 
-		const result = toPropertyWithStats(property);
+		// Transformar a formato compatible con Prisma
+		const transformedProperty = {
+			...drizzleProperty[0],
+			isFavorite: Boolean(drizzleProperty[0].isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				groups: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const property = await prisma.property.findUnique({
+					where: { id },
+					include: propertyCounts,
+				});
+
+				if (property && transformedProperty) {
+					logger.info('✅ Validación dual exitosa getProperty:', { id });
+				} else if (!property && !transformedProperty) {
+					logger.info('✅ Validación dual exitosa getProperty (ambos null):', { id });
+				} else {
+					logger.warn('⚠️ Diferencia en getProperty:', {
+						drizzleFound: !!transformedProperty,
+						prismaFound: !!property
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getProperty:', validationError);
+			}
+		}
+
+		const result = toPropertyWithStats(transformedProperty as any);
 		logger.info(`✅ Propiedad encontrada: ${result.name}`);
 		return result;
 	} catch (error) {
@@ -138,41 +202,143 @@ export async function getProperty(id: string): Promise<PropertyWithStats | null>
  */
 export async function getProperties(options: GetPropertiesOptions = {}): Promise<GetPropertiesResult> {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		const { search, orderBy = 'name', orderDirection = 'asc', onlyFavorites = false } = options;
 
 		logger.info('🏷️ Obteniendo propiedades', { options });
 
-		// Construir filtros
-		const where: Prisma.PropertyWhereInput = {};
+		// Construir filtros dinámicamente
+		const conditions: any[] = [];
 
 		if (onlyFavorites) {
-			where.isFavorite = true;
+			conditions.push(eq(properties.isFavorite, true));
 		}
 
 		if (search) {
-			where.OR = [
-				{ name: { contains: search, mode: 'insensitive' } },
-				{ description: { contains: search, mode: 'insensitive' } },
-			];
+			conditions.push(
+				or(
+					like(properties.name, `%${search}%`),
+					like(properties.description, `%${search}%`)
+				)
+			);
 		}
 
-		// Obtener propiedades
-		const [properties, total] = await Promise.all([
-			prisma.property.findMany({
-				where,
-				include: propertyCounts,
-				orderBy:
-					orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
-			}),
-			prisma.property.count({ where }),
+		// Aplicar filtros
+		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+		// Configurar ordenamiento
+		const orderByClause = (() => {
+			const direction = orderDirection === 'desc' ? desc : asc;
+			switch (orderBy) {
+				case 'createdAt':
+					return direction(properties.createdAt);
+				case 'updatedAt':
+					return direction(properties.updatedAt);
+				case 'name':
+				default:
+					// Para name, primero favoritos luego por nombre
+					return orderDirection === 'desc'
+						? [desc(properties.isFavorite), desc(properties.name)]
+						: [desc(properties.isFavorite), asc(properties.name)];
+			}
+		})();
+
+		// Ejecutar consultas en paralelo
+		const [drizzleProperties, totalCount] = await Promise.all([
+			db
+				.select({
+					id: properties.id,
+					name: properties.name,
+					description: properties.description,
+					emoji: properties.emoji,
+					color: properties.color,
+					category: properties.category,
+					shortcut: properties.shortcut,
+					featuredImage: properties.featuredImage,
+					isFavorite: properties.isFavorite,
+					createdAt: properties.createdAt,
+					updatedAt: properties.updatedAt,
+				})
+				.from(properties)
+				.where(whereClause)
+				.orderBy(...(Array.isArray(orderByClause) ? orderByClause : [orderByClause])),
+			db
+				.select({ count: count() })
+				.from(properties)
+				.where(whereClause)
+				.then(result => result[0]?.count || 0)
 		]);
 
-		const transformedProperties = properties.map(toPropertyWithStats);
+		// Transformar a formato compatible con Prisma
+		const transformedProperties = drizzleProperties.map((rawProperty) => ({
+			...rawProperty,
+			isFavorite: Boolean(rawProperty.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				groups: 0,
+			},
+		}));
 
-		logger.info(`✅ ${transformedProperties.length} propiedades obtenidas`);
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				// Construir filtros de Prisma
+				const where: Prisma.PropertyWhereInput = {};
+
+				if (onlyFavorites) {
+					where.isFavorite = true;
+				}
+
+				if (search) {
+					where.OR = [
+						{ name: { contains: search, mode: 'insensitive' } },
+						{ description: { contains: search, mode: 'insensitive' } },
+					];
+				}
+
+				const [prismaProperties, prismaTotal] = await Promise.all([
+					prisma.property.findMany({
+						where,
+						include: propertyCounts,
+						orderBy:
+							orderBy === 'name' ? [{ isFavorite: 'desc' }, { name: orderDirection }] : { [orderBy]: orderDirection },
+					}),
+					prisma.property.count({ where }),
+				]);
+
+				if (Math.abs(transformedProperties.length - prismaProperties.length) > 0 || totalCount !== prismaTotal) {
+					logger.warn('⚠️ Diferencia en conteo getProperties:', {
+						drizzle: { count: transformedProperties.length, total: totalCount },
+						prisma: { count: prismaProperties.length, total: prismaTotal }
+					});
+				} else {
+					logger.info('✅ Validación dual exitosa getProperties:', {
+						total: totalCount
+					});
+				}
+			} catch (validationError) {
+				logger.error('❌ Error en validación dual getProperties:', validationError);
+			}
+		}
+
+		const result = transformedProperties.map(toPropertyWithStats);
+
+		logger.info(`✅ ${result.length} propiedades obtenidas`);
 		return {
-			properties: transformedProperties,
-			total,
+			properties: result,
+			total: totalCount,
 		};
 	} catch (error) {
 		logger.error('❌ Error al obtener propiedades', { error, options });

@@ -1,5 +1,7 @@
 # Arquitectura del FileBrowser
 
+> **🔄 ESTADO DE MIGRACIÓN**: Este proyecto está en proceso de migración de Next.js a Vite + React y de Prisma a Drizzle ORM. Ver [documentación de migración](./migration-drizzle/) para detalles sobre la coexistencia temporal de ambos ORMs.
+
 ## Visión general
 
 El FileBrowser es un componente central para la visualización y gestión de archivos en la aplicación. Está diseñado con una arquitectura modular que separa las preocupaciones y permite una fácil extensión y mantenimiento.

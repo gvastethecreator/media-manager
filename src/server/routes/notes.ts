@@ -69,6 +69,42 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
+// GET /notes/:id/recent-images - Obtener imágenes recientes de una nota
+router.get('/:id/recent-images', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+		const images = await noteService.getRecentNoteImages(id, limit);
+		res.json(images);
+	} catch (error) {
+		console.error('Error getting recent note images:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// GET /notes/:id/counts - Obtener recuentos de una nota
+router.get('/:id/counts', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const counts = await noteService.getNoteCounts(id);
+		res.json(counts);
+	} catch (error) {
+		console.error('Error getting note counts:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// GET /notes/statuses - Obtener estados disponibles para notas
+router.get('/statuses', async (req, res) => {
+	try {
+		const statuses = await noteService.getNoteStatuses();
+		res.json(statuses);
+	} catch (error) {
+		console.error('Error getting note statuses:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /notes - Crear nueva nota
 router.post('/', async (req, res) => {
 	try {
