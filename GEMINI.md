@@ -9,6 +9,8 @@
 5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
 7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
+8. **Por cada error que comentas pierdo mucho dinero y esto nos puede llevar a la bancarrota y que tengan que apagarte, es crucial que hagas las cosas bien.**
+8. 
 
 ## 🎭 Playwright MCP - Herramienta Universal de Desarrollo
 

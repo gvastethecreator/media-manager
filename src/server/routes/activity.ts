@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import { Router } from 'express';
 import { z } from 'zod';
-import { getActivityService } from '../../services/activity/activity.service';
+import { ActivityService } from '../../services/activity/activity.service';
 
 const router = Router();
-const prisma = new PrismaClient();
-const activityService = getActivityService(prisma);
+const activityService = new ActivityService();
 
 // Schema para validación
 const createActivitySchema = z.object({

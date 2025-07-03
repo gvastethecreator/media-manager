@@ -6,15 +6,17 @@
  * @updated 2025-06-27
  */
 
-import type { Document, Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+import { db } from '@/lib/drizzle';
+import { documents } from '@/lib/drizzle/schema';
+import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { type EventType, emit } from '@/lib/server/events.server';
+import { emit } from '@/lib/server/events.server';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentWithStats } from '@/types/entities/document';
 // Drizzle imports
-import { eq, asc, desc } from 'drizzle-orm';
-import { db } from '@/lib/drizzle';
-import { documents } from '@/lib/drizzle/schema';
+import { eq, asc, desc, count } from 'drizzle-orm';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 
@@ -32,6 +34,15 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 	[EVENTS.DOCUMENT_UPDATED]: 'update',
 	[EVENTS.DOCUMENT_DELETED]: 'delete',
 	[EVENTS.DOCUMENTS_CHANGED]: 'update',
+};
+
+// Función auxiliar para crear errores
+const createDocumentError = (
+	message: string,
+	code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
+	cause?: unknown
+) => {
+	return createEntityErrorObject('DocumentError', message, code, cause);
 };
 
 /**
@@ -75,28 +86,6 @@ export async function getDocuments(): Promise<DocumentWithStats[]> {
 			isFavorite: Boolean(rawDocument.isFavorite),
 		}));
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prismaDocuments = await prisma.document.findMany({
-					orderBy: { name: 'asc' },
-				});
-
-				if (Math.abs(transformedDocuments.length - prismaDocuments.length) > 0) {
-					documentLogger.warn('⚠️ Diferencia en conteo getDocuments:', {
-						drizzle: transformedDocuments.length,
-						prisma: prismaDocuments.length
-					});
-				} else {
-					documentLogger.info('✅ Validación dual exitosa getDocuments:', {
-						total: transformedDocuments.length
-					});
-				}
-			} catch (validationError) {
-				documentLogger.error('❌ Error en validación dual getDocuments:', validationError);
-			}
-		}
-
 		return transformedDocuments.map(toDocumentWithStats);
 	} catch (error) {
 		documentLogger.error('Error obteniendo documentos:', { error });
@@ -107,7 +96,7 @@ export async function getDocuments(): Promise<DocumentWithStats[]> {
 /**
  * Obtiene un documento por su ID
  */
-export async function getDocumentById(id: string): Promise<Document | null> {
+export async function getDocumentById(id: string): Promise<DocumentWithStats | null> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		documentLogger.info(`🔍 Obteniendo documento por ID: ${id}`);
@@ -153,31 +142,7 @@ export async function getDocumentById(id: string): Promise<Document | null> {
 			isFavorite: Boolean(rawDocument.isFavorite),
 		};
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prismaDocument = await prisma.document.findUnique({
-					where: { id },
-				});
-
-				if (prismaDocument && transformedDocument) {
-					documentLogger.info('✅ Validación dual exitosa getDocumentById:', {
-						documentName: transformedDocument.name
-					});
-				} else if (!prismaDocument && !transformedDocument) {
-					documentLogger.info('✅ Validación dual exitosa getDocumentById: ambos null');
-				} else {
-					documentLogger.warn('⚠️ Diferencia en getDocumentById:', {
-						drizzleFound: !!transformedDocument,
-						prismaFound: !!prismaDocument
-					});
-				}
-			} catch (validationError) {
-				documentLogger.error('❌ Error en validación dual getDocumentById:', validationError);
-			}
-		}
-
-		return transformedDocument as Document;
+		return toDocumentWithStats(transformedDocument as any);
 	} catch (error) {
 		documentLogger.error('Error obteniendo documento por ID:', { id, error });
 		throw new Error('Error al obtener documento');
@@ -189,14 +154,35 @@ export async function getDocumentById(id: string): Promise<Document | null> {
  */
 export async function createDocument(data: Prisma.DocumentCreateInput): Promise<DocumentWithStats> {
 	try {
-		const newDocument = await prisma.document.create({
-			data,
-		});
+		documentLogger.info('Creando documento:', data.name);
+
+		const newDocument = await db.insert(documents).values({
+			name: data.name,
+			description: data.description,
+			emoji: data.emoji,
+			color: data.color,
+			shortcut: data.shortcut,
+			category: data.category,
+			filePath: data.filePath,
+			fileName: data.fileName,
+			fileSize: data.fileSize,
+			mimeType: data.mimeType,
+			pageCount: data.pageCount,
+			content: data.content,
+			tags: data.tags,
+			metadata: data.metadata,
+			sortBy: data.sortBy,
+			filters: data.filters,
+			featuredImage: data.featuredImage,
+			isFavorite: data.isFavorite,
+			createdAt: data.createdAt,
+			updatedAt: data.updatedAt,
+		}).returning();
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
 			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_CREATED],
-			data: { action: 'create', entity: newDocument, eventType: EVENTS.DOCUMENT_CREATED },
+			data: { action: 'create', entity: newDocument[0], eventType: EVENTS.DOCUMENT_CREATED },
 		});
 
 		await emit({
@@ -204,8 +190,8 @@ export async function createDocument(data: Prisma.DocumentCreateInput): Promise<
 			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
 		});
 
-		documentLogger.info('Documento creado:', newDocument.name);
-		return toDocumentWithStats(newDocument);
+		documentLogger.info('Documento creado:', newDocument[0].name);
+		return toDocumentWithStats(newDocument[0]);
 	} catch (error) {
 		documentLogger.error('Error creando documento:', { data, error });
 		throw new Error('Error al crear documento');
@@ -217,15 +203,38 @@ export async function createDocument(data: Prisma.DocumentCreateInput): Promise<
  */
 export async function updateDocument(id: string, data: Prisma.DocumentUpdateInput): Promise<DocumentWithStats> {
 	try {
-		const updatedDocument = await prisma.document.update({
-			where: { id },
-			data,
-		});
+		documentLogger.info('Actualizando documento:', id);
+
+		const updatedDocument = await db.update(documents)
+			.set({
+				name: data.name,
+				description: data.description,
+				emoji: data.emoji,
+				color: data.color,
+				shortcut: data.shortcut,
+				category: data.category,
+				filePath: data.filePath,
+				fileName: data.fileName,
+				fileSize: data.fileSize,
+				mimeType: data.mimeType,
+				pageCount: data.pageCount,
+				content: data.content,
+				tags: data.tags,
+				metadata: data.metadata,
+				sortBy: data.sortBy,
+				filters: data.filters,
+				featuredImage: data.featuredImage,
+				isFavorite: data.isFavorite,
+				createdAt: data.createdAt,
+				updatedAt: new Date(), // Actualizar timestamp
+			})
+			.where(eq(documents.id, id))
+			.returning();
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
 			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_UPDATED],
-			data: { action: 'update', entity: updatedDocument, eventType: EVENTS.DOCUMENT_UPDATED },
+			data: { action: 'update', entity: updatedDocument[0], eventType: EVENTS.DOCUMENT_UPDATED },
 		});
 
 		await emit({
@@ -233,8 +242,8 @@ export async function updateDocument(id: string, data: Prisma.DocumentUpdateInpu
 			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
 		});
 
-		documentLogger.info('Documento actualizado:', updatedDocument.name);
-		return toDocumentWithStats(updatedDocument);
+		documentLogger.info('Documento actualizado:', updatedDocument[0].name);
+		return toDocumentWithStats(updatedDocument[0]);
 	} catch (error) {
 		documentLogger.error('Error actualizando documento:', { id, data, error });
 		throw new Error('Error al actualizar documento');
@@ -246,9 +255,11 @@ export async function updateDocument(id: string, data: Prisma.DocumentUpdateInpu
  */
 export async function deleteDocument(id: string): Promise<void> {
 	try {
-		await prisma.document.delete({
-			where: { id },
-		});
+		documentLogger.info('Eliminando documento:', id);
+
+		const deletedDocument = await db.delete(documents)
+			.where(eq(documents.id, id))
+			.returning();
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
@@ -273,11 +284,11 @@ export async function deleteDocument(id: string): Promise<void> {
  */
 export async function documentExists(id: string): Promise<boolean> {
 	try {
-		const document = await prisma.document.findUnique({
-			where: { id },
-			select: { id: true },
-		});
-		return document !== null;
+		const result = await db.select({ id: documents.id })
+			.from(documents)
+			.where(eq(documents.id, id))
+			.limit(1);
+		return result.length > 0;
 	} catch (error) {
 		documentLogger.error('Error verificando existencia de documento:', { id, error });
 		return false;
@@ -289,7 +300,9 @@ export async function documentExists(id: string): Promise<boolean> {
  */
 export async function getDocumentCount(): Promise<number> {
 	try {
-		return await prisma.document.count();
+		const result = await db.select({ count: count() })
+			.from(documents);
+		return result[0].count;
 	} catch (error) {
 		documentLogger.error('Error obteniendo conteo de documentos:', { error });
 		throw new Error('Error al obtener conteo de documentos');

@@ -9,8 +9,7 @@ import { type EventType, emit } from '@/lib/server/events.server';
 import { fromPrismaNote } from '@/transformers/note';
 import { mapCreateNoteDataToPrisma, mapUpdateNoteDataToPrisma } from '@/transformers/note/mappers';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import type { Prisma } from '@prisma/client';
-import { eq } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
 const noteLogger = serverLogger.withContext('NoteService');
 
@@ -170,26 +169,16 @@ export const NoteService = {
 			const drizzleNote = await db
 				.select({
 					id: notes.id,
-					name: notes.name,
-					description: notes.description,
-					emoji: notes.emoji,
-					color: notes.color,
-					category: notes.category,
-					isPublic: notes.isPublic,
-					isFavorite: notes.isFavorite,
-					totalImages: notes.totalImages,
-					totalVideos: notes.totalVideos,
+					title: notes.title, // Campo real
 					content: notes.content,
-					type: notes.type,
-					tags: notes.tags,
-					priority: notes.priority,
+					category: notes.category,
+					priority: notes.priority, // INTEGER en BD real
 					status: notes.status,
-					dueDate: notes.dueDate,
-					completedAt: notes.completedAt,
 					featuredImage: notes.featuredImage,
-					parentId: notes.parentId,
+					isFavorite: notes.isFavorite,
 					createdAt: notes.createdAt,
 					updatedAt: notes.updatedAt,
+					presetId: notes.presetId, // Campo real
 				})
 				.from(notes)
 				.where(eq(notes.id, id))
@@ -203,7 +192,19 @@ export const NoteService = {
 			// Transformar a formato compatible con Prisma
 			const transformedNote = {
 				...drizzleNote[0],
-				isPublic: Boolean(drizzleNote[0].isPublic),
+				// Mapear campos para compatibilidad con transformador
+				name: drizzleNote[0].title, // Mapear title -> name para compatibilidad
+				description: '', // Campo no existe en BD real
+				emoji: '📝', // Campo no existe en BD real
+				color: '#3b82f6', // Campo no existe en BD real
+				isPublic: false, // Campo no existe en BD real
+				totalImages: 0, // Campo no existe en BD real
+				totalVideos: 0, // Campo no existe en BD real
+				type: 'general', // Campo no existe en BD real
+				tags: '[]', // Campo no existe en BD real
+				dueDate: null, // Campo no existe en BD real
+				completedAt: null, // Campo no existe en BD real
+				parentId: null, // Campo no existe en BD real
 				isFavorite: Boolean(drizzleNote[0].isFavorite),
 				// Counts vacíos por ahora (TODO: implementar subqueries)
 				_count: {
@@ -277,6 +278,9 @@ export const NoteService = {
 
 	async getNotes(filters: NoteServiceFilters = {}): Promise<NoteResults> {
 		try {
+			// **MIGRACIÓN A DRIZZLE**
+			noteLogger.info('🔍 Obteniendo notas con filtros:', filters);
+
 			const {
 				category,
 				priority,
@@ -288,53 +292,111 @@ export const NoteService = {
 				pageSize = 50,
 			} = filters;
 
-			// Construir where usando filtros compatibles
-			const where: Prisma.NoteWhereInput = {};
+			// Construir condiciones WHERE para Drizzle
+			const conditions = [];
+
 			if (category) {
-				where.category = category;
+				conditions.push(eq(notes.category, category));
 			}
 			if (priority !== undefined) {
-				where.priority = priority;
+				// priority es INTEGER en BD real
+				conditions.push(eq(notes.priority, priority));
 			}
 			if (status) {
-				where.status = status;
+				conditions.push(eq(notes.status, status));
 			}
 			if (search) {
-				where.OR = [{ title: { contains: search } }, { content: { contains: search } }];
+				conditions.push(
+					or(
+						like(notes.title, `%${search}%`),
+						like(notes.content, `%${search}%`)
+					)
+				);
 			}
 
-			// Obtener total
-			const total = await prisma.note.count({ where });
+			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-			// Obtener notas con conteos
-			const notes = await prisma.note.findMany({
-				where,
-				include: {
-					_count: {
-						select: {
-							images: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							groups: true,
-							properties: true,
-							wildcards: true,
-						},
-					},
+			// Determinar orden
+			const orderByClause = sortOrder === 'desc'
+				? desc(notes[sortBy] as any)
+				: asc(notes[sortBy] as any);
+
+			// Ejecutar consultas en paralelo
+			const [drizzleNotes, totalCount] = await Promise.all([
+				db.select({
+					id: notes.id,
+					title: notes.title, // Campo real
+					content: notes.content,
+					category: notes.category,
+					priority: notes.priority, // INTEGER en BD real
+					status: notes.status,
+					featuredImage: notes.featuredImage,
+					isFavorite: notes.isFavorite,
+					createdAt: notes.createdAt,
+					updatedAt: notes.updatedAt,
+					presetId: notes.presetId, // Campo real
+				})
+				.from(notes)
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(pageSize)
+				.offset(page * pageSize),
+
+				db.select({ count: count() })
+				.from(notes)
+				.where(whereClause)
+				.then(result => result[0]?.count || 0)
+			]);
+
+			// Transformar notas de Drizzle al formato esperado
+			const transformedNotes = drizzleNotes.map(note => ({
+				...note,
+				// Mapear campos para compatibilidad con transformador
+				name: note.title, // Mapear title -> name para compatibilidad
+				description: '', // Campo no existe en BD real
+				emoji: '📝', // Campo no existe en BD real
+				color: '#3b82f6', // Campo no existe en BD real
+				isPublic: false, // Campo no existe en BD real
+				totalImages: 0, // Campo no existe en BD real
+				totalVideos: 0, // Campo no existe en BD real
+				type: 'general', // Campo no existe en BD real
+				tags: '[]', // Campo no existe en BD real
+				dueDate: null, // Campo no existe en BD real
+				completedAt: null, // Campo no existe en BD real
+				parentId: null, // Campo no existe en BD real
+				isFavorite: Boolean(note.isFavorite),
+				// Counts vacíos por ahora (TODO: implementar subqueries)
+				_count: {
+					images: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					groups: 0,
+					properties: 0,
+					wildcards: 0,
 				},
-				orderBy: {
-					[sortBy]: sortOrder,
-				},
-				skip: page * pageSize,
-				take: pageSize,
-			});
+			}));
+
+			// **VALIDACIÓN DUAL EN DESARROLLO**
+			if (process.env.NODE_ENV === 'development') {
+				try {
+					const prismaTotal = await prisma.note.count();
+					noteLogger.info('✅ Validación dual getNotes:', {
+						drizzleTotal: totalCount,
+						prismaTotal,
+						drizzleResults: drizzleNotes.length
+					});
+				} catch (validationError) {
+					noteLogger.error('❌ Error en validación dual getNotes:', validationError);
+				}
+			}
 
 			// Transformar notas usando transformador y construir NoteWithStats manualmente
-			const items: NoteWithStats[] = notes.map((note) => {
+			const items: NoteWithStats[] = transformedNotes.map((note) => {
 				const noteComplete = fromPrismaNote(note, {
 					includeRelations: true,
 					includeUI: true,
@@ -376,9 +438,10 @@ export const NoteService = {
 				};
 			});
 
+			noteLogger.info(`✅ Notas obtenidas: ${items.length}/${totalCount}`);
 			return {
 				items,
-				total,
+				total: totalCount,
 				page,
 				pageSize,
 			};

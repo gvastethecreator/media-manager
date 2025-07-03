@@ -2,11 +2,10 @@
  * @file Tipos para el store de la entidad Group.
  * @module store/entities/group/types
  * @description Define la forma del estado y las acciones para el store de Group.
- * @updated 2025-01-27
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { Prisma } from '@prisma/client';
-import type { GroupWithStats } from '@/types/entities/group';
+import type { GroupWithStats, GroupCreateInput, GroupUpdateInput } from '@/types/entities/group';
 import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/group';
 
 /**
@@ -73,8 +72,8 @@ export interface GroupFilterState {
  */
 export interface GroupCoreActions {
 	loadGroups: () => Promise<void>;
-	createGroup: (data: Prisma.GroupCreateInput) => Promise<void>;
-	updateGroup: (id: string, data: Prisma.GroupUpdateInput) => Promise<void>;
+	createGroup: (data: GroupCreateInput) => Promise<void>;
+	updateGroup: (id: string, data: GroupUpdateInput) => Promise<void>;
 	deleteGroup: (id: string) => Promise<void>;
 }
 

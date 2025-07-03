@@ -3,8 +3,9 @@
  * @module services/queue-job
  */
 
-import type { Prisma } from '@prisma/client';
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/database/db';
+import { queueJobs } from '@/lib/database/schema';
+import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getPaginationInfo } from '@/lib/utils/pagination';
 import { serializeQueueJobMetadata, transformQueueJob, transformQueueJobs } from '@/transformers/queue-job';
@@ -45,16 +46,15 @@ export async function createQueueJob(data: CreateQueueJobInput): Promise<QueueJo
 	try {
 		logger.info('📋 Creando nuevo trabajo en cola:', { queue: data.queue });
 
-		const queueJob = await prisma.queueJob.create({
-			data: {
-				queue: data.queue,
-				data: data.data,
-				maxAttempts: data.maxAttempts,
-				priority: data.priority,
-				metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : undefined,
-				status: QueueJobStatus.PENDING,
-			},
-		});
+		const [queueJob] = await db.insert(queueJobs).values({
+			id: crypto.randomUUID(), // Generate UUID for id
+			queue: data.queue,
+			data: JSON.stringify(data.data), // Store data as JSON string
+			maxAttempts: data.maxAttempts,
+			priority: data.priority,
+			metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
+			status: QueueJobStatus.PENDING,
+		}).returning();
 
 		logger.info('✅ Trabajo en cola creado:', { id: queueJob.id, queue: queueJob.queue });
 		return transformQueueJob(queueJob);
@@ -75,23 +75,19 @@ export async function updateQueueJob(id: string, data: UpdateQueueJobInput): Pro
 		logger.info('📝 Actualizando trabajo en cola:', { id, data });
 
 		// Verificar que el trabajo existe
-		const existingJob = await prisma.queueJob.findUnique({
-			where: { id },
-		});
+		const existingJob = await db.select().from(queueJobs).where(eq(queueJobs.id, id));
 
-		if (!existingJob) {
+		if (existingJob.length === 0) {
 			throw new QueueJobServiceError('Trabajo en cola no encontrado', 'NOT_FOUND');
 		}
 
 		// Actualizar el trabajo
-		const queueJob = await prisma.queueJob.update({
-			where: { id },
-			data: {
-				...data,
-				metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : undefined,
-				updatedAt: new Date(),
-			},
-		});
+		const [queueJob] = await db.update(queueJobs).set({
+			...data,
+			data: data.data ? JSON.stringify(data.data) : existingJob[0].data, // Handle data as JSON string
+			metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
+			updatedAt: sql`(strftime('%s', 'now'))`,
+		}).where(eq(queueJobs.id, id)).returning();
 
 		logger.info('✅ Trabajo en cola actualizado:', { id });
 		return transformQueueJob(queueJob);
@@ -110,9 +106,7 @@ export async function getQueueJobById(id: string): Promise<QueueJobExtended | nu
 	try {
 		logger.info('🔍 Buscando trabajo en cola por ID:', { id });
 
-		const queueJob = await prisma.queueJob.findUnique({
-			where: { id },
-		});
+		const [queueJob] = await db.select().from(queueJobs).where(eq(queueJobs.id, id));
 
 		if (!queueJob) {
 			logger.info('⚠️ Trabajo en cola no encontrado:', { id });
@@ -137,18 +131,14 @@ export async function deleteQueueJob(id: string): Promise<boolean> {
 		logger.info('🗑️ Eliminando trabajo en cola:', { id });
 
 		// Verificar que el trabajo existe
-		const existingJob = await prisma.queueJob.findUnique({
-			where: { id },
-		});
+		const existingJob = await db.select().from(queueJobs).where(eq(queueJobs.id, id));
 
-		if (!existingJob) {
+		if (existingJob.length === 0) {
 			throw new QueueJobServiceError('Trabajo en cola no encontrado', 'NOT_FOUND');
 		}
 
 		// Eliminar el trabajo
-		await prisma.queueJob.delete({
-			where: { id },
-		});
+		await db.delete(queueJobs).where(eq(queueJobs.id, id));
 
 		logger.info('✅ Trabajo en cola eliminado:', { id });
 		return true;
@@ -168,9 +158,7 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.info('🚫 Cancelando trabajo en cola:', { id });
 
 		// Verificar que el trabajo existe y puede ser cancelado
-		const existingJob = await prisma.queueJob.findUnique({
-			where: { id },
-		});
+		const [existingJob] = await db.select().from(queueJobs).where(eq(queueJobs.id, id));
 
 		if (!existingJob) {
 			throw new QueueJobServiceError('Trabajo en cola no encontrado', 'NOT_FOUND');
@@ -184,14 +172,11 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 		}
 
 		// Cancelar el trabajo
-		const queueJob = await prisma.queueJob.update({
-			where: { id },
-			data: {
-				status: QueueJobStatus.CANCELLED,
-				finishedAt: new Date(),
-				updatedAt: new Date(),
-			},
-		});
+		const [queueJob] = await db.update(queueJobs).set({
+			status: QueueJobStatus.CANCELLED,
+			finishedAt: sql`(strftime('%s', 'now'))`,
+			updatedAt: sql`(strftime('%s', 'now'))`,
+		}).where(eq(queueJobs.id, id)).returning();
 
 		logger.info('✅ Trabajo en cola cancelado:', { id });
 		return transformQueueJob(queueJob);
@@ -211,9 +196,7 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.info('🔄 Reintentando trabajo en cola:', { id });
 
 		// Verificar que el trabajo existe y puede ser reintentado
-		const existingJob = await prisma.queueJob.findUnique({
-			where: { id },
-		});
+		const [existingJob] = await db.select().from(queueJobs).where(eq(queueJobs.id, id));
 
 		if (!existingJob) {
 			throw new QueueJobServiceError('Trabajo en cola no encontrado', 'NOT_FOUND');
@@ -228,16 +211,13 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 		}
 
 		// Reintentar el trabajo
-		const queueJob = await prisma.queueJob.update({
-			where: { id },
-			data: {
-				status: QueueJobStatus.RETRYING,
-				progress: 0,
-				error: null,
-				retryAt: new Date(),
-				updatedAt: new Date(),
-			},
-		});
+		const [queueJob] = await db.update(queueJobs).set({
+			status: QueueJobStatus.RETRYING,
+			progress: 0,
+			error: null,
+			retryAt: sql`(strftime('%s', 'now'))`,
+			updatedAt: sql`(strftime('%s', 'now'))`,
+		}).where(eq(queueJobs.id, id)).returning();
 
 		logger.info('✅ Trabajo en cola preparado para reintento:', { id });
 		return transformQueueJob(queueJob);
@@ -268,52 +248,46 @@ export async function findQueueJobs(
 		const sortDirection = pagination.sortDirection || 'desc';
 
 		// Construir condiciones de filtro
-		const where: Prisma.QueueJobWhereInput = {};
+		const whereConditions = [];
 
 		if (filters.queue) {
-			where.queue = filters.queue;
+			whereConditions.push(eq(queueJobs.queue, filters.queue));
 		}
 
 		if (filters.status) {
-			where.status = filters.status;
+			whereConditions.push(eq(queueJobs.status, filters.status));
 		}
 
 		if (filters.priority !== undefined) {
-			where.priority = filters.priority;
+			whereConditions.push(eq(queueJobs.priority, filters.priority));
 		}
 
 		if (filters.createdAfter) {
-			where.createdAt = {
-				...where.createdAt,
-				gte: filters.createdAfter,
-			};
+			whereConditions.push(gte(queueJobs.createdAt, filters.createdAfter));
 		}
 
 		if (filters.createdBefore) {
-			where.createdAt = {
-				...where.createdAt,
-				lte: filters.createdBefore,
-			};
+			whereConditions.push(lte(queueJobs.createdAt, filters.createdBefore));
 		}
 
+		const finalWhere = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
 		// Ejecutar consulta para contar total
-		const total = await prisma.queueJob.count({ where });
+		const [totalResult] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(finalWhere);
+		const total = totalResult.count;
 
 		// Ejecutar consulta para obtener datos
-		const queueJobs = await prisma.queueJob.findMany({
-			where,
-			orderBy: {
-				[sortBy]: sortDirection,
-			},
-			skip,
-			take: limit,
-		});
+		const queueJobsData = await db.select().from(queueJobs)
+			.where(finalWhere)
+			.orderBy(sortDirection === 'asc' ? queueJobs[sortBy] : sql`${queueJobs[sortBy]} DESC`)
+			.offset(skip)
+			.limit(limit);
 
 		// Calcular información de paginación
 		const { totalPages } = getPaginationInfo(total, limit);
 
 		// Transformar resultados
-		const transformedJobs = transformQueueJobs(queueJobs);
+		const transformedJobs = transformQueueJobs(queueJobsData);
 
 		logger.info('✅ Trabajos en cola encontrados:', {
 			count: transformedJobs.length,
@@ -344,12 +318,10 @@ export async function getQueueStats(): Promise<QueueStats> {
 		logger.info('📊 Obteniendo estadísticas de la cola');
 
 		// Obtener conteo por estado
-		const statusCounts = await prisma.queueJob.groupBy({
-			by: ['status'],
-			_count: {
-				_all: true,
-			},
-		});
+		const statusCounts = await db.select({
+			status: queueJobs.status,
+			count: sql<number>`count(*)`,
+		}).from(queueJobs).groupBy(queueJobs.status);
 
 		// Inicializar estadísticas
 		const stats: QueueStats = {
@@ -363,9 +335,9 @@ export async function getQueueStats(): Promise<QueueStats> {
 			paused: 0,
 		};
 
-		// Calcular total y conteo por estado usando for...of en lugar de forEach
+		// Calcular total y conteo por estado
 		for (const item of statusCounts) {
-			const count = item._count._all;
+			const count = item.count;
 			stats.total += count;
 
 			switch (item.status) {
@@ -402,17 +374,7 @@ export async function getQueueStats(): Promise<QueueStats> {
 
 		// Calcular tiempo promedio de procesamiento
 		if (stats.completed > 0) {
-			const completedJobs = await prisma.queueJob.findMany({
-				where: {
-					status: QueueJobStatus.COMPLETED,
-					startedAt: { not: null },
-					finishedAt: { not: null },
-				},
-				select: {
-					startedAt: true,
-					finishedAt: true,
-				},
-			});
+			const completedJobs = await db.select().from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.COMPLETED), sql`${queueJobs.startedAt} IS NOT NULL`, sql`${queueJobs.finishedAt} IS NOT NULL`));
 
 			if (completedJobs.length > 0) {
 				const totalTime = completedJobs.reduce((sum, job) => {
@@ -480,15 +442,12 @@ export async function findRecentQueueJobs(limit = 5): Promise<QueueJobExtended[]
 	try {
 		logger.info('🕒 Buscando trabajos recientes', { limit });
 
-		const queueJobs = await prisma.queueJob.findMany({
-			orderBy: {
-				createdAt: 'desc',
-			},
-			take: limit,
-		});
+		const queueJobsData = await db.select().from(queueJobs)
+			.orderBy(sql`${queueJobs.createdAt} DESC`)
+			.limit(limit);
 
-		logger.info('✅ Trabajos recientes encontrados', { count: queueJobs.length });
-		return transformQueueJobs(queueJobs);
+		logger.info('✅ Trabajos recientes encontrados', { count: queueJobsData.length });
+		return transformQueueJobs(queueJobsData);
 	} catch (error) {
 		logger.error('❌ Error al buscar trabajos recientes:', error);
 		throw new QueueJobServiceError('Error al buscar trabajos recientes', 'FETCH_RECENT_FAILED', error);
@@ -505,18 +464,13 @@ export async function findQueueJobsByStatus(status: QueueJobStatus, limit = 10):
 	try {
 		logger.info('🔍 Buscando trabajos por estado', { status, limit });
 
-		const queueJobs = await prisma.queueJob.findMany({
-			where: {
-				status,
-			},
-			orderBy: {
-				updatedAt: 'desc',
-			},
-			take: limit,
-		});
+		const queueJobsData = await db.select().from(queueJobs)
+			.where(eq(queueJobs.status, status))
+			.orderBy(sql`${queueJobs.updatedAt} DESC`)
+			.limit(limit);
 
-		logger.info('✅ Trabajos encontrados por estado', { status, count: queueJobs.length });
-		return transformQueueJobs(queueJobs);
+		logger.info('✅ Trabajos encontrados por estado', { status, count: queueJobsData.length });
+		return transformQueueJobs(queueJobsData);
 	} catch (error) {
 		logger.error('❌ Error al buscar trabajos por estado:', { status, error });
 		throw new QueueJobServiceError('Error al buscar trabajos por estado', 'FETCH_BY_STATUS_FAILED', error);
@@ -533,15 +487,10 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 		logger.info('📊 Obteniendo estadísticas para cola específica', { queue });
 
 		// Obtener conteo por estado para la cola específica
-		const statusCounts = await prisma.queueJob.groupBy({
-			by: ['status'],
-			where: {
-				queue,
-			},
-			_count: {
-				_all: true,
-			},
-		});
+		const statusCounts = await db.select({
+			status: queueJobs.status,
+			count: sql<number>`count(*)`,
+		}).from(queueJobs).where(eq(queueJobs.queue, queue)).groupBy(queueJobs.status);
 
 		// Inicializar estadísticas
 		const stats: QueueStats = {
@@ -558,7 +507,7 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 
 		// Calcular total y conteo por estado
 		for (const item of statusCounts) {
-			const count = item._count._all;
+			const count = item.count;
 			stats.total += count;
 
 			switch (item.status) {
@@ -608,15 +557,8 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
  */
 export async function countCompletedJobs(since: Date): Promise<number> {
 	try {
-		const count = await prisma.queueJob.count({
-			where: {
-				status: QueueJobStatus.COMPLETED,
-				finishedAt: {
-					gte: since,
-				},
-			},
-		});
-		return count;
+		const [result] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.COMPLETED), gte(queueJobs.finishedAt, since)));
+		return result.count;
 	} catch (error) {
 		logger.error('❌ Error al contar trabajos completados:', error);
 		throw new QueueJobServiceError('Error al contar trabajos completados', 'COUNT_COMPLETED_FAILED', error);
@@ -630,15 +572,8 @@ export async function countCompletedJobs(since: Date): Promise<number> {
  */
 export async function countFailedJobs(since: Date): Promise<number> {
 	try {
-		const count = await prisma.queueJob.count({
-			where: {
-				status: QueueJobStatus.FAILED,
-				finishedAt: {
-					gte: since,
-				},
-			},
-		});
-		return count;
+		const [result] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.FAILED), gte(queueJobs.finishedAt, since)));
+		return result.count;
 	} catch (error) {
 		logger.error('❌ Error al contar trabajos fallidos:', error);
 		throw new QueueJobServiceError('Error al contar trabajos fallidos', 'COUNT_FAILED_FAILED', error);
@@ -652,14 +587,8 @@ export async function countFailedJobs(since: Date): Promise<number> {
  */
 export async function countTotalJobs(since: Date): Promise<number> {
 	try {
-		const count = await prisma.queueJob.count({
-			where: {
-				createdAt: {
-					gte: since,
-				},
-			},
-		});
-		return count;
+		const [result] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(gte(queueJobs.createdAt, since));
+		return result.count;
 	} catch (error) {
 		logger.error('❌ Error al contar total de trabajos:', error);
 		throw new QueueJobServiceError('Error al contar total de trabajos', 'COUNT_TOTAL_FAILED', error);
@@ -673,19 +602,7 @@ export async function countTotalJobs(since: Date): Promise<number> {
  */
 export async function findProcessingTimes(since: Date): Promise<number[]> {
 	try {
-		const completedJobs = await prisma.queueJob.findMany({
-			where: {
-				status: QueueJobStatus.COMPLETED,
-				startedAt: { not: null },
-				finishedAt: {
-					gte: since,
-				},
-			},
-			select: {
-				startedAt: true,
-				finishedAt: true,
-			},
-		});
+		const completedJobs = await db.select().from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.COMPLETED), sql`${queueJobs.startedAt} IS NOT NULL`, gte(queueJobs.finishedAt, since)));
 
 		return completedJobs
 			.map((job) => {
