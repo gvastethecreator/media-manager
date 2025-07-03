@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import type { ProcessStatus } from '@/app/actions/folders/types';
+import type { ProcessStatus } from '@/types/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
 

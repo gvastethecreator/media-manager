@@ -1,6 +1,6 @@
 /**
  * @file Utilidades para manejo de errores del sistema
- * @module app/actions/system/system.errors
+ * @module lib/errors/system
  */
 
 /**

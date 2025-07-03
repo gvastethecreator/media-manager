@@ -5,7 +5,7 @@
 
 import { db } from '@/lib/drizzle';
 import { folders, images } from '@/lib/drizzle/schema';
-import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
+import { fromDrizzleImageWithCounts } from '@/transformers/image/transformer';
 import type { ImageWithStats } from '@/types/entities/image/types';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
@@ -154,7 +154,7 @@ async function migrateGetImages(options: GetImagesOptions = {}): Promise<GetImag
 
     // Transformar resultados de Drizzle a formato compatible con Prisma
     const transformedImages = drizzleImages.map((raw) => {
-      // Restructurar para que sea compatible con fromPrismaImageWithCounts
+      		// Restructurar para que sea compatible con fromDrizzleImageWithCounts
       const drizzleResult = {
         id: raw.id,
         name: raw.name,
@@ -215,7 +215,7 @@ async function migrateGetImages(options: GetImagesOptions = {}): Promise<GetImag
         },
       };
 
-      return fromPrismaImageWithCounts(drizzleResult as any);
+      	return fromDrizzleImageWithCounts(drizzleResult as any);
     });
 
     return {

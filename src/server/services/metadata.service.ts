@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { createMetadataError as createMetadataErrorAction } from '@/app/actions/metadata/index'; // Mantener import para errores
+import { createMetadataError } from '@/lib/errors/metadata';
 import { z } from 'zod';
 
 // Configuración y utilidades
