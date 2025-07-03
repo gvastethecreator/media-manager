@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { albums, images, videos, albumsToImages } from '@/lib/drizzle/schema';
+import { eq, like, or, desc, asc, count } from 'drizzle-orm';
 import { serializeAlbum } from '@/transformers/album';
 
 /**
@@ -49,31 +51,34 @@ albumsRouter.get('/', async (req, res) => {
 	const { search, limit, offset, sortBy, sortOrder } = parse.data;
 
 	try {
-		const where = search
-			? {
-					OR: [
-						{ name: { contains: search, mode: 'insensitive' as const } },
-						{ description: { contains: search, mode: 'insensitive' as const } },
-					],
-				}
-			: {};
+		const whereConditions = [];
+		if (search) {
+			whereConditions.push(
+				or(
+					like(albums.name, `%${search}%`),
+					like(albums.description, `%${search}%`),
+				),
+			);
+		}
 
-		const [albums, total] = await Promise.all([
-			prisma.album.findMany({
-				where,
-				include: {
-					_count: {
-						select: { images: true },
-					},
+		const orderByColumn = albums[sortBy];
+		const orderByClause = sortOrder === 'desc' ? desc(orderByColumn) : asc(orderByColumn);
+
+		const [albumsData, totalResult] = await Promise.all([
+			db.query.albums.findMany({
+				where: and(...whereConditions),
+				with: {
+					images: { columns: { id: true } },
 				},
-				orderBy: { [sortBy]: sortOrder },
-				take: limit,
-				skip: offset,
+				orderBy: orderByClause,
+				limit: limit,
+				offset: offset,
 			}),
-			prisma.album.count({ where }),
+			db.select({ count: count() }).from(albums).where(and(...whereConditions)),
 		]);
 
-		const serializedAlbums = albums.map(serializeAlbum);
+		const total = totalResult[0].count;
+		const serializedAlbums = albumsData.map(serializeAlbum);
 
 		res.json({
 			data: serializedAlbums,
@@ -96,12 +101,10 @@ albumsRouter.get('/:id', async (req, res) => {
 	const { id } = req.params;
 
 	try {
-		const album = await prisma.album.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: { images: true },
-				},
+		const album = await db.query.albums.findFirst({
+			where: eq(albums.id, id),
+			with: {
+				images: { columns: { id: true } },
 			},
 		});
 
@@ -121,23 +124,19 @@ albumsRouter.get('/:id/images', async (req, res) => {
 	const { id } = req.params;
 
 	try {
-		const album = await prisma.album.findUnique({
-			where: { id },
-			include: {
+		const album = await db.query.albums.findFirst({
+			where: eq(albums.id, id),
+			with: {
 				images: {
-					include: {
-						_count: {
-							select: {
-								tags: true,
-								albums: true,
-								collections: true,
-								characters: true,
-								places: true,
-								worldItems: true,
-								notes: true,
-							},
-						},
+					with: {
 						folder: true,
+						tags: { columns: { id: true } },
+						albums: { columns: { id: true } },
+						collections: { columns: { id: true } },
+						characters: { columns: { id: true } },
+						places: { columns: { id: true } },
+						worldItems: { columns: { id: true } },
+						notes: { columns: { id: true } },
 					},
 				},
 			},
@@ -163,14 +162,35 @@ albumsRouter.post('/', async (req, res) => {
 	}
 
 	try {
-		const album = await prisma.album.create({
-			data: parse.data,
-			include: {
-				_count: {
-					select: { images: true },
-				},
+		const [newAlbum] = await db.insert(albums).values(parse.data).returning({
+			id: albums.id,
+			name: albums.name,
+			description: albums.description,
+			color: albums.color,
+			isPrivate: albums.isPrivate,
+			createdAt: albums.createdAt,
+			updatedAt: albums.updatedAt,
+			featuredImage: albums.featuredImage,
+			shortcut: albums.shortcut,
+			category: albums.category,
+			filters: albums.filters,
+		});
+
+		if (!newAlbum) {
+			return res.status(500).json({ error: 'Error creando álbum' });
+		}
+
+		// Para serializar el álbum, necesitamos las relaciones. Realizamos una nueva consulta.
+		const album = await db.query.albums.findFirst({
+			where: eq(albums.id, newAlbum.id),
+			with: {
+				images: { columns: { id: true } },
 			},
 		});
+
+		if (!album) {
+			return res.status(500).json({ error: 'Error obteniendo álbum creado' });
+		}
 
 		res.status(201).json(serializeAlbum(album));
 	} catch (error) {
@@ -189,15 +209,35 @@ albumsRouter.put('/:id', async (req, res) => {
 	}
 
 	try {
-		const album = await prisma.album.update({
-			where: { id },
-			data: parse.data,
-			include: {
-				_count: {
-					select: { images: true },
-				},
+		const [updatedAlbum] = await db.update(albums).set(parse.data).where(eq(albums.id, id)).returning({
+			id: albums.id,
+			name: albums.name,
+			description: albums.description,
+			color: albums.color,
+			isPrivate: albums.isPrivate,
+			createdAt: albums.createdAt,
+			updatedAt: albums.updatedAt,
+			featuredImage: albums.featuredImage,
+			shortcut: albums.shortcut,
+			category: albums.category,
+			filters: albums.filters,
+		});
+
+		if (!updatedAlbum) {
+			return res.status(404).json({ error: 'Album no encontrado' });
+		}
+
+		// Para serializar el álbum, necesitamos las relaciones. Realizamos una nueva consulta.
+		const album = await db.query.albums.findFirst({
+			where: eq(albums.id, updatedAlbum.id),
+			with: {
+				images: { columns: { id: true } },
 			},
 		});
+
+		if (!album) {
+			return res.status(500).json({ error: 'Error obteniendo álbum actualizado' });
+		}
 
 		res.json(serializeAlbum(album));
 	} catch (error) {
@@ -211,9 +251,7 @@ albumsRouter.delete('/:id', async (req, res) => {
 	const { id } = req.params;
 
 	try {
-		await prisma.album.delete({
-			where: { id },
-		});
+		await db.delete(albums).where(eq(albums.id, id));
 
 		res.status(204).send();
 	} catch (error) {
@@ -227,13 +265,9 @@ albumsRouter.post('/:id/images/:imageId', async (req, res) => {
 	const { id, imageId } = req.params;
 
 	try {
-		await prisma.album.update({
-			where: { id },
-			data: {
-				images: {
-					connect: { id: imageId },
-				},
-			},
+		await db.insert(albumsToImages).values({
+			albumId: id,
+			imageId: imageId,
 		});
 
 		res.status(204).send();
@@ -248,14 +282,7 @@ albumsRouter.delete('/:id/images/:imageId', async (req, res) => {
 	const { id, imageId } = req.params;
 
 	try {
-		await prisma.album.update({
-			where: { id },
-			data: {
-				images: {
-					disconnect: { id: imageId },
-				},
-			},
-		});
+		await db.delete(albumsToImages).where(and(eq(albumsToImages.albumId, id), eq(albumsToImages.imageId, imageId)));
 
 		res.status(204).send();
 	} catch (error) {

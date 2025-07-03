@@ -72,21 +72,6 @@ export function validateFieldType(value: unknown, type: string, fieldName: strin
 }
 
 /**
- * 🔄 Transforma un objeto a su versión Prisma
- * @param data Objeto a transformar
- * @param transformFn Función de transformación específica
- * @returns Objeto transformado para Prisma
- */
-export function toPrismaTransform<T, U>(data: T, transformFn: (item: T) => U): U {
-	try {
-		return transformFn(data);
-	} catch (error) {
-		logger.error('Error transformando a Prisma:', { error, data });
-		throw error;
-	}
-}
-
-/**
  * 🎨 Maneja campos de UI comunes
  */
 export interface UIFields {

@@ -2,7 +2,9 @@
 
 import { createSettingsError, isSettingsError } from '@/app/actions/system/settings.errors'; // Mantener import para errores
 import { createSystemError } from '@/app/actions/system/system.errors'; // Mantener import para errores
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { images, collections, tags, albums, notes } from '@/lib/drizzle/schema';
+import { count } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { settingsService } from '@/services/settings';
 import type { Settings } from '@/types/settings';
@@ -308,13 +310,19 @@ export async function getSystemStats(): Promise<SystemRuntimeStats> {
 		}
 
 		// Obtener tamaño de base de datos (conteo de entidades)
-		const [totalImages, totalCollections, totalTags, totalAlbums, totalNotes] = await Promise.all([
-			prisma.image.count(),
-			prisma.collection.count(),
-			prisma.tag.count(),
-			prisma.album.count(),
-			prisma.note.count(),
+		const [totalImagesResult, totalCollectionsResult, totalTagsResult, totalAlbumsResult, totalNotesResult] = await Promise.all([
+			db.select({ count: count() }).from(images),
+			db.select({ count: count() }).from(collections),
+			db.select({ count: count() }).from(tags),
+			db.select({ count: count() }).from(albums),
+			db.select({ count: count() }).from(notes),
 		]);
+
+		const totalImages = totalImagesResult[0].count;
+		const totalCollections = totalCollectionsResult[0].count;
+		const totalTags = totalTagsResult[0].count;
+		const totalAlbums = totalAlbumsResult[0].count;
+		const totalNotes = totalNotesResult[0].count;
 
 		const totalEntities = totalImages + totalCollections + totalTags + totalAlbums + totalNotes;
 

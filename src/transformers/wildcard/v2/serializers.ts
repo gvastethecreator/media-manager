@@ -120,12 +120,12 @@ export function toPrismaWildcard(
 }
 
 /**
- * Deserializa un wildcard desde Prisma
- * @param wildcard Wildcard con campos serializados de Prisma
+ * Deserializa un wildcard desde Drizzle
+ * @param wildcard Wildcard con campos serializados de Drizzle
  * @param options Opciones de transformación
  * @returns Wildcard con campos deserializados
  */
-export function fromPrismaWildcard<T extends WildcardBase>(
+export function fromDrizzleWildcard<T extends WildcardBase>(
 	wildcard: T,
 	options: WildcardTransformOptions = {}
 ): T & WildcardDeserialized {
@@ -218,7 +218,7 @@ function calculateItemCount(wildcard: WildcardBase & { _count?: Record<string, n
  * @returns Wildcard extendido con datos UI
  */
 export function extendWildcard<T extends WildcardBase>(wildcard: T): T & WildcardWithUI {
-	return fromPrismaWildcard(wildcard, { includeUI: true }) as T & WildcardWithUI;
+	return fromDrizzleWildcard(wildcard, { includeUI: true }) as T & WildcardWithUI;
 }
 
 /**

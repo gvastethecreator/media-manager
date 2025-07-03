@@ -1,4 +1,6 @@
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { tags, activities, images, collections, folders, albums, characters, places, worldItems, imageStats } from '@/lib/drizzle/schema';
+import { eq, desc, asc, sql } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -131,42 +133,36 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 
 		// 📊 Obtener topTags y recentActivity por separado (optimización futura)
 		const [topTags, recentActivity] = await Promise.all([
-			prisma.tag.findMany({
-				select: {
+			db.query.tags.findMany({
+				columns: {
 					id: true,
 					name: true,
 					color: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
 				},
-				orderBy: {
-					images: {
-						_count: 'desc',
-					},
+				with: {
+					images: { columns: { id: true } },
 				},
-				take: 5,
-			}) as Promise<TopTag[]>,
-			prisma.activity.findMany({
-				select: {
+				orderBy: desc(sql`count(tags_to_images.image_id)`),
+				limit: 5,
+			}),
+			db.query.activities.findMany({
+				columns: {
 					id: true,
 					type: true,
 					description: true,
 					createdAt: true,
+				},
+				with: {
 					image: {
-						select: {
+						columns: {
 							id: true,
 							name: true,
 							thumbnail: true,
 						},
 					},
 				},
-				orderBy: {
-					createdAt: 'desc',
-				},
-				take: 5,
+				orderBy: desc(activities.createdAt),
+				limit: 5,
 			}),
 		]);
 
@@ -236,136 +232,80 @@ export async function getStats(): Promise<StatsResponse | null> {
 	try {
 		statsLogger.info('📊 Obteniendo estadísticas detalladas');
 
-		const [collections, folders, tags, albums, characters, places, worldItems] = await Promise.all([
-			prisma.collection.findMany({
-				select: {
-					id: true,
-					name: true,
-					color: true,
-					emoji: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-			}) as Promise<CollectionWithData[]>,
-			prisma.folder.findMany({
-				select: {
-					id: true,
-					name: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-			}) as Promise<EntityWithImageCount[]>,
-			prisma.tag.findMany({
-				select: {
-					id: true,
-					name: true,
-					color: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-			}) as Promise<TagWithData[]>,
-			prisma.album.findMany({
-				select: {
-					id: true,
-					name: true,
-					emoji: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-			}) as Promise<EntityWithEmoji[]>,
-			prisma.character.findMany({
-				select: {
-					id: true,
-					name: true,
-					emoji: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-			}) as Promise<EntityWithEmoji[]>,
-			prisma.place.findMany({
-				select: {
-					id: true,
-					name: true,
-					emoji: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-			}) as Promise<EntityWithEmoji[]>,
-			prisma.worldItem.findMany({
-				select: {
-					id: true,
-					name: true,
-					emoji: true,
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-			}) as Promise<EntityWithEmoji[]>,
+		const [collections, folders, tags, albumsData, charactersData, placesData, worldItemsData] = await Promise.all([
+			db.query.collections.findMany({
+				columns: { id: true, name: true, color: true, emoji: true },
+				with: { images: { columns: { id: true } } },
+			}),
+			db.query.folders.findMany({
+				columns: { id: true, name: true },
+				with: { images: { columns: { id: true } } },
+			}),
+			db.query.tags.findMany({
+				columns: { id: true, name: true, color: true },
+				with: { images: { columns: { id: true } } },
+			}),
+			db.query.albums.findMany({
+				columns: { id: true, name: true, emoji: true },
+				with: { images: { columns: { id: true } } },
+			}),
+			db.query.characters.findMany({
+				columns: { id: true, name: true, emoji: true },
+				with: { images: { columns: { id: true } } },
+			}),
+			db.query.places.findMany({
+				columns: { id: true, name: true, emoji: true },
+				with: { images: { columns: { id: true } } },
+			}),
+			db.query.worldItems.findMany({
+				columns: { id: true, name: true, emoji: true },
+				with: { images: { columns: { id: true } } },
+			}),
 		]);
 
 		statsLogger.info('✅ Estadísticas detalladas obtenidas');
 
 		return {
-			collections: collections.map((c: CollectionWithData) => ({
+			collections: collections.map((c) => ({
 				id: c.id,
 				name: c.name,
-				count: c._count.images,
+				count: c.images.length,
 				color: c.color,
 				emoji: c.emoji,
 			})),
-			folders: folders.map((f: EntityWithImageCount) => ({
+			folders: folders.map((f) => ({
 				id: f.id,
 				name: f.name,
-				count: f._count.images,
+				count: f.images.length,
 			})),
-			tags: tags.map((t: TagWithData) => ({
+			tags: tags.map((t) => ({
 				id: t.id,
 				name: t.name,
-				count: t._count.images,
+				count: t.images.length,
 				color: t.color,
 			})),
-			albums: albums.map((a: EntityWithEmoji) => ({
+			albums: albumsData.map((a) => ({
 				id: a.id,
 				name: a.name,
-				count: a._count.images,
+				count: a.images.length,
 				emoji: a.emoji,
 			})),
-			characters: characters.map((c: EntityWithEmoji) => ({
+			characters: charactersData.map((c) => ({
 				id: c.id,
 				name: c.name,
-				count: c._count.images,
+				count: c.images.length,
 				emoji: c.emoji,
 			})),
-			places: places.map((p: EntityWithEmoji) => ({
+			places: placesData.map((p) => ({
 				id: p.id,
 				name: p.name,
-				count: p._count.images,
+				count: p.images.length,
 				emoji: p.emoji,
 			})),
-			worldItems: worldItems.map((o: EntityWithEmoji) => ({
+			worldItems: worldItemsData.map((o) => ({
 				id: o.id,
 				name: o.name,
-				count: o._count.images,
+				count: o.images.length,
 				emoji: o.emoji,
 			})),
 		} satisfies StatsResponse;
@@ -385,19 +325,18 @@ export async function getImageStats(imageId: string) {
 	try {
 		statsLogger.info('🔍 Obteniendo estadísticas de imagen:', imageId);
 
-		let stats = await prisma.imageStats.findUnique({
-			where: { imageId },
+		let stats = await db.query.imageStats.findFirst({
+			where: eq(imageStats.imageId, imageId),
 		});
 
 		if (!stats) {
 			statsLogger.info('➕ Creando estadísticas para imagen:', imageId);
-			stats = await prisma.imageStats.create({
-				data: {
-					imageId,
-					views: 0,
-					lastViewed: new Date(),
-				},
-			});
+			const [newStats] = await db.insert(imageStats).values({
+				imageId,
+				views: 0,
+				lastViewed: new Date(),
+			}).returning();
+			stats = newStats;
 		}
 
 		statsLogger.info('✅ Estadísticas de imagen obtenidas');
@@ -416,17 +355,18 @@ export async function incrementImageView(imageId: string) {
 	try {
 		statsLogger.info('👁️ Incrementando visualización de imagen:', imageId);
 
-		const stats = await prisma.imageStats.update({
-			where: { imageId },
-			data: {
-				views: { increment: 1 },
-				lastViewed: new Date(),
-			},
-		});
+		const [updatedStats] = await db.update(imageStats).set({
+			views: sql`${imageStats.views} + 1`,
+			lastViewed: new Date(),
+		}).where(eq(imageStats.imageId, imageId)).returning();
+
+		if (!updatedStats) {
+			throw createStatsError('No se pudo encontrar la imagen para actualizar las estadísticas', StatsErrorCode.ENTITY_NOT_FOUND, { imageId });
+		}
 
 		statsLogger.info('✅ Visualización de imagen incrementada');
 		revalidatePath('/stats');
-		return stats;
+		return updatedStats;
 	} catch (error) {
 		statsLogger.error('❌ Error al incrementar visualización de imagen:', error);
 		throw createStatsError(

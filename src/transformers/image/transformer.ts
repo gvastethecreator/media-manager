@@ -22,30 +22,30 @@ import type {
 } from '@/types/entities/image';
 
 /**
- * 🔄 Transforma PrismaImageWithCounts a ImageWithStats
- * @param prismaImage - Datos de Prisma con conteos
+ * 🔄 Transforma DrizzleImageWithCounts a ImageWithStats
+ * @param drizzleImage - Datos de Drizzle con conteos
  * @returns ImageWithStats con estadísticas calculadas
  */
-export function fromPrismaImageWithCounts(prismaImage: PrismaImageWithCounts): ImageWithStats {
+export function fromDrizzleImageWithCounts(drizzleImage: PrismaImageWithCounts): ImageWithStats {
 	try {
 		// 📊 Calcular estadísticas
-		const statistics = calculateImageStatistics(prismaImage);
+		const statistics = calculateImageStatistics(drizzleImage);
 
 		// 🖼️ Parsear metadatos
-		const parsedMetadata = parseImageMetadata(prismaImage.metadata);
+		const parsedMetadata = parseImageMetadata(drizzleImage.metadata);
 
 		// 🎯 Calcular campos derivados
-		const derivedFields = calculateDerivedFields(prismaImage, statistics);
+		const derivedFields = calculateDerivedFields(drizzleImage, statistics);
 
 		const imageWithStats: ImageWithStats = {
-			...prismaImage,
+			...drizzleImage,
 			statistics,
 			...derivedFields,
 			parsedMetadata,
 		};
 
 		logger.debug('🖼️ Image transformado exitosamente', {
-			imageId: prismaImage.id,
+			imageId: drizzleImage.id,
 			totalAssociations: statistics.totalAssociations,
 			qualityScore: statistics.qualityScore,
 			technicalGrade: statistics.technicalGrade,
@@ -54,7 +54,7 @@ export function fromPrismaImageWithCounts(prismaImage: PrismaImageWithCounts): I
 		return imageWithStats;
 	} catch (error) {
 		logger.error('❌ Error transformando Image', {
-			imageId: prismaImage.id,
+			imageId: drizzleImage.id,
 			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		throw error;
@@ -408,8 +408,8 @@ export function toPrismaImageUpdate(input: ImageUpdateInput): any {
 /**
  * 🔄 Función auxiliar para arrays de imágenes
  */
-export function fromPrismaImagesWithCounts(prismaImages: PrismaImageWithCounts[]): ImageWithStats[] {
-	return prismaImages.map(fromPrismaImageWithCounts);
+export function fromDrizzleImagesWithCounts(drizzleImages: PrismaImageWithCounts[]): ImageWithStats[] {
+	return drizzleImages.map(fromDrizzleImageWithCounts);
 }
 
 /**

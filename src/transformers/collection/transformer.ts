@@ -10,18 +10,18 @@ import type { CollectionWithStats, PrismaCollectionWithCounts } from '@/types/en
 const logger = serverLogger.withContext('CollectionTransformer');
 
 /**
- * 🔄 Transforma un objeto Collection de Prisma a nuestro tipo canónico CollectionWithStats.
+ * 🔄 Transforma un objeto Collection de Drizzle a nuestro tipo canónico CollectionWithStats.
  *
- * @param prismaCollection - El objeto Collection obtenido de Prisma con conteos.
+ * @param drizzleCollection - El objeto Collection obtenido de Drizzle con conteos.
  * @returns Un objeto CollectionWithStats compatible con nuestra aplicación, o null.
  */
-export function fromPrismaCollection(prismaCollection: PrismaCollectionWithCounts | null): CollectionWithStats | null {
-	if (!prismaCollection) {
+export function fromDrizzleCollection(drizzleCollection: PrismaCollectionWithCounts | null): CollectionWithStats | null {
+	if (!drizzleCollection) {
 		return null;
 	}
 
 	try {
-		const { _count, ...baseData } = prismaCollection;
+		const { _count, ...baseData } = drizzleCollection;
 
 		// Calcular estadísticas
 		const totalImages = _count?.images ?? 0;
@@ -47,7 +47,7 @@ export function fromPrismaCollection(prismaCollection: PrismaCollectionWithCount
 			totalImages,
 			totalVideos,
 			totalEntities,
-			lastUpdated: prismaCollection.updatedAt,
+			lastUpdated: drizzleCollection.updatedAt,
 		};
 
 		return {
@@ -70,20 +70,20 @@ export function fromPrismaCollection(prismaCollection: PrismaCollectionWithCount
 			},
 		};
 	} catch (error) {
-		logger.error('Error transformando colección desde Prisma', {
+		logger.error('Error transformando colección desde Drizzle', {
 			error,
-			collectionId: prismaCollection?.id,
+			collectionId: drizzleCollection?.id,
 		});
 		return null;
 	}
 }
 
 /**
- * 🔄 Transforma una lista de colecciones de Prisma a una lista de CollectionWithStats.
+ * 🔄 Transforma una lista de colecciones de Drizzle a una lista de CollectionWithStats.
  *
- * @param prismaCollections - Un array de objetos Collection de Prisma.
+ * @param drizzleCollections - Un array de objetos Collection de Drizzle.
  * @returns Un array de objetos CollectionWithStats.
  */
-export function fromPrismaCollections(prismaCollections: PrismaCollectionWithCounts[]): CollectionWithStats[] {
-	return prismaCollections.map(fromPrismaCollection).filter((c): c is CollectionWithStats => c !== null);
+export function fromDrizzleCollections(drizzleCollections: PrismaCollectionWithCounts[]): CollectionWithStats[] {
+	return drizzleCollections.map(fromDrizzleCollection).filter((c): c is CollectionWithStats => c !== null);
 }

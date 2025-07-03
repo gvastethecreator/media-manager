@@ -1,6 +1,8 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { albums, images, videos } from '@/lib/drizzle/schema';
+import { eq, and, inArray } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 import type { AlbumWithStats } from '@/types/entities/album';
@@ -32,29 +34,47 @@ export interface AlbumCardData extends Omit<AlbumWithStats, 'filters'> {
  * Obtiene los datos de un álbum para mostrar en una tarjeta
  */
 export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> {
-	const prisma = await getPrismaClient();
-
-	const album = await prisma.album.findUnique({
-		where: {
-			id: albumId,
-		},
-		include: {
-			_count: {
-				select: {
-					images: true,
-					videos: true,
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-				},
+	const album = await db.query.albums.findFirst({
+		where: eq(albums.id, albumId),
+		with: {
+			images: {
+				columns: { id: true },
+			},
+			videos: {
+				columns: { id: true },
+			},
+			collections: {
+				columns: { id: true },
+			},
+			tags: {
+				columns: { id: true },
+			},
+			characters: {
+				columns: { id: true },
+			},
+			places: {
+				columns: { id: true },
+			},
+			worldItems: {
+				columns: { id: true },
+			},
+			concepts: {
+				columns: { id: true },
+			},
+			prompts: {
+				columns: { id: true },
+			},
+			notes: {
+				columns: { id: true },
+			},
+			wildcards: {
+				columns: { id: true },
+			},
+			properties: {
+				columns: { id: true },
+			},
+			groups: {
+				columns: { id: true },
 			},
 		},
 	});
@@ -64,54 +84,38 @@ export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> 
 	}
 
 	// Obtener imágenes recientes relacionadas con este álbum
-	const recentImages = await prisma.image.findMany({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-		select: {
+	const recentImages = await db.query.images.findMany({
+		where: inArray(images.id, album.images.map((img) => img.id)),
+		columns: {
 			id: true,
 			path: true,
 			thumbnailWidth: true,
 			thumbnailHeight: true,
 		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: 6,
+		orderBy: images.updatedAt,
+		limit: 6,
 	});
 
-	const recentImagePaths = recentImages.map((img: { id: string }) => {
+	const recentImagePaths = recentImages.map((img) => {
 		// Convertir la ruta del sistema a una URL para el navegador
 		const imagePath = `/api/thumbnails/${img.id}`;
 		return imagePath;
 	});
 
 	// Obtener videos recientes relacionados con este álbum
-	const recentVideos = await prisma.video.findMany({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-		select: {
+	const recentVideos = await db.query.videos.findMany({
+		where: inArray(videos.id, album.videos.map((vid) => vid.id)),
+		columns: {
 			id: true,
 			path: true,
 			thumbnailWidth: true,
 			thumbnailHeight: true,
 		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: 3,
+		orderBy: videos.updatedAt,
+		limit: 3,
 	});
 
-	const recentVideoPaths = recentVideos.map((video: { id: string }) => {
+	const recentVideoPaths = recentVideos.map((video) => {
 		// Convertir la ruta del sistema a una URL para el navegador
 		const videoPath = `/api/video-thumbnails/${video.id}`;
 		return videoPath;
@@ -152,19 +156,19 @@ export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> 
 	return {
 		...album,
 		stats: {
-			imageCount: album._count.images,
-			videoCount: album._count.videos,
-			collectionCount: album._count.collections,
-			tagCount: album._count.tags,
-			characterCount: album._count.characters,
-			placeCount: album._count.places,
-			worldItemCount: album._count.worldItems,
-			conceptCount: album._count.concepts,
-			promptCount: album._count.prompts,
-			noteCount: album._count.notes,
-			wildcardCount: album._count.wildcards,
-			propertyCount: album._count.properties,
-			groupCount: album._count.groups,
+			imageCount: album.images.length,
+			videoCount: album.videos.length,
+			collectionCount: album.collections.length,
+			tagCount: album.tags.length,
+			characterCount: album.characters.length,
+			placeCount: album.places.length,
+			worldItemCount: album.worldItems.length,
+			conceptCount: album.concepts.length,
+			promptCount: album.prompts.length,
+			noteCount: album.notes.length,
+			wildcardCount: album.wildcards.length,
+			propertyCount: album.properties.length,
+			groupCount: album.groups.length,
 		},
 		recentImages: recentImagePaths,
 		recentVideos: recentVideoPaths,
@@ -197,48 +201,50 @@ export async function getAlbumsForCards(options: {
 		includeStats = false,
 	} = options;
 
-	const prisma = await getPrismaClient();
+	const whereConditions = [];
+	if (category) {
+		whereConditions.push(eq(albums.category, category));
+	}
+	if (isFavorite !== undefined) {
+		whereConditions.push(eq(albums.isFavorite, isFavorite));
+	}
+	if (searchTerm) {
+		whereConditions.push(
+			or(
+				like(albums.name, `%${searchTerm}%`),
+				like(albums.description, `%${searchTerm}%`),
+			),
+		);
+	}
 
-	// Construir la consulta base
-	const albums = await prisma.album.findMany({
-		where: {
-			...(category ? { category } : {}),
-			...(isFavorite !== undefined ? { isFavorite } : {}),
-			...(searchTerm
-				? {
-						OR: [{ name: { contains: searchTerm } }, { description: { contains: searchTerm } }],
-					}
-				: {}),
+	const orderByColumn = albums[orderBy];
+	const orderByClause = orderDir === 'desc' ? desc(orderByColumn) : asc(orderByColumn);
+
+	const albumsData = await db.query.albums.findMany({
+		where: and(...whereConditions),
+		with: {
+			images: { columns: { id: true } },
+			videos: { columns: { id: true } },
+			collections: { columns: { id: true } },
+			tags: { columns: { id: true } },
+			characters: { columns: { id: true } },
+			places: { columns: { id: true } },
+			worldItems: { columns: { id: true } },
+			concepts: { columns: { id: true } },
+			prompts: { columns: { id: true } },
+			notes: { columns: { id: true } },
+			wildcards: { columns: { id: true } },
+			properties: { columns: { id: true } },
+			groups: { columns: { id: true } },
 		},
-		include: {
-			_count: {
-				select: {
-					images: true,
-					videos: true,
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-				},
-			},
-		},
-		orderBy: {
-			[orderBy]: orderDir,
-		},
-		take: limit,
+		orderBy: orderByClause,
+		limit: limit,
 	});
 
 	// Si se solicitan estadísticas adicionales, cargarlas para cada álbum
 	if (includeStats) {
 		const albumsWithStats = await Promise.all(
-			albums.map(async (album) => {
+			albumsData.map(async (album) => {
 				const { totalSize, imageCount, videoCount, entitiesCount } = await getAlbumStats(album.id);
 
 				// Obtener algunas imágenes y videos recientes para mostrar en la tarjeta
@@ -290,7 +296,7 @@ export async function getAlbumsForCards(options: {
 		return albumsWithStats;
 	}
 
-	return albums;
+	return albumsData;
 }
 
 // Interfaz para las imágenes thumbnail
@@ -306,46 +312,28 @@ interface ThumbnailImage {
  * Obtiene las imágenes y videos recientes de un álbum para mostrar en la tarjeta
  */
 export async function getRecentAlbumMedia(albumId: string, limit = 6): Promise<ThumbnailImage[]> {
-	const prisma = await getPrismaClient();
-
 	// Cargar imágenes recientes
-	const recentImages = await prisma.image.findMany({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-		select: {
+	const recentImages = await db.query.images.findMany({
+		where: eq(images.albumId, albumId),
+		columns: {
 			id: true,
 			name: true,
 			path: true,
 		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: Math.ceil(limit / 2),
+		orderBy: images.updatedAt,
+		limit: Math.ceil(limit / 2),
 	});
 
 	// Cargar videos recientes
-	const recentVideos = await prisma.video.findMany({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-		select: {
+	const recentVideos = await db.query.videos.findMany({
+		where: eq(videos.albumId, albumId),
+		columns: {
 			id: true,
 			name: true,
 			path: true,
 		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: Math.floor(limit / 2),
+		orderBy: videos.updatedAt,
+		limit: Math.floor(limit / 2),
 	});
 
 	// Combinar y formatear los resultados
@@ -378,8 +366,6 @@ export async function getAlbumStats(albumId: string): Promise<{
 	totalSize: number;
 	entitiesCount: number;
 }> {
-	const prisma = await getPrismaClient();
-
 	// 🚀 Usar servicio optimizado - una consulta en lugar de 15+
 			const optimizedStatsService = OptimizedStatsService.getInstance();
 	const stats = await optimizedStatsService.getAlbumStatsOptimized(albumId);
@@ -416,62 +402,57 @@ export async function searchAlbums(options: {
 		includeStats = false,
 	} = options;
 
-	const prisma = await getPrismaClient();
+	const whereConditions = [];
+	if (category) {
+		whereConditions.push(eq(albums.category, category));
+	}
+	if (!includeHidden) {
+		whereConditions.push(eq(albums.isHidden, false));
+	}
+	if (searchTerm) {
+		whereConditions.push(
+			or(
+				like(albums.name, `%${searchTerm}%`),
+				like(albums.description, `%${searchTerm}%`),
+				like(albums.category, `%${searchTerm}%`),
+				like(albums.shortcut, `%${searchTerm}%`),
+			),
+		);
+	}
 
-	// Construir filtros con tipo Prisma.AlbumWhereInput
-	const whereClause = {
-		...(category ? { category } : {}),
-		...(includeHidden ? {} : { isHidden: false }),
-		...(searchTerm
-			? {
-					OR: [
-						{ name: { contains: searchTerm } },
-						{ description: { contains: searchTerm } },
-						{ category: { contains: searchTerm } },
-						{ shortcut: { contains: searchTerm } },
-					],
-				}
-			: {}),
-	};
+	const orderByColumn = albums[orderBy];
+	const orderByClause = orderDir === 'desc' ? desc(orderByColumn) : asc(orderByColumn);
 
 	// Consulta de álbumes
-	const albums = await prisma.album.findMany({
-		where: whereClause,
-		include: {
-			_count: {
-				select: {
-					images: true,
-					videos: true,
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-				},
-			},
+	const albumsData = await db.query.albums.findMany({
+		where: and(...whereConditions),
+		with: {
+			images: { columns: { id: true } },
+			videos: { columns: { id: true } },
+			collections: { columns: { id: true } },
+			tags: { columns: { id: true } },
+			characters: { columns: { id: true } },
+			places: { columns: { id: true } },
+			worldItems: { columns: { id: true } },
+			concepts: { columns: { id: true } },
+			prompts: { columns: { id: true } },
+			notes: { columns: { id: true } },
+			wildcards: { columns: { id: true } },
+			properties: { columns: { id: true } },
+			groups: { columns: { id: true } },
 		},
-		orderBy: {
-			[orderBy]: orderDir,
-		},
-		skip: offset,
-		take: limit,
+		orderBy: orderByClause,
+		offset: offset,
+		limit: limit,
 	});
 
 	// Obtener el conteo total para paginación
-	const totalCount = await prisma.album.count({
-		where: whereClause,
-	});
+	const totalCount = await db.select({ count: count() }).from(albums).where(and(...whereConditions));
 
 	// Agregar estadísticas si se solicitan
 	if (includeStats) {
 		const albumsWithStats = await Promise.all(
-			albums.map(async (album) => {
+			albumsData.map(async (album) => {
 				const stats = await getAlbumStats(album.id);
 
 				// Obtener algunas imágenes y videos recientes para mostrar en la tarjeta
@@ -488,14 +469,14 @@ export async function searchAlbums(options: {
 
 		return {
 			albums: albumsWithStats,
-			totalCount,
-			hasMore: offset + albums.length < totalCount,
+			totalCount: totalCount[0].count,
+			hasMore: offset + albumsData.length < totalCount[0].count,
 		};
 	}
 
 	return {
-		albums,
-		totalCount,
-		hasMore: offset + albums.length < totalCount,
+		albums: albumsData,
+		totalCount: totalCount[0].count,
+		hasMore: offset + albumsData.length < totalCount[0].count,
 	};
 }

@@ -1,14 +1,78 @@
 /**
  * @file Datos mock para desarrollo y testing
  * @module lib/mock
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Album, Collection, Image, Tag } from '@prisma/client';
+// Tipos locales para mock (equivalentes a Drizzle)
+type MockImage = {
+	id: string;
+	name: string | null;
+	path: string;
+	size: number;
+	width: number | null;
+	height: number | null;
+	metadata: string | null;
+	thumbnail: Buffer | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
+	isFavorite: boolean;
+	folderId: string | null;
+	addedAt: Date;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+type MockTag = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	shortcut: string | null;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+type MockCollection = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	isPrivate: boolean;
+	isFavorite: boolean;
+	featuredImage: string | null;
+	userId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+type MockAlbum = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	isPrivate: boolean;
+	isFavorite: boolean;
+	featuredImage: string | null;
+	userId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 /**
  * Datos mock para imágenes
  */
-export const mockImages: Partial<Image>[] = [
+export const mockImages: Partial<MockImage>[] = [
 	{
 		id: 'mock-1',
 		path: '/mock/image1.jpg',
@@ -16,7 +80,10 @@ export const mockImages: Partial<Image>[] = [
 		width: 1920,
 		height: 1080,
 		size: 2048000,
-		mimeType: 'image/jpeg',
+		metadata: JSON.stringify({ format: 'jpeg', quality: 95 }),
+		isFavorite: false,
+		folderId: null,
+		addedAt: new Date('2024-01-01'),
 		createdAt: new Date('2024-01-01'),
 		updatedAt: new Date('2024-01-01'),
 	},
@@ -27,7 +94,10 @@ export const mockImages: Partial<Image>[] = [
 		width: 1280,
 		height: 720,
 		size: 1024000,
-		mimeType: 'image/png',
+		metadata: JSON.stringify({ format: 'png', hasAlpha: true }),
+		isFavorite: false,
+		folderId: null,
+		addedAt: new Date('2024-01-02'),
 		createdAt: new Date('2024-01-02'),
 		updatedAt: new Date('2024-01-02'),
 	},
@@ -36,18 +106,26 @@ export const mockImages: Partial<Image>[] = [
 /**
  * Datos mock para tags
  */
-export const mockTags: Partial<Tag>[] = [
+export const mockTags: Partial<MockTag>[] = [
 	{
 		id: 'tag-1',
 		name: 'Paisaje',
+		description: 'Imágenes de paisajes naturales',
+		emoji: '🏞️',
 		color: '#10b981',
+		category: 'general',
+		isFavorite: false,
 		createdAt: new Date('2024-01-01'),
 		updatedAt: new Date('2024-01-01'),
 	},
 	{
 		id: 'tag-2',
 		name: 'Retrato',
+		description: 'Fotografías de retratos',
+		emoji: '��',
 		color: '#3b82f6',
+		category: 'general',
+		isFavorite: false,
 		createdAt: new Date('2024-01-01'),
 		updatedAt: new Date('2024-01-01'),
 	},
@@ -56,7 +134,7 @@ export const mockTags: Partial<Tag>[] = [
 /**
  * Datos mock para colecciones
  */
-export const mockCollections: Partial<Collection>[] = [
+export const mockCollections: Partial<MockCollection>[] = [
 	{
 		id: 'collection-1',
 		name: 'Fotos de Vacaciones',
@@ -64,6 +142,9 @@ export const mockCollections: Partial<Collection>[] = [
 		emoji: '🏖️',
 		color: '#f59e0b',
 		isPrivate: false,
+		isFavorite: false,
+		featuredImage: null,
+		userId: null,
 		createdAt: new Date('2024-01-01'),
 		updatedAt: new Date('2024-01-01'),
 	},
@@ -72,7 +153,7 @@ export const mockCollections: Partial<Collection>[] = [
 /**
  * Datos mock para álbumes
  */
-export const mockAlbums: Partial<Album>[] = [
+export const mockAlbums: Partial<MockAlbum>[] = [
 	{
 		id: 'album-1',
 		name: 'Portfolio',
@@ -80,6 +161,9 @@ export const mockAlbums: Partial<Album>[] = [
 		emoji: '📸',
 		color: '#8b5cf6',
 		isPrivate: false,
+		isFavorite: false,
+		featuredImage: null,
+		userId: null,
 		createdAt: new Date('2024-01-01'),
 		updatedAt: new Date('2024-01-01'),
 	},

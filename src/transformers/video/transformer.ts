@@ -505,24 +505,3 @@ function getQualityLabel(qualityLevel: VideoQuality, technicalGrade: string): st
 
 	return `${qualityNames[qualityLevel]} (${technicalGrade})`;
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar fromDrizzleVideoWithCounts
- */
-export const fromPrismaVideoWithCounts = fromDrizzleVideoWithCounts;
-
-/**
- * @deprecated Usar fromDrizzleVideo
- */
-export const fromPrismaVideo = fromDrizzleVideo;
-
-/**
- * @deprecated Usar fromDrizzleVideos
- */
-export const fromPrismaVideos = fromDrizzleVideos;
-
-/**
- * @deprecated Usar fromDrizzleVideosWithCounts
- */
-export const fromPrismaVideosWithCounts = fromDrizzleVideosWithCounts;
