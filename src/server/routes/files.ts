@@ -1,174 +1,199 @@
-import { Router } from 'express';
-import fs from 'fs/promises';
-import path from 'path';
-import { z } from 'zod';
-import { mapStatsToFileInfo, serializeDirectoryContents, serializeFileOperationResult } from '@/transformers/file';
-
 /**
- * @file files.ts
- * @description Rutas REST para operaciones de archivos y directorios.
- *  - GET    /api/files/info    → Información de un archivo
- *  - GET    /api/files/list    → Listado de un directorio
- *  - DELETE /api/files         → Eliminar archivo
- *  - POST   /api/files/dir     → Crear directorio
- *  - PUT    /api/files/rename  → Renombrar/mover archivo
- *  - POST   /api/files/copy    → Copiar archivo
+ * @file Rutas de API para operaciones con archivos
+ * @module server/routes/files
+ * ✅ MIGRADO DESDE SERVER ACTIONS - 2025-07-03
  */
 
-export const filesRouter = Router();
+import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
+import {
+	getFileInfo,
+	getDirectoryInfo,
+	createDirectory,
+	deleteFile,
+	getFileAsDataUrl,
+	renameFile,
+	copyFile,
+	moveFile,
+} from '@/services/file/file.service';
 
-// Base de seguridad: todas las rutas deben estar bajo este directorio
-const BASE_DIR = process.env.FILES_BASE_DIR ?? path.resolve(process.cwd(), 'public/uploads');
+const router = express.Router();
+const logger = serverLogger.withContext('FilesAPI');
 
 /**
- * Normaliza y valida la ruta recibida para evitar directory traversal
+ * GET /api/files/info/:path - Obtener información de un archivo
  */
-function resolveSafePath(relativePath: string): string {
-	const normalized = path.normalize(relativePath).replace(/^([../\\])+/, '');
-	const absolute = path.resolve(BASE_DIR, normalized);
-	if (!absolute.startsWith(BASE_DIR)) {
-		throw new Error('Ruta fuera de directorio permitido');
-	}
-	return absolute;
-}
-
-// -------------------------- Schemas --------------------------
-
-const PathQuerySchema = z.object({ path: z.string().min(1) });
-
-const RenameSchema = z.object({
-	oldPath: z.string().min(1),
-	newPath: z.string().min(1),
-});
-
-const CopyMoveSchema = z.object({
-	sourcePath: z.string().min(1),
-	destPath: z.string().min(1),
-});
-
-// -------------------------- Endpoints --------------------------
-
-// GET /api/files/info?path=foo.jpg
-filesRouter.get('/info', async (req, res) => {
-	const parse = PathQuerySchema.safeParse(req.query);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
-	}
+router.get('/info/*', async (req, res) => {
 	try {
-		const filePath = resolveSafePath(parse.data.path);
-		const stats = await fs.stat(filePath);
-		if (!stats.isFile()) {
-			return res.status(400).json({ error: 'La ruta indicada no es un archivo' });
+		const filePath = req.params[0]; // Captura toda la ruta después de /info/
+
+		if (!filePath) {
+			return res.status(400).json({ error: 'Ruta de archivo requerida' });
 		}
-		const info = mapStatsToFileInfo(filePath, stats);
-		return res.json(info);
-	} catch (error: any) {
-		return res.status(500).json({ error: 'Error obteniendo información', message: error.message });
+
+		const fileInfo = await getFileInfo(filePath);
+		res.json({ success: true, data: fileInfo });
+	} catch (error) {
+		logger.error('Error obteniendo información del archivo:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
 	}
 });
 
-// GET /api/files/list?path=some/dir
-filesRouter.get('/list', async (req, res) => {
-	const parse = PathQuerySchema.safeParse(req.query);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
-	}
+/**
+ * GET /api/files/directory/:path - Obtener contenido de un directorio
+ */
+router.get('/directory/*', async (req, res) => {
 	try {
-		const dirPath = resolveSafePath(parse.data.path);
-		const stats = await fs.stat(dirPath);
-		if (!stats.isDirectory()) {
-			return res.status(400).json({ error: 'La ruta indicada no es un directorio' });
+		const dirPath = req.params[0]; // Captura toda la ruta después de /directory/
+
+		if (!dirPath) {
+			return res.status(400).json({ error: 'Ruta de directorio requerida' });
 		}
-		const entries = await fs.readdir(dirPath, { withFileTypes: true });
-		const items = await Promise.all(
-			entries.map(async (dirent) => {
-				const fullPath = path.join(dirPath, dirent.name);
-				const entryStats = await fs.stat(fullPath);
-				return mapStatsToFileInfo(fullPath, entryStats);
-			})
-		);
-		const contents = serializeDirectoryContents(dirPath, items);
-		return res.json(contents);
-	} catch (error: any) {
-		return res.status(500).json({ error: 'Error leyendo directorio', message: error.message });
+
+		const directoryInfo = await getDirectoryInfo(dirPath);
+		res.json({ success: true, data: directoryInfo });
+	} catch (error) {
+		logger.error('Error obteniendo contenido del directorio:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
 	}
 });
 
-// DELETE /api/files?path=foo.jpg
-filesRouter.delete('/', async (req, res) => {
-	const parse = PathQuerySchema.safeParse(req.query);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
-	}
+/**
+ * POST /api/files/directory - Crear un nuevo directorio
+ */
+router.post('/directory', async (req, res) => {
 	try {
-		const filePath = resolveSafePath(parse.data.path);
-		await fs.unlink(filePath);
-		return res.json(serializeFileOperationResult(true, filePath));
-	} catch (error: any) {
-		return res.status(500).json({ error: 'Error eliminando archivo', message: error.message });
+		const { path, options } = req.body;
+
+		if (!path) {
+			return res.status(400).json({ error: 'Ruta de directorio requerida' });
+		}
+
+		const result = await createDirectory(path, options);
+		res.json({ success: true, data: result });
+	} catch (error) {
+		logger.error('Error creando directorio:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
 	}
 });
 
-// POST /api/files/dir
-filesRouter.post('/dir', async (req, res) => {
-	const bodySchema = z.object({ path: z.string().min(1) });
-	const parse = bodySchema.safeParse(req.body);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
-	}
+/**
+ * DELETE /api/files/:path - Eliminar un archivo
+ */
+router.delete('/*', async (req, res) => {
 	try {
-		const dirPath = resolveSafePath(parse.data.path);
-		await fs.mkdir(dirPath, { recursive: true });
-		return res.status(201).json(serializeFileOperationResult(true, dirPath));
-	} catch (error: any) {
-		return res.status(500).json({ error: 'Error creando directorio', message: error.message });
+		const filePath = req.params[0]; // Captura toda la ruta
+
+		if (!filePath) {
+			return res.status(400).json({ error: 'Ruta de archivo requerida' });
+		}
+
+		const result = await deleteFile(filePath);
+		res.json({ success: true, data: result });
+	} catch (error) {
+		logger.error('Error eliminando archivo:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
 	}
 });
 
-// PUT /api/files/rename
-filesRouter.put('/rename', async (req, res) => {
-	const parse = RenameSchema.safeParse(req.body);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
-	}
+/**
+ * GET /api/files/dataurl/:path - Obtener archivo como Data URL
+ */
+router.get('/dataurl/*', async (req, res) => {
 	try {
-		const oldPath = resolveSafePath(parse.data.oldPath);
-		const newPath = resolveSafePath(parse.data.newPath);
-		await fs.rename(oldPath, newPath);
-		return res.json(serializeFileOperationResult(true, newPath));
-	} catch (error: any) {
-		return res.status(500).json({ error: 'Error renombrando archivo', message: error.message });
+		const filePath = req.params[0]; // Captura toda la ruta después de /dataurl/
+
+		if (!filePath) {
+			return res.status(400).json({ error: 'Ruta de archivo requerida' });
+		}
+
+		const dataUrl = await getFileAsDataUrl(filePath);
+		res.json({ success: true, data: dataUrl });
+	} catch (error) {
+		logger.error('Error obteniendo Data URL:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
 	}
 });
 
-// POST /api/files/copy
-filesRouter.post('/copy', async (req, res) => {
-	const parse = CopyMoveSchema.safeParse(req.body);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
-	}
+/**
+ * PUT /api/files/rename - Renombrar un archivo
+ */
+router.put('/rename', async (req, res) => {
 	try {
-		const source = resolveSafePath(parse.data.sourcePath);
-		const dest = resolveSafePath(parse.data.destPath);
-		await fs.copyFile(source, dest);
-		return res.status(201).json(serializeFileOperationResult(true, dest));
-	} catch (error: any) {
-		return res.status(500).json({ error: 'Error copiando archivo', message: error.message });
+		const { oldPath, newPath, options } = req.body;
+
+		if (!oldPath || !newPath) {
+			return res.status(400).json({ error: 'Rutas oldPath y newPath requeridas' });
+		}
+
+		const result = await renameFile(oldPath, newPath, options);
+		res.json({ success: true, data: result });
+	} catch (error) {
+		logger.error('Error renombrando archivo:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
 	}
 });
 
-// POST /api/files/move
-filesRouter.post('/move', async (req, res) => {
-	const parse = CopyMoveSchema.safeParse(req.body);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
-	}
+/**
+ * POST /api/files/copy - Copiar un archivo
+ */
+router.post('/copy', async (req, res) => {
 	try {
-		const source = resolveSafePath(parse.data.sourcePath);
-		const dest = resolveSafePath(parse.data.destPath);
-		await fs.rename(source, dest);
-		return res.json(serializeFileOperationResult(true, dest));
-	} catch (error: any) {
-		return res.status(500).json({ error: 'Error moviendo archivo', message: error.message });
+		const { sourcePath, destPath, options } = req.body;
+
+		if (!sourcePath || !destPath) {
+			return res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
+		}
+
+		const result = await copyFile(sourcePath, destPath, options);
+		res.json({ success: true, data: result });
+	} catch (error) {
+		logger.error('Error copiando archivo:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
 	}
 });
+
+/**
+ * POST /api/files/move - Mover un archivo
+ */
+router.post('/move', async (req, res) => {
+	try {
+		const { sourcePath, destPath, options } = req.body;
+
+		if (!sourcePath || !destPath) {
+			return res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
+		}
+
+		const result = await moveFile(sourcePath, destPath, options);
+		res.json({ success: true, data: result });
+	} catch (error) {
+		logger.error('Error moviendo archivo:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor'
+		});
+	}
+});
+
+export default router;
