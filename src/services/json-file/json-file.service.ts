@@ -13,7 +13,7 @@ import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { fromPrismaJsonFile, fromPrismaJsonFiles } from '@/transformers/json-file/transformer';
+import { fromDrizzleJsonFile, fromDrizzleJsonFiles } from '@/transformers/json-file/transformer';
 import type { JsonFileWithStats, JsonFileCreateInput, JsonFileUpdateInput } from '@/types/entities/json-file';
 import { asc, eq, count } from 'drizzle-orm';
 import * as crypto from 'crypto';
@@ -86,7 +86,7 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 			isFavorite: Boolean(rawJsonFile.isFavorite),
 		}));
 
-		return fromPrismaJsonFiles(transformedJsonFiles as any);
+		return fromDrizzleJsonFiles(transformedJsonFiles as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivos JSON:', { error });
 		throw new Error('Error al obtener archivos JSON');
@@ -142,7 +142,7 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 			isFavorite: Boolean(rawJsonFile.isFavorite),
 		};
 
-		return fromPrismaJsonFile(transformedJsonFile as any);
+		return fromDrizzleJsonFile(transformedJsonFile as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivo JSON por ID:', { id, error });
 		throw new Error('Error al obtener archivo JSON');
@@ -186,7 +186,7 @@ export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFil
 		}).returning();
 
 		const newJsonFile = result[0];
-		const jsonFileWithStats = fromPrismaJsonFile(newJsonFile);
+		const jsonFileWithStats = fromDrizzleJsonFile(newJsonFile);
 
 		// Emitir eventos
 		await emit({
@@ -252,7 +252,7 @@ export async function updateJsonFile(id: string, data: JsonFileUpdateInput): Pro
 			.returning();
 
 		const updatedJsonFile = result[0];
-		const jsonFileWithStats = fromPrismaJsonFile(updatedJsonFile);
+		const jsonFileWithStats = fromDrizzleJsonFile(updatedJsonFile);
 
 		// Emitir eventos
 		await emit({

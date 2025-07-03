@@ -1,61 +1,106 @@
-/*
- * @file src/lib/api/client.ts
- * @description Cliente HTTP ligero basado en fetch para consumir la API Express.
- *              Diseñado para usarse con React Query.
+/**
+ * @file Cliente API centralizado para comunicación con el servidor Express
+ * @module lib/api/client
+ * ✅ Reemplaza server actions de Next.js con API calls estándar
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 
-const apiLogger = serverLogger.withContext('APIClient');
+const apiLogger = clientLogger.withContext('ApiClient');
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
-
-interface RequestOptions extends Omit<RequestInit, 'body'> {
-	body?: unknown;
+export interface ApiResponse<T = unknown> {
+	data?: T;
+	error?: string;
+	success: boolean;
+	message?: string;
 }
 
-async function request<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
-	const url = `${API_BASE}${path}`;
+export class ApiClient {
+	private baseURL: string;
 
-	const headers: HeadersInit = {
-		'Content-Type': 'application/json',
-		...(options.headers || {}),
-	};
-
-	const fetchOptions: RequestInit = {
-		...options,
-		method,
-		headers,
-		body: options.body ? JSON.stringify(options.body) : undefined,
-	};
-
-	apiLogger.debug(`${method} ${url}`);
-
-	const res = await fetch(url, fetchOptions);
-
-	if (!res.ok) {
-		const message = await res.text();
-		apiLogger.error(`❌ ${method} ${url} → ${res.status}`, message);
-		throw new Error(message || 'Error inesperado en la petición');
+	constructor() {
+		// En desarrollo, el servidor Express corre en puerto 3001
+		// En producción, usar la misma URL base
+		this.baseURL = process.env.NODE_ENV === 'development'
+			? 'http://localhost:3001'
+			: window.location.origin;
 	}
 
-	// Algunos endpoints responden vacío (204) o binario; intentar JSON y fallback texto
-	if (res.status === 204) return undefined as unknown as T;
-
-	const contentType = res.headers.get('content-type');
-	if (contentType?.includes('application/json')) {
-		return (await res.json()) as T;
+	/**
+	 * Realiza una petición GET
+	 */
+	async get<T>(endpoint: string): Promise<T> {
+		return this.request<T>('GET', endpoint);
 	}
-	const blob = await res.blob();
-	return blob as unknown as T;
+
+	/**
+	 * Realiza una petición POST
+	 */
+	async post<T>(endpoint: string, data?: unknown): Promise<T> {
+		return this.request<T>('POST', endpoint, data);
+	}
+
+	/**
+	 * Realiza una petición PUT
+	 */
+	async put<T>(endpoint: string, data?: unknown): Promise<T> {
+		return this.request<T>('PUT', endpoint, data);
+	}
+
+	/**
+	 * Realiza una petición DELETE
+	 */
+	async delete<T>(endpoint: string): Promise<T> {
+		return this.request<T>('DELETE', endpoint);
+	}
+
+	/**
+	 * Método privado para realizar peticiones HTTP
+	 */
+	private async request<T>(
+		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+		endpoint: string,
+		data?: unknown
+	): Promise<T> {
+		const url = `${this.baseURL}${endpoint}`;
+
+		apiLogger.info(`🌐 ${method} ${endpoint}`, { data });
+
+		try {
+			const config: RequestInit = {
+				method,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			};
+
+			if (data && method !== 'GET') {
+				config.body = JSON.stringify(data);
+			}
+
+			const response = await fetch(url, config);
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				const errorMessage = `HTTP ${response.status}: ${errorText}`;
+				apiLogger.error(`❌ Error en ${method} ${endpoint}`, {
+					status: response.status,
+					error: errorText
+				});
+				throw new Error(errorMessage);
+			}
+
+			const result = await response.json();
+			apiLogger.info(`✅ ${method} ${endpoint} exitoso`);
+
+			return result;
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			apiLogger.error(`💥 Fallo en ${method} ${endpoint}`, { error: errorMessage });
+			throw new Error(`Error en API call: ${errorMessage}`);
+		}
+	}
 }
 
-export const api = {
-	get: <T>(path: string, options?: RequestOptions) => request<T>('GET', path, options),
-	post: <T>(path: string, body?: unknown, options?: RequestOptions) => request<T>('POST', path, { ...options, body }),
-	put: <T>(path: string, body?: unknown, options?: RequestOptions) => request<T>('PUT', path, { ...options, body }),
-	patch: <T>(path: string, body?: unknown, options?: RequestOptions) => request<T>('PATCH', path, { ...options, body }),
-	delete: <T>(path: string, options?: RequestOptions) => request<T>('DELETE', path, options),
-};
-
-export default api;
+// Instancia singleton del cliente API
+export const apiClient = new ApiClient();

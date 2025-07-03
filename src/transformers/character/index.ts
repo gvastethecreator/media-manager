@@ -12,4 +12,4 @@ export {
 } from './mappers';
 
 // De transformer.ts
-export { fromPrismaCharacter, fromPrismaCharacters } from './transformer';
+export { fromDrizzleCharacter, fromDrizzleCharacters } from './transformer';

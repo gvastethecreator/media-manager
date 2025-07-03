@@ -19,7 +19,7 @@ import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
  * @param data - Datos de Prisma con _count
  * @returns Note optimizado con estadísticas pre-calculadas
  */
-export function fromPrismaNoteWithCounts(data: PrismaNoteWithCounts): NoteWithStats {
+export function fromDrizzleNoteWithCounts(data: PrismaNoteWithCounts): NoteWithStats {
 	const statistics = calculateNoteStatistics(data);
 
 	return {
@@ -264,4 +264,4 @@ export function toPrismaNoteUpdate(input: NoteUpdateInput) {
 }
 
 // Alias para compatibilidad con importaciones esperadas
-export const fromPrismaNote = fromPrismaNoteWithCounts;
+export const fromDrizzleNote = fromDrizzleNoteWithCounts;

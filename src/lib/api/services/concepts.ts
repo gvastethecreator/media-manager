@@ -1,106 +1,115 @@
 /**
- * @file Servicio API para la entidad Concept
+ * @file Servicio API para conceptos
  * @module lib/api/services/concepts
- * @description Centraliza todas las operaciones API relacionadas con conceptos
+ * ✅ Reemplaza server actions de concepts con API calls
  */
 
-import { api } from '@/lib/api/client';
-import type {
-	ConceptCreateInput,
-	ConceptUpdateInput,
-	ConceptWithStats,
-} from '@/types/entities/concept';
+import { apiClient } from '../client';
+import type { ConceptWithStats, ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept';
 
-export interface ConceptFilters {
-	search?: string;
-	category?: string;
-	tags?: string[];
-	onlyFavorites?: boolean;
+export const conceptsApi = {
+	/**
+	 * Obtiene todos los conceptos
+	 */
+	getAll: (): Promise<ConceptWithStats[]> => {
+		return apiClient.get<ConceptWithStats[]>('/api/concepts');
+	},
+
+	/**
+	 * Obtiene un concepto por ID
+	 */
+	getById: (id: string): Promise<ConceptWithStats> => {
+		return apiClient.get<ConceptWithStats>(`/api/concepts/${id}`);
+	},
+
+	/**
+	 * Crea un nuevo concepto
+	 */
+	create: (data: ConceptCreateInput): Promise<ConceptWithStats> => {
+		return apiClient.post<ConceptWithStats>('/api/concepts', data);
+	},
+
+	/**
+	 * Actualiza un concepto existente
+	 */
+	update: (id: string, data: ConceptUpdateInput): Promise<ConceptWithStats> => {
+		return apiClient.put<ConceptWithStats>(`/api/concepts/${id}`, data);
+	},
+
+	/**
+	 * Elimina un concepto
+	 */
+	delete: (id: string): Promise<void> => {
+		return apiClient.delete<void>(`/api/concepts/${id}`);
+	},
+};
+
+export interface ConceptCardData {
+	id: string;
+	name: string;
+	description?: string | null;
+	category?: string | null;
+	color?: string | null;
+	emoji?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	stats: {
+		imageCount: number;
+		videoCount: number;
+		albumCount: number;
+		collectionCount: number;
+		noteCount: number;
+		characterCount: number;
+		totalRelations: number;
+	};
+	metadata?: {
+		coverImageUrl?: string | null;
+		lastModified?: Date | string;
+		relationTypes?: string[];
+	};
+}
+
+export interface GetConceptsOptions {
 	limit?: number;
 	offset?: number;
+	searchTerm?: string;
+	category?: string;
+	orderBy?: 'name' | 'createdAt' | 'updatedAt' | 'relationCount';
+	orderDir?: 'asc' | 'desc';
+	includeStats?: boolean;
 }
 
 /**
- * Servicio API para gestión de conceptos
+ * Obtiene los datos de un concepto para mostrar en una tarjeta
  */
-export const conceptsApi = {
-	/**
-	 * Obtener todos los conceptos con filtros opcionales
-	 */
-	getAll: async (filters?: ConceptFilters): Promise<ConceptWithStats[]> => {
-		const queryParams = new URLSearchParams();
+export async function getConceptCardData(conceptId: string): Promise<ConceptCardData> {
+	return apiClient.get<ConceptCardData>(`/concepts/${conceptId}/card-data`);
+}
 
-		if (filters?.search) queryParams.append('search', filters.search);
-		if (filters?.category) queryParams.append('category', filters.category);
-		if (filters?.tags?.length) queryParams.append('tags', filters.tags.join(','));
-		if (filters?.onlyFavorites) queryParams.append('onlyFavorites', 'true');
-		if (filters?.limit) queryParams.append('limit', filters.limit.toString());
-		if (filters?.offset) queryParams.append('offset', filters.offset.toString());
+/**
+ * Obtiene una lista de conceptos para mostrar en una galería de tarjetas
+ */
+export async function getConceptsForCards(options: GetConceptsOptions = {}): Promise<ConceptCardData[]> {
+	const params = new URLSearchParams();
+	for (const [key, value] of Object.entries(options)) {
+		if (value !== undefined) {
+			params.append(key, String(value));
+		}
+	}
 
-		const query = queryParams.toString();
-		const endpoint = `/concepts${query ? `?${query}` : ''}`;
+	return apiClient.get<ConceptCardData[]>(`/concepts/cards?${params.toString()}`);
+}
 
-		return api.get<ConceptWithStats[]>(endpoint);
-	},
+/**
+ * Busca conceptos con filtros avanzados
+ */
+export async function searchConcepts(options: GetConceptsOptions & { searchTerm: string }): Promise<ConceptCardData[]> {
+	const params = new URLSearchParams();
+	for (const [key, value] of Object.entries(options)) {
+		if (value !== undefined) {
+			params.append(key, String(value));
+		}
+	}
 
-	/**
-	 * Obtener un concepto por ID
-	 */
-	getById: async (id: string): Promise<ConceptWithStats> => {
-		return api.get<ConceptWithStats>(`/concepts/${id}`);
-	},
-
-	/**
-	 * Crear un nuevo concepto
-	 */
-	create: async (data: ConceptCreateInput): Promise<ConceptWithStats> => {
-		return api.post<ConceptWithStats>('/concepts', data);
-	},
-
-	/**
-	 * Actualizar un concepto existente
-	 */
-	update: async (id: string, data: ConceptUpdateInput): Promise<ConceptWithStats> => {
-		return api.put<ConceptWithStats>(`/concepts/${id}`, data);
-	},
-
-	/**
-	 * Eliminar un concepto
-	 */
-	delete: async (id: string): Promise<void> => {
-		return api.delete<void>(`/concepts/${id}`);
-	},
-
-	/**
-	 * Buscar conceptos por texto
-	 */
-	search: async (query: string, limit = 20): Promise<ConceptWithStats[]> => {
-		return api.get<ConceptWithStats[]>(`/concepts/search?q=${encodeURIComponent(query)}&limit=${limit}`);
-	},
-
-	/**
-	 * Obtener conceptos favoritos
-	 */
-	getFavorites: async (): Promise<ConceptWithStats[]> => {
-		return api.get<ConceptWithStats[]>('/concepts?onlyFavorites=true');
-	},
-
-	/**
-	 * Marcar/desmarcar concepto como favorito
-	 */
-	toggleFavorite: async (id: string, isFavorite: boolean): Promise<ConceptWithStats> => {
-		return api.patch<ConceptWithStats>(`/concepts/${id}`, { isFavorite });
-	},
-
-	/**
-	 * Obtener estadísticas de conceptos
-	 */
-	getStats: async () => {
-		return api.get<{
-			total: number;
-			favorites: number;
-			byCategory: Record<string, number>;
-			recentCount: number;
-		}>('/concepts/stats');
-	},
-};
+	return apiClient.get<ConceptCardData[]>(`/concepts/search?${params.toString()}`);
+}

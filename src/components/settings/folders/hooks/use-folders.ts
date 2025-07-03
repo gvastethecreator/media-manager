@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ErrorResponse, ProcessStatus } from '@/app/actions/folders/types';
+import type { ErrorResponse, ProcessStatus } from '@/types/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { FolderWithStats } from '@/types/entities/folder';

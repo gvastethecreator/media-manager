@@ -66,7 +66,7 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 
 		const rawAlbum = drizzleAlbum[0];
 
-		// Transformar a formato compatible con Prisma
+		
 		const transformedAlbum = {
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),

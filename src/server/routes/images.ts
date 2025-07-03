@@ -1,4 +1,5 @@
-import { generateThumbnailWithForce } from '@/app/actions/images';
+// Usar servicio de thumbnails en lugar de server action
+import { thumbnailService } from '@/services/thumbnail/thumbnail.service';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
 import { folders, images } from '@/lib/drizzle/schema';

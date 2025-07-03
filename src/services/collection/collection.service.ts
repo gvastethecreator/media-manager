@@ -12,7 +12,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { fromPrismaCollection, fromPrismaCollections } from '@/transformers/collection/transformer';
+import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';
 import type {
     CollectionBase,
     CollectionCreateInput,
@@ -188,7 +188,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 
 		const drizzleCollections = await query;
 
-		// Transformar a formato compatible con Prisma
+
 		const transformedCollections = drizzleCollections.map((rawCollection) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
@@ -210,7 +210,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 			},
 		}));
 
-		const result = fromPrismaCollections(transformedCollections as any);
+		const result = fromDrizzleCollections(transformedCollections as any);
 		logger.info(`✅ ${result.length} colecciones encontradas`);
 		return result;
 	} catch (error) {
@@ -261,7 +261,7 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 			.from(collections)
 			.orderBy(desc(collections.createdAt));
 
-		// Transformar a formato compatible con Prisma
+
 		const transformedCollections = drizzleCollections.map((rawCollection) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
@@ -283,7 +283,7 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 			},
 		}));
 
-		const result = fromPrismaCollections(transformedCollections as any);
+		const result = fromDrizzleCollections(transformedCollections as any);
 		logger.info(`✅ ${result.length} colecciones obtenidas`);
 		return result;
 	} catch (error) {
@@ -342,7 +342,7 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 
 		const rawCollection = drizzleCollection[0];
 
-		// Transformar a formato compatible con Prisma
+
 		const transformedCollection = {
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
@@ -364,7 +364,7 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 			},
 		};
 
-		const result = fromPrismaCollection(transformedCollection as any);
+		const result = fromDrizzleCollection(transformedCollection as any);
 		if (!result) {
 			throw new CollectionServiceError('Error al transformar la colección', 'TRANSFORM_FAILED');
 		}
@@ -442,7 +442,7 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 		// Revalidar rutas
 		await revalidateCollectionPaths();
 
-		const collectionWithStats = fromPrismaCollection(transformedCollection as any);
+		const collectionWithStats = fromDrizzleCollection(transformedCollection as any);
 		if (!collectionWithStats) {
 			throw new CollectionServiceError('Error al transformar la colección recién creada', 'TRANSFORM_FAILED');
 		}

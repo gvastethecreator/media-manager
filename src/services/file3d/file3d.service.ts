@@ -12,7 +12,7 @@ import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { fromPrismaFile3D, fromPrismaFile3Ds } from '@/transformers/file3d/transformer';
+import { fromDrizzleFile3D, fromDrizzleFile3Ds } from '@/transformers/file3d/transformer';
 import type { File3DWithStats, File3DCreateInput, File3DUpdateInput } from '@/types/entities/file3d';
 import { count, desc, eq } from 'drizzle-orm';
 import * as crypto from 'crypto';
@@ -73,7 +73,7 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 			isFavorite: Boolean(rawFile3D.isFavorite),
 		}));
 
-		return fromPrismaFile3Ds(transformedFile3Ds as any);
+		return fromDrizzleFile3Ds(transformedFile3Ds as any);
 	} catch (error) {
 		file3dLogger.error('Error al obtener archivos 3D:', error);
 		throw createFile3DError('Error al obtener archivos 3D', EntityErrorCode.OPERATION_FAILED, error);
@@ -133,7 +133,7 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 			isFavorite: Boolean(rawFile3D.isFavorite),
 		};
 
-		return fromPrismaFile3D(transformedFile3D as any);
+		return fromDrizzleFile3D(transformedFile3D as any);
 	} catch (error) {
 		file3dLogger.error(`Error al obtener archivo 3D ${id}:`, error);
 		throw createFile3DError('Error al obtener archivo 3D', EntityErrorCode.OPERATION_FAILED, error);
@@ -180,7 +180,7 @@ export async function createFile3D(data: File3DCreateInput): Promise<File3DWithS
 		}).returning();
 
 		const newFile3D = result[0];
-		const file3DWithStats = fromPrismaFile3D(newFile3D as any);
+		const file3DWithStats = fromDrizzleFile3D(newFile3D as any);
 
 		// Emitir eventos
 		await emit({
@@ -309,7 +309,7 @@ export async function file3DExists(id: string): Promise<boolean> {
 			.select({ count: count() })
 			.from(file3Ds)
 			.where(eq(file3Ds.id, id));
-		
+
 		return result[0]?.count > 0;
 	} catch (error) {
 		file3dLogger.error(`Error al verificar existencia del archivo 3D ${id}:`, error);

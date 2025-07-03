@@ -2,7 +2,7 @@
 
 // Exportar desde mappers (renombrando la función conflictiva)
 export {
-	fromPrismaFile3D as mapFile3DFromPrisma,
+	fromDrizzleFile3D as mapFile3DFromDrizzle,
 	toPrismaFile3D,
 } from './mappers';
 
@@ -11,6 +11,6 @@ export * from './serializers';
 
 // Exportar desde transformer
 export {
-	fromPrismaFile3D,
-	fromPrismaFile3Ds,
+	fromDrizzleFile3D,
+	fromDrizzleFile3Ds,
 } from './transformer';

@@ -149,7 +149,7 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 
 		const rawAudio = drizzleAudio[0];
 
-		// Transformar a formato compatible con Prisma
+		
 		const transformedAudio = {
 			...rawAudio,
 			isFavorite: Boolean(rawAudio.isFavorite),

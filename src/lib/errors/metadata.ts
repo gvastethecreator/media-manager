@@ -1,6 +1,6 @@
 /**
  * Utilidades para manejo de errores relacionados con metadatos
- * @module app/actions/metadata/metadata-errors.actions
+ * @module lib/errors/metadata
  */
 
 /**
