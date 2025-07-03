@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { WildcardComplete as Wildcard } from '@/types/prisma';
+import type { WildcardComplete as Wildcard } from '@/types/entities/wildcard';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 

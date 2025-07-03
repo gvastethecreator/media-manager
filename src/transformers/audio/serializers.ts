@@ -1,10 +1,9 @@
 // Serializers para Audio
-// ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
 
 import type { Audio, AudioCreateInput, AudioUpdateInput } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
 
-// Tipo local equivalente a Prisma (migración a Drizzle)
+
 type DrizzleAudio = {
 	id: string;
 	name: string;
@@ -48,8 +47,4 @@ export function deserializeAudio(drizzleAudio: DrizzleAudio): Audio {
 	return audioSchema.parse(drizzleAudio) as Audio;
 }
 
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar deserializeAudio con tipos de Drizzle
- */
-export const deserializeAudioFromPrisma = deserializeAudio;
+

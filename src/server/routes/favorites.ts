@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { favorites, profiles } from '@/lib/drizzle/schema';
+import { eq, and } from 'drizzle-orm';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const router = Router();
@@ -19,30 +21,28 @@ router.post('/toggle', async (req, res) => {
   const { entityType, entityId } = validation.data;
 
   try {
-    const existing = await prisma.favorite.findFirst({
-      where: { entityType, entityId },
+    const existing = await db.query.favorites.findFirst({
+      where: and(eq(favorites.entityType, entityType), eq(favorites.entityId, entityId)),
     });
 
     if (existing) {
-      await prisma.favorite.delete({ where: { id: existing.id } });
+      await db.delete(favorites).where(eq(favorites.id, existing.id));
       return res.json({ isFavorite: false });
     }
 
-    const defaultProfile = await prisma.profile.findFirst({
-      where: { isActive: true },
-      select: { id: true },
+    const defaultProfile = await db.query.profiles.findFirst({
+      where: eq(profiles.isActive, true),
+      columns: { id: true },
     });
 
     if (!defaultProfile) {
       return res.status(400).json({ error: 'No se encontró un perfil activo' });
     }
 
-    await prisma.favorite.create({
-      data: {
-        entityType,
-        entityId,
-        profile: { connect: { id: defaultProfile.id } },
-      },
+    await db.insert(favorites).values({
+      entityType,
+      entityId,
+      profileId: defaultProfile.id,
     });
 
     return res.status(201).json({ isFavorite: true });

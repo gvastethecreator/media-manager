@@ -247,29 +247,7 @@ export function toServiceError(error: unknown, defaultOptions?: Partial<CreateSe
 		options.cause = error.cause || error;
 	}
 
-	// Para errores Prisma, mapearlos a códigos más específicos
-	if (error && typeof error === 'object' && 'code' in error) {
-		const prismaCode = (error as { code: string }).code;
-
-		// Mapear códigos comunes de Prisma a nuestros códigos
-		switch (prismaCode) {
-			case 'P2025':
-				options.code = ServiceErrorCode.ENTITY_NOT_FOUND;
-				break;
-			case 'P2002':
-				options.code = ServiceErrorCode.UNIQUE_CONSTRAINT_VIOLATION;
-				break;
-			case 'P2003':
-				options.code = ServiceErrorCode.FOREIGN_KEY_CONSTRAINT_VIOLATION;
-				break;
-			case 'P2001':
-				options.code = ServiceErrorCode.INVALID_INPUT;
-				break;
-			default:
-				options.code = ServiceErrorCode.DATABASE_QUERY_ERROR;
-				options.context = { prismaCode };
-		}
-	}
+	
 
 	return createServiceError(options);
 }

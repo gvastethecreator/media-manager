@@ -202,39 +202,6 @@ export function validateEntityRelations(entityName: string, relations: Record<st
 }
 
 /**
- * 🔗 Prepara las relaciones para Prisma
- */
-export function preparePrismaRelations(
-	entityName: string,
-	relations: Record<string, unknown>
-): Record<string, unknown> {
-	const entityRelations = getEntityRelations(entityName);
-	const prismaRelations: Record<string, unknown> = {};
-
-	for (const [name, value] of Object.entries(relations)) {
-		const definition = entityRelations[name];
-		if (!definition) continue;
-
-		switch (definition.type) {
-			case RELATION_TYPES.ONE_TO_ONE:
-			case RELATION_TYPES.MANY_TO_ONE:
-				prismaRelations[name] = { connect: { id: value } };
-				break;
-			case RELATION_TYPES.ONE_TO_MANY:
-			case RELATION_TYPES.MANY_TO_MANY:
-				if (Array.isArray(value)) {
-					prismaRelations[name] = {
-						connect: value.map((id) => ({ id })),
-					};
-				}
-				break;
-		}
-	}
-
-	return prismaRelations;
-}
-
-/**
  * 🔄 Procesa las relaciones inversas
  */
 export function processInverseRelations(entityName: string, relations: Record<string, unknown>): void {

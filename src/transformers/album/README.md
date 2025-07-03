@@ -5,7 +5,7 @@ Este módulo proporciona funciones para transformar y validar objetos de álbum,
 ## 📋 Descripción general
 
 El transformador de álbumes maneja la conversión entre diferentes formatos de álbum:
-- Transformación de objetos Prisma a objetos de aplicación
+- Transformación de objetos de base de datos a objetos de aplicación
 - Validación y normalización de datos
 - Generación de formatos extendidos para interfaces de usuario
 - Cálculo de estadísticas relacionadas con el álbum
