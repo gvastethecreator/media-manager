@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { TagWithStats } from '@/types/entities/tag';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface TagFilters {
 	search?: string;
@@ -57,7 +57,7 @@ export function useTags(filters: TagFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<TagsResponse>(`/tags?${params.toString()}`);
+			return apiClient.get<TagsResponse>(`/tags?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -66,7 +66,7 @@ export function useTags(filters: TagFilters = {}) {
 export function useTag(id: string) {
 	return useQuery<TagWithStats, Error>({
 		queryKey: tagKeys.detail(id),
-		queryFn: () => api.get<TagWithStats>(`/tags/${id}`),
+		queryFn: () => apiClient.get<TagWithStats>(`/tags/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -75,7 +75,7 @@ export function useTag(id: string) {
 export function useTagImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: tagKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/tags/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/tags/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -85,7 +85,7 @@ export function useCreateTag() {
 	const queryClient = useQueryClient();
 
 	return useMutation<TagWithStats, Error, TagCreateInput>({
-		mutationFn: (data) => api.post<TagWithStats>('/tags', data),
+		mutationFn: (data) => apiClient.post<TagWithStats>('/tags', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
 		},
@@ -96,7 +96,7 @@ export function useUpdateTag() {
 	const queryClient = useQueryClient();
 
 	return useMutation<TagWithStats, Error, { id: string; data: TagUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<TagWithStats>(`/tags/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<TagWithStats>(`/tags/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
 			queryClient.setQueryData(tagKeys.detail(data.id), data);
@@ -108,7 +108,7 @@ export function useDeleteTag() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/tags/${id}`),
+		mutationFn: (id) => apiClient.delete(`/tags/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
 			queryClient.removeQueries({ queryKey: tagKeys.detail(id) });
@@ -120,7 +120,7 @@ export function useDeleteTag() {
 export function useTagThumbnails(tagId: string, limit: number = 6) {
   return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; }>, Error>({
     queryKey: [...tagKeys.detail(tagId), 'thumbnails', limit],
-    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; }>>(`/tags/${tagId}/thumbnails?limit=${limit}`),
+    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; }>>(`/tags/${tagId}/thumbnails?limit=${limit}`),
     enabled: !!tagId,
   });
 }
@@ -143,7 +143,7 @@ export function useTagStats(tagId: string) {
     totalAssociations: number;
   }, Error>({
     queryKey: [...tagKeys.detail(tagId), 'stats'],
-    queryFn: () => api.get<{
+    queryFn: () => apiClient.get<{
       images: number;
       videos: number;
       albums: number;

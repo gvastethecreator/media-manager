@@ -62,10 +62,10 @@ function ThemeEnforcer() {
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 	return (
-		<NextThemeProvider attribute="data-theme" defaultTheme="light" themes={customThemes} {...props}>
+		<NativeThemeProvider {...props}>
 			{children}
 			<ThemeDebugger />
 			<ThemeEnforcer />
-		</NextThemeProvider>
+		</NativeThemeProvider>
 	);
 }

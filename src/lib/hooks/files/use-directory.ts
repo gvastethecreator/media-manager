@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api/client';
+import { apiClient } from '@/lib/api/client';
 import type { DirectoryReadResult } from '@/types/entities/file';
 
 /**
@@ -9,7 +9,7 @@ import type { DirectoryReadResult } from '@/types/entities/file';
 export function useDirectory(path: string) {
 	return useQuery<DirectoryReadResult, Error>({
 		queryKey: ['directory', path],
-		queryFn: () => api.get<DirectoryReadResult>(`/files/list?path=${encodeURIComponent(path)}`),
+		queryFn: () => apiClient.get<DirectoryReadResult>(`/files/list?path=${encodeURIComponent(path)}`),
 		staleTime: 1000 * 30, // 30s
 	});
 }

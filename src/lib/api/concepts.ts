@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import type { ImageWithStats } from '@/types/entities/image';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface ConceptFilters {
 	search?: string;
@@ -57,7 +57,7 @@ export function useConcepts(filters: ConceptFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<ConceptsResponse>(`/concepts?${params.toString()}`);
+			return apiClient.get<ConceptsResponse>(`/concepts?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -66,7 +66,7 @@ export function useConcepts(filters: ConceptFilters = {}) {
 export function useConcept(id: string) {
 	return useQuery<ConceptWithStats, Error>({
 		queryKey: conceptKeys.detail(id),
-		queryFn: () => api.get<ConceptWithStats>(`/concepts/${id}`),
+		queryFn: () => apiClient.get<ConceptWithStats>(`/concepts/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -75,7 +75,7 @@ export function useConcept(id: string) {
 export function useConceptImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: conceptKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/concepts/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/concepts/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -85,7 +85,7 @@ export function useCreateConcept() {
 	const queryClient = useQueryClient();
 
 	return useMutation<ConceptWithStats, Error, ConceptCreateInput>({
-		mutationFn: (data) => api.post<ConceptWithStats>('/concepts', data),
+		mutationFn: (data) => apiClient.post<ConceptWithStats>('/concepts', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: conceptKeys.lists() });
 		},
@@ -96,7 +96,7 @@ export function useUpdateConcept() {
 	const queryClient = useQueryClient();
 
 	return useMutation<ConceptWithStats, Error, { id: string; data: ConceptUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<ConceptWithStats>(`/concepts/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<ConceptWithStats>(`/concepts/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: conceptKeys.lists() });
 			queryClient.setQueryData(conceptKeys.detail(data.id), data);
@@ -108,7 +108,7 @@ export function useDeleteConcept() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/concepts/${id}`),
+		mutationFn: (id) => apiClient.delete(`/concepts/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: conceptKeys.lists() });
 			queryClient.removeQueries({ queryKey: conceptKeys.detail(id) });
@@ -121,7 +121,7 @@ export function useRecentConceptImages(conceptId: string, limit = 6) {
 	return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string }>, Error>({
 		queryKey: [...conceptKeys.detail(conceptId), 'recent-images', limit],
 		queryFn: () =>
-			api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string }>>(
+			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string }>>(
 				`/concepts/${conceptId}/recent-images?limit=${limit}`
 			),
 		enabled: !!conceptId,
@@ -138,7 +138,7 @@ export function useConceptCounts(conceptId: string) {
 	>({
 		queryKey: [...conceptKeys.detail(conceptId), 'counts'],
 		queryFn: () =>
-			api.get<{
+			apiClient.get<{
 				images: number;
 				tags: number;
 			}>(`/concepts/${conceptId}/counts`),

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface SystemStats {
 	totalImages: number;
@@ -54,7 +54,7 @@ export const systemKeys = {
 export function useSystemStats() {
 	return useQuery<SystemStats, Error>({
 		queryKey: systemKeys.stats(),
-		queryFn: () => api.get<SystemStats>('/system/stats'),
+		queryFn: () => apiClient.get<SystemStats>('/system/stats'),
 		staleTime: 1000 * 30, // 30 segundos
 	});
 }
@@ -62,7 +62,7 @@ export function useSystemStats() {
 export function useSystemVersion() {
 	return useQuery<SystemVersion, Error>({
 		queryKey: systemKeys.version(),
-		queryFn: () => api.get<SystemVersion>('/system/version'),
+		queryFn: () => apiClient.get<SystemVersion>('/system/version'),
 		staleTime: 1000 * 60 * 5, // 5 minutos
 	});
 }
@@ -70,7 +70,7 @@ export function useSystemVersion() {
 export function useSystemSettings() {
 	return useQuery<Settings, Error>({
 		queryKey: systemKeys.settings(),
-		queryFn: () => api.get<Settings>('/system/settings'),
+		queryFn: () => apiClient.get<Settings>('/system/settings'),
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }
@@ -78,7 +78,7 @@ export function useSystemSettings() {
 export function useProfileSettings(profileId: string) {
 	return useQuery<Settings | null, Error>({
 		queryKey: systemKeys.profileSettings(profileId),
-		queryFn: () => api.get<Settings | null>(`/system/settings/profile/${profileId}`),
+		queryFn: () => apiClient.get<Settings | null>(`/system/settings/profile/${profileId}`),
 		enabled: !!profileId,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -88,7 +88,7 @@ export function useUpdateSystemSettings() {
 	const queryClient = useQueryClient();
 
 	return useMutation<Settings, Error, SettingsUpdateInput>({
-		mutationFn: (data) => api.put<Settings>('/system/settings', data),
+		mutationFn: (data) => apiClient.put<Settings>('/system/settings', data),
 		onSuccess: (data) => {
 			queryClient.setQueryData(systemKeys.settings(), data);
 		},
@@ -99,7 +99,7 @@ export function useUpdateProfileSettings() {
 	const queryClient = useQueryClient();
 
 	return useMutation<Settings, Error, { profileId: string; data: SettingsUpdateInput }>({
-		mutationFn: ({ profileId, data }) => api.put<Settings>(`/system/settings/profile/${profileId}`, data),
+		mutationFn: ({ profileId, data }) => apiClient.put<Settings>(`/system/settings/profile/${profileId}`, data),
 		onSuccess: (data, { profileId }) => {
 			queryClient.setQueryData(systemKeys.profileSettings(profileId), data);
 		},
@@ -110,7 +110,7 @@ export function useResetSystemSettings() {
 	const queryClient = useQueryClient();
 
 	return useMutation<Settings, Error, void>({
-		mutationFn: () => api.post<Settings>('/system/settings/reset'),
+		mutationFn: () => apiClient.post<Settings>('/system/settings/reset'),
 		onSuccess: (data) => {
 			queryClient.setQueryData(systemKeys.settings(), data);
 		},
@@ -121,7 +121,7 @@ export function useResetProfileSettings() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (profileId) => api.post(`/system/settings/profile/${profileId}/reset`),
+		mutationFn: (profileId) => apiClient.post(`/system/settings/profile/${profileId}/reset`),
 		onSuccess: (_, profileId) => {
 			queryClient.removeQueries({ queryKey: systemKeys.profileSettings(profileId) });
 		},
@@ -132,7 +132,7 @@ export function useRepairSystem() {
 	const queryClient = useQueryClient();
 
 	return useMutation<SystemResponse, Error, void>({
-		mutationFn: () => api.post<SystemResponse>('/system/repair'),
+		mutationFn: () => apiClient.post<SystemResponse>('/system/repair'),
 		onSuccess: () => {
 			// Invalidar stats después de reparación
 			queryClient.invalidateQueries({ queryKey: systemKeys.stats() });
@@ -144,7 +144,7 @@ export function useResetDatabase() {
 	const queryClient = useQueryClient();
 
 	return useMutation<SystemResponse, Error, void>({
-		mutationFn: () => api.post<SystemResponse>('/system/reset-database'),
+		mutationFn: () => apiClient.post<SystemResponse>('/system/reset-database'),
 		onSuccess: () => {
 			// Invalidar todo el cache después de reset
 			queryClient.clear();
@@ -154,6 +154,6 @@ export function useResetDatabase() {
 
 export function useInitServer() {
 	return useMutation<SystemResponse, Error, void>({
-		mutationFn: () => api.post<SystemResponse>('/system/init'),
+		mutationFn: () => apiClient.post<SystemResponse>('/system/init'),
 	});
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface JsonFileFilters {
 	search?: string;
@@ -41,7 +41,7 @@ export function useJsonFiles(filters: JsonFileFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<JsonFilesResponse>(`/json-files?${params.toString()}`);
+			return apiClient.get<JsonFilesResponse>(`/json-files?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -50,7 +50,7 @@ export function useJsonFiles(filters: JsonFileFilters = {}) {
 export function useJsonFile(id: string) {
 	return useQuery<JsonFileWithStats, Error>({
 		queryKey: jsonFileKeys.detail(id),
-		queryFn: () => api.get<JsonFileWithStats>(`/json-files/${id}`),
+		queryFn: () => apiClient.get<JsonFileWithStats>(`/json-files/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { FileItem } from '@/types/files';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface SearchFilters {
 	query: string;
@@ -35,7 +35,7 @@ export function useSearch(filters: SearchFilters) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<SearchResult>(`/search?${params.toString()}`);
+			return apiClient.get<SearchResult>(`/search?${params.toString()}`);
 		},
 		enabled: !!filters.query && filters.query.length > 0,
 		staleTime: 1000 * 30, // 30 segundos

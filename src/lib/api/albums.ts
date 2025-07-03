@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { ImageWithStats } from '@/types/entities/image';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface AlbumFilters {
 	search?: string;
@@ -57,7 +57,7 @@ export function useAlbums(filters: AlbumFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<AlbumsResponse>(`/albums?${params.toString()}`);
+			return apiClient.get<AlbumsResponse>(`/albums?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -66,7 +66,7 @@ export function useAlbums(filters: AlbumFilters = {}) {
 export function useAlbum(id: string) {
 	return useQuery<AlbumWithStats, Error>({
 		queryKey: albumKeys.detail(id),
-		queryFn: () => api.get<AlbumWithStats>(`/albums/${id}`),
+		queryFn: () => apiClient.get<AlbumWithStats>(`/albums/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -75,7 +75,7 @@ export function useAlbum(id: string) {
 export function useAlbumImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: albumKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/albums/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/albums/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -85,7 +85,7 @@ export function useCreateAlbum() {
 	const queryClient = useQueryClient();
 
 	return useMutation<AlbumWithStats, Error, AlbumCreateInput>({
-		mutationFn: (data) => api.post<AlbumWithStats>('/albums', data),
+		mutationFn: (data) => apiClient.post<AlbumWithStats>('/albums', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
 		},
@@ -96,7 +96,7 @@ export function useUpdateAlbum() {
 	const queryClient = useQueryClient();
 
 	return useMutation<AlbumWithStats, Error, { id: string; data: AlbumUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<AlbumWithStats>(`/albums/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<AlbumWithStats>(`/albums/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
 			queryClient.setQueryData(albumKeys.detail(data.id), data);
@@ -108,7 +108,7 @@ export function useDeleteAlbum() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/albums/${id}`),
+		mutationFn: (id) => apiClient.delete(`/albums/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
 			queryClient.removeQueries({ queryKey: albumKeys.detail(id) });
@@ -121,7 +121,7 @@ export function useAddImageToAlbum() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, { albumId: string; imageId: string }>({
-		mutationFn: ({ albumId, imageId }) => api.post(`/albums/${albumId}/images/${imageId}`),
+		mutationFn: ({ albumId, imageId }) => apiClient.post(`/albums/${albumId}/images/${imageId}`),
 		onSuccess: (_, { albumId }) => {
 			queryClient.invalidateQueries({ queryKey: albumKeys.images(albumId) });
 			queryClient.invalidateQueries({ queryKey: albumKeys.detail(albumId) });
@@ -133,7 +133,7 @@ export function useRemoveImageFromAlbum() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, { albumId: string; imageId: string }>({
-		mutationFn: ({ albumId, imageId }) => api.delete(`/albums/${albumId}/images/${imageId}`),
+		mutationFn: ({ albumId, imageId }) => apiClient.delete(`/albums/${albumId}/images/${imageId}`),
 		onSuccess: (_, { albumId }) => {
 			queryClient.invalidateQueries({ queryKey: albumKeys.images(albumId) });
 			queryClient.invalidateQueries({ queryKey: albumKeys.detail(albumId) });
