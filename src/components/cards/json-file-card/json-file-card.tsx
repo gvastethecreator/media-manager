@@ -5,10 +5,11 @@ import { cn } from '@/lib/utils';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
+import { useJsonFile } from '@/lib/api/json-files';
 
 interface JsonFileCardProps {
-	/** Datos del archivo JSON a mostrar */
-	jsonFile: JsonFileWithStats;
+	/** ID del archivo JSON a mostrar */
+	jsonFileId: string;
 	/** Tamaño compacto con menos información */
 	compact?: boolean;
 	/** Modo TCG con efectos especiales de carta */
@@ -18,7 +19,7 @@ interface JsonFileCardProps {
 	/** Clase CSS adicional para la carta */
 	className?: string;
 	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
+	onClick?: (jsonFileData: JsonFileWithStats) => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 	/** Si la tarjeta está activa */
@@ -33,7 +34,7 @@ interface JsonFileCardProps {
  * JsonFileCard - Componente de tarjeta para archivos JSON con preview integrado
  */
 export function JsonFileCard({
-	jsonFile,
+	jsonFileId,
 	compact = false,
 	tcgMode = true,
 	disabled = false,
@@ -44,8 +45,36 @@ export function JsonFileCard({
 	isScrolling = false,
 	shouldLoad = true,
 }: JsonFileCardProps) {
+	const { data: jsonFile, isLoading, error } = useJsonFile(jsonFileId);
 	const [isHovered, setIsHovered] = useState(false);
 	const [showPreview, setShowPreview] = useState(false);
+
+	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando archivo JSON...</p>
+			</div>
+		);
+	}
+
+	if (error || !jsonFile) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Archivo JSON no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Color basado en la validez del JSON
 	const primaryColor = useMemo(() => {
@@ -115,9 +144,9 @@ export function JsonFileCard({
 
 	const handleClick = useCallback(() => {
 		if (!disabled && onClick) {
-			onClick();
+			onClick(jsonFile);
 		}
-	}, [disabled, onClick]);
+	}, [disabled, onClick, jsonFile]);
 
 	const handleMouseEnter = useCallback(() => setIsHovered(true), []);
 	const handleMouseLeave = useCallback(() => setIsHovered(false), []);

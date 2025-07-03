@@ -84,6 +84,20 @@ router.get('/:id/images/all', async (req, res) => {
 	}
 });
 
+// GET /collections/:id/media - Obtener imágenes y videos recientes de una colección
+router.get('/:id/media', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+
+		const media = await collectionService.getRecentCollectionMedia(id, limit);
+		res.json(media);
+	} catch (error) {
+		console.error('Error getting collection media:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /collections - Crear nueva colección
 router.post('/', async (req, res) => {
 	try {
@@ -171,6 +185,18 @@ router.delete('/:id/images/:imageId', async (req, res) => {
 		res.status(204).send();
 	} catch (error) {
 		console.error('Error removing image from collection:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// POST /collections/:id/favorite - Alternar estado de favorito de una colección
+router.post('/:id/favorite', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const collection = await collectionService.toggleFavorite(id);
+		res.json(toCollectionWithStats(collection));
+	} catch (error) {
+		console.error('Error toggling collection favorite status:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

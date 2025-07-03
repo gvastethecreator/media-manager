@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { FolderComplete, FolderWithStats } from '@/types/entities/folder';
+import { useRecentFolderImages, useFolderStats } from '@/lib/api/folders';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
@@ -36,29 +37,27 @@ export const FolderCard = memo(function FolderCard({
 	}
 
 	// Preparar datos con fallbacks
-	const folderData = useMemo(() => {
-		// Extraer conteos de _count si existen
-		const imageCount = folder._count?.images ?? 0;
+	const { data: recentImagesData } = useRecentFolderImages(folder.id);
+	const { data: folderStatsData } = useFolderStats(folder.id);
 
-		// Verificar si es FolderWithStats para acceder a statistics
+	const folderData = useMemo(() => {
+		const imageCount = folder._count?.images ?? 0;
 		const isWithStats = 'statistics' in folder;
 
 		return {
 			...folder,
-			// Asegurar que tenemos conteo de imágenes
 			imageCount,
 			_count: {
 				...(folder._count || {}),
 				images: imageCount,
 			},
-			// Asegurar valores por defecto para otros campos
-			totalFiles: folder.totalFiles ?? imageCount ?? 0,
-			totalSize: folder.totalSize ?? 0,
-			recentImageUrls: [], // Temporalmente vacío
-			childrenCount: isWithStats ? (folder as FolderWithStats).statistics.folderCount : 0,
-			lastIndexed: folder.lastIndexed || null,
+			totalFiles: folderStatsData?.totalImages ?? folder.totalFiles ?? imageCount ?? 0,
+			totalSize: folderStatsData?.totalSize ?? folder.totalSize ?? 0,
+			recentImageUrls: recentImagesData || [],
+			childrenCount: folderStatsData?.totalFolders ?? (isWithStats ? (folder as FolderWithStats).statistics.folderCount : 0),
+			lastIndexed: folderStatsData?.lastActivity ?? folder.lastIndexed ?? null,
 		};
-	}, [folder]);
+	}, [folder, recentImagesData, folderStatsData]);
 
 	// Colores para personalización
 	const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);

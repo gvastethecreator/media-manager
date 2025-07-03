@@ -2,15 +2,15 @@ import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
+import { usePlace, useRecentPlaceMedia } from '@/lib/api/places';
 import { PlaceCardContent } from './place-card-content';
 import { PlaceCardFooter } from './place-card-footer';
 import { PlaceCardHeader } from './place-card-header';
 import { PlaceCardImages } from './place-card-images';
-import type { PlaceCardData } from './place-server-actions';
 
 export interface PlaceCardProps {
-	/** Datos del lugar a mostrar */
-	place: PlaceCardData;
+	/** ID del lugar a mostrar */
+	placeId: string;
 	/** Tamaño compacto con menos información */
 	compact?: boolean;
 	/** Modo TCG con efectos especiales de carta */
@@ -20,7 +20,7 @@ export interface PlaceCardProps {
 	/** Clase CSS adicional para la carta */
 	className?: string;
 	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
+	onClick?: (placeData: PlaceWithStats) => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 }
@@ -30,7 +30,7 @@ export interface PlaceCardProps {
  * Muestra información detallada de un lugar con elementos visuales de Trading Card Game
  */
 export function PlaceCard({
-	place,
+	placeId,
 	compact = false,
 	tcgMode = true,
 	disabled = false,
@@ -38,7 +38,36 @@ export function PlaceCard({
 	onClick,
 	isSelected = false,
 }: PlaceCardProps) {
+	const { data: place, isLoading, error } = usePlace(placeId);
+	const { data: recentMediaData } = useRecentPlaceMedia(placeId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Si no hay datos del lugar o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando lugar...</p>
+			</div>
+		);
+	}
+
+	if (error || !place) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Lugar no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Extraer datos del lugar
 	const {
@@ -58,26 +87,13 @@ export function PlaceCard({
 		_count,
 		parsedDangers = [],
 		parsedResources = [],
-		recentImages = [],
 		metadata,
 	} = place;
 
 	// Preparar los medios para el componente de galería
 	const cardMedia = useMemo(() => {
-		const media = [];
-
-		// Añadir imágenes si están disponibles
-		if (recentImages?.length) {
-			media.push(...recentImages);
-		}
-
-		// Añadir videos si están disponibles
-		if (place.recentVideos?.length) {
-			media.push(...place.recentVideos);
-		}
-
-		return media;
-	}, [recentImages, place.recentVideos]);
+		return recentMediaData || [];
+	}, [recentMediaData]);
 
 	// Calcular colores para la tarjeta TCG
 	const primaryColor = color || '#10b981';
@@ -132,10 +148,10 @@ export function PlaceCard({
 		(e: React.KeyboardEvent) => {
 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
 				e.preventDefault();
-				onClick();
+				onClick(place);
 			}
 		},
-		[onClick, disabled]
+		[onClick, disabled, place]
 	);
 
 	return (

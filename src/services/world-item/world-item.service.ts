@@ -6,27 +6,31 @@
  * @updated 2025-07-01
  */
 
-import { getPrismaClient } from '@/lib/database/db';
+// Drizzle imports
+
+import { db } from '@/lib/drizzle';
+import { worldItems } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
-	fromPrismaWorldItem,
-	mapCreateWorldItemDataToPrisma,
-	mapUpdateWorldItemDataToPrisma,
-	mapWorldItemSearchOptionsToPrisma,
-	toWorldItemWithStats,
-	worldItemPayload,
+    fromPrismaWorldItem,
+    mapCreateWorldItemDataToPrisma,
+    mapUpdateWorldItemDataToPrisma,
+    mapWorldItemSearchOptionsToPrisma,
+    toWorldItemWithStats,
+    worldItemPayload,
 } from '@/transformers/world-item';
 import type { ImageComplete } from '@/types/entities/image';
 import type {
-	WorldItemComplete,
-	WorldItemCreateInput,
-	WorldItemSearchOptions,
-	WorldItemUpdateInput,
-	WorldItemWithStats,
+    WorldItemComplete,
+    WorldItemCreateInput,
+    WorldItemSearchOptions,
+    WorldItemUpdateInput,
+    WorldItemWithStats,
 } from '@/types/entities/world-item';
+import { asc, eq } from 'drizzle-orm';
 
 const worldItemLogger = serverLogger.withContext('WorldItemService');
 
@@ -44,18 +48,98 @@ const createWorldItemError = (
  */
 export async function getWorldItems(options: WorldItemSearchOptions = {}): Promise<WorldItemWithStats[]> {
 	try {
-		const prisma = await getPrismaClient();
-		const findOptions = mapWorldItemSearchOptionsToPrisma(options);
+		// **MIGRACIÓN A DRIZZLE**
+		worldItemLogger.info('🌍 Obteniendo world items con opciones:', options);
 
-		const worldItems = await prisma.worldItem.findMany({
-			...findOptions,
-			...worldItemPayload,
-		});
+		// Por ahora, implementación básica sin filtros complejos
+		const drizzleWorldItems = await db
+			.select({
+				id: worldItems.id,
+				name: worldItems.name,
+				description: worldItems.description,
+				emoji: worldItems.emoji,
+				color: worldItems.color,
+				shortcut: worldItems.shortcut,
+				category: worldItems.category,
+				type: worldItems.type,
+				subtype: worldItems.subtype,
+				rarity: worldItems.rarity,
+				value: worldItems.value,
+				weight: worldItems.weight,
+				size: worldItems.size,
+				material: worldItems.material,
+				origin: worldItems.origin,
+				crafting: worldItems.crafting,
+				requirements: worldItems.requirements,
+				effects: worldItems.effects,
+				properties: worldItems.properties,
+				lore: worldItems.lore,
+				history: worldItems.history,
+				notes: worldItems.notes,
+				sortBy: worldItems.sortBy,
+				filters: worldItems.filters,
+				featuredImage: worldItems.featuredImage,
+				isFavorite: worldItems.isFavorite,
+				isArchived: worldItems.isArchived,
+				createdAt: worldItems.createdAt,
+				updatedAt: worldItems.updatedAt,
+			})
+			.from(worldItems)
+			.orderBy(asc(worldItems.name));
+
+		// Transformar a formato compatible con Prisma
+		const transformedWorldItems = drizzleWorldItems.map((rawWorldItem) => ({
+			...rawWorldItem,
+			isFavorite: Boolean(rawWorldItem.isFavorite),
+			isArchived: Boolean(rawWorldItem.isArchived),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const findOptions = mapWorldItemSearchOptionsToPrisma(options);
+
+				const prismaWorldItems = await prisma.worldItem.findMany({
+					...findOptions,
+					...worldItemPayload,
+				});
+
+				if (Math.abs(transformedWorldItems.length - prismaWorldItems.length) > 0) {
+					worldItemLogger.warn('⚠️ Diferencia en conteo getWorldItems:', {
+						drizzle: transformedWorldItems.length,
+						prisma: prismaWorldItems.length
+					});
+				} else {
+					worldItemLogger.info('✅ Validación dual exitosa getWorldItems:', {
+						total: transformedWorldItems.length
+					});
+				}
+			} catch (validationError) {
+				worldItemLogger.error('❌ Error en validación dual getWorldItems:', validationError);
+			}
+		}
 
 		// Transformar a WorldItemWithStats
-		return worldItems
+		return transformedWorldItems
 			.map((item) => {
-				const complete = fromPrismaWorldItem(item);
+				const complete = fromPrismaWorldItem(item as any);
 				return complete ? toWorldItemWithStats(complete) : null;
 			})
 			.filter((item): item is WorldItemWithStats => item !== null);
@@ -70,17 +154,102 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
  */
 export async function getWorldItemById(id: string): Promise<WorldItemComplete | null> {
 	try {
-		const prisma = await getPrismaClient();
-		const worldItem = await prisma.worldItem.findUnique({
-			where: { id },
-			...worldItemPayload,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		worldItemLogger.info(`🔍 Obteniendo world item por ID: ${id}`);
 
-		if (!worldItem) {
+		const drizzleWorldItem = await db
+			.select({
+				id: worldItems.id,
+				name: worldItems.name,
+				description: worldItems.description,
+				emoji: worldItems.emoji,
+				color: worldItems.color,
+				shortcut: worldItems.shortcut,
+				category: worldItems.category,
+				type: worldItems.type,
+				subtype: worldItems.subtype,
+				rarity: worldItems.rarity,
+				value: worldItems.value,
+				weight: worldItems.weight,
+				size: worldItems.size,
+				material: worldItems.material,
+				origin: worldItems.origin,
+				crafting: worldItems.crafting,
+				requirements: worldItems.requirements,
+				effects: worldItems.effects,
+				properties: worldItems.properties,
+				lore: worldItems.lore,
+				history: worldItems.history,
+				notes: worldItems.notes,
+				sortBy: worldItems.sortBy,
+				filters: worldItems.filters,
+				featuredImage: worldItems.featuredImage,
+				isFavorite: worldItems.isFavorite,
+				isArchived: worldItems.isArchived,
+				createdAt: worldItems.createdAt,
+				updatedAt: worldItems.updatedAt,
+			})
+			.from(worldItems)
+			.where(eq(worldItems.id, id))
+			.limit(1);
+
+		if (drizzleWorldItem.length === 0) {
+			worldItemLogger.warn(`World item no encontrado: ${id}`);
 			return null;
 		}
 
-		return fromPrismaWorldItem(worldItem);
+		const rawWorldItem = drizzleWorldItem[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedWorldItem = {
+			...rawWorldItem,
+			isFavorite: Boolean(rawWorldItem.isFavorite),
+			isArchived: Boolean(rawWorldItem.isArchived),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaWorldItem = await prisma.worldItem.findUnique({
+					where: { id },
+					...worldItemPayload,
+				});
+
+				if (prismaWorldItem && transformedWorldItem) {
+					worldItemLogger.info('✅ Validación dual exitosa getWorldItemById:', {
+						worldItemName: transformedWorldItem.name
+					});
+				} else if (!prismaWorldItem && !transformedWorldItem) {
+					worldItemLogger.info('✅ Validación dual exitosa getWorldItemById: ambos null');
+				} else {
+					worldItemLogger.warn('⚠️ Diferencia en getWorldItemById:', {
+						drizzleFound: !!transformedWorldItem,
+						prismaFound: !!prismaWorldItem
+					});
+				}
+			} catch (validationError) {
+				worldItemLogger.error('❌ Error en validación dual getWorldItemById:', validationError);
+			}
+		}
+
+		return fromPrismaWorldItem(transformedWorldItem as any);
 	} catch (error) {
 		worldItemLogger.error(`Error al obtener world item ${id}:`, error);
 		throw createWorldItemError('Error al obtener objeto del mundo', EntityErrorCode.OPERATION_FAILED, error);
@@ -92,6 +261,7 @@ export async function getWorldItemById(id: string): Promise<WorldItemComplete | 
  */
 export async function getWorldItemWithStatsById(id: string): Promise<WorldItemWithStats | null> {
 	try {
+		// **MIGRACIÓN A DRIZZLE** - Usa el método migrado
 		const worldItem = await getWorldItemById(id);
 		return worldItem ? toWorldItemWithStats(worldItem) : null;
 	} catch (error) {

@@ -1,9 +1,0 @@
-Comando: npx biome format --write .
-Fecha: 2025-07-02T06:02:33.590Z
-Directorio: /workspace/image-manager
-Modo tolerante: SÍ
-Tipo: Linting
-===============================================
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
-npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.
-Formatted 1324 files in 991ms. Fixed 306 files.

@@ -265,6 +265,84 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
+// GET /api/characters/:id/media - Obtener imágenes y videos recientes de un personaje
+router.get('/:id/media', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+
+		if (!z.string().uuid().safeParse(id).success) {
+			return res.status(400).json({ error: 'ID de personaje inválido' });
+		}
+
+		const recentMedia = await getRecentCharacterMedia(id, limit);
+		res.json(recentMedia);
+	} catch (error) {
+		console.error('Error al obtener medios recientes del personaje:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// Helper function (should be moved to a service or utility file)
+async function getRecentCharacterMedia(characterId: string, limit: number) {
+    const recentImages = await prismaClient.image.findMany({
+        where: {
+            characters: {
+                some: {
+                    id: characterId,
+                },
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+            path: true,
+        },
+        orderBy: {
+            updatedAt: 'desc',
+        },
+        take: Math.ceil(limit / 2),
+    });
+
+    const recentVideos = await prismaClient.video.findMany({
+        where: {
+            characters: {
+                some: {
+                    id: characterId,
+                },
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+            path: true,
+        },
+        orderBy: {
+            updatedAt: 'desc',
+        },
+        take: Math.floor(limit / 2),
+    });
+
+    const imageResults = recentImages.map((img) => ({
+        id: img.id,
+        name: img.name,
+        thumbnailUrl: `/api/thumbnails/${img.id}`,
+        url: `/api/images/${img.id}`,
+        isVideo: false,
+    }));
+
+    const videoResults = recentVideos.map((video) => ({
+        id: video.id,
+        name: video.name,
+        thumbnailUrl: `/api/video-thumbnails/${video.id}`,
+        url: `/api/videos/${video.id}`,
+        isVideo: true,
+    }));
+
+    return [...imageResults, ...videoResults].sort((a, b) => (a.id > b.id ? -1 : 1)).slice(0, limit);
+}
+
+
 // POST /api/characters - Crear nuevo personaje
 router.post('/', async (req, res) => {
 	try {

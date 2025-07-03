@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useUpdateTheme } from '@/lib/api/profiles';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
@@ -179,25 +180,8 @@ export const useProfileStore = create<ProfileStore>()(
 				// ===== GESTIÓN DE PREFERENCIAS =====
 
 				updateTheme: (theme: ThemeMode) => {
-					if (!get().activeProfile) return;
-
-					set((state) => {
-						if (state.activeProfile) {
-							state.activeProfile.theme = theme;
-
-							// Aplicar tema según selección
-							if (theme === ThemeMode.DARK) {
-								document.documentElement.classList.add('dark');
-								document.documentElement.classList.remove('light');
-							} else if (theme === ThemeMode.LIGHT) {
-								document.documentElement.classList.add('light');
-								document.documentElement.classList.remove('dark');
-							} else {
-								// System: aplicar según preferencia del sistema
-								get().applySystemTheme();
-							}
-						}
-					});
+          const { mutate } = useUpdateTheme();
+          mutate(theme);
 				},
 
 				updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => {

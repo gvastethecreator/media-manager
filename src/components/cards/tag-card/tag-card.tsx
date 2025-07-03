@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
 import type { TagWithStats } from '@/types/entities/tag';
+import { useTagStats } from '@/lib/api/tags';
 import { TagCardContent } from './tag-card-content';
 import { TagCardFooter } from './tag-card-footer';
 import { TagCardHeader } from './tag-card-header';
