@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface GeneralStats {
 	totalImages: number;
@@ -77,7 +77,7 @@ export const statsKeys = {
 export function useGeneralStats() {
 	return useQuery<GeneralStats, Error>({
 		queryKey: statsKeys.general(),
-		queryFn: () => api.get<GeneralStats>('/stats/general'),
+		queryFn: () => apiClient.get<GeneralStats>('/stats/general'),
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }
@@ -85,7 +85,7 @@ export function useGeneralStats() {
 export function useSystemStatsExtended() {
 	return useQuery<SystemStatsExtended, Error>({
 		queryKey: statsKeys.extended(),
-		queryFn: () => api.get<SystemStatsExtended>('/stats/extended'),
+		queryFn: () => apiClient.get<SystemStatsExtended>('/stats/extended'),
 		staleTime: 1000 * 30, // 30 segundos
 	});
 }
@@ -100,7 +100,7 @@ export function useRecentActivity(filters: StatsFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<RecentActivity[]>(`/stats/activity?${params.toString()}`);
+			return apiClient.get<RecentActivity[]>(`/stats/activity?${params.toString()}`);
 		},
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -109,7 +109,7 @@ export function useRecentActivity(filters: StatsFilters = {}) {
 export function useTopTags(limit = 10) {
 	return useQuery<TopTag[], Error>({
 		queryKey: statsKeys.topTags(limit),
-		queryFn: () => api.get<TopTag[]>(`/stats/top-tags?limit=${limit}`),
+		queryFn: () => apiClient.get<TopTag[]>(`/stats/top-tags?limit=${limit}`),
 		staleTime: 1000 * 60 * 5, // 5 minutos
 	});
 }
@@ -117,7 +117,7 @@ export function useTopTags(limit = 10) {
 export function useStorageBreakdown() {
 	return useQuery<StorageBreakdown, Error>({
 		queryKey: statsKeys.storage(),
-		queryFn: () => api.get<StorageBreakdown>('/stats/storage'),
+		queryFn: () => apiClient.get<StorageBreakdown>('/stats/storage'),
 		staleTime: 1000 * 60 * 5, // 5 minutos
 	});
 }

@@ -76,10 +76,4 @@ export async function runSeeds() {
 	}
 }
 
-// Si se ejecuta directamente
-if (require.main === module) {
-	runSeeds().catch((error) => {
-		seedLogger.error('Error fatal:', error);
-		process.exit(1);
-	});
-}
+

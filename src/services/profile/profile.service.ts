@@ -385,6 +385,28 @@ class ProfileServiceImpl {
 // Exportar instancia única del servicio
 export const profileService = ProfileServiceImpl.getInstance();
 
+// Exportar funciones individuales para compatibilidad con el cliente
+export const getProfiles = (filters?: ProfileFilters, pagination?: ProfilePaginationOptions) =>
+	profileService.getProfiles(filters, pagination);
+
+export const createProfile = (data: ProfileCreateInput) =>
+	profileService.createProfile(data);
+
+export const updateProfile = (id: string, data: ProfileUpdateInput) =>
+	profileService.updateProfile(id, data);
+
+export const activateProfile = (id: string) =>
+	profileService.setActiveProfile(id);
+
+export const getActiveProfile = () =>
+	profileService.getActiveProfile();
+
+export const getProfile = (id: string) =>
+	profileService.getById(id);
+
+export const deleteProfile = (id: string) =>
+	profileService.delete(id);
+
 // Exportar tipos útiles para los consumidores del servicio
 export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };
 

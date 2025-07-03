@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { VideoWithStats } from '@/types/entities/video';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface VideoFilters {
 	search?: string;
@@ -41,7 +41,7 @@ export function useVideos(filters: VideoFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<VideosResponse>(`/videos?${params.toString()}`);
+			return apiClient.get<VideosResponse>(`/videos?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -50,7 +50,7 @@ export function useVideos(filters: VideoFilters = {}) {
 export function useVideo(id: string) {
 	return useQuery<VideoWithStats, Error>({
 		queryKey: videoKeys.detail(id),
-		queryFn: () => api.get<VideoWithStats>(`/videos/${id}`),
+		queryFn: () => apiClient.get<VideoWithStats>(`/videos/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});

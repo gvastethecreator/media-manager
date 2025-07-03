@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PropertyWithStats } from '@/types/entities/property';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface PropertyFilters {
 	search?: string;
@@ -58,7 +58,7 @@ export function useProperties(filters: PropertyFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<PropertiesResponse>(`/properties?${params.toString()}`);
+			return apiClient.get<PropertiesResponse>(`/properties?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -67,7 +67,7 @@ export function useProperties(filters: PropertyFilters = {}) {
 export function useProperty(id: string) {
 	return useQuery<PropertyWithStats, Error>({
 		queryKey: propertyKeys.detail(id),
-		queryFn: () => api.get<PropertyWithStats>(`/properties/${id}`),
+		queryFn: () => apiClient.get<PropertyWithStats>(`/properties/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -77,7 +77,7 @@ export function useCreateProperty() {
 	const queryClient = useQueryClient();
 
 	return useMutation<PropertyWithStats, Error, PropertyCreateInput>({
-		mutationFn: (data) => api.post<PropertyWithStats>('/properties', data),
+		mutationFn: (data) => apiClient.post<PropertyWithStats>('/properties', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
 		},
@@ -88,7 +88,7 @@ export function useUpdateProperty() {
 	const queryClient = useQueryClient();
 
 	return useMutation<PropertyWithStats, Error, { id: string; data: PropertyUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<PropertyWithStats>(`/properties/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<PropertyWithStats>(`/properties/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
 			queryClient.setQueryData(propertyKeys.detail(data.id), data);
@@ -100,7 +100,7 @@ export function useDeleteProperty() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/properties/${id}`),
+		mutationFn: (id) => apiClient.delete(`/properties/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
 			queryClient.removeQueries({ queryKey: propertyKeys.detail(id) });

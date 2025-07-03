@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface ThumbnailInfo {
 	imageId: string;
@@ -67,7 +67,7 @@ export const thumbnailKeys = {
 export function useImageThumbnails(imageId: string) {
 	return useQuery<ThumbnailInfo[], Error>({
 		queryKey: thumbnailKeys.image(imageId),
-		queryFn: () => api.get<ThumbnailInfo[]>(`/thumbnails/image/${imageId}`),
+		queryFn: () => apiClient.get<ThumbnailInfo[]>(`/thumbnails/image/${imageId}`),
 		enabled: !!imageId,
 		staleTime: 1000 * 60 * 5, // 5 minutos
 	});
@@ -76,7 +76,7 @@ export function useImageThumbnails(imageId: string) {
 export function useThumbnailStats() {
 	return useQuery<ThumbnailStats, Error>({
 		queryKey: thumbnailKeys.stats(),
-		queryFn: () => api.get<ThumbnailStats>('/thumbnails/stats'),
+		queryFn: () => apiClient.get<ThumbnailStats>('/thumbnails/stats'),
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }
@@ -84,7 +84,7 @@ export function useThumbnailStats() {
 export function useLastProcessedThumbnails(limit = 9) {
 	return useQuery<LastProcessedThumbnail[], Error>({
 		queryKey: [...thumbnailKeys.lastProcessed(), limit],
-		queryFn: () => api.get<LastProcessedThumbnail[]>(`/thumbnails/last-processed?limit=${limit}`),
+		queryFn: () => apiClient.get<LastProcessedThumbnail[]>(`/thumbnails/last-processed?limit=${limit}`),
 		staleTime: 1000 * 30, // 30 segundos
 	});
 }
@@ -92,7 +92,7 @@ export function useLastProcessedThumbnails(limit = 9) {
 export function useThumbnail(id: string, quality: string) {
 	return useQuery<ThumbnailResponse, Error>({
 		queryKey: thumbnailKeys.single(id, quality),
-		queryFn: () => api.get<ThumbnailResponse>(`/thumbnails/${id}?quality=${quality}`),
+		queryFn: () => apiClient.get<ThumbnailResponse>(`/thumbnails/${id}?quality=${quality}`),
 		enabled: !!id,
 		staleTime: 1000 * 60 * 10, // 10 minutos
 	});
@@ -102,7 +102,7 @@ export function useGenerateThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<ThumbnailInfo[], Error, { imageId: string; options?: ThumbnailGenerationOptions }>({
-		mutationFn: ({ imageId, options = {} }) => api.post<ThumbnailInfo[]>(`/thumbnails/generate/${imageId}`, options),
+		mutationFn: ({ imageId, options = {} }) => apiClient.post<ThumbnailInfo[]>(`/thumbnails/generate/${imageId}`, options),
 		onSuccess: (data, { imageId }) => {
 			queryClient.setQueryData(thumbnailKeys.image(imageId), data);
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.stats() });
@@ -115,7 +115,7 @@ export function useBulkGenerateThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ generated: number; errors: string[] }, Error, BulkThumbnailOptions>({
-		mutationFn: (options) => api.post<{ generated: number; errors: string[] }>('/thumbnails/bulk-generate', options),
+		mutationFn: (options) => apiClient.post<{ generated: number; errors: string[] }>('/thumbnails/bulk-generate', options),
 		onSuccess: (_, { imageIds }) => {
 			// Invalidar cache de todas las imágenes procesadas
 			for (const imageId of imageIds) {
@@ -131,7 +131,7 @@ export function useOptimizeThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ optimized: number; totalSaved: number }, Error, ProcessOptions | undefined>({
-		mutationFn: (options) => api.post<{ optimized: number; totalSaved: number }>('/thumbnails/optimize', options || {}),
+		mutationFn: (options) => apiClient.post<{ optimized: number; totalSaved: number }>('/thumbnails/optimize', options || {}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.all });
 		},
@@ -142,7 +142,7 @@ export function useReprocessThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ processed: number }, Error, ProcessOptions | undefined>({
-		mutationFn: (options) => api.post<{ processed: number }>('/thumbnails/reprocess', options || {}),
+		mutationFn: (options) => apiClient.post<{ processed: number }>('/thumbnails/reprocess', options || {}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.all });
 		},
@@ -153,7 +153,7 @@ export function useCleanThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ cleaned: number; totalFreed: number }, Error, ProcessOptions | undefined>({
-		mutationFn: (options) => api.post<{ cleaned: number; totalFreed: number }>('/thumbnails/clean', options || {}),
+		mutationFn: (options) => apiClient.post<{ cleaned: number; totalFreed: number }>('/thumbnails/clean', options || {}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.all });
 		},
@@ -164,7 +164,7 @@ export function useDeleteThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ deleted: number }, Error, string>({
-		mutationFn: (imageId) => api.delete<{ deleted: number }>(`/thumbnails/image/${imageId}`),
+		mutationFn: (imageId) => apiClient.delete<{ deleted: number }>(`/thumbnails/image/${imageId}`),
 		onSuccess: (_, imageId) => {
 			queryClient.removeQueries({ queryKey: thumbnailKeys.image(imageId) });
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.stats() });
@@ -177,7 +177,7 @@ export function useCleanupThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ cleaned: number; freed: number }, Error, void>({
-		mutationFn: () => api.post<{ cleaned: number; freed: number }>('/thumbnails/cleanup'),
+		mutationFn: () => apiClient.post<{ cleaned: number; freed: number }>('/thumbnails/cleanup'),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.all });
 		},

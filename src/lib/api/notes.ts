@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { NoteWithStats } => from '@/types/entities/note';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface NoteFilters {
 	search?: string;
@@ -57,7 +57,7 @@ export function useNotes(filters: NoteFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<NotesResponse>(`/notes?${params.toString()}`);
+			return apiClient.get<NotesResponse>(`/notes?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -66,7 +66,7 @@ export function useNotes(filters: NoteFilters = {}) {
 export function useNote(id: string) {
 	return useQuery<NoteWithStats, Error>({
 		queryKey: noteKeys.detail(id),
-		queryFn: () => api.get<NoteWithStats>(`/notes/${id}`),
+		queryFn: () => apiClient.get<NoteWithStats>(`/notes/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -75,7 +75,7 @@ export function useNote(id: string) {
 export function useNoteImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: noteKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/notes/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/notes/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -85,7 +85,7 @@ export function useCreateNote() {
 	const queryClient = useQueryClient();
 
 	return useMutation<NoteWithStats, Error, NoteCreateInput>({
-		mutationFn: (data) => api.post<NoteWithStats>('/notes', data),
+		mutationFn: (data) => apiClient.post<NoteWithStats>('/notes', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
 		},
@@ -96,7 +96,7 @@ export function useUpdateNote() {
 	const queryClient = useQueryClient();
 
 	return useMutation<NoteWithStats, Error, { id: string; data: NoteUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<NoteWithStats>(`/notes/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<NoteWithStats>(`/notes/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
 			queryClient.setQueryData(noteKeys.detail(data.id), data);
@@ -108,7 +108,7 @@ export function useDeleteNote() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/notes/${id}`),
+		mutationFn: (id) => apiClient.delete(`/notes/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
 			queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
@@ -120,7 +120,7 @@ export function useDeleteNote() {
 export function useRecentNoteImages(noteId: string, limit: number = 6) {
   return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>, Error>({
     queryKey: [...noteKeys.detail(noteId), 'recent-images', limit],
-    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/notes/${noteId}/recent-images?limit=${limit}`),
+    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/notes/${noteId}/recent-images?limit=${limit}`),
     enabled: !!noteId,
   });
 }
@@ -142,7 +142,7 @@ export function useNoteCounts(noteId: string) {
     groups: number;
   }, Error>({
     queryKey: [...noteKeys.detail(noteId), 'counts'],
-    queryFn: () => api.get<{
+    queryFn: () => apiClient.get<{
       characters: number;
       places: number;
       worldItems: number;
@@ -164,6 +164,6 @@ export function useNoteCounts(noteId: string) {
 export function useNoteStatuses() {
   return useQuery<string[], Error>({
     queryKey: [...noteKeys.all, 'statuses'],
-    queryFn: () => api.get<string[]>(`/notes/statuses`),
+    queryFn: () => apiClient.get<string[]>(`/notes/statuses`),
   });
 }

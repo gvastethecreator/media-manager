@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { PromptWithStats } from '@/types/entities/prompt';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface PromptFilters {
 	search?: string;
@@ -59,7 +59,7 @@ export function usePrompts(filters: PromptFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<PromptsResponse>(`/prompts?${params.toString()}`);
+			return apiClient.get<PromptsResponse>(`/prompts?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -68,7 +68,7 @@ export function usePrompts(filters: PromptFilters = {}) {
 export function usePrompt(id: string) {
 	return useQuery<PromptWithStats, Error>({
 		queryKey: promptKeys.detail(id),
-		queryFn: () => api.get<PromptWithStats>(`/prompts/${id}`),
+		queryFn: () => apiClient.get<PromptWithStats>(`/prompts/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -77,7 +77,7 @@ export function usePrompt(id: string) {
 export function usePromptImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: promptKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/prompts/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/prompts/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -87,7 +87,7 @@ export function useCreatePrompt() {
 	const queryClient = useQueryClient();
 
 	return useMutation<PromptWithStats, Error, PromptCreateInput>({
-		mutationFn: (data) => api.post<PromptWithStats>('/prompts', data),
+		mutationFn: (data) => apiClient.post<PromptWithStats>('/prompts', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: promptKeys.lists() });
 		},
@@ -98,7 +98,7 @@ export function useUpdatePrompt() {
 	const queryClient = useQueryClient();
 
 	return useMutation<PromptWithStats, Error, { id: string; data: PromptUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<PromptWithStats>(`/prompts/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<PromptWithStats>(`/prompts/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: promptKeys.lists() });
 			queryClient.setQueryData(promptKeys.detail(data.id), data);
@@ -110,7 +110,7 @@ export function useDeletePrompt() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/prompts/${id}`),
+		mutationFn: (id) => apiClient.delete(`/prompts/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: promptKeys.lists() });
 			queryClient.removeQueries({ queryKey: promptKeys.detail(id) });
@@ -122,7 +122,7 @@ export function useDeletePrompt() {
 export function useRecentPromptImages(promptId: string, limit: number = 6) {
   return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>, Error>({
     queryKey: [...promptKeys.detail(promptId), 'recent-images', limit],
-    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/prompts/${promptId}/recent-images?limit=${limit}`),
+    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/prompts/${promptId}/recent-images?limit=${limit}`),
     enabled: !!promptId,
   });
 }
