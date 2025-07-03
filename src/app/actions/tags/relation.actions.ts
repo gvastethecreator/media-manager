@@ -6,10 +6,10 @@
  */
 
 import { prisma } from '@/lib/database/prisma';
-import { revalidatePath } from '@/lib/server/revalidate';
 // import { notifyStatChange } from '@/lib/events'; // Comentado, usar serverEmit
 import { emit as serverEmit } from '@/lib/events/server'; // Importar serverEmit correctamente
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 const tagLogger = serverLogger.withContext('TagRelationActions');
 

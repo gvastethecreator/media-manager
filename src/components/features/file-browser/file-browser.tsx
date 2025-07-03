@@ -7,6 +7,9 @@
  * MIGRACIÓN: Este componente reemplazará a file-browser.tsx
  */
 
+import { FileTextIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -16,9 +19,6 @@ import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { EntityStatsType, EntityWithStats } from '@/types/migration';
-import { FileTextIcon } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { StatusBar } from './toolbar/status-bar';
 import { VirtualizedCardsView } from './views/virtualized-cards-view';
 import { VirtualizedListView } from './views/virtualized-list-view';

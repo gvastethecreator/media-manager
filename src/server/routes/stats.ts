@@ -1,5 +1,5 @@
-import { getGeneralStats, getSystemStatsExtended } from '@/app/actions/stats/stats.actions';
 import express from 'express';
+import { getGeneralStats, getSystemStatsExtended } from '@/app/actions/stats/stats.actions';
 
 const router = express.Router();
 

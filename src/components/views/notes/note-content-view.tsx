@@ -1,11 +1,11 @@
+import { ScrollText } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { useNoteImages } from '@/lib/api/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
 import type { FileItem } from '@/types/files';
-import { ScrollText } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('NoteContentView');
 

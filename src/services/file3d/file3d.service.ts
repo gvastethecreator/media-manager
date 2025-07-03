@@ -6,6 +6,7 @@
  * @updated 2025-07-01
  */
 
+import type { Prisma } from '@prisma/client';
 import { getPrismaClient } from '@/lib/database/db';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -13,7 +14,6 @@ import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaFile3D, fromPrismaFile3Ds } from '@/transformers/file3d/transformer';
 import type { File3DWithStats } from '@/types/entities/file3d';
-import type { Prisma } from '@prisma/client';
 
 const file3dLogger = serverLogger.withContext('File3DService');
 

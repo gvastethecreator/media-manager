@@ -1,21 +1,23 @@
 import cors from 'cors';
 import express from 'express';
+import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
 import charactersRouter from './routes/characters';
 import collectionsRouter from './routes/collections';
 import conceptsRouter from './routes/concepts';
+import debugRouter from './routes/debug.js';
+import downloadRouter from './routes/download.js';
 import favoritesRouter from './routes/favorites';
 import { filesRouter } from './routes/files.js';
 import { foldersRouter } from './routes/folders.js';
 import groupsRouter from './routes/groups';
 import { imagesRouter } from './routes/images.js';
-import debugRouter from './routes/debug.js';
-import downloadRouter from './routes/download.js';
 import localFilesRouter from './routes/local-files.js';
 import metadataRouter from './routes/metadata';
 import notesRouter from './routes/notes';
 import placesRouter from './routes/places';
+import profilesRouter from './routes/profiles';
 import promptsRouter from './routes/prompts';
 import propertiesRouter from './routes/properties';
 import searchRouter from './routes/search';
@@ -69,6 +71,8 @@ app.use('/api/search', searchRouter);
 app.use('/api/metadata', metadataRouter);
 app.use('/api/thumbnails', thumbnailsRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/profiles', profilesRouter);
+app.use('/api/activity', activityRouter);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -92,7 +96,7 @@ app.use('*', (req, res) => {
 
 app.listen(PORT, () => {
 	console.log(`🚀 Servidor Express iniciado en puerto ${PORT}`);
-	console.log(`\n📁 APIs de Entidades:`);
+	console.log('\n📁 APIs de Entidades:');
 	console.log(`   📁 Folders: http://localhost:${PORT}/api/folders`);
 	console.log(`   🖼️  Images: http://localhost:${PORT}/api/images`);
 	console.log(`   📂 Files: http://localhost:${PORT}/api/files`);
@@ -115,12 +119,14 @@ app.listen(PORT, () => {
 	console.log(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
 	console.log(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
 
-	console.log(`\n🔧 APIs de Sistema:`);
+	console.log('\n🔧 APIs de Sistema:');
 	console.log(`   🖥️  System: http://localhost:${PORT}/api/system`);
 	console.log(`   🔍 Search: http://localhost:${PORT}/api/search`);
 	console.log(`   📋 Metadata: http://localhost:${PORT}/api/metadata`);
 	console.log(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
 	console.log(`   📊 Stats: http://localhost:${PORT}/api/stats`);
+	console.log(`   👤 Profiles: http://localhost:${PORT}/api/profiles`);
+	console.log(`   📈 Activity: http://localhost:${PORT}/api/activity`);
 
 	console.log(`\n🩺 Health check: http://localhost:${PORT}/health`);
 });

@@ -45,10 +45,9 @@ function applyFix(fix) {
 			fs.writeFileSync(filePath, content, 'utf8');
 			console.log(`✅ Corregido: ${fix.file}`);
 			return true;
-		} else {
-			console.log(`⚠️ Patrón no encontrado en: ${fix.file}`);
-			return false;
 		}
+		console.log(`⚠️ Patrón no encontrado en: ${fix.file}`);
+		return false;
 	} catch (error) {
 		console.error(`❌ Error procesando ${fix.file}:`, error.message);
 		return false;

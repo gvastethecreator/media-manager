@@ -1,8 +1,8 @@
+import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
-import { useState } from 'react';
 import { InfoItem } from './details-panel-info-item';
 import type { InfoItemData, MetadataComponentProps } from './details-panel-types';
 

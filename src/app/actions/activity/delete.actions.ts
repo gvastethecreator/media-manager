@@ -5,10 +5,10 @@
  * @module app/actions/activity/delete.actions
  */
 
-import { revalidatePath } from '@/lib/server/revalidate';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 import { ActivityEventType, type ActivityType } from '@/types/entities/activity';
 

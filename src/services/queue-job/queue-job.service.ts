@@ -3,8 +3,10 @@
  * @module services/queue-job
  */
 
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { getPaginationInfo } from '@/lib/utils/pagination';
 import { serializeQueueJobMetadata, transformQueueJob, transformQueueJobs } from '@/transformers/queue-job';
 import {
 	type CreateQueueJobInput,
@@ -16,8 +18,6 @@ import {
 	type QueueStats,
 	type UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
-import { getPaginationInfo } from '@/lib/utils/pagination';
-import type { Prisma } from '@prisma/client';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('QueueJobService');

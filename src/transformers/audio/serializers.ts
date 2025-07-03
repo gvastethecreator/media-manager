@@ -1,8 +1,8 @@
 // Serializers para Audio
 
+import type { Audio as PrismaAudio } from '@prisma/client';
 import type { Audio, AudioCreateInput, AudioUpdateInput } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
-import type { Audio as PrismaAudio } from '@prisma/client';
 
 export function validateAudio(input: unknown): Audio {
 	return audioSchema.parse(input) as Audio;

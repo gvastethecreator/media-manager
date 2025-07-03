@@ -1,7 +1,7 @@
-import { clientLogger } from '@/lib/logger/client-logger';
-import type { EntityWithStats } from '@/types/migration';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { EntityWithStats } from '@/types/migration';
 
 const selectionLogger = clientLogger.withContext('SelectionStore');
 

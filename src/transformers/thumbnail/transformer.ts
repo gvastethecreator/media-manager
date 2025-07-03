@@ -3,6 +3,7 @@
  * @module transformers/thumbnail/transformer
  */
 
+import { formatBytes, formatDate } from '@/lib/utils/formatters';
 import {
 	ThumbnailComplete,
 	ThumbnailExtended,
@@ -10,7 +11,6 @@ import {
 	ThumbnailStats,
 	ThumbnailWithStats,
 } from '@/types/entities/thumbnail';
-import { formatBytes, formatDate } from '@/lib/utils/formatters';
 
 interface TransformThumbnailOptions {
 	includeMetadata?: boolean;

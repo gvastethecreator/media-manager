@@ -1,3 +1,6 @@
+import { FileText } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { NoteCard } from '@/components/cards/note-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -7,9 +10,6 @@ import { useNotes } from '@/lib/api/notes';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
-import { FileText } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('NotesView');

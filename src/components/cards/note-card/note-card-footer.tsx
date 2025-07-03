@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { BarChart4, Calendar, Heart, Image, LinkIcon, ListChecks, RefreshCw, Star, Video } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface NoteCardFooterProps {
 	createdAt: Date | string;

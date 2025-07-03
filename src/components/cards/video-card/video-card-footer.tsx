@@ -1,6 +1,6 @@
+import { Heart, Image, Tag, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
-import { Heart, Image, Tag, Users } from 'lucide-react';
 
 interface VideoCardFooterProps {
 	video: VideoWithStats;

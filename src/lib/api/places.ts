@@ -1,6 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { PlaceWithStats } from '@/types/entities/place';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
 
 export interface PlaceFilters {

@@ -3,6 +3,7 @@
  * @module transformers/favorite/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	FAVORITE_ENTITY_COLORS,
@@ -14,7 +15,6 @@ import {
 	type FavoriteFilters,
 	type FavoriteUpdateInput,
 } from '@/types/entities/favorite';
-import type { Prisma } from '@prisma/client';
 
 const mappersLogger = serverLogger.withContext('Favorite:Mappers');
 

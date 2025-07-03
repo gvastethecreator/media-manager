@@ -6,6 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import {
 	createQueueJob as createQueueJobService,
 	deleteQueueJob as deleteQueueJobService,
@@ -26,7 +27,6 @@ import {
 	queueJobPaginationSchema,
 	updateQueueJobSchema,
 } from '@/types/entities/queue-job/schema';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('QueueActions:crud');
 

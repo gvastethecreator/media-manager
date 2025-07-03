@@ -5,8 +5,8 @@
  * @module app/actions/activity/query.actions
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 import { extendActivities, extendActivity, mapActivityFiltersToPrisma } from '@/transformers/activity';
 import {

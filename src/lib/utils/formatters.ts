@@ -3,7 +3,7 @@
  * @module lib/utils/formatters
  */
 
-import { formatBytes, formatDate, formatRelativeTime, formatNumber, formatPercentage } from './format';
+import { formatBytes, formatDate, formatNumber, formatPercentage, formatRelativeTime } from './format';
 
 // Re-exportar formatters básicos
 export { formatBytes, formatDate, formatRelativeTime, formatNumber, formatPercentage };
@@ -64,7 +64,7 @@ export function formatPath(path: string, maxLength = 50): string {
 /**
  * Formatea el estado de un proceso
  */
-export function formatProcessStatus(processed: number, total: number, errors: number = 0): string {
+export function formatProcessStatus(processed: number, total: number, errors = 0): string {
 	const percentage = formatPercentage(processed, total);
 	const errorText = errors > 0 ? ` (${errors} errores)` : '';
 

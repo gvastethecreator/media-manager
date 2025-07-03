@@ -4,8 +4,8 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { VideoStore } from '..';
 import { VideoPlayState } from '../../../../types/entities/video/enums';
+import type { VideoStore } from '..';
 
 export interface VideoPlayerState {
 	isFullscreen: boolean;

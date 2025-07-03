@@ -10,8 +10,8 @@ import {
 	transformMetadata,
 	transformMetadatas,
 } from '@/transformers/metadata';
-import { MetadataBase } from '@/types/entities/metadata/types';
 import { MetadataExtended } from '@/types/entities/metadata/extended';
+import { MetadataBase } from '@/types/entities/metadata/types';
 
 /**
  * Obtiene todos los metadatos

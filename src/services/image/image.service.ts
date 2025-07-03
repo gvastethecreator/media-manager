@@ -40,14 +40,14 @@
  * permitiendo redimensionar, cambiar formato y optimizar imágenes.
  */
 
+import { createHash } from 'crypto';
+import { promises as fs } from 'fs';
+import sharp from 'sharp';
 import { extractMetadata } from '@/app/actions/metadata';
 import { imageConfig } from '@/lib/config';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
-import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
-import { ThumbnailQuality } from '@/types/thumbnails';
 import {
 	createEntityNotFoundError,
 	createFileNotFoundError,
@@ -55,9 +55,9 @@ import {
 	ServiceErrorCode,
 	toServiceError,
 } from '@/lib/utils/errors/service-errors';
-import { createHash } from 'crypto';
-import { promises as fs } from 'fs';
-import sharp from 'sharp';
+import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
+import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
+import { ThumbnailQuality } from '@/types/thumbnails';
 
 const SERVICE_NAME = 'ImageService';
 const imageLogger = serverLogger.withContext(SERVICE_NAME);

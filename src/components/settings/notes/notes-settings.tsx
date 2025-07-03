@@ -1,3 +1,5 @@
+import { Filter, Loader2, NotebookPen, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteNote, useNotes } from '@/lib/api/notes';
 import toastService from '@/services/toast';
 import type { NoteWithStats } from '@/types/entities/note';
-import { Filter, Loader2, NotebookPen, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useId, useMemo, useState } from 'react';
 import { CreateNoteForm } from './create-note-form';
 
 // Tipos seguros para preview data

@@ -5,11 +5,11 @@
  * @updated 2025-01-27
  */
 
+import { produce } from 'immer';
+import type { StateCreator } from 'zustand';
 import * as actions from '@/app/actions/groups/group.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
-import { produce } from 'immer';
-import type { StateCreator } from 'zustand';
 import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';
 
 const logger = clientLogger.withContext('GroupCoreSlice');
@@ -78,7 +78,7 @@ export const createGroupCoreSlice: StateCreator<
 	updateGroup: async (id, data) => {
 		try {
 			await actions.updateGroup(id, data);
-			toastService.success(`Grupo actualizado.`);
+			toastService.success('Grupo actualizado.');
 			await get().loadGroups();
 		} catch (error) {
 			const errorMsg = '❌ Error al actualizar el grupo.';

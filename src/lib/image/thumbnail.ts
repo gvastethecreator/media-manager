@@ -1,10 +1,10 @@
-import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { serverLogger } from '@/lib/logger/server-logger';
-import { formatBytes } from '@/lib/utils/format.utils';
 import { createHash } from 'crypto';
 import { existsSync, promises as fs } from 'fs';
 import { extname, join } from 'path';
 import sharp from 'sharp';
+import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { formatBytes } from '@/lib/utils/format.utils';
 import type { ImageFormat } from './image';
 
 const thumbLogger = serverLogger.withContext('Thumbnail');

@@ -3,12 +3,12 @@
  * @module components/features/file-browser/views/masonry-view-v2
  */
 
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { isImageWithStats, isVideoWithStats } from '@/types/migration';
 import { PlayCircleIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
+import { isImageWithStats, isVideoWithStats } from '@/types/migration';
 
 interface MasonryViewProps {
 	items: EntityWithStats[];

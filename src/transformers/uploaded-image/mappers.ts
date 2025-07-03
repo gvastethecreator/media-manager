@@ -4,8 +4,8 @@
  * @description Contains functions to map application-level input types to Prisma-compatible types for UploadedImage.
  */
 
-import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '@/types/entities/uploaded-image/types';
 import type { Prisma } from '@prisma/client';
+import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '@/types/entities/uploaded-image/types';
 
 /**
  * Maps the application-level `UploadedImageCreateInput` to the Prisma `UploadedImageCreateInput`.

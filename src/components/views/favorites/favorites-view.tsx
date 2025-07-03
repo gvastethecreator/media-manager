@@ -1,3 +1,6 @@
+import { Heart } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { FavoriteCard } from '@/components/cards/favorite-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -7,9 +10,6 @@ import { useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFavoriteStore } from '@/store/entities/favorite';
-import { Heart } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('FavoritesView');

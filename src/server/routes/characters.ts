@@ -1,7 +1,7 @@
-import { serializeCharacter } from '@/transformers/character';
 import { PrismaClient } from '@prisma/client';
 import { Router } from 'express';
 import { z } from 'zod';
+import { serializeCharacter } from '@/transformers/character';
 
 const router = Router();
 const prismaClient = new PrismaClient();

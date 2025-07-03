@@ -9,9 +9,9 @@
 
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { fromPrismaFolders, mapFolderSearchOptionsToPrisma } from '@/transformers/folder';
 import type { FolderComplete, FolderSearchOptions } from '@/types/entities/folder';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger para acciones de consulta
 const queryLogger = serverLogger.withContext('FolderQueryActions');

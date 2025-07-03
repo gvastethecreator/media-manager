@@ -4,8 +4,8 @@
  * @description Contiene funciones para transformar datos de la entidad Property.
  */
 
-import { PrismaPropertyWithCounts, PropertyStatistics, PropertyWithStats } from '@/types/entities/property';
 import { calculateCompleteness } from '@/lib/utils/transformers';
+import { PrismaPropertyWithCounts, PropertyStatistics, PropertyWithStats } from '@/types/entities/property';
 
 /**
  * Convierte un objeto Property de Prisma (con conteos) a un objeto PropertyWithStats.

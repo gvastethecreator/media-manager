@@ -1,3 +1,5 @@
+import { AlertCircle, Check, Delete, Edit, Loader2, Plus, Search, Star, X } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -12,12 +14,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useDeletePrompt, usePrompts } from '@/lib/api/prompts';
 import toastService from '@/services/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory } from '@/types/entities/prompt/enums';
-import { useDeletePrompt, usePrompts } from '@/lib/api/prompts';
-import { AlertCircle, Check, Delete, Edit, Loader2, Plus, Search, Star, X } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
 import { CreatePromptForm } from './create-prompt-form';
 
 // Interfaz para PropntWithNullable que funciona como adaptador para el componente CreatePromptForm

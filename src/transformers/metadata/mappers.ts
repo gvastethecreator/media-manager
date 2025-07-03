@@ -3,9 +3,9 @@
  * @module transformers/metadata/mappers
  */
 
+import type { Metadata, Prisma } from '@prisma/client';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataCreateInput, MetadataUpdateInput } from '@/types/entities/metadata';
-import type { Metadata, Prisma } from '@prisma/client';
 
 // formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 

@@ -1,5 +1,5 @@
-import { ToastViewport, toastManager } from '@/components/ui/toast';
 import { Toast as ToastPrimitive } from '@base-ui-components/react/toast';
+import { ToastViewport, toastManager } from '@/components/ui/toast';
 
 export function Toaster() {
 	return (

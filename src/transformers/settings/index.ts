@@ -4,8 +4,8 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Language, Settings, ThemeMode } from '@/types/settings';
 import { handleTransformerError } from '@/lib/utils/transformers/errors';
+import type { Language, Settings, ThemeMode } from '@/types/settings';
 import { mappers, serializers } from './internal';
 
 const _logger = serverLogger.withContext('SettingsTransformer');

@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
-import type { FolderBase } from '@/types/entities/folder';
 import { Folder as FolderIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+import type { FolderBase } from '@/types/entities/folder';
 
 interface FolderCardFooterProps {
 	folder: Pick<FolderBase, 'id' | 'name' | 'color'>;

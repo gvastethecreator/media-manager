@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
@@ -29,37 +29,37 @@ export default defineConfig({
 	preview: {
 		port: 4173,
 	},
-        build: {
-                target: 'esnext',
-                sourcemap: true,
-                rollupOptions: {
-                        output: {
-                                manualChunks: {
-                                        react: ['react', 'react-dom'],
-                                        vendor: ['@tanstack/react-query', 'zustand'],
-                                },
-                        },
-                        // Evitar que Rollup intente resolver dependencias de Node.js
-                        external: ['fs', 'fs/promises', 'path', 'crypto', 'sharp'],
-                },
-        },
+	build: {
+		target: 'esnext',
+		sourcemap: true,
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					react: ['react', 'react-dom'],
+					vendor: ['@tanstack/react-query', 'zustand'],
+				},
+			},
+			// Evitar que Rollup intente resolver dependencias de Node.js
+			external: ['fs', 'fs/promises', 'path', 'crypto', 'sharp'],
+		},
+	},
 	define: {
 		// Definir variables de entorno para el cliente
 		'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
 	},
-        optimizeDeps: {
-                // Evitar que Vite intente bundlear módulos de Node.js
-                exclude: ['fs', 'fs/promises', 'path', 'crypto', 'sharp'],
-                include: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'motion'],
-        },
-        resolve: {
-                alias: [
-                        // Alias para módulos de Node.js que no deben incluirse en el bundle del cliente
-                        { find: 'fs/promises', replacement: emptyModule },
-                        { find: 'fs', replacement: emptyModule },
-                        { find: 'path', replacement: emptyModule },
-                        { find: 'crypto', replacement: emptyModule },
-                        { find: 'sharp', replacement: emptyModule },
-                ],
-        },
+	optimizeDeps: {
+		// Evitar que Vite intente bundlear módulos de Node.js
+		exclude: ['fs', 'fs/promises', 'path', 'crypto', 'sharp'],
+		include: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'motion'],
+	},
+	resolve: {
+		alias: [
+			// Alias para módulos de Node.js que no deben incluirse en el bundle del cliente
+			{ find: 'fs/promises', replacement: emptyModule },
+			{ find: 'fs', replacement: emptyModule },
+			{ find: 'path', replacement: emptyModule },
+			{ find: 'crypto', replacement: emptyModule },
+			{ find: 'sharp', replacement: emptyModule },
+		],
+	},
 });

@@ -1,7 +1,7 @@
 'use server';
 
-import { revalidatePath } from '@/lib/server/revalidate';
 import { z } from 'zod';
+import { revalidatePath } from '@/lib/server/revalidate';
 
 /**
  * Esquema de validación para actualizar metadatos de una imagen

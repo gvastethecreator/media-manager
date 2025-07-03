@@ -1,3 +1,5 @@
+import { Filter, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useConcepts, useDeleteConcept } from '@/lib/api/concepts';
 import toastService from '@/services/toast';
 import type { ConceptWithStats } from '@/types/entities/concept';
-import { Filter, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useId, useMemo, useState } from 'react';
 import { CreateConceptForm } from './create-concept-form';
 
 // Tipos seguros para preview data

@@ -1,6 +1,6 @@
+import express from 'express';
 import { GroupService } from '@/services/group/group.service';
 import { toGroupWithStats } from '@/transformers/group/group.transformer';
-import express from 'express';
 
 const router = express.Router();
 const groupService = new GroupService();

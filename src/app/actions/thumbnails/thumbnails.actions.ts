@@ -1,5 +1,6 @@
 'use server';
 
+import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { prisma } from '@/lib/database/prisma';
 import { generateThumbnail } from '@/lib/image/thumbnail';
@@ -7,7 +8,6 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessOptions } from '@/services/thumbnail';
 import { thumbnailService } from '@/services/thumbnail';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
-import { existsSync } from 'fs';
 
 const thumbLogger = serverLogger.withContext('ThumbnailActions');
 

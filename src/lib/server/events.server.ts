@@ -1,12 +1,6 @@
-'use server';
+import type { ProcessStatus } from '@/types/process';
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { ProcessStatus } from '@/types/process';
-import { revalidatePath } from '@/lib/server/revalidate';
-
-const eventsLogger = serverLogger.withContext('ServerEvents');
-
-// Mapa de rutas a revalidar por tipo de evento
+// Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
 const EVENT_PATHS: Record<EventType, string[]> = {
 	create: ['/'],
 	update: ['/'],
@@ -112,22 +106,29 @@ export interface EventData<T = unknown> {
 }
 
 /**
- * Emite un evento y revalida las rutas necesarias
+ * Emite un evento (versión cliente - usa fetch() para comunicarse con API)
  */
 export async function emit(event: EventData) {
-	eventsLogger.info('🚀 Emitiendo evento:', event);
+	console.log('🚀 Emitiendo evento (cliente):', event);
 
-	// Revalidar rutas asociadas al tipo de evento
-	const paths = EVENT_PATHS[event.type];
-	if (paths) {
-		for (const path of paths) {
-			revalidatePath(path);
+	try {
+		const response = await fetch('/api/events', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(event),
+		});
+
+		if (!response.ok) {
+			console.warn('❌ Error al emitir evento:', response.statusText);
 		}
+	} catch (error) {
+		console.warn('❌ Error al conectar con API de eventos:', error);
+		// En modo desarrollo, no fallar por errores de eventos
 	}
 }
 
 /**
- * Emite un evento de progreso
+ * Emite un evento de progreso (versión cliente)
  */
 export async function emitProgress(status: ProcessStatus) {
 	// Asegurarse de que timestamp esté presente

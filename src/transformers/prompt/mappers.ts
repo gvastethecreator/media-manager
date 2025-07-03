@@ -3,6 +3,7 @@
  * @module transformers/prompt/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	PromptBase,
@@ -15,7 +16,6 @@ import type {
 	PromptWithStats,
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt';
-import type { Prisma } from '@prisma/client';
 import { deserializeParameters, serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');

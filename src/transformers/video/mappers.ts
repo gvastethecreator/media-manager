@@ -4,10 +4,10 @@
  * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Prisma para la entidad Video.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { VideoCreateInput, VideoFilters, VideoUpdateInput } from '@/types/entities/video/types';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
+import type { VideoCreateInput, VideoFilters, VideoUpdateInput } from '@/types/entities/video/types';
 
 const logger = serverLogger.withContext('VideoMapper');
 

@@ -2,6 +2,10 @@
 // Ahora solo el campo "name" es obligatorio, el resto se agrega dinámicamente.
 // Validación y tipos corregidos para compatibilidad con el patrón reusable.
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,10 +15,6 @@ import toastService from '@/services/toast';
 import type { WorldItemCreateInput } from '@/types/entities/world-item';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
 import type { WorldItemComplete } from '@/types/entities/world-item/extended';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)
