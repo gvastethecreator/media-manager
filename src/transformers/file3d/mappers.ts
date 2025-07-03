@@ -1,21 +1,40 @@
 // Mappers para File3D
+// ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
 
-import type { File3D as PrismaFile3D } from '@prisma/client';
 import type { File3D } from '@/types/entities/file3d';
 
-export function fromPrismaFile3D(prisma: PrismaFile3D): File3D {
+// Tipo local equivalente a Prisma (migración a Drizzle)
+type DrizzleFile3D = {
+	id: string;
+	name: string;
+	filePath: string;
+	format: string;
+	size: number;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+/**
+ * Convierte un objeto File3D de Drizzle al tipo de la aplicación
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function fromDrizzleFile3D(drizzle: DrizzleFile3D): File3D {
 	return {
-		id: prisma.id,
-		name: prisma.name,
-		filePath: prisma.filePath,
-		format: prisma.format,
-		size: prisma.size,
-		createdAt: prisma.createdAt,
-		updatedAt: prisma.updatedAt,
+		id: drizzle.id,
+		name: drizzle.name,
+		filePath: drizzle.filePath,
+		format: drizzle.format,
+		size: drizzle.size,
+		createdAt: drizzle.createdAt,
+		updatedAt: drizzle.updatedAt,
 	};
 }
 
-export function toPrismaFile3D(file: File3D): PrismaFile3D {
+/**
+ * Convierte un objeto File3D de la aplicación al tipo de Drizzle
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function toDrizzleFile3D(file: File3D): DrizzleFile3D {
 	return {
 		id: file.id,
 		name: file.name,
@@ -26,3 +45,14 @@ export function toPrismaFile3D(file: File3D): PrismaFile3D {
 		updatedAt: file.updatedAt,
 	};
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar fromDrizzleFile3D
+ */
+export const fromPrismaFile3D = fromDrizzleFile3D;
+
+/**
+ * @deprecated Usar toDrizzleFile3D
+ */
+export const toPrismaFile3D = toDrizzleFile3D;

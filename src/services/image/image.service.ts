@@ -45,12 +45,10 @@ import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { extractMetadata } from '@/app/actions/metadata';
 import { imageConfig } from '@/lib/config';
-import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
-// Drizzle imports
 import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { images, folders } from '@/lib/drizzle/schema';
+import { images, folders, imageStats } from '@/lib/drizzle/schema';
 import { type EventType, emit } from '@/lib/server/events.server';
 import {
     createEntityNotFoundError,
@@ -59,10 +57,10 @@ import {
     ServiceErrorCode,
     toServiceError,
 } from '@/lib/utils/errors/service-errors';
-import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import type { GetImagesOptions, GetImagesResult } from '@/app/actions/images/image-types.actions';
+import * as crypto from 'crypto';
 
 const SERVICE_NAME = 'ImageService';
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
@@ -224,9 +222,10 @@ class ImageService {
 
 	async createImage(data: CreateImageInput): Promise<ImageWithStats> {
 		try {
-			// Crear el registro en la base de datos
-			const dbImage = await prisma.image.create({
-				data: {
+			const [newImage] = await db
+				.insert(images)
+				.values({
+					id: crypto.randomUUID(),
 					name: data.name,
 					path: data.path,
 					size: data.size,
@@ -234,57 +233,32 @@ class ImageService {
 					height: data.height,
 					hash: data.hash,
 					metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-					// isPublic eliminado porque no existe en el modelo
-					folder: {
-						connect: { id: data.folderId },
-					},
-				},
-				include: {
-					tags: true,
-					albums: true,
-					collections: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-					folder: { select: { id: true, name: true, path: true } },
-					_count: {
-						select: {
-							tags: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							notes: true,
-							wildcards: true,
-							properties: true,
-							groups: true,
-						},
-					},
-				},
-			});
+					folderId: data.folderId,
+					isPublic: data.isPublic || false,
+					isFavorite: false,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				})
+				.returning();
 
 			// Crear estadísticas iniciales
-			await prisma.imageStats.create({
-				data: {
-					imageId: dbImage.id,
-					views: 0,
-				},
+			await db.insert(imageStats).values({
+				imageId: newImage.id,
+				views: 0,
 			});
 
 			// Generar thumbnail automáticamente
-			await this.generateThumbnail(dbImage.id);
+			await this.generateThumbnail(newImage.id);
 
-			// Usar el transformer para convertir a ImageWithStats
-			const result = fromPrismaImageWithCounts(dbImage);
+			// Obtener la imagen completa con sus relaciones
+			const result = await this.getImage(newImage.id);
+
+			if (!result) {
+				throw createServiceError({
+					code: ServiceErrorCode.UNEXPECTED_ERROR,
+					message: 'No se pudo obtener la imagen recién creada',
+				});
+			}
 
 			// Emitir evento de creación
 			await this.emitEvent(IMAGE_EVENTS.IMAGE_CREATED, result);
@@ -308,49 +282,39 @@ class ImageService {
 		try {
 			imageLogger.info('🔍 Obteniendo imagen:', id);
 
-			const image = await prisma.image.findUnique({
-				where: { id },
-				include: {
-					tags: true,
-					albums: true,
-					collections: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-					folder: { select: { id: true, name: true, path: true } },
-					_count: {
-						select: {
-							tags: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							notes: true,
-							wildcards: true,
-							properties: true,
-							groups: true,
-						},
-					},
-				},
-			});
+			// Obtener imagen base
+			const imageResult = await db.select().from(images).where(eq(images.id, id)).limit(1);
 
-			if (!image) {
+			if (imageResult.length === 0) {
 				imageLogger.warn('⚠️ Imagen no encontrada:', id);
 				return null;
 			}
 
-			const result = fromPrismaImageWithCounts(image);
+			const image = imageResult[0];
+
+			// Construir imagen con estadísticas
+			const imageWithStats: ImageWithStats = {
+				...image,
+				isFavorite: Boolean(image.isFavorite),
+				isPublic: Boolean(image.isPublic),
+				_count: {
+					tags: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					notes: 0,
+					wildcards: 0,
+					properties: 0,
+					groups: 0,
+				}
+			};
+
 			imageLogger.info('✅ Imagen obtenida correctamente');
-			return result;
+			return imageWithStats;
 		} catch (error) {
 			imageLogger.error('❌ Error obteniendo imagen:', error);
 			throw toServiceError(error, {
@@ -368,8 +332,8 @@ class ImageService {
 			imageLogger.info('📝 Actualizando imagen:', id);
 
 			// Verificar que la imagen exista
-			const existingImage = await prisma.image.findUnique({
-				where: { id },
+			const existingImage = await db.query.images.findFirst({
+				where: eq(images.id, id),
 			});
 
 			if (!existingImage) {
@@ -383,43 +347,13 @@ class ImageService {
 			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 			if (data.metadata !== undefined) updateData.metadata = data.metadata;
 
-			const updated = await prisma.image.update({
-				where: { id },
-				data: updateData,
-				include: {
-					tags: true,
-					albums: true,
-					collections: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-					folder: { select: { id: true, name: true, path: true } },
-					_count: {
-						select: {
-							tags: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							notes: true,
-							wildcards: true,
-							properties: true,
-							groups: true,
-						},
-					},
-				},
-			});
+			await db.update(images).set(updateData).where(eq(images.id, id));
 
-			const result = fromPrismaImageWithCounts(updated);
+			const result = await this.getImage(id);
+
+			if (!result) {
+				throw createEntityNotFoundError('Imagen', id, SERVICE_NAME);
+			}
 
 			// Emitir evento de actualización
 			await this.emitEvent(IMAGE_EVENTS.IMAGE_UPDATED, result);
@@ -444,18 +378,16 @@ class ImageService {
 			imageLogger.info('🗑️ Eliminando imagen:', id);
 
 			// Verificar que la imagen exista
-			const existingImage = await prisma.image.findUnique({
-				where: { id },
-				select: { id: true },
+			const existingImage = await db.query.images.findFirst({
+				where: eq(images.id, id),
+				columns: { id: true },
 			});
 
 			if (!existingImage) {
 				throw createEntityNotFoundError('Imagen', id, SERVICE_NAME);
 			}
 
-			await prisma.image.delete({
-				where: { id },
-			});
+			await db.delete(images).where(eq(images.id, id));
 
 			// Emitir eventos
 			await this.emitEvent(IMAGE_EVENTS.IMAGE_DELETED, { id });
@@ -591,53 +523,16 @@ class ImageService {
 
 			const [{ count: total }] = await countQuery;
 
-			// Transformar resultados de Drizzle a formato compatible con Prisma
 			const transformedImages = drizzleImages.map((raw) => {
-				// Restructurar para que sea compatible con fromPrismaImageWithCounts
-				const drizzleResult = {
-					id: raw.id,
-					name: raw.name,
-					description: raw.description,
-					path: raw.path,
-					hash: raw.hash,
-					size: raw.size,
-					width: raw.width,
-					height: raw.height,
+				return {
+					...raw,
 					metadata: raw.metadata ? JSON.parse(raw.metadata) : null,
-					thumbnail: raw.thumbnail,
-					thumbnailSize: raw.thumbnailSize,
-					thumbnailWidth: raw.thumbnailWidth,
-					thumbnailHeight: raw.thumbnailHeight,
-					thumbnailMimeType: raw.thumbnailMimeType,
-					thumbnailError: raw.thumbnailError,
-					thumbnailErrorAt: raw.thumbnailErrorAt,
-					thumbnailOptimizedAt: raw.thumbnailOptimizedAt,
 					isFavorite: Boolean(raw.isFavorite),
-					folderId: raw.folderId,
-					noteId: raw.noteId,
-					createdAt: raw.createdAt,
-					updatedAt: raw.updatedAt,
-					addedAt: raw.addedAt,
-					// Folder como objeto anidado (como en Prisma)
 					folder: raw.folderRealId ? {
 						id: raw.folderRealId,
 						name: raw.folderName!,
 						path: raw.folderPath!,
 					} : null,
-					// Relaciones vacías por ahora (TODO: implementar JOINs)
-					tags: [],
-					albums: [],
-					collections: [],
-					characters: [],
-					places: [],
-					worldItems: [],
-					concepts: [],
-					prompts: [],
-					notes: [],
-					wildcards: [],
-					properties: [],
-					groups: [],
-					// Counts vacíos por ahora (TODO: implementar subqueries)
 					_count: {
 						tags: 0,
 						albums: 0,
@@ -652,61 +547,10 @@ class ImageService {
 						properties: 0,
 						groups: 0,
 					},
-				};
-
-				return fromPrismaImageWithCounts(drizzleResult as any);
+				} as ImageWithStats;
 			});
 
-			// **VALIDACIÓN DUAL EN DESARROLLO** (como en ProfileService)
-			if (process.env.NODE_ENV === 'development') {
-				try {
-					// Construir filtros para Prisma (código original)
-					const where: any = {};
-
-					if (search) {
-						where.OR = [
-							{ name: { contains: search, mode: 'insensitive' } },
-							{ description: { contains: search, mode: 'insensitive' } },
-						];
-					}
-
-					if (folderId) {
-						where.folderId = folderId;
-					}
-
-					if (isFavorite !== undefined) {
-						where.isFavorite = isFavorite;
-					}
-
-					if (tagIds && tagIds.length > 0) {
-						where.tags = {
-							some: {
-								id: { in: tagIds },
-							},
-						};
-					}
-
-					const [prismaTotal] = await Promise.all([
-						prisma.image.count({ where }),
-					]);
-
-					// Comparar resultados básicos
-					if (Math.abs(total - prismaTotal) > 0) {
-						imageLogger.warn('⚠️ Diferencia en conteo total:', {
-							drizzle: total,
-							prisma: prismaTotal,
-							options
-						});
-					} else {
-						imageLogger.info('✅ Validación dual exitosa:', {
-							total,
-							images: transformedImages.length
-						});
-					}
-				} catch (validationError) {
-					imageLogger.error('❌ Error en validación dual:', validationError);
-				}
-			}
+			
 
 			return {
 				images: transformedImages,
@@ -729,8 +573,8 @@ class ImageService {
 
 	async generateThumbnail(imageId: string): Promise<void> {
 		try {
-			const image = await prisma.image.findUnique({
-				where: { id: imageId },
+			const image = await db.query.images.findFirst({
+				where: eq(images.id, imageId),
 			});
 
 			if (!image) {
@@ -762,9 +606,9 @@ class ImageService {
 			const { buffer, metadata } = await this.processImage(image.path, config);
 
 			// Guardar el thumbnail y sus metadatos en la entidad Image
-			await prisma.image.update({
-				where: { id: imageId },
-				data: {
+			await db
+				.update(images)
+				.set({
 					thumbnail: buffer,
 					thumbnailSize: buffer.length,
 					thumbnailWidth: metadata.width ?? config.width,
@@ -773,8 +617,8 @@ class ImageService {
 					thumbnailError: null,
 					thumbnailErrorAt: null,
 					thumbnailOptimizedAt: new Date(),
-				},
-			});
+				})
+				.where(eq(images.id, imageId));
 
 			// Emitir evento de thumbnail generado
 			await this.emitEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId });
@@ -800,9 +644,9 @@ class ImageService {
 	 */
 	async getThumbnail(imageId: string): Promise<Buffer> {
 		try {
-			const image = await prisma.image.findUnique({
-				where: { id: imageId },
-				select: {
+			const image = await db.query.images.findFirst({
+				where: eq(images.id, imageId),
+				columns: {
 					thumbnail: true,
 					path: true,
 				},
@@ -825,15 +669,15 @@ class ImageService {
 				const { buffer } = await this.processImage(image.path, config);
 
 				// Guardar el thumbnail en la base de datos
-				await prisma.image.update({
-					where: { id: imageId },
-					data: {
+				await db
+					.update(images)
+					.set({
 						thumbnail: buffer,
 						thumbnailSize: buffer.length,
 						thumbnailMimeType: 'image/webp',
 						thumbnailOptimizedAt: new Date(),
-					},
-				});
+					})
+					.where(eq(images.id, imageId));
 
 				// Guardar el thumbnail en la carpeta de caché
 				const cachePath = `${this.CACHE_DIR}/thumb_${imageId}.webp`;
@@ -866,8 +710,8 @@ class ImageService {
 
 	async getOriginalImage(imageId: string): Promise<Buffer> {
 		try {
-			const image = await prisma.image.findUnique({
-				where: { id: imageId },
+			const image = await db.query.images.findFirst({
+				where: eq(images.id, imageId),
 			});
 
 			if (!image) {
@@ -913,8 +757,8 @@ class ImageService {
 
 	async getImageMetadata(imageId: string): Promise<Record<string, unknown>> {
 		try {
-			const image = await prisma.image.findUnique({
-				where: { id: imageId },
+			const image = await db.query.images.findFirst({
+				where: eq(images.id, imageId),
 			});
 
 			if (!image) {
@@ -941,12 +785,12 @@ class ImageService {
 			// Extraer y guardar metadatos
 			const metadata = await extractMetadata(image.path);
 			if (metadata && Object.keys(metadata).length > 0) {
-				await prisma.image.update({
-					where: { id: imageId },
-					data: {
+				await db
+					.update(images)
+					.set({
 						metadata: JSON.stringify(metadata),
-					},
-				});
+					})
+					.where(eq(images.id, imageId));
 
 				// Emitir evento de metadatos actualizados
 				await this.emitEvent(IMAGE_EVENTS.METADATA_UPDATED, { imageId, metadata });

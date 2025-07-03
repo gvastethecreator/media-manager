@@ -2,10 +2,10 @@
  * @file Definición de tipos para el store de Property
  * @module store/entities/property/types
  * @description Tipos refactorizados siguiendo el patrón de slices.
+ * @updated 2025-01-27 - Migrado a tipos locales sin Prisma
  */
 
-import type { Prisma } from '@prisma/client';
-import type { PropertyWithStats } from '@/types/entities/property';
+import type { PropertyCreateInput, PropertyUpdateInput, PropertyWithStats } from '@/types/entities/property';
 
 // --- ENUMS ESPECÍFICOS DEL STORE ---
 
@@ -48,8 +48,8 @@ export interface PropertyCoreState {
  */
 export interface PropertyCoreActions {
 	loadProperties: () => Promise<PropertyWithStats[]>;
-	createProperty: (data: Prisma.PropertyCreateInput) => Promise<PropertyWithStats | null>;
-	updateProperty: (id: string, data: Prisma.PropertyUpdateInput) => Promise<void>;
+	createProperty: (data: PropertyCreateInput) => Promise<PropertyWithStats | null>;
+	updateProperty: (id: string, data: PropertyUpdateInput) => Promise<void>;
 	deleteProperty: (id: string) => Promise<void>;
 	setProperties: (properties: PropertyWithStats[]) => void;
 }

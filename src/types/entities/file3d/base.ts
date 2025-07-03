@@ -35,3 +35,17 @@ export interface File3DStatistics {
 export interface File3DWithStats extends File3DBase {
 	stats: File3DStatistics;
 }
+
+// --- TIPOS PARA MUTACIONES ---
+
+/**
+ * 🆕 Tipo para crear un nuevo File3D
+ * Omite campos autogenerados (id, timestamps)
+ */
+export type File3DCreateInput = Omit<File3DBase, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * ✏️ Tipo para actualizar un File3D existente
+ * Todos los campos son opcionales excepto id
+ */
+export type File3DUpdateInput = Partial<File3DCreateInput>;

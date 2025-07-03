@@ -4,11 +4,10 @@ import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
-import { PrismaClient } from '@prisma/client'; // Para operaciones que aún usen Prisma
+import * as crypto from 'crypto';
 
 const SERVICE_NAME = 'VideoServerService';
 const videoLogger = serverLogger.withContext(SERVICE_NAME);
-const prisma = new PrismaClient(); // Instancia de Prisma para operaciones pendientes
 
 const CreateVideoSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido').max(255),
@@ -59,10 +58,9 @@ const VideoFiltersSchema = z.object({
 	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
 });
 
-// Incluye estándar para videos con relaciones (para Prisma, si se usa)
-const videoInclude = {
-	folder: true,
-	// TODO: Añadir relaciones para albums, collections, tags, etc. si existen en el modelo Prisma
+// Función auxiliar para crear errores de video
+const createVideoError = (message: string, code: string = 'VIDEO_ERROR') => {
+	return new Error(`[${code}] ${message}`);
 };
 
 export async function getVideos(filters: z.infer<typeof VideoFiltersSchema>) {
@@ -231,6 +229,7 @@ export async function createVideo(data: z.infer<typeof CreateVideoSchema>) {
 		videoLogger.info('Creando nuevo video:', data.name);
 
 		const newVideo = await db.insert(videos).values({
+			id: crypto.randomUUID(),
 			name: data.name,
 			description: data.description,
 			path: data.path,
@@ -243,11 +242,13 @@ export async function createVideo(data: z.infer<typeof CreateVideoSchema>) {
 			bitrate: data.bitrate,
 			codec: data.codec,
 			format: data.format,
-			isHidden: data.isHidden,
-			isFavorite: data.isFavorite,
-			tags: data.tags,
-			notes: data.notes,
+			isHidden: data.isHidden || false,
+			isFavorite: data.isFavorite || false,
+			tags: data.tags || '[]',
+			notes: data.notes || '',
 			folderId: data.folderId,
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		}).returning();
 
 		videoLogger.info('Video creado exitosamente:', newVideo[0].id);
@@ -331,17 +332,59 @@ export async function getVideoFormatStats() {
 	try {
 		videoLogger.info('Obteniendo estadísticas de formato de video');
 
-		const formatStats = await db.select({
+		// Nota: Drizzle no tiene avg/sum directo, implementación manual temporal
+		const allVideos = await db.select({
 			format: videos.format,
-			count: count(videos.id),
-			sumSize: count(videos.size),
-			avgDuration: count(videos.duration),
-			avgWidth: count(videos.width),
-			avgHeight: count(videos.height),
+			size: videos.size,
+			duration: videos.duration,
+			width: videos.width,
+			height: videos.height,
 		})
 		.from(videos)
-		.groupBy(videos.format)
-		.orderBy(desc(count(videos.id)));
+		.where(eq(videos.format, videos.format)); // Solo videos con formato
+
+		// Agrupar manualmente por formato
+		const formatGroups = allVideos.reduce((acc: any, video) => {
+			const format = video.format || 'unknown';
+			if (!acc[format]) {
+				acc[format] = {
+					format,
+					count: 0,
+					sumSize: 0,
+					sumDuration: 0,
+					sumWidth: 0,
+					sumHeight: 0,
+					validDuration: 0,
+					validWidth: 0,
+					validHeight: 0,
+				};
+			}
+			acc[format].count++;
+			if (video.size) acc[format].sumSize += video.size;
+			if (video.duration) {
+				acc[format].sumDuration += video.duration;
+				acc[format].validDuration++;
+			}
+			if (video.width) {
+				acc[format].sumWidth += video.width;
+				acc[format].validWidth++;
+			}
+			if (video.height) {
+				acc[format].sumHeight += video.height;
+				acc[format].validHeight++;
+			}
+			return acc;
+		}, {});
+
+		// Calcular promedios y convertir a array
+		const formatStats = Object.values(formatGroups).map((group: any) => ({
+			format: group.format,
+			count: group.count,
+			sumSize: group.sumSize,
+			avgDuration: group.validDuration > 0 ? group.sumDuration / group.validDuration : 0,
+			avgWidth: group.validWidth > 0 ? group.sumWidth / group.validWidth : 0,
+			avgHeight: group.validHeight > 0 ? group.sumHeight / group.validHeight : 0,
+		})).sort((a: any, b: any) => b.count - a.count); // Ordenar por count desc
 
 		videoLogger.info('Estadísticas de formato de video obtenidas exitosamente');
 		return formatStats;

@@ -1,16 +1,47 @@
 /**
  * @file Serializadores para la entidad Favorite
  * @module transformers/favorite/serializers
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Favorite as PrismaFavorite, Image as PrismaImage } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FavoriteWithImage } from '@/types/entities/favorite';
 import type { FileItem } from '@/types/files';
 
-const serializersLogger = serverLogger.withContext('Favorite:Serializers');
+// Tipos locales equivalentes a Prisma (migración a Drizzle)
+type DrizzleFavorite = {
+	id: string;
+	entityId: string;
+	entityType: string;
+	userId: string;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
-type PrismaFavoriteWithImage = PrismaFavorite & { image: PrismaImage };
+type DrizzleImage = {
+	id: string;
+	name: string | null;
+	path: string;
+	size: number | null;
+	width: number | null;
+	height: number | null;
+	metadata: string | null;
+	thumbnail: Buffer | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
+	isFavorite: boolean | null;
+	folderId: string | null;
+	addedAt: Date | null;
+	hash: string | null;
+};
+
+type DrizzleFavoriteWithImage = DrizzleFavorite & { image: DrizzleImage };
+
+const serializersLogger = serverLogger.withContext('Favorite:Serializers');
 
 interface MetadataContent {
 	dimensions: {
@@ -35,8 +66,9 @@ interface MetadataContent {
 
 /**
  * 🔄 Transforma una imagen en un FileItem para uso en componentes de UI
+ * ✅ MIGRADO A DRIZZLE
  */
-export function transformImageToFileItem(image: PrismaImage): FileItem {
+export function transformImageToFileItem(image: DrizzleImage): FileItem {
 	return {
 		id: image.id,
 		name: image.name || 'Untitled',
@@ -79,10 +111,11 @@ export function transformImageToFileItem(image: PrismaImage): FileItem {
 
 /**
  * Convierte un favorito con imagen en un formato FavoriteWithImage
+ * ✅ MIGRADO A DRIZZLE
  * @param favorite Favorito base con imagen incluida
  * @returns Favorito con imagen transformada
  */
-export function toFavoriteWithImage(favorite: PrismaFavoriteWithImage): FavoriteWithImage {
+export function toFavoriteWithImage(favorite: DrizzleFavoriteWithImage): FavoriteWithImage {
 	try {
 		return {
 			id: favorite.id,
@@ -97,16 +130,17 @@ export function toFavoriteWithImage(favorite: PrismaFavoriteWithImage): Favorite
 		serializersLogger.error('Error convirtiendo a favorito con imagen:', error);
 		return {
 			...favorite,
-			image: transformImageToFileItem(favorite.image || ({} as PrismaImage)),
+			image: transformImageToFileItem(favorite.image || ({} as DrizzleImage)),
 		} as FavoriteWithImage;
 	}
 }
 
 /**
  * Convierte una lista de favoritos con imágenes
+ * ✅ MIGRADO A DRIZZLE
  * @param favorites Lista de favoritos con imágenes
  * @returns Lista de favoritos transformados
  */
-export function toFavoritesWithImages(favorites: PrismaFavoriteWithImage[]): FavoriteWithImage[] {
+export function toFavoritesWithImages(favorites: DrizzleFavoriteWithImage[]): FavoriteWithImage[] {
 	return favorites.map(toFavoriteWithImage);
 }

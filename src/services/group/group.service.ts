@@ -8,7 +8,7 @@ import { groups, groupImages, groupVideos, groupAlbums, groupTags } from '@/lib/
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { createGroup as createGroupTransformer, deleteGroup as deleteGroupTransformer, getGroupById as getGroupByIdTransformer, getGroupsByIds as getGroupsByIdsTransformer, searchGroups as searchGroupsTransformer, updateGroup as updateGroupTransformer } from '@/transformers/group';
+import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
 import type {
 	GroupCreateInput,
 	GroupRelations,
@@ -16,7 +16,8 @@ import type {
 	GroupUpdateInput,
 	GroupWithStats,
 } from '@/types/entities/group/types';
-import { eq, asc, desc, like, and, count } from 'drizzle-orm';
+import { eq, asc, desc, like, and, count, or, inArray } from 'drizzle-orm';
+import * as crypto from 'crypto';
 
 // Logger específico para el servicio de grupos
 const logger = serverLogger.withContext('GroupService');
@@ -73,26 +74,56 @@ export const notifyGroupChange = async (
 };
 
 /**
- * Obtiene un grupo por su ID
+ * Obtiene un grupo por su ID con estadísticas
  */
 export const getGroupService = async (id: string): Promise<GroupWithStats | null> => {
 	try {
 		logger.info(`🔍 Buscando grupo con ID: ${id}`);
-		const group = await getGroupByIdTransformer(id, { includeRelations: true, throwIfNotFound: false });
-
-		if (!group) {
+		
+		// Buscar grupo base
+		const groupResult = await db.select().from(groups).where(eq(groups.id, id)).limit(1);
+		
+		if (groupResult.length === 0) {
 			logger.warn(`⚠️ Grupo no encontrado: ${id}`);
 			return null;
 		}
+		
+		const group = groupResult[0];
+		
+		// Obtener conteos de relaciones
+		const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
+			db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, id)).then(res => res[0]?.count || 0),
+			db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, id)).then(res => res[0]?.count || 0),
+			db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, id)).then(res => res[0]?.count || 0),
+			db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, id)).then(res => res[0]?.count || 0),
+		]);
+		
+		// Construir grupo con estadísticas
+		const groupWithStats: GroupWithStats = {
+			...group,
+			_count: {
+				images: imageCount,
+				videos: videoCount,
+				albums: albumCount,
+				tags: tagCount,
+				collections: 0, // TODO: implementar cuando exista la relación
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			}
+		};
 
 		logger.info(`✅ Grupo encontrado: ${group.name}`);
-		return group;
+		return groupWithStats;
 	} catch (error) {
 		logger.error('❌ Error al obtener grupo por ID', { error, groupId: id });
-
-		// Type guard para manejar error unknown
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		throw createGroupError(`Error al obtener grupo: ${errorMessage}`, GroupErrorCode.OPERATION_FAILED, error);
+		throw createGroupError(`Error al obtener grupo: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
 	}
 };
 
@@ -107,9 +138,43 @@ export const getGroupsByIdsService = async (ids: string[]): Promise<GroupWithSta
 			return [];
 		}
 
-		const groups = await getGroupsByIdsTransformer(ids, { includeRelations: true });
-		logger.info(`✅ Grupos encontrados: ${groups.length}`);
-		return groups;
+		// Buscar grupos base
+		const groupsResult = await db.select().from(groups).where(inArray(groups.id, ids));
+		
+		// Obtener estadísticas para cada grupo
+		const groupsWithStats = await Promise.all(
+			groupsResult.map(async (group) => {
+				const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
+					db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, group.id)).then(res => res[0]?.count || 0),
+					db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, group.id)).then(res => res[0]?.count || 0),
+					db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, group.id)).then(res => res[0]?.count || 0),
+					db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, group.id)).then(res => res[0]?.count || 0),
+				]);
+				
+				return {
+					...group,
+					_count: {
+						images: imageCount,
+						videos: videoCount,
+						albums: albumCount,
+						tags: tagCount,
+						collections: 0,
+						characters: 0,
+						places: 0,
+						worldItems: 0,
+						concepts: 0,
+						prompts: 0,
+						notes: 0,
+						wildcards: 0,
+						properties: 0,
+						groups: 0,
+					}
+				} as GroupWithStats;
+			})
+		);
+		
+		logger.info(`✅ Grupos encontrados: ${groupsWithStats.length}`);
+		return groupsWithStats;
 	} catch (error) {
 		logger.error('❌ Error al obtener grupos por IDs', { error, ids });
 		throw createGroupError(
@@ -135,7 +200,95 @@ export const searchGroupsService = async (
 ): Promise<GroupSearchResult> => {
 	try {
 		logger.info('🔍 Buscando grupos con filtros');
-		const result = await searchGroupsTransformer(filters, options);
+		
+		// Configurar paginación
+		const page = options.page || 1;
+		const pageSize = options.pageSize || 20;
+		const offset = (page - 1) * pageSize;
+		
+		// Construir condiciones WHERE
+		const conditions = [];
+		
+		if (filters.search) {
+			conditions.push(
+				or(
+					like(groups.name, `%${filters.search}%`),
+					like(groups.description, `%${filters.search}%`)
+				)
+			);
+		}
+		
+		if (filters.isFavorite !== undefined) {
+			conditions.push(eq(groups.isFavorite, filters.isFavorite));
+		}
+		
+		if (filters.category) {
+			conditions.push(eq(groups.category, filters.category));
+		}
+		
+		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+		
+		// Configurar orden
+		const sortBy = options.sortBy || 'name';
+		const sortOrder = options.sortOrder || 'asc';
+		const orderByClause = sortOrder === 'desc' 
+			? desc(groups[sortBy as keyof typeof groups] as any)
+			: asc(groups[sortBy as keyof typeof groups] as any);
+		
+		// Ejecutar consultas en paralelo
+		const [groupsResult, totalCount] = await Promise.all([
+			db.select().from(groups)
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(pageSize)
+				.offset(offset),
+			db.select({ count: count() }).from(groups)
+				.where(whereClause)
+				.then(res => res[0]?.count || 0)
+		]);
+		
+		// Obtener estadísticas para cada grupo
+		const groupsWithStats = await Promise.all(
+			groupsResult.map(async (group) => {
+				const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
+					db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, group.id)).then(res => res[0]?.count || 0),
+					db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, group.id)).then(res => res[0]?.count || 0),
+					db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, group.id)).then(res => res[0]?.count || 0),
+					db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, group.id)).then(res => res[0]?.count || 0),
+				]);
+				
+				return {
+					...group,
+					_count: {
+						images: imageCount,
+						videos: videoCount,
+						albums: albumCount,
+						tags: tagCount,
+						collections: 0,
+						characters: 0,
+						places: 0,
+						worldItems: 0,
+						concepts: 0,
+						prompts: 0,
+						notes: 0,
+						wildcards: 0,
+						properties: 0,
+						groups: 0,
+					}
+				} as GroupWithStats;
+			})
+		);
+		
+		const result: GroupSearchResult = {
+			data: groupsWithStats,
+			total: totalCount,
+			page,
+			pageSize,
+			totalPages: Math.ceil(totalCount / pageSize),
+			hasNext: page * pageSize < totalCount,
+			hasPrevious: page > 1
+		};
+		
 		logger.info(`✅ Búsqueda completada, encontrados ${result.total} grupos`);
 		return result;
 	} catch (error) {
@@ -165,18 +318,42 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupW
 
 		// Crear grupo usando Drizzle
 		const newGroup = await db.insert(groups).values({
+			id: crypto.randomUUID(),
 			name: data.name,
 			description: data.description,
+			isFavorite: data.isFavorite || false,
+			category: data.category,
+			filters: data.filters || '[]',
+			isActive: data.isActive !== false, // true por defecto
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		}).returning();
 
-		const group = createGroupTransformer(newGroup[0]);
+		// Construir grupo con estadísticas
+		const groupWithStats: GroupWithStats = {
+			...newGroup[0],
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				collections: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			}
+		};
 
 		// Notificar creación
-		await notifyGroupChange('create', group);
-		logger.info(`✅ Grupo creado: ${group.name}`, { groupId: group.id });
-		return group;
+		await notifyGroupChange('create', groupWithStats);
+		logger.info(`✅ Grupo creado: ${groupWithStats.name}`, { groupId: groupWithStats.id });
+		return groupWithStats;
 	} catch (error) {
 		logger.error('❌ Error al crear grupo', { error, data });
 
@@ -215,23 +392,57 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 			}
 		}
 
+		// Preparar datos de actualización
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
+		
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.category !== undefined) updateData.category = data.category;
+		if (data.filters !== undefined) updateData.filters = data.filters;
+		if (data.isActive !== undefined) updateData.isActive = data.isActive;
+		
 		// Actualizar grupo usando Drizzle
 		const updatedGroup = await db.update(groups)
-			.set({
-				name: data.name,
-				description: data.description,
-				updatedAt: new Date(),
-			})
+			.set(updateData)
 			.where(eq(groups.id, id))
 			.returning();
 
-		const group = updateGroupTransformer(updatedGroup[0]);
+		// Obtener estadísticas actualizadas
+		const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
+			db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, id)).then(res => res[0]?.count || 0),
+			db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, id)).then(res => res[0]?.count || 0),
+			db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, id)).then(res => res[0]?.count || 0),
+			db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, id)).then(res => res[0]?.count || 0),
+		]);
+		
+		const groupWithStats: GroupWithStats = {
+			...updatedGroup[0],
+			_count: {
+				images: imageCount,
+				videos: videoCount,
+				albums: albumCount,
+				tags: tagCount,
+				collections: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			}
+		};
 
 		// Notificar actualización
-		await notifyGroupChange('update', group);
+		await notifyGroupChange('update', groupWithStats);
 
-		logger.info(`✅ Grupo actualizado: ${group.name}`, { groupId: group.id });
-		return group;
+		logger.info(`✅ Grupo actualizado: ${groupWithStats.name}`, { groupId: groupWithStats.id });
+		return groupWithStats;
 	} catch (error) {
 		logger.error('❌ Error al actualizar grupo', { error, groupId: id, data });
 
@@ -290,11 +501,10 @@ export const getGroupStatsService = async (id: string): Promise<GroupWithStats |
 	try {
 		logger.info(`📊 Obteniendo estadísticas del grupo: ${id}`);
 
-		// Reutilizar la lógica de la server action que ya hace esto.
-		const group = await getGroupByIdTransformer(id, { includeRelations: true, throwIfNotFound: false });
+		// Reutilizar la lógica de getGroupService que ya está migrada
+		const group = await getGroupService(id);
 
 		if (!group) {
-			// La acción 'getGroup' ya lanza un error si no lo encuentra, pero una doble verificación es segura.
 			throw createGroupError(`No se encontró el grupo con ID: ${id}`, GroupErrorCode.NOT_FOUND);
 		}
 

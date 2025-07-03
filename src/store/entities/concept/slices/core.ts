@@ -1,33 +1,15 @@
-import type { StateCreator } from 'zustand';
+import { conceptsApi } from '@/lib/api/services/concepts';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type {
-	ConceptBase,
-	ConceptComplete,
-	ConceptCreateInput,
-	ConceptUpdateInput,
-	ConceptWithStats,
-} from '@/types/entities/concept';
-import { createConcept, deleteConcept, getConcepts, updateConcept } from '../../../../app/actions/concepts';
+import type { ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept/types';
+import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('ConceptStore:Core');
 
-// Función para transformar ConceptComplete a ConceptWithStats
-const transformConceptToWithStats = (concept: ConceptComplete): ConceptWithStats => ({
-	...concept,
-	stats: {
-		imageCount: concept._count?.images ?? 0,
-		tagCount: concept._count?.tags ?? 0,
-		noteCount: concept._count?.notes ?? 0,
-		totalContentItems: (concept._count?.images ?? 0) + (concept._count?.notes ?? 0),
-		lastUpdated: concept.updatedAt,
-	},
-});
-
 export interface CoreSlice {
 	// Estado
 	concepts: ConceptWithStats[];
-	selectedConcept: ConceptBase | null;
+	selectedConcept: ConceptWithStats | null;
 	isLoading: boolean;
 	error: string | null;
 
@@ -37,7 +19,7 @@ export interface CoreSlice {
 	createConcept: (concept: ConceptCreateInput) => Promise<void>;
 	updateConcept: (id: string, concept: ConceptUpdateInput) => Promise<void>;
 	deleteConcept: (id: string) => Promise<void>;
-	selectConcept: (concept: ConceptBase | null) => void;
+	selectConcept: (concept: ConceptWithStats | null) => void;
 	reset: () => void;
 }
 
@@ -54,14 +36,11 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			set({ isLoading: true, error: null });
 			coreLogger.info('🔄 Cargando conceptos');
 
-			// Llamar a server action para obtener conceptos
-			const concepts = await getConcepts({});
+			// Llamar a API para obtener conceptos
+			const concepts = await conceptsApi.getAll({});
 
-			// Transformar resultados con la función correcta
-			const transformedConcepts = concepts.map(transformConceptToWithStats);
-
-			set({ concepts: transformedConcepts, isLoading: false });
-			coreLogger.info('✅ Conceptos cargados:', { count: transformedConcepts.length });
+			set({ concepts, isLoading: false });
+			coreLogger.info('✅ Conceptos cargados:', { count: concepts.length });
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Error al cargar conceptos';
 			coreLogger.error('❌ Error al cargar conceptos:', error);
@@ -79,12 +58,9 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			set({ isLoading: true, error: null });
 			coreLogger.info('✨ Creando concepto:', concept);
 
-			// Llamar a server action para crear concepto
-			const newConcept = await createConcept(concept);
+			// Llamar a API para crear concepto
+			const newConcept = await conceptsApi.create(concept);
 			if (newConcept) {
-				// Aquí podrías añadir el nuevo concepto directamente al store
-				// o recargar todos los conceptos si es más sencillo para mantener la consistencia.
-				// Por simplicidad, recargaremos todos los conceptos.
 				await get().loadConcepts();
 			}
 
@@ -101,12 +77,9 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			set({ isLoading: true, error: null });
 			coreLogger.info('🔄 Actualizando concepto:', { id, ...concept });
 
-			// Llamar a server action para actualizar concepto
-			const updatedConcept = await updateConcept(id, concept);
+			// Llamar a API para actualizar concepto
+			const updatedConcept = await conceptsApi.update(id, concept);
 			if (updatedConcept) {
-				// Aquí podrías actualizar el concepto directamente en el store
-				// o recargar todos los conceptos si es más sencillo para mantener la consistencia.
-				// Por simplicidad, recargaremos todos los conceptos.
 				await get().loadConcepts();
 			}
 
@@ -123,8 +96,8 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			set({ isLoading: true, error: null });
 			coreLogger.info('🗑️ Eliminando concepto:', id);
 
-			// Llamar a server action para eliminar concepto
-			await deleteConcept(id);
+			// Llamar a API para eliminar concepto
+			await conceptsApi.delete(id);
 
 			// Recargar conceptos para actualizar la lista
 			await get().loadConcepts();
@@ -142,10 +115,10 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 		}
 	},
 
-	selectConcept: (concept) => {
-		coreLogger.info(concept ? `🔍 Seleccionando concepto: ${concept.id}` : '🧹 Limpiando selección de concepto');
-		set({ selectedConcept: concept });
-	},
+ selectConcept: (concept) => {
+  coreLogger.info(concept ? `🔍 Seleccionando concepto: ${concept?.id ?? 'null'}` : '🧹 Limpiando selección de concepto');
+  set({ selectedConcept: concept });
+ },
 
 	reset: () => {
 		set({

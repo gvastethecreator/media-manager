@@ -1,6 +1,6 @@
 import { db } from '@/lib/drizzle';
 import { prompts } from '@/lib/drizzle/schema';
-import { PromptService } from '@/services/prompt/prompt.service';
+import { PromptService, promptService } from '@/services/prompt/prompt.service';
 import { toImageWithStats } from '@/transformers/image/image.transformer';
 import { toPromptWithStats } from '@/transformers/prompt/prompt.transformer';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
@@ -8,7 +8,7 @@ import express from 'express';
 import { z } from 'zod';
 
 const router = express.Router();
-const promptService = new PromptService();
+const legacyPromptService = new PromptService(); // Para métodos legacy
 
 // Schema para filtros de búsqueda
 const PromptFiltersSchema = z.object({
@@ -196,7 +196,7 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/images', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const images = await promptService.getPromptImages(id);
+		const images = await promptService.getImages(id);
 		const transformedImages = images.map(toImageWithStats);
 		res.json(transformedImages);
 	} catch (error) {
@@ -209,7 +209,7 @@ router.get('/:id/recent-images', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const limit = Number(req.query.limit) || 6;
-		const images = await promptService.getRecentPromptImages(id, limit);
+		const images = await promptService.getRecentImages(id, limit);
 		res.json(images);
 	} catch (error) {
 		console.error('Error getting recent prompt images:', error);
@@ -217,17 +217,52 @@ router.get('/:id/recent-images', async (req, res) => {
 	}
 });
 
-// MÉTODOS DE ESCRITURA - PENDIENTES DE MIGRACIÓN (Status 501)
+// POST /prompts - MIGRADO A DRIZZLE
 router.post('/', async (req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+	try {
+		const newPrompt = await promptService.create(req.body);
+		res.status(201).json(newPrompt);
+	} catch (error) {
+		console.error('Error al crear prompt:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
 });
 
+// PUT /prompts/:id - MIGRADO A DRIZZLE
 router.put('/:id', async (req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+	try {
+		const { id } = req.params;
+		const updatedPrompt = await promptService.update(id, req.body);
+		res.json(updatedPrompt);
+	} catch (error) {
+		console.error('Error al actualizar prompt:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
 });
 
+// DELETE /prompts/:id - MIGRADO A DRIZZLE
 router.delete('/:id', async (req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+	try {
+		const { id } = req.params;
+		await promptService.delete(id);
+		res.json({
+			success: true,
+			message: 'Prompt eliminado correctamente',
+			deletedId: id,
+		});
+	} catch (error) {
+		console.error('Error al eliminar prompt:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
 });
 
 export default router;

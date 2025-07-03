@@ -1,7 +1,7 @@
 import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
 import { Smile } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { useCallback, useEffect, useRef, useState } from 'react';
+// Tema eliminado - no se usa en este componente
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
@@ -57,7 +57,6 @@ export function EmojiPicker({
 	showLabel = true,
 	onChange,
 }: EmojiPickerProps) {
-	const { theme } = useTheme();
 	const [selectedEmoji, setSelectedEmoji] = useState(value || '');
 	const [open, setOpen] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);

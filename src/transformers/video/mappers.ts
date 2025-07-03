@@ -1,20 +1,62 @@
 /**
  * @file Funciones de mapeo para la entidad Video.
  * @module transformers/video/mappers
- * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Prisma para la entidad Video.
+ * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Drizzle para la entidad Video.
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { VideoCreateInput, VideoFilters, VideoUpdateInput } from '@/types/entities/video/types';
 
 const logger = serverLogger.withContext('VideoMapper');
 
+// Tipos locales equivalentes a Prisma (migración a Drizzle)
+type DrizzleCreateVideoData = {
+	name: string;
+	description?: string | null;
+	path: string;
+	size: number;
+	duration: number;
+	width: number;
+	height: number;
+	metadata?: string | null;
+	thumbnail?: string | null;
+	thumbnailSize?: number | null;
+	thumbnailWidth?: number | null;
+	thumbnailHeight?: number | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	folderId: string;
+};
+
+type DrizzleUpdateVideoData = Partial<Omit<DrizzleCreateVideoData, 'folderId'>>;
+
+type DrizzleWhereFilter = {
+	AND?: DrizzleWhereFilter[];
+	OR?: DrizzleWhereFilter[];
+	name?: { contains?: string; equals?: string };
+	description?: { contains?: string; equals?: string };
+	isFavorite?: boolean;
+	folderId?: { in?: string[] };
+	createdAt?: { gte?: Date; lte?: Date };
+	duration?: { gte?: number; lte?: number };
+	width?: { gte?: number; lte?: number };
+	height?: { gte?: number; lte?: number };
+	size?: { gte?: number; lte?: number };
+	metadata?: { not?: null } | null;
+	thumbnail?: { not?: null } | null;
+};
+
+type DrizzleFindManyArgs = {
+	where?: DrizzleWhereFilter;
+};
+
 /**
- * 🔄 Mapea un `VideoCreateInput` a un `Prisma.VideoCreateInput`.
+ * 🔄 Mapea un `VideoCreateInput` a datos de creación de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapCreateVideoDataToPrisma(input: VideoCreateInput): Prisma.VideoCreateInput {
+export function mapCreateVideoDataToDrizzle(input: VideoCreateInput): DrizzleCreateVideoData {
 	try {
 		const {
 			albumIds,
@@ -32,7 +74,7 @@ export function mapCreateVideoDataToPrisma(input: VideoCreateInput): Prisma.Vide
 			...rest
 		} = input;
 
-		const prismaData: Prisma.VideoCreateInput = {
+		const drizzleData: DrizzleCreateVideoData = {
 			...rest,
 			metadata: rest.metadata || null,
 			thumbnail: rest.thumbnail || null,
@@ -41,23 +83,11 @@ export function mapCreateVideoDataToPrisma(input: VideoCreateInput): Prisma.Vide
 			thumbnailHeight: rest.thumbnailHeight || null,
 			isPublic: rest.isPublic || false,
 			isFavorite: rest.isFavorite || false,
-			folder: { connect: { id: input.folderId } },
+			folderId: input.folderId,
 		};
 
-		if (albumIds) prismaData.albums = { connect: albumIds.map((id) => ({ id })) };
-		if (collectionIds) prismaData.collections = { connect: collectionIds.map((id) => ({ id })) };
-		if (tagIds) prismaData.tags = { connect: tagIds.map((id) => ({ id })) };
-		if (characterIds) prismaData.characters = { connect: characterIds.map((id) => ({ id })) };
-		if (placeIds) prismaData.places = { connect: placeIds.map((id) => ({ id })) };
-		if (worldItemIds) prismaData.worldItems = { connect: worldItemIds.map((id) => ({ id })) };
-		if (conceptIds) prismaData.concepts = { connect: conceptIds.map((id) => ({ id })) };
-		if (promptIds) prismaData.prompts = { connect: promptIds.map((id) => ({ id })) };
-		if (noteIds) prismaData.notes = { connect: noteIds.map((id) => ({ id })) };
-		if (wildcardIds) prismaData.wildcards = { connect: wildcardIds.map((id) => ({ id })) };
-		if (propertyIds) prismaData.properties = { connect: propertyIds.map((id) => ({ id })) };
-		if (groupIds) prismaData.groups = { connect: groupIds.map((id) => ({ id })) };
-
-		return prismaData;
+		// Las relaciones se manejan por separado en Drizzle con junction tables
+		return drizzleData;
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de video', { error, input });
 		throw new TransformerError('Error al mapear datos de creación de video.');
@@ -65,9 +95,10 @@ export function mapCreateVideoDataToPrisma(input: VideoCreateInput): Prisma.Vide
 }
 
 /**
- * 🔄 Mapea un `VideoUpdateInput` a un `Prisma.VideoUpdateInput`.
+ * 🔄 Mapea un `VideoUpdateInput` a datos de actualización de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapUpdateVideoDataToPrisma(input: VideoUpdateInput): Prisma.VideoUpdateInput {
+export function mapUpdateVideoDataToDrizzle(input: VideoUpdateInput): DrizzleUpdateVideoData {
 	try {
 		const {
 			albumIds,
@@ -84,22 +115,9 @@ export function mapUpdateVideoDataToPrisma(input: VideoUpdateInput): Prisma.Vide
 			groupIds,
 			...rest
 		} = input;
-		const updateData: Prisma.VideoUpdateInput = rest;
 
-		if (albumIds) updateData.albums = { set: albumIds.map((id) => ({ id })) };
-		if (collectionIds) updateData.collections = { set: collectionIds.map((id) => ({ id })) };
-		if (tagIds) updateData.tags = { set: tagIds.map((id) => ({ id })) };
-		if (characterIds) updateData.characters = { set: characterIds.map((id) => ({ id })) };
-		if (placeIds) updateData.places = { set: placeIds.map((id) => ({ id })) };
-		if (worldItemIds) updateData.worldItems = { set: worldItemIds.map((id) => ({ id })) };
-		if (conceptIds) updateData.concepts = { set: conceptIds.map((id) => ({ id })) };
-		if (promptIds) updateData.prompts = { set: promptIds.map((id) => ({ id })) };
-		if (noteIds) updateData.notes = { set: noteIds.map((id) => ({ id })) };
-		if (wildcardIds) updateData.wildcards = { set: wildcardIds.map((id) => ({ id })) };
-		if (propertyIds) updateData.properties = { set: propertyIds.map((id) => ({ id })) };
-		if (groupIds) updateData.groups = { set: groupIds.map((id) => ({ id })) };
-
-		return updateData;
+		// Las relaciones se manejan por separado en Drizzle con junction tables
+		return rest;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de video', { error, input });
 		throw new TransformerError('Error al mapear datos de actualización de video.');
@@ -107,19 +125,21 @@ export function mapUpdateVideoDataToPrisma(input: VideoUpdateInput): Prisma.Vide
 }
 
 /**
- * 🔄 Mapea filtros de video a argumentos de búsqueda de Prisma.
+ * 🔄 Mapea filtros de video a argumentos de búsqueda de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapVideoFiltersToPrismaArgs(filters: VideoFilters): Prisma.VideoFindManyArgs {
+export function mapVideoFiltersToDrizzleArgs(filters: VideoFilters): DrizzleFindManyArgs {
 	return {
-		where: mapVideoFiltersToPrisma(filters),
+		where: mapVideoFiltersToDrizzle(filters),
 	};
 }
 
 /**
- * 🔄 Mapea `VideoFilters` a `Prisma.VideoWhereInput`.
+ * 🔄 Mapea `VideoFilters` a filtros de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  */
-function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWhereInput {
-	const where: Prisma.VideoWhereInput = {};
+function mapVideoFiltersToDrizzle(filters: VideoFilters): DrizzleWhereFilter {
+	const where: DrizzleWhereFilter = {};
 
 	if (filters.search) {
 		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
@@ -133,9 +153,7 @@ function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWhereInput 
 		where.folderId = { in: filters.folders };
 	}
 
-	if (filters.tags?.length) {
-		where.tags = { some: { id: { in: filters.tags } } };
-	}
+	// Las relaciones con tags se manejan con joins separados en Drizzle
 
 	if (filters.dateRange) {
 		const dateFilter: any = {};
@@ -200,3 +218,19 @@ function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWhereInput 
 
 	return where;
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar mapCreateVideoDataToDrizzle
+ */
+export const mapCreateVideoDataToPrisma = mapCreateVideoDataToDrizzle;
+
+/**
+ * @deprecated Usar mapUpdateVideoDataToDrizzle
+ */
+export const mapUpdateVideoDataToPrisma = mapUpdateVideoDataToDrizzle;
+
+/**
+ * @deprecated Usar mapVideoFiltersToDrizzleArgs
+ */
+export const mapVideoFiltersToPrismaArgs = mapVideoFiltersToDrizzleArgs;
