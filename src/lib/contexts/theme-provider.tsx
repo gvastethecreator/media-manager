@@ -1,8 +1,8 @@
 /**
- * @file Theme Provider migrado de Next.js a React nativo
- * @module components/ui/theme-provider
- * @description Proveedor de temas con soporte para temas personalizados
- * @updated 2025-01-27 - Migrado de next-themes a React nativo
+ * @file Theme Provider nativo de React
+ * @module lib/contexts/theme-provider
+ * @description Proveedor de temas migrado de next-themes a React nativo
+ * @updated 2025-01-27 - Migrado de Next.js a React nativo
  */
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -177,4 +177,3 @@ export function useTheme() {
 
 // Exportar tipos para compatibilidad
 export type { Theme, ThemeContextType };
-

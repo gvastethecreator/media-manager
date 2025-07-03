@@ -35,3 +35,17 @@ export interface AudioStatistics {
 export interface AudioWithStats extends AudioBase {
 	stats: AudioStatistics;
 }
+
+// --- TIPOS PARA MUTACIONES ---
+
+/**
+ * 🆕 Tipo para crear un nuevo Audio
+ * Omite campos autogenerados (id, timestamps)
+ */
+export type AudioCreateInput = Omit<AudioBase, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * ✏️ Tipo para actualizar un Audio existente
+ * Todos los campos son opcionales excepto id
+ */
+export type AudioUpdateInput = Partial<AudioCreateInput>;

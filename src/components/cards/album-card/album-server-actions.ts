@@ -381,7 +381,7 @@ export async function getAlbumStats(albumId: string): Promise<{
 	const prisma = await getPrismaClient();
 
 	// 🚀 Usar servicio optimizado - una consulta en lugar de 15+
-	const optimizedStatsService = OptimizedStatsService.getInstance(prisma);
+			const optimizedStatsService = OptimizedStatsService.getInstance();
 	const stats = await optimizedStatsService.getAlbumStatsOptimized(albumId);
 
 	return {

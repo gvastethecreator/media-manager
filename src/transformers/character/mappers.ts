@@ -1,26 +1,101 @@
 /**
  * @file Funciones de mapeo para la entidad Character
  * @module transformers/character/mappers
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-	CharacterCreateInput,
-	CharacterFilters,
-	CharacterSearchOptions,
-	CharacterUpdateInput,
+    CharacterCreateInput,
+    CharacterFilters,
+    CharacterSearchOptions,
+    CharacterUpdateInput,
 } from '@/types/entities/character';
 
+// Tipos locales equivalentes a Prisma (migración a Drizzle)
+type DrizzleCharacterCreateInput = {
+	id?: string;
+	name: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	level?: number;
+	class?: string | null;
+	race?: string | null;
+	alignment?: string | null;
+	stats?: string;
+	skills?: string;
+	relationships?: string;
+	goals?: string;
+	fears?: string;
+	beliefs?: string;
+	personality?: string;
+	abilities?: string;
+	backstory?: string;
+	psychologicalProfile?: string;
+	socialProfile?: string;
+	isFavorite?: boolean;
+	createdAt?: Date;
+	updatedAt?: Date;
+};
+
+type DrizzleCharacterUpdateInput = {
+	name?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	level?: number;
+	class?: string | null;
+	race?: string | null;
+	alignment?: string | null;
+	stats?: string;
+	skills?: string;
+	relationships?: string;
+	goals?: string;
+	fears?: string;
+	beliefs?: string;
+	personality?: string;
+	abilities?: string;
+	backstory?: string;
+	psychologicalProfile?: string;
+	socialProfile?: string;
+	isFavorite?: boolean;
+	updatedAt?: Date;
+};
+
+type DrizzleCharacterWhereInput = {
+	id?: string;
+	name?: { contains?: string };
+	description?: { contains?: string };
+	backstory?: { contains?: string };
+	level?: { gte?: number; lte?: number };
+	class?: { in?: string[] };
+	race?: { in?: string[] };
+	alignment?: { in?: string[] };
+	isFavorite?: boolean;
+	OR?: DrizzleCharacterWhereInput[];
+	tags?: { some?: { id?: { in?: string[] } } };
+};
+
+type DrizzleCharacterFindManyArgs = {
+	where?: DrizzleCharacterWhereInput;
+	orderBy?: any;
+	skip?: number;
+	take?: number;
+	include?: any;
+};
+
 /**
- * 🔄 Mapea un `CharacterCreateInput` a un `Prisma.CharacterCreateInput`.
+ * 🔄 Mapea un `CharacterCreateInput` a un `DrizzleCharacterCreateInput`.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapCreateCharacterDataToPrisma(data: CharacterCreateInput): Prisma.CharacterCreateInput {
+export function mapCreateCharacterDataToDrizzle(data: CharacterCreateInput): DrizzleCharacterCreateInput {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
-		const prismaData: Prisma.CharacterCreateInput = {
+		const drizzleData: DrizzleCharacterCreateInput = {
 			...rest,
+			id: crypto.randomUUID(),
 			stats: data.stats ?? '',
 			skills: data.skills ?? '[]',
 			relationships: data.relationships ?? '[]',
@@ -32,22 +107,14 @@ export function mapCreateCharacterDataToPrisma(data: CharacterCreateInput): Pris
 			backstory: data.backstory ?? '',
 			psychologicalProfile: data.psychologicalProfile ?? '',
 			socialProfile: data.socialProfile ?? '',
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		};
 
-		if (imageIds) {
-			prismaData.images = { connect: imageIds.map((id) => ({ id })) };
-		}
-		if (tagIds) {
-			prismaData.tags = { connect: tagIds.map((id) => ({ id })) };
-		}
-		if (groupIds) {
-			prismaData.groups = { connect: groupIds.map((id) => ({ id })) };
-		}
-		if (propertyIds) {
-			prismaData.properties = { connect: propertyIds.map((id) => ({ id })) };
-		}
+		// Nota: Las relaciones se manejan por separado en Drizzle
+		// imageIds, tagIds, groupIds, propertyIds se procesarán en tablas de unión después de la inserción
 
-		return prismaData;
+		return drizzleData;
 	} catch (error) {
 		serverLogger.error('Error mapeando datos de creación de personaje', { error, data });
 		throw new TransformerError('Error al mapear datos de creación de personaje.');
@@ -55,28 +122,23 @@ export function mapCreateCharacterDataToPrisma(data: CharacterCreateInput): Pris
 }
 
 /**
- * 🔄 Mapea un `CharacterUpdateInput` a un `Prisma.CharacterUpdateInput`.
+ * 🔄 Mapea un `CharacterUpdateInput` a un `DrizzleCharacterUpdateInput`.
  * Esta función no maneja desconexiones, solo actualizaciones y conexiones.
  * La lógica de desconexión debe ser manejada en la capa de servicio si es necesario.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapUpdateCharacterDataToPrisma(data: CharacterUpdateInput): Prisma.CharacterUpdateInput {
+export function mapUpdateCharacterDataToDrizzle(data: CharacterUpdateInput): DrizzleCharacterUpdateInput {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
-		const prismaData: Prisma.CharacterUpdateInput = { ...rest };
+		const drizzleData: DrizzleCharacterUpdateInput = {
+			...rest,
+			updatedAt: new Date()
+		};
 
-		if (imageIds) {
-			prismaData.images = { set: imageIds.map((id) => ({ id })) };
-		}
-		if (tagIds) {
-			prismaData.tags = { set: tagIds.map((id) => ({ id })) };
-		}
-		if (groupIds) {
-			prismaData.groups = { set: groupIds.map((id) => ({ id })) };
-		}
-		if (propertyIds) {
-			prismaData.properties = { set: propertyIds.map((id) => ({ id })) };
-		}
-		return prismaData;
+		// Nota: Las relaciones se manejan por separado en Drizzle
+		// imageIds, tagIds, groupIds, propertyIds se procesarán en tablas de unión en operaciones separadas
+
+		return drizzleData;
 	} catch (error) {
 		serverLogger.error('Error mapeando datos de actualización de personaje', { error, data });
 		throw new TransformerError('Error al mapear datos de actualización de personaje.');
@@ -84,18 +146,19 @@ export function mapUpdateCharacterDataToPrisma(data: CharacterUpdateInput): Pris
 }
 
 /**
- * 🔄 Mapea `CharacterSearchOptions` a `Prisma.CharacterFindManyArgs`.
+ * 🔄 Mapea `CharacterSearchOptions` a `DrizzleCharacterFindManyArgs`.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOptions): Prisma.CharacterFindManyArgs {
+export function mapCharacterSearchOptionsToDrizzle(options: CharacterSearchOptions): DrizzleCharacterFindManyArgs {
 	const { filters, ...rest } = options;
 	return {
 		...rest,
-		where: filters ? mapCharacterFiltersToPrisma(filters) : undefined,
+		where: filters ? mapCharacterFiltersToDrizzle(filters) : undefined,
 	};
 }
 
-function mapCharacterFiltersToPrisma(filters: CharacterFilters): Prisma.CharacterWhereInput {
-	const where: Prisma.CharacterWhereInput = {};
+function mapCharacterFiltersToDrizzle(filters: CharacterFilters): DrizzleCharacterWhereInput {
+	const where: DrizzleCharacterWhereInput = {};
 
 	if (filters.search && typeof filters.search === 'string' && filters.search.trim()) {
 		where.OR = [
@@ -106,7 +169,7 @@ function mapCharacterFiltersToPrisma(filters: CharacterFilters): Prisma.Characte
 	}
 
 	if (filters.level) {
-		const levelFilter: Prisma.IntFilter = {};
+		const levelFilter: { gte?: number; lte?: number } = {};
 		if (filters.level.min !== undefined) {
 			levelFilter.gte = filters.level.min;
 		}
@@ -135,3 +198,19 @@ function mapCharacterFiltersToPrisma(filters: CharacterFilters): Prisma.Characte
 	}
 	return where;
 }
+
+// Mantener funciones legacy con nombres de Prisma por compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar mapCreateCharacterDataToDrizzle en su lugar
+ */
+export const mapCreateCharacterDataToPrisma = mapCreateCharacterDataToDrizzle;
+
+/**
+ * @deprecated Usar mapUpdateCharacterDataToDrizzle en su lugar
+ */
+export const mapUpdateCharacterDataToPrisma = mapUpdateCharacterDataToDrizzle;
+
+/**
+ * @deprecated Usar mapCharacterSearchOptionsToDrizzle en su lugar
+ */
+export const mapCharacterSearchOptionsToPrisma = mapCharacterSearchOptionsToDrizzle;

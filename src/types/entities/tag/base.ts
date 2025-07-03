@@ -1,9 +1,28 @@
-import type { Prisma, Tag } from '@prisma/client';
+/**
+ * 🏷️ TAG BASE TYPES - MIGRADO A DRIZZLE
+ *
+ * Tipos base para tags usando tipos locales de Drizzle.
+ * Eliminadas todas las dependencias de @prisma/client.
+ *
+ * @updated 2025-01-27
+ */
 
 /**
- * 🗿 Modelo base de Tag, directamente desde Prisma.
+ * 🗿 Modelo base de Tag, derivado del schema de Drizzle.
  */
-export type TagBase = Tag;
+export interface TagBase {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	shortcut: string | null;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /**
  *  COUNTS
@@ -27,34 +46,25 @@ export const TAG_COUNTS_RELATIONS = [
 ] as const;
 
 /**
- * 🏭 Prisma `include` para conteos de Tag.
+ * 🤖 El tipo de un Tag con sus conteos de relaciones.
  */
-export const tagCounts = {
+export interface TagWithCounts extends TagBase {
 	_count: {
-		select: {
-			images: true,
-			videos: true,
-			albums: true,
-			collections: true,
-			characters: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			properties: true,
-			groups: true,
-		},
-	},
-} satisfies Prisma.TagInclude;
-
-/**
- * 🤖 El tipo de un Tag de Prisma con sus conteos de relaciones.
- */
-export type PrismaTagWithCounts = Prisma.TagGetPayload<{
-	include: typeof tagCounts;
-}>;
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+}
 
 /**
  * 📊 Estadísticas calculadas para un Tag.
@@ -72,6 +82,21 @@ export interface TagStatistics {
  */
 export interface TagWithStats extends TagBase {
 	stats: TagStatistics;
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
 }
 
 /**
@@ -80,8 +105,8 @@ export interface TagWithStats extends TagBase {
 export interface TagCreateInput {
 	name: string;
 	description?: string | null;
-	emoji?: string;
-	color?: string;
+	emoji?: string | null;
+	color?: string | null;
 	category?: string | null;
 	shortcut?: string | null;
 	featuredImage?: string | null;
@@ -94,10 +119,19 @@ export interface TagCreateInput {
 export interface TagUpdateInput {
 	name?: string;
 	description?: string | null;
-	emoji?: string;
-	color?: string;
+	emoji?: string | null;
+	color?: string | null;
 	category?: string | null;
 	shortcut?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }
+
+// ----------------------------------------------------------------
+// TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
+// ----------------------------------------------------------------
+
+/**
+ * @deprecated Usar TagWithCounts en su lugar
+ */
+export type PrismaTagWithCounts = TagWithCounts;

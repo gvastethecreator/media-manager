@@ -5,6 +5,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { Concept } from '@/types/entities/concept';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import * as crypto from 'crypto';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 

@@ -4,6 +4,7 @@ import { folders, images, videos } from '@/lib/drizzle/schema';
 import { asc, count, desc, eq } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
+import * as crypto from 'crypto';
 
 const router = Router();
 
@@ -152,6 +153,7 @@ router.post('/', async (req, res) => {
 		}
 
 		const newFolder = await db.insert(folders).values({
+			id: crypto.randomUUID(),
 			name: data.name,
 			description: data.description,
 			path: data.path,
@@ -159,8 +161,13 @@ router.post('/', async (req, res) => {
 			color: data.color,
 			featuredImage: data.featuredImage,
 			isFavorite: data.isFavorite || false,
+			autoReindex: data.autoReindex,
+			totalFiles: 0,
+			totalSize: 0,
 			parentId: data.parentId,
 			presetId: data.presetId,
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		}).returning({
 			id: folders.id,
 			name: folders.name,

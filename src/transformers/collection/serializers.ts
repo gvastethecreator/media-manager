@@ -2,23 +2,43 @@
  * @file Funciones de serialización/deserialización para la entidad Collection.
  * @module transformers/collection/serializers
  * @description Contiene funciones para manejar la serialización de campos complejos (JSON) de la entidad Collection.
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-	CollectionCreateInput,
-	CollectionEdition,
-	CollectionFilter,
-	CollectionSortBy,
-	CollectionUpdateInput,
+    CollectionCreateInput,
+    CollectionEdition,
+    CollectionFilter,
+    CollectionSortBy,
+    CollectionUpdateInput,
 } from '@/types/entities/collection';
+
+// Tipos locales equivalentes a Prisma (migración a Drizzle)
+type DrizzleCollectionCreateInput = {
+	name: string;
+	description?: string | null;
+	filters?: string;
+	sortBy?: string;
+	editions?: string;
+	// Las relaciones se manejan por separado en Drizzle
+};
+
+type DrizzleCollectionUpdateInput = {
+	name?: string;
+	description?: string | null;
+	filters?: string;
+	sortBy?: string;
+	editions?: string;
+	// Las relaciones se manejan por separado en Drizzle
+};
 
 const logger = serverLogger.withContext('CollectionSerializers');
 
 /**
  * 🔄 Deserializa el campo `filters` de una Collection.
+ * ✅ MIGRADO A DRIZZLE
  * @param jsonString El string JSON que representa los filtros.
  * @returns Un array de `CollectionFilter`.
  * @throws {TransformerError} si el JSON es inválido.
@@ -39,6 +59,7 @@ export function deserializeFilters(jsonString: string | null | undefined): Colle
 
 /**
  * 🔄 Serializa el campo `filters` de una Collection.
+ * ✅ MIGRADO A DRIZZLE
  * @param data El array de `CollectionFilter`.
  * @returns El string JSON.
  * @throws {TransformerError} si la serialización falla.
@@ -57,6 +78,7 @@ export function serializeFilters(data: CollectionFilter[] | null | undefined): s
 
 /**
  * 🔄 Deserializa el campo `sortBy` de una Collection.
+ * ✅ MIGRADO A DRIZZLE
  * @param jsonString El string JSON que representa el orden.
  * @returns Un objeto `CollectionSortBy`.
  * @throws {TransformerError} si el JSON es inválido.
@@ -76,6 +98,7 @@ export function deserializeSortBy(jsonString: string | null | undefined): Collec
 
 /**
  * 🔄 Serializa el campo `sortBy` de una Collection.
+ * ✅ MIGRADO A DRIZZLE
  * @param data El objeto `CollectionSortBy`.
  * @returns El string JSON.
  * @throws {TransformerError} si la serialización falla.
@@ -94,6 +117,7 @@ export function serializeSortBy(data: CollectionSortBy | null | undefined): stri
 
 /**
  * 🔄 Deserializa el campo `editions` de una Collection.
+ * ✅ MIGRADO A DRIZZLE
  * @param jsonString El string JSON que representa las ediciones.
  * @returns Un array de `CollectionEdition`.
  * @throws {TransformerError} si el JSON es inválido.
@@ -114,6 +138,7 @@ export function deserializeEditions(jsonString: string | null | undefined): Coll
 
 /**
  * 🔄 Serializa el campo `editions` de una Collection.
+ * ✅ MIGRADO A DRIZZLE
  * @param data El array de `CollectionEdition`.
  * @returns El string JSON.
  * @throws {TransformerError} si la serialización falla.
@@ -131,59 +156,51 @@ export function serializeEditions(data: CollectionEdition[] | null | undefined):
 }
 
 /**
- * 🔄 Serializa los datos para crear una colección en Prisma.
+ * 🔄 Serializa los datos para crear una colección en Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function toPrismaCollectionCreate(data: CollectionCreateInput): Prisma.CollectionCreateInput {
+export function toDrizzleCollectionCreate(data: CollectionCreateInput): DrizzleCollectionCreateInput {
 	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
-	const prismaData: Prisma.CollectionCreateInput = {
+
+	// En Drizzle, las relaciones se manejan por separado
+	// Los IDs se almacenan como metadata o se crean relaciones en tablas de unión
+	const drizzleData: DrizzleCollectionCreateInput = {
 		...rest,
+		// Serializar campos JSON si existen
+		filters: rest.filters ? serializeFilters(rest.filters) : undefined,
+		sortBy: rest.sortBy ? serializeSortBy(rest.sortBy) : undefined,
+		editions: rest.editions ? serializeEditions(rest.editions) : undefined,
 	};
 
-	// Conectar relaciones si existen
-	if (imageIds && imageIds.length > 0) {
-		prismaData.images = { connect: imageIds.map((id) => ({ id })) };
-	}
-	if (tagIds && tagIds.length > 0) {
-		prismaData.tags = { connect: tagIds.map((id) => ({ id })) };
-	}
-	if (groupIds && groupIds.length > 0) {
-		prismaData.groups = { connect: groupIds.map((id) => ({ id })) };
-	}
-	if (propertyIds && propertyIds.length > 0) {
-		prismaData.properties = { connect: propertyIds.map((id) => ({ id })) };
-	}
-	if (wildcardIds && wildcardIds.length > 0) {
-		prismaData.wildcards = { connect: wildcardIds.map((id) => ({ id })) };
-	}
-
-	return prismaData;
+	return drizzleData;
 }
 
 /**
- * 🔄 Serializa los datos para actualizar una colección en Prisma.
+ * 🔄 Serializa los datos para actualizar una colección en Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function toPrismaCollectionUpdate(data: CollectionUpdateInput): Prisma.CollectionUpdateInput {
+export function toDrizzleCollectionUpdate(data: CollectionUpdateInput): DrizzleCollectionUpdateInput {
 	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
-	const prismaData: Prisma.CollectionUpdateInput = {
+
+	// En Drizzle, las relaciones se manejan por separado
+	const drizzleData: DrizzleCollectionUpdateInput = {
 		...rest,
+		// Serializar campos JSON si existen
+		filters: rest.filters ? serializeFilters(rest.filters) : undefined,
+		sortBy: rest.sortBy ? serializeSortBy(rest.sortBy) : undefined,
+		editions: rest.editions ? serializeEditions(rest.editions) : undefined,
 	};
 
-	// Actualizar relaciones si se proporcionan
-	if (imageIds !== undefined) {
-		prismaData.images = { set: imageIds.map((id) => ({ id })) };
-	}
-	if (tagIds !== undefined) {
-		prismaData.tags = { set: tagIds.map((id) => ({ id })) };
-	}
-	if (groupIds !== undefined) {
-		prismaData.groups = { set: groupIds.map((id) => ({ id })) };
-	}
-	if (propertyIds !== undefined) {
-		prismaData.properties = { set: propertyIds.map((id) => ({ id })) };
-	}
-	if (wildcardIds !== undefined) {
-		prismaData.wildcards = { set: wildcardIds.map((id) => ({ id })) };
-	}
-
-	return prismaData;
+	return drizzleData;
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar toDrizzleCollectionCreate
+ */
+export const toPrismaCollectionCreate = toDrizzleCollectionCreate;
+
+/**
+ * @deprecated Usar toDrizzleCollectionUpdate
+ */
+export const toPrismaCollectionUpdate = toDrizzleCollectionUpdate;
