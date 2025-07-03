@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { FavoriteWithStats } from '@/types/entities/favorite';
 import type { ImageWithStats } from '@/types/entities/image';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface FavoriteFilters {
 	search?: string;
@@ -60,7 +60,7 @@ export function useFavorites(filters: FavoriteFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<FavoritesResponse>(`/favorites?${params.toString()}`);
+			return apiClient.get<FavoritesResponse>(`/favorites?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -69,7 +69,7 @@ export function useFavorites(filters: FavoriteFilters = {}) {
 export function useFavorite(id: string) {
 	return useQuery<FavoriteWithStats, Error>({
 		queryKey: favoriteKeys.detail(id),
-		queryFn: () => api.get<FavoriteWithStats>(`/favorites/${id}`),
+		queryFn: () => apiClient.get<FavoriteWithStats>(`/favorites/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -78,7 +78,7 @@ export function useFavorite(id: string) {
 export function useFavoriteImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: favoriteKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/favorites/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/favorites/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -88,7 +88,7 @@ export function useCreateFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<FavoriteWithStats, Error, FavoriteCreateInput>({
-		mutationFn: (data) => api.post<FavoriteWithStats>('/favorites', data),
+		mutationFn: (data) => apiClient.post<FavoriteWithStats>('/favorites', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.lists() });
 		},
@@ -99,7 +99,7 @@ export function useUpdateFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<FavoriteWithStats, Error, { id: string; data: FavoriteUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<FavoriteWithStats>(`/favorites/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<FavoriteWithStats>(`/favorites/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.lists() });
 			queryClient.setQueryData(favoriteKeys.detail(data.id), data);
@@ -111,7 +111,7 @@ export function useDeleteFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/favorites/${id}`),
+		mutationFn: (id) => apiClient.delete(`/favorites/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.lists() });
 			queryClient.removeQueries({ queryKey: favoriteKeys.detail(id) });
@@ -124,7 +124,7 @@ export function useAddImageToFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, { favoriteId: string; imageId: string }>({
-		mutationFn: ({ favoriteId, imageId }) => api.post(`/favorites/${favoriteId}/images/${imageId}`),
+		mutationFn: ({ favoriteId, imageId }) => apiClient.post(`/favorites/${favoriteId}/images/${imageId}`),
 		onSuccess: (_, { favoriteId }) => {
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.images(favoriteId) });
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.detail(favoriteId) });
@@ -136,7 +136,7 @@ export function useRemoveImageFromFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, { favoriteId: string; imageId: string }>({
-		mutationFn: ({ favoriteId, imageId }) => api.delete(`/favorites/${favoriteId}/images/${imageId}`),
+		mutationFn: ({ favoriteId, imageId }) => apiClient.delete(`/favorites/${favoriteId}/images/${imageId}`),
 		onSuccess: (_, { favoriteId }) => {
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.images(favoriteId) });
 			queryClient.invalidateQueries({ queryKey: favoriteKeys.detail(favoriteId) });

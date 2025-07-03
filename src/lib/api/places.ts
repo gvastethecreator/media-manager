@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { PlaceWithStats } from '@/types/entities/place';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface PlaceFilters {
 	search?: string;
@@ -65,7 +65,7 @@ export function usePlaces(filters: PlaceFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<PlacesResponse>(`/places?${params.toString()}`);
+			return apiClient.get<PlacesResponse>(`/places?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -74,7 +74,7 @@ export function usePlaces(filters: PlaceFilters = {}) {
 export function usePlace(id: string) {
 	return useQuery<PlaceWithStats, Error>({
 		queryKey: placeKeys.detail(id),
-		queryFn: () => api.get<PlaceWithStats>(`/places/${id}`),
+		queryFn: () => apiClient.get<PlaceWithStats>(`/places/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -83,7 +83,7 @@ export function usePlace(id: string) {
 export function usePlaceImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: placeKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/places/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/places/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -93,7 +93,7 @@ export function useCreatePlace() {
 	const queryClient = useQueryClient();
 
 	return useMutation<PlaceWithStats, Error, PlaceCreateInput>({
-		mutationFn: (data) => api.post<PlaceWithStats>('/places', data),
+		mutationFn: (data) => apiClient.post<PlaceWithStats>('/places', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: placeKeys.lists() });
 		},
@@ -104,7 +104,7 @@ export function useUpdatePlace() {
 	const queryClient = useQueryClient();
 
 	return useMutation<PlaceWithStats, Error, { id: string; data: PlaceUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<PlaceWithStats>(`/places/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<PlaceWithStats>(`/places/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: placeKeys.lists() });
 			queryClient.setQueryData(placeKeys.detail(data.id), data);
@@ -116,7 +116,7 @@ export function useDeletePlace() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/places/${id}`),
+		mutationFn: (id) => apiClient.delete(`/places/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: placeKeys.lists() });
 			queryClient.removeQueries({ queryKey: placeKeys.detail(id) });
@@ -128,7 +128,7 @@ export function useDeletePlace() {
 export function useRecentPlaceMedia(placeId: string, limit: number = 6) {
   return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
     queryKey: [...placeKeys.detail(placeId), 'media', limit],
-    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/places/${placeId}/media?limit=${limit}`),
+    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/places/${placeId}/media?limit=${limit}`),
     enabled: !!placeId,
   });
 }
