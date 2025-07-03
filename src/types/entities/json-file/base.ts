@@ -39,3 +39,17 @@ export interface JsonFileWithStats extends JsonFileBase {
  * Alias de compatibilidad para código legacy
  */
 export type JsonFileComplete = JsonFileWithStats;
+
+// --- TIPOS PARA MUTACIONES ---
+
+/**
+ * 🆕 Tipo para crear un nuevo JsonFile
+ * Omite campos autogenerados (id, timestamps)
+ */
+export type JsonFileCreateInput = Omit<JsonFileBase, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * ✏️ Tipo para actualizar un JsonFile existente
+ * Todos los campos son opcionales excepto id
+ */
+export type JsonFileUpdateInput = Partial<JsonFileCreateInput>;

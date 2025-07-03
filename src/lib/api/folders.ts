@@ -1,6 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFolder, deleteFolder, findFolders, getFolder, getAllFolders, moveFolder, reindexFolder, reindexAllFolders, toggleFolderFavorite, updateFolder } from '@/app/actions/folders/folder.actions';
 import type { FolderWithStats } from '@/types/entities/folder';
+import {
+	createFolder,
+	deleteFolder,
+	findFolders,
+	getAllFolders,
+	getFolder,
+	getFolderIdByPath,
+	getFolderName,
+	getFolderPath,
+	getFolderStats,
+	getParentFolderId,
+	getRecentFolderImages,
+	getRootFolderId,
+	moveFolder,
+	reindexAllFolders,
+	reindexFolder,
+	toggleFolderFavorite,
+	updateFolder,
+} from './services/folders';
 
 export interface FolderFilters {
 	parentId?: string | null;
@@ -50,7 +68,17 @@ export function useFolders(filters: FolderFilters = {}) {
 		queryKey: folderKeys.list(filters),
 		queryFn: async () => {
 			const result = await findFolders(filters);
-			return { data: result.folders, pagination: { total: result.total, limit: filters.limit || 50, offset: filters.offset || 0, hasNext: (filters.offset || 0) + (filters.limit || 50) < result.total, hasPrev: (filters.offset || 0) > 0 } };
+			// Ajustado para coincidir con la nueva estructura de API
+			return {
+				data: result.data,
+				pagination: {
+					total: result.pagination.total,
+					limit: filters.limit || 50,
+					offset: filters.offset || 0,
+					hasNext: (filters.offset || 0) + (filters.limit || 50) < result.pagination.total,
+					hasPrev: (filters.offset || 0) > 0,
+				},
+			};
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -114,15 +142,13 @@ export function useDeleteFolder() {
 export function useMoveFolder() {
 	const queryClient = useQueryClient();
 
-	return useMutation<FolderWithStats, Error, { folderId: string; newParentId: string | null }>(
-		{
-			mutationFn: ({ folderId, newParentId }) => moveFolder(folderId, newParentId),
-			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
-				queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
-			},
-		}
-	);
+	return useMutation<FolderWithStats, Error, { folderId: string; newParentId: string | null }>({
+		mutationFn: ({ folderId, newParentId }) => moveFolder(folderId, newParentId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+		},
+	});
 }
 
 export function useToggleFolderFavorite() {
@@ -162,68 +188,71 @@ export function useReindexAllFolders() {
 }
 
 // Hook para obtener imágenes recientes de una carpeta
-export function useRecentFolderImages(folderId: string, limit: number = 4) {
-  return useQuery<string[], Error>({
-    queryKey: [...folderKeys.detail(folderId), 'recent-images', limit],
-    queryFn: () => getRecentFolderImages(folderId, limit),
-    enabled: !!folderId,
-  });
+export function useRecentFolderImages(folderId: string, limit = 4) {
+	return useQuery<string[], Error>({
+		queryKey: [...folderKeys.detail(folderId), 'recent-images', limit],
+		queryFn: () => getRecentFolderImages(folderId, limit),
+		enabled: !!folderId,
+	});
 }
 
 // Hook para obtener estadísticas de una carpeta
 export function useFolderStats(folderId: string) {
-  return useQuery<{
-    totalImages: number;
-    totalVideos: number;
-    totalSize: number;
-    lastActivity: Date | null;
-  }, Error>({
-    queryKey: [...folderKeys.detail(folderId), 'stats'],
-    queryFn: () => getFolderStats(folderId),
-    enabled: !!folderId,
-  });
+	return useQuery<
+		{
+			totalImages: number;
+			totalVideos: number;
+			totalSize: number;
+			lastActivity: Date | null;
+		},
+		Error
+	>({
+		queryKey: [...folderKeys.detail(folderId), 'stats'],
+		queryFn: () => getFolderStats(folderId),
+		enabled: !!folderId,
+	});
 }
 
 // Hook para obtener el ID de la carpeta raíz
 export function useRootFolderId() {
-  return useQuery<string, Error>({
-    queryKey: [...folderKeys.all, 'root-id'],
-    queryFn: () => getRootFolderId(),
-  });
+	return useQuery<string, Error>({
+		queryKey: [...folderKeys.all, 'root-id'],
+		queryFn: () => getRootFolderId(),
+	});
 }
 
 // Hook para obtener la ruta de una carpeta por su ID
 export function useFolderPath(folderId: string) {
-  return useQuery<string, Error>({
-    queryKey: [...folderKeys.detail(folderId), 'path'],
-    queryFn: () => getFolderPath(folderId),
-    enabled: !!folderId,
-  });
+	return useQuery<string, Error>({
+		queryKey: [...folderKeys.detail(folderId), 'path'],
+		queryFn: () => getFolderPath(folderId),
+		enabled: !!folderId,
+	});
 }
 
 // Hook para obtener el nombre de una carpeta por su ID
 export function useFolderName(folderId: string) {
-  return useQuery<string, Error>({
-    queryKey: [...folderKeys.detail(folderId), 'name'],
-    queryFn: () => getFolderName(folderId),
-    enabled: !!folderId,
-  });
+	return useQuery<string, Error>({
+		queryKey: [...folderKeys.detail(folderId), 'name'],
+		queryFn: () => getFolderName(folderId),
+		enabled: !!folderId,
+	});
 }
 
 // Hook para obtener el ID de una carpeta por su ruta
 export function useFolderIdByPath(folderPath: string) {
-  return useQuery<string, Error>({
-    queryKey: [...folderKeys.all, 'by-path', folderPath],
-    queryFn: () => getFolderIdByPath(folderPath),
-    enabled: !!folderPath,
-  });
+	return useQuery<string, Error>({
+		queryKey: [...folderKeys.all, 'by-path', folderPath],
+		queryFn: () => getFolderIdByPath(folderPath),
+		enabled: !!folderPath,
+	});
 }
 
 // Hook para obtener el ID de la carpeta padre
 export function useParentFolderId(folderId: string) {
-  return useQuery<string | null, Error>({
-    queryKey: [...folderKeys.detail(folderId), 'parent-id'],
-    queryFn: () => getParentFolderId(folderId),
-    enabled: !!folderId,
-  });
+	return useQuery<string | null, Error>({
+		queryKey: [...folderKeys.detail(folderId), 'parent-id'],
+		queryFn: () => getParentFolderId(folderId),
+		enabled: !!folderId,
+	});
 }

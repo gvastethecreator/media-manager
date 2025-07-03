@@ -2,18 +2,64 @@
  * @file Funciones para mapear y transformar datos de la entidad Place.
  * @module transformers/place/mappers
  * @description Contiene funciones para:
- *              1. Transformar la entrada de la app (forms, actions) a tipos de Prisma (create/update).
- *              2. Transformar los datos de Prisma a tipos enriquecidos de la app (PlaceWithStats).
+ *              1. Transformar la entrada de la app (forms, actions) a tipos de Drizzle (create/update).
+ *              2. Transformar los datos de Drizzle a tipos enriquecidos de la app (PlaceWithStats).
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
 import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats, PrismaPlaceWithCounts } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
+// Tipos locales equivalentes a Prisma (migración a Drizzle)
+type DrizzleCreatePlaceData = {
+	name: string;
+	description?: string | null;
+	region?: string | null;
+	type?: string | null;
+	climate?: string | null;
+	population?: string | null;
+	government?: string | null;
+	lore?: string | null;
+	history?: string | null;
+	dangers: string; // JSON
+	resources: string; // JSON
+	stats: string; // JSON
+	filters: string; // JSON
+	isFavorite?: boolean;
+	category?: string | null;
+};
+
+type DrizzleUpdatePlaceData = Partial<DrizzleCreatePlaceData>;
+
+type DrizzleOrderBy = {
+	[key: string]: 'asc' | 'desc';
+};
+
+type DrizzleWhereFilter = {
+	AND?: DrizzleWhereFilter[];
+	OR?: DrizzleWhereFilter[];
+	name?: { contains?: string; equals?: string };
+	description?: { contains?: string; equals?: string };
+	lore?: { contains?: string; equals?: string };
+	history?: { contains?: string; equals?: string };
+	category?: { equals?: string };
+	type?: { equals?: string };
+	region?: { equals?: string };
+	isFavorite?: boolean;
+};
+
+type DrizzleFindManyArgs = {
+	where?: DrizzleWhereFilter;
+	orderBy?: DrizzleOrderBy;
+	skip?: number;
+	take?: number;
+};
+
 /**
- * 🗺️ Transforma un objeto Place de Prisma a un objeto PlaceWithStats enriquecido.
+ * 🗺️ Transforma un objeto Place de Drizzle a un objeto PlaceWithStats enriquecido.
+ * ✅ MIGRADO A DRIZZLE
  *
  * @param place - El objeto de la base de datos, incluyendo los `_count` de relaciones.
  * @returns Un objeto PlaceWithStats con campos JSON parseados y estadísticas calculadas.
@@ -61,11 +107,12 @@ export function toPlaceWithStats(place: PrismaPlaceWithCounts): PlaceWithStats {
 }
 
 /**
- * Mapea la entrada de creación de un lugar al formato de Prisma.
+ * Mapea la entrada de creación de un lugar al formato de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  * @param input - Los datos para crear el lugar, incluyendo IDs de relaciones.
- * @returns Datos listos para `prisma.place.create()`.
+ * @returns Datos listos para inserción en Drizzle.
  */
-export function toCreateData(input: PlaceCreateInput): Prisma.PlaceCreateInput {
+export function toCreateDataForDrizzle(input: PlaceCreateInput): DrizzleCreatePlaceData {
 	const {
 		images,
 		notes,
@@ -86,25 +133,17 @@ export function toCreateData(input: PlaceCreateInput): Prisma.PlaceCreateInput {
 		resources: JSON.stringify(input.resources || []),
 		stats: input.stats ? JSON.stringify(input.stats) : '{}',
 		filters: input.filters ? JSON.stringify(input.filters) : '{}',
-		images: images ? { connect: images.map((id: string) => ({ id })) } : undefined,
-		notes: notes ? { connect: notes.map((id: string) => ({ id })) } : undefined,
-		tags: tags ? { connect: tags.map((id: string) => ({ id })) } : undefined,
-		characters: characters ? { connect: characters.map((id: string) => ({ id })) } : undefined,
-		collections: collections ? { connect: collections.map((id: string) => ({ id })) } : undefined,
-		concepts: concepts ? { connect: concepts.map((id: string) => ({ id })) } : undefined,
-		prompts: promptIds ? { connect: promptIds.map((id) => ({ id })) } : undefined,
-		wildcards: wildcardIds ? { connect: wildcardIds.map((id) => ({ id })) } : undefined,
-		properties: propertyIds ? { connect: propertyIds.map((id) => ({ id })) } : undefined,
-		groups: groupIds ? { connect: groupIds.map((id) => ({ id })) } : undefined,
+		// Las relaciones se manejan por separado en Drizzle con junction tables
 	};
 }
 
 /**
- * Mapea la entrada de actualización de un lugar al formato de Prisma.
+ * Mapea la entrada de actualización de un lugar al formato de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  * @param input - Los datos para actualizar el lugar. Puede ser parcial.
- * @returns Datos listos para `prisma.place.update()`.
+ * @returns Datos listos para actualización en Drizzle.
  */
-export function toUpdateData(input: PlaceUpdateInput): Prisma.PlaceUpdateInput {
+export function toUpdateDataForDrizzle(input: PlaceUpdateInput): DrizzleUpdatePlaceData {
 	const {
 		images,
 		notes,
@@ -119,46 +158,38 @@ export function toUpdateData(input: PlaceUpdateInput): Prisma.PlaceUpdateInput {
 		...rest
 	} = input as any; // Usamos 'as any' para manejar las relaciones que no están en el tipo base
 
-	const data: Prisma.PlaceUpdateInput = { ...rest };
+	const data: DrizzleUpdatePlaceData = { ...rest };
 
 	if (input.dangers !== undefined) data.dangers = JSON.stringify(input.dangers);
 	if (input.resources !== undefined) data.resources = JSON.stringify(input.resources);
 	if (input.stats !== undefined) data.stats = JSON.stringify(input.stats);
 	if (input.filters !== undefined) data.filters = JSON.stringify(input.filters);
 
-	if (images !== undefined) data.images = { set: images?.map((id: string) => ({ id })) ?? [] };
-	if (notes !== undefined) data.notes = { set: notes?.map((id: string) => ({ id })) ?? [] };
-	if (tags !== undefined) data.tags = { set: tags?.map((id: string) => ({ id })) ?? [] };
-	if (characters !== undefined) data.characters = { set: characters?.map((id: string) => ({ id })) ?? [] };
-	if (collections !== undefined) data.collections = { set: collections?.map((id: string) => ({ id })) ?? [] };
-	if (concepts !== undefined) data.concepts = { set: concepts?.map((id: string) => ({ id })) ?? [] };
-	if (promptIds !== undefined) data.prompts = { set: promptIds?.map((id) => ({ id })) ?? [] };
-	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map((id) => ({ id })) ?? [] };
-	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map((id) => ({ id })) ?? [] };
-	if (groupIds !== undefined) data.groups = { set: groupIds?.map((id) => ({ id })) ?? [] };
-
+	// Las relaciones se manejan por separado en Drizzle con junction tables
 	return data;
 }
 
 /**
- * Crea la cláusula `orderBy` para las consultas de Prisma.
+ * Crea la cláusula `orderBy` para las consultas de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  * @param options - Opciones de búsqueda que contienen el `orderBy`.
- * @returns El objeto `orderBy` para Prisma.
+ * @returns El objeto `orderBy` para Drizzle.
  */
-export function createOrderBy(options: PlaceSearchOptions = {}): Prisma.PlaceOrderByWithRelationInput | undefined {
+export function createOrderByForDrizzle(options: PlaceSearchOptions = {}): DrizzleOrderBy | undefined {
 	if (options.orderBy) {
-		return options.orderBy as Prisma.PlaceOrderByWithRelationInput;
+		return options.orderBy as DrizzleOrderBy;
 	}
 	return { updatedAt: 'desc' };
 }
 
 /**
- * Crea la cláusula `where` para las consultas de Prisma a partir de los filtros.
+ * Crea la cláusula `where` para las consultas de Drizzle a partir de los filtros.
+ * ✅ MIGRADO A DRIZZLE
  * @param filters - Los filtros de búsqueda de la aplicación.
- * @returns El objeto `where` para Prisma.
+ * @returns El objeto `where` para Drizzle.
  */
-export function createFilter(filters: PlaceSearchOptions['filters'] = {}): Prisma.PlaceWhereInput {
-	const where: Prisma.PlaceWhereInput = {};
+export function createFilterForDrizzle(filters: PlaceSearchOptions['filters'] = {}): DrizzleWhereFilter {
+	const where: DrizzleWhereFilter = {};
 
 	if (filters?.search) {
 		const search = filters.search.trim();
@@ -175,38 +206,48 @@ export function createFilter(filters: PlaceSearchOptions['filters'] = {}): Prism
 	if (filters?.region) where.region = { equals: filters.region };
 	if (filters?.isFavorite) where.isFavorite = true;
 
-	if (filters?.tags && filters.tags.length > 0) {
-		where.tags = { some: { id: { in: filters.tags } } };
-	}
-	if (filters?.characters && filters.characters.length > 0) {
-		where.characters = { some: { id: { in: filters.characters } } };
-	}
-
+	// Las relaciones se manejan con joins separados en Drizzle
 	return where;
 }
 
 /**
- * Mapea las opciones de búsqueda de la aplicación a los argumentos de `findMany` de Prisma.
+ * Mapea las opciones de búsqueda de la aplicación a los argumentos de consulta de Drizzle.
+ * ✅ MIGRADO A DRIZZLE
  * @param options - Opciones de búsqueda de la aplicación.
- * @returns Argumentos para `prisma.place.findMany()`.
+ * @returns Argumentos para consultas de Drizzle.
  */
-export function toSearchOptions(options: PlaceSearchOptions = {}): Prisma.PlaceFindManyArgs {
+export function toSearchOptionsForDrizzle(options: PlaceSearchOptions = {}): DrizzleFindManyArgs {
 	return {
-		where: createFilter(options.filters),
-		orderBy: createOrderBy(options),
+		where: createFilterForDrizzle(options.filters),
+		orderBy: createOrderByForDrizzle(options),
 		skip: options.skip,
 		take: options.take,
-		include: {
-			_count: {
-				select: {
-					images: true,
-					notes: true,
-					tags: true,
-					characters: true,
-					collections: true,
-					concepts: true,
-				},
-			},
-		},
+		// Los counts se manejan por separado en Drizzle
 	};
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar toCreateDataForDrizzle
+ */
+export const toCreateData = toCreateDataForDrizzle;
+
+/**
+ * @deprecated Usar toUpdateDataForDrizzle
+ */
+export const toUpdateData = toUpdateDataForDrizzle;
+
+/**
+ * @deprecated Usar createOrderByForDrizzle
+ */
+export const createOrderBy = createOrderByForDrizzle;
+
+/**
+ * @deprecated Usar createFilterForDrizzle
+ */
+export const createFilter = createFilterForDrizzle;
+
+/**
+ * @deprecated Usar toSearchOptionsForDrizzle
+ */
+export const toSearchOptions = toSearchOptionsForDrizzle;

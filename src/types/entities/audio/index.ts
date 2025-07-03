@@ -10,7 +10,9 @@
 export type { Audio } from '@prisma/client';
 export type {
 	AudioBase,
+	AudioCreateInput,
 	AudioStatistics,
+	AudioUpdateInput,
 	AudioWithStats,
 } from './base';
 

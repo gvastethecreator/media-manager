@@ -1,3 +1,27 @@
+# MIGRACIÓN SERVER ACTIONS → API CALLS
+
+## Estado de migración
+
+- Todas las server actions de conceptos han sido migradas a llamadas API centralizadas en `src/lib/api/services/concepts.ts`.
+- Los stores y hooks relevantes ya consumen el servicio API y no dependen de server actions.
+- Los archivos de server actions (`concept.actions.ts`, `index.ts`) quedan como stubs temporales y pueden eliminarse tras limpieza de imports legacy.
+
+## Checklist de migración
+
+- [x] Migrar store de conceptos a API calls
+- [x] Eliminar imports y dependencias de server actions
+- [x] Marcar archivos legacy como obsoletos
+- [x] Documentar el proceso
+
+## Notas
+
+- Si encuentras algún import de server actions, debe ser reemplazado por el servicio API correspondiente.
+- El patrón a seguir para otras entidades es idéntico: priorizar `src/lib/api/services/*` y limpiar server actions.
+
+---
+
+_Última actualización: 2025-07-03_
+
 # 💭 Concepts Actions
 
 ## 📄 Descripción
@@ -407,4 +431,3 @@ describe('Concepts Actions', () => {
 - **[Store Implementation](../../../store/entities/concept/)**: Gestión de estado cliente
 
 ## Funciones disponibles
-

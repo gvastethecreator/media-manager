@@ -7,10 +7,12 @@
  */
 
 export type {
-	JsonFileBase,
-	JsonFileComplete,
-	JsonFileStatistics,
-	JsonFileWithStats,
+    JsonFileBase,
+    JsonFileComplete,
+    JsonFileCreateInput,
+    JsonFileStatistics,
+    JsonFileUpdateInput,
+    JsonFileWithStats
 } from './base';
 
 // export * from './json-file.schema'; // Descomentar cuando se creen los esquemas Zod

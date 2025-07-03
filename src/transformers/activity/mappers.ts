@@ -1,17 +1,42 @@
 /**
  * @file Funciones de mapeo para la entidad Activity
  * @module transformers/activity/mappers
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import type { Prisma } from '@prisma/client';
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';
 
+// Tipos locales equivalentes a Prisma (migración a Drizzle)
+type DrizzleCreateActivityData = {
+	type: string;
+	description: string;
+	imageId?: string | null;
+};
+
+type DrizzleWhereFilter = {
+	AND?: DrizzleWhereFilter[];
+	OR?: DrizzleWhereFilter[];
+	type?: { in?: string[] };
+	imageId?: string;
+	createdAt?: { gte?: Date; lte?: Date };
+	description?: { contains?: string };
+};
+
+type DrizzleFindManyArgs = {
+	where?: DrizzleWhereFilter;
+	take?: number;
+	skip?: number;
+	orderBy?: { [key: string]: 'asc' | 'desc' };
+	// Los includes se manejan por separado en Drizzle
+};
+
 /**
- * Mapea datos de creación de actividad a formato compatible con Prisma
+ * Mapea datos de creación de actividad a formato compatible con Drizzle
+ * ✅ MIGRADO A DRIZZLE
  * @param data Datos de creación de actividad
- * @returns Objeto formateado para Prisma
+ * @returns Objeto formateado para Drizzle
  */
-export function mapCreateActivityDataToPrisma(data: CreateActivityData) {
+export function mapCreateActivityDataToDrizzle(data: CreateActivityData): DrizzleCreateActivityData {
 	return {
 		type: data.type,
 		description: data.description,
@@ -20,12 +45,13 @@ export function mapCreateActivityDataToPrisma(data: CreateActivityData) {
 }
 
 /**
- * Mapea filtros de actividad a formato compatible con Prisma para consultas
+ * Mapea filtros de actividad a formato compatible con Drizzle para consultas
+ * ✅ MIGRADO A DRIZZLE
  * @param filters Filtros de actividad
- * @returns Objeto de condiciones para Prisma
+ * @returns Objeto de condiciones para Drizzle
  */
-export function mapActivityFiltersToPrisma(filters: ActivityFilters): Prisma.ActivityFindManyArgs {
-	const where: Prisma.ActivityWhereInput = {};
+export function mapActivityFiltersToDrizzle(filters: ActivityFilters): DrizzleFindManyArgs {
+	const where: DrizzleWhereFilter = {};
 
 	// Filtrar por tipos de actividad
 	if (filters.types && filters.types.length > 0) {
@@ -62,22 +88,15 @@ export function mapActivityFiltersToPrisma(filters: ActivityFilters): Prisma.Act
 		take: filters.limit || 20,
 		skip: filters.offset || 0,
 		orderBy: {
-			createdAt: 'desc' as Prisma.SortOrder,
+			createdAt: 'desc',
 		},
-		include: {
-			image: {
-				select: {
-					id: true,
-					name: true,
-					path: true,
-				},
-			},
-		},
+		// Los includes se manejan por separado en Drizzle con joins
 	};
 }
 
 /**
  * Genera un mensaje descriptivo basado en el tipo de actividad y datos
+ * ✅ MIGRADO A DRIZZLE
  * @param type Tipo de actividad
  * @param data Datos adicionales
  * @returns Mensaje descriptivo
@@ -142,3 +161,14 @@ export function generateActivityDescription(type: ActivityType | string, data: R
 	// Reemplazar variables en la plantilla
 	return template.replace(/\${(\w+)}/g, (_, key) => data[key] || '[?]');
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar mapCreateActivityDataToDrizzle
+ */
+export const mapCreateActivityDataToPrisma = mapCreateActivityDataToDrizzle;
+
+/**
+ * @deprecated Usar mapActivityFiltersToDrizzle
+ */
+export const mapActivityFiltersToPrisma = mapActivityFiltersToDrizzle;
