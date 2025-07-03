@@ -1,4 +1,131 @@
-# 🖼️ Image Manager
+# Sistema de Gestión Multimedia ( codename Image Manager )
+
+Sistema integral para la gestión inteligente de archivos multimedia, diseñado para manejar grandes volúmenes de contenido con alto rendimiento en uso local.
+
+## ¿Qué es?
+
+Nació como una solución para organizar grandes cantidades de imágenes generadas con IA, pero evolucionó hacia un organizador multimedia completo que no solo indexa archivos y extrae metadatos, sino que también permite crear sistemas de organización complejos y personalizables.
+
+La filosofía del sistema combina **organización física** (estructura de carpetas) con **organización digital** (base de datos con etiquetas, álbumes, relaciones) para crear una gestión flexible sin necesidad de mover archivos de su ubicación original.
+
+## 📂 Tipos de Archivo Soportados
+
+### Multimedia Principal
+
+- **Imágenes**: jpg, png, webp, gif
+- **Videos**: mp4, webm, mov, avi, mkv
+- **Audio**: wav, flac, mp3, ogg, m4a, aac, wma
+
+### Contenido Especializado
+
+- **Modelos 3D**: obj, fbx, glb (optimizados para web)
+- **Documentos**: md, txt, csv
+- **Datos estructurados**: json
+
+## 🏗️ Sistema de Organización
+
+### 📋 Entidades Básicas
+
+#### 🏷️ Tags
+
+- Etiquetas simples para categorización rápida
+- Sistema de colores y emojis personalizables
+- Relaciones flexibles con todo tipo de contenido
+
+#### 📸 Álbumes
+
+- Agrupaciones temáticas de archivos multimedia
+- Ideal para colecciones temporales o proyectos específicos
+- Metadata enriquecida con descripción y configuración visual
+
+#### 📂 Grupos
+
+- Meta-organizadores que permiten agrupar cualquier entidad
+- Sistema jerárquico para crear taxonomías complejas
+- Configuración avanzada de filtros y ordenamiento
+
+### 🎭 Entidades Dinámicas
+
+#### 🔧 Wildcards
+
+- Plantillas y variables dinámicas para automatización
+- Sistema jerárquico con relaciones padre-hijo
+- Generación de contenido parametrizable
+
+#### 🔍 Properties
+
+- Descriptores de características específicas (color, forma, estilo)
+- Sistema de metadatos granular para búsquedas avanzadas
+
+### 🌟 Colecciones NFT
+
+#### 💎 Collections
+
+- Organización específica para NFTs y arte digital
+- Metadatos blockchain: contratos, tokens, networks, pricing
+- Integración con plataformas y marketplaces
+- Gestión de ediciones y rareza
+
+### 🧠 Entidades Abstractas
+
+#### 💡 Concepts
+
+- Ideas, conceptos abstractos y referencias conceptuales
+- Sistema de conocimiento interconectado
+- Base para sistemas de IA y generación automática
+
+#### 📝 Notes
+
+- Sistema de anotaciones con prioridades y estados
+- Markdown compatible para documentación rica
+- Integración con flujos de trabajo
+
+#### 🎯 Prompts
+
+- Plantillas para generación de IA
+- Parametrización avanzada con wildcards
+- Versionado y optimización iterativa
+
+### 🗺️ Worldbuilding
+
+#### 👤 Characters
+
+- Personajes completos con stats, backstory, relaciones
+- Sistema de niveles, clases y alineamientos
+- Perfiles psicológicos y sociales detallados
+
+#### 📍 Places
+
+- Ubicaciones con clima, gobierno, población
+- Historia, peligros y recursos
+- Integración geográfica y narrativa
+
+#### 🎯 World Items
+
+- Objetos del mundo con atributos y efectos
+- Sistema de rareza y requisitos
+- Estadísticas y mecánicas de juego
+
+### 📚 Gestión Documental
+
+#### 📄 Documents
+
+- Archivos markdown y texto plano
+- Compatible con Obsidian vaults
+- Sistema de enlaces bidireccionales
+
+#### ⚙️ Workflows
+
+- Flujos de trabajo complejos en JSON
+- Automatización de procesos
+- Integración con herramientas externas
+
+### ⭐ Sistema de Favoritos Multi-Perfil
+
+- Favoritos personalizados por perfil de usuario
+- Cualquier entidad puede ser marcada como favorita
+- Sincronización inteligente entre perfiles
+
 
 **Sistema avanzado de gestión de imágenes y media** construido con React 19, Vite y Drizzle ORM.
 
@@ -378,6 +505,24 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 - ✅ **Tipos consistentes** en toda la aplicación
 - ✅ **Mantenibilidad mejorada** sin duplicación de lógica
 - ✅ **Arquitectura moderna** preparada para el futuro
+
+---
+
+## 🌱 Seeds de Base de Datos (Drizzle ORM)
+
+El sistema de seeds está diseñado para poblar únicamente las **entidades abstractas** (organización, etiquetas, taxonomías, flujos, settings, etc.) y **NO** entidades que dependan de archivos reales (imágenes, videos, audios, etc.).
+
+- Todas las entidades abstractas tienen máximo 2 elementos de ejemplo (excepto folders, que mantiene la estructura original).
+- Seeds disponibles: folders, profiles, tags, albums, collections, groups, properties, wildcards, characters, concepts, prompts, notes, places, worldItems, settings, workflows.
+- No se generan seeds para imágenes, videos, audios, documentos, ni tablas de relaciones many-to-many.
+
+### Ejecución de seeds
+
+```bash
+pnpm seed:drizzle # (o el script correspondiente)
+```
+
+Esto ejecutará todos los seeds en orden de dependencias.
 
 ---
 

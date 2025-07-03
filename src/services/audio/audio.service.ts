@@ -3,7 +3,7 @@
  * @file Servicio de Audio con lógica de negocio
  * @module services/audio.service
  * @description Capa de servicio para la entidad Audio que maneja la lógica de negocio
- * @updated 2025-07-01
+ * @updated 2025-07-03 - ✅ MIGRADO A DRIZZLE + TRANSFORMADORES MODERNOS
  */
 
 import { db } from '@/lib/drizzle';
@@ -12,10 +12,10 @@ import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { fromPrismaAudio, fromPrismaAudios } from '@/transformers/audio/transformer';
-import type { AudioWithStats, AudioCreateInput, AudioUpdateInput } from '@/types/entities/audio';
-import { count, desc, eq } from 'drizzle-orm';
+import { deserializeAudio } from '@/transformers/audio';
+import type { AudioCreateInput, AudioUpdateInput, AudioWithStats, Audio } from '@/types/entities/audio';
 import * as crypto from 'crypto';
+import { count, desc, eq } from 'drizzle-orm';
 
 const audioLogger = serverLogger.withContext('AudioService');
 
@@ -26,6 +26,20 @@ const createAudioError = (
 	cause?: unknown
 ) => {
 	return createEntityErrorObject('AudioError', message, code, cause);
+};
+
+// Función helper para convertir Audio a AudioWithStats
+const addStatsToAudio = (audio: Audio): AudioWithStats => {
+	return {
+		...audio,
+		stats: {
+			duration: audio.duration ?? 0,
+			format: audio.format || 'unknown',
+			bitrate: audio.bitrate || 0,
+			volumePeaks: [],
+			sampleRate: audio.sampleRate || 0,
+		},
+	};
 };
 
 /**
@@ -66,13 +80,23 @@ export async function getAudios(): Promise<AudioWithStats[]> {
 			.from(audios)
 			.orderBy(desc(audios.createdAt));
 
-		// Transformar a formato compatible con Prisma
-		const transformedAudios = drizzleAudios.map((rawAudio) => ({
-			...rawAudio,
-			isFavorite: Boolean(rawAudio.isFavorite),
-		}));
+		// Transformar usando deserializer moderno
+		const audioList = drizzleAudios.map((rawAudio) => {
+			const audio = deserializeAudio({
+				...rawAudio,
+				size: rawAudio.fileSize || 0,
+				filePath: rawAudio.filePath || '',
+				format: rawAudio.codec || null,
+				metadata: rawAudio.metadata || null,
+				thumbnail: rawAudio.featuredImage || null,
+				isPublic: false, // TODO: agregar campo isPublic al schema
+				isFavorite: Boolean(rawAudio.isFavorite),
+				folderId: '', // TODO: agregar relación con folder
+			} as any);
+			return addStatsToAudio(audio);
+		});
 
-		return fromPrismaAudios(transformedAudios as any);
+		return audioList;
 	} catch (error) {
 		audioLogger.error('Error al obtener audios:', error);
 		throw createAudioError('Error al obtener archivos de audio', EntityErrorCode.OPERATION_FAILED, error);
@@ -131,7 +155,7 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 			isFavorite: Boolean(rawAudio.isFavorite),
 		};
 
-		return fromPrismaAudio(transformedAudio as any);
+		return deserializeAudio(transformedAudio as any);
 	} catch (error) {
 		audioLogger.error(`Error al obtener audio ${id}:`, error);
 		throw createAudioError('Error al obtener archivo de audio', EntityErrorCode.OPERATION_FAILED, error);
@@ -174,7 +198,7 @@ export async function createAudio(data: AudioCreateInput): Promise<AudioWithStat
 		}).returning();
 
 		const newAudio = result[0];
-		const audioWithStats = fromPrismaAudio(newAudio as any);
+		const audioWithStats = deserializeAudio(newAudio as any);
 
 		// Emitir eventos
 		await emit({
@@ -299,7 +323,7 @@ export async function audioExists(id: string): Promise<boolean> {
 			.select({ count: count() })
 			.from(audios)
 			.where(eq(audios.id, id));
-		
+
 		return result[0]?.count > 0;
 	} catch (error) {
 		audioLogger.error(`Error al verificar existencia del audio ${id}:`, error);
@@ -327,15 +351,15 @@ export async function getAudioCount(): Promise<number> {
 export async function getAudioFormatStats() {
 	try {
 		audioLogger.info('Obteniendo estadísticas de formato de audio');
-		
+
 		// **MIGRACIÓN A DRIZZLE**
 		// Por ahora implementación básica sin groupBy (TODO: implementar groupBy en Drizzle)
 		const allAudios = await db
-			.select({ 
-				format: audios.format, 
-				size: audios.size, 
-				duration: audios.duration, 
-				bitrate: audios.bitrate 
+			.select({
+				format: audios.format,
+				size: audios.size,
+				duration: audios.duration,
+				bitrate: audios.bitrate
 			})
 			.from(audios);
 
@@ -382,7 +406,7 @@ export async function getAudioFormatStats() {
 export async function getAudioGenreStats() {
 	try {
 		audioLogger.info('Obteniendo estadísticas de géneros de audio');
-		
+
 		// **MIGRACIÓN A DRIZZLE**
 		const allAudios = await db
 			.select({ genre: audios.genre })

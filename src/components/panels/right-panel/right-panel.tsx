@@ -1,6 +1,6 @@
 import { PanelRightClose, X } from 'lucide-react';
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react';
-import { DetailsPanel } from '@/components/features/file-browser/details/details-panel';
+import { DetailsPanel } from '@/components/panels/details-panel/details-panel';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Carga perezosa del StatsPanel compatible con Vite/React 19
-const StatsPanel = lazy(() => import('../stats/stats-panel'));
+const StatsPanel = lazy(() => import('../stats-panel/stats-panel'));
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = memo(function LazyStatsPanel() {

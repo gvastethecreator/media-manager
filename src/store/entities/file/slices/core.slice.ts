@@ -3,11 +3,11 @@
  * @module store/entities/file/slices/core
  */
 
-import { StateCreator } from 'zustand';
+import { getDirectoryInfo } from '@/services/file/file.service';
 import { transformFiles } from '@/transformers/file';
 import { DirectoryReadResult, FileBase } from '@/types/entities/file/base';
 import { EnhancedFile } from '@/types/entities/file/extended';
-import { getDirectoryInfo } from '../../../../app/actions/files/file.actions';
+import { StateCreator } from 'zustand';
 import { FileStore } from '..';
 
 // Estado
