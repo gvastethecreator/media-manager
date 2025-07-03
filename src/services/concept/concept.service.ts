@@ -1,11 +1,25 @@
-import type { ConceptCreate } from '@/app/actions/concepts/concept.actions';
+// Tipo local para crear conceptos
+interface ConceptCreate {
+	name: string;
+	content?: string | null;
+	description?: string | null;
+	category?: string | null;
+	emoji?: string;
+	color?: string;
+	shortcut?: string | null;
+	sortBy?: string | null;
+	filters?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+}
+
 import { db } from '@/lib/drizzle';
 import { concepts } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { Concept } from '@/types/entities/concept';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 

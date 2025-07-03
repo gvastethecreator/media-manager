@@ -15,7 +15,7 @@ import {
 	getQueueStatsByQueue,
 	retryQueueJob,
 	updateQueueJob,
-} from '@/app/actions/queue/queue.actions';
+} from '@/services/queue-job/queue-job.service';
 import type {
 	CreateQueueJobInput,
 	PaginatedQueueJobs,

@@ -3,16 +3,16 @@
  * @module store/entities/tag/slices/core.slice
  */
 
-import { StateCreator } from 'zustand';
-import {
-	createTag as createTagAction,
-	deleteTag as deleteTagAction,
-	getTags as getTagsAction,
-	updateTag as updateTagAction,
-} from '@/app/actions/tags/tag.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
+import {
+    createTag as createTagAction,
+    deleteTag as deleteTagAction,
+    getTags as getTagsAction,
+    updateTag as updateTagAction,
+} from '@/services/tag/tag.service';
 import { toastService } from '@/services/toast';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
+import { StateCreator } from 'zustand';
 import type { TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
