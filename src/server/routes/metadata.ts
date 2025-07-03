@@ -1,6 +1,6 @@
 import express from 'express';
-import { updateImageMetadata, updateMultipleImagesMetadata } from '@/app/actions/images/metadata.actions';
-import { extractAIGenerationInfo } from '@/app/actions/metadata/parsers';
+import { getImageMetadata, updateImageMetadata, clearImageMetadata } from '../services/metadata.service';
+import { extractAIGenerationInfo } from '../services/metadata/parsers.service';
 
 const router = express.Router();
 
@@ -8,20 +8,22 @@ const router = express.Router();
 router.get('/image/:imageId', async (req, res) => {
 	try {
 		const { imageId } = req.params;
+		const metadata = await getImageMetadata(imageId);
+		res.json(metadata);
+	} catch (error) {
+		console.error('Error obteniendo metadatos de imagen:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
 
-		// TODO: Implementar función para obtener metadata existente
-		// Por ahora retornamos estructura base
-		const result = {
-			success: true,
-			metadata: {},
-			aiMetadata: null,
-			errors: [],
-			parser: null,
-		};
-
+// DELETE /metadata/image/:imageId - Limpiar metadata de imagen
+router.delete('/image/:imageId', async (req, res) => {
+	try {
+		const { imageId } = req.params;
+		const result = await clearImageMetadata(imageId);
 		res.json(result);
 	} catch (error) {
-		console.error('Error getting image metadata:', error);
+		console.error('Error limpiando metadatos de imagen:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -73,25 +75,17 @@ router.get('/parsers', async (req, res) => {
 router.put('/image/:imageId', async (req, res) => {
 	try {
 		const { imageId } = req.params;
-		const { metadata } = req.body;
+		const metadata = req.body;
 
 		if (!metadata) {
 			return res.status(400).json({ error: 'Los datos de metadata son requeridos' });
 		}
 
-		await updateImageMetadata(imageId, metadata);
+		const updatedMetadata = await updateImageMetadata(imageId, metadata);
 
-		const result = {
-			success: true,
-			metadata,
-			aiMetadata: null,
-			errors: [],
-			parser: null,
-		};
-
-		res.json(result);
+		res.json(updatedMetadata);
 	} catch (error) {
-		console.error('Error updating image metadata:', error);
+		console.error('Error actualizando metadatos de imagen:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -107,7 +101,8 @@ router.put('/bulk-update', async (req, res) => {
 			});
 		}
 
-		await updateMultipleImagesMetadata(imageIds, metadata);
+		const result = await updateMultipleImagesMetadata(imageIds, metadata);
+		res.json(result);
 
 		res.json({
 			updated: imageIds.length,

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFolder, deleteFolder, findFolders, getFolder, getAllFolders, moveFolder, reindexFolder, reindexAllFolders, toggleFolderFavorite, updateFolder } from '@/app/actions/folders/folder.actions';
 import type { FolderWithStats } from '@/types/entities/folder';
-import { api } from './client';
 
 export interface FolderFilters {
 	parentId?: string | null;
@@ -48,23 +48,18 @@ export const folderKeys = {
 export function useFolders(filters: FolderFilters = {}) {
 	return useQuery<FoldersResponse, Error>({
 		queryKey: folderKeys.list(filters),
-		queryFn: () => {
-			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					params.append(key, String(value));
-				}
-			}
-			return api.get<FoldersResponse>(`/folders?${params.toString()}`);
+		queryFn: async () => {
+			const result = await findFolders(filters);
+			return { data: result.folders, pagination: { total: result.total, limit: filters.limit || 50, offset: filters.offset || 0, hasNext: (filters.offset || 0) + (filters.limit || 50) < result.total, hasPrev: (filters.offset || 0) > 0 } };
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }
 
 export function useFolder(id: string) {
-	return useQuery<FolderWithStats, Error>({
+	return useQuery<FolderWithStats | null, Error>({
 		queryKey: folderKeys.detail(id),
-		queryFn: () => api.get<FolderWithStats>(`/folders/${id}`),
+		queryFn: () => getFolder(id),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -73,7 +68,7 @@ export function useFolder(id: string) {
 export function useFolderTree() {
 	return useQuery<FolderWithStats[], Error>({
 		queryKey: folderKeys.tree(),
-		queryFn: () => api.get<FolderWithStats[]>('/folders/tree'),
+		queryFn: () => getAllFolders(),
 		staleTime: 1000 * 120, // 2 minutos
 	});
 }
@@ -82,7 +77,7 @@ export function useCreateFolder() {
 	const queryClient = useQueryClient();
 
 	return useMutation<FolderWithStats, Error, FolderCreateInput>({
-		mutationFn: (data) => api.post<FolderWithStats>('/folders', data),
+		mutationFn: (data) => createFolder(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
@@ -94,7 +89,7 @@ export function useUpdateFolder() {
 	const queryClient = useQueryClient();
 
 	return useMutation<FolderWithStats, Error, { id: string; data: FolderUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<FolderWithStats>(`/folders/${id}`, data),
+		mutationFn: ({ id, data }) => updateFolder(id, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
@@ -107,7 +102,7 @@ export function useDeleteFolder() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/folders/${id}`),
+		mutationFn: (id) => deleteFolder(id),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
@@ -116,11 +111,61 @@ export function useDeleteFolder() {
 	});
 }
 
+export function useMoveFolder() {
+	const queryClient = useQueryClient();
+
+	return useMutation<FolderWithStats, Error, { folderId: string; newParentId: string | null }>(
+		{
+			mutationFn: ({ folderId, newParentId }) => moveFolder(folderId, newParentId),
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+				queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+			},
+		}
+	);
+}
+
+export function useToggleFolderFavorite() {
+	const queryClient = useQueryClient();
+
+	return useMutation<FolderWithStats, Error, string>({
+		mutationFn: (id) => toggleFolderFavorite(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+		},
+	});
+}
+
+export function useReindexFolder() {
+	const queryClient = useQueryClient();
+
+	return useMutation<FolderWithStats, Error, string>({
+		mutationFn: (id) => reindexFolder(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+		},
+	});
+}
+
+export function useReindexAllFolders() {
+	const queryClient = useQueryClient();
+
+	return useMutation<{ processed: number; errors: string[] }, Error, void>({
+		mutationFn: () => reindexAllFolders(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+		},
+	});
+}
+
 // Hook para obtener imágenes recientes de una carpeta
 export function useRecentFolderImages(folderId: string, limit: number = 4) {
   return useQuery<string[], Error>({
     queryKey: [...folderKeys.detail(folderId), 'recent-images', limit],
-    queryFn: () => api.get<string[]>(`/folders/${folderId}/recent-images?limit=${limit}`),
+    queryFn: () => getRecentFolderImages(folderId, limit),
     enabled: !!folderId,
   });
 }
@@ -134,12 +179,7 @@ export function useFolderStats(folderId: string) {
     lastActivity: Date | null;
   }, Error>({
     queryKey: [...folderKeys.detail(folderId), 'stats'],
-    queryFn: () => api.get<{
-      totalImages: number;
-      totalVideos: number;
-      totalSize: number;
-      lastActivity: Date | null;
-    }>(`/folders/${folderId}/stats`),
+    queryFn: () => getFolderStats(folderId),
     enabled: !!folderId,
   });
 }
@@ -148,7 +188,7 @@ export function useFolderStats(folderId: string) {
 export function useRootFolderId() {
   return useQuery<string, Error>({
     queryKey: [...folderKeys.all, 'root-id'],
-    queryFn: () => api.get<{ id: string }>('/folders/root').then(res => res.id),
+    queryFn: () => getRootFolderId(),
   });
 }
 
@@ -156,7 +196,7 @@ export function useRootFolderId() {
 export function useFolderPath(folderId: string) {
   return useQuery<string, Error>({
     queryKey: [...folderKeys.detail(folderId), 'path'],
-    queryFn: () => api.get<{ path: string }>(`/folders/${folderId}/path`).then(res => res.path),
+    queryFn: () => getFolderPath(folderId),
     enabled: !!folderId,
   });
 }
@@ -165,7 +205,7 @@ export function useFolderPath(folderId: string) {
 export function useFolderName(folderId: string) {
   return useQuery<string, Error>({
     queryKey: [...folderKeys.detail(folderId), 'name'],
-    queryFn: () => api.get<{ name: string }>(`/folders/${folderId}/name`).then(res => res.name),
+    queryFn: () => getFolderName(folderId),
     enabled: !!folderId,
   });
 }
@@ -174,7 +214,7 @@ export function useFolderName(folderId: string) {
 export function useFolderIdByPath(folderPath: string) {
   return useQuery<string, Error>({
     queryKey: [...folderKeys.all, 'by-path', folderPath],
-    queryFn: () => api.get<{ id: string }>(`/folders/by-path?path=${encodeURIComponent(folderPath)}`).then(res => res.id),
+    queryFn: () => getFolderIdByPath(folderPath),
     enabled: !!folderPath,
   });
 }
@@ -183,7 +223,7 @@ export function useFolderIdByPath(folderPath: string) {
 export function useParentFolderId(folderId: string) {
   return useQuery<string | null, Error>({
     queryKey: [...folderKeys.detail(folderId), 'parent-id'],
-    queryFn: () => api.get<{ parentFolderId: string | null }>(`/folders/${folderId}/parent-id`).then(res => res.parentFolderId),
+    queryFn: () => getParentFolderId(folderId),
     enabled: !!folderId,
   });
 }

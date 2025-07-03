@@ -9,19 +9,12 @@
 // Drizzle imports
 
 import { db } from '@/lib/drizzle';
-import { worldItems } from '@/lib/drizzle/schema';
+import { images, imageWorldItems, worldItems } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import {
-    fromPrismaWorldItem,
-    mapCreateWorldItemDataToPrisma,
-    mapUpdateWorldItemDataToPrisma,
-    mapWorldItemSearchOptionsToPrisma,
-    toWorldItemWithStats,
-    worldItemPayload,
-} from '@/transformers/world-item';
+import { toWorldItemWithStats } from '@/transformers/world-item';
 import type { ImageComplete } from '@/types/entities/image';
 import type {
     WorldItemComplete,
@@ -30,7 +23,8 @@ import type {
     WorldItemUpdateInput,
     WorldItemWithStats,
 } from '@/types/entities/world-item';
-import { asc, eq } from 'drizzle-orm';
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq } from 'drizzle-orm';
 
 const worldItemLogger = serverLogger.withContext('WorldItemService');
 
@@ -87,7 +81,7 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 			.from(worldItems)
 			.orderBy(asc(worldItems.name));
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato esperado
 		const transformedWorldItems = drizzleWorldItems.map((rawWorldItem) => ({
 			...rawWorldItem,
 			isFavorite: Boolean(rawWorldItem.isFavorite),
@@ -110,39 +104,12 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 			},
 		}));
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prisma = await getPrismaClient();
-				const findOptions = mapWorldItemSearchOptionsToPrisma(options);
-
-				const prismaWorldItems = await prisma.worldItem.findMany({
-					...findOptions,
-					...worldItemPayload,
-				});
-
-				if (Math.abs(transformedWorldItems.length - prismaWorldItems.length) > 0) {
-					worldItemLogger.warn('⚠️ Diferencia en conteo getWorldItems:', {
-						drizzle: transformedWorldItems.length,
-						prisma: prismaWorldItems.length
-					});
-				} else {
-					worldItemLogger.info('✅ Validación dual exitosa getWorldItems:', {
-						total: transformedWorldItems.length
-					});
-				}
-			} catch (validationError) {
-				worldItemLogger.error('❌ Error en validación dual getWorldItems:', validationError);
-			}
-		}
-
 		// Transformar a WorldItemWithStats
-		return transformedWorldItems
-			.map((item) => {
-				const complete = fromPrismaWorldItem(item as any);
-				return complete ? toWorldItemWithStats(complete) : null;
-			})
-			.filter((item): item is WorldItemWithStats => item !== null);
+		return transformedWorldItems.map((item) => {
+			// Crear WorldItemComplete directamente
+			const complete: WorldItemComplete = item as WorldItemComplete;
+			return toWorldItemWithStats(complete);
+		});
 	} catch (error) {
 		worldItemLogger.error('Error al obtener world items:', error);
 		throw createWorldItemError('Error al obtener objetos del mundo', EntityErrorCode.OPERATION_FAILED, error);
@@ -200,7 +167,7 @@ export async function getWorldItemById(id: string): Promise<WorldItemComplete | 
 
 		const rawWorldItem = drizzleWorldItem[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato esperado
 		const transformedWorldItem = {
 			...rawWorldItem,
 			isFavorite: Boolean(rawWorldItem.isFavorite),
@@ -223,33 +190,7 @@ export async function getWorldItemById(id: string): Promise<WorldItemComplete | 
 			},
 		};
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prisma = await getPrismaClient();
-				const prismaWorldItem = await prisma.worldItem.findUnique({
-					where: { id },
-					...worldItemPayload,
-				});
-
-				if (prismaWorldItem && transformedWorldItem) {
-					worldItemLogger.info('✅ Validación dual exitosa getWorldItemById:', {
-						worldItemName: transformedWorldItem.name
-					});
-				} else if (!prismaWorldItem && !transformedWorldItem) {
-					worldItemLogger.info('✅ Validación dual exitosa getWorldItemById: ambos null');
-				} else {
-					worldItemLogger.warn('⚠️ Diferencia en getWorldItemById:', {
-						drizzleFound: !!transformedWorldItem,
-						prismaFound: !!prismaWorldItem
-					});
-				}
-			} catch (validationError) {
-				worldItemLogger.error('❌ Error en validación dual getWorldItemById:', validationError);
-			}
-		}
-
-		return fromPrismaWorldItem(transformedWorldItem as any);
+		return transformedWorldItem as WorldItemComplete;
 	} catch (error) {
 		worldItemLogger.error(`Error al obtener world item ${id}:`, error);
 		throw createWorldItemError('Error al obtener objeto del mundo', EntityErrorCode.OPERATION_FAILED, error);
@@ -281,23 +222,68 @@ export async function createWorldItem(input: WorldItemCreateInput): Promise<Worl
 	try {
 		worldItemLogger.info('📝 Creando world item:', input.name);
 
-		const prisma = await getPrismaClient();
-		const data = mapCreateWorldItemDataToPrisma(input);
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.insert(worldItems).values({
+			id: crypto.randomUUID(),
+			name: input.name,
+			description: input.description || null,
+			emoji: input.emoji || '🌍',
+			color: input.color || '#3b82f6',
+			shortcut: input.shortcut || null,
+			category: input.category || null,
+			type: input.type || null,
+			subtype: input.subtype || null,
+			rarity: input.rarity || null,
+			value: input.value || null,
+			weight: input.weight || null,
+			size: input.size || null,
+			material: input.material || null,
+			origin: input.origin || null,
+			crafting: input.crafting || null,
+			requirements: input.requirements || null,
+			effects: input.effects || null,
+			properties: input.properties || null,
+			lore: input.lore || null,
+			history: input.history || null,
+			notes: input.notes || null,
+			sortBy: input.sortBy || null,
+			filters: input.filters || null,
+			featuredImage: input.featuredImage || null,
+			isFavorite: input.isFavorite || false,
+			isArchived: input.isArchived || false,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}).returning();
 
-		const worldItem = await prisma.worldItem.create({
-			data,
-			...worldItemPayload,
-		});
+		const worldItem = result[0];
 
-		const complete = fromPrismaWorldItem(worldItem);
-		if (!complete) {
-			throw createWorldItemError('Error al transformar world item creado', EntityErrorCode.OPERATION_FAILED);
-		}
+		// Transformar a formato compatible
+		const complete: WorldItemComplete = {
+			...worldItem,
+			isFavorite: Boolean(worldItem.isFavorite),
+			isArchived: Boolean(worldItem.isArchived),
+			// Counts vacíos para nueva entidad
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
 
 		// Emitir eventos
 		await emit({
 			type: 'world-items:modified',
-			data: { action: 'create', worldItem },
+			data: { action: 'create', worldItem: complete },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.WORLD_ITEM_CHANGE);
 
@@ -316,25 +302,79 @@ export async function updateWorldItem(id: string, input: WorldItemUpdateInput): 
 	try {
 		worldItemLogger.info('📝 Actualizando world item:', id);
 
-		const prisma = await getPrismaClient();
-		const data = mapUpdateWorldItemDataToPrisma(input);
+		// **MIGRACIÓN A DRIZZLE**
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
 
-		const worldItem = await prisma.worldItem.update({
-			where: { id },
-			data,
-			...worldItemPayload,
-		});
+		// Mapear campos opcionales
+		if (input.name !== undefined) updateData.name = input.name;
+		if (input.description !== undefined) updateData.description = input.description;
+		if (input.emoji !== undefined) updateData.emoji = input.emoji;
+		if (input.color !== undefined) updateData.color = input.color;
+		if (input.shortcut !== undefined) updateData.shortcut = input.shortcut;
+		if (input.category !== undefined) updateData.category = input.category;
+		if (input.type !== undefined) updateData.type = input.type;
+		if (input.subtype !== undefined) updateData.subtype = input.subtype;
+		if (input.rarity !== undefined) updateData.rarity = input.rarity;
+		if (input.value !== undefined) updateData.value = input.value;
+		if (input.weight !== undefined) updateData.weight = input.weight;
+		if (input.size !== undefined) updateData.size = input.size;
+		if (input.material !== undefined) updateData.material = input.material;
+		if (input.origin !== undefined) updateData.origin = input.origin;
+		if (input.crafting !== undefined) updateData.crafting = input.crafting;
+		if (input.requirements !== undefined) updateData.requirements = input.requirements;
+		if (input.effects !== undefined) updateData.effects = input.effects;
+		if (input.properties !== undefined) updateData.properties = input.properties;
+		if (input.lore !== undefined) updateData.lore = input.lore;
+		if (input.history !== undefined) updateData.history = input.history;
+		if (input.notes !== undefined) updateData.notes = input.notes;
+		if (input.sortBy !== undefined) updateData.sortBy = input.sortBy;
+		if (input.filters !== undefined) updateData.filters = input.filters;
+		if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
+		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
+		if (input.isArchived !== undefined) updateData.isArchived = input.isArchived;
 
-		const complete = fromPrismaWorldItem(worldItem);
-		if (!complete) {
-			throw createWorldItemError('Error al transformar world item actualizado', EntityErrorCode.OPERATION_FAILED);
+		const result = await db
+			.update(worldItems)
+			.set(updateData)
+			.where(eq(worldItems.id, id))
+			.returning();
+
+		if (result.length === 0) {
+			throw createWorldItemError('World item no encontrado', EntityErrorCode.NOT_FOUND);
 		}
+
+		const worldItem = result[0];
+
+		// Transformar a formato compatible
+		const complete: WorldItemComplete = {
+			...worldItem,
+			isFavorite: Boolean(worldItem.isFavorite),
+			isArchived: Boolean(worldItem.isArchived),
+			// TODO: implementar conteos reales con subqueries
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
 
 		// Emitir eventos
 		await emit({
 			type: 'world-items:modified',
 			id,
-			data: { action: 'update', worldItem },
+			data: { action: 'update', worldItem: complete },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.WORLD_ITEM_CHANGE, id);
 
@@ -353,42 +393,27 @@ export async function deleteWorldItem(id: string): Promise<{ success: boolean }>
 	try {
 		worldItemLogger.info('🗑️ Eliminando world item:', id);
 
-		const prisma = await getPrismaClient();
-
+		// **MIGRACIÓN A DRIZZLE**
 		// Verificar que existe
-		const worldItem = await prisma.worldItem.findUnique({
-			where: { id },
-			select: { id: true, name: true },
-		});
+		const existingWorldItem = await db
+			.select({ id: worldItems.id, name: worldItems.name })
+			.from(worldItems)
+			.where(eq(worldItems.id, id))
+			.limit(1);
 
-		if (!worldItem) {
+		if (existingWorldItem.length === 0) {
 			throw createWorldItemError('World item no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
-		// Eliminar con desconexión de relaciones
-		await prisma.$transaction([
-			prisma.worldItem.update({
-				where: { id },
-				data: {
-					images: { set: [] },
-					videos: { set: [] },
-					albums: { set: [] },
-					collections: { set: [] },
-					tags: { set: [] },
-					characters: { set: [] },
-					places: { set: [] },
-					concepts: { set: [] },
-					prompts: { set: [] },
-					notes: { set: [] },
-					wildcards: { set: [] },
-					properties: { set: [] },
-					groups: { set: [] },
-				},
-			}),
-			prisma.worldItem.delete({
-				where: { id },
-			}),
-		]);
+		// Eliminar directamente (las relaciones many-to-many se manejan automáticamente)
+		const result = await db
+			.delete(worldItems)
+			.where(eq(worldItems.id, id))
+			.returning();
+
+		if (result.length === 0) {
+			throw createWorldItemError('Error al eliminar world item', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
@@ -411,33 +436,45 @@ export async function deleteWorldItem(id: string): Promise<{ success: boolean }>
  */
 export async function getWorldItemImages(worldItemId: string): Promise<{ images: ImageComplete[] }> {
 	try {
-		const prisma = await getPrismaClient();
-		const worldItem = await prisma.worldItem.findUnique({
-			where: { id: worldItemId },
-			select: {
-				images: {
-					select: {
-						id: true,
-						name: true,
-						path: true,
-						thumbnail: true,
-						width: true,
-						height: true,
-						size: true,
-						createdAt: true,
-					},
-					orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
-				},
-			},
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		// Verificar que el world item existe
+		const worldItemExists = await db
+			.select({ id: worldItems.id })
+			.from(worldItems)
+			.where(eq(worldItems.id, worldItemId))
+			.limit(1);
 
-		if (!worldItem) {
+		if (worldItemExists.length === 0) {
 			throw createWorldItemError('World item no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
-		return { images: worldItem.images as ImageComplete[] };
+		// Obtener las imágenes relacionadas con join
+		const worldItemImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+				thumbnail: images.thumbnail,
+				width: images.width,
+				height: images.height,
+				size: images.size,
+				createdAt: images.createdAt,
+				isFavorite: images.isFavorite,
+			})
+			.from(images)
+			.innerJoin(imageWorldItems, eq(images.id, imageWorldItems.A))
+			.where(eq(imageWorldItems.B, worldItemId))
+			.orderBy(desc(images.isFavorite), desc(images.createdAt));
+
+		// Transformar a formato esperado
+		const transformedImages = worldItemImages.map((img) => ({
+			...img,
+			isFavorite: Boolean(img.isFavorite),
+		}));
+
+		return { images: transformedImages as ImageComplete[] };
 	} catch (error) {
-		worldItemLogger.error('❌ Error al obtener imágenes del world item:', error);
+		worldItemLogger.error('❗ Error al obtener imágenes del world item:', error);
 		throw createWorldItemError('No se pudieron obtener las imágenes', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -449,15 +486,12 @@ export async function addImageToWorldItem(worldItemId: string, imageId: string):
 	try {
 		worldItemLogger.info('🔗 Agregando imagen a world item:', { worldItemId, imageId });
 
-		const prisma = await getPrismaClient();
-		await prisma.worldItem.update({
-			where: { id: worldItemId },
-			data: {
-				images: {
-					connect: { id: imageId },
-				},
-			},
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		// Insertar relación en la tabla many-to-many
+		await db.insert(imageWorldItems).values({
+			A: imageId, // imageId
+			B: worldItemId, // worldItemId
+		}).onConflictDoNothing(); // Evitar duplicados
 
 		// Emitir eventos
 		await emit({
@@ -481,15 +515,16 @@ export async function removeImageFromWorldItem(worldItemId: string, imageId: str
 	try {
 		worldItemLogger.info('🔓 Eliminando imagen de world item:', { worldItemId, imageId });
 
-		const prisma = await getPrismaClient();
-		await prisma.worldItem.update({
-			where: { id: worldItemId },
-			data: {
-				images: {
-					disconnect: { id: imageId },
-				},
-			},
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		// Eliminar relación de la tabla many-to-many
+		await db
+			.delete(imageWorldItems)
+			.where(
+				and(
+					eq(imageWorldItems.A, imageId), // imageId
+					eq(imageWorldItems.B, worldItemId) // worldItemId
+				)
+			);
 
 		// Emitir eventos
 		await emit({
@@ -511,11 +546,13 @@ export async function removeImageFromWorldItem(worldItemId: string, imageId: str
  */
 export async function worldItemExists(id: string): Promise<boolean> {
 	try {
-		const prisma = await getPrismaClient();
-		const count = await prisma.worldItem.count({
-			where: { id },
-		});
-		return count > 0;
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.select({ count: count() })
+			.from(worldItems)
+			.where(eq(worldItems.id, id));
+		
+		return result[0].count > 0;
 	} catch (error) {
 		worldItemLogger.error(`Error al verificar existencia del world item ${id}:`, error);
 		return false;
@@ -527,12 +564,10 @@ export async function worldItemExists(id: string): Promise<boolean> {
  */
 export async function getWorldItemCount(filters?: WorldItemSearchOptions['filters']): Promise<number> {
 	try {
-		const prisma = await getPrismaClient();
-		const findOptions = mapWorldItemSearchOptionsToPrisma({ filters });
-
-		return await prisma.worldItem.count({
-			where: findOptions.where,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		// Por ahora implementación básica sin filtros complejos
+		const result = await db.select({ count: count() }).from(worldItems);
+		return result[0].count;
 	} catch (error) {
 		worldItemLogger.error('Error al obtener conteo de world items:', error);
 		throw createWorldItemError('Error al obtener conteo de objetos del mundo', EntityErrorCode.OPERATION_FAILED, error);

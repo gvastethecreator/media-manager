@@ -1,9 +1,7 @@
-'use server';
-
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
-import { revalidatePath, unstable_cache } from '@/lib/server/revalidate';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 
 // Constantes para caché
@@ -11,7 +9,7 @@ const STATS_CACHE_TAG = 'stats';
 const STATS_REVALIDATE_SECONDS = 300; // 5 minutos en lugar de 1 minuto
 
 // Logger para estadísticas
-const statsLogger = serverLogger.withContext('StatsActions');
+const statsLogger = serverLogger.withContext('StatsService');
 
 // Manejo de errores - enfoque funcional
 enum StatsErrorCode {
@@ -116,88 +114,76 @@ interface TopTag {
 	};
 }
 
-// Función privada para obtener las estadísticas en caché
-const getCachedStats = unstable_cache(
-	async (): Promise<GeneralStats | null> => {
-		// Si estamos en desarrollo y USE_MOCK_STATS está activado, devolver datos simulados
-		if (USE_MOCK_STATS) {
-			statsLogger.info('📊 Usando estadísticas simuladas para desarrollo');
-			return MOCK_STATS;
-		}
-
-		try {
-			statsLogger.info('📊 Obteniendo estadísticas del sistema con optimizaciones');
-
-			// 🚀 Usar servicio optimizado para los conteos principales
-			const optimizedStatsService = OptimizedStatsService.getInstance(prisma);
-			const globalStats = await optimizedStatsService.getGlobalStatsOptimized();
-
-			// 📊 Obtener topTags y recentActivity por separado (optimización futura)
-			const [topTags, recentActivity] = await Promise.all([
-				prisma.tag.findMany({
-					select: {
-						id: true,
-						name: true,
-						color: true,
-						_count: {
-							select: {
-								images: true,
-							},
-						},
-					},
-					orderBy: {
-						images: {
-							_count: 'desc',
-						},
-					},
-					take: 5,
-				}) as Promise<TopTag[]>,
-				prisma.activity.findMany({
-					select: {
-						id: true,
-						type: true,
-						description: true,
-						createdAt: true,
-						image: {
-							select: {
-								id: true,
-								name: true,
-								thumbnail: true,
-							},
-						},
-					},
-					orderBy: {
-						createdAt: 'desc',
-					},
-					take: 5,
-				}),
-			]);
-
-			statsLogger.info('✅ Estadísticas del sistema obtenidas (optimizadas)');
-
-			return {
-				...globalStats,
-				topTags: topTags.map((tag: TopTag) => ({
-					...tag,
-					count: tag._count.images,
-				})),
-				recentActivity,
-			} satisfies GeneralStats;
-		} catch (error) {
-			statsLogger.error('❌ Error al obtener las estadísticas del sistema:', error);
-			return null;
-		}
-	},
-	['system-stats'],
-	{
-		revalidate: STATS_REVALIDATE_SECONDS,
-		tags: [STATS_CACHE_TAG],
-	}
-);
-
 // Funciones exportadas
 export async function getSystemStats(): Promise<GeneralStats | null> {
-	return getCachedStats();
+	// Si estamos en desarrollo y USE_MOCK_STATS está activado, devolver datos simulados
+	if (USE_MOCK_STATS) {
+		statsLogger.info('📊 Usando estadísticas simuladas para desarrollo');
+		return MOCK_STATS;
+	}
+
+	try {
+		statsLogger.info('📊 Obteniendo estadísticas del sistema con optimizaciones');
+
+		// 🚀 Usar servicio optimizado para los conteos principales
+		const optimizedStatsService = OptimizedStatsService.getInstance(prisma);
+		const globalStats = await optimizedStatsService.getGlobalStatsOptimized();
+
+		// 📊 Obtener topTags y recentActivity por separado (optimización futura)
+		const [topTags, recentActivity] = await Promise.all([
+			prisma.tag.findMany({
+				select: {
+					id: true,
+					name: true,
+					color: true,
+					_count: {
+						select: {
+							images: true,
+						},
+					},
+				},
+				orderBy: {
+					images: {
+						_count: 'desc',
+					},
+				},
+				take: 5,
+			}) as Promise<TopTag[]>,
+			prisma.activity.findMany({
+				select: {
+					id: true,
+					type: true,
+					description: true,
+					createdAt: true,
+					image: {
+						select: {
+							id: true,
+							name: true,
+							thumbnail: true,
+						},
+					},
+				},
+				orderBy: {
+					createdAt: 'desc',
+				},
+				take: 5,
+			}),
+		]);
+
+		statsLogger.info('✅ Estadísticas del sistema obtenidas (optimizadas)');
+
+		return {
+			...globalStats,
+			topTags: topTags.map((tag: TopTag) => ({
+				...tag,
+				count: tag._count.images,
+			})),
+			recentActivity,
+		} satisfies GeneralStats;
+	} catch (error) {
+		statsLogger.error('❌ Error al obtener las estadísticas del sistema:', error);
+		return null;
+	}
 }
 
 // Nuevos tipos para stats de entidades extendidas
@@ -247,157 +233,146 @@ interface EntityWithEmoji extends EntityWithImageCount {
 }
 
 export async function getStats(): Promise<StatsResponse | null> {
-	const cachedStats = unstable_cache(
-		async () => {
-			try {
-				statsLogger.info('📊 Obteniendo estadísticas detalladas');
+	try {
+		statsLogger.info('📊 Obteniendo estadísticas detalladas');
 
-				const [collections, folders, tags, albums, characters, places, worldItems] = await Promise.all([
-					prisma.collection.findMany({
+		const [collections, folders, tags, albums, characters, places, worldItems] = await Promise.all([
+			prisma.collection.findMany({
+				select: {
+					id: true,
+					name: true,
+					color: true,
+					emoji: true,
+					_count: {
 						select: {
-							id: true,
-							name: true,
-							color: true,
-							emoji: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
+							images: true,
 						},
-					}) as Promise<CollectionWithData[]>,
-					prisma.folder.findMany({
+					},
+				},
+			}) as Promise<CollectionWithData[]>,
+			prisma.folder.findMany({
+				select: {
+					id: true,
+					name: true,
+					_count: {
 						select: {
-							id: true,
-							name: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
+							images: true,
 						},
-					}) as Promise<EntityWithImageCount[]>,
-					prisma.tag.findMany({
+					},
+				},
+			}) as Promise<EntityWithImageCount[]>,
+			prisma.tag.findMany({
+				select: {
+					id: true,
+					name: true,
+					color: true,
+					_count: {
 						select: {
-							id: true,
-							name: true,
-							color: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
+							images: true,
 						},
-					}) as Promise<TagWithData[]>,
-					prisma.album.findMany({
+					},
+				},
+			}) as Promise<TagWithData[]>,
+			prisma.album.findMany({
+				select: {
+					id: true,
+					name: true,
+					emoji: true,
+					_count: {
 						select: {
-							id: true,
-							name: true,
-							emoji: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
+							images: true,
 						},
-					}) as Promise<EntityWithEmoji[]>,
-					prisma.character.findMany({
+					},
+				},
+			}) as Promise<EntityWithEmoji[]>,
+			prisma.character.findMany({
+				select: {
+					id: true,
+					name: true,
+					emoji: true,
+					_count: {
 						select: {
-							id: true,
-							name: true,
-							emoji: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
+							images: true,
 						},
-					}) as Promise<EntityWithEmoji[]>,
-					prisma.place.findMany({
+					},
+				},
+			}) as Promise<EntityWithEmoji[]>,
+			prisma.place.findMany({
+				select: {
+					id: true,
+					name: true,
+					emoji: true,
+					_count: {
 						select: {
-							id: true,
-							name: true,
-							emoji: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
+							images: true,
 						},
-					}) as Promise<EntityWithEmoji[]>,
-					prisma.worldItem.findMany({
+					},
+				},
+			}) as Promise<EntityWithEmoji[]>,
+			prisma.worldItem.findMany({
+				select: {
+					id: true,
+					name: true,
+					emoji: true,
+					_count: {
 						select: {
-							id: true,
-							name: true,
-							emoji: true,
-							_count: {
-								select: {
-									images: true,
-								},
-							},
+							images: true,
 						},
-					}) as Promise<EntityWithEmoji[]>,
-				]);
+					},
+				},
+			}) as Promise<EntityWithEmoji[]>,
+		]);
 
-				statsLogger.info('✅ Estadísticas detalladas obtenidas');
+		statsLogger.info('✅ Estadísticas detalladas obtenidas');
 
-				return {
-					collections: collections.map((c: CollectionWithData) => ({
-						id: c.id,
-						name: c.name,
-						count: c._count.images,
-						color: c.color,
-						emoji: c.emoji,
-					})),
-					folders: folders.map((f: EntityWithImageCount) => ({
-						id: f.id,
-						name: f.name,
-						count: f._count.images,
-					})),
-					tags: tags.map((t: TagWithData) => ({
-						id: t.id,
-						name: t.name,
-						count: t._count.images,
-						color: t.color,
-					})),
-					albums: albums.map((a: EntityWithEmoji) => ({
-						id: a.id,
-						name: a.name,
-						count: a._count.images,
-						emoji: a.emoji,
-					})),
-					characters: characters.map((c: EntityWithEmoji) => ({
-						id: c.id,
-						name: c.name,
-						count: c._count.images,
-						emoji: c.emoji,
-					})),
-					places: places.map((p: EntityWithEmoji) => ({
-						id: p.id,
-						name: p.name,
-						count: p._count.images,
-						emoji: p.emoji,
-					})),
-					worldItems: worldItems.map((o: EntityWithEmoji) => ({
-						id: o.id,
-						name: o.name,
-						count: o._count.images,
-						emoji: o.emoji,
-					})),
-				} satisfies StatsResponse;
-			} catch (error) {
-				statsLogger.error('❌ Error al obtener las estadísticas:', error);
-				return null;
-			}
-		},
-		['stats'],
-		{
-			revalidate: STATS_REVALIDATE_SECONDS,
-			tags: [STATS_CACHE_TAG],
-		}
-	);
-
-	return cachedStats();
+		return {
+			collections: collections.map((c: CollectionWithData) => ({
+				id: c.id,
+				name: c.name,
+				count: c._count.images,
+				color: c.color,
+				emoji: c.emoji,
+			})),
+			folders: folders.map((f: EntityWithImageCount) => ({
+				id: f.id,
+				name: f.name,
+				count: f._count.images,
+			})),
+			tags: tags.map((t: TagWithData) => ({
+				id: t.id,
+				name: t.name,
+				count: t._count.images,
+				color: t.color,
+			})),
+			albums: albums.map((a: EntityWithEmoji) => ({
+				id: a.id,
+				name: a.name,
+				count: a._count.images,
+				emoji: a.emoji,
+			})),
+			characters: characters.map((c: EntityWithEmoji) => ({
+				id: c.id,
+				name: c.name,
+				count: c._count.images,
+				emoji: c.emoji,
+			})),
+			places: places.map((p: EntityWithEmoji) => ({
+				id: p.id,
+				name: p.name,
+				count: p._count.images,
+				emoji: p.emoji,
+			})),
+			worldItems: worldItems.map((o: EntityWithEmoji) => ({
+				id: o.id,
+				name: o.name,
+				count: o._count.images,
+				emoji: o.emoji,
+			})),
+		} satisfies StatsResponse;
+	} catch (error) {
+		statsLogger.error('❌ Error al obtener las estadísticas:', error);
+		return null;
+	}
 }
 
 export async function invalidateStats(): Promise<void> {

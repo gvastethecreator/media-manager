@@ -6,7 +6,6 @@
  * @updated 2025-07-01
  */
 
-import type { Prisma } from '@prisma/client';
 import { db } from '@/lib/drizzle';
 import { audios } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -14,8 +13,9 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaAudio, fromPrismaAudios } from '@/transformers/audio/transformer';
-import type { AudioWithStats } from '@/types/entities/audio';
-import { desc, eq } from 'drizzle-orm';
+import type { AudioWithStats, AudioCreateInput, AudioUpdateInput } from '@/types/entities/audio';
+import { count, desc, eq } from 'drizzle-orm';
+import * as crypto from 'crypto';
 
 const audioLogger = serverLogger.withContext('AudioService');
 
@@ -71,29 +71,6 @@ export async function getAudios(): Promise<AudioWithStats[]> {
 			...rawAudio,
 			isFavorite: Boolean(rawAudio.isFavorite),
 		}));
-
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prisma = await getPrismaClient();
-				const prismaAudios = await prisma.audio.findMany({
-					orderBy: { createdAt: 'desc' },
-				});
-
-				if (Math.abs(transformedAudios.length - prismaAudios.length) > 0) {
-					audioLogger.warn('⚠️ Diferencia en conteo getAudios:', {
-						drizzle: transformedAudios.length,
-						prisma: prismaAudios.length
-					});
-				} else {
-					audioLogger.info('✅ Validación dual exitosa getAudios:', {
-						total: transformedAudios.length
-					});
-				}
-			} catch (validationError) {
-				audioLogger.error('❌ Error en validación dual getAudios:', validationError);
-			}
-		}
 
 		return fromPrismaAudios(transformedAudios as any);
 	} catch (error) {
@@ -154,31 +131,6 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 			isFavorite: Boolean(rawAudio.isFavorite),
 		};
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prisma = await getPrismaClient();
-				const prismaAudio = await prisma.audio.findUnique({
-					where: { id },
-				});
-
-				if (prismaAudio && transformedAudio) {
-					audioLogger.info('✅ Validación dual exitosa getAudioById:', {
-						audioName: transformedAudio.name
-					});
-				} else if (!prismaAudio && !transformedAudio) {
-					audioLogger.info('✅ Validación dual exitosa getAudioById: ambos null');
-				} else {
-					audioLogger.warn('⚠️ Diferencia en getAudioById:', {
-						drizzleFound: !!transformedAudio,
-						prismaFound: !!prismaAudio
-					});
-				}
-			} catch (validationError) {
-				audioLogger.error('❌ Error en validación dual getAudioById:', validationError);
-			}
-		}
-
 		return fromPrismaAudio(transformedAudio as any);
 	} catch (error) {
 		audioLogger.error(`Error al obtener audio ${id}:`, error);
@@ -189,14 +141,40 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 /**
  * Crea un nuevo archivo de audio
  */
-export async function createAudio(data: Prisma.AudioCreateInput): Promise<AudioWithStats> {
+export async function createAudio(data: AudioCreateInput): Promise<AudioWithStats> {
 	try {
 		audioLogger.info('📝 Creando audio:', data.name);
 
-		const prisma = await getPrismaClient();
-		const newAudio = await prisma.audio.create({ data });
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.insert(audios).values({
+			id: crypto.randomUUID(),
+			name: data.name,
+			description: data.description || null,
+			emoji: data.emoji || '🎵',
+			color: data.color || '#3b82f6',
+			shortcut: data.shortcut || null,
+			category: data.category || null,
+			filePath: data.filePath,
+			fileName: data.fileName,
+			fileSize: data.fileSize || null,
+			mimeType: data.mimeType || null,
+			duration: data.duration || null,
+			bitrate: data.bitrate || null,
+			sampleRate: data.sampleRate || null,
+			channels: data.channels || null,
+			codec: data.codec || null,
+			tags: data.tags || null,
+			metadata: data.metadata || null,
+			sortBy: data.sortBy || null,
+			filters: data.filters || null,
+			featuredImage: data.featuredImage || null,
+			isFavorite: data.isFavorite || false,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}).returning();
 
-		const audioWithStats = fromPrismaAudio(newAudio);
+		const newAudio = result[0];
+		const audioWithStats = fromPrismaAudio(newAudio as any);
 
 		// Emitir eventos
 		await emit({
@@ -216,17 +194,47 @@ export async function createAudio(data: Prisma.AudioCreateInput): Promise<AudioW
 /**
  * Actualiza un archivo de audio existente
  */
-export async function updateAudio(id: string, data: Prisma.AudioUpdateInput): Promise<AudioWithStats> {
+export async function updateAudio(id: string, data: AudioUpdateInput): Promise<AudioWithStats> {
 	try {
 		audioLogger.info('📝 Actualizando audio:', id);
 
-		const prisma = await getPrismaClient();
-		const updatedAudio = await prisma.audio.update({
-			where: { id },
-			data,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
 
-		const audioWithStats = fromPrismaAudio(updatedAudio);
+		// Solo actualizar campos que se envían
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.emoji !== undefined) updateData.emoji = data.emoji;
+		if (data.color !== undefined) updateData.color = data.color;
+		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+		if (data.category !== undefined) updateData.category = data.category;
+		if (data.filePath !== undefined) updateData.filePath = data.filePath;
+		if (data.fileName !== undefined) updateData.fileName = data.fileName;
+		if (data.fileSize !== undefined) updateData.fileSize = data.fileSize;
+		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
+		if (data.duration !== undefined) updateData.duration = data.duration;
+		if (data.bitrate !== undefined) updateData.bitrate = data.bitrate;
+		if (data.sampleRate !== undefined) updateData.sampleRate = data.sampleRate;
+		if (data.channels !== undefined) updateData.channels = data.channels;
+		if (data.codec !== undefined) updateData.codec = data.codec;
+		if (data.tags !== undefined) updateData.tags = data.tags;
+		if (data.metadata !== undefined) updateData.metadata = data.metadata;
+		if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
+		if (data.filters !== undefined) updateData.filters = data.filters;
+		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+
+		await db.update(audios)
+			.set(updateData)
+			.where(eq(audios.id, id));
+
+		// Obtener el audio actualizado
+		const updatedAudio = await getAudioById(id);
+		if (!updatedAudio) {
+			throw createAudioError('No se pudo obtener el audio actualizado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
@@ -236,8 +244,8 @@ export async function updateAudio(id: string, data: Prisma.AudioUpdateInput): Pr
 		});
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE, id);
 
-		audioLogger.info('✅ Audio actualizado:', audioWithStats.name);
-		return audioWithStats;
+		audioLogger.info('✅ Audio actualizado:', updatedAudio.name);
+		return updatedAudio;
 	} catch (error) {
 		audioLogger.error('❌ Error al actualizar audio:', error);
 		throw createAudioError('No se pudo actualizar el archivo de audio', EntityErrorCode.OPERATION_FAILED, error);
@@ -251,19 +259,19 @@ export async function deleteAudio(id: string): Promise<{ success: boolean }> {
 	try {
 		audioLogger.info('🗑️ Eliminando audio:', id);
 
-		const prisma = await getPrismaClient();
-
+		// **MIGRACIÓN A DRIZZLE**
 		// Verificar que existe
-		const audio = await prisma.audio.findUnique({
-			where: { id },
-			select: { id: true, name: true },
-		});
+		const existingAudio = await db
+			.select({ id: audios.id, name: audios.name })
+			.from(audios)
+			.where(eq(audios.id, id))
+			.limit(1);
 
-		if (!audio) {
+		if (existingAudio.length === 0) {
 			throw createAudioError('Audio no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
-		await prisma.audio.delete({ where: { id } });
+		await db.delete(audios).where(eq(audios.id, id));
 
 		// Emitir eventos
 		await emit({
@@ -286,11 +294,13 @@ export async function deleteAudio(id: string): Promise<{ success: boolean }> {
  */
 export async function audioExists(id: string): Promise<boolean> {
 	try {
-		const prisma = await getPrismaClient();
-		const count = await prisma.audio.count({
-			where: { id },
-		});
-		return count > 0;
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.select({ count: count() })
+			.from(audios)
+			.where(eq(audios.id, id));
+		
+		return result[0]?.count > 0;
 	} catch (error) {
 		audioLogger.error(`Error al verificar existencia del audio ${id}:`, error);
 		return false;
@@ -302,10 +312,103 @@ export async function audioExists(id: string): Promise<boolean> {
  */
 export async function getAudioCount(): Promise<number> {
 	try {
-		const prisma = await getPrismaClient();
-		return await prisma.audio.count();
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.select({ count: count() })
+			.from(audios);
+
+		return result[0]?.count || 0;
 	} catch (error) {
 		audioLogger.error('Error al obtener conteo de audios:', error);
 		throw createAudioError('Error al obtener conteo de archivos de audio', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+export async function getAudioFormatStats() {
+	try {
+		audioLogger.info('Obteniendo estadísticas de formato de audio');
+		
+		// **MIGRACIÓN A DRIZZLE**
+		// Por ahora implementación básica sin groupBy (TODO: implementar groupBy en Drizzle)
+		const allAudios = await db
+			.select({ 
+				format: audios.format, 
+				size: audios.size, 
+				duration: audios.duration, 
+				bitrate: audios.bitrate 
+			})
+			.from(audios);
+
+		// Agrupar manualmente por formato
+		const formatGroups = allAudios.reduce((acc, audio) => {
+			const format = audio.format || 'unknown';
+			if (!acc[format]) {
+				acc[format] = {
+					format,
+					count: 0,
+					totalSize: 0,
+					totalDuration: 0,
+					totalBitrate: 0,
+					validDurations: 0,
+					validBitrates: 0
+				};
+			}
+			acc[format].count++;
+			acc[format].totalSize += audio.size || 0;
+			if (audio.duration) {
+				acc[format].totalDuration += audio.duration;
+				acc[format].validDurations++;
+			}
+			if (audio.bitrate) {
+				acc[format].totalBitrate += audio.bitrate;
+				acc[format].validBitrates++;
+			}
+			return acc;
+		}, {} as Record<string, any>);
+
+		return Object.values(formatGroups).map((stat: any) => ({
+			format: stat.format,
+			count: stat.count,
+			totalSize: stat.totalSize,
+			avgDuration: stat.validDurations > 0 ? stat.totalDuration / stat.validDurations : null,
+			avgBitrate: stat.validBitrates > 0 ? stat.totalBitrate / stat.validBitrates : null,
+		})).sort((a, b) => b.count - a.count);
+	} catch (error) {
+		audioLogger.error('Error al obtener estadísticas de formatos:', error);
+		throw createAudioError('No se pudieron obtener las estadísticas de formato de audio', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+export async function getAudioGenreStats() {
+	try {
+		audioLogger.info('Obteniendo estadísticas de géneros de audio');
+		
+		// **MIGRACIÓN A DRIZZLE**
+		const allAudios = await db
+			.select({ genre: audios.genre })
+			.from(audios);
+
+		// Agrupar manualmente por género
+		const genreGroups = allAudios.reduce((acc, audio) => {
+			const genre = audio.genre || 'unknown';
+			if (!acc[genre]) {
+				acc[genre] = {
+					genre,
+					count: 0
+				};
+			}
+			acc[genre].count++;
+			return acc;
+		}, {} as Record<string, any>);
+
+		return Object.values(genreGroups)
+			.map((stat: any) => ({
+				genre: stat.genre,
+				count: stat.count,
+			}))
+			.sort((a, b) => b.count - a.count);
+	} catch (error) {
+		audioLogger.error('Error al obtener estadísticas de géneros:', error);
+		throw createAudioError('No se pudieron obtener las estadísticas de géneros de audio', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }

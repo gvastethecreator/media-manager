@@ -5,8 +5,8 @@
  * Verifica que los servicios funcionen correctamente después de sincronizar el schema con la BD real
  */
 
-import { propertyService } from '@/services/property/property.service';
-import { wildcardService } from '@/services/wildcard/wildcard.service';
+import propertyService from '../../src/services/property/property.service.js';
+import wildcardService from '../../src/services/wildcard/wildcard.service.js';
 
 async function testPropertyService() {
 	console.log('\n🏷️ === PROBANDO PROPERTY SERVICE ===');
@@ -126,7 +126,5 @@ async function main() {
 	console.log('\n✅ === PRUEBAS COMPLETADAS ===');
 }
 
-// Ejecutar solo si es llamado directamente
-if (require.main === module) {
-	main().catch(console.error);
-}
+// Ejecutar directamente
+main().catch(console.error);

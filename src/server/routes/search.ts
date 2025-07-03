@@ -1,5 +1,5 @@
 import express from 'express';
-import { searchImages } from '@/app/actions/search/search.actions';
+import { searchImages } from '../services/search.service';
 
 const router = express.Router();
 

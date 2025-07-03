@@ -1,10 +1,10 @@
 import { sql } from 'drizzle-orm';
 import {
-  index,
-  integer,
-  sqliteTable,
-  text,
-  uniqueIndex,
+    index,
+    integer,
+    sqliteTable,
+    text,
+    uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
 
 /**
@@ -643,40 +643,30 @@ export const prompts = sqliteTable(
   }),
 );
 
-// Modelo para las notas
+// Modelo para las notas - CORREGIDO según estructura real de BD
 export const notes = sqliteTable(
   'Note',
   {
     id: text('id').primaryKey(),
-    name: text('name').notNull(),
-    description: text('description'),
-    emoji: text('emoji').default('📝'),
-    color: text('color').default('#3b82f6'),
-    category: text('category'),
-    isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+    title: text('title').notNull(), // Campo real en BD
+    content: text('content').notNull().default(''),
+    category: text('category').notNull().default('general'),
+    priority: integer('priority').notNull().default(0), // INTEGER en BD real
+    status: text('status').notNull().default('active'),
+    featuredImage: text('featuredImage'),
     isFavorite: integer('isFavorite', { mode: 'boolean' })
       .notNull()
       .default(false),
-    totalImages: integer('totalImages').notNull().default(0),
-    totalVideos: integer('totalVideos').notNull().default(0),
-    content: text('content'),
-    type: text('type'),
-    tags: text('tags'),
-    priority: text('priority'),
-    status: text('status'),
-    dueDate: integer('dueDate', { mode: 'timestamp_ms' }),
-    completedAt: integer('completedAt', { mode: 'timestamp_ms' }),
-    featuredImage: text('featuredImage'),
-    parentId: text('parentId'),
     createdAt: integer('createdAt', { mode: 'timestamp_ms' })
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
     updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(
       () => new Date(),
     ),
+    presetId: text('presetId'), // Campo real en BD
   },
   (table) => ({
-    nameIdx: uniqueIndex('Note_name_key').on(table.name),
+    titleIdx: uniqueIndex('Note_title_key').on(table.title),
   }),
 );
 

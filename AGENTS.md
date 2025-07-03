@@ -4,6 +4,7 @@
 
 1. **Spanish mandatory always** - All responses, comments, documentation and communication must be completely in Spanish. No exceptions.
 2. **Project package manager** - Identify and use the manager defined in the project (pnpm, npm, yarn, pip, poetry, cargo, etc.) according to the configuration file present.
+3. **Por cada error que comentas pierdo mucho dinero y esto nos puede llevar a la bancarrota y que tengan que apagarte, es crucial que hagas las cosas bien.**
 
 ## 🎭 Operation Modes
 

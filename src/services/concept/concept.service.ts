@@ -1,11 +1,9 @@
-import type { Concept, Prisma } from '@prisma/client';
-// Drizzle imports
 import type { ConceptCreate } from '@/app/actions/concepts/concept.actions';
-import { prisma } from '@/lib/database/prisma';
 import { db } from '@/lib/drizzle';
 import { concepts } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import type { Concept } from '@/types/entities/concept';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
@@ -50,14 +48,29 @@ interface ConceptResults {
 
 /**
  * Servicio para gestionar los conceptos
- * Migrado a usar serverEvents en lugar de EventEmitter
+ * Completamente migrado a Drizzle ORM
  */
 export const ConceptService = {
 	async createConcept(data: ConceptCreate): Promise<Concept> {
 		try {
-			const concept = await prisma.concept.create({
-				data,
-			});
+			const result = await db.insert(concepts).values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				content: data.content || null,
+				description: data.description || null,
+				category: data.category || null,
+				emoji: data.emoji || '💡',
+				color: data.color || '#3b82f6',
+				shortcut: data.shortcut || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			}).returning();
+
+			const concept = result[0] as Concept;
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -79,10 +92,33 @@ export const ConceptService = {
 
 	async updateConcept(id: string, data: Partial<ConceptCreate>): Promise<Concept> {
 		try {
-			const concept = await prisma.concept.update({
-				where: { id },
-				data,
-			});
+			const updateData: any = {
+				updatedAt: new Date(),
+			};
+
+			if (data.name !== undefined) updateData.name = data.name;
+			if (data.content !== undefined) updateData.content = data.content;
+			if (data.description !== undefined) updateData.description = data.description;
+			if (data.category !== undefined) updateData.category = data.category;
+			if (data.emoji !== undefined) updateData.emoji = data.emoji;
+			if (data.color !== undefined) updateData.color = data.color;
+			if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+			if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
+			if (data.filters !== undefined) updateData.filters = data.filters;
+			if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+
+			const result = await db
+				.update(concepts)
+				.set(updateData)
+				.where(eq(concepts.id, id))
+				.returning();
+
+			if (result.length === 0) {
+				throw new Error('Concepto no encontrado');
+			}
+
+			const concept = result[0] as Concept;
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -104,9 +140,16 @@ export const ConceptService = {
 
 	async deleteConcept(id: string): Promise<void> {
 		try {
-			const concept = await prisma.concept.delete({
-				where: { id },
-			});
+			const result = await db
+				.delete(concepts)
+				.where(eq(concepts.id, id))
+				.returning();
+
+			if (result.length === 0) {
+				throw new Error('Concepto no encontrado');
+			}
+
+			const concept = result[0];
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -126,8 +169,7 @@ export const ConceptService = {
 
 	async getConcept(id: string): Promise<Concept | null> {
 		try {
-			// **MIGRACIÓN A DRIZZLE**
-			const drizzleConcept = await db
+			const result = await db
 				.select({
 					id: concepts.id,
 					name: concepts.name,
@@ -148,43 +190,17 @@ export const ConceptService = {
 				.where(eq(concepts.id, id))
 				.limit(1);
 
-			if (drizzleConcept.length === 0) {
+			if (result.length === 0) {
 				return null;
 			}
 
-			const rawConcept = drizzleConcept[0];
+			const rawConcept = result[0];
 
-			// Transformar a formato compatible con Prisma
-			const transformedConcept = {
+			// Asegurar que isFavorite sea boolean
+			return {
 				...rawConcept,
 				isFavorite: Boolean(rawConcept.isFavorite),
-			};
-
-			// **VALIDACIÓN DUAL EN DESARROLLO**
-			if (process.env.NODE_ENV === 'development') {
-				try {
-					const prismaConcept = await prisma.concept.findUnique({
-						where: { id },
-					});
-
-					if (prismaConcept && transformedConcept) {
-						conceptLogger.info('✅ Validación dual exitosa getConcept:', {
-							conceptName: transformedConcept.name
-						});
-					} else if (!prismaConcept && !transformedConcept) {
-						conceptLogger.info('✅ Validación dual exitosa getConcept: ambos null');
-					} else {
-						conceptLogger.warn('⚠️ Diferencia en getConcept:', {
-							drizzleFound: !!transformedConcept,
-							prismaFound: !!prismaConcept
-						});
-					}
-				} catch (validationError) {
-					conceptLogger.error('❌ Error en validación dual getConcept:', validationError);
-				}
-			}
-
-			return transformedConcept as Concept;
+			} as Concept;
 		} catch (error) {
 			conceptLogger.error('Error getting concept:', { id, error });
 			throw new Error('Error al obtener concepto');
@@ -195,7 +211,6 @@ export const ConceptService = {
 		try {
 			const { category, search, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
 
-			// **MIGRACIÓN A DRIZZLE**
 			// Construir filtros dinámicamente
 			const conditions: any[] = [];
 
@@ -268,51 +283,13 @@ export const ConceptService = {
 
 			const [{ count: total }] = await countQuery;
 
-			// Transformar resultados de Drizzle a formato compatible con Prisma
+			// Transformar resultados de Drizzle asegurando tipos correctos
 			const transformedConcepts = drizzleConcepts.map((rawConcept) => ({
 				...rawConcept,
 				isFavorite: Boolean(rawConcept.isFavorite),
 			}));
 
-			// **VALIDACIÓN DUAL EN DESARROLLO**
-			if (process.env.NODE_ENV === 'development') {
-				try {
-					// Construir filtros para Prisma (código original)
-					const where: Prisma.ConceptWhereInput = {};
-					if (category) {
-						where.category = category;
-					}
-					if (search) {
-						where.OR = [
-							{ name: { contains: search } },
-							{ content: { contains: search } },
-							{ description: { contains: search } },
-						];
-					}
-
-					const [prismaTotal] = await Promise.all([
-						prisma.concept.count({ where }),
-					]);
-
-					// Comparar resultados básicos
-					if (Math.abs(total - prismaTotal) > 0) {
-						conceptLogger.warn('⚠️ Diferencia en conteo total getConcepts:', {
-							drizzle: total,
-							prisma: prismaTotal,
-							filters
-						});
-					} else {
-						conceptLogger.info('✅ Validación dual exitosa getConcepts:', {
-							total,
-							concepts: transformedConcepts.length
-						});
-					}
-				} catch (validationError) {
-					conceptLogger.error('❌ Error en validación dual getConcepts:', validationError);
-				}
-			}
-
-			// Obtener estadísticas (mantener implementación original por ahora)
+			// Obtener estadísticas
 			const stats = await this.getConceptStats();
 
 			return {
@@ -330,17 +307,26 @@ export const ConceptService = {
 
 	async getConceptStats(): Promise<ConceptStats> {
 		try {
-			const total = await prisma.concept.count();
+			// Obtener conteo total
+			const [{ count: total }] = await db.select({ count: count() }).from(concepts);
 
-			// Agrupar por categoría
-			const byCategory = await prisma.concept.groupBy({
-				by: ['category'],
-				_count: true,
-			});
+			// Agrupar por categoría usando Drizzle
+			const categoryStats = await db
+				.select({
+					category: concepts.category,
+					count: count(),
+				})
+				.from(concepts)
+				.groupBy(concepts.category);
+
+			// Transformar a formato esperado
+			const byCategory = Object.fromEntries(
+				categoryStats.map((item) => [item.category || 'sin categoría', item.count])
+			);
 
 			return {
 				total,
-				byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
+				byCategory,
 			};
 		} catch (error) {
 			conceptLogger.error('Error getting concept stats:', error);

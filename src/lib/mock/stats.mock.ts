@@ -80,4 +80,4 @@ export const MOCK_STATS: GeneralStats = {
 };
 
 // Bandera para activar los datos simulados en entorno de desarrollo
-export const USE_MOCK_STATS = process.env.NODE_ENV === 'development';
+export const USE_MOCK_STATS = false;

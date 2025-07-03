@@ -1,91 +1,88 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import { z } from 'zod';
+import { uploadImages, getUploadedImages, deleteUploadedImage, getUploadedImageStats } from '../services/uploaded-images.api.service';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // GET /uploaded-images/:id - Obtener datos de una imagen subida por ID
 router.get('/:id', async (req, res) => {
 	const { id } = req.params;
 
-	if (!z.string().uuid().safeParse(id).success) {
-		return res.status(400).json({ error: 'ID de imagen subida inválido' });
+	const result = await getUploadedImage(id);
+
+	if (!result.success) {
+		return res.status(404).json({ error: result.error });
 	}
 
-	try {
-		const uploadedImage = await prisma.uploadedImage.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-					},
-				},
-			},
-		});
-
-		if (!uploadedImage) {
-			return res.status(404).json({ error: 'Imagen subida no encontrada' });
-		}
-
-		res.json(uploadedImage);
-	} catch (error) {
-		console.error('Error al obtener imagen subida:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+	res.json(result.item);
 });
 
 // GET /uploaded-images - Obtener lista de imágenes subidas con filtros
 router.get('/', async (req, res) => {
-	const { limit = '20', offset = '0', category, searchTerm, orderBy = 'createdAt', orderDir = 'desc' } = req.query;
+	const { limit, offset, category, searchTerm, orderBy, orderDir } = req.query;
 
-	const parsedLimit = Number.parseInt(limit as string);
-	const parsedOffset = Number.parseInt(offset as string);
+	const filters = {
+		limit: limit ? Number.parseInt(limit as string) : undefined,
+		offset: offset ? Number.parseInt(offset as string) : undefined,
+		category: category as string,
+		search: searchTerm as string,
+		sortBy: orderBy as any,
+		sortOrder: orderDir as any,
+	};
 
-	try {
-		const where: any = {};
-		if (category) {
-			where.category = category as string;
-		}
-		if (searchTerm) {
-			where.OR = [
-				{ name: { contains: searchTerm as string, mode: 'insensitive' } },
-				{ description: { contains: searchTerm as string, mode: 'insensitive' } },
-			];
-		}
+	const result = await getUploadedImages(filters);
 
-		const [uploadedImages, total] = await Promise.all([
-			prisma.uploadedImage.findMany({
-				where,
-				include: {
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-				orderBy: { [orderBy as string]: orderDir as string },
-				take: parsedLimit,
-				skip: parsedOffset,
-			}),
-			prisma.uploadedImage.count({ where }),
-		]);
-
-		res.json({
-			data: uploadedImages,
-			pagination: {
-				total,
-				limit: parsedLimit,
-				offset: parsedOffset,
-				hasNext: parsedOffset + parsedLimit < total,
-				hasPrev: parsedOffset > 0,
-			},
-		});
-	} catch (error) {
-		console.error('Error al obtener imágenes subidas:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+	if (!result.success) {
+		return res.status(500).json({ error: result.error });
 	}
+
+	res.json({
+		data: result.items,
+		pagination: {
+			total: result.total,
+			limit: result.pageSize,
+			offset: result.page ? (result.page - 1) * result.pageSize : 0,
+			hasNext: result.page ? result.page * result.pageSize < result.total : false,
+			hasPrev: result.page ? result.page > 1 : false,
+		},
+		stats: result.stats,
+	});
+});
+
+// GET /uploaded-images/stats - Obtener estadísticas de imágenes subidas
+router.get('/stats', async (req, res) => {
+	const result = await getUploadedImageStats();
+
+	if (!result.success) {
+		return res.status(500).json({ error: result.error });
+	}
+
+	res.json(result.stats);
+});
+
+// DELETE /uploaded-images/:id - Eliminar imagen subida
+router.delete('/:id', async (req, res) => {
+	const { id } = req.params;
+
+	const result = await deleteUploadedImage(id);
+
+	if (!result.success) {
+		return res.status(500).json({ error: result.error });
+	}
+
+	res.json(result);
+});
+
+// POST /uploaded-images - Subir imágenes
+router.post('/', async (req, res) => {
+	const formData = req.body; // FormData se maneja en el middleware
+
+	const result = await uploadImages(formData);
+
+	if (!result.success) {
+		return res.status(500).json({ error: result.error });
+	}
+
+	res.status(201).json(result);
 });
 
 export { router as uploadedImagesRouter };

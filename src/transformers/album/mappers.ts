@@ -2,13 +2,13 @@
  * @file Mappers para la entidad Album.
  * @module transformers/album/mappers
  * @description Contiene funciones para transformar datos de la entidad Album.
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { Album } from '@prisma/client';
-import type { AlbumStatistics, AlbumWithStats } from '@/types/entities/album';
+import type { Album, AlbumStatistics, AlbumWithStats } from '@/types/entities/album';
 
 /**
- * Representa la estructura del objeto de agregación de conteos de Prisma para un Album.
+ * Representa la estructura del objeto de agregación de conteos para un Album.
  */
 type AlbumCounts = {
 	_count: {
@@ -29,9 +29,9 @@ type AlbumCounts = {
 };
 
 /**
- * Convierte un objeto Album de Prisma y sus conteos a un objeto canónico AlbumWithStats.
+ * Convierte un objeto Album y sus conteos a un objeto canónico AlbumWithStats.
  *
- * @param album El objeto Album de Prisma.
+ * @param album El objeto Album.
  * @param counts Los conteos de las relaciones del álbum.
  * @returns Un objeto AlbumWithStats.
  */

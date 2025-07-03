@@ -1,11 +1,9 @@
-'use server';
-
 import { getImages } from '@/app/actions/images/image-crud.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image/converter.service';
 import type { FileItem } from '@/types/files';
 
-const log = serverLogger.withContext('SearchActions');
+const log = serverLogger.withContext('SearchService');
 
 export async function searchImages(query: string, limit = 100): Promise<FileItem[]> {
 	try {

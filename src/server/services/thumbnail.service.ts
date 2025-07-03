@@ -1,15 +1,13 @@
-'use server';
-
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { prisma } from '@/lib/database/prisma';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ProcessOptions } from '@/services/thumbnail';
-import { thumbnailService } from '@/services/thumbnail';
+import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto
+import type { ProcessOptions } from '@/types/thumbnails';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
 
-const thumbLogger = serverLogger.withContext('ThumbnailActions');
+const thumbLogger = serverLogger.withContext('ThumbnailService');
 
 export interface ThumbnailResponse {
 	thumbnailUrl?: string;
@@ -180,7 +178,7 @@ export async function getThumbnail(
 export async function optimizeThumbnails(options?: ProcessOptions) {
 	try {
 		thumbLogger.info('🔄 Iniciando optimización de thumbnails');
-		return await thumbnailService.optimizeThumbnails(options);
+		return await baseThumbnailService.optimizeThumbnails(options);
 	} catch (error) {
 		thumbLogger.error('❌ Error optimizando thumbnails:', error);
 		throw error;
@@ -190,7 +188,7 @@ export async function optimizeThumbnails(options?: ProcessOptions) {
 export async function reprocessThumbnails(options?: ProcessOptions) {
 	try {
 		thumbLogger.info('🔄 Iniciando reprocesamiento de thumbnails');
-		return await thumbnailService.reprocessAll(options);
+		return await baseThumbnailService.reprocessAll(options);
 	} catch (error) {
 		thumbLogger.error('❌ Error reprocesando thumbnails:', error);
 		throw error;
@@ -200,7 +198,7 @@ export async function reprocessThumbnails(options?: ProcessOptions) {
 export async function cleanThumbnails(options?: ProcessOptions) {
 	try {
 		thumbLogger.info('🔄 Iniciando limpieza de thumbnails');
-		return await thumbnailService.cleanThumbnails(options);
+		return await baseThumbnailService.cleanThumbnails(options);
 	} catch (error) {
 		thumbLogger.error('❌ Error limpiando thumbnails:', error);
 		throw error;
@@ -313,5 +311,62 @@ export async function verifySignedToken(token: string): Promise<{ buffer: Buffer
 	} catch (error) {
 		thumbLogger.error('❌ Error verificando token:', error);
 		throw new Error(`Token inválido: ${token}`);
+	}
+}
+
+export async function bulkGenerateThumbnails(imageIds: string[], options?: ProcessOptions) {
+	thumbLogger.info(`🔄 Generando thumbnails en lote para ${imageIds.length} imágenes`);
+	const generated: string[] = [];
+	const errors: { id: string; error: string }[] = [];
+
+	for (const imageId of imageIds) {
+		try {
+			await getThumbnail(imageId, options?.quality);
+			generated.push(imageId);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			errors.push({ id: imageId, error: errorMessage });
+		}
+	}
+
+	thumbLogger.info(`✅ Generación en lote completada. Generados: ${generated.length}, Errores: ${errors.length}`);
+	return { generated, errors };
+}
+
+export async function deleteThumbnail(imageId: string): Promise<{ success: boolean; message: string }> {
+	try {
+		thumbLogger.info(`🗑️ Eliminando thumbnail para imagen: ${imageId}`);
+
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+			select: { id: true, thumbnail: true },
+		});
+
+		if (!image) {
+			return { success: false, message: 'Imagen no encontrada' };
+		}
+
+		if (!image.thumbnail) {
+			return { success: true, message: 'Thumbnail no existe para esta imagen' };
+		}
+
+		await prisma.image.update({
+			where: { id: imageId },
+			data: {
+				thumbnail: null,
+				thumbnailSize: null,
+				thumbnailWidth: null,
+				thumbnailHeight: null,
+				thumbnailMimeType: null,
+				thumbnailError: null,
+			},
+		});
+
+		thumbLogger.info(`✅ Thumbnail eliminado para imagen: ${imageId}`);
+		return { success: true, message: 'Thumbnail eliminado exitosamente' };
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+		thumbLogger.error(`❌ Error eliminando thumbnail para imagen ${imageId}:`, error);
+		return { success: false, message: `Error eliminando thumbnail: ${errorMessage}` };
 	}
 }

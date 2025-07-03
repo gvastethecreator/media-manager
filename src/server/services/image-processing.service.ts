@@ -1,14 +1,19 @@
-'use server';
-
 import { existsSync } from 'fs';
 import sharp from 'sharp';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, createFileNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
-import type { ImageProcessingOptions } from './image-types.actions';
 
-const SERVER_ACTION_NAME = 'ImageProcessing';
-const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
+const SERVICE_NAME = 'ImageProcessingService';
+const imageLogger = serverLogger.withContext(SERVICE_NAME);
+
+export interface ImageProcessingOptions {
+	quality?: number;
+	width?: number;
+	height?: number;
+	format?: 'jpeg' | 'png' | 'webp';
+	fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+}
 
 /**
  * Procesa una imagen según las opciones especificadas
@@ -25,11 +30,11 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 		});
 
 		if (!image) {
-			throw createEntityNotFoundError('Imagen', imageId, SERVER_ACTION_NAME);
+			throw createEntityNotFoundError('Imagen', imageId, SERVICE_NAME);
 		}
 
 		if (!existsSync(image.path)) {
-			throw createFileNotFoundError(image.path, { imageId }, SERVER_ACTION_NAME);
+			throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 		}
 
 		// Valores por defecto
@@ -75,7 +80,7 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 		return buffer;
 	} catch (error) {
 		throw toServiceError(error, {
-			serviceName: SERVER_ACTION_NAME,
+			serviceName: SERVICE_NAME,
 			message: 'Error al procesar la imagen',
 			context: { imageId, options },
 		});

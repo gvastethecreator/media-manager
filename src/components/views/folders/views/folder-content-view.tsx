@@ -6,6 +6,7 @@ import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useReindexFolder } from '@/lib/api/folders';
 import { useImageStore } from '@/store/entities/image';
 import type { EntityWithStats } from '@/types/migration';
 
@@ -62,6 +63,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	}, [currentFolderId, isRetrying]);
 
 	const handleScanFolder = useCallback(async () => {
+		const reindexFolderMutation = useReindexFolder();
 		if (!currentFolderId || isRetrying) {
 			logger.warn('⚠️ No hay carpeta seleccionada para escanear o ya hay una operación en curso');
 			return;
@@ -72,8 +74,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 			logger.info(`🔄 Iniciando escaneo de carpeta: ${currentFolderId}`);
 
 			// Importar y ejecutar la función de reindexación
-			const { reindexFolder } = await import('@/app/actions/folders/crud.actions');
-			await reindexFolder(currentFolderId);
+			await reindexFolderMutation.mutateAsync(currentFolderId);
 
 			logger.info('✅ Escaneo completado, recargando imágenes...');
 

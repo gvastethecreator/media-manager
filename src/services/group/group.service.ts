@@ -3,18 +3,12 @@
  * @module services/group
  */
 
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { groups, groupImages, groupVideos, groupAlbums, groupTags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import {
-	createGroup,
-	deleteGroup,
-	getGroupById,
-	getGroupsByIds,
-	searchGroups,
-	updateGroup,
-} from '@/transformers/group';
+import { createGroup as createGroupTransformer, deleteGroup as deleteGroupTransformer, getGroupById as getGroupByIdTransformer, getGroupsByIds as getGroupsByIdsTransformer, searchGroups as searchGroupsTransformer, updateGroup as updateGroupTransformer } from '@/transformers/group';
 import type {
 	GroupCreateInput,
 	GroupRelations,
@@ -22,6 +16,7 @@ import type {
 	GroupUpdateInput,
 	GroupWithStats,
 } from '@/types/entities/group/types';
+import { eq, asc, desc, like, and, count } from 'drizzle-orm';
 
 // Logger específico para el servicio de grupos
 const logger = serverLogger.withContext('GroupService');
@@ -83,7 +78,7 @@ export const notifyGroupChange = async (
 export const getGroupService = async (id: string): Promise<GroupWithStats | null> => {
 	try {
 		logger.info(`🔍 Buscando grupo con ID: ${id}`);
-		const group = await getGroupById(id, { includeRelations: true, throwIfNotFound: false });
+		const group = await getGroupByIdTransformer(id, { includeRelations: true, throwIfNotFound: false });
 
 		if (!group) {
 			logger.warn(`⚠️ Grupo no encontrado: ${id}`);
@@ -112,7 +107,7 @@ export const getGroupsByIdsService = async (ids: string[]): Promise<GroupWithSta
 			return [];
 		}
 
-		const groups = await getGroupsByIds(ids, { includeRelations: true });
+		const groups = await getGroupsByIdsTransformer(ids, { includeRelations: true });
 		logger.info(`✅ Grupos encontrados: ${groups.length}`);
 		return groups;
 	} catch (error) {
@@ -140,7 +135,7 @@ export const searchGroupsService = async (
 ): Promise<GroupSearchResult> => {
 	try {
 		logger.info('🔍 Buscando grupos con filtros');
-		const result = await searchGroups(filters, options);
+		const result = await searchGroupsTransformer(filters, options);
 		logger.info(`✅ Búsqueda completada, encontrados ${result.total} grupos`);
 		return result;
 	} catch (error) {
@@ -162,16 +157,21 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupW
 
 		// Verificar si ya existe un grupo con el mismo nombre
 		if (data.name) {
-			const existingGroup = await prisma.group.findFirst({
-				where: { name: data.name },
-			});
-			if (existingGroup) {
+			const existingGroup = await db.select().from(groups).where(eq(groups.name, data.name)).limit(1);
+			if (existingGroup.length > 0) {
 				throw createGroupError(`Ya existe un grupo con el nombre "${data.name}"`, GroupErrorCode.ALREADY_EXISTS);
 			}
 		}
 
-		// Crear grupo usando el transformador
-		const group = await createGroup(data);
+		// Crear grupo usando Drizzle
+		const newGroup = await db.insert(groups).values({
+			name: data.name,
+			description: data.description,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}).returning();
+
+		const group = createGroupTransformer(newGroup[0]);
 
 		// Notificar creación
 		await notifyGroupChange('create', group);
@@ -200,30 +200,32 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 		logger.info(`📝 Actualizando grupo: ${id}`);
 
 		// Verificar que el grupo existe
-		const existingGroup = await prisma.group.findUnique({
-			where: { id },
-		});
+		const existingGroup = await db.select().from(groups).where(eq(groups.id, id)).limit(1);
 
-		if (!existingGroup) {
+		if (existingGroup.length === 0) {
 			throw createGroupError(`No se encontró el grupo con ID: ${id}`, GroupErrorCode.NOT_FOUND);
 		}
 
 		// Verificar nombre único si se está actualizando
-		if (data.name && data.name !== existingGroup.name) {
-			const groupWithSameName = await prisma.group.findFirst({
-				where: {
-					name: data.name,
-					id: { not: id },
-				},
-			});
+		if (data.name && data.name !== existingGroup[0].name) {
+			const groupWithSameName = await db.select().from(groups).where(and(eq(groups.name, data.name), eq(groups.id, id))).limit(1);
 
-			if (groupWithSameName) {
+			if (groupWithSameName.length > 0) {
 				throw createGroupError(`Ya existe un grupo con el nombre "${data.name}"`, GroupErrorCode.ALREADY_EXISTS);
 			}
 		}
 
-		// Actualizar grupo usando el transformador
-		const group = await updateGroup(id, data);
+		// Actualizar grupo usando Drizzle
+		const updatedGroup = await db.update(groups)
+			.set({
+				name: data.name,
+				description: data.description,
+				updatedAt: new Date(),
+			})
+			.where(eq(groups.id, id))
+			.returning();
+
+		const group = updateGroupTransformer(updatedGroup[0]);
 
 		// Notificar actualización
 		await notifyGroupChange('update', group);
@@ -253,19 +255,17 @@ export const deleteGroupService = async (id: string): Promise<void> => {
 		logger.info(`🗑️ Eliminando grupo: ${id}`);
 
 		// Verificar que el grupo existe
-		const existingGroup = await prisma.group.findUnique({
-			where: { id },
-		});
+		const existingGroup = await db.select().from(groups).where(eq(groups.id, id)).limit(1);
 
-		if (!existingGroup) {
+		if (existingGroup.length === 0) {
 			throw createGroupError(`No se encontró el grupo con ID: ${id}`, GroupErrorCode.NOT_FOUND);
 		}
 
 		// Notificar antes de eliminar
 		await notifyGroupChange('delete', { id });
 
-		// Eliminar usando el transformador
-		await deleteGroup(id);
+		// Eliminar usando Drizzle
+		await db.delete(groups).where(eq(groups.id, id));
 
 		logger.info(`✅ Grupo eliminado: ${id}`);
 	} catch (error) {
@@ -291,7 +291,7 @@ export const getGroupStatsService = async (id: string): Promise<GroupWithStats |
 		logger.info(`📊 Obteniendo estadísticas del grupo: ${id}`);
 
 		// Reutilizar la lógica de la server action que ya hace esto.
-		const group = await getGroup(id);
+		const group = await getGroupByIdTransformer(id, { includeRelations: true, throwIfNotFound: false });
 
 		if (!group) {
 			// La acción 'getGroup' ya lanza un error si no lo encuentra, pero una doble verificación es segura.
@@ -325,55 +325,25 @@ export const addItemToGroupService = async (
 		logger.info('➕ Añadiendo elemento a grupo', { groupId, itemId, itemType });
 
 		// Verificar que el grupo existe
-		const existingGroup = await prisma.group.findUnique({
-			where: { id: groupId },
-		});
+		const existingGroup = await db.select().from(groups).where(eq(groups.id, groupId)).limit(1);
 
-		if (!existingGroup) {
+		if (existingGroup.length === 0) {
 			throw createGroupError(`No se encontró el grupo con ID: ${groupId}`, GroupErrorCode.NOT_FOUND);
 		}
 
-		// Validar y crear la relación según el tipo usando connect
+		// Validar y crear la relación según el tipo usando Drizzle
 		switch (itemType) {
 			case 'images':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						images: {
-							connect: { id: itemId },
-						},
-					},
-				});
+				await db.insert(groupImages).values({ groupId, imageId: itemId });
 				break;
 			case 'videos':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						videos: {
-							connect: { id: itemId },
-						},
-					},
-				});
+				await db.insert(groupVideos).values({ groupId, videoId: itemId });
 				break;
 			case 'albums':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						albums: {
-							connect: { id: itemId },
-						},
-					},
-				});
+				await db.insert(groupAlbums).values({ groupId, albumId: itemId });
 				break;
 			case 'tags':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						tags: {
-							connect: { id: itemId },
-						},
-					},
-				});
+				await db.insert(groupTags).values({ groupId, tagId: itemId });
 				break;
 			default:
 				throw createGroupError(`Tipo de elemento no soportado: ${itemType}`, GroupErrorCode.INVALID_DATA);
@@ -410,55 +380,25 @@ export const removeItemFromGroupService = async (
 		logger.info('➖ Eliminando elemento del grupo', { groupId, itemId, itemType });
 
 		// Verificar que el grupo existe
-		const existingGroup = await prisma.group.findUnique({
-			where: { id: groupId },
-		});
+		const existingGroup = await db.select().from(groups).where(eq(groups.id, groupId)).limit(1);
 
-		if (!existingGroup) {
+		if (existingGroup.length === 0) {
 			throw createGroupError(`No se encontró el grupo con ID: ${groupId}`, GroupErrorCode.NOT_FOUND);
 		}
 
-		// Validar y eliminar la relación según el tipo usando disconnect
+		// Validar y eliminar la relación según el tipo usando Drizzle
 		switch (itemType) {
 			case 'images':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						images: {
-							disconnect: { id: itemId },
-						},
-					},
-				});
+				await db.delete(groupImages).where(and(eq(groupImages.groupId, groupId), eq(groupImages.imageId, itemId)));
 				break;
 			case 'videos':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						videos: {
-							disconnect: { id: itemId },
-						},
-					},
-				});
+				await db.delete(groupVideos).where(and(eq(groupVideos.groupId, groupId), eq(groupVideos.videoId, itemId)));
 				break;
 			case 'albums':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						albums: {
-							disconnect: { id: itemId },
-						},
-					},
-				});
+				await db.delete(groupAlbums).where(and(eq(groupAlbums.groupId, groupId), eq(groupAlbums.albumId, itemId)));
 				break;
 			case 'tags':
-				await prisma.group.update({
-					where: { id: groupId },
-					data: {
-						tags: {
-							disconnect: { id: itemId },
-						},
-					},
-				});
+				await db.delete(groupTags).where(and(eq(groupTags.groupId, groupId), eq(groupTags.tagId, itemId)));
 				break;
 			default:
 				throw createGroupError(`Tipo de elemento no soportado: ${itemType}`, GroupErrorCode.INVALID_DATA);
@@ -508,170 +448,163 @@ export default groupService;
  * Obtiene las imágenes y videos recientes de un grupo para mostrar en la tarjeta
  */
 export async function getRecentGroupMediaService(groupId: string, limit = 6) {
-	const prisma = getPrismaClient();
+	try {
+		// Cargar imágenes recientes
+		const recentImages = await db.select().from(groupImages).where(eq(groupImages.groupId, groupId)).limit(Math.ceil(limit / 2));
 
-	// Cargar imágenes recientes
-	const recentImages = await prisma.image.findMany({
-		where: {
-			groups: {
-				some: {
-					id: groupId,
-				},
-			},
-		},
-		select: {
-			id: true,
-			name: true,
-			path: true,
-		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: Math.ceil(limit / 2),
-	});
+		// Cargar videos recientes
+		const recentVideos = await db.select().from(groupVideos).where(eq(groupVideos.groupId, groupId)).limit(Math.floor(limit / 2));
 
-	// Cargar videos recientes
-	const recentVideos = await prisma.video.findMany({
-		where: {
-			groups: {
-				some: {
-					id: groupId,
-				},
-			},
-		},
-		select: {
-			id: true,
-			name: true,
-			path: true,
-		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: Math.floor(limit / 2),
-	});
+		// Combinar y formatear los resultados
+		const imageResults = recentImages.map((img) => ({
+			id: img.imageId,
+			name: `Image ${img.imageId}`,
+			thumbnailUrl: `/api/images/${img.imageId}/thumbnail`,
+			url: `/api/images/${img.imageId}/content`,
+			isVideo: false,
+		}));
 
-	// Combinar y formatear los resultados
-	const imageResults = recentImages.map((img) => ({
-		id: img.id,
-		name: img.name,
-		thumbnailUrl: `/api/thumbnails/${img.id}`,
-		url: `/api/images/${img.id}`,
-		isVideo: false,
-	}));
+		const videoResults = recentVideos.map((video) => ({
+			id: video.videoId,
+			name: `Video ${video.videoId}`,
+			thumbnailUrl: `/api/videos/${video.videoId}/thumbnail`,
+			url: `/api/videos/${video.videoId}/content`,
+			isVideo: true,
+		}));
 
-	const videoResults = recentVideos.map((video) => ({
-		id: video.id,
-		name: video.name,
-		thumbnailUrl: `/api/video-thumbnails/${video.id}`,
-		url: `/api/videos/${video.id}`,
-		isVideo: true,
-	}));
-
-	// Combinar y ordenar por ID (como proxy de fecha)
-	return [...imageResults, ...videoResults].sort((a, b) => (a.id > b.id ? -1 : 1)).slice(0, limit);
+		// Combinar y ordenar por ID (como proxy de fecha)
+		return [...imageResults, ...videoResults].sort((a, b) => (a.id > b.id ? -1 : 1)).slice(0, limit);
+	} catch (error) {
+		logger.error('Error al obtener medios recientes del grupo', { error, groupId });
+		throw createGroupError(
+			`Error al obtener medios recientes: ${error instanceof Error ? error.message : String(error)}`,
+			GroupErrorCode.OPERATION_FAILED,
+			error
+		);
+	}
 }
 
 /**
  * Obtiene los datos de un grupo para mostrar en una tarjeta
  */
 export async function getGroupCardDataService(groupId: string) {
-	const prisma = getPrismaClient();
+	try {
+		const group = await db.select().from(groups).where(eq(groups.id, groupId)).limit(1);
 
-	const group = await prisma.group.findUnique({
-		where: {
-			id: groupId,
-		},
-		include: {
-			_count: {
-				select: {
-					images: true,
-					videos: true,
-					albums: true,
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-				},
-			},
-		},
-	});
-
-	if (!group) {
-		throw new Error(`Grupo no encontrado: ${groupId}`);
-	}
-
-	// Obtener imágenes y videos recientes
-	const recentMedia = await getRecentGroupMediaService(group.id, 6);
-	const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
-	const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
-
-	// Intentar parsear el campo filters si existe
-	let filters = [];
-	if (typeof group.filters === 'string' && group.filters !== 'empty_array') {
-		try {
-			filters = JSON.parse(group.filters);
-		} catch (e) {
-			console.error('Error parsing group filters:', e);
+		if (group.length === 0) {
+			throw createGroupError(`Grupo no encontrado: ${groupId}`, GroupErrorCode.NOT_FOUND);
 		}
+
+		const groupData = group[0];
+
+		// Obtener imágenes y videos recientes
+		const recentMedia = await getRecentGroupMediaService(groupData.id, 6);
+		const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
+		const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
+
+		// Contar entidades relacionadas (usando Drizzle)
+		const [imageCount, videoCount, albumCount, collectionCount, tagCount, characterCount, placeCount, worldItemCount, conceptCount, promptCount, noteCount, wildcardCount, propertyCount] = await Promise.all([
+			db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, groupId)).then(res => res[0].count),
+			db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, groupId)).then(res => res[0].count),
+			db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, groupId)).then(res => res[0].count),
+			db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, groupId)).then(res => res[0].count),
+			// TODO: Add counts for other relations if they exist in Drizzle schema
+			Promise.resolve(0), // Placeholder for collections
+			Promise.resolve(0), // Placeholder for characters
+			Promise.resolve(0), // Placeholder for places
+			Promise.resolve(0), // Placeholder for worldItems
+			Promise.resolve(0), // Placeholder for concepts
+			Promise.resolve(0), // Placeholder for prompts
+			Promise.resolve(0), // Placeholder for notes
+			Promise.resolve(0), // Placeholder for wildcards
+			Promise.resolve(0), // Placeholder for properties
+		]);
+
+		const counts = {
+			images: imageCount,
+			videos: videoCount,
+			albums: albumCount,
+			collections: collectionCount,
+			tags: tagCount,
+			characters: characterCount,
+			places: placeCount,
+			worldItems: worldItemCount,
+			concepts: conceptCount,
+			prompts: promptCount,
+			notes: noteCount,
+			wildcards: wildcardCount,
+			properties: propertyCount,
+		};
+
+		// Intentar parsear el campo filters si existe
+		let filters = [];
+		if (typeof groupData.filters === 'string' && groupData.filters !== 'empty_array') {
+			try {
+				filters = JSON.parse(groupData.filters);
+			} catch (e) {
+				console.error('Error parsing group filters:', e);
+			}
+		}
+
+		// Calcular metadatos TCG
+		const totalEntities =
+			counts.images +
+			counts.videos +
+			counts.albums +
+			counts.collections +
+			counts.tags +
+			counts.characters +
+			counts.places +
+			counts.worldItems +
+			counts.concepts +
+			counts.prompts +
+			counts.notes +
+			counts.wildcards +
+			counts.properties;
+
+		// Determinar nivel de rareza basado en el número de entidades y filtros
+		const rarityLevel = calculateRarityLevel(totalEntities, filters.length);
+
+		// Calcular puntos de poder
+		const power = calculateGroupPower(groupData, totalEntities, filters.length);
+
+		// Calcular puntos de salud basados en la diversidad de entidades
+		const hp = calculateHealth(counts);
+
+		// Calcular puntos de maná (MP) basados en filtros y flexibilidad
+		const mp = calculateMana(filters.length, groupData.category);
+
+		// Calcular nivel de organización
+		const organizationLevel = calculateOrganizationLevel(counts);
+
+		// Calcular puntaje de flexibilidad
+		const flexibilityScore = calculateFlexibilityScore(filters);
+
+		// Determinar tipo de organización
+		const organizationType = determineOrganizationType(counts);
+
+		return {
+			...groupData,
+			recentImages: recentImagePaths,
+			recentVideos: recentVideoPaths,
+			filters,
+			power,
+			rarityLevel,
+			hp,
+			mp,
+			organizationLevel,
+			flexibilityScore,
+			organizationType,
+			cardId: `G-${groupData.id.substring(0, 8)}`,
+		};
+	} catch (error) {
+		logger.error('Error al obtener datos de la tarjeta del grupo', { error, groupId });
+		throw createGroupError(
+			`Error al obtener datos de la tarjeta: ${error instanceof Error ? error.message : String(error)}`,
+			GroupErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
-
-	// Calcular metadatos TCG
-	const totalEntities =
-		group._count.images +
-		group._count.videos +
-		group._count.albums +
-		group._count.collections +
-		group._count.tags +
-		group._count.characters +
-		group._count.places +
-		group._count.worldItems +
-		group._count.concepts +
-		group._count.prompts +
-		group._count.notes +
-		group._count.wildcards +
-		group._count.properties;
-
-	// Determinar nivel de rareza basado en el número de entidades y filtros
-	const rarityLevel = calculateRarityLevel(totalEntities, filters.length);
-
-	// Calcular puntos de poder
-	const power = calculateGroupPower(group, totalEntities, filters.length);
-
-	// Calcular puntos de salud basados en la diversidad de entidades
-	const hp = calculateHealth(group._count);
-
-	// Calcular puntos de maná (MP) basados en filtros y flexibilidad
-	const mp = calculateMana(filters.length, group.category);
-
-	// Calcular nivel de organización
-	const organizationLevel = calculateOrganizationLevel(group._count);
-
-	// Calcular puntaje de flexibilidad
-	const flexibilityScore = calculateFlexibilityScore(filters);
-
-	// Determinar tipo de organización
-	const organizationType = determineOrganizationType(group._count);
-
-	return {
-		...group,
-		recentImages: recentImagePaths,
-		recentVideos: recentVideoPaths,
-		filters,
-		power,
-		rarityLevel,
-		hp,
-		mp,
-		organizationLevel,
-		flexibilityScore,
-		organizationType,
-		cardId: `G-${group.id.substring(0, 8)}`,
-	};
 }
 
 /**
@@ -734,7 +667,7 @@ function calculateHealth(counts: any): number {
 }
 
 /**
- * Calcula los puntos de maná basados en filtros y flexibilidad
+ * Calcula los puntos de maná (MP) basados en filtros y flexibilidad
  */
 function calculateMana(filtersCount: number, category: string | null): number {
 	// Base MP

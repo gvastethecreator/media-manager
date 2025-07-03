@@ -2,13 +2,9 @@
  * @file Servicio de gestión de etiquetas
  * @module services/tag/tag.service
  * @description Servicio centralizado para operaciones CRUD y lógica de negocio de etiquetas
- * @updated 2025-01-27
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { Prisma } from '@prisma/client';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-// Drizzle imports
-import { prisma } from '@/lib/database/prisma';
 import { db } from '@/lib/drizzle';
 import { tags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -18,6 +14,7 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toTagWithStats } from '@/transformers/tag';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import { tagCounts } from '@/types/entities/tag';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('TagService');
@@ -167,31 +164,6 @@ export async function getTag(id: string): Promise<TagWithStats | null> {
 			},
 		};
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prismaTag = await prisma.tag.findUnique({
-					where: { id },
-					include: tagCounts,
-				});
-
-				if (prismaTag && transformedTag) {
-					logger.info('✅ Validación dual exitosa getTag:', {
-						tagName: transformedTag.name
-					});
-				} else if (!prismaTag && !transformedTag) {
-					logger.info('✅ Validación dual exitosa getTag: ambos null');
-				} else {
-					logger.warn('⚠️ Diferencia en getTag:', {
-						drizzleFound: !!transformedTag,
-						prismaFound: !!prismaTag
-					});
-				}
-			} catch (validationError) {
-				logger.error('❌ Error en validación dual getTag:', validationError);
-			}
-		}
-
 		const result = toTagWithStats(transformedTag as any);
 		logger.info(`✅ Etiqueta encontrada: ${result.name}`);
 		return result;
@@ -308,46 +280,6 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 				groups: 0,
 			},
 		}));
-
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				// Construir filtros para Prisma (código original)
-				const where: Prisma.TagWhereInput = {};
-
-				if (!includeArchived) {
-					where.isArchived = false;
-				}
-
-				if (onlyFavorites) {
-					where.isFavorite = true;
-				}
-
-				if (search) {
-					where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
-				}
-
-				const [prismaTotal] = await Promise.all([
-					prisma.tag.count({ where }),
-				]);
-
-				// Comparar resultados básicos
-				if (Math.abs(total - prismaTotal) > 0) {
-					logger.warn('⚠️ Diferencia en conteo total getTags:', {
-						drizzle: total,
-						prisma: prismaTotal,
-						options
-					});
-				} else {
-					logger.info('✅ Validación dual exitosa getTags:', {
-						total,
-						tags: transformedTags.length
-					});
-				}
-			} catch (validationError) {
-				logger.error('❌ Error en validación dual getTags:', validationError);
-			}
-		}
 
 		const finalTags = transformedTags.map(toTagWithStats);
 
