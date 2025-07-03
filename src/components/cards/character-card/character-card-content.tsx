@@ -1,6 +1,6 @@
-import { Progress } from '@/components/ui/progress';
 import { ArrowUpRight, Brain, Heart, Shield, Sparkles, Star, Swords, User, Wand, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Progress } from '@/components/ui/progress';
 
 interface CharacterCardContentProps {
 	/** Descripción del personaje */

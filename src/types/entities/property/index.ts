@@ -13,8 +13,6 @@
  * @updated 2025-01-27
  */
 
-// --- Tipos Canónicos (NUEVO) ---
-export { PROPERTY_COUNTS_RELATIONS, propertyCounts } from './base';
 export type {
 	PrismaPropertyWithCounts,
 	PropertyBase,
@@ -23,6 +21,8 @@ export type {
 	PropertyUpdateInput,
 	PropertyWithStats,
 } from './base';
+// --- Tipos Canónicos (NUEVO) ---
+export { PROPERTY_COUNTS_RELATIONS, propertyCounts } from './base';
 
 // --- Esquemas de Validación ---
 // Asumiendo que `schema.ts` contiene esquemas relevantes como PropertySchema.

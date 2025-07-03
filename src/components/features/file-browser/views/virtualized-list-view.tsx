@@ -3,11 +3,11 @@
  * @module components/features/file-browser/views/virtualized-list-view
  */
 
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
 import React, { memo, useRef } from 'react';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
 
 interface VirtualizedListViewProps {
 	items: EntityWithStats[];

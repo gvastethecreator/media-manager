@@ -3,6 +3,7 @@
  * @module transformers/character/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
@@ -11,7 +12,6 @@ import type {
 	CharacterSearchOptions,
 	CharacterUpdateInput,
 } from '@/types/entities/character';
-import type { Prisma } from '@prisma/client';
 
 /**
  * 🔄 Mapea un `CharacterCreateInput` a un `Prisma.CharacterCreateInput`.

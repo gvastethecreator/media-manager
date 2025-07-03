@@ -1,108 +1,128 @@
-'use server';
+/**
+ * @file Actions para la entidad Concept - Migradas a API calls
+ * @module app/actions/concepts/concept.actions
+ * @description Funciones que llaman a las rutas API de conceptos
+ * @updated 2025-01-27
+ */
 
-import { prisma } from '@/lib/database/prisma';
-import {
-	conceptPayload,
-	fromPrismaConcept,
-	mapConceptSearchOptionsToPrisma,
-	mapCreateConceptDataToPrisma,
-	mapUpdateConceptDataToPrisma,
-} from '@/transformers/concept';
-import type {
-	ConceptComplete,
-	ConceptCreateInput,
-	ConceptSearchOptions,
-	ConceptUpdateInput,
-} from '@/types/entities/concept/types';
-import { revalidatePath } from '@/lib/server/revalidate';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
 
-const REVALIDATE_PATHS = ['/settings/concepts', '/library/concepts'];
+const logger = clientLogger.withContext('ConceptActions');
+const API_BASE = '/api/concepts';
 
-async function revalidateConceptPaths(id?: string) {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path, 'page');
-	}
-	if (id) {
-		revalidatePath(`/library/concepts/${id}`, 'page');
-	}
-}
-
-export async function getConcepts(options: ConceptSearchOptions): Promise<ConceptComplete[]> {
+/**
+ * Obtiene todos los conceptos con estadísticas.
+ */
+export async function getConcepts(): Promise<ConceptWithStats[]> {
 	try {
-		const findOptions = mapConceptSearchOptionsToPrisma(options);
-		const concepts = await prisma.concept.findMany({
-			...findOptions,
-			...conceptPayload,
-		});
-		const transformedConcepts = concepts
-			.map(fromPrismaConcept)
-			.filter((c: ConceptComplete | null): c is ConceptComplete => c !== null);
-		return transformedConcepts;
-	} catch (error) {
-		console.error('Error al obtener los conceptos:', error);
-		throw new Error('No se pudieron obtener los conceptos.');
-	}
-}
+		logger.info('💡 Obteniendo conceptos via API');
 
-export async function getConceptById(id: string): Promise<ConceptComplete | null> {
-	try {
-		const concept = await prisma.concept.findUnique({
-			where: { id },
-			...conceptPayload,
-		});
-		return fromPrismaConcept(concept);
-	} catch (error) {
-		console.error(`Error al obtener el concepto con ID ${id}:`, error);
-		throw new Error('No se pudo obtener el concepto.');
-	}
-}
+		const response = await fetch(API_BASE);
 
-export async function createConcept(input: ConceptCreateInput): Promise<ConceptComplete> {
-	try {
-		const data = mapCreateConceptDataToPrisma(input);
-		const newConcept = await prisma.concept.create({
-			data,
-			...conceptPayload,
-		});
-		await revalidateConceptPaths();
-		const transformedConcept = fromPrismaConcept(newConcept);
-		if (!transformedConcept) {
-			throw new Error('Error al transformar el concepto creado.');
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-		return transformedConcept;
+
+		const result = await response.json();
+		return result.data || [];
 	} catch (error) {
-		console.error('Error al crear el concepto:', error);
-		throw new Error('No se pudo crear el concepto.');
+		logger.error('❌ Error en API getConcepts', { error });
+		throw error;
 	}
 }
 
-export async function updateConcept(id: string, input: ConceptUpdateInput): Promise<ConceptComplete> {
+/**
+ * Obtiene un único concepto por su ID.
+ */
+export async function getConcept(id: string): Promise<ConceptWithStats | null> {
 	try {
-		const data = mapUpdateConceptDataToPrisma(input);
-		const updatedConcept = await prisma.concept.update({
-			where: { id },
-			data,
-			...conceptPayload,
-		});
-		await revalidateConceptPaths(id);
-		const transformedConcept = fromPrismaConcept(updatedConcept);
-		if (!transformedConcept) {
-			throw new Error('Error al transformar el concepto actualizado.');
+		logger.info(`🔍 Obteniendo concepto ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-		return transformedConcept;
+
+		return await response.json();
 	} catch (error) {
-		console.error(`Error al actualizar el concepto con ID ${id}:`, error);
-		throw new Error('No se pudo actualizar el concepto.');
+		logger.error(`❌ Error en API getConcept: ${id}`, { error });
+		throw error;
 	}
 }
 
-export async function deleteConcept(id: string): Promise<boolean> {
+/**
+ * Crea un nuevo concepto.
+ */
+export async function createConcept(data: ConceptCreateInput): Promise<ConceptWithStats> {
 	try {
-		await prisma.concept.delete({ where: { id } });
-		await revalidateConceptPaths();
-		return true;
+		logger.info('📝 Creando concepto via API', { name: data.name });
+
+		const response = await fetch(API_BASE, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		console.error(`Error al eliminar el concepto con ID ${id}:`, error);
-		return false;
+		logger.error('❌ Error en API createConcept', { error, data });
+		throw error;
+	}
+}
+
+/**
+ * Actualiza un concepto existente.
+ */
+export async function updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptWithStats> {
+	try {
+		logger.info(`🔄 Actualizando concepto ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error(`❌ Error en API updateConcept: ${id}`, { error, data });
+		throw error;
+	}
+}
+
+/**
+ * Elimina un concepto.
+ */
+export async function deleteConcept(id: string): Promise<void> {
+	try {
+		logger.warn(`🗑️ Eliminando concepto ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+	} catch (error) {
+		logger.error(`❌ Error en API deleteConcept: ${id}`, { error });
+		throw error;
 	}
 }

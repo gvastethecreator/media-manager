@@ -8,6 +8,7 @@
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toPrismaCollectionCreate, toPrismaCollectionUpdate } from '@/transformers/collection/serializers';
 import { fromPrismaCollection, fromPrismaCollections } from '@/transformers/collection/transformer';
@@ -18,7 +19,6 @@ import type {
 	CollectionUpdateInput,
 	CollectionWithStats,
 } from '@/types/entities/collection';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');

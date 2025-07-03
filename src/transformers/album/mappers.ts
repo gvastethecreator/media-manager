@@ -3,8 +3,9 @@
  * @module transformers/album/mappers
  * @description Contiene funciones para transformar datos de la entidad Album.
  */
-import type { AlbumStatistics, AlbumWithStats } from '@/types/entities/album';
+
 import type { Album } from '@prisma/client';
+import type { AlbumStatistics, AlbumWithStats } from '@/types/entities/album';
 
 /**
  * Representa la estructura del objeto de agregación de conteos de Prisma para un Album.

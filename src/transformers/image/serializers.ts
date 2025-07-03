@@ -5,9 +5,9 @@
 
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { handleTransformerError } from '@/lib/utils/transformers/errors';
 import type { ImageComplete } from '@/types/entities/image/types';
 import { ImageSchema } from '@/types/entities/image/types';
-import { handleTransformerError } from '@/lib/utils/transformers/errors';
 
 const logger = serverLogger.withContext('ImageSerializer');
 

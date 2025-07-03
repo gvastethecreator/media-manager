@@ -13,9 +13,9 @@ export {
 } from './enums';
 export type {
 	CreateFolderData,
+	FolderBase,
 	// Alias para retrocompatibilidad
 	FolderComplete as Folder,
-	FolderBase,
 	FolderComplete,
 	FolderCounts,
 	FolderCreateInput,

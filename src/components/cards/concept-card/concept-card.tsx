@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
-import type { ConceptComplete } from '@/types/entities/concept';
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { ConceptComplete } from '@/types/entities/concept';
 import { CardHeader } from '../card-header';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';

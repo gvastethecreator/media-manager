@@ -1,9 +1,9 @@
 'use server';
 
-import * as DocumentService from '@/services/document';
-import { DocumentWithStats } from '@/types/entities/document';
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from '@/lib/server/revalidate';
+import * as DocumentService from '@/services/document';
+import { DocumentWithStats } from '@/types/entities/document';
 
 /**
  * 📄 Server Actions para la entidad Document

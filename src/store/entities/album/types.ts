@@ -4,8 +4,8 @@
  * @description Define la forma del estado y las acciones para el store de Album.
  */
 
-import type { AlbumWithStats } from '@/types/entities/album';
 import type { Prisma } from '@prisma/client';
+import type { AlbumWithStats } from '@/types/entities/album';
 
 // --- Estado del Slice ---
 
@@ -16,13 +16,9 @@ export interface AlbumCoreState {
 	lastUpdated: number | null;
 }
 
-export interface AlbumUIState {
-	// ...p.ej., álbum seleccionado, modo de vista, etc.
-}
+export type AlbumUIState = {};
 
-export interface AlbumFilterState {
-	// ...p.ej., filtros de búsqueda, ordenación, etc.
-}
+export type AlbumFilterState = {};
 
 // --- Acciones del Slice ---
 
@@ -35,13 +31,9 @@ export interface AlbumCoreActions {
 	getSortedAlbums: () => AlbumWithStats[];
 }
 
-export interface AlbumUIActions {
-	// ...
-}
+export type AlbumUIActions = {};
 
-export interface AlbumFilterActions {
-	// ...
-}
+export type AlbumFilterActions = {};
 
 // --- Store Completo ---
 

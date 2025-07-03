@@ -1,3 +1,5 @@
+import { FolderIcon } from 'lucide-react';
+import { useCallback, useEffect, useRef } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
@@ -5,8 +7,6 @@ import BlurFade from '@/components/ui/blur-fade';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { EntityWithStats } from '@/types/migration';
-import { FolderIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
 import { useContentView } from './content-view-provider';
 
 const baseLogger = clientLogger.withContext('BaseContentView');

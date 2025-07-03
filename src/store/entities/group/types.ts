@@ -5,9 +5,9 @@
  * @updated 2025-01-27
  */
 
+import type { Prisma } from '@prisma/client';
 import type { GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/group';
-import type { Prisma } from '@prisma/client';
 
 /**
  * Estado del core para el store de grupos

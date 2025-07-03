@@ -5,12 +5,12 @@
 // por los mismos fallos en la herramienta de edición que impiden corregir las
 // server actions de la entidad `Property`.
 
+import { Microscope } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { PropertyWithStats } from '@/types/entities/property';
-import { Microscope } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import React, { useMemo } from 'react';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 

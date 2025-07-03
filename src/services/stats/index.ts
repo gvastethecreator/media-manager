@@ -4,5 +4,5 @@
  * @module services/stats
  */
 
-export * from './stats.service';
 export * from './optimized-stats.service';
+export * from './stats.service';

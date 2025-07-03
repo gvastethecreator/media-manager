@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
-import type { AudioWithStats } from '@/types/entities/audio';
 import { MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { AudioWithStats } from '@/types/entities/audio';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 

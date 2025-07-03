@@ -3,9 +3,9 @@
  * @module lib/server
  */
 
+export * from './config';
 // Re-exportar utilidades del servidor
 export * from './utils';
-export * from './config';
 
 // Servidor específico
 export const isServer = typeof window === 'undefined';

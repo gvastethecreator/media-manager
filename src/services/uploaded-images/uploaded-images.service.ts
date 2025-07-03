@@ -2,6 +2,7 @@ import { prisma } from '@/lib/database/prisma';
 import { processImage } from '@/lib/image/image-processing';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
 import { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
@@ -16,7 +17,6 @@ import type {
 	UploadedImageResults,
 	UploadedImageStats,
 } from '@/types/uploaded-images';
-import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVICE_NAME = 'UploadedImagesService';
 const uploadedImagesLogger = serverLogger.withContext(SERVICE_NAME);

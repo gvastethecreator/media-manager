@@ -7,6 +7,7 @@
  * MIGRACIÓN: Este componente reemplazará a entity-card.tsx una vez completada la migración.
  */
 
+import type { FC } from 'react';
 import {
 	type EntityWithStats,
 	getEntityStatsType,
@@ -28,7 +29,6 @@ import {
 	isWildcardWithStats,
 	isWorldItemWithStats,
 } from '@/types/migration';
-import type { FC } from 'react';
 
 // Importar componentes de tarjetas
 import { AlbumCard } from './album-card/album-card';

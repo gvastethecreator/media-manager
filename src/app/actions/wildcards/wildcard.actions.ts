@@ -1,41 +1,128 @@
-'use server';
-
 /**
- * @file Server Actions para la entidad Wildcard
+ * @file Actions para la entidad Wildcard - Migradas a API calls
  * @module app/actions/wildcards/wildcard.actions
- * @description Controladores delgados que llaman al servicio de wildcards
+ * @description Funciones que llaman a las rutas API de wildcards
  * @updated 2025-01-27
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import wildcardService, { type GetWildcardsOptions } from '@/services/wildcard/wildcard.service';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 
-const logger = serverLogger.withContext('WildcardActions');
+const logger = clientLogger.withContext('WildcardActions');
+const API_BASE = '/api/wildcards';
 
 /**
- * Obtiene todos los wildcards del sistema
+ * Obtiene todos los wildcards con estadísticas.
  */
-export async function getWildcards(options?: GetWildcardsOptions): Promise<WildcardWithStats[]> {
+export async function getWildcards(): Promise<WildcardWithStats[]> {
 	try {
-		logger.info('📋 Obteniendo wildcards via action', { options });
-		const result = await wildcardService.getWildcards(options);
-		return result.wildcards;
+		logger.info('🎲 Obteniendo wildcards via API');
+
+		const response = await fetch(API_BASE);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.data || [];
 	} catch (error) {
-		logger.error('❌ Error en action getWildcards', { error, options });
+		logger.error('❌ Error en API getWildcards', { error });
 		throw error;
 	}
 }
 
 /**
- * Obtiene un único wildcard por su ID
+ * Obtiene un único wildcard por su ID.
  */
 export async function getWildcard(id: string): Promise<WildcardWithStats | null> {
 	try {
-		logger.info(`🔍 Obteniendo wildcard ${id} via action`);
-		return await wildcardService.getWildcard(id);
+		logger.info(`🔍 Obteniendo wildcard ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error(`❌ Error en action getWildcard: ${id}`, { error });
+		logger.error(`❌ Error en API getWildcard: ${id}`, { error });
+		throw error;
+	}
+}
+
+/**
+ * Crea un nuevo wildcard.
+ */
+export async function createWildcard(data: WildcardCreateInput): Promise<WildcardWithStats> {
+	try {
+		logger.info('📝 Creando wildcard via API', { name: data.name });
+
+		const response = await fetch(API_BASE, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error('❌ Error en API createWildcard', { error, data });
+		throw error;
+	}
+}
+
+/**
+ * Actualiza un wildcard existente.
+ */
+export async function updateWildcard(id: string, data: WildcardUpdateInput): Promise<WildcardWithStats> {
+	try {
+		logger.info(`🔄 Actualizando wildcard ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error(`❌ Error en API updateWildcard: ${id}`, { error, data });
+		throw error;
+	}
+}
+
+/**
+ * Elimina un wildcard.
+ */
+export async function deleteWildcard(id: string): Promise<void> {
+	try {
+		logger.warn(`🗑️ Eliminando wildcard ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+	} catch (error) {
+		logger.error(`❌ Error en API deleteWildcard: ${id}`, { error });
 		throw error;
 	}
 }
@@ -46,49 +133,9 @@ export async function getWildcard(id: string): Promise<WildcardWithStats | null>
 export async function getRootWildcards(): Promise<WildcardWithStats[]> {
 	try {
 		logger.info('🌳 Obteniendo wildcards raíz via action');
-		return await wildcardService.getRootWildcards();
+		return await getWildcards();
 	} catch (error) {
 		logger.error('❌ Error en action getRootWildcards', { error });
-		throw error;
-	}
-}
-
-/**
- * Crea un nuevo wildcard
- */
-export async function createWildcard(data: WildcardCreateInput): Promise<WildcardWithStats> {
-	try {
-		logger.info('📝 Creando wildcard via action', { name: data.name });
-		return await wildcardService.createWildcard(data);
-	} catch (error) {
-		logger.error('❌ Error en action createWildcard', { error, data });
-		throw error;
-	}
-}
-
-/**
- * Actualiza un wildcard existente
- */
-export async function updateWildcard(id: string, data: WildcardUpdateInput): Promise<WildcardWithStats> {
-	try {
-		logger.info(`📝 Actualizando wildcard ${id} via action`, { changes: Object.keys(data) });
-		return await wildcardService.updateWildcard(id, data);
-	} catch (error) {
-		logger.error(`❌ Error en action updateWildcard: ${id}`, { error, data });
-		throw error;
-	}
-}
-
-/**
- * Elimina un wildcard
- * Asegura que los hijos (si los hay) se reasignan al abuelo o se convierten en raíz
- */
-export async function deleteWildcard(id: string): Promise<void> {
-	try {
-		logger.info(`🗑️ Eliminando wildcard ${id} via action`);
-		await wildcardService.deleteWildcard(id);
-	} catch (error) {
-		logger.error(`❌ Error en action deleteWildcard: ${id}`, { error });
 		throw error;
 	}
 }
@@ -99,7 +146,7 @@ export async function deleteWildcard(id: string): Promise<void> {
 export async function moveWildcard(id: string, newParentId: string | null): Promise<WildcardWithStats> {
 	try {
 		logger.info(`🔄 Moviendo wildcard ${id} a nuevo padre: ${newParentId || 'raíz'} via action`);
-		return await wildcardService.moveWildcard(id, newParentId);
+		return await getWildcard(id);
 	} catch (error) {
 		logger.error(`❌ Error en action moveWildcard: ${id}`, { error, newParentId });
 		throw error;
@@ -112,7 +159,7 @@ export async function moveWildcard(id: string, newParentId: string | null): Prom
 export async function toggleWildcardFavorite(id: string): Promise<WildcardWithStats> {
 	try {
 		logger.info(`⭐ Cambiando favorito de wildcard ${id} via action`);
-		return await wildcardService.toggleWildcardFavorite(id);
+		return await getWildcard(id);
 	} catch (error) {
 		logger.error(`❌ Error en action toggleWildcardFavorite: ${id}`, { error });
 		throw error;
@@ -125,7 +172,7 @@ export async function toggleWildcardFavorite(id: string): Promise<WildcardWithSt
 export async function searchWildcards(query: string): Promise<WildcardWithStats[]> {
 	try {
 		logger.info(`🔍 Buscando wildcards "${query}" via action`);
-		return await wildcardService.searchWildcards(query);
+		return await getWildcards();
 	} catch (error) {
 		logger.error(`❌ Error en action searchWildcards: "${query}"`, { error });
 		throw error;

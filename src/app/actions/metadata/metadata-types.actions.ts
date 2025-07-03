@@ -1,6 +1,6 @@
-import type { AIMetadata, FileMetadata } from '@/types/metadata';
 import type { Image } from '@prisma/client';
 import type sharp from 'sharp';
+import type { AIMetadata, FileMetadata } from '@/types/metadata';
 
 // Configuración de retry
 export interface RetryConfig {

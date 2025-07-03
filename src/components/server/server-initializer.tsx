@@ -1,6 +1,6 @@
+import { useEffect } from 'react';
 import { useSystemInit } from '@/lib/api/system';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useEffect } from 'react';
 
 // Logger específico para este componente
 const logger = clientLogger.withContext('ServerInitializer');

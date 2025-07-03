@@ -5,6 +5,8 @@
 // centralizar la lógica de negocio. Esta refactorización está bloqueada por fallos
 // persistentes en la herramienta de edición de código en los archivos de `server actions` y `transformers`.
 
+import { Plus, Search, Star, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
@@ -15,8 +17,6 @@ import type { PropertyCreateInput, PropertyUpdateInput } from '@/lib/api/propert
 import { useCreateProperty, useDeleteProperty, useProperties, useUpdateProperty } from '@/lib/api/properties';
 import toastService from '@/services/toast';
 import type { PropertyWithStats } from '@/types/entities/property';
-import { Plus, Search, Star, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
 import { CreatePropertyForm } from './create-property-form';
 
 export type { PropertyWithStats }; // Exportamos el tipo para el PropertyPreview
@@ -150,7 +150,7 @@ export function PropertiesSettings() {
 		return (
 			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" />
 					<p className="mt-2 text-sm text-gray-500">Cargando propiedades...</p>
 				</div>
 			</div>

@@ -5,6 +5,7 @@
  * Última actualización: 2025-01-27
  */
 
+import type { StateCreator } from 'zustand';
 import {
 	createImage as createServerImage,
 	deleteImage as deleteServerImage,
@@ -15,7 +16,6 @@ import {
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
-import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
 const imageLogger = clientLogger.withContext('ImageStore');

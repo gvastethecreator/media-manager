@@ -3,10 +3,10 @@
  * @module utils/video/helpers
  */
 
+import { z } from 'zod';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { type VideoBase, VideoFormat } from '@/types/entities/video';
 import { VideoMetadataSchema } from '@/types/entities/video/schema';
-import { z } from 'zod';
 
 type VideoMetadata = z.infer<typeof VideoMetadataSchema>;
 

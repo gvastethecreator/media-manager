@@ -1,5 +1,5 @@
-import type { WildcardCreateInput as BaseWildcardCreateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { WildcardCreateInput as BaseWildcardCreateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { api } from './client';
 
 export interface WildcardFilters {

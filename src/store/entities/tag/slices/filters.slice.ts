@@ -3,8 +3,8 @@
  * @module store/entities/tag/slices/filters.slice
  */
 
-import { TagWithStats } from '@/types/entities/tag';
 import { StateCreator } from 'zustand';
+import { TagWithStats } from '@/types/entities/tag';
 import type { TagStore } from '../types';
 
 /**
@@ -17,7 +17,7 @@ export enum TagSortCriteria {
 	USAGE_DESC = 'usage:desc',
 	CREATED_ASC = 'createdAt:asc',
 	CREATED_DESC = 'createdAt:desc',
-	UPDATED_ASC = 'updatedAt:desc',
+	UPDATED_ASC = 'updatedAt:asc',
 	UPDATED_DESC = 'updatedAt:desc',
 }
 

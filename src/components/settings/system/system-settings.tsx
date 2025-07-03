@@ -1,3 +1,6 @@
+import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback } from 'react';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -17,9 +20,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useRepairSystem, useResetDatabase, useSystemStats } from '@/lib/api/system';
 import toastService from '@/services/toast';
-import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback } from 'react';
 
 // Tipo para estadísticas del sistema
 interface SystemData {

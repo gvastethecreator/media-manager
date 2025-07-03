@@ -4,17 +4,17 @@
  * @description Store Zustand para gestionar el estado de archivos JSON
  */
 
+import type { Prisma } from '@prisma/client';
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 import {
 	createJsonFile,
 	deleteJsonFile,
 	getJsonFiles,
 	updateJsonFile,
 } from '@/app/actions/json-file/json-file.actions';
-import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { Prisma } from '@prisma/client';
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import type { JsonFileWithStats } from '@/types/entities/json-file';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type JsonFileFilters = Record<string, any>;

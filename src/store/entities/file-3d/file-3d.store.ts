@@ -4,12 +4,12 @@
  * @description Store Zustand para gestionar el estado de archivos 3D
  */
 
-import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/app/actions/file3d/file-3d.actions';
-import type { File3DWithStats } from '@/types/entities/file3d';
-import { createSelectors } from '@/lib/utils/store/create-selectors';
 import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/app/actions/file3d/file-3d.actions';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
+import type { File3DWithStats } from '@/types/entities/file3d';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type File3DFilters = Record<string, any>;

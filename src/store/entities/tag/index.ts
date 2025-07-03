@@ -3,9 +3,9 @@
  * @module store/entities/tag
  */
 
-import { VERSIONING } from '@/lib/constants';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { VERSIONING } from '@/lib/constants';
 import { createTagCoreSlice } from './slices/core.slice';
 import { createTagFiltersSlice } from './slices/filters.slice';
 import { createTagUISlice } from './slices/ui.slice';

@@ -3,20 +3,6 @@
  * @module components/features/file-browser/details/details-panel
  */
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
-import { cn } from '@/lib/utils';
-import { formatBytes } from '@/lib/utils/format.utils';
-import type { EntityWithStats } from '@/types/migration';
-import {
-	getEntityStatistics,
-	getEntityStatsType,
-	isAudioWithStats,
-	isImageWithStats,
-	isVideoWithStats,
-} from '@/types/migration';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -38,6 +24,20 @@ import {
 	Video,
 } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
+import type { EntityWithStats } from '@/types/migration';
+import {
+	getEntityStatistics,
+	getEntityStatsType,
+	isAudioWithStats,
+	isImageWithStats,
+	isVideoWithStats,
+} from '@/types/migration';
 
 interface DetailsPanelV2Props {
 	selectedItems: EntityWithStats[];

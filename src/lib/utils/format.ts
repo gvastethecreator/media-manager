@@ -15,7 +15,7 @@ export function formatBytes(bytes: number, decimals = 2): string {
 
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+	return Number.parseFloat((bytes / k ** i).toFixed(dm)) + ' ' + sizes[i];
 }
 
 /**
@@ -91,9 +91,9 @@ export function formatDuration(milliseconds: number): string {
 
 	if (hours > 0) {
 		return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
-	} else if (minutes > 0) {
-		return `${minutes}m ${seconds % 60}s`;
-	} else {
-		return `${seconds}s`;
 	}
+	if (minutes > 0) {
+		return `${minutes}m ${seconds % 60}s`;
+	}
+	return `${seconds}s`;
 }

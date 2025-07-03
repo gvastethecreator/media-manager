@@ -4,8 +4,8 @@
  * @description Tipos refactorizados siguiendo el patrón de slices.
  */
 
-import type { WorkflowWithStats } from '@/types/entities/workflow';
 import type { Prisma } from '@prisma/client';
+import type { WorkflowWithStats } from '@/types/entities/workflow';
 
 // --- ENUMS Y FILTROS ESPECÍFICOS DEL STORE ---
 

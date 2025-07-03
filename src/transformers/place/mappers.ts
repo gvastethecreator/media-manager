@@ -6,11 +6,11 @@
  *              2. Transformar los datos de Prisma a tipos enriquecidos de la app (PlaceWithStats).
  */
 
+import type { Prisma } from '@prisma/client';
 import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats, PrismaPlaceWithCounts } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
-import type { Prisma } from '@prisma/client';
 
 /**
  * 🗺️ Transforma un objeto Place de Prisma a un objeto PlaceWithStats enriquecido.

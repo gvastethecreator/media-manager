@@ -3,11 +3,11 @@
  * @module transformers/profile
  */
 
-import { Language, type ProfileBase, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
-import { profilePreferencesSchema } from '@/types/entities/profile/schema';
 import type { Profile as ProfileFromPrisma } from '@prisma/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Language, type ProfileBase, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
+import { profilePreferencesSchema } from '@/types/entities/profile/schema';
 
 /**
  * Tipo para el perfil extendido con datos adicionales

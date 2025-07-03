@@ -1,3 +1,7 @@
+import { DatabaseIcon, FolderIcon, RefreshCw, XCircle } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { EntityCard } from '@/components/cards/entity-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -10,10 +14,6 @@ import * as folderService from '@/services/folder/folder.service';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
-import { DatabaseIcon, FolderIcon, RefreshCw, XCircle } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { ViewProps } from '../../types';
 
 const viewLogger = clientLogger.withContext('FoldersView');

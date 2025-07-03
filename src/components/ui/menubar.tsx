@@ -1,6 +1,6 @@
-import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
-import { Menubar as MenubarPrimitive } from '@base-ui-components/react/menubar';
 import { Menu as MenuPrimitive } from '@base-ui-components/react/menu';
+import { Menubar as MenubarPrimitive } from '@base-ui-components/react/menubar';
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';

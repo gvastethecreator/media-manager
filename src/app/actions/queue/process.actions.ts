@@ -6,12 +6,12 @@
 'use server';
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import {
 	cancelQueueJob as cancelQueueJobService,
 	retryQueueJob as retryQueueJobService,
 } from '@/services/queue-job/queue-job.service';
 import type { QueueJobExtended } from '@/types/entities/queue-job';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('QueueActions:process');
 

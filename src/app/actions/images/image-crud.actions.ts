@@ -1,11 +1,11 @@
 'use server';
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { imageService } from '@/services/image/image.service';
-import { Prisma } from '@prisma/client';
-import { revalidatePath } from '@/lib/server/revalidate';
 // Importamos el servicio de imagen
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';

@@ -1,6 +1,6 @@
-import { serverLogger } from '@/lib/logger/server-logger';
 import { existsSync } from 'fs';
 import { normalize, sep } from 'path';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const pathUtilsLogger = serverLogger.withContext('PathUtils');
 

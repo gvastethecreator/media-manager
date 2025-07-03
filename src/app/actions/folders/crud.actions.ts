@@ -5,8 +5,10 @@
  * @module app/actions/folders/crud.actions
  */
 
+import fs from 'fs/promises';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import {
 	folderWithCountsPayload,
 	fromPrismaFoldersWithCounts,
@@ -16,8 +18,6 @@ import {
 } from '@/transformers/folder';
 import type { FolderCreateInput, FolderUpdateInput, FolderWithStats } from '@/types/entities/folder';
 import { CreateFolderSchema, UpdateFolderSchema } from '@/types/entities/folder/schema';
-import fs from 'fs/promises';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('FolderActions');
 

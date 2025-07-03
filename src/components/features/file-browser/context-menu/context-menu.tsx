@@ -1,9 +1,3 @@
-import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
-import { Separator } from '@/components/ui/separator';
-import { useAlbumStore } from '@/store/entities/album';
-import { useCollectionStore } from '@/store/entities/collection';
-import { useTagStore } from '@/store/entities/tag';
-import { Tag as TagType } from '@/types/entities/tag';
 import {
 	Album,
 	BookImage,
@@ -18,6 +12,12 @@ import {
 	Trash,
 } from 'lucide-react';
 import { memo, useState } from 'react';
+import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
+import { Separator } from '@/components/ui/separator';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useTagStore } from '@/store/entities/tag';
+import { Tag as TagType } from '@/types/entities/tag';
 import { EnhancedSubmenu } from './components/enhanced-submenu';
 import type { ContextMenuAction, FileContextMenuProps } from './types';
 

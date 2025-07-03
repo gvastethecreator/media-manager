@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
 import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
 import { Smile } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 

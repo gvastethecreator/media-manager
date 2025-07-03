@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
-import type { VideoWithStats } from '@/types/entities/video';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { VideoWithStats } from '@/types/entities/video';
 import { CardContainer } from '../card-container';
 import { VideoCardContent } from './video-card-content';
 import { VideoCardFooter } from './video-card-footer';

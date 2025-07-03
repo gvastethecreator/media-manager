@@ -6,6 +6,7 @@
  * @updated 2025-07-01
  */
 
+import type { Prisma } from '@prisma/client';
 import { getPrismaClient } from '@/lib/database/db';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -13,7 +14,6 @@ import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaAudio, fromPrismaAudios } from '@/transformers/audio/transformer';
 import type { AudioWithStats } from '@/types/entities/audio';
-import type { Prisma } from '@prisma/client';
 
 const audioLogger = serverLogger.withContext('AudioService');
 

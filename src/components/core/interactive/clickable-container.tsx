@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ClickableContainerProps extends React.HTMLAttributes<HTMLDivElement> {
 	onClick: (event: React.MouseEvent<HTMLDivElement>) => void;

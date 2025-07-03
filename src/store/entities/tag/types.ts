@@ -3,8 +3,8 @@
  * @module store/entities/tag/types
  */
 
-import type { TagWithStats } from '@/types/entities/tag';
 import type { Prisma } from '@prisma/client';
+import type { TagWithStats } from '@/types/entities/tag';
 
 // --- ENUMS ESPECÍFICOS DEL STORE ---
 

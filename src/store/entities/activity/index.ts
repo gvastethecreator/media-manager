@@ -4,6 +4,8 @@
  * @description Implementación del store de Zustand para la gestión de actividades del sistema
  */
 
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 import {
 	createActivity as createActivityAction,
 	deleteActivity as deleteActivityAction,
@@ -14,8 +16,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { extendActivities, extendActivity } from '@/transformers/activity';
 import type { ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
 import { ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
 
 // Logger para el store
 const storeLogger = clientLogger.withContext('ActivityStore');

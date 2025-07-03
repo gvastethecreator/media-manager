@@ -2,9 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
-	getOriginalImage,
-	getImageThumbnailBuffer,
 	generateThumbnailWithForce,
+	getImageThumbnailBuffer,
+	getOriginalImage,
 	verifySignedToken,
 } from '@/app/actions/images';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';

@@ -1,6 +1,6 @@
+import { Clock, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
-import { Clock, Star } from 'lucide-react';
 
 interface VideoCardHeaderProps {
 	video: VideoWithStats;

@@ -5,9 +5,9 @@
  *              enfocándose en el cálculo de estadísticas de ejecución.
  */
 
-import type { WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
-import { safeJsonParse } from '@/lib/utils/safe-json-parse';
 import type { Workflow } from '@prisma/client';
+import { safeJsonParse } from '@/lib/utils/safe-json-parse';
+import type { WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
 
 /**
  * Datos agregados de las ejecuciones de un workflow, obtenidos de Prisma.
@@ -50,7 +50,7 @@ function calculateWorkflowStats(workflow: Workflow, aggregates: WorkflowExecutio
 
 	return {
 		totalExecutions,
-		successRate: parseFloat(successRate.toFixed(1)),
+		successRate: Number.parseFloat(successRate.toFixed(1)),
 		averageDuration: Math.round(_avg.duration ?? 0),
 		lastExecutedAt: _max.startedAt ?? null,
 		nodeCount,

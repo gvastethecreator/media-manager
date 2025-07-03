@@ -5,6 +5,7 @@
  * (ej. desde formularios o actions) a los tipos que Prisma espera para las operaciones de BD.
  */
 
+import type { Prisma } from '@prisma/client';
 import type {
 	ConceptBase,
 	ConceptCreateInput,
@@ -13,7 +14,6 @@ import type {
 	ConceptSortOption,
 	ConceptUpdateInput,
 } from '@/types/entities/concept';
-import type { Prisma } from '@prisma/client';
 
 /**
  * Mapea la entrada de creación de un concepto al formato de Prisma.

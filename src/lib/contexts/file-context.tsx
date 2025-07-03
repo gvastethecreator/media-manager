@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
-import { logActivity } from '@/app/actions/activity/activity.actions';
+import { useLogActivity } from '@/lib/api/activity';
 import { clientEvents } from '@/lib/client/events.client';
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 
 export interface FileItem {
 	id: string;
@@ -81,6 +81,9 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	// Usamos el hook de eventos optimistas del cliente
 	const [_optimisticState, addEvent] = clientEvents.useEvents({});
 
+	// Hook para registrar actividades - debe estar en el nivel superior
+	const logActivity = useLogActivity();
+
 	// Métodos del contexto original
 	const addFiles = useCallback((newFiles: FileItem[]) => {
 		setFiles((prev) => [...prev, ...newFiles]);
@@ -109,14 +112,19 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			// Seleccionar el item
 			selectFiles([item.id]);
 
-			// Registrar actividad de vista usando server action en lugar del servicio
-			await logActivity({
-				type: 'view',
-				description: `Vista de ${item.name}`,
-				imageId: item.id,
-			});
+			// Registrar actividad de vista usando API hook
+			try {
+				await logActivity.mutateAsync({
+					type: 'view',
+					description: `Vista de ${item.name}`,
+					imageId: item.id,
+				});
+			} catch (error) {
+				console.error('Error registrando actividad:', error);
+				// No bloquear la UI por errores de logging
+			}
 		},
-		[selectFiles]
+		[selectFiles, logActivity]
 	);
 
 	const toggleItemSelection = useCallback(
@@ -302,10 +310,10 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			prev.map((file) =>
 				file.id === fileId
 					? {
-							...file,
-							name: newName,
-							path: file.path.replace(/[^/]+$/, newName),
-						}
+						...file,
+						name: newName,
+						path: file.path.replace(/[^/]+$/, newName),
+					}
 					: file
 			)
 		);

@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
 import { PlaceCardContent } from './place-card-content';
 import { PlaceCardFooter } from './place-card-footer';

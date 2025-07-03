@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { WildcardViewMode } from '@/types/entities/wildcard';
-import type { WildcardState, WildcardDisplayState } from '../types';
+import type { WildcardDisplayState, WildcardState } from '../types';
 import type { WildcardCoreSlice } from './core';
 
 const uiLogger = clientLogger.withContext('WildcardStore:UI');

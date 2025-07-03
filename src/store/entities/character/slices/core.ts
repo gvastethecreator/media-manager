@@ -4,9 +4,9 @@
  * @description Slice principal con estructura Record optimizada para acceso O(1).
  */
 
+import type { StateCreator } from 'zustand';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
-import type { StateCreator } from 'zustand';
 import type { CharacterCoreSlice, CharacterState } from '../types';
 
 const logger = serverLogger.withContext('CharacterCoreSlice');

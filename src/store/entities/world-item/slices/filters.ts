@@ -3,9 +3,9 @@
  * @module store/entities/world-item/slices/filters
  */
 
+import type { StateCreator } from 'zustand';
 import { WorldItemSortCriteria } from '@/types/entities/world-item/enums';
 import type { WorldItemFilters } from '@/types/entities/world-item/types';
-import type { StateCreator } from 'zustand';
 import type { WorldItemActions, WorldItemState } from '../types';
 
 export interface WorldItemFiltersSlice {

@@ -1,6 +1,6 @@
+import express from 'express';
 import { updateImageMetadata, updateMultipleImagesMetadata } from '@/app/actions/images/metadata.actions';
 import { extractAIGenerationInfo } from '@/app/actions/metadata/parsers';
-import express from 'express';
 
 const router = express.Router();
 

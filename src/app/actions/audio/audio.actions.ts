@@ -1,6 +1,8 @@
 'use server';
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import {
 	createAudio as createAudioService,
 	deleteAudio as deleteAudioService,
@@ -9,8 +11,6 @@ import {
 	updateAudio as updateAudioService,
 } from '@/services/audio';
 import type { AudioWithStats } from '@/types/entities/audio';
-import type { Prisma } from '@prisma/client';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 const audioLogger = serverLogger.withContext('AudioActions');
 

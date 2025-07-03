@@ -7,5 +7,5 @@
  * @updated 2025-01-27
  */
 
-export { toWorkflowWithStats } from './mappers';
 export type { WorkflowExecutionAggregates } from './mappers';
+export { toWorkflowWithStats } from './mappers';

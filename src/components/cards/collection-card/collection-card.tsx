@@ -6,9 +6,9 @@
 // calculados. Esta tarea está bloqueada por problemas con la herramienta de edición
 // en los archivos de transformadores.
 
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities
 import type { CollectionWithStats } from '@/types/entities/collection';
 import { CollectionCardContent } from './collection-card-content';

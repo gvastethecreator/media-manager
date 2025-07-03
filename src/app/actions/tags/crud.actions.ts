@@ -7,10 +7,10 @@
  * @updated 2025-01-27
  */
 
+import { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import tagService, { type GetTagsOptions } from '@/services/tag/tag.service';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
-import { Prisma } from '@prisma/client';
 
 // Configuración y logging
 const logger = serverLogger.withContext('TagActions');

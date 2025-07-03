@@ -1,7 +1,7 @@
+import type { ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import type { ReactNode } from 'react';
 
 interface BasicSettingsProps {
 	/**

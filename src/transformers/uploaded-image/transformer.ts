@@ -4,12 +4,12 @@
  * @description Contains functions to transform Prisma UploadedImage objects into application-level types.
  */
 
+import type { Prisma } from '@prisma/client';
 import {
 	type UploadedImageBase,
 	type UploadedImageDimensions,
 	type UploadedImageExtended,
 } from '@/types/entities/uploaded-image/types';
-import type { Prisma } from '@prisma/client';
 
 // Prisma payload for a complete uploaded image record with its relations (if any)
 type UploadedImageFromPrisma = Prisma.UploadedImageGetPayload<{

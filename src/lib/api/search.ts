@@ -1,5 +1,5 @@
-import type { FileItem } from '@/types/files';
 import { useQuery } from '@tanstack/react-query';
+import type { FileItem } from '@/types/files';
 import { api } from './client';
 
 export interface SearchFilters {

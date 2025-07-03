@@ -1,5 +1,5 @@
-import type { FolderWithStats } from '@/types/entities/folder';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { FolderWithStats } from '@/types/entities/folder';
 import { api } from './client';
 
 export interface FolderFilters {

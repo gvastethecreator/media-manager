@@ -28,7 +28,7 @@ export interface PaginatedResult<T> {
 /**
  * Calcula los parámetros de paginación
  */
-export function calculatePagination(page: number = 1, limit: number = 10): PaginationParams {
+export function calculatePagination(page = 1, limit = 10): PaginationParams {
 	const normalizedPage = Math.max(1, page);
 	const normalizedLimit = Math.max(1, Math.min(100, limit)); // Límite máximo de 100
 	const offset = (normalizedPage - 1) * normalizedLimit;
@@ -79,8 +79,8 @@ export function createPaginatedResult<T>(
  * Extrae parámetros de paginación de query params
  */
 export function extractPaginationFromQuery(searchParams: URLSearchParams): PaginationParams {
-	const page = parseInt(searchParams.get('page') || '1');
-	const limit = parseInt(searchParams.get('limit') || '10');
+	const page = Number.parseInt(searchParams.get('page') || '1');
+	const limit = Number.parseInt(searchParams.get('limit') || '10');
 
 	return calculatePagination(page, limit);
 }

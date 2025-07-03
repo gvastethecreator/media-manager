@@ -4,6 +4,7 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos optimizados.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
@@ -14,7 +15,6 @@ import type {
 	FolderStatistics,
 	FolderWithStats,
 } from '@/types/entities/folder';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('FolderTransformer');
 

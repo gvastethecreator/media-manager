@@ -1,7 +1,7 @@
+import express from 'express';
 import { TagService } from '@/services/tag/tag.service';
 import { toImageWithStats } from '@/transformers/image/image.transformer';
 import { toTagWithStats } from '@/transformers/tag/tag.transformer';
-import express from 'express';
 
 const router = express.Router();
 const tagService = new TagService();

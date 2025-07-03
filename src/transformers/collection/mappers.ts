@@ -4,8 +4,8 @@
  * @description Contiene funciones para transformar datos de la entidad Collection.
  */
 
-import type { CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 import type { Collection } from '@prisma/client';
+import type { CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 
 /**
  * Representa la estructura del objeto de agregación de conteos de Prisma para una Collection.

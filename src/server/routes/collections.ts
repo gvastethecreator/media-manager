@@ -1,8 +1,8 @@
+import express from 'express';
 import { CollectionService } from '@/services/collection/collection.service';
 import { ImageService } from '@/services/image/image.service';
 import { toCollectionWithStats } from '@/transformers/collection/collection.transformer';
 import { toImageWithStats } from '@/transformers/image/image.transformer';
-import express from 'express';
 
 const router = express.Router();
 const collectionService = new CollectionService();

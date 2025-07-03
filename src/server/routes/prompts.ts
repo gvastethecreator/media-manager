@@ -1,7 +1,7 @@
+import express from 'express';
 import { PromptService } from '@/services/prompt/prompt.service';
 import { toImageWithStats } from '@/transformers/image/image.transformer';
 import { toPromptWithStats } from '@/transformers/prompt/prompt.transformer';
-import express from 'express';
 
 const router = express.Router();
 const promptService = new PromptService();

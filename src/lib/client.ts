@@ -3,10 +3,10 @@
  * @module lib/client
  */
 
+export * from './contexts';
+export * from './hooks';
 // Re-exportar utilidades del cliente
 export * from './utils';
-export * from './hooks';
-export * from './contexts';
 
 // Cliente específico para el navegador
 export const isClient = typeof window !== 'undefined';

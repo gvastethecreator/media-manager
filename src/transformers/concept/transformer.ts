@@ -4,9 +4,9 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
+import type { Prisma } from '@prisma/client';
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { ConceptComplete, ConceptWithStats, PrismaConceptWithCounts } from '@/types/entities/concept';
-import type { Prisma } from '@prisma/client';
 import { fromPrismaCharacter } from '../character/transformer';
 import { fromPrismaNote } from '../note/transformer';
 

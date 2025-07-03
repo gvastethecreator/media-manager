@@ -1,6 +1,6 @@
 'use client';
 
-import { useOptimistic } from 'react';
+import { useState, useCallback } from 'react';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { EventData } from '../server/events.server';
 
@@ -11,13 +11,16 @@ type EventCallback<T = unknown> = (data: T) => void;
 const eventSubscribers = new Map<string, Set<EventCallback<unknown>>>();
 
 /**
- * Hook para manejar eventos optimistas
+ * Hook para manejar eventos - MIGRADO PARA VITE
+ * Reemplaza useOptimistic por useState simple para evitar loops infinitos
  * @param initialState Estado inicial
  * @returns [state, addEvent] - Estado actual y función para añadir eventos
  */
 export function useEvents<T>(initialState: T) {
-	return useOptimistic<T, EventData>(initialState, (state, event) => {
-		eventsLogger.info('📨 Evento recibido:', event);
+	const [state, setState] = useState<T>(initialState);
+
+	const addEvent = useCallback((event: EventData) => {
+		eventsLogger.info('📨 Evento recibido (MOCK):', event);
 
 		// Emitir el evento a los suscriptores
 		const eventType = event.type;
@@ -25,8 +28,12 @@ export function useEvents<T>(initialState: T) {
 			emitToSubscribers(eventType, event.data);
 		}
 
-		return state;
-	});
+		// En lugar de useOptimistic, simplemente mantenemos el estado actual
+		// En una implementación real, aquí aplicaríamos los cambios optimistas
+		eventsLogger.debug('Estado mantenido sin cambios optimistas');
+	}, []);
+
+	return [state, addEvent] as const;
 }
 
 /**

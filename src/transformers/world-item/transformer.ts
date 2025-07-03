@@ -4,8 +4,8 @@
  * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
-import { CharacterWithStats } from '@/types/entities/character';
 import type { Prisma } from '@prisma/client';
+import { CharacterWithStats } from '@/types/entities/character';
 // import type { AlbumWithStats } from '@/types/entities/album'; // No usado - transformer comentado
 import type { CollectionComplete } from '@/types/entities/collection';
 import type { ConceptComplete } from '@/types/entities/concept';

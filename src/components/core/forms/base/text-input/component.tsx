@@ -3,8 +3,9 @@
  * @module components/core/forms/base/text-input
  * @description A foundational, unstyled text input component with proper type definitions.
  */
-import { cn } from '@/lib/utils';
+
 import { forwardRef } from 'react';
+import { cn } from '@/lib/utils';
 
 export interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 

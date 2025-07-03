@@ -1,3 +1,5 @@
+import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
+import { memo, useCallback } from 'react';
 import {
 	ContextMenuItem,
 	ContextMenuSub,
@@ -9,8 +11,6 @@ import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
 import type { FileItem } from '@/types/files';
-import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
-import { memo, useCallback } from 'react';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
 // Logger para el componente

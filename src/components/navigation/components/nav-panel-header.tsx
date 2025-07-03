@@ -1,3 +1,9 @@
+// MIGRADO PARA VITE - Sin useProfileContext problemático
+// import { useProfileContext } from '@/lib/contexts';
+
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useUIStore } from '@/store/ui.store';
 import {
 	Briefcase,
 	Bug,
@@ -21,10 +27,16 @@ import {
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { memo, useCallback, useMemo } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useProfileContext } from '@/lib/contexts';
+
+// MOCK DATA para reemplazar useProfileContext
+const mockProfileData = {
+	settings: {
+		avatar: {
+			color: '#3B82F6',
+			emoji: '🎨'
+		}
+	}
+};
 
 // Constante con los temas disponibles
 const THEMES = [
@@ -209,7 +221,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 	isCollapsed = false,
 	onToggleCollapse,
 }: NavPanelHeaderProps) {
-	const { settings } = useProfileContext();
+	const { settings } = mockProfileData;
 	const { profiles = [], activeProfile } = settings;
 
 	const activeProfileData = useMemo(() => {
@@ -224,7 +236,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 	}, [profiles, activeProfile]);
 
 	const { theme, setTheme } = useTheme();
-	const { setCurrentView } = useNavigationStore();
+	const { setCurrentView } = useUIStore();
 
 	const handleThemeToggle = () => {
 		const nextTheme = getNextTheme(theme);
@@ -258,7 +270,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 					<div className="flex flex-col gap-2">
 						<MemoizedHeaderButton
 							icon={<ChevronRight className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => {})}
+							onClick={onToggleCollapse || (() => { })}
 							tooltipTitle="Expandir Panel"
 							tooltipContent=""
 							tooltipSide="right"
@@ -347,7 +359,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						{/* Botón de colapsar */}
 						<MemoizedHeaderButton
 							icon={<ChevronLeft className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => {})}
+							onClick={onToggleCollapse || (() => { })}
 							tooltipTitle="Colapsar Panel"
 							tooltipContent=""
 						/>

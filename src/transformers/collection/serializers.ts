@@ -4,7 +4,9 @@
  * @description Contiene funciones para manejar la serialización de campos complejos (JSON) de la entidad Collection.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
 	CollectionCreateInput,
 	CollectionEdition,
@@ -12,8 +14,6 @@ import type {
 	CollectionSortBy,
 	CollectionUpdateInput,
 } from '@/types/entities/collection';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('CollectionSerializers');
 

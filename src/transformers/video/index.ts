@@ -14,9 +14,9 @@ export {
 // De transformer.ts
 export {
 	fromPrismaVideo,
-	fromPrismaVideoWithCounts,
 	fromPrismaVideos,
 	fromPrismaVideosWithCounts,
+	fromPrismaVideoWithCounts,
 	getAllVideos,
 	getVideoById,
 	videosToRecord,

@@ -1,117 +1,109 @@
-'use server';
-
 /**
- * @file Server Actions para la entidad Group
+ * @file Actions para la entidad Group - Migradas a API calls
  * @module app/actions/groups/group.actions
- * @description Acciones CRUD y de gestión para los grupos.
+ * @description Funciones que llaman a las rutas API de grupos
  * @updated 2025-01-27
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/database/prisma';
-import { toGroupWithStats } from '@/transformers/group';
-import type { GroupWithStats } from '@/types/entities/group';
-import { Prisma } from '@prisma/client';
-import { revalidatePath } from '@/lib/server/revalidate';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
 
-const logger = serverLogger.withContext('GroupActions');
-
-const revalidatePaths = ['/groups', '/settings/groups']; // Ajustar a rutas reales
-
-const groupWithStatsInclude = {
-	_count: {
-		select: {
-			images: true,
-			videos: true,
-			albums: true,
-			collections: true,
-			tags: true,
-			characters: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			properties: true,
-		},
-	},
-};
+const logger = clientLogger.withContext('GroupActions');
+const API_BASE = '/api/groups';
 
 /**
- * Obtiene todos los grupos con sus estadísticas.
+ * Obtiene todos los grupos con estadísticas.
  */
 export async function getGroups(): Promise<GroupWithStats[]> {
 	try {
-		logger.info('👥 Obteniendo todos los grupos');
-		const groups = await prisma.group.findMany({
-			include: groupWithStatsInclude,
-			orderBy: { name: 'asc' },
-		});
-		return groups.map((group) => toGroupWithStats(group, group._count));
+		logger.info('👥 Obteniendo grupos via API');
+
+		const response = await fetch(API_BASE);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.data || [];
 	} catch (error) {
-		logger.error('❌ Error al obtener los grupos.', { error });
-		throw new Error('No se pudieron obtener los grupos.');
+		logger.error('❌ Error en API getGroups', { error });
+		throw error;
 	}
 }
 
 /**
- * Obtiene un único grupo por su ID con estadísticas.
+ * Obtiene un único grupo por su ID.
  */
 export async function getGroup(id: string): Promise<GroupWithStats | null> {
 	try {
-		logger.info(`🔍 Obteniendo grupo por ID: ${id}`);
-		const group = await prisma.group.findUnique({
-			where: { id },
-			include: groupWithStatsInclude,
-		});
+		logger.info(`🔍 Obteniendo grupo ${id} via API`);
 
-		if (!group) {
-			logger.warn(`Grupo no encontrado: ${id}`);
-			return null;
+		const response = await fetch(`${API_BASE}/${id}`);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-		return toGroupWithStats(group, group._count);
+
+		return await response.json();
 	} catch (error) {
-		logger.error(`❌ Error al obtener el grupo ${id}.`, { error });
-		throw new Error(`No se pudo obtener el grupo.`);
+		logger.error(`❌ Error en API getGroup: ${id}`, { error });
+		throw error;
 	}
 }
 
 /**
  * Crea un nuevo grupo.
  */
-export async function createGroup(data: Prisma.GroupCreateInput): Promise<GroupWithStats> {
+export async function createGroup(data: GroupCreateInput): Promise<GroupWithStats> {
 	try {
-		logger.info('📝 Creando nuevo grupo:', { name: data.name });
-		const newGroup = await prisma.group.create({
-			data,
-			include: groupWithStatsInclude,
+		logger.info('📝 Creando grupo via API', { name: data.name });
+
+		const response = await fetch(API_BASE, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
 		});
-		revalidatePaths.forEach((path) => revalidatePath(path));
-		return toGroupWithStats(newGroup, newGroup._count);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error('❌ Error al crear el grupo.', { error, data });
-		throw new Error('No se pudo crear el grupo.');
+		logger.error('❌ Error en API createGroup', { error, data });
+		throw error;
 	}
 }
 
 /**
  * Actualiza un grupo existente.
  */
-export async function updateGroup(id: string, data: Prisma.GroupUpdateInput): Promise<GroupWithStats> {
+export async function updateGroup(id: string, data: GroupUpdateInput): Promise<GroupWithStats> {
 	try {
-		logger.info(`🔄 Actualizando grupo: ${id}`);
-		const updatedGroup = await prisma.group.update({
-			where: { id },
-			data,
-			include: groupWithStatsInclude,
+		logger.info(`🔄 Actualizando grupo ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
 		});
-		revalidatePaths.forEach((path) => revalidatePath(path));
-		revalidatePath(`/groups/${id}`);
-		return toGroupWithStats(updatedGroup, updatedGroup._count);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error(`❌ Error al actualizar el grupo ${id}.`, { error, data });
-		throw new Error('No se pudo actualizar el grupo.');
+		logger.error(`❌ Error en API updateGroup: ${id}`, { error, data });
+		throw error;
 	}
 }
 
@@ -120,38 +112,17 @@ export async function updateGroup(id: string, data: Prisma.GroupUpdateInput): Pr
  */
 export async function deleteGroup(id: string): Promise<void> {
 	try {
-		logger.warn(`🗑️ Eliminando grupo: ${id}`);
-		await prisma.group.delete({ where: { id } });
-		revalidatePaths.forEach((path) => revalidatePath(path));
-	} catch (error) {
-		logger.error(`❌ Error al eliminar el grupo ${id}.`, { error });
-		throw new Error('No se pudo eliminar el grupo.');
-	}
-}
+		logger.warn(`🗑️ Eliminando grupo ${id} via API`);
 
-/**
- * Actualiza el estado de favorito de un grupo.
- */
-export async function toggleGroupFavorite(id: string): Promise<GroupWithStats> {
-	try {
-		const current = await prisma.group.findUnique({ where: { id }, select: { isFavorite: true } });
-		if (!current) {
-			logger.error(`⭐ Error al cambiar favorito: Grupo no encontrado: ${id}`);
-			throw new Error('Grupo no encontrado para cambiar estado de favorito.');
-		}
-
-		const updatedGroup = await prisma.group.update({
-			where: { id },
-			data: { isFavorite: !current.isFavorite },
-			include: groupWithStatsInclude,
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'DELETE',
 		});
 
-		revalidatePaths.forEach((path) => revalidatePath(path));
-		revalidatePath(`/groups/${id}`);
-		logger.info(`⭐ Favorito cambiado para grupo: ${id}`);
-		return toGroupWithStats(updatedGroup, updatedGroup._count);
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error(`❌ Error al cambiar favorito para el grupo ${id}.`, { error });
-		throw new Error('No se pudo actualizar el estado de favorito.');
+		logger.error(`❌ Error en API deleteGroup: ${id}`, { error });
+		throw error;
 	}
 }

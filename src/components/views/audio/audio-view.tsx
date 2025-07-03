@@ -1,3 +1,6 @@
+import { Music } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { AudioCard } from '@/components/cards/audio-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -5,9 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import type { AudioWithStats } from '@/types/entities/audio';
-import { Music } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AudioView');

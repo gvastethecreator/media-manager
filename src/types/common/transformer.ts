@@ -1,5 +1,5 @@
-import type { MetadataFields, UIFields } from '@/lib/utils/transformers/common';
 import { z } from 'zod';
+import type { MetadataFields, UIFields } from '@/lib/utils/transformers/common';
 
 /**
  * 🔍 Esquema base para validación de campos comunes

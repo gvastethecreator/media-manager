@@ -1,4 +1,21 @@
 import {
+	FileSpreadsheet,
+	Filter,
+	FolderUp,
+	Grid3X3,
+	ImagePlus,
+	ImportIcon,
+	Plus,
+	RefreshCw,
+	SlidersHorizontal,
+	Trash2,
+	UploadCloud,
+	X,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useCallback, useId, useState } from 'react';
+import {
 	AlertDialog,
 	AlertDialogAction,
 	AlertDialogCancel,
@@ -27,23 +44,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast';
-import {
-	FileSpreadsheet,
-	Filter,
-	FolderUp,
-	Grid3X3,
-	ImagePlus,
-	ImportIcon,
-	Plus,
-	RefreshCw,
-	SlidersHorizontal,
-	Trash2,
-	UploadCloud,
-	X,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { useCallback, useId, useState } from 'react';
 
 const sectionLogger = clientLogger.withContext('UploadedImagesSettings');
 

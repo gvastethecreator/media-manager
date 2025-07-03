@@ -4,8 +4,8 @@ import { getPrismaClient } from '@/lib/database/db';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { revalidatePath } from '@/lib/server/revalidate';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 
 // Logger dedicado
 const conceptDeleteLogger = serverLogger.withContext('ConceptDeleteActions');

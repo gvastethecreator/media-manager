@@ -7,6 +7,7 @@ import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { prisma } from '@/lib/database/prisma';
 import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
 	NoteComplete,
 	NoteCreateInput,
@@ -15,7 +16,6 @@ import type {
 	NoteSearchResult,
 	NoteUpdateInput,
 } from '@/types/entities/note/types';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 import {
 	mapCreateNoteDataToPrisma,
 	mapNoteFiltersToPrisma,

@@ -7,22 +7,22 @@ import type { Prisma } from '@prisma/client';
 
 // Re-exportar tipos de Prisma comúnmente utilizados
 export type {
-	Prisma,
-	Image,
-	Tag,
-	Collection,
 	Album,
 	Character,
-	Place,
-	WorldItem,
+	Collection,
 	Concept,
-	Prompt,
-	Note,
-	Group,
-	Property,
-	Wildcard,
 	File3D,
+	Group,
+	Image,
+	Note,
+	Place,
+	Prisma,
+	Prompt,
+	Property,
 	QueueJob,
+	Tag,
+	Wildcard,
+	WorldItem,
 } from '@prisma/client';
 
 // Tipos de consultas comúnmente utilizados

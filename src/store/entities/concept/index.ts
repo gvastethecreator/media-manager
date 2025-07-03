@@ -4,6 +4,8 @@
  * @description Unifica todos los slices y la lógica de estado para los conceptos.
  */
 
+import { create, type StateCreator } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 import {
 	createConcept as createConceptAction,
 	deleteConcept as deleteConceptAction,
@@ -20,8 +22,6 @@ import {
 	ConceptViewMode,
 	ConceptWithStats,
 } from '@/types/entities/concept';
-import { create, type StateCreator } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
 import type { ConceptStore } from './types';
 
 const storeLogger = clientLogger.withContext('ConceptStore');

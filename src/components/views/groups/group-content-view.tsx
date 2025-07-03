@@ -1,11 +1,11 @@
+import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGroup } from '@/lib/api/groups';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
-import { useParams } from 'react-router-dom';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('GroupContentView');

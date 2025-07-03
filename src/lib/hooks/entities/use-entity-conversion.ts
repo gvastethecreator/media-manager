@@ -4,10 +4,10 @@
  * @description Facilita la migración gradual de FileItem a EntityWithStats
  */
 
+import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileItem } from '@/types/files';
 import type { EntityWithStats } from '@/types/migration';
-import { useCallback } from 'react';
 
 const logger = clientLogger.withContext('useEntityConversion');
 

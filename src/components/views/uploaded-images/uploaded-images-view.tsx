@@ -33,12 +33,12 @@ import type { BaseContentProps } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
+import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 import { toastService } from '@/services/toast';
 import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
 import { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';
-import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 

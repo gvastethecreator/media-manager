@@ -3,10 +3,10 @@
  * @module transformers/favorite/serializers
  */
 
+import type { Favorite as PrismaFavorite, Image as PrismaImage } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FavoriteWithImage } from '@/types/entities/favorite';
 import type { FileItem } from '@/types/files';
-import type { Favorite as PrismaFavorite, Image as PrismaImage } from '@prisma/client';
 
 const serializersLogger = serverLogger.withContext('Favorite:Serializers');
 

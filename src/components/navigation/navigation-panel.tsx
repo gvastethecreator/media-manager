@@ -1,15 +1,15 @@
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { type ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { NavCategoryWithChildren } from './components/nav-category-with-children';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
 import { NAVIGATION_CATEGORIES } from './constants/categories';
 import { useCategoryCollapse, useCategoryHandlers, useCategoryStats, useMainNavigation } from './hooks';
 
-export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }: NavPanelProps) {
+export const NavPanel = memo(function NavPanel({ isCollapsed = false, onToggleCollapse }: Omit<NavPanelProps, 'initialData'>) {
 	const { isCategoryCollapsed, handleCollapseToggle, expandCategory } = useCategoryCollapse();
 	const {
 		currentView,
@@ -28,7 +28,7 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 		handlePropertyClick,
 		handleWildcardClick,
 	} = useCategoryHandlers();
-	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats } = useCategoryStats(initialData);
+	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats, isLoading } = useCategoryStats();
 	const { handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, handleMainNavigate } = useMainNavigation();
 	const [categoryViewModes, setCategoryViewModes] = useState<Record<string, 'list' | 'grid'>>({});
 
@@ -202,6 +202,28 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 		}),
 		[handleMainNavigate, isCollapsed, currentView]
 	);
+
+	// Mostrar loading state mientras se cargan los datos
+	if (isLoading) {
+		return (
+			<aside className="flex flex-col h-full w-full bg-card border-r">
+				<div className="p-4 border-b">
+					<div className="h-6 bg-muted animate-pulse rounded" />
+				</div>
+				<div className="flex-1 p-4 space-y-4">
+					{Array.from({ length: 8 }, (_, i) => i).map((index) => (
+						<div key={`nav-skeleton-${index}`} className="space-y-2">
+							<div className="h-4 bg-muted animate-pulse rounded" />
+							<div className="ml-4 space-y-1">
+								<div className="h-3 bg-muted/50 animate-pulse rounded w-3/4" />
+								<div className="h-3 bg-muted/50 animate-pulse rounded w-1/2" />
+							</div>
+						</div>
+					))}
+				</div>
+			</aside>
+		);
+	}
 
 	return (
 		<aside

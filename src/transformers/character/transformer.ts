@@ -4,9 +4,9 @@
  * @description Contiene la lógica para convertir un objeto Character de Prisma a nuestros tipos canónicos.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats, PrismaCharacterWithCounts } from '@/types/entities/character';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('CharacterTransformer');
 

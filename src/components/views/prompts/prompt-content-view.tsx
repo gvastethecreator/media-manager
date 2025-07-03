@@ -1,10 +1,10 @@
+import { Terminal } from 'lucide-react';
+import { useCallback } from 'react';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { usePromptImages } from '@/lib/api/prompts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
-import { Terminal } from 'lucide-react';
-import { useCallback } from 'react';
 
 const viewLogger = clientLogger.withContext('PromptContentView');
 
