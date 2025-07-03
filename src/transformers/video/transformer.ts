@@ -5,6 +5,7 @@
  * Última refactorización: 2025-01-27
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
@@ -15,7 +16,6 @@ import type {
 	VideoWithStats,
 } from '@/types/entities/video/types';
 import { VideoQuality } from '@/types/entities/video/types';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('VideoTransformer');
 
@@ -126,7 +126,7 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);
 		const hasAudio = metadata?.hasAudio ?? true; // Asumir que tiene audio por defecto
-		const hasSubtitles = metadata?.subtitleLanguages?.length > 0 ?? false;
+		const hasSubtitles = (metadata?.subtitleLanguages?.length ?? 0) > 0;
 		const bitrate = metadata?.bitrate || null;
 		const frameRate = metadata?.frameRate || null;
 

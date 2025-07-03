@@ -8,6 +8,7 @@
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { mapCharacterSearchOptionsToPrisma } from '@/transformers/character/mappers';
 import {
@@ -22,7 +23,6 @@ import type {
 	CharacterUpdateInput,
 	CharacterWithStats,
 } from '@/types/entities/character';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CharacterService');

@@ -4,8 +4,8 @@
  * @description Define la forma del estado y las acciones para el store de Document.
  */
 
-import type { DocumentWithStats } from '@/types/entities/document';
 import type { Prisma } from '@prisma/client';
+import type { DocumentWithStats } from '@/types/entities/document';
 
 // --- Estado del Slice ---
 
@@ -16,13 +16,9 @@ export interface DocumentCoreState {
 	lastUpdated: number | null;
 }
 
-export interface DocumentUIState {
-	// ...p.ej., documento seleccionado, etc.
-}
+export type DocumentUIState = {};
 
-export interface DocumentFilterState {
-	// ...p.ej., filtros de búsqueda, ordenación, etc.
-}
+export type DocumentFilterState = {};
 
 // --- Acciones del Slice ---
 
@@ -33,13 +29,9 @@ export interface DocumentCoreActions {
 	deleteDocument: (id: string) => Promise<void>;
 }
 
-export interface DocumentUIActions {
-	// ...
-}
+export type DocumentUIActions = {};
 
-export interface DocumentFilterActions {
-	// ...
-}
+export type DocumentFilterActions = {};
 
 // --- Store Completo ---
 

@@ -1,6 +1,6 @@
+import express from 'express';
 import { WildcardService } from '@/services/wildcard/wildcard.service';
 import { toWildcardWithStats } from '@/transformers/wildcard/wildcard.transformer';
-import express from 'express';
 
 const router = express.Router();
 const wildcardService = new WildcardService();

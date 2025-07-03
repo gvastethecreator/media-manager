@@ -22,7 +22,7 @@ function analyzeComponent(filePath, fileName) {
 		content.includes('--available-height');
 
 	let status = '❓ UNKNOWN';
-	let details = [];
+	const details = [];
 
 	if (hasBaseUIImport) {
 		status = '✅ BASE UI';

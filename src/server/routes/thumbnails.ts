@@ -1,7 +1,7 @@
 import express from 'express';
+import { cleanThumbnails, optimizeThumbnails, reprocessThumbnails } from '@/app/actions/thumbnails/thumbnails.actions';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
 import { thumbnailService } from '@/services/thumbnail';
-import { cleanThumbnails, optimizeThumbnails, reprocessThumbnails } from '@/app/actions/thumbnails/thumbnails.actions';
 
 const router = express.Router();
 

@@ -13,7 +13,7 @@ export type {
 
 export {
 	UploadedFileType,
-	UploadedImageSchema,
 	// Alias para retrocompatibilidad
 	UploadedFileType as UploadedImageType,
+	UploadedImageSchema,
 } from './types';

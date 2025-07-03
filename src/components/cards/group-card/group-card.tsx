@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';

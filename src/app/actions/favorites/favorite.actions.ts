@@ -6,11 +6,11 @@
  * @description Acciones para gestionar favoritos de diversas entidades.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { fromPrismaFavorites } from '@/transformers/favorite';
 import { type FavoriteComplete, FavoriteEntityType } from '@/types/entities/favorite';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('FavoriteActions');
 

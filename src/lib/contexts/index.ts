@@ -3,15 +3,15 @@
  * Este archivo centraliza la exportación de todos los contextos y hooks relacionados
  */
 
-// Exportaciones del contexto de archivos
-export { type FileItem, FileProvider, useFiles } from './file-context';
+// Exportaciones del contexto de archivos (versión segura para Vite)
+export { FileProvider, useFiles, type FileItem } from './file-context-safe';
 
-// Exportaciones del contexto de configuración
+// Exportaciones del contexto de configuración (versión segura para Vite)
 export {
-	type Settings,
-	SettingsProvider,
-	useCollectionTagContext,
-	useProfileContext,
-	useSettings,
-	useTheme,
-} from './settings-context';
+    SettingsProvider,
+    useCollectionTagContext,
+    useProfileContext,
+    useSettings,
+    useTheme, type Settings
+} from './settings-context-safe';
+

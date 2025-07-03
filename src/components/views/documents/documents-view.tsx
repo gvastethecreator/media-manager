@@ -1,3 +1,6 @@
+import { FileText } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { DocumentCard } from '@/components/cards/document-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -5,9 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDocumentStore } from '@/store/entities/document';
 import type { DocumentWithStats } from '@/types/entities/document';
-import { FileText } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('DocumentsView');

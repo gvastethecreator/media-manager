@@ -3,6 +3,8 @@
  * @module store/entities/tag/slices/core.slice
  */
 
+import type { Prisma } from '@prisma/client';
+import { StateCreator } from 'zustand';
 import {
 	createTag as createTagAction,
 	deleteTag as deleteTagAction,
@@ -12,8 +14,6 @@ import { getTags as getTagsAction } from '@/app/actions/tags/query.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { TagWithStats } from '@/types/entities/tag';
-import type { Prisma } from '@prisma/client';
-import { StateCreator } from 'zustand';
 import type { TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');

@@ -1,6 +1,6 @@
+import express from 'express';
 import { PropertyService } from '@/services/property/property.service';
 import { toPropertyWithStats } from '@/transformers/property/property.transformer';
-import express from 'express';
 
 const router = express.Router();
 const propertyService = new PropertyService();

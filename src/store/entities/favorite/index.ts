@@ -3,10 +3,10 @@
  * @module store/entities/favorite
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import { createSelectors } from '@/lib/utils/store-selectors.utils';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { createSelectors } from '@/lib/utils/store-selectors.utils';
 
 // Importar tipos
 

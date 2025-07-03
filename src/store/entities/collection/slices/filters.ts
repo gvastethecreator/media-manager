@@ -3,9 +3,9 @@
  * @module store/entities/collection/slices/filters
  */
 
-import type { CollectionFilter, CollectionWithStats } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
 import { filterCollectionsBySearch, groupCollections, sortCollections } from '@/lib/utils/collection';
+import type { CollectionFilter, CollectionWithStats } from '@/types/entities/collection';
 import type { CollectionState } from '../types';
 
 /**

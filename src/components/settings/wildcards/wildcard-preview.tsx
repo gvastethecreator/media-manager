@@ -1,8 +1,8 @@
+import type { WildcardComplete as Wildcard } from '@prisma/client';
+import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import type { WildcardComplete as Wildcard } from '@prisma/client';
-import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
 
 interface WildcardPreviewProps {
 	wildcard: Wildcard & {

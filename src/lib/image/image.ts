@@ -1,7 +1,7 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import { formatBytes } from '@/lib/utils/format.utils';
 import { existsSync } from 'fs';
 import sharp from 'sharp';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { formatBytes } from '@/lib/utils/format.utils';
 
 export type ImageFormat = 'webp' | 'jpeg' | 'png';
 

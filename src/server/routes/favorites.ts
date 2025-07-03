@@ -1,6 +1,6 @@
+import express from 'express';
 import { FavoriteService } from '@/services/favorite/favorite.service';
 import { toFavoriteWithStats } from '@/transformers/favorite/favorite.transformer';
-import express from 'express';
 
 const router = express.Router();
 const favoriteService = new FavoriteService();

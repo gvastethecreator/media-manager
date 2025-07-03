@@ -5,10 +5,10 @@
  * @updated 2025-06-21
  */
 
-import { VERSIONING } from '@/lib/constants';
-import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { VERSIONING } from '@/lib/constants';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { TaskSortCriteria, type TaskStore, TaskViewMode } from './types';
 
 // Logger específico para el store de tareas

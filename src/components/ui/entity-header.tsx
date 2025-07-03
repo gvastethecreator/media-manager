@@ -1,3 +1,6 @@
+import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -14,9 +17,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { EntityStats, StatItem } from '@/components/ui/entity-stats';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
 
 export interface EntityHeaderAction {
 	/**

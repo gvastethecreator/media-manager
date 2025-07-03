@@ -1,4 +1,3 @@
-import type { CategoryItem } from '@/components/navigation/types';
 import {
 	BookImage,
 	Box,
@@ -14,6 +13,7 @@ import {
 	User2,
 	WandSparkles,
 } from 'lucide-react';
+import type { CategoryItem } from '@/components/navigation/types';
 
 /**
  * Definición de las categorías principales del panel de navegación

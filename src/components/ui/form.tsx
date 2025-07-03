@@ -1,5 +1,3 @@
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
 import * as React from 'react';
 import {
 	Controller,
@@ -10,6 +8,8 @@ import {
 	useFormContext,
 	useFormState,
 } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 // Implementación simple de Slot para reemplazar Radix UI
 const Slot = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }>(

@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
-import { TagRarity } from '@/store/entities/tag/types';
 import { ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { TagRarity } from '@/store/entities/tag/types';
 import { getTagThumbnails } from './tag-server-actions';
 
 interface TagCardImagesProps {

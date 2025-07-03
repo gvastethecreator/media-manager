@@ -4,9 +4,9 @@
  * @description Proporciona funciones para escanear carpetas y obtener información de sus archivos
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import fs from 'fs/promises';
 import path from 'path';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from './path-utils';
 
 // Logger específico para el scanner de carpetas

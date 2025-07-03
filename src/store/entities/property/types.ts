@@ -4,8 +4,8 @@
  * @description Tipos refactorizados siguiendo el patrón de slices.
  */
 
-import type { PropertyWithStats } from '@/types/entities/property';
 import type { Prisma } from '@prisma/client';
+import type { PropertyWithStats } from '@/types/entities/property';
 
 // --- ENUMS ESPECÍFICOS DEL STORE ---
 

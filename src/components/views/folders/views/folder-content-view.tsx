@@ -1,3 +1,5 @@
+import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
@@ -6,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import type { EntityWithStats } from '@/types/migration';
-import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');

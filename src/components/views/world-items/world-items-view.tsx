@@ -1,3 +1,6 @@
+import { Box } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback } from 'react';
 import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -6,9 +9,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useWorldItems } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { Box } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('WorldItemsView');

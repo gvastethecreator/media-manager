@@ -1,5 +1,5 @@
-import type { UploadedImageFilters, UploadedImageResult, UploadedImageStats } from '@/types/uploaded-images';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UploadedImageFilters, UploadedImageResult, UploadedImageStats } from '@/types/uploaded-images';
 import { api } from './client';
 
 export interface UploadedImageCreateInput {

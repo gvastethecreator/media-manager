@@ -1,11 +1,11 @@
+import { Check, Loader2, Pencil, X } from 'lucide-react';
+import { useCallback, useId, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import type { FileItem } from '@/types/files';
-import { Check, Loader2, Pencil, X } from 'lucide-react';
-import { useCallback, useId, useState, useTransition } from 'react';
 
 export interface EditableMetadataProps {
 	item: FileItem;

@@ -5,13 +5,13 @@
  * @module app/actions/tags/query.actions
  */
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem } from '@/services/image/converter.service';
 import { toTagWithStats } from '@/transformers/tag';
 import { TagWithStats, tagCounts } from '@/types/entities/tag';
 import type { FileItem } from '@/types/files';
-import { Prisma } from '@prisma/client';
 
 const tagLogger = serverLogger.withContext('TagQueryActions');
 

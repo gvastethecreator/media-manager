@@ -1,3 +1,5 @@
+import { Filter, Package, PlusCircle, Trash, X } from 'lucide-react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +14,6 @@ import { useCreateWorldItem, useDeleteWorldItem, useUpdateWorldItem, useWorldIte
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast';
 import type { WorldItemComplete } from '@/types/entities/world-item';
-import { Filter, Package, PlusCircle, Trash, X } from 'lucide-react';
-import { useCallback, useId, useMemo, useState } from 'react';
 import { CreateWorldItemForm } from './create-world-item-form';
 
 export function WorldItemsSettings() {
@@ -201,7 +201,7 @@ export function WorldItemsSettings() {
 		return (
 			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" />
 					<p className="mt-2 text-sm text-gray-500">Cargando objetos del mundo...</p>
 				</div>
 			</div>

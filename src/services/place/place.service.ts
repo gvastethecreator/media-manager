@@ -6,6 +6,7 @@
  * @updated 2025-07-01
  */
 
+import type { Prisma } from '@prisma/client';
 import { getPrismaClient } from '@/lib/database/db';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -24,7 +25,6 @@ import type {
 	PlaceWithStats,
 	PrismaPlaceWithCounts,
 } from '@/types/entities/place';
-import type { Prisma } from '@prisma/client';
 
 const placeLogger = serverLogger.withContext('PlaceService');
 

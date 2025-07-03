@@ -4,8 +4,8 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { settingsSchema } from '@/types/settings';
 import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
+import { settingsSchema } from '@/types/settings';
 
 const logger = serverLogger.withContext('SettingsTransformer:internal');
 

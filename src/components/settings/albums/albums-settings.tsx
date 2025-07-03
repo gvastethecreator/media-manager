@@ -1,3 +1,5 @@
+import { Album as AlbumIcon, Info, Loader2, PlusCircle, Trash } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -6,8 +8,6 @@ import { useAlbums, useDeleteAlbum } from '@/lib/api/albums';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import toastService from '@/services/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
-import { Album as AlbumIcon, Info, Loader2, PlusCircle, Trash } from 'lucide-react';
-import { useCallback, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
 
 // Agregar tipo para manejar el onClick

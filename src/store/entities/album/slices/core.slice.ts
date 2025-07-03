@@ -4,11 +4,11 @@
  * @description Gestiona el estado y las acciones CRUD para la entidad Album.
  */
 
+import { produce } from 'immer';
+import type { StateCreator } from 'zustand';
 import * as actions from '@/app/actions/albums/album.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
-import { produce } from 'immer';
-import type { StateCreator } from 'zustand';
 import type { AlbumCoreActions, AlbumCoreState, AlbumStore } from '../types';
 
 const logger = clientLogger.withContext('AlbumCoreSlice');
@@ -84,7 +84,7 @@ export const createAlbumCoreSlice: StateCreator<
 	updateAlbum: async (id, data) => {
 		try {
 			await actions.updateAlbum(id, data);
-			toastService.success(`Álbum actualizado.`);
+			toastService.success('Álbum actualizado.');
 			await get().loadAlbums();
 		} catch (error) {
 			const errorMsg = '❌ Error al actualizar el álbum.';

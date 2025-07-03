@@ -8,20 +8,20 @@
  */
 'use server';
 
+import fs from 'fs/promises';
+import sharp from 'sharp';
 import { thumbnailCache } from '@/lib/database/cache';
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { imageService } from '@/services/image';
-import { ThumbnailQuality } from '@/types/thumbnails';
+import { revalidatePath } from '@/lib/server/revalidate';
 import {
 	createEntityNotFoundError,
 	createServiceError,
 	ServiceErrorCode,
 	toServiceError,
 } from '@/lib/utils/errors/service-errors';
-import fs from 'fs/promises';
-import { revalidatePath } from '@/lib/server/revalidate';
-import sharp from 'sharp';
+import { imageService } from '@/services/image';
+import { ThumbnailQuality } from '@/types/thumbnails';
 import type { CleanupThumbnailsResult, ReprocessThumbnailsResult, ThumbnailStatsResult } from './image-types.actions';
 
 const SERVER_ACTION_NAME = 'ImageThumbnails';

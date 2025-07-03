@@ -1,3 +1,6 @@
+import { Box } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { File3DCard } from '@/components/cards/file3d-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -6,9 +9,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 // Store de archivos 3D se expone desde la carpeta file-3d
 import { useFile3DStore } from '@/store/entities/file-3d';
 import type { File3DWithStats } from '@/types/entities/file3d';
-import { Box } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('File3DView');

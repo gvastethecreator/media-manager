@@ -1,3 +1,6 @@
+import { Lightbulb } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { ConceptCard } from '@/components/cards/concept-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -7,9 +10,6 @@ import { useConcepts } from '@/lib/api/concepts';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useConceptStore } from '@/store/entities/concept';
-import { Lightbulb } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('ConceptsView');

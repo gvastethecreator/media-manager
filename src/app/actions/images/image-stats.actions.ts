@@ -1,7 +1,7 @@
 'use server';
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
 
 const imageLogger = serverLogger.withContext('ImageStats');

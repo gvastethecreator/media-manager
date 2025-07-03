@@ -5,6 +5,7 @@
  * No usar ni importar tipos de base.ts o extended.ts (eliminados).
  */
 
+import type { Favorite as PrismaFavorite } from '@prisma/client';
 import {
 	FAVORITE_ENTITY_COLORS as ENTITY_COLORS,
 	FAVORITE_ENTITY_DISPLAY_NAMES as ENTITY_DISPLAY_NAMES,
@@ -14,7 +15,6 @@ import {
 	FavoriteStats,
 	FavoritesByType,
 } from '@/types/entities/favorite';
-import type { Favorite as PrismaFavorite } from '@prisma/client';
 
 interface TransformFavoriteOptions {
 	includeEntityDetails?: boolean;

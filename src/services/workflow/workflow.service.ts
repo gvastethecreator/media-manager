@@ -6,11 +6,11 @@
  * @updated 2025-06-27
  */
 
+import type { Prisma, Workflow } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { WorkflowWithStats } from '@/types/entities/workflow';
-import type { Prisma, Workflow } from '@prisma/client';
 
 const workflowLogger = serverLogger.withContext('WorkflowService');
 
