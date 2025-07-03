@@ -8,6 +8,7 @@ import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';
 import { useFoldersPolling } from './use-folders-polling';
 import { useFoldersState } from './use-folders-state';
+import { useReindexAllFolders } from '@/lib/api/folders';
 
 const folderLogger = clientLogger.withContext('useFolders');
 
@@ -241,6 +242,7 @@ export function useFolders() {
 	// Función para reiniciar todas las carpetas
 	const reindexAll = useCallback(async () => {
 		folderLogger.info('🔄 Iniciando reindexación global');
+		const reindexAllFoldersMutation = useReindexAllFolders();
 
 		try {
 			setGlobalReindexStatus((prev) => ({
@@ -252,9 +254,7 @@ export function useFolders() {
 				startTime: Date.now(),
 			}));
 
-			// Usar la nueva función de reindexado
-			const { reindexAllFolders } = await import('@/app/actions/folders/crud.actions');
-			const result = await reindexAllFolders();
+			const result = await reindexAllFoldersMutation.mutateAsync();
 
 			folderLogger.info('✅ Reindexación global completada:', result);
 

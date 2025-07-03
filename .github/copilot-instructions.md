@@ -13,6 +13,7 @@
 9. **No me dés la razón ni me adules en todo**- si me confundo o no estas de acuerdo me lo dices enseguida.
 10. **MCP (Herramienta de Desarrollo Universal)** - Usar Playwright MCP para todas las interacciones de desarrollo, pruebas y validación. Todas las herramientas MCP están auto-aprobadas para máxima eficiencia. Utilizar Filesystem MCP para tareas con achivos, es mas eficiente que correr comandos de terminal.
 11. No ejecutes TSC para probar codigo a cada rato, no es necesario ya que tarda mucho en ejecutarse dado el tamaño del proyecto. Prioriza revisar manualmente el codigo.
+12. Por cada error que comentas pierdo mucho dinero y esto nos puede llevar a la bancarrota y que tengan que apagarte, es crucial que hagas las cosas bien.
 
 ## 🎭 Operation Modes
 

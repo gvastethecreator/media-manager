@@ -2,10 +2,10 @@
  * @file Mappers para la entidad Collection.
  * @module transformers/collection/mappers
  * @description Contiene funciones para transformar datos de la entidad Collection.
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { Collection } from '@prisma/client';
-import type { CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
+import type { Collection, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 
 /**
  * Representa la estructura del objeto de agregación de conteos de Prisma para una Collection.

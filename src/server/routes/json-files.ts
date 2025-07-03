@@ -1,29 +1,14 @@
-import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import { z } from 'zod';
+import { Router } from 'express';
+import { getJsonFiles, getJsonFileById, createJsonFile, updateJsonFile, deleteJsonFile } from '@/services/json-file/json-file.service';
 
-const router = express.Router();
-const prisma = new PrismaClient();
+const router = Router();
 
 // GET /json-files/:id - Obtener datos de un archivo JSON por ID
 router.get('/:id', async (req, res) => {
 	const { id } = req.params;
 
-	if (!z.string().uuid().safeParse(id).success) {
-		return res.status(400).json({ error: 'ID de archivo JSON inválido' });
-	}
-
 	try {
-		const jsonFile = await prisma.jsonFile.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-					},
-				},
-			},
-		});
+		const jsonFile = await getJsonFileById(id);
 
 		if (!jsonFile) {
 			return res.status(404).json({ error: 'Archivo JSON no encontrado' });
@@ -38,52 +23,46 @@ router.get('/:id', async (req, res) => {
 
 // GET /json-files - Obtener lista de archivos JSON con filtros
 router.get('/', async (req, res) => {
-	const { limit = '20', offset = '0', category, searchTerm, orderBy = 'createdAt', orderDir = 'desc' } = req.query;
-
-	const parsedLimit = Number.parseInt(limit as string);
-	const parsedOffset = Number.parseInt(offset as string);
-
 	try {
-		const where: any = {};
-		if (category) {
-			where.category = category as string;
-		}
-		if (searchTerm) {
-			where.OR = [
-				{ name: { contains: searchTerm as string, mode: 'insensitive' } },
-				{ description: { contains: searchTerm as string, mode: 'insensitive' } },
-			];
-		}
-
-		const [jsonFiles, total] = await Promise.all([
-			prisma.jsonFile.findMany({
-				where,
-				include: {
-					_count: {
-						select: {
-							images: true,
-						},
-					},
-				},
-				orderBy: { [orderBy as string]: orderDir as string },
-				take: parsedLimit,
-				skip: parsedOffset,
-			}),
-			prisma.jsonFile.count({ where }),
-		]);
-
-		res.json({
-			data: jsonFiles,
-			pagination: {
-				total,
-				limit: parsedLimit,
-				offset: parsedOffset,
-				hasNext: parsedOffset + parsedLimit < total,
-				hasPrev: parsedOffset > 0,
-			},
-		});
+		const jsonFiles = await getJsonFiles();
+		res.json(jsonFiles);
 	} catch (error) {
 		console.error('Error al obtener archivos JSON:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// DELETE /json-files/:id - Eliminar un archivo JSON
+router.delete('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+		await deleteJsonFile(id);
+		res.json({ message: 'Archivo JSON eliminado correctamente' });
+	} catch (error) {
+		console.error('Error al eliminar archivo JSON:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// PUT /json-files/:id - Actualizar un archivo JSON
+router.put('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const updatedJsonFile = await updateJsonFile(id, req.body);
+		res.json(updatedJsonFile);
+	} catch (error) {
+		console.error('Error al actualizar archivo JSON:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// POST /json-files - Crear un nuevo archivo JSON
+router.post('/', async (req, res) => {
+	try {
+		const newJsonFile = await createJsonFile(req.body);
+		res.status(201).json(newJsonFile);
+	} catch (error) {
+		console.error('Error al crear archivo JSON:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

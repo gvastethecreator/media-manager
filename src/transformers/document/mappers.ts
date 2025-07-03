@@ -2,9 +2,10 @@
  * @file Mappers para la entidad Document.
  * @module transformers/document/mappers
  * @description Contiene funciones para transformar datos de la entidad Document.
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
-import type { Document } from '@prisma/client';
-import type { DocumentStatistics, DocumentWithStats } from '@/types/entities/document';
+
+import type { Document, DocumentStatistics, DocumentWithStats } from '@/types/entities/document';
 
 const WORDS_PER_MINUTE = 200;
 

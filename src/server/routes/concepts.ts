@@ -1,149 +1,172 @@
+import { db } from '@/lib/drizzle';
+import { concepts } from '@/lib/drizzle/schema';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
-import { ConceptService } from '@/services/concept/concept.service';
-import { toConceptWithStats } from '@/transformers/concept/concept.transformer';
-import { toImageWithStats } from '@/transformers/image/image.transformer';
+import { z } from 'zod';
 
 const router = express.Router();
-const conceptService = new ConceptService();
 
-// GET /concepts - Listar conceptos con filtros
+const ConceptFiltersSchema = z.object({
+	search: z.string().optional(),
+	category: z.string().optional(),
+	limit: z.number().int().positive().max(100).default(50).optional(),
+	offset: z.number().int().min(0).default(0).optional(),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'category']).default('name').optional(),
+	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
+});
+
+// GET /concepts - MIGRADO A DRIZZLE
 router.get('/', async (req, res) => {
 	try {
-		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc' } = req.query;
+		const filtersResult = ConceptFiltersSchema.safeParse(req.query);
+		if (!filtersResult.success) {
+			return res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+		}
 
-		const filters = {
-			search: search as string,
-			limit: Number.parseInt(limit as string),
-			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'imageCount',
-			sortOrder: sortOrder as 'asc' | 'desc',
-		};
+		const filters = filtersResult.data;
+		const conditions = [];
 
-		const { concepts, total } = await conceptService.getConcepts(filters);
-		const transformedConcepts = concepts.map(toConceptWithStats);
+		// Construir condiciones WHERE
+		if (filters.category) conditions.push(eq(concepts.category, filters.category));
+
+		// Búsqueda por texto
+		if (filters.search) {
+			conditions.push(
+				or(
+					like(concepts.name, `%${filters.search}%`),
+					like(concepts.description, `%${filters.search}%`)
+				)
+			);
+		}
+
+		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+		// Determinar orden
+		const orderByClause = filters.sortOrder === 'desc'
+			? desc(concepts[filters.sortBy || 'name'] as any)
+			: asc(concepts[filters.sortBy || 'name'] as any);
+
+		// Ejecutar consultas en paralelo
+		const [conceptResults, totalCount] = await Promise.all([
+			db.select({
+				id: concepts.id,
+				name: concepts.name,
+				description: concepts.description,
+				emoji: concepts.emoji,
+				color: concepts.color,
+				category: concepts.category,
+				isPublic: concepts.isPublic,
+				isFavorite: concepts.isFavorite,
+				totalImages: concepts.totalImages,
+				totalVideos: concepts.totalVideos,
+				type: concepts.type,
+				complexity: concepts.complexity,
+				applications: concepts.applications,
+				examples: concepts.examples,
+				relatedConcepts: concepts.relatedConcepts,
+				notes: concepts.notes,
+				featuredImage: concepts.featuredImage,
+				parentId: concepts.parentId,
+				createdAt: concepts.createdAt,
+				updatedAt: concepts.updatedAt,
+			})
+			.from(concepts)
+			.where(whereClause)
+			.orderBy(orderByClause)
+			.limit(filters.limit || 50)
+			.offset(filters.offset || 0),
+
+			db.select({ count: count() })
+			.from(concepts)
+			.where(whereClause)
+			.then(result => result[0]?.count || 0)
+		]);
 
 		res.json({
-			data: transformedConcepts,
+			data: conceptResults,
 			pagination: {
-				total,
-				limit: filters.limit,
-				offset: filters.offset,
-				hasNext: filters.offset + filters.limit < total,
-				hasPrev: filters.offset > 0,
+				total: totalCount,
+				limit: filters.limit || 50,
+				offset: filters.offset || 0,
+				hasNext: (filters.offset || 0) + (filters.limit || 50) < totalCount,
+				hasPrev: (filters.offset || 0) > 0,
 			},
 		});
 	} catch (error) {
-		console.error('Error getting concepts:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		console.error('Error al obtener conceptos:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
-// GET /concepts/:id - Obtener concepto por ID
+// GET /concepts/:id - MIGRADO A DRIZZLE
 router.get('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const concept = await conceptService.getConceptById(id);
+		if (!z.string().uuid().safeParse(id).success) {
+			return res.status(400).json({ error: 'ID de concepto inválido' });
+		}
 
-		if (!concept) {
+		const conceptResult = await db.select({
+			id: concepts.id,
+			name: concepts.name,
+			description: concepts.description,
+			emoji: concepts.emoji,
+			color: concepts.color,
+			category: concepts.category,
+			isPublic: concepts.isPublic,
+			isFavorite: concepts.isFavorite,
+			totalImages: concepts.totalImages,
+			totalVideos: concepts.totalVideos,
+			type: concepts.type,
+			complexity: concepts.complexity,
+			applications: concepts.applications,
+			examples: concepts.examples,
+			relatedConcepts: concepts.relatedConcepts,
+			notes: concepts.notes,
+			featuredImage: concepts.featuredImage,
+			parentId: concepts.parentId,
+			createdAt: concepts.createdAt,
+			updatedAt: concepts.updatedAt,
+		})
+		.from(concepts)
+		.where(eq(concepts.id, id))
+		.limit(1);
+
+		if (!conceptResult.length) {
 			return res.status(404).json({ error: 'Concepto no encontrado' });
 		}
 
-		res.json(toConceptWithStats(concept));
+		res.json(conceptResult[0]);
 	} catch (error) {
-		console.error('Error getting concept:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		console.error('Error al obtener concepto:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
 	}
 });
 
-// GET /concepts/:id/images - Obtener imágenes de un concepto
-router.get('/:id/images', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const images = await conceptService.getConceptImages(id);
-		const transformedImages = images.map(toImageWithStats);
-
-		res.json(transformedImages);
-	} catch (error) {
-		console.error('Error getting concept images:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+// GET /concepts/:id/stats - Obtener estadísticas de un concepto (métodos de escritura pendientes)
+router.get('/:id/stats', async (req, res) => {
+	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
-// GET /concepts/:id/counts - Obtener recuentos de un concepto
-router.get('/:id/counts', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const counts = await conceptService.getConceptCounts(id);
-		res.json(counts);
-	} catch (error) {
-		console.error('Error getting concept counts:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// POST /concepts - Crear nuevo concepto
+// POST /concepts - Crear nuevo concepto (métodos de escritura pendientes)
 router.post('/', async (req, res) => {
-	try {
-		const { name, description, color, category } = req.body;
-
-		if (!name) {
-			return res.status(400).json({ error: 'El nombre es requerido' });
-		}
-
-		const concept = await conceptService.createConcept({
-			name,
-			description,
-			color,
-			category,
-		});
-
-		res.status(201).json(toConceptWithStats(concept));
-	} catch (error) {
-		console.error('Error creating concept:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
-// PUT /concepts/:id - Actualizar concepto
+// PUT /concepts/:id - Actualizar concepto (métodos de escritura pendientes)
 router.put('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { name, description, color, category } = req.body;
-
-		const concept = await conceptService.updateConcept(id, {
-			name,
-			description,
-			color,
-			category,
-		});
-
-		if (!concept) {
-			return res.status(404).json({ error: 'Concepto no encontrado' });
-		}
-
-		res.json(toConceptWithStats(concept));
-	} catch (error) {
-		console.error('Error updating concept:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
-// DELETE /concepts/:id - Eliminar concepto
+// DELETE /concepts/:id - Eliminar concepto (métodos de escritura pendientes)
 router.delete('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		const deleted = await conceptService.deleteConcept(id);
-
-		if (!deleted) {
-			return res.status(404).json({ error: 'Concepto no encontrado' });
-		}
-
-		res.status(204).send();
-	} catch (error) {
-		console.error('Error deleting concept:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
+	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
 export default router;

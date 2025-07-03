@@ -13,30 +13,30 @@
   - characters-settings.tsx ⏳ (parcial)
   - concepts-settings.tsx ⏳ (parcial)
 
-#### ⏳ Settings Components Pendientes (16+)
+#### ⏳ Settings Components Pendientes (11+)
 **Alta prioridad** (más usados):
-- notes-settings.tsx → useNotes, useDeleteNote
-- tags-settings.tsx → useTags, useDeleteTag
-- places-settings.tsx → usePlaces, useDeletePlace
-- prompts-settings.tsx → usePrompts, useDeletePrompt
-- collections-settings.tsx → useCollections, useDeleteCollection
+- notes-settings.tsx → ✅ useNotes, useDeleteNote
+- tags-settings.tsx → ✅ useTags, useDeleteTag
+- places-settings.tsx → ✅ usePlaces, useDeletePlace
+- prompts-settings.tsx → ✅ usePrompts, useDeletePrompt
+- collections-settings.tsx → ✅ useCollections, useDeleteCollection
 
 **Media prioridad**:
 - world-items-settings.tsx → useWorldItems, useDeleteWorldItem
 - thumbnails-settings.tsx → useThumbnails
 - uploaded-images-settings.tsx → useUploadedImages
 
-#### ⏳ Create Forms Pendientes (12+)
-- create-character-form.tsx → useCreateCharacter, useUpdateCharacter
-- create-concept-form.tsx → useCreateConcept, useUpdateConcept
-- create-note-form.tsx → useCreateNote, useUpdateNote
-- create-tag-form.tsx → useCreateTag, useUpdateTag
-- create-place-form.tsx → useCreatePlace, useUpdatePlace
-- create-prompt-form.tsx → useCreatePrompt, useUpdatePrompt
-- create-collection-form.tsx → useCreateCollection, useUpdateCollection
-- create-world-item-form.tsx → useCreateWorldItem, useUpdateWorldItem
-- create-album-form.tsx → useCreateAlbum, useUpdateAlbum
-- create-property-form.tsx → useCreateProperty, useUpdateProperty
+#### ✅ Create Forms Pendientes (0)
+- create-character-form.tsx → ✅ useCreateCharacter, useUpdateCharacter
+- create-concept-form.tsx → ✅ useCreateConcept, useUpdateConcept
+- create-note-form.tsx → ✅ useCreateNote, useUpdateNote
+- create-tag-form.tsx → ✅ useCreateTag, useUpdateTag
+- create-place-form.tsx → ✅ useCreatePlace, useUpdatePlace
+- create-prompt-form.tsx → ✅ useCreatePrompt, useUpdatePrompt
+- create-collection-form.tsx → ✅ useCreateCollection, useUpdateCollection
+- create-world-item-form.tsx → ✅ useCreateWorldItem, useUpdateWorldItem
+- create-album-form.tsx → ✅ useCreateAlbum, useUpdateAlbum
+- create-property-form.tsx → ✅ useCreateProperty, useUpdateProperty
 
 ### ✅ UI Legacy → Base UI: 8/30 (27%)
 

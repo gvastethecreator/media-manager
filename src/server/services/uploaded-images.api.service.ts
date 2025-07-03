@@ -1,21 +1,19 @@
-'use server';
-
 import { mkdir, writeFile } from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { revalidatePath } from '@/lib/server/revalidate';
 import { uploadedImagesService } from '@/services/uploaded-images';
 import { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
 import type { UploadedImageFilters } from '@/types/uploaded-images';
 
-const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');
+const serviceLogger = serverLogger.withContext('UploadedImagesApiService');
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 
 /**
  * Sube una o varias imágenes al servidor
  */
 export async function uploadImages(formData: FormData) {
+	serviceLogger.info('Iniciando carga de imágenes');
 	try {
 		const files = formData.getAll('files') as File[];
 		const type = (formData.get('type') as UploadedImageType) || 'thumbnail';
@@ -60,27 +58,11 @@ export async function uploadImages(formData: FormData) {
 			// Guardamos el archivo localmente
 			await writeFile(filePath, buffer);
 
-			// Obtenemos las dimensiones de la imagen
+			// Obtenemos las dimensiones de la imagen (valores por defecto, se pueden mejorar con sharp)
 			const dimensions = {
-				width: 800, // Valores por defecto
+				width: 800,
 				height: 600,
 				aspectRatio: 800 / 600,
-			};
-
-			// Preparamos los datos de entrada usando los tipos del transformer
-			const _imageData: UploadedImageCreateInput = {
-				name: file.name,
-				path: filePath,
-				type,
-				category,
-				size: file.size,
-				width: dimensions.width,
-				height: dimensions.height,
-				metadata: JSON.stringify({
-					originalName: file.name,
-					mimeType: file.type,
-				}),
-				uploadedAt: new Date(),
 			};
 
 			try {
@@ -100,7 +82,6 @@ export async function uploadImages(formData: FormData) {
 					},
 				});
 
-				// El service devuelve un tipo base. La URL se construye en el cliente.
 				results.push({
 					id: imageRecord.id,
 					name: imageRecord.name,
@@ -108,7 +89,7 @@ export async function uploadImages(formData: FormData) {
 					success: true,
 				});
 			} catch (err) {
-				actionLogger.error('Error al crear registro de imagen:', err);
+				serviceLogger.error('Error al crear registro de imagen:', err);
 				results.push({
 					name: file.name,
 					error: 'Error al procesar la imagen',
@@ -117,16 +98,12 @@ export async function uploadImages(formData: FormData) {
 			}
 		}
 
-		// Revalidamos las rutas relevantes
-		revalidatePath('/uploads');
-		revalidatePath('/settings');
-
 		return {
 			success: true,
 			items: results,
 		};
 	} catch (error) {
-		actionLogger.error('Error al procesar imágenes subidas:', error);
+		serviceLogger.error('Error al procesar imágenes subidas:', error);
 		return {
 			success: false,
 			error: 'Error al procesar la solicitud',
@@ -135,91 +112,26 @@ export async function uploadImages(formData: FormData) {
 }
 
 /**
- * 🔒 Garantiza que cualquier dato binario (Uint8Array/Buffer) en thumbnails sea convertido a string
- * @param data Datos que pueden contener binarios
- * @returns Datos seguros para serialización
- */
-function ensureThumbnailsAreStrings(data: any): any {
-	// Si es null o no es objeto
-	if (!data || typeof data !== 'object') return data;
-
-	// Si es array
-	if (Array.isArray(data)) {
-		return data.map((item) => ensureThumbnailsAreStrings(item));
-	}
-
-	// Si es un Uint8Array/Buffer
-	if (data instanceof Uint8Array || (typeof Buffer !== 'undefined' && data instanceof Buffer)) {
-		try {
-			return `data:image/webp;base64,${Buffer.from(data).toString('base64')}`;
-		} catch (_e) {
-			return null;
-		}
-	}
-
-	// Para objetos normales
-	const result = { ...data };
-	for (const key in result) {
-		if (Object.hasOwn(result, key)) {
-			// Si la clave parece un thumbnail y es binario
-			if (
-				(key === 'thumbnail' || key.includes('thumbnail')) &&
-				(result[key] instanceof Uint8Array || (typeof Buffer !== 'undefined' && result[key] instanceof Buffer))
-			) {
-				try {
-					const mimeType = result.thumbnailMimeType || 'image/webp';
-					result[key] = `data:${mimeType};base64,${Buffer.from(result[key]).toString('base64')}`;
-				} catch (_e) {
-					result[key] = null;
-				}
-			} else {
-				result[key] = ensureThumbnailsAreStrings(result[key]);
-			}
-		}
-	}
-	return result;
-}
-
-/**
  * Obtiene la lista de imágenes subidas con filtros opcionales
  */
 export async function getUploadedImages(filters?: UploadedImageFilters) {
+	serviceLogger.info('Obteniendo imágenes subidas', { filters });
 	try {
-		// El service ya usa el transformer, solo pasamos los parámetros y devolvemos el resultado
 		const result = await uploadedImagesService.getImages({
 			filters,
 			includeDimensions: true,
 			includeThumbnails: true,
 		});
 
-		// 🛡️ Asegurar que todos los datos son serializables (especialmente thumbnails)
-		const safeResult = ensureThumbnailsAreStrings(result);
-
-		// Validación de seguridad: intentar serializar para detectar problemas
-		try {
-			JSON.parse(JSON.stringify(safeResult));
-		} catch (jsonError) {
-			actionLogger.error('❌ Error de serialización en getUploadedImages:', jsonError);
-			// Si falla, intentar una versión más segura eliminando thumbnails
-			const fallbackResult = {
-				...safeResult,
-				items: safeResult.items.map((item: any) => ({
-					...item,
-					thumbnail: null, // Eliminar thumbnails problemáticos
-				})),
-			};
-			return {
-				success: true,
-				...fallbackResult,
-			};
-		}
+		// Asegurar que todos los datos son serializables (especialmente thumbnails)
+		const safeResult = _ensureSerializable(result);
 
 		return {
 			success: true,
 			...safeResult,
 		};
 	} catch (error) {
-		actionLogger.error('Error al obtener imágenes subidas:', error);
+		serviceLogger.error('Error al obtener imágenes subidas:', error);
 		return {
 			success: false,
 			error: 'Error al obtener las imágenes',
@@ -241,18 +153,15 @@ export async function getUploadedImages(filters?: UploadedImageFilters) {
  * Elimina una imagen subida
  */
 export async function deleteUploadedImage(id: string) {
+	serviceLogger.info('Eliminando imagen subida:', { id });
 	try {
 		await uploadedImagesService.deleteImage(id);
-
-		// Revalidamos las rutas relevantes
-		revalidatePath('/uploads');
-		revalidatePath('/settings');
 
 		return {
 			success: true,
 		};
 	} catch (error) {
-		actionLogger.error('Error al eliminar imagen:', error);
+		serviceLogger.error('Error al eliminar imagen:', error);
 		return {
 			success: false,
 			error: 'Error al eliminar la imagen',
@@ -264,6 +173,7 @@ export async function deleteUploadedImage(id: string) {
  * Obtiene estadísticas de imágenes subidas
  */
 export async function getUploadedImageStats() {
+	serviceLogger.info('Obteniendo estadísticas de imágenes subidas');
 	try {
 		const stats = await uploadedImagesService.getImageStats();
 
@@ -272,7 +182,7 @@ export async function getUploadedImageStats() {
 			stats,
 		};
 	} catch (error) {
-		actionLogger.error('Error al obtener estadísticas de imágenes:', error);
+		serviceLogger.error('Error al obtener estadísticas de imágenes:', error);
 		return {
 			success: false,
 			error: 'Error al obtener estadísticas',
@@ -283,6 +193,24 @@ export async function getUploadedImageStats() {
 				averageSize: 0,
 			},
 		};
+	}
+}
+
+/**
+ * Obtiene una imagen subida por su ID
+ */
+export async function getUploadedImage(id: string) {
+	serviceLogger.info('Obteniendo imagen subida por ID:', { id });
+	try {
+		const image = await uploadedImagesService.getImage(id);
+		if (!image) {
+			return { success: false, error: 'Imagen subida no encontrada' };
+		}
+		const safeResult = _ensureSerializable(image);
+		return { success: true, item: safeResult };
+	} catch (error) {
+		serviceLogger.error('Error al obtener imagen subida por ID:', error);
+		return { success: false, error: 'Error al obtener la imagen' };
 	}
 }
 
@@ -307,7 +235,7 @@ function _ensureSerializable<T>(obj: T): T {
 			const buffer = Buffer.from(obj);
 			return `data:image/webp;base64,${buffer.toString('base64')}` as unknown as T;
 		} catch (error) {
-			actionLogger.error('❌ Error convirtiendo binario a base64:', error);
+			serviceLogger.error('❌ Error convirtiendo binario a base64:', error);
 			return '' as unknown as T;
 		}
 	}
@@ -323,8 +251,7 @@ function _ensureSerializable<T>(obj: T): T {
 		typeof obj === 'object' &&
 		!(obj instanceof Date) &&
 		!(obj instanceof RegExp) &&
-		!(obj instanceof Map) &&
-		!(obj instanceof Set)
+		!(obj instanceof Map) &&		!(obj instanceof Set)
 	) {
 		// Crear copia para no modificar el original
 		const result = { ...obj } as Record<string, any>;

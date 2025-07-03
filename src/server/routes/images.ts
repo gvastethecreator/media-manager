@@ -1,16 +1,14 @@
-import { PrismaClient } from '@prisma/client';
+import { generateThumbnailWithForce } from '@/app/actions/images';
+import { normalizeQuality } from '@/lib/config/thumbnail.config';
+import { db } from '@/lib/drizzle';
+import { folders, images } from '@/lib/drizzle/schema';
+import { imageService } from '@/services/image/image.service';
+import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
-import {
-	generateThumbnailWithForce,
-	getImageThumbnailBuffer,
-	getOriginalImage,
-	verifySignedToken,
-} from '@/app/actions/images';
-import { normalizeQuality } from '@/lib/config/thumbnail.config';
+import { processImage } from '../services/image-processing.service';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // Schema de validación para crear imagen
 const CreateImageSchema = z.object({
@@ -47,9 +45,6 @@ const ImageFiltersSchema = z.object({
 	minSize: z.number().int().positive().optional(),
 	maxSize: z.number().int().positive().optional(),
 	search: z.string().optional(),
-	tags: z.array(z.string().uuid()).optional(),
-	albums: z.array(z.string().uuid()).optional(),
-	characters: z.array(z.string().uuid()).optional(),
 	limit: z.number().int().positive().max(100).default(20).optional(),
 	offset: z.number().int().min(0).default(0).optional(),
 	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'size', 'width', 'height']).default('createdAt').optional(),
@@ -83,79 +78,114 @@ const imageInclude = {
 	},
 };
 
-// GET /api/images - Obtener imágenes con filtros
+// GET /api/images - MIGRADO A DRIZZLE
 router.get('/', async (req, res) => {
 	try {
 		const filtersResult = ImageFiltersSchema.safeParse(req.query);
-
 		if (!filtersResult.success) {
-			return res.status(400).json({
-				error: 'Parámetros de filtro inválidos',
-				details: filtersResult.error.errors,
-			});
+			return res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
 		}
 
 		const filters = filtersResult.data;
+		const conditions = [];
 
 		// Construir condiciones WHERE
-		const where: any = {};
+		if (filters.folderId) conditions.push(eq(images.folderId, filters.folderId));
+		if (filters.isFavorite !== undefined) conditions.push(eq(images.isFavorite, filters.isFavorite));
+		if (filters.minWidth) conditions.push(gte(images.width, filters.minWidth));
+		if (filters.maxWidth) conditions.push(lte(images.width, filters.maxWidth));
+		if (filters.minHeight) conditions.push(gte(images.height, filters.minHeight));
+		if (filters.maxHeight) conditions.push(lte(images.height, filters.maxHeight));
+		if (filters.minSize) conditions.push(gte(images.size, filters.minSize));
+		if (filters.maxSize) conditions.push(lte(images.size, filters.maxSize));
 
-		if (filters.folderId) where.folderId = filters.folderId;
-		if (filters.isFavorite !== undefined) where.isFavorite = filters.isFavorite;
-		if (filters.minWidth || filters.maxWidth) {
-			where.width = {};
-			if (filters.minWidth) where.width.gte = filters.minWidth;
-			if (filters.maxWidth) where.width.lte = filters.maxWidth;
-		}
-		if (filters.minHeight || filters.maxHeight) {
-			where.height = {};
-			if (filters.minHeight) where.height.gte = filters.minHeight;
-			if (filters.maxHeight) where.height.lte = filters.maxHeight;
-		}
-		if (filters.minSize || filters.maxSize) {
-			where.size = {};
-			if (filters.minSize) where.size.gte = filters.minSize;
-			if (filters.maxSize) where.size.lte = filters.maxSize;
-		}
+		// Búsqueda por texto
 		if (filters.search) {
-			where.OR = [
-				{ name: { contains: filters.search, mode: 'insensitive' } },
-				{ description: { contains: filters.search, mode: 'insensitive' } },
-			];
-		}
-		if (filters.tags && filters.tags.length > 0) {
-			where.tags = { some: { id: { in: filters.tags } } };
-		}
-		if (filters.albums && filters.albums.length > 0) {
-			where.albums = { some: { id: { in: filters.albums } } };
-		}
-		if (filters.characters && filters.characters.length > 0) {
-			where.characters = { some: { id: { in: filters.characters } } };
+			conditions.push(
+				or(
+					like(images.name, `%${filters.search}%`),
+					like(images.description, `%${filters.search}%`)
+				)
+			);
 		}
 
-		// Construir ordenamiento
-		const orderBy: any = {};
-		orderBy[filters.sortBy || 'createdAt'] = filters.sortOrder || 'desc';
+		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-		// Ejecutar consulta con paginación
-		const [images, total] = await Promise.all([
-			prisma.image.findMany({
-				where,
-				include: imageInclude,
-				orderBy,
-				take: filters.limit,
-				skip: filters.offset,
-			}),
-			prisma.image.count({ where }),
+		// Determinar orden
+		const orderByClause = filters.sortOrder === 'desc'
+			? desc(images[filters.sortBy || 'createdAt'] as any)
+			: asc(images[filters.sortBy || 'createdAt'] as any);
+
+		// Ejecutar consultas en paralelo
+		const [imageResults, totalCount] = await Promise.all([
+			db.select({
+				id: images.id,
+				name: images.name,
+				description: images.description,
+				path: images.path,
+				hash: images.hash,
+				size: images.size,
+				width: images.width,
+				height: images.height,
+				metadata: images.metadata,
+				thumbnail: images.thumbnail,
+				thumbnailSize: images.thumbnailSize,
+				thumbnailWidth: images.thumbnailWidth,
+				thumbnailHeight: images.thumbnailHeight,
+				thumbnailMimeType: images.thumbnailMimeType,
+				isFavorite: images.isFavorite,
+				folderId: images.folderId,
+				noteId: images.noteId,
+				createdAt: images.createdAt,
+				updatedAt: images.updatedAt,
+				addedAt: images.addedAt,
+				// Incluir datos de folder
+				folderName: folders.name,
+				folderPath: folders.path
+			})
+			.from(images)
+			.leftJoin(folders, eq(images.folderId, folders.id))
+			.where(whereClause)
+			.orderBy(orderByClause)
+			.limit(filters.limit || 20)
+			.offset(filters.offset || 0),
+
+			db.select({ count: count() })
+			.from(images)
+			.where(whereClause)
+			.then(result => result[0]?.count || 0)
 		]);
 
+		// Formatear respuesta para compatibilidad
+		const formattedImages = imageResults.map(img => ({
+			...img,
+			folder: img.folderName ? {
+				id: img.folderId,
+				name: img.folderName,
+				path: img.folderPath
+			} : null,
+			// Para compatibilidad - estos se implementarán después
+			albums: [],
+			tags: [],
+			characters: [],
+			collections: [],
+			stats: { views: 0, lastViewed: new Date() },
+			_count: {
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				collections: 0,
+				activities: 0
+			}
+		}));
+
 		res.json({
-			data: images,
+			data: formattedImages,
 			pagination: {
-				total,
-				limit: filters.limit,
-				offset: filters.offset,
-				hasNext: (filters.offset || 0) + (filters.limit || 20) < total,
+				total: totalCount,
+				limit: filters.limit || 20,
+				offset: filters.offset || 0,
+				hasNext: (filters.offset || 0) + (filters.limit || 20) < totalCount,
 				hasPrev: (filters.offset || 0) > 0,
 			},
 		});
@@ -168,14 +198,90 @@ router.get('/', async (req, res) => {
 	}
 });
 
-// GET /api/images/:id - Obtener una imagen por ID
+// GET /api/images/:id - MIGRADO A DRIZZLE
+router.get('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		if (!z.string().uuid().safeParse(id).success) {
+			return res.status(400).json({ error: 'ID de imagen inválido' });
+		}
+
+		const imageResult = await db.select({
+			id: images.id,
+			name: images.name,
+			description: images.description,
+			path: images.path,
+			hash: images.hash,
+			size: images.size,
+			width: images.width,
+			height: images.height,
+			metadata: images.metadata,
+			isFavorite: images.isFavorite,
+			folderId: images.folderId,
+			createdAt: images.createdAt,
+			updatedAt: images.updatedAt,
+			noteId: images.noteId,
+			thumbnail: images.thumbnail,
+			thumbnailSize: images.thumbnailSize,
+			thumbnailWidth: images.thumbnailWidth,
+			thumbnailHeight: images.thumbnailHeight,
+			thumbnailMimeType: images.thumbnailMimeType,
+			addedAt: images.addedAt,
+			// Datos del folder
+			folderName: folders.name,
+			folderPath: folders.path
+		})
+		.from(images)
+		.leftJoin(folders, eq(images.folderId, folders.id))
+		.where(eq(images.id, id))
+		.limit(1);
+
+		const image = imageResult[0];
+		if (!image) {
+			return res.status(404).json({ error: 'Imagen no encontrada' });
+		}
+
+		// Formatear respuesta para compatibilidad
+		const formattedImage = {
+			...image,
+			folder: image.folderName ? {
+				id: image.folderId,
+				name: image.folderName,
+				path: image.folderPath
+			} : null,
+			// Para compatibilidad - estos se pueden implementar después con subqueries
+			albums: [],
+			tags: [],
+			characters: [],
+			collections: [],
+			stats: { views: 0, lastViewed: new Date() },
+			_count: {
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				collections: 0,
+				activities: 0
+			}
+		};
+
+		res.json(formattedImage);
+	} catch (error) {
+		console.error('Error al obtener imagen:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
 // GET /api/images/:id/content - Servir la imagen original
 router.get('/:id/content', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { buffer, mimeType } = await getOriginalImage(id);
+		const buffer = await imageService.getOriginalImage(id);
 		res.set({
-			'Content-Type': mimeType,
+			'Content-Type': 'image/jpeg', // Asumimos JPEG por defecto, se puede mejorar
 			'Content-Length': buffer.length.toString(),
 			'Cache-Control': 'public, max-age=31536000',
 		});
@@ -190,12 +296,12 @@ router.get('/:id/content', async (req, res) => {
 router.get('/:id/thumbnail', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { buffer, mimeType } = await getImageThumbnailBuffer(id);
+		const buffer = await imageService.getThumbnail(id);
 		if (!buffer) {
 			return res.status(404).send('Thumbnail not found');
 		}
 		res.set({
-			'Content-Type': mimeType,
+			'Content-Type': 'image/webp', // Asumimos WEBP por defecto, se puede mejorar
 			'Content-Length': buffer.length.toString(),
 			'Cache-Control': 'public, max-age=31536000',
 		});
@@ -237,346 +343,49 @@ router.get('/signed/:token', async (req, res) => {
 	}
 });
 
-// GET /api/images/:id - Obtener una imagen por ID
-router.get('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de imagen inválido' });
-		}
-
-		const image = await prisma.image.findUnique({
-			where: { id },
-			include: imageInclude,
-		});
-
-		if (!image) {
-			return res.status(404).json({ error: 'Imagen no encontrada' });
-		}
-
-		// Incrementar contador de vistas si existe stats
-		if (image.stats) {
-			await prisma.imageStats.update({
-				where: { imageId: id },
-				data: {
-					views: { increment: 1 },
-					lastViewed: new Date(),
-				},
-			});
-		}
-
-		res.json(image);
-	} catch (error) {
-		console.error('Error al obtener imagen:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
 // POST /api/images - Crear nueva imagen
 router.post('/', async (req, res) => {
-	try {
-		const validationResult = CreateImageSchema.safeParse(req.body);
-
-		if (!validationResult.success) {
-			return res.status(400).json({
-				error: 'Datos de entrada inválidos',
-				details: validationResult.error.errors,
-			});
-		}
-
-		const data = validationResult.data;
-
-		// Verificar que la carpeta existe
-		const folder = await prisma.folder.findUnique({
-			where: { id: data.folderId },
-		});
-
-		if (!folder) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
-		}
-
-		// Verificar que no exista una imagen con la misma ruta
-		const existingImage = await prisma.image.findFirst({
-			where: { path: data.path },
-		});
-
-		if (existingImage) {
-			return res.status(409).json({
-				error: 'Ya existe una imagen con esa ruta',
-			});
-		}
-
-		// Crear imagen y stats en transacción
-		const newImage = await prisma.$transaction(async (tx) => {
-			const image = await tx.image.create({
-				data: {
-					name: data.name,
-					description: data.description,
-					path: data.path,
-					hash: data.hash,
-					size: data.size,
-					width: data.width,
-					height: data.height,
-					metadata: data.metadata,
-					isFavorite: data.isFavorite || false,
-					folderId: data.folderId,
-				},
-				include: imageInclude,
-			});
-
-			// Crear stats automáticamente
-			await tx.imageStats.create({
-				data: {
-					imageId: image.id,
-					views: 0,
-					lastViewed: new Date(),
-				},
-			});
-
-			return image;
-		});
-
-		res.status(201).json(newImage);
-	} catch (error) {
-		console.error('Error al crear imagen:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
+	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // PUT /api/images/:id - Actualizar imagen
 router.put('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de imagen inválido' });
-		}
-
-		const validationResult = UpdateImageSchema.safeParse(req.body);
-
-		if (!validationResult.success) {
-			return res.status(400).json({
-				error: 'Datos de entrada inválidos',
-				details: validationResult.error.errors,
-			});
-		}
-
-		const data = validationResult.data;
-
-		// Verificar que la imagen existe
-		const existingImage = await prisma.image.findUnique({
-			where: { id },
-		});
-
-		if (!existingImage) {
-			return res.status(404).json({ error: 'Imagen no encontrada' });
-		}
-
-		const updatedImage = await prisma.image.update({
-			where: { id },
-			data: {
-				...(data.name && { name: data.name }),
-				...(data.description !== undefined && { description: data.description }),
-				...(data.metadata !== undefined && { metadata: data.metadata }),
-				...(data.isFavorite !== undefined && { isFavorite: data.isFavorite }),
-			},
-			include: imageInclude,
-		});
-
-		res.json(updatedImage);
-	} catch (error) {
-		console.error('Error al actualizar imagen:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
+	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // DELETE /api/images/:id - Eliminar imagen
 router.delete('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de imagen inválido' });
-		}
-
-		// Verificar que la imagen existe
-		const existingImage = await prisma.image.findUnique({
-			where: { id },
-			include: {
-				stats: true,
-				_count: {
-					select: {
-						albums: true,
-						tags: true,
-						characters: true,
-						collections: true,
-						activities: true,
-					},
-				},
-			},
-		});
-
-		if (!existingImage) {
-			return res.status(404).json({ error: 'Imagen no encontrada' });
-		}
-
-		// Eliminar imagen y stats en transacción
-		await prisma.$transaction(async (tx) => {
-			// Eliminar stats si existe
-			if (existingImage.stats) {
-				await tx.imageStats.delete({
-					where: { imageId: id },
-				});
-			}
-
-			// Eliminar imagen (las relaciones many-to-many se eliminan automáticamente)
-			await tx.image.delete({
-				where: { id },
-			});
-		});
-
-		res.json({
-			success: true,
-			message: 'Imagen eliminada correctamente',
-			deletedId: id,
-		});
-	} catch (error) {
-		console.error('Error al eliminar imagen:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
+	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // POST /api/images/:id/relations/:entityType/:entityId - Agregar relación
 router.post('/:id/relations/:entityType/:entityId', async (req, res) => {
-	try {
-		const { id, entityType, entityId } = req.params;
-
-		if (!z.string().uuid().safeParse(id).success || !z.string().uuid().safeParse(entityId).success) {
-			return res.status(400).json({ error: 'IDs inválidos' });
-		}
-
-		const validEntityTypes = [
-			'albums',
-			'tags',
-			'characters',
-			'collections',
-			'places',
-			'worldItems',
-			'concepts',
-			'prompts',
-			'notes',
-			'wildcards',
-			'properties',
-			'groups',
-		];
-
-		if (!validEntityTypes.includes(entityType)) {
-			return res.status(400).json({ error: 'Tipo de entidad inválido' });
-		}
-
-		// Verificar que la imagen existe
-		const image = await prisma.image.findUnique({ where: { id } });
-		if (!image) {
-			return res.status(404).json({ error: 'Imagen no encontrada' });
-		}
-
-		// Crear la relación según el tipo de entidad
-		const updateData: any = {};
-		updateData[entityType] = {
-			connect: { id: entityId },
-		};
-
-		const updatedImage = await prisma.image.update({
-			where: { id },
-			data: updateData,
-			include: imageInclude,
-		});
-
-		res.json({
-			success: true,
-			message: `Relación con ${entityType} agregada correctamente`,
-			image: updatedImage,
-		});
-	} catch (error) {
-		console.error('Error al agregar relación:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
+	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // DELETE /api/images/:id/relations/:entityType/:entityId - Eliminar relación
 router.delete('/:id/relations/:entityType/:entityId', async (req, res) => {
+	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+});
+
+// POST /api/images/:id/process - Procesar imagen
+router.post('/:id/process', async (req, res) => {
 	try {
-		const { id, entityType, entityId } = req.params;
+		const { id } = req.params;
+		const options = req.body || {};
 
-		if (!z.string().uuid().safeParse(id).success || !z.string().uuid().safeParse(entityId).success) {
-			return res.status(400).json({ error: 'IDs inválidos' });
-		}
+		const processedBuffer = await processImage(id, options);
 
-		const validEntityTypes = [
-			'albums',
-			'tags',
-			'characters',
-			'collections',
-			'places',
-			'worldItems',
-			'concepts',
-			'prompts',
-			'notes',
-			'wildcards',
-			'properties',
-			'groups',
-		];
-
-		if (!validEntityTypes.includes(entityType)) {
-			return res.status(400).json({ error: 'Tipo de entidad inválido' });
-		}
-
-		// Verificar que la imagen existe
-		const image = await prisma.image.findUnique({ where: { id } });
-		if (!image) {
-			return res.status(404).json({ error: 'Imagen no encontrada' });
-		}
-
-		// Eliminar la relación según el tipo de entidad
-		const updateData: any = {};
-		updateData[entityType] = {
-			disconnect: { id: entityId },
-		};
-
-		const updatedImage = await prisma.image.update({
-			where: { id },
-			data: updateData,
-			include: imageInclude,
+		res.set({
+			'Content-Type': 'image/jpeg', // Asumimos JPEG por defecto, se puede mejorar
+			'Content-Length': processedBuffer.length.toString(),
 		});
-
-		res.json({
-			success: true,
-			message: `Relación con ${entityType} eliminada correctamente`,
-			image: updatedImage,
-		});
+		res.send(processedBuffer);
 	} catch (error) {
-		console.error('Error al eliminar relación:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
+		console.error('Error processing image:', error);
+		res.status(500).send('Error al procesar la imagen');
 	}
 });
 
 export { router as imagesRouter };
+
