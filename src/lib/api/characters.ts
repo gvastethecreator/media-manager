@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { ImageWithStats } from '@/types/entities/image';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface CharacterFilters {
 	search?: string;
@@ -58,7 +58,7 @@ export function useCharacters(filters: CharacterFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<CharactersResponse>(`/characters?${params.toString()}`);
+			return apiClient.get<CharactersResponse>(`/characters?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -67,7 +67,7 @@ export function useCharacters(filters: CharacterFilters = {}) {
 export function useCharacter(id: string) {
 	return useQuery<CharacterWithStats, Error>({
 		queryKey: characterKeys.detail(id),
-		queryFn: () => api.get<CharacterWithStats>(`/characters/${id}`),
+		queryFn: () => apiClient.get<CharacterWithStats>(`/characters/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -76,7 +76,7 @@ export function useCharacter(id: string) {
 export function useCharacterImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: characterKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/characters/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/characters/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -85,7 +85,7 @@ export function useCharacterImages(id: string) {
 export function useSearchCharacters(query: string) {
 	return useQuery<CharacterWithStats[], Error>({
 		queryKey: characterKeys.search(query),
-		queryFn: () => api.get<CharacterWithStats[]>(`/characters/search?q=${encodeURIComponent(query)}`),
+		queryFn: () => apiClient.get<CharacterWithStats[]>(`/characters/search?q=${encodeURIComponent(query)}`),
 		enabled: !!query && query.length >= 2,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -95,7 +95,7 @@ export function useCreateCharacter() {
 	const queryClient = useQueryClient();
 
 	return useMutation<CharacterWithStats, Error, CharacterCreateInput>({
-		mutationFn: (data) => api.post<CharacterWithStats>('/characters', data),
+		mutationFn: (data) => apiClient.post<CharacterWithStats>('/characters', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: characterKeys.lists() });
 		},
@@ -106,7 +106,7 @@ export function useUpdateCharacter() {
 	const queryClient = useQueryClient();
 
 	return useMutation<CharacterWithStats, Error, { id: string; data: CharacterUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<CharacterWithStats>(`/characters/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<CharacterWithStats>(`/characters/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: characterKeys.lists() });
 			queryClient.setQueryData(characterKeys.detail(data.id), data);
@@ -118,7 +118,7 @@ export function useDeleteCharacter() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/characters/${id}`),
+		mutationFn: (id) => apiClient.delete(`/characters/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: characterKeys.lists() });
 			queryClient.removeQueries({ queryKey: characterKeys.detail(id) });
@@ -130,7 +130,7 @@ export function useDeleteCharacter() {
 export function useRecentCharacterMedia(characterId: string, limit: number = 6) {
   return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
     queryKey: [...characterKeys.detail(characterId), 'media', limit],
-    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/characters/${characterId}/media?limit=${limit}`),
+    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/characters/${characterId}/media?limit=${limit}`),
     enabled: !!characterId,
   });
 }
@@ -138,7 +138,7 @@ export function useRecentCharacterMedia(characterId: string, limit: number = 6) 
 export function useRelatedCharacters(characterId: string, limit: number = 5) {
   return useQuery<CharacterWithStats[], Error>({
     queryKey: [...characterKeys.detail(characterId), 'related', limit],
-    queryFn: () => api.get<CharacterWithStats[]>(`/characters/${characterId}/related?limit=${limit}`),
+    queryFn: () => apiClient.get<CharacterWithStats[]>(`/characters/${characterId}/related?limit=${limit}`),
     enabled: !!characterId,
   });
 }

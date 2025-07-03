@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { WildcardCreateInput as BaseWildcardCreateInput, WildcardWithStats } from '@/types/entities/wildcard';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface WildcardFilters {
 	search?: string;
@@ -58,7 +58,7 @@ export function useWildcards(filters: WildcardFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<WildcardsResponse>(`/wildcards?${params.toString()}`);
+			return apiClient.get<WildcardsResponse>(`/wildcards?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -67,7 +67,7 @@ export function useWildcards(filters: WildcardFilters = {}) {
 export function useWildcard(id: string) {
 	return useQuery<WildcardWithStats, Error>({
 		queryKey: wildcardKeys.detail(id),
-		queryFn: () => api.get<WildcardWithStats>(`/wildcards/${id}`),
+		queryFn: () => apiClient.get<WildcardWithStats>(`/wildcards/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -77,7 +77,7 @@ export function useCreateWildcard() {
 	const queryClient = useQueryClient();
 
 	return useMutation<WildcardWithStats, Error, WildcardCreateInput>({
-		mutationFn: (data) => api.post<WildcardWithStats>('/wildcards', data),
+		mutationFn: (data) => apiClient.post<WildcardWithStats>('/wildcards', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
@@ -89,7 +89,7 @@ export function useUpdateWildcard() {
 	const queryClient = useQueryClient();
 
 	return useMutation<WildcardWithStats, Error, { id: string; data: WildcardUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<WildcardWithStats>(`/wildcards/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<WildcardWithStats>(`/wildcards/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
@@ -102,7 +102,7 @@ export function useDeleteWildcard() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/wildcards/${id}`),
+		mutationFn: (id) => apiClient.delete(`/wildcards/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
@@ -114,7 +114,7 @@ export function useDeleteWildcard() {
 export function useRootWildcards() {
 	return useQuery<WildcardWithStats[], Error>({
 		queryKey: wildcardKeys.roots(),
-		queryFn: () => api.get<WildcardWithStats[]>('/wildcards/roots'),
+		queryFn: () => apiClient.get<WildcardWithStats[]>('/wildcards/roots'),
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }
@@ -123,7 +123,7 @@ export function useToggleWildcardFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<WildcardWithStats, Error, string>({
-		mutationFn: (id) => api.patch<WildcardWithStats>(`/wildcards/${id}/favorite`),
+		mutationFn: (id) => apiClient.patch<WildcardWithStats>(`/wildcards/${id}/favorite`),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
@@ -136,7 +136,7 @@ export function useMoveWildcard() {
 	const queryClient = useQueryClient();
 
 	return useMutation<WildcardWithStats, Error, { id: string; newParentId: string | null }>({
-		mutationFn: ({ id, newParentId }) => api.patch<WildcardWithStats>(`/wildcards/${id}/move`, { newParentId }),
+		mutationFn: ({ id, newParentId }) => apiClient.patch<WildcardWithStats>(`/wildcards/${id}/move`, { newParentId }),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: wildcardKeys.roots() });
@@ -148,7 +148,7 @@ export function useMoveWildcard() {
 export function useSearchWildcards(query: string) {
 	return useQuery<WildcardWithStats[], Error>({
 		queryKey: [...wildcardKeys.all, 'search', query],
-		queryFn: () => api.get<WildcardWithStats[]>(`/wildcards/search?q=${encodeURIComponent(query)}`),
+		queryFn: () => apiClient.get<WildcardWithStats[]>(`/wildcards/search?q=${encodeURIComponent(query)}`),
 		enabled: !!query && query.length > 0,
 		staleTime: 1000 * 30, // 30 segundos
 	});

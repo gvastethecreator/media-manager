@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ImageWithStats } from '@/types/entities/image';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface CollectionFilters {
 	search?: string;
@@ -57,7 +57,7 @@ export function useCollections(filters: CollectionFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<CollectionsResponse>(`/collections?${params.toString()}`);
+			return apiClient.get<CollectionsResponse>(`/collections?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -66,7 +66,7 @@ export function useCollections(filters: CollectionFilters = {}) {
 export function useCollection(id: string) {
 	return useQuery<CollectionWithStats, Error>({
 		queryKey: collectionKeys.detail(id),
-		queryFn: () => api.get<CollectionWithStats>(`/collections/${id}`),
+		queryFn: () => apiClient.get<CollectionWithStats>(`/collections/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -75,7 +75,7 @@ export function useCollection(id: string) {
 export function useCollectionImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: collectionKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/collections/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/collections/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -85,7 +85,7 @@ export function useCreateCollection() {
 	const queryClient = useQueryClient();
 
 	return useMutation<CollectionWithStats, Error, CollectionCreateInput>({
-		mutationFn: (data) => api.post<CollectionWithStats>('/collections', data),
+		mutationFn: (data) => apiClient.post<CollectionWithStats>('/collections', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
 		},
@@ -96,7 +96,7 @@ export function useUpdateCollection() {
 	const queryClient = useQueryClient();
 
 	return useMutation<CollectionWithStats, Error, { id: string; data: CollectionUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<CollectionWithStats>(`/collections/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<CollectionWithStats>(`/collections/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
 			queryClient.setQueryData(collectionKeys.detail(data.id), data);
@@ -108,7 +108,7 @@ export function useDeleteCollection() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/collections/${id}`),
+		mutationFn: (id) => apiClient.delete(`/collections/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
 			queryClient.removeQueries({ queryKey: collectionKeys.detail(id) });
@@ -121,7 +121,7 @@ export function useAddImageToCollection() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, { collectionId: string; imageId: string }>({
-		mutationFn: ({ collectionId, imageId }) => api.post(`/collections/${collectionId}/images/${imageId}`),
+		mutationFn: ({ collectionId, imageId }) => apiClient.post(`/collections/${collectionId}/images/${imageId}`),
 		onSuccess: (_, { collectionId }) => {
 			queryClient.invalidateQueries({ queryKey: collectionKeys.images(collectionId) });
 			queryClient.invalidateQueries({ queryKey: collectionKeys.detail(collectionId) });
@@ -133,7 +133,7 @@ export function useRemoveImageFromCollection() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, { collectionId: string; imageId: string }>({
-		mutationFn: ({ collectionId, imageId }) => api.delete(`/collections/${collectionId}/images/${imageId}`),
+		mutationFn: ({ collectionId, imageId }) => apiClient.delete(`/collections/${collectionId}/images/${imageId}`),
 		onSuccess: (_, { collectionId }) => {
 			queryClient.invalidateQueries({ queryKey: collectionKeys.images(collectionId) });
 			queryClient.invalidateQueries({ queryKey: collectionKeys.detail(collectionId) });
@@ -146,7 +146,7 @@ export function useToggleCollectionFavorite() {
 
   return useMutation<CollectionWithStats, Error, string>({
     mutationFn: async (id: string) => {
-      const response = await api.post<CollectionWithStats>(`/collections/${id}/favorite`, {});
+      const response = await apiClient.post<CollectionWithStats>(`/collections/${id}/favorite`, {});
       return response;
     },
     onSuccess: (data) => {
@@ -159,7 +159,7 @@ export function useToggleCollectionFavorite() {
 export function useRecentCollectionMedia(collectionId: string, limit: number = 6) {
   return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
     queryKey: [...collectionKeys.detail(collectionId), 'media', limit],
-    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/collections/${collectionId}/media?limit=${limit}`),
+    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/collections/${collectionId}/media?limit=${limit}`),
     enabled: !!collectionId,
   });
 }

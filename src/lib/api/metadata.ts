@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface AIGenerationMetadata {
 	prompt?: string;
@@ -48,7 +48,7 @@ export const metadataKeys = {
 export function useImageMetadata(imageId: string) {
 	return useQuery<MetadataExtractionResult, Error>({
 		queryKey: metadataKeys.image(imageId),
-		queryFn: () => api.get<MetadataExtractionResult>(`/metadata/image/${imageId}`),
+		queryFn: () => apiClient.get<MetadataExtractionResult>(`/metadata/image/${imageId}`),
 		enabled: !!imageId,
 		staleTime: 1000 * 60 * 5, // 5 minutos
 	});
@@ -57,7 +57,7 @@ export function useImageMetadata(imageId: string) {
 export function useExtractMetadata(imageId: string) {
 	return useQuery<MetadataExtractionResult, Error>({
 		queryKey: metadataKeys.extraction(imageId),
-		queryFn: () => api.post<MetadataExtractionResult>(`/metadata/extract/${imageId}`),
+		queryFn: () => apiClient.post<MetadataExtractionResult>(`/metadata/extract/${imageId}`),
 		enabled: !!imageId,
 		staleTime: 1000 * 60 * 10, // 10 minutos - extracción es costosa
 	});
@@ -66,7 +66,7 @@ export function useExtractMetadata(imageId: string) {
 export function useAvailableParsers() {
 	return useQuery<string[], Error>({
 		queryKey: metadataKeys.parsers(),
-		queryFn: () => api.get<string[]>('/metadata/parsers'),
+		queryFn: () => apiClient.get<string[]>('/metadata/parsers'),
 		staleTime: 1000 * 60 * 60, // 1 hora - raramente cambia
 	});
 }
@@ -76,7 +76,7 @@ export function useUpdateImageMetadata() {
 
 	return useMutation<MetadataExtractionResult, Error, MetadataUpdateInput>({
 		mutationFn: ({ imageId, metadata }) =>
-			api.put<MetadataExtractionResult>(`/metadata/image/${imageId}`, { metadata }),
+			apiClient.put<MetadataExtractionResult>(`/metadata/image/${imageId}`, { metadata }),
 		onSuccess: (data, { imageId }) => {
 			queryClient.setQueryData(metadataKeys.image(imageId), data);
 		},
@@ -87,7 +87,7 @@ export function useBulkUpdateMetadata() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ updated: number; errors: string[] }, Error, BulkMetadataUpdateInput>({
-		mutationFn: (data) => api.put<{ updated: number; errors: string[] }>('/metadata/bulk-update', data),
+		mutationFn: (data) => apiClient.put<{ updated: number; errors: string[] }>('/metadata/bulk-update', data),
 		onSuccess: (_, { imageIds }) => {
 			// Invalidar cache de todas las imágenes actualizadas
 			for (const imageId of imageIds) {
@@ -101,7 +101,7 @@ export function useReprocessMetadata() {
 	const queryClient = useQueryClient();
 
 	return useMutation<MetadataExtractionResult, Error, string>({
-		mutationFn: (imageId) => api.post<MetadataExtractionResult>(`/metadata/reprocess/${imageId}`),
+		mutationFn: (imageId) => apiClient.post<MetadataExtractionResult>(`/metadata/reprocess/${imageId}`),
 		onSuccess: (data, imageId) => {
 			queryClient.setQueryData(metadataKeys.image(imageId), data);
 			queryClient.setQueryData(metadataKeys.extraction(imageId), data);

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { GroupWithStats } from '@/types/entities/group';
 import type { ImageWithStats } from '@/types/entities/image';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface GroupFilters {
 	search?: string;
@@ -59,7 +59,7 @@ export function useGroups(filters: GroupFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<GroupsResponse>(`/groups?${params.toString()}`);
+			return apiClient.get<GroupsResponse>(`/groups?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -68,7 +68,7 @@ export function useGroups(filters: GroupFilters = {}) {
 export function useGroup(id: string) {
 	return useQuery<GroupWithStats, Error>({
 		queryKey: groupKeys.detail(id),
-		queryFn: () => api.get<GroupWithStats>(`/groups/${id}`),
+		queryFn: () => apiClient.get<GroupWithStats>(`/groups/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -77,7 +77,7 @@ export function useGroup(id: string) {
 export function useGroupImages(id: string) {
 	return useQuery<ImageWithStats[], Error>({
 		queryKey: groupKeys.images(id),
-		queryFn: () => api.get<ImageWithStats[]>(`/groups/${id}/images`),
+		queryFn: () => apiClient.get<ImageWithStats[]>(`/groups/${id}/images`),
 		enabled: !!id,
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -87,7 +87,7 @@ export function useCreateGroup() {
 	const queryClient = useQueryClient();
 
 	return useMutation<GroupWithStats, Error, GroupCreateInput>({
-		mutationFn: (data) => api.post<GroupWithStats>('/groups', data),
+		mutationFn: (data) => apiClient.post<GroupWithStats>('/groups', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
 		},
@@ -98,7 +98,7 @@ export function useUpdateGroup() {
 	const queryClient = useQueryClient();
 
 	return useMutation<GroupWithStats, Error, { id: string; data: GroupUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<GroupWithStats>(`/groups/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<GroupWithStats>(`/groups/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
 			queryClient.setQueryData(groupKeys.detail(data.id), data);
@@ -110,7 +110,7 @@ export function useDeleteGroup() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/groups/${id}`),
+		mutationFn: (id) => apiClient.delete(`/groups/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
 			queryClient.removeQueries({ queryKey: groupKeys.detail(id) });
@@ -122,7 +122,7 @@ export function useDeleteGroup() {
 export function useRecentGroupMedia(groupId: string, limit: number = 6) {
   return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
     queryKey: [...groupKeys.detail(groupId), 'media', limit],
-    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/groups/${groupId}/media?limit=${limit}`),
+    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/groups/${groupId}/media?limit=${limit}`),
     enabled: !!groupId,
   });
 }
@@ -130,7 +130,7 @@ export function useRecentGroupMedia(groupId: string, limit: number = 6) {
 export function useGroupCardData(groupId: string) {
   return useQuery<GroupWithStats, Error>({
     queryKey: [...groupKeys.detail(groupId), 'card-data'],
-    queryFn: () => api.get<GroupWithStats>(`/groups/${groupId}/card-data`),
+    queryFn: () => apiClient.get<GroupWithStats>(`/groups/${groupId}/card-data`),
     enabled: !!groupId,
   });
 }

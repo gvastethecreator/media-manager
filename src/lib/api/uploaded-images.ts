@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UploadedImageFilters, UploadedImageResult, UploadedImageStats } from '@/types/uploaded-images';
-import { api } from './client';
+import { apiClient } from './client';
 
 export interface UploadedImageCreateInput {
 	name: string;
@@ -47,7 +47,7 @@ export function useUploadedImages(filters: UploadedImageFilters = {}) {
 					params.append(key, String(value));
 				}
 			}
-			return api.get<UploadedImagesResponse>(`/uploaded-images?${params.toString()}`);
+			return apiClient.get<UploadedImagesResponse>(`/uploaded-images?${params.toString()}`);
 		},
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -56,7 +56,7 @@ export function useUploadedImages(filters: UploadedImageFilters = {}) {
 export function useUploadedImage(id: string) {
 	return useQuery<UploadedImageResult, Error>({
 		queryKey: uploadedImageKeys.detail(id),
-		queryFn: () => api.get<UploadedImageResult>(`/uploaded-images/${id}`),
+		queryFn: () => apiClient.get<UploadedImageResult>(`/uploaded-images/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -65,7 +65,7 @@ export function useUploadedImage(id: string) {
 export function useUploadedImageStats() {
 	return useQuery<UploadedImageStats, Error>({
 		queryKey: uploadedImageKeys.stats(),
-		queryFn: () => api.get<UploadedImageStats>('/uploaded-images/stats'),
+		queryFn: () => apiClient.get<UploadedImageStats>('/uploaded-images/stats'),
 		staleTime: 1000 * 60 * 5, // 5 minutos
 	});
 }
@@ -74,7 +74,7 @@ export function useUploadImages() {
 	const queryClient = useQueryClient();
 
 	return useMutation<UploadedImageResult[], Error, FormData>({
-		mutationFn: (formData) => api.post<UploadedImageResult[]>('/uploaded-images/upload', formData),
+		mutationFn: (formData) => apiClient.post<UploadedImageResult[]>('/uploaded-images/upload', formData),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: uploadedImageKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: uploadedImageKeys.stats() });
@@ -86,7 +86,7 @@ export function useUpdateUploadedImage() {
 	const queryClient = useQueryClient();
 
 	return useMutation<UploadedImageResult, Error, { id: string; data: UploadedImageUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<UploadedImageResult>(`/uploaded-images/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<UploadedImageResult>(`/uploaded-images/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: uploadedImageKeys.lists() });
 			queryClient.setQueryData(uploadedImageKeys.detail(data.id), data);
@@ -98,7 +98,7 @@ export function useDeleteUploadedImage() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/uploaded-images/${id}`),
+		mutationFn: (id) => apiClient.delete(`/uploaded-images/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: uploadedImageKeys.lists() });
 			queryClient.removeQueries({ queryKey: uploadedImageKeys.detail(id) });

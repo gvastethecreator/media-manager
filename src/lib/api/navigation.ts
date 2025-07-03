@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from './client';
+import { apiClient } from './client';
 
 // Tipos para el sistema de navegación
 export interface SystemStats {
@@ -53,7 +53,7 @@ export const navigationKeys = {
 export function useNavigationData() {
 	return useQuery<NavigationData, Error>({
 		queryKey: navigationKeys.data(),
-		queryFn: () => api.get<NavigationData>('/system/navigation'),
+		queryFn: () => apiClient.get<NavigationData>('/system/navigation'),
 		staleTime: 1000 * 60 * 5, // 5 minutos
 		refetchOnWindowFocus: false,
 	});
@@ -63,7 +63,7 @@ export function useNavigationData() {
 export function useNavigationStats() {
 	return useQuery<SystemStats, Error>({
 		queryKey: navigationKeys.stats(),
-		queryFn: () => api.get<SystemStats>('/stats/system'),
+		queryFn: () => apiClient.get<SystemStats>('/stats/system'),
 		staleTime: 1000 * 60 * 2, // 2 minutos
 		refetchOnWindowFocus: false,
 	});
@@ -73,7 +73,7 @@ export function useNavigationStats() {
 export function useCategoryData<T = unknown>(category: string, enabled = true) {
 	return useQuery<T[], Error>({
 		queryKey: [...navigationKeys.all, 'category', category],
-		queryFn: () => api.get<T[]>(`/${category}`),
+		queryFn: () => apiClient.get<T[]>(`/${category}`),
 		enabled,
 		staleTime: 1000 * 60 * 3, // 3 minutos
 	});
@@ -83,7 +83,7 @@ export function useCategoryData<T = unknown>(category: string, enabled = true) {
 export function useCategoryCount(category: string, enabled = true) {
 	return useQuery<{ count: number }, Error>({
 		queryKey: [...navigationKeys.all, 'count', category],
-		queryFn: () => api.get<{ count: number }>(`/${category}/count`),
+		queryFn: () => apiClient.get<{ count: number }>(`/${category}/count`),
 		enabled,
 		staleTime: 1000 * 60 * 5, // 5 minutos
 	});

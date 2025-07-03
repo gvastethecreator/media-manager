@@ -43,7 +43,7 @@ yarn-error.log*
 .image-cache
 .thumbnail-cache
 
-prisma/dev.db
-prisma/migrations/
+/dev.db
+/src/lib/drizzle/migrations/
 
 .qodo

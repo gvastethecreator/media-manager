@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ImageWithStats } from '@/types/entities/image';
-import { api } from './client';
+import { apiClient } from './client';
 
 // Tipos para filtros de imágenes
 export interface ImageFilters {
@@ -78,7 +78,7 @@ export function useImages(filters: ImageFilters = {}) {
 					}
 				}
 			}
-			return api.get<ImagesResponse>(`/images?${params.toString()}`);
+			return apiClient.get<ImagesResponse>(`/images?${params.toString()}`);
 		},
 		staleTime: 1000 * 30, // 30 segundos
 	});
@@ -87,7 +87,7 @@ export function useImages(filters: ImageFilters = {}) {
 export function useImage(id: string) {
 	return useQuery<ImageWithStats, Error>({
 		queryKey: imageKeys.detail(id),
-		queryFn: () => api.get<ImageWithStats>(`/images/${id}`),
+		queryFn: () => apiClient.get<ImageWithStats>(`/images/${id}`),
 		enabled: !!id,
 		staleTime: 1000 * 60, // 1 minuto
 	});
@@ -97,7 +97,7 @@ export function useCreateImage() {
 	const queryClient = useQueryClient();
 
 	return useMutation<ImageWithStats, Error, ImageCreateInput>({
-		mutationFn: (data) => api.post<ImageWithStats>('/images', data),
+		mutationFn: (data) => apiClient.post<ImageWithStats>('/images', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
 		},
@@ -108,7 +108,7 @@ export function useUpdateImage() {
 	const queryClient = useQueryClient();
 
 	return useMutation<ImageWithStats, Error, { id: string; data: ImageUpdateInput }>({
-		mutationFn: ({ id, data }) => api.put<ImageWithStats>(`/images/${id}`, data),
+		mutationFn: ({ id, data }) => apiClient.put<ImageWithStats>(`/images/${id}`, data),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
 			queryClient.setQueryData(imageKeys.detail(data.id), data);
@@ -120,7 +120,7 @@ export function useDeleteImage() {
 	const queryClient = useQueryClient();
 
 	return useMutation<void, Error, string>({
-		mutationFn: (id) => api.delete(`/images/${id}`),
+		mutationFn: (id) => apiClient.delete(`/images/${id}`),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
 			queryClient.removeQueries({ queryKey: imageKeys.detail(id) });
@@ -132,7 +132,7 @@ export function useToggleFavorite() {
 	const queryClient = useQueryClient();
 
 	return useMutation<ImageWithStats, Error, { id: string; isFavorite: boolean }>({
-		mutationFn: ({ id, isFavorite }) => api.patch<ImageWithStats>(`/images/${id}`, { isFavorite }),
+		mutationFn: ({ id, isFavorite }) => apiClient.patch<ImageWithStats>(`/images/${id}`, { isFavorite }),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
 			queryClient.setQueryData(imageKeys.detail(data.id), data);
