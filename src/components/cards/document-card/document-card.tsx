@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
-import type { DocumentWithStats } from '@/types/entities/document';
 import { DownloadIcon, EyeIcon, FileTextIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { DocumentWithStats } from '@/types/entities/document';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 

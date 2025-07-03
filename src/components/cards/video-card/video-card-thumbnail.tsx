@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
-import type { VideoWithStats } from '@/types/entities/video';
 import { Play, Volume2, VolumeX } from 'lucide-react';
 import { motion } from 'motion/react';
+import { cn } from '@/lib/utils';
+import type { VideoWithStats } from '@/types/entities/video';
 
 interface VideoCardThumbnailProps {
 	video: VideoWithStats;

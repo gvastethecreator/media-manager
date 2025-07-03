@@ -1,194 +1,188 @@
-'use server';
-
 /**
- * @file Server Actions para la entidad Character (Controladores delgados)
+ * @file Actions para la entidad Character - Migradas a API calls
  * @module app/actions/characters/character.actions
- * @description Actions optimizadas que actúan como controladores delgados llamando al servicio
+ * @description Funciones que llaman a las rutas API de personajes
  * @updated 2025-01-27
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import {
-	createCharacter as createCharacterService,
-	deleteCharacter as deleteCharacterService,
-	getCharacter as getCharacterService,
-	getCharacters as getCharactersService,
-	searchCharacters as searchCharactersService,
-	toggleCharacterFavorite as toggleCharacterFavoriteService,
-	updateCharacter as updateCharacterService,
-	type GetCharactersResult,
-} from '@/services/character';
-import type {
-	CharacterCreateInput,
-	CharacterSearchOptions,
-	CharacterUpdateInput,
-	CharacterWithStats,
-} from '@/types/entities/character';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } from '@/types/entities/character';
 
-const logger = serverLogger.withContext('CharacterActions');
+const logger = clientLogger.withContext('CharacterActions');
+const API_BASE = '/api/characters';
 
 /**
- * 🔍 Obtiene un personaje por ID con estadísticas optimizadas.
+ * Obtiene todos los personajes con estadísticas.
+ */
+export async function getCharacters(): Promise<CharacterWithStats[]> {
+	try {
+		logger.info('👤 Obteniendo personajes via API');
+
+		const response = await fetch(API_BASE);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.data || [];
+	} catch (error) {
+		logger.error('❌ Error en API getCharacters', { error });
+		throw error;
+	}
+}
+
+/**
+ * Obtiene un único personaje por su ID.
  */
 export async function getCharacter(id: string): Promise<CharacterWithStats | null> {
-	logger.info(`🔍 Action: Obteniendo personaje: ${id}`);
-
 	try {
-		return await getCharacterService(id);
+		logger.info(`🔍 Obteniendo personaje ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error('❌ Action: Error al obtener personaje', { error, id });
+		logger.error(`❌ Error en API getCharacter: ${id}`, { error });
 		throw error;
 	}
 }
 
 /**
- * 🔍 Obtiene múltiples personajes con estadísticas optimizadas.
- */
-export async function getCharacters(options: CharacterSearchOptions = {}): Promise<CharacterWithStats[]> {
-	logger.info('🔍 Action: Obteniendo personajes', { options });
-
-	try {
-		const result = await getCharactersService(options);
-		return result.characters;
-	} catch (error) {
-		logger.error('❌ Action: Error al obtener personajes', { error, options });
-		throw error;
-	}
-}
-
-/**
- * 🔍 Obtiene múltiples personajes con estadísticas optimizadas y conteo total.
- */
-export async function getCharactersWithTotal(options: CharacterSearchOptions = {}): Promise<GetCharactersResult> {
-	logger.info('🔍 Action: Obteniendo personajes con total', { options });
-
-	try {
-		return await getCharactersService(options);
-	} catch (error) {
-		logger.error('❌ Action: Error al obtener personajes con total', { error, options });
-		throw error;
-	}
-}
-
-/**
- * ➕ Crea un nuevo personaje.
+ * Crea un nuevo personaje.
  */
 export async function createCharacter(data: CharacterCreateInput): Promise<CharacterWithStats> {
-	logger.info('➕ Action: Creando personaje', { name: data.name });
-
 	try {
-		return await createCharacterService(data);
+		logger.info('📝 Creando personaje via API', { name: data.name });
+
+		const response = await fetch(API_BASE, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error('❌ Action: Error al crear personaje', { error, data });
+		logger.error('❌ Error en API createCharacter', { error, data });
 		throw error;
 	}
 }
 
 /**
- * 🔄 Actualiza un personaje existente.
+ * Actualiza un personaje existente.
  */
 export async function updateCharacter(id: string, data: CharacterUpdateInput): Promise<CharacterWithStats> {
-	logger.info(`🔄 Action: Actualizando personaje: ${id}`);
-
 	try {
-		return await updateCharacterService(id, data);
+		logger.info(`🔄 Actualizando personaje ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error('❌ Action: Error al actualizar personaje', { error, id, data });
+		logger.error(`❌ Error en API updateCharacter: ${id}`, { error, data });
 		throw error;
 	}
 }
 
 /**
- * 🗑️ Elimina un personaje.
+ * Elimina un personaje.
  */
 export async function deleteCharacter(id: string): Promise<void> {
-	logger.warn(`🗑️ Action: Eliminando personaje: ${id}`);
-
 	try {
-		await deleteCharacterService(id);
+		logger.warn(`🗑️ Eliminando personaje ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error('❌ Action: Error al eliminar personaje', { error, id });
+		logger.error(`❌ Error en API deleteCharacter: ${id}`, { error });
 		throw error;
 	}
 }
 
 /**
- * ⭐ Cambia el estado de favorito de un personaje.
+ * Obtiene las imágenes asociadas a un personaje.
  */
-export async function toggleCharacterFavorite(id: string): Promise<CharacterWithStats> {
-	logger.info(`⭐ Action: Cambiando estado de favorito del personaje: ${id}`);
-
+export async function getCharacterImages(characterId: string): Promise<{ id: string; name: string; path: string }[]> {
 	try {
-		return await toggleCharacterFavoriteService(id);
+		logger.info(`🖼️ Obteniendo imágenes de personaje ${characterId} via API`);
+
+		const response = await fetch(`${API_BASE}/${characterId}/images`);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error('❌ Action: Error al cambiar estado de favorito', { error, id });
+		logger.error(`❌ Error en API getCharacterImages: ${characterId}`, { error });
 		throw error;
 	}
 }
 
 /**
- * 🔍 Busca personajes por nombre o descripción.
+ * Agrega un personaje a una imagen.
  */
-export async function searchCharacters(query: string): Promise<CharacterWithStats[]> {
-	logger.info(`🔍 Action: Buscando personajes: "${query}"`);
-
+export async function addCharacterToImage(imageId: string, characterId: string): Promise<void> {
 	try {
-		return await searchCharactersService(query);
+		logger.info(`🔗 Agregando personaje ${characterId} a imagen ${imageId} via API`);
+
+		const response = await fetch(`/api/images/${imageId}/characters/${characterId}`, {
+			method: 'POST',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error('❌ Action: Error al buscar personajes', { error, query });
+		logger.error('❌ Error en API addCharacterToImage', { error, imageId, characterId });
 		throw error;
 	}
 }
 
 /**
- * 🖼️ Obtiene las imágenes asociadas a un personaje.
+ * Remueve un personaje de una imagen.
  */
-export async function getCharacterImages(id: string): Promise<{ id: string; name: string; path: string }[]> {
-	logger.info(`🖼️ Action: Obteniendo imágenes del personaje: ${id}`);
-
+export async function removeCharacterFromImage(imageId: string, characterId: string): Promise<void> {
 	try {
-		// Nota: Esta función necesita ser implementada en el servicio
-		// Por ahora retornamos un array vacío
-		logger.warn(`⚠️ getCharacterImages no implementada para personaje: ${id}`);
-		return [];
+		logger.info(`🔗 Removiendo personaje ${characterId} de imagen ${imageId} via API`);
+
+		const response = await fetch(`/api/images/${imageId}/characters/${characterId}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error('❌ Action: Error al obtener imágenes del personaje', { error, id });
+		logger.error('❌ Error en API removeCharacterFromImage', { error, imageId, characterId });
 		throw error;
 	}
 }
-
-/**
- * 🔗 Agrega una imagen a un personaje.
- */
-export async function addImageToCharacter(characterId: string, imageId: string): Promise<void> {
-	logger.info(`🔗 Action: Agregando imagen ${imageId} al personaje ${characterId}`);
-
-	try {
-		// Nota: Esta función necesita ser implementada en el servicio
-		// Por ahora no hace nada
-	} catch (error) {
-		logger.error('❌ Action: Error al agregar imagen al personaje', { error, characterId, imageId });
-		throw error;
-	}
-}
-
-/**
- * 🔗 Remueve una imagen de un personaje.
- */
-export async function removeImageFromCharacter(characterId: string, imageId: string): Promise<void> {
-	logger.info(`🔗 Action: Removiendo imagen ${imageId} del personaje ${characterId}`);
-
-	try {
-		// Nota: Esta función necesita ser implementada en el servicio
-		// Por ahora no hace nada
-	} catch (error) {
-		logger.error('❌ Action: Error al remover imagen del personaje', { error, characterId, imageId });
-		throw error;
-	}
-}
-
-// Alias para compatibilidad con código existente
-export const getCharacterById = getCharacter;
-
-// Re-exportar tipos para uso externo
-export type { CharacterWithStats } from '@/types/entities/character';

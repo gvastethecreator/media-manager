@@ -1,3 +1,5 @@
+import { Filter, Loader2, PlusCircle, TagIcon, Trash } from 'lucide-react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +13,6 @@ import { useDeleteTag, useTags } from '@/lib/api/tags';
 import toastService from '@/services/toast';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagBase as UITag } from '@/types/entities/tag/types';
-import { Filter, Loader2, PlusCircle, TagIcon, Trash } from 'lucide-react';
-import { useCallback, useId, useMemo, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
 
 interface TagsSettingsProps {

@@ -1,7 +1,7 @@
-import { prisma } from '@/lib/database/prisma';
-import { serializeAlbum } from '@/transformers/album';
 import { Router } from 'express';
 import { z } from 'zod';
+import { prisma } from '@/lib/database/prisma';
+import { serializeAlbum } from '@/transformers/album';
 
 /**
  * @file albums.ts

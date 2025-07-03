@@ -3,9 +3,6 @@
  * @module components/features/file-browser/views/list-view-v2
  */
 
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
 import {
 	FileIcon,
 	FileTextIcon,
@@ -20,6 +17,9 @@ import {
 	VideoIcon,
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
+import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 interface ListViewProps {
 	items: EntityWithStats[];

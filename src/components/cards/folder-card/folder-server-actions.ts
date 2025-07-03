@@ -1,7 +1,7 @@
 'use server';
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { getPrismaClient } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { folderWithCountsPayload, fromPrismaFolderWithCounts } from '@/transformers/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
 

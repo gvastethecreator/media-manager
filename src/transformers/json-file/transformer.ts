@@ -5,8 +5,8 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file';
 
 const logger = serverLogger.withContext('JsonFileTransformer');
 

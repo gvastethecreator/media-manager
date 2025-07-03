@@ -6,12 +6,12 @@
  *   Se comunica con las server actions para la persistencia de datos.
  */
 
+import { produce } from 'immer';
+import type { StateCreator } from 'zustand';
 import * as actions from '@/app/actions/properties/property.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import { PropertyWithStats } from '@/types/entities/property';
-import { produce } from 'immer';
-import type { StateCreator } from 'zustand';
 import type { PropertyCoreActions, PropertyCoreState, PropertyStore } from '../types';
 
 const logger = clientLogger.withContext('PropertyCoreSlice');

@@ -1,5 +1,5 @@
-import type { PropertyWithStats } from '@/types/entities/property';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { PropertyWithStats } from '@/types/entities/property';
 import { api } from './client';
 
 export interface PropertyFilters {

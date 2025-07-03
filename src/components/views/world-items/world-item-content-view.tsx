@@ -1,3 +1,5 @@
+import { Box } from 'lucide-react';
+import { useCallback } from 'react';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { useWorldItemImages } from '@/lib/api/world-items';
@@ -5,8 +7,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useSelectionStore } from '@/store/selection.store';
 import type { FileItem } from '@/types/files';
-import { Box } from 'lucide-react';
-import { useCallback } from 'react';
 
 const viewLogger = clientLogger.withContext('WorldItemContentView');
 

@@ -3,6 +3,7 @@
  * @module store/entities/place/types
  */
 
+import type { StateCreator } from 'zustand';
 import type {
 	PlaceCategory,
 	PlaceSearchOptions,
@@ -10,7 +11,6 @@ import type {
 	PlaceViewMode,
 	PlaceWithStats,
 } from '@/types/entities/place';
-import type { StateCreator } from 'zustand';
 
 type PlaceFilters = PlaceSearchOptions['filters'];
 

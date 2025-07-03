@@ -34,9 +34,11 @@ export function getDbConfig(): DbConfig {
 	try {
 		return dbConfigSchema.parse({
 			url: process.env.DATABASE_URL,
-			maxConnections: process.env.DB_MAX_CONNECTIONS ? parseInt(process.env.DB_MAX_CONNECTIONS) : undefined,
-			connectionTimeout: process.env.DB_CONNECTION_TIMEOUT ? parseInt(process.env.DB_CONNECTION_TIMEOUT) : undefined,
-			queryTimeout: process.env.DB_QUERY_TIMEOUT ? parseInt(process.env.DB_QUERY_TIMEOUT) : undefined,
+			maxConnections: process.env.DB_MAX_CONNECTIONS ? Number.parseInt(process.env.DB_MAX_CONNECTIONS) : undefined,
+			connectionTimeout: process.env.DB_CONNECTION_TIMEOUT
+				? Number.parseInt(process.env.DB_CONNECTION_TIMEOUT)
+				: undefined,
+			queryTimeout: process.env.DB_QUERY_TIMEOUT ? Number.parseInt(process.env.DB_QUERY_TIMEOUT) : undefined,
 			logLevel: process.env.DB_LOG_LEVEL,
 			enableLogging: process.env.DB_ENABLE_LOGGING === 'true',
 		});

@@ -1,7 +1,7 @@
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { SettingsView } from '@/components/settings/settings-view';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo, useEffect, useState } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { SettingsView } from '@/components/settings/settings-view';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
 import { AlbumContentView } from './albums/album-content-view';
 import { AlbumsView } from './albums/albums-view';

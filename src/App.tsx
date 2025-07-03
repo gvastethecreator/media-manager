@@ -3,24 +3,11 @@
  * @module App
  */
 
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { AppProvider } from '@/providers/app-provider';
-import { ThemeProvider } from '@/components/ui/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
-import { Router } from './router';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './router';
 
 export function App() {
-	return (
-		<BrowserRouter>
-			<ThemeProvider defaultTheme="system" storageKey="image-manager-theme">
-				<AppProvider>
-					<Router />
-					<Toaster />
-				</AppProvider>
-			</ThemeProvider>
-		</BrowserRouter>
-	);
+	return <RouterProvider router={router} />;
 }
 
 export default App;

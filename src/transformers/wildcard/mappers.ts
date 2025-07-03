@@ -6,6 +6,7 @@
  *              2. Transformar los datos de Prisma a tipos enriquecidos de la app (WildcardWithStats).
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
@@ -17,7 +18,6 @@ import {
 	WildcardUpdateInput,
 	WildcardWithStats,
 } from '@/types/entities/wildcard';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('WildcardMappers');
 

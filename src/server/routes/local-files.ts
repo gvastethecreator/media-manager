@@ -10,7 +10,7 @@ const BASE_DIRECTORY = path.resolve('/allowed/base/directory');
 router.get('/*', async (req, res) => {
 	try {
 		const rawPath = req.params[0];
-		const sanitizedPath = rawPath.replace(/^\.\.[\/\\]/, ''); // Remove leading traversal sequences
+		const sanitizedPath = rawPath.replace(/^\.\.[/\\]/, ''); // Remove leading traversal sequences
 		const fullPath = path.resolve(BASE_DIRECTORY, sanitizedPath);
 
 		if (!fullPath.startsWith(BASE_DIRECTORY)) {

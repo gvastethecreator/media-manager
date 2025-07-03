@@ -1,53 +1,10 @@
-'use server';
-
 /**
  * @file Servicio para la entidad Folder
  * @module services/folder/folder.service
  * @description Lógica de negocio y acceso a datos para las carpetas.
  */
 
-import { prisma } from '@/lib/database/prisma';
-import { serverLogger } from '@/lib/logger/server-logger';
-import {
-	folderWithCountsPayload,
-	fromPrismaFolder,
-	fromPrismaFolders,
-	fromPrismaFoldersWithCounts,
-	mapCreateFolderDataToPrisma,
-	mapUpdateFolderDataToPrisma,
-} from '@/transformers/folder';
 import type { FolderComplete, FolderCreateInput, FolderUpdateInput, FolderWithStats } from '@/types/entities/folder';
-import { revalidatePath } from '@/lib/server/revalidate';
-
-const logger = serverLogger.withContext('FolderService');
-
-/**
- * Objeto de inclusión de Prisma para asegurar que todas las relaciones
- * y conteos necesarios para el tipo `FolderComplete` se obtengan siempre.
- */
-const FOLDER_INCLUDE = {
-	images: { take: 10, orderBy: { createdAt: 'desc' } }, // Limitar para previsualización
-	parent: true,
-	children: true,
-	_count: {
-		select: {
-			images: true,
-			children: true,
-		},
-	},
-};
-
-/**
- * Revalida las rutas de caché relacionadas con las carpetas.
- * @param folderId - El ID de la carpeta específica para revalidar su página.
- */
-async function revalidateFolderPaths(folderId?: string) {
-	revalidatePath('/folders');
-	revalidatePath('/settings/folders');
-	if (folderId) {
-		revalidatePath(`/folders/${folderId}`);
-	}
-}
 
 /**
  * Obtiene todas las carpetas, opcionalmente filtrando por un ID de padre.
@@ -55,18 +12,12 @@ async function revalidateFolderPaths(folderId?: string) {
  * @returns Una promesa que se resuelve con un array de carpetas completas.
  */
 export async function getFolders(parentId?: string): Promise<FolderComplete[]> {
-	logger.info('📂 Obteniendo carpetas', { parentId });
-	try {
-		const folders = await prisma.folder.findMany({
-			where: { parentId: parentId === undefined ? null : parentId },
-			orderBy: { name: 'asc' },
-			include: FOLDER_INCLUDE,
-		});
-		return fromPrismaFolders(folders);
-	} catch (error) {
-		logger.error('❌ Error al obtener carpetas', { error });
+	const url = parentId ? `/api/folders?parentId=${parentId}` : '/api/folders';
+	const response = await fetch(url);
+	if (!response.ok) {
 		throw new Error('No se pudieron obtener las carpetas.');
 	}
+	return response.json();
 }
 
 /**
@@ -75,17 +26,12 @@ export async function getFolders(parentId?: string): Promise<FolderComplete[]> {
  * @returns Una promesa que se resuelve con la carpeta completa o null si no se encuentra.
  */
 export async function getFolder(id: string): Promise<FolderComplete | null> {
-	logger.info(`🔍 Obteniendo carpeta por ID: ${id}`);
-	try {
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			include: FOLDER_INCLUDE,
-		});
-		return folder ? fromPrismaFolder(folder) : null;
-	} catch (error) {
-		logger.error(`❌ Error al obtener la carpeta ${id}`, { error });
+	const response = await fetch(`/api/folders/${id}`);
+	if (!response.ok) {
+		if (response.status === 404) return null;
 		throw new Error('No se pudo obtener la carpeta.');
 	}
+	return response.json();
 }
 
 /**
@@ -94,19 +40,15 @@ export async function getFolder(id: string): Promise<FolderComplete | null> {
  * @returns Una promesa que se resuelve con la carpeta recién creada.
  */
 export async function createFolder(data: FolderCreateInput): Promise<FolderComplete> {
-	logger.info('➕ Creando nueva carpeta', { name: data.name });
-	try {
-		const prismaData = mapCreateFolderDataToPrisma(data);
-		const newFolder = await prisma.folder.create({
-			data: prismaData,
-			include: FOLDER_INCLUDE,
-		});
-		await revalidateFolderPaths();
-		return fromPrismaFolder(newFolder);
-	} catch (error) {
-		logger.error('❌ Error al crear la carpeta', { error, data });
+	const response = await fetch('/api/folders', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
 		throw new Error('No se pudo crear la carpeta.');
 	}
+	return response.json();
 }
 
 /**
@@ -116,20 +58,15 @@ export async function createFolder(data: FolderCreateInput): Promise<FolderCompl
  * @returns Una promesa que se resuelve con la carpeta actualizada.
  */
 export async function updateFolder(id: string, data: FolderUpdateInput): Promise<FolderComplete> {
-	logger.info(`🔄 Actualizando carpeta: ${id}`);
-	try {
-		const prismaData = mapUpdateFolderDataToPrisma(data);
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: prismaData,
-			include: FOLDER_INCLUDE,
-		});
-		await revalidateFolderPaths(id);
-		return fromPrismaFolder(updatedFolder);
-	} catch (error) {
-		logger.error(`❌ Error al actualizar la carpeta ${id}`, { error, data });
+	const response = await fetch(`/api/folders/${id}`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data),
+	});
+	if (!response.ok) {
 		throw new Error('No se pudo actualizar la carpeta.');
 	}
+	return response.json();
 }
 
 /**
@@ -137,23 +74,12 @@ export async function updateFolder(id: string, data: FolderUpdateInput): Promise
  * @param id - El ID de la carpeta a eliminar.
  */
 export async function deleteFolder(id: string): Promise<void> {
-	logger.warn(`🗑️ Eliminando carpeta: ${id}`);
-	try {
-		// Asegurarse de que no tenga hijos para evitar registros huérfanos
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			select: { _count: { select: { children: true } } },
-		});
-
-		if (folder?._count.children > 0) {
-			throw new Error('No se puede eliminar una carpeta que contiene otras carpetas.');
-		}
-
-		await prisma.folder.delete({ where: { id } });
-		await revalidateFolderPaths();
-	} catch (error) {
-		logger.error(`❌ Error al eliminar la carpeta ${id}`, { error });
-		const errorMessage = error instanceof Error ? error.message : 'No se pudo eliminar la carpeta.';
+	const response = await fetch(`/api/folders/${id}`, {
+		method: 'DELETE',
+	});
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		const errorMessage = errorData.error || 'No se pudo eliminar la carpeta.';
 		throw new Error(errorMessage);
 	}
 }
@@ -164,18 +90,12 @@ export async function deleteFolder(id: string): Promise<void> {
  * @returns Una promesa que se resuelve con un array de carpetas con estadísticas.
  */
 export async function getFoldersWithStats(parentId?: string): Promise<FolderWithStats[]> {
-	logger.info('📂 Obteniendo carpetas con estadísticas', { parentId });
-	try {
-		const folders = await prisma.folder.findMany({
-			where: { parentId: parentId === undefined ? null : parentId },
-			orderBy: { name: 'asc' },
-			...folderWithCountsPayload,
-		});
-		return fromPrismaFoldersWithCounts(folders);
-	} catch (error) {
-		logger.error('❌ Error al obtener carpetas con estadísticas', { error });
+	const url = parentId ? `/api/folders/stats?parentId=${parentId}` : '/api/folders/stats';
+	const response = await fetch(url);
+	if (!response.ok) {
 		throw new Error('No se pudieron obtener las carpetas con estadísticas.');
 	}
+	return response.json();
 }
 
 // Nota: La lógica de indexación y eventos complejos se ha movido a un sistema de colas (Queue/Jobs)

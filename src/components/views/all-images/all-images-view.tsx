@@ -1,3 +1,6 @@
+import { ImageIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -5,9 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import type { ImageWithStats } from '@/types/entities/image';
-import { ImageIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AllImagesView');

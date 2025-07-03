@@ -1,3 +1,5 @@
+import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeletePlace, usePlaces } from '@/lib/api/places';
 import toastService from '@/services/toast';
 import type { PlaceWithStats } from '@/types/entities/place';
-import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
 import { CreatePlaceForm } from './create-place-form';
 
 // Agregar type para manejar el onClick

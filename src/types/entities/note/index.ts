@@ -6,11 +6,9 @@
  */
 
 export type {
-	NoteCreateInput as CreateNoteData, // Alias para retrocompatibilidad
-	// Alias para retrocompatibilidad
-	NoteWithStats as Note,
 	NoteBase,
 	NoteComplete,
+	NoteCreateInput as CreateNoteData, // Alias para retrocompatibilidad
 	NoteCreateInput, // Alias para retrocompatibilidad
 	NoteFilters,
 	NoteRelations,
@@ -21,6 +19,8 @@ export type {
 	NoteUI,
 	NoteUpdateInput,
 	NoteValidated,
+	// Alias para retrocompatibilidad
+	NoteWithStats as Note,
 	NoteWithStats,
 	PrismaNoteWithCounts,
 	RelatedNote,

@@ -1,3 +1,5 @@
+import { cva, VariantProps } from 'class-variance-authority';
+import { PanelLeftIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -6,8 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/lib/hooks/utils/use-mobile';
 import { cn } from '@/lib/utils';
-import { cva, VariantProps } from 'class-variance-authority';
-import { PanelLeftIcon } from 'lucide-react';
 
 // Custom Slot implementation to replace Radix UI Slot
 const Slot = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement> & { asChild?: boolean }>(

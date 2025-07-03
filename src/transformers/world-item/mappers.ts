@@ -3,6 +3,7 @@
  * @module transformers/world-item/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
@@ -14,7 +15,6 @@ import type {
 	WorldItemUpdateInput,
 	WorldItemWithStats,
 } from '@/types/entities/world-item';
-import type { Prisma } from '@prisma/client';
 import {
 	serializeAttributes,
 	serializeEffects,

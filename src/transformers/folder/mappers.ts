@@ -3,7 +3,9 @@
  * @module transformers/folder/mappers
  */
 
+import type { Prisma, Folder as PrismaFolder } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
 	FolderComplete,
 	FolderCreateInput,
@@ -11,8 +13,6 @@ import type {
 	FolderSearchOptions,
 	FolderUpdateInput,
 } from '@/types/entities/folder';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { Prisma, Folder as PrismaFolder } from '@prisma/client';
 import { normalizeFolderPath } from './serializers';
 
 const logger = serverLogger.withContext('FolderMappers');

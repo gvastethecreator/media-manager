@@ -5,15 +5,15 @@
  * @updated 2025-01-27
  */
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toTagWithStats } from '@/transformers/tag';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import { tagCounts } from '@/types/entities/tag';
-import { Prisma } from '@prisma/client';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('TagService');

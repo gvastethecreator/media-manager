@@ -1,8 +1,8 @@
 'use server';
 
+import ExifReader from 'exifreader';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { MediaMetadata } from '@/types/metadata';
-import ExifReader from 'exifreader';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import type { ImageFormat } from './metadata-types.actions';
 import { withRetry } from './metadata-utils.actions';

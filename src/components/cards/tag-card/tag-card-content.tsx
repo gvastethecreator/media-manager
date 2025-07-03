@@ -1,5 +1,3 @@
-import { cn } from '@/lib/utils';
-import { TagRarity } from '@/store/entities/tag/types';
 import {
 	Album,
 	BookOpen,
@@ -18,6 +16,8 @@ import {
 	Video,
 } from 'lucide-react';
 import React from 'react';
+import { cn } from '@/lib/utils';
+import { TagRarity } from '@/store/entities/tag/types';
 
 interface TagCardContentProps {
 	description?: string | null;

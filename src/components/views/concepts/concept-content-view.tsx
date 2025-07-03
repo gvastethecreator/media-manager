@@ -1,10 +1,10 @@
+import { Lightbulb } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { useConceptImages } from '@/lib/api/concepts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { selectSelectedConcept, useConceptStore } from '@/store/entities/concept';
-import { Lightbulb } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('ConceptContentView');
 

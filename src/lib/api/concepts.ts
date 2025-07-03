@@ -1,6 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import type { ImageWithStats } from '@/types/entities/image';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
 
 export interface ConceptFilters {

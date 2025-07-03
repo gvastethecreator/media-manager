@@ -6,12 +6,12 @@
  * @updated 2025-06-27
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import type { Document, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentWithStats } from '@/types/entities/document';
-import type { Document, Prisma } from '@prisma/client';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 

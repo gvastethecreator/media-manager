@@ -1,14 +1,11 @@
-'use server';
-
 /**
- * @file Server Actions para la entidad Collection
+ * @file Actions para la entidad Collection - Migradas a API calls
  * @module app/actions/collections/collection.actions
- * @description Controladores delgados que llaman al servicio de colecciones
+ * @description Funciones que llaman a las rutas API de colecciones
  * @updated 2025-01-27
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import collectionService from '@/services/collection';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type {
 	CollectionCreateInput,
 	CollectionSearchOptions,
@@ -16,17 +13,34 @@ import type {
 	CollectionWithStats,
 } from '@/types/entities/collection';
 
-const logger = serverLogger.withContext('CollectionActions');
+const logger = clientLogger.withContext('CollectionActions');
+const API_BASE = '/api/collections';
 
 /**
  * Busca y obtiene colecciones según los criterios de búsqueda.
  */
 export async function searchCollections(options: CollectionSearchOptions): Promise<CollectionWithStats[]> {
 	try {
-		logger.info('🔍 Buscando colecciones via action', { options });
-		return await collectionService.searchCollections(options);
+		logger.info('🔍 Buscando colecciones via API', { options });
+
+		const searchParams = new URLSearchParams();
+		for (const [key, value] of Object.entries(options)) {
+			if (value !== undefined && value !== null) {
+				searchParams.append(key, String(value));
+			}
+		}
+
+		const url = searchParams.toString() ? `${API_BASE}?${searchParams}` : API_BASE;
+		const response = await fetch(url);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.data || [];
 	} catch (error) {
-		logger.error('❌ Error en action searchCollections', { error, options });
+		logger.error('❌ Error en API searchCollections', { error, options });
 		throw error;
 	}
 }
@@ -36,10 +50,18 @@ export async function searchCollections(options: CollectionSearchOptions): Promi
  */
 export async function getCollections(): Promise<CollectionWithStats[]> {
 	try {
-		logger.info('📚 Obteniendo colecciones via action');
-		return await collectionService.getCollections();
+		logger.info('📚 Obteniendo colecciones via API');
+
+		const response = await fetch(API_BASE);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.data || [];
 	} catch (error) {
-		logger.error('❌ Error en action getCollections', { error });
+		logger.error('❌ Error en API getCollections', { error });
 		throw error;
 	}
 }
@@ -49,10 +71,20 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
  */
 export async function getCollection(id: string): Promise<CollectionWithStats | null> {
 	try {
-		logger.info(`🔍 Obteniendo colección ${id} via action`);
-		return await collectionService.getCollection(id);
+		logger.info(`🔍 Obteniendo colección ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error(`❌ Error en action getCollection: ${id}`, { error });
+		logger.error(`❌ Error en API getCollection: ${id}`, { error });
 		throw error;
 	}
 }
@@ -62,10 +94,23 @@ export async function getCollection(id: string): Promise<CollectionWithStats | n
  */
 export async function createCollection(data: CollectionCreateInput): Promise<CollectionWithStats> {
 	try {
-		logger.info('➕ Creando colección via action', { name: data.name });
-		return await collectionService.createCollection(data);
+		logger.info('➕ Creando colección via API', { name: data.name });
+
+		const response = await fetch(API_BASE, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error('❌ Error en action createCollection', { error, data });
+		logger.error('❌ Error en API createCollection', { error, data });
 		throw error;
 	}
 }
@@ -75,10 +120,23 @@ export async function createCollection(data: CollectionCreateInput): Promise<Col
  */
 export async function updateCollection(id: string, data: CollectionUpdateInput): Promise<CollectionWithStats> {
 	try {
-		logger.info(`🔄 Actualizando colección ${id} via action`);
-		return await collectionService.updateCollection(id, data);
+		logger.info(`🔄 Actualizando colección ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error(`❌ Error en action updateCollection: ${id}`, { error, data });
+		logger.error(`❌ Error en API updateCollection: ${id}`, { error, data });
 		throw error;
 	}
 }
@@ -88,10 +146,17 @@ export async function updateCollection(id: string, data: CollectionUpdateInput):
  */
 export async function deleteCollection(id: string): Promise<void> {
 	try {
-		logger.warn(`🗑️ Eliminando colección ${id} via action`);
-		await collectionService.deleteCollection(id);
+		logger.warn(`🗑️ Eliminando colección ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error(`❌ Error en action deleteCollection: ${id}`, { error });
+		logger.error(`❌ Error en API deleteCollection: ${id}`, { error });
 		throw error;
 	}
 }
@@ -101,10 +166,17 @@ export async function deleteCollection(id: string): Promise<void> {
  */
 export async function getCollectionImages(collectionId: string): Promise<{ id: string; name: string; path: string }[]> {
 	try {
-		logger.info(`🖼️ Obteniendo imágenes de colección ${collectionId} via action`);
-		return await collectionService.getCollectionImages(collectionId);
+		logger.info(`🖼️ Obteniendo imágenes de colección ${collectionId} via API`);
+
+		const response = await fetch(`${API_BASE}/${collectionId}/images`);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error(`❌ Error en action getCollectionImages: ${collectionId}`, { error });
+		logger.error(`❌ Error en API getCollectionImages: ${collectionId}`, { error });
 		throw error;
 	}
 }
@@ -114,10 +186,19 @@ export async function getCollectionImages(collectionId: string): Promise<{ id: s
  */
 export async function toggleCollectionFavorite(id: string): Promise<CollectionWithStats> {
 	try {
-		logger.info(`⭐ Cambiando favorito de colección ${id} via action`);
-		return await collectionService.toggleCollectionFavorite(id);
+		logger.info(`⭐ Cambiando favorito de colección ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}/favorite`, {
+			method: 'POST',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
 	} catch (error) {
-		logger.error(`❌ Error en action toggleCollectionFavorite: ${id}`, { error });
+		logger.error(`❌ Error en API toggleCollectionFavorite: ${id}`, { error });
 		throw error;
 	}
 }
@@ -127,11 +208,17 @@ export async function toggleCollectionFavorite(id: string): Promise<CollectionWi
  */
 export async function addImageToCollection(collectionId: string, imageId: string): Promise<void> {
 	try {
-		logger.info(`🔗 Agregando imagen ${imageId} a colección ${collectionId} via action`);
-		// Nota: Esta función necesita ser implementada en el servicio
-		logger.warn(`⚠️ addImageToCollection no implementada para ${collectionId}-${imageId}`);
+		logger.info(`🔗 Agregando imagen ${imageId} a colección ${collectionId} via API`);
+
+		const response = await fetch(`${API_BASE}/${collectionId}/images/${imageId}`, {
+			method: 'POST',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error('❌ Error en action addImageToCollection', { error, collectionId, imageId });
+		logger.error('❌ Error en API addImageToCollection', { error, collectionId, imageId });
 		throw error;
 	}
 }
@@ -141,11 +228,17 @@ export async function addImageToCollection(collectionId: string, imageId: string
  */
 export async function removeImageFromCollection(collectionId: string, imageId: string): Promise<void> {
 	try {
-		logger.info(`🔗 Removiendo imagen ${imageId} de colección ${collectionId} via action`);
-		// Nota: Esta función necesita ser implementada en el servicio
-		logger.warn(`⚠️ removeImageFromCollection no implementada para ${collectionId}-${imageId}`);
+		logger.info(`🔗 Removiendo imagen ${imageId} de colección ${collectionId} via API`);
+
+		const response = await fetch(`${API_BASE}/${collectionId}/images/${imageId}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error('❌ Error en action removeImageFromCollection', { error, collectionId, imageId });
+		logger.error('❌ Error en API removeImageFromCollection', { error, collectionId, imageId });
 		throw error;
 	}
 }
@@ -155,11 +248,17 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
  */
 export async function addCollectionToImage(imageId: string, collectionId: string): Promise<void> {
 	try {
-		logger.info(`🔗 Agregando colección ${collectionId} a imagen ${imageId} via action`);
-		// Nota: Esta función necesita ser implementada en el servicio
-		logger.warn(`⚠️ addCollectionToImage no implementada para ${imageId}-${collectionId}`);
+		logger.info(`🔗 Agregando colección ${collectionId} a imagen ${imageId} via API`);
+
+		const response = await fetch(`/api/images/${imageId}/collections/${collectionId}`, {
+			method: 'POST',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error('❌ Error en action addCollectionToImage', { error, imageId, collectionId });
+		logger.error('❌ Error en API addCollectionToImage', { error, imageId, collectionId });
 		throw error;
 	}
 }
@@ -169,11 +268,17 @@ export async function addCollectionToImage(imageId: string, collectionId: string
  */
 export async function removeCollectionFromImage(imageId: string, collectionId: string): Promise<void> {
 	try {
-		logger.info(`🔗 Removiendo colección ${collectionId} de imagen ${imageId} via action`);
-		// Nota: Esta función necesita ser implementada en el servicio
-		logger.warn(`⚠️ removeCollectionFromImage no implementada para ${imageId}-${collectionId}`);
+		logger.info(`🔗 Removiendo colección ${collectionId} de imagen ${imageId} via API`);
+
+		const response = await fetch(`/api/images/${imageId}/collections/${collectionId}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 	} catch (error) {
-		logger.error('❌ Error en action removeCollectionFromImage', { error, imageId, collectionId });
+		logger.error('❌ Error en API removeCollectionFromImage', { error, imageId, collectionId });
 		throw error;
 	}
 }

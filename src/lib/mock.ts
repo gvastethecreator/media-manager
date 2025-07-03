@@ -3,7 +3,7 @@
  * @module lib/mock
  */
 
-import type { Image, Tag, Collection, Album } from '@prisma/client';
+import type { Album, Collection, Image, Tag } from '@prisma/client';
 
 /**
  * Datos mock para imágenes
@@ -103,14 +103,14 @@ export function generateMockData<T>(
 /**
  * Simula delay de red para testing
  */
-export function mockDelay(ms: number = 1000): Promise<void> {
+export function mockDelay(ms = 1000): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
  * Simula error aleatorio para testing
  */
-export function mockRandomError(probability: number = 0.1): void {
+export function mockRandomError(probability = 0.1): void {
 	if (Math.random() < probability) {
 		throw new Error('Error simulado para testing');
 	}

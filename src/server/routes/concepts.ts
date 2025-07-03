@@ -1,7 +1,7 @@
+import express from 'express';
 import { ConceptService } from '@/services/concept/concept.service';
 import { toConceptWithStats } from '@/transformers/concept/concept.transformer';
 import { toImageWithStats } from '@/transformers/image/image.transformer';
-import express from 'express';
 
 const router = express.Router();
 const conceptService = new ConceptService();

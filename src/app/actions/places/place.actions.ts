@@ -1,72 +1,128 @@
-'use server';
-
 /**
- * @file Server Actions para la entidad Place
+ * @file Actions para la entidad Place - Migradas a API calls
  * @module app/actions/places/place.actions
- * @description Acciones CRUD y de gestión de relaciones para los Lugares como controladores delegados.
+ * @description Funciones que llaman a las rutas API de lugares
+ * @updated 2025-01-27
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import {
-	createPlace as createPlaceService,
-	deletePlace as deletePlaceService,
-	getPlaceById as getPlaceByIdService,
-	getPlaces as getPlacesService,
-	updatePlace as updatePlaceService,
-} from '@/services/place';
-import type { PlaceCreateInput, PlaceSearchOptions, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
-import { revalidatePath } from '@/lib/server/revalidate';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
-const placeLogger = serverLogger.withContext('PlaceActions');
+const logger = clientLogger.withContext('PlaceActions');
+const API_BASE = '/api/places';
 
-const REVALIDATE_PATHS = ['/settings/places', '/library/places'];
+/**
+ * Obtiene todos los lugares con estadísticas.
+ */
+export async function getPlaces(): Promise<PlaceWithStats[]> {
+	try {
+		logger.info('📍 Obteniendo lugares via API');
 
-async function revalidatePlacePaths(id?: string) {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path, 'page');
+		const response = await fetch(API_BASE);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.data || [];
+	} catch (error) {
+		logger.error('❌ Error en API getPlaces', { error });
+		throw error;
 	}
-	if (id) {
-		revalidatePath(`/library/places/${id}`, 'page');
-	}
-	placeLogger.info('🔄 Rutas revalidadas');
-}
-
-export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithStats[]> {
-	const places = await getPlacesService(options);
-	return places;
-}
-
-export async function getPlaceById(id: string): Promise<PlaceWithStats | null> {
-	const place = await getPlaceByIdService(id);
-	return place;
-}
-
-export async function createPlace(input: PlaceCreateInput): Promise<PlaceWithStats> {
-	const place = await createPlaceService(input);
-	await revalidatePlacePaths();
-	return place;
-}
-
-export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<PlaceWithStats> {
-	const place = await updatePlaceService(id, input);
-	await revalidatePlacePaths(id);
-	return place;
-}
-
-export async function deletePlace(id: string): Promise<boolean> {
-	const result = await deletePlaceService(id);
-	await revalidatePlacePaths();
-	return result;
 }
 
 /**
- * Obtiene las imágenes asociadas a un lugar específico
- * @param placeId - El ID del lugar
- * @param options - Opciones para la consulta de imágenes
- * @returns Promise con el array de imágenes del lugar
+ * Obtiene un único lugar por su ID.
  */
-export async function getPlaceImages(placeId: string, options?: unknown): Promise<unknown[]> {
-	placeLogger.info(`🖼️ Obteniendo imágenes para lugar: ${placeId}`);
-	// Función stub - devuelve array vacío por ahora
-	return [];
+export async function getPlace(id: string): Promise<PlaceWithStats | null> {
+	try {
+		logger.info(`🔍 Obteniendo lugar ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error(`❌ Error en API getPlace: ${id}`, { error });
+		throw error;
+	}
+}
+
+/**
+ * Crea un nuevo lugar.
+ */
+export async function createPlace(data: PlaceCreateInput): Promise<PlaceWithStats> {
+	try {
+		logger.info('📝 Creando lugar via API', { name: data.name });
+
+		const response = await fetch(API_BASE, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error('❌ Error en API createPlace', { error, data });
+		throw error;
+	}
+}
+
+/**
+ * Actualiza un lugar existente.
+ */
+export async function updatePlace(id: string, data: PlaceUpdateInput): Promise<PlaceWithStats> {
+	try {
+		logger.info(`🔄 Actualizando lugar ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error(`❌ Error en API updatePlace: ${id}`, { error, data });
+		throw error;
+	}
+}
+
+/**
+ * Elimina un lugar.
+ */
+export async function deletePlace(id: string): Promise<void> {
+	try {
+		logger.warn(`🗑️ Eliminando lugar ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'DELETE',
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+	} catch (error) {
+		logger.error(`❌ Error en API deletePlace: ${id}`, { error });
+		throw error;
+	}
 }

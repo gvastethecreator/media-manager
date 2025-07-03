@@ -1,9 +1,9 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { getActiveProfile } from '@/app/actions/profiles';
+import { useActiveProfile } from '@/lib/api/profiles';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
 import { type ProfileBase, ThemeMode } from '@/types/entities/profile';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 // Contexto para acceso síncrono al perfil
 export interface ProfileContextValue {
@@ -38,7 +38,7 @@ const ProfileContext = createContext<ProfileContextValue>({
 	isLoading: true,
 	profile: null,
 	error: null,
-	applyTheme: () => {},
+	applyTheme: () => { },
 });
 
 export const useProfile = () => useContext(ProfileContext);
@@ -46,11 +46,12 @@ export const useProfile = () => useContext(ProfileContext);
 // Componente Provider
 export function ProfileProvider({ children }: { children: ReactNode }) {
 	const [_isInitialized, setIsInitialized] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+
+	// Hook para obtener el perfil activo desde la API
+	const { data: activeProfile, isLoading: isLoadingAPI, error: errorAPI } = useActiveProfile();
 
 	// Acceder al store de Zustand
-	const { activeProfile, isLoadingActive, activeProfileError, fetchActiveProfile, updateTheme } = useProfileStore();
+	const { activeProfile: storeProfile, isLoadingActive, activeProfileError, fetchActiveProfile, updateTheme } = useProfileStore();
 
 	// Calcular si está en modo oscuro usando el selector
 	const isDarkMode = useProfileStore(selectIsDarkMode);
@@ -87,35 +88,37 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		const init = async () => {
 			try {
-				// Asegurar que existe un perfil por defecto
-				// Simplemente intentamos obtener el perfil activo, que creará uno por defecto si no existe
-				await getActiveProfile();
-
-				// Cargar el perfil activo en el store
-				await fetchActiveProfile();
+				// Si tenemos datos del API, actualizar el store
+				if (activeProfile) {
+					// Usar el perfil obtenido desde la API
+					// El store puede mantener su propio estado para mutaciones locales
+					await fetchActiveProfile();
+				}
 
 				setIsInitialized(true);
 			} catch (error) {
 				console.error('Error inicializando perfil:', error);
-				setError('Error inicializando perfil');
-			} finally {
-				setIsLoading(false);
 			}
 		};
 
-		init();
-	}, [fetchActiveProfile]);
-
-	// Aplicar tema cuando cambie el perfil activo
-	useEffect(() => {
-		if (activeProfile?.theme) {
-			applyTheme(activeProfile.theme);
+		// Solo inicializar si no estamos cargando desde la API
+		if (!isLoadingAPI) {
+			init();
 		}
-	}, [activeProfile?.theme, applyTheme]);
+	}, [activeProfile, isLoadingAPI, fetchActiveProfile]);
+
+	// Aplicar tema cuando cambie el perfil activo (priorizar API sobre store)
+	useEffect(() => {
+		const currentProfile = activeProfile || storeProfile;
+		if (currentProfile?.theme) {
+			applyTheme(currentProfile.theme);
+		}
+	}, [activeProfile?.theme, storeProfile?.theme, applyTheme]);
 
 	// Escuchar cambios en la preferencia del sistema cuando el tema es SYSTEM
 	useEffect(() => {
-		if (!activeProfile || activeProfile.theme !== ThemeMode.SYSTEM) return;
+		const currentProfile = activeProfile || storeProfile;
+		if (!currentProfile || currentProfile.theme !== ThemeMode.SYSTEM) return;
 
 		// Función para aplicar tema según cambios en preferencia del sistema
 		const handleSystemThemeChange = (e: MediaQueryListEvent) => {
@@ -135,14 +138,14 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 		return () => {
 			mediaQuery.removeEventListener('change', handleSystemThemeChange);
 		};
-	}, [activeProfile]);
+	}, [activeProfile, storeProfile]);
 
-	// Valor del contexto
+	// Valor del contexto - priorizar datos de API sobre store
 	const contextValue: ProfileContextValue = {
 		isDarkMode,
-		isLoading: isLoading || isLoadingActive,
-		profile: activeProfile,
-		error: error || activeProfileError,
+		isLoading: isLoadingAPI || isLoadingActive,
+		profile: activeProfile || storeProfile,
+		error: errorAPI?.message || activeProfileError,
 		applyTheme,
 	};
 

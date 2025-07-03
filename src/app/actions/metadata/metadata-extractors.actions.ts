@@ -1,11 +1,11 @@
 'use server';
 
-import { CacheManager } from '@/lib/database/cache';
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { MediaMetadata } from '@/types/metadata';
 import { type Stats } from 'fs';
 import * as fs from 'fs/promises';
 import sharp from 'sharp';
+import { CacheManager } from '@/lib/database/cache';
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { MediaMetadata } from '@/types/metadata';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import { getAIGenerationInfo, parseExifData } from './metadata-parsers.actions';
 import { METADATA_RETRY_CONFIG, type MetadataOptions } from './metadata-types.actions';

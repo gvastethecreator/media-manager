@@ -1,3 +1,6 @@
+import { Album as AlbumIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -5,9 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import type { AlbumWithStats } from '@/types/entities/album';
-import { Album as AlbumIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AlbumsView');

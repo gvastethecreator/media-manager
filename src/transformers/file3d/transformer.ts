@@ -5,8 +5,8 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { File3DBase, File3DWithStats } from '@/types/entities/file3d';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import type { File3DBase, File3DWithStats } from '@/types/entities/file3d';
 
 const logger = serverLogger.withContext('File3DTransformer');
 

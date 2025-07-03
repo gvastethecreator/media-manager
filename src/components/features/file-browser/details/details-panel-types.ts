@@ -5,9 +5,9 @@
  * utilizando el tipo unificado `FileItem`.
  */
 
+import type * as React from 'react';
 import type { FileItem } from '@/types/files';
 import type { MediaMetadata } from '@/types/metadata';
-import type * as React from 'react';
 
 /**
  * Props para el componente InfoItem que muestra una línea de información.

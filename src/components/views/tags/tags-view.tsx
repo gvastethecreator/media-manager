@@ -1,3 +1,6 @@
+import { Tag } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback } from 'react';
 import { TagCard, type TagWithStats } from '@/components/cards/tag-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -6,9 +9,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTags } from '@/lib/api/tags';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useTagStore } from '@/store/entities/tag';
-import { Tag } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('TagsView');

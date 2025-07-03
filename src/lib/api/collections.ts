@@ -1,6 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ImageWithStats } from '@/types/entities/image';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
 
 export interface CollectionFilters {

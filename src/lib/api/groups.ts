@@ -1,6 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { GroupWithStats } from '@/types/entities/group';
 import type { ImageWithStats } from '@/types/entities/image';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
 
 export interface GroupFilters {

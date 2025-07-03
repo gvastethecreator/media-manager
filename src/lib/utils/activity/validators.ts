@@ -3,8 +3,8 @@
  * @module utils/activity/validators
  */
 
-import { ActivityType } from '@/types/entities/activity';
 import { z } from 'zod';
+import { ActivityType } from '@/types/entities/activity';
 
 /**
  * Determina si un tipo de actividad es válido

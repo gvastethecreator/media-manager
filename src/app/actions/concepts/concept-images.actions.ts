@@ -3,9 +3,9 @@
 import { getPrismaClient } from '@/lib/database/db';
 import { createEntityErrorObject, EntityErrorCode, handlePrismaError, handlePrismaNotFoundError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { fromPrismaConcept } from '@/transformers/concept';
 import type { ConceptComplete } from '@/types/entities/concept';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger dedicado
 const conceptImagesLogger = serverLogger.withContext('ConceptImagesActions');

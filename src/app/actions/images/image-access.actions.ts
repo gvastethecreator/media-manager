@@ -2,9 +2,9 @@
 
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createEntityNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
 import { imageService } from '@/services/image';
 import { ThumbnailQuality } from '@/types/thumbnails';
-import { createEntityNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'ImageAccess';
 const _imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);

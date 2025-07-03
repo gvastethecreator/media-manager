@@ -2,8 +2,8 @@
 
 import { existsSync } from 'fs';
 import sharp from 'sharp';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/database/prisma';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, createFileNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
 import type { ImageProcessingOptions } from './image-types.actions';
 

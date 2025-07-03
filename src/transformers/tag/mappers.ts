@@ -4,8 +4,8 @@
  * @description Contiene funciones para transformar datos de la entidad Tag.
  */
 
-import { PrismaTagWithCounts, TagStatistics, TagWithStats } from '@/types/entities/tag';
 import { calculateCompleteness } from '@/lib/utils/transformers';
+import { PrismaTagWithCounts, TagStatistics, TagWithStats } from '@/types/entities/tag';
 
 /**
  * Convierte un objeto Tag de Prisma (con conteos) a un objeto TagWithStats.

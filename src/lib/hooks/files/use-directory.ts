@@ -1,6 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import type { DirectoryReadResult } from '@/types/entities/file';
-import { useQuery } from '@tanstack/react-query';
 
 /**
  * Hook React Query para obtener el contenido de un directorio desde el backend.

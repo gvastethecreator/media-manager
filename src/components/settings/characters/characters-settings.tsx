@@ -1,3 +1,5 @@
+import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +13,6 @@ import { useCharacters, useDeleteCharacter } from '@/lib/api/characters';
 import toastService from '@/services/toast';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
-import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
-import { useCallback, useState } from 'react';
 import { CreateCharacterForm } from './create-character-form';
 
 // Tipos seguros para el manejo de eventos y datos de preview

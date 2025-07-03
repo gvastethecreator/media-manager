@@ -14,12 +14,12 @@ export type { FolderFromPrisma } from './transformer';
 // Exportar funciones legacy para compatibilidad
 export {
 	buildFolderTree,
-	folderWithCountsPayload,
 	foldersToRecord,
+	folderWithCountsPayload,
 	fromPrismaFolder,
-	fromPrismaFolderWithCounts,
 	fromPrismaFolders,
 	fromPrismaFoldersWithCounts,
+	fromPrismaFolderWithCounts,
 	getAllFolders,
 	getFolderById,
 	transformFolderToExtended,

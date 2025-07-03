@@ -3,6 +3,7 @@
  * @module store/entities/wildcard/slices/core
  */
 
+import type { StateCreator } from 'zustand';
 import {
 	createWildcard as createWildcardAction,
 	deleteWildcard as deleteWildcardAction,
@@ -12,10 +13,9 @@ import {
 	updateWildcard as updateWildcardAction,
 } from '@/app/actions/wildcards';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { arrayToRecord } from '@/lib/utils/array.utils';
 import { toastService } from '@/services/toast';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
-import { arrayToRecord } from '@/lib/utils/array.utils';
-import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
 const wildcardLogger = clientLogger.withContext('WildcardStore');

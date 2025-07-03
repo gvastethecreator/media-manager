@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import { z } from 'zod';
+import { cn } from '@/lib/utils';
 
 // Definir tipos locales ya que no están exportados
 interface GroupFilter {

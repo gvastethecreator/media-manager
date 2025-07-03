@@ -3,6 +3,7 @@
  * @module hooks/use-settings
  */
 
+import { useEffect } from 'react';
 import {
 	selectActiveProfileId,
 	selectAdvanced,
@@ -18,7 +19,6 @@ import {
 	selectTheme,
 	useSettingsStore,
 } from '@/store/settings.store';
-import { useEffect } from 'react';
 
 /**
  * Hook personalizado que proporciona acceso a la configuración global

@@ -3,11 +3,12 @@
  * @module store/entities/document/slices/core
  * @description Gestiona el estado y las acciones CRUD para la entidad Document.
  */
+
+import { produce } from 'immer';
+import type { StateCreator } from 'zustand';
 import * as actions from '@/app/actions/document/document.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
-import { produce } from 'immer';
-import type { StateCreator } from 'zustand';
 import type { DocumentCoreActions, DocumentCoreState, DocumentStore } from '../types';
 
 const logger = clientLogger.withContext('DocumentCoreSlice');

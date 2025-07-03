@@ -1,8 +1,8 @@
 'use client';
 
-import { queryClient } from '@/lib/web/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { lazy, type ReactNode, Suspense } from 'react';
+import { queryClient } from '@/lib/web/react-query';
 
 // Carga perezosa de Devtools solo en desarrollo y lado cliente
 const ReactQueryDevtools =

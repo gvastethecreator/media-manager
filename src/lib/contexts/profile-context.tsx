@@ -1,7 +1,7 @@
 'use client';
 
-import type { User } from '@/lib/types';
 import { createContext, type ReactNode, useContext, useState } from 'react';
+import type { User } from '@/lib/types';
 
 type ViewType = 'files' | 'collections' | 'folders' | 'tags';
 

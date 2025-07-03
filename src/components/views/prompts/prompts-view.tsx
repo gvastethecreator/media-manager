@@ -1,3 +1,7 @@
+import { AlertCircle, MessageSquare } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -8,10 +12,6 @@ import { usePrompts } from '@/lib/api/prompts';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
-import { AlertCircle, MessageSquare } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('PromptsView');

@@ -1,105 +1,128 @@
-'use server';
+/**
+ * @file Actions para la entidad WorldItem - Migradas a API calls
+ * @module app/actions/world-items/world-item.actions
+ * @description Funciones que llaman a las rutas API de world items
+ * @updated 2025-01-27
+ */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import {
-	addImageToWorldItem as addImageToWorldItemService,
-	createWorldItem as createWorldItemService,
-	deleteWorldItem as deleteWorldItemService,
-	getWorldItemImages as getWorldItemImagesService,
-	getWorldItems as getWorldItemsService,
-	getWorldItemWithStatsById as getWorldItemWithStatsByIdService,
-	removeImageFromWorldItem as removeImageFromWorldItemService,
-	updateWorldItem as updateWorldItemService,
-} from '@/services/world-item';
-import type { ImageComplete } from '@/types/entities/image';
-import type {
-	WorldItemComplete,
-	WorldItemCreateInput,
-	WorldItemSearchOptions,
-	WorldItemUpdateInput,
-	WorldItemWithStats,
-} from '@/types/entities/world-item';
-import { revalidatePath } from '@/lib/server/revalidate';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { WorldItemCreateInput, WorldItemUpdateInput, WorldItemWithStats } from '@/types/entities/world-item';
 
-const worldItemLogger = serverLogger.withContext('WorldItemActions');
+const logger = clientLogger.withContext('WorldItemActions');
+const API_BASE = '/api/world-items';
 
-const REVALIDATE_PATHS = ['/settings/world-items', '/library/world-items'] as const;
+/**
+ * Obtiene todos los world items con estadísticas.
+ */
+export async function getWorldItems(): Promise<WorldItemWithStats[]> {
+	try {
+		logger.info('🌍 Obteniendo world items via API');
 
-const revalidateAllPaths = async (id?: string) => {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
+		const response = await fetch(API_BASE);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.data || [];
+	} catch (error) {
+		logger.error('❌ Error en API getWorldItems', { error });
+		throw error;
 	}
-	if (id) {
-		revalidatePath(`/library/world-items/${id}`);
+}
+
+/**
+ * Obtiene un único world item por su ID.
+ */
+export async function getWorldItem(id: string): Promise<WorldItemWithStats | null> {
+	try {
+		logger.info(`🔍 Obteniendo world item ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error(`❌ Error en API getWorldItem: ${id}`, { error });
+		throw error;
 	}
-	worldItemLogger.info('🔄 Rutas revalidadas');
-};
-
-/**
- * Obtiene todos los world items con estadísticas
- */
-export async function getWorldItems(options: WorldItemSearchOptions = {}): Promise<WorldItemWithStats[]> {
-	const worldItems = await getWorldItemsService(options);
-	return worldItems;
 }
 
 /**
- * Obtiene un world item específico por ID con estadísticas
+ * Crea un nuevo world item.
  */
-export async function getWorldItemById(id: string): Promise<WorldItemWithStats | null> {
-	const worldItem = await getWorldItemWithStatsByIdService(id);
-	return worldItem;
+export async function createWorldItem(data: WorldItemCreateInput): Promise<WorldItemWithStats> {
+	try {
+		logger.info('📝 Creando world item via API', { name: data.name });
+
+		const response = await fetch(API_BASE, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error('❌ Error en API createWorldItem', { error, data });
+		throw error;
+	}
 }
 
 /**
- * Crea un nuevo world item
+ * Actualiza un world item existente.
  */
-export async function createWorldItem(input: WorldItemCreateInput): Promise<WorldItemComplete> {
-	const worldItem = await createWorldItemService(input);
-	await revalidateAllPaths();
-	return worldItem;
+export async function updateWorldItem(id: string, data: WorldItemUpdateInput): Promise<WorldItemWithStats> {
+	try {
+		logger.info(`🔄 Actualizando world item ${id} via API`);
+
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		logger.error(`❌ Error en API updateWorldItem: ${id}`, { error, data });
+		throw error;
+	}
 }
 
 /**
- * Actualiza un world item existente
+ * Elimina un world item.
  */
-export async function updateWorldItem(id: string, input: WorldItemUpdateInput): Promise<WorldItemComplete> {
-	const worldItem = await updateWorldItemService(id, input);
-	await revalidateAllPaths(id);
-	return worldItem;
-}
+export async function deleteWorldItem(id: string): Promise<void> {
+	try {
+		logger.warn(`🗑️ Eliminando world item ${id} via API`);
 
-/**
- * Elimina un world item
- */
-export async function deleteWorldItem(id: string): Promise<{ success: boolean }> {
-	const result = await deleteWorldItemService(id);
-	await revalidateAllPaths();
-	return result;
-}
+		const response = await fetch(`${API_BASE}/${id}`, {
+			method: 'DELETE',
+		});
 
-/**
- * Obtiene las imágenes de un world item
- */
-export async function getWorldItemImages(worldItemId: string): Promise<{ images: ImageComplete[] }> {
-	const result = await getWorldItemImagesService(worldItemId);
-	return result;
-}
-
-/**
- * Agrega una imagen a un world item
- */
-export async function addImageToWorldItem(worldItemId: string, imageId: string): Promise<{ success: boolean }> {
-	const result = await addImageToWorldItemService(worldItemId, imageId);
-	await revalidateAllPaths(worldItemId);
-	return result;
-}
-
-/**
- * Elimina una imagen de un world item
- */
-export async function removeImageFromWorldItem(worldItemId: string, imageId: string): Promise<{ success: boolean }> {
-	const result = await removeImageFromWorldItemService(worldItemId, imageId);
-	await revalidateAllPaths(worldItemId);
-	return result;
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+	} catch (error) {
+		logger.error(`❌ Error en API deleteWorldItem: ${id}`, { error });
+		throw error;
+	}
 }

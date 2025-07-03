@@ -3,13 +3,13 @@
  * @module components/views/folders/components/image-grid
  */
 
+import { Image as ImageIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import type { ImageWithStats } from '@/types/entities/image';
-import { Image as ImageIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useMemo } from 'react';
 
 const logger = clientLogger.withContext('ImageGrid');
 

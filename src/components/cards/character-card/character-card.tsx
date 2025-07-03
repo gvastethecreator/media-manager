@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
-import type { CharacterWithStats } from '@/types/entities/character';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { CharacterWithStats } from '@/types/entities/character';
 import { CardContainer } from '../card-container';
 import { adaptCharacterWithStats, isCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';

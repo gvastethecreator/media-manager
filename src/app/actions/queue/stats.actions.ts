@@ -6,6 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { unstable_cache } from '@/lib/server/revalidate';
 import {
 	countCompletedJobs,
 	countFailedJobs,
@@ -16,7 +17,6 @@ import {
 } from '@/services/queue-job/queue-job.service';
 import type { QueueStats } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job';
-import { unstable_cache } from '@/lib/server/revalidate';
 
 // Logger específico para acciones de estadísticas
 const logger = serverLogger.withContext('QueueActions:stats');

@@ -1,3 +1,6 @@
+import { Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { WildcardCard } from '@/components/cards/wildcard-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -8,9 +11,6 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 // El store se expone desde el barrel de la entidad
 import { useWildcardStore } from '@/store/entities/wildcard';
-import { Sparkles } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('WildcardsView');

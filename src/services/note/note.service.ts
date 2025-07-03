@@ -1,10 +1,10 @@
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromPrismaNote } from '@/transformers/note';
 import { mapCreateNoteDataToPrisma, mapUpdateNoteDataToPrisma } from '@/transformers/note/mappers';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import type { Prisma } from '@prisma/client';
 
 const noteLogger = serverLogger.withContext('NoteService');
 

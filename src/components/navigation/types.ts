@@ -1,5 +1,5 @@
-import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 import type { LucideIcon } from 'lucide-react';
+import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 
 /**
  * Tipo para las categorías de navegación disponibles

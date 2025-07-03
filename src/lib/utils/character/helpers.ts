@@ -10,11 +10,11 @@ import {
 	CharacterBase,
 	CharacterCategory,
 	CharacterClass,
-	CharacterWithStats,
 	CharacterRace,
 	CharacterRelationship,
 	CharacterRelationshipType,
 	CharacterSortOption,
+	CharacterWithStats,
 } from '@/types/entities/character';
 
 /**

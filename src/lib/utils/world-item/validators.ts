@@ -3,8 +3,8 @@
  * @module utils/world-item/validators
  */
 
-import { RarityLevel, WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import { z } from 'zod';
+import { RarityLevel, WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 
 // Esquema para validar propiedades de objeto
 export const worldItemPropertySchema = z.object({

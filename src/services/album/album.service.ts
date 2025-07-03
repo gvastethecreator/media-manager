@@ -5,12 +5,12 @@
  * @updated 2025-01-27
  */
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
-import { Prisma } from '@prisma/client';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 const logger = serverLogger.withContext('AlbumService');
 
@@ -280,9 +280,9 @@ export async function addImageToAlbum(albumId: string, imageId: string): Promise
 		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${albumId}`);
 
-		logger.info(`✅ Imagen agregada exitosamente al álbum`);
+		logger.info('✅ Imagen agregada exitosamente al álbum');
 	} catch (error) {
-		logger.error(`❌ Error al agregar imagen al álbum`, { error, albumId, imageId });
+		logger.error('❌ Error al agregar imagen al álbum', { error, albumId, imageId });
 		throw new Error(
 			`No se pudo agregar la imagen al álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
 		);
@@ -309,9 +309,9 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${albumId}`);
 
-		logger.info(`✅ Imagen removida exitosamente del álbum`);
+		logger.info('✅ Imagen removida exitosamente del álbum');
 	} catch (error) {
-		logger.error(`❌ Error al remover imagen del álbum`, { error, albumId, imageId });
+		logger.error('❌ Error al remover imagen del álbum', { error, albumId, imageId });
 		throw new Error(
 			`No se pudo remover la imagen del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
 		);

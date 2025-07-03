@@ -21,8 +21,8 @@
  * ✅ Selección multi-item eficiente
  */
 
-import { getFolderImages } from '@/app/actions/folders';
 import { create } from 'zustand';
+import { getFolderImages } from '@/app/actions/folders';
 // 🚀 Importaciones actualizadas - MIGRADAS A EntityWithStats
 import type { ViewMode } from '@/components/navigation/types';
 import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cache';

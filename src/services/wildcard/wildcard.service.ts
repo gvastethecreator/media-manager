@@ -5,9 +5,11 @@
  * @updated 2025-01-27
  */
 
+import { Prisma } from '@prisma/client';
 import { getPrismaClient } from '@/lib/database/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import {
 	mapCreateWildcardDataToPrisma,
@@ -15,8 +17,6 @@ import {
 	toWildcardWithStats,
 } from '@/transformers/wildcard';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
-import { Prisma } from '@prisma/client';
-import { revalidatePath } from '@/lib/server/revalidate';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('WildcardService');

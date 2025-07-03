@@ -4,6 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import { NoteSchema } from '@/types/entities/note/schema';
 import type {
 	NoteBase,
@@ -12,7 +13,6 @@ import type {
 	NoteTransformerOptions,
 	NoteUpdateInput,
 } from '@/types/entities/note/types';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 
 // Logger específico para el transformer de Note
 const logger = serverLogger.withContext('NoteSerializer');

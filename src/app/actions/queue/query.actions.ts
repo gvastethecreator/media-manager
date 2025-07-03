@@ -6,6 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { unstable_cache } from '@/lib/server/revalidate';
 import {
 	findQueueJobs,
 	findQueueJobsByStatus,
@@ -19,7 +20,6 @@ import {
 	type QueueJobPaginationOptions,
 	QueueJobStatus,
 } from '@/types/entities/queue-job';
-import { unstable_cache } from '@/lib/server/revalidate';
 
 // Logger específico para acciones de consulta
 const logger = serverLogger.withContext('QueueActions:query');

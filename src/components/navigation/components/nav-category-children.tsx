@@ -1,11 +1,11 @@
+import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
+import type React from 'react';
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import type { ViewMode } from '@/components/navigation/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
-import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
-import type React from 'react';
-import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 
 export type CategoryChild = {
 	id: string;

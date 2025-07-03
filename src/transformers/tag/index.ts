@@ -8,4 +8,4 @@
  */
 
 export { toTagWithStats } from './mappers';
-export { fromPrismaTag, transformTag, type TagComplete } from './transformer';
+export { fromPrismaTag, type TagComplete, transformTag } from './transformer';
