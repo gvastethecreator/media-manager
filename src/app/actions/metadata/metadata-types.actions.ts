@@ -1,6 +1,64 @@
-import type { Image } from '@prisma/client';
-import type sharp from 'sharp';
-import type { AIMetadata, FileMetadata } from '@/types/metadata';
+/**
+ * @file Acciones para tipos de metadatos
+ * @module app/actions/metadata/metadata-types
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ */
+
+'use server';
+
+// Tipo local para Image (equivalente a Drizzle)
+type DrizzleImage = {
+	id: string;
+	name: string | null;
+	path: string;
+	size: number;
+	width: number | null;
+	height: number | null;
+	metadata: string | null;
+	thumbnail: Buffer | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
+	isFavorite: boolean;
+	folderId: string | null;
+	addedAt: Date;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+import { serverLogger } from '@/lib/logger/server-logger';
+
+const metadataLogger = serverLogger.withContext('MetadataTypesActions');
+
+/**
+ * Obtiene los tipos de metadatos disponibles para una imagen
+ */
+export async function getAvailableMetadataTypes(imageId: string): Promise<string[]> {
+	try {
+		metadataLogger.info('Obteniendo tipos de metadatos disponibles', { imageId });
+		// TODO: Implementar con Drizzle cuando esté disponible
+		return ['exif', 'iptc', 'xmp'];
+	} catch (error) {
+		metadataLogger.error('Error al obtener tipos de metadatos', { error, imageId });
+		throw new Error('No se pudieron obtener los tipos de metadatos');
+	}
+}
+
+/**
+ * Valida si un tipo de metadato es soportado
+ */
+export async function validateMetadataType(type: string): Promise<boolean> {
+	try {
+		const supportedTypes = ['exif', 'iptc', 'xmp', 'custom'];
+		return supportedTypes.includes(type.toLowerCase());
+	} catch (error) {
+		metadataLogger.error('Error al validar tipo de metadato', { error, type });
+		return false;
+	}
+}
 
 // Configuración de retry
 export interface RetryConfig {

@@ -1,6 +1,8 @@
 import { existsSync } from 'fs';
 import sharp from 'sharp';
-import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { images } from '@/lib/drizzle/schema';
+import { eq } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, createFileNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
 
@@ -20,9 +22,9 @@ export interface ImageProcessingOptions {
  */
 export async function processImage(imageId: string, options: ImageProcessingOptions = {}): Promise<Buffer> {
 	try {
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
-			select: {
+		const image = await db.query.images.findFirst({
+			where: eq(images.id, imageId),
+			columns: {
 				path: true,
 				width: true,
 				height: true,

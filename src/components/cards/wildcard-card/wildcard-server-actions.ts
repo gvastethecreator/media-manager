@@ -1,6 +1,8 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { wildcards, images } from '@/lib/drizzle/schema';
+import { eq, and, inArray, like, or, desc, asc } from 'drizzle-orm';
 
 export interface WildcardCardData {
 	id: string;
@@ -29,20 +31,12 @@ export interface WildcardCardData {
  * Obtiene los datos de un comodín para mostrar en una tarjeta
  */
 export async function getWildcardCardData(wildcardId: string): Promise<WildcardCardData> {
-	const prisma = await getPrismaClient();
-
-	const wildcard = await prisma.wildcard.findUnique({
-		where: {
-			id: wildcardId,
-		},
-		include: {
-			_count: {
-				select: {
-					images: true,
-					videos: true,
-					childWildcards: true,
-				},
-			},
+	const wildcard = await db.query.wildcards.findFirst({
+		where: eq(wildcards.id, wildcardId),
+		with: {
+			images: { columns: { id: true } },
+			videos: { columns: { id: true } },
+			childWildcards: { columns: { id: true } },
 		},
 	});
 
@@ -51,24 +45,16 @@ export async function getWildcardCardData(wildcardId: string): Promise<WildcardC
 	}
 
 	// Obtener imágenes recientes relacionadas con este comodín
-	const recentImages = await prisma.image.findMany({
-		where: {
-			wildcards: {
-				some: {
-					id: wildcardId,
-				},
-			},
-		},
-		select: {
+	const recentImages = await db.query.images.findMany({
+		where: inArray(images.id, wildcard.images.map((img) => img.id)),
+		columns: {
 			id: true,
 			path: true,
 			thumbnailWidth: true,
 			thumbnailHeight: true,
 		},
-		orderBy: {
-			updatedAt: 'desc',
-		},
-		take: 4,
+		orderBy: images.updatedAt,
+		limit: 4,
 	});
 
 	const recentImagePaths = recentImages.map((img: { id: string }) => {
@@ -89,6 +75,11 @@ export async function getWildcardCardData(wildcardId: string): Promise<WildcardC
 
 	return {
 		...wildcard,
+		_count: {
+			images: wildcard.images.length,
+			videos: wildcard.videos.length,
+			childWildcards: wildcard.childWildcards.length,
+		},
 		recentImages: recentImagePaths,
 		children,
 	};
@@ -107,32 +98,42 @@ export async function getWildcardsForCards(options: {
 }) {
 	const { limit = 20, category, parentId, searchTerm, orderBy = 'updatedAt', orderDir = 'desc' } = options;
 
-	const prisma = await getPrismaClient();
+	const whereConditions = [];
+	if (category) {
+		whereConditions.push(eq(wildcards.category, category));
+	}
+	if (parentId !== undefined) {
+		whereConditions.push(eq(wildcards.parentId, parentId));
+	}
+	if (searchTerm) {
+		whereConditions.push(
+			or(
+				like(wildcards.name, `%${searchTerm}%`),
+				like(wildcards.description, `%${searchTerm}%`),
+			),
+		);
+	}
 
-	const wildcards = await prisma.wildcard.findMany({
-		where: {
-			...(category ? { category } : {}),
-			...(parentId !== undefined ? { parentId } : {}),
-			...(searchTerm
-				? {
-						OR: [{ name: { contains: searchTerm } }, { description: { contains: searchTerm } }],
-					}
-				: {}),
+	const orderByColumn = wildcards[orderBy];
+	const orderByClause = orderDir === 'desc' ? desc(orderByColumn) : asc(orderByColumn);
+
+	const wildcardsData = await db.query.wildcards.findMany({
+		where: and(...whereConditions),
+		with: {
+			images: { columns: { id: true } },
+			videos: { columns: { id: true } },
+			childWildcards: { columns: { id: true } },
 		},
-		include: {
-			_count: {
-				select: {
-					images: true,
-					videos: true,
-					childWildcards: true,
-				},
-			},
-		},
-		orderBy: {
-			[orderBy]: orderDir,
-		},
-		take: limit,
+		orderBy: orderByClause,
+		limit: limit,
 	});
 
-	return wildcards;
+	return wildcardsData.map((wildcard) => ({
+		...wildcard,
+		_count: {
+			images: wildcard.images.length,
+			videos: wildcard.videos.length,
+			childWildcards: wildcard.childWildcards.length,
+		},
+	}));
 }

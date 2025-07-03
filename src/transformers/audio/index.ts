@@ -5,4 +5,4 @@
 
 export { mapAudioFromUI, mapAudioToUI } from './mappers';
 export { deserializeAudio, serializeAudio } from './serializers';
-export { fromPrismaAudio, fromPrismaAudios } from './transformer';
+export { fromDrizzleAudio, fromDrizzleAudios } from './transformer';

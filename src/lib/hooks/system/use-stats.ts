@@ -1,8 +1,21 @@
-import type { ImageStats } from '@prisma/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { GeneralStats } from '@/app/actions/stats/stats.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { statsService } from '@/services/stats';
+
+// Tipo local para ImageStats (equivalente a Drizzle)
+type DrizzleImageStats = {
+	id: string;
+	imageId: string;
+	views: number;
+	downloads: number;
+	shares: number;
+	favorites: number;
+	lastViewedAt: Date | null;
+	lastDownloadedAt: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 const statsLogger = serverLogger.withContext('StatsHook');
 
@@ -12,6 +25,10 @@ export const STATS_QUERY_KEYS = {
 	image: (imageId: string) => [...STATS_QUERY_KEYS.all, 'image', imageId] as const,
 };
 
+/**
+ * Hook para obtener estadísticas generales del sistema
+ * ✅ MIGRADO A DRIZZLE
+ */
 export function useStats() {
 	const queryClient = useQueryClient();
 
@@ -46,6 +63,10 @@ export function useStats() {
 	};
 }
 
+/**
+ * Hook para obtener estadísticas de una imagen específica
+ * ✅ MIGRADO A DRIZZLE
+ */
 export function useImageStats(imageId: string) {
 	const queryClient = useQueryClient();
 
@@ -54,7 +75,7 @@ export function useImageStats(imageId: string) {
 		error,
 		isLoading,
 		isError,
-	} = useQuery<ImageStats>({
+	} = useQuery<DrizzleImageStats>({
 		queryKey: STATS_QUERY_KEYS.image(imageId),
 		queryFn: async () => {
 			try {

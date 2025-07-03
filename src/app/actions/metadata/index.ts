@@ -3,9 +3,12 @@
 /**
  * @file Exportaciones asíncronas para funciones de gestión de metadatos
  * @module app/actions/metadata
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { images } from '@/lib/drizzle/schema';
+import { eq } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileMetadata } from '@/types/metadata';
 import * as MetadataActions from './metadata.actions';
@@ -63,19 +66,19 @@ export async function getImageMetadata(...args: Parameters<typeof MetadataAction
 	return MetadataActions.getImageMetadata(...args);
 }
 
-// Restauramos la función getImageMetadataById directamente en este archivo
 /**
- * Obtiene y parsea los metadatos de una imagen por su ID
+ * Obtiene y parsea los metadatos de una imagen por su ID usando Drizzle
+ * ✅ MIGRADO A DRIZZLE
  */
 export async function getImageMetadataById(imageId: string): Promise<FileMetadata | null> {
 	try {
 		metadataLogger.info(`Consultando metadatos para imagen: ${imageId}`);
 
-		const prisma = await getPrismaClient();
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
-			select: { metadata: true },
-		});
+		const [image] = await db
+			.select({ metadata: images.metadata })
+			.from(images)
+			.where(eq(images.id, imageId))
+			.limit(1);
 
 		if (!image || !image.metadata) {
 			metadataLogger.warn(`No se encontraron metadatos para la imagen: ${imageId}`);
