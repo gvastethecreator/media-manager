@@ -1,17 +1,16 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
 import { getAlbums } from '@/app/actions/albums/album.actions';
-import { searchCharacters } from '@/app/actions/characters/character.actions';
 import { getCollections } from '@/app/actions/collections/collection.actions';
-import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { getGroups } from '@/app/actions/groups/group.actions';
 import { getNotes } from '@/app/actions/notes/note.actions';
 import { getPlaces } from '@/app/actions/places/place.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
-import { getProperties } from '@/app/actions/properties/property.actions';
-import { getTagsAction } from '@/app/actions/tags';
-import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { searchCharacters } from '@/services/character/character.service';
+import { getConcepts } from '@/services/concept/concept.service';
+import { getProperties } from '@/services/property/property.service';
+import { getTagsAction } from '@/services/tag/tag.service';
+import { getWildcards } from '@/services/wildcard/wildcard.service';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -24,6 +23,7 @@ import { usePropertyStore } from '@/store/entities/property';
 import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { EntityLoadingState, LoadingStates } from '../types';
 
 // Logger para el componente
