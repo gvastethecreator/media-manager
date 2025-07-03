@@ -1,6 +1,6 @@
 /**
  * @file Utilidades para manejo de errores de configuración del sistema
- * @module app/actions/system/settings.errors
+ * @module lib/errors/settings
  */
 
 /**

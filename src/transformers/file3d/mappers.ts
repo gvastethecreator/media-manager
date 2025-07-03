@@ -50,7 +50,7 @@ export function toDrizzleFile3D(file: File3D): DrizzleFile3D {
 /**
  * @deprecated Usar fromDrizzleFile3D
  */
-export const fromPrismaFile3D = fromDrizzleFile3D;
+export const fromDrizzleFile3D_legacy = fromDrizzleFile3D;
 
 /**
  * @deprecated Usar toDrizzleFile3D

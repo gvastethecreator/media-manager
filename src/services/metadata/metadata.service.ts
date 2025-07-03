@@ -2,6 +2,7 @@
  * @file Servicio para operaciones con metadatos
  * @module services/metadata/metadata.service
  * ✅ MIGRADO A DRIZZLE - 2025-07-03
+ * ✅ INCLUYE EXTRACCIÓN DE METADATOS - Migrado desde server actions
  */
 
 // Drizzle imports
@@ -17,6 +18,32 @@ import {
 } from '@/transformers/metadata';
 import { MetadataExtended } from '@/types/entities/metadata/extended';
 import { MetadataBase } from '@/types/entities/metadata/types';
+
+// Imports para extracción de metadatos (migrados desde server actions)
+import { promises as fs } from 'fs';
+import sharp from 'sharp';
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { MediaMetadata } from '@/types/metadata.types';
+
+const metadataLogger = serverLogger.withContext('MetadataService');
+
+// Cache simple en memoria para metadatos (migrado desde server actions)
+const metadataCache = new Map<string, MediaMetadata>();
+
+export type MetadataOptions = {
+	skipExif?: boolean;
+	skipIptc?: boolean;
+	skipXmp?: boolean;
+	retry?: {
+		maxRetries: number;
+		delay: number;
+	};
+};
+
+const DEFAULT_RETRY_CONFIG = {
+	maxRetries: 3,
+	delay: 1000,
+};
 
 /**
  * Obtiene todos los metadatos
@@ -249,5 +276,246 @@ export async function deleteMetadataByImageId(imageId: string): Promise<boolean>
 	} catch (error) {
 		console.error(`Error al eliminar metadatos para imagen ${imageId}:`, error);
 		return false;
+	}
+}
+
+// ==========================================
+// FUNCIONES DE EXTRACCIÓN DE METADATOS
+// Migradas desde src/app/actions/metadata/
+// ==========================================
+
+/**
+ * Función de reintento con backoff exponencial
+ */
+async function withRetry<T>(
+	operation: () => Promise<T>,
+	config = DEFAULT_RETRY_CONFIG
+): Promise<T> {
+	let lastError: Error;
+
+	for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
+		try {
+			return await operation();
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error(String(error));
+
+			if (attempt === config.maxRetries) {
+				break;
+			}
+
+			// Backoff exponencial
+			const delay = config.delay * Math.pow(2, attempt - 1);
+			await new Promise(resolve => setTimeout(resolve, delay));
+		}
+	}
+
+	throw lastError!;
+}
+
+/**
+ * Normaliza la ruta para el cache
+ */
+function normalizePathForCache(path: string): string {
+	// Convertir separadores a formato estándar y normalizar
+	return path.replace(/\\/g, '/').toLowerCase();
+}
+
+/**
+ * Verifica si el formato de imagen es soportado
+ */
+async function isSupportedImageFormat(path: string): Promise<boolean> {
+	const supportedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.tiff', '.tif'];
+	const ext = path.toLowerCase().substring(path.lastIndexOf('.'));
+	return supportedExtensions.includes(ext);
+}
+
+/**
+ * Obtiene el formato de imagen
+ */
+async function getImageFormat(path: string): Promise<string> {
+	try {
+		const buffer = await fs.readFile(path);
+		const metadata = await sharp(buffer).metadata();
+		return metadata.format || 'unknown';
+	} catch (error) {
+		metadataLogger.warn('Error al detectar formato:', { path, error });
+		// Fallback basado en extensión
+		const ext = path.toLowerCase().substring(path.lastIndexOf('.') + 1);
+		return ext || 'unknown';
+	}
+}
+
+/**
+ * Extrae metadatos EXIF básicos
+ */
+async function parseExifData(buffer: Buffer, path: string): Promise<{ exif: Record<string, unknown> }> {
+	try {
+		const metadata = await sharp(buffer).metadata();
+		const exif: Record<string, unknown> = {};
+
+		if (metadata.exif) {
+			// Sharp proporciona algunos metadatos EXIF básicos
+			exif.orientation = metadata.orientation;
+			exif.density = metadata.density;
+		}
+
+		return { exif };
+	} catch (error) {
+		metadataLogger.warn('Error al extraer EXIF:', { path, error });
+		return { exif: {} };
+	}
+}
+
+/**
+ * Extrae información de generación por IA
+ */
+async function getAIGenerationInfo(metadata: Record<string, unknown>): Promise<any | null> {
+	// Buscar patrones comunes de metadatos de IA
+	const aiKeys = ['parameters', 'prompt', 'model', 'seed', 'steps'];
+	const aiData: Record<string, unknown> = {};
+
+	for (const [key, value] of Object.entries(metadata)) {
+		const lowerKey = key.toLowerCase();
+		if (aiKeys.some(aiKey => lowerKey.includes(aiKey))) {
+			aiData[key] = value;
+		}
+	}
+
+	return Object.keys(aiData).length > 0 ? aiData : null;
+}
+
+/**
+ * Extrae metadatos completos de un archivo de imagen
+ * ✅ MIGRADO desde src/app/actions/metadata/metadata-extractors.actions.ts
+ */
+export async function extractMetadata(path: string, options?: MetadataOptions): Promise<MediaMetadata> {
+	metadataLogger.info('Extrayendo metadatos de:', path);
+	const normalizedPath = normalizePathForCache(path);
+
+	// Verificar cache
+	const cached = metadataCache.get(normalizedPath);
+	if (cached?.width && cached.width > 0) {
+		metadataLogger.info('Metadatos obtenidos de caché:', path);
+		return cached;
+	}
+
+	// Verificar soporte del formato
+	if (!(await isSupportedImageFormat(path))) {
+		throw new Error(`Formato de archivo no soportado: ${path}`);
+	}
+
+	// Obtener estadísticas del archivo
+	const stats = await withRetry<fs.Stats>(() => fs.stat(path), options?.retry || DEFAULT_RETRY_CONFIG);
+	const buffer = await withRetry<Buffer>(() => fs.readFile(path), options?.retry || DEFAULT_RETRY_CONFIG);
+
+	// Inicializar metadatos base
+	const metadata: Partial<MediaMetadata> = {
+		totalSize: Number(stats.size),
+		itemCount: 1,
+		lastModified: stats.mtime,
+		fileSize: Number(stats.size),
+		mimeType: 'image/unknown',
+		format: 'unknown',
+	};
+
+	try {
+		// Extraer metadatos con Sharp
+		const sharpInstance = sharp(buffer);
+		const sharpMeta = await withRetry<sharp.Metadata>(
+			() => sharpInstance.metadata(),
+			options?.retry || DEFAULT_RETRY_CONFIG
+		);
+
+		// Actualizar campos relevantes
+		if (sharpMeta.width) metadata.width = sharpMeta.width;
+		if (sharpMeta.height) metadata.height = sharpMeta.height;
+		if (sharpMeta.format) {
+			metadata.format = sharpMeta.format;
+			metadata.mimeType = `image/${sharpMeta.format}`;
+		}
+		if (sharpMeta.density) metadata.density = sharpMeta.density;
+		if (sharpMeta.hasAlpha !== undefined) metadata.hasAlpha = sharpMeta.hasAlpha;
+		if (sharpMeta.orientation) metadata.orientation = sharpMeta.orientation;
+		if (sharpMeta.space) metadata.colorSpace = sharpMeta.space;
+	} catch (sharpError) {
+		metadataLogger.warn('Error al extraer metadatos con Sharp:', {
+			path,
+			error: sharpError instanceof Error ? sharpError.message : String(sharpError),
+		});
+	}
+
+	// Valores por defecto si no se pudieron obtener
+	if (!metadata.width) metadata.width = 800;
+	if (!metadata.height) metadata.height = 600;
+
+	// Extraer metadatos adicionales si no están deshabilitados
+	if (!options?.skipExif) {
+		try {
+			const exifData = await parseExifData(buffer, path);
+			metadata.exif = exifData.exif;
+		} catch (error) {
+			metadataLogger.warn('No se pudieron extraer metadatos EXIF', { path });
+		}
+	}
+
+	// Extraer metadatos de IA
+	try {
+		const aiMetadata = await getAIGenerationInfo(metadata as Record<string, unknown>);
+		if (aiMetadata) {
+			metadata.ai = aiMetadata;
+		}
+	} catch (error) {
+		metadataLogger.warn('No se pudieron extraer metadatos de IA', { path });
+	}
+
+	// Asegurar que todos los campos requeridos estén presentes
+	const finalMetadata: MediaMetadata = {
+		totalSize: metadata.totalSize!,
+		itemCount: metadata.itemCount!,
+		lastModified: metadata.lastModified!,
+		fileSize: metadata.fileSize!,
+		mimeType: metadata.mimeType!,
+		format: metadata.format!,
+		width: metadata.width,
+		height: metadata.height,
+		exif: metadata.exif,
+		iptc: metadata.iptc,
+		xmp: metadata.xmp,
+		icc: metadata.icc,
+		ai: metadata.ai,
+		gps: metadata.gps,
+		colorSpace: metadata.colorSpace,
+		colorProfile: metadata.colorProfile,
+		hasAlpha: metadata.hasAlpha,
+		orientation: metadata.orientation,
+		density: metadata.density,
+		isAnimated: metadata.isAnimated,
+		sizeInBytes: metadata.sizeInBytes,
+		dimensions: metadata.dimensions,
+		duration: metadata.duration,
+		encoding: metadata.encoding,
+		hash: metadata.hash,
+		customFields: metadata.customFields,
+	};
+
+	// Guardar en cache
+	metadataCache.set(normalizedPath, finalMetadata);
+	return finalMetadata;
+}
+
+/**
+ * Limpia el cache de metadatos
+ * ✅ MIGRADO desde src/app/actions/metadata/metadata-utils.actions.ts
+ */
+export async function clearMetadataCache(imageId?: string): Promise<void> {
+	if (imageId) {
+		// Limpiar cache específico (necesitaríamos mapear imageId a path)
+		metadataLogger.info('Limpiando cache para imagen específica:', imageId);
+		// Por ahora, limpiar todo el cache
+		metadataCache.clear();
+	} else {
+		// Limpiar todo el cache
+		metadataLogger.info('Limpiando todo el cache de metadatos');
+		metadataCache.clear();
 	}
 }

@@ -6,12 +6,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import {
-	createActivity as createActivityAction,
-	deleteActivity as deleteActivityAction,
-	getActivityById,
-	getFilteredActivities,
-} from '@/app/actions/activity';
+// Server actions eliminados - usar servicios directamente
 import { clientLogger } from '@/lib/logger/client-logger';
 import { extendActivities, extendActivity } from '@/transformers/activity';
 import type { ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { GeneralStats } from '@/app/actions/stats/stats.actions';
+import type { SystemStats } from '@/lib/api/system';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { statsService } from '@/services/stats';
 

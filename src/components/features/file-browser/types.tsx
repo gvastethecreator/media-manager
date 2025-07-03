@@ -1,4 +1,4 @@
-import type { ProcessStatus } from '../../../app/actions/folders/types';
+import type { ProcessStatus } from '@/types/folders';
 
 export type { ProcessStatus };
 
