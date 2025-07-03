@@ -1,196 +1,68 @@
-import { type ProfileBase, type ProfileExtended } from '@/types/entities/profile';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ThemeMode } from '@/types/entities/profile';
 
-// Tipos para la API
-interface CreateProfileData {
-	name: string;
-	theme?: 'light' | 'dark' | 'system';
-	language?: string;
-}
+const API_BASE = '/api/profiles';
 
-interface UpdateProfileData {
-	name?: string;
-	theme?: 'light' | 'dark' | 'system';
-	language?: string;
-}
-
-interface GetProfilesParams {
-	page?: number;
-	limit?: number;
-	search?: string;
-}
-
-interface ProfilesResponse {
-	data: ProfileBase[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		pages: number;
-	};
-	timestamp: string;
-}
-
-interface ProfileResponse {
-	data: ProfileExtended;
-	timestamp: string;
-}
-
-// API functions
-const profilesApi = {
-	async getActiveProfile(): Promise<ProfileExtended> {
-		const response = await fetch('/api/profiles/active');
-
-		if (!response.ok) {
-			throw new Error(`Error ${response.status}: ${response.statusText}`);
-		}
-
-		const result: ProfileResponse = await response.json();
-		return result.data;
-	},
-
-	async getProfiles(params: GetProfilesParams = {}): Promise<ProfilesResponse> {
-		const searchParams = new URLSearchParams();
-
-		if (params.page) searchParams.set('page', params.page.toString());
-		if (params.limit) searchParams.set('limit', params.limit.toString());
-		if (params.search) searchParams.set('search', params.search);
-
-		const response = await fetch(`/api/profiles?${searchParams.toString()}`);
-
-		if (!response.ok) {
-			throw new Error(`Error ${response.status}: ${response.statusText}`);
-		}
-
-		return response.json();
-	},
-
-	async createProfile(data: CreateProfileData): Promise<ProfileBase> {
-		const response = await fetch('/api/profiles', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(data),
-		});
-
-		if (!response.ok) {
-			throw new Error(`Error ${response.status}: ${response.statusText}`);
-		}
-
-		const result: ProfileResponse = await response.json();
-		return result.data;
-	},
-
-	async updateProfile(id: string, data: UpdateProfileData): Promise<ProfileBase> {
-		const response = await fetch(`/api/profiles/${id}`, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(data),
-		});
-
-		if (!response.ok) {
-			throw new Error(`Error ${response.status}: ${response.statusText}`);
-		}
-
-		const result: ProfileResponse = await response.json();
-		return result.data;
-	},
-
-	async activateProfile(id: string): Promise<ProfileBase> {
-		const response = await fetch(`/api/profiles/${id}/activate`, {
-			method: 'POST',
-		});
-
-		if (!response.ok) {
-			throw new Error(`Error ${response.status}: ${response.statusText}`);
-		}
-
-		const result: ProfileResponse = await response.json();
-		return result.data;
-	},
-
-	async deleteProfile(id: string): Promise<void> {
-		const response = await fetch(`/api/profiles/${id}`, {
-			method: 'DELETE',
-		});
-
-		if (!response.ok) {
-			throw new Error(`Error ${response.status}: ${response.statusText}`);
-		}
-	},
+// Hook para obtener el perfil activo
+export const useActiveProfile = () => {
+  return useQuery({
+    queryKey: ['activeProfile'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE}/active`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const result = await response.json();
+      return result.data;
+    },
+  });
 };
 
-// React Query hooks
-export function useActiveProfile() {
-	return useQuery({
-		queryKey: ['profiles', 'active'],
-		queryFn: profilesApi.getActiveProfile,
-		staleTime: 5 * 60 * 1000, // 5 minutos
-		gcTime: 10 * 60 * 1000, // 10 minutos
-	});
-}
+// Hook para actualizar el tema (con actualización optimista)
+export const useUpdateTheme = () => {
+  const queryClient = useQueryClient();
 
-export function useProfiles(params: GetProfilesParams = {}) {
-	return useQuery({
-		queryKey: ['profiles', 'list', params],
-		queryFn: () => profilesApi.getProfiles(params),
-		staleTime: 2 * 60 * 1000, // 2 minutos
-		gcTime: 5 * 60 * 1000, // 5 minutos
-	});
-}
+  return useMutation({
+    mutationFn: async (theme: ThemeMode) => {
+      const response = await fetch(`${API_BASE}/active/theme`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ theme }),
+      });
 
-export function useCreateProfile() {
-	const queryClient = useQueryClient();
+      if (!response.ok) {
+        throw new Error('Failed to update theme');
+      }
 
-	return useMutation({
-		mutationFn: profilesApi.createProfile,
-		onSuccess: () => {
-			// Invalidar las consultas de profiles para refrescar la lista
-			queryClient.invalidateQueries({ queryKey: ['profiles'] });
-		},
-	});
-}
+      return response.json();
+    },
+    onMutate: async (newTheme: ThemeMode) => {
+      // Cancelar cualquier refetch pendiente para evitar sobreescribir la actualización optimista
+      await queryClient.cancelQueries({ queryKey: ['activeProfile'] });
 
-export function useUpdateProfile() {
-	const queryClient = useQueryClient();
+      // Guardar el estado previo
+      const previousProfile = queryClient.getQueryData(['activeProfile']);
 
-	return useMutation({
-		mutationFn: ({ id, data }: { id: string; data: UpdateProfileData }) =>
-			profilesApi.updateProfile(id, data),
-		onSuccess: (updatedProfile) => {
-			// Actualizar el cache del perfil específico
-			queryClient.setQueryData(['profiles', 'active'], updatedProfile);
-			// Invalidar las consultas de profiles
-			queryClient.invalidateQueries({ queryKey: ['profiles'] });
-		},
-	});
-}
+      // Actualizar el estado de forma optimista
+      queryClient.setQueryData(['activeProfile'], (old: any) => {
+        if (!old) return null;
+        return { ...old, theme: newTheme };
+      });
 
-export function useActivateProfile() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: profilesApi.activateProfile,
-		onSuccess: (activatedProfile) => {
-			// Actualizar el cache del perfil activo
-			queryClient.setQueryData(['profiles', 'active'], activatedProfile);
-			// Invalidar las consultas de profiles
-			queryClient.invalidateQueries({ queryKey: ['profiles'] });
-		},
-	});
-}
-
-export function useDeleteProfile() {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: profilesApi.deleteProfile,
-		onSuccess: () => {
-			// Invalidar las consultas de profiles para refrescar la lista
-			queryClient.invalidateQueries({ queryKey: ['profiles'] });
-		},
-	});
-}
+      // Devolver el estado previo en el contexto para poder hacer rollback
+      return { previousProfile };
+    },
+    onError: (err, newTheme, context) => {
+      // Revertir al estado previo en caso de error
+      if (context?.previousProfile) {
+        queryClient.setQueryData(['activeProfile'], context.previousProfile);
+      }
+    },
+    onSettled: () => {
+      // Invalidar y refetchear la query del perfil activo para asegurar consistencia
+      queryClient.invalidateQueries({ queryKey: ['activeProfile'] });
+    },
+  });
+};

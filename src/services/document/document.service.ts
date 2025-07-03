@@ -7,11 +7,14 @@
  */
 
 import type { Document, Prisma } from '@prisma/client';
-import { prisma } from '@/lib/database/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentWithStats } from '@/types/entities/document';
+// Drizzle imports
+import { eq, asc, desc } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { documents } from '@/lib/drizzle/schema';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 
@@ -36,10 +39,65 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
  */
 export async function getDocuments(): Promise<DocumentWithStats[]> {
 	try {
-		const documents = await prisma.document.findMany({
-			orderBy: { name: 'asc' },
-		});
-		return documents.map(toDocumentWithStats);
+		// **MIGRACIÓN A DRIZZLE**
+		documentLogger.info('📄 Obteniendo documentos');
+
+		const drizzleDocuments = await db
+			.select({
+				id: documents.id,
+				name: documents.name,
+				description: documents.description,
+				emoji: documents.emoji,
+				color: documents.color,
+				shortcut: documents.shortcut,
+				category: documents.category,
+				filePath: documents.filePath,
+				fileName: documents.fileName,
+				fileSize: documents.fileSize,
+				mimeType: documents.mimeType,
+				pageCount: documents.pageCount,
+				content: documents.content,
+				tags: documents.tags,
+				metadata: documents.metadata,
+				sortBy: documents.sortBy,
+				filters: documents.filters,
+				featuredImage: documents.featuredImage,
+				isFavorite: documents.isFavorite,
+				createdAt: documents.createdAt,
+				updatedAt: documents.updatedAt,
+			})
+			.from(documents)
+			.orderBy(asc(documents.name));
+
+		// Transformar a formato compatible con Prisma
+		const transformedDocuments = drizzleDocuments.map((rawDocument) => ({
+			...rawDocument,
+			isFavorite: Boolean(rawDocument.isFavorite),
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prismaDocuments = await prisma.document.findMany({
+					orderBy: { name: 'asc' },
+				});
+
+				if (Math.abs(transformedDocuments.length - prismaDocuments.length) > 0) {
+					documentLogger.warn('⚠️ Diferencia en conteo getDocuments:', {
+						drizzle: transformedDocuments.length,
+						prisma: prismaDocuments.length
+					});
+				} else {
+					documentLogger.info('✅ Validación dual exitosa getDocuments:', {
+						total: transformedDocuments.length
+					});
+				}
+			} catch (validationError) {
+				documentLogger.error('❌ Error en validación dual getDocuments:', validationError);
+			}
+		}
+
+		return transformedDocuments.map(toDocumentWithStats);
 	} catch (error) {
 		documentLogger.error('Error obteniendo documentos:', { error });
 		throw new Error('Error al obtener documentos');
@@ -51,9 +109,75 @@ export async function getDocuments(): Promise<DocumentWithStats[]> {
  */
 export async function getDocumentById(id: string): Promise<Document | null> {
 	try {
-		return await prisma.document.findUnique({
-			where: { id },
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		documentLogger.info(`🔍 Obteniendo documento por ID: ${id}`);
+
+		const drizzleDocument = await db
+			.select({
+				id: documents.id,
+				name: documents.name,
+				description: documents.description,
+				emoji: documents.emoji,
+				color: documents.color,
+				shortcut: documents.shortcut,
+				category: documents.category,
+				filePath: documents.filePath,
+				fileName: documents.fileName,
+				fileSize: documents.fileSize,
+				mimeType: documents.mimeType,
+				pageCount: documents.pageCount,
+				content: documents.content,
+				tags: documents.tags,
+				metadata: documents.metadata,
+				sortBy: documents.sortBy,
+				filters: documents.filters,
+				featuredImage: documents.featuredImage,
+				isFavorite: documents.isFavorite,
+				createdAt: documents.createdAt,
+				updatedAt: documents.updatedAt,
+			})
+			.from(documents)
+			.where(eq(documents.id, id))
+			.limit(1);
+
+		if (drizzleDocument.length === 0) {
+			documentLogger.warn(`Documento no encontrado: ${id}`);
+			return null;
+		}
+
+		const rawDocument = drizzleDocument[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedDocument = {
+			...rawDocument,
+			isFavorite: Boolean(rawDocument.isFavorite),
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prismaDocument = await prisma.document.findUnique({
+					where: { id },
+				});
+
+				if (prismaDocument && transformedDocument) {
+					documentLogger.info('✅ Validación dual exitosa getDocumentById:', {
+						documentName: transformedDocument.name
+					});
+				} else if (!prismaDocument && !transformedDocument) {
+					documentLogger.info('✅ Validación dual exitosa getDocumentById: ambos null');
+				} else {
+					documentLogger.warn('⚠️ Diferencia en getDocumentById:', {
+						drizzleFound: !!transformedDocument,
+						prismaFound: !!prismaDocument
+					});
+				}
+			} catch (validationError) {
+				documentLogger.error('❌ Error en validación dual getDocumentById:', validationError);
+			}
+		}
+
+		return transformedDocument as Document;
 	} catch (error) {
 		documentLogger.error('Error obteniendo documento por ID:', { id, error });
 		throw new Error('Error al obtener documento');

@@ -116,3 +116,49 @@ export function useDeleteTag() {
 		},
 	});
 }
+
+export function useTagThumbnails(tagId: string, limit: number = 6) {
+  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; }>, Error>({
+    queryKey: [...tagKeys.detail(tagId), 'thumbnails', limit],
+    queryFn: () => api.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; }>>(`/tags/${tagId}/thumbnails?limit=${limit}`),
+    enabled: !!tagId,
+  });
+}
+
+export function useTagStats(tagId: string) {
+  return useQuery<{
+    images: number;
+    videos: number;
+    albums: number;
+    collections: number;
+    characters: number;
+    places: number;
+    worldItems: number;
+    concepts: number;
+    prompts: number;
+    notes: number;
+    wildcards: number;
+    properties: number;
+    groups: number;
+    totalAssociations: number;
+  }, Error>({
+    queryKey: [...tagKeys.detail(tagId), 'stats'],
+    queryFn: () => api.get<{
+      images: number;
+      videos: number;
+      albums: number;
+      collections: number;
+      characters: number;
+      places: number;
+      worldItems: number;
+      concepts: number;
+      prompts: number;
+      notes: number;
+      wildcards: number;
+      properties: number;
+      groups: number;
+      totalAssociations: number;
+    }>(`/tags/${tagId}/stats`),
+    enabled: !!tagId,
+  });
+}

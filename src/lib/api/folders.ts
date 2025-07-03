@@ -115,3 +115,75 @@ export function useDeleteFolder() {
 		},
 	});
 }
+
+// Hook para obtener imágenes recientes de una carpeta
+export function useRecentFolderImages(folderId: string, limit: number = 4) {
+  return useQuery<string[], Error>({
+    queryKey: [...folderKeys.detail(folderId), 'recent-images', limit],
+    queryFn: () => api.get<string[]>(`/folders/${folderId}/recent-images?limit=${limit}`),
+    enabled: !!folderId,
+  });
+}
+
+// Hook para obtener estadísticas de una carpeta
+export function useFolderStats(folderId: string) {
+  return useQuery<{
+    totalImages: number;
+    totalVideos: number;
+    totalSize: number;
+    lastActivity: Date | null;
+  }, Error>({
+    queryKey: [...folderKeys.detail(folderId), 'stats'],
+    queryFn: () => api.get<{
+      totalImages: number;
+      totalVideos: number;
+      totalSize: number;
+      lastActivity: Date | null;
+    }>(`/folders/${folderId}/stats`),
+    enabled: !!folderId,
+  });
+}
+
+// Hook para obtener el ID de la carpeta raíz
+export function useRootFolderId() {
+  return useQuery<string, Error>({
+    queryKey: [...folderKeys.all, 'root-id'],
+    queryFn: () => api.get<{ id: string }>('/folders/root').then(res => res.id),
+  });
+}
+
+// Hook para obtener la ruta de una carpeta por su ID
+export function useFolderPath(folderId: string) {
+  return useQuery<string, Error>({
+    queryKey: [...folderKeys.detail(folderId), 'path'],
+    queryFn: () => api.get<{ path: string }>(`/folders/${folderId}/path`).then(res => res.path),
+    enabled: !!folderId,
+  });
+}
+
+// Hook para obtener el nombre de una carpeta por su ID
+export function useFolderName(folderId: string) {
+  return useQuery<string, Error>({
+    queryKey: [...folderKeys.detail(folderId), 'name'],
+    queryFn: () => api.get<{ name: string }>(`/folders/${folderId}/name`).then(res => res.name),
+    enabled: !!folderId,
+  });
+}
+
+// Hook para obtener el ID de una carpeta por su ruta
+export function useFolderIdByPath(folderPath: string) {
+  return useQuery<string, Error>({
+    queryKey: [...folderKeys.all, 'by-path', folderPath],
+    queryFn: () => api.get<{ id: string }>(`/folders/by-path?path=${encodeURIComponent(folderPath)}`).then(res => res.id),
+    enabled: !!folderPath,
+  });
+}
+
+// Hook para obtener el ID de la carpeta padre
+export function useParentFolderId(folderId: string) {
+  return useQuery<string | null, Error>({
+    queryKey: [...folderKeys.detail(folderId), 'parent-id'],
+    queryFn: () => api.get<{ parentFolderId: string | null }>(`/folders/${folderId}/parent-id`).then(res => res.parentFolderId),
+    enabled: !!folderId,
+  });
+}

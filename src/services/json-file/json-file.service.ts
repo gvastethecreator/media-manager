@@ -7,11 +7,14 @@
  */
 
 import type { Prisma } from '@prisma/client';
-import { prisma } from '@/lib/database/prisma';
+// Drizzle imports
+import { db } from '@/lib/drizzle';
+import { jsonFiles } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromPrismaJsonFile, fromPrismaJsonFiles } from '@/transformers/json-file/transformer';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
+import { asc, eq } from 'drizzle-orm';
 
 const jsonFileLogger = serverLogger.withContext('JsonFileService');
 
@@ -36,10 +39,65 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
  */
 export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 	try {
-		const jsonFiles = await prisma.jsonFile.findMany({
-			orderBy: { name: 'asc' },
-		});
-		return fromPrismaJsonFiles(jsonFiles);
+		// **MIGRACIÓN A DRIZZLE**
+		jsonFileLogger.info('🗂️ Obteniendo archivos JSON');
+
+		const drizzleJsonFiles = await db
+			.select({
+				id: jsonFiles.id,
+				name: jsonFiles.name,
+				description: jsonFiles.description,
+				emoji: jsonFiles.emoji,
+				color: jsonFiles.color,
+				shortcut: jsonFiles.shortcut,
+				category: jsonFiles.category,
+				filePath: jsonFiles.filePath,
+				fileName: jsonFiles.fileName,
+				fileSize: jsonFiles.fileSize,
+				mimeType: jsonFiles.mimeType,
+				content: jsonFiles.content,
+				schema: jsonFiles.schema,
+				tags: jsonFiles.tags,
+				metadata: jsonFiles.metadata,
+				sortBy: jsonFiles.sortBy,
+				filters: jsonFiles.filters,
+				featuredImage: jsonFiles.featuredImage,
+				isFavorite: jsonFiles.isFavorite,
+				createdAt: jsonFiles.createdAt,
+				updatedAt: jsonFiles.updatedAt,
+			})
+			.from(jsonFiles)
+			.orderBy(asc(jsonFiles.name));
+
+		// Transformar a formato compatible con Prisma
+		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile) => ({
+			...rawJsonFile,
+			isFavorite: Boolean(rawJsonFile.isFavorite),
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prismaJsonFiles = await prisma.jsonFile.findMany({
+					orderBy: { name: 'asc' },
+				});
+
+				if (Math.abs(transformedJsonFiles.length - prismaJsonFiles.length) > 0) {
+					jsonFileLogger.warn('⚠️ Diferencia en conteo getJsonFiles:', {
+						drizzle: transformedJsonFiles.length,
+						prisma: prismaJsonFiles.length
+					});
+				} else {
+					jsonFileLogger.info('✅ Validación dual exitosa getJsonFiles:', {
+						total: transformedJsonFiles.length
+					});
+				}
+			} catch (validationError) {
+				jsonFileLogger.error('❌ Error en validación dual getJsonFiles:', validationError);
+			}
+		}
+
+		return fromPrismaJsonFiles(transformedJsonFiles as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivos JSON:', { error });
 		throw new Error('Error al obtener archivos JSON');
@@ -51,11 +109,75 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
  */
 export async function getJsonFileById(id: string): Promise<JsonFileWithStats | null> {
 	try {
-		const jsonFile = await prisma.jsonFile.findUnique({
-			where: { id },
-		});
-		if (!jsonFile) return null;
-		return fromPrismaJsonFile(jsonFile);
+		// **MIGRACIÓN A DRIZZLE**
+		jsonFileLogger.info(`🔍 Obteniendo archivo JSON por ID: ${id}`);
+
+		const drizzleJsonFile = await db
+			.select({
+				id: jsonFiles.id,
+				name: jsonFiles.name,
+				description: jsonFiles.description,
+				emoji: jsonFiles.emoji,
+				color: jsonFiles.color,
+				shortcut: jsonFiles.shortcut,
+				category: jsonFiles.category,
+				filePath: jsonFiles.filePath,
+				fileName: jsonFiles.fileName,
+				fileSize: jsonFiles.fileSize,
+				mimeType: jsonFiles.mimeType,
+				content: jsonFiles.content,
+				schema: jsonFiles.schema,
+				tags: jsonFiles.tags,
+				metadata: jsonFiles.metadata,
+				sortBy: jsonFiles.sortBy,
+				filters: jsonFiles.filters,
+				featuredImage: jsonFiles.featuredImage,
+				isFavorite: jsonFiles.isFavorite,
+				createdAt: jsonFiles.createdAt,
+				updatedAt: jsonFiles.updatedAt,
+			})
+			.from(jsonFiles)
+			.where(eq(jsonFiles.id, id))
+			.limit(1);
+
+		if (drizzleJsonFile.length === 0) {
+			jsonFileLogger.warn(`Archivo JSON no encontrado: ${id}`);
+			return null;
+		}
+
+		const rawJsonFile = drizzleJsonFile[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedJsonFile = {
+			...rawJsonFile,
+			isFavorite: Boolean(rawJsonFile.isFavorite),
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prismaJsonFile = await prisma.jsonFile.findUnique({
+					where: { id },
+				});
+
+				if (prismaJsonFile && transformedJsonFile) {
+					jsonFileLogger.info('✅ Validación dual exitosa getJsonFileById:', {
+						jsonFileName: transformedJsonFile.name
+					});
+				} else if (!prismaJsonFile && !transformedJsonFile) {
+					jsonFileLogger.info('✅ Validación dual exitosa getJsonFileById: ambos null');
+				} else {
+					jsonFileLogger.warn('⚠️ Diferencia en getJsonFileById:', {
+						drizzleFound: !!transformedJsonFile,
+						prismaFound: !!prismaJsonFile
+					});
+				}
+			} catch (validationError) {
+				jsonFileLogger.error('❌ Error en validación dual getJsonFileById:', validationError);
+			}
+		}
+
+		return fromPrismaJsonFile(transformedJsonFile as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivo JSON por ID:', { id, error });
 		throw new Error('Error al obtener archivo JSON');

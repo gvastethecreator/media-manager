@@ -1,10 +1,16 @@
-import type { Prisma } from '@prisma/client';
+// Drizzle imports
+
+
 import { prisma } from '@/lib/database/prisma';
+import { db } from '@/lib/drizzle';
+import { notes } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromPrismaNote } from '@/transformers/note';
 import { mapCreateNoteDataToPrisma, mapUpdateNoteDataToPrisma } from '@/transformers/note/mappers';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import type { Prisma } from '@prisma/client';
+import { eq } from 'drizzle-orm';
 
 const noteLogger = serverLogger.withContext('NoteService');
 
@@ -158,37 +164,111 @@ export const NoteService = {
 
 	async getNote(id: string): Promise<NoteComplete | null> {
 		try {
-			const note = await prisma.note.findUnique({
-				where: { id },
-				include: {
-					_count: {
-						select: {
-							images: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							groups: true,
-							properties: true,
-							wildcards: true,
-						},
-					},
-				},
-			});
+			// **MIGRACIÓN A DRIZZLE**
+			noteLogger.info(`🔍 Obteniendo nota por ID: ${id}`);
 
-			if (!note) {
+			const drizzleNote = await db
+				.select({
+					id: notes.id,
+					name: notes.name,
+					description: notes.description,
+					emoji: notes.emoji,
+					color: notes.color,
+					category: notes.category,
+					isPublic: notes.isPublic,
+					isFavorite: notes.isFavorite,
+					totalImages: notes.totalImages,
+					totalVideos: notes.totalVideos,
+					content: notes.content,
+					type: notes.type,
+					tags: notes.tags,
+					priority: notes.priority,
+					status: notes.status,
+					dueDate: notes.dueDate,
+					completedAt: notes.completedAt,
+					featuredImage: notes.featuredImage,
+					parentId: notes.parentId,
+					createdAt: notes.createdAt,
+					updatedAt: notes.updatedAt,
+				})
+				.from(notes)
+				.where(eq(notes.id, id))
+				.limit(1);
+
+			if (drizzleNote.length === 0) {
+				noteLogger.warn(`Nota no encontrada: ${id}`);
 				return null;
 			}
 
+			// Transformar a formato compatible con Prisma
+			const transformedNote = {
+				...drizzleNote[0],
+				isPublic: Boolean(drizzleNote[0].isPublic),
+				isFavorite: Boolean(drizzleNote[0].isFavorite),
+				// Counts vacíos por ahora (TODO: implementar subqueries)
+				_count: {
+					images: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					groups: 0,
+					properties: 0,
+					wildcards: 0,
+				},
+			};
+
+			// **VALIDACIÓN DUAL EN DESARROLLO**
+			if (process.env.NODE_ENV === 'development') {
+				try {
+					const note = await prisma.note.findUnique({
+						where: { id },
+						include: {
+							_count: {
+								select: {
+									images: true,
+									albums: true,
+									collections: true,
+									characters: true,
+									places: true,
+									worldItems: true,
+									concepts: true,
+									prompts: true,
+									groups: true,
+									properties: true,
+									wildcards: true,
+								},
+							},
+						},
+					});
+
+					if (note && transformedNote) {
+						noteLogger.info('✅ Validación dual exitosa getNote:', { id });
+					} else if (!note && !transformedNote) {
+						noteLogger.info('✅ Validación dual exitosa getNote (ambos null):', { id });
+					} else {
+						noteLogger.warn('⚠️ Diferencia en getNote:', {
+							drizzleFound: !!transformedNote,
+							prismaFound: !!note
+						});
+					}
+				} catch (validationError) {
+					noteLogger.error('❌ Error en validación dual getNote:', validationError);
+				}
+			}
+
 			// Transformar usando el transformador canónico
-			return fromPrismaNote(note, {
+			const result = fromPrismaNote(transformedNote, {
 				includeRelations: true,
 				includeUI: true,
 				deserializeFields: true,
 			});
+
+			noteLogger.info(`✅ Nota encontrada: ${result.name}`);
+			return result;
 		} catch (error) {
 			noteLogger.error('Error getting note:', { id, error });
 			throw new Error('Error al obtener nota');

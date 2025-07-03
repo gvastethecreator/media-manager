@@ -7,13 +7,15 @@
  */
 
 import type { Prisma } from '@prisma/client';
-import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { audios } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaAudio, fromPrismaAudios } from '@/transformers/audio/transformer';
 import type { AudioWithStats } from '@/types/entities/audio';
+import { desc, eq } from 'drizzle-orm';
 
 const audioLogger = serverLogger.withContext('AudioService');
 
@@ -31,12 +33,69 @@ const createAudioError = (
  */
 export async function getAudios(): Promise<AudioWithStats[]> {
 	try {
-		const prisma = await getPrismaClient();
-		const audios = await prisma.audio.findMany({
-			orderBy: { createdAt: 'desc' },
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		audioLogger.info('🎵 Obteniendo audios');
 
-		return fromPrismaAudios(audios);
+		const drizzleAudios = await db
+			.select({
+				id: audios.id,
+				name: audios.name,
+				description: audios.description,
+				emoji: audios.emoji,
+				color: audios.color,
+				shortcut: audios.shortcut,
+				category: audios.category,
+				filePath: audios.filePath,
+				fileName: audios.fileName,
+				fileSize: audios.fileSize,
+				mimeType: audios.mimeType,
+				duration: audios.duration,
+				bitrate: audios.bitrate,
+				sampleRate: audios.sampleRate,
+				channels: audios.channels,
+				codec: audios.codec,
+				tags: audios.tags,
+				metadata: audios.metadata,
+				sortBy: audios.sortBy,
+				filters: audios.filters,
+				featuredImage: audios.featuredImage,
+				isFavorite: audios.isFavorite,
+				createdAt: audios.createdAt,
+				updatedAt: audios.updatedAt,
+			})
+			.from(audios)
+			.orderBy(desc(audios.createdAt));
+
+		// Transformar a formato compatible con Prisma
+		const transformedAudios = drizzleAudios.map((rawAudio) => ({
+			...rawAudio,
+			isFavorite: Boolean(rawAudio.isFavorite),
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaAudios = await prisma.audio.findMany({
+					orderBy: { createdAt: 'desc' },
+				});
+
+				if (Math.abs(transformedAudios.length - prismaAudios.length) > 0) {
+					audioLogger.warn('⚠️ Diferencia en conteo getAudios:', {
+						drizzle: transformedAudios.length,
+						prisma: prismaAudios.length
+					});
+				} else {
+					audioLogger.info('✅ Validación dual exitosa getAudios:', {
+						total: transformedAudios.length
+					});
+				}
+			} catch (validationError) {
+				audioLogger.error('❌ Error en validación dual getAudios:', validationError);
+			}
+		}
+
+		return fromPrismaAudios(transformedAudios as any);
 	} catch (error) {
 		audioLogger.error('Error al obtener audios:', error);
 		throw createAudioError('Error al obtener archivos de audio', EntityErrorCode.OPERATION_FAILED, error);
@@ -48,16 +107,79 @@ export async function getAudios(): Promise<AudioWithStats[]> {
  */
 export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 	try {
-		const prisma = await getPrismaClient();
-		const audio = await prisma.audio.findUnique({
-			where: { id },
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		audioLogger.info(`🔍 Obteniendo audio por ID: ${id}`);
 
-		if (!audio) {
+		const drizzleAudio = await db
+			.select({
+				id: audios.id,
+				name: audios.name,
+				description: audios.description,
+				emoji: audios.emoji,
+				color: audios.color,
+				shortcut: audios.shortcut,
+				category: audios.category,
+				filePath: audios.filePath,
+				fileName: audios.fileName,
+				fileSize: audios.fileSize,
+				mimeType: audios.mimeType,
+				duration: audios.duration,
+				bitrate: audios.bitrate,
+				sampleRate: audios.sampleRate,
+				channels: audios.channels,
+				codec: audios.codec,
+				tags: audios.tags,
+				metadata: audios.metadata,
+				sortBy: audios.sortBy,
+				filters: audios.filters,
+				featuredImage: audios.featuredImage,
+				isFavorite: audios.isFavorite,
+				createdAt: audios.createdAt,
+				updatedAt: audios.updatedAt,
+			})
+			.from(audios)
+			.where(eq(audios.id, id))
+			.limit(1);
+
+		if (drizzleAudio.length === 0) {
+			audioLogger.warn(`Audio no encontrado: ${id}`);
 			return null;
 		}
 
-		return fromPrismaAudio(audio);
+		const rawAudio = drizzleAudio[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedAudio = {
+			...rawAudio,
+			isFavorite: Boolean(rawAudio.isFavorite),
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaAudio = await prisma.audio.findUnique({
+					where: { id },
+				});
+
+				if (prismaAudio && transformedAudio) {
+					audioLogger.info('✅ Validación dual exitosa getAudioById:', {
+						audioName: transformedAudio.name
+					});
+				} else if (!prismaAudio && !transformedAudio) {
+					audioLogger.info('✅ Validación dual exitosa getAudioById: ambos null');
+				} else {
+					audioLogger.warn('⚠️ Diferencia en getAudioById:', {
+						drizzleFound: !!transformedAudio,
+						prismaFound: !!prismaAudio
+					});
+				}
+			} catch (validationError) {
+				audioLogger.error('❌ Error en validación dual getAudioById:', validationError);
+			}
+		}
+
+		return fromPrismaAudio(transformedAudio as any);
 	} catch (error) {
 		audioLogger.error(`Error al obtener audio ${id}:`, error);
 		throw createAudioError('Error al obtener archivo de audio', EntityErrorCode.OPERATION_FAILED, error);

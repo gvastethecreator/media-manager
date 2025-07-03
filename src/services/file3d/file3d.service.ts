@@ -6,14 +6,16 @@
  * @updated 2025-07-01
  */
 
-import type { Prisma } from '@prisma/client';
-import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { file3Ds } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaFile3D, fromPrismaFile3Ds } from '@/transformers/file3d/transformer';
 import type { File3DWithStats } from '@/types/entities/file3d';
+import type { Prisma } from '@prisma/client';
+import { desc, eq } from 'drizzle-orm';
 
 const file3dLogger = serverLogger.withContext('File3DService');
 
@@ -31,12 +33,70 @@ const createFile3DError = (
  */
 export async function getFile3Ds(): Promise<File3DWithStats[]> {
 	try {
-		const prisma = await getPrismaClient();
-		const file3Ds = await prisma.file3D.findMany({
-			orderBy: { createdAt: 'desc' },
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		file3dLogger.info('🧊 Obteniendo archivos 3D');
 
-		return fromPrismaFile3Ds(file3Ds);
+		const drizzleFile3Ds = await db
+			.select({
+						id: file3Ds.id,
+		name: file3Ds.name,
+		description: file3Ds.description,
+		emoji: file3Ds.emoji,
+		color: file3Ds.color,
+		shortcut: file3Ds.shortcut,
+		category: file3Ds.category,
+		filePath: file3Ds.filePath,
+		fileName: file3Ds.fileName,
+		fileSize: file3Ds.fileSize,
+		mimeType: file3Ds.mimeType,
+		format: file3Ds.format,
+		vertices: file3Ds.vertices,
+		faces: file3Ds.faces,
+		materials: file3Ds.materials,
+		textures: file3Ds.textures,
+		animations: file3Ds.animations,
+		tags: file3Ds.tags,
+		metadata: file3Ds.metadata,
+		sortBy: file3Ds.sortBy,
+		filters: file3Ds.filters,
+		featuredImage: file3Ds.featuredImage,
+		isFavorite: file3Ds.isFavorite,
+		createdAt: file3Ds.createdAt,
+		updatedAt: file3Ds.updatedAt,
+	})
+	.from(file3Ds)
+	.orderBy(desc(file3Ds.createdAt));
+
+		// Transformar a formato compatible con Prisma
+		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D) => ({
+			...rawFile3D,
+			isFavorite: Boolean(rawFile3D.isFavorite),
+		}));
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaFile3Ds = await prisma.file3D.findMany({
+					orderBy: { createdAt: 'desc' },
+				});
+
+				if (Math.abs(transformedFile3Ds.length - prismaFile3Ds.length) > 0) {
+					file3dLogger.warn('⚠️ Diferencia en conteo getFile3Ds:', {
+						drizzle: transformedFile3Ds.length,
+						prisma: prismaFile3Ds.length
+					});
+				} else {
+					file3dLogger.info('✅ Validación dual exitosa getFile3Ds:', {
+						total: transformedFile3Ds.length
+					});
+				}
+			} catch (validationError) {
+				file3dLogger.error('❌ Error en validación dual getFile3Ds:', validationError);
+			}
+		}
+
+		return fromPrismaFile3Ds(transformedFile3Ds as any);
 	} catch (error) {
 		file3dLogger.error('Error al obtener archivos 3D:', error);
 		throw createFile3DError('Error al obtener archivos 3D', EntityErrorCode.OPERATION_FAILED, error);
@@ -48,16 +108,80 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
  */
 export async function getFile3DById(id: string): Promise<File3DWithStats | null> {
 	try {
-		const prisma = await getPrismaClient();
-		const file3D = await prisma.file3D.findUnique({
-			where: { id },
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		file3dLogger.info(`🔍 Obteniendo archivo 3D por ID: ${id}`);
 
-		if (!file3D) {
+		const drizzleFile3D = await db
+			.select({
+						id: file3Ds.id,
+		name: file3Ds.name,
+		description: file3Ds.description,
+		emoji: file3Ds.emoji,
+		color: file3Ds.color,
+		shortcut: file3Ds.shortcut,
+		category: file3Ds.category,
+		filePath: file3Ds.filePath,
+		fileName: file3Ds.fileName,
+		fileSize: file3Ds.fileSize,
+		mimeType: file3Ds.mimeType,
+		format: file3Ds.format,
+		vertices: file3Ds.vertices,
+		faces: file3Ds.faces,
+		materials: file3Ds.materials,
+		textures: file3Ds.textures,
+		animations: file3Ds.animations,
+		tags: file3Ds.tags,
+		metadata: file3Ds.metadata,
+		sortBy: file3Ds.sortBy,
+		filters: file3Ds.filters,
+		featuredImage: file3Ds.featuredImage,
+		isFavorite: file3Ds.isFavorite,
+		createdAt: file3Ds.createdAt,
+		updatedAt: file3Ds.updatedAt,
+	})
+	.from(file3Ds)
+	.where(eq(file3Ds.id, id))
+			.limit(1);
+
+		if (drizzleFile3D.length === 0) {
+			file3dLogger.warn(`Archivo 3D no encontrado: ${id}`);
 			return null;
 		}
 
-		return fromPrismaFile3D(file3D);
+		const rawFile3D = drizzleFile3D[0];
+
+		// Transformar a formato compatible con Prisma
+		const transformedFile3D = {
+			...rawFile3D,
+			isFavorite: Boolean(rawFile3D.isFavorite),
+		};
+
+		// **VALIDACIÓN DUAL EN DESARROLLO**
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const prisma = await getPrismaClient();
+				const prismaFile3D = await prisma.file3D.findUnique({
+					where: { id },
+				});
+
+				if (prismaFile3D && transformedFile3D) {
+					file3dLogger.info('✅ Validación dual exitosa getFile3DById:', {
+						file3DName: transformedFile3D.name
+					});
+				} else if (!prismaFile3D && !transformedFile3D) {
+					file3dLogger.info('✅ Validación dual exitosa getFile3DById: ambos null');
+				} else {
+					file3dLogger.warn('⚠️ Diferencia en getFile3DById:', {
+						drizzleFound: !!transformedFile3D,
+						prismaFound: !!prismaFile3D
+					});
+				}
+			} catch (validationError) {
+				file3dLogger.error('❌ Error en validación dual getFile3DById:', validationError);
+			}
+		}
+
+		return fromPrismaFile3D(transformedFile3D as any);
 	} catch (error) {
 		file3dLogger.error(`Error al obtener archivo 3D ${id}:`, error);
 		throw createFile3DError('Error al obtener archivo 3D', EntityErrorCode.OPERATION_FAILED, error);

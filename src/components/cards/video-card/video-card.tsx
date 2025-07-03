@@ -3,14 +3,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
 import { CardContainer } from '../card-container';
+import { useVideo } from '@/lib/api/videos';
 import { VideoCardContent } from './video-card-content';
 import { VideoCardFooter } from './video-card-footer';
 import { VideoCardHeader } from './video-card-header';
 import { VideoCardThumbnail } from './video-card-thumbnail';
 
 export interface VideoCardProps {
-	video: VideoWithStats;
-	onClick?: () => void;
+	videoId: string;
+	onClick?: (videoData: VideoWithStats) => void;
 	className?: string;
 	style?: React.CSSProperties;
 	compact?: boolean;
@@ -26,7 +27,7 @@ export interface VideoCardProps {
  * incluyendo thumbnail, estadísticas técnicas, calidad y metadatos.
  */
 export function VideoCard({
-	video,
+	videoId,
 	onClick,
 	className,
 	style,
@@ -35,7 +36,35 @@ export function VideoCard({
 	tcgMode = true,
 	disabled = false,
 }: VideoCardProps) {
+	const { data: video, isLoading, error } = useVideo(videoId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Si no hay datos del video o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando video...</p>
+			</div>
+		);
+	}
+
+	if (error || !video) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Video no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Extraer datos del video
 	const { id, name, statistics, _count } = video;
@@ -86,18 +115,18 @@ export function VideoCard({
 	// Manejar eventos
 	const handleClick = useCallback(() => {
 		if (!disabled && onClick) {
-			onClick();
+			onClick(video);
 		}
-	}, [onClick, disabled]);
+	}, [onClick, disabled, video]);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
 				e.preventDefault();
-				onClick();
+				onClick(video);
 			}
 		},
-		[onClick, disabled]
+		[onClick, disabled, video]
 	);
 
 	// ID de carta para TCG

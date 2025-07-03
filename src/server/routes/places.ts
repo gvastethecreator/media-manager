@@ -69,6 +69,20 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
+// GET /places/:id/media - Obtener imágenes y videos recientes de un lugar
+router.get('/:id/media', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+
+		const media = await placeService.getRecentPlaceMedia(id, limit);
+		res.json(media);
+	} catch (error) {
+		console.error('Error getting place media:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /places - Crear nuevo lugar
 router.post('/', async (req, res) => {
 	try {

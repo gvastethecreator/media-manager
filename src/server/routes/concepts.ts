@@ -69,6 +69,18 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
+// GET /concepts/:id/counts - Obtener recuentos de un concepto
+router.get('/:id/counts', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const counts = await conceptService.getConceptCounts(id);
+		res.json(counts);
+	} catch (error) {
+		console.error('Error getting concept counts:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /concepts - Crear nuevo concepto
 router.post('/', async (req, res) => {
 	try {

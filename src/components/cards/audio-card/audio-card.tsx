@@ -5,28 +5,17 @@ import { cn } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
+import { useAudio } from '@/lib/api/audio';
 
 export interface AudioCardProps {
-	/** Datos del audio a mostrar */
-	audio: AudioWithStats;
-	/** Tamaño compacto con menos información */
-	compact?: boolean;
-	/** Modo TCG con efectos especiales de carta */
-	tcgMode?: boolean;
-	/** Deshabilitar interacciones */
-	disabled?: boolean;
-	/** Clase CSS adicional para la carta */
+	audioId: string;
+	onClick?: (audioData: AudioWithStats) => void;
 	className?: string;
-	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
-	/** Si la tarjeta está seleccionada */
+	style?: React.CSSProperties;
+	compact?: boolean;
 	isSelected?: boolean;
-	/** Si la tarjeta está activa */
-	isActive?: boolean;
-	/** Si está en modo scroll (para optimización) */
-	isScrolling?: boolean;
-	/** Si debe cargar contenido */
-	shouldLoad?: boolean;
+	tcgMode?: boolean;
+	disabled?: boolean;
 }
 
 /**

@@ -4,16 +4,16 @@ import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CardContainer } from '../card-container';
+import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { adaptCharacterWithStats, isCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';
 import { CharacterCardHeader } from './character-card-header';
 import { CharacterCardImages } from './character-card-images';
-import type { CharacterCardData } from './character-server-actions';
 
 export interface CharacterCardProps {
 	/** Datos del personaje a mostrar */
-	character: CharacterCardData | CharacterWithStats;
+	characterId: string;
 	/** Tamaño compacto con menos información */
 	compact?: boolean;
 	/** Modo TCG con efectos especiales de carta */
@@ -23,7 +23,7 @@ export interface CharacterCardProps {
 	/** Clase CSS adicional para la carta */
 	className?: string;
 	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
+	onClick?: (characterData: CharacterWithStats) => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 }
@@ -36,7 +36,7 @@ export interface CharacterCardProps {
  * y miniaturas de las imágenes contenidas.
  */
 export function CharacterCard({
-	character: rawCharacter,
+	characterId,
 	compact = false,
 	tcgMode = true,
 	disabled = false,
@@ -44,46 +44,41 @@ export function CharacterCard({
 	onClick,
 	isSelected = false,
 }: CharacterCardProps) {
+	const { data: character, isLoading, error } = useCharacter(characterId);
+	const { data: recentMediaData } = useRecentCharacterMedia(characterId);
 	const [isHovered, setIsHovered] = useState(false);
 
-	// Adaptar el personaje al formato esperado si es necesario
-	const character = useMemo(() => {
-		// Si es CharacterWithStats, adaptarlo a CharacterCardData
-		if (isCharacterWithStats(rawCharacter)) {
-			return adaptCharacterWithStats(rawCharacter);
-		}
-		// Si ya es CharacterCardData, usar tal como está
-		return rawCharacter as CharacterCardData;
-	}, [rawCharacter]);
+	// Si no hay datos del personaje o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando personaje...</p>
+			</div>
+		);
+	}
+
+	if (error || !character) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Personaje no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Preparar las imágenes para el componente de galería
 	const cardMedia = useMemo(() => {
-		const media = [];
-
-		// Añadir imágenes si están disponibles (CharacterCardData)
-		if ('recentImages' in character && character.recentImages?.length) {
-			media.push(
-				...character.recentImages.map((path) => ({
-					id: path,
-					thumbnailUrl: path,
-					isVideo: false,
-				}))
-			);
-		}
-
-		// Añadir videos si están disponibles (CharacterCardData)
-		if ('recentVideos' in character && character.recentVideos?.length) {
-			media.push(
-				...character.recentVideos.map((path) => ({
-					id: path,
-					thumbnailUrl: path,
-					isVideo: true,
-				}))
-			);
-		}
-
-		return media;
-	}, [character]);
+		return recentMediaData || [];
+	}, [recentMediaData]);
 
 	// Preparar etiquetas para el pie de la tarjeta
 	const footerTags = useMemo(() => {
@@ -100,23 +95,23 @@ export function CharacterCard({
 		if (character.alignment) tags.push(character.alignment);
 
 		// Añadir habilidades del personaje (solo para CharacterCardData)
-		if ('parsedAbilities' in character && character.parsedAbilities?.length) {
+		if (character.abilities?.length) {
 			// Solo las primeras 2 habilidades para no sobrecargar la tarjeta
-			tags.push(...character.parsedAbilities.slice(0, 2));
+			tags.push(...character.abilities.slice(0, 2));
 		}
 
 		return tags;
-	}, [character.class, character.race, character.level, character.alignment]);
+	}, [character.class, character.race, character.level, character.alignment, character.abilities]);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
 				e.preventDefault();
-				onClick();
+				onClick(character);
 			}
 		},
-		[onClick, disabled]
+		[onClick, disabled, character]
 	);
 
 	// Calcular colores para la tarjeta TCG
@@ -180,7 +175,7 @@ export function CharacterCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled ? undefined : onClick}
+			onClick={disabled ? undefined : () => onClick && onClick(character)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}
@@ -295,8 +290,8 @@ export function CharacterCard({
 							{/* Contenido con descripción y contadores */}
 							<CharacterCardContent
 								description={character.description || ''}
-								stats={character.parsedStats}
-								abilities={character.parsedAbilities}
+								stats={character.stats}
+								abilities={character.abilities}
 								backstory={character.backstory}
 								alignment={character.alignment}
 								primaryColor={primaryColor}

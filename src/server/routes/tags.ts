@@ -69,6 +69,34 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
+// GET /tags/:id/thumbnails - Obtener thumbnails de un tag
+router.get('/:id/thumbnails', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+		const thumbnails = await tagService.getTagThumbnails(id, limit);
+		res.json(thumbnails);
+	} catch (error) {
+		console.error('Error getting tag thumbnails:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// GET /tags/:id/stats - Obtener estadísticas de un tag
+router.get('/:id/stats', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const stats = await tagService.getTagStats(id);
+		if (!stats) {
+			return res.status(404).json({ error: 'Estadísticas de tag no encontradas' });
+		}
+		res.json(stats);
+	} catch (error) {
+		console.error('Error getting tag stats:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // POST /tags - Crear nuevo tag
 router.post('/', async (req, res) => {
 	try {
