@@ -1,12 +1,12 @@
 import express from 'express';
-import { getGeneralStats, getSystemStatsExtended } from '@/app/actions/stats/stats.actions';
+import { getSystemStats, getSystemStatsExtended, getStats } from '../services/stats.service';
 
 const router = express.Router();
 
 // GET /stats/general - Obtener estadísticas generales
 router.get('/general', async (req, res) => {
 	try {
-		const stats = await getGeneralStats();
+		const stats = await getStats();
 		res.json(stats);
 	} catch (error) {
 		console.error('Error getting general stats:', error);
@@ -28,11 +28,9 @@ router.get('/extended', async (req, res) => {
 // GET /stats/activity - Obtener actividad reciente
 router.get('/activity', async (req, res) => {
 	try {
-		const { period = 'week', entityType, limit = '50' } = req.query;
-
-		// TODO: Implementar función específica de actividad
-		const activity = []; // await getRecentActivity({ period, entityType, limit: Number.parseInt(limit) });
-
+		const { limit = '50' } = req.query;
+		const stats = await getSystemStats();
+		const activity = stats?.recentActivity?.slice(0, Number.parseInt(limit as string)) || [];
 		res.json(activity);
 	} catch (error) {
 		console.error('Error getting recent activity:', error);
@@ -44,10 +42,8 @@ router.get('/activity', async (req, res) => {
 router.get('/top-tags', async (req, res) => {
 	try {
 		const { limit = '10' } = req.query;
-
-		// TODO: Implementar función específica de top tags
-		const topTags = []; // await getTopTags(Number.parseInt(limit));
-
+		const stats = await getSystemStats();
+		const topTags = stats?.topTags?.slice(0, Number.parseInt(limit as string)) || [];
 		res.json(topTags);
 	} catch (error) {
 		console.error('Error getting top tags:', error);
@@ -58,15 +54,35 @@ router.get('/top-tags', async (req, res) => {
 // GET /stats/storage - Obtener desglose de almacenamiento
 router.get('/storage', async (req, res) => {
 	try {
-		// TODO: Implementar función específica de storage breakdown
+		const stats = await getSystemStatsExtended();
+
+		const totalSize = stats?.totalSize || 0;
+		const totalDocuments = stats?.totalDocuments || 0;
+		const totalAudio = stats?.totalAudio || 0;
+		const totalJsonFiles = stats?.totalJsonFiles || 0;
+		const totalWorkflows = stats?.totalWorkflows || 0;
+		const totalFile3D = stats?.totalFile3D || 0;
+
 		const storage = {
-			images: { count: 0, size: 0, percentage: 0 },
-			videos: { count: 0, size: 0, percentage: 0 },
-			audio: { count: 0, size: 0, percentage: 0 },
-			documents: { count: 0, size: 0, percentage: 0 },
-			thumbnails: { count: 0, size: 0, percentage: 0 },
-			other: { count: 0, size: 0, percentage: 0 },
+			images: { count: stats?.totalImages || 0, size: totalSize, percentage: 0 },
+			videos: { count: 0, size: 0, percentage: 0 }, // No hay datos directos
+			audio: { count: 0, size: totalAudio, percentage: 0 },
+			documents: { count: 0, size: totalDocuments, percentage: 0 },
+			thumbnails: { count: 0, size: totalSize, percentage: 0 }, // totalSize es de thumbnails
+			other: { count: 0, size: totalJsonFiles + totalWorkflows + totalFile3D, percentage: 0 },
 		};
+
+		// Calcular porcentajes
+		const grandTotalSize = storage.images.size + storage.videos.size + storage.audio.size + storage.documents.size + storage.thumbnails.size + storage.other.size;
+
+		if (grandTotalSize > 0) {
+			storage.images.percentage = (storage.images.size / grandTotalSize) * 100;
+			storage.videos.percentage = (storage.videos.size / grandTotalSize) * 100;
+			storage.audio.percentage = (storage.audio.size / grandTotalSize) * 100;
+			storage.documents.percentage = (storage.documents.size / grandTotalSize) * 100;
+			storage.thumbnails.percentage = (storage.thumbnails.size / grandTotalSize) * 100;
+			storage.other.percentage = (storage.other.size / grandTotalSize) * 100;
+		}
 
 		res.json(storage);
 	} catch (error) {

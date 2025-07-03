@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { createFolder, deleteFolder, updateFolder } from '@/app/actions/folders';
+import { useCreateFolder, useDeleteFolder, useUpdateFolder, useReindexFolder, useReindexAllFolders } from '@/lib/api/folders';
 import { clearMetadataCache } from '@/app/actions/metadata';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
@@ -26,6 +26,7 @@ export function useFoldersOperations({
 	// Añadir una nueva carpeta
 	const handleAddFolder = useCallback(
 		async (folderPath: string) => {
+			const createFolderMutation = useCreateFolder();
 			try {
 				operationsLogger.info('➕ Agregando carpeta:', { path: folderPath });
 
@@ -37,7 +38,7 @@ export function useFoldersOperations({
 				};
 
 				// Llamar a la acción del servidor
-				const result = await createFolder(input);
+				const result = await createFolderMutation.mutateAsync(input);
 
 				// Notificar inicio de procesamiento
 				onStartProcessing(result.id);
@@ -60,6 +61,7 @@ export function useFoldersOperations({
 	// Reindexar una carpeta
 	const handleReindexFolder = useCallback(
 		async (folderId: string) => {
+			const reindexFolderMutation = useReindexFolder();
 			try {
 				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
 
@@ -67,8 +69,7 @@ export function useFoldersOperations({
 				onStartProcessing(folderId);
 
 				// Usar la nueva función de reindexado
-				const { reindexFolder } = await import('@/app/actions/folders/crud.actions');
-				await reindexFolder(folderId);
+				await reindexFolderMutation.mutateAsync(folderId);
 
 				operationsLogger.info('✅ Reindexación completada');
 				toastService.success('Carpeta reindexada correctamente');
@@ -86,11 +87,12 @@ export function useFoldersOperations({
 	// Eliminar una carpeta
 	const handleRemoveFolder = useCallback(
 		async (folderId: string) => {
+			const deleteFolderMutation = useDeleteFolder();
 			try {
 				operationsLogger.info('🗑️ Eliminando carpeta:', { folderId });
 
 				// Llamar a la acción del servidor
-				await deleteFolder(folderId);
+				await deleteFolderMutation.mutateAsync(folderId);
 
 				// Recargar datos
 				await onLoadData();
@@ -110,11 +112,12 @@ export function useFoldersOperations({
 	// Actualizar configuración de autoreindexado
 	const handleAutoReindexToggle = useCallback(
 		async (folderId: string, value: boolean) => {
+			const updateFolderMutation = useUpdateFolder();
 			try {
 				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
 
 				// Llamar a la acción del servidor
-				await updateFolder(folderId, { autoReindex: value });
+				await updateFolderMutation.mutateAsync({ id: folderId, data: { autoReindex: value } });
 
 				// Recargar datos
 				await onLoadData();
@@ -138,6 +141,8 @@ export function useFoldersOperations({
 
 			// Iniciar directamente el proceso de reindexado sin diálogo
 			onReindexAllStart();
+			await reindexAllFoldersMutation.mutateAsync();
+			toastService.success('Reindexación global completada');
 		} catch (error) {
 			operationsLogger.error('❌ Error al iniciar reindexación global:', error);
 

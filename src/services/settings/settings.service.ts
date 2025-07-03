@@ -4,11 +4,13 @@
  */
 
 import { createSettingsError } from '@/app/actions/system/settings.errors';
-import { getPrismaClient } from '@/lib/database/db';
+import { db } from '@/lib/drizzle';
+import { profiles, settings } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
 import { settingsSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
+import { eq } from 'drizzle-orm';
 
 // Logger específico para el servicio de configuración
 const logger = serverLogger.withContext('SettingsService');
@@ -49,10 +51,10 @@ export interface SettingsService {
 }
 
 /**
- * Convierte Record<string, unknown> a object para Prisma
+ * Convierte Record<string, unknown> a string JSON para Drizzle
  */
-function toInputJsonValue(data: Record<string, unknown>): object {
-	return JSON.parse(JSON.stringify(data));
+function toJsonString(data: Record<string, unknown>): string {
+	return JSON.stringify(data);
 }
 
 /**
@@ -96,30 +98,49 @@ async function createDefaultSettings(): Promise<Settings> {
 
 		// Crear datos predeterminados
 		const defaultData = await createDefaultSettingsData();
-		const prisma = await getPrismaClient();
 
 		// Obtener el perfil activo o usar un valor por defecto
 		let profileId = 'default-profile';
 		try {
-			const activeProfile = await prisma.profile.findFirst({
-				where: { isActive: true },
-			});
-			if (activeProfile) {
-				profileId = activeProfile.id;
+			const activeProfile = await db
+				.select()
+				.from(profiles)
+				.where(eq(profiles.isActive, true))
+				.limit(1);
+
+			if (activeProfile.length > 0) {
+				profileId = activeProfile[0].id;
 			}
 		} catch {
 			logger.warn('⚠️ No se pudo obtener perfil activo, usando perfil por defecto');
 		}
 
-		await prisma.settings.upsert({
-			where: { id: 'default' },
-			update: {},
-			create: {
+		// Verificar si ya existe la configuración
+		const existingSettings = await db
+			.select()
+			.from(settings)
+			.where(eq(settings.id, 'default'))
+			.limit(1);
+
+		if (existingSettings.length > 0) {
+			// Actualizar configuración existente
+			await db
+				.update(settings)
+				.set({
+					data: toJsonString(defaultData),
+					profileId,
+				})
+				.where(eq(settings.id, 'default'));
+		} else {
+			// Crear nueva configuración
+			await db.insert(settings).values({
 				id: 'default',
-				data: toInputJsonValue(defaultData),
+				data: toJsonString(defaultData),
 				profileId,
-			},
-		});
+				theme: 'system',
+				language: 'es',
+			});
+		}
 
 		// Deserializar y devolver
 		return deserializeSettings(defaultData);
@@ -127,7 +148,7 @@ async function createDefaultSettings(): Promise<Settings> {
 		logger.error('❌ Error al crear configuración predeterminada:', error);
 
 		// Si ya existe, intentar actualizar
-		if (error instanceof Error && error.message.includes('Unique constraint failed')) {
+		if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
 			logger.info('ℹ️ Ya existe una configuración, actualizando a valores predeterminados');
 			return settingsService.resetSystemSettings();
 		}
@@ -148,19 +169,21 @@ export const settingsService: SettingsService = {
 
 		try {
 			// Intentar obtener la configuración existente
-			const prisma = await getPrismaClient();
-			const settings = await prisma.settings.findUnique({
-				where: { id: 'default' },
-			});
+			const settingsResult = await db
+				.select()
+				.from(settings)
+				.where(eq(settings.id, 'default'))
+				.limit(1);
 
-			if (!settings || !settings.data) {
+			if (settingsResult.length === 0 || !settingsResult[0].data) {
 				logger.info('ℹ️ No se encontró configuración global, creando valores predeterminados');
 				// Si no existe, crear una configuración por defecto
 				return createDefaultSettings();
 			}
 
 			// Deserializar configuración al formato de la aplicación
-			return deserializeSettings(settings.data as Record<string, unknown>);
+			const settingsData = JSON.parse(settingsResult[0].data) as Record<string, unknown>;
+			return deserializeSettings(settingsData);
 		} catch (error) {
 			logger.error('❌ Error al obtener la configuración global:', error);
 			throw createSettingsError('No se pudo obtener la configuración del sistema', 'GET_FAILED', error);
@@ -190,32 +213,49 @@ export const settingsService: SettingsService = {
 
 			// Serializar para almacenamiento
 			const serializedData = serializeSettings(validationResult.data);
-			const prisma = await getPrismaClient();
 
 			// Obtener el perfil activo o usar un valor por defecto
 			let profileId = 'default-profile';
 			try {
-				const activeProfile = await prisma.profile.findFirst({
-					where: { isActive: true },
-				});
-				if (activeProfile) {
-					profileId = activeProfile.id;
+				const activeProfile = await db
+					.select()
+					.from(profiles)
+					.where(eq(profiles.isActive, true))
+					.limit(1);
+
+				if (activeProfile.length > 0) {
+					profileId = activeProfile[0].id;
 				}
 			} catch {
 				logger.warn('⚠️ No se pudo obtener perfil activo, usando perfil por defecto');
 			}
 
-			await prisma.settings.upsert({
-				where: { id: 'default' },
-				update: {
-					data: toInputJsonValue(serializedData),
-				},
-				create: {
+			// Verificar si ya existe la configuración
+			const existingSettings = await db
+				.select()
+				.from(settings)
+				.where(eq(settings.id, 'default'))
+				.limit(1);
+
+			if (existingSettings.length > 0) {
+				// Actualizar configuración existente
+				await db
+					.update(settings)
+					.set({
+						data: toJsonString(serializedData),
+						profileId,
+					})
+					.where(eq(settings.id, 'default'));
+			} else {
+				// Crear nueva configuración
+				await db.insert(settings).values({
 					id: 'default',
-					data: toInputJsonValue(serializedData),
+					data: toJsonString(serializedData),
 					profileId,
-				},
-			});
+					theme: 'system',
+					language: 'es',
+				});
+			}
 
 			logger.info('✅ Configuración global actualizada exitosamente');
 
@@ -234,32 +274,49 @@ export const settingsService: SettingsService = {
 
 		try {
 			const defaultData = await createDefaultSettingsData();
-			const prisma = await getPrismaClient();
 
 			// Obtener el perfil activo o usar un valor por defecto
 			let profileId = 'default-profile';
 			try {
-				const activeProfile = await prisma.profile.findFirst({
-					where: { isActive: true },
-				});
-				if (activeProfile) {
-					profileId = activeProfile.id;
+				const activeProfile = await db
+					.select()
+					.from(profiles)
+					.where(eq(profiles.isActive, true))
+					.limit(1);
+
+				if (activeProfile.length > 0) {
+					profileId = activeProfile[0].id;
 				}
 			} catch {
 				logger.warn('⚠️ No se pudo obtener perfil activo, usando perfil por defecto');
 			}
 
-			await prisma.settings.upsert({
-				where: { id: 'default' },
-				update: {
-					data: toInputJsonValue(defaultData),
-				},
-				create: {
+			// Verificar si ya existe la configuración
+			const existingSettings = await db
+				.select()
+				.from(settings)
+				.where(eq(settings.id, 'default'))
+				.limit(1);
+
+			if (existingSettings.length > 0) {
+				// Actualizar configuración existente
+				await db
+					.update(settings)
+					.set({
+						data: toJsonString(defaultData),
+						profileId,
+					})
+					.where(eq(settings.id, 'default'));
+			} else {
+				// Crear nueva configuración
+				await db.insert(settings).values({
 					id: 'default',
-					data: toInputJsonValue(defaultData),
+					data: toJsonString(defaultData),
 					profileId,
-				},
-			});
+					theme: 'system',
+					language: 'es',
+				});
+			}
 
 			logger.info('✅ Configuración global reseteada exitosamente');
 
@@ -277,25 +334,32 @@ export const settingsService: SettingsService = {
 		logger.debug(`📤 Obteniendo configuración del perfil: ${profileId}`);
 
 		try {
-			const prisma = await getPrismaClient();
-			const profile = await prisma.profile.findUnique({
-				where: { id: profileId },
-				include: {
-					settings: true,
-				},
-			});
+			// Verificar que el perfil existe
+			const profile = await db
+				.select()
+				.from(profiles)
+				.where(eq(profiles.id, profileId))
+				.limit(1);
 
-			if (!profile) {
+			if (profile.length === 0) {
 				logger.warn(`⚠️ Perfil no encontrado: ${profileId}`);
 				return null;
 			}
 
-			if (!profile.settings || !profile.settings.data) {
+			// Buscar configuración específica del perfil
+			const profileSettings = await db
+				.select()
+				.from(settings)
+				.where(eq(settings.profileId, profileId))
+				.limit(1);
+
+			if (profileSettings.length === 0 || !profileSettings[0].data) {
 				logger.info(`ℹ️ Perfil ${profileId} no tiene configuración específica, usando configuración global`);
 				return await this.getSystemSettings();
 			}
 
-			return deserializeSettings(profile.settings.data as Record<string, unknown>);
+			const settingsData = JSON.parse(profileSettings[0].data) as Record<string, unknown>;
+			return deserializeSettings(settingsData);
 		} catch (error) {
 			logger.error(`❌ Error al obtener configuración del perfil ${profileId}:`, error);
 			throw createSettingsError('No se pudo obtener la configuración del perfil', 'GET_PROFILE_FAILED', error);
@@ -309,14 +373,14 @@ export const settingsService: SettingsService = {
 		logger.debug(`📥 Actualizando configuración del perfil: ${profileId}`, { data });
 
 		try {
-			const prisma = await getPrismaClient();
-
 			// Verificar que el perfil existe
-			const profile = await prisma.profile.findUnique({
-				where: { id: profileId },
-			});
+			const profile = await db
+				.select()
+				.from(profiles)
+				.where(eq(profiles.id, profileId))
+				.limit(1);
 
-			if (!profile) {
+			if (profile.length === 0) {
 				throw createSettingsError(`Perfil no encontrado: ${profileId}`, 'PROFILE_NOT_FOUND');
 			}
 
@@ -337,18 +401,31 @@ export const settingsService: SettingsService = {
 			// Serializar para almacenamiento
 			const serializedData = serializeSettings(validationResult.data);
 
-			// Actualizar o crear configuración específica del perfil
-			await prisma.settings.upsert({
-				where: { profileId },
-				update: {
-					data: toInputJsonValue(serializedData),
-				},
-				create: {
+			// Verificar si ya existe configuración para este perfil
+			const existingProfileSettings = await db
+				.select()
+				.from(settings)
+				.where(eq(settings.profileId, profileId))
+				.limit(1);
+
+			if (existingProfileSettings.length > 0) {
+				// Actualizar configuración existente del perfil
+				await db
+					.update(settings)
+					.set({
+						data: toJsonString(serializedData),
+					})
+					.where(eq(settings.profileId, profileId));
+			} else {
+				// Crear nueva configuración específica del perfil
+				await db.insert(settings).values({
 					id: `profile-${profileId}`,
-					data: toInputJsonValue(serializedData),
+					data: toJsonString(serializedData),
 					profileId,
-				},
-			});
+					theme: 'system',
+					language: 'es',
+				});
+			}
 
 			logger.info(`✅ Configuración del perfil ${profileId} actualizada exitosamente`);
 
@@ -366,21 +443,21 @@ export const settingsService: SettingsService = {
 		logger.debug(`🔄 Reseteando configuración del perfil: ${profileId}`);
 
 		try {
-			const prisma = await getPrismaClient();
-
 			// Verificar que el perfil existe
-			const profile = await prisma.profile.findUnique({
-				where: { id: profileId },
-			});
+			const profile = await db
+				.select()
+				.from(profiles)
+				.where(eq(profiles.id, profileId))
+				.limit(1);
 
-			if (!profile) {
+			if (profile.length === 0) {
 				throw createSettingsError(`Perfil no encontrado: ${profileId}`, 'PROFILE_NOT_FOUND');
 			}
 
 			// Eliminar configuración específica del perfil (volverá a usar la global)
-			await prisma.settings.deleteMany({
-				where: { profileId },
-			});
+			await db
+				.delete(settings)
+				.where(eq(settings.profileId, profileId));
 
 			logger.info(`✅ Configuración del perfil ${profileId} reseteada exitosamente`);
 		} catch (error) {

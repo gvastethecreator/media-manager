@@ -28,8 +28,11 @@ import systemRouter from './routes/system';
 import tagsRouter from './routes/tags';
 import thumbnailsRouter from './routes/thumbnails';
 import { videosRouter } from './routes/videos.js';
+import { documentsRouter } from './routes/documents.js';
+import { workflowsRouter } from './routes/workflows.js';
 import uploadedImagesRouter from './routes/uploaded-images';
 import wildcardsRouter from './routes/wildcards';
+import { queueRouter } from './routes/queue';
 import worldItemsRouter from './routes/world-items';
 
 const app = express();
@@ -62,6 +65,8 @@ app.use('/api/uploaded-images', uploadedImagesRouter);
 app.use('/api/wildcards', wildcardsRouter);
 app.use('/api/audio', audioRouter);
 app.use('/api/videos', videosRouter);
+app.use('/api/documents', documentsRouter);
+app.use('/api/workflows', workflowsRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/properties', propertiesRouter);
 app.use('/api/groups', groupsRouter);
@@ -70,6 +75,7 @@ app.use('/api/favorites', favoritesRouter);
 app.use('/api/json-files', jsonFilesRouter);
 app.use('/api/local-files', localFilesRouter);
 app.use('/api/debug', debugRouter);
+app.use('/api/queue', queueRouter);
 
 // API Routes - Sistema y utilidades
 app.use('/api/system', systemRouter);
@@ -124,6 +130,7 @@ app.listen(PORT, () => {
 	console.log(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
 	console.log(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
 	console.log(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
+	console.log(`   📦 Queue: http://localhost:${PORT}/api/queue`);
 
 	console.log('\n🔧 APIs de Sistema:');
 	console.log(`   🖥️  System: http://localhost:${PORT}/api/system`);

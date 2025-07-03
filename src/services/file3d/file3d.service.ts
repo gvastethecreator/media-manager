@@ -13,9 +13,9 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromPrismaFile3D, fromPrismaFile3Ds } from '@/transformers/file3d/transformer';
-import type { File3DWithStats } from '@/types/entities/file3d';
-import type { Prisma } from '@prisma/client';
-import { desc, eq } from 'drizzle-orm';
+import type { File3DWithStats, File3DCreateInput, File3DUpdateInput } from '@/types/entities/file3d';
+import { count, desc, eq } from 'drizzle-orm';
+import * as crypto from 'crypto';
 
 const file3dLogger = serverLogger.withContext('File3DService');
 
@@ -72,29 +72,6 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 			...rawFile3D,
 			isFavorite: Boolean(rawFile3D.isFavorite),
 		}));
-
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prisma = await getPrismaClient();
-				const prismaFile3Ds = await prisma.file3D.findMany({
-					orderBy: { createdAt: 'desc' },
-				});
-
-				if (Math.abs(transformedFile3Ds.length - prismaFile3Ds.length) > 0) {
-					file3dLogger.warn('⚠️ Diferencia en conteo getFile3Ds:', {
-						drizzle: transformedFile3Ds.length,
-						prisma: prismaFile3Ds.length
-					});
-				} else {
-					file3dLogger.info('✅ Validación dual exitosa getFile3Ds:', {
-						total: transformedFile3Ds.length
-					});
-				}
-			} catch (validationError) {
-				file3dLogger.error('❌ Error en validación dual getFile3Ds:', validationError);
-			}
-		}
 
 		return fromPrismaFile3Ds(transformedFile3Ds as any);
 	} catch (error) {
@@ -156,31 +133,6 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 			isFavorite: Boolean(rawFile3D.isFavorite),
 		};
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prisma = await getPrismaClient();
-				const prismaFile3D = await prisma.file3D.findUnique({
-					where: { id },
-				});
-
-				if (prismaFile3D && transformedFile3D) {
-					file3dLogger.info('✅ Validación dual exitosa getFile3DById:', {
-						file3DName: transformedFile3D.name
-					});
-				} else if (!prismaFile3D && !transformedFile3D) {
-					file3dLogger.info('✅ Validación dual exitosa getFile3DById: ambos null');
-				} else {
-					file3dLogger.warn('⚠️ Diferencia en getFile3DById:', {
-						drizzleFound: !!transformedFile3D,
-						prismaFound: !!prismaFile3D
-					});
-				}
-			} catch (validationError) {
-				file3dLogger.error('❌ Error en validación dual getFile3DById:', validationError);
-			}
-		}
-
 		return fromPrismaFile3D(transformedFile3D as any);
 	} catch (error) {
 		file3dLogger.error(`Error al obtener archivo 3D ${id}:`, error);
@@ -191,14 +143,44 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 /**
  * Crea un nuevo archivo 3D
  */
-export async function createFile3D(data: Prisma.File3DCreateInput): Promise<File3DWithStats> {
+export async function createFile3D(data: File3DCreateInput): Promise<File3DWithStats> {
 	try {
 		file3dLogger.info('📝 Creando archivo 3D:', data.name);
 
-		const prisma = await getPrismaClient();
-		const newFile3D = await prisma.file3D.create({ data });
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.insert(file3Ds).values({
+			id: crypto.randomUUID(),
+			name: data.name,
+			path: data.path,
+			size: data.size,
+			hash: data.hash,
+			mimeType: data.mimeType,
+			extension: data.extension,
+			folderId: data.folderId,
+			isFavorite: data.isFavorite || false,
+			isArchived: data.isArchived || false,
+			format: data.format || null,
+			version: data.version || null,
+			vertices: data.vertices || null,
+			faces: data.faces || null,
+			triangles: data.triangles || null,
+			materials: data.materials || null,
+			textures: data.textures || null,
+			animations: data.animations || null,
+			bones: data.bones || null,
+			scenes: data.scenes || null,
+			cameras: data.cameras || null,
+			lights: data.lights || null,
+			hasUV: data.hasUV || false,
+			hasNormals: data.hasNormals || false,
+			hasColors: data.hasColors || false,
+			boundingBox: data.boundingBox || null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}).returning();
 
-		const file3DWithStats = fromPrismaFile3D(newFile3D);
+		const newFile3D = result[0];
+		const file3DWithStats = fromPrismaFile3D(newFile3D as any);
 
 		// Emitir eventos
 		await emit({
@@ -218,17 +200,51 @@ export async function createFile3D(data: Prisma.File3DCreateInput): Promise<File
 /**
  * Actualiza un archivo 3D existente
  */
-export async function updateFile3D(id: string, data: Prisma.File3DUpdateInput): Promise<File3DWithStats> {
+export async function updateFile3D(id: string, data: File3DUpdateInput): Promise<File3DWithStats> {
 	try {
 		file3dLogger.info('📝 Actualizando archivo 3D:', id);
 
-		const prisma = await getPrismaClient();
-		const updatedFile3D = await prisma.file3D.update({
-			where: { id },
-			data,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
 
-		const file3DWithStats = fromPrismaFile3D(updatedFile3D);
+		// Solo actualizar campos que se envían
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.path !== undefined) updateData.path = data.path;
+		if (data.size !== undefined) updateData.size = data.size;
+		if (data.hash !== undefined) updateData.hash = data.hash;
+		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
+		if (data.extension !== undefined) updateData.extension = data.extension;
+		if (data.folderId !== undefined) updateData.folderId = data.folderId;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
+		if (data.format !== undefined) updateData.format = data.format;
+		if (data.version !== undefined) updateData.version = data.version;
+		if (data.vertices !== undefined) updateData.vertices = data.vertices;
+		if (data.faces !== undefined) updateData.faces = data.faces;
+		if (data.triangles !== undefined) updateData.triangles = data.triangles;
+		if (data.materials !== undefined) updateData.materials = data.materials;
+		if (data.textures !== undefined) updateData.textures = data.textures;
+		if (data.animations !== undefined) updateData.animations = data.animations;
+		if (data.bones !== undefined) updateData.bones = data.bones;
+		if (data.scenes !== undefined) updateData.scenes = data.scenes;
+		if (data.cameras !== undefined) updateData.cameras = data.cameras;
+		if (data.lights !== undefined) updateData.lights = data.lights;
+		if (data.hasUV !== undefined) updateData.hasUV = data.hasUV;
+		if (data.hasNormals !== undefined) updateData.hasNormals = data.hasNormals;
+		if (data.hasColors !== undefined) updateData.hasColors = data.hasColors;
+		if (data.boundingBox !== undefined) updateData.boundingBox = data.boundingBox;
+
+		await db.update(file3Ds)
+			.set(updateData)
+			.where(eq(file3Ds.id, id));
+
+		// Obtener el archivo 3D actualizado
+		const updatedFile3D = await getFile3DById(id);
+		if (!updatedFile3D) {
+			throw createFile3DError('No se pudo obtener el archivo 3D actualizado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Emitir eventos
 		await emit({
@@ -238,8 +254,8 @@ export async function updateFile3D(id: string, data: Prisma.File3DUpdateInput): 
 		});
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE, id);
 
-		file3dLogger.info('✅ Archivo 3D actualizado:', file3DWithStats.name);
-		return file3DWithStats;
+		file3dLogger.info('✅ Archivo 3D actualizado:', updatedFile3D.name);
+		return updatedFile3D;
 	} catch (error) {
 		file3dLogger.error('❌ Error al actualizar archivo 3D:', error);
 		throw createFile3DError('No se pudo actualizar el archivo 3D', EntityErrorCode.OPERATION_FAILED, error);
@@ -253,19 +269,19 @@ export async function deleteFile3D(id: string): Promise<{ success: boolean }> {
 	try {
 		file3dLogger.info('🗑️ Eliminando archivo 3D:', id);
 
-		const prisma = await getPrismaClient();
-
+		// **MIGRACIÓN A DRIZZLE**
 		// Verificar que existe
-		const file3D = await prisma.file3D.findUnique({
-			where: { id },
-			select: { id: true, name: true },
-		});
+		const existingFile3D = await db
+			.select({ id: file3Ds.id, name: file3Ds.name })
+			.from(file3Ds)
+			.where(eq(file3Ds.id, id))
+			.limit(1);
 
-		if (!file3D) {
+		if (existingFile3D.length === 0) {
 			throw createFile3DError('Archivo 3D no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
-		await prisma.file3D.delete({ where: { id } });
+		await db.delete(file3Ds).where(eq(file3Ds.id, id));
 
 		// Emitir eventos
 		await emit({
@@ -288,11 +304,13 @@ export async function deleteFile3D(id: string): Promise<{ success: boolean }> {
  */
 export async function file3DExists(id: string): Promise<boolean> {
 	try {
-		const prisma = await getPrismaClient();
-		const count = await prisma.file3D.count({
-			where: { id },
-		});
-		return count > 0;
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.select({ count: count() })
+			.from(file3Ds)
+			.where(eq(file3Ds.id, id));
+		
+		return result[0]?.count > 0;
 	} catch (error) {
 		file3dLogger.error(`Error al verificar existencia del archivo 3D ${id}:`, error);
 		return false;
@@ -304,8 +322,12 @@ export async function file3DExists(id: string): Promise<boolean> {
  */
 export async function getFile3DCount(): Promise<number> {
 	try {
-		const prisma = await getPrismaClient();
-		return await prisma.file3D.count();
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.select({ count: count() })
+			.from(file3Ds);
+
+		return result[0]?.count || 0;
 	} catch (error) {
 		file3dLogger.error('Error al obtener conteo de archivos 3D:', error);
 		throw createFile3DError('Error al obtener conteo de archivos 3D', EntityErrorCode.OPERATION_FAILED, error);

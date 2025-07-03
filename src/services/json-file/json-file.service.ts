@@ -14,7 +14,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromPrismaJsonFile, fromPrismaJsonFiles } from '@/transformers/json-file/transformer';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, count } from 'drizzle-orm';
 
 const jsonFileLogger = serverLogger.withContext('JsonFileService');
 
@@ -75,28 +75,6 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 			isFavorite: Boolean(rawJsonFile.isFavorite),
 		}));
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prismaJsonFiles = await prisma.jsonFile.findMany({
-					orderBy: { name: 'asc' },
-				});
-
-				if (Math.abs(transformedJsonFiles.length - prismaJsonFiles.length) > 0) {
-					jsonFileLogger.warn('⚠️ Diferencia en conteo getJsonFiles:', {
-						drizzle: transformedJsonFiles.length,
-						prisma: prismaJsonFiles.length
-					});
-				} else {
-					jsonFileLogger.info('✅ Validación dual exitosa getJsonFiles:', {
-						total: transformedJsonFiles.length
-					});
-				}
-			} catch (validationError) {
-				jsonFileLogger.error('❌ Error en validación dual getJsonFiles:', validationError);
-			}
-		}
-
 		return fromPrismaJsonFiles(transformedJsonFiles as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivos JSON:', { error });
@@ -153,30 +131,6 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 			isFavorite: Boolean(rawJsonFile.isFavorite),
 		};
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prismaJsonFile = await prisma.jsonFile.findUnique({
-					where: { id },
-				});
-
-				if (prismaJsonFile && transformedJsonFile) {
-					jsonFileLogger.info('✅ Validación dual exitosa getJsonFileById:', {
-						jsonFileName: transformedJsonFile.name
-					});
-				} else if (!prismaJsonFile && !transformedJsonFile) {
-					jsonFileLogger.info('✅ Validación dual exitosa getJsonFileById: ambos null');
-				} else {
-					jsonFileLogger.warn('⚠️ Diferencia en getJsonFileById:', {
-						drizzleFound: !!transformedJsonFile,
-						prismaFound: !!prismaJsonFile
-					});
-				}
-			} catch (validationError) {
-				jsonFileLogger.error('❌ Error en validación dual getJsonFileById:', validationError);
-			}
-		}
-
 		return fromPrismaJsonFile(transformedJsonFile as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivo JSON por ID:', { id, error });
@@ -189,14 +143,35 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
  */
 export async function createJsonFile(data: Prisma.JsonFileCreateInput): Promise<JsonFileWithStats> {
 	try {
-		const newJsonFile = await prisma.jsonFile.create({
-			data,
-		});
+		jsonFileLogger.info('Creando archivo JSON:', data.name);
+
+		const newJsonFile = await db.insert(jsonFiles).values({
+			name: data.name,
+			description: data.description,
+			emoji: data.emoji,
+			color: data.color,
+			shortcut: data.shortcut,
+			category: data.category,
+			filePath: data.filePath,
+			fileName: data.fileName,
+			fileSize: data.fileSize,
+			mimeType: data.mimeType,
+			content: data.content,
+			schema: data.schema,
+			tags: data.tags,
+			metadata: data.metadata,
+			sortBy: data.sortBy,
+			filters: data.filters,
+			featuredImage: data.featuredImage,
+			isFavorite: data.isFavorite,
+			createdAt: data.createdAt,
+			updatedAt: data.updatedAt,
+		}).returning();
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
 			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILE_CREATED],
-			data: { action: 'create', entity: newJsonFile, eventType: EVENTS.JSON_FILE_CREATED },
+			data: { action: 'create', entity: newJsonFile[0], eventType: EVENTS.JSON_FILE_CREATED },
 		});
 
 		await emit({
@@ -204,8 +179,8 @@ export async function createJsonFile(data: Prisma.JsonFileCreateInput): Promise<
 			data: { action: 'change', eventType: EVENTS.JSON_FILES_CHANGED },
 		});
 
-		jsonFileLogger.info('Archivo JSON creado:', newJsonFile.name);
-		return fromPrismaJsonFile(newJsonFile);
+		jsonFileLogger.info('Archivo JSON creado:', newJsonFile[0].name);
+		return fromPrismaJsonFile(newJsonFile[0]);
 	} catch (error) {
 		jsonFileLogger.error('Error creando archivo JSON:', { data, error });
 		throw new Error('Error al crear archivo JSON');
@@ -217,15 +192,38 @@ export async function createJsonFile(data: Prisma.JsonFileCreateInput): Promise<
  */
 export async function updateJsonFile(id: string, data: Prisma.JsonFileUpdateInput): Promise<JsonFileWithStats> {
 	try {
-		const updatedJsonFile = await prisma.jsonFile.update({
-			where: { id },
-			data,
-		});
+		jsonFileLogger.info('Actualizando archivo JSON:', id);
+
+		const updatedJsonFile = await db.update(jsonFiles)
+			.set({
+				name: data.name,
+				description: data.description,
+				emoji: data.emoji,
+				color: data.color,
+				shortcut: data.shortcut,
+				category: data.category,
+				filePath: data.filePath,
+				fileName: data.fileName,
+				fileSize: data.fileSize,
+				mimeType: data.mimeType,
+				content: data.content,
+				schema: data.schema,
+				tags: data.tags,
+				metadata: data.metadata,
+				sortBy: data.sortBy,
+				filters: data.filters,
+				featuredImage: data.featuredImage,
+				isFavorite: data.isFavorite,
+				createdAt: data.createdAt,
+				updatedAt: new Date(), // Actualizar timestamp
+			})
+			.where(eq(jsonFiles.id, id))
+			.returning();
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
 			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILE_UPDATED],
-			data: { action: 'update', entity: updatedJsonFile, eventType: EVENTS.JSON_FILE_UPDATED },
+			data: { action: 'update', entity: updatedJsonFile[0], eventType: EVENTS.JSON_FILE_UPDATED },
 		});
 
 		await emit({
@@ -233,8 +231,8 @@ export async function updateJsonFile(id: string, data: Prisma.JsonFileUpdateInpu
 			data: { action: 'change', eventType: EVENTS.JSON_FILES_CHANGED },
 		});
 
-		jsonFileLogger.info('Archivo JSON actualizado:', updatedJsonFile.name);
-		return fromPrismaJsonFile(updatedJsonFile);
+		jsonFileLogger.info('Archivo JSON actualizado:', updatedJsonFile[0].name);
+		return fromPrismaJsonFile(updatedJsonFile[0]);
 	} catch (error) {
 		jsonFileLogger.error('Error actualizando archivo JSON:', { id, data, error });
 		throw new Error('Error al actualizar archivo JSON');
@@ -246,9 +244,11 @@ export async function updateJsonFile(id: string, data: Prisma.JsonFileUpdateInpu
  */
 export async function deleteJsonFile(id: string): Promise<void> {
 	try {
-		await prisma.jsonFile.delete({
-			where: { id },
-		});
+		jsonFileLogger.info('Eliminando archivo JSON:', id);
+
+		const deletedJsonFile = await db.delete(jsonFiles)
+			.where(eq(jsonFiles.id, id))
+			.returning();
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
@@ -273,11 +273,11 @@ export async function deleteJsonFile(id: string): Promise<void> {
  */
 export async function jsonFileExists(id: string): Promise<boolean> {
 	try {
-		const jsonFile = await prisma.jsonFile.findUnique({
-			where: { id },
-			select: { id: true },
-		});
-		return jsonFile !== null;
+		const result = await db.select({ id: jsonFiles.id })
+			.from(jsonFiles)
+			.where(eq(jsonFiles.id, id))
+			.limit(1);
+		return result.length > 0;
 	} catch (error) {
 		jsonFileLogger.error('Error verificando existencia de archivo JSON:', { id, error });
 		return false;
@@ -289,7 +289,9 @@ export async function jsonFileExists(id: string): Promise<boolean> {
  */
 export async function getJsonFileCount(): Promise<number> {
 	try {
-		return await prisma.jsonFile.count();
+		const result = await db.select({ count: count() })
+			.from(jsonFiles);
+		return result[0].count;
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo conteo de archivos JSON:', { error });
 		throw new Error('Error al obtener conteo de archivos JSON');

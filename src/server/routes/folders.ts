@@ -1,13 +1,11 @@
-import { PrismaClient } from '@prisma/client';
 // Drizzle imports
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { folders, images, videos } from '@/lib/drizzle/schema';
+import { asc, count, desc, eq } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
-import { db } from '@/lib/drizzle';
-import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // Schema de validación para crear carpeta
 const CreateFolderSchema = z.object({
@@ -33,7 +31,8 @@ const UpdateFolderSchema = CreateFolderSchema.partial().omit({ path: true });
 // GET /api/folders - Obtener todas las carpetas
 router.get('/', async (req, res) => {
 	try {
-		// **MIGRACIÓN A DRIZZLE**
+		console.log('🔍 Obteniendo carpetas con Drizzle ORM');
+
 		const drizzleFolders = await db
 			.select({
 				id: folders.id,
@@ -56,7 +55,7 @@ router.get('/', async (req, res) => {
 			.from(folders)
 			.orderBy(asc(folders.name));
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible
 		const transformedFolders = drizzleFolders.map((folder) => ({
 			...folder,
 			isFavorite: Boolean(folder.isFavorite),
@@ -76,49 +75,10 @@ router.get('/', async (req, res) => {
 			},
 		}));
 
-		// **VALIDACIÓN DUAL EN DESARROLLO**
-		if (process.env.NODE_ENV === 'development') {
-			try {
-				const prismaFolders = await prisma.folder.findMany({
-					include: {
-						_count: {
-							select: {
-								images: true,
-								videos: true,
-								documents: true,
-								file3Ds: true,
-								jsonFiles: true,
-								audios: true,
-							},
-						},
-						preset: true,
-						parent: true,
-						children: true,
-					},
-					orderBy: {
-						name: 'asc',
-					},
-				});
-
-				// Comparar conteos básicos
-				if (Math.abs(transformedFolders.length - prismaFolders.length) > 0) {
-					console.warn('⚠️ Diferencia en conteo de folders:', {
-						drizzle: transformedFolders.length,
-						prisma: prismaFolders.length
-					});
-				} else {
-					console.info('✅ Validación dual exitosa folders:', {
-						total: transformedFolders.length
-					});
-				}
-			} catch (validationError) {
-				console.error('❌ Error en validación dual folders:', validationError);
-			}
-		}
-
+		console.log(`✅ ${transformedFolders.length} carpetas obtenidas con Drizzle`);
 		res.json(transformedFolders);
 	} catch (error) {
-		console.error('Error al obtener carpetas:', error);
+		console.error('❌ Error al obtener carpetas:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -135,24 +95,24 @@ router.get('/:id', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						documents: true,
-						file3Ds: true,
-						jsonFiles: true,
-						audios: true,
-					},
-				},
-				preset: true,
-				parent: true,
-				children: true,
-			},
-		});
+		const folder = await db.select({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
+		}).from(folders).where(eq(folders.id, id));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
@@ -183,9 +143,7 @@ router.post('/', async (req, res) => {
 		const data = validationResult.data;
 
 		// Verificar que no exista una carpeta con la misma ruta
-		const existingFolder = await prisma.folder.findFirst({
-			where: { path: data.path },
-		});
+		const existingFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, data.path));
 
 		if (existingFolder) {
 			return res.status(409).json({
@@ -193,33 +151,33 @@ router.post('/', async (req, res) => {
 			});
 		}
 
-		const newFolder = await prisma.folder.create({
-			data: {
-				name: data.name,
-				description: data.description,
-				path: data.path,
-				emoji: data.emoji,
-				color: data.color,
-				featuredImage: data.featuredImage,
-				isFavorite: data.isFavorite || false,
-				parentId: data.parentId,
-				presetId: data.presetId,
-			},
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						documents: true,
-						file3Ds: true,
-						jsonFiles: true,
-						audios: true,
-					},
-				},
-				preset: true,
-				parent: true,
-				children: true,
-			},
+		const newFolder = await db.insert(folders).values({
+			name: data.name,
+			description: data.description,
+			path: data.path,
+			emoji: data.emoji,
+			color: data.color,
+			featuredImage: data.featuredImage,
+			isFavorite: data.isFavorite || false,
+			parentId: data.parentId,
+			presetId: data.presetId,
+		}).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 
 		res.status(201).json(newFolder);
@@ -253,41 +211,38 @@ router.put('/:id', async (req, res) => {
 		const data = validationResult.data;
 
 		// Verificar que la carpeta existe
-		const existingFolder = await prisma.folder.findUnique({
-			where: { id },
-		});
+		const existingFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.id, id));
 
 		if (!existingFolder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: {
-				...(data.name && { name: data.name }),
-				...(data.description !== undefined && { description: data.description }),
-				...(data.emoji !== undefined && { emoji: data.emoji }),
-				...(data.color !== undefined && { color: data.color }),
-				...(data.featuredImage !== undefined && { featuredImage: data.featuredImage }),
-				...(data.isFavorite !== undefined && { isFavorite: data.isFavorite }),
-				...(data.parentId !== undefined && { parentId: data.parentId }),
-				...(data.presetId !== undefined && { presetId: data.presetId }),
-			},
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						documents: true,
-						file3Ds: true,
-						jsonFiles: true,
-						audios: true,
-					},
-				},
-				preset: true,
-				parent: true,
-				children: true,
-			},
+		const updatedFolder = await db.update(folders).set({
+			...(data.name && { name: data.name }),
+			...(data.description !== undefined && { description: data.description }),
+			...(data.emoji !== undefined && { emoji: data.emoji }),
+			...(data.color !== undefined && { color: data.color }),
+			...(data.featuredImage !== undefined && { featuredImage: data.featuredImage }),
+			...(data.isFavorite !== undefined && { isFavorite: data.isFavorite }),
+			...(data.parentId !== undefined && { parentId: data.parentId }),
+			...(data.presetId !== undefined && { presetId: data.presetId }),
+		}).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 
 		res.json(updatedFolder);
@@ -310,39 +265,23 @@ router.delete('/:id', async (req, res) => {
 		}
 
 		// Verificar que la carpeta existe
-		const existingFolder = await prisma.folder.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						documents: true,
-						file3Ds: true,
-						jsonFiles: true,
-						audios: true,
-					},
-				},
-			},
-		});
+		const existingFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.id, id));
 
 		if (!existingFolder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
 		}
 
 		// Verificar que la carpeta no tiene archivos asociados
-		const totalFiles = Object.values(existingFolder._count).reduce((sum, count) => sum + count, 0);
+		const totalFiles = await db.select({ totalFiles: folders.totalFiles }).from(folders).where(eq(folders.id, id));
 
-		if (totalFiles > 0) {
+		if (totalFiles.totalFiles > 0) {
 			return res.status(409).json({
 				error: 'No se puede eliminar la carpeta porque contiene archivos',
-				details: `La carpeta contiene ${totalFiles} archivos`,
+				details: `La carpeta contiene ${totalFiles.totalFiles} archivos`,
 			});
 		}
 
-		await prisma.folder.delete({
-			where: { id },
-		});
+		await db.delete(folders).where(eq(folders.id, id));
 
 		res.json({
 			success: true,
@@ -368,14 +307,9 @@ router.get('/:id/recent-images', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const images = await prisma.image.findMany({
-			where: { folderId: id },
-			select: { thumbnailUrl: true },
-			orderBy: { createdAt: 'desc' },
-			take: limit,
-		});
+		const folderImages = await db.select({ thumbnailUrl: images.thumbnailUrl }).from(images).where(eq(images.folderId, id)).orderBy(desc(images.createdAt)).limit(limit);
 
-		const imageUrls = images.map((img) => img.thumbnailUrl).filter((url): url is string => url !== null);
+		const imageUrls = folderImages.map((img) => img.thumbnailUrl).filter((url): url is string => url !== null);
 		res.json(imageUrls);
 	} catch (error) {
 		console.error('Error al obtener imágenes recientes de la carpeta:', error);
@@ -395,27 +329,20 @@ router.get('/:id/stats', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			select: {
-				totalSize: true,
-				lastIndexed: true,
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-					},
-				},
-			},
-		});
+		const folder = await db.select({
+			totalSize: folders.totalSize,
+			lastIndexed: folders.lastIndexed,
+			totalImages: count(images.id).from(images).where(eq(images.folderId, id)),
+			totalVideos: count(videos.id).from(videos).where(eq(videos.folderId, id)),
+		}).from(folders).leftJoin(images, eq(folders.id, images.folderId)).leftJoin(videos, eq(folders.id, videos.folderId)).where(eq(folders.id, id));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
 		}
 
 		const stats = {
-			totalImages: folder._count.images,
-			totalVideos: folder._count.videos,
+			totalImages: folder.totalImages,
+			totalVideos: folder.totalVideos,
 			totalSize: folder.totalSize,
 			lastActivity: folder.lastIndexed,
 		};
@@ -432,10 +359,7 @@ router.get('/:id/stats', async (req, res) => {
 // GET /api/folders/root - Obtener el ID de la carpeta raíz
 router.get('/root', async (req, res) => {
 	try {
-		const rootFolder = await prisma.folder.findFirst({
-			where: { parentFolderId: null },
-			select: { id: true },
-		});
+		const rootFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.parentFolderId, null));
 
 		if (!rootFolder) {
 			return res.status(404).json({ error: 'No se encontró la carpeta raíz' });
@@ -459,10 +383,7 @@ router.get('/:id/path', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			select: { path: true },
-		});
+		const folder = await db.select({ path: folders.path }).from(folders).where(eq(folders.id, id));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
@@ -486,10 +407,7 @@ router.get('/:id/name', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			select: { name: true },
-		});
+		const folder = await db.select({ name: folders.name }).from(folders).where(eq(folders.id, id));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
@@ -513,10 +431,7 @@ router.get('/by-path', async (req, res) => {
 			return res.status(400).json({ error: 'La ruta es requerida' });
 		}
 
-		const folder = await prisma.folder.findUnique({
-			where: { path: folderPath },
-			select: { id: true },
-		});
+		const folder = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, folderPath));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada para la ruta proporcionada' });
@@ -540,10 +455,7 @@ router.get('/:id/parent-id', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			select: { parentFolderId: true },
-		});
+		const folder = await db.select({ parentFolderId: folders.parentFolderId }).from(folders).where(eq(folders.id, id));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
@@ -568,9 +480,23 @@ router.patch('/:id/featured-image', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: { featuredImage: imageUrl },
+		const updatedFolder = await db.update(folders).set({ featuredImage: imageUrl }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 		res.json(updatedFolder);
 	} catch (error) {
@@ -592,9 +518,23 @@ router.patch('/:id/color', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: { color: color },
+		const updatedFolder = await db.update(folders).set({ color: color }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 		res.json(updatedFolder);
 	} catch (error) {
@@ -616,9 +556,23 @@ router.patch('/:id/emoji', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: { emoji: emoji },
+		const updatedFolder = await db.update(folders).set({ emoji: emoji }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 		res.json(updatedFolder);
 	} catch (error) {
@@ -640,9 +594,23 @@ router.patch('/:id/favorite', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: { isFavorite: isFavorite },
+		const updatedFolder = await db.update(folders).set({ isFavorite: isFavorite }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 		res.json(updatedFolder);
 	} catch (error) {
@@ -664,9 +632,23 @@ router.patch('/:id/description', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: { description: description },
+		const updatedFolder = await db.update(folders).set({ description: description }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 		res.json(updatedFolder);
 	} catch (error) {
@@ -688,9 +670,23 @@ router.patch('/:id/name', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: { name: name },
+		const updatedFolder = await db.update(folders).set({ name: name }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 		res.json(updatedFolder);
 	} catch (error) {
@@ -712,9 +708,23 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await prisma.folder.update({
-			where: { id },
-			data: { autoReindex: autoReindex },
+		const updatedFolder = await db.update(folders).set({ autoReindex: autoReindex }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
 		});
 		res.json(updatedFolder);
 	} catch (error) {
@@ -726,62 +736,5 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 	}
 });
 
-// DELETE /api/folders/:id - Eliminar carpeta
-router.delete('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de carpeta inválido' });
-		}
-
-		// Verificar que la carpeta existe
-		const existingFolder = await prisma.folder.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						documents: true,
-						file3Ds: true,
-						jsonFiles: true,
-						audios: true,
-					},
-				},
-			},
-		});
-
-		if (!existingFolder) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
-		}
-
-		// Verificar que la carpeta no tiene archivos asociados
-		const totalFiles = Object.values(existingFolder._count).reduce((sum, count) => sum + count, 0);
-
-		if (totalFiles > 0) {
-			return res.status(409).json({
-				error: 'No se puede eliminar la carpeta porque contiene archivos',
-				details: `La carpeta contiene ${totalFiles} archivos`,
-			});
-		}
-
-		await prisma.folder.delete({
-			where: { id },
-		});
-
-		res.json({
-			success: true,
-			message: 'Carpeta eliminada correctamente',
-			deletedId: id,
-		});
-	} catch (error) {
-		console.error('Error al eliminar carpeta:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
 export { router as foldersRouter };
+

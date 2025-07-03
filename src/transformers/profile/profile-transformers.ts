@@ -1,13 +1,14 @@
 /**
  * @file Transformadores para perfiles de usuario
  * @module transformers/profile
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { Profile as ProfileFromPrisma } from '@prisma/client';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import type { Profile } from '@/types/entities/profile';
 import { Language, type ProfileBase, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 /**
  * Tipo para el perfil extendido con datos adicionales
@@ -72,7 +73,7 @@ export function formatProfileDate(date: Date): string {
  * @returns Preferencias validadas y con valores por defecto
  * @throws Error si la validación falla
  */
-export function parseProfilePreferences(profile: ProfileFromPrisma): ProfilePreferencesSchemaType {
+export function parseProfilePreferences(profile: Profile): ProfilePreferencesSchemaType {
 	let rawPreferences: Record<string, any> = {}; // Initialize as empty object
 	try {
 		// Intentar parsear las preferencias desde profile.settings si existe
@@ -124,7 +125,7 @@ export function parseProfilePreferences(profile: ProfileFromPrisma): ProfilePref
  * @param profile - Perfil de Prisma
  * @returns Perfil extendido con datos adicionales para UI
  */
-export function transformProfile(profile: ProfileFromPrisma): ProfileExtended {
+export function transformProfile(profile: Profile): ProfileExtended {
 	const createdAt = new Date(profile.createdAt);
 	const updatedAt = new Date(profile.updatedAt);
 
@@ -155,7 +156,7 @@ export function transformProfile(profile: ProfileFromPrisma): ProfileExtended {
  * @param profiles - Lista de perfiles de Prisma
  * @returns Lista de perfiles extendidos
  */
-export function transformProfiles(profiles: ProfileFromPrisma[]): ProfileExtended[] {
+export function transformProfiles(profiles: Profile[]): ProfileExtended[] {
 	return profiles.map(transformProfile);
 }
 
