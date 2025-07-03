@@ -17,9 +17,9 @@ const logger = serverLogger.withContext('File3DTransformer');
  * @returns Un objeto File3DWithStats compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaFile3D(prismaFile3D: File3DBase): File3DWithStats {
-	if (!prismaFile3D) {
-		throw new TransformerError('El objeto de archivo 3D de Prisma no puede ser nulo.');
+export function fromDrizzleFile3D(drizzleFile3D: File3DBase): File3DWithStats {
+	if (!drizzleFile3D) {
+		throw new TransformerError('El objeto de archivo 3D de Drizzle no puede ser nulo.');
 	}
 
 	try {
@@ -27,21 +27,21 @@ export function fromPrismaFile3D(prismaFile3D: File3DBase): File3DWithStats {
 		const stats = {
 			polygonCount: 0,
 			textureSize: 0,
-			format: prismaFile3D.format,
+			format: drizzleFile3D.format,
 			vertexCount: 0,
 			materialCount: 0,
 		};
 
 		const file3DWithStats: File3DWithStats = {
-			...prismaFile3D,
+			...drizzleFile3D,
 			stats,
 		};
 
 		return file3DWithStats;
 	} catch (error) {
-		logger.error('Error transformando archivo 3D desde Prisma', {
+		logger.error('Error transformando archivo 3D desde Drizzle', {
 			error,
-			file3DId: prismaFile3D?.id,
+			file3DId: drizzleFile3D?.id,
 		});
 		throw new TransformerError(`Error al transformar el archivo 3D: ${(error as Error).message}`);
 	}
@@ -53,6 +53,6 @@ export function fromPrismaFile3D(prismaFile3D: File3DBase): File3DWithStats {
  * @param prismaFile3Ds - Un array de objetos File3D de Prisma.
  * @returns Un array de objetos File3DWithStats.
  */
-export function fromPrismaFile3Ds(prismaFile3Ds: File3DBase[]): File3DWithStats[] {
-	return prismaFile3Ds.map(fromPrismaFile3D);
+export function fromDrizzleFile3Ds(drizzleFile3Ds: File3DBase[]): File3DWithStats[] {
+	return drizzleFile3Ds.map(fromDrizzleFile3D);
 }

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useCreateFolder, useDeleteFolder, useUpdateFolder, useReindexFolder, useReindexAllFolders } from '@/lib/api/folders';
-import { clearMetadataCache } from '@/app/actions/metadata';
+import { clearMetadataCache } from '@/services/metadata/metadata.service';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { FolderCreateInput } from '@/types/entities/folder';

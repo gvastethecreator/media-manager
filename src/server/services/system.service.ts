@@ -1,7 +1,7 @@
 // src/server/services/system.service.ts
 
-import { createSettingsError, isSettingsError } from '@/app/actions/system/settings.errors'; // Mantener import para errores
-import { createSystemError } from '@/app/actions/system/system.errors'; // Mantener import para errores
+import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
+import { createSystemError } from '@/lib/errors/system';
 import { db } from '@/lib/drizzle';
 import { images, collections, tags, albums, notes } from '@/lib/drizzle/schema';
 import { count } from 'drizzle-orm';

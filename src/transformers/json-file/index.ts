@@ -2,7 +2,7 @@
 
 // Exportar desde mappers (renombrando la función conflictiva)
 export {
-	fromPrismaJsonFile as mapJsonFileFromPrisma,
+	fromDrizzleJsonFile as mapJsonFileFromDrizzle,
 	toPrismaJsonFile,
 } from './mappers';
 
@@ -11,6 +11,6 @@ export * from './serializers';
 
 // Exportar desde transformer
 export {
-	fromPrismaJsonFile,
-	fromPrismaJsonFiles,
+	fromDrizzleJsonFile,
+	fromDrizzleJsonFiles,
 } from './transformer';

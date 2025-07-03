@@ -306,23 +306,4 @@ function determineRarityLevel(
 	return 'common';
 }
 
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar fromDrizzleCharacter
- */
-export const fromPrismaCharacter = fromDrizzleCharacter;
 
-/**
- * @deprecated Usar fromDrizzleCharacters
- */
-export const fromPrismaCharacters = fromDrizzleCharacters;
-
-/**
- * @deprecated Usar toDrizzleCharacterCreate
- */
-export const toPrismaCharacterCreate = toDrizzleCharacterCreate;
-
-/**
- * @deprecated Usar toDrizzleCharacterUpdate
- */
-export const toPrismaCharacterUpdate = toDrizzleCharacterUpdate;

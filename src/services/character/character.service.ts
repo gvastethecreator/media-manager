@@ -12,7 +12,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { fromPrismaCharacter, fromPrismaCharacters } from '@/transformers/character/transformer';
+import { fromDrizzleCharacter, fromDrizzleCharacters } from '@/transformers/character/transformer';
 import type {
     CharacterCreateInput,
     CharacterSearchOptions,
@@ -157,7 +157,7 @@ export async function getCharacter(id: string): Promise<CharacterWithStats | nul
 
 		const rawCharacter = drizzleCharacter[0];
 
-		// Transformar a formato compatible con Prisma
+
 		const transformedCharacter = {
 			...rawCharacter,
 			isFavorite: Boolean(rawCharacter.isFavorite),
@@ -181,7 +181,7 @@ export async function getCharacter(id: string): Promise<CharacterWithStats | nul
 			},
 		};
 
-		const result = fromPrismaCharacter(transformedCharacter as any);
+		const result = fromDrizzleCharacter(transformedCharacter as any);
 		if (!result) {
 			throw new CharacterServiceError('Error al transformar personaje obtenido', 'TRANSFORM_ERROR');
 		}
@@ -242,7 +242,7 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			.from(characters)
 			.orderBy(desc(characters.createdAt));
 
-		// Transformar a formato compatible con Prisma
+
 		const transformedCharacters = drizzleCharacters.map((rawCharacter) => ({
 			...rawCharacter,
 			isFavorite: Boolean(rawCharacter.isFavorite),
@@ -266,7 +266,7 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			},
 		}));
 
-		const charactersResult = fromPrismaCharacters(transformedCharacters as any);
+		const charactersResult = fromDrizzleCharacters(transformedCharacters as any);
 		const total = transformedCharacters.length; // TODO: implementar conteo separado
 
 		logger.info(`✅ ${charactersResult.length} personajes encontrados`);
@@ -490,7 +490,7 @@ export async function toggleCharacterFavorite(id: string): Promise<CharacterWith
 		const newFavoriteState = !Boolean(currentCharacter[0].isFavorite);
 
 		await db.update(characters)
-			.set({ 
+			.set({
 				isFavorite: newFavoriteState,
 				updatedAt: new Date()
 			})

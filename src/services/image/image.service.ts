@@ -43,7 +43,7 @@
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
-import { extractMetadata } from '@/app/actions/metadata';
+import { extractMetadata } from '@/services/metadata/metadata.service';
 import { imageConfig } from '@/lib/config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
@@ -59,7 +59,21 @@ import {
 } from '@/lib/utils/errors/service-errors';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
-import type { GetImagesOptions, GetImagesResult } from '@/app/actions/images/image-types.actions';
+// Tipos movidos a types locales
+export interface GetImagesOptions {
+	folderId?: string;
+	limit?: number;
+	offset?: number;
+	search?: string;
+	sortBy?: string;
+	sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetImagesResult {
+	images: any[];
+	total: number;
+	hasMore: boolean;
+}
 import * as crypto from 'crypto';
 
 const SERVICE_NAME = 'ImageService';
@@ -550,7 +564,7 @@ class ImageService {
 				} as ImageWithStats;
 			});
 
-			
+
 
 			return {
 				images: transformedImages,

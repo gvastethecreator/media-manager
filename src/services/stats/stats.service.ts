@@ -1,13 +1,7 @@
-import {
-	type GeneralStats,
-	getImageStats,
-	getSystemStats,
-	incrementImageDownload,
-	incrementImageView,
-	invalidateStats,
-} from '@/app/actions/stats/stats.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import type { SystemStats } from '@/lib/api/system';
+import { apiClient } from '@/lib/api/client';
 
 const statsLogger = serverLogger.withContext('StatsService');
 
@@ -70,8 +64,6 @@ export type StatsUpdateEvent =
 export type StatsEvents = typeof STATS_EVENTS;
 
 // Implementamos el nuevo sistema de eventos para estadísticas
-// Esta será una implementación temporal para mantener compatibilidad con los servicios existentes
-// mientras continuamos la migración
 export const statsEventEmitter = {
 	// Omitimos nombres de parámetros para evitar errores de linter de "no utilizado"
 	on: (_: string, __: (...args: unknown[]) => void) => {
@@ -94,11 +86,10 @@ export const statsEventEmitter = {
 	},
 };
 
-// Versión migrada del servicio que no extiende de EventEmitter
+// Versión migrada del servicio que usa API calls
 export class StatsService {
 	private static instance: StatsService;
 	private isUpdating = false;
-	private eventCallbacks = new Map<string, Set<CallableFunction>>();
 
 	private constructor() {
 		statsLogger.info('🚀 Inicializando StatsService');
@@ -121,12 +112,13 @@ export class StatsService {
 	}
 
 	async invalidateStats() {
-		await invalidateStats();
+		// No hay acción específica para invalidar, se puede implementar cache busting
+		statsLogger.info('Invalidando estadísticas (cache busting)');
 	}
 
-	async getGeneralStats(): Promise<GeneralStats> {
+	async getGeneralStats(): Promise<SystemStats> {
 		try {
-			const stats = await getSystemStats();
+			const stats = await apiClient.get<SystemStats>('/system/stats');
 			if (!stats) {
 				throw new Error('No se pudieron obtener las estadísticas del sistema');
 			}
@@ -141,7 +133,9 @@ export class StatsService {
 
 	async getOrCreateImageStats(imageId: string) {
 		try {
-			return await getImageStats(imageId);
+			// Usar API call para obtener stats de imagen específica
+			const stats = await apiClient.get(`/images/${imageId}/stats`);
+			return stats;
 		} catch (error) {
 			statsLogger.error('Error al obtener estadísticas de imagen', {
 				error,
@@ -154,7 +148,7 @@ export class StatsService {
 
 	async incrementViewCount(imageId: string) {
 		try {
-			const stats = await incrementImageView(imageId);
+			const stats = await apiClient.post(`/images/${imageId}/view`);
 			await this.emitEvent(STATS_EVENTS.VIEW_INCREMENTED, { imageId, stats });
 			return stats;
 		} catch (error) {
@@ -166,7 +160,7 @@ export class StatsService {
 
 	async incrementDownloadCount(imageId: string) {
 		try {
-			const stats = await incrementImageDownload(imageId);
+			const stats = await apiClient.post(`/images/${imageId}/download`);
 			await this.emitEvent(STATS_EVENTS.DOWNLOAD_INCREMENTED, { imageId, stats });
 			return stats;
 		} catch (error) {

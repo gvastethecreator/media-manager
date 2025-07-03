@@ -3,7 +3,7 @@
  * @module services/settings
  */
 
-import { createSettingsError } from '@/app/actions/system/settings.errors';
+import { createSettingsError } from '@/lib/errors/settings';
 import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';

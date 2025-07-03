@@ -4,6 +4,9 @@ import { db } from '@/lib/drizzle';
 import { albums, images, videos, albumsToImages } from '@/lib/drizzle/schema';
 import { eq, like, or, desc, asc, count } from 'drizzle-orm';
 import { serializeAlbum } from '@/transformers/album';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
+import type { AlbumWithStats } from '@/types/entities/album';
 
 /**
  * @file albums.ts
@@ -40,6 +43,37 @@ const AlbumCreateSchema = z.object({
 });
 
 const AlbumUpdateSchema = AlbumCreateSchema.partial();
+
+const albumLogger = serverLogger.withContext('AlbumsAPI');
+
+interface AlbumCardData extends Omit<AlbumWithStats, 'filters'> {
+	recentImages?: string[];
+	recentVideos?: string[];
+	totalSize?: number;
+	filters?: unknown[] | string;
+	metadata?: {
+		itemCount?: number;
+		imageCount?: number;
+		videoCount?: number;
+		coverImageUrl?: string | null;
+		thumbnailUrls?: string[];
+		lastModified?: Date | string;
+		entitiesCount?: number;
+	};
+	viewConfig?: {
+		theme?: string;
+		layout?: string;
+		thumbnailSize?: 'small' | 'medium' | 'large';
+	};
+}
+
+interface ThumbnailImage {
+	id: string;
+	name?: string | null;
+	thumbnailUrl: string;
+	url?: string;
+	isVideo?: boolean;
+}
 
 // GET /api/albums - Listar albums
 albumsRouter.get('/', async (req, res) => {
@@ -290,3 +324,466 @@ albumsRouter.delete('/:id/images/:imageId', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+
+/**
+ * GET /albums/:id/card-data
+ * Obtiene los datos de un álbum para mostrar en una tarjeta
+ */
+albumsRouter.get('/:id/card-data', async (req, res) => {
+	try {
+		const { id: albumId } = req.params;
+
+		const album = await db.query.albums.findFirst({
+			where: eq(albums.id, albumId),
+			with: {
+				images: {
+					columns: { id: true },
+				},
+				videos: {
+					columns: { id: true },
+				},
+				collections: {
+					columns: { id: true },
+				},
+				tags: {
+					columns: { id: true },
+				},
+				characters: {
+					columns: { id: true },
+				},
+				places: {
+					columns: { id: true },
+				},
+				worldItems: {
+					columns: { id: true },
+				},
+				concepts: {
+					columns: { id: true },
+				},
+				prompts: {
+					columns: { id: true },
+				},
+				notes: {
+					columns: { id: true },
+				},
+				wildcards: {
+					columns: { id: true },
+				},
+				properties: {
+					columns: { id: true },
+				},
+				groups: {
+					columns: { id: true },
+				},
+			},
+		});
+
+		if (!album) {
+			return res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });
+		}
+
+		// Obtener imágenes recientes relacionadas con este álbum
+		const recentImages = await db.query.images.findMany({
+			where: inArray(images.id, album.images.map((img) => img.id)),
+			columns: {
+				id: true,
+				path: true,
+				thumbnailWidth: true,
+				thumbnailHeight: true,
+			},
+			orderBy: desc(images.updatedAt),
+			limit: 6,
+		});
+
+		const recentImagePaths = recentImages.map((img) => `/api/thumbnails/${img.id}`);
+
+		// Obtener videos recientes relacionados con este álbum
+		const recentVideos = await db.query.videos.findMany({
+			where: inArray(videos.id, album.videos.map((vid) => vid.id)),
+			columns: {
+				id: true,
+				path: true,
+				thumbnailWidth: true,
+				thumbnailHeight: true,
+			},
+			orderBy: desc(videos.updatedAt),
+			limit: 3,
+		});
+
+		const recentVideoPaths = recentVideos.map((video) => `/api/video-thumbnails/${video.id}`);
+
+		// Intentar parsear el campo filters si existe
+		let filters = [];
+		if (typeof album.filters === 'string' && album.filters !== 'empty_array') {
+			try {
+				filters = JSON.parse(album.filters);
+			} catch (e) {
+				filters = [];
+			}
+		}
+
+		// Calcular el tamaño total de las imágenes y videos en el álbum
+		const { totalSize, imageCount, videoCount, entitiesCount } = await getAlbumStats(albumId);
+
+		// Crear objeto de metadata
+		const metadata = {
+			itemCount: imageCount + videoCount,
+			imageCount,
+			videoCount,
+			lastModified: album.updatedAt,
+			coverImageUrl: album.featuredImage ? `/api/images/${album.featuredImage}` : null,
+			thumbnailUrls: recentImagePaths.slice(0, 3),
+			entitiesCount,
+		};
+
+		// Crear viewConfig básico
+		const viewConfig = {
+			theme: 'default',
+			layout: 'grid',
+			thumbnailSize: 'medium' as 'small' | 'medium' | 'large',
+		};
+
+		const result: AlbumCardData = {
+			...album,
+			stats: {
+				imageCount: album.images.length,
+				videoCount: album.videos.length,
+				collectionCount: album.collections.length,
+				tagCount: album.tags.length,
+				characterCount: album.characters.length,
+				placeCount: album.places.length,
+				worldItemCount: album.worldItems.length,
+				conceptCount: album.concepts.length,
+				promptCount: album.prompts.length,
+				noteCount: album.notes.length,
+				wildcardCount: album.wildcards.length,
+				propertyCount: album.properties.length,
+				groupCount: album.groups.length,
+			},
+			recentImages: recentImagePaths,
+			recentVideos: recentVideoPaths,
+			totalSize,
+			filters,
+			metadata,
+			viewConfig,
+		};
+
+		res.json(result);
+	} catch (error) {
+		albumLogger.error('Error getting album card data', { error, albumId: req.params.id });
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+/**
+ * GET /albums/cards
+ * Obtiene una lista de álbumes para mostrar en una galería de tarjetas
+ */
+albumsRouter.get('/cards', async (req, res) => {
+	try {
+		const {
+			limit = '20',
+			category,
+			searchTerm,
+			orderBy = 'updatedAt',
+			orderDir = 'desc',
+			isFavorite,
+			includeStats = 'true',
+		} = req.query;
+
+		const limitNum = Number.parseInt(limit as string, 10);
+		const includeStatsFlag = includeStats === 'true';
+
+		const conditions = [];
+
+		// Filtros
+		if (category) {
+			conditions.push(eq(albums.category, category as string));
+		}
+
+		if (searchTerm) {
+			conditions.push(
+				or(
+					like(albums.name, `%${searchTerm}%`),
+					like(albums.description, `%${searchTerm}%`)
+				)
+			);
+		}
+
+		if (isFavorite === 'true') {
+			conditions.push(eq(albums.isFavorite, true));
+		}
+
+		// Ordenamiento
+		const orderColumn = orderBy === 'name' ? albums.name : orderBy === 'createdAt' ? albums.createdAt : albums.updatedAt;
+		const orderDirection = orderDir === 'asc' ? asc : desc;
+
+		const albumResults = await db.query.albums.findMany({
+			where: conditions.length > 0 ? and(...conditions) : undefined,
+			with: includeStatsFlag ? {
+				images: { columns: { id: true } },
+				videos: { columns: { id: true } },
+				collections: { columns: { id: true } },
+				tags: { columns: { id: true } },
+				characters: { columns: { id: true } },
+				places: { columns: { id: true } },
+				worldItems: { columns: { id: true } },
+				concepts: { columns: { id: true } },
+				prompts: { columns: { id: true } },
+				notes: { columns: { id: true } },
+				wildcards: { columns: { id: true } },
+				properties: { columns: { id: true } },
+				groups: { columns: { id: true } },
+			} : undefined,
+			orderBy: orderDirection(orderColumn),
+			limit: limitNum,
+		});
+
+		// Transformar resultados a AlbumCardData
+		const results: AlbumCardData[] = albumResults.map((album) => ({
+			...album,
+			stats: includeStatsFlag ? {
+				imageCount: album.images?.length || 0,
+				videoCount: album.videos?.length || 0,
+				collectionCount: album.collections?.length || 0,
+				tagCount: album.tags?.length || 0,
+				characterCount: album.characters?.length || 0,
+				placeCount: album.places?.length || 0,
+				worldItemCount: album.worldItems?.length || 0,
+				conceptCount: album.concepts?.length || 0,
+				promptCount: album.prompts?.length || 0,
+				noteCount: album.notes?.length || 0,
+				wildcardCount: album.wildcards?.length || 0,
+				propertyCount: album.properties?.length || 0,
+				groupCount: album.groups?.length || 0,
+			} : {
+				imageCount: 0, videoCount: 0, collectionCount: 0, tagCount: 0,
+				characterCount: 0, placeCount: 0, worldItemCount: 0, conceptCount: 0,
+				promptCount: 0, noteCount: 0, wildcardCount: 0, propertyCount: 0, groupCount: 0,
+			},
+		}));
+
+		res.json(results);
+	} catch (error) {
+		albumLogger.error('Error getting albums for cards', { error });
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+/**
+ * GET /albums/:id/recent-media
+ * Obtiene medios recientes de un álbum
+ */
+albumsRouter.get('/:id/recent-media', async (req, res) => {
+	try {
+		const { id: albumId } = req.params;
+		const { limit = '6' } = req.query;
+		const limitNum = Number.parseInt(limit as string, 10);
+
+		const album = await db.query.albums.findFirst({
+			where: eq(albums.id, albumId),
+			with: {
+				images: { columns: { id: true } },
+				videos: { columns: { id: true } },
+			},
+		});
+
+		if (!album) {
+			return res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });
+		}
+
+		const media: ThumbnailImage[] = [];
+
+		// Obtener imágenes recientes
+		if (album.images.length > 0) {
+			const recentImages = await db.query.images.findMany({
+				where: inArray(images.id, album.images.map((img) => img.id)),
+				columns: {
+					id: true,
+					name: true,
+					path: true,
+				},
+				orderBy: desc(images.updatedAt),
+				limit: Math.ceil(limitNum * 0.8), // 80% para imágenes
+			});
+
+			media.push(...recentImages.map((img): ThumbnailImage => ({
+				id: img.id,
+				name: img.name,
+				thumbnailUrl: `/api/thumbnails/${img.id}`,
+				url: `/api/images/${img.id}`,
+				isVideo: false,
+			})));
+		}
+
+		// Obtener videos recientes
+		if (album.videos.length > 0) {
+			const recentVideos = await db.query.videos.findMany({
+				where: inArray(videos.id, album.videos.map((vid) => vid.id)),
+				columns: {
+					id: true,
+					name: true,
+					path: true,
+				},
+				orderBy: desc(videos.updatedAt),
+				limit: Math.ceil(limitNum * 0.2), // 20% para videos
+			});
+
+			media.push(...recentVideos.map((video): ThumbnailImage => ({
+				id: video.id,
+				name: video.name,
+				thumbnailUrl: `/api/video-thumbnails/${video.id}`,
+				url: `/api/videos/${video.id}`,
+				isVideo: true,
+			})));
+		}
+
+		// Limitar el resultado final
+		const result = media.slice(0, limitNum);
+		res.json(result);
+	} catch (error) {
+		albumLogger.error('Error getting recent album media', { error, albumId: req.params.id });
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+/**
+ * GET /albums/:id/stats
+ * Obtiene estadísticas de un álbum
+ */
+albumsRouter.get('/:id/stats', async (req, res) => {
+	try {
+		const { id: albumId } = req.params;
+		const stats = await getAlbumStats(albumId);
+		res.json(stats);
+	} catch (error) {
+		albumLogger.error('Error getting album stats', { error, albumId: req.params.id });
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+/**
+ * GET /albums/search
+ * Busca álbumes con filtros avanzados
+ */
+albumsRouter.get('/search', async (req, res) => {
+	try {
+		const {
+			searchTerm,
+			limit = '20',
+			offset = '0',
+			category,
+			orderBy = 'updatedAt',
+			orderDir = 'desc',
+			includeHidden = 'false',
+			includeStats = 'true',
+		} = req.query;
+
+		if (!searchTerm) {
+			return res.status(400).json({ error: 'searchTerm es requerido' });
+		}
+
+		const limitNum = Number.parseInt(limit as string, 10);
+		const offsetNum = Number.parseInt(offset as string, 10);
+		const includeStatsFlag = includeStats === 'true';
+		const includeHiddenFlag = includeHidden === 'true';
+
+		const conditions = [
+			or(
+				like(albums.name, `%${searchTerm}%`),
+				like(albums.description, `%${searchTerm}%`)
+			)
+		];
+
+		if (category) {
+			conditions.push(eq(albums.category, category as string));
+		}
+
+		if (!includeHiddenFlag) {
+			conditions.push(eq(albums.isHidden, false));
+		}
+
+		// Ordenamiento
+		const orderColumn = orderBy === 'name' ? albums.name : orderBy === 'createdAt' ? albums.createdAt : albums.updatedAt;
+		const orderDirection = orderDir === 'asc' ? asc : desc;
+
+		const albumResults = await db.query.albums.findMany({
+			where: and(...conditions),
+			with: includeStatsFlag ? {
+				images: { columns: { id: true } },
+				videos: { columns: { id: true } },
+				collections: { columns: { id: true } },
+				tags: { columns: { id: true } },
+				characters: { columns: { id: true } },
+				places: { columns: { id: true } },
+				worldItems: { columns: { id: true } },
+				concepts: { columns: { id: true } },
+				prompts: { columns: { id: true } },
+				notes: { columns: { id: true } },
+				wildcards: { columns: { id: true } },
+				properties: { columns: { id: true } },
+				groups: { columns: { id: true } },
+			} : undefined,
+			orderBy: orderDirection(orderColumn),
+			limit: limitNum,
+			offset: offsetNum,
+		});
+
+		// Transformar resultados
+		const results: AlbumCardData[] = albumResults.map((album) => ({
+			...album,
+			stats: includeStatsFlag ? {
+				imageCount: album.images?.length || 0,
+				videoCount: album.videos?.length || 0,
+				collectionCount: album.collections?.length || 0,
+				tagCount: album.tags?.length || 0,
+				characterCount: album.characters?.length || 0,
+				placeCount: album.places?.length || 0,
+				worldItemCount: album.worldItems?.length || 0,
+				conceptCount: album.concepts?.length || 0,
+				promptCount: album.prompts?.length || 0,
+				noteCount: album.notes?.length || 0,
+				wildcardCount: album.wildcards?.length || 0,
+				propertyCount: album.properties?.length || 0,
+				groupCount: album.groups?.length || 0,
+			} : {
+				imageCount: 0, videoCount: 0, collectionCount: 0, tagCount: 0,
+				characterCount: 0, placeCount: 0, worldItemCount: 0, conceptCount: 0,
+				promptCount: 0, noteCount: 0, wildcardCount: 0, propertyCount: 0, groupCount: 0,
+			},
+		}));
+
+		res.json(results);
+	} catch (error) {
+		albumLogger.error('Error searching albums', { error });
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+/**
+ * Helper function para obtener estadísticas de un álbum
+ */
+async function getAlbumStats(albumId: string): Promise<{
+	imageCount: number;
+	videoCount: number;
+	totalSize: number;
+	entitiesCount: number;
+}> {
+	try {
+		const stats = await OptimizedStatsService.getAlbumStats(albumId);
+		return {
+			imageCount: stats.imageCount || 0,
+			videoCount: stats.videoCount || 0,
+			totalSize: stats.totalSize || 0,
+			entitiesCount: stats.entitiesCount || 0,
+		};
+	} catch (error) {
+		albumLogger.error('Error getting album stats from OptimizedStatsService', { error, albumId });
+		return {
+			imageCount: 0,
+			videoCount: 0,
+			totalSize: 0,
+			entitiesCount: 0,
+		};
+	}
+}
