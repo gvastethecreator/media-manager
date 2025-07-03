@@ -4,24 +4,24 @@
  * @description Unifica todos los slices y la lógica de estado para los conceptos.
  */
 
-import { create, type StateCreator } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import {
-	createConcept as createConceptAction,
-	deleteConcept as deleteConceptAction,
-	getConcepts as getConceptsAction,
-	updateConcept as updateConceptAction,
-} from '@/app/actions/concepts';
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import {
-	ConceptComplete,
-	ConceptCreateInput,
-	ConceptSortOption,
-	ConceptUpdateInput,
-	ConceptViewMode,
-	ConceptWithStats,
+    createConcept as createConceptAction,
+    deleteConcept as deleteConceptAction,
+    getConcepts as getConceptsAction,
+    updateConcept as updateConceptAction,
+} from '@/services/concept/concept.service';
+import {
+    ConceptComplete,
+    ConceptCreateInput,
+    ConceptSortOption,
+    ConceptUpdateInput,
+    ConceptViewMode,
+    ConceptWithStats,
 } from '@/types/entities/concept';
+import { create, type StateCreator } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 import type { ConceptStore } from './types';
 
 const storeLogger = clientLogger.withContext('ConceptStore');
@@ -159,3 +159,4 @@ export const useConceptStore = create<ConceptStore>()(
 export { selectSelectedConcept } from './store';
 // --- RE-EXPORTS ---
 export * from './types';
+

@@ -3,8 +3,9 @@
 // import { addImageToAlbum } from '@/app/actions/albums/album.actions';
 // TODO: addImageToCollection no está implementada aún
 // import { addImageToCollection } from '@/app/actions/collections/collection-images.actions';
-import { addImageToTag } from '@/app/actions/tags/relation.actions';
+
 import { clientLogger } from '@/lib/logger/client-logger';
+import { addImageToTag } from '@/services/tag/tag.service';
 import { toast } from '@/services/toast';
 
 // Importaciones de stores en entidades

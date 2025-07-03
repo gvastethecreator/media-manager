@@ -9,7 +9,7 @@ import {
 	deleteTag as deleteTagAction,
 	getTags as getTagsAction,
 	updateTag as updateTagAction,
-} from '@/app/actions/tags/tag.actions';
+} from '@/services/tag/tag.service';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';

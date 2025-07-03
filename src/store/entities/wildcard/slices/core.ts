@@ -4,17 +4,10 @@
  */
 
 import type { StateCreator } from 'zustand';
-import {
-	createWildcard as createWildcardAction,
-	deleteWildcard as deleteWildcardAction,
-	getWildcard as getWildcardAction,
-	getWildcards as getWildcardsAction,
-	moveWildcard as moveWildcardAction,
-	updateWildcard as updateWildcardAction,
-} from '@/app/actions/wildcards';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { arrayToRecord } from '@/lib/utils/array.utils';
 import { toastService } from '@/services/toast';
+import {\n\tcreateWildcard as createWildcardAction,\n\tdeleteWildcard as deleteWildcardAction,\n\tgetWildcard as getWildcardAction,\n\tgetWildcards as getWildcardsAction,\n\tmoveWildcard as moveWildcardAction,\n\tupdateWildcard as updateWildcardAction,\n} from '@/services/wildcard/wildcard.service';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import type { WildcardState } from '../types';
 

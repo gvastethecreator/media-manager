@@ -3,9 +3,9 @@
  * @module store/entities/profile/actions
  */
 
-import type { StateCreator } from 'zustand';
-import { getActiveProfile, getProfiles } from '@/app/actions/profiles';
+import { getActiveProfile, getProfiles } from '@/services/profile/profile.service';
 import type { ProfileExtended, ProfileFilters, ProfilePaginationOptions } from '@/types/entities/profile';
+import type { StateCreator } from 'zustand';
 import type { ProfileStoreState } from './types';
 
 /**
