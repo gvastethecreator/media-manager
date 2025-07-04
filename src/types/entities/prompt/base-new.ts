@@ -86,27 +86,6 @@ export interface PromptStatistics {
 }
 
 /**
- * 🔢 Conteos de Drizzle para Prompt
- */
-export interface PromptCounts {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-}
-
-/**
  * ✨ Modelo extendido de Prompt con estadísticas.
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */

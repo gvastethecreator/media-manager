@@ -14,13 +14,13 @@ graph TD
     D --> E[ThumbnailWithStats]
     F[ThumbnailSerializer] --> G[API Response]
     E --> F
-    
+
     subgraph "Tipos Base"
         H[ThumbnailStatistics]
         I[ThumbnailCreateInput]
         J[ThumbnailUpdateInput]
     end
-    
+
     B --> H
     B --> I
     B --> J

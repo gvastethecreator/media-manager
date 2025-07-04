@@ -1,5 +1,7 @@
 import { memo } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+// import { FoldersView } from '@/components/views';
+import { FoldersViewMinimal } from './folders/views/folders-view-minimal';
 
 export const ViewContainer = memo(function ViewContainer() {
 	const { currentView } = useNavigationStore();
@@ -7,7 +9,7 @@ export const ViewContainer = memo(function ViewContainer() {
 	const renderView = () => {
 		switch (currentView) {
 			case 'folders':
-				return <FoldersView />;
+			return <FoldersViewMinimal />;
 
 			// Para el resto, usar placeholder temporal mientras los incorporo uno por uno
 			default:

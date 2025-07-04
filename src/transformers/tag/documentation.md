@@ -14,14 +14,14 @@ graph TD
     D --> E[TagWithStats]
     F[TagSerializer] --> G[API Response]
     E --> F
-    
+
     subgraph "Tipos Base"
         H[TagStatistics]
         I[TagWithCounts]
         J[TagCreateInput]
         K[TagUpdateInput]
     end
-    
+
     B --> H
     B --> I
     B --> J

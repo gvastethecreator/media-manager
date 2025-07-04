@@ -2,10 +2,10 @@
 
 ## Información General
 
-**Módulo:** `transformers/settings`  
-**Entidad:** Settings (Configuración del sistema)  
-**Estado:** ✅ MIGRADO A DRIZZLE - Julio 2025  
-**Base de datos:** SQLite con Drizzle ORM  
+**Módulo:** `transformers/settings`
+**Entidad:** Settings (Configuración del sistema)
+**Estado:** ✅ MIGRADO A DRIZZLE - Julio 2025
+**Base de datos:** SQLite con Drizzle ORM
 
 ## Descripción
 
@@ -160,11 +160,11 @@ El transformer utiliza Zod para validación robusta:
 
 ```typescript
 // Esquemas disponibles
-import { 
+import {
   settingsSchema,
   updateSettingsSchema,
   appearanceSchema,
-  notificationsSchema 
+  notificationsSchema
 } from '@/transformers/settings/schema';
 
 // Validación segura
@@ -213,23 +213,23 @@ graph TD
     A[Request Data] --> B{¿Desde DB?}
     B -->|Sí| C[fromDatabase]
     B -->|No| D[normalize]
-    
+
     C --> E[fromDbToSettings]
     E --> F[fromStorageSettings]
     F --> G[validateSettings]
-    
+
     D --> H[normalizeSettings]
     H --> G
-    
+
     G --> I[Settings Object]
-    
+
     I --> J{¿Para cliente?}
     J -->|Sí| K[forClient]
     J -->|No| L[toDatabase]
-    
+
     K --> M[sanitizeSettingsForClient]
     M --> N[Cliente Response]
-    
+
     L --> O[toStorageSettings]
     O --> P[fromSettingsToDbInsert]
     P --> Q[Database Insert]
@@ -260,7 +260,7 @@ Las funciones antiguas están disponibles con warnings de deprecación:
 // ⚠️ Deprecated - usa normalize()
 import { deserializeSettings } from '@/transformers/settings';
 
-// ⚠️ Deprecated - usa forClient()  
+// ⚠️ Deprecated - usa forClient()
 import { serializeSettings } from '@/transformers/settings';
 ```
 
@@ -279,7 +279,7 @@ describe('Settings Validation', () => {
       privacy: { shareUsageData: false, storeCookies: true, storeHistory: true },
       advanced: { apiKey: null, devMode: false, experimentalFeatures: false }
     };
-    
+
     expect(() => validateSettings(settings)).not.toThrow();
   });
 });
@@ -299,7 +299,7 @@ describe('Settings Mappers', () => {
       data: JSON.stringify({ fontSize: 18, devMode: true }),
       profileId: 'user-1'
     };
-    
+
     const settings = fromDbToSettings(dbData);
     expect(settings.appearance.theme).toBe('dark');
     expect(settings.appearance.fontSize).toBe(18);
@@ -331,5 +331,5 @@ logger.debug('Settings operation', { data });
 
 ---
 
-**Última actualización:** Julio 2025  
+**Última actualización:** Julio 2025
 **Próximas mejoras:** Soporte para configuraciones por rol, temas personalizados avanzados

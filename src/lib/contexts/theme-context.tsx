@@ -29,7 +29,7 @@ export function ThemeProvider({
 	children,
 	defaultTheme = 'system',
 	storageKey = 'theme',
-	attribute = 'data-theme',
+	attribute = 'class',
 	enableSystem = true,
 }: ThemeProviderProps) {
 	const [theme, setTheme] = useState<Theme>(defaultTheme);
@@ -59,8 +59,8 @@ export function ThemeProvider({
 		// Aplicar nueva clase
 		root.classList.add(themeToApply);
 
-		// Aplicar atributo si se especifica
-		if (attribute) {
+		// Aplicar atributo si se especifica y no es 'class'
+		if (attribute && attribute !== 'class') {
 			root.setAttribute(attribute, themeToApply);
 		}
 	};
@@ -117,4 +117,4 @@ export function useTheme() {
 }
 
 // Exportar tipos para compatibilidad
-export type { Theme, ThemeContextType as ThemeProviderProps };
+export type { Theme, ThemeProviderProps };

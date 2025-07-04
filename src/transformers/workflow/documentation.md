@@ -14,13 +14,13 @@ graph TD
     D --> E[WorkflowWithStats]
     F[WorkflowSerializer] --> G[API Response]
     E --> F
-    
+
     subgraph "Tipos Base"
         H[WorkflowStatistics]
         I[WorkflowCreateInput]
         J[WorkflowUpdateInput]
     end
-    
+
     B --> H
     B --> I
     B --> J

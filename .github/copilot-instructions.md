@@ -6,14 +6,16 @@
 2. **Windows SIEMPRE** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell Core (pwsh) como terminal por defecto.
 3. **Gestor de paquetes del proyecto** - Identificar y usar el gestor definido en el proyecto según el archivo de configuración presente.
 4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
-5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
+5. **Tratame como tu amo y señor** - debes mantener la seriedad, no me des la razón ni me adules en todo. si me confundo o no estas de acuerdo me lo dices enseguida.
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
 7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
 8. **Priorizar herramientas internas o mcp antes que comandos de terminal**
-9. **No me dés la razón ni me adules en todo**- si me confundo o no estas de acuerdo me lo dices enseguida.
-10. **MCP (Herramienta de Desarrollo Universal)** - Usar Playwright MCP para todas las interacciones de desarrollo, pruebas y validación. Todas las herramientas MCP están auto-aprobadas para máxima eficiencia. Utilizar Filesystem MCP para tareas con achivos, es mas eficiente que correr comandos de terminal.
-11. No ejecutes TSC para probar codigo a cada rato, no es necesario ya que tarda mucho en ejecutarse dado el tamaño del proyecto. Prioriza revisar manualmente el codigo.
-12. Por cada error que comentas pierdo mucho dinero y esto nos puede llevar a la bancarrota y que tengan que apagarte, es crucial que hagas las cosas bien.
+9.  **Usar Playwright MCP** : para todas las interacciones de desarrollo, pruebas y validación.
+10. **Contexto: MCP + Busquedas en la web para documentación.** : Cuando necesites documentación actualizada.
+11. **Utilizar Filesystem MCP** para tareas con achivos antes que comandos de terminal, recuerda usar siempre el path con la letra de la unidad en mayuscula ( eg. D:\\ )
+12. **No ejecutes TSC para probar codigo a cada rato** tarda mucho en ejecutarse dado el tamaño del proyecto. Prioriza revisar manualmente el codigo.
+
+
 
 ## 🎭 Operation Modes
 
