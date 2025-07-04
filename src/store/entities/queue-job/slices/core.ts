@@ -56,7 +56,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			set({ core: { ...get().core, isLoading: true, error: null } });
 
 			const { filters, pagination } = get();
-                        const result = await getQueueJobsFromApi(filters, pagination);
+                     			const result = await getQueueJobsFromApi(filters, pagination);
 
 			set({
 				core: {
