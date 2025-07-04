@@ -8,7 +8,7 @@ import { useThumbnailStore } from '@/store/thumbnails.store';
 const RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 30000;
 const MAX_RECONNECT_ATTEMPTS = 5;
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 type EventSourceMessage = {
 	data: string;
