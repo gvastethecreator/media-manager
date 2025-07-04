@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 
 // Tipos de campos soportados por el formulario
 export type EntityFieldType =

@@ -13,7 +13,7 @@ import {
         updateTagInApi,
 } from '@/lib/api/client/tag.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import type { TagCoreActions, TagCoreState, TagStore } from '../types';
 

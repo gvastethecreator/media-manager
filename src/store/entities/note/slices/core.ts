@@ -6,7 +6,7 @@ import {
     getNotesFromApi,
     updateNoteInApi,
 } from '@/lib/api/client/note.client';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import { adaptNoteCompleteToWithStats, adaptNotesCompleteToWithStats } from '@/transformers/note/note-adapter';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import { StateCreator } from 'zustand';
