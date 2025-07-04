@@ -7,8 +7,8 @@
  */
 
 import {
-	WorkflowBase,
-	WorkflowWithStats,
+    WorkflowBase,
+    WorkflowWithStats,
 } from '@/types/entities/workflow';
 
 /**

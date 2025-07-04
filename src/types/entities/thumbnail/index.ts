@@ -7,18 +7,16 @@
 // ✅ EXPORTACIONES PRINCIPALES (estructura canónica)
 export type {
 	ThumbnailBase,
-	ThumbnailStatistics,
-	ThumbnailWithStats,
-	ThumbnailCreateInput,
-	ThumbnailUpdateInput,
 	// Legacy para compatibilidad temporal
 	ThumbnailComplete,
+	ThumbnailCreateInput,
 	ThumbnailExtended,
+	ThumbnailStatistics,
+	ThumbnailUpdateInput,
+	ThumbnailWithStats,
 } from './base';
 
-export {
-	ThumbnailQuality,
-} from './base';
+export { ThumbnailQuality } from './base';
 
 // 🔧 LEGACY: Exportaciones del archivo types.ts (en transición)
 export type {

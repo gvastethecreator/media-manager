@@ -1,15 +1,15 @@
 /**
- * @file Tipos base para la entidad WorldItem
- * @module types/entities/world-item/base
- * @description Define los tipos base de WorldItem siguiendo el patrón EntityWithStats
+ * 🌍 WORLD-ITEM BASE TYPES
+ *
+ * Tipos base para world-items usando tipos locales de Drizzle.
+ *
+ * @updated 2025-01-27
  */
-
-import type { BaseEntity } from '@/types/common/base';
 
 /**
- * 🎯 Tipo base para WorldItem derivado del schema de Drizzle
+ * 🗿 Modelo base de WorldItem, derivado del schema de Drizzle.
  */
-export interface WorldItemBase extends BaseEntity {
+export interface WorldItemBase {
 	id: string;
 	name: string;
 	description: string | null;

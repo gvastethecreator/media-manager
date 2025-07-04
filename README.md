@@ -24,8 +24,6 @@ La filosofía del sistema combina **organización física** (estructura de carpe
 
 ## 🏗️ Sistema de Organización
 
-### 📋 Entidades Básicas
-
 #### 🏷️ Tags
 
 - Etiquetas simples para categorización rápida

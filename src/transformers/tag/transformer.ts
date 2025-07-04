@@ -5,11 +5,11 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { handleTransformerError } from '@/lib/utils/transformers/errors';
-import type { TagBase, TagWithStats, TagStatistics } from '@/types/entities/tag';
 import { calculateCompleteness } from '@/lib/utils/transformers';
-import { normalizeTag, sanitizeTagForClient, toStorageTag, fromStorageTag } from './serializers';
-import { validateTag, safeValidateTag } from './validators';
+import { handleTransformerError } from '@/lib/utils/transformers/errors';
+import type { TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
+import { fromStorageTag, normalizeTag, sanitizeTagForClient, toStorageTag } from './serializers';
+import { safeValidateTag, validateTag } from './validators';
 
 const logger = serverLogger.withContext('TagTransformer');
 
@@ -19,17 +19,17 @@ const logger = serverLogger.withContext('TagTransformer');
 export function fromDatabase(dbData: any): TagBase {
 	try {
 		logger.debug('🔄 Transformando Tag desde DB', { dbData });
-		
+
 		if (!dbData) {
 			throw new Error('Datos de DB requeridos para transformar Tag');
 		}
 
 		// Aplicar transformaciones de deserialización
 		const processed = fromStorageTag(dbData);
-		
+
 		// Validar resultado
 		const validated = validateTag(processed);
-		
+
 		logger.debug('✅ Tag transformado desde DB exitosamente', { validated });
 		return validated;
 	} catch (error) {
@@ -44,17 +44,17 @@ export function fromDatabase(dbData: any): TagBase {
 export function toDatabase(tag: TagBase): any {
 	try {
 		logger.debug('🔄 Transformando Tag para DB insert', { tag });
-		
+
 		if (!tag) {
 			throw new Error('Objeto Tag requerido');
 		}
 
 		// Validar entrada
 		const validated = validateTag(tag);
-		
+
 		// Aplicar transformaciones de serialización
 		const serialized = toStorageTag(validated);
-		
+
 		logger.debug('✅ Tag transformado para DB exitosamente', { serialized });
 		return serialized;
 	} catch (error) {
@@ -69,10 +69,10 @@ export function toDatabase(tag: TagBase): any {
 export function normalize(tag: Partial<TagBase>): TagBase {
 	try {
 		logger.debug('🔄 Normalizando Tag', { tag });
-		
+
 		const normalized = normalizeTag(tag);
 		const validated = validateTag(normalized);
-		
+
 		logger.debug('✅ Tag normalizado exitosamente', { validated });
 		return validated;
 	} catch (error) {
@@ -87,13 +87,13 @@ export function normalize(tag: Partial<TagBase>): TagBase {
 export function forClient(tag: TagBase): TagBase {
 	try {
 		logger.debug('🔄 Preparando Tag para cliente', { tag });
-		
+
 		// Validar entrada
 		const validated = validateTag(tag);
-		
+
 		// Sanitizar datos
 		const sanitized = sanitizeTagForClient(validated);
-		
+
 		logger.debug('✅ Tag preparado para cliente exitosamente', { sanitized });
 		return sanitized;
 	} catch (error) {
@@ -108,7 +108,7 @@ export function forClient(tag: TagBase): TagBase {
 export function safeParse(data: unknown): { success: true; data: TagBase } | { success: false; error: string } {
 	try {
 		logger.debug('🔍 Validación segura de Tag', { data });
-		
+
 		return safeValidateTag(data);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
@@ -123,7 +123,7 @@ export function safeParse(data: unknown): { success: true; data: TagBase } | { s
  */
 export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
 	logger.warn('⚠️ Usando función legacy fromDrizzleTag, considerar migrar a nuevas funciones');
-	
+
 	if (!drizzleTag) {
 		logger.warn('⚠️ Tag de Drizzle nulo o indefinido');
 		return null;
@@ -140,7 +140,7 @@ export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
 			const counts = _count as Record<string, number>;
 			const totalRelations = Object.values(counts).reduce((sum: number, count: number) => sum + count, 0);
 			const usageDiversity = Object.values(counts).filter((count: number) => count > 0).length;
-			
+
 			const diversityRatio = usageDiversity > 0 ? usageDiversity / Object.keys(counts).length : 0;
 			const popularity = Math.log1p(totalRelations) * diversityRatio;
 

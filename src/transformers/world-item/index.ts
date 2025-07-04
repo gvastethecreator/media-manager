@@ -8,4 +8,4 @@
  */
 
 export { toWorldItemWithStats } from './mappers';
-export { type WorldItemComplete, fromDrizzleWorldItem } from './transformer';
+export { fromDrizzleWorldItem, type WorldItemComplete } from './transformer';

@@ -2,16 +2,15 @@ import { DatabaseIcon, FolderIcon, RefreshCw, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { EntityCard } from '@/components/cards/entity-card';
+import { FolderCard } from '@/components/cards/folder-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { findFolders } from '@/lib/api/services/folders';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-// Migración: se reemplazan servicios por funciones del cliente API
-import { findFolders } from '@/lib/api/services/folders';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
@@ -19,19 +18,12 @@ import type { ViewProps } from '../../types';
 
 const viewLogger = clientLogger.withContext('FoldersView');
 
-// Extender FolderWithStats para asegurar compatibilidad con EntityCard
-type FolderEntity = FolderWithStats & {
-	entityType: 'folder';
-	_count?: {
-		images: number;
-	};
-	totalSize: number;
-	totalFiles: number;
-};
+// Simplificar tipo para FolderCard
+type FolderEntity = FolderWithStats;
 
-const MemoizedEntityCard = React.memo(
+const MemoizedFolderCard = React.memo(
 	({ folder, onFolderClick }: { folder: FolderEntity; onFolderClick: () => void }) => (
-		<EntityCard entity={folder} onClick={onFolderClick} className="h-full" />
+		<FolderCard folder={folder} onClick={onFolderClick} className="h-full" />
 	),
 	(prevProps, nextProps) =>
 		prevProps.folder.id === nextProps.folder.id &&
@@ -41,7 +33,7 @@ const MemoizedEntityCard = React.memo(
 		prevProps.folder.totalSize === nextProps.folder.totalSize &&
 		prevProps.folder.totalFiles === nextProps.folder.totalFiles
 );
-MemoizedEntityCard.displayName = 'MemoizedEntityCard';
+MemoizedFolderCard.displayName = 'MemoizedFolderCard';
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView, setCurrentItem } = useNavigationStore();
@@ -70,16 +62,15 @@ export function FoldersView(_props: ViewProps) {
 					setIsManualRetry(true);
 				}
 				setIsLoading(true);
-                                viewLogger.info('🔄 Cargando carpetas...');
-                                const result = await findFolders({ limit: 100 });
-                                const data = result.data;
+				viewLogger.info('🔄 Cargando carpetas...');
+				const result = await findFolders({ limit: 100 });
+				const data = result.data;
 
 				// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
 				if (Array.isArray(data)) {
 					const transformedData = data.map((folderData: FolderWithStats): FolderEntity => {
 						return {
 							...folderData,
-							entityType: 'folder', // 🆕 Requerido para EntityCard
 							lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
 							createdAt: new Date(folderData.createdAt),
 							updatedAt: new Date(folderData.updatedAt),
@@ -289,7 +280,7 @@ export function FoldersView(_props: ViewProps) {
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
 									data-folder-id={folder.id}
 								>
-									<MemoizedEntityCard folder={folder} onFolderClick={onFolderClick} />
+									<MemoizedFolderCard folder={folder} onFolderClick={onFolderClick} />
 								</div>
 							</motion.div>
 						);
