@@ -1,243 +1,199 @@
 /**
- * @file Mappers para la entidad File
+ * @file Mappers para la entidad File.
  * @module transformers/file/mappers
+ * @description Contiene funciones para transformar datos de File entre tipos base y enriquecidos.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { Stats } from 'fs';
-import path from 'path';
-import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	DirectoryInfo,
-	EnhancedDirectory,
-	EnhancedImageFile,
-	FileBase,
-	FileFilterOptions,
-	FileInfo,
-	ImageFileInfo,
-} from '@/types/entities/file';
-import { FILE_EXTENSION_GROUPS, FileType } from '@/types/entities/file/enums';
+import { FileType, type FileBase, type FileStatistics, type FileWithStats } from '@/types/entities/file';
 
-const _mappersLogger = serverLogger.withContext('File:Mappers');
-
-export function generateFileId(filePath: string): string {
-	const normalizedPath = path
-		.normalize(filePath)
-		.replace(/\\/g, '/')
-		.replace(/^\/+|\/+$/g, '');
-	return Buffer.from(normalizedPath).toString('base64');
-}
-
-export function determineFileType(extension: string): FileType {
-	if (!extension) return FileType.OTHER;
-	const ext = extension.toLowerCase();
-	if (FILE_EXTENSION_GROUPS.IMAGE.includes(ext)) return FileType.IMAGE;
-	if (FILE_EXTENSION_GROUPS.VIDEO.includes(ext)) return FileType.VIDEO;
-	if (FILE_EXTENSION_GROUPS.AUDIO.includes(ext)) return FileType.AUDIO;
-	if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(ext)) return FileType.DOCUMENT;
-	if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(ext)) return FileType.ARCHIVE;
-	return FileType.FILE;
-}
-
-export function determineMimeType(extension: string): string {
-	const mimeTypes: Record<string, string> = {
-		'.jpg': 'image/jpeg',
-		'.jpeg': 'image/jpeg',
-		'.png': 'image/png',
-		'.gif': 'image/gif',
-		'.webp': 'image/webp',
-		'.svg': 'image/svg+xml',
-		'.pdf': 'application/pdf',
-		'.doc': 'application/msword',
-		'.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-		'.xls': 'application/vnd.ms-excel',
-		'.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		'.ppt': 'application/vnd.ms-powerpoint',
-		'.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-		'.txt': 'text/plain',
-		'.md': 'text/markdown',
-		'.html': 'text/html',
-		'.css': 'text/css',
-		'.js': 'application/javascript',
-		'.json': 'application/json',
-		'.mp3': 'audio/mpeg',
-		'.wav': 'audio/wav',
-		'.mp4': 'video/mp4',
-		'.avi': 'video/x-msvideo',
-		'.mov': 'video/quicktime',
-		'.zip': 'application/zip',
-		'.rar': 'application/vnd.rar',
-		'.tar': 'application/x-tar',
-		'.gz': 'application/gzip',
+/**
+ * 📊 Calcula las estadísticas de un archivo.
+ *
+ * @param file - El archivo base desde Drizzle
+ * @returns Las estadísticas calculadas del archivo
+ */
+function calculateFileStats(file: FileBase): FileStatistics {
+	const now = new Date();
+	const modifiedAt = new Date(file.modifiedAt);
+	const accessedAt = new Date(file.accessedAt);
+	
+	const daysSinceModified = Math.floor((now.getTime() - modifiedAt.getTime()) / (1000 * 60 * 60 * 24));
+	const daysSinceAccessed = Math.floor((now.getTime() - accessedAt.getTime()) / (1000 * 60 * 60 * 24));
+	
+	// Mapeo de tipos a etiquetas legibles
+	const typeLabels: Record<FileType, string> = {
+		[FileType.IMAGE]: 'Imagen',
+		[FileType.VIDEO]: 'Video',
+		[FileType.AUDIO]: 'Audio',
+		[FileType.DOCUMENT]: 'Documento',
+		[FileType.TEXT]: 'Texto',
+		[FileType.ARCHIVE]: 'Archivo',
+		[FileType.CODE]: 'Código',
+		[FileType.EXECUTABLE]: 'Ejecutable',
+		[FileType.FONT]: 'Fuente',
+		[FileType.DATA]: 'Datos',
+		[FileType.UNKNOWN]: 'Desconocido',
 	};
-	return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
-}
+	
+	// Mapeo de tipos a iconos
+	const typeIcons: Record<FileType, string> = {
+		[FileType.IMAGE]: 'image',
+		[FileType.VIDEO]: 'video',
+		[FileType.AUDIO]: 'music',
+		[FileType.DOCUMENT]: 'file-text',
+		[FileType.TEXT]: 'file-text',
+		[FileType.ARCHIVE]: 'archive',
+		[FileType.CODE]: 'code',
+		[FileType.EXECUTABLE]: 'play',
+		[FileType.FONT]: 'type',
+		[FileType.DATA]: 'database',
+		[FileType.UNKNOWN]: 'file',
+	};
+	
+	// Mapeo de tipos a colores
+	const typeColors: Record<FileType, string> = {
+		[FileType.IMAGE]: '#e74c3c',
+		[FileType.VIDEO]: '#9b59b6',
+		[FileType.AUDIO]: '#f39c12',
+		[FileType.DOCUMENT]: '#3498db',
+		[FileType.TEXT]: '#2ecc71',
+		[FileType.ARCHIVE]: '#95a5a6',
+		[FileType.CODE]: '#e67e22',
+		[FileType.EXECUTABLE]: '#34495e',
+		[FileType.FONT]: '#1abc9c',
+		[FileType.DATA]: '#8e44ad',
+		[FileType.UNKNOWN]: '#7f8c8d',
+	};
+	
+	const formatFileSize = (bytes: number): string => {
+		if (bytes === 0) return '0 Bytes';
+		const k = 1024;
+		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
+	};
+	
+	const getShortPath = (fullPath: string): string => {
+		const segments = fullPath.split('/').filter(Boolean);
+		if (segments.length <= 3) return fullPath;
+		return `.../${segments.slice(-2).join('/')}`;
+	};
 
-export function mapStatsToFileInfo(filePath: string, stats: Stats): FileInfo {
-	const isDirectory = stats.isDirectory();
-	const name = path.basename(filePath);
-	const extension = isDirectory ? '' : path.extname(filePath);
 	return {
-		id: generateFileId(filePath),
-		name,
-		path: filePath,
-		type: isDirectory ? FileType.DIRECTORY : determineFileType(extension),
-		extension,
-		mimeType: isDirectory ? 'directory' : determineMimeType(extension),
-		size: stats.size,
-		createdAt: stats.birthtime || stats.ctime,
-		updatedAt: stats.mtime,
-		modifiedAt: stats.mtime,
-		accessedAt: stats.atime,
-		isDirectory,
-		parentPath: path.dirname(filePath),
-		absolutePath: path.resolve(filePath),
-		relativePath: path.relative(process.cwd(), filePath),
+		formattedSize: formatFileSize(file.size),
+		typeLabel: typeLabels[file.type] || 'Desconocido',
+		iconName: typeIcons[file.type] || 'file',
+		colorCode: typeColors[file.type] || '#7f8c8d',
+		daysSinceModified,
+		daysSinceAccessed,
+		isRecent: daysSinceModified <= 7,
+		isLarge: file.size > 100 * 1024 * 1024, // > 100MB
+		formattedModifiedAt: modifiedAt.toLocaleDateString('es-ES', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		}),
+		childCount: file.isDirectory ? 0 : 0, // Placeholder - se calcularía desde una consulta
+		shortPath: getShortPath(file.relativePath),
 	};
 }
 
-export function toFileListItem(fileInfo: FileInfo): FileBase {
+/**
+ * 📁 Transforma un archivo base en un archivo con estadísticas.
+ * Esta es la función principal de transformación para la entidad File.
+ *
+ * @param file - El archivo base desde Drizzle
+ * @returns Un archivo enriquecido con estadísticas calculadas
+ */
+export function toFileWithStats(file: FileBase): FileWithStats {
+	const stats = calculateFileStats(file);
+
 	return {
-		id: fileInfo.id,
-		path: fileInfo.path,
-		name: fileInfo.name,
-		type: fileInfo.type,
-		size: fileInfo.size,
-		isDirectory: fileInfo.isDirectory,
-		extension: fileInfo.extension,
-		modifiedAt: fileInfo.modifiedAt,
-		createdAt: fileInfo.createdAt,
-		icon: getIconForFileType(fileInfo.type, fileInfo.extension),
-		iconColor: getColorForFileType(fileInfo.type),
+		...file,
+		stats,
 	};
 }
 
-export function getIconForFileType(fileType: string, extension = ''): string {
-	const iconMap: Record<string, string> = {
-		[FileType.DIRECTORY]: '📁',
-		[FileType.FILE]: '📄',
-		[FileType.IMAGE]: '🖼️',
-		[FileType.VIDEO]: '🎬',
-		[FileType.AUDIO]: '🎵',
-		[FileType.DOCUMENT]: '📝',
-		[FileType.ARCHIVE]: '🗄️',
-		[FileType.OTHER]: '❓',
-	};
-	const extensionIconMap: Record<string, string> = {
-		'.pdf': '📑',
-		'.doc': '📘',
-		'.docx': '📘',
-		'.xls': '📊',
-		'.xlsx': '📊',
-		'.ppt': '📽️',
-		'.pptx': '📽️',
-		'.txt': '📃',
-		'.md': '📝',
-		'.json': '🔍',
-		'.zip': '📦',
-		'.rar': '📦',
-	};
-	return extensionIconMap[extension] || iconMap[fileType] || iconMap[FileType.OTHER];
+/**
+ * 📁 Transforma una lista de archivos base en archivos con estadísticas.
+ *
+ * @param files - Lista de archivos base desde Drizzle
+ * @returns Lista de archivos enriquecidos con estadísticas
+ */
+export function toFileWithStatsList(files: FileBase[]): FileWithStats[] {
+	return files.map(toFileWithStats);
 }
 
-export function getColorForFileType(fileType: string): string {
-	const colorMap: Record<string, string> = {
-		[FileType.DIRECTORY]: '#3b82f6',
-		[FileType.FILE]: '#64748b',
-		[FileType.IMAGE]: '#10b981',
-		[FileType.VIDEO]: '#f97316',
-		[FileType.AUDIO]: '#8b5cf6',
-		[FileType.DOCUMENT]: '#0ea5e9',
-		[FileType.ARCHIVE]: '#f59e0b',
-		[FileType.OTHER]: '#6b7280',
-	};
-	return colorMap[fileType] || colorMap[FileType.OTHER];
+/**
+ * 📂 Filtra archivos por tipo.
+ *
+ * @param files - Lista de archivos con estadísticas
+ * @param types - Tipos de archivo a incluir
+ * @returns Lista filtrada de archivos
+ */
+export function filterFilesByType(files: FileWithStats[], types: FileType[]): FileWithStats[] {
+	if (types.length === 0) return files;
+	return files.filter(file => types.includes(file.type));
 }
 
-export function toEnhancedDirectory(fileInfo: FileInfo, childItems: FileBase[] = []): EnhancedDirectory | null {
-	if (!fileInfo.isDirectory) return null;
-	const stats = {
-		fileTypes: {} as Record<string, number>,
-		totalSize: 0,
-		lastModified: fileInfo.modifiedAt,
-		averageFileSize: 0,
-	};
-	const contentSummary = { images: 0, videos: 0, documents: 0, others: 0 };
-	let fileCount = 0;
-	for (const item of childItems) {
-		if (!item.isDirectory) {
-			stats.totalSize += item.size;
-			const typeKey = item.type || 'others';
-			stats.fileTypes[typeKey] = (stats.fileTypes[typeKey] || 0) + 1;
-			if (item.type === FileType.IMAGE) contentSummary.images++;
-			else if (item.type === FileType.VIDEO) contentSummary.videos++;
-			else if (item.type === FileType.DOCUMENT) contentSummary.documents++;
-			else contentSummary.others++;
-			fileCount++;
+/**
+ * 📂 Agrupa archivos por tipo.
+ *
+ * @param files - Lista de archivos con estadísticas
+ * @returns Objeto con archivos agrupados por tipo
+ */
+export function groupFilesByType(files: FileWithStats[]): Record<FileType, FileWithStats[]> {
+	const grouped = {} as Record<FileType, FileWithStats[]>;
+
+	// Inicializar grupos vacíos
+	for (const type of Object.values(FileType)) {
+		grouped[type] = [];
+	}
+
+	// Agrupar archivos
+	for (const file of files) {
+		if (grouped[file.type]) {
+			grouped[file.type].push(file);
 		}
 	}
-	if (fileCount > 0) stats.averageFileSize = stats.totalSize / fileCount;
-	return {
-		...(fileInfo as DirectoryInfo),
-		stats,
-		contentSummary,
-		level: fileInfo.path.split('/').length,
-	};
+
+	return grouped;
 }
 
-export function toEnhancedImageFile(
-	fileInfo: FileInfo,
-	imageMetadata: Record<string, unknown> = {}
-): EnhancedImageFile | null {
-	if (fileInfo.type !== FileType.IMAGE) return null;
-	return {
-		...(fileInfo as ImageFileInfo),
-		metadata: imageMetadata,
-	};
-}
-
-export function applyFileFilters(files: FileBase[], options: FileFilterOptions): FileBase[] {
-	let filteredFiles = files;
-	if (options.searchTerm) {
-		const searchTerm = options.searchTerm.toLowerCase();
-		filteredFiles = filteredFiles.filter((f) => f.name.toLowerCase().includes(searchTerm));
-	}
-	if (options.fileTypes?.length) {
-		filteredFiles = filteredFiles.filter((f) => options.fileTypes?.includes(f.type as FileType));
-	}
-	if (options.extensions?.length) {
-		filteredFiles = filteredFiles.filter((f) => f.extension && options.extensions?.includes(f.extension.toLowerCase()));
-	}
-	if (options.minSize) {
-		filteredFiles = filteredFiles.filter((f) => f.size >= options.minSize!);
-	}
-	if (options.maxSize) {
-		filteredFiles = filteredFiles.filter((f) => f.size <= options.maxSize!);
-	}
-	if (options.modifiedAfter) {
-		filteredFiles = filteredFiles.filter((f) => new Date(f.modifiedAt) > new Date(options.modifiedAfter!));
-	}
-	if (options.modifiedBefore) {
-		filteredFiles = filteredFiles.filter((f) => new Date(f.modifiedAt) < new Date(options.modifiedBefore!));
-	}
-	if (options.sortBy) {
-		const sortBy = options.sortBy;
-		filteredFiles.sort((a, b) => {
-			const fieldA = a[sortBy];
-			const fieldB = b[sortBy];
-			const order = options.sortOrder === 'asc' ? 1 : -1;
-
-			if (typeof fieldA === 'string' && typeof fieldB === 'string') {
-				return fieldA.localeCompare(fieldB) * order;
-			}
-
-			if (fieldA < fieldB) {
-				return -1 * order;
-			}
-			if (fieldA > fieldB) {
-				return 1 * order;
-			}
-			return 0;
-		});
-	}
-	return filteredFiles;
+/**
+ * 📊 Ordena archivos por criterio especificado.
+ *
+ * @param files - Lista de archivos con estadísticas
+ * @param sortBy - Campo por el cual ordenar
+ * @param order - Orden ascendente o descendente
+ * @returns Lista ordenada de archivos
+ */
+export function sortFiles(
+	files: FileWithStats[], 
+	sortBy: 'name' | 'size' | 'modifiedAt' | 'type' = 'name',
+	order: 'asc' | 'desc' = 'asc'
+): FileWithStats[] {
+	return files.sort((a, b) => {
+		let compareValue = 0;
+		
+		switch (sortBy) {
+			case 'name':
+				compareValue = a.name.localeCompare(b.name);
+				break;
+			case 'size':
+				compareValue = a.size - b.size;
+				break;
+			case 'modifiedAt':
+				compareValue = new Date(a.modifiedAt).getTime() - new Date(b.modifiedAt).getTime();
+				break;
+			case 'type':
+				compareValue = a.type.localeCompare(b.type);
+				break;
+		}
+		
+		return order === 'desc' ? -compareValue : compareValue;
+	});
 }
