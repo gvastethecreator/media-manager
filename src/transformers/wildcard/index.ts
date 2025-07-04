@@ -1,17 +1,11 @@
 /**
  * @file Punto de entrada para los transformadores de la entidad Wildcard.
  * @module transformers/wildcard
- * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Wildcard.
+ * @description Exporta las funciones de transformación canónicas para Wildcard.
+ * @see /src/transformers/wildcard/mappers.ts
+ * @see /src/transformers/wildcard/transformer.ts
+ * @updated 2025-01-27
  */
 
-export {
-	mapCreateWildcardData,
-	// Alias para compatibilidad
-	mapCreateWildcardDataToPrisma,
-	mapUpdateWildcardData,
-	mapUpdateWildcardDataToPrisma,
-	mapWildcardFilters,
-	toWildcardWithStats,
-} from './mappers';
-
-export { fromDrizzleWildcard, transformWildcard, type WildcardComplete } from './transformer';
+export { toWildcardWithStats } from './mappers';
+export { type WildcardComplete, transformWildcard } from './transformer';
