@@ -8,7 +8,13 @@
  */
 
 import { useToast } from '@/lib/hooks/ui/use-toast';
-import { createNote, deleteNote, getNotes, updateNote } from '@/services/note/note.service';
+// Migración: se reemplaza el uso directo del servicio por un cliente de API
+import {
+    getNotesFromApi,
+    createNoteInApi,
+    updateNoteInApi,
+    deleteNoteFromApi,
+} from '@/lib/api/client/note.client';
 import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -21,10 +27,10 @@ const NOTE_QUERY_KEY = 'notes';
  * @returns Un objeto con la lista de notas y el estado de la consulta.
  */
 export function useNotes() {
-	return useQuery<NoteBase[], Error>({
-		queryKey: [NOTE_QUERY_KEY],
-		queryFn: () => getNotes(),
-	});
+        return useQuery<NoteBase[], Error>({
+                queryKey: [NOTE_QUERY_KEY],
+                queryFn: () => getNotesFromApi(),
+        });
 }
 
 /**
@@ -54,8 +60,8 @@ export function useNoteActions() {
 		return queryClient.invalidateQueries({ queryKey: [NOTE_QUERY_KEY] });
 	};
 
-	const { mutate: create, isPending: isCreating } = useMutation({
-		mutationFn: (data: NoteCreateInput) => createNote(data),
+        const { mutate: create, isPending: isCreating } = useMutation({
+                mutationFn: (data: NoteCreateInput) => createNoteInApi(data),
 		onSuccess: (newNote) => {
 			toast({ title: 'Nota Creada', description: `La nota "${newNote.title}" ha sido creada.` });
 			return invalidateNotesCache();
@@ -69,8 +75,8 @@ export function useNoteActions() {
 		},
 	});
 
-	const { mutate: update, isPending: isUpdating } = useMutation({
-		mutationFn: ({ id, data }: { id: string; data: NoteUpdateInput }) => updateNote(id, data),
+        const { mutate: update, isPending: isUpdating } = useMutation({
+                mutationFn: ({ id, data }: { id: string; data: NoteUpdateInput }) => updateNoteInApi(id, data),
 		onSuccess: (updatedNote) => {
 			toast({ title: 'Nota Actualizada', description: `La nota "${updatedNote.title}" ha sido actualizada.` });
 			return invalidateNotesCache();
@@ -84,8 +90,8 @@ export function useNoteActions() {
 		},
 	});
 
-	const { mutate: remove, isPending: isDeleting } = useMutation({
-		mutationFn: (id: string) => deleteNote(id),
+        const { mutate: remove, isPending: isDeleting } = useMutation({
+                mutationFn: (id: string) => deleteNoteFromApi(id),
 		onSuccess: (_data, _id) => {
 			toast({ title: 'Nota Eliminada', description: 'La nota ha sido eliminada.' });
 			return invalidateNotesCache();
