@@ -78,7 +78,8 @@
     "preview:vite": "vite preview",
     "build:server": "tsup",
     "watch:server": "tsup --watch --onSuccess \"node dist/server/index.js\"",
-    "release:windows": "pnpm desktop:tauri && pwsh scripts/ps/zip-release.ps1 %npm_package_version%"
+    "release:windows": "pnpm desktop:tauri && pwsh scripts/ps/zip-release.ps1 %npm_package_version%",
+    "dev:server": "pnpm watch:server"
   },
   "dependencies": {
     "@bull-board/api": "^6.11.0",
