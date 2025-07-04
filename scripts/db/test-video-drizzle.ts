@@ -18,27 +18,28 @@ async function testVideoService() {
 
 		// Test 2: Obtener primeros 5 videos con información de folder
 		console.log('📋 Test 2: Obteniendo primeros 5 videos...');
-		const videosList = await db.select({
-			id: videos.id,
-			name: videos.name,
-			path: videos.path,
-			size: videos.size,
-			duration: videos.duration,
-			width: videos.width,
-			height: videos.height,
-			isFavorite: videos.isFavorite,
-			folderId: videos.folderId,
-			createdAt: videos.createdAt,
-			// Datos del folder
-			folder: {
-				id: folders.id,
-				name: folders.name,
-				path: folders.path
-			}
-		})
-		.from(videos)
-		.leftJoin(folders, eq(videos.folderId, folders.id))
-		.limit(5);
+		const videosList = await db
+			.select({
+				id: videos.id,
+				name: videos.name,
+				path: videos.path,
+				size: videos.size,
+				duration: videos.duration,
+				width: videos.width,
+				height: videos.height,
+				isFavorite: videos.isFavorite,
+				folderId: videos.folderId,
+				createdAt: videos.createdAt,
+				// Datos del folder
+				folder: {
+					id: folders.id,
+					name: folders.name,
+					path: folders.path,
+				},
+			})
+			.from(videos)
+			.leftJoin(folders, eq(videos.folderId, folders.id))
+			.limit(5);
 
 		console.log(`   ✅ Videos obtenidos: ${videosList.length}`);
 		videosList.forEach((video, index) => {
@@ -55,33 +56,34 @@ async function testVideoService() {
 			const firstVideo = videosList[0];
 			console.log('🔍 Test 3: Obteniendo video específico por ID...');
 
-			const specificVideo = await db.select({
-				id: videos.id,
-				name: videos.name,
-				description: videos.description,
-				path: videos.path,
-				hash: videos.hash,
-				size: videos.size,
-				duration: videos.duration,
-				width: videos.width,
-				height: videos.height,
-				metadata: videos.metadata,
-				thumbnail: videos.thumbnail,
-				isPublic: videos.isPublic,
-				isFavorite: videos.isFavorite,
-				folderId: videos.folderId,
-				createdAt: videos.createdAt,
-				updatedAt: videos.updatedAt,
-				folder: {
-					id: folders.id,
-					name: folders.name,
-					path: folders.path
-				}
-			})
-			.from(videos)
-			.leftJoin(folders, eq(videos.folderId, folders.id))
-			.where(eq(videos.id, firstVideo.id))
-			.limit(1);
+			const specificVideo = await db
+				.select({
+					id: videos.id,
+					name: videos.name,
+					description: videos.description,
+					path: videos.path,
+					hash: videos.hash,
+					size: videos.size,
+					duration: videos.duration,
+					width: videos.width,
+					height: videos.height,
+					metadata: videos.metadata,
+					thumbnail: videos.thumbnail,
+					isPublic: videos.isPublic,
+					isFavorite: videos.isFavorite,
+					folderId: videos.folderId,
+					createdAt: videos.createdAt,
+					updatedAt: videos.updatedAt,
+					folder: {
+						id: folders.id,
+						name: folders.name,
+						path: folders.path,
+					},
+				})
+				.from(videos)
+				.leftJoin(folders, eq(videos.folderId, folders.id))
+				.where(eq(videos.id, firstVideo.id))
+				.limit(1);
 
 			if (specificVideo.length > 0) {
 				const video = specificVideo[0];
@@ -99,15 +101,11 @@ async function testVideoService() {
 		console.log('\n🔍 Test 4: Probando filtros básicos...');
 
 		// Videos favoritos
-		const favoriteVideos = await db.select({ count: count() })
-			.from(videos)
-			.where(eq(videos.isFavorite, true));
+		const favoriteVideos = await db.select({ count: count() }).from(videos).where(eq(videos.isFavorite, true));
 		console.log(`   ⭐ Videos favoritos: ${favoriteVideos[0]?.count || 0}`);
 
 		// Videos públicos
-		const publicVideos = await db.select({ count: count() })
-			.from(videos)
-			.where(eq(videos.isPublic, true));
+		const publicVideos = await db.select({ count: count() }).from(videos).where(eq(videos.isPublic, true));
 		console.log(`   🌐 Videos públicos: ${publicVideos[0]?.count || 0}`);
 
 		console.log('\n🎉 ¡Todas las pruebas de VideoService completadas exitosamente!');
@@ -115,9 +113,8 @@ async function testVideoService() {
 		console.log(`   • Total de videos: ${totalVideos[0]?.count || 0}`);
 		console.log(`   • Videos favoritos: ${favoriteVideos[0]?.count || 0}`);
 		console.log(`   • Videos públicos: ${publicVideos[0]?.count || 0}`);
-		console.log(`   • Consultas con JOIN funcionando: ✅`);
-		console.log(`   • Filtros básicos funcionando: ✅`);
-
+		console.log('   • Consultas con JOIN funcionando: ✅');
+		console.log('   • Filtros básicos funcionando: ✅');
 	} catch (error) {
 		console.error('❌ Error en las pruebas de VideoService:', error);
 		console.error('Detalles del error:', error instanceof Error ? error.message : 'Error desconocido');

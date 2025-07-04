@@ -1,9 +1,9 @@
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useVideo } from '@/lib/api/videos';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
 import { CardContainer } from '../card-container';
-import { useVideo } from '@/lib/api/videos';
 import { VideoCardContent } from './video-card-content';
 import { VideoCardFooter } from './video-card-footer';
 import { VideoCardHeader } from './video-card-header';

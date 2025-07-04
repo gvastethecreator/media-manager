@@ -32,10 +32,13 @@ export const ColorPicker = memo(function ColorPicker({ value, onChange, classNam
 	const [open, setOpen] = useState(false);
 
 	// Callback memoizado para manejar selección de color
-	const handleColorSelect = useCallback((color: string) => {
-		onChange(color);
-		setOpen(false);
-	}, [onChange]);
+	const handleColorSelect = useCallback(
+		(color: string) => {
+			onChange(color);
+			setOpen(false);
+		},
+		[onChange]
+	);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>

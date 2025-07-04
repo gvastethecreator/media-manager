@@ -3,14 +3,14 @@
  * @module services/note
  */
 
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { notes } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-import * as crypto from 'crypto';
 
 const noteLogger = serverLogger.withContext('NoteService');
 
@@ -55,19 +55,22 @@ interface NoteResults {
 const NoteServiceImpl = {
 	async createNote(data: NoteCreateInput): Promise<NoteComplete> {
 		try {
-			const [newNote] = await db.insert(notes).values({
-				id: crypto.randomUUID(),
-				title: data.title,
-				content: data.content || null,
-				category: data.category || 'general',
-				priority: data.priority || 0,
-				status: data.status || 'draft',
-				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				presetId: data.presetId || null,
-			}).returning();
+			const [newNote] = await db
+				.insert(notes)
+				.values({
+					id: crypto.randomUUID(),
+					title: data.title,
+					content: data.content || null,
+					category: data.category || 'general',
+					priority: data.priority || 0,
+					status: data.status || 'draft',
+					featuredImage: data.featuredImage || null,
+					isFavorite: data.isFavorite || false,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					presetId: data.presetId || null,
+				})
+				.returning();
 
 			const noteComplete: NoteComplete = {
 				...newNote,
@@ -118,16 +121,20 @@ const NoteServiceImpl = {
 
 	async updateNote(id: string, data: NoteUpdateInput): Promise<NoteComplete> {
 		try {
-			const [updatedNote] = await db.update(notes).set({
-				title: data.title,
-				content: data.content || null,
-				category: data.category || 'general',
-				priority: data.priority || 0,
-				status: data.status || 'draft',
-				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
-				updatedAt: new Date(),
-			}).where(eq(notes.id, id)).returning();
+			const [updatedNote] = await db
+				.update(notes)
+				.set({
+					title: data.title,
+					content: data.content || null,
+					category: data.category || 'general',
+					priority: data.priority || 0,
+					status: data.status || 'draft',
+					featuredImage: data.featuredImage || null,
+					isFavorite: data.isFavorite || false,
+					updatedAt: new Date(),
+				})
+				.where(eq(notes.id, id))
+				.returning();
 
 			if (!updatedNote) {
 				throw new Error('Nota no encontrada');
@@ -298,46 +305,41 @@ const NoteServiceImpl = {
 				conditions.push(eq(notes.status, status));
 			}
 			if (search) {
-				conditions.push(
-					or(
-						like(notes.title, `%${search}%`),
-						like(notes.content, `%${search}%`)
-					)
-				);
+				conditions.push(or(like(notes.title, `%${search}%`), like(notes.content, `%${search}%`)));
 			}
 
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 			// Determinar orden
-			const orderByClause = sortOrder === 'desc'
-				? desc(notes[sortBy] as any)
-				: asc(notes[sortBy] as any);
+			const orderByClause = sortOrder === 'desc' ? desc(notes[sortBy] as any) : asc(notes[sortBy] as any);
 
 			// Ejecutar consultas en paralelo
 			const [drizzleNotes, totalCount] = await Promise.all([
-				db.select({
-					id: notes.id,
-					title: notes.title, // Campo real
-					content: notes.content,
-					category: notes.category,
-					priority: notes.priority, // INTEGER en BD real
-					status: notes.status,
-					featuredImage: notes.featuredImage,
-					isFavorite: notes.isFavorite,
-					createdAt: notes.createdAt,
-					updatedAt: notes.updatedAt,
-					presetId: notes.presetId, // Campo real
-				})
-				.from(notes)
-				.where(whereClause)
-				.orderBy(orderByClause)
-				.limit(pageSize)
-				.offset(page * pageSize),
+				db
+					.select({
+						id: notes.id,
+						title: notes.title, // Campo real
+						content: notes.content,
+						category: notes.category,
+						priority: notes.priority, // INTEGER en BD real
+						status: notes.status,
+						featuredImage: notes.featuredImage,
+						isFavorite: notes.isFavorite,
+						createdAt: notes.createdAt,
+						updatedAt: notes.updatedAt,
+						presetId: notes.presetId, // Campo real
+					})
+					.from(notes)
+					.where(whereClause)
+					.orderBy(orderByClause)
+					.limit(pageSize)
+					.offset(page * pageSize),
 
-				db.select({ count: count() })
-				.from(notes)
-				.where(whereClause)
-				.then(result => result[0]?.count || 0)
+				db
+					.select({ count: count() })
+					.from(notes)
+					.where(whereClause)
+					.then((result) => result[0]?.count || 0),
 			]);
 
 			const items: NoteWithStats[] = drizzleNotes.map((note) => {
@@ -458,7 +460,7 @@ export class NoteService {
 		return { notes: result.items, total: result.total };
 	}
 
-		async getNoteById(id: string): Promise<NoteWithStats | null> {
+	async getNoteById(id: string): Promise<NoteWithStats | null> {
 		const note = await NoteServiceImpl.getNote(id);
 		if (!note) return null;
 

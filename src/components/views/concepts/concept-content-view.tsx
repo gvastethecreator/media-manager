@@ -47,25 +47,40 @@ export const ConceptContentView = memo(function ConceptContentView() {
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);
 
-	const emptyState = useMemo(() => ({
-		icon: Lightbulb,
-		title: 'Concepto vacío',
-		description: `No se encontraron imágenes en ${
-			selectedConcept?.name || 'este concepto'
-		}. Puedes agregar imágenes arrastrándolas aquí.`,
-	}), [selectedConcept?.name]);
+	const emptyState = useMemo(
+		() => ({
+			icon: Lightbulb,
+			title: 'Concepto vacío',
+			description: `No se encontraron imágenes en ${
+				selectedConcept?.name || 'este concepto'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
+		}),
+		[selectedConcept?.name]
+	);
 
-	const contentProps: BaseContentProps = useMemo(() => ({
-		items,
-		isLoading,
-		error,
-		toggleItemSelection,
-		currentContainerId: selectedConcept?.id ?? null,
-		containerName: selectedConcept?.name ?? null,
-		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
-		emptyState,
-		onRefresh: loadConceptImages,
-	}), [items, isLoading, error, toggleItemSelection, selectedConcept?.id, selectedConcept?.name, emptyState, loadConceptImages]);
+	const contentProps: BaseContentProps = useMemo(
+		() => ({
+			items,
+			isLoading,
+			error,
+			toggleItemSelection,
+			currentContainerId: selectedConcept?.id ?? null,
+			containerName: selectedConcept?.name ?? null,
+			setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
+			emptyState,
+			onRefresh: loadConceptImages,
+		}),
+		[
+			items,
+			isLoading,
+			error,
+			toggleItemSelection,
+			selectedConcept?.id,
+			selectedConcept?.name,
+			emptyState,
+			loadConceptImages,
+		]
+	);
 
 	if (isLoading || isLoadingImages) {
 		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;

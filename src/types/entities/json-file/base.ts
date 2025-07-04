@@ -8,24 +8,24 @@
  * 🟫 Tipo base de JsonFile directamente desde el schema de Drizzle.
  */
 export type JsonFileBase = {
-    id: string;
-    name: string;
-    path: string;
-    size: number;
-    hash: string;
-    mimeType: string;
-    extension: string;
-    folderId: string;
-    isFavorite: boolean;
-    isArchived: boolean;
-    content: string | null;
-    schema: string | null;
-    isValid: boolean | null;
-    validationErrors: string | null;
-    keyCount: number | null;
-    depth: number | null;
-    createdAt: Date;
-    updatedAt: Date;
+	id: string;
+	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	content: string | null;
+	schema: string | null;
+	isValid: boolean | null;
+	validationErrors: string | null;
+	keyCount: number | null;
+	depth: number | null;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 /**

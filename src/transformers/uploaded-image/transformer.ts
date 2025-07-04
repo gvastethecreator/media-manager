@@ -6,9 +6,9 @@
  */
 
 import {
-    type UploadedImageBase,
-    type UploadedImageDimensions,
-    type UploadedImageExtended,
+	type UploadedImageBase,
+	type UploadedImageDimensions,
+	type UploadedImageExtended,
 } from '@/types/entities/uploaded-image/types';
 
 // Tipos locales equivalentes a Prisma (migración a Drizzle)
@@ -71,7 +71,9 @@ export function transformToUploadedImageFromDrizzle(uploadedImage: DrizzleUpload
  * @param uploadedImage - The Drizzle object, including relations.
  * @returns The canonical UploadedImageExtended.
  */
-export function transformToUploadedImageWithRelationsFromDrizzle(uploadedImage: DrizzleUploadedImageWithRelations): UploadedImageExtended {
+export function transformToUploadedImageWithRelationsFromDrizzle(
+	uploadedImage: DrizzleUploadedImageWithRelations
+): UploadedImageExtended {
 	const dimensions: UploadedImageDimensions = {
 		width: uploadedImage.width,
 		height: uploadedImage.height,

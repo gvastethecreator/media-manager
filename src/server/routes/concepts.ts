@@ -1,8 +1,8 @@
-import { db } from '@/lib/drizzle';
-import { concepts } from '@/lib/drizzle/schema';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
+import { db } from '@/lib/drizzle';
+import { concepts } from '@/lib/drizzle/schema';
 
 const router = express.Router();
 
@@ -32,54 +32,54 @@ router.get('/', async (req, res) => {
 		// Búsqueda por texto
 		if (filters.search) {
 			conditions.push(
-				or(
-					like(concepts.name, `%${filters.search}%`),
-					like(concepts.description, `%${filters.search}%`)
-				)
+				or(like(concepts.name, `%${filters.search}%`), like(concepts.description, `%${filters.search}%`))
 			);
 		}
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 		// Determinar orden
-		const orderByClause = filters.sortOrder === 'desc'
-			? desc(concepts[filters.sortBy || 'name'] as any)
-			: asc(concepts[filters.sortBy || 'name'] as any);
+		const orderByClause =
+			filters.sortOrder === 'desc'
+				? desc(concepts[filters.sortBy || 'name'] as any)
+				: asc(concepts[filters.sortBy || 'name'] as any);
 
 		// Ejecutar consultas en paralelo
 		const [conceptResults, totalCount] = await Promise.all([
-			db.select({
-				id: concepts.id,
-				name: concepts.name,
-				description: concepts.description,
-				emoji: concepts.emoji,
-				color: concepts.color,
-				category: concepts.category,
-				isPublic: concepts.isPublic,
-				isFavorite: concepts.isFavorite,
-				totalImages: concepts.totalImages,
-				totalVideos: concepts.totalVideos,
-				type: concepts.type,
-				complexity: concepts.complexity,
-				applications: concepts.applications,
-				examples: concepts.examples,
-				relatedConcepts: concepts.relatedConcepts,
-				notes: concepts.notes,
-				featuredImage: concepts.featuredImage,
-				parentId: concepts.parentId,
-				createdAt: concepts.createdAt,
-				updatedAt: concepts.updatedAt,
-			})
-			.from(concepts)
-			.where(whereClause)
-			.orderBy(orderByClause)
-			.limit(filters.limit || 50)
-			.offset(filters.offset || 0),
+			db
+				.select({
+					id: concepts.id,
+					name: concepts.name,
+					description: concepts.description,
+					emoji: concepts.emoji,
+					color: concepts.color,
+					category: concepts.category,
+					isPublic: concepts.isPublic,
+					isFavorite: concepts.isFavorite,
+					totalImages: concepts.totalImages,
+					totalVideos: concepts.totalVideos,
+					type: concepts.type,
+					complexity: concepts.complexity,
+					applications: concepts.applications,
+					examples: concepts.examples,
+					relatedConcepts: concepts.relatedConcepts,
+					notes: concepts.notes,
+					featuredImage: concepts.featuredImage,
+					parentId: concepts.parentId,
+					createdAt: concepts.createdAt,
+					updatedAt: concepts.updatedAt,
+				})
+				.from(concepts)
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(filters.limit || 50)
+				.offset(filters.offset || 0),
 
-			db.select({ count: count() })
-			.from(concepts)
-			.where(whereClause)
-			.then(result => result[0]?.count || 0)
+			db
+				.select({ count: count() })
+				.from(concepts)
+				.where(whereClause)
+				.then((result) => result[0]?.count || 0),
 		]);
 
 		res.json({
@@ -109,31 +109,32 @@ router.get('/:id', async (req, res) => {
 			return res.status(400).json({ error: 'ID de concepto inválido' });
 		}
 
-		const conceptResult = await db.select({
-			id: concepts.id,
-			name: concepts.name,
-			description: concepts.description,
-			emoji: concepts.emoji,
-			color: concepts.color,
-			category: concepts.category,
-			isPublic: concepts.isPublic,
-			isFavorite: concepts.isFavorite,
-			totalImages: concepts.totalImages,
-			totalVideos: concepts.totalVideos,
-			type: concepts.type,
-			complexity: concepts.complexity,
-			applications: concepts.applications,
-			examples: concepts.examples,
-			relatedConcepts: concepts.relatedConcepts,
-			notes: concepts.notes,
-			featuredImage: concepts.featuredImage,
-			parentId: concepts.parentId,
-			createdAt: concepts.createdAt,
-			updatedAt: concepts.updatedAt,
-		})
-		.from(concepts)
-		.where(eq(concepts.id, id))
-		.limit(1);
+		const conceptResult = await db
+			.select({
+				id: concepts.id,
+				name: concepts.name,
+				description: concepts.description,
+				emoji: concepts.emoji,
+				color: concepts.color,
+				category: concepts.category,
+				isPublic: concepts.isPublic,
+				isFavorite: concepts.isFavorite,
+				totalImages: concepts.totalImages,
+				totalVideos: concepts.totalVideos,
+				type: concepts.type,
+				complexity: concepts.complexity,
+				applications: concepts.applications,
+				examples: concepts.examples,
+				relatedConcepts: concepts.relatedConcepts,
+				notes: concepts.notes,
+				featuredImage: concepts.featuredImage,
+				parentId: concepts.parentId,
+				createdAt: concepts.createdAt,
+				updatedAt: concepts.updatedAt,
+			})
+			.from(concepts)
+			.where(eq(concepts.id, id))
+			.limit(1);
 
 		if (!conceptResult.length) {
 			return res.status(404).json({ error: 'Concepto no encontrado' });

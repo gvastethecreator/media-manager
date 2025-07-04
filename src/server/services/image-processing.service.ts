@@ -1,8 +1,8 @@
+import { eq } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import sharp from 'sharp';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema';
-import { eq } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, createFileNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
 

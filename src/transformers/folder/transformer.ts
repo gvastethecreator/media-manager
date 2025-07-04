@@ -39,11 +39,10 @@ function calculateFolderStatistics(folder: any, allFolders?: any[]): FolderStati
 	const totalItems = imageCount + videoCount + folderCount;
 
 	// Calcular diversidad de contenido (0-100)
-	const contentTypes = [
-		imageCount > 0 ? 1 : 0,
-		videoCount > 0 ? 1 : 0,
-		folderCount > 0 ? 1 : 0,
-	].reduce((sum, has) => sum + has, 0);
+	const contentTypes = [imageCount > 0 ? 1 : 0, videoCount > 0 ? 1 : 0, folderCount > 0 ? 1 : 0].reduce(
+		(sum, has) => sum + has,
+		0
+	);
 	const contentDiversity = totalItems > 0 ? Math.min(100, (contentTypes / 3) * 100) : 0;
 
 	// Calcular organization score (0-100)
@@ -175,10 +174,7 @@ function calculateFolderStatistics(folder: any, allFolders?: any[]): FolderStati
 /**
  * 🔄 Transforma un objeto Folder de Drizzle a FolderWithStats (FUNCIÓN PRINCIPAL)
  */
-export function fromDrizzleFolderWithCounts(
-	folderFromDrizzle: any | null,
-	allFolders?: any[]
-): FolderWithStats | null {
+export function fromDrizzleFolderWithCounts(folderFromDrizzle: any | null, allFolders?: any[]): FolderWithStats | null {
 	if (!folderFromDrizzle) return null;
 
 	try {

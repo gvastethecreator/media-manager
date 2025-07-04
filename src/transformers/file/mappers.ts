@@ -5,7 +5,7 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import { FileType, type FileBase, type FileStatistics, type FileWithStats } from '@/types/entities/file';
+import { type FileBase, type FileStatistics, FileType, type FileWithStats } from '@/types/entities/file';
 
 /**
  * 📊 Calcula las estadísticas de un archivo.
@@ -17,10 +17,10 @@ function calculateFileStats(file: FileBase): FileStatistics {
 	const now = new Date();
 	const modifiedAt = new Date(file.modifiedAt);
 	const accessedAt = new Date(file.accessedAt);
-	
+
 	const daysSinceModified = Math.floor((now.getTime() - modifiedAt.getTime()) / (1000 * 60 * 60 * 24));
 	const daysSinceAccessed = Math.floor((now.getTime() - accessedAt.getTime()) / (1000 * 60 * 60 * 24));
-	
+
 	// Mapeo de tipos a etiquetas legibles
 	const typeLabels: Record<FileType, string> = {
 		[FileType.IMAGE]: 'Imagen',
@@ -35,7 +35,7 @@ function calculateFileStats(file: FileBase): FileStatistics {
 		[FileType.DATA]: 'Datos',
 		[FileType.UNKNOWN]: 'Desconocido',
 	};
-	
+
 	// Mapeo de tipos a iconos
 	const typeIcons: Record<FileType, string> = {
 		[FileType.IMAGE]: 'image',
@@ -50,7 +50,7 @@ function calculateFileStats(file: FileBase): FileStatistics {
 		[FileType.DATA]: 'database',
 		[FileType.UNKNOWN]: 'file',
 	};
-	
+
 	// Mapeo de tipos a colores
 	const typeColors: Record<FileType, string> = {
 		[FileType.IMAGE]: '#e74c3c',
@@ -65,7 +65,7 @@ function calculateFileStats(file: FileBase): FileStatistics {
 		[FileType.DATA]: '#8e44ad',
 		[FileType.UNKNOWN]: '#7f8c8d',
 	};
-	
+
 	const formatFileSize = (bytes: number): string => {
 		if (bytes === 0) return '0 Bytes';
 		const k = 1024;
@@ -73,7 +73,7 @@ function calculateFileStats(file: FileBase): FileStatistics {
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
 		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 	};
-	
+
 	const getShortPath = (fullPath: string): string => {
 		const segments = fullPath.split('/').filter(Boolean);
 		if (segments.length <= 3) return fullPath;
@@ -136,7 +136,7 @@ export function toFileWithStatsList(files: FileBase[]): FileWithStats[] {
  */
 export function filterFilesByType(files: FileWithStats[], types: FileType[]): FileWithStats[] {
 	if (types.length === 0) return files;
-	return files.filter(file => types.includes(file.type));
+	return files.filter((file) => types.includes(file.type));
 }
 
 /**
@@ -172,13 +172,13 @@ export function groupFilesByType(files: FileWithStats[]): Record<FileType, FileW
  * @returns Lista ordenada de archivos
  */
 export function sortFiles(
-	files: FileWithStats[], 
+	files: FileWithStats[],
 	sortBy: 'name' | 'size' | 'modifiedAt' | 'type' = 'name',
 	order: 'asc' | 'desc' = 'asc'
 ): FileWithStats[] {
 	return files.sort((a, b) => {
 		let compareValue = 0;
-		
+
 		switch (sortBy) {
 			case 'name':
 				compareValue = a.name.localeCompare(b.name);
@@ -193,7 +193,7 @@ export function sortFiles(
 				compareValue = a.type.localeCompare(b.type);
 				break;
 		}
-		
+
 		return order === 'desc' ? -compareValue : compareValue;
 	});
 }

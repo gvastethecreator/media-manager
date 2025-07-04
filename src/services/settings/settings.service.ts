@@ -3,14 +3,14 @@
  * @module services/settings
  */
 
-import { createSettingsError } from '@/lib/errors/settings';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema';
+import { createSettingsError } from '@/lib/errors/settings';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
 import { settingsSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
-import { eq } from 'drizzle-orm';
 
 // Logger específico para el servicio de configuración
 const logger = serverLogger.withContext('SettingsService');
@@ -102,11 +102,7 @@ async function createDefaultSettings(): Promise<Settings> {
 		// Obtener el perfil activo o usar un valor por defecto
 		let profileId = 'default-profile';
 		try {
-			const activeProfile = await db
-				.select()
-				.from(profiles)
-				.where(eq(profiles.isActive, true))
-				.limit(1);
+			const activeProfile = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
 
 			if (activeProfile.length > 0) {
 				profileId = activeProfile[0].id;
@@ -116,11 +112,7 @@ async function createDefaultSettings(): Promise<Settings> {
 		}
 
 		// Verificar si ya existe la configuración
-		const existingSettings = await db
-			.select()
-			.from(settings)
-			.where(eq(settings.id, 'default'))
-			.limit(1);
+		const existingSettings = await db.select().from(settings).where(eq(settings.id, 'default')).limit(1);
 
 		if (existingSettings.length > 0) {
 			// Actualizar configuración existente
@@ -169,11 +161,7 @@ export const settingsService: SettingsService = {
 
 		try {
 			// Intentar obtener la configuración existente
-			const settingsResult = await db
-				.select()
-				.from(settings)
-				.where(eq(settings.id, 'default'))
-				.limit(1);
+			const settingsResult = await db.select().from(settings).where(eq(settings.id, 'default')).limit(1);
 
 			if (settingsResult.length === 0 || !settingsResult[0].data) {
 				logger.info('ℹ️ No se encontró configuración global, creando valores predeterminados');
@@ -217,11 +205,7 @@ export const settingsService: SettingsService = {
 			// Obtener el perfil activo o usar un valor por defecto
 			let profileId = 'default-profile';
 			try {
-				const activeProfile = await db
-					.select()
-					.from(profiles)
-					.where(eq(profiles.isActive, true))
-					.limit(1);
+				const activeProfile = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
 
 				if (activeProfile.length > 0) {
 					profileId = activeProfile[0].id;
@@ -231,11 +215,7 @@ export const settingsService: SettingsService = {
 			}
 
 			// Verificar si ya existe la configuración
-			const existingSettings = await db
-				.select()
-				.from(settings)
-				.where(eq(settings.id, 'default'))
-				.limit(1);
+			const existingSettings = await db.select().from(settings).where(eq(settings.id, 'default')).limit(1);
 
 			if (existingSettings.length > 0) {
 				// Actualizar configuración existente
@@ -278,11 +258,7 @@ export const settingsService: SettingsService = {
 			// Obtener el perfil activo o usar un valor por defecto
 			let profileId = 'default-profile';
 			try {
-				const activeProfile = await db
-					.select()
-					.from(profiles)
-					.where(eq(profiles.isActive, true))
-					.limit(1);
+				const activeProfile = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
 
 				if (activeProfile.length > 0) {
 					profileId = activeProfile[0].id;
@@ -292,11 +268,7 @@ export const settingsService: SettingsService = {
 			}
 
 			// Verificar si ya existe la configuración
-			const existingSettings = await db
-				.select()
-				.from(settings)
-				.where(eq(settings.id, 'default'))
-				.limit(1);
+			const existingSettings = await db.select().from(settings).where(eq(settings.id, 'default')).limit(1);
 
 			if (existingSettings.length > 0) {
 				// Actualizar configuración existente
@@ -335,11 +307,7 @@ export const settingsService: SettingsService = {
 
 		try {
 			// Verificar que el perfil existe
-			const profile = await db
-				.select()
-				.from(profiles)
-				.where(eq(profiles.id, profileId))
-				.limit(1);
+			const profile = await db.select().from(profiles).where(eq(profiles.id, profileId)).limit(1);
 
 			if (profile.length === 0) {
 				logger.warn(`⚠️ Perfil no encontrado: ${profileId}`);
@@ -347,11 +315,7 @@ export const settingsService: SettingsService = {
 			}
 
 			// Buscar configuración específica del perfil
-			const profileSettings = await db
-				.select()
-				.from(settings)
-				.where(eq(settings.profileId, profileId))
-				.limit(1);
+			const profileSettings = await db.select().from(settings).where(eq(settings.profileId, profileId)).limit(1);
 
 			if (profileSettings.length === 0 || !profileSettings[0].data) {
 				logger.info(`ℹ️ Perfil ${profileId} no tiene configuración específica, usando configuración global`);
@@ -374,11 +338,7 @@ export const settingsService: SettingsService = {
 
 		try {
 			// Verificar que el perfil existe
-			const profile = await db
-				.select()
-				.from(profiles)
-				.where(eq(profiles.id, profileId))
-				.limit(1);
+			const profile = await db.select().from(profiles).where(eq(profiles.id, profileId)).limit(1);
 
 			if (profile.length === 0) {
 				throw createSettingsError(`Perfil no encontrado: ${profileId}`, 'PROFILE_NOT_FOUND');
@@ -444,20 +404,14 @@ export const settingsService: SettingsService = {
 
 		try {
 			// Verificar que el perfil existe
-			const profile = await db
-				.select()
-				.from(profiles)
-				.where(eq(profiles.id, profileId))
-				.limit(1);
+			const profile = await db.select().from(profiles).where(eq(profiles.id, profileId)).limit(1);
 
 			if (profile.length === 0) {
 				throw createSettingsError(`Perfil no encontrado: ${profileId}`, 'PROFILE_NOT_FOUND');
 			}
 
 			// Eliminar configuración específica del perfil (volverá a usar la global)
-			await db
-				.delete(settings)
-				.where(eq(settings.profileId, profileId));
+			await db.delete(settings).where(eq(settings.profileId, profileId));
 
 			logger.info(`✅ Configuración del perfil ${profileId} reseteada exitosamente`);
 		} catch (error) {

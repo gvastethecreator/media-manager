@@ -58,30 +58,36 @@ export const CharacterContentView = memo(function CharacterContentView() {
 		viewLogger.info('🖱️ Item seleccionado:', item.name);
 	}, []);
 
-	const emptyState = useMemo(() =>
-		!selectedCharacterId
-			? {
-					icon: Users,
-					title: 'No hay personaje seleccionado',
-					description: 'Selecciona un personaje para ver su contenido.',
-				}
-			: {
-					icon: Users,
-					title: 'Personaje sin imágenes',
-					description: currentCharacter
-						? `${currentCharacter.name} no tiene imágenes asociadas.`
-						: 'Este personaje no tiene imágenes asociadas.',
-				}, [selectedCharacterId, currentCharacter]);
+	const emptyState = useMemo(
+		() =>
+			!selectedCharacterId
+				? {
+						icon: Users,
+						title: 'No hay personaje seleccionado',
+						description: 'Selecciona un personaje para ver su contenido.',
+					}
+				: {
+						icon: Users,
+						title: 'Personaje sin imágenes',
+						description: currentCharacter
+							? `${currentCharacter.name} no tiene imágenes asociadas.`
+							: 'Este personaje no tiene imágenes asociadas.',
+					},
+		[selectedCharacterId, currentCharacter]
+	);
 
-	const contentProps: BaseContentProps = useMemo(() => ({
-		items: optimisticItems,
-		isLoading,
-		error,
-		toggleItemSelection: handleItemSelection,
-		currentContainerId: selectedCharacterId ?? null,
-		containerName: currentCharacter?.name ?? null,
-		emptyState,
-	}), [optimisticItems, isLoading, error, handleItemSelection, selectedCharacterId, currentCharacter?.name, emptyState]);
+	const contentProps: BaseContentProps = useMemo(
+		() => ({
+			items: optimisticItems,
+			isLoading,
+			error,
+			toggleItemSelection: handleItemSelection,
+			currentContainerId: selectedCharacterId ?? null,
+			containerName: currentCharacter?.name ?? null,
+			emptyState,
+		}),
+		[optimisticItems, isLoading, error, handleItemSelection, selectedCharacterId, currentCharacter?.name, emptyState]
+	);
 
 	if (isLoading || isLoadingImages) {
 		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;

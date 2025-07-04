@@ -5,12 +5,12 @@
  * Última actualización: 2025-07-04
  */
 
+import type { StateCreator } from 'zustand';
+import * as ImageApi from '@/lib/api/client/image.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
-import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
-import * as ImageApi from '@/lib/api/client/image.client';
 
 const imageLogger = clientLogger.withContext('ImageStore');
 

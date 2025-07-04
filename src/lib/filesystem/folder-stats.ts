@@ -1,7 +1,7 @@
-import { scanFolder } from './folder-scanner';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { folders, images } from '@/lib/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { scanFolder } from './folder-scanner';
 
 /**
  * 🔧 FIXED: Actualiza estadísticas usando el mismo criterio que el reindexado

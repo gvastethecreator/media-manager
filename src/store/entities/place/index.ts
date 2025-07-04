@@ -175,7 +175,7 @@ export const usePlaceStore = create<PlaceStore>()(
 					set({ isLoading: true, error: null });
 					placeLogger.info('🔄 Cargando lugares...');
 
-                                        const places = await getPlacesFromApi(options ?? {});
+					const places = await getPlacesFromApi(options ?? {});
 					set({ places, isLoading: false });
 					placeLogger.info('✅ Lugares cargados correctamente');
 				} catch (error) {

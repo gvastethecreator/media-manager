@@ -30,7 +30,6 @@ export type {
 	CharacterViewConfig,
 	CharacterWithStats,
 	CreateCharacterData,
-	
 	UpdateCharacterData,
 } from './types';
 

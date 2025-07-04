@@ -35,7 +35,6 @@ async function testCollectionService() {
 		console.log('\n🔍 Probando searchCollections...');
 		const searchResults = await searchCollections({});
 		console.log(`✅ searchCollections exitoso: ${searchResults.length} colecciones encontradas`);
-
 	} catch (error) {
 		console.error('❌ Error en CollectionService:', error);
 	}
@@ -48,10 +47,14 @@ async function testCharacterService() {
 		// Prueba getCharacters
 		console.log('\n📋 Probando getCharacters...');
 		const charactersResult = await getCharacters({});
-		console.log(`✅ getCharacters exitoso: ${charactersResult.characters.length} personajes encontrados (total: ${charactersResult.total})`);
+		console.log(
+			`✅ getCharacters exitoso: ${charactersResult.characters.length} personajes encontrados (total: ${charactersResult.total})`
+		);
 
 		if (charactersResult.characters.length > 0) {
-			console.log(`   👤 Primer personaje: ${charactersResult.characters[0].name} (${charactersResult.characters[0].id})`);
+			console.log(
+				`   👤 Primer personaje: ${charactersResult.characters[0].name} (${charactersResult.characters[0].id})`
+			);
 
 			// Prueba getCharacter
 			console.log('\n🔍 Probando getCharacter...');
@@ -66,7 +69,6 @@ async function testCharacterService() {
 		} else {
 			console.log('ℹ️ No hay personajes para probar getCharacter');
 		}
-
 	} catch (error) {
 		console.error('❌ Error en CharacterService:', error);
 	}

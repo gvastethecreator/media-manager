@@ -1,6 +1,17 @@
+import { asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { tags, activities, images, collections, folders, albums, characters, places, worldItems, imageStats } from '@/lib/drizzle/schema';
-import { eq, desc, asc, sql } from 'drizzle-orm';
+import {
+	activities,
+	albums,
+	characters,
+	collections,
+	folders,
+	imageStats,
+	images,
+	places,
+	tags,
+	worldItems,
+} from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -331,11 +342,14 @@ export async function getImageStats(imageId: string) {
 
 		if (!stats) {
 			statsLogger.info('➕ Creando estadísticas para imagen:', imageId);
-			const [newStats] = await db.insert(imageStats).values({
-				imageId,
-				views: 0,
-				lastViewed: new Date(),
-			}).returning();
+			const [newStats] = await db
+				.insert(imageStats)
+				.values({
+					imageId,
+					views: 0,
+					lastViewed: new Date(),
+				})
+				.returning();
 			stats = newStats;
 		}
 
@@ -355,13 +369,21 @@ export async function incrementImageView(imageId: string) {
 	try {
 		statsLogger.info('👁️ Incrementando visualización de imagen:', imageId);
 
-		const [updatedStats] = await db.update(imageStats).set({
-			views: sql`${imageStats.views} + 1`,
-			lastViewed: new Date(),
-		}).where(eq(imageStats.imageId, imageId)).returning();
+		const [updatedStats] = await db
+			.update(imageStats)
+			.set({
+				views: sql`${imageStats.views} + 1`,
+				lastViewed: new Date(),
+			})
+			.where(eq(imageStats.imageId, imageId))
+			.returning();
 
 		if (!updatedStats) {
-			throw createStatsError('No se pudo encontrar la imagen para actualizar las estadísticas', StatsErrorCode.ENTITY_NOT_FOUND, { imageId });
+			throw createStatsError(
+				'No se pudo encontrar la imagen para actualizar las estadísticas',
+				StatsErrorCode.ENTITY_NOT_FOUND,
+				{ imageId }
+			);
 		}
 
 		statsLogger.info('✅ Visualización de imagen incrementada');

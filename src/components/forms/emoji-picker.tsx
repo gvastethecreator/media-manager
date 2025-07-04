@@ -153,16 +153,22 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 	const [activeTab, setActiveTab] = useState('activities');
 
 	// 🎯 Manejar selección con Frimousse
-	const handleFrimousseSelect = useCallback((emoji: { native: string }) => {
-		onChange(emoji.native);
-		setOpen(false);
-	}, [onChange]);
+	const handleFrimousseSelect = useCallback(
+		(emoji: { native: string }) => {
+			onChange(emoji.native);
+			setOpen(false);
+		},
+		[onChange]
+	);
 
 	// Callback para manejar selección de emojis del grid
-	const handleEmojiSelect = useCallback((emoji: string) => {
-		onChange(emoji);
-		setOpen(false);
-	}, [onChange]);
+	const handleEmojiSelect = useCallback(
+		(emoji: string) => {
+			onChange(emoji);
+			setOpen(false);
+		},
+		[onChange]
+	);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>

@@ -3,7 +3,6 @@
 import type { Audio, AudioCreateInput, AudioUpdateInput } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
 
-
 type DrizzleAudio = {
 	id: string;
 	name: string;
@@ -46,5 +45,3 @@ export function serializeAudio(data: AudioCreateInput | AudioUpdateInput): Audio
 export function deserializeAudio(drizzleAudio: DrizzleAudio): Audio {
 	return audioSchema.parse(drizzleAudio) as Audio;
 }
-
-

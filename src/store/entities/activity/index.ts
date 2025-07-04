@@ -18,6 +18,15 @@ import {
         getActivityFromApi,
         getActivitiesFromApi,
 } from '@/lib/api/client/activity.client';
+import {
+	createActivity as createActivityService,
+	deleteActivity as deleteActivityService,
+	getActivityById as getActivityByIdService,
+	getFilteredActivities as getFilteredActivitiesService,
+} from '@/services/activity/activity.service';
+import { extendActivities, extendActivity } from '@/transformers/activity';
+import type { ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
+import { ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
 
 // Logger para el store
 const storeLogger = clientLogger.withContext('ActivityStore');

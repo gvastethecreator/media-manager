@@ -1,90 +1,75 @@
 /**
- * @file Transformador principal para la entidad Prompt.
+ * @file Transformador principal para la entidad Prompt
  * @module transformers/prompt/transformer
- * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptComplete } from '@/types/entities/prompt';
-import type { PropertyComplete } from '@/types/entities/property';
-import type { TagComplete } from '@/types/entities/tag';
-import type { VideoComplete } from '@/types/entities/video';
-import type { WildcardComplete } from '@/types/entities/wildcard';
-import type { WorldItemComplete } from '@/types/entities/world-item';
-import { transformImagesForCard } from '../image/transformer';
-import { fromDrizzleNote } from '../note/transformer';
-import { fromDrizzleProperty } from '../property/transformer';
-import { fromDrizzleTag } from '../tag/transformer';
-import { fromDrizzleVideo } from '../video/transformer';
-import { fromDrizzleWildcard } from '../wildcard/transformer';
-import { fromDrizzleWorldItem } from '../world-item/transformer';
+import { TransformerError } from '@/lib/utils/transformers/errors';
+import type { PromptBase, PromptStatistics, PromptWithStats } from '@/types/entities/prompt';
 
-const promptTransformerLogger = serverLogger.withContext('PromptTransformer');
+const logger = serverLogger.withContext('PromptTransformer');
 
 /**
- * 🤖 Transforma un prompt de Drizzle a PromptComplete
+ * Transforma un objeto Prompt de Drizzle a PromptWithStats
  */
-export function fromDrizzlePrompt(promptFromDrizzle: any | null): PromptComplete | null {
-	if (!promptFromDrizzle) {
-		promptTransformerLogger.warn('⚠️ Prompt de Drizzle nulo o indefinido');
-		return null;
+export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
+	if (!drizzlePrompt) {
+		throw new TransformerError('El objeto de prompt de Drizzle no puede ser nulo.');
 	}
 
 	try {
-		promptTransformerLogger.debug(`🔄 Transformando prompt: ${promptFromDrizzle.id}`);
+		const { _count, ...baseData } = drizzlePrompt;
 
-		const prompt: PromptComplete = {
-			id: promptFromDrizzle.id,
-			name: promptFromDrizzle.name,
-			description: promptFromDrizzle.description,
-			content: promptFromDrizzle.content,
-			isPublic: promptFromDrizzle.isPublic,
-			isFavorite: promptFromDrizzle.isFavorite,
-			createdAt: promptFromDrizzle.createdAt,
-			updatedAt: promptFromDrizzle.updatedAt,
+		const wordCount = baseData.content ? baseData.content.split(/\s+/).length : 0;
+		const parameterCount = baseData.parameters ? Object.keys(baseData.parameters).length : 0;
 
-			// Relaciones transformadas
-			images: transformImagesForCard(promptFromDrizzle.images || []),
-			videos: promptFromDrizzle.videos?.map(fromDrizzleVideo).filter((v): v is VideoComplete => v !== null) || [],
-			tags: promptFromDrizzle.tags?.map(fromDrizzleTag).filter((t): t is TagComplete => t !== null) || [],
-			notes: promptFromDrizzle.notes?.map(fromDrizzleNote).filter((n): n is any => n !== null) || [],
-			wildcards:
-				promptFromDrizzle.wildcards?.map(fromDrizzleWildcard).filter((w): w is WildcardComplete => w !== null) || [],
-			properties:
-				promptFromDrizzle.properties?.map(fromDrizzleProperty).filter((p): p is PropertyComplete => p !== null) || [],
-			worldItems:
-				promptFromDrizzle.worldItems?.map(fromDrizzleWorldItem).filter((w): w is WorldItemComplete => w !== null) || [],
-
-			// Conteos
-			_count: promptFromDrizzle._count || {
-				images: 0,
-				videos: 0,
-				tags: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				worldItems: 0,
-			},
+		const stats: PromptStatistics = {
+			useCount: _count?.uses || 0,
+			favoriteCount: _count?.favorites || 0,
+			shareCount: _count?.shares || 0,
+			wordCount,
+			parameterCount,
+			tagCount: baseData.tags ? baseData.tags.length : 0,
+			lastUsed: _count?.lastUsed || undefined,
+			popularity: Math.min(100, ((_count?.uses || 0) / 10) * 100),
 		};
 
-		promptTransformerLogger.debug(`✅ Prompt transformado: ${prompt.id}`);
-		return prompt;
+		return {
+			...baseData,
+			stats,
+		};
 	} catch (error) {
-		promptTransformerLogger.error(`❌ Error transformando prompt ${promptFromDrizzle.id}:`, error);
-		return null;
+		logger.error('Error transformando prompt desde Drizzle', {
+			error,
+			promptId: drizzlePrompt?.id,
+		});
+		throw new TransformerError(`Error al transformar el prompt: ${(error as Error).message}`);
 	}
 }
 
 /**
- * 🔄 Transforma una lista de prompts de Drizzle a una lista de PromptComplete.
- *
- * @param drizzlePrompts - Un array de objetos Prompt de Drizzle.
- * @returns Un array de objetos PromptComplete.
+ * Transforma una lista de prompts de Drizzle a PromptWithStats[]
  */
-export function fromDrizzlePrompts(drizzlePrompts: any[]): PromptComplete[] {
-	return drizzlePrompts.map(fromDrizzlePrompt).filter((p): p is PromptComplete => p !== null);
+export function fromDrizzlePrompts(drizzlePrompts: any[]): PromptWithStats[] {
+	return drizzlePrompts.map(fromDrizzlePrompt);
 }
 
-// Alias para compatibilidad con código existente
-export const transformPrompt = fromDrizzlePrompt;
-export const transformPrompts = fromDrizzlePrompts;
+/**
+ * Convierte un PromptBase a DrizzlePrompt para inserción/actualización
+ */
+export function toDrizzlePrompt(prompt: PromptBase): any {
+	return {
+		id: prompt.id,
+		title: prompt.title,
+		content: prompt.content,
+		description: prompt.description,
+		category: prompt.category,
+		tags: prompt.tags,
+		parameters: prompt.parameters,
+		isPublic: prompt.isPublic,
+		isFavorite: prompt.isFavorite,
+		createdAt: prompt.createdAt,
+		updatedAt: prompt.updatedAt,
+	};
+}

@@ -4,8 +4,8 @@
  * ✅ Reemplaza server actions de concepts con API calls
  */
 
+import type { ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
 import { apiClient } from '../client';
-import type { ConceptWithStats, ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept';
 
 export const conceptsApi = {
 	/**

@@ -65,7 +65,7 @@ export const MixedContentView = memo<MixedContentViewProps>(function MixedConten
 
 		try {
 			// Simular refresco (en una implementación real, recargarías los stores)
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 			logger.info('✅ Vista de contenido mixto refrescada');
 		} catch (error) {
 			logger.error('❌ Error al refrescar vista mixta:', error);
@@ -79,7 +79,7 @@ export const MixedContentView = memo<MixedContentViewProps>(function MixedConten
 		(item: EntityWithStats) => {
 			logger.debug('📋 Item seleccionado en vista mixta:', {
 				id: item.id,
-				type: 'entityType' in item ? item.entityType : 'unknown'
+				type: 'entityType' in item ? item.entityType : 'unknown',
 			});
 			onItemSelect?.(item);
 		},
@@ -90,7 +90,7 @@ export const MixedContentView = memo<MixedContentViewProps>(function MixedConten
 		(item: EntityWithStats) => {
 			logger.debug('🖱️ Doble click en item de vista mixta:', {
 				id: item.id,
-				type: 'entityType' in item ? item.entityType : 'unknown'
+				type: 'entityType' in item ? item.entityType : 'unknown',
 			});
 			onItemDoubleClick?.(item);
 		},
@@ -112,13 +112,7 @@ export const MixedContentView = memo<MixedContentViewProps>(function MixedConten
 						<p className="text-sm text-muted-foreground">{currentConfig.description}</p>
 					</div>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleRefresh}
-					disabled={isRefreshing}
-					className="gap-2"
-				>
+				<Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing} className="gap-2">
 					<RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
 					Refrescar
 				</Button>

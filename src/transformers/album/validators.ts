@@ -5,8 +5,8 @@
  * Estado: Completo, sin dependencias de Prisma
  */
 
-import { CreateAlbumSchema, UpdateAlbumSchema } from '@/types/entities/album';
 import type { Album, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
+import { CreateAlbumSchema, UpdateAlbumSchema } from '@/types/entities/album';
 
 /**
  * Valida los datos para crear un álbum
@@ -54,9 +54,9 @@ export function validateUpdateAlbumData(
  */
 export function isValidAlbum(album: unknown): album is Album {
 	if (!album || typeof album !== 'object') return false;
-	
+
 	const albumObj = album as Record<string, unknown>;
-	
+
 	return (
 		typeof albumObj.id === 'string' &&
 		typeof albumObj.name === 'string' &&

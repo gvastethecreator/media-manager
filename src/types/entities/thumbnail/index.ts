@@ -1,26 +1,32 @@
 /**
  * @file Punto de entrada para los tipos de Thumbnail
  * @module types/entities/thumbnail
+ * @updated 2025-01-27 - Migrado a estructura canónica Base+Statistics+WithStats
  */
 
-export type {
-	ThumbnailComplete,
-	ThumbnailExtended,
-	ThumbnailStats,
-	ThumbnailWithStats,
-} from './extended';
-
+// ✅ EXPORTACIONES PRINCIPALES (estructura canónica)
 export type {
 	ThumbnailBase,
+	ThumbnailStatistics,
+	ThumbnailWithStats,
 	ThumbnailCreateInput,
+	ThumbnailUpdateInput,
+	// Legacy para compatibilidad temporal
+	ThumbnailComplete,
+	ThumbnailExtended,
+} from './base';
+
+export {
+	ThumbnailQuality,
+} from './base';
+
+// 🔧 LEGACY: Exportaciones del archivo types.ts (en transición)
+export type {
 	ThumbnailMetadata,
 	ThumbnailRelations,
-	ThumbnailUpdateInput,
-} from './types';
-export {
-	ThumbnailFormat,
-	ThumbnailQuality,
-	thumbnailBaseSchema,
 } from './types';
 
-// Añadir aquí exportaciones adicionales si es necesario
+export {
+	ThumbnailFormat,
+	thumbnailBaseSchema,
+} from './types';

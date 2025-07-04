@@ -1,9 +1,9 @@
 import { Loader2, XCircle } from 'lucide-react';
+import * as React from 'react';
 // No importamos Image de Next.js ya que está causando problemas
 import { cn } from '@/lib/utils';
 import { pathToUrl } from '@/lib/web/url-utils';
 import { useImageViewer } from '@/store/image-viewer.store';
-import * as React from 'react';
 import type { ItemComponentProps } from './details-panel-types';
 
 /**

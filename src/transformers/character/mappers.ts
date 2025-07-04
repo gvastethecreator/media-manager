@@ -132,7 +132,7 @@ export function mapUpdateCharacterDataToDrizzle(data: CharacterUpdateInput): Dri
 		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
 		const drizzleData: DrizzleCharacterUpdateInput = {
 			...rest,
-			updatedAt: new Date()
+			updatedAt: new Date(),
 		};
 
 		// Nota: Las relaciones se manejan por separado en Drizzle

@@ -1,5 +1,5 @@
-import { CharacterService } from '@/services/character/character.service';
 import { Router } from 'express';
+import { CharacterService } from '@/services/character/character.service';
 
 const router = Router();
 const characterService = new CharacterService();
@@ -47,4 +47,3 @@ export { router as charactersRouter };
 
 // Exportación default para compatibilidad con server/index.ts
 export default router;
-

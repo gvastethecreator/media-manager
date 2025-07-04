@@ -120,12 +120,12 @@ export default [
 
 			// TypeScript específicas que Biome no cubre completamente
 			'@typescript-eslint/no-unused-vars': 'off', // Biome ya maneja esta regla
-			'@typescript-eslint/no-explicit-any': 'warn',
+			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/prefer-as-const': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'warn',
 
 			// Reglas generales que complementan Biome
-			'no-console': 'warn',
+			'no-console': 'off',
 			'no-debugger': 'error',
 			'no-alert': 'error',
 			'prefer-const': 'error',

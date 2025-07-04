@@ -5,6 +5,8 @@
  * @updated 2025-01-27
  */
 
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { collections, images } from '@/lib/drizzle/schema';
@@ -14,14 +16,12 @@ import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';
 import type {
-    CollectionBase,
-    CollectionCreateInput,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
-    CollectionWithStats,
+	CollectionBase,
+	CollectionCreateInput,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
+	CollectionWithStats,
 } from '@/types/entities/collection';
-import { and, asc, desc, eq, like, or, count } from 'drizzle-orm';
-import * as crypto from 'crypto';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');
@@ -30,7 +30,6 @@ const logger = serverLogger.withContext('CollectionService');
 const REVALIDATE_PATHS = ['/collections', '/settings/collections'];
 
 // Selección optimizada para obtener solo los conteos
-
 
 // Eventos del servicio de colecciones
 export const COLLECTION_EVENTS = {
@@ -131,7 +130,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		}
 
 		if (options.filters?.category && options.filters.category.length > 0) {
-			const categoryConditions = options.filters.category.map(cat => eq(collections.category, cat));
+			const categoryConditions = options.filters.category.map((cat) => eq(collections.category, cat));
 			conditions.push(or(...categoryConditions));
 		}
 
@@ -187,7 +186,6 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		}
 
 		const drizzleCollections = await query;
-
 
 		const transformedCollections = drizzleCollections.map((rawCollection) => ({
 			...rawCollection,
@@ -260,7 +258,6 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 			})
 			.from(collections)
 			.orderBy(desc(collections.createdAt));
-
 
 		const transformedCollections = drizzleCollections.map((rawCollection) => ({
 			...rawCollection,
@@ -342,7 +339,6 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 
 		const rawCollection = drizzleCollection[0];
 
-
 		const transformedCollection = {
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
@@ -389,32 +385,35 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 		logger.info('✨ Creando nueva colección', { name: data.name });
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(collections).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			emoji: data.emoji || '📋',
-			color: data.color || '#3b82f6',
-			description: data.description || null,
-			shortcut: data.shortcut || null,
-			category: data.category || null,
-			sortBy: data.sortBy || null,
-			filters: data.filters || null,
-			url: data.url || null,
-			alternativeUrl: data.alternativeUrl || null,
-			sourceImage: data.sourceImage || null,
-			platform: data.platform || null,
-			price: data.price || null,
-			network: data.network || null,
-			tokenId: data.tokenId || null,
-			tokenAddress: data.tokenAddress || null,
-			contractAddress: data.contractAddress || null,
-			contractType: data.contractType || null,
-			editions: data.editions || null,
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(collections)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				emoji: data.emoji || '📋',
+				color: data.color || '#3b82f6',
+				description: data.description || null,
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				url: data.url || null,
+				alternativeUrl: data.alternativeUrl || null,
+				sourceImage: data.sourceImage || null,
+				platform: data.platform || null,
+				price: data.price || null,
+				network: data.network || null,
+				tokenId: data.tokenId || null,
+				tokenAddress: data.tokenAddress || null,
+				contractAddress: data.contractAddress || null,
+				contractType: data.contractType || null,
+				editions: data.editions || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newCollection = result[0];
 
@@ -469,30 +468,34 @@ export const updateCollection = async (id: string, data: CollectionUpdateInput):
 	try {
 		logger.info(`📝 Actualizando colección: ${id}`);
 
-		const [updatedCollection] = await db.update(collections).set({
-			name: data.name,
-			emoji: data.emoji || '📋',
-			color: data.color || '#3b82f6',
-			description: data.description || null,
-			shortcut: data.shortcut || null,
-			category: data.category || null,
-			sortBy: data.sortBy || null,
-			filters: data.filters || null,
-			url: data.url || null,
-			alternativeUrl: data.alternativeUrl || null,
-			sourceImage: data.sourceImage || null,
-			platform: data.platform || null,
-			price: data.price || null,
-			network: data.network || null,
-			tokenId: data.tokenId || null,
-			tokenAddress: data.tokenAddress || null,
-			contractAddress: data.contractAddress || null,
-			contractType: data.contractType || null,
-			editions: data.editions || null,
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
-			updatedAt: new Date(),
-		}).where(eq(collections.id, id)).returning();
+		const [updatedCollection] = await db
+			.update(collections)
+			.set({
+				name: data.name,
+				emoji: data.emoji || '📋',
+				color: data.color || '#3b82f6',
+				description: data.description || null,
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				url: data.url || null,
+				alternativeUrl: data.alternativeUrl || null,
+				sourceImage: data.sourceImage || null,
+				platform: data.platform || null,
+				price: data.price || null,
+				network: data.network || null,
+				tokenId: data.tokenId || null,
+				tokenAddress: data.tokenAddress || null,
+				contractAddress: data.contractAddress || null,
+				contractType: data.contractType || null,
+				editions: data.editions || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				updatedAt: new Date(),
+			})
+			.where(eq(collections.id, id))
+			.returning();
 
 		if (!updatedCollection) {
 			throw new CollectionServiceError('Colección no encontrada', 'COLLECTION_NOT_FOUND');
@@ -570,14 +573,16 @@ export const getCollectionImages = async (id: string): Promise<{ id: string; nam
 	try {
 		logger.info(`🖼️ Obteniendo imágenes de la colección: ${id}`);
 
-		const result = await db.select({
-			id: images.id,
-			name: images.name,
-			path: images.path,
-		}).from(images)
-		.innerJoin(collections, eq(images.collectionId, collections.id))
-		.where(eq(collections.id, id))
-		.orderBy(desc(images.createdAt));
+		const result = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+			})
+			.from(images)
+			.innerJoin(collections, eq(images.collectionId, collections.id))
+			.where(eq(collections.id, id))
+			.orderBy(desc(images.createdAt));
 
 		logger.info(`✅ ${result.length} imágenes obtenidas de la colección: ${id}`);
 		return result;
@@ -608,9 +613,13 @@ export const toggleCollectionFavorite = async (id: string): Promise<CollectionWi
 			throw new CollectionServiceError('Colección no encontrada', 'COLLECTION_NOT_FOUND');
 		}
 
-		const [updatedCollection] = await db.update(collections).set({
-			isFavorite: !currentCollection.isFavorite,
-		}).where(eq(collections.id, id)).returning();
+		const [updatedCollection] = await db
+			.update(collections)
+			.set({
+				isFavorite: !currentCollection.isFavorite,
+			})
+			.where(eq(collections.id, id))
+			.returning();
 
 		if (!updatedCollection) {
 			throw new CollectionServiceError('Error al actualizar la colección', 'UPDATE_FAILED');

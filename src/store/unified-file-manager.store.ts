@@ -24,13 +24,13 @@
 import { create } from 'zustand';
 // 🚀 Importaciones actualizadas - MIGRADAS A EntityWithStats
 import type { ViewMode } from '@/components/navigation/types';
+// 🚧 Refactor: ahora usamos cliente de API en lugar de servicio del servidor
+// Uso de cliente de API para desacoplar el store de los servicios del servidor
+import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
 import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
 // 🎯 Cache y throttling optimizados
 import { throttleEvent } from '@/lib/system/event-throttler';
-// 🚧 Refactor: ahora usamos cliente de API en lugar de servicio del servidor
-// Uso de cliente de API para desacoplar el store de los servicios del servidor
-import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
 import type { EntityStatsType, EntityWithStats } from '@/types/migration';
 import { isFolderWithStats, isImageWithStats, isVideoWithStats } from '@/types/migration';
 
@@ -394,7 +394,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 				// 🎯 Cargar según contexto usando APIs disponibles
 				switch (context) {
 					case 'folder': {
-                                                // Llamada a la API para obtener imágenes de la carpeta
+						// Llamada a la API para obtener imágenes de la carpeta
 						if (id) {
 							try {
 								fileManagerLogger.info(`🔄 Obteniendo imágenes de carpeta con ID: ${id}`);
@@ -405,7 +405,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 								const take = ITEMS_PER_BATCH;
 
 								// Obtener imágenes con paginación
-                                                                rawResponse = await getFolderImagesFromApi(id, { skip, take });
+								rawResponse = await getFolderImagesFromApi(id, { skip, take });
 
 								// Verificar si se obtuvo una respuesta válida
 								if (!rawResponse || !Array.isArray(rawResponse.items)) {

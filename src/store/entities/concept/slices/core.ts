@@ -1,7 +1,7 @@
+import type { StateCreator } from 'zustand';
 import { conceptsApi } from '@/lib/api/services/concepts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept/types';
-import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('ConceptStore:Core');
@@ -115,10 +115,12 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 		}
 	},
 
- selectConcept: (concept) => {
-  coreLogger.info(concept ? `🔍 Seleccionando concepto: ${concept?.id ?? 'null'}` : '🧹 Limpiando selección de concepto');
-  set({ selectedConcept: concept });
- },
+	selectConcept: (concept) => {
+		coreLogger.info(
+			concept ? `🔍 Seleccionando concepto: ${concept?.id ?? 'null'}` : '🧹 Limpiando selección de concepto'
+		);
+		set({ selectedConcept: concept });
+	},
 
 	reset: () => {
 		set({

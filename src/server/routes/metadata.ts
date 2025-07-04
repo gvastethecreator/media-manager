@@ -29,7 +29,6 @@ router.put('/:id', async (req, res) => {
 	}
 });
 
-
 // GET /metadata/image/:imageId - Obtener metadata de imagen
 /*
 router.get('/image/:imageId', async (req, res) => {

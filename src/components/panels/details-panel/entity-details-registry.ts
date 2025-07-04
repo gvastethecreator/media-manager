@@ -7,12 +7,16 @@
 import type { ComponentType } from 'react';
 import type { EntityWithStats } from '@/types/migration';
 import { getEntityStatsType } from '@/types/migration';
-
+import {
+	CollectionDetails,
+	CollectionMetadata,
+	CollectionPreview,
+	CollectionToolbar,
+} from './entities/collection-details';
+import { FolderDetails, FolderMetadata, FolderPreview, FolderToolbar } from './entities/folder-details';
 // Imports de componentes específicos
-import { ImageDetails, ImagePreview, ImageToolbar, ImageMetadata } from './entities/image-details';
-import { VideoDetails, VideoPreview, VideoToolbar, VideoMetadata } from './entities/video-details';
-import { FolderDetails, FolderPreview, FolderToolbar, FolderMetadata } from './entities/folder-details';
-import { CollectionDetails, CollectionPreview, CollectionToolbar, CollectionMetadata } from './entities/collection-details';
+import { ImageDetails, ImageMetadata, ImagePreview, ImageToolbar } from './entities/image-details';
+import { VideoDetails, VideoMetadata, VideoPreview, VideoToolbar } from './entities/video-details';
 
 // Tipos base para los componentes de detalles
 export interface EntityDetailsProps<T extends EntityWithStats = EntityWithStats> {
@@ -76,10 +80,7 @@ class EntityDetailsRegistry {
 	/**
 	 * Registra una configuración para un tipo de entidad
 	 */
-	register<T extends EntityWithStats>(
-		entityType: string,
-		config: EntityDetailsConfig<T>
-	): void {
+	register<T extends EntityWithStats>(entityType: string, config: EntityDetailsConfig<T>): void {
 		this.configs.set(entityType, config as EntityDetailsConfig);
 	}
 
@@ -127,9 +128,7 @@ class EntityDetailsRegistry {
 		const config = this.getConfigForEntity(entity);
 		if (!config) return [];
 
-		return config.actions.filter(action =>
-			!action.condition || action.condition(entity)
-		);
+		return config.actions.filter((action) => !action.condition || action.condition(entity));
 	}
 }
 
@@ -402,10 +401,7 @@ export function createEntityConfig<T extends EntityWithStats>(
 		toolbarComponent: config.toolbarComponent || (() => null),
 		metadataComponent: config.metadataComponent || (() => null),
 		actions: config.actions || [],
-		infoCategories: config.infoCategories || [
-			DefaultInfoCategories.BASIC,
-			DefaultInfoCategories.METADATA,
-		],
+		infoCategories: config.infoCategories || [DefaultInfoCategories.BASIC, DefaultInfoCategories.METADATA],
 		supportsExpandedPreview: config.supportsExpandedPreview ?? false,
 		supportsInlineEdit: config.supportsInlineEdit ?? false,
 		...config,

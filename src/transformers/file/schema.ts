@@ -26,7 +26,7 @@ export const fileTypeEnum = pgEnum('file_type', [
 
 /**
  * 📁 Tabla de archivos en la base de datos.
- * 
+ *
  * @description Representa archivos y directorios del sistema con metadatos y relaciones.
  */
 export const filesTable = pgTable('files', {
@@ -34,31 +34,31 @@ export const filesTable = pgTable('files', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	path: text('path').notNull(),
-	
+
 	// Propiedades del archivo
 	size: integer('size').notNull(),
 	hash: text('hash').notNull(),
 	mimeType: text('mime_type').notNull(),
 	extension: text('extension').notNull(),
 	type: fileTypeEnum('type').notNull(),
-	
+
 	// Metadatos del sistema
 	isDirectory: boolean('is_directory').notNull().default(false),
 	parentPath: text('parent_path').notNull(),
 	absolutePath: text('absolute_path').notNull(),
 	relativePath: text('relative_path').notNull(),
-	
+
 	// Fechas del sistema de archivos
 	modifiedAt: timestamp('modified_at', { withTimezone: true }).notNull(),
 	accessedAt: timestamp('accessed_at', { withTimezone: true }).notNull(),
-	
+
 	// Relaciones
 	folderId: uuid('folder_id'),
-	
+
 	// Estados
 	isHidden: boolean('is_hidden').notNull().default(false),
 	isReadonly: boolean('is_readonly').notNull().default(false),
-	
+
 	// Timestamps del sistema
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

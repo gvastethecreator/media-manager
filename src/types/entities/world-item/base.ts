@@ -89,6 +89,3 @@ export interface WorldItemStatistics {
 export interface WorldItemWithStats extends WorldItemBase {
 	_stats: WorldItemStatistics;
 }
-
-
-

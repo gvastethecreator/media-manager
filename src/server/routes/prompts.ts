@@ -1,11 +1,11 @@
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import express from 'express';
+import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { prompts } from '@/lib/drizzle/schema';
 import { PromptService, promptService } from '@/services/prompt/prompt.service';
 import { toImageWithStats } from '@/transformers/image';
 import { toPromptWithStats } from '@/transformers/prompt';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-import express from 'express';
-import { z } from 'zod';
 
 const router = express.Router();
 const legacyPromptService = new PromptService(); // Para métodos legacy
@@ -52,60 +52,63 @@ router.get('/', async (req, res) => {
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 		// Determinar orden
-		const orderByClause = filters.sortOrder === 'desc'
-			? desc(prompts[filters.sortBy || 'name'] as any)
-			: asc(prompts[filters.sortBy || 'name'] as any);
+		const orderByClause =
+			filters.sortOrder === 'desc'
+				? desc(prompts[filters.sortBy || 'name'] as any)
+				: asc(prompts[filters.sortBy || 'name'] as any);
 
 		// Ejecutar consultas en paralelo
 		const [promptResults, totalCount] = await Promise.all([
-			db.select({
-				id: prompts.id,
-				name: prompts.name,
-				description: prompts.description,
-				emoji: prompts.emoji,
-				color: prompts.color,
-				category: prompts.category,
-				isPublic: prompts.isPublic,
-				isFavorite: prompts.isFavorite,
-				totalImages: prompts.totalImages,
-				totalVideos: prompts.totalVideos,
-				type: prompts.type,
-				content: prompts.content,
-				parameters: prompts.parameters,
-				style: prompts.style,
-				mood: prompts.mood,
-				lighting: prompts.lighting,
-				composition: prompts.composition,
-				technique: prompts.technique,
-				inspiration: prompts.inspiration,
-				notes: prompts.notes,
-				featuredImage: prompts.featuredImage,
-				parentId: prompts.parentId,
-				createdAt: prompts.createdAt,
-				updatedAt: prompts.updatedAt
-			})
-			.from(prompts)
-			.where(whereClause)
-			.orderBy(orderByClause)
-			.limit(filters.limit || 50)
-			.offset(filters.offset || 0),
+			db
+				.select({
+					id: prompts.id,
+					name: prompts.name,
+					description: prompts.description,
+					emoji: prompts.emoji,
+					color: prompts.color,
+					category: prompts.category,
+					isPublic: prompts.isPublic,
+					isFavorite: prompts.isFavorite,
+					totalImages: prompts.totalImages,
+					totalVideos: prompts.totalVideos,
+					type: prompts.type,
+					content: prompts.content,
+					parameters: prompts.parameters,
+					style: prompts.style,
+					mood: prompts.mood,
+					lighting: prompts.lighting,
+					composition: prompts.composition,
+					technique: prompts.technique,
+					inspiration: prompts.inspiration,
+					notes: prompts.notes,
+					featuredImage: prompts.featuredImage,
+					parentId: prompts.parentId,
+					createdAt: prompts.createdAt,
+					updatedAt: prompts.updatedAt,
+				})
+				.from(prompts)
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(filters.limit || 50)
+				.offset(filters.offset || 0),
 
-			db.select({ count: count() })
-			.from(prompts)
-			.where(whereClause)
-			.then(result => result[0]?.count || 0)
+			db
+				.select({ count: count() })
+				.from(prompts)
+				.where(whereClause)
+				.then((result) => result[0]?.count || 0),
 		]);
 
 		// Formatear respuesta para compatibilidad
-		const transformedPrompts = promptResults.map(prompt => ({
+		const transformedPrompts = promptResults.map((prompt) => ({
 			...prompt,
 			// Para compatibilidad con transformer
 			images: [],
 			videos: [],
 			_count: {
 				images: prompt.totalImages || 0,
-				videos: prompt.totalVideos || 0
-			}
+				videos: prompt.totalVideos || 0,
+			},
 		}));
 
 		res.json({
@@ -136,35 +139,36 @@ router.get('/:id', async (req, res) => {
 			return res.status(400).json({ error: 'ID de prompt inválido' });
 		}
 
-		const promptResult = await db.select({
-			id: prompts.id,
-			name: prompts.name,
-			description: prompts.description,
-			emoji: prompts.emoji,
-			color: prompts.color,
-			category: prompts.category,
-			isPublic: prompts.isPublic,
-			isFavorite: prompts.isFavorite,
-			totalImages: prompts.totalImages,
-			totalVideos: prompts.totalVideos,
-			type: prompts.type,
-			content: prompts.content,
-			parameters: prompts.parameters,
-			style: prompts.style,
-			mood: prompts.mood,
-			lighting: prompts.lighting,
-			composition: prompts.composition,
-			technique: prompts.technique,
-			inspiration: prompts.inspiration,
-			notes: prompts.notes,
-			featuredImage: prompts.featuredImage,
-			parentId: prompts.parentId,
-			createdAt: prompts.createdAt,
-			updatedAt: prompts.updatedAt
-		})
-		.from(prompts)
-		.where(eq(prompts.id, id))
-		.limit(1);
+		const promptResult = await db
+			.select({
+				id: prompts.id,
+				name: prompts.name,
+				description: prompts.description,
+				emoji: prompts.emoji,
+				color: prompts.color,
+				category: prompts.category,
+				isPublic: prompts.isPublic,
+				isFavorite: prompts.isFavorite,
+				totalImages: prompts.totalImages,
+				totalVideos: prompts.totalVideos,
+				type: prompts.type,
+				content: prompts.content,
+				parameters: prompts.parameters,
+				style: prompts.style,
+				mood: prompts.mood,
+				lighting: prompts.lighting,
+				composition: prompts.composition,
+				technique: prompts.technique,
+				inspiration: prompts.inspiration,
+				notes: prompts.notes,
+				featuredImage: prompts.featuredImage,
+				parentId: prompts.parentId,
+				createdAt: prompts.createdAt,
+				updatedAt: prompts.updatedAt,
+			})
+			.from(prompts)
+			.where(eq(prompts.id, id))
+			.limit(1);
 
 		const prompt = promptResult[0];
 		if (!prompt) {
@@ -178,8 +182,8 @@ router.get('/:id', async (req, res) => {
 			videos: [],
 			_count: {
 				images: prompt.totalImages || 0,
-				videos: prompt.totalVideos || 0
-			}
+				videos: prompt.totalVideos || 0,
+			},
 		};
 
 		res.json(toPromptWithStats(formattedPrompt));

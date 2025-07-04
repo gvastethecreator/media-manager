@@ -31,7 +31,6 @@ async function testDocumentService() {
 		} else {
 			console.log('ℹ️ No hay documentos para probar getDocumentById');
 		}
-
 	} catch (error) {
 		console.error('❌ Error en DocumentService:', error);
 	}
@@ -61,7 +60,6 @@ async function testAudioService() {
 		} else {
 			console.log('ℹ️ No hay audios para probar getAudioById');
 		}
-
 	} catch (error) {
 		console.error('❌ Error en AudioService:', error);
 	}
@@ -91,7 +89,6 @@ async function testFile3DService() {
 		} else {
 			console.log('ℹ️ No hay archivos 3D para probar getFile3DById');
 		}
-
 	} catch (error) {
 		console.error('❌ Error en File3DService:', error);
 	}

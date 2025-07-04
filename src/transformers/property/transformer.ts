@@ -6,11 +6,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { calculateCompleteness } from '@/lib/utils/transformers';
-import type {
-	PropertyBase,
-	PropertyStatistics,
-	PropertyWithStats,
-} from '@/types/entities/property';
+import type { PropertyBase, PropertyStatistics, PropertyWithStats } from '@/types/entities/property';
 
 const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer');
 
@@ -21,9 +17,7 @@ const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer'
  * @param drizzleProperty El objeto Property de Drizzle, puede incluir conteos de relaciones
  * @returns Un objeto PropertyWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromDrizzleProperty(
-	drizzleProperty: any | null
-): PropertyWithStats | null {
+export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithStats | null {
 	if (!drizzleProperty) {
 		propertyTransformerLogger.warn('⚠️ Property de Drizzle nulo o indefinido');
 		return null;

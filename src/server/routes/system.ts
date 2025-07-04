@@ -1,19 +1,17 @@
-import { getNavigationData } from '../services/system.service';
 import express from 'express';
-import {
+import { 
+	createDefaultSettingsData,getNavigationData, 
 	getNavigationData,
+	getProfileSettings,
+	getSystemSettings,
 	getSystemStats,
+	getSystemVersion,
 	repairSystem,
 	resetDatabase,
-	getSystemVersion,
-	getSystemSettings,
-	updateSystemSettings,
-	resetSystemSettings,
-	getProfileSettings,
-	updateProfileSettings,
 	resetProfileSettings,
-	createDefaultSettingsData,
-} from '../services/system.service';
+	resetSystemSettings,
+	updateProfileSettings,
+	updateSystemSettings,} from '../services/system.service';
 
 const router = express.Router();
 

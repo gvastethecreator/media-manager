@@ -2,10 +2,12 @@
  * @file Punto de entrada para los transformadores de la entidad Property.
  * @module transformers/property
  * @description Exporta las funciones de transformación canónicas para Property.
- * @see /src/transformers/property/mappers.ts
- * @see /src/transformers/property/transformer.ts
- * @updated 2025-01-27
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-export { toPropertyWithStats } from './mappers';
-export { transformProperty, type PropertyComplete } from './transformer';
+// Exportar mappers, serializers, validators y schemas
+export * from './mappers';
+export * from './serializers';
+export * from './validators';
+export * from './schema';
+export * from './transformer';

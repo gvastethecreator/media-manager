@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { getJsonFiles, getJsonFileById, createJsonFile, updateJsonFile, deleteJsonFile } from '@/services/json-file/json-file.service';
+import {
+	createJsonFile,
+	deleteJsonFile,
+	getJsonFileById,
+	getJsonFiles,
+	updateJsonFile,
+} from '@/services/json-file/json-file.service';
 
 const router = Router();
 
