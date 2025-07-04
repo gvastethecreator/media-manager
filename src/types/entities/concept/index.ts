@@ -1,32 +1,39 @@
 /**
- * @file Exporta todos los tipos relacionados con la entidad Concept
+ * @file Exportaciones principales de tipos para la entidad Concept.
  * @module types/entities/concept
+ * @description
+ *   Centraliza la exportación del tipo canónico **`ConceptWithStats`**.
  *
- * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
- * Legacy eliminado.
+ *   - `ConceptBase`: Tipo base de Drizzle.
+ *   - `ConceptStatistics`: Interfaz para las estadísticas de conteo.
+ *   - `ConceptWithStats`: El tipo enriquecido que se debe usar en la app.
+ *
+ * @see /src/types/entities/concept/base.ts
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Tipos Canónicos ---
+export type { ConceptBase, ConceptStatistics, ConceptWithStats } from './base';
+
+// --- Enumeraciones ---
 export {
 	ConceptCategory,
 	ConceptSortOption,
 	ConceptStatus,
 	ConceptViewMode,
 } from './enums';
-// Exportar esquema de validación
-export type { ConceptStats } from './schema';
-export type {
-	ConceptBase as Concept,
-	ConceptBase,
-	ConceptComplete,
-	ConceptCreateInput,
-	ConceptExtended,
-	ConceptFilters,
-	ConceptListItem,
-	ConceptSearchOptions,
-	ConceptSearchResult,
-	ConceptUpdateInput,
-} from './types';
-// Exportar tipo principal como Concept para compatibilidad
-export { ConceptSchema } from './types';
+
+// --- Tipos de compatibilidad e interfaces ---
+import type { ConceptBase, ConceptWithStats } from './base';
+
+export type ConceptComplete = ConceptWithStats;
+export type ConceptCreateInput = Partial<ConceptBase>;
+export type ConceptUpdateInput = Partial<Omit<ConceptBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export type ConceptSearchOptions = {
+	skip?: number;
+	take?: number;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	where?: Record<string, unknown>;
+};
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

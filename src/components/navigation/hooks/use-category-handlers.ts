@@ -5,11 +5,11 @@
  * @updated 2025-01-27
  */
 
-import type { ViewType } from '@/components/views/types';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import type { ViewType } from '@/components/views/types';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 const logger = clientLogger.withContext('CategoryHandlers');
 

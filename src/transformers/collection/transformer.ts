@@ -1,73 +1,64 @@
 /**
  * @file Transformador principal para la entidad Collection
  * @module transformers/collection/transformer
- * @description Contiene la lógica para convertir un objeto Collection de Prisma a nuestro tipo canónico.
+ * @description Contiene la lógica para convertir un objeto Collection de Drizzle a nuestro tipo canónico.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CollectionWithStats, PrismaCollectionWithCounts } from '@/types/entities/collection';
+import type { CollectionWithStats, CollectionBase, CollectionStatistics } from '@/types/entities/collection';
 
 const logger = serverLogger.withContext('CollectionTransformer');
 
 /**
- * 🔄 Transforma un objeto Collection de Drizzle a nuestro tipo canónico CollectionWithStats.
+ * 🔄 Transforma un objeto Collection de Drizzle con conteos a nuestro tipo canónico CollectionWithStats.
  *
- * @param drizzleCollection - El objeto Collection obtenido de Drizzle con conteos.
+ * @param drizzleCollection - El objeto Collection base obtenido de Drizzle.
+ * @param counts - Los conteos de las relaciones de la colección.
  * @returns Un objeto CollectionWithStats compatible con nuestra aplicación, o null.
  */
-export function fromDrizzleCollection(drizzleCollection: PrismaCollectionWithCounts | null): CollectionWithStats | null {
+export function fromDrizzleCollection(
+	drizzleCollection: CollectionBase | null,
+	counts: {
+		images: number;
+		videos: number;
+		albums: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	}
+): CollectionWithStats | null {
 	if (!drizzleCollection) {
 		return null;
 	}
 
 	try {
-		const { _count, ...baseData } = drizzleCollection;
-
-		// Calcular estadísticas
-		const totalImages = _count?.images ?? 0;
-		const totalVideos = _count?.videos ?? 0;
-		const totalItems = totalImages + totalVideos;
-
-		// Calcular total de entidades relacionadas
-		const totalEntities =
-			(_count?.albums ?? 0) +
-			(_count?.tags ?? 0) +
-			(_count?.characters ?? 0) +
-			(_count?.places ?? 0) +
-			(_count?.worldItems ?? 0) +
-			(_count?.concepts ?? 0) +
-			(_count?.prompts ?? 0) +
-			(_count?.notes ?? 0) +
-			(_count?.wildcards ?? 0) +
-			(_count?.properties ?? 0) +
-			(_count?.groups ?? 0);
-
-		const stats = {
-			totalItems,
-			totalImages,
-			totalVideos,
-			totalEntities,
-			lastUpdated: drizzleCollection.updatedAt,
+		const stats: CollectionStatistics = {
+			imageCount: counts.images,
+			videoCount: counts.videos,
+			albumCount: counts.albums,
+			tagCount: counts.tags,
+			characterCount: counts.characters,
+			placeCount: counts.places,
+			worldItemCount: counts.worldItems,
+			conceptCount: counts.concepts,
+			promptCount: counts.prompts,
+			noteCount: counts.notes,
+			wildcardCount: counts.wildcards,
+			propertyCount: counts.properties,
+			groupCount: counts.groups,
 		};
 
 		return {
-			...baseData,
+			...drizzleCollection,
 			stats,
-			_count: {
-				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
-				albums: _count?.albums ?? 0,
-				tags: _count?.tags ?? 0,
-				characters: _count?.characters ?? 0,
-				places: _count?.places ?? 0,
-				worldItems: _count?.worldItems ?? 0,
-				concepts: _count?.concepts ?? 0,
-				prompts: _count?.prompts ?? 0,
-				notes: _count?.notes ?? 0,
-				wildcards: _count?.wildcards ?? 0,
-				properties: _count?.properties ?? 0,
-				groups: _count?.groups ?? 0,
-			},
 		};
 	} catch (error) {
 		logger.error('Error transformando colección desde Drizzle', {
@@ -81,9 +72,30 @@ export function fromDrizzleCollection(drizzleCollection: PrismaCollectionWithCou
 /**
  * 🔄 Transforma una lista de colecciones de Drizzle a una lista de CollectionWithStats.
  *
- * @param drizzleCollections - Un array de objetos Collection de Drizzle.
+ * @param drizzleCollections - Un array de objetos Collection de Drizzle con sus conteos.
  * @returns Un array de objetos CollectionWithStats.
  */
-export function fromDrizzleCollections(drizzleCollections: PrismaCollectionWithCounts[]): CollectionWithStats[] {
-	return drizzleCollections.map(fromDrizzleCollection).filter((c): c is CollectionWithStats => c !== null);
+export function fromDrizzleCollections(
+	drizzleCollections: Array<{
+		collection: CollectionBase;
+		counts: {
+			images: number;
+			videos: number;
+			albums: number;
+			tags: number;
+			characters: number;
+			places: number;
+			worldItems: number;
+			concepts: number;
+			prompts: number;
+			notes: number;
+			wildcards: number;
+			properties: number;
+			groups: number;
+		};
+	}>
+): CollectionWithStats[] {
+	return drizzleCollections
+		.map(({ collection, counts }) => fromDrizzleCollection(collection, counts))
+		.filter((c): c is CollectionWithStats => c !== null);
 }
