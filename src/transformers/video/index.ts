@@ -1,20 +1,11 @@
 /**
- * @file Punto de entrada para transformadores de Video
+ * @file Punto de entrada para los transformadores de la entidad Video.
  * @module transformers/video
- * ✅ MIGRADO A DRIZZLE
+ * @description Exporta las funciones de transformación canónicas para Video.
+ * @see /src/transformers/video/mappers.ts
+ * @see /src/transformers/video/transformer.ts
+ * @updated 2025-01-27
  */
 
-export {
-	mapCreateVideoDataToDrizzle,
-	// Alias para compatibilidad, marcados como deprecated en el mapper
-	mapCreateVideoDataToPrisma,
-	mapUpdateVideoDataToDrizzle,
-	mapUpdateVideoDataToPrisma,
-	mapVideoFiltersToDrizzleArgs,
-	mapVideoFiltersToPrismaArgs,
-} from './mappers';
-
-export { fromDrizzleVideo, fromDrizzleVideos, toVideoWithStats } from './transformer';
-
-// TODO: Revisar y migrar esquemas de validación si es necesario
-// export { VideoSchema } from './schema';
+export { toVideoWithStats } from './mappers';
+export { type VideoComplete, fromDrizzleVideo } from './transformer';
