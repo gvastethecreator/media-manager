@@ -45,3 +45,26 @@ export * from './wildcards/wildcards-view';
 export * from './workflows/workflows-view';
 export * from './world-items/world-item-content-view';
 export * from './world-items/world-items-view';
+
+// Exportaciones agrupadas según la nueva estructura file-centric
+export { default as AllFilesView } from './all-files-view';
+export { default as ImagesView } from './images-view';
+export { default as VideosView } from './videos-view';
+export { default as AudioView } from './audio-view';
+export { default as DocumentsView } from './documents-view';
+export { default as JsonFilesView } from './json-files-view';
+export { default as WorkflowsView } from './workflows-view';
+export { default as File3DView } from './file3d-view';
+
+export { default as FavoritesView } from './favorites-view';
+export { default as AlbumsView } from './albums-view';
+export { default as GroupsView } from './groups-view';
+export { default as TagsView } from './tags-view';
+export { default as CollectionsView } from './collections-view';
+export { default as PromptsView } from './prompts-view';
+
+export { default as CharactersView } from './characters-view';
+export { default as PlacesView } from './places-view';
+export { default as WorldItemsView } from './world-items-view';
+export { default as ConceptsView } from './concepts-view';
+export { default as WildcardsView } from './wildcards-view';

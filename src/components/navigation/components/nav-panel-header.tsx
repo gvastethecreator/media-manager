@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useThemeSync } from '@/lib/contexts/settings-context';
 import { useUIStore } from '@/store/ui.store';
+import { ThemeToggle } from '@/components/core/theme/theme-toggle';
+import { useTheme } from '@/components/ui/theme-provider';
 
 // MOCK DATA para reemplazar useProfileContext
 const mockProfileData = {
@@ -34,50 +36,6 @@ const mockProfileData = {
 		activeProfile: '1',
 	},
 };
-
-// Constante con los temas disponibles (solo los básicos para empezar)
-const THEMES = ['light', 'dark', 'system'] as const;
-
-type ThemeType = (typeof THEMES)[number];
-
-// Función para obtener el siguiente tema
-function getNextTheme(currentTheme: string | undefined): ThemeType {
-	if (!currentTheme || !THEMES.includes(currentTheme as ThemeType)) {
-		return 'light';
-	}
-
-	const currentIndex = THEMES.indexOf(currentTheme as ThemeType);
-	const nextIndex = (currentIndex + 1) % THEMES.length;
-	return THEMES[nextIndex];
-}
-
-// Función para obtener el icono del tema
-function getThemeIcon(theme: string | undefined) {
-	switch (theme) {
-		case 'light':
-			return <Sun className="h-3.5 w-3.5" />;
-		case 'dark':
-			return <Moon className="h-3.5 w-3.5" />;
-		case 'system':
-			return <Palette className="h-3.5 w-3.5" />;
-		default:
-			return <Sun className="h-3.5 w-3.5" />;
-	}
-}
-
-// Función para obtener el nombre del tema en español
-function getThemeName(theme: string | undefined): string {
-	switch (theme) {
-		case 'light':
-			return 'Claro';
-		case 'dark':
-			return 'Oscuro';
-		case 'system':
-			return 'Sistema';
-		default:
-			return 'Claro';
-	}
-}
 
 interface NavPanelHeaderProps {
 	totalImages: number;
@@ -141,6 +99,37 @@ const MemoizedAvatar = memo(function Avatar({ color, emoji }: { color: string; e
 	);
 });
 
+function getThemeIcon(theme: string | undefined) {
+	switch (theme) {
+		case 'light':
+			return <Sun className="h-4 w-4 text-yellow-400" />;
+		case 'dark':
+			return <Moon className="h-4 w-4 text-blue-400" />;
+		case 'cafe':
+			return <Palette className="h-4 w-4 text-amber-700" />;
+		case 'violeta':
+			return <Palette className="h-4 w-4 text-violet-400" />;
+		case 'madera':
+			return <Palette className="h-4 w-4 text-yellow-800" />;
+		case 'nocturno':
+			return <Moon className="h-4 w-4 text-sky-400" />;
+		case 'verde':
+			return <Palette className="h-4 w-4 text-green-400" />;
+		case 'atardecer':
+			return <Palette className="h-4 w-4 text-orange-400" />;
+		case 'corporativo':
+			return <Palette className="h-4 w-4 text-blue-600" />;
+		case 'carbon':
+			return <Palette className="h-4 w-4 text-neutral-500" />;
+		case 'teal':
+			return <Palette className="h-4 w-4 text-teal-400" />;
+		case 'citrico':
+			return <Palette className="h-4 w-4 text-lime-400" />;
+		default:
+			return <Palette className="h-4 w-4 text-primary" />;
+	}
+}
+
 // Componente principal memoizado
 export const NavPanelHeader = memo(function NavPanelHeader({
 	totalImages,
@@ -165,15 +154,13 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 		);
 	}, [profiles, activeProfile]);
 
-	const { theme, setTheme } = useThemeSync();
+	const { theme, setTheme, themes } = useTheme();
 	const { setView } = useUIStore();
 
-	const handleThemeToggle = () => {
-		const nextTheme = getNextTheme(theme);
-		console.log(`Cambiando tema de ${theme} a ${nextTheme}`);
-
-		// Actualizar el estado del tema
-		setTheme(nextTheme);
+	const handleThemeRotate = () => {
+		const idx = themes.indexOf(theme as string);
+		const nextTheme = themes[(idx + 1) % themes.length];
+		setTheme(nextTheme as any);
 	};
 
 	const handleHomeClick = useCallback(() => {
@@ -236,10 +223,21 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						)}
 
 						<MemoizedHeaderButton
-							icon={getThemeIcon(theme)}
-							onClick={handleThemeToggle}
+							icon={
+								<Button
+									onClick={handleThemeRotate}
+									variant="ghost"
+									size="icon"
+									className="flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-md border border-border hover:bg-secondary/30 transition-colors"
+									aria-label="Cambiar tema"
+								>
+									{getThemeIcon(theme)}
+									<span className="ml-1 capitalize hidden md:inline">{theme}</span>
+								</Button>
+							}
+							onClick={handleThemeRotate}
 							tooltipTitle="Tema"
-							tooltipContent={`Actual: ${getThemeName(theme)}`}
+							tooltipContent={`Actual: ${theme}`}
 						/>
 
 						<MemoizedHeaderButton
@@ -248,6 +246,8 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipTitle="Configuración"
 							tooltipContent="Personaliza tu experiencia"
 						/>
+
+						<ThemeToggle />
 					</div>
 				</div>
 			) : (
@@ -321,10 +321,21 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						)}
 
 						<MemoizedHeaderButton
-							icon={getThemeIcon(theme)}
-							onClick={handleThemeToggle}
+							icon={
+								<Button
+									onClick={handleThemeRotate}
+									variant="ghost"
+									size="icon"
+									className="flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-md border border-border hover:bg-secondary/30 transition-colors"
+									aria-label="Cambiar tema"
+								>
+									{getThemeIcon(theme)}
+									<span className="ml-1 capitalize hidden md:inline">{theme}</span>
+								</Button>
+							}
+							onClick={handleThemeRotate}
 							tooltipTitle="Tema"
-							tooltipContent={`Actual: ${getThemeName(theme)}`}
+							tooltipContent={`Actual: ${theme}`}
 						/>
 
 						<MemoizedHeaderButton
@@ -333,6 +344,8 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipTitle="Configuración"
 							tooltipContent="Personaliza tu experiencia"
 						/>
+
+						<ThemeToggle />
 					</div>
 				</div>
 			)}
