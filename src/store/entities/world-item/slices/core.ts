@@ -5,12 +5,13 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
+// Refactor 2025-07: uso de cliente API para world items
 import {
-    createWorldItem as createServerWorldItem,
-    deleteWorldItem as deleteServerWorldItem,
-    getWorldItems,
-    updateWorldItem as updateServerWorldItem,
-} from '@/services/world-item/world-item.service';
+    createWorldItemInApi,
+    deleteWorldItemFromApi,
+    getWorldItemsFromApi,
+    updateWorldItemInApi,
+} from '@/lib/api/client/world-item.client';
 import type { CreateWorldItemData, UpdateWorldItemData, WorldItem } from '@/types/entities/world-item';
 import type { StateCreator } from 'zustand';
 import type { WorldItemActions, WorldItemState } from '../types';
@@ -43,7 +44,7 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemAc
 		try {
 			set({ isLoading: true, error: null });
 			worldItemLogger.info('🔄 Cargando objetos del mundo...');
-			const items = await getWorldItems();
+                        const items = await getWorldItemsFromApi();
 			set({ worldItems: items as unknown as WorldItem[], isLoading: false });
 			worldItemLogger.info('✅ Objetos del mundo cargados');
 		} catch (error) {
@@ -56,7 +57,7 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemAc
 	createWorldItem: async (item) => {
 		try {
 			worldItemLogger.info('➕ Creando objeto del mundo:', item);
-			const newItem = await createServerWorldItem(item);
+                        const newItem = await createWorldItemInApi(item);
 			set((state) => ({ worldItems: [...state.worldItems, newItem as unknown as WorldItem] }));
 			toastService.system.success('Objeto del mundo creado');
 		} catch (error) {
@@ -67,7 +68,7 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemAc
 	updateWorldItem: async (id, item) => {
 		try {
 			worldItemLogger.info('🔄 Actualizando objeto del mundo:', { id, ...item });
-			const updatedItem = await updateServerWorldItem(id, item);
+                        const updatedItem = await updateWorldItemInApi(id, item);
 			set((state) => ({
 				worldItems: state.worldItems.map((i) => (i.id === id ? (updatedItem as unknown as WorldItem) : i)),
 			}));
@@ -80,7 +81,7 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemAc
 	deleteWorldItem: async (id) => {
 		try {
 			worldItemLogger.info('🗑️ Eliminando objeto del mundo:', id);
-			await deleteServerWorldItem(id);
+                        await deleteWorldItemFromApi(id);
 			set((state) => ({
 				worldItems: state.worldItems.filter((i) => i.id !== id),
 			}));

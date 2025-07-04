@@ -7,14 +7,15 @@ import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { arrayToRecord } from '@/lib/utils/array.utils';
 import { toastService } from '@/services/toast';
+// Refactor 2025-07: uso de cliente API para wildcards
 import {
-    createWildcard as createWildcardAction,
-    deleteWildcard as deleteWildcardAction,
-    getWildcard as getWildcardAction,
-    getWildcards as getWildcardsAction,
-    moveWildcard as moveWildcardAction,
-    updateWildcard as updateWildcardAction,
-} from '@/services/wildcard/wildcard.service';
+    createWildcardInApi,
+    deleteWildcardFromApi,
+    getWildcardFromApi,
+    getWildcardsFromApi,
+    moveWildcardInApi,
+    updateWildcardInApi,
+} from '@/lib/api/client/wildcard.client';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import type { WildcardState } from '../types';
 
@@ -165,7 +166,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 	fetchWildcard: async (id) => {
 		get().setLoading(true);
 		try {
-			const wildcard = await getWildcardAction(id);
+                        const wildcard = await getWildcardFromApi(id);
 			if (wildcard) {
 				get().addWildcard(wildcard);
 				return wildcard;
@@ -183,7 +184,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 	fetchWildcards: async () => {
 		get().setLoading(true);
 		try {
-			const wildcards = await getWildcardsAction();
+                        const wildcards = await getWildcardsFromApi();
 			get().addWildcards(wildcards);
 			return wildcards;
 		} catch (e) {
@@ -198,7 +199,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 	createWildcard: async (data) => {
 		get().setLoading(true);
 		try {
-			const newWildcard = await createWildcardAction(data);
+                        const newWildcard = await createWildcardInApi(data);
 			get().addWildcard(newWildcard);
 			toastService.success('Wildcard creado');
 			return newWildcard;
@@ -214,7 +215,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 	updateWildcard: async (id, data) => {
 		get().setLoading(true);
 		try {
-			const updatedWildcard = await updateWildcardAction(id, data);
+                        const updatedWildcard = await updateWildcardInApi(id, data);
 			get().addWildcard(updatedWildcard);
 			toastService.success('Wildcard actualizado');
 			return updatedWildcard;
@@ -230,7 +231,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 	removeWildcard: async (id) => {
 		get().setLoading(true);
 		try {
-			await deleteWildcardAction(id);
+                        await deleteWildcardFromApi(id);
 			get().deleteWildcard(id);
 			toastService.success('Wildcard eliminado');
 			return true;
@@ -246,7 +247,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 	moveWildcard: async (id, newParentId) => {
 		get().setLoading(true);
 		try {
-			await moveWildcardAction(id, newParentId);
+                        await moveWildcardInApi(id, newParentId);
 			// Re-fetch para actualizar el estado, ya que la acción de mover puede afectar a varios.
 			await get().fetchWildcards();
 			toastService.success('Wildcard movido');
