@@ -20,7 +20,7 @@ import * as schema from './schema.js';
 // Obtener la URL de la base de datos desde las variables de entorno
 // En el servidor (Node.js) usa process.env.DATABASE_URL
 // En el cliente (browser) usa una URL por defecto que será interceptada por el proxy
-const databaseUrl = typeof window === 'undefined' ? process.env.DATABASE_URL : 'file:./dev.db'; // Fallback para el cliente, aunque no se usará realmente
+const databaseUrl = typeof window === 'undefined' ? process.env.DATABASE_URL : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
 
 if (typeof window === 'undefined' && !databaseUrl) {
 	throw new Error(

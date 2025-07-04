@@ -560,3 +560,29 @@ html[data-theme="neon"] {
 	--chart-5: oklch(0.7 0.28 190);
 	/* Cian neón */
 }
+
+html {
+	transition:
+		background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		outline-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		text-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		filter 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		-webkit-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root {
+	transition:
+		background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		outline-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		text-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		filter 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		-webkit-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}

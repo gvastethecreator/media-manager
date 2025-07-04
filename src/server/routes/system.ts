@@ -1,6 +1,6 @@
 import express from 'express';
-import { 
-	createDefaultSettingsData,getNavigationData, 
+import {
+	createDefaultSettingsData,getNavigationData,
 	getNavigationData,
 	getProfileSettings,
 	getSystemSettings,
@@ -11,7 +11,8 @@ import {
 	resetProfileSettings,
 	resetSystemSettings,
 	updateProfileSettings,
-	updateSystemSettings,} from '../services/system.service';
+	updateSystemSettings } from '../services/system.service';
+import { getDatabaseInfo } from '@/lib/drizzle';
 
 const router = express.Router();
 
@@ -202,6 +203,16 @@ router.post('/settings/default', async (req, res) => {
 			error: 'Error interno del servidor',
 			message: 'No se pudo crear la configuración por defecto'
 		});
+	}
+});
+
+// ENDPOINT TEMPORAL PARA DEBUG DE BASE DE DATOS
+router.get('/dbinfo', async (req, res) => {
+	try {
+		const info = await getDatabaseInfo();
+		res.json(info);
+	} catch (error) {
+		res.status(500).json({ error: 'No se pudo obtener información de la base de datos', details: error });
 	}
 });
 

@@ -361,44 +361,12 @@ const CategoryItems = memo(
 );
 
 // Componente principal
-export const NavCategoryChildren = memo(
-	forwardRef<CategoryChildrenRef, NavCategoryChildrenProps>(
-		({ categoryId, isCollapsed, selectedChildId, currentView, items, onItemClick, onToggleViewMode }, ref) => {
-			// Estado local para el modo de vista
-			const [viewMode, setViewMode] = useState<ViewMode>('list');
-
-			// Exponer métodos al componente padre
-			useImperativeHandle(
-				ref,
-				() => ({
-					toggleViewMode: () => {
-						const newMode = viewMode === 'list' ? 'grid' : 'list';
-						setViewMode(newMode);
-						onToggleViewMode?.(newMode);
-					},
-					getViewMode: () => viewMode,
-				}),
-				[viewMode, onToggleViewMode]
-			);
-
-			// Si está colapsado, no mostrar nada
-			if (isCollapsed) {
-				return null;
-			}
-
-			return (
-				<>
-					{/* Renderizado condicional de los ítems */}
-					<CategoryItems
-						items={items}
-						categoryId={categoryId}
-						viewMode={viewMode}
-						currentView={currentView}
-						selectedChildId={selectedChildId}
-						onItemClick={onItemClick}
-					/>
-				</>
-			);
-		}
-	)
-);
+export const NavCategoryChildren = memo(function NavCategoryChildren({
+	children,
+}) {
+	return (
+		<div className="flex flex-col gap-1">
+			{children}
+		</div>
+	);
+});

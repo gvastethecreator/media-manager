@@ -9,56 +9,35 @@ import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-
-// Hook de tema simplificado
-function useTheme() {
-	const [theme, setThemeState] = useState<'light' | 'dark'>('light');
-
-	// Detectar preferencia del sistema
-	const getSystemTheme = (): 'light' | 'dark' => {
-		if (typeof window === 'undefined') return 'light';
-		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	};
-
-	// Aplicar tema al DOM
-	const applyTheme = (themeToApply: 'light' | 'dark') => {
-		const root = document.documentElement;
-		root.classList.remove('light', 'dark');
-		root.classList.add(themeToApply);
-		root.setAttribute('data-theme', themeToApply);
-	};
-
-	// Inicializar tema desde localStorage
-	useEffect(() => {
-		const storedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system';
-		if (storedTheme === 'system' || !storedTheme) {
-			const systemTheme = getSystemTheme();
-			setThemeState(systemTheme);
-			applyTheme(systemTheme);
-		} else if (storedTheme === 'light' || storedTheme === 'dark') {
-			setThemeState(storedTheme);
-			applyTheme(storedTheme);
-		}
-	}, []);
-
-	// Función para cambiar tema
-	const setTheme = (newTheme: 'light' | 'dark') => {
-		setThemeState(newTheme);
-		localStorage.setItem('theme', newTheme);
-		applyTheme(newTheme);
-	};
-
-	return { theme, setTheme };
-}
+import { useTheme } from '@/components/ui/theme-provider';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function ThemeToggle() {
-	const { theme, setTheme } = useTheme();
+	const { theme, setTheme, themes } = useTheme();
 
 	return (
-		<Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-			<Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-			<Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-			<span className="sr-only">Toggle theme</span>
-		</Button>
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="ghost" size="icon">
+					<Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+					<Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+					<span className="sr-only">Toggle theme</span>
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+				{themes.map((t) => (
+					<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
+						{t.charAt(0).toUpperCase() + t.slice(1)}
+						{theme === t && <span className="ml-2 text-xs text-primary">(actual)</span>}
+					</DropdownMenuItem>
+				))}
+				<DropdownMenuItem onClick={() => setTheme('system')}>Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }

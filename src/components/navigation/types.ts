@@ -5,25 +5,9 @@ import type { NavigationData } from '@/components/navigation/actions/navigation.
  * Tipo para las categorías de navegación disponibles
  */
 export type NavigationCategory =
-	| 'collections'
-	| 'folders'
-	| 'tags'
-	| 'albums'
-	| 'characters'
-	| 'places'
-	| 'world-items'
-	| 'concepts'
-	| 'prompts'
-	| 'notes'
-	| 'groups'
-	| 'properties'
-	| 'wildcards'
-	// Nuevas entidades
-	| 'audios'
-	| 'documents'
-	| 'json-files'
-	| 'file-3ds'
-	| 'workflows';
+	| 'files'
+	| 'library'
+	| 'worldbuilding';
 
 /**
  * @description Representa una entidad que puede tener un conteo de imágenes asociadas.
@@ -48,21 +32,8 @@ export interface CategoryItem {
 
 export interface CategoryChild {
 	id: string;
-	name: string;
-	title?: string; // Para notas que usan title en lugar de name
-	emoji?: string;
-	color?: string;
-	path?: string;
-	description?: string;
-	totalFiles?: number;
-	totalSize?: number;
-	_count?: {
-		images: number;
-		// Otros conteos posibles
-		folders?: number;
-		collections?: number;
-		tags?: number;
-	};
+	label: string;
+	icon?: LucideIcon;
 }
 
 // Tipo para vista de elementos en el panel de navegación

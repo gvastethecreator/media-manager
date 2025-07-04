@@ -6,239 +6,77 @@ import { cn } from '@/lib/utils';
 import { NavCategoryWithChildren } from './components/nav-category-with-children';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
-import { NAVIGATION_CATEGORIES } from './constants/categories';
+import { Home, Palette, IdCard } from 'lucide-react';
 import { useCategoryCollapse, useCategoryHandlers, useCategoryStats, useMainNavigation } from './hooks';
+
+// Nueva estructura de categorías file-centric
+const NAVIGATION_CATEGORIES = [
+	{
+		id: 'files',
+		label: 'Archivos',
+		color: '#3B82F6',
+		icon: Home,
+		children: [
+			{ id: 'all-files', label: 'Todos los archivos' },
+			{ id: 'images', label: 'Imágenes' },
+			{ id: 'videos', label: 'Videos' },
+			{ id: 'audio', label: 'Audio' },
+			{ id: 'docs', label: 'Documentos' },
+			{ id: 'json', label: 'JSON' },
+			{ id: 'workflows', label: 'Workflows' },
+			{ id: 'file3d', label: '3D' },
+		],
+	},
+	{
+		id: 'library',
+		label: 'Librería',
+		color: '#A21CAF',
+		icon: Palette,
+		children: [
+			{ id: 'favorites', label: 'Favoritos' },
+			{ id: 'albums', label: 'Álbumes' },
+			{ id: 'groups', label: 'Grupos' },
+			{ id: 'tags', label: 'Etiquetas' },
+			{ id: 'collections', label: 'Colecciones' },
+			{ id: 'prompts', label: 'Prompts' },
+		],
+	},
+	{
+		id: 'worldbuilding',
+		label: 'Worldbuilding',
+		color: '#059669',
+		icon: IdCard,
+		children: [
+			{ id: 'characters', label: 'Personajes' },
+			{ id: 'places', label: 'Lugares' },
+			{ id: 'world-items', label: 'Objetos del mundo' },
+			{ id: 'concepts', label: 'Conceptos' },
+			{ id: 'wildcards', label: 'Comodines' },
+		],
+	},
+];
 
 export const NavPanel = memo(function NavPanel({
 	isCollapsed = false,
 	onToggleCollapse,
 }: Omit<NavPanelProps, 'initialData'>) {
-	const { isCategoryCollapsed, handleCollapseToggle, expandCategory } = useCategoryCollapse();
-	const {
-		currentView,
-		handleCategoryClick,
-		handleFolderClick,
-		handleCollectionClick,
-		handleTagClick,
-		handleAlbumClick,
-		handleCharacterClick,
-		handlePlaceClick,
-		handleWorldItemClick,
-		handleConceptClick,
-		handlePromptClick,
-		handleNoteClick,
-		handleGroupClick,
-		handlePropertyClick,
-		handleWildcardClick,
-	} = useCategoryHandlers();
-	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats, isLoading } = useCategoryStats();
-	const { handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, handleMainNavigate } = useMainNavigation();
-	const [categoryViewModes, setCategoryViewModes] = useState<Record<string, 'list' | 'grid'>>({});
+	const [currentView, setCurrentView] = useState('all-files');
+	const { stats } = useCategoryStats();
 
-	// Implementaciones temporales para las funciones faltantes
-	const getSelectedChildId = useCallback((_id: ViewType): string | null => {
-		// Implementación temporal - retorna null para todas las categorías
-		return null;
+	const handleNavigate = useCallback((id: string) => {
+		setCurrentView(id);
 	}, []);
-
-	const getItemClickHandler = useCallback(
-		(categoryId: ViewType) => {
-			return (childId: string) => {
-				// Mapear cada categoría a su handler específico
-				switch (categoryId) {
-					case 'folders':
-						handleFolderClick(childId);
-						break;
-					case 'collections':
-						handleCollectionClick(childId);
-						break;
-					case 'tags':
-						handleTagClick(childId);
-						break;
-					case 'albums':
-						handleAlbumClick(childId);
-						break;
-					case 'characters':
-						handleCharacterClick(childId);
-						break;
-					case 'places':
-						handlePlaceClick(childId);
-						break;
-					case 'world-items':
-						handleWorldItemClick(childId);
-						break;
-					case 'concepts':
-						handleConceptClick(childId);
-						break;
-					case 'prompts':
-						handlePromptClick(childId);
-						break;
-					case 'notes':
-						handleNoteClick(childId);
-						break;
-					case 'groups':
-						handleGroupClick(childId);
-						break;
-					case 'properties':
-						handlePropertyClick(childId);
-						break;
-					case 'wildcards':
-						handleWildcardClick(childId);
-						break;
-					default:
-						// Log silencioso en desarrollo - no mostrar en producción
-						if (process.env.NODE_ENV === 'development') {
-							// eslint-disable-next-line no-console
-							console.warn(`No se encontró handler para la categoría: ${categoryId}`);
-						}
-				}
-			};
-		},
-		[
-			handleFolderClick,
-			handleCollectionClick,
-			handleTagClick,
-			handleAlbumClick,
-			handleCharacterClick,
-			handlePlaceClick,
-			handleWorldItemClick,
-			handleConceptClick,
-			handlePromptClick,
-			handleNoteClick,
-			handleGroupClick,
-			handlePropertyClick,
-			handleWildcardClick,
-		]
-	);
-
-	useEffect(() => {
-		if (!currentView) return;
-
-		const parentCategory = NAVIGATION_CATEGORIES.find((cat) =>
-			getCategoryItems(cat.id).some((item) => item.id === currentView)
-		);
-
-		if (parentCategory) {
-			expandCategory(parentCategory.id);
-		} else if (NAVIGATION_CATEGORIES.some((cat) => cat.id === currentView)) {
-			expandCategory(currentView as ViewType);
-		}
-	}, [currentView, getCategoryItems, expandCategory]);
-
-	const handleCategoryToggleViewMode = useCallback((categoryId: string, mode: 'list' | 'grid') => {
-		setCategoryViewModes((prev) => ({ ...prev, [categoryId]: mode }));
-	}, []);
-
-	const getCategoryClickHandler = useCallback(
-		(id: ViewType) => () => {
-			handleCategoryClick(id);
-			expandCategory(id);
-		},
-		[handleCategoryClick, expandCategory]
-	);
-
-	const getCollapseToggleHandler = useCallback(
-		(id: ViewType) => (e: React.MouseEvent) => handleCollapseToggle(id, e),
-		[handleCollapseToggle]
-	);
-
-	const categoriesContent = useMemo(
-		() =>
-			NAVIGATION_CATEGORIES.map(({ id, icon, label, color }) => {
-				const viewMode = categoryViewModes[id] || 'list';
-				return (
-					<NavCategoryWithChildren
-						key={id}
-						id={id}
-						label={label}
-						color={color}
-						icon={icon}
-						isCollapsed={isCategoryCollapsed(id)}
-						isCurrent={currentView === id}
-						itemCount={getCategoryItemCount(id)}
-						imageCount={getImagesForCategory(id)}
-						isNavCollapsed={isCollapsed}
-						viewMode={viewMode}
-						getCategoryItems={getCategoryItems}
-						onToggleCollapse={getCollapseToggleHandler(id)}
-						onCategoryClick={getCategoryClickHandler(id)}
-						onToggleViewMode={(mode) => handleCategoryToggleViewMode(id, mode)}
-						getSelectedChildId={getSelectedChildId}
-						getItemClickHandler={getItemClickHandler}
-						currentView={currentView}
-					/>
-				);
-			}),
-		[
-			categoryViewModes,
-			currentView,
-			getCategoryItemCount,
-			getImagesForCategory,
-			isCollapsed,
-			isCategoryCollapsed,
-			getCategoryItems,
-			getCollapseToggleHandler,
-			getCategoryClickHandler,
-			handleCategoryToggleViewMode,
-			getSelectedChildId,
-			getItemClickHandler,
-		]
-	);
-
-	const headerProps = useMemo(
-		() => ({
-			totalImages: stats.totalImages,
-			onOpenSettings: handleOpenSettings,
-			onOpenDevelopment: handleOpenDevelopment,
-			onOpenEntityCards: handleOpenEntityCards,
-			isCollapsed,
-			onToggleCollapse,
-		}),
-		[stats.totalImages, handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, isCollapsed, onToggleCollapse]
-	);
-
-	const mainNavProps = useMemo(
-		() => ({
-			onNavigate: handleMainNavigate,
-			isCollapsed,
-			currentView: currentView || '',
-		}),
-		[handleMainNavigate, isCollapsed, currentView]
-	);
-
-	// Mostrar loading state mientras se cargan los datos
-	if (isLoading) {
-		return (
-			<aside className="flex flex-col h-full w-full bg-card border-r">
-				<div className="p-4 border-b">
-					<div className="h-6 bg-muted animate-pulse rounded" />
-				</div>
-				<div className="flex-1 p-4 space-y-4">
-					{Array.from({ length: 8 }, (_, i) => i).map((index) => (
-						<div key={`nav-skeleton-${index}`} className="space-y-2">
-							<div className="h-4 bg-muted animate-pulse rounded" />
-							<div className="ml-4 space-y-1">
-								<div className="h-3 bg-muted/50 animate-pulse rounded w-3/4" />
-								<div className="h-3 bg-muted/50 animate-pulse rounded w-1/2" />
-							</div>
-						</div>
-					))}
-				</div>
-			</aside>
-		);
-	}
 
 	return (
-		<aside
-			className={cn(
-				'flex flex-col h-full w-full bg-card border-r transition-all duration-300 ease-in-out',
-				isCollapsed && 'min-w-[35px] max-w-[35px]'
-			)}
-		>
-			<NavPanelHeader {...headerProps} />
-			<NavMainNavigation {...mainNavProps} />
+		<aside className={cn('h-full flex flex-col bg-background border-r border-border', isCollapsed && 'w-16')}
+			aria-label="Panel de navegación principal">
+			<NavPanelHeader isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} totalImages={stats.totalImages || 0} />
 			<ScrollArea className="flex-1">
-				<div className="py-2 px-2 space-y-1">{categoriesContent}</div>
+				<NavMainNavigation
+					currentView={currentView}
+					onNavigate={handleNavigate}
+					isCollapsed={isCollapsed}
+				/>
 			</ScrollArea>
 		</aside>
 	);
