@@ -10,10 +10,12 @@ export const PlaceCreateSchema = z.object({
 	name: z.string().min(1).max(255),
 	description: z.string().max(1000).optional(),
 	type: z.string().max(100),
-	coordinates: z.object({
-		lat: z.number().min(-90).max(90),
-		lng: z.number().min(-180).max(180),
-	}).optional(),
+	coordinates: z
+		.object({
+			lat: z.number().min(-90).max(90),
+			lng: z.number().min(-180).max(180),
+		})
+		.optional(),
 	address: z.string().max(500).optional(),
 	country: z.string().max(100).optional(),
 	region: z.string().max(100).optional(),
@@ -25,10 +27,12 @@ export const PlaceUpdateSchema = z.object({
 	name: z.string().min(1).max(255).optional(),
 	description: z.string().max(1000).optional(),
 	type: z.string().max(100).optional(),
-	coordinates: z.object({
-		lat: z.number().min(-90).max(90),
-		lng: z.number().min(-180).max(180),
-	}).optional(),
+	coordinates: z
+		.object({
+			lat: z.number().min(-90).max(90),
+			lng: z.number().min(-180).max(180),
+		})
+		.optional(),
 	address: z.string().max(500).optional(),
 	country: z.string().max(100).optional(),
 	region: z.string().max(100).optional(),

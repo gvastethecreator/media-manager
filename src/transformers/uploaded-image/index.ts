@@ -8,4 +8,8 @@
  */
 
 export { toUploadedImageExtended } from './mappers';
-export { transformToUploadedImageFromDrizzle, type UploadedImageComplete } from './transformer';
+export {
+	transformToUploadedImageFromDrizzle as transformUploadedImage,
+	transformToUploadedImageWithRelationsFromDrizzle as fromDB,
+	type UploadedImageComplete,
+} from './transformer';

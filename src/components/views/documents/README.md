@@ -16,7 +16,7 @@ Esta vista permite editar y previsualizar archivos Markdown usando `@uiw/react-m
 
 ## Dependencias
 
-- `@uiw/react-md-editor` (agregar con `pnpm add @uiw/react-md-editor`)
+- `@uiw/react-md-editor` (agregar con `bun add @uiw/react-md-editor`)
 
 ## Extensiones futuras
 

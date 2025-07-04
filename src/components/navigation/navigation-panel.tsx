@@ -1,3 +1,4 @@
+import { Home, IdCard, Palette } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -6,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { NavCategoryWithChildren } from './components/nav-category-with-children';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
-import { Home, Palette, IdCard } from 'lucide-react';
 import { useCategoryCollapse, useCategoryHandlers, useCategoryStats, useMainNavigation } from './hooks';
 
 // Nueva estructura de categorías file-centric
@@ -68,15 +68,17 @@ export const NavPanel = memo(function NavPanel({
 	}, []);
 
 	return (
-		<aside className={cn('h-full flex flex-col bg-background border-r border-border', isCollapsed && 'w-16')}
-			aria-label="Panel de navegación principal">
-			<NavPanelHeader isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} totalImages={stats.totalImages || 0} />
+		<aside
+			className={cn('h-full flex flex-col bg-background border-r border-border', isCollapsed && 'w-16')}
+			aria-label="Panel de navegación principal"
+		>
+			<NavPanelHeader
+				isCollapsed={isCollapsed}
+				onToggleCollapse={onToggleCollapse}
+				totalImages={stats.totalImages || 0}
+			/>
 			<ScrollArea className="flex-1">
-				<NavMainNavigation
-					currentView={currentView}
-					onNavigate={handleNavigate}
-					isCollapsed={isCollapsed}
-				/>
+				<NavMainNavigation currentView={currentView} onNavigate={handleNavigate} isCollapsed={isCollapsed} />
 			</ScrollArea>
 		</aside>
 	);

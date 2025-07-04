@@ -3,10 +3,10 @@ import React, { useMemo } from 'react';
 import { useTheme } from '@/lib/contexts/theme-context';
 import { cn } from '@/lib/utils';
 import type {
-    WorldItemEffect,
-    WorldItemProperty,
-    WorldItemRequirement,
-    WorldItemStats,
+	WorldItemEffect,
+	WorldItemProperty,
+	WorldItemRequirement,
+	WorldItemStats,
 } from '@/types/entities/world-item/stats-types';
 
 interface WorldItemCardContentProps {

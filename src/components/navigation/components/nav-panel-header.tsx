@@ -1,22 +1,13 @@
 // MIGRADO PARA VITE - Arreglado sistema de theming
-import {
-    Bug,
-    ChevronLeft,
-    ChevronRight, Eye,
-    Home,
-    IdCard, Moon,
-    Palette,
-    Settings2,
-    Sun
-} from 'lucide-react';
+import { Bug, ChevronLeft, ChevronRight, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { memo, useCallback, useMemo } from 'react';
+import { ThemeToggle } from '@/components/core/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/components/ui/theme-provider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useThemeSync } from '@/lib/contexts/settings-context';
 import { useUIStore } from '@/store/ui.store';
-import { ThemeToggle } from '@/components/core/theme/theme-toggle';
-import { useTheme } from '@/components/ui/theme-provider';
 
 // MOCK DATA para reemplazar useProfileContext
 const mockProfileData = {

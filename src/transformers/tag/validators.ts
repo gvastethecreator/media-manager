@@ -18,7 +18,10 @@ export const tagSchema = z.object({
 	name: z.string().min(1, 'Nombre es requerido').max(100, 'Nombre no puede exceder 100 caracteres'),
 	description: z.string().max(500, 'Descripción no puede exceder 500 caracteres').nullable(),
 	emoji: z.string().max(10, 'Emoji no puede exceder 10 caracteres').nullable(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido').nullable(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido')
+		.nullable(),
 	category: z.string().max(50, 'Categoría no puede exceder 50 caracteres').nullable(),
 	shortcut: z.string().max(10, 'Shortcut no puede exceder 10 caracteres').nullable(),
 	featuredImage: z.string().url('Featured image debe ser una URL válida').nullable(),
@@ -34,7 +37,10 @@ export const tagCreateSchema = z.object({
 	name: z.string().min(1, 'Nombre es requerido').max(100, 'Nombre no puede exceder 100 caracteres'),
 	description: z.string().max(500, 'Descripción no puede exceder 500 caracteres').optional(),
 	emoji: z.string().max(10, 'Emoji no puede exceder 10 caracteres').optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido').default('#6B7280'),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido')
+		.default('#6B7280'),
 	category: z.string().max(50, 'Categoría no puede exceder 50 caracteres').optional(),
 	shortcut: z.string().max(10, 'Shortcut no puede exceder 10 caracteres').optional(),
 	featuredImage: z.string().url('Featured image debe ser una URL válida').optional(),
@@ -48,7 +54,11 @@ export const tagUpdateSchema = z.object({
 	name: z.string().min(1, 'Nombre es requerido').max(100, 'Nombre no puede exceder 100 caracteres').optional(),
 	description: z.string().max(500, 'Descripción no puede exceder 500 caracteres').nullable().optional(),
 	emoji: z.string().max(10, 'Emoji no puede exceder 10 caracteres').nullable().optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido').nullable().optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido')
+		.nullable()
+		.optional(),
 	category: z.string().max(50, 'Categoría no puede exceder 50 caracteres').nullable().optional(),
 	shortcut: z.string().max(10, 'Shortcut no puede exceder 10 caracteres').nullable().optional(),
 	featuredImage: z.string().url('Featured image debe ser una URL válida').nullable().optional(),
@@ -71,7 +81,9 @@ export function validateTag(data: unknown): TagBase {
 		return result;
 	} catch (error) {
 		logger.error('❌ Error validando Tag:', error);
-		throw new Error(`Datos de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map(e => e.message).join(', ') : String(error)}`);
+		throw new Error(
+			`Datos de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+		);
 	}
 }
 
@@ -87,7 +99,9 @@ export function validateTagCreate(data: unknown): TagCreateInput {
 		return result;
 	} catch (error) {
 		logger.error('❌ Error validando datos de creación de Tag:', error);
-		throw new Error(`Datos de creación de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map(e => e.message).join(', ') : String(error)}`);
+		throw new Error(
+			`Datos de creación de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+		);
 	}
 }
 
@@ -103,7 +117,9 @@ export function validateTagUpdate(data: unknown): TagUpdateInput {
 		return result;
 	} catch (error) {
 		logger.error('❌ Error validando datos de actualización de Tag:', error);
-		throw new Error(`Datos de actualización de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map(e => e.message).join(', ') : String(error)}`);
+		throw new Error(
+			`Datos de actualización de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+		);
 	}
 }
 
@@ -126,7 +142,9 @@ export function safeValidateTag(data: unknown): { success: true; data: TagBase }
 /**
  * Validación segura para datos de creación
  */
-export function safeValidateTagCreate(data: unknown): { success: true; data: TagCreateInput } | { success: false; error: string } {
+export function safeValidateTagCreate(
+	data: unknown
+): { success: true; data: TagCreateInput } | { success: false; error: string } {
 	logger.debug('🔍 Validación segura de creación de Tag', { data });
 
 	try {
@@ -142,7 +160,9 @@ export function safeValidateTagCreate(data: unknown): { success: true; data: Tag
 /**
  * Validación segura para datos de actualización
  */
-export function safeValidateTagUpdate(data: unknown): { success: true; data: TagUpdateInput } | { success: false; error: string } {
+export function safeValidateTagUpdate(
+	data: unknown
+): { success: true; data: TagUpdateInput } | { success: false; error: string } {
 	logger.debug('🔍 Validación segura de actualización de Tag', { data });
 
 	try {

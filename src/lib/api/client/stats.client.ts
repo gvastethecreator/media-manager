@@ -22,25 +22,25 @@ export async function invalidateStatsInApi(): Promise<void> {
  * Se añadió para reemplazar el uso directo de StatsService en hooks del cliente.
  */
 export async function getImageStatsFromApi(imageId: string): Promise<ImageStatistics> {
-    const response = await fetch(`/api/images/${imageId}/stats`);
-    if (!response.ok) throw new Error('Error al obtener estadísticas de imagen');
-    return response.json();
+	const response = await fetch(`/api/images/${imageId}/stats`);
+	if (!response.ok) throw new Error('Error al obtener estadísticas de imagen');
+	return response.json();
 }
 
 /**
  * Incrementa el contador de vistas de una imagen mediante la API.
  */
 export async function incrementImageViewInApi(imageId: string): Promise<ImageStatistics> {
-    const response = await fetch(`/api/images/${imageId}/view`, { method: 'POST' });
-    if (!response.ok) throw new Error('Error al incrementar vistas');
-    return response.json();
+	const response = await fetch(`/api/images/${imageId}/view`, { method: 'POST' });
+	if (!response.ok) throw new Error('Error al incrementar vistas');
+	return response.json();
 }
 
 /**
  * Incrementa el contador de descargas de una imagen mediante la API.
  */
 export async function incrementImageDownloadInApi(imageId: string): Promise<ImageStatistics> {
-    const response = await fetch(`/api/images/${imageId}/download`, { method: 'POST' });
-    if (!response.ok) throw new Error('Error al incrementar descargas');
-    return response.json();
+	const response = await fetch(`/api/images/${imageId}/download`, { method: 'POST' });
+	if (!response.ok) throw new Error('Error al incrementar descargas');
+	return response.json();
 }

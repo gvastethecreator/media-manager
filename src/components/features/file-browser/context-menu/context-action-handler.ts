@@ -5,8 +5,8 @@
 // import { addImageToCollection } from '@/app/actions/collections/collection-images.actions';
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import { addImageToTag } from '@/services/tag/tag.service';
 import { toast } from '@/lib/ui/toast';
+import { addImageToTag } from '@/services/tag/tag.service';
 
 // Importaciones de stores en entidades
 

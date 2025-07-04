@@ -22,3 +22,4 @@ export type {
 
 // --- Enums ---
 export { FileType } from './base';
+export { FileErrorCode, FileEventType } from './enums';

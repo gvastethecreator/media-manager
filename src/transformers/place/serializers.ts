@@ -39,11 +39,11 @@ export function serializePlaces(places: PlaceWithStats[]) {
  */
 export function normalizeCoordinates(coordinates: any): { lat: number; lng: number } | null {
 	if (!coordinates) return null;
-	
-	const lat = parseFloat(coordinates.lat);
-	const lng = parseFloat(coordinates.lng);
-	
+
+	const lat = Number.parseFloat(coordinates.lat);
+	const lng = Number.parseFloat(coordinates.lng);
+
 	if (isNaN(lat) || isNaN(lng)) return null;
-	
+
 	return { lat, lng };
 }

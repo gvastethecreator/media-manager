@@ -1,5 +1,8 @@
+// Cargar variables de entorno primero
+
 import cors from 'cors';
 import express from 'express';
+import { ENV } from '../config/env.js';
 import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
@@ -10,13 +13,12 @@ import debugRouter from './routes/debug.js';
 import { documentsRouter } from './routes/documents.js';
 import downloadRouter from './routes/download.js';
 import favoritesRouter from './routes/favorites';
-import favoritesRouter from './routes/favorites';
-import { filesRouter } from './routes/files.js';
+import filesRouter from './routes/files-temp.js';
 import { foldersRouter } from './routes/folders.js';
 import groupsRouter from './routes/groups';
 import { imagesRouter } from './routes/images.js';
 import jsonFilesRouter from './routes/json-files';
-import localFilesRouter from './routes/local-files.js';
+import localFilesRouter from './routes/local-files-simple.js';
 import metadataRouter from './routes/metadata';
 import notesRouter from './routes/notes';
 import placesRouter from './routes/places';
@@ -36,10 +38,15 @@ import { workflowsRouter } from './routes/workflows.js';
 import worldItemsRouter from './routes/world-items';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = ENV.API_PORT;
 
 // Middleware
-app.use(cors());
+app.use(
+	cors({
+		origin: ENV.CORS_ORIGIN,
+		credentials: true,
+	})
+);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -71,7 +78,6 @@ app.use('/api/notes', notesRouter);
 app.use('/api/properties', propertiesRouter);
 app.use('/api/groups', groupsRouter);
 app.use('/api/favorites', favoritesRouter);
-app.use('/api/favorites', favoritesRouter);
 app.use('/api/json-files', jsonFilesRouter);
 app.use('/api/local-files', localFilesRouter);
 app.use('/api/debug', debugRouter);
@@ -96,8 +102,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 	});
 });
 
-// 404 handler
-app.use('*', (req, res) => {
+// 404 handler - Usar middleware sin patrón wildcard para compatibilidad con Express 5
+app.use((req, res) => {
 	res.status(404).json({
 		error: 'Endpoint no encontrado',
 		path: req.originalUrl,

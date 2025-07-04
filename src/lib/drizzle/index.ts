@@ -17,16 +17,14 @@ import * as schema from './schema.js';
  * https://orm.drizzle.team/docs/get-started/sqlite-existing
  */
 
-// Obtener la URL de la base de datos desde las variables de entorno
-// En el servidor (Node.js) usa process.env.DATABASE_URL
-// En el cliente (browser) usa una URL por defecto que será interceptada por el proxy
-const databaseUrl = typeof window === 'undefined' ? process.env.DATABASE_URL : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
+import { ENV } from '../../config/env.js';
 
-if (typeof window === 'undefined' && !databaseUrl) {
-	throw new Error(
-		'DATABASE_URL no está definida. Asegúrate de tener un archivo .env con la configuración de la base de datos.'
-	);
-}
+// Obtener la URL de la base de datos desde las variables de entorno
+// En el servidor (Node.js) usa ENV.DATABASE_URL
+// En el cliente (browser) usa una URL por defecto que será interceptada por el proxy
+const databaseUrl = typeof window === 'undefined' ? ENV.DATABASE_URL : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
+
+// El archivo de configuración ya valida que DATABASE_URL esté definida
 
 // Crear cliente de libsql solo en el servidor
 // En el cliente (browser), exportar un objeto mock que será interceptado por el proxy

@@ -4,11 +4,11 @@
  */
 
 import { RouterProvider } from 'react-router-dom';
-import { router } from './router';
-import { ReactScanProvider } from './lib/dev/react-scan';
 import { ErrorBoundary } from './components/core/error-boundary';
-import lastLogContent from './logs/last-log.json';
 import { ThemeProvider } from './components/ui/theme-provider';
+import { ReactScanProvider } from './lib/dev/react-scan';
+import lastLogContent from './logs/last-log.json';
+import { router } from './router';
 
 export function App() {
 	return (

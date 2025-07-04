@@ -61,7 +61,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 						<div className="bg-neutral-800 rounded-xl shadow-lg p-8 w-full flex flex-col items-center border border-neutral-700">
 							<h1 className="text-3xl font-bold mb-4 text-red-400">¡Algo salió mal!</h1>
 							<p className="mb-4 text-neutral-200">Intenta recargar la página o reporta el error.</p>
-							<button type="button" onClick={this.handleReload} className="btn btn-primary mb-4">Recargar</button>
+							<button type="button" onClick={this.handleReload} className="btn btn-primary mb-4">
+								Recargar
+							</button>
 							{process.env.NODE_ENV !== 'production' && this.state.error && (
 								<div className="w-full mt-4 flex flex-col gap-6 items-start">
 									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
@@ -69,29 +71,55 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 										<ul className="list-disc ml-6 text-xs mt-2 text-neutral-200">
 											{affectedFiles.length === 0 && <li>No detectados en el stack trace.</li>}
 											{affectedFiles.map((f) => (
-												<li key={`${f.file}:${f.line}`}><span className="font-mono text-blue-300">{f.file}:{f.line}</span></li>
+												<li key={`${f.file}:${f.line}`}>
+													<span className="font-mono text-blue-300">
+														{f.file}:{f.line}
+													</span>
+												</li>
 											))}
 										</ul>
 									</div>
 									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
 										<div className="flex items-center mb-2">
 											<strong className="text-blue-300">Stack trace:</strong>
-											<button type="button" className="ml-2 text-xs underline text-blue-400 hover:text-blue-200" onClick={() => navigator.clipboard.writeText(stack)}>Copiar</button>
+											<button
+												type="button"
+												className="ml-2 text-xs underline text-blue-400 hover:text-blue-200"
+												onClick={() => navigator.clipboard.writeText(stack)}
+											>
+												Copiar
+											</button>
 										</div>
-										<pre className="bg-neutral-800 p-2 rounded text-xs max-w-xl overflow-x-auto mt-2 text-neutral-200">{stack}</pre>
+										<pre className="bg-neutral-800 p-2 rounded text-xs max-w-xl overflow-x-auto mt-2 text-neutral-200">
+											{stack}
+										</pre>
 									</div>
 									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
 										<strong className="text-green-300">Información de entorno:</strong>
 										<ul className="text-xs ml-4 mt-2 text-neutral-200">
-											<li>Versión: <span className="font-mono text-green-200">{envInfo.version}</span></li>
-											<li>Rama: <span className="font-mono text-green-200">{envInfo.branch}</span></li>
-											<li>Fecha: <span className="font-mono text-green-200">{envInfo.date}</span></li>
-											<li>Ruta: <span className="font-mono text-green-200">{envInfo.path}</span></li>
+											<li>
+												Versión: <span className="font-mono text-green-200">{envInfo.version}</span>
+											</li>
+											<li>
+												Rama: <span className="font-mono text-green-200">{envInfo.branch}</span>
+											</li>
+											<li>
+												Fecha: <span className="font-mono text-green-200">{envInfo.date}</span>
+											</li>
+											<li>
+												Ruta: <span className="font-mono text-green-200">{envInfo.path}</span>
+											</li>
 										</ul>
 									</div>
 									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
 										<strong className="text-yellow-300">Estado de stores (debug):</strong>
-										<pre className="text-xs bg-neutral-800 rounded p-2 mt-2 text-yellow-200 max-h-40 overflow-auto">{JSON.stringify({ /* TODO: dump real de stores aquí */ demo: 'Implementa aquí el snapshot de Zustand o Redux' }, null, 2)}</pre>
+										<pre className="text-xs bg-neutral-800 rounded p-2 mt-2 text-yellow-200 max-h-40 overflow-auto">
+											{JSON.stringify(
+												{ /* TODO: dump real de stores aquí */ demo: 'Implementa aquí el snapshot de Zustand o Redux' },
+												null,
+												2
+											)}
+										</pre>
 									</div>
 								</div>
 							)}
@@ -99,7 +127,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 					</div>
 					{this.props.lastLogContent && (
 						<aside className="w-[420px] max-w-full bg-neutral-950 border-l border-neutral-800 p-4 overflow-auto rounded-lg shadow-inner flex flex-col">
-							<h2 className="font-semibold text-sm mb-2 text-neutral-200">Último log: <span className="font-mono text-xs text-blue-300">{this.props.lastLogContent.file}</span></h2>
+							<h2 className="font-semibold text-sm mb-2 text-neutral-200">
+								Último log: <span className="font-mono text-xs text-blue-300">{this.props.lastLogContent.file}</span>
+							</h2>
 							<pre className="text-xs bg-neutral-900 rounded p-2 max-h-[400px] overflow-auto text-neutral-300">
 								{this.props.lastLogContent.lines.join('\n')}
 							</pre>

@@ -4,9 +4,6 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { arrayToRecord } from '@/lib/utils/array.utils';
-import { toastService } from '@/lib/ui/toast';
 // Refactor 2025-07: uso de cliente API para wildcards
 import {
 	createWildcardInApi,
@@ -16,8 +13,9 @@ import {
 	moveWildcardInApi,
 	updateWildcardInApi,
 } from '@/lib/api/client/wildcard.client';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { arrayToRecord } from '@/lib/utils/array.utils';
+import { clientLogger, clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
+import { arrayToRecord, arrayToRecord } from '@/lib/utils/array.utils';
 import { toastService } from '@/services/toast';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import type { WildcardState } from '../types';

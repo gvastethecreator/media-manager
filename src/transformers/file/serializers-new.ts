@@ -85,7 +85,7 @@ export function serializeDirectoryContents(directory: FileWithStats, files: File
 		files: serializeFileList(files),
 		totalFiles: files.length,
 		totalSize: files.reduce((sum, file) => sum + file.size, 0),
-		fileTypes: [...new Set(files.map(file => file.type))],
+		fileTypes: [...new Set(files.map((file) => file.type))],
 	};
 }
 
@@ -117,13 +117,16 @@ export function serializeFileSearchResults(results: FileWithStats[], query: stri
 		total: results.length,
 		files: serializeFileList(results),
 		summary: {
-			byType: results.reduce((acc, file) => {
-				acc[file.type] = (acc[file.type] || 0) + 1;
-				return acc;
-			}, {} as Record<string, number>),
+			byType: results.reduce(
+				(acc, file) => {
+					acc[file.type] = (acc[file.type] || 0) + 1;
+					return acc;
+				},
+				{} as Record<string, number>
+			),
 			totalSize: results.reduce((sum, file) => sum + file.size, 0),
-			recentFiles: results.filter(file => file.stats.isRecent).length,
-			largeFiles: results.filter(file => file.stats.isLarge).length,
+			recentFiles: results.filter((file) => file.stats.isRecent).length,
+			largeFiles: results.filter((file) => file.stats.isLarge).length,
 		},
 	};
 }
