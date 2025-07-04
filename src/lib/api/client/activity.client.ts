@@ -17,7 +17,12 @@ const API_BASE_PATH = '/api/activity';
 
 export async function getActivityFromApi(id: string): Promise<Activity> {
     const response = await fetch(`${API_BASE_PATH}/${id}`);
-    if (!response.ok) throw new Error('Error al obtener actividad');
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error(`Actividad con ID ${id} no encontrada`);
+        }
+        throw new Error(`Error al obtener actividad: ${response.status}`);
+    }
     const result = await response.json();
     return result.data ?? result;
 }
