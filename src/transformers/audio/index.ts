@@ -1,8 +1,18 @@
 /**
  * 🎵 Transformador de Audio - Exportaciones principales
  * @module transformers/audio
+ * ✅ MIGRADO A DRIZZLE - Julio 2025
+ * 
+ * Estado de migración:
+ * - ✅ Mappers: Convertidos a tipos Drizzle
+ * - ✅ Serializers: Sin dependencias de Prisma
+ * - ✅ Transformer: Usando tipos locales
+ * - ✅ Documentación: Actualizada a Drizzle
  */
 
-export { mapAudioFromUI, mapAudioToUI } from './mappers';
-export { deserializeAudio, serializeAudio } from './serializers';
-export { fromDrizzleAudio, fromDrizzleAudios } from './transformer';
+// Exportar todas las funciones de transformación
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';
+export * from './validators';
+export * from './schema';

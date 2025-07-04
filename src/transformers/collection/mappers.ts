@@ -5,10 +5,10 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { Collection, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 
 /**
- * Representa la estructura del objeto de agregación de conteos de Prisma para una Collection.
+ * Representa la estructura del objeto de agregación de conteos para una Collection (Drizzle).
  */
 type CollectionCounts = {
 	_count: {
@@ -29,13 +29,13 @@ type CollectionCounts = {
 };
 
 /**
- * Convierte un objeto Collection de Prisma y sus conteos a un objeto canónico CollectionWithStats.
+ * Convierte un objeto Collection y sus conteos a un objeto canónico CollectionWithStats.
  *
- * @param collection El objeto Collection de Prisma.
+ * @param collection El objeto Collection base.
  * @param counts Los conteos de las relaciones de la colección.
  * @returns Un objeto CollectionWithStats.
  */
-export function toCollectionWithStats(collection: Collection, counts: CollectionCounts['_count']): CollectionWithStats {
+export function toCollectionWithStats(collection: CollectionBase, counts: CollectionCounts['_count']): CollectionWithStats {
 	const stats: CollectionStatistics = {
 		imageCount: counts.images,
 		videoCount: counts.videos,

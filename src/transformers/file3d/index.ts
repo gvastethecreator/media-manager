@@ -3,11 +3,10 @@
  * @module transformers/file3d
  */
 
-// Exportar desde mappers (renombrando para evitar conflictos)
+// Exportar desde mappers (solo Drizzle, sin alias Prisma)
 export {
 	fromDrizzleFile3D as mapFile3DFromDrizzle, // Mapeo simple
 	toDrizzleFile3D as mapFile3DToDrizzle,     // Mapeo simple
-	toPrismaFile3D,                             // Alias deprecated por compatibilidad
 } from './mappers';
 
 // Exportar desde serializers

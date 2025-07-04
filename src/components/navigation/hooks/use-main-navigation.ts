@@ -1,8 +1,8 @@
-import { clientLogger } from '@/lib/logger/client-logger';
-import { useUIStore } from '@/store/ui.store';
+import { useCallback } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ViewType } from '@/components/views/types';
-import { useCallback } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useUIStore } from '@/store/ui.store';
 
 const logger = clientLogger.withContext('MainNavigation');
 

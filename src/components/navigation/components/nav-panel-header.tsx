@@ -1,43 +1,41 @@
 // MIGRADO PARA VITE - Sin useProfileContext problemático
 // import { useProfileContext } from '@/lib/contexts';
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useUIStore } from '@/store/ui.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import {
-	Briefcase,
-	Bug,
-	ChevronLeft,
-	ChevronRight,
-	CircleDot,
-	Citrus,
-	Coffee,
-	Eye,
-	Home,
-	IdCard,
-	Leaf,
-	Moon,
-	Palette,
-	Settings2,
-	Sun,
-	Sunset,
-	TreePine,
-	Waves,
+    Briefcase,
+    Bug,
+    ChevronLeft,
+    ChevronRight,
+    CircleDot,
+    Citrus,
+    Coffee,
+    Eye,
+    Home,
+    IdCard,
+    Leaf,
+    Moon,
+    Palette,
+    Settings2,
+    Sun,
+    Sunset,
+    TreePine,
+    Waves,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useUIStore } from '@/store/ui.store';
 
 // MOCK DATA para reemplazar useProfileContext
 const mockProfileData = {
 	settings: {
 		avatar: {
 			color: '#3B82F6',
-			emoji: '🎨'
-		}
-	}
+			emoji: '🎨',
+		},
+	},
 };
 
 // Constante con los temas disponibles
@@ -270,7 +268,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 					<div className="flex flex-col gap-2">
 						<MemoizedHeaderButton
 							icon={<ChevronRight className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => { })}
+							onClick={onToggleCollapse || (() => {})}
 							tooltipTitle="Expandir Panel"
 							tooltipContent=""
 							tooltipSide="right"
@@ -359,7 +357,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						{/* Botón de colapsar */}
 						<MemoizedHeaderButton
 							icon={<ChevronLeft className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => { })}
+							onClick={onToggleCollapse || (() => {})}
 							tooltipTitle="Colapsar Panel"
 							tooltipContent=""
 						/>
