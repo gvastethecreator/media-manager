@@ -4,12 +4,14 @@
  */
 
 import { StateCreator } from 'zustand';
+// Refactor 2025-07: se reemplaza el uso directo de tag.service
+// por funciones de un cliente API dedicado
 import {
-	createTag as createTagAction,
-	deleteTag as deleteTagAction,
-	getTags as getTagsAction,
-	updateTag as updateTagAction,
-} from '@/services/tag/tag.service';
+        createTagInApi,
+        deleteTagFromApi,
+        getTagsFromApi,
+        updateTagInApi,
+} from '@/lib/api/client/tag.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
@@ -107,7 +109,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Cargando tags...');
 
-			const tags = await getTagsAction();
+                        const tags = await getTagsFromApi();
 
 			set({
 				tags: tagsToRecord(tags),
@@ -138,7 +140,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('➕ Creando tag:', data);
 
-			const newTag = await createTagAction(data);
+                        const newTag = await createTagInApi(data);
 
 			if (!newTag) {
 				throw new Error('La acción del servidor no devolvió una etiqueta creada.');
@@ -171,7 +173,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Actualizando tag:', { id, data });
 
-			const updatedTag = await updateTagAction(id, data);
+                        const updatedTag = await updateTagInApi(id, data);
 
 			set((state) => ({
 				tags: {
@@ -198,7 +200,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🗑️ Eliminando tag:', id);
 
-			await deleteTagAction(id);
+                        await deleteTagFromApi(id);
 
 			set((state) => {
 				const { [id]: deletedTag, ...remainingTags } = state.tags;
