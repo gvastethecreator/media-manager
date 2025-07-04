@@ -2,7 +2,8 @@ import { BookText, Globe, Image, MessageSquare, Package, Tag, UserSquare, VideoI
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getConceptCounts } from './concept-server-actions';
+
+// import { getConceptCounts } from './concept-server-actions'; // TODO: Archivo no encontrado
 
 interface ConceptCardContentProps {
 	description?: string | null;

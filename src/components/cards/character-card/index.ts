@@ -3,7 +3,8 @@ export * from './character-card-content';
 export * from './character-card-footer';
 export * from './character-card-header';
 export * from './character-card-images';
-export * from './character-server-actions';
+
+// export * from './character-server-actions'; // TODO: Archivo no encontrado
 
 // Componente memorizado para mejorar rendimiento
 import { memo } from 'react';

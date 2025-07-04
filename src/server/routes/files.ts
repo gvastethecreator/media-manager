@@ -197,3 +197,6 @@ router.post('/move', async (req, res) => {
 });
 
 export default router;
+
+// Exportación nombrada para compatibilidad con server/index.ts
+export { router as filesRouter };

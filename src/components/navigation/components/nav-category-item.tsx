@@ -92,22 +92,22 @@ const CategoryCounters = memo(function CategoryCounters({
 
 			{/* Botón para cambiar de vista - a la derecha de los badges */}
 			{!isCollapsed && onToggleViewMode && (
-				<Button
-					asChild
-					variant="ghost"
-					size="sm"
-					className="h-5 w-5 p-0 bg-background/50 hover:bg-secondary/60 rounded text-muted-foreground hover:text-foreground transition-all ml-1"
+				<button
+					type="button"
+					className="h-5 w-5 p-0 bg-background/50 hover:bg-secondary/60 rounded text-muted-foreground hover:text-foreground transition-all ml-1 border-0 cursor-pointer flex items-center justify-center"
 					title={viewMode === 'list' ? 'Cambiar a vista de cuadrícula' : 'Cambiar a vista de lista'}
 					onClick={handleViewModeToggle}
 					onKeyDown={(e) => {
 						if (e.key === 'Enter' || e.key === ' ') {
 							e.preventDefault();
-							handleViewModeToggle(e as any);
+							// Simular un click para el manejador que espera MouseEvent
+							const mockEvent = { stopPropagation: () => {} } as React.MouseEvent;
+							handleViewModeToggle(mockEvent);
 						}
 					}}
 				>
 					{viewMode === 'list' ? <Grid className="h-3 w-3" /> : <List className="h-3 w-3" />}
-				</Button>
+				</button>
 			)}
 		</div>
 	);
@@ -130,7 +130,6 @@ interface NavCategoryItemProps {
 }
 
 export const NavCategoryItem = memo(function NavCategoryItem({
-	id,
 	label,
 	color,
 	icon: Icon,
@@ -229,10 +228,10 @@ export const NavCategoryItem = memo(function NavCategoryItem({
 	// Si el panel está colapsado, envolver en un tooltip
 	if (!showLabel) {
 		return (
-			<TooltipProvider delayDuration={200}>
+			<TooltipProvider>
 				<Tooltip>
-					<TooltipTrigger asChild>{categoryItem}</TooltipTrigger>
-					<TooltipContent side="right" className="text-xs p-2">
+					<TooltipTrigger>{categoryItem}</TooltipTrigger>
+					<TooltipContent className="text-xs p-2">
 						<p className="font-medium text-amber-400">{label}</p>
 						<p className="flex items-center gap-2">
 							<span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-[9px] bg-muted/60 text-muted-foreground min-w-[24px]">

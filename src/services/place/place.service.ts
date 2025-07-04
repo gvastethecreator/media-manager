@@ -379,7 +379,7 @@ export async function placeExists(id: string): Promise<boolean> {
 			.select({ count: count() })
 			.from(places)
 			.where(eq(places.id, id));
-		
+
 		return result[0]?.count > 0;
 	} catch (error) {
 		placeLogger.error(`Error al verificar existencia del place ${id}:`, error);
@@ -402,5 +402,50 @@ export async function getPlaceCount(filters?: PlaceSearchOptions): Promise<numbe
 	} catch (error) {
 		placeLogger.error('Error al obtener conteo de places:', error);
 		throw createPlaceError('Error al obtener conteo de lugares', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Clase de servicio para gestión de lugares
+ */
+export class PlaceService {
+	async getPlaces(filters?: any): Promise<{ places: PlaceWithStats[]; total: number }> {
+		const places = await getPlaces(filters || {});
+		return { places, total: places.length };
+	}
+
+	async getPlaceById(id: string): Promise<PlaceWithStats | null> {
+		return await getPlaceById(id);
+	}
+
+	async createPlace(data: PlaceCreateInput): Promise<PlaceWithStats> {
+		return await createPlace(data);
+	}
+
+	async updatePlace(id: string, data: PlaceUpdateInput): Promise<PlaceWithStats | null> {
+		try {
+			return await updatePlace(id, data);
+		} catch (error) {
+			if (error instanceof Error && error.message.includes('Place no encontrado')) {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deletePlace(id: string): Promise<boolean> {
+		return await deletePlace(id);
+	}
+
+	async getPlaceImages(id: string): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes del lugar
+		placeLogger.info(`Obteniendo imágenes del lugar ${id}`);
+		return [];
+	}
+
+	async getRecentPlaceMedia(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener media reciente del lugar
+		placeLogger.info(`Obteniendo media reciente del lugar ${id} (limit: ${limit})`);
+		return [];
 	}
 }

@@ -6,9 +6,13 @@
 
 // De mappers.ts
 export {
-	mapCharacterSearchOptionsToPrisma,
+	mapCreateCharacterDataToDrizzle,
+	mapUpdateCharacterDataToDrizzle,
+	mapCharacterSearchOptionsToDrizzle,
+	// Alias de compatibilidad
 	mapCreateCharacterDataToPrisma,
 	mapUpdateCharacterDataToPrisma,
+	mapCharacterSearchOptionsToPrisma,
 } from './mappers';
 
 // De transformer.ts

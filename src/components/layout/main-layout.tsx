@@ -1,86 +1,79 @@
-import React, { memo, useMemo } from 'react';
+import { memo, useState } from 'react';
 import { NavPanel } from '@/components/navigation/navigation-panel';
-import { useNavigationStats } from '@/lib/api/navigation';
+import { RightPanel } from '@/components/panels/right-panel/right-panel';
+import { ViewToolbar } from '@/components/toolbar/main-toolbar';
+import { ViewContainer } from '@/components/views/view-container';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 export const MainLayout = memo(function MainLayout() {
 	const { isVisible } = useDetailsPanel();
-	const { data: stats, isLoading: isLoadingStats } = useNavigationStats();
-
-	// Memoizar las props del NavPanel para evitar re-renders innecesarios
-	const navPanelProps = useMemo(() => ({
-		isCollapsed: false,
-	}), []);
-
-	// Memoizar el contenido de estadísticas para evitar recálculos
-	const statsContent = useMemo(() => {
-		if (isLoadingStats) {
-			return (
-				<div className="text-sm text-muted-foreground space-y-2">
-					<div className="h-4 bg-muted animate-pulse rounded w-48 mx-auto" />
-					<div className="h-4 bg-muted animate-pulse rounded w-32 mx-auto" />
-					<div className="h-4 bg-muted animate-pulse rounded w-40 mx-auto" />
-				</div>
-			);
-		}
-
-		return (
-			<div className="text-sm text-muted-foreground">
-				<p>Total imágenes: {stats?.totalImages || 0}</p>
-				<p>Total carpetas: {stats?.totalFolders || 0}</p>
-				<p>Total colecciones: {stats?.totalCollections || 0}</p>
-				<p>Total tags: {stats?.totalTags || 0}</p>
-				<p>Panel detalles: {isVisible ? 'Visible' : 'Oculto'}</p>
-			</div>
-		);
-	}, [isLoadingStats, stats, isVisible]);
-
-	// Memoizar el panel de detalles para evitar re-renders cuando no es visible
-	const detailsPanel = useMemo(() => {
-		if (!isVisible) return null;
-
-		return (
-			<div className="w-80 bg-background border-l border-border">
-				<div className="p-4">
-					<h3 className="font-semibold mb-2">Panel de Detalles</h3>
-					<p className="text-sm text-muted-foreground">
-						Panel de detalles funcionando correctamente
-					</p>
-				</div>
-			</div>
-		);
-	}, [isVisible]);
+	const [leftPanelSize, setLeftPanelSize] = useState(20); // 20% por defecto
+	const [rightPanelSize, setRightPanelSize] = useState(25); // 25% por defecto
+	const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
+	const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
 	return (
-		<div className="h-screen w-full flex bg-background">
-			{/* Panel de navegación izquierdo */}
-			<div className="w-64 border-r border-border">
-				<NavPanel {...navPanelProps} />
-			</div>
+		<div className="h-screen w-full flex bg-background text-foreground">
+			<ResizablePanelGroup direction="horizontal" className="h-full">
+				{/* Panel de navegación izquierdo */}
+				<ResizablePanel
+					defaultSize={leftPanelSize}
+					minSize={isLeftCollapsed ? 3 : 15}
+					maxSize={isLeftCollapsed ? 3 : 35}
+					collapsedSize={3}
+					collapsible={true}
+					onCollapse={() => setIsLeftCollapsed(true)}
+					onExpand={() => setIsLeftCollapsed(false)}
+					className="border-r border-border"
+				>
+					<NavPanel isCollapsed={isLeftCollapsed} onToggleCollapse={() => setIsLeftCollapsed(!isLeftCollapsed)} />
+				</ResizablePanel>
 
-			{/* Panel central */}
-			<div className="flex-1 flex flex-col">
-				{/* Toolbar superior */}
-				<div className="h-12 bg-blue-100 border-b border-border p-2 flex items-center">
-					<span className="text-sm font-medium">🎉 MainLayout con API Migrada</span>
-				</div>
+				<ResizableHandle withHandle />
 
-				{/* Contenido principal */}
-				<div className="flex-1 p-4 bg-background">
-					<div className="h-full bg-muted/10 rounded-lg flex items-center justify-center">
-						<div className="text-center">
-							<h2 className="text-2xl font-bold mb-2">🚀 ¡MainLayout con API!</h2>
-							<p className="text-muted-foreground mb-4">
-								Navigation System migrado a API calls con React Query
-							</p>
-							{statsContent}
+				{/* Panel central con toolbar y view container */}
+				<ResizablePanel defaultSize={isVisible ? 55 : 80} minSize={30} className="flex flex-col">
+					<div className="h-full flex flex-col bg-background">
+						{/* Toolbar superior */}
+						<div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
+							<ViewToolbar
+								isRightPanelCollapsed={isRightCollapsed}
+								toggleRightPanelCollapse={() => setIsRightCollapsed(!isRightCollapsed)}
+								isRightPanelVisible={isVisible}
+								allItemIds={[]}
+							/>
+						</div>
+
+						{/* Contenido principal */}
+						<div className="flex-1 min-h-0 bg-background p-4">
+							<ViewContainer />
 						</div>
 					</div>
-				</div>
-			</div>
+				</ResizablePanel>
 
-			{/* Panel de detalles */}
-			{detailsPanel}
+				{/* Panel de detalles derecho - solo visible cuando isVisible es true */}
+				{isVisible && (
+					<>
+						<ResizableHandle withHandle />
+						<ResizablePanel
+							defaultSize={rightPanelSize}
+							minSize={isRightCollapsed ? 3 : 20}
+							maxSize={isRightCollapsed ? 3 : 50}
+							collapsedSize={3}
+							collapsible={true}
+							onCollapse={() => setIsRightCollapsed(true)}
+							onExpand={() => setIsRightCollapsed(false)}
+							className="border-l border-border"
+						>
+							<RightPanel
+								isCollapsed={isRightCollapsed}
+								onToggleCollapse={() => setIsRightCollapsed(!isRightCollapsed)}
+							/>
+						</ResizablePanel>
+					</>
+				)}
+			</ResizablePanelGroup>
 		</div>
 	);
 });

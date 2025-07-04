@@ -2,21 +2,15 @@
  * @file Slice principal para operaciones CRUD del store de imágenes
  * @module store/entities/image/slices/core
  * @description Implementa operaciones CRUD básicas y gestión de estado para imágenes optimizado con ImageWithStats
- * Última actualización: 2025-01-27
+ * Última actualización: 2025-07-04
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import {
-    createImage as createServerImage,
-    deleteImage as deleteServerImage,
-    getImage,
-    getImages,
-    updateImage as updateServerImage,
-} from '@/services/image/image.service';
 import { toastService } from '@/services/toast';
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
+import * as ImageApi from '@/lib/api/client/image.client';
 
 const imageLogger = clientLogger.withContext('ImageStore');
 
@@ -44,7 +38,7 @@ export interface ImageCoreState {
 	fetchImage: (id: string) => Promise<ImageWithStats | undefined>;
 	fetchImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
 	loadImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
-	createImage: (data: ImageCreateInput) => Promise<ImageWithStats | undefined>;
+	// createImage: (data: ImageCreateInput) => Promise<ImageWithStats | undefined>; // Comentado temporalmente
 	updateImage: (id: string, data: ImageUpdateInput) => Promise<ImageWithStats | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
@@ -120,13 +114,9 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	fetchImage: async (id) => {
 		set({ isLoading: true, error: null });
 		try {
-			const image = await getImage(id);
-			if (image) {
-				// ✅ Server action ya devuelve ImageWithStats - conversión directa
-				get().addImage(image);
-				return image;
-			}
-			return undefined;
+			const image = await ImageApi.getImageFromApi(id);
+			get().addImage(image);
+			return image;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch image';
 			imageLogger.error(errorMessage, { error: e });
@@ -137,132 +127,42 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		}
 	},
 	fetchImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
-		const state = get();
-
-		// Evitar múltiples llamadas simultáneas
-		if (state.isLoading && !options.refresh) {
-			imageLogger.debug('⚠️ Ya hay una carga en progreso, saltando...');
-			return Object.values(state.images);
+		if (get().isLoading && !options.refresh) {
+			return Object.values(get().images);
 		}
-
 		set({ isLoading: true, error: null });
 		try {
-			if (options.refresh) {
-				get().clearImages();
-			}
-
-			imageLogger.info('🔄 Obteniendo imágenes con opciones:', options);
-			const result = await getImages(options);
-
-			imageLogger.debug('📦 Respuesta del servidor:', {
-				result: result ? 'datos recibidos' : 'null/undefined',
-				type: typeof result,
-				isArray: Array.isArray(result),
-			});
-
-			// Verificar que result tiene la estructura esperada
-			if (!result) {
-				imageLogger.info('ℹ️ No se encontraron imágenes para los criterios especificados');
-				set({ isLoading: false, error: null });
-				return [];
-			}
-
-			if (typeof result !== 'object') {
-				throw new Error(`Respuesta del servidor inválida: ${typeof result}`);
-			}
-
-			// Extraer imágenes del resultado
-			const images = Array.isArray(result) ? result : result.images || [];
-			imageLogger.info(`✅ ${images.length} imágenes obtenidas`);
-
-			// Validar que las imágenes tienen la estructura correcta
-			const validImages = images.filter((img) => img && img.id && typeof img.id === 'string');
-			if (validImages.length !== images.length) {
-				imageLogger.warn(`⚠️ Se filtraron ${images.length - validImages.length} imágenes inválidas`);
-			}
-
+			if (options.refresh) get().clearImages();
+			const result = await ImageApi.getImagesFromApi(options);
+			const validImages = result.images.filter((img) => img && img.id);
 			get().addImages(validImages);
-			set({ isLoading: false, error: null });
 			return validImages;
 		} catch (e: unknown) {
-			// Manejo más robusto de errores
-			let errorMessage = 'Failed to fetch images';
-
-			if (e instanceof Error) {
-				errorMessage = e.message;
-			} else if (typeof e === 'string') {
-				errorMessage = e;
-			} else if (e && typeof e === 'object' && 'message' in e) {
-				errorMessage = String(e.message);
-			}
-
-			// No logear errores vacíos como objetos vacíos
-			if (e && typeof e === 'object' && Object.keys(e).length === 0) {
-				errorMessage = 'Error de conexión o servidor no disponible';
-				imageLogger.error('❌ Error obteniendo imágenes: Error de conexión', { options });
-			} else {
-				imageLogger.error('❌ Error obteniendo imágenes:', {
-					error: errorMessage,
-					errorType: typeof e,
-					options,
-				});
-			}
-
-			set({ error: errorMessage, isLoading: false });
-			return [];
-		}
-	},
-	// Alias para fetchImages para compatibilidad con componentes existentes
-	loadImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
-		return get().fetchImages(options);
-	},
-	createImage: async (data) => {
-		set({ isLoading: true, error: null });
-		try {
-			// Adaptar ImageCreateInput para que sea compatible con CreateImageData
-			const adaptedData = {
-				name: data.name,
-				path: data.path,
-				hash: data.hash,
-				size: data.size,
-				width: data.width,
-				height: data.height,
-				description: data.description || undefined,
-				metadata: data.metadata || undefined,
-				folderId: data.folderId || '',
-			};
-			const image = await createServerImage(adaptedData);
-			if (image) {
-				// ✅ Server action ya devuelve ImageWithStats - conversión directa
-				get().addImage(image);
-				toastService.success('Imagen creada');
-				return image;
-			}
-			return undefined;
-		} catch (e: unknown) {
-			const errorMessage = e instanceof Error ? e.message : 'Failed to create image';
-			imageLogger.error(errorMessage, { error: e });
+			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch images';
+			imageLogger.error(errorMessage, { error: e, options });
 			set({ error: errorMessage });
-			toastService.error(errorMessage);
-			return undefined;
+			return [];
 		} finally {
 			set({ isLoading: false });
 		}
 	},
+	loadImages: (options: { folderId?: string; refresh?: boolean } = {}) => get().fetchImages(options),
+	/*
+	createImage: async (data) => {
+		// Lógica de creación a implementar con API
+		return undefined;
+	},
+	*/
 	updateImage: async (id, data) => {
 		set({ isLoading: true, error: null });
 		try {
-			const image = await updateServerImage(id, data);
-			if (image) {
-				// ✅ Server action ya devuelve ImageWithStats - conversión directa
-				get().addImage(image);
-				toastService.success('Imagen actualizada');
-				return image;
-			}
-			return undefined;
+			const updatedImage = await ImageApi.updateImageInApi(id, data);
+			get().addImage(updatedImage);
+			toastService.success('Imagen actualizada');
+			return updatedImage;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to update image';
-			imageLogger.error(errorMessage, { error: e });
+			imageLogger.error(errorMessage, { error: e, id, data });
 			set({ error: errorMessage });
 			toastService.error(errorMessage);
 			return undefined;
@@ -273,13 +173,13 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	removeImage: async (id) => {
 		set({ isLoading: true, error: null });
 		try {
-			await deleteServerImage(id);
+			await ImageApi.deleteImageFromApi(id);
 			get().deleteImage(id);
 			toastService.success('Imagen eliminada');
 			return true;
 		} catch (e: unknown) {
-			const errorMessage = e instanceof Error ? e.message : 'Failed to remove image';
-			imageLogger.error(errorMessage, { error: e });
+			const errorMessage = e instanceof Error ? e.message : 'Failed to delete image';
+			imageLogger.error(errorMessage, { error: e, id });
 			set({ error: errorMessage });
 			toastService.error(errorMessage);
 			return false;

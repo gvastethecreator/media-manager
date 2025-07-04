@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { updateMetadata } from '@/services/metadata/metadata.service';
+// import { updateMetadata } from '@/services/metadata/metadata.service';
 import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import { Check, Loader2, Pencil, X } from 'lucide-react';
 import { useCallback, useState, useTransition } from 'react';
@@ -23,9 +23,6 @@ export function BulkMetadataEditor({ items }: BulkMetadataEditorProps) {
 	const [isPending, startTransition] = useTransition();
 	const { toast } = useToast();
 
-	// Obtener IDs de todos los elementos
-	const itemIds = items.map((item) => item.id);
-
 	// Manejar el inicio de la edición
 	const handleStartEditing = useCallback(() => {
 		setTitle('');
@@ -38,53 +35,77 @@ export function BulkMetadataEditor({ items }: BulkMetadataEditorProps) {
 		if (!title && !description) {
 			toast({
 				title: 'No hay cambios que guardar',
-				description: 'Por favor, introduce un título o descripción para aplicar a los elementos seleccionados',
+				description: 'Por favor, introduce un título o descripción para aplicar a los elementos seleccionados.',
 				variant: 'default',
 			});
 			return;
 		}
 
 		startTransition(async () => {
+			const updates = items
+				.map((item) => item.metadata?.id)
+				.filter((id): id is string => !!id)
+				.map((id) => ({
+					id,
+					data: {
+						title: title || undefined,
+						description: description || undefined,
+					},
+				}));
+
+			if (updates.length === 0) {
+				toast({
+					title: 'No hay metadatos para actualizar',
+					description: 'Ninguno de los elementos seleccionados parece tener una entrada de metadatos asociada.',
+					variant: 'destructive',
+				});
+				return;
+			}
+
 			try {
-				let successCount = 0;
+				const response = await fetch('/api/metadata/bulk-update', {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ updates }),
+				});
 
-				// Actualizar metadatos para cada item individualmente
-				for (const itemId of itemIds) {
-					try {
-						const metadataUpdate = {
-							title: title || undefined,
-							description: description || undefined,
-						};
+				const result = await response.json();
 
-						await updateMetadata(itemId, metadataUpdate);
-						successCount++;
-					} catch (error) {
-						console.error(`Error actualizando metadatos para item ${itemId}:`, error);
-					}
+				if (!response.ok) {
+					throw new Error(result.error || 'Error en la respuesta del servidor');
 				}
 
-				if (successCount > 0) {
+				if (result.updated > 0) {
 					toast({
 						title: 'Metadatos actualizados',
-						description: `Se han actualizado ${successCount} elementos correctamente`,
+						description: `Se han actualizado ${result.updated} de ${updates.length} elementos.`,
 					});
-
-					setIsEditing(false);
-					setTitle('');
-					setDescription('');
-				} else {
-					throw new Error('No se pudieron actualizar los metadatos');
 				}
+
+				if (result.errors && result.errors.length > 0) {
+					toast({
+						title: `Ocurrieron ${result.errors.length} errores`,
+						description: 'Algunos metadatos no se pudieron actualizar. Revisa la consola para más detalles.',
+						variant: 'destructive',
+					});
+					console.error('Errores en la actualización masiva:', result.errors);
+				}
+
+				setIsEditing(false);
+				setTitle('');
+				setDescription('');
 			} catch (error) {
 				console.error('Error al actualizar metadatos en masa:', error);
 				toast({
 					title: 'Error al guardar',
-					description: 'No se pudieron actualizar los metadatos',
+					description: (error as Error).message || 'No se pudieron actualizar los metadatos.',
 					variant: 'destructive',
 				});
 			}
 		});
-	}, [itemIds, title, description, toast]);
+	}, [items, title, description, toast]);
 
 	// Manejar la cancelación de la edición
 	const handleCancel = useCallback(() => {

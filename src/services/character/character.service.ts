@@ -487,7 +487,7 @@ export async function toggleCharacterFavorite(id: string): Promise<CharacterWith
 			throw new CharacterServiceError('Personaje no encontrado', 'CHARACTER_NOT_FOUND');
 		}
 
-		const newFavoriteState = !Boolean(currentCharacter[0].isFavorite);
+		const newFavoriteState = !currentCharacter[0].isFavorite;
 
 		await db.update(characters)
 			.set({
@@ -598,6 +598,59 @@ export async function getFavoriteCharacters(): Promise<CharacterWithStats[]> {
 			'GET_FAVORITE_CHARACTERS_FAILED',
 			error
 		);
+	}
+}
+
+/**
+ * Clase de servicio para gestión de personajes
+ */
+export class CharacterService {
+	async getCharacters(filters?: any): Promise<{ characters: CharacterWithStats[]; total: number }> {
+		const result = await getCharacters(filters || {});
+		return result;
+	}
+
+	async getCharacterById(id: string): Promise<CharacterWithStats | null> {
+		return await getCharacter(id);
+	}
+
+	async createCharacter(data: CharacterCreateInput): Promise<CharacterWithStats> {
+		return await createCharacter(data);
+	}
+
+	async updateCharacter(id: string, data: CharacterUpdateInput): Promise<CharacterWithStats | null> {
+		try {
+			return await updateCharacter(id, data);
+		} catch (error) {
+			if (error instanceof CharacterServiceError && error.code === 'CHARACTER_NOT_FOUND') {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteCharacter(id: string): Promise<boolean> {
+		try {
+			await deleteCharacter(id);
+			return true;
+		} catch (error) {
+			if (error instanceof CharacterServiceError && error.code === 'CHARACTER_NOT_FOUND') {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	async getCharacterImages(id: string): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes del personaje
+		logger.info(`Obteniendo imágenes del personaje ${id}`);
+		return [];
+	}
+
+	async getRecentCharacterImages(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes recientes del personaje
+		logger.info(`Obteniendo imágenes recientes del personaje ${id} (limit: ${limit})`);
+		return [];
 	}
 }
 

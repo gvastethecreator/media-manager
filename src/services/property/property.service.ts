@@ -551,6 +551,59 @@ export async function searchProperties(query: string): Promise<PropertyWithStats
 	}
 }
 
+/**
+ * Clase de servicio para gestión de propiedades
+ */
+export class PropertyService {
+	async getProperties(filters?: any): Promise<{ properties: PropertyWithStats[]; total: number }> {
+		const result = await getProperties(filters || {});
+		return result;
+	}
+
+	async getPropertyById(id: string): Promise<PropertyWithStats | null> {
+		return await getProperty(id);
+	}
+
+	async createProperty(data: PropertyCreateInput): Promise<PropertyWithStats> {
+		return await createProperty(data);
+	}
+
+	async updateProperty(id: string, data: PropertyUpdateInput): Promise<PropertyWithStats | null> {
+		try {
+			return await updateProperty(id, data);
+		} catch (error) {
+			if (error instanceof PropertyServiceError && error.code === 'PROPERTY_NOT_FOUND') {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteProperty(id: string): Promise<boolean> {
+		try {
+			await deleteProperty(id);
+			return true;
+		} catch (error) {
+			if (error instanceof PropertyServiceError && error.code === 'PROPERTY_NOT_FOUND') {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	async getPropertyImages(id: string): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes de la propiedad
+		logger.info(`Obteniendo imágenes de la propiedad ${id}`);
+		return [];
+	}
+
+	async getRecentPropertyImages(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes recientes de la propiedad
+		logger.info(`Obteniendo imágenes recientes de la propiedad ${id} (limit: ${limit})`);
+		return [];
+	}
+}
+
 // Servicio principal
 const propertyService = {
 	getProperty,

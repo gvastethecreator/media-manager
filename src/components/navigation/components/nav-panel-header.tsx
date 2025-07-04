@@ -1,9 +1,11 @@
 // MIGRADO PARA VITE - Sin useProfileContext problemático
 // import { useProfileContext } from '@/lib/contexts';
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUIStore } from '@/store/ui.store';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import {
 	Briefcase,
 	Bug,
@@ -164,18 +166,16 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 	tooltipContent,
 	tooltipTitle,
 	tooltipNote,
-	tooltipSide = 'bottom',
 }: {
 	icon: React.ReactNode;
 	onClick: () => void;
 	tooltipContent: string;
 	tooltipTitle: string;
 	tooltipNote?: string;
-	tooltipSide?: 'bottom' | 'right' | 'left' | 'top';
 }) {
 	return (
 		<Tooltip>
-			<TooltipTrigger asChild>
+			<TooltipTrigger>
 				<Button
 					variant="ghost"
 					size="icon"
@@ -185,7 +185,7 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 					{icon}
 				</Button>
 			</TooltipTrigger>
-			<TooltipContent side={tooltipSide} className="text-xs">
+			<TooltipContent className="text-xs">
 				<p className="font-medium text-amber-400">{tooltipTitle}</p>
 				<p>{tooltipContent}</p>
 				{tooltipNote && <p className="text-[10px] text-zinc-400 mt-1.5">{tooltipNote}</p>}

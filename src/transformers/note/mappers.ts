@@ -194,3 +194,105 @@ export const mapNoteFiltersToPrisma = mapNoteFiltersToDrizzle;
 // Aliases para compatibilidad con exportaciones esperadas
 export const toCreateNoteData = mapCreateNoteDataToDrizzle;
 export const toUpdateNoteData = mapUpdateNoteDataToDrizzle;
+
+/**
+ * 🔄 Transforma una nota con conteos a NoteWithStats
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function toNoteWithStats(note: any): any {
+	try {
+		// Calcular estadísticas básicas
+		const wordCount = note.content ? note.content.split(/\s+/).length : 0;
+		const characterCount = note.content ? note.content.length : 0;
+		const readingTime = Math.max(1, Math.ceil(wordCount / 200)); // ~200 palabras por minuto
+
+		// Calcular puntuación de completitud
+		const completenessFields = [
+			note.title,
+			note.content,
+			note.category,
+			note.status,
+		];
+		const completenessScore = Math.round((completenessFields.filter(Boolean).length / completenessFields.length) * 100);
+
+		// Extraer conteos de relaciones
+		const counts = note._count || {};
+		const totalItems = Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0);
+
+		const statistics = {
+			totalItems,
+			totalImages: counts.images || 0,
+			totalVideos: counts.videos || 0,
+			totalAlbums: counts.albums || 0,
+			totalCollections: counts.collections || 0,
+			totalTags: counts.tags || 0,
+			totalCharacters: counts.characters || 0,
+			totalPlaces: counts.places || 0,
+			totalWorldItems: counts.worldItems || 0,
+			totalConcepts: counts.concepts || 0,
+			totalPrompts: counts.prompts || 0,
+			totalWildcards: counts.wildcards || 0,
+			totalProperties: counts.properties || 0,
+			totalGroups: counts.groups || 0,
+			wordCount,
+			characterCount,
+			readingTime,
+			completionScore: completenessScore,
+			lastUpdated: note.updatedAt,
+		};
+
+		// Campos derivados
+		const excerpt = note.content ? note.content.substring(0, 150) + (note.content.length > 150 ? '...' : '') : '';
+		const formattedDate = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
+		const priorityLabel = getPriorityLabel(note.priority || 0);
+		const statusLabel = getStatusLabel(note.status || 'draft');
+		const categoryLabel = getCategoryLabel(note.category || 'general');
+
+		return {
+			...note,
+			statistics,
+			excerpt,
+			formattedDate,
+			priorityLabel,
+			statusLabel,
+			categoryLabel,
+		};
+	} catch (error) {
+		logger.error('Error transformando nota con stats:', error);
+		// Retornar al menos la nota original en caso de error
+		return note;
+	}
+}
+
+// Funciones auxiliares para etiquetas
+function getPriorityLabel(priority: number): string {
+	const labels = ['Muy Baja', 'Baja', 'Media', 'Alta', 'Muy Alta'];
+	return labels[priority] || 'Media';
+}
+
+function getStatusLabel(status: string): string {
+	const labels: Record<string, string> = {
+		draft: 'Borrador',
+		active: 'Activa',
+		completed: 'Completada',
+		archived: 'Archivada',
+		pending: 'Pendiente',
+	};
+	return labels[status] || 'Borrador';
+}
+
+function getCategoryLabel(category: string): string {
+	const labels: Record<string, string> = {
+		general: 'General',
+		story: 'Historia',
+		lore: 'Lore',
+		mechanics: 'Mecánicas',
+		character: 'Personaje',
+		place: 'Lugar',
+		world_item: 'Objeto del Mundo',
+		prompt: 'Prompt',
+		idea: 'Idea',
+		todo: 'Por Hacer',
+	};
+	return labels[category] || 'General';
+}
