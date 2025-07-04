@@ -1,17 +1,11 @@
 /**
- * @file Punto de entrada para transformadores de Thumbnail
+ * @file Punto de entrada para los transformadores de la entidad Thumbnail.
  * @module transformers/thumbnail
+ * @description Exporta las funciones de transformación canónicas para Thumbnail.
+ * @see /src/transformers/thumbnail/mappers.ts
+ * @see /src/transformers/thumbnail/transformer.ts
+ * @updated 2025-01-27
  */
 
-export * from './transformer';
-
-// Exportar transformador como objeto para mantener coherencia con otros transformadores
-import * as transformerFunctions from './transformer';
-
-export const thumbnailTransformer = {
-	transform: transformerFunctions.transformThumbnail,
-	transformMany: transformerFunctions.transformThumbnails,
-	toWithStats: transformerFunctions.transformThumbnailToWithStats,
-	toExtended: transformerFunctions.transformThumbnailToExtended,
-	calculateStats: transformerFunctions.calculateThumbnailStats,
-};
+export { toThumbnailWithStats } from './mappers';
+export { type ThumbnailComplete, transformThumbnail } from './transformer';
