@@ -7,8 +7,8 @@
  */
 
 import {
-	ThumbnailBase,
-	ThumbnailWithStats,
+    ThumbnailBase,
+    ThumbnailWithStats,
 } from '@/types/entities/thumbnail';
 
 /**

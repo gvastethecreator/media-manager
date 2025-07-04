@@ -8,4 +8,4 @@
  */
 
 export { toWorkflowWithStats } from './mappers';
-export { type WorkflowComplete, transformWorkflow } from './transformer';
+export { transformWorkflow, type WorkflowComplete } from './transformer';

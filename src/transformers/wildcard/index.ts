@@ -8,4 +8,4 @@
  */
 
 export { toWildcardWithStats } from './mappers';
-export { type WildcardComplete, transformWildcard } from './transformer';
+export { transformWildcard, type WildcardComplete } from './transformer';

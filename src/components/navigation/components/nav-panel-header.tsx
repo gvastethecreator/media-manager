@@ -1,31 +1,19 @@
-// MIGRADO PARA VITE - Sin useProfileContext problemático
-// import { useProfileContext } from '@/lib/contexts';
-
+// MIGRADO PARA VITE - Arreglado sistema de theming
 import {
-	Briefcase,
-	Bug,
-	ChevronLeft,
-	ChevronRight,
-	CircleDot,
-	Citrus,
-	Coffee,
-	Eye,
-	Home,
-	IdCard,
-	Leaf,
-	Moon,
-	Palette,
-	Settings2,
-	Sun,
-	Sunset,
-	TreePine,
-	Waves,
+    Bug,
+    ChevronLeft,
+    ChevronRight, Eye,
+    Home,
+    IdCard, Moon,
+    Palette,
+    Settings2,
+    Sun
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useTheme } from 'next-themes';
 import React, { memo, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useThemeSync } from '@/lib/contexts/settings-context';
 import { useUIStore } from '@/store/ui.store';
 
 // MOCK DATA para reemplazar useProfileContext
@@ -35,44 +23,32 @@ const mockProfileData = {
 			color: '#3B82F6',
 			emoji: '🎨',
 		},
+		profiles: [
+			{
+				id: '1',
+				name: 'Default',
+				emoji: '🎨',
+				color: '#3B82F6',
+			},
+		],
+		activeProfile: '1',
 	},
 };
 
-// Constante con los temas disponibles
-const THEMES = [
-	'light',
-	'dark',
-	'cafe',
-	'violeta',
-	'madera',
-	'nocturno',
-	'verde',
-	'atardecer',
-	'corporativo',
-	'carbon',
-	'teal',
-	'citrico',
-	'aurora',
-	'neon',
-];
+// Constante con los temas disponibles (solo los básicos para empezar)
+const THEMES = ['light', 'dark', 'system'] as const;
+
+type ThemeType = (typeof THEMES)[number];
 
 // Función para obtener el siguiente tema
-function getNextTheme(currentTheme: string | undefined): string {
-	if (!currentTheme || !THEMES.includes(currentTheme)) {
+function getNextTheme(currentTheme: string | undefined): ThemeType {
+	if (!currentTheme || !THEMES.includes(currentTheme as ThemeType)) {
 		return 'light';
 	}
 
-	const currentIndex = THEMES.indexOf(currentTheme);
+	const currentIndex = THEMES.indexOf(currentTheme as ThemeType);
 	const nextIndex = (currentIndex + 1) % THEMES.length;
 	return THEMES[nextIndex];
-}
-
-// Función para aplicar el tema sin transiciones
-function applyTheme(nextTheme: string) {
-	if (typeof document !== 'undefined') {
-		// Aplicar el tema directamente al HTML
-		document.documentElement.setAttribute('data-theme', nextTheme);
-	}
 }
 
 // Función para obtener el icono del tema
@@ -82,30 +58,8 @@ function getThemeIcon(theme: string | undefined) {
 			return <Sun className="h-3.5 w-3.5" />;
 		case 'dark':
 			return <Moon className="h-3.5 w-3.5" />;
-		case 'cafe':
-			return <Coffee className="h-3.5 w-3.5" />;
-		case 'violeta':
+		case 'system':
 			return <Palette className="h-3.5 w-3.5" />;
-		case 'madera':
-			return <TreePine className="h-3.5 w-3.5" />;
-		case 'nocturno':
-			return <Moon className="h-3.5 w-3.5 text-blue-400" />;
-		case 'verde':
-			return <Leaf className="h-3.5 w-3.5" />;
-		case 'atardecer':
-			return <Sunset className="h-3.5 w-3.5" />;
-		case 'corporativo':
-			return <Briefcase className="h-3.5 w-3.5" />;
-		case 'carbon':
-			return <CircleDot className="h-3.5 w-3.5" />;
-		case 'teal':
-			return <Waves className="h-3.5 w-3.5" />;
-		case 'citrico':
-			return <Citrus className="h-3.5 w-3.5" />;
-		case 'aurora':
-			return <Waves className="h-3.5 w-3.5 text-purple-400" />;
-		case 'neon':
-			return <CircleDot className="h-3.5 w-3.5 text-pink-500" />;
 		default:
 			return <Sun className="h-3.5 w-3.5" />;
 	}
@@ -118,30 +72,8 @@ function getThemeName(theme: string | undefined): string {
 			return 'Claro';
 		case 'dark':
 			return 'Oscuro';
-		case 'cafe':
-			return 'Café';
-		case 'violeta':
-			return 'Violeta';
-		case 'madera':
-			return 'Madera';
-		case 'nocturno':
-			return 'Nocturno';
-		case 'verde':
-			return 'Verde';
-		case 'atardecer':
-			return 'Atardecer';
-		case 'corporativo':
-			return 'Corporativo';
-		case 'carbon':
-			return 'Carbón';
-		case 'teal':
-			return 'Teal';
-		case 'citrico':
-			return 'Cítrico';
-		case 'aurora':
-			return 'Aurora';
-		case 'neon':
-			return 'Neón';
+		case 'system':
+			return 'Sistema';
 		default:
 			return 'Claro';
 	}
@@ -233,23 +165,20 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 		);
 	}, [profiles, activeProfile]);
 
-	const { theme, setTheme } = useTheme();
-	const { setCurrentView } = useUIStore();
+	const { theme, setTheme } = useThemeSync();
+	const { setView } = useUIStore();
 
 	const handleThemeToggle = () => {
 		const nextTheme = getNextTheme(theme);
 		console.log(`Cambiando tema de ${theme} a ${nextTheme}`);
 
-		// Aplicar el tema directamente sin transiciones
-		applyTheme(nextTheme);
-
-		// Actualizar el estado en next-themes
+		// Actualizar el estado del tema
 		setTheme(nextTheme);
 	};
 
 	const handleHomeClick = useCallback(() => {
-		setCurrentView('folders');
-	}, [setCurrentView]);
+		setView('grid');
+	}, [setView]);
 
 	return (
 		<motion.div
@@ -271,7 +200,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							onClick={onToggleCollapse || (() => {})}
 							tooltipTitle="Expandir Panel"
 							tooltipContent=""
-							tooltipSide="right"
 						/>
 
 						<MemoizedHeaderButton
@@ -279,7 +207,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							onClick={handleHomeClick}
 							tooltipTitle="Inicio"
 							tooltipContent="Volver a la vista de carpetas"
-							tooltipSide="right"
 						/>
 
 						<MemoizedHeaderButton
@@ -287,7 +214,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							onClick={onOpenEntityCards}
 							tooltipTitle="Entity Cards"
 							tooltipContent="Visualizador y herramientas para tarjetas de entidades"
-							tooltipSide="right"
 						/>
 
 						<MemoizedHeaderButton
@@ -296,7 +222,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipTitle="Modo Desarrollador"
 							tooltipContent="Accede a herramientas de desarrollo y depuración"
 							tooltipNote="Solo para administradores"
-							tooltipSide="right"
 						/>
 
 						{/* 🧘 Botón de modo zen */}
@@ -307,7 +232,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 								tooltipTitle="Modo Zen"
 								tooltipContent="Activa el modo de concentración"
 								tooltipNote="Oculta distracciones"
-								tooltipSide="right"
 							/>
 						)}
 
@@ -316,7 +240,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							onClick={handleThemeToggle}
 							tooltipTitle="Tema"
 							tooltipContent={`Actual: ${getThemeName(theme)}`}
-							tooltipSide="right"
 						/>
 
 						<MemoizedHeaderButton
@@ -324,7 +247,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							onClick={onOpenSettings}
 							tooltipTitle="Configuración"
 							tooltipContent="Personaliza tu experiencia"
-							tooltipSide="right"
 						/>
 					</div>
 				</div>

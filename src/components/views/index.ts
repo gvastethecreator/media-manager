@@ -21,6 +21,8 @@ export * from './development/development-view';
 export * from './documents/documents-view';
 export * from './favorites/favorites-view';
 export * from './file3d/file3d-view';
+export * from './folders/views/folder-content-view';
+export * from './folders/views/folders-view';
 export * from './groups/group-content-view';
 export * from './groups/groups-view';
 export * from './json-files/json-files-view';

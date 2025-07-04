@@ -2,8 +2,8 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { profileClient } from '@/services/profile/client';
-import { type ProfileCreate, type ProfileUpdate, type ProfileWithStats } from '@/services/profile-service-export';
-import { toastService } from '@/lib/ui/toast/toast.service';
+import { type ProfileCreate, type ProfileUpdate, type ProfileWithStats } from '@/services/profile-service-export';	
+import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
 
 export interface Settings {
@@ -271,25 +271,6 @@ export function useSettings() {
 	return context;
 }
 
-// Helper hook para manejar el tema
-export function useTheme() {
-	const { settings, updateSettings } = useSettings();
-
-	useEffect(() => {
-		const root = window.document.documentElement;
-		const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-		const theme = settings.theme === 'system' ? systemTheme : settings.theme;
-
-		root.classList.remove('light', 'dark');
-		root.classList.add(theme);
-	}, [settings.theme]);
-
-	return {
-		theme: settings.theme,
-		setTheme: (theme: 'light' | 'dark' | 'system') => updateSettings({ theme }),
-	};
-}
-
 // Helper hook para colecciones y etiquetas
 export function useCollectionTagContext() {
 	const { settings } = useSettings();
@@ -311,5 +292,18 @@ export function useProfileContext() {
 		updateProfile,
 		deleteProfile,
 		setActiveProfile,
+	};
+}
+
+// Helper hook para sincronizar el tema entre settings y theme-context
+export function useThemeSync() {
+	const { settings, updateSettings } = useSettings();
+
+	return {
+		theme: settings.theme,
+		setTheme: (theme: 'light' | 'dark' | 'system') => {
+			console.log(`🎨 Actualizando tema a: ${theme}`);
+			updateSettings({ theme });
+		},
 	};
 }

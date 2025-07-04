@@ -7,12 +7,12 @@
  */
 
 import {
-	ZodUploadedImageSchema,
-	ZodUploadedImageCreateSchema,
-	ZodUploadedImageUpdateSchema,
-	type ZodUploadedImageType,
-	type ZodUploadedImageCreateType,
-	type ZodUploadedImageUpdateType,
+    ZodUploadedImageCreateSchema,
+    type ZodUploadedImageCreateType,
+    ZodUploadedImageSchema,
+    type ZodUploadedImageType,
+    ZodUploadedImageUpdateSchema,
+    type ZodUploadedImageUpdateType,
 } from './schema';
 
 /**

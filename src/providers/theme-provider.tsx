@@ -48,11 +48,21 @@ function ThemeEnforcer() {
 	useEffect(() => {
 		// Solo aplicar si el tema cambió realmente y no está ya aplicado
 		if (theme && typeof globalThis !== 'undefined' && globalThis.document) {
-			const currentTheme = globalThis.document.documentElement.getAttribute('data-theme');
+			const root = globalThis.document.documentElement;
 
-			// Verificar si realmente necesitamos cambiar el tema
-			if (currentTheme !== theme) {
-				globalThis.document.documentElement.setAttribute('data-theme', theme);
+			// Remover clases anteriores
+			root.classList.remove('light', 'dark', 'system');
+
+			// Aplicar clase del tema resuelto
+			if (theme === 'system') {
+				const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				root.classList.add(systemTheme);
+				// Actualizar el atributo solo para debug
+				root.setAttribute('data-theme', systemTheme);
+			} else {
+				root.classList.add(theme);
+				// Actualizar el atributo solo para debug
+				root.setAttribute('data-theme', theme);
 			}
 		}
 	}, [theme]);

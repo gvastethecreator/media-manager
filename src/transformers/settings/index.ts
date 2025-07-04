@@ -8,18 +8,14 @@
 
 // Mappers para conversión de datos
 export * from './mappers';
-
-// Serializers para procesamiento de datos
-export * from './serializers';
-
-// Validators para validación con Zod
-export * from './validators';
-
 // Schemas para definición de tipos
 export * from './schema';
-
+// Serializers para procesamiento de datos
+export * from './serializers';
 // Transformer principal
 export * from './transformer';
+// Validators para validación con Zod
+export * from './validators';
 
 // ===== FUNCIONES DE COMPATIBILIDAD LEGACY =====
 
@@ -27,7 +23,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { handleTransformerError } from '@/lib/utils/transformers/errors';
 import type { Settings } from '@/types/settings';
 import { serializers } from './internal';
-import { normalize, forClient } from './transformer';
+import { forClient, normalize } from './transformer';
 
 const _logger = serverLogger.withContext('SettingsTransformer:legacy');
 
@@ -41,12 +37,12 @@ export function deserializeSettings(rawData: Record<string, unknown>): Settings 
 }
 
 /**
- * @deprecated Usar forClient() desde transformer.ts  
+ * @deprecated Usar forClient() desde transformer.ts
  * Transforma la estructura tipada de configuración a un formato raw
  */
 export function serializeSettings(settings: Settings): Record<string, unknown> {
 	_logger.warn('⚠️ Usando función legacy serializeSettings, migrar a forClient()');
-	
+
 	const processed = forClient(settings);
 	return {
 		theme: processed.appearance.theme,
@@ -76,7 +72,7 @@ export function serializeSettings(settings: Settings): Record<string, unknown> {
  */
 export function mergeSettings(base: Settings, override: Partial<Settings>): Settings {
 	_logger.warn('⚠️ Usando función legacy mergeSettings, migrar a merge()');
-	
+
 	return {
 		appearance: {
 			...base.appearance,
@@ -103,7 +99,7 @@ export function mergeSettings(base: Settings, override: Partial<Settings>): Sett
  */
 export function hasSettingsChanged(oldSettings: Settings, newSettings: Settings): boolean {
 	_logger.warn('⚠️ Usando función legacy hasSettingsChanged, considerar reimplementar');
-	
+
 	// Comparar appearance
 	if (
 		oldSettings.appearance.theme !== newSettings.appearance.theme ||

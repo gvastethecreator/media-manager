@@ -17,10 +17,11 @@ export type {
 	PropertyCreateInput,
 	PropertyStatistics,
 	PropertyUpdateInput,
+	PropertyWithCounts,
 	PropertyWithStats,
 } from './base';
 // --- Tipos Canónicos (NUEVO) ---
-export { PROPERTY_COUNTS_RELATIONS, propertyCounts } from './base';
+export { PROPERTY_COUNTS_RELATIONS } from './base';
 
 // --- Esquemas de Validación ---
 // Asumiendo que `schema.ts` contiene esquemas relevantes como PropertySchema.

@@ -7,8 +7,8 @@
  */
 
 import {
-	WildcardBase,
-	WildcardWithStats,
+    WildcardBase,
+    WildcardWithStats,
 } from '@/types/entities/wildcard';
 
 /**

@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { EventData } from '../server/events.server';
 
-const eventsLogger = serverLogger.withContext('ClientEvents');
+const eventsLogger = clientLogger.withContext('ClientEvents');
 
 // Mapa de suscriptores de eventos
 type EventCallback<T = unknown> = (data: T) => void;
