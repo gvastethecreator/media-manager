@@ -1,10 +1,10 @@
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
+import { useConcept, useConceptCounts, useRecentConceptImages } from '@/lib/api/concepts';
 import { cn } from '@/lib/utils';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import { CardHeader } from '../card-header';
-import { useConcept, useRecentConceptImages, useConceptCounts } from '@/lib/api/concepts';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
 import { ConceptCardImages } from './concept-card-images';
@@ -20,13 +20,7 @@ export interface ConceptCardProps {
 /**
  * Card para mostrar un concepto, con un diseño inspirado en cartas de TCG.
  */
-export function ConceptCard({
-	conceptId,
-	onClick,
-	className,
-	style,
-	tcgMode = true,
-}: ConceptCardProps) {
+export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
 	const { data: concept, isLoading, error } = useConcept(conceptId);
 	const { data: conceptCounts } = useConceptCounts(conceptId);
 

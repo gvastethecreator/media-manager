@@ -9,22 +9,22 @@
  * 🗿 Modelo base de Collection, basado en el esquema de Drizzle.
  */
 export type CollectionBase = {
-    id: string;
-    name: string;
-    description: string | null;
-    emoji: string | null;
-    color: string | null;
-    featuredImage: string | null;
-    isPublic: boolean;
-    isFavorite: boolean;
-    totalImages: number;
-    totalVideos: number;
-    totalSize: number;
-    lastImageAddedAt: Date | null;
-    lastVideoAddedAt: Date | null;
-    parentId: string | null;
-    createdAt: Date;
-    updatedAt: Date;
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	featuredImage: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	totalSize: number;
+	lastImageAddedAt: Date | null;
+	lastVideoAddedAt: Date | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 /**

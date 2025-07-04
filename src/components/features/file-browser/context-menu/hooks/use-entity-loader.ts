@@ -1,3 +1,4 @@
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { getAlbums } from '@/services/album/album.service';
 import { getCharacters, searchCharacters } from '@/services/character/character.service';
@@ -23,7 +24,6 @@ import { usePropertyStore } from '@/store/entities/property';
 import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { useCallback, useMemo, useRef, useState } from 'react';
 import type { EntityLoadingState, LoadingStates } from '../types';
 
 // Logger para el componente

@@ -1,6 +1,6 @@
+import type { SystemStats } from '@/lib/api/system';
 import { useSystemStats } from '@/lib/api/system';
 import { MOCK_STATS } from '@/lib/mock/stats.mock';
-import type { SystemStats } from '@/lib/api/system';
 
 // Caché local en memoria para reducir llamadas
 const cachedStats: SystemStats | null = null;

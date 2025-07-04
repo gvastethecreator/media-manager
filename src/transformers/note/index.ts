@@ -184,5 +184,5 @@ export function toRelatedNote(
 }
 
 // Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
-export { toCreateNoteData, toUpdateNoteData, toNoteWithStats } from './mappers';
+export { toCreateNoteData, toNoteWithStats, toUpdateNoteData } from './mappers';
 export { fromDrizzleNote, validateNote } from './serializers';

@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useFolderStats, useRecentFolderImages } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import type { FolderComplete, FolderWithStats } from '@/types/entities/folder';
-import { useRecentFolderImages, useFolderStats } from '@/lib/api/folders';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
@@ -54,7 +54,8 @@ export const FolderCard = memo(function FolderCard({
 			totalFiles: folderStatsData?.totalImages ?? folder.totalFiles ?? imageCount ?? 0,
 			totalSize: folderStatsData?.totalSize ?? folder.totalSize ?? 0,
 			recentImageUrls: recentImagesData || [],
-			childrenCount: folderStatsData?.totalFolders ?? (isWithStats ? (folder as FolderWithStats).statistics.folderCount : 0),
+			childrenCount:
+				folderStatsData?.totalFolders ?? (isWithStats ? (folder as FolderWithStats).statistics.folderCount : 0),
 			lastIndexed: folderStatsData?.lastActivity ?? folder.lastIndexed ?? null,
 		};
 	}, [folder, recentImagesData, folderStatsData]);

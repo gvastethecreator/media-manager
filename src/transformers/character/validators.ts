@@ -14,9 +14,9 @@ import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } f
  */
 export function isValidCharacter(character: unknown): character is CharacterWithStats {
 	if (!character || typeof character !== 'object') return false;
-	
+
 	const characterObj = character as Record<string, unknown>;
-	
+
 	return (
 		typeof characterObj.id === 'string' &&
 		typeof characterObj.name === 'string' &&
@@ -102,10 +102,7 @@ export function validateUpdateCharacterData(
  */
 export function isValidCharacterName(name: string): boolean {
 	return (
-		typeof name === 'string' &&
-		name.trim().length > 0 &&
-		name.length <= 100 &&
-		!/[<>:"/\\|?*]/.test(name) // No caracteres especiales
+		typeof name === 'string' && name.trim().length > 0 && name.length <= 100 && !/[<>:"/\\|?*]/.test(name) // No caracteres especiales
 	);
 }
 
@@ -115,10 +112,7 @@ export function isValidCharacterName(name: string): boolean {
  * @returns true si es válido, false si no lo es
  */
 export function isValidCharacterClass(characterClass: string): boolean {
-	const validClasses = [
-		'warrior', 'mage', 'rogue', 'healer', 'archer', 
-		'paladin', 'necromancer', 'berserker', 'other'
-	];
+	const validClasses = ['warrior', 'mage', 'rogue', 'healer', 'archer', 'paladin', 'necromancer', 'berserker', 'other'];
 	return validClasses.includes(characterClass.toLowerCase());
 }
 

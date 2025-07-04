@@ -42,8 +42,10 @@ export function serializeAlbum(album: AlbumWithStats): Record<string, unknown> {
 		// Formatear fechas
 		const createdAt = album.createdAt instanceof Date ? album.createdAt.toISOString() : album.createdAt;
 		const updatedAt = album.updatedAt instanceof Date ? album.updatedAt.toISOString() : album.updatedAt;
-		const lastImageAddedAt = album.lastImageAddedAt instanceof Date ? album.lastImageAddedAt.toISOString() : album.lastImageAddedAt;
-		const lastVideoAddedAt = album.lastVideoAddedAt instanceof Date ? album.lastVideoAddedAt.toISOString() : album.lastVideoAddedAt;
+		const lastImageAddedAt =
+			album.lastImageAddedAt instanceof Date ? album.lastImageAddedAt.toISOString() : album.lastImageAddedAt;
+		const lastVideoAddedAt =
+			album.lastVideoAddedAt instanceof Date ? album.lastVideoAddedAt.toISOString() : album.lastVideoAddedAt;
 
 		// Crear objeto base
 		const serialized: Record<string, unknown> = {
@@ -95,12 +97,18 @@ export function serializeAlbums(albums: AlbumWithStats[]): Record<string, unknow
 export function deserializeAlbum(data: Record<string, unknown>): AlbumWithStats | null {
 	try {
 		// Convertir fechas si es necesario
-		const createdAt = typeof data.createdAt === 'string' ? new Date(data.createdAt) : data.createdAt as Date;
-		const updatedAt = typeof data.updatedAt === 'string' ? new Date(data.updatedAt) : data.updatedAt as Date;
-		const lastImageAddedAt = data.lastImageAddedAt ? 
-			(typeof data.lastImageAddedAt === 'string' ? new Date(data.lastImageAddedAt) : data.lastImageAddedAt as Date) : null;
-		const lastVideoAddedAt = data.lastVideoAddedAt ? 
-			(typeof data.lastVideoAddedAt === 'string' ? new Date(data.lastVideoAddedAt) : data.lastVideoAddedAt as Date) : null;
+		const createdAt = typeof data.createdAt === 'string' ? new Date(data.createdAt) : (data.createdAt as Date);
+		const updatedAt = typeof data.updatedAt === 'string' ? new Date(data.updatedAt) : (data.updatedAt as Date);
+		const lastImageAddedAt = data.lastImageAddedAt
+			? typeof data.lastImageAddedAt === 'string'
+				? new Date(data.lastImageAddedAt)
+				: (data.lastImageAddedAt as Date)
+			: null;
+		const lastVideoAddedAt = data.lastVideoAddedAt
+			? typeof data.lastVideoAddedAt === 'string'
+				? new Date(data.lastVideoAddedAt)
+				: (data.lastVideoAddedAt as Date)
+			: null;
 
 		// Construir objeto final
 		const album: AlbumWithStats = {
@@ -119,7 +127,7 @@ export function deserializeAlbum(data: Record<string, unknown>): AlbumWithStats 
 			lastVideoAddedAt,
 			createdAt,
 			updatedAt,
-			stats: data.stats as AlbumStatistics || {
+			stats: (data.stats as AlbumStatistics) || {
 				imageCount: 0,
 				videoCount: 0,
 				collectionCount: 0,

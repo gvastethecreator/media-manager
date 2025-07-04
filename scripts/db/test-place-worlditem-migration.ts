@@ -3,8 +3,8 @@
  * @description Valida que las migraciones funcionen correctamente
  */
 
-import { getPlaces, getPlaceById } from '@/services/place/place.service';
-import { getWorldItems, getWorldItemById, getWorldItemWithStatsById } from '@/services/world-item/world-item.service';
+import { getPlaceById, getPlaces } from '@/services/place/place.service';
+import { getWorldItemById, getWorldItems, getWorldItemWithStatsById } from '@/services/world-item/world-item.service';
 
 async function testPlaceService() {
 	console.log('\n🌍 === PRUEBAS DE PLACE SERVICE ===');
@@ -30,7 +30,6 @@ async function testPlaceService() {
 		} else {
 			console.log('ℹ️ No hay places para probar getPlaceById');
 		}
-
 	} catch (error) {
 		console.error('❌ Error en PlaceService:', error);
 	}
@@ -70,7 +69,6 @@ async function testWorldItemService() {
 		} else {
 			console.log('ℹ️ No hay world items para probar métodos individuales');
 		}
-
 	} catch (error) {
 		console.error('❌ Error en WorldItemService:', error);
 	}

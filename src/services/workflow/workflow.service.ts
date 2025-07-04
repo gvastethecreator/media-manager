@@ -11,7 +11,7 @@ import { db } from '@/lib/drizzle';
 import { workflows } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { WorkflowWithStats, WorkflowCreateInput, WorkflowUpdateInput } from '@/types/entities/workflow';
+import type { WorkflowCreateInput, WorkflowUpdateInput, WorkflowWithStats } from '@/types/entities/workflow';
 
 const workflowLogger = serverLogger.withContext('WorkflowService');
 
@@ -138,18 +138,15 @@ export async function createWorkflow(data: WorkflowCreateInput): Promise<any> {
 			isActive: data.isActive ?? true,
 		};
 
-		const [newWorkflow] = await db
-			.insert(workflows)
-			.values(newWorkflowData)
-			.returning({
-				id: workflows.id,
-				name: workflows.name,
-				description: workflows.description,
-				content: workflows.content,
-				isActive: workflows.isActive,
-				createdAt: workflows.createdAt,
-				updatedAt: workflows.updatedAt,
-			});
+		const [newWorkflow] = await db.insert(workflows).values(newWorkflowData).returning({
+			id: workflows.id,
+			name: workflows.name,
+			description: workflows.description,
+			content: workflows.content,
+			isActive: workflows.isActive,
+			createdAt: workflows.createdAt,
+			updatedAt: workflows.updatedAt,
+		});
 
 		const finalWorkflow = {
 			...newWorkflow,
@@ -188,19 +185,15 @@ export async function updateWorkflow(id: string, data: WorkflowUpdateInput): Pro
 		if (data.content !== undefined) updateData.content = data.content;
 		if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
-		const [updatedWorkflow] = await db
-			.update(workflows)
-			.set(updateData)
-			.where(eq(workflows.id, id))
-			.returning({
-				id: workflows.id,
-				name: workflows.name,
-				description: workflows.description,
-				content: workflows.content,
-				isActive: workflows.isActive,
-				createdAt: workflows.createdAt,
-				updatedAt: workflows.updatedAt,
-			});
+		const [updatedWorkflow] = await db.update(workflows).set(updateData).where(eq(workflows.id, id)).returning({
+			id: workflows.id,
+			name: workflows.name,
+			description: workflows.description,
+			content: workflows.content,
+			isActive: workflows.isActive,
+			createdAt: workflows.createdAt,
+			updatedAt: workflows.updatedAt,
+		});
 
 		const finalWorkflow = {
 			...updatedWorkflow,
@@ -233,9 +226,7 @@ export async function deleteWorkflow(id: string): Promise<void> {
 	try {
 		workflowLogger.info(`🗑️ Eliminando workflow: ${id}`);
 
-		await db
-			.delete(workflows)
-			.where(eq(workflows.id, id));
+		await db.delete(workflows).where(eq(workflows.id, id));
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
@@ -260,11 +251,7 @@ export async function deleteWorkflow(id: string): Promise<void> {
  */
 export async function workflowExists(id: string): Promise<boolean> {
 	try {
-		const workflow = await db
-			.select({ id: workflows.id })
-			.from(workflows)
-			.where(eq(workflows.id, id))
-			.limit(1);
+		const workflow = await db.select({ id: workflows.id }).from(workflows).where(eq(workflows.id, id)).limit(1);
 
 		return workflow.length > 0;
 	} catch (error) {
@@ -278,9 +265,7 @@ export async function workflowExists(id: string): Promise<boolean> {
  */
 export async function getWorkflowCount(): Promise<number> {
 	try {
-		const [result] = await db
-			.select({ count: count() })
-			.from(workflows);
+		const [result] = await db.select({ count: count() }).from(workflows);
 
 		return result.count;
 	} catch (error) {

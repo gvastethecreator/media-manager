@@ -7,13 +7,13 @@
  */
 
 import {
-    FAVORITE_ENTITY_COLORS as ENTITY_COLORS,
-    FAVORITE_ENTITY_DISPLAY_NAMES as ENTITY_DISPLAY_NAMES,
-    FAVORITE_ENTITY_EMOJIS as ENTITY_ICONS,
-    FavoriteComplete,
-    FavoriteEntityType,
-    FavoriteStats,
-    FavoritesByType,
+	FAVORITE_ENTITY_COLORS as ENTITY_COLORS,
+	FAVORITE_ENTITY_DISPLAY_NAMES as ENTITY_DISPLAY_NAMES,
+	FAVORITE_ENTITY_EMOJIS as ENTITY_ICONS,
+	FavoriteComplete,
+	FavoriteEntityType,
+	FavoriteStats,
+	FavoritesByType,
 } from '@/types/entities/favorite';
 
 // Tipos locales equivalentes a Prisma (migración a Drizzle)

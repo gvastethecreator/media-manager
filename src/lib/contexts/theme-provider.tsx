@@ -23,12 +23,12 @@ const customThemes = [
 	'citrico',
 ] as const;
 
-type Theme = typeof customThemes[number] | 'system';
+type Theme = (typeof customThemes)[number] | 'system';
 
 interface ThemeContextType {
 	theme: Theme;
 	setTheme: (theme: Theme) => void;
-	resolvedTheme: typeof customThemes[number];
+	resolvedTheme: (typeof customThemes)[number];
 	themes: readonly string[];
 }
 
@@ -85,28 +85,28 @@ export function ThemeProvider({
 	enableSystem = true,
 }: ThemeProviderProps) {
 	const [theme, setTheme] = useState<Theme>(defaultTheme);
-	const [resolvedTheme, setResolvedTheme] = useState<typeof customThemes[number]>('light');
+	const [resolvedTheme, setResolvedTheme] = useState<(typeof customThemes)[number]>('light');
 
 	// Detectar preferencia del sistema
-	const getSystemTheme = (): typeof customThemes[number] => {
+	const getSystemTheme = (): (typeof customThemes)[number] => {
 		if (typeof window === 'undefined') return 'light';
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 	};
 
 	// Resolver tema actual
-	const resolveTheme = (currentTheme: Theme): typeof customThemes[number] => {
+	const resolveTheme = (currentTheme: Theme): (typeof customThemes)[number] => {
 		if (currentTheme === 'system') {
 			return getSystemTheme();
 		}
-		return currentTheme as typeof customThemes[number];
+		return currentTheme as (typeof customThemes)[number];
 	};
 
 	// Aplicar tema al DOM
-	const applyTheme = (themeToApply: typeof customThemes[number]) => {
+	const applyTheme = (themeToApply: (typeof customThemes)[number]) => {
 		const root = document.documentElement;
 
 		// Remover todas las clases de tema anteriores
-		customThemes.forEach(t => root.classList.remove(t));
+		customThemes.forEach((t) => root.classList.remove(t));
 
 		// Aplicar nueva clase de tema
 		root.classList.add(themeToApply);

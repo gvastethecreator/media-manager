@@ -30,21 +30,21 @@ export const favoriteEntityTypeEnum = pgEnum('favorite_entity_type', [
 
 /**
  * ⭐ Tabla de favoritos en la base de datos.
- * 
+ *
  * @description Representa las entidades marcadas como favoritas por los usuarios.
  */
 export const favoritesTable = pgTable('favorites', {
 	// Identificación
 	id: uuid('id').primaryKey().defaultRandom(),
-	
+
 	// Entidad favorita
 	entityId: uuid('entity_id').notNull(),
 	entityType: favoriteEntityTypeEnum('entity_type').notNull(),
-	
+
 	// Usuario (opcional para compatibilidad)
 	userId: uuid('user_id'),
 	profileId: uuid('profile_id'),
-	
+
 	// Timestamps del sistema
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

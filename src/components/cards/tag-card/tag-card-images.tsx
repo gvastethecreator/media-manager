@@ -1,7 +1,7 @@
 import { ImageIcon } from 'lucide-react';
+import { useTagThumbnails } from '@/lib/api/tags';
 import { cn } from '@/lib/utils';
 import { TagRarity } from '@/store/entities/tag/types';
-import { useTagThumbnails } from '@/lib/api/tags';
 
 interface TagCardImagesProps {
 	tagId: string;
@@ -29,7 +29,11 @@ export function TagCardImages({
 	const { data: fetchedImages, isLoading: loading, error } = useTagThumbnails(tagId);
 
 	// Estado para almacenar las imágenes
-	const images = fetchedImages ? (featuredImage && fetchedImages.length > 0 ? [featuredImage, ...fetchedImages.filter((img) => img.id !== featuredImage.id)] : fetchedImages) : [];
+	const images = fetchedImages
+		? featuredImage && fetchedImages.length > 0
+			? [featuredImage, ...fetchedImages.filter((img) => img.id !== featuredImage.id)]
+			: fetchedImages
+		: [];
 
 	// Conseguir un factor de brillo basado en la rareza para efectos visuales
 	const rarityBrightnessMap = {

@@ -14,7 +14,6 @@ export type {
 	PlaceStatistics,
 	PlaceUpdateInput,
 	PlaceWithStats,
-	
 } from './base';
 
 // --- 📚 Tipos Adicionales ---

@@ -8,6 +8,5 @@
  */
 
 export type { WorkflowExecutionAggregates } from './mappers';
-export { toWorkflowWithStats } from './mappers';
 // Alias por compatibilidad
-export { toWorkflowWithStatsFromPrisma } from './mappers';
+export { toWorkflowWithStats, toWorkflowWithStatsFromPrisma } from './mappers';

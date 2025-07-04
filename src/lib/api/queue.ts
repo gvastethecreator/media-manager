@@ -7,9 +7,9 @@ import {
 	createQueueJob,
 	deleteQueueJob,
 	findProcessingTimes,
-	findRecentQueueJobs,
 	findQueueJobs,
 	findQueueJobsByStatus,
+	findRecentQueueJobs,
 	getQueueJobById,
 	getQueueStats,
 	getQueueStatsByQueue,
@@ -132,7 +132,7 @@ export function useQueueStats() {
 	});
 }
 
-export function useRecentQueueJobs(limit: number = 5) {
+export function useRecentQueueJobs(limit = 5) {
 	return useQuery<QueueJobExtended[], Error>({
 		queryKey: queueKeys.recent(limit),
 		queryFn: () => findRecentQueueJobs(limit),
@@ -140,7 +140,7 @@ export function useRecentQueueJobs(limit: number = 5) {
 	});
 }
 
-export function useQueueJobsByStatus(status: string, limit: number = 10) {
+export function useQueueJobsByStatus(status: string, limit = 10) {
 	return useQuery<QueueJobExtended[], Error>({
 		queryKey: queueKeys.byStatus(status, limit),
 		queryFn: () => findQueueJobsByStatus(status, limit),

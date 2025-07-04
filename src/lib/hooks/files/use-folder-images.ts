@@ -1,9 +1,9 @@
 'use client';
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import { getFolderImages } from '@/services/folder/folder.service';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { getFolderImages } from '@/services/folder/folder.service';
 
 // Logger para depuración
 const logger = clientLogger.withContext('useFolderImages');

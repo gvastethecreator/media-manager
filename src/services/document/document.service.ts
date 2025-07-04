@@ -6,6 +6,9 @@
  * @updated 2025-06-27
  */
 
+import * as crypto from 'crypto';
+// Drizzle imports
+import { asc, count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { documents } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -13,10 +16,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toDocumentWithStats } from '@/transformers/document';
-import type { DocumentWithStats, DocumentCreateInput, DocumentUpdateInput } from '@/types/entities/document';
-// Drizzle imports
-import { eq, asc, desc, count } from 'drizzle-orm';
-import * as crypto from 'crypto';
+import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 
@@ -157,35 +157,38 @@ export async function createDocument(data: DocumentCreateInput): Promise<Documen
 		documentLogger.info('📝 Creando documento:', data.name);
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(documents).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			path: data.path,
-			size: data.size,
-			hash: data.hash,
-			mimeType: data.mimeType,
-			extension: data.extension,
-			folderId: data.folderId,
-			isFavorite: data.isFavorite || false,
-			isArchived: data.isArchived || false,
-			pageCount: data.pageCount || null,
-			wordCount: data.wordCount || null,
-			language: data.language || null,
-			title: data.title || null,
-			author: data.author || null,
-			subject: data.subject || null,
-			keywords: data.keywords || null,
-			creator: data.creator || null,
-			producer: data.producer || null,
-			creationDate: data.creationDate || null,
-			modificationDate: data.modificationDate || null,
-			encrypted: data.encrypted || false,
-			version: data.version || null,
-			content: data.content || null,
-			summary: data.summary || null,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(documents)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				path: data.path,
+				size: data.size,
+				hash: data.hash,
+				mimeType: data.mimeType,
+				extension: data.extension,
+				folderId: data.folderId,
+				isFavorite: data.isFavorite || false,
+				isArchived: data.isArchived || false,
+				pageCount: data.pageCount || null,
+				wordCount: data.wordCount || null,
+				language: data.language || null,
+				title: data.title || null,
+				author: data.author || null,
+				subject: data.subject || null,
+				keywords: data.keywords || null,
+				creator: data.creator || null,
+				producer: data.producer || null,
+				creationDate: data.creationDate || null,
+				modificationDate: data.modificationDate || null,
+				encrypted: data.encrypted || false,
+				version: data.version || null,
+				content: data.content || null,
+				summary: data.summary || null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newDocument = result[0];
 		const documentWithStats = toDocumentWithStats(newDocument);
@@ -249,11 +252,7 @@ export async function updateDocument(id: string, data: DocumentUpdateInput): Pro
 		if (data.content !== undefined) updateData.content = data.content;
 		if (data.summary !== undefined) updateData.summary = data.summary;
 
-		const result = await db
-			.update(documents)
-			.set(updateData)
-			.where(eq(documents.id, id))
-			.returning();
+		const result = await db.update(documents).set(updateData).where(eq(documents.id, id)).returning();
 
 		const updatedDocument = result[0];
 		const documentWithStats = toDocumentWithStats(updatedDocument);
@@ -287,10 +286,7 @@ export async function deleteDocument(id: string): Promise<void> {
 		}
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.delete(documents)
-			.where(eq(documents.id, id))
-			.returning();
+		const result = await db.delete(documents).where(eq(documents.id, id)).returning();
 
 		const deletedDocument = result[0];
 
@@ -314,10 +310,7 @@ export async function deleteDocument(id: string): Promise<void> {
 export async function documentExists(id: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(documents)
-			.where(eq(documents.id, id));
+		const result = await db.select({ count: count() }).from(documents).where(eq(documents.id, id));
 
 		return result[0].count > 0;
 	} catch (error) {
@@ -332,9 +325,7 @@ export async function documentExists(id: string): Promise<boolean> {
 export async function getDocumentCount(): Promise<number> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(documents);
+		const result = await db.select({ count: count() }).from(documents);
 
 		return result[0].count;
 	} catch (error) {

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ErrorResponse, ProcessStatus } from '@/types/folders';
+import { useReindexAllFolders } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { FolderWithStats } from '@/types/entities/folder';
+import type { ErrorResponse, ProcessStatus } from '@/types/folders';
 import { type ExtendedProcessStatus, initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';
 import { useFoldersPolling } from './use-folders-polling';
 import { useFoldersState } from './use-folders-state';
-import { useReindexAllFolders } from '@/lib/api/folders';
 
 const folderLogger = clientLogger.withContext('useFolders');
 

@@ -2,11 +2,6 @@ import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, U
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-	deleteUploadedImage,
-	getUploadedImages,
-	uploadImages,
-} from '@/services/uploaded-images/uploaded-images.service';
 import { MemoizedImageCard } from '@/components/cards/image-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -35,9 +30,14 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 import { toastService } from '@/services/toast';
+import {
+	deleteUploadedImage,
+	getUploadedImages,
+	uploadImages,
+} from '@/services/uploaded-images/uploaded-images.service';
 import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
-import { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import { FileProcessingStatus, FileType } from '@/types/files';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');

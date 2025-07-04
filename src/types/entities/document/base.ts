@@ -14,25 +14,25 @@ export interface DocumentBase {
 	id: string;
 	name: string;
 	path: string;
-	
+
 	// Propiedades del archivo
 	size: number;
 	hash: string;
 	mimeType: string;
 	extension: string;
-	
+
 	// Relaciones
 	folderId: string;
-	
+
 	// Estados
 	isFavorite: boolean;
 	isArchived: boolean;
-	
+
 	// Metadatos de documento
 	pageCount: number | null;
 	wordCount: number | null;
 	language: string | null;
-	
+
 	// Metadatos de PDF/documento
 	title: string | null;
 	author: string | null;
@@ -44,11 +44,11 @@ export interface DocumentBase {
 	modificationDate: Date | null;
 	encrypted: boolean | null;
 	version: string | null;
-	
+
 	// Contenido
 	content: string | null;
 	summary: string | null;
-	
+
 	// Timestamps del sistema
 	createdAt: Date;
 	updatedAt: Date;

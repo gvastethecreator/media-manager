@@ -175,10 +175,6 @@ export interface VideoBase {
 	updatedAt: Date;
 }
 
-
-
-
-
 /**
  * ➕ Input para crear un nuevo video
  */

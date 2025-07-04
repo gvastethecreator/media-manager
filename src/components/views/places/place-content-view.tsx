@@ -49,19 +49,25 @@ export const PlaceContentView = memo(function PlaceContentView() {
 		console.log('Item seleccionado:', item.name);
 	}, []);
 
-	const emptyStateConfig = useMemo(() => ({
-		icon: MapPin,
-		title: 'No hay imágenes en este lugar',
-		description: 'Este lugar no tiene imágenes asociadas',
-	}), []);
+	const emptyStateConfig = useMemo(
+		() => ({
+			icon: MapPin,
+			title: 'No hay imágenes en este lugar',
+			description: 'Este lugar no tiene imágenes asociadas',
+		}),
+		[]
+	);
 
-	const noSelectionEmptyState = useMemo(() => (
-		<EmptyState
-			icon={MapPin}
-			title="No hay lugar seleccionado"
-			description="Selecciona un lugar para ver su contenido"
-		/>
-	), []);
+	const noSelectionEmptyState = useMemo(
+		() => (
+			<EmptyState
+				icon={MapPin}
+				title="No hay lugar seleccionado"
+				description="Selecciona un lugar para ver su contenido"
+			/>
+		),
+		[]
+	);
 
 	if (!selectedPlaceId) {
 		return noSelectionEmptyState;

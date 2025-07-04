@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { cn } from '@/lib/utils';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CardContainer } from '../card-container';
-import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { adaptCharacterWithStats, isCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';

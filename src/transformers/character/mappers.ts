@@ -7,10 +7,10 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-    CharacterCreateInput,
-    CharacterFilters,
-    CharacterSearchOptions,
-    CharacterUpdateInput,
+	CharacterCreateInput,
+	CharacterFilters,
+	CharacterSearchOptions,
+	CharacterUpdateInput,
 } from '@/types/entities/character';
 
 // Tipos locales equivalentes a Prisma (migración a Drizzle)
@@ -132,7 +132,7 @@ export function mapUpdateCharacterDataToDrizzle(data: CharacterUpdateInput): Dri
 		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
 		const drizzleData: DrizzleCharacterUpdateInput = {
 			...rest,
-			updatedAt: new Date()
+			updatedAt: new Date(),
 		};
 
 		// Nota: Las relaciones se manejan por separado en Drizzle

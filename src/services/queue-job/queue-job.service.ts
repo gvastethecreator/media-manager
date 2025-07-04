@@ -3,9 +3,9 @@
  * @module services/queue-job
  */
 
+import { and, eq, gte, lte, sql } from 'drizzle-orm';
 import { db } from '@/lib/database/db';
 import { queueJobs } from '@/lib/database/schema';
-import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getPaginationInfo } from '@/lib/utils/pagination';
 import { serializeQueueJobMetadata, transformQueueJob, transformQueueJobs } from '@/transformers/queue-job';
@@ -46,15 +46,18 @@ export async function createQueueJob(data: CreateQueueJobInput): Promise<QueueJo
 	try {
 		logger.info('📋 Creando nuevo trabajo en cola:', { queue: data.queue });
 
-		const [queueJob] = await db.insert(queueJobs).values({
-			id: crypto.randomUUID(), // Generate UUID for id
-			queue: data.queue,
-			data: JSON.stringify(data.data), // Store data as JSON string
-			maxAttempts: data.maxAttempts,
-			priority: data.priority,
-			metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
-			status: QueueJobStatus.PENDING,
-		}).returning();
+		const [queueJob] = await db
+			.insert(queueJobs)
+			.values({
+				id: crypto.randomUUID(), // Generate UUID for id
+				queue: data.queue,
+				data: JSON.stringify(data.data), // Store data as JSON string
+				maxAttempts: data.maxAttempts,
+				priority: data.priority,
+				metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
+				status: QueueJobStatus.PENDING,
+			})
+			.returning();
 
 		logger.info('✅ Trabajo en cola creado:', { id: queueJob.id, queue: queueJob.queue });
 		return transformQueueJob(queueJob);
@@ -82,12 +85,16 @@ export async function updateQueueJob(id: string, data: UpdateQueueJobInput): Pro
 		}
 
 		// Actualizar el trabajo
-		const [queueJob] = await db.update(queueJobs).set({
-			...data,
-			data: data.data ? JSON.stringify(data.data) : existingJob[0].data, // Handle data as JSON string
-			metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
-			updatedAt: sql`(strftime('%s', 'now'))`,
-		}).where(eq(queueJobs.id, id)).returning();
+		const [queueJob] = await db
+			.update(queueJobs)
+			.set({
+				...data,
+				data: data.data ? JSON.stringify(data.data) : existingJob[0].data, // Handle data as JSON string
+				metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
+				updatedAt: sql`(strftime('%s', 'now'))`,
+			})
+			.where(eq(queueJobs.id, id))
+			.returning();
 
 		logger.info('✅ Trabajo en cola actualizado:', { id });
 		return transformQueueJob(queueJob);
@@ -172,11 +179,15 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 		}
 
 		// Cancelar el trabajo
-		const [queueJob] = await db.update(queueJobs).set({
-			status: QueueJobStatus.CANCELLED,
-			finishedAt: sql`(strftime('%s', 'now'))`,
-			updatedAt: sql`(strftime('%s', 'now'))`,
-		}).where(eq(queueJobs.id, id)).returning();
+		const [queueJob] = await db
+			.update(queueJobs)
+			.set({
+				status: QueueJobStatus.CANCELLED,
+				finishedAt: sql`(strftime('%s', 'now'))`,
+				updatedAt: sql`(strftime('%s', 'now'))`,
+			})
+			.where(eq(queueJobs.id, id))
+			.returning();
 
 		logger.info('✅ Trabajo en cola cancelado:', { id });
 		return transformQueueJob(queueJob);
@@ -211,13 +222,17 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 		}
 
 		// Reintentar el trabajo
-		const [queueJob] = await db.update(queueJobs).set({
-			status: QueueJobStatus.RETRYING,
-			progress: 0,
-			error: null,
-			retryAt: sql`(strftime('%s', 'now'))`,
-			updatedAt: sql`(strftime('%s', 'now'))`,
-		}).where(eq(queueJobs.id, id)).returning();
+		const [queueJob] = await db
+			.update(queueJobs)
+			.set({
+				status: QueueJobStatus.RETRYING,
+				progress: 0,
+				error: null,
+				retryAt: sql`(strftime('%s', 'now'))`,
+				updatedAt: sql`(strftime('%s', 'now'))`,
+			})
+			.where(eq(queueJobs.id, id))
+			.returning();
 
 		logger.info('✅ Trabajo en cola preparado para reintento:', { id });
 		return transformQueueJob(queueJob);
@@ -277,7 +292,9 @@ export async function findQueueJobs(
 		const total = totalResult.count;
 
 		// Ejecutar consulta para obtener datos
-		const queueJobsData = await db.select().from(queueJobs)
+		const queueJobsData = await db
+			.select()
+			.from(queueJobs)
 			.where(finalWhere)
 			.orderBy(sortDirection === 'asc' ? queueJobs[sortBy] : sql`${queueJobs[sortBy]} DESC`)
 			.offset(skip)
@@ -318,10 +335,13 @@ export async function getQueueStats(): Promise<QueueStats> {
 		logger.info('📊 Obteniendo estadísticas de la cola');
 
 		// Obtener conteo por estado
-		const statusCounts = await db.select({
-			status: queueJobs.status,
-			count: sql<number>`count(*)`,
-		}).from(queueJobs).groupBy(queueJobs.status);
+		const statusCounts = await db
+			.select({
+				status: queueJobs.status,
+				count: sql<number>`count(*)`,
+			})
+			.from(queueJobs)
+			.groupBy(queueJobs.status);
 
 		// Inicializar estadísticas
 		const stats: QueueStats = {
@@ -374,7 +394,16 @@ export async function getQueueStats(): Promise<QueueStats> {
 
 		// Calcular tiempo promedio de procesamiento
 		if (stats.completed > 0) {
-			const completedJobs = await db.select().from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.COMPLETED), sql`${queueJobs.startedAt} IS NOT NULL`, sql`${queueJobs.finishedAt} IS NOT NULL`));
+			const completedJobs = await db
+				.select()
+				.from(queueJobs)
+				.where(
+					and(
+						eq(queueJobs.status, QueueJobStatus.COMPLETED),
+						sql`${queueJobs.startedAt} IS NOT NULL`,
+						sql`${queueJobs.finishedAt} IS NOT NULL`
+					)
+				);
 
 			if (completedJobs.length > 0) {
 				const totalTime = completedJobs.reduce((sum, job) => {
@@ -442,9 +471,7 @@ export async function findRecentQueueJobs(limit = 5): Promise<QueueJobExtended[]
 	try {
 		logger.info('🕒 Buscando trabajos recientes', { limit });
 
-		const queueJobsData = await db.select().from(queueJobs)
-			.orderBy(sql`${queueJobs.createdAt} DESC`)
-			.limit(limit);
+		const queueJobsData = await db.select().from(queueJobs).orderBy(sql`${queueJobs.createdAt} DESC`).limit(limit);
 
 		logger.info('✅ Trabajos recientes encontrados', { count: queueJobsData.length });
 		return transformQueueJobs(queueJobsData);
@@ -464,7 +491,9 @@ export async function findQueueJobsByStatus(status: QueueJobStatus, limit = 10):
 	try {
 		logger.info('🔍 Buscando trabajos por estado', { status, limit });
 
-		const queueJobsData = await db.select().from(queueJobs)
+		const queueJobsData = await db
+			.select()
+			.from(queueJobs)
 			.where(eq(queueJobs.status, status))
 			.orderBy(sql`${queueJobs.updatedAt} DESC`)
 			.limit(limit);
@@ -487,10 +516,14 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 		logger.info('📊 Obteniendo estadísticas para cola específica', { queue });
 
 		// Obtener conteo por estado para la cola específica
-		const statusCounts = await db.select({
-			status: queueJobs.status,
-			count: sql<number>`count(*)`,
-		}).from(queueJobs).where(eq(queueJobs.queue, queue)).groupBy(queueJobs.status);
+		const statusCounts = await db
+			.select({
+				status: queueJobs.status,
+				count: sql<number>`count(*)`,
+			})
+			.from(queueJobs)
+			.where(eq(queueJobs.queue, queue))
+			.groupBy(queueJobs.status);
 
 		// Inicializar estadísticas
 		const stats: QueueStats = {
@@ -557,7 +590,10 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
  */
 export async function countCompletedJobs(since: Date): Promise<number> {
 	try {
-		const [result] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.COMPLETED), gte(queueJobs.finishedAt, since)));
+		const [result] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(queueJobs)
+			.where(and(eq(queueJobs.status, QueueJobStatus.COMPLETED), gte(queueJobs.finishedAt, since)));
 		return result.count;
 	} catch (error) {
 		logger.error('❌ Error al contar trabajos completados:', error);
@@ -572,7 +608,10 @@ export async function countCompletedJobs(since: Date): Promise<number> {
  */
 export async function countFailedJobs(since: Date): Promise<number> {
 	try {
-		const [result] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.FAILED), gte(queueJobs.finishedAt, since)));
+		const [result] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(queueJobs)
+			.where(and(eq(queueJobs.status, QueueJobStatus.FAILED), gte(queueJobs.finishedAt, since)));
 		return result.count;
 	} catch (error) {
 		logger.error('❌ Error al contar trabajos fallidos:', error);
@@ -587,7 +626,10 @@ export async function countFailedJobs(since: Date): Promise<number> {
  */
 export async function countTotalJobs(since: Date): Promise<number> {
 	try {
-		const [result] = await db.select({ count: sql<number>`count(*)` }).from(queueJobs).where(gte(queueJobs.createdAt, since));
+		const [result] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(queueJobs)
+			.where(gte(queueJobs.createdAt, since));
 		return result.count;
 	} catch (error) {
 		logger.error('❌ Error al contar total de trabajos:', error);
@@ -602,7 +644,16 @@ export async function countTotalJobs(since: Date): Promise<number> {
  */
 export async function findProcessingTimes(since: Date): Promise<number[]> {
 	try {
-		const completedJobs = await db.select().from(queueJobs).where(and(eq(queueJobs.status, QueueJobStatus.COMPLETED), sql`${queueJobs.startedAt} IS NOT NULL`, gte(queueJobs.finishedAt, since)));
+		const completedJobs = await db
+			.select()
+			.from(queueJobs)
+			.where(
+				and(
+					eq(queueJobs.status, QueueJobStatus.COMPLETED),
+					sql`${queueJobs.startedAt} IS NOT NULL`,
+					gte(queueJobs.finishedAt, since)
+				)
+			);
 
 		return completedJobs
 			.map((job) => {

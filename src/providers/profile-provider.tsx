@@ -1,9 +1,9 @@
 'use client';
 
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { useActiveProfile } from '@/lib/api/profiles';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
 import { type ProfileBase, ThemeMode } from '@/types/entities/profile';
-import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 
 // Contexto para acceso síncrono al perfil
 export interface ProfileContextValue {

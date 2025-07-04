@@ -3,12 +3,12 @@
  * @module store/entities/file/slices/core
  */
 
+import { StateCreator } from 'zustand';
 // Refactor 2025-07: se usa cliente API para obtener info de directorio
 import { getDirectoryInfoFromApi } from '@/lib/api/client/file.client';
 import { transformFiles } from '@/transformers/file';
 import { DirectoryReadResult, FileBase } from '@/types/entities/file/base';
 import { EnhancedFile } from '@/types/entities/file/extended';
-import { StateCreator } from 'zustand';
 import { FileStore } from '..';
 
 // Estado
@@ -115,7 +115,7 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 		setError(null);
 
 		try {
-                        const result = await getDirectoryInfoFromApi(path);
+			const result = await getDirectoryInfoFromApi(path);
 			const newParentDirectories = currentDirectory ? [...parentDirectories, currentDirectory] : parentDirectories;
 			set({ currentDirectory: path, parentDirectories: newParentDirectories });
 			updateDirectoryContents(result);
@@ -141,7 +141,7 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 				newParents = parentDirectories.slice(0, -1);
 			}
 
-                        const result = await getDirectoryInfoFromApi(targetPath || ''); // Pasar cadena vacía para la raíz
+			const result = await getDirectoryInfoFromApi(targetPath || ''); // Pasar cadena vacía para la raíz
 			set({ currentDirectory: targetPath, parentDirectories: newParents });
 			updateDirectoryContents(result);
 		} catch (error: any) {

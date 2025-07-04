@@ -3,15 +3,15 @@
  * @module components/panels/details-panel/details-panel-showcase
  */
 
-import { memo, useState, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
-import { useDetailsPanelComplete } from './integration-hook';
 import { EnhancedDetailsPanel } from './enhanced-details-panel';
+import { useDetailsPanelComplete } from './integration-hook';
 
 // Datos de ejemplo para la demostración
 const mockEntities: EntityWithStats[] = [
@@ -85,11 +85,16 @@ const EntityCard = memo<{
 }>(function EntityCard({ entity, isSelected, onSelect, onToggle }) {
 	const getTypeColor = (type: string) => {
 		switch (type) {
-			case 'image': return 'bg-blue-100 text-blue-800';
-			case 'video': return 'bg-purple-100 text-purple-800';
-			case 'folder': return 'bg-yellow-100 text-yellow-800';
-			case 'collection': return 'bg-green-100 text-green-800';
-			default: return 'bg-gray-100 text-gray-800';
+			case 'image':
+				return 'bg-blue-100 text-blue-800';
+			case 'video':
+				return 'bg-purple-100 text-purple-800';
+			case 'folder':
+				return 'bg-yellow-100 text-yellow-800';
+			case 'collection':
+				return 'bg-green-100 text-green-800';
+			default:
+				return 'bg-gray-100 text-gray-800';
 		}
 	};
 
@@ -102,17 +107,15 @@ const EntityCard = memo<{
 	return (
 		<Card
 			className={cn(
-				"cursor-pointer transition-all duration-200 hover:shadow-md",
-				isSelected && "ring-2 ring-primary ring-offset-2"
+				'cursor-pointer transition-all duration-200 hover:shadow-md',
+				isSelected && 'ring-2 ring-primary ring-offset-2'
 			)}
 			onClick={() => onSelect(entity)}
 		>
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-sm truncate">{entity.name}</CardTitle>
-					<Badge className={cn("text-xs", getTypeColor(entity.type))}>
-						{entity.type}
-					</Badge>
+					<Badge className={cn('text-xs', getTypeColor(entity.type))}>{entity.type}</Badge>
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -156,31 +159,31 @@ const EntityCard = memo<{
 // Componente principal de demostración
 export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-	const {
-		selectSingle,
-		toggleSelection,
-		clearSelection,
-		updateSelection,
-		handleAction
-	} = useDetailsPanelComplete();
+	const { selectSingle, toggleSelection, clearSelection, updateSelection, handleAction } = useDetailsPanelComplete();
 
-	const handleSelectEntity = useCallback((entity: EntityWithStats) => {
-		selectSingle(entity);
-		setSelectedIds(new Set([entity.id]));
-	}, [selectSingle]);
+	const handleSelectEntity = useCallback(
+		(entity: EntityWithStats) => {
+			selectSingle(entity);
+			setSelectedIds(new Set([entity.id]));
+		},
+		[selectSingle]
+	);
 
-	const handleToggleEntity = useCallback((entity: EntityWithStats) => {
-		toggleSelection(entity);
-		setSelectedIds(prev => {
-			const newSet = new Set(prev);
-			if (newSet.has(entity.id)) {
-				newSet.delete(entity.id);
-			} else {
-				newSet.add(entity.id);
-			}
-			return newSet;
-		});
-	}, [toggleSelection]);
+	const handleToggleEntity = useCallback(
+		(entity: EntityWithStats) => {
+			toggleSelection(entity);
+			setSelectedIds((prev) => {
+				const newSet = new Set(prev);
+				if (newSet.has(entity.id)) {
+					newSet.delete(entity.id);
+				} else {
+					newSet.add(entity.id);
+				}
+				return newSet;
+			});
+		},
+		[toggleSelection]
+	);
 
 	const handleClearAll = useCallback(() => {
 		clearSelection();
@@ -189,7 +192,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 
 	const handleSelectAll = useCallback(() => {
 		updateSelection(mockEntities);
-		setSelectedIds(new Set(mockEntities.map(e => e.id)));
+		setSelectedIds(new Set(mockEntities.map((e) => e.id)));
 	}, [updateSelection]);
 
 	return (
@@ -200,18 +203,10 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 					<div className="flex items-center justify-between">
 						<h1 className="text-2xl font-bold">Demostración Details Panel</h1>
 						<div className="flex gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleSelectAll}
-							>
+							<Button variant="outline" size="sm" onClick={handleSelectAll}>
 								Seleccionar todo
 							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleClearAll}
-							>
+							<Button variant="outline" size="sm" onClick={handleClearAll}>
 								Limpiar selección
 							</Button>
 						</div>
@@ -229,7 +224,8 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 							</CardHeader>
 							<CardContent>
 								<p className="text-sm text-muted-foreground">
-									{selectedIds.size} elemento{selectedIds.size !== 1 ? 's' : ''} seleccionado{selectedIds.size !== 1 ? 's' : ''}
+									{selectedIds.size} elemento{selectedIds.size !== 1 ? 's' : ''} seleccionado
+									{selectedIds.size !== 1 ? 's' : ''}
 								</p>
 							</CardContent>
 						</Card>

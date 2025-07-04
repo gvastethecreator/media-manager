@@ -5,21 +5,17 @@
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import { createSelectors } from '@/lib/utils/store/create-selectors';
-// Migrado para consumir la API REST en lugar del servicio del servidor
-import {
-    createFile3DInApi,
-    deleteFile3DFromApi,
-    getFile3DsFromApi,
-    updateFile3DInApi,
-} from '@/lib/api/client/file3d.client';
-import type {
-    File3DCreateInput,
-    File3DUpdateInput,
-    File3DWithStats
-} from '@/types/entities/file3d';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+// Migrado para consumir la API REST en lugar del servicio del servidor
+import {
+	createFile3DInApi,
+	deleteFile3DFromApi,
+	getFile3DsFromApi,
+	updateFile3DInApi,
+} from '@/lib/api/client/file3d.client';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
+import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type File3DFilters = Record<string, any>;
@@ -73,7 +69,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			fetchFile3Ds: async () => {
 				set({ loading: true, error: null });
 				try {
-                                        const file3Ds = await getFile3DsFromApi();
+					const file3Ds = await getFile3DsFromApi();
 					set({ file3Ds, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
@@ -83,7 +79,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			createFile3D: async (data: File3DCreateInput) => {
 				set({ loading: true, error: null });
 				try {
-                                        const newFile3D = await createFile3DInApi(data);
+					const newFile3D = await createFile3DInApi(data);
 					set((state) => ({
 						file3Ds: [...state.file3Ds, newFile3D],
 						loading: false,
@@ -98,7 +94,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			updateFile3D: async (id: string, data: File3DUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
-                                        const updatedFile3D = await updateFile3DInApi(id, data);
+					const updatedFile3D = await updateFile3DInApi(id, data);
 					set((state) => ({
 						file3Ds: state.file3Ds.map((f) => (f.id === id ? updatedFile3D : f)),
 						currentFile3D: state.currentFile3D?.id === id ? updatedFile3D : state.currentFile3D,
@@ -114,7 +110,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			deleteFile3D: async (id: string) => {
 				set({ loading: true, error: null });
 				try {
-                                        await deleteFile3DFromApi(id);
+					await deleteFile3DFromApi(id);
 					set((state) => ({
 						file3Ds: state.file3Ds.filter((f) => f.id !== id),
 						selectedFile3Ds: state.selectedFile3Ds.filter((f) => f.id !== id),

@@ -1,7 +1,7 @@
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBytes } from '@/lib/utils/format.utils';
 import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatBytes } from '@/lib/utils/format.utils';
 import { Activity } from './components/activity';
 import { StatCard } from './components/stat-card';
 import { TagUsage } from './components/tag-usage';

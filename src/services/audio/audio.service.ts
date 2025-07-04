@@ -6,6 +6,8 @@
  * @updated 2025-07-03 - ✅ MIGRADO A DRIZZLE + TRANSFORMADORES MODERNOS
  */
 
+import * as crypto from 'crypto';
+import { count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -13,9 +15,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { deserializeAudio } from '@/transformers/audio';
-import type { AudioCreateInput, AudioUpdateInput, AudioWithStats, Audio } from '@/types/entities/audio';
-import * as crypto from 'crypto';
-import { count, desc, eq } from 'drizzle-orm';
+import type { Audio, AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 
 const audioLogger = serverLogger.withContext('AudioService');
 
@@ -149,7 +149,6 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 
 		const rawAudio = drizzleAudio[0];
 
-		
 		const transformedAudio = {
 			...rawAudio,
 			isFavorite: Boolean(rawAudio.isFavorite),
@@ -170,32 +169,35 @@ export async function createAudio(data: AudioCreateInput): Promise<AudioWithStat
 		audioLogger.info('📝 Creando audio:', data.name);
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(audios).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description || null,
-			emoji: data.emoji || '🎵',
-			color: data.color || '#3b82f6',
-			shortcut: data.shortcut || null,
-			category: data.category || null,
-			filePath: data.filePath,
-			fileName: data.fileName,
-			fileSize: data.fileSize || null,
-			mimeType: data.mimeType || null,
-			duration: data.duration || null,
-			bitrate: data.bitrate || null,
-			sampleRate: data.sampleRate || null,
-			channels: data.channels || null,
-			codec: data.codec || null,
-			tags: data.tags || null,
-			metadata: data.metadata || null,
-			sortBy: data.sortBy || null,
-			filters: data.filters || null,
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(audios)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description || null,
+				emoji: data.emoji || '🎵',
+				color: data.color || '#3b82f6',
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				filePath: data.filePath,
+				fileName: data.fileName,
+				fileSize: data.fileSize || null,
+				mimeType: data.mimeType || null,
+				duration: data.duration || null,
+				bitrate: data.bitrate || null,
+				sampleRate: data.sampleRate || null,
+				channels: data.channels || null,
+				codec: data.codec || null,
+				tags: data.tags || null,
+				metadata: data.metadata || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newAudio = result[0];
 		const audioWithStats = deserializeAudio(newAudio as any);
@@ -250,9 +252,7 @@ export async function updateAudio(id: string, data: AudioUpdateInput): Promise<A
 		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
-		await db.update(audios)
-			.set(updateData)
-			.where(eq(audios.id, id));
+		await db.update(audios).set(updateData).where(eq(audios.id, id));
 
 		// Obtener el audio actualizado
 		const updatedAudio = await getAudioById(id);
@@ -319,10 +319,7 @@ export async function deleteAudio(id: string): Promise<{ success: boolean }> {
 export async function audioExists(id: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(audios)
-			.where(eq(audios.id, id));
+		const result = await db.select({ count: count() }).from(audios).where(eq(audios.id, id));
 
 		return result[0]?.count > 0;
 	} catch (error) {
@@ -337,9 +334,7 @@ export async function audioExists(id: string): Promise<boolean> {
 export async function getAudioCount(): Promise<number> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(audios);
+		const result = await db.select({ count: count() }).from(audios);
 
 		return result[0]?.count || 0;
 	} catch (error) {
@@ -359,47 +354,56 @@ export async function getAudioFormatStats() {
 				format: audios.format,
 				size: audios.size,
 				duration: audios.duration,
-				bitrate: audios.bitrate
+				bitrate: audios.bitrate,
 			})
 			.from(audios);
 
 		// Agrupar manualmente por formato
-		const formatGroups = allAudios.reduce((acc, audio) => {
-			const format = audio.format || 'unknown';
-			if (!acc[format]) {
-				acc[format] = {
-					format,
-					count: 0,
-					totalSize: 0,
-					totalDuration: 0,
-					totalBitrate: 0,
-					validDurations: 0,
-					validBitrates: 0
-				};
-			}
-			acc[format].count++;
-			acc[format].totalSize += audio.size || 0;
-			if (audio.duration) {
-				acc[format].totalDuration += audio.duration;
-				acc[format].validDurations++;
-			}
-			if (audio.bitrate) {
-				acc[format].totalBitrate += audio.bitrate;
-				acc[format].validBitrates++;
-			}
-			return acc;
-		}, {} as Record<string, any>);
+		const formatGroups = allAudios.reduce(
+			(acc, audio) => {
+				const format = audio.format || 'unknown';
+				if (!acc[format]) {
+					acc[format] = {
+						format,
+						count: 0,
+						totalSize: 0,
+						totalDuration: 0,
+						totalBitrate: 0,
+						validDurations: 0,
+						validBitrates: 0,
+					};
+				}
+				acc[format].count++;
+				acc[format].totalSize += audio.size || 0;
+				if (audio.duration) {
+					acc[format].totalDuration += audio.duration;
+					acc[format].validDurations++;
+				}
+				if (audio.bitrate) {
+					acc[format].totalBitrate += audio.bitrate;
+					acc[format].validBitrates++;
+				}
+				return acc;
+			},
+			{} as Record<string, any>
+		);
 
-		return Object.values(formatGroups).map((stat: any) => ({
-			format: stat.format,
-			count: stat.count,
-			totalSize: stat.totalSize,
-			avgDuration: stat.validDurations > 0 ? stat.totalDuration / stat.validDurations : null,
-			avgBitrate: stat.validBitrates > 0 ? stat.totalBitrate / stat.validBitrates : null,
-		})).sort((a, b) => b.count - a.count);
+		return Object.values(formatGroups)
+			.map((stat: any) => ({
+				format: stat.format,
+				count: stat.count,
+				totalSize: stat.totalSize,
+				avgDuration: stat.validDurations > 0 ? stat.totalDuration / stat.validDurations : null,
+				avgBitrate: stat.validBitrates > 0 ? stat.totalBitrate / stat.validBitrates : null,
+			}))
+			.sort((a, b) => b.count - a.count);
 	} catch (error) {
 		audioLogger.error('Error al obtener estadísticas de formatos:', error);
-		throw createAudioError('No se pudieron obtener las estadísticas de formato de audio', EntityErrorCode.OPERATION_FAILED, error);
+		throw createAudioError(
+			'No se pudieron obtener las estadísticas de formato de audio',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -408,22 +412,23 @@ export async function getAudioGenreStats() {
 		audioLogger.info('Obteniendo estadísticas de géneros de audio');
 
 		// **MIGRACIÓN A DRIZZLE**
-		const allAudios = await db
-			.select({ genre: audios.genre })
-			.from(audios);
+		const allAudios = await db.select({ genre: audios.genre }).from(audios);
 
 		// Agrupar manualmente por género
-		const genreGroups = allAudios.reduce((acc, audio) => {
-			const genre = audio.genre || 'unknown';
-			if (!acc[genre]) {
-				acc[genre] = {
-					genre,
-					count: 0
-				};
-			}
-			acc[genre].count++;
-			return acc;
-		}, {} as Record<string, any>);
+		const genreGroups = allAudios.reduce(
+			(acc, audio) => {
+				const genre = audio.genre || 'unknown';
+				if (!acc[genre]) {
+					acc[genre] = {
+						genre,
+						count: 0,
+					};
+				}
+				acc[genre].count++;
+				return acc;
+			},
+			{} as Record<string, any>
+		);
 
 		return Object.values(genreGroups)
 			.map((stat: any) => ({
@@ -433,6 +438,10 @@ export async function getAudioGenreStats() {
 			.sort((a, b) => b.count - a.count);
 	} catch (error) {
 		audioLogger.error('Error al obtener estadísticas de géneros:', error);
-		throw createAudioError('No se pudieron obtener las estadísticas de géneros de audio', EntityErrorCode.OPERATION_FAILED, error);
+		throw createAudioError(
+			'No se pudieron obtener las estadísticas de géneros de audio',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

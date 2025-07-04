@@ -10,6 +10,8 @@
 import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { EntityCard } from '@/components/cards/entity-card';
+import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
 import { EmptyState } from '@/components/core/data-display';
 import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -24,8 +26,6 @@ import { VirtualizedCardsView } from './views/virtualized-cards-view';
 import { VirtualizedListView } from './views/virtualized-list-view';
 import { VirtualizedMasonryView } from './views/virtualized-masonry-view';
 import { VirtualizedSimpleGridView } from './views/virtualized-simple-grid-view';
-import { EntityCard } from '@/components/cards/entity-card';
-import type { CardLayout, CardVariant, CardSize } from '@/components/cards/types/card-layout.types';
 
 const logger = clientLogger.withContext('FileBrowser');
 
@@ -89,7 +89,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 
 	// Stores por tipo de entidad (expandir según necesidad)
-	const { images: imagesRecord, isLoading: imagesLoading, error: imagesError, loadImages, getSortedImages, getImagesByFolder } = useImageStore();
+	const {
+		images: imagesRecord,
+		isLoading: imagesLoading,
+		error: imagesError,
+		loadImages,
+		getSortedImages,
+		getImagesByFolder,
+	} = useImageStore();
 	// TODO: Añadir otros stores cuando estén implementados
 	// const { videos: videosRecord, isLoading: videosLoading, ... } = useVideoStore();
 	// const { audios: audiosRecord, isLoading: audiosLoading, ... } = useAudioStore();
@@ -110,7 +117,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		// Cargar datos para cada tipo
 		for (const type of typesToLoad) {
 			if (type === 'image') {
-				const { loadImages: storeLoadImages, isLoading: currentlyLoading, getImagesByFolder } = useImageStore.getState();
+				const {
+					loadImages: storeLoadImages,
+					isLoading: currentlyLoading,
+					getImagesByFolder,
+				} = useImageStore.getState();
 
 				const loadParams: Parameters<typeof storeLoadImages>[0] = {};
 
@@ -367,22 +378,25 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	}, [clearSelection]);
 
 	// Función para renderizar item usando EntityCard
-	const renderItem = useCallback((item: EntityWithStats, index: number) => {
-		return (
-			<EntityCard
-				key={item.id}
-				entity={item}
-				isSelected={selectedIds.includes(item.id)}
-				onClick={() => handleItemClick(item)}
-				onDoubleClick={() => handleItemDoubleClick(item)}
-				layout={layout}
-				preset={preset}
-				variant={variant}
-				size={size}
-				className="w-full h-full"
-			/>
-		);
-	}, [selectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size]);
+	const renderItem = useCallback(
+		(item: EntityWithStats, index: number) => {
+			return (
+				<EntityCard
+					key={item.id}
+					entity={item}
+					isSelected={selectedIds.includes(item.id)}
+					onClick={() => handleItemClick(item)}
+					onDoubleClick={() => handleItemDoubleClick(item)}
+					layout={layout}
+					preset={preset}
+					variant={variant}
+					size={size}
+					className="w-full h-full"
+				/>
+			);
+		},
+		[selectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size]
+	);
 
 	// Renderizar contenido según el estado
 	const renderContent = () => {

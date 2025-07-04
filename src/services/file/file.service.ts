@@ -4,29 +4,29 @@
  * ✅ MIGRADO DESDE SERVER ACTIONS - 2025-07-03
  */
 
+import fs, { stat } from 'fs/promises';
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import {
-    determineFileType,
-    determineMimeType,
-    generateFileId,
-    mapStatsToFileInfo,
-    serializeDirectoryContents,
-    serializeFileOperationResult,
+	determineFileType,
+	determineMimeType,
+	generateFileId,
+	mapStatsToFileInfo,
+	serializeDirectoryContents,
+	serializeFileOperationResult,
 } from '@/transformers/file';
 import {
-    type DirectoryReadResult,
-    type FileBase,
-    type FileCopyMoveResult,
-    FileErrorCode,
-    FileEventType,
-    type FileInfo,
-    type FileOperationOptions,
-    type FileOperationResult,
-    FileType,
+	type DirectoryReadResult,
+	type FileBase,
+	type FileCopyMoveResult,
+	FileErrorCode,
+	FileEventType,
+	type FileInfo,
+	type FileOperationOptions,
+	type FileOperationResult,
+	FileType,
 } from '@/types/entities/file';
-import fs, { stat } from 'fs/promises';
-import path from 'path';
 
 const logger = serverLogger.withContext('FileService');
 
@@ -431,9 +431,8 @@ export async function moveFile(
 
 			logger.info('✅ Archivo movido');
 			return copyResult;
-		} else {
-			throw createFileError('Error en la copia durante el movimiento', FileErrorCode.OPERATION_FAILED);
 		}
+		throw createFileError('Error en la copia durante el movimiento', FileErrorCode.OPERATION_FAILED);
 	} catch (error) {
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;

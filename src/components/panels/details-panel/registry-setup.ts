@@ -3,29 +3,28 @@
  * @module components/panels/details-panel/registry-setup
  */
 
-import {
-	entityDetailsRegistry,
-	createEntityConfig,
-	ImageActions,
-	VideoActions,
-	FolderActions,
-	CollectionActions,
-	AlbumActions,
-	DefaultInfoCategories
-} from './entity-details-registry';
-
-import type {
-	EntityDetailsProps,
-	EntityPreviewProps,
-	EntityToolbarProps,
-	EntityMetadataProps
-} from './entity-details-registry';
+import { CollectionDetails, CollectionMetadata, CollectionPreview, CollectionToolbar } from './entities/collection-details';
+import { FolderDetails, FolderMetadata, FolderPreview, FolderToolbar } from './entities/folder-details';
 
 // Importar componentes específicos
-import { ImageDetails, ImagePreview, ImageToolbar, ImageMetadata } from './entities/image-details';
-import { VideoDetails, VideoPreview, VideoToolbar, VideoMetadata } from './entities/video-details';
-import { FolderDetails, FolderPreview, FolderToolbar, FolderMetadata } from './entities/folder-details';
-import { CollectionDetails, CollectionPreview, CollectionToolbar, CollectionMetadata } from './entities/collection-details';
+import { ImageDetails, ImageMetadata, ImagePreview, ImageToolbar } from './entities/image-details';
+import { VideoDetails, VideoMetadata, VideoPreview, VideoToolbar } from './entities/video-details';
+import type {
+	EntityDetailsProps,
+	EntityMetadataProps, 
+	EntityPreviewProps,
+	EntityToolbarProps
+} from './entity-details-registry';
+import {
+	AlbumActions,
+	CollectionActions,
+	createEntityConfig,
+	DefaultInfoCategories, 
+	entityDetailsRegistry,
+	FolderActions,
+	ImageActions,
+	VideoActions
+} from './entity-details-registry';
 
 // Componentes genéricos para otros tipos
 const GenericEntityDetails = ({ entity }: EntityDetailsProps) => {

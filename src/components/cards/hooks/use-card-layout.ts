@@ -6,7 +6,7 @@
 
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { CardLayoutConfig, BaseCardProps } from '../types/card-layout.types';
+import type { BaseCardProps, CardLayoutConfig } from '../types/card-layout.types';
 import { resolveLayoutConfig } from '../types/card-layout.types';
 
 interface UseCardLayoutReturn {
@@ -35,10 +35,7 @@ interface UseCardLayoutReturn {
 /**
  * Hook para obtener clases CSS y estilos basados en la configuración de layout
  */
-export function useCardLayout(
-	props: Partial<BaseCardProps>,
-	preset?: string
-): UseCardLayoutReturn {
+export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): UseCardLayoutReturn {
 	const config = useMemo(() => resolveLayoutConfig(props, preset), [props, preset]);
 
 	// Resolver dimensiones
@@ -93,9 +90,7 @@ export function useCardLayout(
 
 	// Generar clases para el contenedor principal
 	const containerClasses = useMemo(() => {
-		const classes = [
-			'relative overflow-hidden transition-all duration-200',
-		];
+		const classes = ['relative overflow-hidden transition-all duration-200'];
 
 		// Layout específico
 		switch (config.layout) {

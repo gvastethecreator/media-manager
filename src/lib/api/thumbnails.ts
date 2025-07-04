@@ -102,7 +102,8 @@ export function useGenerateThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<ThumbnailInfo[], Error, { imageId: string; options?: ThumbnailGenerationOptions }>({
-		mutationFn: ({ imageId, options = {} }) => apiClient.post<ThumbnailInfo[]>(`/thumbnails/generate/${imageId}`, options),
+		mutationFn: ({ imageId, options = {} }) =>
+			apiClient.post<ThumbnailInfo[]>(`/thumbnails/generate/${imageId}`, options),
 		onSuccess: (data, { imageId }) => {
 			queryClient.setQueryData(thumbnailKeys.image(imageId), data);
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.stats() });
@@ -115,7 +116,8 @@ export function useBulkGenerateThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ generated: number; errors: string[] }, Error, BulkThumbnailOptions>({
-		mutationFn: (options) => apiClient.post<{ generated: number; errors: string[] }>('/thumbnails/bulk-generate', options),
+		mutationFn: (options) =>
+			apiClient.post<{ generated: number; errors: string[] }>('/thumbnails/bulk-generate', options),
 		onSuccess: (_, { imageIds }) => {
 			// Invalidar cache de todas las imágenes procesadas
 			for (const imageId of imageIds) {
@@ -131,7 +133,8 @@ export function useOptimizeThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ optimized: number; totalSaved: number }, Error, ProcessOptions | undefined>({
-		mutationFn: (options) => apiClient.post<{ optimized: number; totalSaved: number }>('/thumbnails/optimize', options || {}),
+		mutationFn: (options) =>
+			apiClient.post<{ optimized: number; totalSaved: number }>('/thumbnails/optimize', options || {}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.all });
 		},
@@ -153,7 +156,8 @@ export function useCleanThumbnails() {
 	const queryClient = useQueryClient();
 
 	return useMutation<{ cleaned: number; totalFreed: number }, Error, ProcessOptions | undefined>({
-		mutationFn: (options) => apiClient.post<{ cleaned: number; totalFreed: number }>('/thumbnails/clean', options || {}),
+		mutationFn: (options) =>
+			apiClient.post<{ cleaned: number; totalFreed: number }>('/thumbnails/clean', options || {}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: thumbnailKeys.all });
 		},

@@ -127,18 +127,24 @@ export function useDeleteCharacter() {
 	});
 }
 
-export function useRecentCharacterMedia(characterId: string, limit: number = 6) {
-  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
-    queryKey: [...characterKeys.detail(characterId), 'media', limit],
-    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/characters/${characterId}/media?limit=${limit}`),
-    enabled: !!characterId,
-  });
+export function useRecentCharacterMedia(characterId: string, limit = 6) {
+	return useQuery<
+		Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>,
+		Error
+	>({
+		queryKey: [...characterKeys.detail(characterId), 'media', limit],
+		queryFn: () =>
+			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>>(
+				`/characters/${characterId}/media?limit=${limit}`
+			),
+		enabled: !!characterId,
+	});
 }
 
-export function useRelatedCharacters(characterId: string, limit: number = 5) {
-  return useQuery<CharacterWithStats[], Error>({
-    queryKey: [...characterKeys.detail(characterId), 'related', limit],
-    queryFn: () => apiClient.get<CharacterWithStats[]>(`/characters/${characterId}/related?limit=${limit}`),
-    enabled: !!characterId,
-  });
+export function useRelatedCharacters(characterId: string, limit = 5) {
+	return useQuery<CharacterWithStats[], Error>({
+		queryKey: [...characterKeys.detail(characterId), 'related', limit],
+		queryFn: () => apiClient.get<CharacterWithStats[]>(`/characters/${characterId}/related?limit=${limit}`),
+		enabled: !!characterId,
+	});
 }

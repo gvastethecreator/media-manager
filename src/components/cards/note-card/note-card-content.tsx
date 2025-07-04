@@ -15,8 +15,8 @@ import {
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { useNoteCounts } from '@/lib/api/notes';
+import { cn } from '@/lib/utils';
 
 interface NoteCardContentProps {
 	content?: string | null;

@@ -6,11 +6,11 @@
 
 export {
 	mapCreateVideoDataToDrizzle,
-	mapUpdateVideoDataToDrizzle,
-	mapVideoFiltersToDrizzleArgs,
 	// Alias para compatibilidad, marcados como deprecated en el mapper
 	mapCreateVideoDataToPrisma,
+	mapUpdateVideoDataToDrizzle,
 	mapUpdateVideoDataToPrisma,
+	mapVideoFiltersToDrizzleArgs,
 	mapVideoFiltersToPrismaArgs,
 } from './mappers';
 
