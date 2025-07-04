@@ -6,7 +6,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { addImageToTag } from '@/services/tag/tag.service';
-import { toast } from '@/services/toast';
+import { toast } from '@/lib/ui/toast';
 
 // Importaciones de stores en entidades
 

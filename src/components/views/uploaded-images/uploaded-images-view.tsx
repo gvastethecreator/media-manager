@@ -2,6 +2,11 @@ import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, U
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+        deleteUploadedImageFromApi,
+        getUploadedImagesFromApi,
+        uploadImagesToApi,
+} from '@/lib/api/client/uploaded-images.client';
 import { MemoizedImageCard } from '@/components/cards/image-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -35,6 +40,7 @@ import {
 	getUploadedImages,
 	uploadImages,
 } from '@/services/uploaded-images/uploaded-images.service';
+
 import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
 import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import { UploadedImageType } from '@/types/entities/uploaded-image/types';
@@ -65,21 +71,17 @@ export function UploadedImagesView() {
 	const loadImages = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			// Usando la server action
-			const response = await getUploadedImages({
-				...filters,
-				page: currentPage,
-				pageSize: 20,
-			});
+                        // Usando el cliente API
+                        const response = await getUploadedImagesFromApi({
+                                ...filters,
+                                page: currentPage,
+                                pageSize: 20,
+                        });
 
-			if (response.success) {
-				setItems(response.items || []);
-				setTotalItems(response.total || 0);
-				setTotalPages(Math.ceil((response.total || 0) / (response.pageSize || 20)));
-			} else {
-				toastService.error(response.error || 'No se pudieron cargar las imágenes subidas.');
-			}
-			setIsLoading(false);
+                        setItems(response.items || []);
+                        setTotalItems(response.total || 0);
+                        setTotalPages(Math.ceil((response.total || 0) / (response.pageSize || 20)));
+                        setIsLoading(false);
 		} catch (error) {
 			viewLogger.error('Error al cargar imágenes:', error);
 			toastService.error('No se pudieron cargar las imágenes subidas.');
@@ -109,18 +111,13 @@ export function UploadedImagesView() {
 					formData.append('type', filters.type);
 				}
 
-				// Llamar a la server action
-				const result = await uploadImages(formData);
-
-				if (result.success) {
-					toastService.success(
-						`Se ${result.items?.length === 1 ? 'ha subido' : 'han subido'} ${result.items?.length} ${result.items?.length === 1 ? 'imagen' : 'imágenes'} correctamente.`
-					);
-					loadImages(); // Recargamos la lista de imágenes
-				} else {
-					toastService.error(result.error || 'No se pudieron subir las imágenes.');
-				}
-				setIsUploading(false);
+                                // Llamar al cliente API
+                                const result = await uploadImagesToApi(formData);
+                                toastService.success(
+                                        `Se ${result.items?.length === 1 ? 'ha subido' : 'han subido'} ${result.items?.length} ${result.items?.length === 1 ? 'imagen' : 'imágenes'} correctamente.`
+                                );
+                                loadImages(); // Recargamos la lista de imágenes
+                                setIsUploading(false);
 			} catch (error) {
 				viewLogger.error('Error al subir imágenes:', error);
 				toastService.error('No se pudieron subir las imágenes.');
@@ -134,15 +131,10 @@ export function UploadedImagesView() {
 	const handleDeleteImage = useCallback(
 		async (id: string) => {
 			try {
-				const result = await deleteUploadedImage(id);
-
-				if (result.success) {
-					toastService.success('La imagen se ha eliminado correctamente.');
-					setSelectedImage(null);
-					loadImages();
-				} else {
-					toastService.error(result.error || 'No se pudo eliminar la imagen.');
-				}
+                                await deleteUploadedImageFromApi(id);
+                                toastService.success('La imagen se ha eliminado correctamente.');
+                                setSelectedImage(null);
+                                loadImages();
 			} catch (error) {
 				viewLogger.error('Error al eliminar imagen:', error);
 				toastService.error('No se pudo eliminar la imagen.');

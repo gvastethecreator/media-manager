@@ -8,7 +8,7 @@
 import type { StateCreator } from 'zustand';
 import * as ImageApi from '@/lib/api/client/image.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
 import type { ImageState } from '../types';
 

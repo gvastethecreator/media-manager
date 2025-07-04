@@ -4,6 +4,8 @@
  * @description Gestiona el estado y las acciones CRUD para la entidad Workflow.
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
 // Refactor 2025-07: ahora usamos cliente API en lugar de workflow.service

@@ -11,7 +11,7 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { WorldItemCreateInput } from '@/types/entities/world-item';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
 import type { WorldItemComplete } from '@/types/entities/world-item/extended';
