@@ -1,10 +1,14 @@
 /**
  * @file Punto de entrada para transformadores de JsonFile
  * @module transformers/json-file
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-// Exportar desde serializers
+// Exportar mappers, serializers, validators y schemas
+export * from './mappers';
 export * from './serializers';
+export * from './validators';
+export * from './schema';
 
 // Exportar desde transformer
 export {
