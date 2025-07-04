@@ -9,11 +9,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type {
-    VideoComplete,
-    VideoStatistics,
-    VideoWithStats,
-} from '@/types/entities/video/types';
+import type { VideoComplete, VideoStatistics, VideoWithStats } from '@/types/entities/video/types';
 import { VideoQuality } from '@/types/entities/video/types';
 
 // Tipos locales equivalentes a Prisma (migración a Drizzle)
@@ -371,27 +367,40 @@ function calculateQualityScore(params: {
 
 	// Resolución (40 puntos máximo)
 	const pixels = (params.width || 0) * (params.height || 0);
-	if (pixels >= 8294400) score += 40; // 4K
-	else if (pixels >= 2073600) score += 35; // 2K
-	else if (pixels >= 921600) score += 30; // HD
-	else if (pixels >= 307200) score += 20; // SD
+	if (pixels >= 8294400)
+		score += 40; // 4K
+	else if (pixels >= 2073600)
+		score += 35; // 2K
+	else if (pixels >= 921600)
+		score += 30; // HD
+	else if (pixels >= 307200)
+		score += 20; // SD
 	else score += 10; // Low
 
 	// Duración (20 puntos máximo)
 	const minutes = params.duration / 60;
-	if (minutes >= 60) score += 20; // Película
-	else if (minutes >= 30) score += 18; // Episodio largo
-	else if (minutes >= 10) score += 15; // Episodio corto
-	else if (minutes >= 3) score += 12; // Clip largo
-	else if (minutes >= 1) score += 8; // Clip corto
+	if (minutes >= 60)
+		score += 20; // Película
+	else if (minutes >= 30)
+		score += 18; // Episodio largo
+	else if (minutes >= 10)
+		score += 15; // Episodio corto
+	else if (minutes >= 3)
+		score += 12; // Clip largo
+	else if (minutes >= 1)
+		score += 8; // Clip corto
 	else score += 3; // Muy corto
 
 	// Tamaño vs calidad (15 puntos máximo)
 	const mbPerMinute = params.size / (1024 * 1024) / Math.max(minutes, 0.1);
-	if (mbPerMinute >= 50) score += 15; // Alta calidad
-	else if (mbPerMinute >= 20) score += 12; // Buena calidad
-	else if (mbPerMinute >= 10) score += 8; // Calidad media
-	else if (mbPerMinute >= 5) score += 5; // Baja calidad
+	if (mbPerMinute >= 50)
+		score += 15; // Alta calidad
+	else if (mbPerMinute >= 20)
+		score += 12; // Buena calidad
+	else if (mbPerMinute >= 10)
+		score += 8; // Calidad media
+	else if (mbPerMinute >= 5)
+		score += 5; // Baja calidad
 	else score += 2; // Muy baja calidad
 
 	// Metadatos (10 puntos máximo)

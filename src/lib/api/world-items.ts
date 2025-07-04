@@ -119,10 +119,13 @@ export function useDeleteWorldItem() {
 	});
 }
 
-export function useRecentWorldItemImages(worldItemId: string, limit: number = 6) {
-  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>, Error>({
-    queryKey: [...worldItemKeys.detail(worldItemId), 'recent-images', limit],
-    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; }>>(`/world-items/${worldItemId}/recent-images?limit=${limit}`),
-    enabled: !!worldItemId,
-  });
+export function useRecentWorldItemImages(worldItemId: string, limit = 6) {
+	return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string }>, Error>({
+		queryKey: [...worldItemKeys.detail(worldItemId), 'recent-images', limit],
+		queryFn: () =>
+			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string }>>(
+				`/world-items/${worldItemId}/recent-images?limit=${limit}`
+			),
+		enabled: !!worldItemId,
+	});
 }

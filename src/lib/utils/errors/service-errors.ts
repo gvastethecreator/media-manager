@@ -247,8 +247,6 @@ export function toServiceError(error: unknown, defaultOptions?: Partial<CreateSe
 		options.cause = error.cause || error;
 	}
 
-	
-
 	return createServiceError(options);
 }
 

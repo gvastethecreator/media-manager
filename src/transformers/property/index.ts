@@ -8,4 +8,4 @@
  */
 
 export { toPropertyWithStats } from './mappers';
-export { transformProperty, type PropertyComplete } from './transformer';
+export { type PropertyComplete, transformProperty } from './transformer';

@@ -7,11 +7,11 @@
  */
 
 export type {
-    File3DBase,
-    File3DCreateInput,
-    File3DStatistics,
-    File3DUpdateInput,
-    File3DWithStats
+	File3DBase,
+	File3DCreateInput,
+	File3DStatistics,
+	File3DUpdateInput,
+	File3DWithStats,
 } from './base';
 
 // export * from './file3d.schema'; // Descomentar cuando se creen los esquemas Zod

@@ -5,6 +5,8 @@
  * @updated 2025-07-03 - ✅ MIGRADO COMPLETAMENTE A DRIZZLE ORM
  */
 
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { tags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -13,8 +15,6 @@ import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toTagWithStats } from '@/transformers/tag';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
-import * as crypto from 'crypto';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('TagService');
@@ -199,12 +199,7 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 		}
 
 		if (search) {
-			conditions.push(
-				or(
-					like(tags.name, `%${search}%`),
-					like(tags.description, `%${search}%`)
-				)
-			);
+			conditions.push(or(like(tags.name, `%${search}%`), like(tags.description, `%${search}%`)));
 		}
 
 		// Determinar el ordenamiento
@@ -306,20 +301,23 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 		logger.info('📝 Creando nueva etiqueta', { name: data.name });
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(tags).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description || null,
-			color: data.color || '#3b82f6',
-			emoji: data.emoji || '🏷️',
-			category: data.category || null,
-			isPublic: data.isPublic || false,
-			isFavorite: data.isFavorite || false,
-			totalImages: 0,
-			totalVideos: 0,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(tags)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description || null,
+				color: data.color || '#3b82f6',
+				emoji: data.emoji || '🏷️',
+				category: data.category || null,
+				isPublic: data.isPublic || false,
+				isFavorite: data.isFavorite || false,
+				totalImages: 0,
+				totalVideos: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newTag = result[0];
 
@@ -379,11 +377,7 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 
 		// **MIGRACIÓN A DRIZZLE**
 		// Verificar si la etiqueta existe
-		const existingTag = await db
-			.select({ id: tags.id })
-			.from(tags)
-			.where(eq(tags.id, id))
-			.limit(1);
+		const existingTag = await db.select({ id: tags.id }).from(tags).where(eq(tags.id, id)).limit(1);
 
 		if (existingTag.length === 0) {
 			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
@@ -402,10 +396,7 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 		if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
-		const result = await db.update(tags)
-			.set(updateData)
-			.where(eq(tags.id, id))
-			.returning();
+		const result = await db.update(tags).set(updateData).where(eq(tags.id, id)).returning();
 
 		if (result.length === 0) {
 			throw new TagServiceError('Error al actualizar etiqueta', 'UPDATE_FAILED');
@@ -469,11 +460,7 @@ export async function deleteTag(id: string): Promise<void> {
 
 		// **MIGRACIÓN A DRIZZLE**
 		// Verificar si la etiqueta existe
-		const existingTag = await db
-			.select({ id: tags.id, name: tags.name })
-			.from(tags)
-			.where(eq(tags.id, id))
-			.limit(1);
+		const existingTag = await db.select({ id: tags.id, name: tags.name }).from(tags).where(eq(tags.id, id)).limit(1);
 
 		if (existingTag.length === 0) {
 			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
@@ -508,20 +495,17 @@ export async function toggleTagFavorite(id: string): Promise<TagWithStats> {
 
 		// **MIGRACIÓN A DRIZZLE**
 		// Obtener estado actual
-		const currentTag = await db
-			.select({ isFavorite: tags.isFavorite })
-			.from(tags)
-			.where(eq(tags.id, id))
-			.limit(1);
+		const currentTag = await db.select({ isFavorite: tags.isFavorite }).from(tags).where(eq(tags.id, id)).limit(1);
 
 		if (currentTag.length === 0) {
 			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
 		}
 
-		const result = await db.update(tags)
+		const result = await db
+			.update(tags)
 			.set({
 				isFavorite: !currentTag[0].isFavorite,
-				updatedAt: new Date()
+				updatedAt: new Date(),
 			})
 			.where(eq(tags.id, id))
 			.returning();
@@ -588,20 +572,17 @@ export async function toggleTagArchive(id: string): Promise<TagWithStats> {
 
 		// **MIGRACIÓN A DRIZZLE**
 		// Obtener estado actual
-		const currentTag = await db
-			.select({ isPublic: tags.isPublic })
-			.from(tags)
-			.where(eq(tags.id, id))
-			.limit(1);
+		const currentTag = await db.select({ isPublic: tags.isPublic }).from(tags).where(eq(tags.id, id)).limit(1);
 
 		if (currentTag.length === 0) {
 			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
 		}
 
-		const result = await db.update(tags)
+		const result = await db
+			.update(tags)
 			.set({
 				isPublic: !currentTag[0].isPublic,
-				updatedAt: new Date()
+				updatedAt: new Date(),
 			})
 			.where(eq(tags.id, id))
 			.returning();

@@ -31,31 +31,31 @@ export interface FileBase {
 	id: string;
 	name: string;
 	path: string;
-	
+
 	// Propiedades del archivo
 	size: number;
 	hash: string;
 	mimeType: string;
 	extension: string;
 	type: FileType;
-	
+
 	// Metadatos del sistema
 	isDirectory: boolean;
 	parentPath: string;
 	absolutePath: string;
 	relativePath: string;
-	
+
 	// Fechas del sistema de archivos
 	modifiedAt: Date;
 	accessedAt: Date;
-	
+
 	// Relaciones
 	folderId: string | null;
-	
+
 	// Estados
 	isHidden: boolean;
 	isReadonly: boolean;
-	
+
 	// Timestamps del sistema
 	createdAt: Date;
 	updatedAt: Date;

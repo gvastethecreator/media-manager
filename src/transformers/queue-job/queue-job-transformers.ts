@@ -4,11 +4,11 @@
  * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
+import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
 import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
-import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 // Tipo local equivalente a Prisma (migración a Drizzle)
 type DrizzleQueueJob = {

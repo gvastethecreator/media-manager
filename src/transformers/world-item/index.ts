@@ -6,9 +6,7 @@
 // --- Exportaciones Controladas --- //
 
 // De mappers.ts
-export {
-	toWorldItemWithStats,
-} from './mappers';
+export { toWorldItemWithStats } from './mappers';
 // De serializers.ts
 export {
 	deserializeAttributes,
@@ -31,7 +29,7 @@ export {
 // De transformer.ts (funciones principales de transformación)
 export {
 	fromDrizzleWorldItem,
-	fromDrizzleWorldItems
+	fromDrizzleWorldItems,
 } from './transformer';
 
 // --- Fin Exportaciones Controladas --- //

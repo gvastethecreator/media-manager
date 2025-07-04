@@ -6,6 +6,8 @@
  * @updated 2025-07-01
  */
 
+import * as crypto from 'crypto';
+import { asc, count, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { places } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -13,14 +15,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toPlaceWithStats } from '@/transformers/place';
-import type {
-    PlaceCreateInput,
-    PlaceSearchOptions,
-    PlaceUpdateInput,
-    PlaceWithStats
-} from '@/types/entities/place';
-import { asc, count, eq } from 'drizzle-orm';
-import * as crypto from 'crypto';
+import type { PlaceCreateInput, PlaceSearchOptions, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 const placeLogger = serverLogger.withContext('PlaceService');
 
@@ -32,8 +27,6 @@ const createPlaceError = (
 ) => {
 	return createEntityErrorObject('PlaceError', message, code, cause);
 };
-
-
 
 /**
  * Obtiene todos los places con opciones de búsqueda
@@ -192,42 +185,45 @@ export async function createPlace(input: PlaceCreateInput): Promise<PlaceWithSta
 		placeLogger.info('📝 Creando place:', input.name);
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(places).values({
-			id: crypto.randomUUID(),
-			name: input.name,
-			description: input.description || null,
-			emoji: input.emoji || '🌍',
-			color: input.color || '#3b82f6',
-			shortcut: input.shortcut || null,
-			category: input.category || null,
-			location: input.location || null,
-			coordinates: input.coordinates || null,
-			climate: input.climate || null,
-			terrain: input.terrain || null,
-			population: input.population || null,
-			government: input.government || null,
-			economy: input.economy || null,
-			culture: input.culture || null,
-			history: input.history || null,
-			geography: input.geography || null,
-			landmarks: input.landmarks || null,
-			resources: input.resources || null,
-			threats: input.threats || null,
-			allies: input.allies || null,
-			enemies: input.enemies || null,
-			secrets: input.secrets || null,
-			rumors: input.rumors || null,
-			hooks: input.hooks || null,
-			notes: input.notes || null,
-			size: input.size || null,
-			importance: input.importance || null,
-			sortBy: input.sortBy || null,
-			filters: input.filters || null,
-			featuredImage: input.featuredImage || null,
-			isFavorite: input.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(places)
+			.values({
+				id: crypto.randomUUID(),
+				name: input.name,
+				description: input.description || null,
+				emoji: input.emoji || '🌍',
+				color: input.color || '#3b82f6',
+				shortcut: input.shortcut || null,
+				category: input.category || null,
+				location: input.location || null,
+				coordinates: input.coordinates || null,
+				climate: input.climate || null,
+				terrain: input.terrain || null,
+				population: input.population || null,
+				government: input.government || null,
+				economy: input.economy || null,
+				culture: input.culture || null,
+				history: input.history || null,
+				geography: input.geography || null,
+				landmarks: input.landmarks || null,
+				resources: input.resources || null,
+				threats: input.threats || null,
+				allies: input.allies || null,
+				enemies: input.enemies || null,
+				secrets: input.secrets || null,
+				rumors: input.rumors || null,
+				hooks: input.hooks || null,
+				notes: input.notes || null,
+				size: input.size || null,
+				importance: input.importance || null,
+				sortBy: input.sortBy || null,
+				filters: input.filters || null,
+				featuredImage: input.featuredImage || null,
+				isFavorite: input.isFavorite || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newPlace = result[0];
 
@@ -300,9 +296,7 @@ export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<
 		if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
 		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
 
-		await db.update(places)
-			.set(updateData)
-			.where(eq(places.id, id));
+		await db.update(places).set(updateData).where(eq(places.id, id));
 
 		// Emitir eventos
 		await emit({
@@ -375,10 +369,7 @@ export async function deletePlace(id: string): Promise<boolean> {
 export async function placeExists(id: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(places)
-			.where(eq(places.id, id));
+		const result = await db.select({ count: count() }).from(places).where(eq(places.id, id));
 
 		return result[0]?.count > 0;
 	} catch (error) {
@@ -394,9 +385,7 @@ export async function getPlaceCount(filters?: PlaceSearchOptions): Promise<numbe
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		// Por ahora, conteo simple sin filtros complejos
-		const result = await db
-			.select({ count: count() })
-			.from(places);
+		const result = await db.select({ count: count() }).from(places);
 
 		return result[0]?.count || 0;
 	} catch (error) {

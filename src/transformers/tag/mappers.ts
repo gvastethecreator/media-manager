@@ -6,7 +6,7 @@
  */
 
 import { calculateCompleteness } from '@/lib/utils/transformers';
-import { TagStatistics, TagWithStats, TagWithCounts } from '@/types/entities/tag';
+import { TagStatistics, TagWithCounts, TagWithStats } from '@/types/entities/tag';
 
 /**
  * Convierte un objeto Tag de Drizzle (con conteos) a un objeto TagWithStats.

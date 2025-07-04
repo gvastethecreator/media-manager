@@ -1,10 +1,11 @@
 // Drizzle imports
-import { db } from '@/lib/drizzle';
-import { folders, images, videos } from '@/lib/drizzle/schema';
+
+import * as crypto from 'crypto';
 import { asc, count, desc, eq } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
-import * as crypto from 'crypto';
+import { db } from '@/lib/drizzle';
+import { folders, images, videos } from '@/lib/drizzle/schema';
 
 const router = Router();
 
@@ -96,24 +97,27 @@ router.get('/:id', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await db.select({
-			id: folders.id,
-			name: folders.name,
-			description: folders.description,
-			path: folders.path,
-			emoji: folders.emoji,
-			color: folders.color,
-			featuredImage: folders.featuredImage,
-			isFavorite: folders.isFavorite,
-			totalFiles: folders.totalFiles,
-			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
-			lastIndexed: folders.lastIndexed,
-			createdAt: folders.createdAt,
-			updatedAt: folders.updatedAt,
-			parentId: folders.parentId,
-			presetId: folders.presetId,
-		}).from(folders).where(eq(folders.id, id));
+		const folder = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			})
+			.from(folders)
+			.where(eq(folders.id, id));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
@@ -152,40 +156,43 @@ router.post('/', async (req, res) => {
 			});
 		}
 
-		const newFolder = await db.insert(folders).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description,
-			path: data.path,
-			emoji: data.emoji,
-			color: data.color,
-			featuredImage: data.featuredImage,
-			isFavorite: data.isFavorite || false,
-			autoReindex: data.autoReindex,
-			totalFiles: 0,
-			totalSize: 0,
-			parentId: data.parentId,
-			presetId: data.presetId,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning({
-			id: folders.id,
-			name: folders.name,
-			description: folders.description,
-			path: folders.path,
-			emoji: folders.emoji,
-			color: folders.color,
-			featuredImage: folders.featuredImage,
-			isFavorite: folders.isFavorite,
-			totalFiles: folders.totalFiles,
-			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
-			lastIndexed: folders.lastIndexed,
-			createdAt: folders.createdAt,
-			updatedAt: folders.updatedAt,
-			parentId: folders.parentId,
-			presetId: folders.presetId,
-		});
+		const newFolder = await db
+			.insert(folders)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description,
+				path: data.path,
+				emoji: data.emoji,
+				color: data.color,
+				featuredImage: data.featuredImage,
+				isFavorite: data.isFavorite || false,
+				autoReindex: data.autoReindex,
+				totalFiles: 0,
+				totalSize: 0,
+				parentId: data.parentId,
+				presetId: data.presetId,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
 
 		res.status(201).json(newFolder);
 	} catch (error) {
@@ -224,33 +231,37 @@ router.put('/:id', async (req, res) => {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
 		}
 
-		const updatedFolder = await db.update(folders).set({
-			...(data.name && { name: data.name }),
-			...(data.description !== undefined && { description: data.description }),
-			...(data.emoji !== undefined && { emoji: data.emoji }),
-			...(data.color !== undefined && { color: data.color }),
-			...(data.featuredImage !== undefined && { featuredImage: data.featuredImage }),
-			...(data.isFavorite !== undefined && { isFavorite: data.isFavorite }),
-			...(data.parentId !== undefined && { parentId: data.parentId }),
-			...(data.presetId !== undefined && { presetId: data.presetId }),
-		}).where(eq(folders.id, id)).returning({
-			id: folders.id,
-			name: folders.name,
-			description: folders.description,
-			path: folders.path,
-			emoji: folders.emoji,
-			color: folders.color,
-			featuredImage: folders.featuredImage,
-			isFavorite: folders.isFavorite,
-			totalFiles: folders.totalFiles,
-			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
-			lastIndexed: folders.lastIndexed,
-			createdAt: folders.createdAt,
-			updatedAt: folders.updatedAt,
-			parentId: folders.parentId,
-			presetId: folders.presetId,
-		});
+		const updatedFolder = await db
+			.update(folders)
+			.set({
+				...(data.name && { name: data.name }),
+				...(data.description !== undefined && { description: data.description }),
+				...(data.emoji !== undefined && { emoji: data.emoji }),
+				...(data.color !== undefined && { color: data.color }),
+				...(data.featuredImage !== undefined && { featuredImage: data.featuredImage }),
+				...(data.isFavorite !== undefined && { isFavorite: data.isFavorite }),
+				...(data.parentId !== undefined && { parentId: data.parentId }),
+				...(data.presetId !== undefined && { presetId: data.presetId }),
+			})
+			.where(eq(folders.id, id))
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
 
 		res.json(updatedFolder);
 	} catch (error) {
@@ -314,7 +325,12 @@ router.get('/:id/recent-images', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folderImages = await db.select({ thumbnailUrl: images.thumbnailUrl }).from(images).where(eq(images.folderId, id)).orderBy(desc(images.createdAt)).limit(limit);
+		const folderImages = await db
+			.select({ thumbnailUrl: images.thumbnailUrl })
+			.from(images)
+			.where(eq(images.folderId, id))
+			.orderBy(desc(images.createdAt))
+			.limit(limit);
 
 		const imageUrls = folderImages.map((img) => img.thumbnailUrl).filter((url): url is string => url !== null);
 		res.json(imageUrls);
@@ -336,12 +352,17 @@ router.get('/:id/stats', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await db.select({
-			totalSize: folders.totalSize,
-			lastIndexed: folders.lastIndexed,
-			totalImages: count(images.id).from(images).where(eq(images.folderId, id)),
-			totalVideos: count(videos.id).from(videos).where(eq(videos.folderId, id)),
-		}).from(folders).leftJoin(images, eq(folders.id, images.folderId)).leftJoin(videos, eq(folders.id, videos.folderId)).where(eq(folders.id, id));
+		const folder = await db
+			.select({
+				totalSize: folders.totalSize,
+				lastIndexed: folders.lastIndexed,
+				totalImages: count(images.id).from(images).where(eq(images.folderId, id)),
+				totalVideos: count(videos.id).from(videos).where(eq(videos.folderId, id)),
+			})
+			.from(folders)
+			.leftJoin(images, eq(folders.id, images.folderId))
+			.leftJoin(videos, eq(folders.id, videos.folderId))
+			.where(eq(folders.id, id));
 
 		if (!folder) {
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
@@ -487,24 +508,28 @@ router.patch('/:id/featured-image', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db.update(folders).set({ featuredImage: imageUrl }).where(eq(folders.id, id)).returning({
-			id: folders.id,
-			name: folders.name,
-			description: folders.description,
-			path: folders.path,
-			emoji: folders.emoji,
-			color: folders.color,
-			featuredImage: folders.featuredImage,
-			isFavorite: folders.isFavorite,
-			totalFiles: folders.totalFiles,
-			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
-			lastIndexed: folders.lastIndexed,
-			createdAt: folders.createdAt,
-			updatedAt: folders.updatedAt,
-			parentId: folders.parentId,
-			presetId: folders.presetId,
-		});
+		const updatedFolder = await db
+			.update(folders)
+			.set({ featuredImage: imageUrl })
+			.where(eq(folders.id, id))
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
 		res.json(updatedFolder);
 	} catch (error) {
 		console.error('Error al actualizar la imagen destacada de la carpeta:', error);
@@ -639,24 +664,28 @@ router.patch('/:id/description', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db.update(folders).set({ description: description }).where(eq(folders.id, id)).returning({
-			id: folders.id,
-			name: folders.name,
-			description: folders.description,
-			path: folders.path,
-			emoji: folders.emoji,
-			color: folders.color,
-			featuredImage: folders.featuredImage,
-			isFavorite: folders.isFavorite,
-			totalFiles: folders.totalFiles,
-			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
-			lastIndexed: folders.lastIndexed,
-			createdAt: folders.createdAt,
-			updatedAt: folders.updatedAt,
-			parentId: folders.parentId,
-			presetId: folders.presetId,
-		});
+		const updatedFolder = await db
+			.update(folders)
+			.set({ description: description })
+			.where(eq(folders.id, id))
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
 		res.json(updatedFolder);
 	} catch (error) {
 		console.error('Error al actualizar la descripción de la carpeta:', error);
@@ -715,24 +744,28 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db.update(folders).set({ autoReindex: autoReindex }).where(eq(folders.id, id)).returning({
-			id: folders.id,
-			name: folders.name,
-			description: folders.description,
-			path: folders.path,
-			emoji: folders.emoji,
-			color: folders.color,
-			featuredImage: folders.featuredImage,
-			isFavorite: folders.isFavorite,
-			totalFiles: folders.totalFiles,
-			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
-			lastIndexed: folders.lastIndexed,
-			createdAt: folders.createdAt,
-			updatedAt: folders.updatedAt,
-			parentId: folders.parentId,
-			presetId: folders.presetId,
-		});
+		const updatedFolder = await db
+			.update(folders)
+			.set({ autoReindex: autoReindex })
+			.where(eq(folders.id, id))
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
 		res.json(updatedFolder);
 	} catch (error) {
 		console.error('Error al actualizar el estado de auto-reindexación de la carpeta:', error);
@@ -744,4 +777,3 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 });
 
 export { router as foldersRouter };
-

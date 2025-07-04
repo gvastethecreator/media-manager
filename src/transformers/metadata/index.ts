@@ -7,11 +7,11 @@ import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataBase, MetadataExtended } from '@/types/entities/metadata';
 import {
 	fromDrizzleMetadata,
-	mapCreateInputToDrizzle,
-	mapUpdateInputToDrizzle,
 	// Alias legacy
 	fromPrismaMetadata,
+	mapCreateInputToDrizzle,
 	mapCreateInputToPrisma,
+	mapUpdateInputToDrizzle,
 	mapUpdateInputToPrisma,
 } from './mappers';
 

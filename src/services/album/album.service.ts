@@ -5,9 +5,9 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { albums, images, imageAlbums } from '@/lib/drizzle/schema';
+import { albums, imageAlbums, images } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { toAlbumWithStats } from '@/transformers/album';
@@ -66,7 +66,6 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 
 		const rawAlbum = drizzleAlbum[0];
 
-		
 		const transformedAlbum = {
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
@@ -115,12 +114,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		const conditions: any[] = [];
 
 		if (search) {
-			conditions.push(
-				or(
-					like(albums.name, `%${search}%`),
-					like(albums.description, `%${search}%`)
-				)
-			);
+			conditions.push(or(like(albums.name, `%${search}%`), like(albums.description, `%${search}%`)));
 		}
 
 		// Determinar el ordenamiento
@@ -217,19 +211,22 @@ export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStat
 	try {
 		logger.info('📝 Creando nuevo álbum', { name: data.name });
 
-		const [newAlbum] = await db.insert(albums).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			emoji: data.emoji || '📸',
-			color: data.color || '#3b82f6',
-			description: data.description || null,
-			shortcut: data.shortcut || null,
-			category: data.category || 'general',
-			sortBy: data.sortBy || 'name',
-			filters: data.filters || '[]',
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
-		}).returning();
+		const [newAlbum] = await db
+			.insert(albums)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				emoji: data.emoji || '📸',
+				color: data.color || '#3b82f6',
+				description: data.description || null,
+				shortcut: data.shortcut || null,
+				category: data.category || 'general',
+				sortBy: data.sortBy || 'name',
+				filters: data.filters || '[]',
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+			})
+			.returning();
 
 		// Revalidar rutas
 		for (const path of REVALIDATE_PATHS) {
@@ -267,19 +264,23 @@ export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<A
 	try {
 		logger.info(`🔄 Actualizando álbum: ${id}`, { data });
 
-		const [updatedAlbum] = await db.update(albums).set({
-			name: data.name,
-			emoji: data.emoji,
-			color: data.color,
-			description: data.description,
-			shortcut: data.shortcut,
-			category: data.category,
-			sortBy: data.sortBy,
-			filters: data.filters,
-			featuredImage: data.featuredImage,
-			isFavorite: data.isFavorite,
-			updatedAt: sql`(strftime('%s', 'now'))`,
-		}).where(eq(albums.id, id)).returning();
+		const [updatedAlbum] = await db
+			.update(albums)
+			.set({
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description,
+				shortcut: data.shortcut,
+				category: data.category,
+				sortBy: data.sortBy,
+				filters: data.filters,
+				featuredImage: data.featuredImage,
+				isFavorite: data.isFavorite,
+				updatedAt: sql`(strftime('%s', 'now'))`,
+			})
+			.where(eq(albums.id, id))
+			.returning();
 
 		// Revalidar rutas
 		for (const path of REVALIDATE_PATHS) {
@@ -339,14 +340,16 @@ export async function getAlbumImages(albumId: string): Promise<{ id: string; nam
 	try {
 		logger.info(`🖼️ Obteniendo imágenes del álbum: ${albumId}`);
 
-		const imagesData = await db.select({
-			id: images.id,
-			name: images.name,
-			path: images.path,
-		}).from(images)
-		.innerJoin(imageAlbums, eq(images.id, imageAlbums.A))
-		.where(eq(imageAlbums.B, albumId))
-		.orderBy(desc(images.createdAt));
+		const imagesData = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+			})
+			.from(images)
+			.innerJoin(imageAlbums, eq(images.id, imageAlbums.A))
+			.where(eq(imageAlbums.B, albumId))
+			.orderBy(desc(images.createdAt));
 
 		logger.info(`✅ Obtenidas ${imagesData.length} imágenes del álbum ${albumId}`);
 		return imagesData;

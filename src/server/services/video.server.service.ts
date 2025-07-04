@@ -1,10 +1,10 @@
-import { db } from '@/lib/drizzle';
-import { folders, videos } from '@/lib/drizzle/schema';
+import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { z } from 'zod';
+import { db } from '@/lib/drizzle';
+import { folders, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
-import * as crypto from 'crypto';
 
 const SERVICE_NAME = 'VideoServerService';
 const videoLogger = serverLogger.withContext(SERVICE_NAME);
@@ -59,7 +59,7 @@ const VideoFiltersSchema = z.object({
 });
 
 // Función auxiliar para crear errores de video
-const createVideoError = (message: string, code: string = 'VIDEO_ERROR') => {
+const createVideoError = (message: string, code = 'VIDEO_ERROR') => {
 	return new Error(`[${code}] ${message}`);
 };
 
@@ -81,61 +81,59 @@ export async function getVideos(filters: z.infer<typeof VideoFiltersSchema>) {
 
 		// Búsqueda por texto
 		if (filters.search) {
-			conditions.push(
-				or(
-					like(videos.name, `%${filters.search}%`),
-					like(videos.description, `%${filters.search}%`)
-				)
-			);
+			conditions.push(or(like(videos.name, `%${filters.search}%`), like(videos.description, `%${filters.search}%`)));
 		}
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 		// Determinar orden
-		const orderByClause = filters.sortOrder === 'desc'
-			? desc(videos[filters.sortBy || 'name'] as any)
-			: asc(videos[filters.sortBy || 'name'] as any);
+		const orderByClause =
+			filters.sortOrder === 'desc'
+				? desc(videos[filters.sortBy || 'name'] as any)
+				: asc(videos[filters.sortBy || 'name'] as any);
 
 		// Ejecutar consultas en paralelo
 		const [videoResults, totalCount] = await Promise.all([
-			db.select({
-				id: videos.id,
-				name: videos.name,
-				description: videos.description,
-				path: videos.path,
-				hash: videos.hash,
-				size: videos.size,
-				duration: videos.duration,
-				width: videos.width,
-				height: videos.height,
-				metadata: videos.metadata,
-				thumbnail: videos.thumbnail,
-				thumbnailSize: videos.thumbnailSize,
-				thumbnailWidth: videos.thumbnailWidth,
-				thumbnailHeight: videos.thumbnailHeight,
-				isPublic: videos.isPublic,
-				isFavorite: videos.isFavorite,
-				folderId: videos.folderId,
-				createdAt: videos.createdAt,
-				updatedAt: videos.updatedAt,
-				// Incluir datos de folder
-				folder: {
-					id: folders.id,
-					name: folders.name,
-					path: folders.path
-				}
-			})
-			.from(videos)
-			.leftJoin(folders, eq(videos.folderId, folders.id))
-			.where(whereClause)
-			.orderBy(orderByClause)
-			.limit(filters.limit || 20)
-			.offset(filters.offset || 0),
+			db
+				.select({
+					id: videos.id,
+					name: videos.name,
+					description: videos.description,
+					path: videos.path,
+					hash: videos.hash,
+					size: videos.size,
+					duration: videos.duration,
+					width: videos.width,
+					height: videos.height,
+					metadata: videos.metadata,
+					thumbnail: videos.thumbnail,
+					thumbnailSize: videos.thumbnailSize,
+					thumbnailWidth: videos.thumbnailWidth,
+					thumbnailHeight: videos.thumbnailHeight,
+					isPublic: videos.isPublic,
+					isFavorite: videos.isFavorite,
+					folderId: videos.folderId,
+					createdAt: videos.createdAt,
+					updatedAt: videos.updatedAt,
+					// Incluir datos de folder
+					folder: {
+						id: folders.id,
+						name: folders.name,
+						path: folders.path,
+					},
+				})
+				.from(videos)
+				.leftJoin(folders, eq(videos.folderId, folders.id))
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(filters.limit || 20)
+				.offset(filters.offset || 0),
 
-			db.select({ count: count() })
-			.from(videos)
-			.where(whereClause)
-			.then(result => result[0]?.count || 0)
+			db
+				.select({ count: count() })
+				.from(videos)
+				.where(whereClause)
+				.then((result) => result[0]?.count || 0),
 		]);
 
 		return {
@@ -159,37 +157,38 @@ export async function getVideos(filters: z.infer<typeof VideoFiltersSchema>) {
 
 export async function getVideoById(id: string) {
 	try {
-		const videoResult = await db.select({
-			id: videos.id,
-			name: videos.name,
-			description: videos.description,
-			path: videos.path,
-			hash: videos.hash,
-			size: videos.size,
-			duration: videos.duration,
-			width: videos.width,
-			height: videos.height,
-			metadata: videos.metadata,
-			thumbnail: videos.thumbnail,
-			thumbnailSize: videos.thumbnailSize,
-			thumbnailWidth: videos.thumbnailWidth,
-			thumbnailHeight: videos.thumbnailHeight,
-			isPublic: videos.isPublic,
-			isFavorite: videos.isFavorite,
-			folderId: videos.folderId,
-			createdAt: videos.createdAt,
-			updatedAt: videos.updatedAt,
-			// Incluir datos de folder
-			folder: {
-				id: folders.id,
-				name: folders.name,
-				path: folders.path
-			}
-		})
-		.from(videos)
-		.leftJoin(folders, eq(videos.folderId, folders.id))
-		.where(eq(videos.id, id))
-		.limit(1);
+		const videoResult = await db
+			.select({
+				id: videos.id,
+				name: videos.name,
+				description: videos.description,
+				path: videos.path,
+				hash: videos.hash,
+				size: videos.size,
+				duration: videos.duration,
+				width: videos.width,
+				height: videos.height,
+				metadata: videos.metadata,
+				thumbnail: videos.thumbnail,
+				thumbnailSize: videos.thumbnailSize,
+				thumbnailWidth: videos.thumbnailWidth,
+				thumbnailHeight: videos.thumbnailHeight,
+				isPublic: videos.isPublic,
+				isFavorite: videos.isFavorite,
+				folderId: videos.folderId,
+				createdAt: videos.createdAt,
+				updatedAt: videos.updatedAt,
+				// Incluir datos de folder
+				folder: {
+					id: folders.id,
+					name: folders.name,
+					path: folders.path,
+				},
+			})
+			.from(videos)
+			.leftJoin(folders, eq(videos.folderId, folders.id))
+			.where(eq(videos.id, id))
+			.limit(1);
 
 		if (!videoResult.length) {
 			throw createEntityNotFoundError('Video', id, SERVICE_NAME);
@@ -211,7 +210,7 @@ export async function getVideoById(id: string) {
 				wildcards: 0,
 				properties: 0,
 				groups: 0,
-			}
+			},
 		};
 
 		return video;
@@ -228,28 +227,31 @@ export async function createVideo(data: z.infer<typeof CreateVideoSchema>) {
 	try {
 		videoLogger.info('Creando nuevo video:', data.name);
 
-		const newVideo = await db.insert(videos).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description,
-			path: data.path,
-			size: data.size,
-			mimeType: data.mimeType,
-			duration: data.duration,
-			width: data.width,
-			height: data.height,
-			framerate: data.framerate,
-			bitrate: data.bitrate,
-			codec: data.codec,
-			format: data.format,
-			isHidden: data.isHidden || false,
-			isFavorite: data.isFavorite || false,
-			tags: data.tags || '[]',
-			notes: data.notes || '',
-			folderId: data.folderId,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const newVideo = await db
+			.insert(videos)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description,
+				path: data.path,
+				size: data.size,
+				mimeType: data.mimeType,
+				duration: data.duration,
+				width: data.width,
+				height: data.height,
+				framerate: data.framerate,
+				bitrate: data.bitrate,
+				codec: data.codec,
+				format: data.format,
+				isHidden: data.isHidden || false,
+				isFavorite: data.isFavorite || false,
+				tags: data.tags || '[]',
+				notes: data.notes || '',
+				folderId: data.folderId,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		videoLogger.info('Video creado exitosamente:', newVideo[0].id);
 		return newVideo[0];
@@ -266,7 +268,8 @@ export async function updateVideo(id: string, data: z.infer<typeof UpdateVideoSc
 	try {
 		videoLogger.info('Actualizando video:', id);
 
-		const updatedVideo = await db.update(videos)
+		const updatedVideo = await db
+			.update(videos)
 			.set({
 				name: data.name,
 				description: data.description,
@@ -309,9 +312,7 @@ export async function deleteVideo(id: string) {
 	try {
 		videoLogger.info('Eliminando video:', id);
 
-		const deletedVideo = await db.delete(videos)
-			.where(eq(videos.id, id))
-			.returning();
+		const deletedVideo = await db.delete(videos).where(eq(videos.id, id)).returning();
 
 		if (!deletedVideo.length) {
 			throw createEntityNotFoundError('Video', id, SERVICE_NAME);
@@ -333,15 +334,16 @@ export async function getVideoFormatStats() {
 		videoLogger.info('Obteniendo estadísticas de formato de video');
 
 		// Nota: Drizzle no tiene avg/sum directo, implementación manual temporal
-		const allVideos = await db.select({
-			format: videos.format,
-			size: videos.size,
-			duration: videos.duration,
-			width: videos.width,
-			height: videos.height,
-		})
-		.from(videos)
-		.where(eq(videos.format, videos.format)); // Solo videos con formato
+		const allVideos = await db
+			.select({
+				format: videos.format,
+				size: videos.size,
+				duration: videos.duration,
+				width: videos.width,
+				height: videos.height,
+			})
+			.from(videos)
+			.where(eq(videos.format, videos.format)); // Solo videos con formato
 
 		// Agrupar manualmente por formato
 		const formatGroups = allVideos.reduce((acc: any, video) => {
@@ -377,14 +379,16 @@ export async function getVideoFormatStats() {
 		}, {});
 
 		// Calcular promedios y convertir a array
-		const formatStats = Object.values(formatGroups).map((group: any) => ({
-			format: group.format,
-			count: group.count,
-			sumSize: group.sumSize,
-			avgDuration: group.validDuration > 0 ? group.sumDuration / group.validDuration : 0,
-			avgWidth: group.validWidth > 0 ? group.sumWidth / group.validWidth : 0,
-			avgHeight: group.validHeight > 0 ? group.sumHeight / group.validHeight : 0,
-		})).sort((a: any, b: any) => b.count - a.count); // Ordenar por count desc
+		const formatStats = Object.values(formatGroups)
+			.map((group: any) => ({
+				format: group.format,
+				count: group.count,
+				sumSize: group.sumSize,
+				avgDuration: group.validDuration > 0 ? group.sumDuration / group.validDuration : 0,
+				avgWidth: group.validWidth > 0 ? group.sumWidth / group.validWidth : 0,
+				avgHeight: group.validHeight > 0 ? group.sumHeight / group.validHeight : 0,
+			}))
+			.sort((a: any, b: any) => b.count - a.count); // Ordenar por count desc
 
 		videoLogger.info('Estadísticas de formato de video obtenidas exitosamente');
 		return formatStats;

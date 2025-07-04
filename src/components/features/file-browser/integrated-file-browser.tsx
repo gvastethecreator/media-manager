@@ -66,7 +66,7 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 	const allItemIds = useMemo(() => {
 		// En modo manual, usar los items proporcionados
 		if (mode === 'manual' && manualItems) {
-			return manualItems.map(item => item.id);
+			return manualItems.map((item) => item.id);
 		}
 
 		// En modo auto, obtener desde stores
@@ -78,9 +78,9 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 				switch (type) {
 					case 'image':
 						if (filterId && filterType === 'folder') {
-							allIds.push(...imageStore.getImagesByFolder(filterId).map(img => img.id));
+							allIds.push(...imageStore.getImagesByFolder(filterId).map((img) => img.id));
 						} else {
-							allIds.push(...imageStore.getSortedImages().map(img => img.id));
+							allIds.push(...imageStore.getSortedImages().map((img) => img.id));
 						}
 						break;
 					// TODO: Añadir otros casos según se implementen otros stores
@@ -95,10 +95,10 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 			case 'image':
 				// Si hay filtro por carpeta, usar getImagesByFolder
 				if (filterId && filterType === 'folder') {
-					return imageStore.getImagesByFolder(filterId).map(img => img.id);
+					return imageStore.getImagesByFolder(filterId).map((img) => img.id);
 				}
 				// De lo contrario, usar todas las imágenes ordenadas
-				return imageStore.getSortedImages().map(img => img.id);
+				return imageStore.getSortedImages().map((img) => img.id);
 			// TODO: Añadir otros casos según se implementen otros stores
 			default:
 				return [];

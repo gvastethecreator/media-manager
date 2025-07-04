@@ -3,16 +3,16 @@ import { serverLogger } from '@/lib/logger/server-logger';
 // Re-exportar TransformerError y otras clases de error relacionadas desde utils/transformers/errors
 // para mantener compatibilidad con el código existente
 export {
-    handleTransformerError,
-    MappingError,
-    MetadataError,
-    RelationError,
-    SearchError,
-    SerializationError,
-    TransformerError,
-    TypeMismatchError,
-    UIError,
-    ValidationError
+	handleTransformerError,
+	MappingError,
+	MetadataError,
+	RelationError,
+	SearchError,
+	SerializationError,
+	TransformerError,
+	TypeMismatchError,
+	UIError,
+	ValidationError,
 } from '@/lib/utils/transformers/errors';
 
 const _errorLogger = serverLogger.withContext('ErrorHandler');

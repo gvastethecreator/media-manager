@@ -5,6 +5,8 @@
  * @updated 2025-01-27
  */
 
+import * as crypto from 'crypto';
+import { count, desc, eq } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { characters } from '@/lib/drizzle/schema';
@@ -14,13 +16,11 @@ import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCharacter, fromDrizzleCharacters } from '@/transformers/character/transformer';
 import type {
-    CharacterCreateInput,
-    CharacterSearchOptions,
-    CharacterUpdateInput,
-    CharacterWithStats,
+	CharacterCreateInput,
+	CharacterSearchOptions,
+	CharacterUpdateInput,
+	CharacterWithStats,
 } from '@/types/entities/character';
-import { count, desc, eq } from 'drizzle-orm';
-import * as crypto from 'crypto';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CharacterService');
@@ -35,8 +35,6 @@ export const CHARACTER_EVENTS = {
 	DELETED: 'character:deleted',
 	STATS_UPDATED: 'character:stats:updated',
 } as const;
-
-
 
 // Tipos de entrada
 export interface GetCharactersResult {
@@ -157,7 +155,6 @@ export async function getCharacter(id: string): Promise<CharacterWithStats | nul
 
 		const rawCharacter = drizzleCharacter[0];
 
-
 		const transformedCharacter = {
 			...rawCharacter,
 			isFavorite: Boolean(rawCharacter.isFavorite),
@@ -242,7 +239,6 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			.from(characters)
 			.orderBy(desc(characters.createdAt));
 
-
 		const transformedCharacters = drizzleCharacters.map((rawCharacter) => ({
 			...rawCharacter,
 			isFavorite: Boolean(rawCharacter.isFavorite),
@@ -292,37 +288,40 @@ export async function createCharacter(data: CharacterCreateInput): Promise<Chara
 		logger.info('📝 Creando nuevo personaje', { name: data.name });
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(characters).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description || null,
-			emoji: data.emoji || '👤',
-			color: data.color || '#3b82f6',
-			shortcut: data.shortcut || null,
-			category: data.category || null,
-			level: data.level || null,
-			class: data.class || null,
-			race: data.race || null,
-			type: data.type || null,
-			alignment: data.alignment || null,
-			backstory: data.backstory || null,
-			stats: data.stats || null,
-			psychologicalProfile: data.psychologicalProfile || null,
-			socialProfile: data.socialProfile || null,
-			relationships: data.relationships || null,
-			goals: data.goals || null,
-			fears: data.fears || null,
-			beliefs: data.beliefs || null,
-			personality: data.personality || null,
-			skills: data.skills || null,
-			abilities: data.abilities || null,
-			sortBy: data.sortBy || null,
-			filters: data.filters || null,
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(characters)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description || null,
+				emoji: data.emoji || '👤',
+				color: data.color || '#3b82f6',
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				level: data.level || null,
+				class: data.class || null,
+				race: data.race || null,
+				type: data.type || null,
+				alignment: data.alignment || null,
+				backstory: data.backstory || null,
+				stats: data.stats || null,
+				psychologicalProfile: data.psychologicalProfile || null,
+				socialProfile: data.socialProfile || null,
+				relationships: data.relationships || null,
+				goals: data.goals || null,
+				fears: data.fears || null,
+				beliefs: data.beliefs || null,
+				personality: data.personality || null,
+				skills: data.skills || null,
+				abilities: data.abilities || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newCharacter = result[0];
 
@@ -401,9 +400,7 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
 		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
-		await db.update(characters)
-			.set(updateData)
-			.where(eq(characters.id, id));
+		await db.update(characters).set(updateData).where(eq(characters.id, id));
 
 		// Obtener el personaje actualizado con estadísticas
 		const updatedCharacter = await getCharacter(id);
@@ -489,10 +486,11 @@ export async function toggleCharacterFavorite(id: string): Promise<CharacterWith
 
 		const newFavoriteState = !currentCharacter[0].isFavorite;
 
-		await db.update(characters)
+		await db
+			.update(characters)
 			.set({
 				isFavorite: newFavoriteState,
-				updatedAt: new Date()
+				updatedAt: new Date(),
 			})
 			.where(eq(characters.id, id));
 

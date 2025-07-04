@@ -1,8 +1,8 @@
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
+import { usePlace, useRecentPlaceMedia } from '@/lib/api/places';
 import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
-import { usePlace, useRecentPlaceMedia } from '@/lib/api/places';
 import { PlaceCardContent } from './place-card-content';
 import { PlaceCardFooter } from './place-card-footer';
 import { PlaceCardHeader } from './place-card-header';

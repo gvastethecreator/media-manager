@@ -1,13 +1,12 @@
+import { and, count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema';
-import { eq, and, not, isNull, desc, sql, sum, count } from 'drizzle-orm';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto
-import type { ProcessOptions } from '@/types/thumbnails';
-import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
+import type { LastProcessedThumbnail, ProcessOptions, ThumbnailStats } from '@/types/thumbnails';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
@@ -101,9 +100,12 @@ export async function getThumbnail(
 		if (!image.path || !existsSync(image.path)) {
 			const error = `Archivo no encontrado en ruta: ${image.path}`;
 			// Registrar el error en la base de datos
-			await db.update(images).set({
-				thumbnailError: error,
-			}).where(eq(images.id, id));
+			await db
+				.update(images)
+				.set({
+					thumbnailError: error,
+				})
+				.where(eq(images.id, id));
 			thumbLogger.error(`❌ ${error}`);
 			return {
 				thumbnailUrl: '',
@@ -122,14 +124,17 @@ export async function getThumbnail(
 			}
 
 			// Actualizar la imagen con el nuevo thumbnail
-			await db.update(images).set({
-				thumbnail: thumbnail.buffer,
-				thumbnailSize: thumbnail.buffer.length,
-				thumbnailWidth: thumbnail.width,
-				thumbnailHeight: thumbnail.height,
-				thumbnailError: null, // Limpiar error previo si existía
-				thumbnailMimeType: `image/${thumbnail.format}`,
-			}).where(eq(images.id, id));
+			await db
+				.update(images)
+				.set({
+					thumbnail: thumbnail.buffer,
+					thumbnailSize: thumbnail.buffer.length,
+					thumbnailWidth: thumbnail.width,
+					thumbnailHeight: thumbnail.height,
+					thumbnailError: null, // Limpiar error previo si existía
+					thumbnailMimeType: `image/${thumbnail.format}`,
+				})
+				.where(eq(images.id, id));
 
 			thumbLogger.info('✅ Nuevo thumbnail generado (servido por API):', {
 				id,
@@ -148,9 +153,12 @@ export async function getThumbnail(
 		} catch (genError) {
 			// Registrar el error en la imagen
 			const errorMessage = genError instanceof Error ? genError.message : 'Error desconocido';
-			await db.update(images).set({
-				thumbnailError: errorMessage,
-			}).where(eq(images.id, id));
+			await db
+				.update(images)
+				.set({
+					thumbnailError: errorMessage,
+				})
+				.where(eq(images.id, id));
 
 			thumbLogger.error('❌ Error generando thumbnail:', genError);
 			return {
@@ -241,7 +249,10 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 
 		const [totalFilesResult, withThumbnailResult, pendingResult, errorsData, totalSizeResult] = await Promise.all([
 			db.select({ count: count() }).from(images),
-			db.select({ count: count() }).from(images).where(not(isNull(images.thumbnail))),
+			db
+				.select({ count: count() })
+				.from(images)
+				.where(not(isNull(images.thumbnail))),
 			db.select({ count: count() }).from(images).where(isNull(images.thumbnail)),
 			db.query.images.findMany({
 				where: not(isNull(images.thumbnailError)),
@@ -252,7 +263,10 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 					updatedAt: true,
 				},
 			}),
-			db.select({ totalSize: sum(images.thumbnailSize) }).from(images).where(not(isNull(images.thumbnailSize))),
+			db
+				.select({ totalSize: sum(images.thumbnailSize) })
+				.from(images)
+				.where(not(isNull(images.thumbnailSize))),
 		]);
 
 		const totalFiles = totalFilesResult[0].count;
@@ -326,14 +340,17 @@ export async function deleteThumbnail(imageId: string): Promise<{ success: boole
 			return { success: true, message: 'Thumbnail no existe para esta imagen' };
 		}
 
-		await db.update(images).set({
-			thumbnail: null,
-			thumbnailSize: null,
-			thumbnailWidth: null,
-			thumbnailHeight: null,
-			thumbnailMimeType: null,
-			thumbnailError: null,
-		}).where(eq(images.id, imageId));
+		await db
+			.update(images)
+			.set({
+				thumbnail: null,
+				thumbnailSize: null,
+				thumbnailWidth: null,
+				thumbnailHeight: null,
+				thumbnailMimeType: null,
+				thumbnailError: null,
+			})
+			.where(eq(images.id, imageId));
 
 		thumbLogger.info(`✅ Thumbnail eliminado para imagen: ${imageId}`);
 		return { success: true, message: 'Thumbnail eliminado exitosamente' };

@@ -22,7 +22,6 @@ export type {
 	// Alias para retrocompatibilidad
 	NoteWithStats as Note,
 	NoteWithStats,
-	
 	RelatedNote,
 } from './types';
 

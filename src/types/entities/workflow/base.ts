@@ -2,32 +2,30 @@
  * 🗿 Modelo base de Workflow, directamente desde Drizzle.
  */
 export type WorkflowBase = {
-    id: string;
-    name: string;
-    description: string | null;
-    emoji: string | null;
-    color: string | null;
-    category: string | null;
-    isPublic: boolean;
-    isFavorite: boolean;
-    isActive: boolean;
-    version: string;
-    config: string | null;
-    steps: string | null;
-    triggers: string | null;
-    conditions: string | null;
-    actions: string | null;
-    schedule: string | null;
-    lastRun: Date | null;
-    nextRun: Date | null;
-    runCount: number;
-    successCount: number;
-    errorCount: number;
-    createdAt: Date;
-    updatedAt: Date;
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	isActive: boolean;
+	version: string;
+	config: string | null;
+	steps: string | null;
+	triggers: string | null;
+	conditions: string | null;
+	actions: string | null;
+	schedule: string | null;
+	lastRun: Date | null;
+	nextRun: Date | null;
+	runCount: number;
+	successCount: number;
+	errorCount: number;
+	createdAt: Date;
+	updatedAt: Date;
 };
-
-
 
 /**
  * 📊 Estadísticas calculadas para un Workflow.

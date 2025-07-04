@@ -42,17 +42,16 @@ async function testPropertyService() {
 		const searchResults = await propertyService.getProperties({
 			search: 'a',
 			orderBy: 'name',
-			orderDirection: 'asc'
+			orderDirection: 'asc',
 		});
 		console.log(`✅ Propiedades con 'a': ${searchResults.total}`);
 
 		// Probar solo favoritos
 		console.log('\n⭐ Probando filtro de favoritos...');
 		const favoriteResults = await propertyService.getProperties({
-			onlyFavorites: true
+			onlyFavorites: true,
 		});
 		console.log(`✅ Propiedades favoritas: ${favoriteResults.total}`);
-
 	} catch (error) {
 		console.error('❌ Error en PropertyService:', error);
 	}
@@ -93,24 +92,23 @@ async function testWildcardService() {
 		const searchResults = await wildcardService.getWildcards({
 			search: 'a',
 			orderBy: 'name',
-			orderDirection: 'asc'
+			orderDirection: 'asc',
 		});
 		console.log(`✅ Wildcards con 'a': ${searchResults.total}`);
 
 		// Probar solo favoritos
 		console.log('\n⭐ Probando filtro de favoritos...');
 		const favoriteResults = await wildcardService.getWildcards({
-			onlyFavorites: true
+			onlyFavorites: true,
 		});
 		console.log(`✅ Wildcards favoritos: ${favoriteResults.total}`);
 
 		// Probar filtro por parentId (raíz)
 		console.log('\n🌳 Probando wildcards raíz...');
 		const rootResults = await wildcardService.getWildcards({
-			parentId: null
+			parentId: null,
 		});
 		console.log(`✅ Wildcards raíz: ${rootResults.total}`);
-
 	} catch (error) {
 		console.error('❌ Error en WildcardService:', error);
 	}
