@@ -1,7 +1,7 @@
 {
   "name": "Image Manager E2E Tests",
   "settings": {
-    "baseURL": "http://localhost:5174",
+    "baseURL": "http://localhost:5173",
     "timeout": 30000,
     "viewport": {
       "width": 1280,

@@ -9,18 +9,27 @@ const emptyModule = resolve(__dirname, 'src/empty.ts');
 export default defineConfig({
 	plugins: [
 		react(),
-		tsconfigPaths(),
+		tsconfigPaths({
+			ignoreConfigErrors: true,
+		}),
 		svgr({
 			svgrOptions: {
 				icon: true,
 			},
 		}),
 	],
+	esbuild: {
+		target: 'esnext',
+	},
 	server: {
-		port: 5174,
+		port: 5173,
+		host: true,
+		hmr: {
+			port: 5175,
+		},
 		proxy: {
 			'/api': {
-				target: 'http://localhost:5173',
+				target: 'http://localhost:3001',
 				changeOrigin: true,
 				secure: false,
 			},

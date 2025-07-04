@@ -22,7 +22,7 @@
 
 ### Configuración Obligatoria (Solo cuando MCP esté disponible)
 
-- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (Frontend: 5174, Backend: 5173)
+- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (Frontend: 5173, Backend: 3001)
 - **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
 - **Scripts integrados** - Usar `pnpm test:e2e` (con logs automáticos) para testing formal
 - **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua cuando esté disponible
@@ -107,7 +107,7 @@
 pnpm dev                           # Servidor en 4444
 
 # 2. Validación continua con MCP
-# browser_navigate → http://localhost:5174
+# browser_navigate → http://localhost:5173
 # browser_snapshot → Revisar estructura
 # browser_console_messages → Detectar errores
 # browser_take_screenshot → Documentar estado
