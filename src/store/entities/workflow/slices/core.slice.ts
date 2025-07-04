@@ -6,7 +6,13 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
-import * as actions from '@/services/workflow/workflow.service';
+// Refactor 2025-07: ahora usamos cliente API en lugar de workflow.service
+import {
+    createWorkflowInApi,
+    deleteWorkflowFromApi,
+    getWorkflowsFromApi,
+    updateWorkflowInApi,
+} from '@/lib/api/client/workflow.client';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
 import type { WorkflowCoreActions, WorkflowCoreState, WorkflowStore } from '../types';
@@ -36,7 +42,7 @@ export const createWorkflowCoreSlice: StateCreator<
 		});
 
 		try {
-			const workflows = await actions.getWorkflows();
+                        const workflows = await getWorkflowsFromApi();
 			set((state) => {
 				state.workflows = workflows.reduce(
 					(acc, wf) => {
@@ -64,7 +70,7 @@ export const createWorkflowCoreSlice: StateCreator<
 
 	createWorkflow: async (data) => {
 		try {
-			await actions.createWorkflow(data);
+                        await createWorkflowInApi(data);
 			toastService.success(`Workflow "${data.name}" creado.`);
 			await get().loadWorkflows(); // Recargar para obtener el nuevo item con stats
 		} catch (error) {
@@ -76,7 +82,7 @@ export const createWorkflowCoreSlice: StateCreator<
 
 	updateWorkflow: async (id, data) => {
 		try {
-			await actions.updateWorkflow(id, data);
+                        await updateWorkflowInApi(id, data);
 			toastService.success('Workflow actualizado.');
 			await get().loadWorkflows(); // Recargar para obtener los datos actualizados
 		} catch (error) {
@@ -94,7 +100,7 @@ export const createWorkflowCoreSlice: StateCreator<
 			})
 		);
 		try {
-			await actions.deleteWorkflow(id);
+                        await deleteWorkflowFromApi(id);
 			toastService.success(`Workflow "${workflowName}" eliminado.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al eliminar el workflow.';
