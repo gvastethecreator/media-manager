@@ -5,7 +5,7 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 // Refactor 2025-07: ahora usamos cliente API en lugar de workflow.service
 import {
     createWorkflowInApi,

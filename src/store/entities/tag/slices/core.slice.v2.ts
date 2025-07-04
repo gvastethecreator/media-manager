@@ -11,7 +11,7 @@ import {
     getTagsFromApi,
     updateTagInApi,
 } from '@/lib/api/client/tag.client';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import { StateCreator } from 'zustand';
 import type { TagStore } from '../types';

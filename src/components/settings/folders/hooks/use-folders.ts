@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ErrorResponse, ProcessStatus } from '@/types/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { type ExtendedProcessStatus, initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
