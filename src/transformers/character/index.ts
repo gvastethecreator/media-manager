@@ -1,19 +1,18 @@
 /**
  * @file Punto de entrada para los transformadores de la entidad Character.
  * @module transformers/character
- * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Character.
+ * ✅ MIGRADO A DRIZZLE - Julio 2025
+ * 
+ * Estado de migración:
+ * - ✅ Mappers: Convertidos a tipos Drizzle
+ * - ✅ Serializers: Sin dependencias de Prisma
+ * - ✅ Transformer: Usando tipos locales
+ * - ✅ Documentación: Pendiente actualización
  */
 
-// De mappers.ts
-export {
-	mapCreateCharacterDataToDrizzle,
-	mapUpdateCharacterDataToDrizzle,
-	mapCharacterSearchOptionsToDrizzle,
-	// Alias de compatibilidad
-	mapCreateCharacterDataToPrisma,
-	mapUpdateCharacterDataToPrisma,
-	mapCharacterSearchOptionsToPrisma,
-} from './mappers';
-
-// De transformer.ts
-export { fromDrizzleCharacter, fromDrizzleCharacters } from './transformer';
+// Exportar todas las funciones de transformación
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';
+export * from './validators';
+export * from './schema';
