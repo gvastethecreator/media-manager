@@ -250,7 +250,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 ### Configuración Obligatoria
 
-- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 5173)
+- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (Frontend: 5174, Backend: 5173)
 - **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
 - **Scripts integrados** - Usar `bun run test:e2e` (con logs automáticos) para testing formal
 - **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua
@@ -331,7 +331,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 ```bash
 # 1. Iniciar desarrollo
-bun dev                            # Servidor en 5173
+bun dev                            # Frontend en 5174 + Backend en 5173
 
 # 2. Validación continua con MCP
 # browser_navigate → http://localhost:5173
