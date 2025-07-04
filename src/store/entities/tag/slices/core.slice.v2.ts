@@ -3,7 +3,7 @@
  * @module store/entities/tag/slices/core.slice
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
+import { StateCreator } from 'zustand';
 // Refactor 2025-07: se utiliza cliente de API en lugar de tag.service
 import {
     createTagInApi,
@@ -12,8 +12,10 @@ import {
     updateTagInApi,
 } from '@/lib/api/client/tag.client';
 import { toastService } from '@/lib/ui/toast';
+import { createTagInApi, deleteTagFromApi, getTagsFromApi, updateTagInApi } from '@/lib/api/client/tag.client';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
-import { StateCreator } from 'zustand';
 import type { TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
@@ -108,7 +110,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Cargando tags...');
 
-                        const tags = await getTagsFromApi();
+			const tags = await getTagsFromApi();
 
 			set({
 				tags: tagsToRecord(tags),
@@ -139,7 +141,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('➕ Creando tag:', data);
 
-                        const newTag = await createTagInApi(data);
+			const newTag = await createTagInApi(data);
 
 			if (!newTag) {
 				throw new Error('La acción del servidor no devolvió una etiqueta creada.');
@@ -172,7 +174,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Actualizando tag:', { id, data });
 
-                        const updatedTag = await updateTagInApi(id, data);
+			const updatedTag = await updateTagInApi(id, data);
 
 			set((state) => ({
 				tags: {
@@ -199,7 +201,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🗑️ Eliminando tag:', id);
 
-                        await deleteTagFromApi(id);
+			await deleteTagFromApi(id);
 
 			set((state) => {
 				const { [id]: deletedTag, ...remainingTags } = state.tags;

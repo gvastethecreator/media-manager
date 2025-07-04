@@ -1,10 +1,10 @@
 import { BookOpen, ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { useNote, useNoteCounts, useRecentNoteImages } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
 import type { NoteWithStats } from '@/types/entities/note';
 import { CardHeader } from '../card-header';
-import { useNote, useRecentNoteImages, useNoteCounts } from '@/lib/api/notes';
 import { NoteCardContent } from './note-card-content';
 import { NoteCardFooter } from './note-card-footer';
 import { NoteCardImages } from './note-card-images';
@@ -20,13 +20,7 @@ export interface NoteCardProps {
 /**
  * Card para mostrar una nota, con un diseño inspirado en cartas de TCG.
  */
-export function NoteCard({
-	noteId,
-	onClick,
-	className,
-	style,
-	tcgMode = true,
-}: NoteCardProps) {
+export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: NoteCardProps) {
 	const { data: note, isLoading, error } = useNote(noteId);
 	const { data: recentImagesData } = useRecentNoteImages(noteId);
 	const { data: noteCounts } = useNoteCounts(noteId);
@@ -156,7 +150,8 @@ export function NoteCard({
 				: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
 			...style,
 		}),
-		[primaryColor, secondaryColor, style, tcgMode]);
+		[primaryColor, secondaryColor, style, tcgMode]
+	);
 
 	// Render del componente
 	return (

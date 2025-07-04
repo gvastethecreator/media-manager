@@ -6,6 +6,8 @@
  * @updated 2025-07-01
  */
 
+import * as crypto from 'crypto';
+import { count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { file3Ds } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -13,9 +15,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleFile3D, fromDrizzleFile3Ds } from '@/transformers/file3d/transformer';
-import type { File3DWithStats, File3DCreateInput, File3DUpdateInput } from '@/types/entities/file3d';
-import { count, desc, eq } from 'drizzle-orm';
-import * as crypto from 'crypto';
+import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
 
 const file3dLogger = serverLogger.withContext('File3DService');
 
@@ -38,34 +38,34 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 
 		const drizzleFile3Ds = await db
 			.select({
-						id: file3Ds.id,
-		name: file3Ds.name,
-		description: file3Ds.description,
-		emoji: file3Ds.emoji,
-		color: file3Ds.color,
-		shortcut: file3Ds.shortcut,
-		category: file3Ds.category,
-		filePath: file3Ds.filePath,
-		fileName: file3Ds.fileName,
-		fileSize: file3Ds.fileSize,
-		mimeType: file3Ds.mimeType,
-		format: file3Ds.format,
-		vertices: file3Ds.vertices,
-		faces: file3Ds.faces,
-		materials: file3Ds.materials,
-		textures: file3Ds.textures,
-		animations: file3Ds.animations,
-		tags: file3Ds.tags,
-		metadata: file3Ds.metadata,
-		sortBy: file3Ds.sortBy,
-		filters: file3Ds.filters,
-		featuredImage: file3Ds.featuredImage,
-		isFavorite: file3Ds.isFavorite,
-		createdAt: file3Ds.createdAt,
-		updatedAt: file3Ds.updatedAt,
-	})
-	.from(file3Ds)
-	.orderBy(desc(file3Ds.createdAt));
+				id: file3Ds.id,
+				name: file3Ds.name,
+				description: file3Ds.description,
+				emoji: file3Ds.emoji,
+				color: file3Ds.color,
+				shortcut: file3Ds.shortcut,
+				category: file3Ds.category,
+				filePath: file3Ds.filePath,
+				fileName: file3Ds.fileName,
+				fileSize: file3Ds.fileSize,
+				mimeType: file3Ds.mimeType,
+				format: file3Ds.format,
+				vertices: file3Ds.vertices,
+				faces: file3Ds.faces,
+				materials: file3Ds.materials,
+				textures: file3Ds.textures,
+				animations: file3Ds.animations,
+				tags: file3Ds.tags,
+				metadata: file3Ds.metadata,
+				sortBy: file3Ds.sortBy,
+				filters: file3Ds.filters,
+				featuredImage: file3Ds.featuredImage,
+				isFavorite: file3Ds.isFavorite,
+				createdAt: file3Ds.createdAt,
+				updatedAt: file3Ds.updatedAt,
+			})
+			.from(file3Ds)
+			.orderBy(desc(file3Ds.createdAt));
 
 		// Transformar a formato compatible con Prisma
 		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D) => ({
@@ -90,34 +90,34 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 
 		const drizzleFile3D = await db
 			.select({
-						id: file3Ds.id,
-		name: file3Ds.name,
-		description: file3Ds.description,
-		emoji: file3Ds.emoji,
-		color: file3Ds.color,
-		shortcut: file3Ds.shortcut,
-		category: file3Ds.category,
-		filePath: file3Ds.filePath,
-		fileName: file3Ds.fileName,
-		fileSize: file3Ds.fileSize,
-		mimeType: file3Ds.mimeType,
-		format: file3Ds.format,
-		vertices: file3Ds.vertices,
-		faces: file3Ds.faces,
-		materials: file3Ds.materials,
-		textures: file3Ds.textures,
-		animations: file3Ds.animations,
-		tags: file3Ds.tags,
-		metadata: file3Ds.metadata,
-		sortBy: file3Ds.sortBy,
-		filters: file3Ds.filters,
-		featuredImage: file3Ds.featuredImage,
-		isFavorite: file3Ds.isFavorite,
-		createdAt: file3Ds.createdAt,
-		updatedAt: file3Ds.updatedAt,
-	})
-	.from(file3Ds)
-	.where(eq(file3Ds.id, id))
+				id: file3Ds.id,
+				name: file3Ds.name,
+				description: file3Ds.description,
+				emoji: file3Ds.emoji,
+				color: file3Ds.color,
+				shortcut: file3Ds.shortcut,
+				category: file3Ds.category,
+				filePath: file3Ds.filePath,
+				fileName: file3Ds.fileName,
+				fileSize: file3Ds.fileSize,
+				mimeType: file3Ds.mimeType,
+				format: file3Ds.format,
+				vertices: file3Ds.vertices,
+				faces: file3Ds.faces,
+				materials: file3Ds.materials,
+				textures: file3Ds.textures,
+				animations: file3Ds.animations,
+				tags: file3Ds.tags,
+				metadata: file3Ds.metadata,
+				sortBy: file3Ds.sortBy,
+				filters: file3Ds.filters,
+				featuredImage: file3Ds.featuredImage,
+				isFavorite: file3Ds.isFavorite,
+				createdAt: file3Ds.createdAt,
+				updatedAt: file3Ds.updatedAt,
+			})
+			.from(file3Ds)
+			.where(eq(file3Ds.id, id))
 			.limit(1);
 
 		if (drizzleFile3D.length === 0) {
@@ -148,36 +148,39 @@ export async function createFile3D(data: File3DCreateInput): Promise<File3DWithS
 		file3dLogger.info('📝 Creando archivo 3D:', data.name);
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(file3Ds).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			path: data.path,
-			size: data.size,
-			hash: data.hash,
-			mimeType: data.mimeType,
-			extension: data.extension,
-			folderId: data.folderId,
-			isFavorite: data.isFavorite || false,
-			isArchived: data.isArchived || false,
-			format: data.format || null,
-			version: data.version || null,
-			vertices: data.vertices || null,
-			faces: data.faces || null,
-			triangles: data.triangles || null,
-			materials: data.materials || null,
-			textures: data.textures || null,
-			animations: data.animations || null,
-			bones: data.bones || null,
-			scenes: data.scenes || null,
-			cameras: data.cameras || null,
-			lights: data.lights || null,
-			hasUV: data.hasUV || false,
-			hasNormals: data.hasNormals || false,
-			hasColors: data.hasColors || false,
-			boundingBox: data.boundingBox || null,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(file3Ds)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				path: data.path,
+				size: data.size,
+				hash: data.hash,
+				mimeType: data.mimeType,
+				extension: data.extension,
+				folderId: data.folderId,
+				isFavorite: data.isFavorite || false,
+				isArchived: data.isArchived || false,
+				format: data.format || null,
+				version: data.version || null,
+				vertices: data.vertices || null,
+				faces: data.faces || null,
+				triangles: data.triangles || null,
+				materials: data.materials || null,
+				textures: data.textures || null,
+				animations: data.animations || null,
+				bones: data.bones || null,
+				scenes: data.scenes || null,
+				cameras: data.cameras || null,
+				lights: data.lights || null,
+				hasUV: data.hasUV || false,
+				hasNormals: data.hasNormals || false,
+				hasColors: data.hasColors || false,
+				boundingBox: data.boundingBox || null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newFile3D = result[0];
 		const file3DWithStats = fromDrizzleFile3D(newFile3D as any);
@@ -236,9 +239,7 @@ export async function updateFile3D(id: string, data: File3DUpdateInput): Promise
 		if (data.hasColors !== undefined) updateData.hasColors = data.hasColors;
 		if (data.boundingBox !== undefined) updateData.boundingBox = data.boundingBox;
 
-		await db.update(file3Ds)
-			.set(updateData)
-			.where(eq(file3Ds.id, id));
+		await db.update(file3Ds).set(updateData).where(eq(file3Ds.id, id));
 
 		// Obtener el archivo 3D actualizado
 		const updatedFile3D = await getFile3DById(id);
@@ -305,10 +306,7 @@ export async function deleteFile3D(id: string): Promise<{ success: boolean }> {
 export async function file3DExists(id: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(file3Ds)
-			.where(eq(file3Ds.id, id));
+		const result = await db.select({ count: count() }).from(file3Ds).where(eq(file3Ds.id, id));
 
 		return result[0]?.count > 0;
 	} catch (error) {
@@ -323,9 +321,7 @@ export async function file3DExists(id: string): Promise<boolean> {
 export async function getFile3DCount(): Promise<number> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(file3Ds);
+		const result = await db.select({ count: count() }).from(file3Ds);
 
 		return result[0]?.count || 0;
 	} catch (error) {

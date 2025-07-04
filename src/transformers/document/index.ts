@@ -7,30 +7,27 @@
 
 // --- Transformadores principales ---
 export { toDocumentWithStats, toDocumentWithStatsList } from './mappers';
-
+// --- Schema de Drizzle ---
+export { type DocumentInsert, type DocumentSchema, documentsTable } from './schema';
 // --- Serializadores ---
 export {
 	serializeDocumentBase,
-	serializeDocumentWithStats,
-	serializeDocumentList,
 	serializeDocumentContent,
+	serializeDocumentList,
+	serializeDocumentWithStats,
 } from './serializers';
-
 // --- Validadores y esquemas ---
 export {
-	documentBaseSchema,
-	documentStatisticsSchema,
-	documentWithStatsSchema,
-	documentCreateSchema,
-	documentUpdateSchema,
-	documentSearchSchema,
 	type DocumentBase,
-	type DocumentStatistics,
-	type DocumentWithStats,
 	type DocumentCreateInput,
-	type DocumentUpdateInput,
 	type DocumentSearchInput,
+	type DocumentStatistics,
+	type DocumentUpdateInput,
+	type DocumentWithStats,
+	documentBaseSchema,
+	documentCreateSchema,
+	documentSearchSchema,
+	documentStatisticsSchema,
+	documentUpdateSchema,
+	documentWithStatsSchema,
 } from './validators';
-
-// --- Schema de Drizzle ---
-export { documentsTable, type DocumentSchema, type DocumentInsert } from './schema';

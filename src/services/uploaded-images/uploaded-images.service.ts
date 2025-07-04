@@ -1,3 +1,4 @@
+import { and, asc, count, desc, eq, gte, like, or, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { uploadedImages } from '@/lib/drizzle/schema';
 import { processImage } from '@/lib/image/image-processing';
@@ -7,18 +8,17 @@ import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/l
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
 import { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
-    CreateUploadedImageParams,
-    GetUploadedImagesParams,
-    UpdateUploadedImageParams,
-    UploadedImageDimensions,
-    UploadedImageEvents,
-    UploadedImageMetadata,
-    UploadedImageProcessingOptions,
-    UploadedImageResult,
-    UploadedImageResults,
-    UploadedImageStats,
+	CreateUploadedImageParams,
+	GetUploadedImagesParams,
+	UpdateUploadedImageParams,
+	UploadedImageDimensions,
+	UploadedImageEvents,
+	UploadedImageMetadata,
+	UploadedImageProcessingOptions,
+	UploadedImageResult,
+	UploadedImageResults,
+	UploadedImageStats,
 } from '@/types/uploaded-images';
-import { and, asc, count, desc, eq, gte, like, or, sql } from 'drizzle-orm';
 
 const SERVICE_NAME = 'UploadedImagesService';
 const uploadedImagesLogger = serverLogger.withContext(SERVICE_NAME);
@@ -263,9 +263,7 @@ class UploadedImagesService {
 			await this.deleteImageFile(path);
 
 			// Eliminar la entrada de la base de datos
-			await db
-				.delete(uploadedImages)
-				.where(eq(uploadedImages.id, id));
+			await db.delete(uploadedImages).where(eq(uploadedImages.id, id));
 
 			// Emitir evento de eliminación
 			await this.emitEvent(this.EVENTS.IMAGE_DELETED, { id });
@@ -337,12 +335,7 @@ class UploadedImagesService {
 
 			// Búsqueda por nombre o categoría
 			if (search) {
-				conditions.push(
-					or(
-						like(uploadedImages.name, `%${search}%`),
-						like(uploadedImages.category, `%${search}%`)
-					)
-				);
+				conditions.push(or(like(uploadedImages.name, `%${search}%`), like(uploadedImages.category, `%${search}%`)));
 			}
 
 			const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
@@ -354,9 +347,10 @@ class UploadedImagesService {
 				.where(whereCondition);
 
 			// Determinar el orden
-			const orderBy = sortOrder === 'desc'
-				? desc(uploadedImages[sortBy as keyof typeof uploadedImages] || uploadedImages.createdAt)
-				: asc(uploadedImages[sortBy as keyof typeof uploadedImages] || uploadedImages.createdAt);
+			const orderBy =
+				sortOrder === 'desc'
+					? desc(uploadedImages[sortBy as keyof typeof uploadedImages] || uploadedImages.createdAt)
+					: asc(uploadedImages[sortBy as keyof typeof uploadedImages] || uploadedImages.createdAt);
 
 			// Obtener las imágenes paginadas
 			const rawImages = await db
@@ -413,9 +407,7 @@ class UploadedImagesService {
 			uploadedImagesLogger.info('📊 Calculando estadísticas de imágenes subidas');
 
 			// Contar el número total de imágenes
-			const totalResult = await db
-				.select({ count: count(uploadedImages.id) })
-				.from(uploadedImages);
+			const totalResult = await db.select({ count: count(uploadedImages.id) }).from(uploadedImages);
 
 			// Agrupar por tipo usando una consulta SQL raw para obtener suma
 			const byTypeQuery = await db.execute(sql`

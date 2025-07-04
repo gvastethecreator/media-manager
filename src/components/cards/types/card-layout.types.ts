@@ -6,33 +6,33 @@
 
 /** Tipos de layout disponibles para las cards */
 export type CardLayout =
-	| 'minimal'     // Solo icono/thumbnail + nombre
-	| 'compact'     // Información básica compacta
-	| 'complete'    // Información completa (default)
-	| 'horizontal'  // Layout horizontal (para listas)
-	| 'vertical'    // Layout vertical (para grids)
-	| 'list'        // Layout específico para vista de lista
-	| 'grid'        // Layout específico para vista de grid
-	| 'masonry';    // Layout para vista masonry
+	| 'minimal' // Solo icono/thumbnail + nombre
+	| 'compact' // Información básica compacta
+	| 'complete' // Información completa (default)
+	| 'horizontal' // Layout horizontal (para listas)
+	| 'vertical' // Layout vertical (para grids)
+	| 'list' // Layout específico para vista de lista
+	| 'grid' // Layout específico para vista de grid
+	| 'masonry'; // Layout para vista masonry
 
 /** Tamaños de card disponibles */
 export type CardSize =
-	| 'xs'    // Extra small (64px)
-	| 'sm'    // Small (120px)
-	| 'md'    // Medium (200px) - default
-	| 'lg'    // Large (280px)
-	| 'xl'    // Extra large (400px)
+	| 'xs' // Extra small (64px)
+	| 'sm' // Small (120px)
+	| 'md' // Medium (200px) - default
+	| 'lg' // Large (280px)
+	| 'xl' // Extra large (400px)
 	| 'auto'; // Tamaño automático
 
 /** Variantes visuales de las cards */
 export type CardVariant =
-	| 'default'   // Estilo estándar
-	| 'minimal'   // Estilo minimalista
-	| 'elevated'  // Con sombra elevada
-	| 'outlined'  // Solo borde
-	| 'tcg'       // Estilo Trading Card Game
-	| 'polaroid'  // Estilo polaroid (para imágenes)
-	| 'glass';    // Efecto glassmorphism
+	| 'default' // Estilo estándar
+	| 'minimal' // Estilo minimalista
+	| 'elevated' // Con sombra elevada
+	| 'outlined' // Solo borde
+	| 'tcg' // Estilo Trading Card Game
+	| 'polaroid' // Estilo polaroid (para imágenes)
+	| 'glass'; // Efecto glassmorphism
 
 /** Configuración de layout para una card */
 export interface CardLayoutConfig {
@@ -149,7 +149,7 @@ export const LAYOUT_PRESETS: Record<string, CardLayoutConfig> = {
 		showTags: true,
 		density: 'medium',
 	},
-	'dashboard': {
+	dashboard: {
 		layout: 'complete',
 		size: 'lg',
 		variant: 'elevated',
@@ -170,7 +170,7 @@ export const LAYOUT_PRESETS: Record<string, CardLayoutConfig> = {
 		showStats: true,
 		density: 'high',
 	},
-	'gallery': {
+	gallery: {
 		layout: 'vertical',
 		size: 'md',
 		variant: 'polaroid',
@@ -179,7 +179,7 @@ export const LAYOUT_PRESETS: Record<string, CardLayoutConfig> = {
 		showTags: false,
 		density: 'low',
 	},
-	'masonry': {
+	masonry: {
 		layout: 'masonry',
 		size: 'auto',
 		variant: 'default',
@@ -190,10 +190,7 @@ export const LAYOUT_PRESETS: Record<string, CardLayoutConfig> = {
 };
 
 /** Función para resolver la configuración final de layout */
-export function resolveLayoutConfig(
-	props: Partial<BaseCardProps>,
-	preset?: string
-): CardLayoutConfig {
+export function resolveLayoutConfig(props: Partial<BaseCardProps>, preset?: string): CardLayoutConfig {
 	// Configuración base
 	const baseConfig: CardLayoutConfig = {
 		layout: 'complete',

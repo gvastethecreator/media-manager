@@ -8,6 +8,8 @@
 
 // Drizzle imports
 
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { images, imageWorldItems, worldItems } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -17,14 +19,12 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toWorldItemWithStats } from '@/transformers/world-item';
 import type { ImageComplete } from '@/types/entities/image';
 import type {
-    WorldItemComplete,
-    WorldItemCreateInput,
-    WorldItemSearchOptions,
-    WorldItemUpdateInput,
-    WorldItemWithStats,
+	WorldItemComplete,
+	WorldItemCreateInput,
+	WorldItemSearchOptions,
+	WorldItemUpdateInput,
+	WorldItemWithStats,
 } from '@/types/entities/world-item';
-import * as crypto from 'crypto';
-import { and, asc, count, desc, eq } from 'drizzle-orm';
 
 const worldItemLogger = serverLogger.withContext('WorldItemService');
 
@@ -223,37 +223,40 @@ export async function createWorldItem(input: WorldItemCreateInput): Promise<Worl
 		worldItemLogger.info('📝 Creando world item:', input.name);
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(worldItems).values({
-			id: crypto.randomUUID(),
-			name: input.name,
-			description: input.description || null,
-			emoji: input.emoji || '🌍',
-			color: input.color || '#3b82f6',
-			shortcut: input.shortcut || null,
-			category: input.category || null,
-			type: input.type || null,
-			subtype: input.subtype || null,
-			rarity: input.rarity || null,
-			value: input.value || null,
-			weight: input.weight || null,
-			size: input.size || null,
-			material: input.material || null,
-			origin: input.origin || null,
-			crafting: input.crafting || null,
-			requirements: input.requirements || null,
-			effects: input.effects || null,
-			properties: input.properties || null,
-			lore: input.lore || null,
-			history: input.history || null,
-			notes: input.notes || null,
-			sortBy: input.sortBy || null,
-			filters: input.filters || null,
-			featuredImage: input.featuredImage || null,
-			isFavorite: input.isFavorite || false,
-			isArchived: input.isArchived || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(worldItems)
+			.values({
+				id: crypto.randomUUID(),
+				name: input.name,
+				description: input.description || null,
+				emoji: input.emoji || '🌍',
+				color: input.color || '#3b82f6',
+				shortcut: input.shortcut || null,
+				category: input.category || null,
+				type: input.type || null,
+				subtype: input.subtype || null,
+				rarity: input.rarity || null,
+				value: input.value || null,
+				weight: input.weight || null,
+				size: input.size || null,
+				material: input.material || null,
+				origin: input.origin || null,
+				crafting: input.crafting || null,
+				requirements: input.requirements || null,
+				effects: input.effects || null,
+				properties: input.properties || null,
+				lore: input.lore || null,
+				history: input.history || null,
+				notes: input.notes || null,
+				sortBy: input.sortBy || null,
+				filters: input.filters || null,
+				featuredImage: input.featuredImage || null,
+				isFavorite: input.isFavorite || false,
+				isArchived: input.isArchived || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const worldItem = result[0];
 
@@ -335,11 +338,7 @@ export async function updateWorldItem(id: string, input: WorldItemUpdateInput): 
 		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
 		if (input.isArchived !== undefined) updateData.isArchived = input.isArchived;
 
-		const result = await db
-			.update(worldItems)
-			.set(updateData)
-			.where(eq(worldItems.id, id))
-			.returning();
+		const result = await db.update(worldItems).set(updateData).where(eq(worldItems.id, id)).returning();
 
 		if (result.length === 0) {
 			throw createWorldItemError('World item no encontrado', EntityErrorCode.NOT_FOUND);
@@ -406,10 +405,7 @@ export async function deleteWorldItem(id: string): Promise<{ success: boolean }>
 		}
 
 		// Eliminar directamente (las relaciones many-to-many se manejan automáticamente)
-		const result = await db
-			.delete(worldItems)
-			.where(eq(worldItems.id, id))
-			.returning();
+		const result = await db.delete(worldItems).where(eq(worldItems.id, id)).returning();
 
 		if (result.length === 0) {
 			throw createWorldItemError('Error al eliminar world item', EntityErrorCode.OPERATION_FAILED);
@@ -488,10 +484,13 @@ export async function addImageToWorldItem(worldItemId: string, imageId: string):
 
 		// **MIGRACIÓN A DRIZZLE**
 		// Insertar relación en la tabla many-to-many
-		await db.insert(imageWorldItems).values({
-			A: imageId, // imageId
-			B: worldItemId, // worldItemId
-		}).onConflictDoNothing(); // Evitar duplicados
+		await db
+			.insert(imageWorldItems)
+			.values({
+				A: imageId, // imageId
+				B: worldItemId, // worldItemId
+			})
+			.onConflictDoNothing(); // Evitar duplicados
 
 		// Emitir eventos
 		await emit({
@@ -517,14 +516,12 @@ export async function removeImageFromWorldItem(worldItemId: string, imageId: str
 
 		// **MIGRACIÓN A DRIZZLE**
 		// Eliminar relación de la tabla many-to-many
-		await db
-			.delete(imageWorldItems)
-			.where(
-				and(
-					eq(imageWorldItems.A, imageId), // imageId
-					eq(imageWorldItems.B, worldItemId) // worldItemId
-				)
-			);
+		await db.delete(imageWorldItems).where(
+			and(
+				eq(imageWorldItems.A, imageId), // imageId
+				eq(imageWorldItems.B, worldItemId) // worldItemId
+			)
+		);
 
 		// Emitir eventos
 		await emit({
@@ -547,10 +544,7 @@ export async function removeImageFromWorldItem(worldItemId: string, imageId: str
 export async function worldItemExists(id: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(worldItems)
-			.where(eq(worldItems.id, id));
+		const result = await db.select({ count: count() }).from(worldItems).where(eq(worldItems.id, id));
 
 		return result[0].count > 0;
 	} catch (error) {

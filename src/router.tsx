@@ -1,5 +1,5 @@
-import { MainLayout } from '@/components/layout/main-layout';
 import { createBrowserRouter } from 'react-router-dom';
+import { MainLayout } from '@/components/layout/main-layout';
 
 // import { MainLayoutTest } from '@/components/layout/main-layout-test';
 // import { MainLayoutSimpleNavPanel } from '@/components/layout/main-layout-simple-navpanel';

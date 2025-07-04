@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { useUpdateTheme } from '@/lib/api/profiles';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useUpdateTheme } from '@/lib/api/profiles';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { transformProfile } from '@/transformers/profile/profile-transformers';
 import {
@@ -180,8 +180,8 @@ export const useProfileStore = create<ProfileStore>()(
 				// ===== GESTIÓN DE PREFERENCIAS =====
 
 				updateTheme: (theme: ThemeMode) => {
-          const { mutate } = useUpdateTheme();
-          mutate(theme);
+					const { mutate } = useUpdateTheme();
+					mutate(theme);
 				},
 
 				updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => {

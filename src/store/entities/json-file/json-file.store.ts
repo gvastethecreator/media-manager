@@ -6,22 +6,18 @@
  * 👉 2025-07 Refactor: ahora consume la API mediante json-file.client
  */
 
-import { createSelectors } from '@/lib/utils/store/create-selectors';
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 // Refactor: se eliminan dependencias directas del servicio del servidor
 // y se utilizan funciones cliente que consumen la API REST
 import {
-    createJsonFileInApi,
-    deleteJsonFileFromApi,
-    getJsonFilesFromApi,
-    updateJsonFileInApi,
+	createJsonFileInApi,
+	deleteJsonFileFromApi,
+	getJsonFilesFromApi,
+	updateJsonFileInApi,
 } from '@/lib/api/client/json-file.client';
-import type {
-    JsonFileCreateInput,
-    JsonFileUpdateInput,
-    JsonFileWithStats
-} from '@/types/entities/json-file';
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
+import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type JsonFileFilters = Record<string, any>;
@@ -75,7 +71,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			fetchJsonFiles: async () => {
 				set({ loading: true, error: null });
 				try {
-                                       const jsonFiles = await getJsonFilesFromApi();
+					const jsonFiles = await getJsonFilesFromApi();
 					set({ jsonFiles, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
@@ -85,7 +81,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			createJsonFile: async (data: JsonFileCreateInput) => {
 				set({ loading: true, error: null });
 				try {
-                                       const newJsonFile = await createJsonFileInApi(data);
+					const newJsonFile = await createJsonFileInApi(data);
 					set((state) => ({
 						jsonFiles: [...state.jsonFiles, newJsonFile],
 						loading: false,
@@ -100,7 +96,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			updateJsonFile: async (id: string, data: JsonFileUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
-                                       const updatedJsonFile = await updateJsonFileInApi(id, data);
+					const updatedJsonFile = await updateJsonFileInApi(id, data);
 					set((state) => ({
 						jsonFiles: state.jsonFiles.map((j) => (j.id === id ? updatedJsonFile : j)),
 						currentJsonFile: state.currentJsonFile?.id === id ? updatedJsonFile : state.currentJsonFile,
@@ -116,7 +112,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			deleteJsonFile: async (id: string) => {
 				set({ loading: true, error: null });
 				try {
-                                       await deleteJsonFileFromApi(id);
+					await deleteJsonFileFromApi(id);
 					set((state) => ({
 						jsonFiles: state.jsonFiles.filter((j) => j.id !== id),
 						selectedJsonFiles: state.selectedJsonFiles.filter((j) => j.id !== id),

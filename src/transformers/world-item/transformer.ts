@@ -6,11 +6,11 @@
 
 import type { WorldItemComplete } from '@/types/entities/world-item';
 import {
-    deserializeAttributes,
-    deserializeEffects,
-    deserializeFilters,
-    deserializeRequirements,
-    deserializeStats,
+	deserializeAttributes,
+	deserializeEffects,
+	deserializeFilters,
+	deserializeRequirements,
+	deserializeStats,
 } from './serializers';
 
 // Tipos locales equivalentes a Drizzle
