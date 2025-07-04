@@ -175,7 +175,7 @@ La filosofía del sistema combina **organización física** (estructura de carpe
 ```
 React 19 + TypeScript + Vite
 ├── Estado: Zustand + TanStack Query
-├── UI: Tailwind CSS v4 + Base UI
+├── UI: Tailwind CSS v4 + Shadcn/Radix UI
 ├── Routing: React Router v7
 └── Animaciones: Framer Motion
 ```
