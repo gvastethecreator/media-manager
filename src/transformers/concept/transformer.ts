@@ -2,128 +2,126 @@
  * @file Transformador principal para la entidad Concept.
  * @module transformers/concept/transformer
  * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { ConceptComplete, ConceptWithStats } from '@/types/entities/concept';
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { ConceptBase, ConceptWithStats, ConceptStatistics } from '@/types/entities/concept';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
-type DrizzleConceptWithCounts = {
-	id: string;
-	name: string;
-	description: string | null;
-	color: string;
-	emoji: string;
-	isPublic: boolean;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	_count?: {
-		images?: number;
-		videos?: number;
-		tags?: number;
-		groups?: number;
-		properties?: number;
-		collections?: number;
-		albums?: number;
-		places?: number;
-		worldItems?: number;
-		characters?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-	};
-};
-
-type DrizzleConceptWithRelations = DrizzleConceptWithCounts & {
-	characters?: any[];
-	notes?: any[];
-	// Otras relaciones se pueden agregar según sea necesario
-};
+const logger = serverLogger.withContext('ConceptTransformer');
 
 /**
- * 🧠 Transforma un concepto de Drizzle a ConceptWithStats
- * ✅ MIGRADO A DRIZZLE
- * @param concept Concepto con conteos de Drizzle
- * @returns Concepto con estadísticas pre-calculadas
+ * 🧠 Transforma un concepto de Drizzle con conteos a ConceptWithStats.
+ *
+ * @param conceptData - Concepto base de Drizzle.
+ * @param counts - Conteos de las relaciones del concepto.
+ * @returns Concepto con estadísticas pre-calculadas, o null si hay error.
  */
-export function fromDrizzleConcept(concept: DrizzleConceptWithCounts): ConceptWithStats {
-	const now = new Date();
+export function fromDrizzleConcept(
+	conceptData: ConceptBase | null,
+	counts: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	}
+): ConceptWithStats | null {
+	if (!conceptData) {
+		return null;
+	}
 
-	// Calcular estadísticas
-	const totalImages = concept._count?.images || 0;
-	const totalVideos = concept._count?.videos || 0;
-	const totalTags = concept._count?.tags || 0;
-	const totalGroups = concept._count?.groups || 0;
-	const totalProperties = concept._count?.properties || 0;
-	const totalCollections = concept._count?.collections || 0;
-	const totalAlbums = concept._count?.albums || 0;
-	const totalPlaces = concept._count?.places || 0;
-	const totalWorldItems = concept._count?.worldItems || 0;
-	const totalCharacters = concept._count?.characters || 0;
-	const totalPrompts = concept._count?.prompts || 0;
-	const totalNotes = concept._count?.notes || 0;
-	const totalWildcards = concept._count?.wildcards || 0;
+	try {
+		const stats: ConceptStatistics = {
+			imageCount: counts.images,
+			videoCount: counts.videos,
+			albumCount: counts.albums,
+			collectionCount: counts.collections,
+			tagCount: counts.tags,
+			characterCount: counts.characters,
+			placeCount: counts.places,
+			worldItemCount: counts.worldItems,
+			promptCount: counts.prompts,
+			noteCount: counts.notes,
+			wildcardCount: counts.wildcards,
+			propertyCount: counts.properties,
+			groupCount: counts.groups,
+		};
 
-	const totalAssociations =
-		totalImages +
-		totalVideos +
-		totalTags +
-		totalGroups +
-		totalProperties +
-		totalCollections +
-		totalAlbums +
-		totalPlaces +
-		totalWorldItems +
-		totalCharacters +
-		totalPrompts +
-		totalNotes +
-		totalWildcards;
-
-	return {
-		...concept,
-		statistics: {
-			totalImages,
-			totalVideos,
-			totalTags,
-			totalGroups,
-			totalProperties,
-			totalCollections,
-			totalAlbums,
-			totalPlaces,
-			totalWorldItems,
-			totalCharacters,
-			totalPrompts,
-			totalNotes,
-			totalWildcards,
-			totalAssociations,
-			lastUpdated: now,
-		},
-	};
+		return {
+			...conceptData,
+			stats,
+		};
+	} catch (error) {
+		logger.error('Error transformando concepto desde Drizzle', {
+			error,
+			conceptId: conceptData?.id,
+		});
+		return null;
+	}
 }
 
 /**
- * 🧠 Transforma un concepto de Drizzle con relaciones completas a ConceptComplete
- * ✅ MIGRADO A DRIZZLE
- * @param concept Concepto de Drizzle con relaciones
- * @returns Concepto completo con relaciones transformadas
+ * 🔄 Transforma una lista de conceptos de Drizzle a una lista de ConceptWithStats.
+ *
+ * @param conceptsData - Un array de objetos Concept de Drizzle con sus conteos.
+ * @returns Un array de objetos ConceptWithStats.
  */
-export function fromDrizzleConceptWithRelations(concept: DrizzleConceptWithRelations): ConceptComplete {
-	return {
-		...concept,
-		// Transformar relaciones usando transformers específicos
-		characters: concept.characters || [], // Simplificado para evitar dependencias circulares
-		notes: concept.notes || [], // Simplificado para evitar dependencias circulares
-		// ... existing code for other relations ...
-	};
+export function fromDrizzleConcepts(
+	conceptsData: Array<{
+		concept: ConceptBase;
+		counts: {
+			images: number;
+			videos: number;
+			albums: number;
+			collections: number;
+			tags: number;
+			characters: number;
+			places: number;
+			worldItems: number;
+			prompts: number;
+			notes: number;
+			wildcards: number;
+			properties: number;
+			groups: number;
+		};
+	}>
+): ConceptWithStats[] {
+	return conceptsData
+		.map(({ concept, counts }) => fromDrizzleConcept(concept, counts))
+		.filter((c): c is ConceptWithStats => c !== null);
 }
 
 /**
- * 🔄 Transforma una lista de objetos Concept de Drizzle a un array de ConceptComplete.
- * ✅ MIGRADO A DRIZZLE
- * @param concepts - Los objetos Concept obtenidos de Drizzle.
- * @returns Un array de objetos ConceptComplete.
+ * 🔄 Función legacy de compatibilidad - transforma concepto con relaciones extendidas.
+ * @deprecated Usar fromDrizzleConcept en su lugar.
  */
-export function fromDrizzleConcepts(concepts: DrizzleConceptWithCounts[]): ConceptComplete[] {
-	return concepts.map(fromDrizzleConcept).filter((c): c is ConceptComplete => c !== null);
+export function fromDrizzleConceptWithRelations(
+	conceptData: ConceptBase | null,
+	counts: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	}
+): ConceptWithStats | null {
+	// Delegar a la función principal
+	return fromDrizzleConcept(conceptData, counts);
 }

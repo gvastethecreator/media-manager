@@ -1,23 +1,49 @@
 /**
- * @file Punto de entrada para transformadores de Favorite
+ * @file Punto de entrada para los transformadores de la entidad Favorite.
  * @module transformers/favorite
- * ✅ MIGRADO A DRIZZLE
+ * @description Exporta funciones de transformación, validación y serialización para Favorite.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Transformadores principales ---
 export {
-	toFavoriteExtended,
-	toFavoritesExtended,
-	mapFavoriteFiltersToDrizzle,
-	mapCreateFavoriteDataToDrizzle,
-	mapUpdateFavoriteDataToDrizzle,
+	toFavoriteWithStats,
+	toFavoriteWithStatsList,
 	groupFavoritesByType,
-	// Alias para compatibilidad, marcados como deprecated
-	mapFavoriteFiltersToPrisma,
-	mapCreateFavoriteDataToPrisma,
-	mapUpdateFavoriteDataToPrisma,
+	getFavoritesSummary,
 } from './mappers';
 
-export { fromDrizzleFavorite, fromDrizzleFavorites, toFavoriteWithStats } from './transformer';
+// --- Serializadores ---
+export {
+	serializeFavoriteBase,
+	serializeFavoriteWithStats,
+	serializeFavoriteList,
+	serializeFavoriteGroupedStats,
+	serializeFavoritesSummary,
+} from './serializers';
 
-// TODO: Revisar y migrar esquemas de validación
-// export { FavoriteCreateInputSchema, FavoriteUpdateInputSchema } from './schema';
+// --- Validadores y esquemas ---
+export {
+	favoriteBaseSchema,
+	favoriteStatisticsSchema,
+	favoriteWithStatsSchema,
+	favoriteCreateSchema,
+	favoriteUpdateSchema,
+	favoriteSearchSchema,
+	favoriteGroupByTypeSchema,
+	type FavoriteBase,
+	type FavoriteStatistics,
+	type FavoriteWithStats,
+	type FavoriteCreateInput,
+	type FavoriteUpdateInput,
+	type FavoriteSearchInput,
+	type FavoriteGroupByType,
+} from './validators';
+
+// --- Schema de Drizzle ---
+export {
+	favoritesTable,
+	favoriteEntityTypeEnum,
+	type FavoriteSchema,
+	type FavoriteInsert,
+} from './schema';
