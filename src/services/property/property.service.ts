@@ -5,16 +5,14 @@
  * @updated 2025-01-27
  */
 
-
-
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type { PropertyCreateInput, PropertyUpdateInput, PropertyWithStats } from '@/types/entities/property';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-import * as crypto from 'crypto';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('PropertyService');
@@ -184,12 +182,7 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 		}
 
 		if (search) {
-			conditions.push(
-				or(
-					like(properties.name, `%${search}%`),
-					like(properties.description, `%${search}%`)
-				)
-			);
+			conditions.push(or(like(properties.name, `%${search}%`), like(properties.description, `%${search}%`)));
 		}
 
 		// Aplicar filtros
@@ -235,7 +228,7 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 				.select({ count: count() })
 				.from(properties)
 				.where(whereClause)
-				.then(result => result[0]?.count || 0)
+				.then((result) => result[0]?.count || 0),
 		]);
 
 		const result: PropertyWithStats[] = drizzleProperties.map((rawProperty) => ({
@@ -280,20 +273,23 @@ export async function createProperty(data: PropertyCreateInput): Promise<Propert
 	try {
 		logger.info('📝 Creando nueva propiedad', { name: data.name });
 
-		const [newProperty] = await db.insert(properties).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description || null,
-			value: data.value || null,
-			type: data.type,
-			unit: data.unit || null,
-			category: data.category || null,
-			isRequired: data.isRequired ?? false,
-			isPrivate: data.isPrivate ?? false,
-			isFavorite: data.isFavorite ?? false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const [newProperty] = await db
+			.insert(properties)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description || null,
+				value: data.value || null,
+				type: data.type,
+				unit: data.unit || null,
+				category: data.category || null,
+				isRequired: data.isRequired ?? false,
+				isPrivate: data.isPrivate ?? false,
+				isFavorite: data.isFavorite ?? false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		// Revalidar rutas
 		await revalidatePropertyPaths();
@@ -453,9 +449,13 @@ export async function togglePropertyFavorite(id: string): Promise<PropertyWithSt
 			throw new PropertyServiceError('Propiedad no encontrada', 'PROPERTY_NOT_FOUND');
 		}
 
-		const [updatedProperty] = await db.update(properties).set({
-			isFavorite: !currentProperty.isFavorite,
-		}).where(eq(properties.id, id)).returning();
+		const [updatedProperty] = await db
+			.update(properties)
+			.set({
+				isFavorite: !currentProperty.isFavorite,
+			})
+			.where(eq(properties.id, id))
+			.returning();
 
 		// Revalidar rutas
 		await revalidatePropertyPaths();
@@ -501,26 +501,25 @@ export async function searchProperties(query: string): Promise<PropertyWithStats
 	try {
 		logger.info(`🔍 Buscando propiedades: "${query}"`);
 
-		const drizzleProperties = await db.select({
-			id: properties.id,
-			name: properties.name,
-			description: properties.description,
-			emoji: properties.emoji,
-			color: properties.color,
-			category: properties.category,
-			shortcut: properties.shortcut,
-			featuredImage: properties.featuredImage,
-			isFavorite: properties.isFavorite,
-			createdAt: properties.createdAt,
-			updatedAt: properties.updatedAt,
-		}).from(properties)
-		.where(or(
-			like(properties.name, `%${query}%`),
-			like(properties.description, `%${query}%`)
-		))
-		.orderBy(desc(properties.isFavorite), asc(properties.name));
+		const drizzleProperties = await db
+			.select({
+				id: properties.id,
+				name: properties.name,
+				description: properties.description,
+				emoji: properties.emoji,
+				color: properties.color,
+				category: properties.category,
+				shortcut: properties.shortcut,
+				featuredImage: properties.featuredImage,
+				isFavorite: properties.isFavorite,
+				createdAt: properties.createdAt,
+				updatedAt: properties.updatedAt,
+			})
+			.from(properties)
+			.where(or(like(properties.name, `%${query}%`), like(properties.description, `%${query}%`)))
+			.orderBy(desc(properties.isFavorite), asc(properties.name));
 
-		const result: PropertyWithStats[] = drizzleProperties.map(p => ({
+		const result: PropertyWithStats[] = drizzleProperties.map((p) => ({
 			...p,
 			_count: {
 				images: 0,

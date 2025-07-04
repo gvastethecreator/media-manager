@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { getVideos, getVideoById, createVideo, updateVideo, deleteVideo, getVideoFormatStats } from '../services/video.server.service';
+import {
+	createVideo,
+	deleteVideo,
+	getVideoById,
+	getVideoFormatStats,
+	getVideos,
+	updateVideo,
+} from '../services/video.server.service';
 
 const router = Router();
 
@@ -105,4 +112,3 @@ router.get('/stats/formats', async (req, res) => {
 });
 
 export { router as videosRouter };
-

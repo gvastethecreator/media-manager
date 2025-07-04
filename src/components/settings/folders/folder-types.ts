@@ -1,5 +1,5 @@
-import type { ProcessStatus } from '@/types/folders';
 import type { FolderExtended, FolderStats } from '@/types/entities/folder';
+import type { ProcessStatus } from '@/types/folders';
 
 /**
  * 📁 Extensión del tipo canónico para incluir estado de error temporal

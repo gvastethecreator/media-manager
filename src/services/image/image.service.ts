@@ -41,20 +41,20 @@
  */
 
 import { createHash } from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { imageConfig } from '@/lib/config';
-import { serverLogger } from '@/lib/logger/server-logger';
-import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { images, folders, imageStats } from '@/lib/drizzle/schema';
+import { folders, imageStats, images } from '@/lib/drizzle/schema';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import {
-    createEntityNotFoundError,
-    createFileNotFoundError,
-    createServiceError,
-    ServiceErrorCode,
-    toServiceError,
+	createEntityNotFoundError,
+	createFileNotFoundError,
+	createServiceError,
+	ServiceErrorCode,
+	toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
@@ -73,6 +73,7 @@ export interface GetImagesResult {
 	total: number;
 	hasMore: boolean;
 }
+
 import * as crypto from 'crypto';
 
 const SERVICE_NAME = 'ImageService';
@@ -323,7 +324,7 @@ class ImageService {
 					wildcards: 0,
 					properties: 0,
 					groups: 0,
-				}
+				},
 			};
 
 			imageLogger.info('✅ Imagen obtenida correctamente');
@@ -437,12 +438,7 @@ class ImageService {
 
 			// Filtro de búsqueda por texto
 			if (search) {
-				conditions.push(
-					or(
-						like(images.name, `%${search}%`),
-						like(images.description, `%${search}%`)
-					)
-				);
+				conditions.push(or(like(images.name, `%${search}%`), like(images.description, `%${search}%`)));
 			}
 
 			// Filtro por carpeta
@@ -540,11 +536,13 @@ class ImageService {
 					...raw,
 					metadata: raw.metadata ? JSON.parse(raw.metadata) : null,
 					isFavorite: Boolean(raw.isFavorite),
-					folder: raw.folderRealId ? {
-						id: raw.folderRealId,
-						name: raw.folderName!,
-						path: raw.folderPath!,
-					} : null,
+					folder: raw.folderRealId
+						? {
+								id: raw.folderRealId,
+								name: raw.folderName!,
+								path: raw.folderPath!,
+							}
+						: null,
 					_count: {
 						tags: 0,
 						albums: 0,
@@ -663,9 +661,7 @@ class ImageService {
 				await this.generateThumbnail(imageId);
 				const updatedImage = await this.getImage(imageId);
 				if (!updatedImage?.thumbnailPath) {
-					throw createFileNotFoundError(
-						`Miniatura para la imagen ${imageId} no encontrada después de la generación`
-					);
+					throw createFileNotFoundError(`Miniatura para la imagen ${imageId} no encontrada después de la generación`);
 				}
 				return fs.readFile(updatedImage.thumbnailPath);
 			}

@@ -50,7 +50,10 @@ type WorkflowDefinition = {
  * @param aggregates Los datos agregados de las ejecuciones del workflow.
  * @returns Un objeto de tipo WorkflowStatistics.
  */
-function calculateWorkflowStats(workflow: DrizzleWorkflow, aggregates: WorkflowExecutionAggregates): WorkflowStatistics {
+function calculateWorkflowStats(
+	workflow: DrizzleWorkflow,
+	aggregates: WorkflowExecutionAggregates
+): WorkflowStatistics {
 	const { totalExecutions, successfulExecutions, _avg, _max } = aggregates;
 
 	// Parsear la definición para contar nodos y conexiones
@@ -79,7 +82,10 @@ function calculateWorkflowStats(workflow: DrizzleWorkflow, aggregates: WorkflowE
  * @param aggregates Los datos agregados de las ejecuciones del workflow.
  * @returns Un objeto WorkflowWithStats.
  */
-export function toWorkflowWithStats(workflow: DrizzleWorkflow, aggregates: WorkflowExecutionAggregates): WorkflowWithStats {
+export function toWorkflowWithStats(
+	workflow: DrizzleWorkflow,
+	aggregates: WorkflowExecutionAggregates
+): WorkflowWithStats {
 	const stats = calculateWorkflowStats(workflow, aggregates);
 
 	return {

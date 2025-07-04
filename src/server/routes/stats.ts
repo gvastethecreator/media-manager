@@ -1,5 +1,5 @@
 import express from 'express';
-import { getSystemStats, getSystemStatsExtended, getStats } from '../services/stats.service';
+import { getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
 
 const router = express.Router();
 
@@ -73,7 +73,13 @@ router.get('/storage', async (req, res) => {
 		};
 
 		// Calcular porcentajes
-		const grandTotalSize = storage.images.size + storage.videos.size + storage.audio.size + storage.documents.size + storage.thumbnails.size + storage.other.size;
+		const grandTotalSize =
+			storage.images.size +
+			storage.videos.size +
+			storage.audio.size +
+			storage.documents.size +
+			storage.thumbnails.size +
+			storage.other.size;
 
 		if (grandTotalSize > 0) {
 			storage.images.percentage = (storage.images.size / grandTotalSize) * 100;

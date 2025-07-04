@@ -1,5 +1,5 @@
-import { useNavigationData, useNavigationStats } from '@/lib/api/navigation';
 import { useCallback, useMemo } from 'react';
+import { useNavigationData, useNavigationStats } from '@/lib/api/navigation';
 import type { CategoryChild, NavigationCategory } from '../types';
 
 // Tipo que representa cualquier posible item de navegación
@@ -92,33 +92,38 @@ export function useCategoryStats() {
 					description: item.description,
 					totalFiles: item.totalFiles || 0,
 					totalSize: item.totalSize || 0,
-					_count: item._count ? {
-						images: item._count.images || 0,
-						folders: item._count.folders,
-						collections: item._count.collections,
-						tags: item._count.tags,
-					} : undefined,
+					_count: item._count
+						? {
+								images: item._count.images || 0,
+								folders: item._count.folders,
+								collections: item._count.collections,
+								tags: item._count.tags,
+							}
+						: undefined,
 				})
 			);
 		},
 		[categoryDataMap]
 	);
 
-	const stats = useMemo(() => ({
-		totalImages: statsData?.totalImages || navigationData?.stats?.totalImages || 0,
-		totalFolders: statsData?.totalFolders || navigationData?.stats?.totalFolders || 0,
-		totalCollections: statsData?.totalCollections || navigationData?.stats?.totalCollections || 0,
-		totalTags: statsData?.totalTags || navigationData?.stats?.totalTags || 0,
-		totalAlbums: statsData?.totalAlbums || navigationData?.stats?.totalAlbums || 0,
-		totalCharacters: statsData?.totalCharacters || navigationData?.stats?.totalCharacters || 0,
-		totalPlaces: statsData?.totalPlaces || navigationData?.stats?.totalPlaces || 0,
-		totalWorldItems: statsData?.totalWorldItems || navigationData?.stats?.totalWorldItems || 0,
-		totalFavorites: statsData?.totalFavorites || navigationData?.stats?.totalFavorites || 0,
-		totalActivities: statsData?.totalActivities || navigationData?.stats?.totalActivities || 0,
-		totalSize: statsData?.totalSize || navigationData?.stats?.totalSize || 0,
-		totalViews: statsData?.totalViews || navigationData?.stats?.totalViews || 0,
-		totalDownloads: statsData?.totalDownloads || navigationData?.stats?.totalDownloads || 0,
-	}), [statsData, navigationData]);
+	const stats = useMemo(
+		() => ({
+			totalImages: statsData?.totalImages || navigationData?.stats?.totalImages || 0,
+			totalFolders: statsData?.totalFolders || navigationData?.stats?.totalFolders || 0,
+			totalCollections: statsData?.totalCollections || navigationData?.stats?.totalCollections || 0,
+			totalTags: statsData?.totalTags || navigationData?.stats?.totalTags || 0,
+			totalAlbums: statsData?.totalAlbums || navigationData?.stats?.totalAlbums || 0,
+			totalCharacters: statsData?.totalCharacters || navigationData?.stats?.totalCharacters || 0,
+			totalPlaces: statsData?.totalPlaces || navigationData?.stats?.totalPlaces || 0,
+			totalWorldItems: statsData?.totalWorldItems || navigationData?.stats?.totalWorldItems || 0,
+			totalFavorites: statsData?.totalFavorites || navigationData?.stats?.totalFavorites || 0,
+			totalActivities: statsData?.totalActivities || navigationData?.stats?.totalActivities || 0,
+			totalSize: statsData?.totalSize || navigationData?.stats?.totalSize || 0,
+			totalViews: statsData?.totalViews || navigationData?.stats?.totalViews || 0,
+			totalDownloads: statsData?.totalDownloads || navigationData?.stats?.totalDownloads || 0,
+		}),
+		[statsData, navigationData]
+	);
 
 	return {
 		stats,
@@ -127,6 +132,6 @@ export function useCategoryStats() {
 		getCategoryItems,
 		isLoading: isLoadingNavigation || isLoadingStats,
 		navigationData,
-		statsData
+		statsData,
 	};
 }

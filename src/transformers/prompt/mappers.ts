@@ -6,14 +6,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    PromptBase,
-    PromptComplete,
-    PromptCreateInput,
-    PromptFilters,
-    PromptStatistics,
-    PromptUpdateInput,
-    PromptWithRelations,
-    PromptWithStats,
+	PromptBase,
+	PromptComplete,
+	PromptCreateInput,
+	PromptFilters,
+	PromptStatistics,
+	PromptUpdateInput,
+	PromptWithRelations,
+	PromptWithStats,
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt';
 import { serializeParameters, serializeTags } from './serializers';

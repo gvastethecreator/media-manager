@@ -119,18 +119,24 @@ export function useDeleteGroup() {
 	});
 }
 
-export function useRecentGroupMedia(groupId: string, limit: number = 6) {
-  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
-    queryKey: [...groupKeys.detail(groupId), 'media', limit],
-    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/groups/${groupId}/media?limit=${limit}`),
-    enabled: !!groupId,
-  });
+export function useRecentGroupMedia(groupId: string, limit = 6) {
+	return useQuery<
+		Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>,
+		Error
+	>({
+		queryKey: [...groupKeys.detail(groupId), 'media', limit],
+		queryFn: () =>
+			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>>(
+				`/groups/${groupId}/media?limit=${limit}`
+			),
+		enabled: !!groupId,
+	});
 }
 
 export function useGroupCardData(groupId: string) {
-  return useQuery<GroupWithStats, Error>({
-    queryKey: [...groupKeys.detail(groupId), 'card-data'],
-    queryFn: () => apiClient.get<GroupWithStats>(`/groups/${groupId}/card-data`),
-    enabled: !!groupId,
-  });
+	return useQuery<GroupWithStats, Error>({
+		queryKey: [...groupKeys.detail(groupId), 'card-data'],
+		queryFn: () => apiClient.get<GroupWithStats>(`/groups/${groupId}/card-data`),
+		enabled: !!groupId,
+	});
 }

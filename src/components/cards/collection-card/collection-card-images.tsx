@@ -1,7 +1,7 @@
 import { ImageOffIcon, VideoIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useRecentCollectionMedia } from '@/lib/api/collections';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRecentCollectionMedia } from '@/lib/api/collections';
 
 interface CollectionCardImagesProps {
 	collectionId: string;
@@ -13,18 +13,16 @@ interface CollectionCardImagesProps {
  * Componente para mostrar imágenes y videos recientes de una colección.
  * Diseñado con estilo TCG para la sección de "ilustración" de la carta.
  */
-export function CollectionCardImages({
-	collectionId,
-	primaryColor,
-	secondaryColor,
-}: CollectionCardImagesProps) {
+export function CollectionCardImages({ collectionId, primaryColor, secondaryColor }: CollectionCardImagesProps) {
 	const { data: thumbnails, isLoading: loading } = useRecentCollectionMedia(collectionId);
 
 	// Calcular color secundario derivado si no se proporciona
 	const derivedSecondaryColor = secondaryColor || `${primaryColor}90`;
 
 	// Ordenamos para mostrar primero las imágenes
-	const sortedThumbnails = thumbnails ? [...thumbnails].sort((a, b) => (a.isVideo === b.isVideo ? 0 : a.isVideo ? 1 : -1)) : [];
+	const sortedThumbnails = thumbnails
+		? [...thumbnails].sort((a, b) => (a.isVideo === b.isVideo ? 0 : a.isVideo ? 1 : -1))
+		: [];
 
 	// Placeholder para mostrar cuando no hay imágenes
 	const renderPlaceholder = () => (

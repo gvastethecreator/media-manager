@@ -3,20 +3,20 @@
  * @module services/prompt
  */
 
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { prompts, imagePrompts, videoPrompts } from '@/lib/drizzle/schema';
+import { imagePrompts, prompts, videoPrompts } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
 	PromptCreateInput,
+	PromptSearchResult,
 	PromptUpdateInput,
 	PromptWithStats,
-	PromptSearchResult,
 } from '@/types/entities/prompt/types';
-import { eq, asc, desc, like, and, count, or, inArray } from 'drizzle-orm';
-import * as crypto from 'crypto';
 
 // Logger específico para el servicio de prompts
 const logger = serverLogger.withContext('PromptService');
@@ -89,8 +89,16 @@ export const getPromptService = async (id: string): Promise<PromptWithStats | nu
 
 		// Obtener conteos de relaciones
 		const [imageCount, videoCount] = await Promise.all([
-			db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, id)).then(res => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(promptImages)
+				.where(eq(promptImages.promptId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(promptVideos)
+				.where(eq(promptVideos.promptId, id))
+				.then((res) => res[0]?.count || 0),
 		]);
 
 		// Construir prompt con estadísticas
@@ -99,14 +107,18 @@ export const getPromptService = async (id: string): Promise<PromptWithStats | nu
 			_count: {
 				images: imageCount,
 				videos: videoCount,
-			}
+			},
 		};
 
 		logger.info(`✅ Prompt encontrado: ${prompt.name}`);
 		return promptWithStats;
 	} catch (error) {
 		logger.error('❌ Error al obtener prompt por ID', { error, promptId: id });
-		throw createPromptError(`Error al obtener prompt: ${error instanceof Error ? error.message : String(error)}`, PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError(
+			`Error al obtener prompt: ${error instanceof Error ? error.message : String(error)}`,
+			PromptErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 };
 
@@ -128,8 +140,16 @@ export const getPromptsByIdsService = async (ids: string[]): Promise<PromptWithS
 		const promptsWithStats = await Promise.all(
 			promptsResult.map(async (prompt) => {
 				const [imageCount, videoCount] = await Promise.all([
-					db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, prompt.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, prompt.id)).then(res => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(promptImages)
+						.where(eq(promptImages.promptId, prompt.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(promptVideos)
+						.where(eq(promptVideos.promptId, prompt.id))
+						.then((res) => res[0]?.count || 0),
 				]);
 
 				return {
@@ -137,7 +157,7 @@ export const getPromptsByIdsService = async (ids: string[]): Promise<PromptWithS
 					_count: {
 						images: imageCount,
 						videos: videoCount,
-					}
+					},
 				} as PromptWithStats;
 			})
 		);
@@ -209,28 +229,35 @@ export const searchPromptsService = async (
 		// Configurar orden
 		const sortBy = options.sortBy || 'name';
 		const sortOrder = options.sortOrder || 'asc';
-		const orderByClause = sortOrder === 'desc'
-			? desc(prompts[sortBy as keyof typeof prompts] as any)
-			: asc(prompts[sortBy as keyof typeof prompts] as any);
+		const orderByClause =
+			sortOrder === 'desc'
+				? desc(prompts[sortBy as keyof typeof prompts] as any)
+				: asc(prompts[sortBy as keyof typeof prompts] as any);
 
 		// Ejecutar consultas en paralelo
 		const [promptsResult, totalCount] = await Promise.all([
-			db.select().from(prompts)
+			db.select().from(prompts).where(whereClause).orderBy(orderByClause).limit(pageSize).offset(offset),
+			db
+				.select({ count: count() })
+				.from(prompts)
 				.where(whereClause)
-				.orderBy(orderByClause)
-				.limit(pageSize)
-				.offset(offset),
-			db.select({ count: count() }).from(prompts)
-				.where(whereClause)
-				.then(res => res[0]?.count || 0)
+				.then((res) => res[0]?.count || 0),
 		]);
 
 		// Obtener estadísticas para cada prompt
 		const promptsWithStats = await Promise.all(
 			promptsResult.map(async (prompt) => {
 				const [imageCount, videoCount] = await Promise.all([
-					db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, prompt.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, prompt.id)).then(res => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(promptImages)
+						.where(eq(promptImages.promptId, prompt.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(promptVideos)
+						.where(eq(promptVideos.promptId, prompt.id))
+						.then((res) => res[0]?.count || 0),
 				]);
 
 				return {
@@ -238,7 +265,7 @@ export const searchPromptsService = async (
 					_count: {
 						images: imageCount,
 						videos: videoCount,
-					}
+					},
 				} as PromptWithStats;
 			})
 		);
@@ -250,7 +277,7 @@ export const searchPromptsService = async (
 			pageSize,
 			totalPages: Math.ceil(totalCount / pageSize),
 			hasNext: page * pageSize < totalCount,
-			hasPrevious: page > 1
+			hasPrevious: page > 1,
 		};
 
 		logger.info(`✅ Búsqueda completada, encontrados ${result.total} prompts`);
@@ -281,32 +308,35 @@ export const createPromptService = async (data: PromptCreateInput): Promise<Prom
 		}
 
 		// Crear prompt usando Drizzle
-		const newPrompt = await db.insert(prompts).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description,
-			emoji: data.emoji,
-			color: data.color,
-			category: data.category,
-			isPublic: data.isPublic || false,
-			isFavorite: data.isFavorite || false,
-			type: data.type,
-			content: data.content,
-			parameters: data.parameters,
-			style: data.style,
-			mood: data.mood,
-			lighting: data.lighting,
-			composition: data.composition,
-			technique: data.technique,
-			inspiration: data.inspiration,
-			notes: data.notes,
-			featuredImage: data.featuredImage,
-			parentId: data.parentId,
-			totalImages: 0,
-			totalVideos: 0,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const newPrompt = await db
+			.insert(prompts)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description,
+				emoji: data.emoji,
+				color: data.color,
+				category: data.category,
+				isPublic: data.isPublic || false,
+				isFavorite: data.isFavorite || false,
+				type: data.type,
+				content: data.content,
+				parameters: data.parameters,
+				style: data.style,
+				mood: data.mood,
+				lighting: data.lighting,
+				composition: data.composition,
+				technique: data.technique,
+				inspiration: data.inspiration,
+				notes: data.notes,
+				featuredImage: data.featuredImage,
+				parentId: data.parentId,
+				totalImages: 0,
+				totalVideos: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		// Construir prompt con estadísticas
 		const promptWithStats: PromptWithStats = {
@@ -314,7 +344,7 @@ export const createPromptService = async (data: PromptCreateInput): Promise<Prom
 			_count: {
 				images: 0,
 				videos: 0,
-			}
+			},
 		};
 
 		// Notificar creación
@@ -352,7 +382,11 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 
 		// Verificar nombre único si se está actualizando
 		if (data.name && data.name !== existingPrompt[0].name) {
-			const promptWithSameName = await db.select().from(prompts).where(and(eq(prompts.name, data.name), eq(prompts.id, id))).limit(1);
+			const promptWithSameName = await db
+				.select()
+				.from(prompts)
+				.where(and(eq(prompts.name, data.name), eq(prompts.id, id)))
+				.limit(1);
 
 			if (promptWithSameName.length > 0) {
 				throw createPromptError(`Ya existe un prompt con el nombre "${data.name}"`, PromptErrorCode.ALREADY_EXISTS);
@@ -385,15 +419,20 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 		if (data.parentId !== undefined) updateData.parentId = data.parentId;
 
 		// Actualizar prompt usando Drizzle
-		const updatedPrompt = await db.update(prompts)
-			.set(updateData)
-			.where(eq(prompts.id, id))
-			.returning();
+		const updatedPrompt = await db.update(prompts).set(updateData).where(eq(prompts.id, id)).returning();
 
 		// Obtener estadísticas actualizadas
 		const [imageCount, videoCount] = await Promise.all([
-			db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, id)).then(res => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(promptImages)
+				.where(eq(promptImages.promptId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(promptVideos)
+				.where(eq(promptVideos.promptId, id))
+				.then((res) => res[0]?.count || 0),
 		]);
 
 		const promptWithStats: PromptWithStats = {
@@ -401,7 +440,7 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 			_count: {
 				images: imageCount,
 				videos: videoCount,
-			}
+			},
 		};
 
 		// Notificar actualización

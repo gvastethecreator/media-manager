@@ -1,9 +1,15 @@
 'use client';
 
-import { useLogActivity } from '@/lib/api/activity';
-import { useAddTags, useRemoveTags, useAddToCollection, useRemoveFromCollection, useToggleFavorite } from '@/lib/api/files';
-import { clientEvents } from '@/lib/client/events.client';
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+import { useLogActivity } from '@/lib/api/activity';
+import {
+	useAddTags,
+	useAddToCollection,
+	useRemoveFromCollection,
+	useRemoveTags,
+	useToggleFavorite,
+} from '@/lib/api/files';
+import { clientEvents } from '@/lib/client/events.client';
 
 export interface FileItem {
 	id: string;
@@ -187,18 +193,18 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 	const addToCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			fileIds.forEach(fileId => {
-        addToCollectionMutate({ fileId, collectionId });
-      });
+			fileIds.forEach((fileId) => {
+				addToCollectionMutate({ fileId, collectionId });
+			});
 		},
 		[addToCollectionMutate]
 	);
 
 	const removeFromCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			fileIds.forEach(fileId => {
-        removeFromCollectionMutate({ fileId, collectionId });
-      });
+			fileIds.forEach((fileId) => {
+				removeFromCollectionMutate({ fileId, collectionId });
+			});
 		},
 		[removeFromCollectionMutate]
 	);
@@ -208,18 +214,18 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 	const addTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			fileIds.forEach(fileId => {
-        addTagsMutate({ fileId, tags });
-      });
+			fileIds.forEach((fileId) => {
+				addTagsMutate({ fileId, tags });
+			});
 		},
 		[addTagsMutate]
 	);
 
 	const removeTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			fileIds.forEach(fileId => {
-        removeTagsMutate({ fileId, tags });
-      });
+			fileIds.forEach((fileId) => {
+				removeTagsMutate({ fileId, tags });
+			});
 		},
 		[removeTagsMutate]
 	);
@@ -267,10 +273,10 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			prev.map((file) =>
 				file.id === fileId
 					? {
-						...file,
-						name: newName,
-						path: file.path.replace(/[^/]+$/, newName),
-					}
+							...file,
+							name: newName,
+							path: file.path.replace(/[^/]+$/, newName),
+						}
 					: file
 			)
 		);

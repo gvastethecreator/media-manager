@@ -1,11 +1,11 @@
 import { MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useAudio } from '@/lib/api/audio';
 import { cn } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
-import { useAudio } from '@/lib/api/audio';
 
 export interface AudioCardProps {
 	audioId: string;

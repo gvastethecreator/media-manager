@@ -4,13 +4,13 @@
  * @description Vista que se adapta automáticamente según el viewMode y usa EntityCard con layouts
  */
 
-import React, { memo, useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import { cn } from '@/lib/utils';
+import React, { memo, useMemo } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
+import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
+import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
-import type { CardLayout, CardVariant, CardSize } from '@/components/cards/types/card-layout.types';
 
 interface AdaptiveFileBrowserViewProps {
 	items: EntityWithStats[];
@@ -38,25 +38,25 @@ export const AdaptiveFileBrowserView = memo<AdaptiveFileBrowserViewProps>(functi
 	// Configuración de layout basada en el viewMode
 	const layoutConfig = useMemo(() => {
 		const configs: Record<string, { layout: CardLayout; variant: CardVariant; size: CardSize; preset?: string }> = {
-			'grid': {
+			grid: {
 				layout: 'vertical',
 				variant: 'default',
 				size: 'md',
 				preset: 'file-browser-grid',
 			},
-			'list': {
+			list: {
 				layout: 'horizontal',
 				variant: 'minimal',
 				size: 'sm',
 				preset: 'file-browser-list',
 			},
-			'cards': {
+			cards: {
 				layout: 'complete',
 				variant: 'elevated',
 				size: 'lg',
 				preset: 'file-browser-cards',
 			},
-			'masonry': {
+			masonry: {
 				layout: 'masonry',
 				variant: 'default',
 				size: 'auto',
@@ -104,7 +104,7 @@ export const AdaptiveFileBrowserView = memo<AdaptiveFileBrowserViewProps>(functi
 					columns: Math.max(1, Math.floor(containerWidth / 250)),
 					gap: 12,
 				};
-						case 'grid':
+			case 'grid':
 			default: {
 				const minCellSize = itemSize || 200;
 				const gap = 12;

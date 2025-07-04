@@ -70,23 +70,25 @@ export const characterStatisticsSchema = z.object({
  */
 export const characterWithStatsSchema = characterBaseSchema.extend({
 	statistics: characterStatisticsSchema,
-	_count: z.object({
-		images: z.number().optional(),
-		videos: z.number().optional(),
-		tags: z.number().optional(),
-		groups: z.number().optional(),
-		properties: z.number().optional(),
-		collections: z.number().optional(),
-		albums: z.number().optional(),
-		places: z.number().optional(),
-		worldItems: z.number().optional(),
-		concepts: z.number().optional(),
-		prompts: z.number().optional(),
-		notes: z.number().optional(),
-		wildcards: z.number().optional(),
-		relatedCharacters: z.number().optional(),
-		relatedTo: z.number().optional(),
-	}).optional(),
+	_count: z
+		.object({
+			images: z.number().optional(),
+			videos: z.number().optional(),
+			tags: z.number().optional(),
+			groups: z.number().optional(),
+			properties: z.number().optional(),
+			collections: z.number().optional(),
+			albums: z.number().optional(),
+			places: z.number().optional(),
+			worldItems: z.number().optional(),
+			concepts: z.number().optional(),
+			prompts: z.number().optional(),
+			notes: z.number().optional(),
+			wildcards: z.number().optional(),
+			relatedCharacters: z.number().optional(),
+			relatedTo: z.number().optional(),
+		})
+		.optional(),
 });
 
 /**

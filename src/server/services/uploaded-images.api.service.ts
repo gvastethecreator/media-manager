@@ -251,7 +251,8 @@ function _ensureSerializable<T>(obj: T): T {
 		typeof obj === 'object' &&
 		!(obj instanceof Date) &&
 		!(obj instanceof RegExp) &&
-		!(obj instanceof Map) &&		!(obj instanceof Set)
+		!(obj instanceof Map) &&
+		!(obj instanceof Set)
 	) {
 		// Crear copia para no modificar el original
 		const result = { ...obj } as Record<string, any>;

@@ -1,15 +1,10 @@
-import { clientLogger } from '@/lib/logger/client-logger';
+import { StateCreator } from 'zustand';
 // Ahora usamos el cliente de API y no el servicio del servidor
-import {
-    createNoteInApi,
-    deleteNoteFromApi,
-    getNotesFromApi,
-    updateNoteInApi,
-} from '@/lib/api/client/note.client';
+import { createNoteInApi, deleteNoteFromApi, getNotesFromApi, updateNoteInApi } from '@/lib/api/client/note.client';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import { adaptNoteCompleteToWithStats, adaptNotesCompleteToWithStats } from '@/transformers/note/note-adapter';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');
@@ -112,7 +107,7 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('🔄 Cargando notas');
-                        const notesData = await getNotesFromApi();
+			const notesData = await getNotesFromApi();
 
 			// Convertir NoteComplete[] a NoteWithStats[] usando el adaptador
 			const notesWithStats = adaptNotesCompleteToWithStats(notesData);
@@ -146,7 +141,7 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('✨ Creando nota:', note);
-                        const newNoteData = await createNoteInApi(note);
+			const newNoteData = await createNoteInApi(note);
 
 			// Convertir NoteComplete a NoteWithStats usando el adaptador
 			const newNote = adaptNoteCompleteToWithStats(newNoteData);
@@ -175,7 +170,7 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('🔄 Actualizando nota:', { id, noteData });
-                        const updatedNoteData = await updateNoteInApi(id, noteData);
+			const updatedNoteData = await updateNoteInApi(id, noteData);
 
 			// Convertir NoteComplete a NoteWithStats usando el adaptador
 			const updatedNote = adaptNoteCompleteToWithStats(updatedNoteData);
@@ -207,7 +202,7 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			coreLogger.info('🗑️ Eliminando nota:', id);
 
 			// Llamar a la acción de borrado
-                    await deleteNoteFromApi(id);
+			await deleteNoteFromApi(id);
 
 			// Actualizar el estado local
 			const newNotes = { ...get().notes };

@@ -4,17 +4,17 @@
  * @description Gestiona el estado y las acciones CRUD para la entidad Document.
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
-// Uso del cliente de API para documentos
-import {
-    createDocumentInApi,
-    deleteDocumentFromApi,
-    getDocumentsFromApi,
-    updateDocumentInApi,
-} from '@/lib/api/client/document.client';
-import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
+// Uso del cliente de API para documentos
+import {
+	createDocumentInApi,
+	deleteDocumentFromApi,
+	getDocumentsFromApi,
+	updateDocumentInApi,
+} from '@/lib/api/client/document.client';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast';
 import type { DocumentCoreActions, DocumentCoreState, DocumentStore } from '../types';
 
 const logger = clientLogger.withContext('DocumentCoreSlice');
@@ -42,7 +42,7 @@ export const createDocumentCoreSlice: StateCreator<
 		});
 
 		try {
-                        const documents = await getDocumentsFromApi();
+			const documents = await getDocumentsFromApi();
 			set((state) => {
 				state.documents = documents.reduce(
 					(acc, doc) => {
@@ -70,7 +70,7 @@ export const createDocumentCoreSlice: StateCreator<
 
 	createDocument: async (data) => {
 		try {
-                        await createDocumentInApi(data);
+			await createDocumentInApi(data);
 			toastService.success(`Documento "${data.name}" creado.`);
 			await get().loadDocuments();
 		} catch (error) {
@@ -82,7 +82,7 @@ export const createDocumentCoreSlice: StateCreator<
 
 	updateDocument: async (id, data) => {
 		try {
-                        await updateDocumentInApi(id, data);
+			await updateDocumentInApi(id, data);
 			toastService.success('Documento actualizado.');
 			await get().loadDocuments();
 		} catch (error) {
@@ -100,7 +100,7 @@ export const createDocumentCoreSlice: StateCreator<
 			})
 		);
 		try {
-                        await deleteDocumentFromApi(id);
+			await deleteDocumentFromApi(id);
 			toastService.success(`Documento "${docName}" eliminado.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al eliminar el documento.';

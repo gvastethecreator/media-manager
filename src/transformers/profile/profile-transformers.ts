@@ -4,11 +4,11 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import type { Profile } from '@/types/entities/profile';
 import { Language, type ProfileBase, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 /**
  * Tipo para el perfil extendido con datos adicionales

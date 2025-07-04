@@ -1,6 +1,12 @@
 import { Router } from 'express';
-import { getDocuments, createDocument, updateDocument, deleteDocument, getDocumentById } from '@/services/document/document.service';
 import { z } from 'zod';
+import {
+	createDocument,
+	deleteDocument,
+	getDocumentById,
+	getDocuments,
+	updateDocument,
+} from '@/services/document/document.service';
 
 const router = Router();
 

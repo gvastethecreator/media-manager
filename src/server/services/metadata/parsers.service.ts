@@ -40,7 +40,7 @@ export interface AIGenerationParserModule {
 
 	/**
 	 * Función para extraer y convertir los metadatos
-	 */	parse: ParserFunction;
+	 */ parse: ParserFunction;
 }
 
 /**
@@ -111,9 +111,9 @@ const a1111Parser: AIGenerationParserModule = {
 			type: 'Automatic1111',
 			prompt: promptMatch ? promptMatch[1].trim() : undefined,
 			negative_prompt: negativePromptMatch ? negativePromptMatch[1].trim() : undefined,
-			steps: stepsMatch ? parseInt(stepsMatch[1]) : undefined,
-			cfg_scale: cfgScaleMatch ? parseFloat(cfgScaleMatch[1]) : undefined,
-			seed: seedMatch ? parseInt(seedMatch[1]) : undefined,
+			steps: stepsMatch ? Number.parseInt(stepsMatch[1]) : undefined,
+			cfg_scale: cfgScaleMatch ? Number.parseFloat(cfgScaleMatch[1]) : undefined,
+			seed: seedMatch ? Number.parseInt(seedMatch[1]) : undefined,
 			sampler: samplerMatch ? samplerMatch[1].trim() : undefined,
 			model: modelMatch ? modelMatch[1].trim() : undefined,
 		};
@@ -138,7 +138,8 @@ const comfyuiParser: AIGenerationParserModule = {
 			const node = promptData[nodeId];
 			if (node.class_type === 'CLIPTextEncode') {
 				if (node.inputs.text) {
-					if (!prompt) prompt = node.inputs.text; // Asume el primer prompt es el principal
+					if (!prompt)
+						prompt = node.inputs.text; // Asume el primer prompt es el principal
 					else negative_prompt = node.inputs.text; // Asume el segundo es el negativo
 				}
 			}
@@ -193,9 +194,9 @@ const novelaiParser: AIGenerationParserModule = {
 			type: 'NovelAI',
 			prompt: promptMatch ? promptMatch[1].trim() : undefined,
 			negative_prompt: negativePromptMatch ? negativePromptMatch[1].trim() : undefined,
-			steps: stepsMatch ? parseInt(stepsMatch[1]) : undefined,
-			cfg_scale: scaleMatch ? parseFloat(scaleMatch[1]) : undefined,
-			seed: seedMatch ? parseInt(seedMatch[1]) : undefined,
+			steps: stepsMatch ? Number.parseInt(stepsMatch[1]) : undefined,
+			cfg_scale: scaleMatch ? Number.parseFloat(scaleMatch[1]) : undefined,
+			seed: seedMatch ? Number.parseInt(seedMatch[1]) : undefined,
 			sampler: samplerMatch ? samplerMatch[1].trim() : undefined,
 		};
 	},

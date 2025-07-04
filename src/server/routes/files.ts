@@ -7,14 +7,14 @@
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	getFileInfo,
-	getDirectoryInfo,
+	copyFile,
 	createDirectory,
 	deleteFile,
+	getDirectoryInfo,
 	getFileAsDataUrl,
-	renameFile,
-	copyFile,
+	getFileInfo,
 	moveFile,
+	renameFile,
 } from '@/services/file/file.service';
 
 const router = express.Router();
@@ -37,7 +37,7 @@ router.get('/info/*', async (req, res) => {
 		logger.error('Error obteniendo información del archivo:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });
@@ -59,7 +59,7 @@ router.get('/directory/*', async (req, res) => {
 		logger.error('Error obteniendo contenido del directorio:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });
@@ -81,7 +81,7 @@ router.post('/directory', async (req, res) => {
 		logger.error('Error creando directorio:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });
@@ -103,7 +103,7 @@ router.delete('/*', async (req, res) => {
 		logger.error('Error eliminando archivo:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });
@@ -125,7 +125,7 @@ router.get('/dataurl/*', async (req, res) => {
 		logger.error('Error obteniendo Data URL:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });
@@ -147,7 +147,7 @@ router.put('/rename', async (req, res) => {
 		logger.error('Error renombrando archivo:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });
@@ -169,7 +169,7 @@ router.post('/copy', async (req, res) => {
 		logger.error('Error copiando archivo:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });
@@ -191,7 +191,7 @@ router.post('/move', async (req, res) => {
 		logger.error('Error moviendo archivo:', error);
 		res.status(500).json({
 			success: false,
-			error: error instanceof Error ? error.message : 'Error interno del servidor'
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
 		});
 	}
 });

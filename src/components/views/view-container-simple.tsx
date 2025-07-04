@@ -61,10 +61,10 @@ export const ViewContainer = memo(function ViewContainer() {
 				return (
 					<div className="p-8">
 						<h3 className="text-xl font-semibold mb-4">🏠 Vista: {currentView}</h3>
-						<p className="text-muted-foreground">Vista genérica para: <strong>{currentView}</strong></p>
-						<p className="text-xs text-blue-600 mt-2">
-							ℹ️ Esta vista no tiene implementación específica
+						<p className="text-muted-foreground">
+							Vista genérica para: <strong>{currentView}</strong>
 						</p>
+						<p className="text-xs text-blue-600 mt-2">ℹ️ Esta vista no tiene implementación específica</p>
 					</div>
 				);
 		}
@@ -72,9 +72,7 @@ export const ViewContainer = memo(function ViewContainer() {
 
 	return (
 		<div className="h-full w-full flex flex-col overflow-hidden">
-			<div className="flex-1 min-h-0 flex flex-col">
-				{renderView()}
-			</div>
+			<div className="flex-1 min-h-0 flex flex-col">{renderView()}</div>
 		</div>
 	);
 });

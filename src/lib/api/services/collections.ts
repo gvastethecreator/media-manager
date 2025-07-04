@@ -4,8 +4,8 @@
  * ✅ Reemplaza server actions de collections con API calls
  */
 
+import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import { apiClient } from '../client';
-import type { CollectionWithStats, CollectionCreateInput, CollectionUpdateInput } from '@/types/entities/collection';
 
 export const collectionsApi = {
 	/**
@@ -150,7 +150,9 @@ export async function getCollectionStats(options: { userId?: string } = {}): Pro
 /**
  * Busca colecciones con filtros avanzados
  */
-export async function searchCollections(options: GetCollectionsOptions & { searchTerm: string }): Promise<CollectionCardData[]> {
+export async function searchCollections(
+	options: GetCollectionsOptions & { searchTerm: string }
+): Promise<CollectionCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -164,16 +166,23 @@ export async function searchCollections(options: GetCollectionsOptions & { searc
 /**
  * Obtiene elementos recientes de una colección
  */
-export async function getCollectionRecentItems(collectionId: string, limit = 6): Promise<Array<{
-	id: string;
-	type: 'image' | 'video' | 'album';
-	thumbnailUrl?: string;
-	name?: string;
-}>> {
-	return apiClient.get<Array<{
+export async function getCollectionRecentItems(
+	collectionId: string,
+	limit = 6
+): Promise<
+	Array<{
 		id: string;
 		type: 'image' | 'video' | 'album';
 		thumbnailUrl?: string;
 		name?: string;
-	}>>(`/collections/${collectionId}/recent-items?limit=${limit}`);
+	}>
+> {
+	return apiClient.get<
+		Array<{
+			id: string;
+			type: 'image' | 'video' | 'album';
+			thumbnailUrl?: string;
+			name?: string;
+		}>
+	>(`/collections/${collectionId}/recent-items?limit=${limit}`);
 }

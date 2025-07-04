@@ -7,14 +7,7 @@ const router = express.Router();
 // GET /wildcards/cards - Obtener wildcards para mostrar en galería de cards (migrado desde server actions)
 router.get('/cards', async (req, res) => {
 	try {
-		const {
-			limit = '20',
-			category,
-			parentId,
-			searchTerm,
-			orderBy = 'updatedAt',
-			orderDir = 'desc'
-		} = req.query;
+		const { limit = '20', category, parentId, searchTerm, orderBy = 'updatedAt', orderDir = 'desc' } = req.query;
 
 		const options = {
 			search: searchTerm as string,
@@ -118,7 +111,7 @@ router.get('/:id/recent-images', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const limit = Number(req.query.limit) || 4;
-		const images = await getWildcard(id).then(wildcard => wildcard?.images.slice(0, limit) || []);
+		const images = await getWildcard(id).then((wildcard) => wildcard?.images.slice(0, limit) || []);
 		res.json(images);
 	} catch (error) {
 		console.error('Error getting recent wildcard images:', error);
@@ -135,19 +128,18 @@ router.post('/', async (req, res) => {
 			return res.status(400).json({ error: 'El nombre y contenido son requeridos' });
 		}
 
-		const wildcard = await getWildcard(id).then(wildcard => {
+		const wildcard = await getWildcard(id).then((wildcard) => {
 			if (wildcard) {
 				return wildcard;
-			} else {
-				return getWildcards({ search: name, limit: 1 }).then(result => result.wildcards[0]);
 			}
+			return getWildcards({ search: name, limit: 1 }).then((result) => result.wildcards[0]);
 		});
 
 		if (!wildcard) {
 			return res.status(500).json({ error: 'Error al obtener el wildcard' });
 		}
 
-		const updatedWildcard = await getWildcard(wildcard.id).then(wildcard => {
+		const updatedWildcard = await getWildcard(wildcard.id).then((wildcard) => {
 			if (wildcard) {
 				return {
 					...wildcard,
@@ -157,9 +149,8 @@ router.post('/', async (req, res) => {
 					category,
 					tags,
 				};
-			} else {
-				return null;
 			}
+			return null;
 		});
 
 		if (!updatedWildcard) {
@@ -194,12 +185,11 @@ router.put('/:id', async (req, res) => {
 			tags,
 		};
 
-		const result = await getWildcards({ search: name, limit: 1 }).then(result => {
+		const result = await getWildcards({ search: name, limit: 1 }).then((result) => {
 			if (result.wildcards.length > 0) {
 				return null;
-			} else {
-				return updatedWildcard;
 			}
+			return updatedWildcard;
 		});
 
 		if (!result) {

@@ -1,12 +1,13 @@
 // Usar servicio de thumbnails en lugar de server action
-import { thumbnailService } from '@/services/thumbnail/thumbnail.service';
+
+import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
+import { Router } from 'express';
+import { z } from 'zod';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
 import { folders, images } from '@/lib/drizzle/schema';
 import { imageService } from '@/services/image/image.service';
-import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
-import { Router } from 'express';
-import { z } from 'zod';
+import { thumbnailService } from '@/services/thumbnail/thumbnail.service';
 import { processImage } from '../services/image-processing.service';
 
 const router = Router();
@@ -102,69 +103,69 @@ router.get('/', async (req, res) => {
 
 		// Búsqueda por texto
 		if (filters.search) {
-			conditions.push(
-				or(
-					like(images.name, `%${filters.search}%`),
-					like(images.description, `%${filters.search}%`)
-				)
-			);
+			conditions.push(or(like(images.name, `%${filters.search}%`), like(images.description, `%${filters.search}%`)));
 		}
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 		// Determinar orden
-		const orderByClause = filters.sortOrder === 'desc'
-			? desc(images[filters.sortBy || 'createdAt'] as any)
-			: asc(images[filters.sortBy || 'createdAt'] as any);
+		const orderByClause =
+			filters.sortOrder === 'desc'
+				? desc(images[filters.sortBy || 'createdAt'] as any)
+				: asc(images[filters.sortBy || 'createdAt'] as any);
 
 		// Ejecutar consultas en paralelo
 		const [imageResults, totalCount] = await Promise.all([
-			db.select({
-				id: images.id,
-				name: images.name,
-				description: images.description,
-				path: images.path,
-				hash: images.hash,
-				size: images.size,
-				width: images.width,
-				height: images.height,
-				metadata: images.metadata,
-				thumbnail: images.thumbnail,
-				thumbnailSize: images.thumbnailSize,
-				thumbnailWidth: images.thumbnailWidth,
-				thumbnailHeight: images.thumbnailHeight,
-				thumbnailMimeType: images.thumbnailMimeType,
-				isFavorite: images.isFavorite,
-				folderId: images.folderId,
-				noteId: images.noteId,
-				createdAt: images.createdAt,
-				updatedAt: images.updatedAt,
-				addedAt: images.addedAt,
-				// Incluir datos de folder
-				folderName: folders.name,
-				folderPath: folders.path
-			})
-			.from(images)
-			.leftJoin(folders, eq(images.folderId, folders.id))
-			.where(whereClause)
-			.orderBy(orderByClause)
-			.limit(filters.limit || 20)
-			.offset(filters.offset || 0),
+			db
+				.select({
+					id: images.id,
+					name: images.name,
+					description: images.description,
+					path: images.path,
+					hash: images.hash,
+					size: images.size,
+					width: images.width,
+					height: images.height,
+					metadata: images.metadata,
+					thumbnail: images.thumbnail,
+					thumbnailSize: images.thumbnailSize,
+					thumbnailWidth: images.thumbnailWidth,
+					thumbnailHeight: images.thumbnailHeight,
+					thumbnailMimeType: images.thumbnailMimeType,
+					isFavorite: images.isFavorite,
+					folderId: images.folderId,
+					noteId: images.noteId,
+					createdAt: images.createdAt,
+					updatedAt: images.updatedAt,
+					addedAt: images.addedAt,
+					// Incluir datos de folder
+					folderName: folders.name,
+					folderPath: folders.path,
+				})
+				.from(images)
+				.leftJoin(folders, eq(images.folderId, folders.id))
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(filters.limit || 20)
+				.offset(filters.offset || 0),
 
-			db.select({ count: count() })
-			.from(images)
-			.where(whereClause)
-			.then(result => result[0]?.count || 0)
+			db
+				.select({ count: count() })
+				.from(images)
+				.where(whereClause)
+				.then((result) => result[0]?.count || 0),
 		]);
 
 		// Formatear respuesta para compatibilidad
-		const formattedImages = imageResults.map(img => ({
+		const formattedImages = imageResults.map((img) => ({
 			...img,
-			folder: img.folderName ? {
-				id: img.folderId,
-				name: img.folderName,
-				path: img.folderPath
-			} : null,
+			folder: img.folderName
+				? {
+						id: img.folderId,
+						name: img.folderName,
+						path: img.folderPath,
+					}
+				: null,
 			// Para compatibilidad - estos se implementarán después
 			albums: [],
 			tags: [],
@@ -176,8 +177,8 @@ router.get('/', async (req, res) => {
 				tags: 0,
 				characters: 0,
 				collections: 0,
-				activities: 0
-			}
+				activities: 0,
+			},
 		}));
 
 		res.json({
@@ -208,35 +209,36 @@ router.get('/:id', async (req, res) => {
 			return res.status(400).json({ error: 'ID de imagen inválido' });
 		}
 
-		const imageResult = await db.select({
-			id: images.id,
-			name: images.name,
-			description: images.description,
-			path: images.path,
-			hash: images.hash,
-			size: images.size,
-			width: images.width,
-			height: images.height,
-			metadata: images.metadata,
-			isFavorite: images.isFavorite,
-			folderId: images.folderId,
-			createdAt: images.createdAt,
-			updatedAt: images.updatedAt,
-			noteId: images.noteId,
-			thumbnail: images.thumbnail,
-			thumbnailSize: images.thumbnailSize,
-			thumbnailWidth: images.thumbnailWidth,
-			thumbnailHeight: images.thumbnailHeight,
-			thumbnailMimeType: images.thumbnailMimeType,
-			addedAt: images.addedAt,
-			// Datos del folder
-			folderName: folders.name,
-			folderPath: folders.path
-		})
-		.from(images)
-		.leftJoin(folders, eq(images.folderId, folders.id))
-		.where(eq(images.id, id))
-		.limit(1);
+		const imageResult = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				description: images.description,
+				path: images.path,
+				hash: images.hash,
+				size: images.size,
+				width: images.width,
+				height: images.height,
+				metadata: images.metadata,
+				isFavorite: images.isFavorite,
+				folderId: images.folderId,
+				createdAt: images.createdAt,
+				updatedAt: images.updatedAt,
+				noteId: images.noteId,
+				thumbnail: images.thumbnail,
+				thumbnailSize: images.thumbnailSize,
+				thumbnailWidth: images.thumbnailWidth,
+				thumbnailHeight: images.thumbnailHeight,
+				thumbnailMimeType: images.thumbnailMimeType,
+				addedAt: images.addedAt,
+				// Datos del folder
+				folderName: folders.name,
+				folderPath: folders.path,
+			})
+			.from(images)
+			.leftJoin(folders, eq(images.folderId, folders.id))
+			.where(eq(images.id, id))
+			.limit(1);
 
 		const image = imageResult[0];
 		if (!image) {
@@ -246,11 +248,13 @@ router.get('/:id', async (req, res) => {
 		// Formatear respuesta para compatibilidad
 		const formattedImage = {
 			...image,
-			folder: image.folderName ? {
-				id: image.folderId,
-				name: image.folderName,
-				path: image.folderPath
-			} : null,
+			folder: image.folderName
+				? {
+						id: image.folderId,
+						name: image.folderName,
+						path: image.folderPath,
+					}
+				: null,
 			// Para compatibilidad - estos se pueden implementar después con subqueries
 			albums: [],
 			tags: [],
@@ -262,8 +266,8 @@ router.get('/:id', async (req, res) => {
 				tags: 0,
 				characters: 0,
 				collections: 0,
-				activities: 0
-			}
+				activities: 0,
+			},
 		};
 
 		res.json(formattedImage);
@@ -389,4 +393,3 @@ router.post('/:id/process', async (req, res) => {
 });
 
 export { router as imagesRouter };
-

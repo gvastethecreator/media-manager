@@ -9,7 +9,7 @@ import { boolean, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg
 
 /**
  * 📄 Tabla de documentos en la base de datos.
- * 
+ *
  * @description Representa documentos de texto (PDF, DOC, TXT, etc.) con metadatos y contenido.
  */
 export const documentsTable = pgTable('documents', {
@@ -17,25 +17,25 @@ export const documentsTable = pgTable('documents', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	path: text('path').notNull(),
-	
+
 	// Propiedades del archivo
 	size: integer('size').notNull(),
 	hash: text('hash').notNull(),
 	mimeType: text('mime_type').notNull(),
 	extension: text('extension').notNull(),
-	
+
 	// Relaciones
 	folderId: uuid('folder_id').notNull(),
-	
+
 	// Estados
 	isFavorite: boolean('is_favorite').notNull().default(false),
 	isArchived: boolean('is_archived').notNull().default(false),
-	
+
 	// Metadatos de documento
 	pageCount: integer('page_count'),
 	wordCount: integer('word_count'),
 	language: text('language'),
-	
+
 	// Metadatos de PDF/documento
 	title: text('title'),
 	author: text('author'),
@@ -47,11 +47,11 @@ export const documentsTable = pgTable('documents', {
 	modificationDate: timestamp('modification_date', { withTimezone: true }),
 	encrypted: boolean('encrypted'),
 	version: text('version'),
-	
+
 	// Contenido
 	content: text('content'), // Texto extraído del documento
 	summary: text('summary'), // Resumen generado automáticamente
-	
+
 	// Timestamps del sistema
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

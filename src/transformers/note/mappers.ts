@@ -90,10 +90,7 @@ export function mapCreateNoteDataToDrizzle(data: NoteCreateInput): DrizzleCreate
  * Retorna un objeto con data para ser usado en update
  * ✅ MIGRADO A DRIZZLE
  */
-export function mapUpdateNoteDataToDrizzle(
-	id: string,
-	data: NoteUpdateInput
-): DrizzleUpdateResult {
+export function mapUpdateNoteDataToDrizzle(id: string, data: NoteUpdateInput): DrizzleUpdateResult {
 	try {
 		const {
 			images,
@@ -207,12 +204,7 @@ export function toNoteWithStats(note: any): any {
 		const readingTime = Math.max(1, Math.ceil(wordCount / 200)); // ~200 palabras por minuto
 
 		// Calcular puntuación de completitud
-		const completenessFields = [
-			note.title,
-			note.content,
-			note.category,
-			note.status,
-		];
+		const completenessFields = [note.title, note.content, note.category, note.status];
 		const completenessScore = Math.round((completenessFields.filter(Boolean).length / completenessFields.length) * 100);
 
 		// Extraer conteos de relaciones

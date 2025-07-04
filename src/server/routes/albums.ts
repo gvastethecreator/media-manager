@@ -1,11 +1,11 @@
+import { asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { albums, images, videos, imageAlbums } from '@/lib/drizzle/schema';
-import { eq, like, or, desc, asc, count } from 'drizzle-orm';
-import { serializeAlbum } from '@/transformers/album';
+import { albums, imageAlbums, images, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
+import { serializeAlbum } from '@/transformers/album';
 import type { AlbumWithStats } from '@/types/entities/album';
 
 /**
@@ -87,12 +87,7 @@ albumsRouter.get('/', async (req, res) => {
 	try {
 		const whereConditions = [];
 		if (search) {
-			whereConditions.push(
-				or(
-					like(albums.name, `%${search}%`),
-					like(albums.description, `%${search}%`),
-				),
-			);
+			whereConditions.push(or(like(albums.name, `%${search}%`), like(albums.description, `%${search}%`)));
 		}
 
 		const orderByColumn = albums[sortBy];
@@ -108,7 +103,10 @@ albumsRouter.get('/', async (req, res) => {
 				limit: limit,
 				offset: offset,
 			}),
-			db.select({ count: count() }).from(albums).where(and(...whereConditions)),
+			db
+				.select({ count: count() })
+				.from(albums)
+				.where(and(...whereConditions)),
 		]);
 
 		const total = totalResult[0].count;
@@ -384,7 +382,10 @@ albumsRouter.get('/:id/card-data', async (req, res) => {
 
 		// Obtener imágenes recientes relacionadas con este álbum
 		const recentImages = await db.query.images.findMany({
-			where: inArray(images.id, album.images.map((img) => img.id)),
+			where: inArray(
+				images.id,
+				album.images.map((img) => img.id)
+			),
 			columns: {
 				id: true,
 				path: true,
@@ -399,7 +400,10 @@ albumsRouter.get('/:id/card-data', async (req, res) => {
 
 		// Obtener videos recientes relacionados con este álbum
 		const recentVideos = await db.query.videos.findMany({
-			where: inArray(videos.id, album.videos.map((vid) => vid.id)),
+			where: inArray(
+				videos.id,
+				album.videos.map((vid) => vid.id)
+			),
 			columns: {
 				id: true,
 				path: true,
@@ -502,12 +506,7 @@ albumsRouter.get('/cards', async (req, res) => {
 		}
 
 		if (searchTerm) {
-			conditions.push(
-				or(
-					like(albums.name, `%${searchTerm}%`),
-					like(albums.description, `%${searchTerm}%`)
-				)
-			);
+			conditions.push(or(like(albums.name, `%${searchTerm}%`), like(albums.description, `%${searchTerm}%`)));
 		}
 
 		if (isFavorite === 'true') {
@@ -515,26 +514,29 @@ albumsRouter.get('/cards', async (req, res) => {
 		}
 
 		// Ordenamiento
-		const orderColumn = orderBy === 'name' ? albums.name : orderBy === 'createdAt' ? albums.createdAt : albums.updatedAt;
+		const orderColumn =
+			orderBy === 'name' ? albums.name : orderBy === 'createdAt' ? albums.createdAt : albums.updatedAt;
 		const orderDirection = orderDir === 'asc' ? asc : desc;
 
 		const albumResults = await db.query.albums.findMany({
 			where: conditions.length > 0 ? and(...conditions) : undefined,
-			with: includeStatsFlag ? {
-				images: { columns: { id: true } },
-				videos: { columns: { id: true } },
-				collections: { columns: { id: true } },
-				tags: { columns: { id: true } },
-				characters: { columns: { id: true } },
-				places: { columns: { id: true } },
-				worldItems: { columns: { id: true } },
-				concepts: { columns: { id: true } },
-				prompts: { columns: { id: true } },
-				notes: { columns: { id: true } },
-				wildcards: { columns: { id: true } },
-				properties: { columns: { id: true } },
-				groups: { columns: { id: true } },
-			} : undefined,
+			with: includeStatsFlag
+				? {
+						images: { columns: { id: true } },
+						videos: { columns: { id: true } },
+						collections: { columns: { id: true } },
+						tags: { columns: { id: true } },
+						characters: { columns: { id: true } },
+						places: { columns: { id: true } },
+						worldItems: { columns: { id: true } },
+						concepts: { columns: { id: true } },
+						prompts: { columns: { id: true } },
+						notes: { columns: { id: true } },
+						wildcards: { columns: { id: true } },
+						properties: { columns: { id: true } },
+						groups: { columns: { id: true } },
+					}
+				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
 		});
@@ -542,25 +544,37 @@ albumsRouter.get('/cards', async (req, res) => {
 		// Transformar resultados a AlbumCardData
 		const results: AlbumCardData[] = albumResults.map((album) => ({
 			...album,
-			stats: includeStatsFlag ? {
-				imageCount: album.images?.length || 0,
-				videoCount: album.videos?.length || 0,
-				collectionCount: album.collections?.length || 0,
-				tagCount: album.tags?.length || 0,
-				characterCount: album.characters?.length || 0,
-				placeCount: album.places?.length || 0,
-				worldItemCount: album.worldItems?.length || 0,
-				conceptCount: album.concepts?.length || 0,
-				promptCount: album.prompts?.length || 0,
-				noteCount: album.notes?.length || 0,
-				wildcardCount: album.wildcards?.length || 0,
-				propertyCount: album.properties?.length || 0,
-				groupCount: album.groups?.length || 0,
-			} : {
-				imageCount: 0, videoCount: 0, collectionCount: 0, tagCount: 0,
-				characterCount: 0, placeCount: 0, worldItemCount: 0, conceptCount: 0,
-				promptCount: 0, noteCount: 0, wildcardCount: 0, propertyCount: 0, groupCount: 0,
-			},
+			stats: includeStatsFlag
+				? {
+						imageCount: album.images?.length || 0,
+						videoCount: album.videos?.length || 0,
+						collectionCount: album.collections?.length || 0,
+						tagCount: album.tags?.length || 0,
+						characterCount: album.characters?.length || 0,
+						placeCount: album.places?.length || 0,
+						worldItemCount: album.worldItems?.length || 0,
+						conceptCount: album.concepts?.length || 0,
+						promptCount: album.prompts?.length || 0,
+						noteCount: album.notes?.length || 0,
+						wildcardCount: album.wildcards?.length || 0,
+						propertyCount: album.properties?.length || 0,
+						groupCount: album.groups?.length || 0,
+					}
+				: {
+						imageCount: 0,
+						videoCount: 0,
+						collectionCount: 0,
+						tagCount: 0,
+						characterCount: 0,
+						placeCount: 0,
+						worldItemCount: 0,
+						conceptCount: 0,
+						promptCount: 0,
+						noteCount: 0,
+						wildcardCount: 0,
+						propertyCount: 0,
+						groupCount: 0,
+					},
 		}));
 
 		res.json(results);
@@ -597,7 +611,10 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 		// Obtener imágenes recientes
 		if (album.images.length > 0) {
 			const recentImages = await db.query.images.findMany({
-				where: inArray(images.id, album.images.map((img) => img.id)),
+				where: inArray(
+					images.id,
+					album.images.map((img) => img.id)
+				),
 				columns: {
 					id: true,
 					name: true,
@@ -607,19 +624,26 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 				limit: Math.ceil(limitNum * 0.8), // 80% para imágenes
 			});
 
-			media.push(...recentImages.map((img): ThumbnailImage => ({
-				id: img.id,
-				name: img.name,
-				thumbnailUrl: `/api/thumbnails/${img.id}`,
-				url: `/api/images/${img.id}`,
-				isVideo: false,
-			})));
+			media.push(
+				...recentImages.map(
+					(img): ThumbnailImage => ({
+						id: img.id,
+						name: img.name,
+						thumbnailUrl: `/api/thumbnails/${img.id}`,
+						url: `/api/images/${img.id}`,
+						isVideo: false,
+					})
+				)
+			);
 		}
 
 		// Obtener videos recientes
 		if (album.videos.length > 0) {
 			const recentVideos = await db.query.videos.findMany({
-				where: inArray(videos.id, album.videos.map((vid) => vid.id)),
+				where: inArray(
+					videos.id,
+					album.videos.map((vid) => vid.id)
+				),
 				columns: {
 					id: true,
 					name: true,
@@ -629,13 +653,17 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 				limit: Math.ceil(limitNum * 0.2), // 20% para videos
 			});
 
-			media.push(...recentVideos.map((video): ThumbnailImage => ({
-				id: video.id,
-				name: video.name,
-				thumbnailUrl: `/api/video-thumbnails/${video.id}`,
-				url: `/api/videos/${video.id}`,
-				isVideo: true,
-			})));
+			media.push(
+				...recentVideos.map(
+					(video): ThumbnailImage => ({
+						id: video.id,
+						name: video.name,
+						thumbnailUrl: `/api/video-thumbnails/${video.id}`,
+						url: `/api/videos/${video.id}`,
+						isVideo: true,
+					})
+				)
+			);
 		}
 
 		// Limitar el resultado final
@@ -688,12 +716,7 @@ albumsRouter.get('/search', async (req, res) => {
 		const includeStatsFlag = includeStats === 'true';
 		const includeHiddenFlag = includeHidden === 'true';
 
-		const conditions = [
-			or(
-				like(albums.name, `%${searchTerm}%`),
-				like(albums.description, `%${searchTerm}%`)
-			)
-		];
+		const conditions = [or(like(albums.name, `%${searchTerm}%`), like(albums.description, `%${searchTerm}%`))];
 
 		if (category) {
 			conditions.push(eq(albums.category, category as string));
@@ -704,26 +727,29 @@ albumsRouter.get('/search', async (req, res) => {
 		}
 
 		// Ordenamiento
-		const orderColumn = orderBy === 'name' ? albums.name : orderBy === 'createdAt' ? albums.createdAt : albums.updatedAt;
+		const orderColumn =
+			orderBy === 'name' ? albums.name : orderBy === 'createdAt' ? albums.createdAt : albums.updatedAt;
 		const orderDirection = orderDir === 'asc' ? asc : desc;
 
 		const albumResults = await db.query.albums.findMany({
 			where: and(...conditions),
-			with: includeStatsFlag ? {
-				images: { columns: { id: true } },
-				videos: { columns: { id: true } },
-				collections: { columns: { id: true } },
-				tags: { columns: { id: true } },
-				characters: { columns: { id: true } },
-				places: { columns: { id: true } },
-				worldItems: { columns: { id: true } },
-				concepts: { columns: { id: true } },
-				prompts: { columns: { id: true } },
-				notes: { columns: { id: true } },
-				wildcards: { columns: { id: true } },
-				properties: { columns: { id: true } },
-				groups: { columns: { id: true } },
-			} : undefined,
+			with: includeStatsFlag
+				? {
+						images: { columns: { id: true } },
+						videos: { columns: { id: true } },
+						collections: { columns: { id: true } },
+						tags: { columns: { id: true } },
+						characters: { columns: { id: true } },
+						places: { columns: { id: true } },
+						worldItems: { columns: { id: true } },
+						concepts: { columns: { id: true } },
+						prompts: { columns: { id: true } },
+						notes: { columns: { id: true } },
+						wildcards: { columns: { id: true } },
+						properties: { columns: { id: true } },
+						groups: { columns: { id: true } },
+					}
+				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
 			offset: offsetNum,
@@ -732,25 +758,37 @@ albumsRouter.get('/search', async (req, res) => {
 		// Transformar resultados
 		const results: AlbumCardData[] = albumResults.map((album) => ({
 			...album,
-			stats: includeStatsFlag ? {
-				imageCount: album.images?.length || 0,
-				videoCount: album.videos?.length || 0,
-				collectionCount: album.collections?.length || 0,
-				tagCount: album.tags?.length || 0,
-				characterCount: album.characters?.length || 0,
-				placeCount: album.places?.length || 0,
-				worldItemCount: album.worldItems?.length || 0,
-				conceptCount: album.concepts?.length || 0,
-				promptCount: album.prompts?.length || 0,
-				noteCount: album.notes?.length || 0,
-				wildcardCount: album.wildcards?.length || 0,
-				propertyCount: album.properties?.length || 0,
-				groupCount: album.groups?.length || 0,
-			} : {
-				imageCount: 0, videoCount: 0, collectionCount: 0, tagCount: 0,
-				characterCount: 0, placeCount: 0, worldItemCount: 0, conceptCount: 0,
-				promptCount: 0, noteCount: 0, wildcardCount: 0, propertyCount: 0, groupCount: 0,
-			},
+			stats: includeStatsFlag
+				? {
+						imageCount: album.images?.length || 0,
+						videoCount: album.videos?.length || 0,
+						collectionCount: album.collections?.length || 0,
+						tagCount: album.tags?.length || 0,
+						characterCount: album.characters?.length || 0,
+						placeCount: album.places?.length || 0,
+						worldItemCount: album.worldItems?.length || 0,
+						conceptCount: album.concepts?.length || 0,
+						promptCount: album.prompts?.length || 0,
+						noteCount: album.notes?.length || 0,
+						wildcardCount: album.wildcards?.length || 0,
+						propertyCount: album.properties?.length || 0,
+						groupCount: album.groups?.length || 0,
+					}
+				: {
+						imageCount: 0,
+						videoCount: 0,
+						collectionCount: 0,
+						tagCount: 0,
+						characterCount: 0,
+						placeCount: 0,
+						worldItemCount: 0,
+						conceptCount: 0,
+						promptCount: 0,
+						noteCount: 0,
+						wildcardCount: 0,
+						propertyCount: 0,
+						groupCount: 0,
+					},
 		}));
 
 		res.json(results);

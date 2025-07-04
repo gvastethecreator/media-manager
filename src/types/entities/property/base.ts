@@ -129,5 +129,3 @@ export interface PropertyUpdateInput {
 // ----------------------------------------------------------------
 // TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
 // ----------------------------------------------------------------
-
-

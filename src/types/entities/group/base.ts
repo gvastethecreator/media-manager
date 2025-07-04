@@ -2,11 +2,11 @@
  * 🗿 Modelo base de Group, basado en el esquema de Drizzle.
  */
 export type GroupBase = {
-    id: string;
-    name: string;
-    description: string | null;
-    createdAt: Date;
-    updatedAt: Date;
+	id: string;
+	name: string;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 /**

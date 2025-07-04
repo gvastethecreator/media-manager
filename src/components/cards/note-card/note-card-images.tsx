@@ -1,8 +1,8 @@
 import { ImageIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { memo, Suspense, useMemo } from 'react';
-import { cn } from '@/lib/utils';
 import { useRecentNoteImages } from '@/lib/api/notes';
+import { cn } from '@/lib/utils';
 
 interface NoteCardImagesProps {
 	noteId: string;
@@ -15,7 +15,12 @@ interface NoteCardImagesProps {
  * Componente para mostrar las im?genes recientes de una nota en una tarjeta.
  * Similar a la secci?n de ilustraci?n de una carta TCG.
  */
-export const NoteCardImages = memo(function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode = true }: NoteCardImagesProps) {
+export const NoteCardImages = memo(function NoteCardImages({
+	noteId,
+	primaryColor,
+	secondaryColor,
+	tcgMode = true,
+}: NoteCardImagesProps) {
 	// Generar un ID de renderizado ?nico
 	const renderKey = React.useMemo(() => nanoid(), []);
 
@@ -35,9 +40,12 @@ export const NoteCardImages = memo(function NoteCardImages({ noteId, primaryColo
 		};
 	}, [tcgMode, primaryColor]);
 
-	const backgroundStyle = useMemo(() => ({
-		backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
-	}), [primaryColor, secondaryColor]);
+	const backgroundStyle = useMemo(
+		() => ({
+			backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
+		}),
+		[primaryColor, secondaryColor]
+	);
 
 	return (
 		<div
