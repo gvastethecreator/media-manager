@@ -6,7 +6,13 @@
 
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
-import * as actions from '@/services/album/album.service';
+// Consumimos la API en lugar de las server actions
+import {
+    createAlbumInApi,
+    deleteAlbumFromApi,
+    getAlbumsFromApi,
+    updateAlbumInApi,
+} from '@/lib/api/client/album.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import type { AlbumCoreActions, AlbumCoreState, AlbumStore } from '../types';
@@ -43,7 +49,7 @@ export const createAlbumCoreSlice: StateCreator<
 		});
 
 		try {
-			const albums = await actions.getAlbums();
+                        const albums = await getAlbumsFromApi();
 			set((state) => {
 				state.albums = albums.reduce(
 					(acc, album) => {
@@ -71,7 +77,7 @@ export const createAlbumCoreSlice: StateCreator<
 
 	createAlbum: async (data) => {
 		try {
-			await actions.createAlbum(data);
+                        await createAlbumInApi(data);
 			toastService.success(`Álbum "${data.name}" creado.`);
 			await get().loadAlbums();
 		} catch (error) {
@@ -83,7 +89,7 @@ export const createAlbumCoreSlice: StateCreator<
 
 	updateAlbum: async (id, data) => {
 		try {
-			await actions.updateAlbum(id, data);
+                        await updateAlbumInApi(id, data);
 			toastService.success('Álbum actualizado.');
 			await get().loadAlbums();
 		} catch (error) {
@@ -101,7 +107,7 @@ export const createAlbumCoreSlice: StateCreator<
 			})
 		);
 		try {
-			await actions.deleteAlbum(id);
+                        await deleteAlbumFromApi(id);
 			toastService.success(`Álbum "${albumName}" eliminado.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al eliminar el álbum.';
