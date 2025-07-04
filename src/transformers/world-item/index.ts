@@ -1,35 +1,11 @@
 /**
- * @file Índice de transformadores para la entidad WorldItem
+ * @file Punto de entrada para los transformadores de la entidad WorldItem.
  * @module transformers/world-item
+ * @description Exporta las funciones de transformación canónicas para WorldItem.
+ * @see /src/transformers/world-item/mappers.ts
+ * @see /src/transformers/world-item/transformer.ts
+ * @updated 2025-01-27
  */
 
-// --- Exportaciones Controladas --- //
-
-// De mappers.ts
 export { toWorldItemWithStats } from './mappers';
-// De serializers.ts
-export {
-	deserializeAttributes,
-	deserializeEffects,
-	deserializeFilters,
-	deserializeProperties,
-	deserializeRequirements,
-	deserializeStats,
-	deserializeTags,
-	extendWorldItem,
-	extendWorldItems,
-	serializeAttributes,
-	serializeEffects,
-	serializeFilters,
-	serializeProperties,
-	serializeRequirements,
-	serializeStats,
-	serializeTags,
-} from './serializers';
-// De transformer.ts (funciones principales de transformación)
-export {
-	fromDrizzleWorldItem,
-	fromDrizzleWorldItems,
-} from './transformer';
-
-// --- Fin Exportaciones Controladas --- //
+export { type WorldItemComplete, fromDrizzleWorldItem } from './transformer';

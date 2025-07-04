@@ -9,7 +9,7 @@ import { handleTransformerError } from '@/lib/utils/transformers/errors';
 import type { Settings } from '@/types/settings';
 import { fromDbToSettings, fromSettingsToDbInsert, fromSettingsUpdateToDb } from './mappers';
 import { fromStorageSettings, toStorageSettings, normalizeSettings, sanitizeSettingsForClient } from './serializers';
-import { validateSettings, validateSettingsUpdate, safeValidateSettings } from './validators';
+import { validateSettings, safeValidateSettings } from './validators';
 
 const logger = serverLogger.withContext('SettingsTransformer');
 

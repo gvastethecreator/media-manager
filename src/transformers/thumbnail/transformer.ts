@@ -1,227 +1,113 @@
 /**
- * @file Transformadores para la entidad Thumbnail
- * @module transformers/thumbnail/transformer
+ * 🖼️ THUMBNAIL TRANSFORMER
+ *
+ * Transformador principal para la entidad Thumbnail.
+ * Convierte datos de base de datos a estructuras optimizadas para UI.
+ *
+ * @updated 2025-01-27
  */
 
-import { formatBytes, formatDate } from '@/lib/utils/formatters';
 import {
-	ThumbnailComplete,
-	ThumbnailExtended,
-	ThumbnailQuality,
-	ThumbnailStats,
+	ThumbnailBase,
 	ThumbnailWithStats,
+	ThumbnailQuality,
 } from '@/types/entities/thumbnail';
+import { toThumbnailWithStats } from './mappers';
+import { validateThumbnail } from './validators';
 
-interface TransformThumbnailOptions {
-	includeMetadata?: boolean;
-	baseUrl?: string;
+/**
+ * Tipo para datos de entrada del transformer
+ */
+export interface ThumbnailInputData extends Partial<ThumbnailBase> {
+	// Propiedades adicionales que podrían venir de DB
+	source_id?: string;
+	source_type?: string;
+	created_at?: Date | string;
+	updated_at?: Date | string;
+	usageCount?: number;
 }
 
 /**
- * Transforma un objeto de thumbnail en su versión completa
+ * Tipo completo de Thumbnail (alias para compatibilidad)
+ */
+export type ThumbnailComplete = ThumbnailWithStats;
+
+/**
+ * Transformador principal para Thumbnail
  */
 export function transformThumbnail(
-	thumbnail: Partial<ThumbnailComplete>,
-	options: TransformThumbnailOptions = {}
-): ThumbnailComplete {
-	// Valores por defecto para las opciones
-	const { includeMetadata = true, baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5173' } = options;
-
-	// Normalización básica de propiedades
-	const id = thumbnail.id || '';
-	const sourceId = thumbnail.sourceId || thumbnail.source_id || '';
-	const sourceType = thumbnail.sourceType || thumbnail.source_type || '';
-	const path = thumbnail.path || '';
-	const size = typeof thumbnail.size === 'number' ? thumbnail.size : 0;
-	const width = typeof thumbnail.width === 'number' ? thumbnail.width : 0;
-	const height = typeof thumbnail.height === 'number' ? thumbnail.height : 0;
-	const format = thumbnail.format || '';
-	const quality = thumbnail.quality || ThumbnailQuality.MEDIUM;
-
-	// Fechas
-	const createdAt =
-		thumbnail.createdAt instanceof Date
-			? thumbnail.createdAt
-			: new Date(thumbnail.createdAt || thumbnail.created_at || Date.now());
-
-	const updatedAt =
-		thumbnail.updatedAt instanceof Date
-			? thumbnail.updatedAt
-			: new Date(thumbnail.updatedAt || thumbnail.updated_at || Date.now());
-
-	// Propiedades opcionales
-	const errorMessage = thumbnail.errorMessage || thumbnail.error_message || null;
-	const errorTimestamp =
-		thumbnail.errorTimestamp instanceof Date
-			? thumbnail.errorTimestamp
-			: thumbnail.errorTimestamp
-				? new Date(thumbnail.errorTimestamp)
-				: null;
-
-	const optimizedAt =
-		thumbnail.optimizedAt instanceof Date
-			? thumbnail.optimizedAt
-			: thumbnail.optimizedAt
-				? new Date(thumbnail.optimizedAt)
-				: null;
-
-	// Metadatos
-	let metadata = null;
-	if (includeMetadata && thumbnail.metadata) {
-		try {
-			metadata = typeof thumbnail.metadata === 'string' ? JSON.parse(thumbnail.metadata) : thumbnail.metadata;
-		} catch (error) {
-			console.error('Error parsing thumbnail metadata:', error);
-		}
-	}
-
-	// Construir URL
-	const url = thumbnail.url || `${baseUrl}/api/thumbnails/${id}`;
-
-	// Conteos
-	const _count = thumbnail._count || {};
-
-	return {
-		id,
-		sourceId,
-		sourceType,
-		path,
-		size,
-		width,
-		height,
-		format,
-		quality,
-		createdAt,
-		updatedAt,
-		url,
-		metadata,
-		errorMessage,
-		errorTimestamp,
-		optimizedAt,
-		_count,
-	};
-}
-
-/**
- * Transforma un array de thumbnails
- */
-export function transformThumbnails(
-	thumbnails: Partial<ThumbnailComplete>[],
-	options?: TransformThumbnailOptions
-): ThumbnailComplete[] {
-	return thumbnails.map((thumbnail) => transformThumbnail(thumbnail, options));
-}
-
-/**
- * Calcula estadísticas para un conjunto de thumbnails
- */
-export function calculateThumbnailStats(thumbnails: ThumbnailComplete[]): ThumbnailStats {
-	const count = thumbnails.length;
-
-	if (count === 0) {
-		return {
-			totalSize: 0,
-			averageSize: 0,
-			averageWidth: 0,
-			averageHeight: 0,
-			formatsDistribution: {},
-			qualityDistribution: {},
-			lastGenerated: null,
-			optimizationRate: 0,
-			errorRate: 0,
-		};
-	}
-
-	let totalSize = 0;
-	let totalWidth = 0;
-	let totalHeight = 0;
-	const formatsDistribution: Record<string, number> = {};
-	const qualityDistribution: Record<string, number> = {};
-	let lastGenerated: Date | null = null;
-	let optimizedCount = 0;
-	let errorCount = 0;
-
-	for (const thumbnail of thumbnails) {
-		totalSize += thumbnail.size;
-		totalWidth += thumbnail.width;
-		totalHeight += thumbnail.height;
-
-		// Formato
-		formatsDistribution[thumbnail.format] = (formatsDistribution[thumbnail.format] || 0) + 1;
-
-		// Calidad
-		qualityDistribution[thumbnail.quality] = (qualityDistribution[thumbnail.quality] || 0) + 1;
-
-		// Última generación
-		if (!lastGenerated || (thumbnail.createdAt && thumbnail.createdAt > lastGenerated)) {
-			lastGenerated = thumbnail.createdAt;
-		}
-
-		// Optimización y errores
-		if (thumbnail.optimizedAt) {
-			optimizedCount++;
-		}
-
-		if (thumbnail.errorMessage) {
-			errorCount++;
-		}
-	}
-
-	return {
-		totalSize,
-		averageSize: totalSize / count,
-		averageWidth: totalWidth / count,
-		averageHeight: totalHeight / count,
-		formatsDistribution,
-		qualityDistribution,
-		lastGenerated,
-		optimizationRate: optimizedCount / count,
-		errorRate: errorCount / count,
-	};
-}
-
-/**
- * Transforma un thumbnail en su versión con estadísticas
- */
-export function transformThumbnailToWithStats(
-	thumbnail: ThumbnailComplete,
-	allThumbnails: ThumbnailComplete[]
+	data: ThumbnailInputData,
+	options: {
+		includeStats?: boolean;
+		usageCount?: number;
+	} = {}
 ): ThumbnailWithStats {
-	const stats = calculateThumbnailStats(allThumbnails);
+	const { includeStats = true, usageCount = 0 } = options;
 
+	try {
+		// Normalizar datos de entrada
+		const normalizedData = normalizeThumbnailData(data);
+		
+		// Validar estructura básica
+		const baseThumb = validateThumbnail(normalizedData);
+		
+		// Retornar con estadísticas si se solicita
+		if (includeStats) {
+			return toThumbnailWithStats(baseThumb, usageCount);
+		}
+		
+		// Retornar con estadísticas vacías
+		return {
+			...baseThumb,
+			stats: {
+				aspectRatio: 0,
+				compressionRatio: 0,
+				qualityScore: 0,
+				usageCount: 0,
+				storageEfficiency: 0,
+			},
+		};
+	} catch (error) {
+		throw new Error(`Error transforming thumbnail: ${error instanceof Error ? error.message : 'Unknown error'}`);
+	}
+}
+
+/**
+ * Normaliza datos de entrada para asegurar compatibilidad
+ */
+function normalizeThumbnailData(data: ThumbnailInputData): ThumbnailBase {
 	return {
-		...thumbnail,
-		stats,
+		id: data.id || '',
+		sourceId: data.sourceId || data.source_id || '',
+		sourceType: data.sourceType || data.source_type || '',
+		path: data.path || '',
+		size: data.size || 0,
+		width: data.width || 0,
+		height: data.height || 0,
+		format: data.format || '',
+		quality: data.quality || ThumbnailQuality.MEDIUM,
+		createdAt: normalizeDate(data.createdAt || data.created_at),
+		updatedAt: normalizeDate(data.updatedAt || data.updated_at),
 	};
 }
 
 /**
- * Transforma un thumbnail en su versión extendida para UI
+ * Normaliza fechas desde diferentes formatos
  */
-export function transformThumbnailToExtended(thumbnail: ThumbnailComplete): ThumbnailExtended {
-	// Formateo para UI
-	const formattedSize = formatBytes(thumbnail.size);
-	const formattedCreatedAt = formatDate(thumbnail.createdAt);
-	const formattedUpdatedAt = formatDate(thumbnail.updatedAt);
-	const formattedDimensions = `${thumbnail.width}×${thumbnail.height}`;
+function normalizeDate(date?: Date | string | null): Date {
+	if (!date) return new Date();
+	if (date instanceof Date) return date;
+	return new Date(date);
+}
 
-	// Estados
-	const hasFailed = !!thumbnail.errorMessage;
-	const optimizationStatus = hasFailed ? 'error' : thumbnail.optimizedAt ? 'optimized' : 'not-optimized';
-
-	// URLs
-	const viewUrl = thumbnail.url;
-	const downloadUrl = `${thumbnail.url}?download=true`;
-
-	return {
-		...thumbnail,
-		formattedSize,
-		formattedCreatedAt,
-		formattedUpdatedAt,
-		formattedDimensions,
-		optimizationStatus,
-		hasFailed,
-		viewUrl,
-		downloadUrl,
-	};
+/**
+ * Función de ayuda para calcular completeness
+ */
+function calculateCompleteness(thumbnail: ThumbnailBase, requiredFields: (keyof ThumbnailBase)[]): number {
+	const completed = requiredFields.filter(field => {
+		const value = thumbnail[field];
+		return value !== null && value !== undefined && value !== '';
+	}).length;
+	
+	return Math.round((completed / requiredFields.length) * 100);
 }
