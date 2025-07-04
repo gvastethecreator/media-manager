@@ -1,6 +1,7 @@
 /**
- * @file Exportaciones para el transformer de Prompt
- * @module transformers/prompt
+ * @file Punto de entrada para los transformadores de la entidad Profile
+ * @module transformers/profile
+ * @description Exporta de forma controlada las funciones de mapeo, serialización y transformación para Profile
  * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
@@ -12,7 +13,6 @@ export * from './schema';
 
 // Exportar funciones principales de transformación
 export {
-	fromDrizzlePrompt,
-	fromDrizzlePrompts,
-	toDrizzlePrompt,
+	fromDrizzleProfile,
+	fromDrizzleProfiles,
 } from './transformer';
