@@ -8,10 +8,16 @@
 // --- Exportaciones de Mappers ---
 // Se renombran para seguir el patrón de nomenclatura: map[Entidad][Accion]To[Destino]
 export {
-	createFilter as mapPlaceFiltersToPrisma,
-	createOrderBy as mapPlaceOrderByToPrisma,
-	toCreateData as mapCreatePlaceDataToPrisma,
 	toPlaceWithStats,
-	toSearchOptions as mapPlaceSearchOptionsToPrisma,
-	toUpdateData as mapUpdatePlaceDataToPrisma,
+	toCreateDataForDrizzle,
+	toUpdateDataForDrizzle,
+	createOrderByForDrizzle,
+	createFilterForDrizzle,
+	toSearchOptionsForDrizzle,
 } from './mappers';
+
+// --- Exportaciones de Transformer ---
+// (No hay transformer.ts para Place, ya que la lógica está en mappers)
+
+// --- Exportaciones de Serializers ---
+// (No hay serializers.ts para Place)

@@ -1,7 +1,7 @@
 import express from 'express';
 import { WorldItemService } from '@/services/world-item/world-item.service';
-import { toImageWithStats } from '@/transformers/image/image.transformer';
-import { toWorldItemWithStats } from '@/transformers/world-item/world-item.transformer';
+import { toImageWithStats } from '@/transformers/image';
+import { toWorldItemWithStats } from '@/transformers/world-item';
 
 const router = express.Router();
 const worldItemService = new WorldItemService();

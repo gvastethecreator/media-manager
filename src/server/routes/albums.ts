@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { albums, images, videos, albumsToImages } from '@/lib/drizzle/schema';
+import { albums, images, videos, imageAlbums } from '@/lib/drizzle/schema';
 import { eq, like, or, desc, asc, count } from 'drizzle-orm';
 import { serializeAlbum } from '@/transformers/album';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -299,7 +299,7 @@ albumsRouter.post('/:id/images/:imageId', async (req, res) => {
 	const { id, imageId } = req.params;
 
 	try {
-		await db.insert(albumsToImages).values({
+		await db.insert(imageAlbums).values({
 			albumId: id,
 			imageId: imageId,
 		});
@@ -316,7 +316,7 @@ albumsRouter.delete('/:id/images/:imageId', async (req, res) => {
 	const { id, imageId } = req.params;
 
 	try {
-		await db.delete(albumsToImages).where(and(eq(albumsToImages.albumId, id), eq(albumsToImages.imageId, imageId)));
+		await db.delete(imageAlbums).where(and(eq(imageAlbums.albumId, id), eq(imageAlbums.imageId, imageId)));
 
 		res.status(204).send();
 	} catch (error) {

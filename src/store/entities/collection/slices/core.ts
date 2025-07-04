@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 // Server actions eliminados - usar servicios API
-import { collectionService } from '@/services/collection/collection.service';
+import * as collectionService from '@/services/collection/collection.service';
 import type { CollectionState } from '../types';
 
 /**

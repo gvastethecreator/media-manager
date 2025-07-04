@@ -9,7 +9,7 @@ async function testFoldersEndpoint() {
     console.log('📋 Probando endpoint GET /api/folders');
 
     const start = Date.now();
-    const response = await fetch('http://localhost:3000/api/folders');
+    const response = await fetch('http://localhost:5173/api/folders');
     const time = Date.now() - start;
 
     if (!response.ok) {

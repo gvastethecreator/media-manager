@@ -1,7 +1,8 @@
 import { ImageIcon } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getRecentWorldItemImages } from './world-item-server-actions';
+
+// import { getRecentWorldItemImages } from './world-item-server-actions'; // TODO: Archivo no encontrado
 
 interface WorldItemCardImagesProps {
 	worldItemId: string;

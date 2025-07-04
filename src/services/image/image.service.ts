@@ -43,7 +43,6 @@
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
-import { extractMetadata } from '@/services/metadata/metadata.service';
 import { imageConfig } from '@/lib/config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { eq, and, or, like, desc, asc, count } from 'drizzle-orm';
@@ -343,43 +342,42 @@ class ImageService {
 	 */
 	async updateImage(id: string, data: ImageUpdateInput): Promise<ImageWithStats> {
 		try {
-			imageLogger.info('📝 Actualizando imagen:', id);
-
-			// Verificar que la imagen exista
-			const existingImage = await db.query.images.findFirst({
+			// Buscar la imagen existente
+			const image = await db.query.images.findFirst({
 				where: eq(images.id, id),
 			});
 
-			if (!existingImage) {
-				throw createEntityNotFoundError('Imagen', id, SERVICE_NAME);
+			if (!image) {
+				throw createEntityNotFoundError('Image', id);
 			}
 
-			// Preparar datos para actualización
-			const updateData: any = {};
-			if (data.name !== undefined) updateData.name = data.name;
-			if (data.description !== undefined) updateData.description = data.description;
-			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-			if (data.metadata !== undefined) updateData.metadata = data.metadata;
+			// Actualizar en la base de datos
+			const [updatedImage] = await db
+				.update(images)
+				.set({
+					...data,
+					metadata: data.metadata ? JSON.stringify(data.metadata) : image.metadata,
+					updatedAt: new Date(),
+				})
+				.where(eq(images.id, id))
+				.returning();
 
-			await db.update(images).set(updateData).where(eq(images.id, id));
-
-			const result = await this.getImage(id);
-
-			if (!result) {
-				throw createEntityNotFoundError('Imagen', id, SERVICE_NAME);
+			// Volver a obtener la imagen con sus estadísticas
+			const imageWithStats = await this.getImage(id);
+			if (!imageWithStats) {
+				throw createEntityNotFoundError('Image', id, 'después de actualizar');
 			}
 
-			// Emitir evento de actualización
-			await this.emitEvent(IMAGE_EVENTS.IMAGE_UPDATED, result);
-			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'update', image: result });
+			await this.emitEvent(IMAGE_EVENTS.IMAGE_UPDATED, { id, changes: data });
+			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, {});
 
-			imageLogger.info('✅ Imagen actualizada correctamente');
-			return result;
+			return imageWithStats;
 		} catch (error) {
-			imageLogger.error('❌ Error actualizando imagen:', error);
 			throw toServiceError(error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: 'Error al actualizar imagen',
+				context: { imageId: id, data },
 				serviceName: SERVICE_NAME,
-				message: 'No se pudo actualizar la imagen',
 			});
 		}
 	}
@@ -564,8 +562,6 @@ class ImageService {
 				} as ImageWithStats;
 			});
 
-
-
 			return {
 				images: transformedImages,
 				pagination: {
@@ -658,64 +654,27 @@ class ImageService {
 	 */
 	async getThumbnail(imageId: string): Promise<Buffer> {
 		try {
-			const image = await db.query.images.findFirst({
-				where: eq(images.id, imageId),
-				columns: {
-					thumbnail: true,
-					path: true,
-				},
-			});
-
-			// Si ya existe el thumbnail en la base de datos, devolverlo
-			if (image?.thumbnail) {
-				return Buffer.isBuffer(image.thumbnail) ? image.thumbnail : Buffer.from(image.thumbnail);
+			const image = await this.getImage(imageId);
+			if (!image) {
+				throw createEntityNotFoundError('Image', imageId);
 			}
 
-			// Si no existe, intentar generarlo en caliente desde el archivo original
-			if (image?.path) {
-				const config: ImageProcessingOptions = {
-					width: 512,
-					height: 512,
-					quality: 80,
-					format: 'webp',
-					fit: 'cover',
-				};
-				const { buffer } = await this.processImage(image.path, config);
-
-				// Guardar el thumbnail en la base de datos
-				await db
-					.update(images)
-					.set({
-						thumbnail: buffer,
-						thumbnailSize: buffer.length,
-						thumbnailMimeType: 'image/webp',
-						thumbnailOptimizedAt: new Date(),
-					})
-					.where(eq(images.id, imageId));
-
-				// Guardar el thumbnail en la carpeta de caché
-				const cachePath = `${this.CACHE_DIR}/thumb_${imageId}.webp`;
-				await fs.writeFile(cachePath, buffer);
-
-				return buffer;
+			if (!image.thumbnailPath) {
+				await this.generateThumbnail(imageId);
+				const updatedImage = await this.getImage(imageId);
+				if (!updatedImage?.thumbnailPath) {
+					throw createFileNotFoundError(
+						`Miniatura para la imagen ${imageId} no encontrada después de la generación`
+					);
+				}
+				return fs.readFile(updatedImage.thumbnailPath);
 			}
 
-			// Si no se puede generar, lanzar error
-			throw createServiceError({
-				code: ServiceErrorCode.FILE_NOT_FOUND,
-				message: 'Thumbnail no encontrado',
-				context: { imageId },
-				serviceName: SERVICE_NAME,
-			});
-		} catch (error: any) {
-			await this.emitEvent(IMAGE_EVENTS.ERROR, {
-				message: 'Error al obtener thumbnail',
-				imageId,
-				error: error instanceof Error ? error.message : String(error),
-			});
+			return fs.readFile(image.thumbnailPath);
+		} catch (error) {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
-				message: 'Error al obtener thumbnail',
+				message: 'Error al obtener miniatura',
 				context: { imageId },
 				serviceName: SERVICE_NAME,
 			});
@@ -724,102 +683,20 @@ class ImageService {
 
 	async getOriginalImage(imageId: string): Promise<Buffer> {
 		try {
-			const image = await db.query.images.findFirst({
-				where: eq(images.id, imageId),
-			});
-
+			const image = await this.getImage(imageId);
 			if (!image) {
-				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
+				throw createEntityNotFoundError('Image', imageId);
 			}
 
-			// 🟡 Logging detallado para depuración de acceso a archivos
-			imageLogger.info('🔍 Verificando acceso al archivo original:', image.path);
-			try {
-				await fs.access(image.path, fs.constants.R_OK);
-				imageLogger.info('🟢 Permiso de lectura OK para:', image.path);
-			} catch (permError) {
-				imageLogger.error(
-					'🔴 Sin permiso de lectura para:',
-					image.path,
-					permError instanceof Error ? permError.message : String(permError)
-				);
+			if (!image.path) {
+				throw createFileNotFoundError(`Ruta original para la imagen ${imageId} no encontrada`);
 			}
-			imageLogger.info(
-				'🟡 Usuario proceso:',
-				process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A')
-			);
 
-			try {
-				return await fs.readFile(image.path);
-			} catch (_error) {
-				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
-			}
+			return await fs.readFile(image.path);
 		} catch (error) {
-			await this.emitEvent(IMAGE_EVENTS.ERROR, {
-				message: 'Error al obtener imagen original',
-				imageId,
-				error: error instanceof Error ? error.message : String(error),
-			});
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
-				message: 'Error al obtener imagen original',
-				context: { imageId },
-				serviceName: SERVICE_NAME,
-			});
-		}
-	}
-
-	async getImageMetadata(imageId: string): Promise<Record<string, unknown>> {
-		try {
-			const image = await db.query.images.findFirst({
-				where: eq(images.id, imageId),
-			});
-
-			if (!image) {
-				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
-			}
-
-			// Si ya tiene metadatos, retornarlos
-			if (image.metadata) {
-				try {
-					return JSON.parse(image.metadata);
-				} catch (error) {
-					imageLogger.warn('Error al parsear metadatos existentes:', { error, imageId });
-					// Si falla, continuar para extraer nuevos metadatos
-				}
-			}
-
-			// Verificar si el archivo existe
-			try {
-				await fs.access(image.path);
-			} catch (_error) {
-				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
-			}
-
-			// Extraer y guardar metadatos
-			const metadata = await extractMetadata(image.path);
-			if (metadata && Object.keys(metadata).length > 0) {
-				await db
-					.update(images)
-					.set({
-						metadata: JSON.stringify(metadata),
-					})
-					.where(eq(images.id, imageId));
-
-				// Emitir evento de metadatos actualizados
-				await this.emitEvent(IMAGE_EVENTS.METADATA_UPDATED, { imageId, metadata });
-			}
-
-			return metadata || {};
-		} catch (error) {
-			await this.emitEvent(IMAGE_EVENTS.ERROR, {
-				message: 'Error al obtener metadatos',
-				imageId,
-				error: error instanceof Error ? error.message : String(error),
-			});
-			throw toServiceError(error, {
-				code: ServiceErrorCode.UNEXPECTED_ERROR,
-				message: 'Error al obtener metadatos',
+				message: 'Error al obtener la imagen original',
 				context: { imageId },
 				serviceName: SERVICE_NAME,
 			});
@@ -827,7 +704,8 @@ class ImageService {
 	}
 }
 
-// Exportar la instancia singleton del servicio
+// Exportar la clase y la instancia singleton del servicio
+export { ImageService };
 export const imageService = ImageService.getInstance();
 
 /**

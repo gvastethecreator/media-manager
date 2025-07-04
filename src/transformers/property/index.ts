@@ -8,4 +8,4 @@
  */
 
 export { toPropertyWithStats } from './mappers';
-export { fromPrismaProperty, type PropertyComplete, transformProperty } from './transformer';
+export { transformProperty, type PropertyComplete } from './transformer';

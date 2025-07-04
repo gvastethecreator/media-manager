@@ -7,7 +7,7 @@
 
 import type { ViewType } from '@/components/views/types';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useUIStore } from '@/store/ui.store';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ const logger = clientLogger.withContext('CategoryHandlers');
 
 export function useCategoryHandlers() {
 	const navigate = useNavigate();
-	const { currentView, setCurrentView } = useUIStore();
+	const { currentView, setCurrentView } = useNavigationStore();
 
 	// Handler genérico para categorías
 	const handleCategoryClick = useCallback(

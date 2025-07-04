@@ -86,3 +86,6 @@ router.post('/', async (req, res) => {
 });
 
 export { router as uploadedImagesRouter };
+
+// Exportación default para compatibilidad con server/index.ts
+export default router;

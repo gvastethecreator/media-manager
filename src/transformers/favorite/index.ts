@@ -1,45 +1,23 @@
 /**
  * @file Punto de entrada para transformadores de Favorite
  * @module transformers/favorite
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ * ✅ MIGRADO A DRIZZLE
  */
 
-// Exportaciones de mappers
-export { mapToFavoriteBase, mapToFavoriteWithCounts, mapToFavoriteWithStats } from './mappers';
-
-// Exportaciones de serializadores
-import { toFavoritesWithImages, toFavoriteWithImage, transformImageToEntityWithStats, transformImageToFileItem } from './serializers';
-
 export {
-	toFavoritesWithImages,
-	toFavoriteWithImage,
-	transformImageToEntityWithStats,
-	transformImageToFileItem, // Alias para compatibilidad
-};
+	toFavoriteExtended,
+	toFavoritesExtended,
+	mapFavoriteFiltersToDrizzle,
+	mapCreateFavoriteDataToDrizzle,
+	mapUpdateFavoriteDataToDrizzle,
+	groupFavoritesByType,
+	// Alias para compatibilidad, marcados como deprecated
+	mapFavoriteFiltersToPrisma,
+	mapCreateFavoriteDataToPrisma,
+	mapUpdateFavoriteDataToPrisma,
+} from './mappers';
 
-// Esquemas de validación
-export {
-	FavoriteCreateInputSchema,
-	FavoriteSchema,
-	FavoriteUpdateInputSchema,
-	FavoriteWithImageSchema,
-} from './schema';
+export { fromDrizzleFavorite, fromDrizzleFavorites, toFavoriteWithStats } from './transformer';
 
-// Exportaciones adicionales (si las hay)
-export type { FavoriteWithImage } from '@/types/entities/favorite';
-
-// --- Funciones principales para uso externo ---
-
-/**
- * Función principal para transformar datos de favoritos
- * @deprecated Usar transformImageToEntityWithStats directamente
- */
-export const transformFavoriteData = {
-	/**
-	 * @deprecated Usar transformImageToEntityWithStats
-	 */
-	transformImageToFileItem: transformImageToEntityWithStats,
-	transformImageToEntityWithStats: transformImageToEntityWithStats,
-	toFavoriteWithImage,
-	toFavoritesWithImages,
-};
+// TODO: Revisar y migrar esquemas de validación
+// export { FavoriteCreateInputSchema, FavoriteUpdateInputSchema } from './schema';

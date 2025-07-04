@@ -1,11 +1,11 @@
 import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/loading';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { IntegratedFileBrowser } from '@/components/features/file-browser';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
-import { useReindexFolder } from '@/lib/api/folder';
+import { useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import type { EntityWithStats } from '@/types/migration';

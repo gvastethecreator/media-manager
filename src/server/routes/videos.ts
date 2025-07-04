@@ -1,6 +1,5 @@
+import { Router } from 'express';
 import { getVideos, getVideoById, createVideo, updateVideo, deleteVideo, getVideoFormatStats } from '../services/video.server.service';
-
-const router = Router();
 
 const router = Router();
 

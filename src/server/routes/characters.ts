@@ -45,3 +45,6 @@ router.get('/:id', async (req, res) => {
 
 export { router as charactersRouter };
 
+// Exportación default para compatibilidad con server/index.ts
+export default router;
+

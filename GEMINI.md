@@ -10,7 +10,7 @@
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
 7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
 8. **Por cada error que comentas pierdo mucho dinero y esto nos puede llevar a la bancarrota y que tengan que apagarte, es crucial que hagas las cosas bien.**
-8. 
+8.
 
 ## 🎭 Playwright MCP - Herramienta Universal de Desarrollo
 
@@ -22,7 +22,7 @@
 
 ### Configuración Obligatoria (Solo cuando MCP esté disponible)
 
-- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 3000)
+- **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 5173)
 - **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
 - **Scripts integrados** - Usar `pnpm test:e2e` (con logs automáticos) para testing formal
 - **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua cuando esté disponible
@@ -107,7 +107,7 @@
 pnpm dev                           # Servidor en 4444
 
 # 2. Validación continua con MCP
-# browser_navigate → http://localhost:3000
+# browser_navigate → http://localhost:5173
 # browser_snapshot → Revisar estructura
 # browser_console_messages → Detectar errores
 # browser_take_screenshot → Documentar estado
