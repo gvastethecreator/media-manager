@@ -13,13 +13,13 @@ interface ConceptCreate {
 	isFavorite?: boolean;
 }
 
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { concepts } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { Concept } from '@/types/entities/concept';
-import * as crypto from 'crypto';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 
@@ -68,22 +68,25 @@ interface ConceptResults {
 export const ConceptService = {
 	async createConcept(data: ConceptCreate): Promise<Concept> {
 		try {
-			const result = await db.insert(concepts).values({
-				id: crypto.randomUUID(),
-				name: data.name,
-				content: data.content || null,
-				description: data.description || null,
-				category: data.category || null,
-				emoji: data.emoji || '💡',
-				color: data.color || '#3b82f6',
-				shortcut: data.shortcut || null,
-				sortBy: data.sortBy || null,
-				filters: data.filters || null,
-				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			}).returning();
+			const result = await db
+				.insert(concepts)
+				.values({
+					id: crypto.randomUUID(),
+					name: data.name,
+					content: data.content || null,
+					description: data.description || null,
+					category: data.category || null,
+					emoji: data.emoji || '💡',
+					color: data.color || '#3b82f6',
+					shortcut: data.shortcut || null,
+					sortBy: data.sortBy || null,
+					filters: data.filters || null,
+					featuredImage: data.featuredImage || null,
+					isFavorite: data.isFavorite || false,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				})
+				.returning();
 
 			const concept = result[0] as Concept;
 
@@ -123,11 +126,7 @@ export const ConceptService = {
 			if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
-			const result = await db
-				.update(concepts)
-				.set(updateData)
-				.where(eq(concepts.id, id))
-				.returning();
+			const result = await db.update(concepts).set(updateData).where(eq(concepts.id, id)).returning();
 
 			if (result.length === 0) {
 				throw new Error('Concepto no encontrado');
@@ -155,10 +154,7 @@ export const ConceptService = {
 
 	async deleteConcept(id: string): Promise<void> {
 		try {
-			const result = await db
-				.delete(concepts)
-				.where(eq(concepts.id, id))
-				.returning();
+			const result = await db.delete(concepts).where(eq(concepts.id, id)).returning();
 
 			if (result.length === 0) {
 				throw new Error('Concepto no encontrado');

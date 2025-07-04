@@ -6,21 +6,21 @@
  */
 
 import {
-    activateProfile,
-    createProfile,
-    deleteProfile,
-    getActiveProfile,
-    getProfile,
-    getProfiles,
-    updateProfile,
+	activateProfile,
+	createProfile,
+	deleteProfile,
+	getActiveProfile,
+	getProfile,
+	getProfiles,
+	updateProfile,
 } from '@/services/profile/profile.service';
 
 import type {
-    CreateProfileInput,
-    ProfileExtended,
-    ProfileFilters,
-    ProfilePaginationOptions,
-    UpdateProfileInput,
+	CreateProfileInput,
+	ProfileExtended,
+	ProfileFilters,
+	ProfilePaginationOptions,
+	UpdateProfileInput,
 } from '@/types/entities/profile/types';
 
 /**
@@ -73,4 +73,3 @@ export const profileClient = {
 
 // Re-exportar tipos para conveniencia
 export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };
-

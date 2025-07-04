@@ -24,13 +24,13 @@ flowchart TD
     F -->|serializeActivity| M[Object]
     F -->|deserializeActivity| N[Activity]
     F -->|serializeActivityListResponse| O[Object]
-    
+
     A --> P[validators.ts]
     P -->|validateCreateActivityData| Q[CreateActivitySchemaType]
     P -->|validateActivity| R[ActivitySchemaType]
     P -->|validateActivityFilters| S[ActivityFiltersSchemaType]
     P -->|normalizeActivityFilters| T[ActivityFilters]
-    
+
     A --> U[schema.ts]
     U -->|activitySchema| V[ZodSchema]
     U -->|createActivitySchema| W[ZodSchema]

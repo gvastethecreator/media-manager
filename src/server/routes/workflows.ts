@@ -1,6 +1,12 @@
 import { Router } from 'express';
-import { getWorkflows, createWorkflow, updateWorkflow, deleteWorkflow, getWorkflowById } from '@/services/workflow/workflow.service';
 import { z } from 'zod';
+import {
+	createWorkflow,
+	deleteWorkflow,
+	getWorkflowById,
+	getWorkflows,
+	updateWorkflow,
+} from '@/services/workflow/workflow.service';
 
 const router = Router();
 

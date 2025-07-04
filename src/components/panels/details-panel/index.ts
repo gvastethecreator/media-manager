@@ -4,25 +4,22 @@ export { DetailsPanel as DetailsPanelV2 } from './details-panel'; // Alias para 
 
 // Componentes de demostración
 export { DetailsPanelShowcase } from './details-panel-showcase';
-
-// Sistema de registro y configuración
-export { entityDetailsRegistry } from './entity-details-registry';
+// Componentes específicos de entidades
+export { ImageDetails, ImageMetadata, ImagePreview, ImageToolbar } from './entities/image-details';
 export type {
-	EntityDetailsConfig,
 	EntityAction,
+	EntityDetailsConfig,
 	EntityDetailsProps,
+	EntityMetadataProps,
 	EntityPreviewProps,
 	EntityToolbarProps,
-	EntityMetadataProps
 } from './entity-details-registry';
-
+// Sistema de registro y configuración
+export { entityDetailsRegistry } from './entity-details-registry';
+export type { DetailsPanelIntegrationProps } from './integration-hook';
 // Hooks de integración
 export {
+	useDetailsPanelComplete,
 	useDetailsPanelIntegration,
 	useEntityActions,
-	useDetailsPanelComplete
 } from './integration-hook';
-export type { DetailsPanelIntegrationProps } from './integration-hook';
-
-// Componentes específicos de entidades
-export { ImageDetails, ImagePreview, ImageToolbar, ImageMetadata } from './entities/image-details';

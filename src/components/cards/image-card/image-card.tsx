@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useImage } from '@/lib/api/images';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
-import { useImage } from '@/lib/api/images';
 import { ImageWithStats } from '@/types/entities/image';
 
 interface ImageCardProps {

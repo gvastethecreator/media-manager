@@ -3,9 +3,9 @@
  * @description Compatible con Vite + React - ✅ MIGRADO A DRIZZLE
  */
 
+import { count, gte, sql, sum } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { images, folders, collections, tags } from '@/lib/drizzle/schema';
-import { count, sum, gte, sql } from 'drizzle-orm';
+import { collections, folders, images, tags } from '@/lib/drizzle/schema';
 import { formatBytes } from '@/lib/utils/format.utils';
 
 /**
@@ -13,9 +13,7 @@ import { formatBytes } from '@/lib/utils/format.utils';
  */
 export async function getIndexedFilesCount(): Promise<number> {
 	try {
-		const [result] = await db
-			.select({ count: count() })
-			.from(images);
+		const [result] = await db.select({ count: count() }).from(images);
 
 		return result.count;
 	} catch (error) {
@@ -32,9 +30,7 @@ export async function getTotalSpaceUsed(): Promise<{
 	formatted: string;
 }> {
 	try {
-		const [result] = await db
-			.select({ totalSize: sum(images.size) })
-			.from(images);
+		const [result] = await db.select({ totalSize: sum(images.size) }).from(images);
 
 		const totalBytes = Number(result.totalSize) || 0;
 
@@ -56,9 +52,7 @@ export async function getTotalSpaceUsed(): Promise<{
  */
 export async function getMonitoredFoldersCount(): Promise<number> {
 	try {
-		const [result] = await db
-			.select({ count: count() })
-			.from(folders);
+		const [result] = await db.select({ count: count() }).from(folders);
 
 		return result.count;
 	} catch (error) {
@@ -72,9 +66,7 @@ export async function getMonitoredFoldersCount(): Promise<number> {
  */
 export async function getCollectionsCount(): Promise<number> {
 	try {
-		const [result] = await db
-			.select({ count: count() })
-			.from(collections);
+		const [result] = await db.select({ count: count() }).from(collections);
 
 		return result.count;
 	} catch (error) {
@@ -88,9 +80,7 @@ export async function getCollectionsCount(): Promise<number> {
  */
 export async function getTagsCount(): Promise<number> {
 	try {
-		const [result] = await db
-			.select({ count: count() })
-			.from(tags);
+		const [result] = await db.select({ count: count() }).from(tags);
 
 		return result.count;
 	} catch (error) {
@@ -156,10 +146,7 @@ export async function getTagsHistoricalData(): Promise<
 		const sevenDaysAgo = new Date();
 		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-		const tagsData = await db
-			.select({ createdAt: tags.createdAt })
-			.from(tags)
-			.where(gte(tags.createdAt, sevenDaysAgo));
+		const tagsData = await db.select({ createdAt: tags.createdAt }).from(tags).where(gte(tags.createdAt, sevenDaysAgo));
 
 		// Agrupar por día
 		const groupedByDay = tagsData.reduce<Record<string, number>>((acc, tag) => {

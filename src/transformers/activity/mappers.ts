@@ -6,7 +6,6 @@
 
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';
 
-
 type DrizzleCreateActivityData = {
 	type: string;
 	description: string;
@@ -161,5 +160,3 @@ export function generateActivityDescription(type: ActivityType | string, data: R
 	// Reemplazar variables en la plantilla
 	return template.replace(/\${(\w+)}/g, (_, key) => data[key] || '[?]');
 }
-
-

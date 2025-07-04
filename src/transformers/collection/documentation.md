@@ -4,9 +4,9 @@
 
 Este módulo contiene todos los transformadores, validadores y utilidades para manejar la entidad **Collection** dentro del sistema de gestión de imágenes. Las colecciones representan agrupaciones lógicas de contenido multimedia.
 
-**✅ Estado:** MIGRADO A DRIZZLE - Enero 2025  
-**🎯 Propósito:** Transformar datos entre Drizzle ORM y tipos locales para la entidad Collection  
-**🔧 Arquitectura:** Patrón de transformadores con validación Zod  
+**✅ Estado:** MIGRADO A DRIZZLE - Enero 2025
+**🎯 Propósito:** Transformar datos entre Drizzle ORM y tipos locales para la entidad Collection
+**🔧 Arquitectura:** Patrón de transformadores con validación Zod
 
 ## 🏗️ Estructura del Módulo
 
@@ -38,7 +38,7 @@ graph LR
     B --> E[toCollectionWithStats]
     D --> E
     E --> F[CollectionWithStats]
-    
+
     style A fill:#e1f5fe
     style F fill:#c8e6c9
     style E fill:#fff3e0
@@ -210,7 +210,7 @@ expect(() => validateCollectionWithStats(result)).not.toThrow();
 
 ## 📝 Migración desde Prisma
 
-**Estado Anterior:** Dependía completamente de tipos Prisma (`Collection`, `Prisma.CollectionInclude`)  
+**Estado Anterior:** Dependía completamente de tipos Prisma (`Collection`, `Prisma.CollectionInclude`)
 **Estado Actual:** Usa solo tipos Drizzle locales (`CollectionBase`, tipos locales)
 
 ### Cambios Principales
@@ -231,6 +231,6 @@ Los transformadores mantienen **100% compatibilidad** con:
 
 ---
 
-**✅ Estado de Migración:** COMPLETADO  
-**🎯 Próximos Pasos:** Continuar migración con otros bloques de transformadores  
+**✅ Estado de Migración:** COMPLETADO
+**🎯 Próximos Pasos:** Continuar migración con otros bloques de transformadores
 **📅 Última Actualización:** Enero 2025

@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/types/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/types/folders';
 
 const eventsLogger = clientLogger.withContext('FoldersEvents');
 

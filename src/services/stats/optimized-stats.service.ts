@@ -1,10 +1,10 @@
 // 🎯 Servicio optimizado de estadísticas migrado a Drizzle ORM
 // filepath: d:\DEV\image-manager\src\services\stats\optimized-stats.service.ts
 
+import { sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { unstable_cache } from '@/lib/server/revalidate';
-import { sql } from 'drizzle-orm';
 
 /**
  * 🚀 Servicio optimizado que agrupa consultas SUM y usa caché inteligente
@@ -135,7 +135,9 @@ export class OptimizedStatsService {
 			try {
 				// 🚀 Una consulta para todos los álbumes en lugar de N consultas separadas
 				const placeholders = albumIds.map(() => '?').join(',');
-				const batchStatsQuery = await db.all(sql.raw(`
+				const batchStatsQuery = await db.all(
+					sql.raw(
+						`
 					SELECT
 						a.id as albumId,
 						a.name as albumName,
@@ -152,7 +154,10 @@ export class OptimizedStatsService {
 					LEFT JOIN Video v ON av.B = v.id
 					WHERE a.id IN (${placeholders})
 					GROUP BY a.id, a.name
-				`, albumIds));
+				`,
+						albumIds
+					)
+				);
 
 				return (batchStatsQuery as any[]).reduce(
 					(acc, stats) => {
@@ -331,7 +336,9 @@ export class OptimizedStatsService {
 				// Si no se proporcionan IDs, obtener todos los tags
 				const batchTagStatsQuery =
 					tagIds && tagIds.length > 0
-						? await db.all(sql.raw(`
+						? await db.all(
+								sql.raw(
+									`
 						SELECT
 							t.id as tagId,
 							t.name,
@@ -352,7 +359,10 @@ export class OptimizedStatsService {
 						LEFT JOIN Wildcard w ON tw.B = w.id
 						WHERE t.id IN (${tagIds.map(() => '?').join(',')})
 						GROUP BY t.id, t.name, t.color
-					`, tagIds))
+					`,
+									tagIds
+								)
+							)
 						: await db.all(sql`
 						SELECT
 							t.id as tagId,
@@ -413,7 +423,9 @@ export class OptimizedStatsService {
 			try {
 				const batchCollectionStatsQuery =
 					collectionIds && collectionIds.length > 0
-						? await db.all(sql.raw(`
+						? await db.all(
+								sql.raw(
+									`
 						SELECT
 							c.id as collectionId,
 							c.name,
@@ -433,7 +445,10 @@ export class OptimizedStatsService {
 						LEFT JOIN Wildcard w ON cw.B = w.id
 						WHERE c.id IN (${collectionIds.map(() => '?').join(',')})
 						GROUP BY c.id, c.name
-					`, collectionIds))
+					`,
+									collectionIds
+								)
+							)
 						: await db.all(sql`
 						SELECT
 							c.id as collectionId,

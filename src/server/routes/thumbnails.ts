@@ -1,7 +1,15 @@
 import express from 'express';
-import { getThumbnail, optimizeThumbnails, reprocessThumbnails, cleanThumbnails, getLastProcessedThumbnails, getThumbnailStats, verifySignedToken } from '../services/thumbnail.service';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
 import { thumbnailService } from '@/services/thumbnail';
+import {
+	cleanThumbnails,
+	getLastProcessedThumbnails,
+	getThumbnail,
+	getThumbnailStats,
+	optimizeThumbnails,
+	reprocessThumbnails,
+	verifySignedToken,
+} from '../services/thumbnail.service';
 
 const router = express.Router();
 

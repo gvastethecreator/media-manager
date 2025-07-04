@@ -1,9 +1,19 @@
 /**
  * @file Punto de entrada para los transformadores de la entidad Group.
  * @module transformers/group
- * @description Exporta la función `toGroupWithStats` como el transformador canónico.
- * @see /src/transformers/group/mappers.ts
- * @updated 2025-01-27
+ * @description Exporta de forma controlada las funciones de mapeo, serialización y transformación para la entidad Group.
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-export { toGroupWithStats } from './mappers';
+// Exportar mappers, serializers, validators y schemas
+export * from './mappers';
+export * from './serializers';
+export * from './validators';
+export * from './schema';
+
+// Exportar funciones principales de transformación
+export {
+	fromDrizzleGroup,
+	fromDrizzleGroups,
+	toDrizzleGroup,
+} from './transformer';

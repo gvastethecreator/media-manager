@@ -1,8 +1,9 @@
 /**
  * 🛠️ Utilidades para trabajar con la base de datos a través de Drizzle
  */
-import { db } from '@/lib/drizzle';
+
 import { eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
 import * as schema from './schema';
 
 type DrizzleTransactionClient = typeof db._;
@@ -56,13 +57,14 @@ export async function testDatabaseConnection(): Promise<boolean> {
  * 📊 Obtiene estadísticas básicas de la base de datos
  */
 export async function getDatabaseStats() {
-	const [imageCountResult, folderCountResult, tagCountResult, albumCountResult, collectionCountResult] = await Promise.all([
-		db.select({ count: sql<number>`count(*)` }).from(schema.images),
-		db.select({ count: sql<number>`count(*)` }).from(schema.folders),
-		db.select({ count: sql<number>`count(*)` }).from(schema.tags),
-		db.select({ count: sql<number>`count(*)` }).from(schema.albums),
-		db.select({ count: sql<number>`count(*)` }).from(schema.collections),
-	]);
+	const [imageCountResult, folderCountResult, tagCountResult, albumCountResult, collectionCountResult] =
+		await Promise.all([
+			db.select({ count: sql<number>`count(*)` }).from(schema.images),
+			db.select({ count: sql<number>`count(*)` }).from(schema.folders),
+			db.select({ count: sql<number>`count(*)` }).from(schema.tags),
+			db.select({ count: sql<number>`count(*)` }).from(schema.albums),
+			db.select({ count: sql<number>`count(*)` }).from(schema.collections),
+		]);
 
 	return {
 		imageCount: imageCountResult[0].count,

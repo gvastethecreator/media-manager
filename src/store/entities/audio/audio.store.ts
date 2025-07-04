@@ -5,21 +5,17 @@
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import { createSelectors } from '@/lib/utils/store/create-selectors';
-// Migrado a cliente de API
-import {
-    createAudioInApi,
-    deleteAudioFromApi,
-    getAudiosFromApi,
-    updateAudioInApi,
-} from '@/lib/api/client/audio.client';
-import type {
-    AudioCreateInput,
-    AudioUpdateInput,
-    AudioWithStats
-} from '@/types/entities/audio';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+// Migrado a cliente de API
+import {
+	createAudioInApi,
+	deleteAudioFromApi,
+	getAudiosFromApi,
+	updateAudioInApi,
+} from '@/lib/api/client/audio.client';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
+import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type AudioFilters = Record<string, any>;
@@ -73,7 +69,7 @@ const useAudioStoreBase = create<AudioState>()(
 			fetchAudios: async () => {
 				set({ loading: true, error: null });
 				try {
-                                        const audios = await getAudiosFromApi();
+					const audios = await getAudiosFromApi();
 					set({ audios, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
@@ -83,7 +79,7 @@ const useAudioStoreBase = create<AudioState>()(
 			createAudio: async (data: AudioCreateInput) => {
 				set({ loading: true, error: null });
 				try {
-                                        const newAudio = await createAudioInApi(data);
+					const newAudio = await createAudioInApi(data);
 					set((state) => ({
 						audios: [...state.audios, newAudio],
 						loading: false,
@@ -98,7 +94,7 @@ const useAudioStoreBase = create<AudioState>()(
 			updateAudio: async (id: string, data: AudioUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
-                                        const updatedAudio = await updateAudioInApi(id, data);
+					const updatedAudio = await updateAudioInApi(id, data);
 					set((state) => ({
 						audios: state.audios.map((a) => (a.id === id ? updatedAudio : a)),
 						currentAudio: state.currentAudio?.id === id ? updatedAudio : state.currentAudio,
@@ -114,7 +110,7 @@ const useAudioStoreBase = create<AudioState>()(
 			deleteAudio: async (id: string) => {
 				set({ loading: true, error: null });
 				try {
-                                        await deleteAudioFromApi(id);
+					await deleteAudioFromApi(id);
 					set((state) => ({
 						audios: state.audios.filter((a) => a.id !== id),
 						selectedAudios: state.selectedAudios.filter((a) => a.id !== id),

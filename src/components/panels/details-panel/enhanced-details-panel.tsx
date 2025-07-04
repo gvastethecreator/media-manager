@@ -3,24 +3,19 @@
  * @module components/panels/details-panel/enhanced-details-panel
  */
 
+import { ChevronDown, ChevronUp, Maximize2, Minimize2, MoreHorizontal, Pin, PinOff, Settings, X } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
-import {
-	ChevronDown,
-	ChevronUp,
-	Settings,
-	X,
-	Pin,
-	PinOff,
-	Maximize2,
-	Minimize2,
-	MoreHorizontal
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import type { EntityWithStats } from '@/types/migration';
@@ -52,9 +47,7 @@ const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action:
 						{entity.createdAt && (
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Creado:</span>
-								<span className="font-medium text-xs">
-									{new Date(entity.createdAt).toLocaleDateString()}
-								</span>
+								<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
 							</div>
 						)}
 					</div>
@@ -112,9 +105,7 @@ const MultipleSelectionDetails = memo<{ entities: EntityWithStats[]; onAction?: 
 									<Separator />
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">Tamaño total:</span>
-										<span className="font-medium">
-											{(totalSize / (1024 * 1024)).toFixed(1)} MB
-										</span>
+										<span className="font-medium">{(totalSize / (1024 * 1024)).toFixed(1)} MB</span>
 									</div>
 								</>
 							)}
@@ -165,14 +156,7 @@ const MultipleSelectionDetails = memo<{ entities: EntityWithStats[]; onAction?: 
 
 // Componente principal del panel de detalles mejorado
 export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
-	const {
-		isVisible,
-		isFixed,
-		selectedItems,
-		toggleVisibility,
-		toggleFixed,
-		setVisible
-	} = useDetailsPanel();
+	const { isVisible, isFixed, selectedItems, toggleVisibility, toggleFixed, setVisible } = useDetailsPanel();
 
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
@@ -215,12 +199,7 @@ export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
 		}
 
 		if (selectedItems.length > 1) {
-			return (
-				<MultipleSelectionDetails
-					entities={selectedItems}
-					onAction={handleEntityAction}
-				/>
-			);
+			return <MultipleSelectionDetails entities={selectedItems} onAction={handleEntityAction} />;
 		}
 
 		const entity = selectedItems[0];
@@ -228,22 +207,11 @@ export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
 
 		if (config) {
 			const DetailsComponent = config.detailsComponent;
-			return (
-				<DetailsComponent
-					entity={entity}
-					isSelected={true}
-					onAction={handleEntityAction}
-				/>
-			);
+			return <DetailsComponent entity={entity} isSelected={true} onAction={handleEntityAction} />;
 		}
 
 		// Fallback para entidades sin configuración específica
-		return (
-			<DefaultEntityDetails
-				entity={entity}
-				onAction={handleEntityAction}
-			/>
-		);
+		return <DefaultEntityDetails entity={entity} onAction={handleEntityAction} />;
 	}, [selectedItems, handleEntityAction]);
 
 	if (!isVisible) {
@@ -251,11 +219,13 @@ export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
 	}
 
 	return (
-		<div className={cn(
-			"bg-background border-l border-border transition-all duration-200",
-			isExpanded ? "fixed inset-0 z-50 bg-background" : "w-80",
-			isFixed ? "relative" : "absolute right-0 top-0 bottom-0"
-		)}>
+		<div
+			className={cn(
+				'bg-background border-l border-border transition-all duration-200',
+				isExpanded ? 'fixed inset-0 z-50 bg-background' : 'w-80',
+				isFixed ? 'relative' : 'absolute right-0 top-0 bottom-0'
+			)}
+		>
 			{/* Header del panel */}
 			<div className="flex items-center justify-between p-3 border-b border-border">
 				<div className="flex items-center gap-2">
@@ -269,32 +239,17 @@ export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
 
 				<div className="flex items-center gap-1">
 					{/* Colapsar/expandir */}
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => setIsCollapsed(!isCollapsed)}
-						className="h-8 w-8 p-0"
-					>
+					<Button variant="ghost" size="sm" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 p-0">
 						{isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
 					</Button>
 
 					{/* Expandir/contraer */}
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => setIsExpanded(!isExpanded)}
-						className="h-8 w-8 p-0"
-					>
+					<Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="h-8 w-8 p-0">
 						{isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
 					</Button>
 
 					{/* Fijar/desfijar */}
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={toggleFixed}
-						className="h-8 w-8 p-0"
-					>
+					<Button variant="ghost" size="sm" onClick={toggleFixed} className="h-8 w-8 p-0">
 						{isFixed ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
 					</Button>
 
@@ -309,22 +264,13 @@ export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
 							<DropdownMenuItem onClick={() => setIsCollapsed(!isCollapsed)}>
 								{isCollapsed ? 'Expandir' : 'Colapsar'}
 							</DropdownMenuItem>
-							<DropdownMenuItem onClick={toggleFixed}>
-								{isFixed ? 'Desfijar' : 'Fijar'}
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setVisible(false)}>
-								Ocultar panel
-							</DropdownMenuItem>
+							<DropdownMenuItem onClick={toggleFixed}>{isFixed ? 'Desfijar' : 'Fijar'}</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setVisible(false)}>Ocultar panel</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 
 					{/* Cerrar */}
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => setVisible(false)}
-						className="h-8 w-8 p-0"
-					>
+					<Button variant="ghost" size="sm" onClick={() => setVisible(false)} className="h-8 w-8 p-0">
 						<X className="h-4 w-4" />
 					</Button>
 				</div>
@@ -332,13 +278,8 @@ export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
 
 			{/* Contenido del panel */}
 			{!isCollapsed && (
-				<ScrollArea className={cn(
-					"flex-1",
-					isExpanded ? "h-[calc(100vh-4rem)]" : "h-[calc(100vh-4rem)]"
-				)}>
-					<div className="p-3">
-						{renderContent()}
-					</div>
+				<ScrollArea className={cn('flex-1', isExpanded ? 'h-[calc(100vh-4rem)]' : 'h-[calc(100vh-4rem)]')}>
+					<div className="p-3">{renderContent()}</div>
 				</ScrollArea>
 			)}
 		</div>

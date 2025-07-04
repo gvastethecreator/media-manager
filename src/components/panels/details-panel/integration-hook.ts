@@ -16,14 +16,17 @@ export function useDetailsPanelIntegration() {
 	/**
 	 * Actualiza los elementos seleccionados en el Details Panel
 	 */
-	const updateSelection = useCallback((items: EntityWithStats[]) => {
-		setSelectedItems(items);
+	const updateSelection = useCallback(
+		(items: EntityWithStats[]) => {
+			setSelectedItems(items);
 
-		// Mostrar el panel automáticamente si hay selección
-		if (items.length > 0) {
-			setVisible(true);
-		}
-	}, [setSelectedItems, setVisible]);
+			// Mostrar el panel automáticamente si hay selección
+			if (items.length > 0) {
+				setVisible(true);
+			}
+		},
+		[setSelectedItems, setVisible]
+	);
 
 	/**
 	 * Limpia la selección del Details Panel
@@ -35,42 +38,54 @@ export function useDetailsPanelIntegration() {
 	/**
 	 * Selecciona un solo elemento
 	 */
-	const selectSingle = useCallback((item: EntityWithStats) => {
-		updateSelection([item]);
-	}, [updateSelection]);
+	const selectSingle = useCallback(
+		(item: EntityWithStats) => {
+			updateSelection([item]);
+		},
+		[updateSelection]
+	);
 
 	/**
 	 * Añade un elemento a la selección múltiple
 	 */
-	const addToSelection = useCallback((item: EntityWithStats) => {
-		setSelectedItems(prev => {
-			const exists = prev.find(p => p.id === item.id);
-			if (exists) return prev;
-			return [...prev, item];
-		});
-		setVisible(true);
-	}, [setSelectedItems, setVisible]);
+	const addToSelection = useCallback(
+		(item: EntityWithStats) => {
+			setSelectedItems((prev) => {
+				const exists = prev.find((p) => p.id === item.id);
+				if (exists) return prev;
+				return [...prev, item];
+			});
+			setVisible(true);
+		},
+		[setSelectedItems, setVisible]
+	);
 
 	/**
 	 * Quita un elemento de la selección
 	 */
-	const removeFromSelection = useCallback((itemId: string) => {
-		setSelectedItems(prev => prev.filter(p => p.id !== itemId));
-	}, [setSelectedItems]);
+	const removeFromSelection = useCallback(
+		(itemId: string) => {
+			setSelectedItems((prev) => prev.filter((p) => p.id !== itemId));
+		},
+		[setSelectedItems]
+	);
 
 	/**
 	 * Toggle de selección para un elemento
 	 */
-	const toggleSelection = useCallback((item: EntityWithStats) => {
-		setSelectedItems(prev => {
-			const exists = prev.find(p => p.id === item.id);
-			if (exists) {
-				return prev.filter(p => p.id !== item.id);
-			}
-			setVisible(true);
-			return [...prev, item];
-		});
-	}, [setSelectedItems, setVisible]);
+	const toggleSelection = useCallback(
+		(item: EntityWithStats) => {
+			setSelectedItems((prev) => {
+				const exists = prev.find((p) => p.id === item.id);
+				if (exists) {
+					return prev.filter((p) => p.id !== item.id);
+				}
+				setVisible(true);
+				return [...prev, item];
+			});
+		},
+		[setSelectedItems, setVisible]
+	);
 
 	return {
 		updateSelection,

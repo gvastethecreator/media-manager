@@ -7,12 +7,12 @@
  */
 
 import type {
-    ConceptBase,
-    ConceptCreateInput,
-    ConceptFilters,
-    ConceptSearchOptions,
-    ConceptSortOption,
-    ConceptUpdateInput,
+	ConceptBase,
+	ConceptCreateInput,
+	ConceptFilters,
+	ConceptSearchOptions,
+	ConceptSortOption,
+	ConceptUpdateInput,
 } from '@/types/entities/concept';
 
 // Tipos locales equivalentes a Prisma (migración a Drizzle)
@@ -130,7 +130,7 @@ export function toUpdateDataDrizzle(input: ConceptUpdateInput): DrizzleConceptUp
 
 	const data: DrizzleConceptUpdateInput = {
 		...rest,
-		updatedAt: new Date()
+		updatedAt: new Date(),
 	};
 
 	// Nota: Las relaciones se manejan por separado en Drizzle
@@ -164,11 +164,7 @@ export function createFilterDrizzle(filters: ConceptSearchOptions['filters'] = {
 	if (filters?.search) {
 		const search = filters.search.trim();
 		conditions.push({
-			OR: [
-				{ name: { contains: search } },
-				{ description: { contains: search } },
-				{ content: { contains: search } }
-			],
+			OR: [{ name: { contains: search } }, { description: { contains: search } }, { content: { contains: search } }],
 		});
 	}
 

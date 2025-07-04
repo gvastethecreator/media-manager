@@ -46,13 +46,4 @@ export function toDrizzleFile3D(file: File3D): DrizzleFile3D {
 	};
 }
 
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar fromDrizzleFile3D
- */
-export const fromDrizzleFile3D_legacy = fromDrizzleFile3D;
 
-/**
- * @deprecated Usar toDrizzleFile3D
- */
-export const toPrismaFile3D = toDrizzleFile3D;

@@ -76,23 +76,23 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 
 	// Lista de vistas que requieren el panel de detalles - memoizada
-	const viewsWithDetails = useMemo(() => [
-		'all-images',
-		'favorites',
-		'search',
-		'collection-content',
-		'folder-content',
-		'tag-content',
-		'album-content',
-		'character-content',
-		'place-content',
-		'world-item-content',
-	], []);
-
-	const showDetailsButton = useMemo(() =>
-		viewsWithDetails.includes(currentView),
-		[viewsWithDetails, currentView]
+	const viewsWithDetails = useMemo(
+		() => [
+			'all-images',
+			'favorites',
+			'search',
+			'collection-content',
+			'folder-content',
+			'tag-content',
+			'album-content',
+			'character-content',
+			'place-content',
+			'world-item-content',
+		],
+		[]
 	);
+
+	const showDetailsButton = useMemo(() => viewsWithDetails.includes(currentView), [viewsWithDetails, currentView]);
 
 	// Determinar si estamos en la vista de settings para ocultar controles innecesarios
 	const isInSettingsView = useMemo(() => currentView === 'settings', [currentView]);

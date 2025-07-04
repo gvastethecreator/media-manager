@@ -5,11 +5,15 @@
  * ✅ INCLUYE EXTRACCIÓN DE METADATOS - Migrado desde server actions
  */
 
+import * as crypto from 'crypto';
+import { desc, eq } from 'drizzle-orm';
+// Imports para extracción de metadatos (migrados desde server actions)
+import { promises as fs } from 'fs';
+import sharp from 'sharp';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { metadatas } from '@/lib/drizzle/schema';
-import { eq, desc } from 'drizzle-orm';
-import * as crypto from 'crypto';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	mapCreateMetadataDataToPrisma,
 	mapUpdateMetadataDataToPrisma,
@@ -18,11 +22,6 @@ import {
 } from '@/transformers/metadata';
 import { MetadataExtended, MetadataToCreate } from '@/types/entities/metadata/extended';
 import { MetadataBase } from '@/types/entities/metadata/types';
-
-// Imports para extracción de metadatos (migrados desde server actions)
-import { promises as fs } from 'fs';
-import sharp from 'sharp';
-import { serverLogger } from '@/lib/logger/server-logger';
 import type { MediaMetadata } from '@/types/metadata.types';
 
 const metadataLogger = serverLogger.withContext('MetadataService');
@@ -178,19 +177,22 @@ export async function createMetadata(data: Partial<MetadataBase>): Promise<Metad
 		const prismaData = mapCreateMetadataDataToPrisma(data);
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(metadatas).values({
-			id: crypto.randomUUID(),
-			entityType: prismaData.entityType,
-			entityId: prismaData.entityId,
-			key: prismaData.key,
-			value: prismaData.value || null,
-			type: prismaData.type || 'string',
-			isPublic: prismaData.isPublic || false,
-			category: prismaData.category || null,
-			description: prismaData.description || null,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(metadatas)
+			.values({
+				id: crypto.randomUUID(),
+				entityType: prismaData.entityType,
+				entityId: prismaData.entityId,
+				key: prismaData.key,
+				value: prismaData.value || null,
+				type: prismaData.type || 'string',
+				isPublic: prismaData.isPublic || false,
+				category: prismaData.category || null,
+				description: prismaData.description || null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newMetadata = result[0];
 
@@ -215,7 +217,7 @@ export async function createMetadata(data: Partial<MetadataBase>): Promise<Metad
  */
 export async function updateMetadata(
 	id: string,
-	data: Partial<Omit<MetadataBase, 'id' | 'entityId' | 'entityType'>>,
+	data: Partial<Omit<MetadataBase, 'id' | 'entityId' | 'entityType'>>
 ): Promise<MetadataExtended | null> {
 	try {
 		const prismaData = mapUpdateMetadataDataToPrisma(data);
@@ -252,7 +254,7 @@ export async function updateMetadata(
  * @returns Un objeto con el número de actualizados y los errores.
  */
 export async function updateMultipleMetadata(
-	updates: { id: string; data: Partial<Omit<MetadataBase, 'id' | 'entityId' | 'entityType'>> }[],
+	updates: { id: string; data: Partial<Omit<MetadataBase, 'id' | 'entityId' | 'entityType'>> }[]
 ): Promise<{ updated: number; errors: { id: string; error: string }[] }> {
 	const results = await Promise.allSettled(updates.map(({ id, data }) => updateMetadata(id, data)));
 
@@ -282,8 +284,7 @@ export async function updateMultipleMetadata(
 export async function deleteMetadata(id: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		await db.delete(metadatas)
-			.where(eq(metadatas.id, id));
+		await db.delete(metadatas).where(eq(metadatas.id, id));
 
 		return true;
 	} catch (error) {
@@ -300,8 +301,7 @@ export async function deleteMetadata(id: string): Promise<boolean> {
 export async function deleteMetadataByImageId(imageId: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		await db.delete(metadatas)
-			.where(eq(metadatas.entityId, imageId));
+		await db.delete(metadatas).where(eq(metadatas.entityId, imageId));
 
 		return true;
 	} catch (error) {
@@ -318,10 +318,7 @@ export async function deleteMetadataByImageId(imageId: string): Promise<boolean>
 /**
  * Función de reintento con backoff exponencial
  */
-async function withRetry<T>(
-	operation: () => Promise<T>,
-	config = DEFAULT_RETRY_CONFIG
-): Promise<T> {
+async function withRetry<T>(operation: () => Promise<T>, config = DEFAULT_RETRY_CONFIG): Promise<T> {
 	let lastError: Error;
 
 	for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
@@ -335,8 +332,8 @@ async function withRetry<T>(
 			}
 
 			// Backoff exponencial
-			const delay = config.delay * Math.pow(2, attempt - 1);
-			await new Promise(resolve => setTimeout(resolve, delay));
+			const delay = config.delay * 2 ** (attempt - 1);
+			await new Promise((resolve) => setTimeout(resolve, delay));
 		}
 	}
 
@@ -407,7 +404,7 @@ async function getAIGenerationInfo(metadata: Record<string, unknown>): Promise<a
 
 	for (const [key, value] of Object.entries(metadata)) {
 		const lowerKey = key.toLowerCase();
-		if (aiKeys.some(aiKey => lowerKey.includes(aiKey))) {
+		if (aiKeys.some((aiKey) => lowerKey.includes(aiKey))) {
 			aiData[key] = value;
 		}
 	}

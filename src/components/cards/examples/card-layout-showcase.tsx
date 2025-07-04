@@ -6,10 +6,10 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { EntityCard } from '../entity-card';
-import type { CardLayout, CardVariant, CardSize } from '../types/card-layout.types';
-import { LAYOUT_PRESETS } from '../types/card-layout.types';
 import type { EntityWithStats } from '@/types/migration';
+import { EntityCard } from '../entity-card';
+import type { CardLayout, CardSize, CardVariant } from '../types/card-layout.types';
+import { LAYOUT_PRESETS } from '../types/card-layout.types';
 
 // Mock data para demostración
 const mockEntities: EntityWithStats[] = [
@@ -74,7 +74,9 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
 				{/* Layout */}
 				<div className="space-y-2">
-					<label htmlFor="layout-select" className="text-sm font-medium">Layout</label>
+					<label htmlFor="layout-select" className="text-sm font-medium">
+						Layout
+					</label>
 					<select
 						id="layout-select"
 						value={selectedLayout}
@@ -91,7 +93,9 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 				{/* Variante */}
 				<div className="space-y-2">
-					<label htmlFor="variant-select" className="text-sm font-medium">Variante</label>
+					<label htmlFor="variant-select" className="text-sm font-medium">
+						Variante
+					</label>
 					<select
 						id="variant-select"
 						value={selectedVariant}
@@ -108,7 +112,9 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 				{/* Tamaño */}
 				<div className="space-y-2">
-					<label htmlFor="size-select" className="text-sm font-medium">Tamaño</label>
+					<label htmlFor="size-select" className="text-sm font-medium">
+						Tamaño
+					</label>
 					<select
 						id="size-select"
 						value={selectedSize}
@@ -125,7 +131,9 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 				{/* Preset */}
 				<div className="space-y-2">
-					<label htmlFor="preset-select" className="text-sm font-medium">Preset</label>
+					<label htmlFor="preset-select" className="text-sm font-medium">
+						Preset
+					</label>
 					<select
 						id="preset-select"
 						value={selectedPreset}
@@ -169,16 +177,16 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 						<div key={presetName} className="space-y-3">
 							<div className="flex items-center justify-between">
 								<h4 className="font-medium">{presetName}</h4>
-															<button
-								type="button"
-								onClick={() => {
-									setSelectedLayout(config.layout);
-									setSelectedVariant(config.variant);
-									setSelectedSize(config.size);
-									setSelectedPreset(presetName);
-								}}
-								className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded"
-							>
+								<button
+									type="button"
+									onClick={() => {
+										setSelectedLayout(config.layout);
+										setSelectedVariant(config.variant);
+										setSelectedSize(config.size);
+										setSelectedPreset(presetName);
+									}}
+									className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded"
+								>
 									Aplicar
 								</button>
 							</div>
@@ -261,59 +269,37 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 							</p>
 							<div className="grid grid-cols-3 gap-2">
 								{mockEntities.map((entity) => (
-									<EntityCard
-										key={`grid-${entity.id}`}
-										entity={entity}
-										preset="file-browser-grid"
-									/>
+									<EntityCard key={`grid-${entity.id}`} entity={entity} preset="file-browser-grid" />
 								))}
 							</div>
 						</div>
 
 						<div className="p-4 border rounded-lg space-y-2">
 							<h4 className="font-medium">File Browser - Vista Lista</h4>
-							<p className="text-sm text-muted-foreground">
-								Layout horizontal compacto para listas de archivos
-							</p>
+							<p className="text-sm text-muted-foreground">Layout horizontal compacto para listas de archivos</p>
 							<div className="space-y-2">
 								{mockEntities.map((entity) => (
-									<EntityCard
-										key={`list-${entity.id}`}
-										entity={entity}
-										preset="file-browser-list"
-									/>
+									<EntityCard key={`list-${entity.id}`} entity={entity} preset="file-browser-list" />
 								))}
 							</div>
 						</div>
 
 						<div className="p-4 border rounded-lg space-y-2">
 							<h4 className="font-medium">Dashboard</h4>
-							<p className="text-sm text-muted-foreground">
-								Layout completo con toda la información disponible
-							</p>
+							<p className="text-sm text-muted-foreground">Layout completo con toda la información disponible</p>
 							<div className="grid grid-cols-2 gap-2">
 								{mockEntities.slice(0, 2).map((entity) => (
-									<EntityCard
-										key={`dashboard-${entity.id}`}
-										entity={entity}
-										preset="dashboard"
-									/>
+									<EntityCard key={`dashboard-${entity.id}`} entity={entity} preset="dashboard" />
 								))}
 							</div>
 						</div>
 
 						<div className="p-4 border rounded-lg space-y-2">
 							<h4 className="font-medium">TCG Mode</h4>
-							<p className="text-sm text-muted-foreground">
-								Estilo Trading Card Game para una experiencia inmersiva
-							</p>
+							<p className="text-sm text-muted-foreground">Estilo Trading Card Game para una experiencia inmersiva</p>
 							<div className="grid grid-cols-2 gap-2">
 								{mockEntities.slice(0, 2).map((entity) => (
-									<EntityCard
-										key={`tcg-${entity.id}`}
-										entity={entity}
-										preset="tcg-mode"
-									/>
+									<EntityCard key={`tcg-${entity.id}`} entity={entity} preset="tcg-mode" />
 								))}
 							</div>
 						</div>

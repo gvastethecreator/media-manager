@@ -1,3 +1,7 @@
+import { Group as GroupIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GroupCard } from '@/components/cards/group-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -7,10 +11,6 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
 import { type GroupWithStats } from '@/types/entities/group';
-import { Group as GroupIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('GroupsView');

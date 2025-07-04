@@ -2,7 +2,7 @@
  * @file Exportaciones principales de transformers para la entidad Activity
  * @module transformers/activity
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * 
+ *
  * Estado de migración:
  * - ✅ Mappers: Convertidos a tipos Drizzle
  * - ✅ Serializers: Sin dependencias de Prisma

@@ -7,17 +7,17 @@ import type { ImageWithStats } from '@/types/entities/image';
 const API_BASE_PATH = '/api/images';
 
 export interface FolderImagesOptions {
-    skip?: number;
-    take?: number;
+	skip?: number;
+	take?: number;
 }
 
 export interface FolderImagesResponse {
-    items: ImageWithStats[];
-    pagination: {
-        total: number;
-        hasMore: boolean;
-        currentPage: number;
-    };
+	items: ImageWithStats[];
+	pagination: {
+		total: number;
+		hasMore: boolean;
+		currentPage: number;
+	};
 }
 
 /**
@@ -25,28 +25,28 @@ export interface FolderImagesResponse {
  * Se utiliza en el store unificado para reemplazar la llamada al servicio del servidor.
  */
 export async function getFolderImagesFromApi(
-    folderId: string,
-    options: FolderImagesOptions = {}
+	folderId: string,
+	options: FolderImagesOptions = {}
 ): Promise<FolderImagesResponse> {
-    const params = new URLSearchParams();
-    params.append('folderId', folderId);
-    if (options.take) params.append('limit', String(options.take));
-    if (options.skip) params.append('offset', String(options.skip));
+	const params = new URLSearchParams();
+	params.append('folderId', folderId);
+	if (options.take) params.append('limit', String(options.take));
+	if (options.skip) params.append('offset', String(options.skip));
 
-    const response = await fetch(`${API_BASE_PATH}?${params.toString()}`);
+	const response = await fetch(`${API_BASE_PATH}?${params.toString()}`);
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Error al obtener las imágenes de la carpeta');
-    }
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.error || 'Error al obtener las imágenes de la carpeta');
+	}
 
-    const data = await response.json();
-    return {
-        items: data.data ?? [],
-        pagination: {
-            total: data.pagination?.total ?? 0,
-            hasMore: data.pagination?.hasNext ?? false,
-            currentPage: Math.floor((data.pagination?.offset ?? 0) / (data.pagination?.limit ?? 1)),
-        },
-    };
+	const data = await response.json();
+	return {
+		items: data.data ?? [],
+		pagination: {
+			total: data.pagination?.total ?? 0,
+			hasMore: data.pagination?.hasNext ?? false,
+			currentPage: Math.floor((data.pagination?.offset ?? 0) / (data.pagination?.limit ?? 1)),
+		},
+	};
 }

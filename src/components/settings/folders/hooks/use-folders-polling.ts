@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
-import type { ProcessStatus } from '@/types/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
+import type { ProcessStatus } from '@/types/folders';
 
 const pollingLogger = clientLogger.withContext('FoldersPolling');
 
