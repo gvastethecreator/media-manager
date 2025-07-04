@@ -115,7 +115,7 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
                         const notesData = await getNotesFromApi();
 
 			// Convertir NoteComplete[] a NoteWithStats[] usando el adaptador
-			const notesWithStats = adaptNotesCompleteToWithStats(notesData.items);
+			const notesWithStats = adaptNotesCompleteToWithStats(notesData);
 			const notesRecord = notesWithStats.reduce(
 				(acc: Record<string, NoteWithStats>, note: NoteWithStats) => {
 					acc[note.id] = note;
