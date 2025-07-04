@@ -8,6 +8,59 @@
       "group": "build",
       "isBackground": true,
       "problemMatcher": []
+    },
+    {
+      "label": "Frontend (Vite)",
+      "type": "shell",
+      "command": "bun",
+      "args": ["run", "dev:vite"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "development"
+      }
+    },
+    {
+      "label": "Backend (Express)",
+      "type": "shell",
+      "command": "bun",
+      "args": ["run", "dev:server:hot"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false,
+        "group": "development"
+      }
+    },
+    {
+      "label": "Full Development",
+      "type": "shell",
+      "command": "bun",
+      "args": ["run", "dev:full"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      }
     }
   ]
 }
