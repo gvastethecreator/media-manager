@@ -244,6 +244,7 @@ bun run drizzle:verify
 DATABASE_URL="file:./dev.db"
 NODE_ENV="development"
 PORT=5173
+CORS_ORIGIN="http://localhost:5174"
 
 # Opcional: Turso (producción)
 TURSO_DATABASE_URL="libsql://..."

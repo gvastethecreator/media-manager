@@ -10,7 +10,7 @@ export const ENV = {
 	API_PORT: process.env.API_PORT || process.env.PORT || '5173',
 	DATABASE_URL: process.env.DATABASE_URL || 'file:./db.sqlite',
 	VITE_API_URL: process.env.VITE_API_URL || 'http://localhost:5173/api',
-	CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
+	CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5174',
 } as const;
 
 // Validar variables críticas en el servidor
