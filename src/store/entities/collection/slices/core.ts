@@ -6,7 +6,14 @@
 import type { StateCreator } from 'zustand';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 // Server actions eliminados - usar servicios API
-import * as collectionService from '@/services/collection/collection.service';
+// Se migran las llamadas al servicio hacia el cliente de API
+import {
+    createCollectionInApi,
+    deleteCollectionFromApi,
+    getCollectionFromApi,
+    getCollectionsFromApi,
+    updateCollectionInApi,
+} from '@/lib/api/client/collection.client';
 import type { CollectionState } from '../types';
 
 /**
@@ -129,7 +136,7 @@ export const createCollectionCoreSlice: StateCreator<
 	fetchCollection: async (id: string) => {
 		set({ isLoading: true, error: null });
 		try {
-			const collection = await collectionService.getCollection(id);
+                const collection = await getCollectionFromApi(id);
 			if (collection) {
 				get().addCollection(collection);
 				return collection;
@@ -147,7 +154,7 @@ export const createCollectionCoreSlice: StateCreator<
 	fetchCollections: async () => {
 		set({ isLoading: true, error: null });
 		try {
-			const collections = await collectionService.getCollections();
+                const collections = await getCollectionsFromApi();
 			get().setCollections(collections);
 			return collections;
 		} catch (error: any) {
@@ -162,7 +169,7 @@ export const createCollectionCoreSlice: StateCreator<
 	createCollectionServer: async (data: CollectionCreateInput) => {
 		set({ isLoading: true, error: null });
 		try {
-			const newCollection = await collectionService.createCollection(data);
+                const newCollection = await createCollectionInApi(data);
 			get().addCollection(newCollection);
 			return newCollection;
 		} catch (error: any) {
@@ -177,7 +184,7 @@ export const createCollectionCoreSlice: StateCreator<
 	updateCollectionServer: async (id: string, data: Partial<CollectionUpdateInput>) => {
 		set({ isLoading: true, error: null });
 		try {
-			const updatedCollection = await collectionService.updateCollection(id, data);
+                const updatedCollection = await updateCollectionInApi(id, data);
 			get().updateCollection(id, updatedCollection);
 			return updatedCollection;
 		} catch (error: any) {
@@ -192,7 +199,7 @@ export const createCollectionCoreSlice: StateCreator<
 	removeCollectionServer: async (id: string) => {
 		set({ isLoading: true, error: null });
 		try {
-			await collectionService.deleteCollection(id);
+                await deleteCollectionFromApi(id);
 			get().removeCollection(id);
 			return true;
 		} catch (error: any) {
