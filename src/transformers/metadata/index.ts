@@ -1,18 +1,15 @@
 /**
  * @file Transformadores para entidades Metadata
  * @module transformers/metadata
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataBase, MetadataExtended } from '@/types/entities/metadata';
 import {
 	fromDrizzleMetadata,
-	// Alias legacy
-	fromPrismaMetadata,
 	mapCreateInputToDrizzle,
-	mapCreateInputToPrisma,
 	mapUpdateInputToDrizzle,
-	mapUpdateInputToPrisma,
 } from './mappers';
 
 /**
@@ -51,11 +48,4 @@ export {
 	mapUpdateInputToDrizzle,
 	// Re-exportar desde @/lib/utils/format.utils
 	formatBytes,
-	// ---- Alias por compatibilidad (legacy) ----
-	fromPrismaMetadata,
-	fromPrismaMetadata as extendMetadata,
-	mapCreateInputToPrisma,
-	mapCreateInputToPrisma as mapCreateMetadataDataToPrisma,
-	mapUpdateInputToPrisma,
-	mapUpdateInputToPrisma as mapUpdateMetadataDataToPrisma,
 };
