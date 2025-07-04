@@ -7,28 +7,28 @@ Actualmente existen múltiples violaciones de arquitectura donde código del lad
 ## Subtareas
 
 ### [HIGH] [BIG] Refactorizar todos los stores Zustand
-- [ ] [002] [HIGH] [BIG] Refactorizar `src/store/unified-file-manager.store.ts` para usar cliente de API
-- [ ] [003] [HIGH] [BIG] Refactorizar `src/store/entities/json-file/json-file.store.ts`
-- [ ] [004] [HIGH] [BIG] Refactorizar `src/store/entities/tag/slices/core.slice.ts`
-- [ ] [005] [HIGH] [BIG] Refactorizar `src/store/entities/tag/slices/core.slice.v2.ts`
-- [ ] [006] [HIGH] [BIG] Refactorizar `src/store/entities/video/slices/core.ts`
-- [ ] [007] [HIGH] [BIG] Refactorizar `src/store/entities/wildcard/slices/core.ts`
-- [ ] [008] [HIGH] [BIG] Refactorizar `src/store/entities/world-item/slices/core.ts`
-- [ ] [009] [HIGH] [BIG] Refactorizar `src/store/entities/workflow/slices/core.slice.ts`
-- [ ] [010] [HIGH] [BIG] Refactorizar `src/store/entities/file/slices/core.slice.ts`
-- [ ] [011] [HIGH] [BIG] Refactorizar `src/store/entities/profile/actions.ts`
-- [ ] [012] [HIGH] [BIG] Refactorizar `src/store/entities/queue-job/slices/core.ts`
-- [ ] [013] [HIGH] [BIG] Refactorizar `src/store/entities/place/index.ts`
-- [ ] [014] [HIGH] [BIG] Refactorizar `src/store/entities/property/slices/core.ts`
-- [ ] [015] [HIGH] [BIG] Refactorizar `src/store/entities/note/slices/core.ts`
-- [ ] [016] [HIGH] [BIG] Refactorizar `src/store/entities/file-3d/file-3d.store.ts`
-- [ ] [017] [HIGH] [BIG] Refactorizar `src/store/entities/group/slices/core.ts`
-- [ ] [018] [HIGH] [BIG] Refactorizar `src/store/entities/concept/index.ts`
-- [ ] [019] [HIGH] [BIG] Refactorizar `src/store/entities/collection/slices/core.ts`
-- [ ] [020] [HIGH] [BIG] Refactorizar `src/store/stats.store.ts`
-- [ ] [021] [HIGH] [BIG] Refactorizar `src/store/entities/audio/audio.store.ts`
-- [ ] [022] [HIGH] [BIG] Refactorizar `src/store/entities/document/slices/core.slice.ts`
-- [ ] [023] [HIGH] [BIG] Refactorizar `src/store/entities/album/slices/core.slice.ts`
+- [x] [002] [HIGH] [BIG] Refactorizar `src/store/unified-file-manager.store.ts` para usar cliente de API
+ - [x] [003] [HIGH] [BIG] Refactorizar `src/store/entities/json-file/json-file.store.ts`
+- [x] [004] [HIGH] [BIG] Refactorizar `src/store/entities/tag/slices/core.slice.ts`
+- [x] [005] [HIGH] [BIG] Refactorizar `src/store/entities/tag/slices/core.slice.v2.ts`
+- [x] [006] [HIGH] [BIG] Refactorizar `src/store/entities/video/slices/core.ts`
+- [x] [007] [HIGH] [BIG] Refactorizar `src/store/entities/wildcard/slices/core.ts`
+- [x] [008] [HIGH] [BIG] Refactorizar `src/store/entities/world-item/slices/core.ts`
+- [x] [009] [HIGH] [BIG] Refactorizar `src/store/entities/workflow/slices/core.slice.ts`
+- [x] [010] [HIGH] [BIG] Refactorizar `src/store/entities/file/slices/core.slice.ts`
+- [x] [011] [HIGH] [BIG] Refactorizar `src/store/entities/profile/actions.ts`
+- [x] [012] [HIGH] [BIG] Refactorizar `src/store/entities/queue-job/slices/core.ts`
+- [x] [013] [HIGH] [BIG] Refactorizar `src/store/entities/place/index.ts`
+- [x] [014] [HIGH] [BIG] Refactorizar `src/store/entities/property/slices/core.ts`
+- [x] [015] [HIGH] [BIG] Refactorizar `src/store/entities/note/slices/core.ts`
+- [x] [016] [HIGH] [BIG] Refactorizar `src/store/entities/file-3d/file-3d.store.ts`
+- [x] [017] [HIGH] [BIG] Refactorizar `src/store/entities/group/slices/core.ts`
+- [x] [018] [HIGH] [BIG] Refactorizar `src/store/entities/concept/index.ts`
+- [x] [019] [HIGH] [BIG] Refactorizar `src/store/entities/collection/slices/core.ts`
+- [x] [020] [HIGH] [BIG] Refactorizar `src/store/stats.store.ts`
+- [x] [021] [HIGH] [BIG] Refactorizar `src/store/entities/audio/audio.store.ts`
+- [x] [022] [HIGH] [BIG] Refactorizar `src/store/entities/document/slices/core.slice.ts`
+- [x] [023] [HIGH] [BIG] Refactorizar `src/store/entities/album/slices/core.slice.ts`
 - [ ] [024] [HIGH] [BIG] Refactorizar `src/store/entities/activity/index.ts`
 
 ### [HIGH] [BIG] Refactorizar hooks personalizados y utilidades
