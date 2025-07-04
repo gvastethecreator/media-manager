@@ -5,14 +5,11 @@
 
 // --- Exportaciones Controladas --- //
 
-// De mappers.ts (Funciones actuales)
+// De mappers.ts
 export {
-	mapCreateWorldItemDataToPrisma,
-	mapUpdateWorldItemDataToPrisma,
-	mapWorldItemSearchOptionsToPrisma,
 	toWorldItemWithStats,
 } from './mappers';
-// De serializers.ts (Funciones actuales)
+// De serializers.ts
 export {
 	deserializeAttributes,
 	deserializeEffects,
@@ -33,9 +30,8 @@ export {
 } from './serializers';
 // De transformer.ts (funciones principales de transformación)
 export {
-	fromPrismaWorldItem,
-	fromPrismaWorldItems,
-	worldItemPayload,
+	fromDrizzleWorldItem,
+	fromDrizzleWorldItems
 } from './transformer';
 
 // --- Fin Exportaciones Controladas --- //

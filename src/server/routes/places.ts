@@ -1,7 +1,7 @@
 import express from 'express';
 import { PlaceService } from '@/services/place/place.service';
-import { toImageWithStats } from '@/transformers/image/image.transformer';
-import { toPlaceWithStats } from '@/transformers/place/place.transformer';
+import { toImageWithStats } from '@/transformers/image';
+import { toPlaceWithStats } from '@/transformers/place';
 
 const router = express.Router();
 const placeService = new PlaceService();

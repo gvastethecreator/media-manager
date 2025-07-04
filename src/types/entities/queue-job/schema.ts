@@ -85,3 +85,7 @@ export type UpdateQueueJobSchemaType = z.infer<typeof updateQueueJobSchema>;
 export type QueueJobFiltersSchemaType = z.infer<typeof queueJobFiltersSchema>;
 export type QueueJobPaginationSchemaType = z.infer<typeof queueJobPaginationSchema>;
 export type QueueJobStatusType = keyof typeof QueueJobStatus;
+
+// Alias para compatibilidad con rutas del servidor
+export const CreateQueueJobInputSchema = createQueueJobSchema;
+export const UpdateQueueJobInputSchema = updateQueueJobSchema;

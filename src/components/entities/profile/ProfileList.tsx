@@ -3,7 +3,7 @@
  * @module components/entities/profile/ProfileList
  */
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { useCallback } from 'react';
 import { useProfileStore } from '@/store/entities/profile';
 import type { ProfileExtended } from '@/types/entities/profile';

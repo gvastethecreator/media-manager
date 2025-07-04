@@ -551,7 +551,7 @@ export async function worldItemExists(id: string): Promise<boolean> {
 			.select({ count: count() })
 			.from(worldItems)
 			.where(eq(worldItems.id, id));
-		
+
 		return result[0].count > 0;
 	} catch (error) {
 		worldItemLogger.error(`Error al verificar existencia del world item ${id}:`, error);
@@ -571,5 +571,66 @@ export async function getWorldItemCount(filters?: WorldItemSearchOptions['filter
 	} catch (error) {
 		worldItemLogger.error('Error al obtener conteo de world items:', error);
 		throw createWorldItemError('Error al obtener conteo de objetos del mundo', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Clase de servicio para gestión de objetos del mundo
+ */
+export class WorldItemService {
+	async getWorldItems(filters?: any): Promise<{ worldItems: WorldItemWithStats[]; total: number }> {
+		const worldItems = await getWorldItems(filters || {});
+		return { worldItems, total: worldItems.length };
+	}
+
+	async getWorldItemById(id: string): Promise<WorldItemWithStats | null> {
+		const worldItem = await getWorldItemById(id);
+		if (!worldItem) return null;
+		return toWorldItemWithStats(worldItem);
+	}
+
+	async createWorldItem(data: WorldItemCreateInput): Promise<WorldItemWithStats> {
+		const worldItem = await createWorldItem(data);
+		return toWorldItemWithStats(worldItem);
+	}
+
+	async updateWorldItem(id: string, data: WorldItemUpdateInput): Promise<WorldItemWithStats | null> {
+		try {
+			const worldItem = await updateWorldItem(id, data);
+			return toWorldItemWithStats(worldItem);
+		} catch (error) {
+			if (error instanceof Error && error.message.includes('World item no encontrado')) {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteWorldItem(id: string): Promise<boolean> {
+		try {
+			const result = await deleteWorldItem(id);
+			return result.success;
+		} catch (error) {
+			if (error instanceof Error && error.message.includes('World item no encontrado')) {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	async getWorldItemImages(id: string): Promise<any[]> {
+		try {
+			const result = await getWorldItemImages(id);
+			return result.images;
+		} catch (error) {
+			worldItemLogger.error(`Error al obtener imágenes del world item ${id}:`, error);
+			return [];
+		}
+	}
+
+	async getRecentWorldItemImages(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes recientes
+		worldItemLogger.info(`Obteniendo imágenes recientes del world item ${id} (limit: ${limit})`);
+		return [];
 	}
 }

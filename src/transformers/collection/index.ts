@@ -6,9 +6,7 @@
 
 // De mappers.ts
 export {
-	mapCollectionSearchOptionsToPrisma,
-	mapCreateCollectionDataToPrisma,
-	mapUpdateCollectionDataToPrisma,
+	toCollectionWithStats,
 } from './mappers';
 
 // De transformer.ts

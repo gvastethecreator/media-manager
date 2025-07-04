@@ -1,7 +1,7 @@
-import { clientLogger } from '@/lib/logger/client-logger';
-import * as thumbnailActions from '@/services/thumbnail/thumbnail.service';
-import type { ThumbnailStats } from '@/types/thumbnails';
 import { create } from 'zustand';
+import { clientLogger } from '@/lib/logger/client-logger';
+// import * as thumbnailActions from '@/services/thumbnail/thumbnail.service'; // TODO: Archivo no encontrado
+import type { ThumbnailStats } from '@/types/thumbnails';
 
 export interface ProcessStatus {
 	status: string;
@@ -46,7 +46,7 @@ const initialProcessStatus: ProcessStatus = {
 	progress: 0,
 };
 
-const _BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const _BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173';
 
 export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 	isLoading: true,

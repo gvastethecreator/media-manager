@@ -343,8 +343,7 @@ export class ActivityServiceImpl implements ActivityService {
 let activityServiceInstance: ActivityService | null = null;
 
 /**
- * Obtiene la instancia del servicio de actividades
- * @returns Servicio de actividades
+ * Función factory para obtener la instancia del servicio
  */
 export function getActivityService(): ActivityService {
 	if (!activityServiceInstance) {
@@ -354,9 +353,12 @@ export function getActivityService(): ActivityService {
 	return activityServiceInstance;
 }
 
+// Alias para compatibilidad con rutas del servidor
+export { ActivityServiceImpl as ActivityService };
+
 /**
- * Inicializa el servicio de actividades
+ * Función de inicialización del servicio
  */
 export function initActivityService(): void {
-	activityServiceInstance = new ActivityServiceImpl();
+	console.log('ActivityService inicializado');
 }

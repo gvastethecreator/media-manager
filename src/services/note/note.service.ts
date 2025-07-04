@@ -52,7 +52,7 @@ interface NoteResults {
  * Servicio para gestionar las notas
  * Refactorizado para usar tipos canónicos y transformadores
  */
-export const NoteService = {
+const NoteServiceImpl = {
 	async createNote(data: NoteCreateInput): Promise<NoteComplete> {
 		try {
 			const [newNote] = await db.insert(notes).values({
@@ -449,4 +449,110 @@ export const NoteService = {
 	},
 };
 
-export const noteService = NoteService;
+/**
+ * Clase de servicio para gestión de notas (wrapper para compatibilidad)
+ */
+export class NoteService {
+	async getNotes(filters?: any): Promise<{ notes: NoteWithStats[]; total: number }> {
+		const result = await NoteServiceImpl.getNotes(filters || {});
+		return { notes: result.items, total: result.total };
+	}
+
+		async getNoteById(id: string): Promise<NoteWithStats | null> {
+		const note = await NoteServiceImpl.getNote(id);
+		if (!note) return null;
+
+		// Convertir a NoteWithStats
+		const content = note.content || '';
+		const wordCount = content.trim() ? content.split(/\s+/).length : 0;
+		const characterCount = content.length;
+		const readingTime = Math.ceil(wordCount / 200);
+		const completionScore = Math.min(100, Math.max(0, wordCount / 10 + characterCount / 100));
+
+		return {
+			...note,
+			statistics: {
+				totalItems: 0,
+				totalImages: 0,
+				totalVideos: 0,
+				totalAlbums: 0,
+				totalCollections: 0,
+				totalTags: 0,
+				totalCharacters: 0,
+				totalPlaces: 0,
+				totalWorldItems: 0,
+				totalConcepts: 0,
+				totalPrompts: 0,
+				totalWildcards: 0,
+				totalProperties: 0,
+				totalGroups: 0,
+				wordCount,
+				characterCount,
+				readingTime,
+				completionScore,
+				lastUpdated: note.updatedAt,
+			},
+			excerpt: content.substring(0, 150) + (content.length > 150 ? '...' : ''),
+			formattedDate: note.updatedAt.toLocaleDateString(),
+			priorityLabel: NoteServiceImpl.getPriorityLabel(note.priority),
+			statusLabel: NoteServiceImpl.getStatusLabel(note.status),
+			categoryLabel: NoteServiceImpl.getCategoryLabel(note.category),
+		};
+	}
+
+	async createNote(data: NoteCreateInput): Promise<NoteWithStats> {
+		const note = await NoteServiceImpl.createNote(data);
+		return this.getNoteById(note.id) as Promise<NoteWithStats>;
+	}
+
+	async updateNote(id: string, data: NoteUpdateInput): Promise<NoteWithStats | null> {
+		try {
+			await NoteServiceImpl.updateNote(id, data);
+			return this.getNoteById(id);
+		} catch (error) {
+			if (error instanceof Error && error.message.includes('Nota no encontrada')) {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteNote(id: string): Promise<boolean> {
+		try {
+			await NoteServiceImpl.deleteNote(id);
+			return true;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	async getNoteImages(id: string): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes de la nota
+		noteLogger.info(`Obteniendo imágenes de la nota ${id}`);
+		return [];
+	}
+
+	async getRecentNoteImages(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes recientes de la nota
+		noteLogger.info(`Obteniendo imágenes recientes de la nota ${id} (limit: ${limit})`);
+		return [];
+	}
+
+	async getNoteCounts(id: string): Promise<any> {
+		// TODO: Implementar lógica para obtener conteos de la nota
+		noteLogger.info(`Obteniendo conteos de la nota ${id}`);
+		return {
+			images: 0,
+			videos: 0,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+		};
+	}
+
+	async getNoteStatuses(): Promise<string[]> {
+		return ['draft', 'published', 'archived', 'pending'];
+	}
+}
+
+export const noteService = NoteServiceImpl;

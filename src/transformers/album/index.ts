@@ -7,3 +7,6 @@
  */
 
 export { toAlbumWithStats } from './mappers';
+
+// Alias para compatibilidad con rutas del servidor
+export { toAlbumWithStats as serializeAlbum } from './mappers';

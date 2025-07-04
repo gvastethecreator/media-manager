@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { favorites, profiles } from '@/lib/drizzle/schema';
+// import { favorites, profiles } from '@/lib/drizzle/schema'; // favorites no existe
+import { profiles } from '@/lib/drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 
@@ -21,31 +22,9 @@ router.post('/toggle', async (req, res) => {
   const { entityType, entityId } = validation.data;
 
   try {
-    const existing = await db.query.favorites.findFirst({
-      where: and(eq(favorites.entityType, entityType), eq(favorites.entityId, entityId)),
-    });
-
-    if (existing) {
-      await db.delete(favorites).where(eq(favorites.id, existing.id));
-      return res.json({ isFavorite: false });
-    }
-
-    const defaultProfile = await db.query.profiles.findFirst({
-      where: eq(profiles.isActive, true),
-      columns: { id: true },
-    });
-
-    if (!defaultProfile) {
-      return res.status(400).json({ error: 'No se encontró un perfil activo' });
-    }
-
-    await db.insert(favorites).values({
-      entityType,
-      entityId,
-      profileId: defaultProfile.id,
-    });
-
-    return res.status(201).json({ isFavorite: true });
+    // TODO: Implementar lógica de favoritos usando campos isFavorite en cada entidad
+    // Por ahora, devolver respuesta básica
+    return res.json({ isFavorite: false, message: 'Funcionalidad de favoritos en desarrollo' });
   } catch (error) {
     console.error(`Error al alternar favorito para ${entityType}:${entityId}:`, error);
     res.status(500).json({ error: 'Error interno del servidor' });

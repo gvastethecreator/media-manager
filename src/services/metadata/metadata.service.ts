@@ -16,7 +16,7 @@ import {
 	transformMetadata,
 	transformMetadatas,
 } from '@/transformers/metadata';
-import { MetadataExtended } from '@/types/entities/metadata/extended';
+import { MetadataExtended, MetadataToCreate } from '@/types/entities/metadata/extended';
 import { MetadataBase } from '@/types/entities/metadata/types';
 
 // Imports para extracción de metadatos (migrados desde server actions)
@@ -213,16 +213,16 @@ export async function createMetadata(data: Partial<MetadataBase>): Promise<Metad
  * @param data - Datos para actualizar
  * @returns Metadatos actualizados o null si hay error
  */
-export async function updateMetadata(id: string, data: Partial<MetadataBase>): Promise<MetadataExtended | null> {
+export async function updateMetadata(
+	id: string,
+	data: Partial<Omit<MetadataBase, 'id' | 'entityId' | 'entityType'>>,
+): Promise<MetadataExtended | null> {
 	try {
 		const prismaData = mapUpdateMetadataDataToPrisma(data);
-
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.update(metadatas)
-			.set({
-				...prismaData,
-				updatedAt: new Date(),
-			})
+		const result = await db
+			.update(metadatas)
+			.set({ ...prismaData, updatedAt: new Date() })
 			.where(eq(metadatas.id, id))
 			.returning();
 
@@ -230,10 +230,12 @@ export async function updateMetadata(id: string, data: Partial<MetadataBase>): P
 			return null;
 		}
 
+		const updatedMetadata = result[0];
+
 		// Transformar a formato compatible con Prisma
 		const transformedMetadata = {
-			...result[0],
-			isPublic: Boolean(result[0].isPublic),
+			...updatedMetadata,
+			isPublic: Boolean(updatedMetadata.isPublic),
 		};
 
 		return transformMetadata(transformedMetadata as any);
@@ -241,6 +243,35 @@ export async function updateMetadata(id: string, data: Partial<MetadataBase>): P
 		console.error(`Error al actualizar metadatos ${id}:`, error);
 		return null;
 	}
+}
+
+/**
+ * Actualiza múltiples metadatos en lote.
+ * Reutiliza la función `updateMetadata` individual.
+ * @param updates - Array de objetos con el id y los datos a actualizar.
+ * @returns Un objeto con el número de actualizados y los errores.
+ */
+export async function updateMultipleMetadata(
+	updates: { id: string; data: Partial<Omit<MetadataBase, 'id' | 'entityId' | 'entityType'>> }[],
+): Promise<{ updated: number; errors: { id: string; error: string }[] }> {
+	const results = await Promise.allSettled(updates.map(({ id, data }) => updateMetadata(id, data)));
+
+	const updatedCount = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+
+	const errors = results
+		.map((result, index) => ({ result, id: updates[index].id }))
+		.filter(({ result }) => result.status === 'rejected' || !result.value)
+		.map(({ result, id }) => ({
+			id,
+			error:
+				result.status === 'rejected'
+					? (result.reason as Error).message
+					: 'La actualización no devolvió un resultado válido.',
+		}));
+
+	metadataLogger.info(`Actualización masiva completada. Éxito: ${updatedCount}, Fallos: ${errors.length}`);
+
+	return { updated: updatedCount, errors };
 }
 
 /**

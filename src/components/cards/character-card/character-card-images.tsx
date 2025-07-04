@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion } from 'motion/react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 // Imágenes con thumbnails para el componente de galería

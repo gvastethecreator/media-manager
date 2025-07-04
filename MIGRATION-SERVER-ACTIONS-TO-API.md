@@ -178,7 +178,7 @@ export function useConcepts() {
 
 ```bash
 # 1. Verificar estado actual
-pnpm dev  # Servidor en puerto 3000
+pnpm dev  # Servidor en puerto 5173
 # Server Express debería estar en 3001
 
 # 2. Validar APIs con Playwright MCP

@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
 import { FolderIcon } from 'lucide-react';
-import { useState } from 'react';
+import { motion } from 'motion/react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface GroupCardImagesProps {

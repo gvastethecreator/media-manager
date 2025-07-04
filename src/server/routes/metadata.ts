@@ -1,10 +1,37 @@
 import express from 'express';
-import { getImageMetadata, updateImageMetadata, clearImageMetadata } from '../services/metadata.service';
-import { extractAIGenerationInfo } from '../services/metadata/parsers.service';
+// import { getImageMetadata, updateImageMetadata, clearImageMetadata } from '../services/metadata.service';
+// import { extractAIGenerationInfo } from '../services/metadata/parsers.service';
+import * as MetadataService from '@/services/metadata';
 
 const router = express.Router();
 
+// Nueva ruta para actualizar metadatos por su ID
+router.put('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const data = req.body;
+
+		if (!data) {
+			return res.status(400).json({ error: 'Los datos de metadata son requeridos' });
+		}
+
+		const updatedMetadata = await MetadataService.updateMetadata(id, data);
+
+		if (!updatedMetadata) {
+			return res.status(404).json({ error: `Metadato con id ${id} no encontrado` });
+		}
+
+		res.json(updatedMetadata);
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+		console.error(`Error actualizando metadatos ${req.params.id}:`, errorMessage);
+		res.status(500).json({ error: 'Error interno del servidor', details: errorMessage });
+	}
+});
+
+
 // GET /metadata/image/:imageId - Obtener metadata de imagen
+/*
 router.get('/image/:imageId', async (req, res) => {
 	try {
 		const { imageId } = req.params;
@@ -15,8 +42,10 @@ router.get('/image/:imageId', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+*/
 
 // DELETE /metadata/image/:imageId - Limpiar metadata de imagen
+/*
 router.delete('/image/:imageId', async (req, res) => {
 	try {
 		const { imageId } = req.params;
@@ -27,8 +56,10 @@ router.delete('/image/:imageId', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+*/
 
 // POST /metadata/extract/:imageId - Extraer metadata de imagen
+/*
 router.post('/extract/:imageId', async (req, res) => {
 	try {
 		const { imageId } = req.params;
@@ -58,8 +89,10 @@ router.post('/extract/:imageId', async (req, res) => {
 		});
 	}
 });
+*/
 
 // GET /metadata/parsers - Obtener parsers disponibles
+/*
 router.get('/parsers', async (req, res) => {
 	try {
 		const parsers = ['comfyui', 'automatic1111', 'invokeai', 'novelai', 'generic'];
@@ -70,8 +103,10 @@ router.get('/parsers', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+*/
 
 // PUT /metadata/image/:imageId - Actualizar metadata de imagen
+/*
 router.put('/image/:imageId', async (req, res) => {
 	try {
 		const { imageId } = req.params;
@@ -89,32 +124,30 @@ router.put('/image/:imageId', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+*/
 
 // PUT /metadata/bulk-update - Actualizar metadata en lote
 router.put('/bulk-update', async (req, res) => {
 	try {
-		const { imageIds, metadata } = req.body;
+		const { updates } = req.body;
 
-		if (!imageIds || !Array.isArray(imageIds) || !metadata) {
+		if (!updates || !Array.isArray(updates)) {
 			return res.status(400).json({
-				error: 'imageIds (array) y metadata son requeridos',
+				error: 'El campo "updates" (un array de objetos con id y data) es requerido',
 			});
 		}
 
-		const result = await updateMultipleImagesMetadata(imageIds, metadata);
+		const result = await MetadataService.updateMultipleMetadata(updates);
 		res.json(result);
-
-		res.json({
-			updated: imageIds.length,
-			errors: [],
-		});
 	} catch (error) {
-		console.error('Error in bulk metadata update:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+		console.error('Error en la actualización masiva de metadatos:', errorMessage);
+		res.status(500).json({ error: 'Error interno del servidor', details: errorMessage });
 	}
 });
 
 // POST /metadata/reprocess/:imageId - Reprocesar metadata de imagen
+/*
 router.post('/reprocess/:imageId', async (req, res) => {
 	try {
 		const { imageId } = req.params;
@@ -140,5 +173,6 @@ router.post('/reprocess/:imageId', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+*/
 
 export default router;

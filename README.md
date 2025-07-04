@@ -233,7 +233,7 @@ pnpm drizzle:verify
 # .env.local
 DATABASE_URL="file:./dev.db"
 NODE_ENV="development"
-PORT=3000
+PORT=5173
 
 # Opcional: Turso (producción)
 TURSO_DATABASE_URL="libsql://..."

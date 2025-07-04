@@ -1,6 +1,7 @@
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useUIStore } from '@/store/ui.store';
-import { ViewType } from '@/types/files';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { ViewType } from '@/components/views/types';
 import { useCallback } from 'react';
 
 const logger = clientLogger.withContext('MainNavigation');
@@ -10,7 +11,8 @@ const logger = clientLogger.withContext('MainNavigation');
  * Maneja la navegación entre vistas principales como configuración y desarrollo
  */
 export function useMainNavigation() {
-	const { setCurrentView, toggleSettings } = useUIStore();
+	const { toggleSettings } = useUIStore();
+	const { setCurrentView } = useNavigationStore();
 
 	const handleOpenSettings = useCallback(() => {
 		logger.info('⚙️ Abriendo configuración');

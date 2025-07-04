@@ -24,7 +24,7 @@ export function serverOnly<T>(fn: () => T): T | undefined {
 export const serverEnv = {
 	NODE_ENV: process.env.NODE_ENV || 'development',
 	DATABASE_URL: process.env.DATABASE_URL,
-	PORT: process.env.PORT || '3000',
+	PORT: process.env.PORT || '5173',
 	HOST: process.env.HOST || 'localhost',
 } as const;
 
