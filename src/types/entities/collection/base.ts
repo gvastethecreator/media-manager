@@ -1,4 +1,11 @@
 /**
+ * @file Tipos base para la entidad Collection.
+ * @module types/entities/collection/base
+ * @description Define los tipos canónicos para la entidad Collection, siguiendo el patrón `Base + Statistics + WithStats`.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
+ */
+
+/**
  * 🗿 Modelo base de Collection, basado en el esquema de Drizzle.
  */
 export type CollectionBase = {

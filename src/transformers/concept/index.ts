@@ -1,10 +1,11 @@
 /**
- * @file Punto de entrada para transformadores de Concept
+ * @file Punto de entrada para los transformadores de la entidad Concept.
  * @module transformers/concept
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Concept.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-// Exportaciones de mappers
+// 🗺️ Mappers - Transformaciones básicas entre tipos
 export {
 	toCreateDataDrizzle,
 	toUpdateDataDrizzle,
@@ -14,19 +15,37 @@ export {
 	processConcepts,
 } from './mappers';
 
-// Exportaciones de serializadores
-export { deserializeTags, serializeTags } from './serializers';
-
-// Exportaciones de transformadores
+// 🔄 Transformers - Conversiones desde Drizzle
 export {
 	fromDrizzleConcept,
 	fromDrizzleConcepts,
 	fromDrizzleConceptWithRelations,
 } from './transformer';
 
-// Esquemas de validación (aún pendientes de revisión)
-// export {
-// 	ConceptCreateInputSchema,
-// 	ConceptSchema,
-// 	ConceptUpdateInputSchema,
-// } from './schema';
+// 📦 Serializers - Manejo de campos complejos JSON
+export { deserializeTags, serializeTags } from './serializers';
+
+// 🛡️ Validators - Validaciones con Zod
+export {
+	validateConceptBase,
+	validateConceptStatistics,
+	validateConceptWithStats,
+	validateConceptCounts,
+	validateConceptCreate,
+	validateConceptUpdate,
+	validateConceptFilters,
+	validateConceptSortOptions,
+	sanitizeConceptData,
+} from './validators';
+
+// 📋 Schemas - Esquemas Zod para validación
+export {
+	ConceptBaseSchema,
+	ConceptStatisticsSchema,
+	ConceptWithStatsSchema,
+	ConceptCountsSchema,
+	ConceptCreateSchema,
+	ConceptUpdateSchema,
+	ConceptFiltersSchema,
+	ConceptSortOptionsSchema,
+} from './schema';
