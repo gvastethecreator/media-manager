@@ -193,14 +193,3 @@ export function toDrizzleCollectionUpdate(data: CollectionUpdateInput): DrizzleC
 
 	return drizzleData;
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar toDrizzleCollectionCreate
- */
-export const toPrismaCollectionCreate = toDrizzleCollectionCreate;
-
-/**
- * @deprecated Usar toDrizzleCollectionUpdate
- */
-export const toPrismaCollectionUpdate = toDrizzleCollectionUpdate;
