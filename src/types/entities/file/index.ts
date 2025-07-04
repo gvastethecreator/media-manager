@@ -1,12 +1,24 @@
 /**
- * @file Re-exportación de tipos para la entidad File
+ * @file Exportaciones principales de tipos para la entidad File.
  * @module types/entities/file
+ * @description
+ *   Este archivo centraliza las exportaciones de tipos para la entidad File.
+ *   El tipo canónico para usar en la aplicación es **`FileWithStats`**.
  *
- * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
- * Legacy eliminado.
+ *   - `FileBase`: Tipo base desde Drizzle.
+ *   - `FileStatistics`: Estadísticas calculadas.
+ *   - `FileWithStats`: Tipo enriquecido con estadísticas (CANÓNICO).
+ *
+ * @see /src/types/entities/file/base.ts
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-export * from './enums';
-export * from './types';
+// --- Tipos Canónicos ---
+export type {
+	FileBase,
+	FileStatistics,
+	FileWithStats,
+} from './base';
 
-// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.
+// --- Enums ---
+export { FileType } from './base';
