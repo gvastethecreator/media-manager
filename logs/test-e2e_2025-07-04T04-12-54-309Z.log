@@ -1,0 +1,30 @@
+Comando: npx playwright test
+Fecha: 2025-07-04T04:12:54.312Z
+Directorio: /workspace/image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › tests/e2e/basic.spec.ts:5:1 › carga la página principal (4ms)
+
+
+  1) [chromium] › tests/e2e/basic.spec.ts:5:1 › carga la página principal ──────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1179/chrome-linux/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  1 failed
+    [chromium] › tests/e2e/basic.spec.ts:5:1 › carga la página principal ───────────────────────────
+
+[36m  Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.[39m

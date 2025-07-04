@@ -10,7 +10,8 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import * as folderService from '@/services/folder/folder.service';
+// Migración: se reemplazan servicios por funciones del cliente API
+import { findFolders } from '@/lib/api/services/folders';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
@@ -69,8 +70,9 @@ export function FoldersView(_props: ViewProps) {
 					setIsManualRetry(true);
 				}
 				setIsLoading(true);
-				viewLogger.info('🔄 Cargando carpetas...');
-				const data = await folderService.getFoldersWithStats();
+                                viewLogger.info('🔄 Cargando carpetas...');
+                                const result = await findFolders({ limit: 100 });
+                                const data = result.data;
 
 				// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
 				if (Array.isArray(data)) {

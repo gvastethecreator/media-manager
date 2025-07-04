@@ -29,17 +29,17 @@ Actualmente existen múltiples violaciones de arquitectura donde código del lad
 - [x] [021] [HIGH] [BIG] Refactorizar `src/store/entities/audio/audio.store.ts`
 - [x] [022] [HIGH] [BIG] Refactorizar `src/store/entities/document/slices/core.slice.ts`
 - [x] [023] [HIGH] [BIG] Refactorizar `src/store/entities/album/slices/core.slice.ts`
-- [ ] [024] [HIGH] [BIG] Refactorizar `src/store/entities/activity/index.ts`
+- [x] [024] [HIGH] [BIG] Refactorizar `src/store/entities/activity/index.ts` ✅
 
 ### [HIGH] [BIG] Refactorizar hooks personalizados y utilidades
-- [ ] [025] [HIGH] [BIG] Refactorizar `src/lib/hooks/entities/note/useNotes.ts`
-- [ ] [026] [HIGH] [BIG] Refactorizar `src/lib/hooks/files/use-folder-images.ts`
-- [ ] [027] [HIGH] [BIG] Refactorizar `src/lib/hooks/system/use-stats.ts`
-- [ ] [028] [HIGH] [BIG] Refactorizar `src/lib/hooks/system/use-stats-service.ts`
+- [x] [025] [HIGH] [BIG] Refactorizar `src/lib/hooks/entities/note/useNotes.ts` ✅
+- [x] [026] [HIGH] [BIG] Refactorizar `src/lib/hooks/files/use-folder-images.ts` ✅
+- [x] [027] [HIGH] [BIG] Refactorizar `src/lib/hooks/system/use-stats.ts` ✅
+- [x] [028] [HIGH] [BIG] Refactorizar `src/lib/hooks/system/use-stats-service.ts` ✅
 
 ### [HIGH] [BIG] Refactorizar componentes React que importan servicios
-- [ ] [029] [HIGH] [BIG] Refactorizar `src/components/views/uploaded-images/uploaded-images-view.tsx`
-- [ ] [030] [HIGH] [BIG] Refactorizar `src/components/views/folders/views/folders-view.tsx`
+- [x] [029] [HIGH] [BIG] Refactorizar `src/components/views/uploaded-images/uploaded-images-view.tsx` ✅
+- [x] [030] [HIGH] [BIG] Refactorizar `src/components/views/folders/views/folders-view.tsx` ✅
 
 ### [MEDIUM] [MEDIUM] Crear clientes de API faltantes
 - [ ] [031] [MEDIUM] [MEDIUM] Crear cliente de API para cada entidad que no lo tenga en `src/lib/api/client/`
