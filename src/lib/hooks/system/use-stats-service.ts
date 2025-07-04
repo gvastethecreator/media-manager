@@ -2,17 +2,20 @@
 
 import { useEffect } from 'react';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { statsEventEmitter } from '@/services/stats';
+// Migración: se elimina el uso de statsEventEmitter del lado cliente
+import { invalidateStatsInApi } from '@/lib/api/client/stats.client';
 
 const statsLogger = serverLogger.withContext('StatsHook');
 
 export function useStatsService() {
-	useEffect(() => {
-		try {
-			statsLogger.info('🔄 Inicializando servicio de estadísticas');
-			statsEventEmitter.emit('init');
-		} catch (error) {
-			statsLogger.error('❌ Error al inicializar servicio de estadísticas:', error);
-		}
-	}, []);
+        useEffect(() => {
+                (async () => {
+                        try {
+                                statsLogger.info('🔄 Inicializando estadísticas desde API');
+                                await invalidateStatsInApi();
+                        } catch (error) {
+                                statsLogger.error('❌ Error al inicializar estadísticas:', error);
+                        }
+                })();
+        }, []);
 }

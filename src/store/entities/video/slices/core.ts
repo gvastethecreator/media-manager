@@ -9,6 +9,14 @@ import type { StateCreator } from 'zustand';
 // Refactor 2025-07: se reemplazan servicios por cliente API
 import { createVideoInApi, deleteVideoFromApi, findVideosInApi, getVideoFromApi } from '@/lib/api/client/video.client';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
+// Refactor 2025-07: se reemplazan servicios por cliente API
+import {
+    createVideoInApi,
+    deleteVideoFromApi,
+    findVideosInApi,
+    getVideoFromApi,
+} from '@/lib/api/client/video.client';
 import { toastService } from '@/services/toast';
 import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
 import type { VideoStore } from '..';

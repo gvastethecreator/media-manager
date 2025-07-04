@@ -15,6 +15,7 @@ import {
 	getPropertiesFromApi,
 	updatePropertyInApi,
 } from '@/lib/api/client/property.client';
+import { toastService } from '@/lib/ui/toast';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import { PropertyWithStats } from '@/types/entities/property';

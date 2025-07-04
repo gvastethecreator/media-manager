@@ -15,7 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Toggle } from '@/components/ui/toggle';
 import type { PropertyCreateInput, PropertyUpdateInput } from '@/lib/api/properties';
 import { useCreateProperty, useDeleteProperty, useProperties, useUpdateProperty } from '@/lib/api/properties';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { CreatePropertyForm } from './create-property-form';
 

@@ -43,7 +43,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 
 const sectionLogger = clientLogger.withContext('UploadedImagesSettings');
 
