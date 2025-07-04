@@ -6,11 +6,7 @@
 
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataBase, MetadataExtended } from '@/types/entities/metadata';
-import {
-	fromDrizzleMetadata,
-	mapCreateInputToDrizzle,
-	mapUpdateInputToDrizzle,
-} from './mappers';
+import { fromDrizzleMetadata, mapCreateInputToDrizzle, mapUpdateInputToDrizzle } from './mappers';
 
 /**
  * Transforma un objeto Metadata a su versión extendida con propiedades calculadas
@@ -49,3 +45,8 @@ export {
 	// Re-exportar desde @/lib/utils/format.utils
 	formatBytes,
 };
+
+export {
+	mapCreateInputToDrizzle as mapCreateMetadataDataToPrisma,
+	mapUpdateInputToDrizzle as mapUpdateMetadataDataToPrisma,
+} from './mappers';

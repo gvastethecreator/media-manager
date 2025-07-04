@@ -6,10 +6,7 @@
  * @updated 2025-01-27
  */
 
-import {
-    WildcardBase,
-    WildcardWithStats,
-} from '@/types/entities/wildcard';
+import { WildcardBase, WildcardWithStats } from '@/types/entities/wildcard';
 
 /**
  * Serializa WildcardBase para respuestas de API

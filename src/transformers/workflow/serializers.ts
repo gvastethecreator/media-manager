@@ -6,10 +6,7 @@
  * @updated 2025-01-27
  */
 
-import {
-    WorkflowBase,
-    WorkflowWithStats,
-} from '@/types/entities/workflow';
+import { WorkflowBase, WorkflowWithStats } from '@/types/entities/workflow';
 
 /**
  * Serializa WorkflowBase para respuestas de API

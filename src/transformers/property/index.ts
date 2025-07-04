@@ -7,7 +7,7 @@
 
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
-export * from './serializers';
-export * from './validators';
 export * from './schema';
+export * from './serializers';
 export * from './transformer';
+export * from './validators';

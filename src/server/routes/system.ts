@@ -1,18 +1,19 @@
 import express from 'express';
-import {
-	createDefaultSettingsData,getNavigationData,
-	getNavigationData,
-	getProfileSettings,
-	getSystemSettings,
-	getSystemStats,
-	getSystemVersion,
-	repairSystem,
-	resetDatabase,
-	resetProfileSettings,
-	resetSystemSettings,
-	updateProfileSettings,
-	updateSystemSettings } from '../services/system.service';
 import { getDatabaseInfo } from '@/lib/drizzle';
+import {
+    createDefaultSettingsData,
+    getNavigationData,
+    getProfileSettings,
+    getSystemSettings,
+    getSystemStats,
+    getSystemVersion,
+    repairSystem,
+    resetDatabase,
+    resetProfileSettings,
+    resetSystemSettings,
+    updateProfileSettings,
+    updateSystemSettings
+} from '../services/system.service';
 
 const router = express.Router();
 

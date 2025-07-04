@@ -186,8 +186,7 @@ export function toRelatedNote(
 
 // Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
 export { toCreateNoteData, toNoteWithStats, toUpdateNoteData } from './mappers';
+export * from './schema';
 export { fromDrizzleNote, validateNote } from './serializers';
-
 // Exportar validators y schemas
 export * from './validators';
-export * from './schema';

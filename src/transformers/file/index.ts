@@ -26,6 +26,15 @@ export {
 	serializeFileList,
 	serializeFileWithStats,
 } from './serializers';
+// --- Las siguientes funciones están implementadas en el módulo utils ---
+export {
+	determineFileType,
+	determineMimeType,
+	generateFileId,
+	mapStatsToFileInfo,
+	serializeDirectoryContents,
+	serializeFileOperationResult,
+} from './utils';
 // --- Validadores y esquemas ---
 export {
 	type FileBase,

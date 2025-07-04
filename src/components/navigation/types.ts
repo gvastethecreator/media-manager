@@ -4,10 +4,7 @@ import type { NavigationData } from '@/components/navigation/actions/navigation.
 /**
  * Tipo para las categorías de navegación disponibles
  */
-export type NavigationCategory =
-	| 'files'
-	| 'library'
-	| 'worldbuilding';
+export type NavigationCategory = 'files' | 'library' | 'worldbuilding';
 
 /**
  * @description Representa una entidad que puede tener un conteo de imágenes asociadas.

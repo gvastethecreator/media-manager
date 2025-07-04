@@ -7,12 +7,12 @@
  */
 
 import {
-    ZodThumbnailCreateSchema,
-    type ZodThumbnailCreateType,
-    ZodThumbnailSchema,
-    type ZodThumbnailType,
-    ZodThumbnailUpdateSchema,
-    type ZodThumbnailUpdateType,
+	ZodThumbnailCreateSchema,
+	type ZodThumbnailCreateType,
+	ZodThumbnailSchema,
+	type ZodThumbnailType,
+	ZodThumbnailUpdateSchema,
+	type ZodThumbnailUpdateType,
 } from './schema';
 
 /**
