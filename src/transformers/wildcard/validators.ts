@@ -7,12 +7,12 @@
  */
 
 import {
-    ZodWildcardCreateSchema,
-    type ZodWildcardCreateType,
-    ZodWildcardSchema,
-    type ZodWildcardType,
-    ZodWildcardUpdateSchema,
-    type ZodWildcardUpdateType,
+	ZodWildcardCreateSchema,
+	type ZodWildcardCreateType,
+	ZodWildcardSchema,
+	type ZodWildcardType,
+	ZodWildcardUpdateSchema,
+	type ZodWildcardUpdateType,
 } from './schema';
 
 /**

@@ -9,13 +9,13 @@ import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/components/ui/theme-provider';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useTheme } from '@/components/ui/theme-provider';
 
 export function ThemeToggle() {
 	const { theme, setTheme, themes } = useTheme();
@@ -36,7 +36,9 @@ export function ThemeToggle() {
 						{theme === t && <span className="ml-2 text-xs text-primary">(actual)</span>}
 					</DropdownMenuItem>
 				))}
-				<DropdownMenuItem onClick={() => setTheme('system')}>Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => setTheme('system')}>
+					Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

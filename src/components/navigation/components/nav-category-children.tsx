@@ -361,12 +361,6 @@ const CategoryItems = memo(
 );
 
 // Componente principal
-export const NavCategoryChildren = memo(function NavCategoryChildren({
-	children,
-}) {
-	return (
-		<div className="flex flex-col gap-1">
-			{children}
-		</div>
-	);
+export const NavCategoryChildren = memo(function NavCategoryChildren({ children }) {
+	return <div className="flex flex-col gap-1">{children}</div>;
 });

@@ -14,7 +14,10 @@ export const tagBaseSchema = z.object({
 	name: z.string().min(1, 'Nombre es requerido').max(100, 'Nombre no puede exceder 100 caracteres'),
 	description: z.string().max(500, 'Descripción no puede exceder 500 caracteres').nullable(),
 	emoji: z.string().max(10, 'Emoji no puede exceder 10 caracteres').nullable(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido').nullable(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un código hexadecimal válido')
+		.nullable(),
 	category: z.string().max(50, 'Categoría no puede exceder 50 caracteres').nullable(),
 	shortcut: z.string().max(10, 'Shortcut no puede exceder 10 caracteres').nullable(),
 	featuredImage: z.string().url('Featured image debe ser una URL válida').nullable(),
@@ -30,7 +33,10 @@ export const tagCreateSchema = z.object({
 	name: z.string().min(1, 'Nombre es requerido').max(100, 'Nombre no puede exceder 100 caracteres'),
 	description: z.string().max(500).optional(),
 	emoji: z.string().max(10).optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#6B7280'),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.default('#6B7280'),
 	category: z.string().max(50).optional(),
 	shortcut: z.string().max(10).optional(),
 	featuredImage: z.string().url().optional(),
@@ -44,7 +50,11 @@ export const tagUpdateSchema = z.object({
 	name: z.string().min(1).max(100).optional(),
 	description: z.string().max(500).nullable().optional(),
 	emoji: z.string().max(10).nullable().optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable().optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.nullable()
+		.optional(),
 	category: z.string().max(50).nullable().optional(),
 	shortcut: z.string().max(10).nullable().optional(),
 	featuredImage: z.string().url().nullable().optional(),
@@ -94,10 +104,12 @@ export const tagFilterSchema = z.object({
 	colors: z.array(z.string()).optional(),
 	isFavorite: z.boolean().optional(),
 	hasFiles: z.boolean().optional(),
-	dateRange: z.object({
-		from: z.date(),
-		to: z.date(),
-	}).optional(),
+	dateRange: z
+		.object({
+			from: z.date(),
+			to: z.date(),
+		})
+		.optional(),
 });
 
 // Tipos inferidos de los esquemas

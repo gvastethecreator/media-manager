@@ -2,11 +2,11 @@
 
 1. **Español obligatorio** - Todas las respuestas, comentarios, documentación, etc. deben estar completamente en español.
 2. **Windows SIEMPRE** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell Core (pwsh) como terminal por defecto.
-3. **Gestor de paquetes del proyecto** - Identificar y usar el gestor definido en el proyecto según el archivo de configuración presente.
+3. **Bun como runtime principal** - USAR BUN para todos los comandos y scripts. El proyecto ha migrado de Node.js + pnpm a Bun runtime + bun install.
 4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
 5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
-7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
+7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run check:errors` para análisis avanzado de errores.
 
 ## 🎭 Modos de Operación
 
@@ -16,8 +16,8 @@
 - **Eficiencia máxima en cambios** - Mostrar solo las modificaciones necesarias, no repetir código completo
 - **Documentación técnica precisa** - Comentarios claros pero concisos que expliquen el "por qué" del código
 - **Enfoque en mejores prácticas** - Aplicar patrones y convenciones estándar del lenguaje/framework
-- **Uso obligatorio de scripts** - Usar `pnpm lint`, `pnpm test`, `pnpm check`, etc. en lugar de comandos directos. Los logs se guardan automáticamente en `/logs`
-- **Gestión de logs integrada** - Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores con filtros por herramienta y días
+- **Uso obligatorio de scripts** - Usar `bun run lint`, `bun run test`, `bun run check`, etc. en lugar de comandos directos. Los logs se guardan automáticamente en `/logs`
+- **Gestión de logs integrada** - Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run check:errors` para análisis avanzado de errores con filtros por herramienta y días
 
 ### Modo Conocimiento (Obsidian, Documentación, Investigación, Conocimiento)
 
@@ -68,8 +68,8 @@
 
 ## 💻 Desarrollo
 
-- **Scripts inteligentes primero** - SIEMPRE usar `pnpm lint`, `pnpm test`, `pnpm check`, etc. Los scripts manejan automáticamente logging y códigos de salida tolerantes
-- **Análisis de errores con logs** - Usar `pnpm logs` y `pnpm check:errors` para analizar issues en lugar de ejecutar comandos directos
+- **Scripts inteligentes primero** - SIEMPRE usar `bun run lint`, `bun run test`, `bun run check`, etc. Los scripts manejan automáticamente logging y códigos de salida tolerantes
+- **Análisis de errores con logs** - Usar `bun run logs` y `bun run check:errors` para analizar issues en lugar de ejecutar comandos directos
 - **Comentarios significativos y útiles** - Usar las convenciones del proyecto y agregar valor real, no comentarios obvios
 - **Documentación de API completa** - Seguir el estándar del lenguaje (JSDoc, docstrings, rustdoc, etc.) con ejemplos cuando sea útil
 - **Formato consistente del proyecto** - Respetar prettier, black, rustfmt o cualquier formateador configurado
@@ -230,21 +230,21 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 #### Ejecución (siempre usa estos)
 
-- `pnpm lint` / `pnpm check` / `pnpm test` - Ejecuta con logging automático y tolerancia inteligente
-- `pnpm biome:fix` / `pnpm lint:fix` - Arregla issues automáticamente con logs
+- `bun run lint` / `bun run check` / `bun run test` - Ejecuta con logging automático y tolerancia inteligente
+- `bun run biome:fix` / `bun run lint:fix` - Arregla issues automáticamente con logs
 
 #### Análisis de logs
 
-- `pnpm logs list [num]` - Lista logs recientes (por defecto 10)
-- `pnpm logs clean [días]` - Limpia logs antiguos (por defecto 7 días)
-- `pnpm check:errors` - Busca errores en logs del último día
-- `pnpm check:errors --tool biome --days 3` - Busca errores específicos
+- `bun run logs list [num]` - Lista logs recientes (por defecto 10)
+- `bun run logs clean [días]` - Limpia logs antiguos (por defecto 7 días)
+- `bun run check:errors` - Busca errores en logs del último día
+- `bun run check:errors --tool biome --days 3` - Busca errores específicos
 
 #### Comportamiento inteligente
 
-- **Linting/Testing**: Exit code 1 → ⚠️ Issues encontrados (normal, no falla pnpm)
-- **Builds/Deploy**: Exit code 1 → ❌ Error crítico (falla pnpm como debe ser)
-- **Dependencias faltantes**: Siempre → ❌ Error crítico + sugerencia `pnpm install`
+- **Linting/Testing**: Exit code 1 → ⚠️ Issues encontrados (normal, no falla bun)
+- **Builds/Deploy**: Exit code 1 → ❌ Error crítico (falla bun como debe ser)
+- **Dependencias faltantes**: Siempre → ❌ Error crítico + sugerencia `bun install`
 
 ## 🎭 Playwright MCP - Herramienta Universal de Desarrollo
 
@@ -252,7 +252,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 - **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (actualmente 5173)
 - **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
-- **Scripts integrados** - Usar `pnpm test:e2e` (con logs automáticos) para testing formal
+- **Scripts integrados** - Usar `bun run test:e2e` (con logs automáticos) para testing formal
 - **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua
 
 ### Herramientas MCP Disponibles
@@ -331,7 +331,7 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 ```bash
 # 1. Iniciar desarrollo
-pnpm dev                           # Servidor en 4444
+bun dev                            # Servidor en 5173
 
 # 2. Validación continua con MCP
 # browser_navigate → http://localhost:5173
@@ -354,13 +354,13 @@ pnpm dev                           # Servidor en 4444
 
 ```bash
 # 1. Ejecutar tests con logs
-pnpm test:e2e                      # Tests completos con logs automáticos
-pnpm test:e2e:ui                   # UI interactiva de Playwright
-pnpm test:e2e:debug                # Debug paso a paso
+bun run test:e2e                   # Tests completos con logs automáticos
+bun run test:e2e:ui                # UI interactiva de Playwright
+bun run test:e2e:debug             # Debug paso a paso
 
 # 2. Análisis de resultados
-pnpm logs list                     # Ver logs recientes
-pnpm check:errors --tool playwright  # Analizar errores específicos
+bun run logs list                  # Ver logs recientes
+bun run check:errors --tool playwright  # Analizar errores específicos
 ```
 
 ### Configuración de Tests
@@ -384,7 +384,7 @@ pnpm check:errors --tool playwright  # Analizar errores específicos
 ```yaml
 # Ejemplo para GitHub Actions
 - name: Ejecutar tests E2E
-  run: pnpm test:e2e
+  run: bun run test:e2e
 
 - name: Subir screenshots de errores
   if: failure()

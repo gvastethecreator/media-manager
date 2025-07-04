@@ -4,8 +4,8 @@
  * @description Gestiona el estado y las acciones CRUD para la entidad Document.
  */
 
-import { produce } from 'immer';
-import type { StateCreator } from 'zustand';
+import { produce, produce } from 'immer';
+import type { StateCreator, StateCreator } from 'zustand';
 // Uso del cliente de API para documentos
 import {
 	createDocumentInApi,
@@ -13,10 +13,8 @@ import {
 	getDocumentsFromApi,
 	updateDocumentInApi,
 } from '@/lib/api/client/document.client';
-import { toastService } from '@/lib/ui/toast';
-import { produce } from 'immer';
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
 import { toastService } from '@/services/toast';
 import type { DocumentCoreActions, DocumentCoreState, DocumentStore } from '../types';
 

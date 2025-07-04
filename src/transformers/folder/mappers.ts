@@ -243,5 +243,3 @@ export function transformFolderToDrizzle(folder: any): DrizzleFolder {
 		return folder as DrizzleFolder;
 	}
 }
-
-
