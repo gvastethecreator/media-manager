@@ -5,7 +5,13 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import * as actions from '@/services/document/document.service';
+// Uso del cliente de API para documentos
+import {
+    createDocumentInApi,
+    deleteDocumentFromApi,
+    getDocumentsFromApi,
+    updateDocumentInApi,
+} from '@/lib/api/client/document.client';
 import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
@@ -36,7 +42,7 @@ export const createDocumentCoreSlice: StateCreator<
 		});
 
 		try {
-			const documents = await actions.getDocuments();
+                        const documents = await getDocumentsFromApi();
 			set((state) => {
 				state.documents = documents.reduce(
 					(acc, doc) => {
@@ -64,7 +70,7 @@ export const createDocumentCoreSlice: StateCreator<
 
 	createDocument: async (data) => {
 		try {
-			await actions.createDocument(data);
+                        await createDocumentInApi(data);
 			toastService.success(`Documento "${data.name}" creado.`);
 			await get().loadDocuments();
 		} catch (error) {
@@ -76,7 +82,7 @@ export const createDocumentCoreSlice: StateCreator<
 
 	updateDocument: async (id, data) => {
 		try {
-			await actions.updateDocument(id, data);
+                        await updateDocumentInApi(id, data);
 			toastService.success('Documento actualizado.');
 			await get().loadDocuments();
 		} catch (error) {
@@ -94,7 +100,7 @@ export const createDocumentCoreSlice: StateCreator<
 			})
 		);
 		try {
-			await actions.deleteDocument(id);
+                        await deleteDocumentFromApi(id);
 			toastService.success(`Documento "${docName}" eliminado.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al eliminar el documento.';

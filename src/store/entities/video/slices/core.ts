@@ -7,12 +7,13 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
+// Refactor 2025-07: se reemplazan servicios por cliente API
 import {
-    createVideo as createServerVideo,
-    deleteVideo as deleteServerVideo,
-    findVideos,
-    getVideo as getServerVideo,
-} from '@/services/video/video.service';
+    createVideoInApi,
+    deleteVideoFromApi,
+    findVideosInApi,
+    getVideoFromApi,
+} from '@/lib/api/client/video.client';
 import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoStore } from '..';
@@ -261,7 +262,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	fetchVideo: async (id) => {
 		get().setLoading(true);
 		try {
-			const video = await getServerVideo(id);
+                        const video = await getVideoFromApi(id);
 			if (video) {
 				get().addVideo(video);
 			}
@@ -279,7 +280,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	fetchVideos: async (folderIds) => {
 		get().setLoading(true);
 		try {
-			const videos = await findVideos({ folderIds });
+                        const videos = await findVideosInApi({ folderIds });
 			if (videos && videos.length > 0) {
 				get().addVideos(videos);
 			}
@@ -297,7 +298,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	createVideo: async (data) => {
 		get().setLoading(true);
 		try {
-			const video = await createServerVideo(data);
+                        const video = await createVideoInApi(data);
 			if (video) {
 				get().addVideo(video);
 				toastService.success('Video creado');
@@ -317,7 +318,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	removeVideo: async (id) => {
 		get().setLoading(true);
 		try {
-			await deleteServerVideo(id);
+                        await deleteVideoFromApi(id);
 			get().deleteVideo(id);
 			toastService.success('Video eliminado');
 			return true;
