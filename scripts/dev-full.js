@@ -34,8 +34,8 @@ process.on('SIGTERM', cleanup);
 process.on('exit', cleanup);
 
 console.log(chalk.blue('🚀 Iniciando desarrollo completo...'));
-console.log(chalk.gray('   Frontend: http://localhost:5174'));
-console.log(chalk.gray('   Backend:  http://localhost:5173\n'));
+console.log(chalk.gray('   Frontend: http://localhost:5173'));
+console.log(chalk.gray('   Backend:  http://localhost:3001\n'));
 
 // Ejecutar frontend (Vite)
 const viteProcess = spawn('bun', ['run', 'dev:vite'], {
