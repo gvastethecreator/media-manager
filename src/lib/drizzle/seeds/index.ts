@@ -41,7 +41,7 @@ export const seedLogger = {
  */
 export async function runSeeds() {
 	const client = createClient({
-		url: process.env.DATABASE_URL || 'file:dev.db',
+		url: process.env.DATABASE_URL || 'file:./db.sqlite',
 	});
 
 	const db = drizzle(client);

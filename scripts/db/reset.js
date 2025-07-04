@@ -106,7 +106,7 @@ function ensureEnvFile() {
 	if (!fileExists(envPath)) {
 		log('Creando archivo .env...', 'info');
 		try {
-			fs.writeFileSync(envPath, 'DATABASE_URL="file:./dev.db"\n');
+			fs.writeFileSync(envPath, 'DATABASE_URL="file:./db.sqlite"\n');
 			log('Archivo .env creado correctamente', 'success');
 		} catch (error) {
 			log(`Error al crear el archivo .env: ${error.message}`, 'error');
@@ -119,7 +119,7 @@ function ensureEnvFile() {
 			const envContent = fs.readFileSync(envPath, 'utf8');
 			if (!envContent.includes('DATABASE_URL=')) {
 				log('Añadiendo DATABASE_URL al archivo .env...', 'info');
-				fs.appendFileSync(envPath, '\nDATABASE_URL="file:./dev.db"\n');
+				fs.appendFileSync(envPath, '\nDATABASE_URL="file:./db.sqlite"\n');
 				log('DATABASE_URL añadido al archivo .env', 'success');
 			} else {
 				log('DATABASE_URL ya existe en el archivo .env', 'info');
@@ -145,7 +145,7 @@ async function resetDatabase() {
 	}
 
 	// Paso 2: Eliminar la base de datos si existe
-	const dbPath = path.join(rootDir, 'dev.db');
+	const dbPath = path.join(rootDir, 'db.sqlite');
 	if (!deleteFileIfExists(dbPath)) {
 		return false;
 	}

@@ -11,6 +11,7 @@ import { createSystemError } from '@/lib/errors/system';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { settingsService } from '@/services/settings';
 import type { Settings } from '@/types/settings';
+import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 
 const navLogger = serverLogger.withContext('NavActions');
 const systemLogger = serverLogger.withContext('SystemActions');
@@ -39,19 +40,19 @@ export interface NavigationData {
 	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
 	tags: Array<{ id: string; name: string; count?: number }>;
 	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
-	characters: Array<{ id: string; name: string; description?: string }>;
-	places: Array<{ id: string; name: string; description?: string }>;
-	worldItems: Array<{ id: string; name: string; description?: string }>;
-	concepts: Array<{ id: string; name: string; description?: string }>;
-	prompts: Array<{ id: string; name: string; description?: string }>;
-	notes: Array<{ id: string; title: string; content?: string }>;
-	groups: Array<{ id: string; name: string; description?: string }>;
-	properties: Array<{ id: string; name: string; value?: string }>;
-	wildcards: Array<{ id: string; name: string; pattern?: string }>;
-	audios: Array<{ id: string; name: string; duration?: number }>;
-	documents: Array<{ id: string; name: string; type?: string }>;
-	jsonFiles: Array<{ id: string; name: string; size?: number }>;
-	file3ds: Array<{ id: string; name: string; format?: string }>;
+	characters: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	places: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	worldItems: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	concepts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	prompts: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	notes: Array<{ id: string; title: string; content?: string; itemCount?: number }>;
+	groups: Array<{ id: string; name: string; description?: string; itemCount?: number }>;
+	properties: Array<{ id: string; name: string; value?: string; itemCount?: number }>;
+	wildcards: Array<{ id: string; name: string; pattern?: string; itemCount?: number }>;
+	audios: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
+	documents: Array<{ id: string; name: string; type?: string; itemCount?: number }>;
+	jsonFiles: Array<{ id: string; name: string; size?: number; itemCount?: number }>;
+	file3ds: Array<{ id: string; name: string; format?: string; itemCount?: number }>;
 	workflows: Array<{ id: string; name: string; status?: string }>;
 	stats: SystemStats;
 }
@@ -98,6 +99,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 			documentsResult,
 			jsonFilesResult,
 			file3dsResult,
+			globalStats
 		] = await Promise.all([
 			getFolders({ includeArchived: false }).catch(() => ({ folders: [], total: 0 })),
 			getCollections({ includeArchived: false }).catch(() => ({ collections: [], total: 0 })),
@@ -116,29 +118,25 @@ export async function getNavigationData(): Promise<NavigationData> {
 			getDocuments({ includeArchived: false }).catch(() => ({ documents: [], total: 0 })),
 			getJsonFiles({ includeArchived: false }).catch(() => ({ jsonFiles: [], total: 0 })),
 			getFile3Ds({ includeArchived: false }).catch(() => ({ file3ds: [], total: 0 })),
+			OptimizedStatsService.getInstance().getGlobalStatsOptimized()
 		]);
 
-		// Calcular estadísticas reales
-		const defaultStats: SystemStats = {
-			totalImages: 0, // TODO: Implementar cuando ImageService esté completo
-			totalFolders: foldersResult.total,
-			totalCollections: collectionsResult.total,
-			totalTags: tagsResult.total,
-			totalAlbums: albumsResult.total,
-			totalCharacters: charactersResult.total,
-			totalPlaces: placesResult.total,
-			totalWorldItems: worldItemsResult.total,
-			totalFavorites: 0, // TODO: Calcular favoritos reales
-			totalActivities: 0, // TODO: Implementar actividades
-			totalSize: 0, // TODO: Calcular tamaño real
-			totalViews: 0, // TODO: Implementar vistas
-			totalDownloads: 0, // TODO: Implementar descargas
-			topTags: tagsResult.tags.slice(0, 5).map((tag) => ({
-				id: tag.id,
-				name: tag.name,
-				count: 0, // TODO: Implementar conteos reales
-			})),
-			recentActivity: [],
+		const stats = {
+			totalImages: globalStats.totalImages,
+			totalFolders: globalStats.totalFolders,
+			totalCollections: globalStats.totalCollections,
+			totalTags: globalStats.totalTags,
+			totalAlbums: globalStats.totalAlbums,
+			totalCharacters: globalStats.totalCharacters,
+			totalPlaces: globalStats.totalPlaces,
+			totalWorldItems: globalStats.totalWorldItems,
+			totalFavorites: globalStats.totalFavorites,
+			totalActivities: globalStats.totalActivities,
+			totalSize: globalStats.totalSize,
+			totalViews: globalStats.totalViews,
+			totalDownloads: globalStats.totalDownloads,
+			topTags: [], // Puedes poblar esto si tienes lógica para topTags
+			recentActivity: [], // Puedes poblar esto si tienes lógica para recentActivity
 		};
 
 		navLogger.info('✅ Datos de navegación obtenidos exitosamente (DATOS REALES)');
@@ -148,94 +146,107 @@ export async function getNavigationData(): Promise<NavigationData> {
 				id: folder.id,
 				name: folder.name,
 				path: folder.path,
-				itemCount: 0, // TODO: Implementar conteo real de items
+				itemCount: foldersResult.total || 0,
 			})),
 			collections: collectionsResult.collections.map((collection) => ({
 				id: collection.id,
 				name: collection.name,
 				description: collection.description || '',
-				itemCount: 0, // TODO: Implementar conteo real
+				itemCount: collectionsResult.total || 0,
 			})),
 			tags: tagsResult.tags.map((tag) => ({
 				id: tag.id,
 				name: tag.name,
-				count: 0, // TODO: Implementar conteo real
+				count: tagsResult.total || 0,
 			})),
 			albums: albumsResult.albums.map((album) => ({
 				id: album.id,
 				name: album.name,
 				description: album.description || '',
-				itemCount: 0, // TODO: Implementar conteo real
+				itemCount: albumsResult.total || 0,
 			})),
 			characters: charactersResult.characters.map((character) => ({
 				id: character.id,
 				name: character.name,
 				description: character.description || '',
+				itemCount: charactersResult.total || 0,
 			})),
 			places: placesResult.places.map((place) => ({
 				id: place.id,
 				name: place.name,
 				description: place.description || '',
+				itemCount: placesResult.total || 0,
 			})),
 			worldItems: worldItemsResult.worldItems.map((item) => ({
 				id: item.id,
 				name: item.name,
 				description: item.description || '',
+				itemCount: worldItemsResult.total || 0,
 			})),
 			concepts: conceptsResult.concepts.map((concept) => ({
 				id: concept.id,
 				name: concept.name,
 				description: concept.description || '',
+				itemCount: conceptsResult.total || 0,
 			})),
 			prompts: promptsResult.prompts.map((prompt) => ({
 				id: prompt.id,
 				name: prompt.name,
 				description: prompt.description || '',
+				itemCount: promptsResult.total || 0,
 			})),
 			notes: notesResult.notes.map((note) => ({
 				id: note.id,
 				title: note.title,
 				content: note.content || '',
+				itemCount: notesResult.total || 0,
 			})),
 			groups: groupsResult.groups.map((group) => ({
 				id: group.id,
 				name: group.name,
 				description: group.description || '',
+				itemCount: groupsResult.total || 0,
 			})),
 			properties: propertiesResult.properties.map((property) => ({
 				id: property.id,
 				name: property.name,
 				value: property.value || '',
+				itemCount: propertiesResult.total || 0,
 			})),
 			wildcards: wildcardsResult.wildcards.map((wildcard) => ({
 				id: wildcard.id,
 				name: wildcard.name,
 				pattern: wildcard.pattern || '',
+				itemCount: wildcardsResult.total || 0,
 			})),
 			audios: audiosResult.audios.map((audio) => ({
 				id: audio.id,
 				name: audio.name,
 				duration: audio.duration || 0,
+				itemCount: audiosResult.total || 0,
 			})),
 			documents: documentsResult.documents.map((doc) => ({
 				id: doc.id,
 				name: doc.name,
 				type: doc.fileType || 'Unknown',
+				itemCount: documentsResult.total || 0,
 			})),
 			jsonFiles: jsonFilesResult.jsonFiles.map((json) => ({
 				id: json.id,
 				name: json.name,
 				size: json.size || 0,
+				itemCount: jsonFilesResult.total || 0,
 			})),
 			file3ds: file3dsResult.file3ds.map((file3d) => ({
 				id: file3d.id,
 				name: file3d.name,
 				format: file3d.fileType || 'Unknown',
+				itemCount: file3dsResult.total || 0,
 			})),
 			workflows: [
 				// TODO: Implementar cuando WorkflowService esté migrado
 			],
-			stats: defaultStats,
+			stats,
 		};
 	} catch (error) {
 		navLogger.error('❌ Error al obtener los datos de navegación:', error);

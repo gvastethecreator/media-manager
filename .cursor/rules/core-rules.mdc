@@ -7,6 +7,8 @@ alwaysApply: true
 
 ## 🌐 Base Configuration
 
+
+0. Una respuesta corta y de aprobación debe entenderse con que debes proceder inmediatamente a analizar, implementar los cambios, usar tus herramientas y realizar todas las tareas que tienes en tu lista de instrucciones.
 1. **Español obligatorio** - Todas las respuestas, comentarios, documentación, etc. deben estar completamente en español.
 2. **Windows SIEMPRE** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell Core (pwsh) como terminal por defecto.
 3. **Gestor de paquetes del proyecto** - Identificar y usar el gestor definido en el proyecto según el archivo de configuración presente.
