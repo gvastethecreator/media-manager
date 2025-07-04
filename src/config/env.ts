@@ -7,10 +7,10 @@
 // Exportar configuración para uso en otros módulos
 export const ENV = {
 	NODE_ENV: process.env.NODE_ENV || 'development',
-	API_PORT: process.env.API_PORT || process.env.PORT || '5173',
+	API_PORT: process.env.API_PORT || process.env.PORT || '3001',
 	DATABASE_URL: process.env.DATABASE_URL || 'file:./db.sqlite',
-	VITE_API_URL: process.env.VITE_API_URL || 'http://localhost:5173/api',
-	CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5174',
+	VITE_API_URL: process.env.VITE_API_URL || 'http://localhost:3001/api',
+	CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
 } as const;
 
 // Validar variables críticas en el servidor
