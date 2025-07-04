@@ -3,7 +3,6 @@
  * @module services/profile
  */
 
-
 import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Importar Drizzle para coexistencia
 import { db } from '@/lib/drizzle';
@@ -11,13 +10,13 @@ import { profiles, settings } from '@/lib/drizzle/schema';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
-    type ProfileCreateInput,
-    type ProfileExtended,
-    type ProfileFilters,
-    type ProfilePaginationOptions,
-    type ProfileUpdateInput,
-    profileFiltersSchema,
-    profilePaginationSchema,
+	type ProfileCreateInput,
+	type ProfileExtended,
+	type ProfileFilters,
+	type ProfilePaginationOptions,
+	type ProfileUpdateInput,
+	profileFiltersSchema,
+	profilePaginationSchema,
 } from '@/types/entities/profile';
 import { CreateProfileInput, UpdateProfileInput } from './client';
 
@@ -36,7 +35,7 @@ function validateProfileResults(drizzleResult: any, prismaResult: any, context: 
 	if (drizzleJson !== prismaJson) {
 		console.warn(`[PROFILE VALIDATION] Diferencia encontrada en ${context}:`, {
 			drizzle: drizzleResult,
-			prisma: prismaResult
+			prisma: prismaResult,
 		});
 	} else {
 		console.log(`[PROFILE VALIDATION] ✅ ${context} - Resultados idénticos`);
@@ -79,24 +78,25 @@ class ProfileServiceImpl {
 			const { page = 1, limit = 50, sortBy = 'name', sortDirection = 'asc' } = validatedPagination;
 
 			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
-			let query = db.select({
-				// Campos del perfil
-				id: profiles.id,
-				name: profiles.name,
-				emoji: profiles.emoji,
-				color: profiles.color,
-				description: profiles.description,
-				isActive: profiles.isActive,
-				createdAt: profiles.createdAt,
-				updatedAt: profiles.updatedAt,
-				settingsId: profiles.settingsId,
-				imageId: profiles.imageId,
-				// Campos de settings (planos para luego restructurar)
-				settingsRealId: settings.id,
-				settingsData: settings.data,
-				settingsTheme: settings.theme,
-				settingsLanguage: settings.language,
-			})
+			let query = db
+				.select({
+					// Campos del perfil
+					id: profiles.id,
+					name: profiles.name,
+					emoji: profiles.emoji,
+					color: profiles.color,
+					description: profiles.description,
+					isActive: profiles.isActive,
+					createdAt: profiles.createdAt,
+					updatedAt: profiles.updatedAt,
+					settingsId: profiles.settingsId,
+					imageId: profiles.imageId,
+					// Campos de settings (planos para luego restructurar)
+					settingsRealId: settings.id,
+					settingsData: settings.data,
+					settingsTheme: settings.theme,
+					settingsLanguage: settings.language,
+				})
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id));
 
@@ -105,12 +105,7 @@ class ProfileServiceImpl {
 
 			// Filtro de búsqueda (name OR description)
 			if (search) {
-				conditions.push(
-					or(
-						like(profiles.name, `%${search}%`),
-						like(profiles.description, `%${search}%`)
-					)
-				);
+				conditions.push(or(like(profiles.name, `%${search}%`), like(profiles.description, `%${search}%`)));
 			}
 
 			// Filtro de estado activo
@@ -132,11 +127,16 @@ class ProfileServiceImpl {
 			}
 
 			// 3. Aplicar ordenamiento dinámico
-			const orderColumn = sortBy === 'name' ? profiles.name :
-			                  sortBy === 'isActive' ? profiles.isActive :
-			                  sortBy === 'createdAt' ? profiles.createdAt :
-			                  sortBy === 'updatedAt' ? profiles.updatedAt :
-			                  profiles.name; // default fallback
+			const orderColumn =
+				sortBy === 'name'
+					? profiles.name
+					: sortBy === 'isActive'
+						? profiles.isActive
+						: sortBy === 'createdAt'
+							? profiles.createdAt
+							: sortBy === 'updatedAt'
+								? profiles.updatedAt
+								: profiles.name; // default fallback
 
 			const orderDirection = sortDirection === 'desc' ? desc(orderColumn) : asc(orderColumn);
 			query = query.orderBy(orderDirection);
@@ -148,7 +148,7 @@ class ProfileServiceImpl {
 			const drizzleProfiles = await query;
 
 			// 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
-			const drizzleResults = drizzleProfiles.map(raw => ({
+			const drizzleResults = drizzleProfiles.map((raw) => ({
 				id: raw.id,
 				name: raw.name,
 				emoji: raw.emoji,
@@ -159,13 +159,15 @@ class ProfileServiceImpl {
 				updatedAt: raw.updatedAt,
 				settingsId: raw.settingsId,
 				imageId: raw.imageId,
-				settings: raw.settingsRealId ? {
-					id: raw.settingsRealId,
-					theme: raw.settingsTheme,
-					language: raw.settingsLanguage,
-					data: raw.settingsData,
-					profileId: raw.id,
-				} : null,
+				settings: raw.settingsRealId
+					? {
+							id: raw.settingsRealId,
+							theme: raw.settingsTheme,
+							language: raw.settingsLanguage,
+							data: raw.settingsData,
+							profileId: raw.id,
+						}
+					: null,
 			}));
 
 			// 7. Retornar resultados de Drizzle
@@ -236,32 +238,33 @@ class ProfileServiceImpl {
 	 * con validación de Prisma en desarrollo para asegurar consistencia.
 	 */
 	async getActiveProfile(): Promise<ProfileExtended | null> {
-				try {
-						// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
-			const drizzleProfile = await db.select({
-				// Campos del perfil
-				id: profiles.id,
-				name: profiles.name,
-				emoji: profiles.emoji,
-				color: profiles.color,
-				description: profiles.description,
-				isActive: profiles.isActive,
-				createdAt: profiles.createdAt,
-				updatedAt: profiles.updatedAt,
-				settingsId: profiles.settingsId,
-				imageId: profiles.imageId,
-				// Campos de settings (planos para luego restructurar)
-				settingsRealId: settings.id,
-				settingsData: settings.data,
-				settingsTheme: settings.theme,
-				settingsLanguage: settings.language,
-			})
+		try {
+			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
+			const drizzleProfile = await db
+				.select({
+					// Campos del perfil
+					id: profiles.id,
+					name: profiles.name,
+					emoji: profiles.emoji,
+					color: profiles.color,
+					description: profiles.description,
+					isActive: profiles.isActive,
+					createdAt: profiles.createdAt,
+					updatedAt: profiles.updatedAt,
+					settingsId: profiles.settingsId,
+					imageId: profiles.imageId,
+					// Campos de settings (planos para luego restructurar)
+					settingsRealId: settings.id,
+					settingsData: settings.data,
+					settingsTheme: settings.theme,
+					settingsLanguage: settings.language,
+				})
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id))
 				.where(eq(profiles.isActive, true))
 				.limit(1);
 
-						// Restructurar el resultado para que sea compatible con el transformador de Prisma
+			// Restructurar el resultado para que sea compatible con el transformador de Prisma
 			let drizzleResult = null;
 			if (drizzleProfile.length > 0) {
 				const raw = drizzleProfile[0];
@@ -277,17 +280,19 @@ class ProfileServiceImpl {
 					settingsId: raw.settingsId,
 					imageId: raw.imageId,
 					// Crear objeto settings compatible con Prisma
-					settings: raw.settingsRealId ? {
-						id: raw.settingsRealId,
-						theme: raw.settingsTheme,
-						language: raw.settingsLanguage,
-						data: raw.settingsData,
-						profileId: raw.id,
-					} : null,
+					settings: raw.settingsRealId
+						? {
+								id: raw.settingsRealId,
+								theme: raw.settingsTheme,
+								language: raw.settingsLanguage,
+								data: raw.settingsData,
+								profileId: raw.id,
+							}
+						: null,
 				};
 			}
 
-						// 2. Transformar y retornar resultado de Drizzle
+			// 2. Transformar y retornar resultado de Drizzle
 			return drizzleResult ? transformProfile(drizzleResult) : null;
 		} catch (error) {
 			throw toServiceError(error, {
@@ -304,26 +309,27 @@ class ProfileServiceImpl {
 	 * con validación de Prisma en desarrollo para asegurar consistencia.
 	 */
 	async getById(id: string): Promise<ProfileExtended | null> {
-						try {
+		try {
 			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
-			const drizzleProfile = await db.select({
-				// Campos del perfil
-				id: profiles.id,
-				name: profiles.name,
-				emoji: profiles.emoji,
-				color: profiles.color,
-				description: profiles.description,
-				isActive: profiles.isActive,
-				createdAt: profiles.createdAt,
-				updatedAt: profiles.updatedAt,
-				settingsId: profiles.settingsId,
-				imageId: profiles.imageId,
-				// Campos de settings (planos para luego restructurar)
-				settingsRealId: settings.id,
-				settingsData: settings.data,
-				settingsTheme: settings.theme,
-				settingsLanguage: settings.language,
-			})
+			const drizzleProfile = await db
+				.select({
+					// Campos del perfil
+					id: profiles.id,
+					name: profiles.name,
+					emoji: profiles.emoji,
+					color: profiles.color,
+					description: profiles.description,
+					isActive: profiles.isActive,
+					createdAt: profiles.createdAt,
+					updatedAt: profiles.updatedAt,
+					settingsId: profiles.settingsId,
+					imageId: profiles.imageId,
+					// Campos de settings (planos para luego restructurar)
+					settingsRealId: settings.id,
+					settingsData: settings.data,
+					settingsTheme: settings.theme,
+					settingsLanguage: settings.language,
+				})
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id))
 				.where(eq(profiles.id, id))
@@ -345,17 +351,19 @@ class ProfileServiceImpl {
 					settingsId: raw.settingsId,
 					imageId: raw.imageId,
 					// Crear objeto settings compatible con Prisma
-					settings: raw.settingsRealId ? {
-						id: raw.settingsRealId,
-						theme: raw.settingsTheme,
-						language: raw.settingsLanguage,
-						data: raw.settingsData,
-						profileId: raw.id,
-					} : null,
+					settings: raw.settingsRealId
+						? {
+								id: raw.settingsRealId,
+								theme: raw.settingsTheme,
+								language: raw.settingsLanguage,
+								data: raw.settingsData,
+								profileId: raw.id,
+							}
+						: null,
 				};
 			}
 
-						// 2. Transformar y retornar resultado de Drizzle
+			// 2. Transformar y retornar resultado de Drizzle
 			return drizzleResult ? transformProfile(drizzleResult) : null;
 		} catch (error) {
 			throw toServiceError(error, {
@@ -389,24 +397,17 @@ export const profileService = ProfileServiceImpl.getInstance();
 export const getProfiles = (filters?: ProfileFilters, pagination?: ProfilePaginationOptions) =>
 	profileService.getProfiles(filters, pagination);
 
-export const createProfile = (data: ProfileCreateInput) =>
-	profileService.createProfile(data);
+export const createProfile = (data: ProfileCreateInput) => profileService.createProfile(data);
 
-export const updateProfile = (id: string, data: ProfileUpdateInput) =>
-	profileService.updateProfile(id, data);
+export const updateProfile = (id: string, data: ProfileUpdateInput) => profileService.updateProfile(id, data);
 
-export const activateProfile = (id: string) =>
-	profileService.setActiveProfile(id);
+export const activateProfile = (id: string) => profileService.setActiveProfile(id);
 
-export const getActiveProfile = () =>
-	profileService.getActiveProfile();
+export const getActiveProfile = () => profileService.getActiveProfile();
 
-export const getProfile = (id: string) =>
-	profileService.getById(id);
+export const getProfile = (id: string) => profileService.getById(id);
 
-export const deleteProfile = (id: string) =>
-	profileService.delete(id);
+export const deleteProfile = (id: string) => profileService.delete(id);
 
 // Exportar tipos útiles para los consumidores del servicio
 export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };
-

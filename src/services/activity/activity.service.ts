@@ -4,10 +4,10 @@
  * @description Implementación del servicio para gestionar actividades del sistema
  */
 
+import { and, count, desc, eq, gte, ilike, inArray, lte } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { activities, images } from '@/lib/drizzle/schema';
 import type { Activity, ActivityFilters, ActivityListResponse, CreateActivityData } from '@/types/entities/activity';
-import { and, count, desc, eq, gte, ilike, inArray, lte } from 'drizzle-orm';
 
 /**
  * Interfaz para el servicio de Activity
@@ -94,14 +94,17 @@ export class ActivityServiceImpl implements ActivityService {
 	async create(data: CreateActivityData): Promise<Activity> {
 		try {
 			// Insertar nueva actividad (mapear description -> message)
-			const result = await db.insert(activities).values({
-				id: crypto.randomUUID(),
-				type: data.type,
-				message: data.description, // Mapeo: description en app -> message en BD
-				data: null,
-				imageId: data.imageId || null,
-				createdAt: new Date(),
-			}).returning();
+			const result = await db
+				.insert(activities)
+				.values({
+					id: crypto.randomUUID(),
+					type: data.type,
+					message: data.description, // Mapeo: description en app -> message en BD
+					data: null,
+					imageId: data.imageId || null,
+					createdAt: new Date(),
+				})
+				.returning();
 
 			const newActivity = result[0];
 
@@ -198,17 +201,12 @@ export class ActivityServiceImpl implements ActivityService {
 				.offset(offset);
 
 			// Consulta para contar total
-			const totalCountResult = await db
-				.select({ count: count() })
-				.from(activities)
-				.where(whereConditions);
+			const totalCountResult = await db.select({ count: count() }).from(activities).where(whereConditions);
 
 			const totalCount = totalCountResult[0]?.count || 0;
 
 			// Transformar resultados
-			const transformedActivities = activitiesResult.map((activity) =>
-				this.transformActivityResponse(activity)
-			);
+			const transformedActivities = activitiesResult.map((activity) => this.transformActivityResponse(activity));
 
 			return {
 				activities: transformedActivities,
@@ -228,10 +226,7 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	async delete(id: string): Promise<boolean> {
 		try {
-			const result = await db
-				.delete(activities)
-				.where(eq(activities.id, id))
-				.returning();
+			const result = await db.delete(activities).where(eq(activities.id, id)).returning();
 
 			return result.length > 0;
 		} catch (error) {
@@ -249,10 +244,7 @@ export class ActivityServiceImpl implements ActivityService {
 		try {
 			const whereConditions = filters ? buildWhereConditions(filters) : undefined;
 
-			const result = await db
-				.delete(activities)
-				.where(whereConditions)
-				.returning();
+			const result = await db.delete(activities).where(whereConditions).returning();
 
 			return result.length;
 		} catch (error) {

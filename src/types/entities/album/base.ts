@@ -3,21 +3,21 @@
  * Este tipo no se modifica y representa la estructura en la base de datos.
  */
 export type AlbumBase = {
-    id: string;
-    name: string;
-    description: string | null;
-    emoji: string | null;
-    color: string | null;
-    featuredImage: string | null;
-    isPublic: boolean;
-    isFavorite: boolean;
-    totalImages: number;
-    totalVideos: number;
-    totalSize: number;
-    lastImageAddedAt: Date | null;
-    lastVideoAddedAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	featuredImage: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	totalSize: number;
+	lastImageAddedAt: Date | null;
+	lastVideoAddedAt: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 /**

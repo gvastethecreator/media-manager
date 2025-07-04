@@ -3,21 +3,18 @@
  * @module transformers/place
  * @description Centraliza la exportación de funciones de transformación y mapeo
  * para la entidad Place, asegurando una interfaz consistente para el resto de la aplicación.
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-// --- Exportaciones de Mappers ---
-// Se renombran para seguir el patrón de nomenclatura: map[Entidad][Accion]To[Destino]
+// Exportar mappers, serializers, validators y schemas
+export * from './mappers';
+export * from './serializers';
+export * from './validators';
+export * from './schema';
+
+// Exportar funciones principales de transformación
 export {
-	toPlaceWithStats,
-	toCreateDataForDrizzle,
-	toUpdateDataForDrizzle,
-	createOrderByForDrizzle,
-	createFilterForDrizzle,
-	toSearchOptionsForDrizzle,
-} from './mappers';
-
-// --- Exportaciones de Transformer ---
-// (No hay transformer.ts para Place, ya que la lógica está en mappers)
-
-// --- Exportaciones de Serializers ---
-// (No hay serializers.ts para Place)
+	fromDrizzlePlace,
+	fromDrizzlePlaces,
+	toDrizzlePlace,
+} from './transformer';

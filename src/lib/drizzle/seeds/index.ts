@@ -75,5 +75,3 @@ export async function runSeeds() {
 		client.close();
 	}
 }
-
-

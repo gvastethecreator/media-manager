@@ -1,16 +1,16 @@
 // src/server/services/system.service.ts
 
-import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
-import { createSystemError } from '@/lib/errors/system';
-import { db } from '@/lib/drizzle';
-import { images, collections, tags, albums, notes } from '@/lib/drizzle/schema';
 import { count } from 'drizzle-orm';
-import { serverLogger } from '@/lib/logger/server-logger';
-import { settingsService } from '@/services/settings';
-import type { Settings } from '@/types/settings';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
+import { db } from '@/lib/drizzle';
+import { albums, collections, images, notes, tags } from '@/lib/drizzle/schema';
+import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
+import { createSystemError } from '@/lib/errors/system';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { settingsService } from '@/services/settings';
+import type { Settings } from '@/types/settings';
 
 const navLogger = serverLogger.withContext('NavActions');
 const systemLogger = serverLogger.withContext('SystemActions');
@@ -133,10 +133,10 @@ export async function getNavigationData(): Promise<NavigationData> {
 			totalSize: 0, // TODO: Calcular tamaño real
 			totalViews: 0, // TODO: Implementar vistas
 			totalDownloads: 0, // TODO: Implementar descargas
-			topTags: tagsResult.tags.slice(0, 5).map(tag => ({
+			topTags: tagsResult.tags.slice(0, 5).map((tag) => ({
 				id: tag.id,
 				name: tag.name,
-				count: 0 // TODO: Implementar conteos reales
+				count: 0, // TODO: Implementar conteos reales
 			})),
 			recentActivity: [],
 		};
@@ -144,93 +144,93 @@ export async function getNavigationData(): Promise<NavigationData> {
 		navLogger.info('✅ Datos de navegación obtenidos exitosamente (DATOS REALES)');
 
 		return {
-			folders: foldersResult.folders.map(folder => ({
+			folders: foldersResult.folders.map((folder) => ({
 				id: folder.id,
 				name: folder.name,
 				path: folder.path,
-				itemCount: 0 // TODO: Implementar conteo real de items
+				itemCount: 0, // TODO: Implementar conteo real de items
 			})),
-			collections: collectionsResult.collections.map(collection => ({
+			collections: collectionsResult.collections.map((collection) => ({
 				id: collection.id,
 				name: collection.name,
 				description: collection.description || '',
-				itemCount: 0 // TODO: Implementar conteo real
+				itemCount: 0, // TODO: Implementar conteo real
 			})),
-			tags: tagsResult.tags.map(tag => ({
+			tags: tagsResult.tags.map((tag) => ({
 				id: tag.id,
 				name: tag.name,
-				count: 0 // TODO: Implementar conteo real
+				count: 0, // TODO: Implementar conteo real
 			})),
-			albums: albumsResult.albums.map(album => ({
+			albums: albumsResult.albums.map((album) => ({
 				id: album.id,
 				name: album.name,
 				description: album.description || '',
-				itemCount: 0 // TODO: Implementar conteo real
+				itemCount: 0, // TODO: Implementar conteo real
 			})),
-			characters: charactersResult.characters.map(character => ({
+			characters: charactersResult.characters.map((character) => ({
 				id: character.id,
 				name: character.name,
-				description: character.description || ''
+				description: character.description || '',
 			})),
-			places: placesResult.places.map(place => ({
+			places: placesResult.places.map((place) => ({
 				id: place.id,
 				name: place.name,
-				description: place.description || ''
+				description: place.description || '',
 			})),
-			worldItems: worldItemsResult.worldItems.map(item => ({
+			worldItems: worldItemsResult.worldItems.map((item) => ({
 				id: item.id,
 				name: item.name,
-				description: item.description || ''
+				description: item.description || '',
 			})),
-			concepts: conceptsResult.concepts.map(concept => ({
+			concepts: conceptsResult.concepts.map((concept) => ({
 				id: concept.id,
 				name: concept.name,
-				description: concept.description || ''
+				description: concept.description || '',
 			})),
-			prompts: promptsResult.prompts.map(prompt => ({
+			prompts: promptsResult.prompts.map((prompt) => ({
 				id: prompt.id,
 				name: prompt.name,
-				description: prompt.description || ''
+				description: prompt.description || '',
 			})),
-			notes: notesResult.notes.map(note => ({
+			notes: notesResult.notes.map((note) => ({
 				id: note.id,
 				title: note.title,
-				content: note.content || ''
+				content: note.content || '',
 			})),
-			groups: groupsResult.groups.map(group => ({
+			groups: groupsResult.groups.map((group) => ({
 				id: group.id,
 				name: group.name,
-				description: group.description || ''
+				description: group.description || '',
 			})),
-			properties: propertiesResult.properties.map(property => ({
+			properties: propertiesResult.properties.map((property) => ({
 				id: property.id,
 				name: property.name,
-				value: property.value || ''
+				value: property.value || '',
 			})),
-			wildcards: wildcardsResult.wildcards.map(wildcard => ({
+			wildcards: wildcardsResult.wildcards.map((wildcard) => ({
 				id: wildcard.id,
 				name: wildcard.name,
-				pattern: wildcard.pattern || ''
+				pattern: wildcard.pattern || '',
 			})),
-			audios: audiosResult.audios.map(audio => ({
+			audios: audiosResult.audios.map((audio) => ({
 				id: audio.id,
 				name: audio.name,
-				duration: audio.duration || 0
+				duration: audio.duration || 0,
 			})),
-			documents: documentsResult.documents.map(doc => ({
+			documents: documentsResult.documents.map((doc) => ({
 				id: doc.id,
 				name: doc.name,
-				type: doc.fileType || 'Unknown'
+				type: doc.fileType || 'Unknown',
 			})),
-			jsonFiles: jsonFilesResult.jsonFiles.map(json => ({
+			jsonFiles: jsonFilesResult.jsonFiles.map((json) => ({
 				id: json.id,
 				name: json.name,
-				size: json.size || 0
+				size: json.size || 0,
 			})),
-			file3ds: file3dsResult.file3ds.map(file3d => ({
+			file3ds: file3dsResult.file3ds.map((file3d) => ({
 				id: file3d.id,
 				name: file3d.name,
-				format: file3d.fileType || 'Unknown'
+				format: file3d.fileType || 'Unknown',
 			})),
 			workflows: [
 				// TODO: Implementar cuando WorkflowService esté migrado
@@ -310,13 +310,14 @@ export async function getSystemStats(): Promise<SystemRuntimeStats> {
 		}
 
 		// Obtener tamaño de base de datos (conteo de entidades)
-		const [totalImagesResult, totalCollectionsResult, totalTagsResult, totalAlbumsResult, totalNotesResult] = await Promise.all([
-			db.select({ count: count() }).from(images),
-			db.select({ count: count() }).from(collections),
-			db.select({ count: count() }).from(tags),
-			db.select({ count: count() }).from(albums),
-			db.select({ count: count() }).from(notes),
-		]);
+		const [totalImagesResult, totalCollectionsResult, totalTagsResult, totalAlbumsResult, totalNotesResult] =
+			await Promise.all([
+				db.select({ count: count() }).from(images),
+				db.select({ count: count() }).from(collections),
+				db.select({ count: count() }).from(tags),
+				db.select({ count: count() }).from(albums),
+				db.select({ count: count() }).from(notes),
+			]);
 
 		const totalImages = totalImagesResult[0].count;
 		const totalCollections = totalCollectionsResult[0].count;

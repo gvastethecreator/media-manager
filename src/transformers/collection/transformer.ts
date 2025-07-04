@@ -6,7 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CollectionWithStats, CollectionBase, CollectionStatistics } from '@/types/entities/collection';
+import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 
 const logger = serverLogger.withContext('CollectionTransformer');
 

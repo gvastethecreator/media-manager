@@ -125,10 +125,16 @@ export function useDeletePlace() {
 	});
 }
 
-export function useRecentPlaceMedia(placeId: string, limit: number = 6) {
-  return useQuery<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>, Error>({
-    queryKey: [...placeKeys.detail(placeId), 'media', limit],
-    queryFn: () => apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean; }>>(`/places/${placeId}/media?limit=${limit}`),
-    enabled: !!placeId,
-  });
+export function useRecentPlaceMedia(placeId: string, limit = 6) {
+	return useQuery<
+		Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>,
+		Error
+	>({
+		queryKey: [...placeKeys.detail(placeId), 'media', limit],
+		queryFn: () =>
+			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>>(
+				`/places/${placeId}/media?limit=${limit}`
+			),
+		enabled: !!placeId,
+	});
 }

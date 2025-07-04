@@ -1,7 +1,7 @@
 import { PanelRightClose, X } from 'lucide-react';
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react';
-import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';

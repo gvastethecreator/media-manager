@@ -8,34 +8,34 @@
  * 🧊 Tipo base de File3D directamente desde el schema de Drizzle.
  */
 export type File3DBase = {
-    id: string;
-    name: string;
-    path: string;
-    size: number;
-    hash: string;
-    mimeType: string;
-    extension: string;
-    folderId: string;
-    isFavorite: boolean;
-    isArchived: boolean;
-    format: string | null;
-    version: string | null;
-    vertices: number | null;
-    faces: number | null;
-    triangles: number | null;
-    materials: number | null;
-    textures: number | null;
-    animations: number | null;
-    bones: number | null;
-    scenes: number | null;
-    cameras: number | null;
-    lights: number | null;
-    hasUV: boolean | null;
-    hasNormals: boolean | null;
-    hasColors: boolean | null;
-    boundingBox: string | null;
-    createdAt: Date;
-    updatedAt: Date;
+	id: string;
+	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	format: string | null;
+	version: string | null;
+	vertices: number | null;
+	faces: number | null;
+	triangles: number | null;
+	materials: number | null;
+	textures: number | null;
+	animations: number | null;
+	bones: number | null;
+	scenes: number | null;
+	cameras: number | null;
+	lights: number | null;
+	hasUV: boolean | null;
+	hasNormals: boolean | null;
+	hasColors: boolean | null;
+	boundingBox: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 /**

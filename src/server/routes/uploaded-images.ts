@@ -1,5 +1,10 @@
 import express from 'express';
-import { uploadImages, getUploadedImages, deleteUploadedImage, getUploadedImageStats } from '../services/uploaded-images.api.service';
+import {
+	deleteUploadedImage,
+	getUploadedImageStats,
+	getUploadedImages,
+	uploadImages,
+} from '../services/uploaded-images.api.service';
 
 const router = express.Router();
 

@@ -6,15 +6,17 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-// Refactor 2025-07: ahora usamos cliente API en lugar de workflow.service
-import {
-    createWorkflowInApi,
-    deleteWorkflowFromApi,
-    getWorkflowsFromApi,
-    updateWorkflowInApi,
-} from '@/lib/api/client/workflow.client';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
+// Refactor 2025-07: ahora usamos cliente API en lugar de workflow.service
+import {
+	createWorkflowInApi,
+	deleteWorkflowFromApi,
+	getWorkflowsFromApi,
+	updateWorkflowInApi,
+} from '@/lib/api/client/workflow.client';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast';
 import type { WorkflowCoreActions, WorkflowCoreState, WorkflowStore } from '../types';
 
 const logger = clientLogger.withContext('WorkflowCoreSlice');
@@ -42,7 +44,7 @@ export const createWorkflowCoreSlice: StateCreator<
 		});
 
 		try {
-                        const workflows = await getWorkflowsFromApi();
+			const workflows = await getWorkflowsFromApi();
 			set((state) => {
 				state.workflows = workflows.reduce(
 					(acc, wf) => {
@@ -70,7 +72,7 @@ export const createWorkflowCoreSlice: StateCreator<
 
 	createWorkflow: async (data) => {
 		try {
-                        await createWorkflowInApi(data);
+			await createWorkflowInApi(data);
 			toastService.success(`Workflow "${data.name}" creado.`);
 			await get().loadWorkflows(); // Recargar para obtener el nuevo item con stats
 		} catch (error) {
@@ -82,7 +84,7 @@ export const createWorkflowCoreSlice: StateCreator<
 
 	updateWorkflow: async (id, data) => {
 		try {
-                        await updateWorkflowInApi(id, data);
+			await updateWorkflowInApi(id, data);
 			toastService.success('Workflow actualizado.');
 			await get().loadWorkflows(); // Recargar para obtener los datos actualizados
 		} catch (error) {
@@ -100,7 +102,7 @@ export const createWorkflowCoreSlice: StateCreator<
 			})
 		);
 		try {
-                        await deleteWorkflowFromApi(id);
+			await deleteWorkflowFromApi(id);
 			toastService.success(`Workflow "${workflowName}" eliminado.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al eliminar el workflow.';

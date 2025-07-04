@@ -19,7 +19,7 @@ const WORDS_PER_MINUTE = 200;
 function calculateDocumentStats(document: DocumentBase): DocumentStatistics {
 	const wordCount = document.wordCount || 0;
 	const charCount = document.content?.length || 0;
-	
+
 	// Calcular tiempo de lectura estimado en minutos
 	const readingTime = wordCount > 0 ? Math.ceil(wordCount / WORDS_PER_MINUTE) : 0;
 

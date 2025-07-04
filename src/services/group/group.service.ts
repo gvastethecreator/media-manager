@@ -3,12 +3,14 @@
  * @module services/group
  */
 
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { groups } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
 	GroupCreateInput,
 	GroupRelations,
@@ -16,8 +18,6 @@ import type {
 	GroupUpdateInput,
 	GroupWithStats,
 } from '@/types/entities/group/types';
-import { eq, asc, desc, like, and, count, or, inArray } from 'drizzle-orm';
-import * as crypto from 'crypto';
 
 // Logger específico para el servicio de grupos
 const logger = serverLogger.withContext('GroupService');
@@ -92,10 +92,26 @@ export const getGroupService = async (id: string): Promise<GroupWithStats | null
 
 		// Obtener conteos de relaciones
 		const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
-			db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, id)).then(res => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupImages)
+				.where(eq(groupImages.groupId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupVideos)
+				.where(eq(groupVideos.groupId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupAlbums)
+				.where(eq(groupAlbums.groupId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupTags)
+				.where(eq(groupTags.groupId, id))
+				.then((res) => res[0]?.count || 0),
 		]);
 
 		// Construir grupo con estadísticas
@@ -116,14 +132,18 @@ export const getGroupService = async (id: string): Promise<GroupWithStats | null
 				wildcards: 0,
 				properties: 0,
 				groups: 0,
-			}
+			},
 		};
 
 		logger.info(`✅ Grupo encontrado: ${group.name}`);
 		return groupWithStats;
 	} catch (error) {
 		logger.error('❌ Error al obtener grupo por ID', { error, groupId: id });
-		throw createGroupError(`Error al obtener grupo: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
+		throw createGroupError(
+			`Error al obtener grupo: ${error instanceof Error ? error.message : String(error)}`,
+			GroupErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 };
 
@@ -145,10 +165,26 @@ export const getGroupsByIdsService = async (ids: string[]): Promise<GroupWithSta
 		const groupsWithStats = await Promise.all(
 			groupsResult.map(async (group) => {
 				const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
-					db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, group.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, group.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, group.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, group.id)).then(res => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupImages)
+						.where(eq(groupImages.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupVideos)
+						.where(eq(groupVideos.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupAlbums)
+						.where(eq(groupAlbums.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupTags)
+						.where(eq(groupTags.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
 				]);
 
 				return {
@@ -168,7 +204,7 @@ export const getGroupsByIdsService = async (ids: string[]): Promise<GroupWithSta
 						wildcards: 0,
 						properties: 0,
 						groups: 0,
-					}
+					},
 				} as GroupWithStats;
 			})
 		);
@@ -210,12 +246,7 @@ export const searchGroupsService = async (
 		const conditions = [];
 
 		if (filters.search) {
-			conditions.push(
-				or(
-					like(groups.name, `%${filters.search}%`),
-					like(groups.description, `%${filters.search}%`)
-				)
-			);
+			conditions.push(or(like(groups.name, `%${filters.search}%`), like(groups.description, `%${filters.search}%`)));
 		}
 
 		if (filters.isFavorite !== undefined) {
@@ -231,30 +262,45 @@ export const searchGroupsService = async (
 		// Configurar orden
 		const sortBy = options.sortBy || 'name';
 		const sortOrder = options.sortOrder || 'asc';
-		const orderByClause = sortOrder === 'desc'
-			? desc(groups[sortBy as keyof typeof groups] as any)
-			: asc(groups[sortBy as keyof typeof groups] as any);
+		const orderByClause =
+			sortOrder === 'desc'
+				? desc(groups[sortBy as keyof typeof groups] as any)
+				: asc(groups[sortBy as keyof typeof groups] as any);
 
 		// Ejecutar consultas en paralelo
 		const [groupsResult, totalCount] = await Promise.all([
-			db.select().from(groups)
+			db.select().from(groups).where(whereClause).orderBy(orderByClause).limit(pageSize).offset(offset),
+			db
+				.select({ count: count() })
+				.from(groups)
 				.where(whereClause)
-				.orderBy(orderByClause)
-				.limit(pageSize)
-				.offset(offset),
-			db.select({ count: count() }).from(groups)
-				.where(whereClause)
-				.then(res => res[0]?.count || 0)
+				.then((res) => res[0]?.count || 0),
 		]);
 
 		// Obtener estadísticas para cada grupo
 		const groupsWithStats = await Promise.all(
 			groupsResult.map(async (group) => {
 				const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
-					db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, group.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, group.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, group.id)).then(res => res[0]?.count || 0),
-					db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, group.id)).then(res => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupImages)
+						.where(eq(groupImages.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupVideos)
+						.where(eq(groupVideos.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupAlbums)
+						.where(eq(groupAlbums.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
+					db
+						.select({ count: count() })
+						.from(groupTags)
+						.where(eq(groupTags.groupId, group.id))
+						.then((res) => res[0]?.count || 0),
 				]);
 
 				return {
@@ -274,7 +320,7 @@ export const searchGroupsService = async (
 						wildcards: 0,
 						properties: 0,
 						groups: 0,
-					}
+					},
 				} as GroupWithStats;
 			})
 		);
@@ -286,7 +332,7 @@ export const searchGroupsService = async (
 			pageSize,
 			totalPages: Math.ceil(totalCount / pageSize),
 			hasNext: page * pageSize < totalCount,
-			hasPrevious: page > 1
+			hasPrevious: page > 1,
 		};
 
 		logger.info(`✅ Búsqueda completada, encontrados ${result.total} grupos`);
@@ -317,17 +363,20 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupW
 		}
 
 		// Crear grupo usando Drizzle
-		const newGroup = await db.insert(groups).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description,
-			isFavorite: data.isFavorite || false,
-			category: data.category,
-			filters: data.filters || '[]',
-			isActive: data.isActive !== false, // true por defecto
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const newGroup = await db
+			.insert(groups)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description,
+				isFavorite: data.isFavorite || false,
+				category: data.category,
+				filters: data.filters || '[]',
+				isActive: data.isActive !== false, // true por defecto
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		// Construir grupo con estadísticas
 		const groupWithStats: GroupWithStats = {
@@ -347,7 +396,7 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupW
 				wildcards: 0,
 				properties: 0,
 				groups: 0,
-			}
+			},
 		};
 
 		// Notificar creación
@@ -385,7 +434,11 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 
 		// Verificar nombre único si se está actualizando
 		if (data.name && data.name !== existingGroup[0].name) {
-			const groupWithSameName = await db.select().from(groups).where(and(eq(groups.name, data.name), eq(groups.id, id))).limit(1);
+			const groupWithSameName = await db
+				.select()
+				.from(groups)
+				.where(and(eq(groups.name, data.name), eq(groups.id, id)))
+				.limit(1);
 
 			if (groupWithSameName.length > 0) {
 				throw createGroupError(`Ya existe un grupo con el nombre "${data.name}"`, GroupErrorCode.ALREADY_EXISTS);
@@ -405,17 +458,30 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 		if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
 		// Actualizar grupo usando Drizzle
-		const updatedGroup = await db.update(groups)
-			.set(updateData)
-			.where(eq(groups.id, id))
-			.returning();
+		const updatedGroup = await db.update(groups).set(updateData).where(eq(groups.id, id)).returning();
 
 		// Obtener estadísticas actualizadas
 		const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
-			db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, id)).then(res => res[0]?.count || 0),
-			db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, id)).then(res => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupImages)
+				.where(eq(groupImages.groupId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupVideos)
+				.where(eq(groupVideos.groupId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupAlbums)
+				.where(eq(groupAlbums.groupId, id))
+				.then((res) => res[0]?.count || 0),
+			db
+				.select({ count: count() })
+				.from(groupTags)
+				.where(eq(groupTags.groupId, id))
+				.then((res) => res[0]?.count || 0),
 		]);
 
 		const groupWithStats: GroupWithStats = {
@@ -435,7 +501,7 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 				wildcards: 0,
 				properties: 0,
 				groups: 0,
-			}
+			},
 		};
 
 		// Notificar actualización
@@ -660,10 +726,18 @@ export default groupService;
 export async function getRecentGroupMediaService(groupId: string, limit = 6) {
 	try {
 		// Cargar imágenes recientes
-		const recentImages = await db.select().from(groupImages).where(eq(groupImages.groupId, groupId)).limit(Math.ceil(limit / 2));
+		const recentImages = await db
+			.select()
+			.from(groupImages)
+			.where(eq(groupImages.groupId, groupId))
+			.limit(Math.ceil(limit / 2));
 
 		// Cargar videos recientes
-		const recentVideos = await db.select().from(groupVideos).where(eq(groupVideos.groupId, groupId)).limit(Math.floor(limit / 2));
+		const recentVideos = await db
+			.select()
+			.from(groupVideos)
+			.where(eq(groupVideos.groupId, groupId))
+			.limit(Math.floor(limit / 2));
 
 		// Combinar y formatear los resultados
 		const imageResults = recentImages.map((img) => ({
@@ -713,11 +787,41 @@ export async function getGroupCardDataService(groupId: string) {
 		const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
 
 		// Contar entidades relacionadas (usando Drizzle)
-		const [imageCount, videoCount, albumCount, collectionCount, tagCount, characterCount, placeCount, worldItemCount, conceptCount, promptCount, noteCount, wildcardCount, propertyCount] = await Promise.all([
-			db.select({ count: count() }).from(groupImages).where(eq(groupImages.groupId, groupId)).then(res => res[0].count),
-			db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.groupId, groupId)).then(res => res[0].count),
-			db.select({ count: count() }).from(groupAlbums).where(eq(groupAlbums.groupId, groupId)).then(res => res[0].count),
-			db.select({ count: count() }).from(groupTags).where(eq(groupTags.groupId, groupId)).then(res => res[0].count),
+		const [
+			imageCount,
+			videoCount,
+			albumCount,
+			collectionCount,
+			tagCount,
+			characterCount,
+			placeCount,
+			worldItemCount,
+			conceptCount,
+			promptCount,
+			noteCount,
+			wildcardCount,
+			propertyCount,
+		] = await Promise.all([
+			db
+				.select({ count: count() })
+				.from(groupImages)
+				.where(eq(groupImages.groupId, groupId))
+				.then((res) => res[0].count),
+			db
+				.select({ count: count() })
+				.from(groupVideos)
+				.where(eq(groupVideos.groupId, groupId))
+				.then((res) => res[0].count),
+			db
+				.select({ count: count() })
+				.from(groupAlbums)
+				.where(eq(groupAlbums.groupId, groupId))
+				.then((res) => res[0].count),
+			db
+				.select({ count: count() })
+				.from(groupTags)
+				.where(eq(groupTags.groupId, groupId))
+				.then((res) => res[0].count),
 			// TODO: Add counts for other relations if they exist in Drizzle schema
 			Promise.resolve(0), // Placeholder for collections
 			Promise.resolve(0), // Placeholder for characters

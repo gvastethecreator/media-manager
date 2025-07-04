@@ -24,49 +24,50 @@ router.get('/', async (req, res) => {
 
 		// Búsqueda por texto
 		if (filters.search) {
-			conditions.push(
-				like(groups.name, `%${filters.search}%`)
-			);
+			conditions.push(like(groups.name, `%${filters.search}%`));
 		}
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 		// Determinar orden
-		const orderByClause = filters.sortOrder === 'desc'
-			? desc(groups[filters.sortBy || 'name'] as any)
-			: asc(groups[filters.sortBy || 'name'] as any);
+		const orderByClause =
+			filters.sortOrder === 'desc'
+				? desc(groups[filters.sortBy || 'name'] as any)
+				: asc(groups[filters.sortBy || 'name'] as any);
 
 		// Ejecutar consultas en paralelo
 		const [groupResults, totalCount] = await Promise.all([
-			db.select({
-				id: groups.id,
-				name: groups.name,
-				description: groups.description,
-				createdAt: groups.createdAt,
-				updatedAt: groups.updatedAt
-			})
-			.from(groups)
-			.where(whereClause)
-			.orderBy(orderByClause)
-			.limit(filters.limit || 50)
-			.offset(filters.offset || 0),
+			db
+				.select({
+					id: groups.id,
+					name: groups.name,
+					description: groups.description,
+					createdAt: groups.createdAt,
+					updatedAt: groups.updatedAt,
+				})
+				.from(groups)
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(filters.limit || 50)
+				.offset(filters.offset || 0),
 
-			db.select({ count: count() })
-			.from(groups)
-			.where(whereClause)
-			.then(result => result[0]?.count || 0)
+			db
+				.select({ count: count() })
+				.from(groups)
+				.where(whereClause)
+				.then((result) => result[0]?.count || 0),
 		]);
 
 		// Formatear respuesta para compatibilidad
-		const transformedGroups = groupResults.map(group => ({
+		const transformedGroups = groupResults.map((group) => ({
 			...group,
 			// Para compatibilidad con transformer
 			images: [],
 			videos: [],
 			_count: {
 				images: 0,
-				videos: 0
-			}
+				videos: 0,
+			},
 		}));
 
 		res.json({
@@ -97,16 +98,17 @@ router.get('/:id', async (req, res) => {
 			return res.status(400).json({ error: 'ID de grupo inválido' });
 		}
 
-		const groupResult = await db.select({
-			id: groups.id,
-			name: groups.name,
-			description: groups.description,
-			createdAt: groups.createdAt,
-			updatedAt: groups.updatedAt
-		})
-		.from(groups)
-		.where(eq(groups.id, id))
-		.limit(1);
+		const groupResult = await db
+			.select({
+				id: groups.id,
+				name: groups.name,
+				description: groups.description,
+				createdAt: groups.createdAt,
+				updatedAt: groups.updatedAt,
+			})
+			.from(groups)
+			.where(eq(groups.id, id))
+			.limit(1);
 
 		const group = groupResult[0];
 		if (!group) {
@@ -120,8 +122,8 @@ router.get('/:id', async (req, res) => {
 			videos: [],
 			_count: {
 				images: 0,
-				videos: 0
-			}
+				videos: 0,
+			},
 		};
 
 		res.json(toGroupWithStats(formattedGroup));

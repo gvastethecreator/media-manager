@@ -1,6 +1,7 @@
 /**
  * @file Índice de transformadores para la entidad Note
  * @module transformers/note
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
 import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
@@ -184,5 +185,9 @@ export function toRelatedNote(
 }
 
 // Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
-export { toCreateNoteData, toUpdateNoteData, toNoteWithStats } from './mappers';
+export { toCreateNoteData, toNoteWithStats, toUpdateNoteData } from './mappers';
 export { fromDrizzleNote, validateNote } from './serializers';
+
+// Exportar validators y schemas
+export * from './validators';
+export * from './schema';

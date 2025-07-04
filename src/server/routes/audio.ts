@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { createAudio, getAudios, getAudioById, updateAudio, deleteAudio, getAudioCount } from '@/services/audio/audio.service';
+import {
+	createAudio,
+	deleteAudio,
+	getAudioById,
+	getAudioCount,
+	getAudios,
+	updateAudio,
+} from '@/services/audio/audio.service';
 
 // GET /api/audio
 const router = Router();

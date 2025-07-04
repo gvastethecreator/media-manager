@@ -39,19 +39,18 @@ import { ConceptCard } from './concept-card/concept-card';
 import { DocumentCard } from './document-card/document-card';
 import { FolderCard } from './folder-card/folder-card';
 import { GroupCard } from './group-card/group-card';
+import { useCardLayout } from './hooks/use-card-layout';
 import { ImageCard } from './image-card';
 import { NoteCard } from './note-card/note-card';
 import { PlaceCard } from './place-card/place-card';
 import { PromptCard } from './prompt-card/prompt-card';
 import { PropertyCard } from './property-card/property-card';
 import { TagCard } from './tag-card/tag-card';
+// Importar el nuevo sistema de layouts
+import type { BaseCardProps } from './types/card-layout.types';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
-
-// Importar el nuevo sistema de layouts
-import type { BaseCardProps } from './types/card-layout.types';
-import { useCardLayout } from './hooks/use-card-layout';
 
 interface EntityCardProps extends BaseCardProps {
 	entity: EntityWithStats;
@@ -78,19 +77,22 @@ export const EntityCard: FC<EntityCardProps> = ({
 	...props
 }) => {
 	// Usar el hook de layout para obtener la configuración
-	const { config } = useCardLayout({
-		layoutConfig,
-		layout,
-		size,
-		variant,
-		className,
-		isSelected,
-		isActive,
-		onClick,
-		onDoubleClick,
-		compact,
-		tcgMode,
-	}, preset);
+	const { config } = useCardLayout(
+		{
+			layoutConfig,
+			layout,
+			size,
+			variant,
+			className,
+			isSelected,
+			isActive,
+			onClick,
+			onDoubleClick,
+			compact,
+			tcgMode,
+		},
+		preset
+	);
 
 	// Props comunes para todas las cards
 	const commonProps = {
@@ -129,39 +131,19 @@ export const EntityCard: FC<EntityCardProps> = ({
 	}
 
 	if (isVideoWithStats(entity)) {
-		return (
-			<VideoCard
-				video={entity}
-				{...commonProps}
-			/>
-		);
+		return <VideoCard video={entity} {...commonProps} />;
 	}
 
 	if (isAlbumWithStats(entity)) {
-		return (
-			<AlbumCard
-				album={entity}
-				{...commonProps}
-			/>
-		);
+		return <AlbumCard album={entity} {...commonProps} />;
 	}
 
 	if (isCollectionWithStats(entity)) {
-		return (
-			<CollectionCard
-				collection={entity}
-				{...commonProps}
-			/>
-		);
+		return <CollectionCard collection={entity} {...commonProps} />;
 	}
 
 	if (isCharacterWithStats(entity)) {
-		return (
-			<CharacterCard
-				character={entity}
-				{...commonProps}
-			/>
-		);
+		return <CharacterCard character={entity} {...commonProps} />;
 	}
 
 	if (isFolderWithStats(entity)) {
@@ -176,102 +158,47 @@ export const EntityCard: FC<EntityCardProps> = ({
 	}
 
 	if (isAudioWithStats(entity)) {
-		return (
-			<AudioCard
-				audio={entity}
-				{...commonProps}
-			/>
-		);
+		return <AudioCard audio={entity} {...commonProps} />;
 	}
 
 	if (isDocumentWithStats(entity)) {
-		return (
-			<DocumentCard
-				document={entity}
-				{...commonProps}
-			/>
-		);
+		return <DocumentCard document={entity} {...commonProps} />;
 	}
 
 	if (isTagWithStats(entity)) {
-		return (
-			<TagCard
-				tag={entity}
-				{...commonProps}
-			/>
-		);
+		return <TagCard tag={entity} {...commonProps} />;
 	}
 
 	if (isNoteWithStats(entity)) {
-		return (
-			<NoteCard
-				note={entity}
-				{...commonProps}
-			/>
-		);
+		return <NoteCard note={entity} {...commonProps} />;
 	}
 
 	if (isPlaceWithStats(entity)) {
-		return (
-			<PlaceCard
-				place={entity}
-				{...commonProps}
-			/>
-		);
+		return <PlaceCard place={entity} {...commonProps} />;
 	}
 
 	if (isWorldItemWithStats(entity)) {
-		return (
-			<WorldItemCard
-				worldItem={entity}
-				{...commonProps}
-			/>
-		);
+		return <WorldItemCard worldItem={entity} {...commonProps} />;
 	}
 
 	if (isConceptWithStats(entity)) {
-		return (
-			<ConceptCard
-				concept={entity}
-				{...commonProps}
-			/>
-		);
+		return <ConceptCard concept={entity} {...commonProps} />;
 	}
 
 	if (isPromptWithStats(entity)) {
-		return (
-			<PromptCard
-				prompt={entity}
-				{...commonProps}
-			/>
-		);
+		return <PromptCard prompt={entity} {...commonProps} />;
 	}
 
 	if (isPropertyWithStats(entity)) {
-		return (
-			<PropertyCard
-				property={entity}
-				{...commonProps}
-			/>
-		);
+		return <PropertyCard property={entity} {...commonProps} />;
 	}
 
 	if (isGroupWithStats(entity)) {
-		return (
-			<GroupCard
-				group={entity}
-				{...commonProps}
-			/>
-		);
+		return <GroupCard group={entity} {...commonProps} />;
 	}
 
 	if (isWildcardWithStats(entity)) {
-		return (
-			<WildcardCard
-				wildcard={entity}
-				{...commonProps}
-			/>
-		);
+		return <WildcardCard wildcard={entity} {...commonProps} />;
 	}
 
 	// Fallback para entidades no reconocidas

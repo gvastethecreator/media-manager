@@ -21,9 +21,7 @@ export class ApiClient {
 	constructor() {
 		// En desarrollo, el servidor Express corre en puerto 3001
 		// En producción, usar la misma URL base
-		this.baseURL = process.env.NODE_ENV === 'development'
-			? 'http://localhost:3001'
-			: window.location.origin;
+		this.baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : window.location.origin;
 	}
 
 	/**
@@ -57,11 +55,7 @@ export class ApiClient {
 	/**
 	 * Método privado para realizar peticiones HTTP
 	 */
-	private async request<T>(
-		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-		endpoint: string,
-		data?: unknown
-	): Promise<T> {
+	private async request<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', endpoint: string, data?: unknown): Promise<T> {
 		const url = `${this.baseURL}${endpoint}`;
 
 		apiLogger.info(`🌐 ${method} ${endpoint}`, { data });
@@ -85,7 +79,7 @@ export class ApiClient {
 				const errorMessage = `HTTP ${response.status}: ${errorText}`;
 				apiLogger.error(`❌ Error en ${method} ${endpoint}`, {
 					status: response.status,
-					error: errorText
+					error: errorText,
 				});
 				throw new Error(errorMessage);
 			}

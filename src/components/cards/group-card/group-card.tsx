@@ -1,13 +1,13 @@
 import { motion } from 'motion/react';
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 import { useGroupCardData } from '@/lib/api/groups';
+import { cn } from '@/lib/utils';
+import type { GroupWithStats } from '@/types/entities/group';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
-import type { GroupWithStats } from '@/types/entities/group';
 
 export interface GroupCardProps {
 	groupId: string;
@@ -95,12 +95,15 @@ export function GroupCard({
 		}
 	}, [onClick, disabled, group]);
 
-	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
-			e.preventDefault();
-			onClick(group);
-		}
-	}, [onClick, disabled, group]);
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
+				e.preventDefault();
+				onClick(group);
+			}
+		},
+		[onClick, disabled, group]
+	);
 
 	// Determinar el número total de entidades
 	const entityCounts = useMemo(
@@ -265,4 +268,3 @@ export function GroupCard({
 
 // Exportar también un componente memorizado
 export const MemoizedGroupCard = React.memo(GroupCard);
-

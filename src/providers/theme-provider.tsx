@@ -1,8 +1,8 @@
 'use client';
 
-import { ThemeProvider as NativeThemeProvider, useTheme } from '@/lib/contexts/theme-context';
-import type { ThemeProviderProps } from '@/lib/contexts/theme-context';
 import { useEffect } from 'react';
+import type { ThemeProviderProps } from '@/lib/contexts/theme-context';
+import { ThemeProvider as NativeThemeProvider, useTheme } from '@/lib/contexts/theme-context';
 
 // Definimos los temas personalizados
 const customThemes = [

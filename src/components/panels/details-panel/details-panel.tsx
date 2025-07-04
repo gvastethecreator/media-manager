@@ -5,24 +5,14 @@
 
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import {
-	Calendar,
-	Cpu,
-	FileImage,
-	HardDrive,
-	Info,
-	Package,
-} from 'lucide-react';
+import { Calendar, Cpu, FileImage, HardDrive, Info, Package } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { EntityWithStats } from '@/types/migration';
-import {
-	getEntityStatistics,
-	getEntityStatsType,
-} from '@/types/migration';
+import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 // Importar el sistema de registry
 import { entityDetailsRegistry } from './entity-details-registry';
@@ -53,7 +43,7 @@ const EntityDetailsView = memo<{ item: EntityWithStats }>(function EntityDetails
 		detailsComponent: DetailsComponent,
 		previewComponent: PreviewComponent,
 		toolbarComponent: ToolbarComponent,
-		metadataComponent: MetadataComponent
+		metadataComponent: MetadataComponent,
 	} = config;
 
 	return (
@@ -65,28 +55,16 @@ const EntityDetailsView = memo<{ item: EntityWithStats }>(function EntityDetails
 				</CardHeader>
 				<CardContent>
 					<div className="aspect-video bg-muted/30 rounded-lg overflow-hidden">
-						<PreviewComponent
-							entity={item}
-							size="lg"
-							showControls={true}
-							onAction={handleAction}
-						/>
+						<PreviewComponent entity={item} size="lg" showControls={true} onAction={handleAction} />
 					</div>
 				</CardContent>
 			</Card>
 
 			{/* Componente de detalles específico */}
-			<DetailsComponent
-				entity={item}
-				isSelected={true}
-				onAction={handleAction}
-			/>
+			<DetailsComponent entity={item} isSelected={true} onAction={handleAction} />
 
 			{/* Toolbar de acciones */}
-			<ToolbarComponent
-				entity={item}
-				onAction={handleAction}
-			/>
+			<ToolbarComponent entity={item} onAction={handleAction} />
 
 			{/* Metadatos */}
 			<MetadataComponent
@@ -232,20 +210,13 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 
 							return (
 								<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
-									<PreviewComponent
-										entity={item}
-										size="sm"
-										showControls={false}
-										onAction={() => {}}
-									/>
+									<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
 								</div>
 							);
 						})}
 					</div>
 					{items.length > 9 && (
-						<p className="text-xs text-muted-foreground mt-2 text-center">
-							+{items.length - 9} elementos más
-						</p>
+						<p className="text-xs text-muted-foreground mt-2 text-center">+{items.length - 9} elementos más</p>
 					)}
 				</CardContent>
 			</Card>
@@ -254,10 +225,7 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 });
 
 // Componente principal del panel
-export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2({
-	selectedItems,
-	className,
-}) {
+export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2({ selectedItems, className }) {
 	const hasItems = selectedItems.length > 0;
 	const singleItem = selectedItems.length === 1 ? selectedItems[0] : null;
 
@@ -278,11 +246,7 @@ export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2(
 		<div className={cn('w-80 border-l bg-background', className)}>
 			<ScrollArea className="h-full">
 				<div className="p-4">
-					{singleItem ? (
-						<EntityDetailsView item={singleItem} />
-					) : (
-						<MultipleSelectionView items={selectedItems} />
-					)}
+					{singleItem ? <EntityDetailsView item={singleItem} /> : <MultipleSelectionView items={selectedItems} />}
 				</div>
 			</ScrollArea>
 		</div>

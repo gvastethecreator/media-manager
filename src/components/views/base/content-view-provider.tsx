@@ -1,6 +1,6 @@
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import type React from 'react';
 import { createContext, useCallback, useContext, useMemo } from 'react';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import type { BaseContentProps } from './types';
 
 type ContentViewContextProps = BaseContentProps;

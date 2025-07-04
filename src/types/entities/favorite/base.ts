@@ -33,15 +33,15 @@ export enum FavoriteEntityType {
 export interface FavoriteBase {
 	// Identificación
 	id: string;
-	
+
 	// Entidad favorita
 	entityId: string;
 	entityType: FavoriteEntityType;
-	
+
 	// Usuario (opcional para compatibilidad)
 	userId: string | null;
 	profileId: string | null;
-	
+
 	// Timestamps del sistema
 	createdAt: Date;
 	updatedAt: Date;

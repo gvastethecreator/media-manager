@@ -1,10 +1,7 @@
-import { clientLogger } from '@/lib/logger/client-logger';
-// Se sustituye el uso de servicios por el cliente de API
-import {
-    getSystemStatsFromApi,
-    invalidateStatsInApi,
-} from '@/lib/api/client/stats.client';
 import { create } from 'zustand';
+// Se sustituye el uso de servicios por el cliente de API
+import { getSystemStatsFromApi, invalidateStatsInApi } from '@/lib/api/client/stats.client';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { createStoreFactory } from './store.factory';
 import type { BaseEntity } from './types';
 
@@ -118,8 +115,8 @@ type StatsUpdate = Partial<StatsData>;
 
 // Acciones del servidor
 const getStats = async () => {
-        try {
-                const data = await getSystemStatsFromApi();
+	try {
+		const data = await getSystemStatsFromApi();
 		if (!data) throw new Error('No se pudieron obtener las estadísticas');
 		return [
 			{
@@ -135,9 +132,9 @@ const getStats = async () => {
 };
 
 const updateStats = async (_id: string, _data: StatsUpdate) => {
-        try {
-                await invalidateStatsInApi();
-                const data = await getSystemStatsFromApi();
+	try {
+		await invalidateStatsInApi();
+		const data = await getSystemStatsFromApi();
 		if (!data) throw new Error('Error al actualizar estadísticas');
 		return {
 			id: 'stats',

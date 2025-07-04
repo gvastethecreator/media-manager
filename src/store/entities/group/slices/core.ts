@@ -5,17 +5,20 @@
  * @updated 2025-01-27
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
+import { produce } from 'immer';
+import type { StateCreator } from 'zustand';
 // Uso de cliente de API para grupos
 import {
-    createGroupInApi,
-    deleteGroupFromApi,
-    getGroupsFromApi,
-    updateGroupInApi,
+	createGroupInApi,
+	deleteGroupFromApi,
+	getGroupsFromApi,
+	updateGroupInApi,
 } from '@/lib/api/client/group.client';
 import { toastService } from '@/lib/ui/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast';
 import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';
 
 const logger = clientLogger.withContext('GroupCoreSlice');
@@ -43,7 +46,7 @@ export const createGroupCoreSlice: StateCreator<
 		});
 
 		try {
-                        const groups = await getGroupsFromApi();
+			const groups = await getGroupsFromApi();
 			set((state) => {
 				state.groups = groups.reduce(
 					(acc, group) => {
@@ -71,7 +74,7 @@ export const createGroupCoreSlice: StateCreator<
 
 	createGroup: async (data) => {
 		try {
-                        await createGroupInApi(data);
+			await createGroupInApi(data);
 			toastService.success(`Grupo "${data.name}" creado.`);
 			await get().loadGroups();
 		} catch (error) {
@@ -83,7 +86,7 @@ export const createGroupCoreSlice: StateCreator<
 
 	updateGroup: async (id, data) => {
 		try {
-                        await updateGroupInApi(id, data);
+			await updateGroupInApi(id, data);
 			toastService.success('Grupo actualizado.');
 			await get().loadGroups();
 		} catch (error) {
@@ -101,7 +104,7 @@ export const createGroupCoreSlice: StateCreator<
 			})
 		);
 		try {
-                        await deleteGroupFromApi(id);
+			await deleteGroupFromApi(id);
 			toastService.success(`Grupo "${groupName}" eliminado.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al eliminar el grupo.';

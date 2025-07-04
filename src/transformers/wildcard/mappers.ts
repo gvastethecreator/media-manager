@@ -12,10 +12,10 @@ import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import {
-    WildcardCreateInput,
-    WildcardUpdateInput,
-    WildcardWithCounts,
-    WildcardWithStats,
+	WildcardCreateInput,
+	WildcardUpdateInput,
+	WildcardWithCounts,
+	WildcardWithStats,
 } from '@/types/entities/wildcard';
 
 const logger = serverLogger.withContext('WildcardMappers');

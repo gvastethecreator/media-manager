@@ -5,12 +5,12 @@
  */
 
 import type {
-    VideoCreateInput,
-    VideoFilters,
-    VideoPaginationOptions,
-    VideoStats,
-    VideoUpdateInput,
-    VideoWithStats,
+	VideoCreateInput,
+	VideoFilters,
+	VideoPaginationOptions,
+	VideoStats,
+	VideoUpdateInput,
+	VideoWithStats,
 } from '@/types/entities/video';
 
 /**

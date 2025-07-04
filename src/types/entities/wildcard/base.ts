@@ -145,4 +145,3 @@ export interface WildcardPreview {
 // ----------------------------------------------------------------
 // TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
 // ----------------------------------------------------------------
-

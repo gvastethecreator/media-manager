@@ -1,7 +1,7 @@
-import { formatBytes } from '@/lib/utils/format.utils';
 // import { updateMetadata } from '@/services/metadata/metadata.service';
 import { Calendar, FileImage, Folder, HardDrive, ImageIcon } from 'lucide-react';
 import { useCallback } from 'react';
+import { formatBytes } from '@/lib/utils/format.utils';
 import { InfoItem } from './details-panel-info-item';
 import type { BasicInfoProps } from './details-panel-types';
 import { EditableMetadata } from './editable-metadata';
@@ -44,31 +44,28 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 	};
 
 	// Función para actualizar metadatos
-	const handleUpdateMetadata = useCallback(
-		async (id: string, data: { title?: string; description?: string }) => {
-			try {
-				const response = await fetch(`/api/metadata/${id}`, {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(data),
-				});
+	const handleUpdateMetadata = useCallback(async (id: string, data: { title?: string; description?: string }) => {
+		try {
+			const response = await fetch(`/api/metadata/${id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
 
-				if (!response.ok) {
-					const errorData = await response.json();
-					console.error('Error al actualizar metadatos:', errorData);
-					throw new Error(errorData.error || 'Fallo al actualizar metadatos');
-				}
-
-				return await response.json();
-			} catch (error) {
-				console.error('Error de conexión al actualizar metadatos:', error);
-				throw error; // Re-lanzo para que el componente que llama pueda manejarlo
+			if (!response.ok) {
+				const errorData = await response.json();
+				console.error('Error al actualizar metadatos:', errorData);
+				throw new Error(errorData.error || 'Fallo al actualizar metadatos');
 			}
-		},
-		[],
-	);
+
+			return await response.json();
+		} catch (error) {
+			console.error('Error de conexión al actualizar metadatos:', error);
+			throw error; // Re-lanzo para que el componente que llama pueda manejarlo
+		}
+	}, []);
 
 	return (
 		<div className="space-y-3">

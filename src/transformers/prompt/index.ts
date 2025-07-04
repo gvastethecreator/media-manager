@@ -1,35 +1,18 @@
 /**
  * @file Exportaciones para el transformer de Prompt
  * @module transformers/prompt
+ * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
  */
 
-// Importar funciones de mapeo
-import {
-	filterPrompts,
-	mapPromptsToRelated,
-	mapPromptToRelated,
-	paginatePrompts,
-	processPrompts,
-	sortPrompts,
-	toPromptWithStats,
-} from './mappers';
+// Exportar mappers, serializers, validators y schemas
+export * from './mappers';
+export * from './serializers';
+export * from './validators';
+export * from './schema';
 
-// Importar funciones de serialización
-import { deserializeParameters, deserializeTags, serializeParameters, serializeTags } from './serializers';
-
-// Exportar funciones individuales
+// Exportar funciones principales de transformación
 export {
-	// Serializers
-	deserializeParameters,
-	deserializeTags,
-	// Mappers
-	filterPrompts,
-	mapPromptsToRelated,
-	mapPromptToRelated,
-	paginatePrompts,
-	processPrompts,
-	serializeParameters,
-	serializeTags,
-	sortPrompts,
-	toPromptWithStats,
-};
+	fromDrizzlePrompt,
+	fromDrizzlePrompts,
+	toDrizzlePrompt,
+} from './transformer';

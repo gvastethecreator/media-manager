@@ -6,6 +6,8 @@
  * @updated 2025-06-27
  */
 
+import * as crypto from 'crypto';
+import { asc, count, eq } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { jsonFiles } from '@/lib/drizzle/schema';
@@ -14,9 +16,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleJsonFile, fromDrizzleJsonFiles } from '@/transformers/json-file/transformer';
-import type { JsonFileWithStats, JsonFileCreateInput, JsonFileUpdateInput } from '@/types/entities/json-file';
-import { asc, eq, count } from 'drizzle-orm';
-import * as crypto from 'crypto';
+import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
 
 const jsonFileLogger = serverLogger.withContext('JsonFileService');
 
@@ -157,33 +157,36 @@ export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFil
 		jsonFileLogger.info('🗂️ Creando archivo JSON:', data.name);
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db.insert(jsonFiles).values({
-			id: crypto.randomUUID(),
-			name: data.name,
-			path: data.path,
-			size: data.size,
-			hash: data.hash,
-			mimeType: data.mimeType,
-			extension: data.extension,
-			folderId: data.folderId,
-			isFavorite: data.isFavorite || false,
-			isArchived: data.isArchived || false,
-			validJson: data.validJson || false,
-			schemaVersion: data.schemaVersion || null,
-			keys: data.keys || null,
-			values: data.values || null,
-			depth: data.depth || null,
-			hasArrays: data.hasArrays || false,
-			hasObjects: data.hasObjects || false,
-			encoding: data.encoding || null,
-			compressed: data.compressed || false,
-			minified: data.minified || false,
-			prettyPrinted: data.prettyPrinted || false,
-			content: data.content || null,
-			parsedContent: data.parsedContent || null,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		}).returning();
+		const result = await db
+			.insert(jsonFiles)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				path: data.path,
+				size: data.size,
+				hash: data.hash,
+				mimeType: data.mimeType,
+				extension: data.extension,
+				folderId: data.folderId,
+				isFavorite: data.isFavorite || false,
+				isArchived: data.isArchived || false,
+				validJson: data.validJson || false,
+				schemaVersion: data.schemaVersion || null,
+				keys: data.keys || null,
+				values: data.values || null,
+				depth: data.depth || null,
+				hasArrays: data.hasArrays || false,
+				hasObjects: data.hasObjects || false,
+				encoding: data.encoding || null,
+				compressed: data.compressed || false,
+				minified: data.minified || false,
+				prettyPrinted: data.prettyPrinted || false,
+				content: data.content || null,
+				parsedContent: data.parsedContent || null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
 		const newJsonFile = result[0];
 		const jsonFileWithStats = fromDrizzleJsonFile(newJsonFile);
@@ -245,11 +248,7 @@ export async function updateJsonFile(id: string, data: JsonFileUpdateInput): Pro
 		if (data.content !== undefined) updateData.content = data.content;
 		if (data.parsedContent !== undefined) updateData.parsedContent = data.parsedContent;
 
-		const result = await db
-			.update(jsonFiles)
-			.set(updateData)
-			.where(eq(jsonFiles.id, id))
-			.returning();
+		const result = await db.update(jsonFiles).set(updateData).where(eq(jsonFiles.id, id)).returning();
 
 		const updatedJsonFile = result[0];
 		const jsonFileWithStats = fromDrizzleJsonFile(updatedJsonFile);
@@ -283,10 +282,7 @@ export async function deleteJsonFile(id: string): Promise<void> {
 		}
 
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.delete(jsonFiles)
-			.where(eq(jsonFiles.id, id))
-			.returning();
+		const result = await db.delete(jsonFiles).where(eq(jsonFiles.id, id)).returning();
 
 		const deletedJsonFile = result[0];
 
@@ -310,10 +306,7 @@ export async function deleteJsonFile(id: string): Promise<void> {
 export async function jsonFileExists(id: string): Promise<boolean> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(jsonFiles)
-			.where(eq(jsonFiles.id, id));
+		const result = await db.select({ count: count() }).from(jsonFiles).where(eq(jsonFiles.id, id));
 
 		return result[0].count > 0;
 	} catch (error) {
@@ -328,9 +321,7 @@ export async function jsonFileExists(id: string): Promise<boolean> {
 export async function getJsonFileCount(): Promise<number> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		const result = await db
-			.select({ count: count() })
-			.from(jsonFiles);
+		const result = await db.select({ count: count() }).from(jsonFiles);
 
 		return result[0].count;
 	} catch (error) {

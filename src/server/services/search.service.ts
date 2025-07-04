@@ -1,7 +1,8 @@
 // Usar servicio de imágenes en lugar de server action
-import { imageService } from '@/services/image/image.service';
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image/converter.service';
+import { imageService } from '@/services/image/image.service';
 import type { FileItem } from '@/types/files';
 
 const log = serverLogger.withContext('SearchService');

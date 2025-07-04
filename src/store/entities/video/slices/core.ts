@@ -5,6 +5,9 @@
  * Última refactorización: 2025-01-27
  */
 
+import type { StateCreator } from 'zustand';
+// Refactor 2025-07: se reemplazan servicios por cliente API
+import { createVideoInApi, deleteVideoFromApi, findVideosInApi, getVideoFromApi } from '@/lib/api/client/video.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 // Refactor 2025-07: se reemplazan servicios por cliente API
@@ -14,8 +17,8 @@ import {
     findVideosInApi,
     getVideoFromApi,
 } from '@/lib/api/client/video.client';
+import { toastService } from '@/services/toast';
 import type { VideoCreateInput, VideoFilters, VideoWithStats } from '@/types/entities/video';
-import type { StateCreator } from 'zustand';
 import type { VideoStore } from '..';
 
 export interface VideoCoreState {
@@ -262,7 +265,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	fetchVideo: async (id) => {
 		get().setLoading(true);
 		try {
-                        const video = await getVideoFromApi(id);
+			const video = await getVideoFromApi(id);
 			if (video) {
 				get().addVideo(video);
 			}
@@ -280,7 +283,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	fetchVideos: async (folderIds) => {
 		get().setLoading(true);
 		try {
-                        const videos = await findVideosInApi({ folderIds });
+			const videos = await findVideosInApi({ folderIds });
 			if (videos && videos.length > 0) {
 				get().addVideos(videos);
 			}
@@ -298,7 +301,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	createVideo: async (data) => {
 		get().setLoading(true);
 		try {
-                        const video = await createVideoInApi(data);
+			const video = await createVideoInApi(data);
 			if (video) {
 				get().addVideo(video);
 				toastService.success('Video creado');
@@ -318,7 +321,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	removeVideo: async (id) => {
 		get().setLoading(true);
 		try {
-                        await deleteVideoFromApi(id);
+			await deleteVideoFromApi(id);
 			get().deleteVideo(id);
 			toastService.success('Video eliminado');
 			return true;

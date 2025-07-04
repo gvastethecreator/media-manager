@@ -8,6 +8,7 @@
  * Estado: MIGRACIÓN 96% COMPLETADA + LIMPIEZA MASIVA
  */
 
+import { count } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { albums, images, tags } from '@/lib/drizzle/schema';
 import { AlbumService } from '@/services/album/album.service';
@@ -15,7 +16,6 @@ import { CharacterService } from '@/services/character/character.service';
 import { ConceptService } from '@/services/concept/concept.service';
 import { FolderService } from '@/services/folder/folder.service';
 import { ImageService } from '@/services/image/image.service';
-import { count } from 'drizzle-orm';
 // Servicios migrados para verificar
 import { TagService } from '@/services/tag/tag.service';
 
@@ -29,11 +29,7 @@ interface VerificationResult {
 class DrizzleMigrationVerifier {
 	private results: VerificationResult[] = [];
 
-	async verifyService(
-		serviceName: string,
-		serviceMethod: () => Promise<any[]>,
-		tableName: string
-	): Promise<void> {
+	async verifyService(serviceName: string, serviceMethod: () => Promise<any[]>, tableName: string): Promise<void> {
 		try {
 			console.log(`🔍 Verificando ${serviceName}...`);
 
@@ -45,7 +41,7 @@ class DrizzleMigrationVerifier {
 				service: serviceName,
 				status: 'SUCCESS',
 				message: `✅ Servicio funcionando correctamente (${endTime - startTime}ms)`,
-				recordCount: records.length
+				recordCount: records.length,
 			});
 
 			console.log(`   ✅ ${records.length} registros obtenidos en ${endTime - startTime}ms`);
@@ -53,7 +49,7 @@ class DrizzleMigrationVerifier {
 			this.results.push({
 				service: serviceName,
 				status: 'ERROR',
-				message: `❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`
+				message: `❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			});
 
 			console.error(`   ❌ Error en ${serviceName}:`, error);
@@ -72,7 +68,7 @@ class DrizzleMigrationVerifier {
 			this.results.push({
 				service: 'Database Connection',
 				status: 'SUCCESS',
-				message: `✅ Conexión exitosa. Tags: ${tagCount[0].count}, Albums: ${albumCount[0].count}, Images: ${imageCount[0].count}`
+				message: `✅ Conexión exitosa. Tags: ${tagCount[0].count}, Albums: ${albumCount[0].count}, Images: ${imageCount[0].count}`,
 			});
 
 			console.log('   ✅ Conexión a la base de datos exitosa');
@@ -80,7 +76,7 @@ class DrizzleMigrationVerifier {
 			this.results.push({
 				service: 'Database Connection',
 				status: 'ERROR',
-				message: `❌ Error de conexión: ${error instanceof Error ? error.message : 'Error desconocido'}`
+				message: `❌ Error de conexión: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			});
 
 			console.error('   ❌ Error de conexión a la base de datos:', error);
@@ -89,7 +85,7 @@ class DrizzleMigrationVerifier {
 
 	async verifyAllServices(): Promise<void> {
 		console.log('\n🚀 INICIANDO VERIFICACIÓN COMPLETA DE MIGRACIÓN DRIZZLE');
-		console.log('=' .repeat(60));
+		console.log('='.repeat(60));
 
 		// 1. Verificar conexión a BD
 		await this.verifyDatabaseConnection();
@@ -112,10 +108,10 @@ class DrizzleMigrationVerifier {
 
 	printSummary(): void {
 		console.log('\n📊 RESUMEN DE VERIFICACIÓN');
-		console.log('=' .repeat(60));
+		console.log('='.repeat(60));
 
-		const successCount = this.results.filter(r => r.status === 'SUCCESS').length;
-		const errorCount = this.results.filter(r => r.status === 'ERROR').length;
+		const successCount = this.results.filter((r) => r.status === 'SUCCESS').length;
+		const errorCount = this.results.filter((r) => r.status === 'ERROR').length;
 		const totalCount = this.results.length;
 
 		console.log(`✅ Servicios exitosos: ${successCount}/${totalCount}`);
@@ -159,7 +155,7 @@ async function main() {
 		verifier.printSummary();
 
 		console.log('\n🎉 VERIFICACIÓN COMPLETADA');
-		console.log('=' .repeat(60));
+		console.log('='.repeat(60));
 
 		process.exit(0);
 	} catch (error) {

@@ -148,15 +148,11 @@ export function mapAlbumFiltersToDrizzle(filters: {
 		where.createdAt = {};
 
 		if (filters.startDate) {
-			where.createdAt.gte = typeof filters.startDate === 'string' 
-				? new Date(filters.startDate) 
-				: filters.startDate;
+			where.createdAt.gte = typeof filters.startDate === 'string' ? new Date(filters.startDate) : filters.startDate;
 		}
 
 		if (filters.endDate) {
-			where.createdAt.lte = typeof filters.endDate === 'string' 
-				? new Date(filters.endDate) 
-				: filters.endDate;
+			where.createdAt.lte = typeof filters.endDate === 'string' ? new Date(filters.endDate) : filters.endDate;
 		}
 	}
 

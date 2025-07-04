@@ -1,6 +1,6 @@
+import { asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { profiles } from '@/lib/drizzle/schema';
-import { eq, count, asc, desc, or, like } from 'drizzle-orm';
 import { transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
 	Language,
@@ -35,12 +35,7 @@ export function buildProfileFilters(filters: ProfileFilters = {}) {
 
 	// Filtro por búsqueda de texto
 	if (filters.search) {
-		conditions.push(
-			or(
-				like(profiles.name, `%${filters.search}%`),
-				like(profiles.description, `%${filters.search}%`)
-			)
-		);
+		conditions.push(or(like(profiles.name, `%${filters.search}%`), like(profiles.description, `%${filters.search}%`)));
 	}
 
 	// Filtro por estado activo
@@ -88,9 +83,10 @@ export async function getPaginatedProfiles(
 	const skip = (page - 1) * limit;
 
 	// Construir ordenación
-	const orderBy = sortDirection === 'asc'
-		? asc(profiles[sortBy as keyof typeof profiles])
-		: desc(profiles[sortBy as keyof typeof profiles]);
+	const orderBy =
+		sortDirection === 'asc'
+			? asc(profiles[sortBy as keyof typeof profiles])
+			: desc(profiles[sortBy as keyof typeof profiles]);
 
 	// Consultar registros
 	const profilesData = await db
@@ -118,11 +114,7 @@ export async function getPaginatedProfiles(
  * ✅ MIGRADO A DRIZZLE
  */
 export async function getActiveProfile(): Promise<DrizzleProfile | null> {
-	const [profile] = await db
-		.select()
-		.from(profiles)
-		.where(eq(profiles.isActive, true))
-		.limit(1);
+	const [profile] = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
 
 	return profile || null;
 }
@@ -134,11 +126,7 @@ export async function getActiveProfile(): Promise<DrizzleProfile | null> {
 export async function setActiveProfile(id: string): Promise<boolean> {
 	try {
 		// Verificar que el perfil existe
-		const [profile] = await db
-			.select()
-			.from(profiles)
-			.where(eq(profiles.id, id))
-			.limit(1);
+		const [profile] = await db.select().from(profiles).where(eq(profiles.id, id)).limit(1);
 
 		if (!profile) {
 			return false;
@@ -146,15 +134,9 @@ export async function setActiveProfile(id: string): Promise<boolean> {
 
 		// Transacción: desactivar todos los perfiles y activar solo el solicitado
 		await db.transaction(async (tx) => {
-			await tx
-				.update(profiles)
-				.set({ isActive: false })
-				.where(eq(profiles.isActive, true));
+			await tx.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
 
-			await tx
-				.update(profiles)
-				.set({ isActive: true })
-				.where(eq(profiles.id, id));
+			await tx.update(profiles).set({ isActive: true }).where(eq(profiles.id, id));
 		});
 
 		return true;
@@ -170,26 +152,16 @@ export async function setActiveProfile(id: string): Promise<boolean> {
  */
 export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 	// Buscar si ya existe algún perfil
-	const [existingProfilesResult] = await db
-		.select({ count: count() })
-		.from(profiles);
+	const [existingProfilesResult] = await db.select({ count: count() }).from(profiles);
 
 	const existingProfiles = existingProfilesResult.count;
 
 	if (existingProfiles > 0) {
 		// Si no hay perfil activo pero hay perfiles, activamos el primero
-		const [activeProfile] = await db
-			.select()
-			.from(profiles)
-			.where(eq(profiles.isActive, true))
-			.limit(1);
+		const [activeProfile] = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
 
 		if (!activeProfile) {
-			const [firstProfile] = await db
-				.select()
-				.from(profiles)
-				.orderBy(asc(profiles.createdAt))
-				.limit(1);
+			const [firstProfile] = await db.select().from(profiles).orderBy(asc(profiles.createdAt)).limit(1);
 
 			if (firstProfile) {
 				const [updatedProfile] = await db
@@ -253,12 +225,7 @@ export function validateProfilePreferences(preferences: Record<string, unknown>)
 	}
 
 	// Valores booleanos
-	const booleanFields = [
-		'enableAnimations',
-		'showThumbnails',
-		'autoSave',
-		'enableNotifications',
-	];
+	const booleanFields = ['enableAnimations', 'showThumbnails', 'autoSave', 'enableNotifications'];
 
 	for (const field of booleanFields) {
 		if (typeof preferences[field] === 'boolean') {
