@@ -11,9 +11,9 @@ import type { File3DBase, File3DWithStats } from '@/types/entities/file3d';
 const logger = serverLogger.withContext('File3DTransformer');
 
 /**
- * 🔄 Transforma un objeto File3D de Prisma a nuestro tipo canónico File3DWithStats.
+ * 🔄 Transforma un objeto File3D de Drizzle a nuestro tipo canónico File3DWithStats.
  *
- * @param prismaFile3D - El objeto File3DBase obtenido de Prisma.
+ * @param drizzleFile3D - El objeto File3DBase obtenido de Drizzle.
  * @returns Un objeto File3DWithStats compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
@@ -48,9 +48,9 @@ export function fromDrizzleFile3D(drizzleFile3D: File3DBase): File3DWithStats {
 }
 
 /**
- * 🔄 Transforma una lista de archivos 3D de Prisma a una lista de File3DWithStats.
+ * 🔄 Transforma una lista de archivos 3D de Drizzle a una lista de File3DWithStats.
  *
- * @param prismaFile3Ds - Un array de objetos File3D de Prisma.
+ * @param drizzleFile3Ds - Un array de objetos File3D de Drizzle.
  * @returns Un array de objetos File3DWithStats.
  */
 export function fromDrizzleFile3Ds(drizzleFile3Ds: File3DBase[]): File3DWithStats[] {

@@ -2,8 +2,8 @@ import { memo, useState } from 'react';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { RightPanel } from '@/components/panels/right-panel/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
-import { ViewContainer } from '@/components/views/view-container';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { ViewContainer } from '@/components/views/view-container';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 export const MainLayout = memo(function MainLayout() {

@@ -2,7 +2,7 @@
 
 ## Descripción
 
-Los transformadores de **Album** permiten mapear, serializar, deserializar y extender la entidad Album para distintos usos (UI, API, persistencia, estadísticas, etc.), asegurando siempre el uso de tipos canónicos y validación robusta.
+Los transformadores de **Album** permiten mapear, serializar, deserializar y extender la entidad Album para distintos usos (UI, API, persistencia, estadísticas, etc.), asegurando siempre el uso de tipos canónicos Drizzle y validación robusta.
 
 ---
 
@@ -10,29 +10,37 @@ Los transformadores de **Album** permiten mapear, serializar, deserializar y ext
 
 ```mermaid
 flowchart TD
-    A[Album (Prisma/Raw)] --> B[serializers.ts]
-    B -->|toPrismaAlbum| C[Prisma.AlbumCreateInput]
-    B -->|fromPrismaAlbum| D[AlbumComplete]
-    B -->|extendAlbum| E[AlbumComplete]
-    B -->|validateAlbum| F[Validación Zod]
-    B -->|toExtendedAlbum| G[AlbumComplete]
-    A --> H[mappers.ts]
-    H -->|toAlbumListItem| I[AlbumListItem]
-    H -->|toAlbumCard| J[AlbumCard]
-    H -->|parseAlbumSearchParams| K[Prisma.AlbumWhereInput]
-    A --> L[transformer.ts]
-    L -->|transformAlbum| D
-    L -->|transformAlbumToWithStats| M[AlbumWithStats]
-    L -->|transformAlbumToExtended| N[AlbumExtended]
+    A[Album (Drizzle/Local)] --> B[mappers.ts]
+    B -->|toAlbumWithStats| C[AlbumWithStats]
+    B -->|mapCreateAlbumDataToDrizzle| D[DrizzleCreateAlbumData]
+    B -->|mapAlbumFiltersToDrizzle| E[DrizzleFindManyArgs]
+    
+    A --> F[serializers.ts]
+    F -->|extendAlbum| G[AlbumWithStats]
+    F -->|extendAlbums| H[AlbumWithStats[]]
+    F -->|serializeAlbum| I[Record<string, unknown>]
+    F -->|deserializeAlbum| J[AlbumWithStats]
+    
+    A --> K[validators.ts]
+    K -->|validateCreateAlbumData| L[CreateAlbumInput]
+    K -->|validateUpdateAlbumData| M[UpdateAlbumInput]
+    K -->|isValidAlbum| N[boolean]
+    K -->|normalizeAlbumFilters| O[NormalizedFilters]
+    
+    A --> P[schema.ts]
+    P -->|albumBaseSchema| Q[ZodSchema]
+    P -->|albumWithStatsSchema| R[ZodSchema]
+    P -->|albumFiltersSchema| S[ZodSchema]
 ```
 
 ---
 
 ## Estructura y Relaciones
 
-- **mappers.ts**: Mapeo a formatos de UI y búsqueda.
+- **mappers.ts**: Mapeo a formatos Drizzle, conversión de datos y filtros.
 - **serializers.ts**: Serialización/deserialización, validación y extensión.
-- **transformer.ts**: Transformador principal, entrada unificada para conversión y extensión.
+- **validators.ts**: Validadores usando esquemas Zod y tipos locales.
+- **schema.ts**: Esquemas Zod para validación y tipos derivados.
 - **index.ts**: Barrel limpio, solo exporta funciones y tipos canónicos.
 
 ---
@@ -40,14 +48,24 @@ flowchart TD
 ## Ejemplo de Uso
 
 ```typescript
-import { transformAlbum, transformAlbumToWithStats } from '@/transformers/album/transformer';
-import { toAlbumListItem } from '@/transformers/album/mappers';
-import { toPrismaAlbum } from '@/transformers/album/serializers';
+import { toAlbumWithStats, mapCreateAlbumDataToDrizzle } from '@/transformers/album/mappers';
+import { extendAlbum, serializeAlbum } from '@/transformers/album/serializers';
+import { validateCreateAlbumData } from '@/transformers/album/validators';
 
-const album = transformAlbum(rawAlbum);
-const albumStats = transformAlbumToWithStats(album);
-const listItem = toAlbumListItem(album);
-const prismaInput = toPrismaAlbum(album);
+// Crear álbum con estadísticas
+const albumWithStats = toAlbumWithStats(album, counts);
+
+// Mapear datos para Drizzle
+const drizzleData = mapCreateAlbumDataToDrizzle(createData);
+
+// Extender álbum
+const extendedAlbum = extendAlbum(album);
+
+// Serializar para API
+const serialized = serializeAlbum(albumWithStats);
+
+// Validar datos de creación
+const validation = validateCreateAlbumData(inputData);
 ```
 
 ---

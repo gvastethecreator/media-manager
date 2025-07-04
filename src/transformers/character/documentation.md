@@ -168,8 +168,9 @@ interface CharacterWithStats extends CharacterComplete {
 
 ### Serializers
 
-- `fromPrismaCharacter`: Transforma un objeto de Prisma a CharacterComplete.
-- `toPrismaCharacter`: Transforma un CharacterComplete a formato Prisma para operaciones CRUD.
+- `fromDrizzleCharacter`: Transforma un objeto de Drizzle a CharacterComplete.
+- `serializeCharacter`: Serializa un CharacterComplete para API o almacenamiento.
+- `deserializeCharacter`: Deserializa datos para uso en la aplicación.
 - `validateCharacter`: Valida un objeto como Character.
 - `deserializeStats`: Deserializa un string JSON de estadísticas a objeto.
 - `serializeStats`: Serializa un objeto de estadísticas a string JSON.
@@ -178,23 +179,54 @@ interface CharacterWithStats extends CharacterComplete {
 
 ### Mappers
 
-- `mapCharacterSearchOptionsToPrisma`: Mapea opciones de búsqueda a formato Prisma.
-- `mapCreateCharacterDataToPrisma`: Mapea datos de creación a formato Prisma.
-- `mapUpdateCharacterDataToPrisma`: Mapea datos de actualización a formato Prisma.
+- `mapCharacterSearchOptionsToDrizzle`: Mapea opciones de búsqueda a formato Drizzle.
+- `mapCreateCharacterDataToDrizzle`: Mapea datos de creación a formato Drizzle.
+- `mapUpdateCharacterDataToDrizzle`: Mapea datos de actualización a formato Drizzle.
 - `filterCharacters`: Filtra personajes según criterios.
 - `sortCharacters`: Ordena personajes según criterio.
 - `paginateCharacters`: Aplica paginación a un array de personajes.
 
+### Validators
+
+- `validateCreateCharacterData`: Valida datos para crear un personaje.
+- `validateUpdateCharacterData`: Valida datos para actualizar un personaje.
+- `isValidCharacter`: Verifica si un objeto es un personaje válido.
+- `isValidCharacterName`: Valida un nombre de personaje.
+- `isValidCharacterClass`: Valida una clase de personaje.
+- `normalizeCharacterFilters`: Normaliza filtros con valores por defecto.
+
+### Schema
+
+- `characterBaseSchema`: Esquema Zod para validación base.
+- `characterWithStatsSchema`: Esquema para personajes con estadísticas.
+- `createCharacterSchema`: Esquema para creación.
+- `updateCharacterSchema`: Esquema para actualización.
+- `characterFiltersSchema`: Esquema para filtros.
+
 ## Ejemplos de uso
 
-### Transformar un personaje desde Prisma
+### Transformar un personaje desde Drizzle
 
 ```typescript
-// Obtener personaje de Prisma
-const prismaCharacter = await prisma.character.findUnique({ where: { id } });
+// Obtener personaje de Drizzle
+const drizzleCharacter = await db.character.findFirst({ where: eq(character.id, id) });
 
-// Transformar a CharacterComplete
-const character = transformCharacter(prismaCharacter, { deserializeFields: true });
+// Transformar a CharacterWithStats
+const character = fromDrizzleCharacter(drizzleCharacter);
+```
+
+### Validar datos de creación
+
+```typescript
+import { validateCreateCharacterData } from '@/transformers/character/validators';
+
+const validation = validateCreateCharacterData(inputData);
+if (validation.success) {
+  // Crear personaje con datos validados
+  const character = await createCharacter(validation.data);
+} else {
+  console.error(validation.error);
+}
 ```
 
 ### Extender un personaje para UI
