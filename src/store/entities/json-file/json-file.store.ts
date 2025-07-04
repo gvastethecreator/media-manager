@@ -3,15 +3,18 @@
  * @module store/entities/json-file/json-file.store
  * @description Store Zustand para gestionar el estado de archivos JSON
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
+ * 👉 2025-07 Refactor: ahora consume la API mediante json-file.client
  */
 
 import { createSelectors } from '@/lib/utils/store/create-selectors';
+// Refactor: se eliminan dependencias directas del servicio del servidor
+// y se utilizan funciones cliente que consumen la API REST
 import {
-    createJsonFile,
-    deleteJsonFile,
-    getJsonFiles,
-    updateJsonFile,
-} from '@/services/json-file/json-file.service';
+    createJsonFileInApi,
+    deleteJsonFileFromApi,
+    getJsonFilesFromApi,
+    updateJsonFileInApi,
+} from '@/lib/api/client/json-file.client';
 import type {
     JsonFileCreateInput,
     JsonFileUpdateInput,
@@ -72,7 +75,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			fetchJsonFiles: async () => {
 				set({ loading: true, error: null });
 				try {
-					const jsonFiles = await getJsonFiles();
+                                       const jsonFiles = await getJsonFilesFromApi();
 					set({ jsonFiles, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
@@ -82,7 +85,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			createJsonFile: async (data: JsonFileCreateInput) => {
 				set({ loading: true, error: null });
 				try {
-					const newJsonFile = await createJsonFile(data);
+                                       const newJsonFile = await createJsonFileInApi(data);
 					set((state) => ({
 						jsonFiles: [...state.jsonFiles, newJsonFile],
 						loading: false,
@@ -97,7 +100,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			updateJsonFile: async (id: string, data: JsonFileUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
-					const updatedJsonFile = await updateJsonFile(id, data);
+                                       const updatedJsonFile = await updateJsonFileInApi(id, data);
 					set((state) => ({
 						jsonFiles: state.jsonFiles.map((j) => (j.id === id ? updatedJsonFile : j)),
 						currentJsonFile: state.currentJsonFile?.id === id ? updatedJsonFile : state.currentJsonFile,
@@ -113,7 +116,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			deleteJsonFile: async (id: string) => {
 				set({ loading: true, error: null });
 				try {
-					await deleteJsonFile(id);
+                                       await deleteJsonFileFromApi(id);
 					set((state) => ({
 						jsonFiles: state.jsonFiles.filter((j) => j.id !== id),
 						selectedJsonFiles: state.selectedJsonFiles.filter((j) => j.id !== id),

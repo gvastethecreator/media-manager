@@ -6,7 +6,13 @@
  */
 
 import { createSelectors } from '@/lib/utils/store/create-selectors';
-import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/services/file3d/file3d.service';
+// Migrado para consumir la API REST en lugar del servicio del servidor
+import {
+    createFile3DInApi,
+    deleteFile3DFromApi,
+    getFile3DsFromApi,
+    updateFile3DInApi,
+} from '@/lib/api/client/file3d.client';
 import type {
     File3DCreateInput,
     File3DUpdateInput,
@@ -67,7 +73,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			fetchFile3Ds: async () => {
 				set({ loading: true, error: null });
 				try {
-					const file3Ds = await getFile3Ds();
+                                        const file3Ds = await getFile3DsFromApi();
 					set({ file3Ds, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
@@ -77,7 +83,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			createFile3D: async (data: File3DCreateInput) => {
 				set({ loading: true, error: null });
 				try {
-					const newFile3D = await createFile3D(data);
+                                        const newFile3D = await createFile3DInApi(data);
 					set((state) => ({
 						file3Ds: [...state.file3Ds, newFile3D],
 						loading: false,
@@ -92,7 +98,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			updateFile3D: async (id: string, data: File3DUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
-					const updatedFile3D = await updateFile3D(id, data);
+                                        const updatedFile3D = await updateFile3DInApi(id, data);
 					set((state) => ({
 						file3Ds: state.file3Ds.map((f) => (f.id === id ? updatedFile3D : f)),
 						currentFile3D: state.currentFile3D?.id === id ? updatedFile3D : state.currentFile3D,
@@ -108,7 +114,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			deleteFile3D: async (id: string) => {
 				set({ loading: true, error: null });
 				try {
-					await deleteFile3D(id);
+                                        await deleteFile3DFromApi(id);
 					set((state) => ({
 						file3Ds: state.file3Ds.filter((f) => f.id !== id),
 						selectedFile3Ds: state.selectedFile3Ds.filter((f) => f.id !== id),
