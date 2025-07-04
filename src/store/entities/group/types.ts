@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { GroupWithStats, GroupCreateInput, GroupUpdateInput } from '@/types/entities/group';
+import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/group';
 
 /**

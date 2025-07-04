@@ -15,6 +15,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
 	Dialog,
 	DialogContent,
@@ -23,13 +25,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
@@ -49,9 +49,7 @@ export interface ActionResult {
 	redirect?: string;
 }
 
-export interface ActionHandler {
-	(context: ActionContext): Promise<ActionResult>;
-}
+export type ActionHandler = (context: ActionContext) => Promise<ActionResult>;
 
 export interface ActionConfig {
 	id: string;
@@ -92,84 +90,84 @@ export function useActionsSystem() {
 	/**
 	 * Ejecuta una acción con el contexto proporcionado
 	 */
-	const executeAction = useCallback(async (
-		action: ActionConfig,
-		context: ActionContext
-	) => {
-		try {
-			setIsExecuting(true);
-			setProgress(0);
+	const executeAction = useCallback(
+		async (action: ActionConfig, context: ActionContext) => {
+			try {
+				setIsExecuting(true);
+				setProgress(0);
 
-			// Simular progreso
-			const progressInterval = setInterval(() => {
-				setProgress(prev => Math.min(prev + 10, 90));
-			}, 100);
+				// Simular progreso
+				const progressInterval = setInterval(() => {
+					setProgress((prev) => Math.min(prev + 10, 90));
+				}, 100);
 
-			const result = await action.handler(context);
+				const result = await action.handler(context);
 
-			clearInterval(progressInterval);
-			setProgress(100);
+				clearInterval(progressInterval);
+				setProgress(100);
 
-			if (result.success) {
+				if (result.success) {
+					toast({
+						title: 'Acción completada',
+						description: result.message || `${action.label} ejecutado correctamente`,
+					});
+				} else {
+					toast({
+						title: 'Error en la acción',
+						description: result.message || `Error al ejecutar ${action.label}`,
+						variant: 'destructive',
+					});
+				}
+
+				return result;
+			} catch (error) {
 				toast({
-					title: 'Acción completada',
-					description: result.message || `${action.label} ejecutado correctamente`,
-				});
-			} else {
-				toast({
-					title: 'Error en la acción',
-					description: result.message || `Error al ejecutar ${action.label}`,
+					title: 'Error inesperado',
+					description: `Error al ejecutar ${action.label}: ${error.message}`,
 					variant: 'destructive',
 				});
+				return { success: false, message: error.message };
+			} finally {
+				setIsExecuting(false);
+				setProgress(0);
+				setCurrentAction(null);
+				setShowConfirmation(false);
+				setShowInputDialog(false);
+				setInputValues({});
 			}
-
-			return result;
-		} catch (error) {
-			toast({
-				title: 'Error inesperado',
-				description: `Error al ejecutar ${action.label}: ${error.message}`,
-				variant: 'destructive',
-			});
-			return { success: false, message: error.message };
-		} finally {
-			setIsExecuting(false);
-			setProgress(0);
-			setCurrentAction(null);
-			setShowConfirmation(false);
-			setShowInputDialog(false);
-			setInputValues({});
-		}
-	}, [toast]);
+		},
+		[toast]
+	);
 
 	/**
 	 * Inicia la ejecución de una acción
 	 */
-	const startAction = useCallback((
-		action: ActionConfig,
-		context: ActionContext
-	) => {
-		setCurrentAction(action);
+	const startAction = useCallback(
+		(action: ActionConfig, context: ActionContext) => {
+			setCurrentAction(action);
 
-		// Si requiere entrada de datos
-		if (action.requiresInput && action.inputFields) {
-			const defaultValues: Record<string, any> = {};
-			action.inputFields.forEach(field => {
-				defaultValues[field.id] = field.defaultValue || '';
-			});
-			setInputValues(defaultValues);
-			setShowInputDialog(true);
-			return;
-		}
+			// Si requiere entrada de datos
+			if (action.requiresInput && action.inputFields) {
+				const defaultValues: Record<string, any> = {};
+				action.inputFields.forEach((field) => {
+					defaultValues[field.id] = field.defaultValue || '';
+				});
+				setInputValues(defaultValues);
+				setShowInputDialog(true);
+				return;
+			}
 
-		// Si requiere confirmación
-		if (action.requiresConfirmation) {
-			setShowConfirmation(true);
-			return;
-		}
+			// Si requiere confirmación
+			if (action.requiresConfirmation) {
+				setShowConfirmation(true);
+				return;
+			}
 
-		// Ejecutar directamente
-		executeAction(action, context);
-	}, [executeAction]);
+			// Ejecutar directamente
+			executeAction(action, context);
+		},
+		[executeAction]
+	);
 
 	/**
 	 * Confirma y ejecuta la acción
@@ -199,7 +197,7 @@ export function useActionsSystem() {
 	 * Actualiza un valor de entrada
 	 */
 	const updateInputValue = useCallback((fieldId: string, value: any) => {
-		setInputValues(prev => ({
+		setInputValues((prev) => ({
 			...prev,
 			[fieldId]: value,
 		}));
@@ -247,18 +245,16 @@ export function useActionsSystem() {
 					<AlertDialogTitle>Confirmar acción</AlertDialogTitle>
 					<AlertDialogDescription>
 						{currentAction?.confirmationMessage ||
-						 `¿Estás seguro de que quieres ${currentAction?.label.toLowerCase()}?`}
+							`¿Estás seguro de que quieres ${currentAction?.label.toLowerCase()}?`}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel onClick={cancelAction}>
-						Cancelar
-					</AlertDialogCancel>
+					<AlertDialogCancel onClick={cancelAction}>Cancelar</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={confirmAction}
 						className={cn(
 							currentAction?.category === 'destructive' &&
-							'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+								'bg-destructive text-destructive-foreground hover:bg-destructive/90'
 						)}
 					>
 						{currentAction?.label}
@@ -274,9 +270,7 @@ export function useActionsSystem() {
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>{currentAction?.label}</DialogTitle>
-					<DialogDescription>
-						{currentAction?.description || 'Completa los siguientes campos'}
-					</DialogDescription>
+					<DialogDescription>{currentAction?.description || 'Completa los siguientes campos'}</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-4 py-4">
 					{currentAction?.inputFields?.map((field) => (
@@ -361,18 +355,14 @@ export function useActionsSystem() {
 	);
 
 	// Componente de progreso
-	const ProgressIndicator = () => (
+	const ProgressIndicator = () =>
 		isExecuting && (
 			<div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
 				<div className="bg-card p-6 rounded-lg shadow-lg min-w-[300px]">
 					<div className="space-y-4">
 						<div className="text-center">
-							<h3 className="text-lg font-semibold">
-								Ejecutando {currentAction?.label}...
-							</h3>
-							<p className="text-sm text-muted-foreground mt-1">
-								Por favor espera mientras se completa la acción
-							</p>
+							<h3 className="text-lg font-semibold">Ejecutando {currentAction?.label}...</h3>
+							<p className="text-sm text-muted-foreground mt-1">Por favor espera mientras se completa la acción</p>
 						</div>
 						<Progress value={progress} className="w-full" />
 						<div className="text-center">
@@ -381,8 +371,7 @@ export function useActionsSystem() {
 					</div>
 				</div>
 			</div>
-		)
-	);
+		);
 
 	return {
 		// Estado
@@ -431,7 +420,7 @@ export const CommonActionHandlers: Record<string, ActionHandler> = {
 	delete: async ({ entity }) => {
 		console.log('Eliminando entidad:', entity.id);
 		// Simular eliminación
-		await new Promise(resolve => setTimeout(resolve, 1000));
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 		return { success: true, message: 'Entidad eliminada correctamente' };
 	},
 
@@ -463,7 +452,7 @@ export const CommonActionHandlers: Record<string, ActionHandler> = {
 	download: async ({ entity }) => {
 		console.log('Descargando entidad:', entity.id);
 		// Simular descarga
-		await new Promise(resolve => setTimeout(resolve, 2000));
+		await new Promise((resolve) => setTimeout(resolve, 2000));
 		return { success: true, message: 'Descarga completada' };
 	},
 
@@ -473,7 +462,7 @@ export const CommonActionHandlers: Record<string, ActionHandler> = {
 		console.log(isFavorite ? 'Quitando de favoritos:' : 'Añadiendo a favoritos:', entity.id);
 		return {
 			success: true,
-			message: isFavorite ? 'Quitado de favoritos' : 'Añadido a favoritos'
+			message: isFavorite ? 'Quitado de favoritos' : 'Añadido a favoritos',
 		};
 	},
 

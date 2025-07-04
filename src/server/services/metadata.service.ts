@@ -1,11 +1,11 @@
+import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { createMetadataError } from '@/lib/errors/metadata';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { createMetadataError } from '@/lib/errors/metadata';
-import { z } from 'zod';
 
 // Configuración y utilidades
 const metadataLogger = serverLogger.withContext('MetadataService');
@@ -128,11 +128,7 @@ export async function getImageMetadata(imageId: string): Promise<ImageWithMetada
 	try {
 		metadataLogger.info('🔍 Obteniendo metadatos:', imageId);
 
-		const [image] = await db
-			.select()
-			.from(images)
-			.where(eq(images.id, imageId))
-			.limit(1);
+		const [image] = await db.select().from(images).where(eq(images.id, imageId)).limit(1);
 
 		if (!image) {
 			throw _createMetadataError('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
@@ -145,11 +141,7 @@ export async function getImageMetadata(imageId: string): Promise<ImageWithMetada
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw _createMetadataError(
-			'No se pudieron obtener los metadatos',
-			MetadataErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw _createMetadataError('No se pudieron obtener los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -157,11 +149,7 @@ export async function updateImageMetadata(imageId: string, data: UpdateMetadataI
 	try {
 		metadataLogger.info('📝 Actualizando metadatos:', imageId);
 
-		const [image] = await db
-			.select()
-			.from(images)
-			.where(eq(images.id, imageId))
-			.limit(1);
+		const [image] = await db.select().from(images).where(eq(images.id, imageId)).limit(1);
 
 		if (!image) {
 			throw _createMetadataError('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
@@ -203,11 +191,7 @@ export async function updateImageMetadata(imageId: string, data: UpdateMetadataI
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw _createMetadataError(
-			'No se pudieron actualizar los metadatos',
-			MetadataErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw _createMetadataError('No se pudieron actualizar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -215,11 +199,7 @@ export async function clearImageMetadata(imageId: string): Promise<ImageWithMeta
 	try {
 		metadataLogger.info('🗑️ Limpiando metadatos:', imageId);
 
-		const [image] = await db
-			.select()
-			.from(images)
-			.where(eq(images.id, imageId))
-			.limit(1);
+		const [image] = await db.select().from(images).where(eq(images.id, imageId)).limit(1);
 
 		if (!image) {
 			throw _createMetadataError('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
@@ -245,11 +225,7 @@ export async function clearImageMetadata(imageId: string): Promise<ImageWithMeta
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw _createMetadataError(
-			'No se pudieron limpiar los metadatos',
-			MetadataErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw _createMetadataError('No se pudieron limpiar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
 	}
 }
 

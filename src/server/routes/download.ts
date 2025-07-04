@@ -1,7 +1,7 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import { getFileInfo } from '@/services/file/file.service';
 import express from 'express';
 import fs from 'fs/promises';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { getFileInfo } from '@/services/file/file.service';
 
 const router = express.Router();
 const downloadLogger = serverLogger.withContext('DownloadAPI');

@@ -9,9 +9,9 @@ import {
 	createQueueJob,
 	deleteQueueJob,
 	findProcessingTimes,
-	findRecentQueueJobs,
 	findQueueJobs,
 	findQueueJobsByStatus,
+	findRecentQueueJobs,
 	getQueueJobById,
 	getQueueStats,
 	getQueueStatsByQueue,
@@ -32,7 +32,10 @@ queueRouter.get('/', async (req, res) => {
 		res.json(result);
 	} catch (error) {
 		logger.error('Error en GET /api/queue', { error });
-		res.status(500).json({ message: 'Error al obtener trabajos en cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al obtener trabajos en cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -44,7 +47,10 @@ queueRouter.post('/', async (req, res) => {
 		res.status(201).json(job);
 	} catch (error) {
 		logger.error('Error en POST /api/queue', { error });
-		res.status(400).json({ message: 'Error al crear trabajo en cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(400).json({
+			message: 'Error al crear trabajo en cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -59,7 +65,10 @@ queueRouter.get('/:id', async (req, res) => {
 		}
 	} catch (error) {
 		logger.error('Error en GET /api/queue/:id', { error });
-		res.status(500).json({ message: 'Error al obtener trabajo en cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al obtener trabajo en cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -71,7 +80,10 @@ queueRouter.put('/:id', async (req, res) => {
 		res.json(job);
 	} catch (error) {
 		logger.error('Error en PUT /api/queue/:id', { error });
-		res.status(400).json({ message: 'Error al actualizar trabajo en cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(400).json({
+			message: 'Error al actualizar trabajo en cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -82,7 +94,10 @@ queueRouter.delete('/:id', async (req, res) => {
 		res.status(204).send();
 	} catch (error) {
 		logger.error('Error en DELETE /api/queue/:id', { error });
-		res.status(500).json({ message: 'Error al eliminar trabajo en cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al eliminar trabajo en cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -93,7 +108,10 @@ queueRouter.post('/:id/cancel', async (req, res) => {
 		res.json(job);
 	} catch (error) {
 		logger.error('Error en POST /api/queue/:id/cancel', { error });
-		res.status(500).json({ message: 'Error al cancelar trabajo en cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al cancelar trabajo en cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -104,7 +122,10 @@ queueRouter.post('/:id/retry', async (req, res) => {
 		res.json(job);
 	} catch (error) {
 		logger.error('Error en POST /api/queue/:id/retry', { error });
-		res.status(500).json({ message: 'Error al reintentar trabajo en cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al reintentar trabajo en cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -115,31 +136,40 @@ queueRouter.get('/stats', async (req, res) => {
 		res.json(stats);
 	} catch (error) {
 		logger.error('Error en GET /api/queue/stats', { error });
-		res.status(500).json({ message: 'Error al obtener estadísticas de la cola', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al obtener estadísticas de la cola',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
 // GET /api/queue/recent - Busca trabajos recientes
 queueRouter.get('/recent', async (req, res) => {
 	try {
-		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 5;
+		const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 5;
 		const jobs = await findRecentQueueJobs(limit);
 		res.json(jobs);
 	} catch (error) {
 		logger.error('Error en GET /api/queue/recent', { error });
-		res.status(500).json({ message: 'Error al buscar trabajos recientes', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al buscar trabajos recientes',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
 // GET /api/queue/status/:status - Busca trabajos por estado
 queueRouter.get('/status/:status', async (req, res) => {
 	try {
-		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+		const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 10;
 		const jobs = await findQueueJobsByStatus(req.params.status, limit);
 		res.json(jobs);
 	} catch (error) {
 		logger.error('Error en GET /api/queue/status/:status', { error });
-		res.status(500).json({ message: 'Error al buscar trabajos por estado', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al buscar trabajos por estado',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -150,7 +180,10 @@ queueRouter.get('/stats/:queue', async (req, res) => {
 		res.json(stats);
 	} catch (error) {
 		logger.error('Error en GET /api/queue/stats/:queue', { error });
-		res.status(500).json({ message: 'Error al obtener estadísticas para cola específica', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al obtener estadísticas para cola específica',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -162,7 +195,10 @@ queueRouter.get('/count/completed', async (req, res) => {
 		res.json({ count });
 	} catch (error) {
 		logger.error('Error en GET /api/queue/count/completed', { error });
-		res.status(500).json({ message: 'Error al contar trabajos completados', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al contar trabajos completados',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -174,7 +210,10 @@ queueRouter.get('/count/failed', async (req, res) => {
 		res.json({ count });
 	} catch (error) {
 		logger.error('Error en GET /api/queue/count/failed', { error });
-		res.status(500).json({ message: 'Error al contar trabajos fallidos', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al contar trabajos fallidos',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -186,7 +225,10 @@ queueRouter.get('/count/total', async (req, res) => {
 		res.json({ count });
 	} catch (error) {
 		logger.error('Error en GET /api/queue/count/total', { error });
-		res.status(500).json({ message: 'Error al contar total de trabajos', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al contar total de trabajos',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });
 
@@ -198,6 +240,9 @@ queueRouter.get('/processing-times', async (req, res) => {
 		res.json(times);
 	} catch (error) {
 		logger.error('Error en GET /api/queue/processing-times', { error });
-		res.status(500).json({ message: 'Error al buscar tiempos de procesamiento', error: error instanceof Error ? error.message : String(error) });
+		res.status(500).json({
+			message: 'Error al buscar tiempos de procesamiento',
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 });

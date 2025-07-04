@@ -214,12 +214,7 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 		}
 
 		if (search) {
-			conditions.push(
-				or(
-					like(wildcards.name, `%${search}%`),
-					like(wildcards.description, `%${search}%`)
-				)
-			);
+			conditions.push(or(like(wildcards.name, `%${search}%`), like(wildcards.description, `%${search}%`)));
 		}
 
 		// Aplicar filtros
@@ -267,7 +262,7 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 				.select({ count: count() })
 				.from(wildcards)
 				.where(whereClause)
-				.then(result => result[0]?.count || 0)
+				.then((result) => result[0]?.count || 0),
 		]);
 
 		// Transformar a formato WildcardWithStats
@@ -374,11 +369,7 @@ export async function updateWildcard(id: string, data: WildcardUpdateInput): Pro
 		logger.info(`📝 Actualizando wildcard: ${id}`, { changes: Object.keys(data) });
 
 		// Verificar si el wildcard existe
-		const existingWildcard = await db
-			.select({ id: wildcards.id })
-			.from(wildcards)
-			.where(eq(wildcards.id, id))
-			.limit(1);
+		const existingWildcard = await db.select({ id: wildcards.id }).from(wildcards).where(eq(wildcards.id, id)).limit(1);
 
 		if (existingWildcard.length === 0) {
 			throw createWildcardError('Wildcard no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
@@ -413,11 +404,7 @@ export async function updateWildcard(id: string, data: WildcardUpdateInput): Pro
 		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
 		if (data.parentId !== undefined) updateData.parentId = data.parentId;
 
-		const [updatedWildcard] = await db
-			.update(wildcards)
-			.set(updateData)
-			.where(eq(wildcards.id, id))
-			.returning();
+		const [updatedWildcard] = await db.update(wildcards).set(updateData).where(eq(wildcards.id, id)).returning();
 
 		// Revalidar rutas
 		await revalidateWildcardPaths();
@@ -468,25 +455,17 @@ export async function deleteWildcard(id: string): Promise<void> {
 			const wildcardData = wildcard[0];
 
 			// Obtener hijos del wildcard a eliminar
-			const children = await tx
-				.select({ id: wildcards.id })
-				.from(wildcards)
-				.where(eq(wildcards.parentId, id));
+			const children = await tx.select({ id: wildcards.id }).from(wildcards).where(eq(wildcards.parentId, id));
 
 			// Reasignar hijos al padre del wildcard eliminado (o null para convertirlos en raíz)
 			if (children.length > 0) {
-				await tx
-					.update(wildcards)
-					.set({ parentId: wildcardData.parentId })
-					.where(eq(wildcards.parentId, id));
+				await tx.update(wildcards).set({ parentId: wildcardData.parentId }).where(eq(wildcards.parentId, id));
 
 				logger.info(`📋 Reasignados ${children.length} hijos al padre: ${wildcardData.parentId || 'raíz'}`);
 			}
 
 			// Eliminar el wildcard
-			await tx
-				.delete(wildcards)
-				.where(eq(wildcards.id, id));
+			await tx.delete(wildcards).where(eq(wildcards.id, id));
 		});
 
 		// Revalidar rutas

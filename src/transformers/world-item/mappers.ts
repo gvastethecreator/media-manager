@@ -7,22 +7,22 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-    WorldItemComplete,
-    WorldItemCreateInput,
-    WorldItemFilters,
-    WorldItemSearchOptions,
-    WorldItemStatistics,
-    WorldItemUpdateInput,
-    WorldItemWithStats,
+	WorldItemComplete,
+	WorldItemCreateInput,
+	WorldItemFilters,
+	WorldItemSearchOptions,
+	WorldItemStatistics,
+	WorldItemUpdateInput,
+	WorldItemWithStats,
 } from '@/types/entities/world-item';
 import {
-    serializeAttributes,
-    serializeEffects,
-    serializeFilters,
-    serializeProperties,
-    serializeRequirements,
-    serializeStats,
-    serializeTags,
+	serializeAttributes,
+	serializeEffects,
+	serializeFilters,
+	serializeProperties,
+	serializeRequirements,
+	serializeStats,
+	serializeTags,
 } from './serializers';
 
 // Tipos locales equivalentes a Prisma (migración a Drizzle)
@@ -87,10 +87,7 @@ const relationMap: Record<string, string> = {
 	groupIds: 'groups',
 };
 
-function connectRelations(
-	input: Partial<WorldItemCreateInput>,
-	operation: 'connect' | 'set'
-): Record<string, any> {
+function connectRelations(input: Partial<WorldItemCreateInput>, operation: 'connect' | 'set'): Record<string, any> {
 	const relations: any = {};
 	for (const key in relationMap) {
 		if (key in input && Array.isArray((input as any)[key])) {

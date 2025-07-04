@@ -14,7 +14,7 @@ const componentsToFix = [
 	'src/components/views/concepts/concept-content-view.tsx',
 	'src/components/views/collections/collection-content-view.tsx',
 	'src/components/views/characters/character-content-view.tsx',
-	'src/components/views/albums/album-content-view.tsx'
+	'src/components/views/albums/album-content-view.tsx',
 ];
 
 function fixComponent(filePath) {
@@ -68,7 +68,6 @@ function fixComponent(filePath) {
 		} else {
 			console.log(`ℹ️  ${filePath} ya estaba correcto`);
 		}
-
 	} catch (error) {
 		console.error(`❌ Error corrigiendo ${filePath}:`, error.message);
 	}

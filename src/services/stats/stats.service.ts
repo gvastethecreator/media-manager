@@ -1,7 +1,7 @@
+import { apiClient } from '@/lib/api/client';
+import type { SystemStats } from '@/lib/api/system';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { SystemStats } from '@/lib/api/system';
-import { apiClient } from '@/lib/api/client';
 
 const statsLogger = serverLogger.withContext('StatsService');
 

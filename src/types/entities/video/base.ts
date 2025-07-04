@@ -14,33 +14,33 @@ export interface VideoBase {
 	id: string;
 	name: string;
 	description: string | null;
-	
+
 	// Propiedades del archivo
 	path: string;
 	hash: string;
 	size: number;
-	
+
 	// Propiedades de video específicas
 	duration: number;
 	width: number | null;
 	height: number | null;
-	
+
 	// Metadatos
 	metadata: string | null;
-	
+
 	// Thumbnail
 	thumbnail: Buffer | null;
 	thumbnailSize: number | null;
 	thumbnailWidth: number | null;
 	thumbnailHeight: number | null;
-	
+
 	// Estados
 	isPublic: boolean;
 	isFavorite: boolean;
-	
+
 	// Relaciones
 	folderId: string;
-	
+
 	// Timestamps del sistema
 	createdAt: Date;
 	updatedAt: Date;

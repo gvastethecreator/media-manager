@@ -9,11 +9,11 @@ import { Microscope } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { useProperty } from '@/lib/api/properties';
 import { cn } from '@/lib/utils';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
-import { useProperty } from '@/lib/api/properties';
 
 export interface PropertyCardProps {
 	propertyId: string;
@@ -26,12 +26,7 @@ export interface PropertyCardProps {
  * Card para mostrar una propiedad
  * Sigue el diseño de los otros componentes de tarjetas
  */
-export function PropertyCard({
-	propertyId,
-	onClick,
-	className,
-	showBadges = true,
-}: PropertyCardProps) {
+export function PropertyCard({ propertyId, onClick, className, showBadges = true }: PropertyCardProps) {
 	const { data: property, isLoading, error } = useProperty(propertyId);
 
 	// Si no hay datos de la propiedad o está cargando, mostrar un esqueleto o un mensaje de error
@@ -92,12 +87,15 @@ export function PropertyCard({
 		}
 	}, [onClick, property]);
 
-	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-			e.preventDefault();
-			onClick(property);
-		}
-	}, [onClick, property]);
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+				e.preventDefault();
+				onClick(property);
+			}
+		},
+		[onClick, property]
+	);
 
 	const cardContent = (
 		<CardContainer

@@ -9,7 +9,10 @@ import { NavPanelHeader } from './components/nav-panel-header';
 import { NAVIGATION_CATEGORIES } from './constants/categories';
 import { useCategoryCollapse, useCategoryHandlers, useCategoryStats, useMainNavigation } from './hooks';
 
-export const NavPanel = memo(function NavPanel({ isCollapsed = false, onToggleCollapse }: Omit<NavPanelProps, 'initialData'>) {
+export const NavPanel = memo(function NavPanel({
+	isCollapsed = false,
+	onToggleCollapse,
+}: Omit<NavPanelProps, 'initialData'>) {
 	const { isCategoryCollapsed, handleCollapseToggle, expandCategory } = useCategoryCollapse();
 	const {
 		currentView,

@@ -5,11 +5,7 @@
  * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import type {
-    DocumentCreateInput,
-    DocumentUpdateInput,
-    DocumentWithStats
-} from '@/types/entities/document';
+import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
 
 // --- Estado del Slice ---
 

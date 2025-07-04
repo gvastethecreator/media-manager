@@ -7,14 +7,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { CollectionBase, CollectionWithStats, CollectionStatistics } from '@/types/entities/collection';
+import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 import {
 	CollectionBaseSchema,
-	CollectionStatisticsSchema,
-	CollectionWithStatsSchema,
 	CollectionCountsSchema,
 	CollectionCreateSchema,
+	CollectionStatisticsSchema,
 	CollectionUpdateSchema,
+	CollectionWithStatsSchema,
 } from './schema';
 
 const logger = serverLogger.withContext('CollectionValidators');

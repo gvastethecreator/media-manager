@@ -7,11 +7,11 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-    FolderComplete,
-    FolderCreateInput,
-    FolderFilters,
-    FolderSearchOptions,
-    FolderUpdateInput,
+	FolderComplete,
+	FolderCreateInput,
+	FolderFilters,
+	FolderSearchOptions,
+	FolderUpdateInput,
 } from '@/types/entities/folder';
 import { normalizeFolderPath } from './serializers';
 
@@ -244,28 +244,4 @@ export function transformFolderToDrizzle(folder: any): DrizzleFolder {
 	}
 }
 
-// Mantener funciones legacy con nombres de Prisma por compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreateFolderDataToDrizzle en su lugar
- */
-export const mapCreateFolderDataToPrisma = mapCreateFolderDataToDrizzle;
 
-/**
- * @deprecated Usar mapUpdateFolderDataToDrizzle en su lugar
- */
-export const mapUpdateFolderDataToPrisma = mapUpdateFolderDataToDrizzle;
-
-/**
- * @deprecated Usar mapFolderSearchOptionsToDrizzle en su lugar
- */
-export const mapFolderSearchOptionsToPrisma = mapFolderSearchOptionsToDrizzle;
-
-/**
- * @deprecated Usar transformCompleteFolderToDrizzle en su lugar
- */
-export const transformCompleteFolderToPrisma = transformCompleteFolderToDrizzle;
-
-/**
- * @deprecated Usar transformFolderToDrizzle en su lugar
- */
-export const transformFolderToPrisma = transformFolderToDrizzle;
