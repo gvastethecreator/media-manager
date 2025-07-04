@@ -45,5 +45,3 @@ export function toDrizzleFile3D(file: File3D): DrizzleFile3D {
 		updatedAt: file.updatedAt,
 	};
 }
-
-

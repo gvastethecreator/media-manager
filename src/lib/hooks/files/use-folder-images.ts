@@ -1,11 +1,10 @@
 'use client';
 
-import { clientLogger } from '@/lib/logger/client-logger';
-// Migración: se reemplaza el servicio por funciones del cliente API
-import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { clientLogger } from '@/lib/logger/client-logger';
+// Migración: se reemplaza el servicio por funciones del cliente API
+import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
+import { clientLogger, clientLogger } from '@/lib/logger/client-logger';
 import { getFolderImages } from '@/services/folder/folder.service';
 
 // Logger para depuración

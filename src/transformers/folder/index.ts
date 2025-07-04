@@ -7,22 +7,20 @@
 
 // Exportar mappers y serializers
 export * from './mappers';
-export * from './serializers';
-
-// Exportar validadores y esquemas
-export * from './validators';
 export * from './schema';
-
+export * from './serializers';
 // Exportar funciones principales optimizadas
 export {
 	buildFolderTree,
 	foldersToRecord,
-	fromDrizzleFolderWithCounts,
-	fromDrizzleFoldersWithCounts,
-	getAllFolders,
-	getFolderById,
-	transformFolderToExtended,
 	// Funciones legacy para compatibilidad
 	fromDrizzleFolder,
 	fromDrizzleFolders,
+	fromDrizzleFoldersWithCounts,
+	fromDrizzleFolderWithCounts,
+	getAllFolders,
+	getFolderById,
+	transformFolderToExtended,
 } from './transformer';
+// Exportar validadores y esquemas
+export * from './validators';

@@ -9,7 +9,7 @@ export const ViewContainer = memo(function ViewContainer() {
 	const renderView = () => {
 		switch (currentView) {
 			case 'folders':
-			return <FoldersViewMinimal />;
+				return <FoldersViewMinimal />;
 
 			// Para el resto, usar placeholder temporal mientras los incorporo uno por uno
 			default:

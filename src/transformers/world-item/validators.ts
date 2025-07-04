@@ -7,12 +7,12 @@
  */
 
 import {
-    ZodWorldItemCreateSchema,
-    type ZodWorldItemCreateType,
-    ZodWorldItemSchema,
-    type ZodWorldItemType,
-    ZodWorldItemUpdateSchema,
-    type ZodWorldItemUpdateType,
+	ZodWorldItemCreateSchema,
+	type ZodWorldItemCreateType,
+	ZodWorldItemSchema,
+	type ZodWorldItemType,
+	ZodWorldItemUpdateSchema,
+	type ZodWorldItemUpdateType,
 } from './schema';
 
 /**

@@ -12,47 +12,23 @@ import { z } from 'zod';
  */
 export const FolderSchema = z.object({
 	id: z.string().uuid('ID debe ser un UUID válido'),
-	name: z.string()
-		.min(1, 'El nombre es requerido')
-		.max(255, 'El nombre no puede exceder 255 caracteres'),
-	path: z.string()
-		.min(1, 'La ruta es requerida')
-		.max(500, 'La ruta no puede exceder 500 caracteres'),
-	description: z.string()
-		.max(1000, 'La descripción no puede exceder 1000 caracteres')
-		.nullable()
-		.optional(),
-	emoji: z.string()
-		.max(10, 'El emoji no puede exceder 10 caracteres')
-		.nullable()
-		.optional(),
-	color: z.string()
+	name: z.string().min(1, 'El nombre es requerido').max(255, 'El nombre no puede exceder 255 caracteres'),
+	path: z.string().min(1, 'La ruta es requerida').max(500, 'La ruta no puede exceder 500 caracteres'),
+	description: z.string().max(1000, 'La descripción no puede exceder 1000 caracteres').nullable().optional(),
+	emoji: z.string().max(10, 'El emoji no puede exceder 10 caracteres').nullable().optional(),
+	color: z
+		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un hexadecimal válido')
 		.nullable()
 		.optional(),
-	featuredImage: z.string()
-		.url('Debe ser una URL válida')
-		.nullable()
-		.optional(),
+	featuredImage: z.string().url('Debe ser una URL válida').nullable().optional(),
 	isFavorite: z.boolean().default(false),
-	totalFiles: z.number()
-		.int('Debe ser un número entero')
-		.min(0, 'No puede ser negativo')
-		.default(0),
-	totalSize: z.number()
-		.int('Debe ser un número entero')
-		.min(0, 'No puede ser negativo')
-		.default(0),
+	totalFiles: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').default(0),
+	totalSize: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').default(0),
 	autoReindex: z.boolean().default(false),
 	lastIndexed: z.date().nullable().optional(),
-	parentId: z.string()
-		.uuid('Parent ID debe ser un UUID válido')
-		.nullable()
-		.optional(),
-	presetId: z.string()
-		.uuid('Preset ID debe ser un UUID válido')
-		.nullable()
-		.optional(),
+	parentId: z.string().uuid('Parent ID debe ser un UUID válido').nullable().optional(),
+	presetId: z.string().uuid('Preset ID debe ser un UUID válido').nullable().optional(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -61,87 +37,51 @@ export const FolderSchema = z.object({
  * Esquema para crear carpetas
  */
 export const FolderCreateSchema = z.object({
-	name: z.string()
-		.min(1, 'El nombre es requerido')
-		.max(255, 'El nombre no puede exceder 255 caracteres'),
-	path: z.string()
-		.min(1, 'La ruta es requerida')
-		.max(500, 'La ruta no puede exceder 500 caracteres'),
-	description: z.string()
-		.max(1000, 'La descripción no puede exceder 1000 caracteres')
-		.nullable()
-		.optional(),
-	emoji: z.string()
-		.max(10, 'El emoji no puede exceder 10 caracteres')
-		.nullable()
-		.optional(),
-	color: z.string()
+	name: z.string().min(1, 'El nombre es requerido').max(255, 'El nombre no puede exceder 255 caracteres'),
+	path: z.string().min(1, 'La ruta es requerida').max(500, 'La ruta no puede exceder 500 caracteres'),
+	description: z.string().max(1000, 'La descripción no puede exceder 1000 caracteres').nullable().optional(),
+	emoji: z.string().max(10, 'El emoji no puede exceder 10 caracteres').nullable().optional(),
+	color: z
+		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un hexadecimal válido')
 		.nullable()
 		.optional(),
-	featuredImage: z.string()
-		.url('Debe ser una URL válida')
-		.nullable()
-		.optional(),
+	featuredImage: z.string().url('Debe ser una URL válida').nullable().optional(),
 	isFavorite: z.boolean().default(false),
 	autoReindex: z.boolean().default(false),
-	parentId: z.string()
-		.uuid('Parent ID debe ser un UUID válido')
-		.nullable()
-		.optional(),
-	presetId: z.string()
-		.uuid('Preset ID debe ser un UUID válido')
-		.nullable()
-		.optional(),
+	parentId: z.string().uuid('Parent ID debe ser un UUID válido').nullable().optional(),
+	presetId: z.string().uuid('Preset ID debe ser un UUID válido').nullable().optional(),
 });
 
 /**
  * Esquema para actualizar carpetas
  */
 export const FolderUpdateSchema = z.object({
-	name: z.string()
+	name: z
+		.string()
 		.min(1, 'El nombre no puede estar vacío')
 		.max(255, 'El nombre no puede exceder 255 caracteres')
 		.optional(),
-	path: z.string()
+	path: z
+		.string()
 		.min(1, 'La ruta no puede estar vacía')
 		.max(500, 'La ruta no puede exceder 500 caracteres')
 		.optional(),
-	description: z.string()
-		.max(1000, 'La descripción no puede exceder 1000 caracteres')
-		.nullable()
-		.optional(),
-	emoji: z.string()
-		.max(10, 'El emoji no puede exceder 10 caracteres')
-		.nullable()
-		.optional(),
-	color: z.string()
+	description: z.string().max(1000, 'La descripción no puede exceder 1000 caracteres').nullable().optional(),
+	emoji: z.string().max(10, 'El emoji no puede exceder 10 caracteres').nullable().optional(),
+	color: z
+		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un hexadecimal válido')
 		.nullable()
 		.optional(),
-	featuredImage: z.string()
-		.url('Debe ser una URL válida')
-		.nullable()
-		.optional(),
+	featuredImage: z.string().url('Debe ser una URL válida').nullable().optional(),
 	isFavorite: z.boolean().optional(),
-	totalFiles: z.number()
-		.int('Debe ser un número entero')
-		.min(0, 'No puede ser negativo')
-		.optional(),
-	totalSize: z.number()
-		.int('Debe ser un número entero')
-		.min(0, 'No puede ser negativo')
-		.optional(),
+	totalFiles: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').optional(),
+	totalSize: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').optional(),
 	autoReindex: z.boolean().optional(),
 	lastIndexed: z.date().nullable().optional(),
-	parentId: z.string()
-		.uuid('Parent ID debe ser un UUID válido')
-		.nullable()
-		.optional(),
-	presetId: z.string()
-		.uuid('Preset ID debe ser un UUID válido')
-		.nullable()
-		.optional(),
+	parentId: z.string().uuid('Parent ID debe ser un UUID válido').nullable().optional(),
+	presetId: z.string().uuid('Preset ID debe ser un UUID válido').nullable().optional(),
 });
 
 /**
@@ -167,11 +107,13 @@ export const FolderStatisticsSchema = z.object({
 	hasConsistentNaming: z.boolean(),
 	hasDeepHierarchy: z.boolean(),
 	isWellOrganized: z.boolean(),
-	breadcrumbs: z.array(z.object({
-		id: z.string(),
-		name: z.string(),
-		path: z.string(),
-	})),
+	breadcrumbs: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+			path: z.string(),
+		})
+	),
 	fullPath: z.string(),
 	relativePath: z.string(),
 	autoTags: z.array(z.string()),

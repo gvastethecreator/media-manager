@@ -6,10 +6,10 @@
  */
 
 import {
-    type FavoriteBase,
-    FavoriteEntityType,
-    type FavoriteStatistics,
-    type FavoriteWithStats,
+	type FavoriteBase,
+	FavoriteEntityType,
+	type FavoriteStatistics,
+	type FavoriteWithStats,
 } from '@/types/entities/favorite';
 
 /**

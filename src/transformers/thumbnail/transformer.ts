@@ -7,11 +7,7 @@
  * @updated 2025-01-27
  */
 
-import {
-	ThumbnailBase,
-	ThumbnailWithStats,
-	ThumbnailQuality,
-} from '@/types/entities/thumbnail';
+import { ThumbnailBase, ThumbnailQuality, ThumbnailWithStats } from '@/types/entities/thumbnail';
 import { toThumbnailWithStats } from './mappers';
 import { validateThumbnail } from './validators';
 
@@ -47,15 +43,15 @@ export function transformThumbnail(
 	try {
 		// Normalizar datos de entrada
 		const normalizedData = normalizeThumbnailData(data);
-		
+
 		// Validar estructura básica
 		const baseThumb = validateThumbnail(normalizedData);
-		
+
 		// Retornar con estadísticas si se solicita
 		if (includeStats) {
 			return toThumbnailWithStats(baseThumb, usageCount);
 		}
-		
+
 		// Retornar con estadísticas vacías
 		return {
 			...baseThumb,
@@ -104,10 +100,10 @@ function normalizeDate(date?: Date | string | null): Date {
  * Función de ayuda para calcular completeness
  */
 function calculateCompleteness(thumbnail: ThumbnailBase, requiredFields: (keyof ThumbnailBase)[]): number {
-	const completed = requiredFields.filter(field => {
+	const completed = requiredFields.filter((field) => {
 		const value = thumbnail[field];
 		return value !== null && value !== undefined && value !== '';
 	}).length;
-	
+
 	return Math.round((completed / requiredFields.length) * 100);
 }

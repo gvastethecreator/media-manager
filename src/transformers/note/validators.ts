@@ -12,7 +12,10 @@ export const NoteCreateSchema = z.object({
 	excerpt: z.string().max(500).optional(),
 	category: z.string().max(100).optional(),
 	emoji: z.string().max(10).optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.optional(),
 	isFavorite: z.boolean().default(false),
 	isPinned: z.boolean().default(false),
 	isArchived: z.boolean().default(false),
@@ -25,7 +28,10 @@ export const NoteUpdateSchema = z.object({
 	excerpt: z.string().max(500).optional(),
 	category: z.string().max(100).optional(),
 	emoji: z.string().max(10).optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.optional(),
 	isFavorite: z.boolean().optional(),
 	isPinned: z.boolean().optional(),
 	isArchived: z.boolean().optional(),

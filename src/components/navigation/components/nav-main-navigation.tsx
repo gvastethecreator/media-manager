@@ -1,11 +1,21 @@
-import { Image as ImageIcon, Layers, MessageSquare, Search, Star, UploadCloud, Home, Palette, IdCard } from 'lucide-react';
+import {
+	Home,
+	IdCard,
+	Image as ImageIcon,
+	Layers,
+	MessageSquare,
+	Palette,
+	Search,
+	Star,
+	UploadCloud,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { ViewType } from '@/types/files';
-import { Badge } from '@/components/ui/badge';
 
 interface NavMainNavigationProps {
 	currentView: string;
@@ -227,14 +237,19 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 						<div key={category.id} className="mb-1">
 							<div className="flex items-center gap-1 mb-0.5">
 								<category.icon className="h-4 w-4" style={{ color: category.color }} />
-								<span className="font-semibold text-xs" style={{ color: category.color }}>{category.label}</span>
+								<span className="font-semibold text-xs" style={{ color: category.color }}>
+									{category.label}
+								</span>
 							</div>
 							<div className="flex flex-col gap-0.5">
 								{category.children.map((child, idx) => (
 									<Button
 										key={child.id}
 										variant={currentView === child.id ? 'secondary' : 'ghost'}
-										className={cn('justify-between w-full text-xs px-2 py-0.5 rounded flex items-center', currentView === child.id && 'font-bold')}
+										className={cn(
+											'justify-between w-full text-xs px-2 py-0.5 rounded flex items-center',
+											currentView === child.id && 'font-bold'
+										)}
 										onClick={() => onNavigate(child.id as ViewType)}
 									>
 										<span className="flex items-center">

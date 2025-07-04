@@ -13,7 +13,10 @@ export const NoteBaseSchema = z.object({
 	excerpt: z.string().max(500).nullable(),
 	category: z.string().max(100).nullable(),
 	emoji: z.string().max(10).nullable(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.nullable(),
 	isFavorite: z.boolean(),
 	isPinned: z.boolean(),
 	isArchived: z.boolean(),

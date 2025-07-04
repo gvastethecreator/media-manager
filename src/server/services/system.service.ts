@@ -10,8 +10,8 @@ import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
 import { createSystemError } from '@/lib/errors/system';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { settingsService } from '@/services/settings';
-import type { Settings } from '@/types/settings';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
+import type { Settings } from '@/types/settings';
 
 const navLogger = serverLogger.withContext('NavActions');
 const systemLogger = serverLogger.withContext('SystemActions');
@@ -99,7 +99,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 			documentsResult,
 			jsonFilesResult,
 			file3dsResult,
-			globalStats
+			globalStats,
 		] = await Promise.all([
 			getFolders({ includeArchived: false }).catch(() => ({ folders: [], total: 0 })),
 			getCollections({ includeArchived: false }).catch(() => ({ collections: [], total: 0 })),
@@ -118,7 +118,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 			getDocuments({ includeArchived: false }).catch(() => ({ documents: [], total: 0 })),
 			getJsonFiles({ includeArchived: false }).catch(() => ({ jsonFiles: [], total: 0 })),
 			getFile3Ds({ includeArchived: false }).catch(() => ({ file3ds: [], total: 0 })),
-			OptimizedStatsService.getInstance().getGlobalStatsOptimized()
+			OptimizedStatsService.getInstance().getGlobalStatsOptimized(),
 		]);
 
 		const stats = {

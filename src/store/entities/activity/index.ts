@@ -6,27 +6,24 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-// Migración: se eliminaron servicios directos para evitar dependencias del lado cliente
-import { clientLogger } from '@/lib/logger/client-logger';
-import { extendActivities, extendActivity } from '@/transformers/activity';
-import type { ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
-import { ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
 // 🔄 Migración: consumo de API en lugar de servicios directos
 import {
         createActivityInApi,
         deleteActivityFromApi,
-        getActivityFromApi,
         getActivitiesFromApi,
+        getActivityFromApi,
 } from '@/lib/api/client/activity.client';
+// Migración: se eliminaron servicios directos para evitar dependencias del lado cliente
+import { clientLogger } from '@/lib/logger/client-logger';
 import {
 	createActivity as createActivityService,
 	deleteActivity as deleteActivityService,
 	getActivityById as getActivityByIdService,
 	getFilteredActivities as getFilteredActivitiesService,
 } from '@/services/activity/activity.service';
-import { extendActivities, extendActivity } from '@/transformers/activity';
-import type { ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
-import { ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
+import { extendActivities, extendActivities, extendActivity, extendActivity } from '@/transformers/activity';
+import type { ActivityBase, ActivityBase, ActivityFilters, ActivityFilters, ActivityListResponse, ActivityListResponse } from '@/types/entities/activity';
+import { ActivityComplete, ActivityComplete, ActivitySortCriteria, ActivitySortCriteria } from '@/types/entities/activity';
 
 // Logger para el store
 const storeLogger = clientLogger.withContext('ActivityStore');

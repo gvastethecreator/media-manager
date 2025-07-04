@@ -7,12 +7,12 @@
  */
 
 import {
-    ZodVideoCreateSchema,
-    type ZodVideoCreateType,
-    ZodVideoSchema,
-    type ZodVideoType,
-    ZodVideoUpdateSchema,
-    type ZodVideoUpdateType,
+	ZodVideoCreateSchema,
+	type ZodVideoCreateType,
+	ZodVideoSchema,
+	type ZodVideoType,
+	ZodVideoUpdateSchema,
+	type ZodVideoUpdateType,
 } from './schema';
 
 /**

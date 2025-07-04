@@ -9,12 +9,12 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 import {
-    CollectionBaseSchema,
-    CollectionCountsSchema,
-    CollectionCreateSchema,
-    CollectionStatisticsSchema,
-    CollectionUpdateSchema,
-    CollectionWithStatsSchema,
+	CollectionBaseSchema,
+	CollectionCountsSchema,
+	CollectionCreateSchema,
+	CollectionStatisticsSchema,
+	CollectionUpdateSchema,
+	CollectionWithStatsSchema,
 } from './schema';
 
 const logger = serverLogger.withContext('CollectionValidators');

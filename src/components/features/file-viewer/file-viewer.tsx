@@ -4,9 +4,9 @@ import type React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { pathToUrl } from '@/lib/web/url-utils';
-import { toastService } from '@/lib/ui/toast';
 import { useImageResources } from '@/store/image-resources.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 

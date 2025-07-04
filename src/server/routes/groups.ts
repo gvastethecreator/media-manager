@@ -1,6 +1,12 @@
+import { and, asc, count, desc, eq, like } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
+import { db } from '@/lib/drizzle';
+import { groups } from '@/lib/drizzle/schema';
 import { groupService } from '@/services/group/group.service';
+import { toGroupWithStats } from '@/transformers/group';
+
+const router = express.Router();
 
 // Schema para filtros de búsqueda
 const GroupFiltersSchema = z.object({

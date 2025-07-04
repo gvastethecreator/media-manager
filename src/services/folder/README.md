@@ -4,7 +4,7 @@
 
 Servicio central para la gestión de carpetas, indexado, reindexado, borrado y emisión de eventos en tiempo real.
 
-- **Stack:** Node.js, Next.js, Prisma, eventos custom, Server Actions.
+- **Stack:** Bun Runtime, React, Drizzle ORM, eventos custom, Express.
 - **Ubicación:** `src/services/folder/`
 
 ## Eventos soportados

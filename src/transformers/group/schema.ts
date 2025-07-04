@@ -12,7 +12,10 @@ export const GroupSchema = z.object({
 	name: z.string().min(1).max(100),
 	description: z.string().max(500).nullable(),
 	emoji: z.string().max(10).nullable(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.nullable(),
 	isFavorite: z.boolean(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
@@ -22,7 +25,10 @@ export const GroupCreateSchema = z.object({
 	name: z.string().min(1).max(100),
 	description: z.string().max(500).optional(),
 	emoji: z.string().max(10).optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.optional(),
 	isFavorite: z.boolean().default(false),
 });
 
@@ -30,7 +36,10 @@ export const GroupUpdateSchema = z.object({
 	name: z.string().min(1).max(100).optional(),
 	description: z.string().max(500).optional(),
 	emoji: z.string().max(10).optional(),
-	color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.optional(),
 	isFavorite: z.boolean().optional(),
 });
 
