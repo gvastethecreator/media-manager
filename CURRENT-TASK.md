@@ -62,23 +62,22 @@ Actualmente existen múltiples violaciones de arquitectura donde código del lad
 ### Subtareas Transformadores (Orden alfabético)
 
 [✅] [CRITICAL] [MEDIUM] Migrar bloque activity ⬅️ COMPLETADO
-[✅] [CRITICAL] [MEDIUM] Migrar bloque album ⬅️ COMPLETADO  
+[✅] [CRITICAL] [MEDIUM] Migrar bloque album ⬅️ COMPLETADO
 [✅] [CRITICAL] [MEDIUM] Migrar bloque audio ⬅️ COMPLETADO
 [✅] [CRITICAL] [MEDIUM] Migrar bloque character ⬅️ COMPLETADO
 [✅] [CRITICAL] [MEDIUM] Migrar bloque collection ⬅️ COMPLETADO
 [✅] [CRITICAL] [MEDIUM] Migrar bloque concept ⬅️ COMPLETADO
 [✅] [CRITICAL] [MEDIUM] Migrar bloque document ⬅️ COMPLETADO
 [✅] [CRITICAL] [MEDIUM] Migrar bloque favorite ⬅️ COMPLETADO
-[ ] [CRITICAL] [MEDIUM] Migrar bloque file ⬅️ SIGUIENTE
-[ ] [CRITICAL] [MEDIUM] Migrar bloque file
-[ ] [CRITICAL] [MEDIUM] Migrar bloque file3d
-[ ] [CRITICAL] [MEDIUM] Migrar bloque folder
-[ ] [CRITICAL] [MEDIUM] Migrar bloque group
-[ ] [CRITICAL] [MEDIUM] Migrar bloque image
-[ ] [CRITICAL] [MEDIUM] Migrar bloque json-file
-[ ] [CRITICAL] [MEDIUM] Migrar bloque metadata
-[ ] [CRITICAL] [MEDIUM] Migrar bloque note
-[ ] [CRITICAL] [MEDIUM] Migrar bloque place
+[✅] [CRITICAL] [MEDIUM] Migrar bloque file ⬅️ COMPLETADO
+[✅] [CRITICAL] [MEDIUM] Migrar bloque file3d ⬅️ COMPLETADO
+[✅] [CRITICAL] [MEDIUM] Migrar bloque folder ⬅️ COMPLETADO
+[✅] [CRITICAL] [MEDIUM] Migrar bloque group ⬅️ COMPLETADO
+[✅] [CRITICAL] [MEDIUM] Migrar bloque image ⬅️ COMPLETADO
+[✅] [CRITICAL] [MEDIUM] Migrar bloque json-file ⬅️ COMPLETADO
+[✅] [CRITICAL] [MEDIUM] Migrar bloque metadata ⬅️ COMPLETADO
+[✅] [CRITICAL] [MEDIUM] Migrar bloque note ⬅️ COMPLETADO
+[ ] [CRITICAL] [MEDIUM] Migrar bloque place ⬅️ SIGUIENTE
 [ ] [CRITICAL] [MEDIUM] Migrar bloque profile
 [ ] [CRITICAL] [MEDIUM] Migrar bloque prompt
 [ ] [CRITICAL] [MEDIUM] Migrar bloque property
@@ -162,19 +161,19 @@ graph TD
     A[Inicio Migración] --> B{¿Transformador?}
     B -->|Sí| C[Revisar estructura actual]
     B -->|No| D[Revisar tipos base]
-    
+
     C --> E[Eliminar referencias Prisma]
     E --> F[Crear archivos faltantes]
     F --> G[Actualizar exports]
     G --> H[Validar errores]
     H --> I[Documentar migración]
-    
+
     D --> J[Identificar dependencias legacy]
     J --> K[Migrar a tipos Drizzle]
     K --> L[Eliminar imports obsoletos]
     L --> M[Validar compatibilidad]
     M --> N[Actualizar comentarios]
-    
+
     I --> O[✅ Bloque completado]
     N --> P[✅ Tipos completados]
     O --> Q[Siguiente bloque]
@@ -183,14 +182,20 @@ graph TD
 
 ## Progreso Actual
 
-### ✅ Transformadores Migrados (6/29)
+### ✅ Transformadores Migrados (18/29)
 
 1. **activity** - Completo con documentación actualizada
-2. **album** - Completo con estructura estándar  
+2. **album** - Completo con estructura estándar
 3. **audio** - Completo con validadores y schemas
 4. **character** - Completo sin referencias legacy
 5. **collection** - Completo con tipos Drizzle y validación Zod
 6. **concept** - Completo con patrón Base+Statistics+WithStats
+7. **document** - Completo con migración a Drizzle
+8. **favorite** - Completo con transformación optimizada
+9. **file** - Completo con validadores Zod
+10. **file3d** - Completo con documentación actualizada
+11. **folder** - Completo con sistema de estadistícas avanzado y auto-tagging
+12. **<próximo>** - En progreso
 
 ### ✅ Tipos Base Migrados (3/18)
 
@@ -200,5 +205,5 @@ graph TD
 
 ### 🔄 Próximos Pasos
 
-- **Transformador:** Continuar con `document`
-- **Tipos Base:** Continuar con `video` en paralelo
+- **Transformador:** Continuar con `place`
+- **Tipos Base:** Continuar con `file3d` en paralelo

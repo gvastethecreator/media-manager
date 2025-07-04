@@ -14,19 +14,19 @@ flowchart TD
     B -->|toAlbumWithStats| C[AlbumWithStats]
     B -->|mapCreateAlbumDataToDrizzle| D[DrizzleCreateAlbumData]
     B -->|mapAlbumFiltersToDrizzle| E[DrizzleFindManyArgs]
-    
+
     A --> F[serializers.ts]
     F -->|extendAlbum| G[AlbumWithStats]
     F -->|extendAlbums| H[AlbumWithStats[]]
     F -->|serializeAlbum| I[Record<string, unknown>]
     F -->|deserializeAlbum| J[AlbumWithStats]
-    
+
     A --> K[validators.ts]
     K -->|validateCreateAlbumData| L[CreateAlbumInput]
     K -->|validateUpdateAlbumData| M[UpdateAlbumInput]
     K -->|isValidAlbum| N[boolean]
     K -->|normalizeAlbumFilters| O[NormalizedFilters]
-    
+
     A --> P[schema.ts]
     P -->|albumBaseSchema| Q[ZodSchema]
     P -->|albumWithStatsSchema| R[ZodSchema]

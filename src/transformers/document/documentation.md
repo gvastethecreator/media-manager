@@ -36,10 +36,10 @@ graph TD
     A --> D[toDocumentWithStats]
     C --> D
     D --> E[DocumentWithStats]
-    
+
     E --> F[serializeDocumentWithStats]
     F --> G[API Response]
-    
+
     H[validators] --> I[Validación Zod]
     I --> J[Datos Validados]
 ```

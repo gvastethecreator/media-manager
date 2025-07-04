@@ -4,9 +4,9 @@
 
 Este módulo contiene todos los transformadores, validadores y utilidades para manejar la entidad **Concept** dentro del sistema de gestión de imágenes. Los conceptos representan ideas, temas o clasificaciones que ayudan a organizar y categorizar el contenido.
 
-**✅ Estado:** MIGRADO A DRIZZLE - Enero 2025  
-**🎯 Propósito:** Transformar datos entre Drizzle ORM y tipos locales para la entidad Concept  
-**🔧 Arquitectura:** Patrón de transformadores con validación Zod  
+**✅ Estado:** MIGRADO A DRIZZLE - Enero 2025
+**🎯 Propósito:** Transformar datos entre Drizzle ORM y tipos locales para la entidad Concept
+**🔧 Arquitectura:** Patrón de transformadores con validación Zod
 
 ## 🏗️ Estructura del Módulo
 
@@ -38,7 +38,7 @@ graph LR
     B --> E[fromDrizzleConcept]
     D --> E
     E --> F[ConceptWithStats]
-    
+
     style A fill:#e1f5fe
     style F fill:#c8e6c9
     style E fill:#fff3e0
@@ -46,6 +46,6 @@ graph LR
 
 ---
 
-**✅ Estado de Migración:** COMPLETADO  
-**🎯 Próximos Pasos:** Continuar migración con otros bloques de transformadores  
+**✅ Estado de Migración:** COMPLETADO
+**🎯 Próximos Pasos:** Continuar migración con otros bloques de transformadores
 **📅 Última Actualización:** Enero 2025

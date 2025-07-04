@@ -40,16 +40,16 @@ graph TD
     A --> D[toFileWithStats]
     C --> D
     D --> E[FileWithStats]
-    
+
     E --> F[groupFilesByType]
     F --> G[Archivos Agrupados]
-    
+
     E --> H[serializeDirectoryStructure]
     H --> I[Estructura Jerárquica]
-    
+
     E --> J[serializeFileWithStats]
     J --> K[API Response]
-    
+
     L[validators] --> M[Validación Zod]
     M --> N[Datos Validados]
 ```
