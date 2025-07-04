@@ -6,7 +6,17 @@
 
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { QueueJobService } from '@/services/queue-job.service';
+// Refactor 2025-07: se reemplaza QueueJobService por cliente API
+import {
+    cancelQueueJobInApi,
+    createQueueJobInApi,
+    deleteQueueJobFromApi,
+    getQueueJobsFromApi,
+    getQueueStatsFromApi,
+    matchesFilters,
+    retryQueueJobInApi,
+    updateQueueJobInApi,
+} from '@/lib/api/client/queue-job.client';
 import type { CreateQueueJobInput, QueueJobExtended, UpdateQueueJobInput } from '@/types/entities/queue-job';
 import type { QueueJobState } from '../types';
 
@@ -46,7 +56,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			set({ core: { ...get().core, isLoading: true, error: null } });
 
 			const { filters, pagination } = get();
-			const result = await QueueJobService.getJobs(filters, pagination);
+                     			const result = await getQueueJobsFromApi(filters, pagination);
 
 			set({
 				core: {
@@ -80,7 +90,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Cargando estadísticas de cola');
 			set({ core: { ...get().core, isLoading: true, error: null } });
 
-			const stats = await QueueJobService.getStats();
+                        const stats = await getQueueStatsFromApi();
 
 			set({
 				core: {
@@ -110,13 +120,13 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Creando trabajo en cola', { input });
 			set({ ui: { ...get().ui, isCreating: true } });
 
-			const job = await QueueJobService.createJob(input);
+                        const job = await createQueueJobInApi(input);
 
 			// Actualizar lista si el trabajo coincide con los filtros actuales
 			const { core, filters } = get();
-			const matchesFilters = QueueJobService.matchesFilters(job, filters);
+                        const matchesFiltersResult = matchesFilters(job, filters);
 
-			if (matchesFilters) {
+                        if (matchesFiltersResult) {
 				set({
 					core: {
 						...core,
@@ -151,7 +161,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Actualizando trabajo en cola', { id, input });
 			set({ ui: { ...get().ui, isUpdating: true } });
 
-			const job = await QueueJobService.updateJob(id, input);
+                        const job = await updateQueueJobInApi(id, input);
 
 			// Actualizar job en la lista
 			const { core } = get();
@@ -193,7 +203,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Eliminando trabajo en cola', { id });
 			set({ ui: { ...get().ui, isDeleting: true } });
 
-			await QueueJobService.deleteJob(id);
+                        await deleteQueueJobFromApi(id);
 
 			// Eliminar job de la lista
 			const { core } = get();
@@ -235,7 +245,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Reintentando trabajo en cola', { id });
 			set({ ui: { ...get().ui, isRetrying: true } });
 
-			const job = await QueueJobService.retryJob(id);
+                        const job = await retryQueueJobInApi(id);
 
 			// Actualizar job en la lista
 			const { core } = get();
@@ -277,7 +287,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			coreLogger.info('Cancelando trabajo en cola', { id });
 			set({ ui: { ...get().ui, isCancelling: true } });
 
-			const job = await QueueJobService.cancelJob(id);
+                        const job = await cancelQueueJobInApi(id);
 
 			// Actualizar job en la lista
 			const { core } = get();

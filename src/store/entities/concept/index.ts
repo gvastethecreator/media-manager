@@ -6,9 +6,13 @@
 
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
+// Ahora usamos llamadas a la API en lugar del servicio del servidor
 import {
-    ConceptService
-} from '@/services/concept/concept.service';
+    createConceptInApi,
+    deleteConceptFromApi,
+    getConceptsFromApi,
+    updateConceptInApi,
+} from '@/lib/api/client/concept.client';
 import {
     ConceptComplete,
     ConceptCreateInput,
@@ -44,7 +48,7 @@ const createCoreSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>>
 		storeLogger.info('🔄 Loading concepts...');
 		set({ isLoading: true, error: null });
 		try {
-			const concepts = await ConceptService.getConcepts({});
+                const concepts = await getConceptsFromApi();
 			const transformedConcepts = concepts.items.map(transformConceptToWithStats);
 			set({ concepts: transformedConcepts, isLoading: false });
 			storeLogger.info(`✅ Loaded ${transformedConcepts.length} concepts.`);
@@ -56,17 +60,17 @@ const createCoreSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>>
 	},
 	createConcept: async (concept: ConceptCreateInput) => {
 		storeLogger.info('✨ Creating concept...');
-		await ConceptService.createConcept(concept);
+        await createConceptInApi(concept);
 		await get().loadConcepts();
 	},
 	updateConcept: async (id: string, concept: ConceptUpdateInput) => {
 		storeLogger.info(`🔄 Updating concept ${id}...`);
-		await ConceptService.updateConcept(id, concept);
+        await updateConceptInApi(id, concept);
 		await get().loadConcepts();
 	},
 	deleteConcept: async (id: string) => {
 		storeLogger.info(`🗑️ Deleting concept ${id}...`);
-		await ConceptService.deleteConcept(id);
+        await deleteConceptFromApi(id);
 		await get().loadConcepts();
 		if (get().selectedConcept?.id === id) {
 			set({ selectedConcept: null });

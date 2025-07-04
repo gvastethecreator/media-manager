@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { getPlaces, PlaceSearchOptions } from '@/services/place/place.service';
+// Refactor 2025-07: se usa cliente API para lugares
+import { getPlacesFromApi, type PlaceSearchOptions } from '@/lib/api/client/place.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';
 import { PlaceViewMode, PlaceWithStats } from '@/types/entities/place';
@@ -174,7 +175,7 @@ export const usePlaceStore = create<PlaceStore>()(
 					set({ isLoading: true, error: null });
 					placeLogger.info('🔄 Cargando lugares...');
 
-					const places = await getPlaces(options ?? {});
+                                        const places = await getPlacesFromApi(options ?? {});
 					set({ places, isLoading: false });
 					placeLogger.info('✅ Lugares cargados correctamente');
 				} catch (error) {
