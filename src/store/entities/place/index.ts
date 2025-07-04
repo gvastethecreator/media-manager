@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 // Refactor 2025-07: se usa cliente API para lugares
 import { getPlacesFromApi, type PlaceSearchOptions } from '@/lib/api/client/place.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import { PlaceViewMode, PlaceWithStats } from '@/types/entities/place';
 
 import { PLACE_STORE_NAME } from './constants';

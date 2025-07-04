@@ -14,7 +14,7 @@ import {
     getPropertiesFromApi,
     updatePropertyInApi,
 } from '@/lib/api/client/property.client';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import { PropertyWithStats } from '@/types/entities/property';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';

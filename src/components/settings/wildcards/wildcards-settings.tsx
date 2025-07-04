@@ -15,7 +15,7 @@ import {
 	useWildcards,
 } from '@/lib/api/wildcards';
 import { cn } from '@/lib/utils';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import { WildcardPreview } from './wildcard-preview';
 

@@ -14,7 +14,7 @@ import {
     updateAlbumInApi,
 } from '@/lib/api/client/album.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { AlbumCoreActions, AlbumCoreState, AlbumStore } from '../types';
 
 const logger = clientLogger.withContext('AlbumCoreSlice');

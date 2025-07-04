@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDeletePrompt, usePrompts } from '@/lib/api/prompts';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory } from '@/types/entities/prompt/enums';
 import { CreatePromptForm } from './create-prompt-form';
