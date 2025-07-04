@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeletePlace, usePlaces } from '@/lib/api/places';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { PlaceWithStats } from '@/types/entities/place';
 import { CreatePlaceForm } from './create-place-form';
 

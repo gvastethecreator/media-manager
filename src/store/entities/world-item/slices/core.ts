@@ -3,6 +3,8 @@
  * @module store/entities/world-item/slices/core
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
 import type { StateCreator } from 'zustand';
 // Refactor 2025-07: uso de cliente API para world items
 import {

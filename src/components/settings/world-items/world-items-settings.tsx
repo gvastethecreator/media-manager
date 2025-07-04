@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { WorldItemCreateInput, WorldItemUpdateInput } from '@/lib/api/world-items';
 import { useCreateWorldItem, useDeleteWorldItem, useUpdateWorldItem, useWorldItems } from '@/lib/api/world-items';
 import { cn } from '@/lib/utils';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { WorldItemComplete } from '@/types/entities/world-item';
 import { CreateWorldItemForm } from './create-world-item-form';
 
