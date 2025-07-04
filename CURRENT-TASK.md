@@ -1,145 +1,59 @@
-# [004] Migración completa a Drizzle ORM y Vite + React
+[001] Refactorización global: Aislamiento cliente-servidor en stores, hooks y componentes
 
-## 📊 Estado actual: **PROGRESO SIGNIFICATIVO** (68% completado)
+## Contexto
 
-### 🎯 **MIGRACIÓN A DRIZZLE ORM: 18/25 servicios (72%)**
+Actualmente existen múltiples violaciones de arquitectura donde código del lado cliente (stores Zustand, hooks, componentes React) importa servicios del servidor (`src/services/*`). Esto genera errores de runtime en Vite/React 19 y rompe la separación de responsabilidades. Es necesario migrar todo acceso a datos a través de clientes de API (`src/lib/api/client/`) o rutas `/api/`.
 
-#### **✅ COMPLETAMENTE MIGRADOS (18 servicios):**
+## Subtareas
 
-- ProfileService, TagService, AlbumService, ConceptService, PlaceService
-- WorldItemService, CollectionService, CharacterService, DocumentService
-- AudioService, File3DService, JsonFileService, PropertyService, WildcardService
-- FolderService, NoteService, VideoService, ImageService, PromptService
-- GroupService, SearchService, SettingsService, WorkflowService, UploadedImagesService
-- **✅ OptimizedStatsService** (RECIÉN COMPLETADO)
+### [HIGH] [BIG] Refactorizar todos los stores Zustand
+- [ ] [002] [HIGH] [BIG] Refactorizar `src/store/unified-file-manager.store.ts` para usar cliente de API
+- [ ] [003] [HIGH] [BIG] Refactorizar `src/store/entities/json-file/json-file.store.ts`
+- [ ] [004] [HIGH] [BIG] Refactorizar `src/store/entities/tag/slices/core.slice.ts`
+- [ ] [005] [HIGH] [BIG] Refactorizar `src/store/entities/tag/slices/core.slice.v2.ts`
+- [ ] [006] [HIGH] [BIG] Refactorizar `src/store/entities/video/slices/core.ts`
+- [ ] [007] [HIGH] [BIG] Refactorizar `src/store/entities/wildcard/slices/core.ts`
+- [ ] [008] [HIGH] [BIG] Refactorizar `src/store/entities/world-item/slices/core.ts`
+- [ ] [009] [HIGH] [BIG] Refactorizar `src/store/entities/workflow/slices/core.slice.ts`
+- [ ] [010] [HIGH] [BIG] Refactorizar `src/store/entities/file/slices/core.slice.ts`
+- [ ] [011] [HIGH] [BIG] Refactorizar `src/store/entities/profile/actions.ts`
+- [ ] [012] [HIGH] [BIG] Refactorizar `src/store/entities/queue-job/slices/core.ts`
+- [ ] [013] [HIGH] [BIG] Refactorizar `src/store/entities/place/index.ts`
+- [ ] [014] [HIGH] [BIG] Refactorizar `src/store/entities/property/slices/core.ts`
+- [ ] [015] [HIGH] [BIG] Refactorizar `src/store/entities/note/slices/core.ts`
+- [ ] [016] [HIGH] [BIG] Refactorizar `src/store/entities/file-3d/file-3d.store.ts`
+- [ ] [017] [HIGH] [BIG] Refactorizar `src/store/entities/group/slices/core.ts`
+- [ ] [018] [HIGH] [BIG] Refactorizar `src/store/entities/concept/index.ts`
+- [ ] [019] [HIGH] [BIG] Refactorizar `src/store/entities/collection/slices/core.ts`
+- [ ] [020] [HIGH] [BIG] Refactorizar `src/store/stats.store.ts`
+- [ ] [021] [HIGH] [BIG] Refactorizar `src/store/entities/audio/audio.store.ts`
+- [ ] [022] [HIGH] [BIG] Refactorizar `src/store/entities/document/slices/core.slice.ts`
+- [ ] [023] [HIGH] [BIG] Refactorizar `src/store/entities/album/slices/core.slice.ts`
+- [ ] [024] [HIGH] [BIG] Refactorizar `src/store/entities/activity/index.ts`
 
-#### **⏳ PENDIENTES (7 servicios):**
+### [HIGH] [BIG] Refactorizar hooks personalizados y utilidades
+- [ ] [025] [HIGH] [BIG] Refactorizar `src/lib/hooks/entities/note/useNotes.ts`
+- [ ] [026] [HIGH] [BIG] Refactorizar `src/lib/hooks/files/use-folder-images.ts`
+- [ ] [027] [HIGH] [BIG] Refactorizar `src/lib/hooks/system/use-stats.ts`
+- [ ] [028] [HIGH] [BIG] Refactorizar `src/lib/hooks/system/use-stats-service.ts`
 
-- ~~StatsService~~ → **COMPLETADO** ✅
-- BulkUpdateService
-- BackupService
-- AnalyticsService
-- NotificationService
-- CacheService
-- ValidationService
+### [HIGH] [BIG] Refactorizar componentes React que importan servicios
+- [ ] [029] [HIGH] [BIG] Refactorizar `src/components/views/uploaded-images/uploaded-images-view.tsx`
+- [ ] [030] [HIGH] [BIG] Refactorizar `src/components/views/folders/views/folders-view.tsx`
 
----
+### [MEDIUM] [MEDIUM] Crear clientes de API faltantes
+- [ ] [031] [MEDIUM] [MEDIUM] Crear cliente de API para cada entidad que no lo tenga en `src/lib/api/client/`
 
-### 🔄 **TRANSFORMADORES MIGRADOS: 4/24 archivos (17%)**
+## Especificaciones técnicas
+- Todos los stores y hooks deben consumir datos solo vía clientes de API o fetch a endpoints, nunca servicios directos.
+- Si una función de servicio es necesaria en el cliente, debe exponerse vía API y consumirse desde el cliente de API.
+- Dejar comentarios claros en cada archivo refactorizado explicando el cambio y el motivo.
+- Validar que no queden importaciones directas de `src/services/` en ningún archivo de cliente.
 
-#### **✅ COMPLETADOS:**
-
-- **✅ FolderMappers** (RECIÉN COMPLETADO)
-- **✅ ConceptMappers** (RECIÉN COMPLETADO)
-- **✅ CharacterMappers** (RECIÉN COMPLETADO)
-- ImageMappers (ya estaba limpio)
-
-#### **⏳ PENDIENTES (20 archivos):**
-
-- workflow/mappers.ts
-- world-item/transformer.ts + mappers.ts
-- video/transformer.ts + mappers.ts
-- uploaded-image/transformer.ts + mappers.ts
-- note/mappers.ts
-- queue-job/queue-job-transformers.ts
-- prompt/mappers.ts
-- metadata/mappers.ts
-- place/mappers.ts
-- audio/serializers.ts
-- folder/transformer.ts
-- favorite/mappers.ts + serializers.ts + transformer.ts
-- file3d/mappers.ts
-- collection/serializers.ts
-- activity/mappers.ts
-
----
-
-### 🚀 **SERVER ACTIONS MIGRADAS: 1/20+ archivos (5%)**
-
-#### **✅ COMPLETADAS:**
-
-- **✅ images/images-random.action.ts** (RECIÉN COMPLETADO)
-
-#### **⏳ PENDIENTES:**
-
-- metadata/metadata.actions.ts
-- queue/control.actions.ts
-- metadata/index.ts
-- images/image-thumbnails.actions.ts
-- images/folder-images.action.ts
-- concepts/concept-delete.actions.ts
-- concepts/concept-images.actions.ts
-- Y otros 13+ archivos
-
----
-
-### 🧹 **LIMPIEZA DE TIPOS BASE: 0/13 archivos (0%)**
-
-#### **⏳ PENDIENTES:**
-
-- src/types/entities/*.ts (13+ archivos que usan @prisma/client)
-
----
-
-### ⚡ **MIGRACIÓN A VITE + REACT: 0% completado**
-
-#### **⏳ PENDIENTES:**
-
-- Configuración de Vite
-- Migración de Webpack a Vite
-- Actualización de React a v19
-- Migración de componentes
-- Actualización de rutas
-- Testing con Vite
-
----
-
-## 🎯 **PRÓXIMOS PASOS CRÍTICOS**
-
-### **Prioridad ALTA:**
-
-1. **Continuar Server Actions** - Migrar las 19+ restantes
-2. **Completar transformadores** - Migrar los 20 archivos restantes
-3. **Limpiar tipos base** - Eliminar dependencias @prisma/client
-4. **Migrar servicios pendientes** - Los 7 restantes
-
-### **Prioridad MEDIA:**
-
-5. **Configurar Vite** - Reemplazar Webpack
-6. **Actualizar React** - Migrar a v19
-7. **Testing completo** - Verificar toda la funcionalidad
-
----
-
-## 📈 **PROGRESO GENERAL**
-
-- **Servicios**: 18/25 (72%) ✅
-- **Transformadores**: 4/24 (17%) 🔄
-- **Server Actions**: 1/20+ (5%) 🔄
-- **Tipos base**: 0/13 (0%) ⏳
-- **Vite + React**: 0% ⏳
-
-**TOTAL ESTIMADO: 68% completado**
-
----
-
-## 🚨 **BLOQUEADORES ACTUALES**
-
-1. **Server Actions sin migrar** - 19+ archivos usan getPrismaClient()
-2. **Transformadores con Prisma** - 20 archivos con tipos @prisma/client
-3. **Tipos base legacy** - 13+ archivos en src/types/entities/
-
----
-
-## ✅ **HITOS RECIENTES**
-
-- ✅ **OptimizedStatsService migrado** - Servicio crítico completado
-- ✅ **3 transformadores migrados** - Folder, Concept, Character
-- ✅ **Primera Server Action migrada** - images-random.action.ts
-- ✅ **Patrón establecido** - Funciones legacy para compatibilidad
-
----
-
-## 🎯 **SIGUIENTE ACCIÓN**
-
-**Continuar con Server Actions** - Migrar `folder-images.action.ts` siguiente en la lista.
+## Diagrama de flujo (Mermaid)
+```mermaid
+graph TD
+A[Store/Hook/Componente Cliente] --X--> B[Servicio Servidor]
+A --API Client--> C[API REST/Handler]
+C --> B
+```
