@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useCreateFolder, useDeleteFolder, useReindexFolder, useUpdateFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { FolderCreateInput } from '@/types/entities/folder';
 
 // Stub para clearMetadataCache en el cliente - la funcionalidad real está en el servidor

@@ -24,7 +24,7 @@ import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import { ThumbnailError } from './thumbnail-error';
 
