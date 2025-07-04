@@ -3,7 +3,8 @@ import { useEffect } from 'react';
 import { serverLogger } from '@/lib/logger/server-logger';
 // import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail-service-export';
 // TODO: Implementar servicio de thumbnails o usar servicio de imágenes
-import { useThumbnailStore } from '@/store/thumbnails.store';
+import { ProcessStatus, useThumbnailStore } from '@/store/thumbnails.store';
+import { ThumbnailError } from '@/types/thumbnails';
 
 const RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 30000;
