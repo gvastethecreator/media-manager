@@ -1,8 +1,24 @@
 /**
- * @file Re-exportaciones para la entidad Favorite
+ * @file Exportaciones principales de tipos para la entidad Favorite.
  * @module types/entities/favorite
- * @description Exporta únicamente los tipos canónicos y validados para la entidad Favorite.
- * No se deben exportar tipos legacy o específicos de UI desde aquí.
+ * @description
+ *   Este archivo centraliza las exportaciones de tipos para la entidad Favorite.
+ *   El tipo canónico para usar en la aplicación es **`FavoriteWithStats`**.
+ *
+ *   - `FavoriteBase`: Tipo base desde Drizzle.
+ *   - `FavoriteStatistics`: Estadísticas calculadas.
+ *   - `FavoriteWithStats`: Tipo enriquecido con estadísticas (CANÓNICO).
+ *
+ * @see /src/types/entities/favorite/base.ts
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-export * from './types';
+// --- Tipos Canónicos ---
+export type {
+	FavoriteBase,
+	FavoriteStatistics,
+	FavoriteWithStats,
+} from './base';
+
+// --- Enums ---
+export { FavoriteEntityType } from './base';

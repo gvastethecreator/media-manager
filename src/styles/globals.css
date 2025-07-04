@@ -3,7 +3,7 @@
 
 /* Base UI Portal Configuration */
 .root {
-	isolation: isolate;
+  isolation: isolate;
 }
 
 /* Theme variables */

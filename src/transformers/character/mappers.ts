@@ -80,10 +80,10 @@ type DrizzleCharacterWhereInput = {
 
 type DrizzleCharacterFindManyArgs = {
 	where?: DrizzleCharacterWhereInput;
-	orderBy?: any;
+	orderBy?: { [key: string]: 'asc' | 'desc' } | { [key: string]: 'asc' | 'desc' }[];
 	skip?: number;
 	take?: number;
-	include?: any;
+	// Los includes se manejan por separado en Drizzle con joins
 };
 
 /**
@@ -198,19 +198,3 @@ function mapCharacterFiltersToDrizzle(filters: CharacterFilters): DrizzleCharact
 	}
 	return where;
 }
-
-// Mantener funciones legacy con nombres de Prisma por compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreateCharacterDataToDrizzle en su lugar
- */
-export const mapCreateCharacterDataToPrisma = mapCreateCharacterDataToDrizzle;
-
-/**
- * @deprecated Usar mapUpdateCharacterDataToDrizzle en su lugar
- */
-export const mapUpdateCharacterDataToPrisma = mapUpdateCharacterDataToDrizzle;
-
-/**
- * @deprecated Usar mapCharacterSearchOptionsToDrizzle en su lugar
- */
-export const mapCharacterSearchOptionsToPrisma = mapCharacterSearchOptionsToDrizzle;
