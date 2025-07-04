@@ -6,7 +6,7 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';

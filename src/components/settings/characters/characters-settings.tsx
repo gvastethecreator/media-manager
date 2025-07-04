@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCharacters, useDeleteCharacter } from '@/lib/api/characters';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
 import { CreateCharacterForm } from './create-character-form';

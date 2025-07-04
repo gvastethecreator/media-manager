@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteNote, useNotes } from '@/lib/api/notes';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import type { NoteWithStats } from '@/types/entities/note';
 import { CreateNoteForm } from './create-note-form';
 

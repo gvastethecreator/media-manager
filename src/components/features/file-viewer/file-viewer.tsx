@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { pathToUrl } from '@/lib/web/url-utils';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 import { useImageResources } from '@/store/image-resources.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';

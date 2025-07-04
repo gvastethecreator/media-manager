@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { arrayToRecord } from '@/lib/utils/array.utils';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 // Refactor 2025-07: uso de cliente API para wildcards
 import {
     createWildcardInApi,

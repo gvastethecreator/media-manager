@@ -4,7 +4,7 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
 // Refactor 2025-07: uso de cliente API para world items
 import {
     createWorldItemInApi,

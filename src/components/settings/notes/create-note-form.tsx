@@ -7,7 +7,7 @@ import { DynamicCreateForm, type FormField } from '@/components/settings/common/
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
-import toastService from '@/services/toast';
+import toastService from '@/lib/ui/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
 import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note/types';
 

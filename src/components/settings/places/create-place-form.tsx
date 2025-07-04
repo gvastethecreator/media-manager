@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast';
+import { toast } from '@/lib/ui/toast';
 import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 // Opciones para los selects que antes eran enums
