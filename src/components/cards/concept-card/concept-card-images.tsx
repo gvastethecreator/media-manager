@@ -2,7 +2,8 @@ import { ImageIcon, Sparkles } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getRecentConceptImages } from './concept-server-actions';
+
+// import { getRecentConceptImages } from './concept-server-actions'; // TODO: Archivo no encontrado
 
 interface ConceptCardImagesProps {
 	conceptId: string;

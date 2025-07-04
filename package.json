@@ -67,7 +67,7 @@
     "drizzle:check-property-schema": "tsx scripts/db/check-property-schema.ts",
     "drizzle:verify": "tsx scripts/db/verify-drizzle-migration.ts",
     "playwright:install": "npx playwright install",
-    "playwright:codegen": "npx playwright codegen http://localhost:3000",
+    "playwright:codegen": "npx playwright codegen http://localhost:5173",
     "playwright:helper": "node scripts/playwright-mcp-helper.js",
     "playwright:generate": "node scripts/playwright-mcp-helper.js generate-tests",
     "playwright:scenarios": "node scripts/playwright-mcp-helper.js list-scenarios",

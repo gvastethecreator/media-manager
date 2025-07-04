@@ -1,6 +1,6 @@
 import express from 'express';
 import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
-import { toWildcardWithStats } from '@/transformers/wildcard/wildcard.transformer';
+import { toWildcardWithStats } from '@/transformers/wildcard';
 
 const router = express.Router();
 

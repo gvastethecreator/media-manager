@@ -454,3 +454,6 @@ export function transformImagesForCard(images: any[]): any[] {
 		...img,
 	}));
 }
+
+// Alias para compatibilidad con rutas del servidor
+export const toImageWithStats = fromDrizzleImageWithCounts;

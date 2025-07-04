@@ -7,10 +7,7 @@
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import {
-    createConcept as createConceptAction,
-    deleteConcept as deleteConceptAction,
-    getConcepts as getConceptsAction,
-    updateConcept as updateConceptAction,
+    ConceptService
 } from '@/services/concept/concept.service';
 import {
     ConceptComplete,
@@ -47,8 +44,8 @@ const createCoreSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>>
 		storeLogger.info('🔄 Loading concepts...');
 		set({ isLoading: true, error: null });
 		try {
-			const concepts = await getConceptsAction({});
-			const transformedConcepts = concepts.map(transformConceptToWithStats);
+			const concepts = await ConceptService.getConcepts({});
+			const transformedConcepts = concepts.items.map(transformConceptToWithStats);
 			set({ concepts: transformedConcepts, isLoading: false });
 			storeLogger.info(`✅ Loaded ${transformedConcepts.length} concepts.`);
 		} catch (error) {
@@ -59,17 +56,17 @@ const createCoreSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>>
 	},
 	createConcept: async (concept: ConceptCreateInput) => {
 		storeLogger.info('✨ Creating concept...');
-		await createConceptAction(concept);
+		await ConceptService.createConcept(concept);
 		await get().loadConcepts();
 	},
 	updateConcept: async (id: string, concept: ConceptUpdateInput) => {
 		storeLogger.info(`🔄 Updating concept ${id}...`);
-		await updateConceptAction(id, concept);
+		await ConceptService.updateConcept(id, concept);
 		await get().loadConcepts();
 	},
 	deleteConcept: async (id: string) => {
 		storeLogger.info(`🗑️ Deleting concept ${id}...`);
-		await deleteConceptAction(id);
+		await ConceptService.deleteConcept(id);
 		await get().loadConcepts();
 		if (get().selectedConcept?.id === id) {
 			set({ selectedConcept: null });

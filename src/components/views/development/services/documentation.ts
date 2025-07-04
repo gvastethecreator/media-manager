@@ -11,7 +11,7 @@ export async function loadDocumentationFile(filename: string): Promise<string> {
 		// En un entorno de servidor real, podríamos leer el sistema de archivos directamente
 		// Usamos fetch para obtener el archivo desde la carpeta pública
 
-		const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/docs/${filename}`, {
+		const response = await fetch(`${import.meta.env.VITE_APP_URL || 'http://localhost:5173'}/docs/${filename}`, {
 			cache: 'no-store',
 		});
 

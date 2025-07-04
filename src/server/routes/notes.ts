@@ -1,7 +1,7 @@
 import express from 'express';
 import { NoteService } from '@/services/note/note.service';
-import { toImageWithStats } from '@/transformers/image/image.transformer';
-import { toNoteWithStats } from '@/transformers/note/note.transformer';
+import { toImageWithStats } from '@/transformers/image';
+import { toNoteWithStats } from '@/transformers/note';
 
 const router = express.Router();
 const noteService = new NoteService();

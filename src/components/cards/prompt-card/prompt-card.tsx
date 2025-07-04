@@ -1,13 +1,13 @@
 import { MessageSquareQuote, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { CardContainer } from '../card-container';
 import { usePrompt, useRecentPromptImages } from '@/lib/api/prompts';
+import { cn } from '@/lib/utils';
+import type { PromptWithStats } from '@/types/entities/prompt';
+import { CardContainer } from '../card-container';
 import { PromptCardContent } from './prompt-card-content';
 import { PromptCardFooter } from './prompt-card-footer';
 import { PromptCardImages } from './prompt-card-images';
-import type { PromptWithStats } from '@/types/entities/prompt';
 
 export interface PromptCardProps {
 	/** ID del prompt */
@@ -187,7 +187,20 @@ function PromptCardComponent({
 
 	// Definir estilos de la tarjeta TCG
 	const cardStyle = useMemo(() => {
-		const totalRelations = imagesCount + videosCount + promptsCount + notesCount + charactersCount + placesCount + worldItemsCount + propertiesCount + wildcardsCount + groupsCount + albumsCount + collectionsCount + tagsCount;
+		const totalRelations =
+			imagesCount +
+			videosCount +
+			promptsCount +
+			notesCount +
+			charactersCount +
+			placesCount +
+			worldItemsCount +
+			propertiesCount +
+			wildcardsCount +
+			groupsCount +
+			albumsCount +
+			collectionsCount +
+			tagsCount;
 
 		if (!tcgMode) {
 			return {
@@ -209,4 +222,27 @@ function PromptCardComponent({
 			boxShadow: `0 0 15px ${primaryColor}40, inset 0 0 20px ${primaryColor}20`,
 			...style,
 		};
-	}, [primaryColor, style, tcgMode, imagesCount, videosCount, promptsCount, notesCount, charactersCount, placesCount, worldItemsCount, propertiesCount, wildcardsCount, groupsCount, albumsCount, collectionsCount, tagsCount]);
+	}, [
+		primaryColor,
+		style,
+		tcgMode,
+		imagesCount,
+		videosCount,
+		promptsCount,
+		notesCount,
+		charactersCount,
+		placesCount,
+		worldItemsCount,
+		propertiesCount,
+		wildcardsCount,
+		groupsCount,
+		albumsCount,
+		collectionsCount,
+		tagsCount,
+	]);
+
+	// El componente necesita un return statement aquí
+	return null; // TODO: Implementar el JSX del componente
+}
+
+export const PromptCard = memo(PromptCardComponent);

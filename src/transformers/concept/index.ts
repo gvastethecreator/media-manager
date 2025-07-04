@@ -6,23 +6,27 @@
 
 // Exportaciones de mappers
 export {
-	mapToConceptBase,
-	mapToConceptWithCounts,
-	mapToConceptWithStats,
-	toConceptCreateData,
-	toConceptUpdateData,
+	toCreateDataDrizzle,
+	toUpdateDataDrizzle,
+	createOrderByDrizzle,
+	createFilterDrizzle,
+	toSearchOptionsDrizzle,
+	processConcepts,
 } from './mappers';
+
+// Exportaciones de serializadores
+export { deserializeTags, serializeTags } from './serializers';
 
 // Exportaciones de transformadores
 export {
 	fromDrizzleConcept,
-	fromDrizzleConceptWithRelations,
 	fromDrizzleConcepts,
+	fromDrizzleConceptWithRelations,
 } from './transformer';
 
-// Esquemas de validación
-export {
-	ConceptCreateInputSchema,
-	ConceptSchema,
-	ConceptUpdateInputSchema,
-} from './schema';
+// Esquemas de validación (aún pendientes de revisión)
+// export {
+// 	ConceptCreateInputSchema,
+// 	ConceptSchema,
+// 	ConceptUpdateInputSchema,
+// } from './schema';

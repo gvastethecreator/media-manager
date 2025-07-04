@@ -8,18 +8,12 @@
 export * from './mappers';
 export * from './serializers';
 
-// Exportar tipos de transformer
-export type { FolderFromPrisma } from './transformer';
 // Exportar funciones principales optimizadas
-// Exportar funciones legacy para compatibilidad
 export {
 	buildFolderTree,
 	foldersToRecord,
-	folderWithCountsPayload,
-	fromPrismaFolder,
-	fromPrismaFolders,
-	fromPrismaFoldersWithCounts,
-	fromPrismaFolderWithCounts,
+	fromDrizzleFolder,
+	fromDrizzleFolders,
 	getAllFolders,
 	getFolderById,
 	transformFolderToExtended,

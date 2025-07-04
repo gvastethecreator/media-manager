@@ -3,8 +3,9 @@
  * @module components/cards/character-card/character-card-adapter
  */
 
+import { CharacterCardData } from '@/lib/api/services/characters';
 import type { CharacterWithStats } from '@/types/entities/character';
-import type { CharacterCardData } from './character-server-actions';
+// import type { CharacterCardData } from './character-server-actions'; // TODO: Archivo no encontrado
 
 /**
  * 🎭 Convierte CharacterWithStats a CharacterCardData para compatibilidad con CharacterCard

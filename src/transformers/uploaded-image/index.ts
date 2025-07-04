@@ -7,3 +7,7 @@
 export * from './mappers';
 export * from './serializers';
 export * from './transformer';
+
+// Alias para compatibilidad con servicios
+export { transformToUploadedImageFromDrizzle as fromDB } from './transformer';
+export { transformToUploadedImageFromDrizzle as transformUploadedImage } from './transformer';

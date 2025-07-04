@@ -111,3 +111,6 @@ export function generatePageUrls(
 		last: createUrl(pagination.totalPages),
 	};
 }
+
+// Alias para compatibilidad con servicios
+export const getPaginationInfo = createPaginationInfo;

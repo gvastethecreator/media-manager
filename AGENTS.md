@@ -318,10 +318,10 @@ approach contrasts with traditional monolithic architectures...
 
 ```bash
 # 1. Start development
-pnpm dev                           # Server on 4444
+pnpm dev                          
 
 # 2. Continuous validation with MCP
-# browser_navigate → http://localhost:3000
+# browser_navigate → http://localhost:5173
 # browser_snapshot → Review structure
 # browser_console_messages → Detect errors
 # browser_take_screenshot → Document state

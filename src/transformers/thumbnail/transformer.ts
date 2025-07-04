@@ -25,7 +25,7 @@ export function transformThumbnail(
 	options: TransformThumbnailOptions = {}
 ): ThumbnailComplete {
 	// Valores por defecto para las opciones
-	const { includeMetadata = true, baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000' } = options;
+	const { includeMetadata = true, baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5173' } = options;
 
 	// Normalización básica de propiedades
 	const id = thumbnail.id || '';

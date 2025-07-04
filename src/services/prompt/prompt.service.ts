@@ -4,7 +4,7 @@
  */
 
 import { db } from '@/lib/drizzle';
-import { prompts, promptImages, promptVideos } from '@/lib/drizzle/schema';
+import { prompts, imagePrompts, videoPrompts } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
@@ -76,23 +76,23 @@ export const notifyPromptChange = async (
 export const getPromptService = async (id: string): Promise<PromptWithStats | null> => {
 	try {
 		logger.info(`🔍 Buscando prompt con ID: ${id}`);
-		
+
 		// Buscar prompt base
 		const promptResult = await db.select().from(prompts).where(eq(prompts.id, id)).limit(1);
-		
+
 		if (promptResult.length === 0) {
 			logger.warn(`⚠️ Prompt no encontrado: ${id}`);
 			return null;
 		}
-		
+
 		const prompt = promptResult[0];
-		
+
 		// Obtener conteos de relaciones
 		const [imageCount, videoCount] = await Promise.all([
 			db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, id)).then(res => res[0]?.count || 0),
 			db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, id)).then(res => res[0]?.count || 0),
 		]);
-		
+
 		// Construir prompt con estadísticas
 		const promptWithStats: PromptWithStats = {
 			...prompt,
@@ -123,7 +123,7 @@ export const getPromptsByIdsService = async (ids: string[]): Promise<PromptWithS
 
 		// Buscar prompts base
 		const promptsResult = await db.select().from(prompts).where(inArray(prompts.id, ids));
-		
+
 		// Obtener estadísticas para cada prompt
 		const promptsWithStats = await Promise.all(
 			promptsResult.map(async (prompt) => {
@@ -131,7 +131,7 @@ export const getPromptsByIdsService = async (ids: string[]): Promise<PromptWithS
 					db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, prompt.id)).then(res => res[0]?.count || 0),
 					db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, prompt.id)).then(res => res[0]?.count || 0),
 				]);
-				
+
 				return {
 					...prompt,
 					_count: {
@@ -141,7 +141,7 @@ export const getPromptsByIdsService = async (ids: string[]): Promise<PromptWithS
 				} as PromptWithStats;
 			})
 		);
-		
+
 		logger.info(`✅ Prompts encontrados: ${promptsWithStats.length}`);
 		return promptsWithStats;
 	} catch (error) {
@@ -169,15 +169,15 @@ export const searchPromptsService = async (
 ): Promise<PromptSearchResult> => {
 	try {
 		logger.info('🔍 Buscando prompts con filtros');
-		
+
 		// Configurar paginación
 		const page = options.page || 1;
 		const pageSize = options.pageSize || 20;
 		const offset = (page - 1) * pageSize;
-		
+
 		// Construir condiciones WHERE
 		const conditions = [];
-		
+
 		if (filters.search) {
 			conditions.push(
 				or(
@@ -187,32 +187,32 @@ export const searchPromptsService = async (
 				)
 			);
 		}
-		
+
 		if (filters.category) {
 			conditions.push(eq(prompts.category, filters.category));
 		}
-		
+
 		if (filters.isPublic !== undefined) {
 			conditions.push(eq(prompts.isPublic, filters.isPublic));
 		}
-		
+
 		if (filters.isFavorite !== undefined) {
 			conditions.push(eq(prompts.isFavorite, filters.isFavorite));
 		}
-		
+
 		if (filters.type) {
 			conditions.push(eq(prompts.type, filters.type));
 		}
-		
+
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-		
+
 		// Configurar orden
 		const sortBy = options.sortBy || 'name';
 		const sortOrder = options.sortOrder || 'asc';
-		const orderByClause = sortOrder === 'desc' 
+		const orderByClause = sortOrder === 'desc'
 			? desc(prompts[sortBy as keyof typeof prompts] as any)
 			: asc(prompts[sortBy as keyof typeof prompts] as any);
-		
+
 		// Ejecutar consultas en paralelo
 		const [promptsResult, totalCount] = await Promise.all([
 			db.select().from(prompts)
@@ -224,7 +224,7 @@ export const searchPromptsService = async (
 				.where(whereClause)
 				.then(res => res[0]?.count || 0)
 		]);
-		
+
 		// Obtener estadísticas para cada prompt
 		const promptsWithStats = await Promise.all(
 			promptsResult.map(async (prompt) => {
@@ -232,7 +232,7 @@ export const searchPromptsService = async (
 					db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, prompt.id)).then(res => res[0]?.count || 0),
 					db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, prompt.id)).then(res => res[0]?.count || 0),
 				]);
-				
+
 				return {
 					...prompt,
 					_count: {
@@ -242,7 +242,7 @@ export const searchPromptsService = async (
 				} as PromptWithStats;
 			})
 		);
-		
+
 		const result: PromptSearchResult = {
 			data: promptsWithStats,
 			total: totalCount,
@@ -252,7 +252,7 @@ export const searchPromptsService = async (
 			hasNext: page * pageSize < totalCount,
 			hasPrevious: page > 1
 		};
-		
+
 		logger.info(`✅ Búsqueda completada, encontrados ${result.total} prompts`);
 		return result;
 	} catch (error) {
@@ -363,7 +363,7 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 		const updateData: any = {
 			updatedAt: new Date(),
 		};
-		
+
 		if (data.name !== undefined) updateData.name = data.name;
 		if (data.description !== undefined) updateData.description = data.description;
 		if (data.emoji !== undefined) updateData.emoji = data.emoji;
@@ -383,7 +383,7 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 		if (data.notes !== undefined) updateData.notes = data.notes;
 		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 		if (data.parentId !== undefined) updateData.parentId = data.parentId;
-		
+
 		// Actualizar prompt usando Drizzle
 		const updatedPrompt = await db.update(prompts)
 			.set(updateData)
@@ -395,7 +395,7 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 			db.select({ count: count() }).from(promptImages).where(eq(promptImages.promptId, id)).then(res => res[0]?.count || 0),
 			db.select({ count: count() }).from(promptVideos).where(eq(promptVideos.promptId, id)).then(res => res[0]?.count || 0),
 		]);
-		
+
 		const promptWithStats: PromptWithStats = {
 			...updatedPrompt[0],
 			_count: {
@@ -500,7 +500,7 @@ export const getPromptCountService = async (): Promise<number> => {
 export const getPromptImagesService = async (promptId: string) => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes del prompt: ${promptId}`);
-		
+
 		// TODO: Implementar cuando existan las tablas de relación
 		// Por ahora retornamos array vacío
 		logger.warn('⚠️ getPromptImages no implementado - falta tabla de relación');
@@ -521,7 +521,7 @@ export const getPromptImagesService = async (promptId: string) => {
 export const getRecentPromptImagesService = async (promptId: string, limit = 6) => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes recientes del prompt: ${promptId}`);
-		
+
 		// TODO: Implementar cuando existan las tablas de relación
 		// Por ahora retornamos array vacío
 		logger.warn('⚠️ getRecentPromptImages no implementado - falta tabla de relación');

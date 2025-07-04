@@ -138,28 +138,6 @@ export function hasSettingsChanged(oldSettings: Settings, newSettings: Settings)
 }
 
 /**
- * Transforma los datos de configuración de Prisma a su formato para la interfaz de usuario
- */
-export async function fromPrismaSettings<T>(settingsData: T): Promise<T> {
-	try {
-		return serializers.fromPrismaSettings(settingsData);
-	} catch (error) {
-		throw handleTransformerError(error as Error);
-	}
-}
-
-/**
- * Transforma los datos de configuración de la interfaz de usuario a su formato para Prisma
- */
-export async function toPrismaSettings<T>(settingsData: T): Promise<T> {
-	try {
-		return serializers.toPrismaSettings(settingsData);
-	} catch (error) {
-		throw handleTransformerError(error as Error);
-	}
-}
-
-/**
  * Deserializa campos JSON en la configuración
  */
 export function deserializeSettingsJson<T>(settingsData: T): T {
@@ -192,23 +170,9 @@ export function validateSettings<T>(settingsData: T): T {
 	}
 }
 
-/**
- * Mapea los datos de configuración para actualizar en Prisma
- */
-export function mapSettingsUpdateToPrisma<T, U>(updateData: T): U {
-	try {
-		return mappers.mapSettingsUpdateToPrisma(updateData);
-	} catch (error) {
-		throw handleTransformerError(error as Error);
-	}
-}
-
 // Compatibilidad para código existente
 export const SettingsTransformer = {
-	fromPrisma: fromPrismaSettings,
-	toPrisma: toPrismaSettings,
 	deserializeJson: deserializeSettingsJson,
 	serializeJson: serializeSettingsJson,
 	validate: validateSettings,
-	mapUpdateToPrisma: mapSettingsUpdateToPrisma,
 };

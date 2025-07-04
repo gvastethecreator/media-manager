@@ -1,22 +1,20 @@
 /**
  * @file Punto de entrada para transformadores de Video
  * @module transformers/video
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ * ✅ MIGRADO A DRIZZLE
  */
 
-// Exportaciones de mappers
-export { mapToVideoBase, mapToVideoWithCounts, mapToVideoWithStats } from './mappers';
-
-// Exportaciones de transformadores
 export {
-	fromDrizzleVideo,
-	fromDrizzleVideos,
-	fromDrizzleVideosWithCounts,
-	fromDrizzleVideoWithCounts,
-	getAllVideos,
-	getVideoById,
-	videosToRecord,
-} from './transformer';
+	mapCreateVideoDataToDrizzle,
+	mapUpdateVideoDataToDrizzle,
+	mapVideoFiltersToDrizzleArgs,
+	// Alias para compatibilidad, marcados como deprecated en el mapper
+	mapCreateVideoDataToPrisma,
+	mapUpdateVideoDataToPrisma,
+	mapVideoFiltersToPrismaArgs,
+} from './mappers';
 
-// Esquemas de validación
-export { VideoCreateInputSchema, VideoSchema, VideoUpdateInputSchema } from './schema';
+export { fromDrizzleVideo, fromDrizzleVideos, toVideoWithStats } from './transformer';
+
+// TODO: Revisar y migrar esquemas de validación si es necesario
+// export { VideoSchema } from './schema';

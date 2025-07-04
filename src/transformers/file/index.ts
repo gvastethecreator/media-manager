@@ -54,7 +54,7 @@ export {
 	deserializeImageMetadata,
 	determineFileType,
 	determineMimeType,
-	formatFileSize,
+	// formatFileSize se importa desde utils, no se reexporta desde aquí
 	// Desde mappers
 	generateFileId,
 	getColorForFileType,
@@ -89,7 +89,7 @@ export const fileTransformer = {
 	// Desde serializers
 	deserializeImageMetadata,
 	serializeImageMetadata,
-	formatFileSize, // Re-exportado desde @/lib/utils/format.utils
+	// formatFileSize no pertenece a este transformador, se consume desde los utils
 	pathsToTreeStructure,
 	serializeDirectoryContents,
 	serializeFileListForUI,

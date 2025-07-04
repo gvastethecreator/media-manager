@@ -4,8 +4,17 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { debounce } from '@/lib/utils';
 import { MemoizedPromptCard } from './prompt-card';
-import type { PromptCardData } from './prompt-server-actions';
-import { searchPrompts } from './prompt-server-actions';
+
+// import type { PromptCardData } from './prompt-server-actions'; // TODO: Archivo no encontrado
+// import { searchPrompts } from './prompt-server-actions'; // TODO: Archivo no encontrado
+
+// Tipo temporal hasta que se implemente el server action
+type PromptCardData = {
+	id: string;
+	name: string;
+	description?: string;
+	content?: string;
+};
 
 interface PromptCardGridProps {
 	/** Título del grid */

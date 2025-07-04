@@ -659,6 +659,59 @@ export async function toggleTagArchive(id: string): Promise<TagWithStats> {
 	}
 }
 
+/**
+ * Clase de servicio para gestión de etiquetas
+ */
+export class TagService {
+	async getTags(filters?: any): Promise<{ tags: TagWithStats[]; total: number }> {
+		const result = await getTags(filters || {});
+		return result;
+	}
+
+	async getTagById(id: string): Promise<TagWithStats | null> {
+		return await getTag(id);
+	}
+
+	async createTag(data: TagCreateInput): Promise<TagWithStats> {
+		return await createTag(data);
+	}
+
+	async updateTag(id: string, data: TagUpdateInput): Promise<TagWithStats | null> {
+		try {
+			return await updateTag(id, data);
+		} catch (error) {
+			if (error instanceof TagServiceError && error.code === 'TAG_NOT_FOUND') {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteTag(id: string): Promise<boolean> {
+		try {
+			await deleteTag(id);
+			return true;
+		} catch (error) {
+			if (error instanceof TagServiceError && error.code === 'TAG_NOT_FOUND') {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	async getTagImages(id: string): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes de la etiqueta
+		logger.info(`Obteniendo imágenes de la etiqueta ${id}`);
+		return [];
+	}
+
+	async getRecentTagImages(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes recientes de la etiqueta
+		logger.info(`Obteniendo imágenes recientes de la etiqueta ${id} (limit: ${limit})`);
+		return [];
+	}
+}
+
 // Servicio principal
 const tagService = {
 	getTag,

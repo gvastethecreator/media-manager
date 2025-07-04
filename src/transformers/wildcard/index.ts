@@ -5,10 +5,13 @@
  */
 
 export {
+	toWildcardWithStats,
+	mapCreateWildcardData,
+	mapUpdateWildcardData,
+	mapWildcardFilters,
+	// Alias para compatibilidad
 	mapCreateWildcardDataToPrisma,
 	mapUpdateWildcardDataToPrisma,
-	mapWildcardSearchOptionsToPrisma,
-	toWildcardWithStats,
 } from './mappers';
 
 export { fromDrizzleWildcard, transformWildcard, type WildcardComplete } from './transformer';

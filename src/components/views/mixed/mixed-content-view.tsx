@@ -4,10 +4,9 @@
  * @description Demuestra cómo usar el FileBrowser con múltiples tipos de entidades
  */
 
-import { FileSearch, Layers, RefreshCw } from 'lucide-react';
+import { Layers, RefreshCw } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/loading';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { IntegratedFileBrowser } from '@/components/features/file-browser';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

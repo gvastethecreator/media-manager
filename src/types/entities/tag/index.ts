@@ -22,7 +22,7 @@ export type {
 	TagWithStats,
 } from './base';
 // --- Tipos Canónicos (NUEVO) ---
-export { TAG_COUNTS_RELATIONS, tagCounts } from './base';
+export { TAG_COUNTS_RELATIONS } from './base';
 // --- Esquemas de Validación ---
 export {
 	RelatedTagSchema,

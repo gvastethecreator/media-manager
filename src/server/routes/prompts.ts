@@ -1,8 +1,8 @@
 import { db } from '@/lib/drizzle';
 import { prompts } from '@/lib/drizzle/schema';
 import { PromptService, promptService } from '@/services/prompt/prompt.service';
-import { toImageWithStats } from '@/transformers/image/image.transformer';
-import { toPromptWithStats } from '@/transformers/prompt/prompt.transformer';
+import { toImageWithStats } from '@/transformers/image';
+import { toPromptWithStats } from '@/transformers/prompt';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';

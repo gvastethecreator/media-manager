@@ -68,3 +68,6 @@ router.post('/', async (req, res) => {
 });
 
 export { router as jsonFilesRouter };
+
+// Exportación default para compatibilidad con server/index.ts
+export default router;

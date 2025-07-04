@@ -133,7 +133,7 @@ export function FoldersView(_props: ViewProps) {
 				}
 			}
 		},
-		[retryCount, isManualRetry]
+		[retryCount]
 	);
 
 	useEffect(() => {
@@ -146,7 +146,7 @@ export function FoldersView(_props: ViewProps) {
 		return () => {
 			viewLogger.debug('🔴 FoldersView Desmontado');
 		};
-	}, []); // Solo ejecutar una vez al montar
+	}, [folders.length, isLoading, loadFolders]); // Especificar todas las dependencias
 
 	const handleFolderClick = useCallback(
 		(folder: FolderEntity) => {

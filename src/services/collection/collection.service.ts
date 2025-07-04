@@ -655,7 +655,72 @@ export const toggleCollectionFavorite = async (id: string): Promise<CollectionWi
 	}
 };
 
-// Servicio principal
+/**
+ * Clase de servicio para gestión de colecciones
+ */
+export class CollectionService {
+	async getCollections(filters?: any): Promise<{ collections: CollectionWithStats[]; total: number }> {
+		const collections = await getCollections();
+		return { collections, total: collections.length };
+	}
+
+	async getCollectionById(id: string): Promise<CollectionWithStats | null> {
+		return await getCollection(id);
+	}
+
+	async createCollection(data: CollectionCreateInput): Promise<CollectionWithStats> {
+		return await createCollection(data);
+	}
+
+	async updateCollection(id: string, data: CollectionUpdateInput): Promise<CollectionWithStats | null> {
+		try {
+			return await updateCollection(id, data);
+		} catch (error) {
+			if (error instanceof CollectionServiceError && error.code === 'COLLECTION_NOT_FOUND') {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteCollection(id: string): Promise<boolean> {
+		try {
+			await deleteCollection(id);
+			return true;
+		} catch (error) {
+			if (error instanceof CollectionServiceError && error.code === 'COLLECTION_NOT_FOUND') {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	async getCollectionImages(id: string): Promise<{ id: string; name: string; path: string }[]> {
+		return await getCollectionImages(id);
+	}
+
+	async toggleFavorite(id: string): Promise<CollectionWithStats> {
+		return await toggleCollectionFavorite(id);
+	}
+
+	async addImageToCollection(collectionId: string, imageId: string): Promise<void> {
+		// TODO: Implementar lógica para agregar imagen a colección
+		logger.info(`Agregando imagen ${imageId} a colección ${collectionId}`);
+	}
+
+	async removeImageFromCollection(collectionId: string, imageId: string): Promise<void> {
+		// TODO: Implementar lógica para remover imagen de colección
+		logger.info(`Removiendo imagen ${imageId} de colección ${collectionId}`);
+	}
+
+	async getRecentCollectionMedia(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener media reciente
+		logger.info(`Obteniendo media reciente de colección ${id} (limit: ${limit})`);
+		return [];
+	}
+}
+
+// Servicio principal (legacy)
 const collectionService = {
 	searchCollections,
 	getCollections,
