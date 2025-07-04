@@ -23,7 +23,7 @@ build.on('close', (code) => {
         setTimeout(() => {
             console.log('\n🌟 3. Iniciando servidor backend...');
             console.log('💡 Para iniciar el servidor manualmente ejecuta: bun run start:server');
-            console.log('🌐 El servidor debería estar en: http://localhost:5173');
+            console.log('🌐 Backend API disponible en: http://localhost:5173');
         }, 3000);
 
     } else {
