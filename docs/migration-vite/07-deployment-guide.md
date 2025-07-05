@@ -11,7 +11,7 @@
 
 ## 2. Paquetes de salida Vite
 
-- `pnpm build:vite` → `dist/` (static) con `index.html` y assets.
+- `bun run build:vite` → `dist/` (static) con `index.html` y assets.
 - API Express compilada con `tsup` → `dist/server`.
 
 ### Archivo `.env.example`
@@ -30,10 +30,10 @@ CORS_ORIGIN=http://localhost:5173
 # Stage 1 – Build frontend
 FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm fetch --prod
+COPY package.json bun.lock ./
+RUN bun install --production
 COPY . .
-RUN pnpm build:vite && pnpm build:server
+RUN bun run build:vite && bun run build:server
 
 # Stage 2 – Runtime
 FROM node:22-slim
@@ -59,7 +59,7 @@ server {
 
 ## 4. Servidor Windows standalone
 
-1. Ejecutar `pnpm build:vite` y `pnpm build:server`.
+1. Ejecutar `bun run build:vite` y `bun run build:server`.
 2. Empaquetar `dist/` + `dist/server` en un zip.
 3. Crear script `start.ps1`:
 
@@ -74,8 +74,8 @@ server {
 ## 5. Empaquetado Tauri 2
 
 ```bash
-pnpm add -D @tauri-apps/cli@^2
-pnpm tauri init --ci --app-name "ImageManager" --dist-dir ../dist --dev-path http://localhost:5173
+bun add -d @tauri-apps/cli@^2
+bunx tauri init --ci --app-name "ImageManager" --dist-dir ../dist --dev-path http://localhost:5173
 ```
 
 - Ajustar `tauri.conf.json` → target `windows-msi`, `nsis`.
@@ -84,7 +84,7 @@ pnpm tauri init --ci --app-name "ImageManager" --dist-dir ../dist --dev-path htt
 ## 6. Empaquetado Electron 30
 
 ```bash
-pnpm add -D electron@30 electron-builder@24
+bun add -d electron@30 electron-builder@24
 ```
 
 `electron-builder.yml`:

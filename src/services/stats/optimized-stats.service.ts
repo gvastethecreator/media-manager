@@ -620,7 +620,7 @@ export const optimizedStatsUtils = {
 	 * Invalida caché cuando se modifica un álbum
 	 */
 	invalidateAlbumCache: () => {
-		// Invalidar en Next.js 15 cache
+		// Invalidar caché global
 		// Esta función se llamaría después de operaciones CRUD en álbumes
 	},
 
@@ -628,7 +628,7 @@ export const optimizedStatsUtils = {
 	 * Invalida caché global
 	 */
 	invalidateGlobalCache: () => {
-		// Invalidar en Next.js 15 cache
+		// Invalidar caché global
 		// Esta función se llamaría después de operaciones significativas
 	},
 };
