@@ -170,6 +170,7 @@ export default [
 			'prisma/migrations/**',
 			'test-results/**',
 			'playwright-report/**',
+			'~/',
 		],
 	},
 ];
