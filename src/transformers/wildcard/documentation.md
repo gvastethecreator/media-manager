@@ -17,7 +17,7 @@ graph TD
     Wildcard --> Actions[Actions]
 
     Transformers --> T1[fromPrismaWildcard]
-    Transformers --> T2[fromPrismaWildcards]
+    
     Transformers --> T3[extendWildcard]
     Transformers --> T4[extendWildcards]
     Transformers --> T5[Serializers]

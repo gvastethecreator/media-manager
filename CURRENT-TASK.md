@@ -7,7 +7,7 @@
 La **FASE 1** ha sido completada con **éxito total** en ~30 minutos:
 
 - [x] ✅ **Runtime migrado**: Bun 1.2.15 funcionando perfectamente
-- [x] ✅ **Package manager**: pnpm → bun install exitoso (bun.lock generado)
+- [x] ✅ **Package manager**: bun install exitoso (bun.lock generado)
 - [x] ✅ **Scripts actualizados**: 30+ scripts migrados a bun/bunx
 - [x] ✅ **Configuración**: bunfig.toml creado y optimizado
 - [x] ✅ **Compatibilidad**: Vite funcionando con Bun runtime
@@ -62,7 +62,6 @@ La **FASE 1** ha sido completada con **éxito total** en ~30 minutos:
 - ✅ `README.md` - Actualizado completamente para Bun
 - ✅ `docs/rules/core-rules.md` - Reglas actualizadas para Bun
 - ✅ `docs/BUN-CONFIGURATION.md` - Guía completa de configuración post-migración ⭐ **NUEVO**
-- ✅ Documentación secundaria - Referencias a pnpm/node corregidas
 
 ---
 

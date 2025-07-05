@@ -158,7 +158,7 @@ async function resetDatabase() {
 
 	// Paso 4: Generar migraciones con Drizzle
 	log('Generando migraciones con Drizzle...', 'info');
-	if (!runCommand('npx', ['drizzle-kit', 'generate'])) {
+	if (!runCommand('bunx', ['drizzle-kit', 'generate'])) {
 		log('Falló la generación de migraciones con Drizzle', 'error');
 		return false;
 	}
@@ -166,7 +166,7 @@ async function resetDatabase() {
 
 	// Paso 5: Aplicar migraciones con Drizzle Push
 	log('Aplicando esquema con Drizzle Push...', 'info');
-	if (!runCommand('npx', ['drizzle-kit', 'push'])) {
+	if (!runCommand('bunx', ['drizzle-kit', 'push'])) {
 		log('Falló la aplicación del esquema con Drizzle', 'error');
 		return false;
 	}

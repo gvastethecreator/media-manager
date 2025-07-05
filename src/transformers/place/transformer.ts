@@ -1,7 +1,7 @@
 /**
  * @file Transformador principal para la entidad Place
  * @module transformers/place/transformer
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';

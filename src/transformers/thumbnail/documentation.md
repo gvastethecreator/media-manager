@@ -76,9 +76,7 @@ const thumbnailBasic = await transformThumbnail(thumbnailData, {
 - **usageCount**: Número de veces que se ha usado este thumbnail
 - **storageEfficiency**: Eficiencia de almacenamiento (calidad vs tamaño)
 
-## Migración desde Prisma
 
-✅ **Completado**: Eliminadas todas las referencias a Prisma
 - Tipos base migrados a definiciones locales
 - Transformadores actualizados a lógica Drizzle
 - Validaciones con Zod

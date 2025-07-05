@@ -7,7 +7,7 @@ Este módulo contiene los transformadores para la entidad **File3D**, responsabl
 ## ✅ Estado de Migración
 
 - **Estado**: ✅ MIGRADO A DRIZZLE
-- **Dependencias de Prisma**: ❌ Eliminadas
+
 - **Compatibilidad**: ✅ Total con tipos locales
 - **Documentación**: ✅ Actualizada
 

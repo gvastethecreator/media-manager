@@ -53,7 +53,7 @@ sequenceDiagram
     participant DB
     Client->>API: createFavorite()
     API->>Transformer: mapCreateFavoriteDataToPrisma()
-    Transformer->>DB: prisma.favorite.create()
+    
     DB-->>Transformer: Favorite
     Transformer-->>API: transformFavorite()
     API-->>Client: FavoriteComplete

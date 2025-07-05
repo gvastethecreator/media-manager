@@ -2,7 +2,7 @@
 
 ## Resumen
 
-Este documento describe el proceso de migración de los tipos en el sistema a una estructura de "tipos canónicos" basada en Prisma, con el objetivo de reducir la duplicación, simplificar la jerarquía de tipos y resolver errores de TypeScript.
+
 
 > **⚠️ NOTA DE MIGRACIÓN**: Este proyecto está migrando gradualmente de Prisma a Drizzle ORM. Durante la transición, ambos ORMs coexisten. Ver [Guía de Coexistencia](../../../docs/migration-drizzle/02-coexistence-guide.md) para detalles sobre la migración en curso.
 
@@ -135,6 +135,6 @@ const updateInput: EntityUpdateInput = {
 const entity: Entity = {
   id: '123',
   name: 'Entidad',
-  // otros campos requeridos por Prisma
+  // otros campos requeridos por Drizzle
 };
 ```

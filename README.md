@@ -173,7 +173,7 @@ La filosofía del sistema combina **organización física** (estructura de carpe
 ```
 Bun 1.2.15 + TypeScript + Vite (transitorio)
 ├── Runtime: Bun (reemplaza Node.js) ✅
-├── Package Manager: bun install (reemplaza pnpm) ✅
+├── Package Manager: bun install ✅
 ├── Bundler: Vite → Bun.build (migración gradual) 🔄
 └── Scripts: Ejecutándose en Bun runtime ✅
 ```
@@ -217,8 +217,6 @@ Bun + Vite (híbrido) + Biome + Playwright
 
 - **Bun** 1.2+ (runtime y package manager) ✅ **NUEVO**
 - **SQLite** 3+ (base de datos)
-- ~~Node.js~~ (reemplazado por Bun)
-- ~~pnpm~~ (reemplazado por bun install)
 
 ### **Instalación**
 
@@ -231,10 +229,10 @@ cd image-manager
 bun install
 
 # Configurar base de datos
-bun run drizzle:push
+bun run db:push
 
 # Verificar migración (opcional)
-bun run drizzle:verify
+bun run db:verify
 ```
 
 ### **Variables de Entorno**
@@ -267,18 +265,18 @@ bun run start         # Iniciar servidor de producción
 ### **Base de Datos**
 
 ```bash
-bun run drizzle:studio   # Abrir Drizzle Studio (GUI)
-bun run drizzle:push     # Aplicar cambios de schema
-bun run drizzle:verify   # Verificar migración Drizzle ✨
-bun run drizzle:generate # Generar migraciones
+bun run db:studio   # Abrir Drizzle Studio (GUI)
+bun run db:push     # Aplicar cambios de schema
+bun run db:verify   # Verificar migración Drizzle ✨
+bun run db:generate # Generar migraciones
 ```
 
 ### **Calidad de Código**
 
 ```bash
 bun run lint             # Linting con ESLint (ejecutado con Bun)
-bun run biome:check      # Linting con Biome (ejecutado con Bun)
-bun run biome:fix        # Auto-fix con Biome
+bun run check      # Linting con Biome (ejecutado con Bun)
+bun run check:fix        # Auto-fix con Biome
 bun run format           # Formatear código
 bun run tsc              # Verificar tipos TypeScript
 ```
@@ -295,7 +293,7 @@ bun run test:debug       # Debug de tests
 ### **Logs y Debugging**
 
 ```bash
-bun run logs             # Ver logs recientes
+bun run logs:list             # Ver logs recientes
 bun run logs:clean       # Limpiar logs antiguos
 bun run check:errors     # Analizar errores en logs
 ```
@@ -339,21 +337,23 @@ bun run check:errors     # Analizar errores en logs
 **Estado**: 100% Funcional
 
 #### **🎯 Logros**
+
 - **Runtime migrado** de Node.js 20+ a Bun 1.2.15
-- **Package manager** migrado de pnpm a `bun install`
+- **Package manager** migrado a `bun install`
 - **30+ scripts** actualizados para usar `bun` y `bunx`
-- **Lockfile** migrado: `pnpm-lock.yaml` → `bun.lock`
+- **Lockfile** migrado a `bun.lock`
 - **Configuración** optimizada con `bunfig.toml`
 - **📚 Documentación completamente actualizada** - Todo el proyecto ahora refleja Bun
 
 #### **📚 Documentación Actualizada**
+
 - ✅ **README.md principal** - Arquitectura, scripts, instalación con Bun
 - ✅ **docs/rules/core-rules.md** - Reglas actualizadas para Bun runtime
 - ✅ **docs/BUN-CONFIGURATION.md** - Guía completa de configuración post-migración
-- ✅ **Documentación secundaria** - Referencias a pnpm/node corregidas en componentes
 - ✅ **Scripts de ejemplo** - Todos los comandos actualizados a bun/bunx
 
 #### **📊 Mejoras de Rendimiento Observadas**
+
 ```
 ⚡ Tiempo de inicio de scripts: 0.07ms (extremadamente rápido)
 📦 Resolución de 125 dependencias: 12.40ms
@@ -456,7 +456,7 @@ image-manager/
 
 ```bash
 # Abrir GUI para explorar la base de datos
-bun run drizzle:studio
+bun run db:studio
 # Disponible en: http://localhost:4983
 ```
 
@@ -493,10 +493,10 @@ bun run build:server
 
 ```bash
 # Verificar schema
-bun run drizzle:check
+bun run db:check
 
 # Recrear base de datos
-bun run db:full-reset
+bun run db:reset
 ```
 
 **Errores de TypeScript:**

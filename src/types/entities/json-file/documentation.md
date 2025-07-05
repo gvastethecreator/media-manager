@@ -77,7 +77,7 @@ sequenceDiagram
     participant DB
     Client->>API: createJsonFile()
     API->>Transformer: mapCreateJsonFileDataToPrisma()
-    Transformer->>DB: prisma.jsonFile.create()
+    
     DB-->>Transformer: JsonFile
     Transformer-->>API: transformJsonFile()
     API-->>Client: JsonFileBase

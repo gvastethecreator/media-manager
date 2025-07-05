@@ -57,7 +57,7 @@ sequenceDiagram
     participant DB
     Client->>API: createFile3D()
     API->>Transformer: mapCreateFile3DDataToPrisma()
-    Transformer->>DB: prisma.file3D.create()
+    
     DB-->>Transformer: File3D
     Transformer-->>API: transformFile3D()
     API-->>Client: File3DBase

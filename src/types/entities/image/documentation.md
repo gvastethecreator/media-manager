@@ -54,7 +54,7 @@ sequenceDiagram
     participant DB
     Client->>API: createImage()
     API->>Transformer: mapCreateImageDataToPrisma()
-    Transformer->>DB: prisma.image.create()
+    
     DB-->>Transformer: Image
     Transformer-->>API: transformImage()
     API-->>Client: ImageComplete

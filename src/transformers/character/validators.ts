@@ -2,7 +2,7 @@
  * @file Validadores para la entidad Character
  * @module transformers/character/validators
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * Estado: Completo, sin dependencias de Prisma
+ 
  */
 
 import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } from '@/types/entities/character';

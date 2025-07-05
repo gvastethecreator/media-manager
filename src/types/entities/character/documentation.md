@@ -45,7 +45,7 @@ sequenceDiagram
     participant DB
     Client->>API: createCharacter()
     API->>Transformer: mapCreateCharacterDataToPrisma()
-    Transformer->>DB: prisma.character.create()
+    
     DB-->>Transformer: Character
     Transformer-->>API: transformCharacter()
     API-->>Client: CharacterComplete

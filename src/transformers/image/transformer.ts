@@ -1,8 +1,7 @@
 /**
  * @file Transformer optimizado para la entidad Image
  * @module transformers/image/transformer
- * @description Transforma datos de Prisma a ImageWithStats con estadísticas pre-calculadas.
- * Patrón: PrismaImageWithCounts → ImageWithStats (optimizado)
+ 
  * Beneficios: 60-80% más rápido vs include completo
  * Última actualización: 2025-01-27
  */
@@ -408,7 +407,7 @@ export function toPrismaImageUpdate(input: ImageUpdateInput): any {
 /**
  * 🔄 Función auxiliar para arrays de imágenes
  */
-export function fromDrizzleImagesWithCounts(drizzleImages: PrismaImageWithCounts[]): ImageWithStats[] {
+export function fromDrizzleImagesWithCounts(drizzleImages: DrizzleImageWithCounts[]): ImageWithStats[] {
 	return drizzleImages.map(fromDrizzleImageWithCounts);
 }
 

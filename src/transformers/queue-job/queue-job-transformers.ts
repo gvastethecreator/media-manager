@@ -1,7 +1,7 @@
 /**
  * @file Transformadores para trabajos en cola
  * @module transformers/queue-job
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
@@ -10,7 +10,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
 import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
 
-// Tipo local equivalente a Prisma (migración a Drizzle)
+// Tipo local equivalente a Drizzle (migración a Drizzle)
 type DrizzleQueueJob = {
 	id: string;
 	type: string;

@@ -41,7 +41,7 @@ La migración de **Next.js 15** a **Vite 7 + React 19** se completó con éxito.
 
 | Objetivo | Indicador | Meta |
 |----------|-----------|------|
-| Mejorar performance build | Tiempo `pnpm build` | ≤ 30 s |
+| Mejorar performance build | Tiempo `bun build` | ≤ 30 s |
 | Reducir tamaño imagen | Docker image | < 250 MB |
 | Garantizar calidad | Tests E2E | 100 % pasen |
 

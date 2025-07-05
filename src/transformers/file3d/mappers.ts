@@ -1,9 +1,9 @@
 // Mappers para File3D
-// ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+
 
 import type { File3D } from '@/types/entities/file3d';
 
-// Tipo local equivalente a Prisma (migración a Drizzle)
+// Tipo local equivalente a Drizzle
 type DrizzleFile3D = {
 	id: string;
 	name: string;

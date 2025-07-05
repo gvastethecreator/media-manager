@@ -76,9 +76,7 @@ const tagBasic = await transformTag(tagData);
 - **popularity**: Score basado en totalRelations × diversityRatio
 - **completenessScore**: Porcentaje de campos completados del perfil
 
-## Migración desde Prisma
 
-✅ **Completado**: Eliminadas todas las referencias a Prisma
 - Tipos base migrados a definiciones locales
 - Transformadores actualizados a lógica Drizzle
 - Validaciones con Zod

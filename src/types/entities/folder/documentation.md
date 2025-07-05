@@ -42,7 +42,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createFolder()
-    API->>Transformer: mapCreateFolderDataToPrisma()
+    
     Transformer->>DB: prisma.folder.create()
     DB-->>Transformer: Folder
     Transformer-->>API: transformFolder()

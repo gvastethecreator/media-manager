@@ -128,7 +128,7 @@ export interface TransformerOptions {
  */
 export interface BaseTransformer<T, U, P = any> {
 	toPrisma(data: Partial<T>): P;
-	fromPrisma(data: U): T;
+	
 	validate(data: unknown): T;
 	extend(data: T, options?: TransformerOptions): Promise<T>;
 }

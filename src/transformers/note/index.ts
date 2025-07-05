@@ -1,7 +1,7 @@
 /**
  * @file Índice de transformadores para la entidad Note
  * @module transformers/note
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';

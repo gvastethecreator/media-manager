@@ -1,7 +1,7 @@
 /**
  * @file Transformer optimizado para la entidad Note
  * @module transformers/note/transformer
- * @description Transformador principal que convierte datos de Prisma a NoteWithStats optimizado
+ 
  * 🎯 Patrón: Solo conteos, sin relaciones completas para máximo rendimiento
  */
 
@@ -10,7 +10,7 @@ import type {
 	NoteStatistics,
 	NoteUpdateInput,
 	NoteWithStats,
-	PrismaNoteWithCounts,
+	NoteComplete,
 } from '@/types/entities/note';
 import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
 
@@ -19,7 +19,7 @@ import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
  * @param data - Datos de Prisma con _count
  * @returns Note optimizado con estadísticas pre-calculadas
  */
-export function fromDrizzleNoteWithCounts(data: PrismaNoteWithCounts): NoteWithStats {
+export function fromPrismaNoteWithCounts(data: NoteComplete): NoteWithStats {
 	const statistics = calculateNoteStatistics(data);
 
 	return {
@@ -49,8 +49,8 @@ export function fromDrizzleNoteWithCounts(data: PrismaNoteWithCounts): NoteWithS
 /**
  * 📊 Calcula estadísticas completas para una nota
  */
-function calculateNoteStatistics(data: PrismaNoteWithCounts): NoteStatistics {
-	const totalItems = Object.values(data._count).reduce((sum, count) => sum + count, 0);
+function calculateNoteStatistics(data: NoteComplete): NoteStatistics {
+	const totalItems = data._count ? Object.values(data._count).reduce((sum, count) => sum + (count || 0), 0) : 0;
 	const wordCount = calculateWordCount(data.content);
 	const characterCount = data.content.length;
 	const readingTime = Math.ceil(wordCount / 200); // ~200 palabras por minuto
@@ -58,19 +58,19 @@ function calculateNoteStatistics(data: PrismaNoteWithCounts): NoteStatistics {
 
 	return {
 		totalItems,
-		totalImages: data._count.images,
-		totalVideos: data._count.videos,
-		totalAlbums: data._count.albums,
-		totalCollections: data._count.collections,
-		totalTags: data._count.tags,
-		totalCharacters: data._count.characters,
-		totalPlaces: data._count.places,
-		totalWorldItems: data._count.worldItems,
-		totalConcepts: data._count.concepts,
-		totalPrompts: data._count.prompts,
-		totalWildcards: data._count.wildcards,
-		totalProperties: data._count.properties,
-		totalGroups: data._count.groups,
+		totalImages: data._count?.images || 0,
+		totalVideos: data._count?.videos || 0,
+		totalAlbums: data._count?.albums || 0,
+		totalCollections: data._count?.collections || 0,
+		totalTags: data._count?.tags || 0,
+		totalCharacters: data._count?.characters || 0,
+		totalPlaces: data._count?.places || 0,
+		totalWorldItems: data._count?.worldItems || 0,
+		totalConcepts: data._count?.concepts || 0,
+		totalPrompts: data._count?.prompts || 0,
+		totalWildcards: data._count?.wildcards || 0,
+		totalProperties: data._count?.properties || 0,
+		totalGroups: data._count?.groups || 0,
 		wordCount,
 		characterCount,
 		readingTime,
@@ -82,7 +82,7 @@ function calculateNoteStatistics(data: PrismaNoteWithCounts): NoteStatistics {
 /**
  * 📊 Calcula score de completitud de la nota (0-100)
  */
-function calculateCompletionScore(data: PrismaNoteWithCounts, totalItems: number): number {
+function calculateCompletionScore(data: NoteComplete, totalItems: number): number {
 	let score = 0;
 
 	// Contenido base (40 puntos)
@@ -120,7 +120,7 @@ function generateExcerpt(content: string, maxLength = 150): string {
 	const truncated = cleaned.substring(0, maxLength);
 	const lastSpace = truncated.lastIndexOf(' ');
 
-	return lastSpace > maxLength * 0.8 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+	return lastSpace > maxLength * 0.8 ? `${truncated.substring(0, lastSpace)}...` : `${truncated}...`;
 }
 
 /**
@@ -225,9 +225,9 @@ function calculateWordCount(content: string): number {
 }
 
 /**
- * 🔄 Convierte NoteCreateInput a formato Prisma
+ * 🔄 Convierte NoteCreateInput a formato Drizzle
  */
-export function toPrismaNoteCreate(input: NoteCreateInput) {
+export function toDrizzleNoteCreate(input: NoteCreateInput) {
 	return {
 		title: input.title,
 		content: input.content || '',
@@ -244,9 +244,9 @@ export function toPrismaNoteCreate(input: NoteCreateInput) {
 }
 
 /**
- * 🔄 Convierte NoteUpdateInput a formato Prisma
+ * 🔄 Convierte NoteUpdateInput a formato Drizzle
  */
-export function toPrismaNoteUpdate(input: NoteUpdateInput) {
+export function toDrizzleNoteUpdate(input: NoteUpdateInput) {
 	const updateData: Record<string, any> = {};
 
 	if (input.title !== undefined) updateData.title = input.title;
@@ -264,4 +264,4 @@ export function toPrismaNoteUpdate(input: NoteUpdateInput) {
 }
 
 // Alias para compatibilidad con importaciones esperadas
-export const fromDrizzleNote = fromDrizzleNoteWithCounts;
+

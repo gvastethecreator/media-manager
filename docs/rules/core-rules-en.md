@@ -8,7 +8,7 @@
 4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
 5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
-7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
+7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `bun run logs:list` para ver logs recientes, `bun run logs:clean [días]` para limpiar logs antiguos, y `bun run check:errors` para análisis avanzado de errores.
 
 ## 🎭 Operation Modes
 
@@ -108,7 +108,7 @@
 
 ### For development
 
-````markdown
+```markdown
 [001] Implement authentication system
 
 ## Context
@@ -142,7 +142,7 @@ C -->|No| E[Error 401]
 D --> F[Save in client]
 F --> G[Authenticated requests]
 \```
-````
+```
 
 ### For knowledge
 
@@ -226,9 +226,9 @@ approach contrasts with traditional monolithic architectures...
 
 ### Logging Commands
 
-- `pnpm <script>`: Runs a task (e.g., `pnpm lint`) and saves its log.
-- `pnpm logs [action] [value]`: Manages logs. `list [num]` to view, `clean [days]` to clean.
-- `pnpm check:errors -- [--tool <name>] [--days <num>]`: Searches for errors in logs.
+- `bun run <script>`: Runs a task (e.g., `bun run lint`) and saves its log.
+- `bun run logs [action] [value]`: Manages logs. `list [num]` to view, `clean [days]` to clean.
+- `bun run check:errors -- [--tool <name>] [--days <num>]`: Searches for errors in logs.
 
 ## 🎭 Playwright MCP - Universal Development Tool
 

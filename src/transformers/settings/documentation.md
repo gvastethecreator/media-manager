@@ -9,7 +9,7 @@
 
 ## Descripción
 
-El transformer de Settings maneja la configuración global del sistema, incluyendo apariencia, notificaciones, privacidad y configuraciones avanzadas. Ha sido migrado completamente de Prisma a Drizzle con una arquitectura modular estándar.
+
 
 ## Estructura de Archivos
 

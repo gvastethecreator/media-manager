@@ -9,8 +9,8 @@ Todos los scripts respetan la regla **Windows SIEMPRE**; se proporcionan equival
 | `dev:vite` | Inicia servidor Vite + proxy API |
 | `build:vite` | Compila frontend y API |
 | `preview:vite` | Previsualiza build |
-| `db:full-reset` | Reset DB usando Prisma + seed |
-| `logs:list` | Lista logs con `pnpm logs list` |
+| `db:reset` | Reset DB usando Drizzle + seed |
+| `logs:list` | Lista logs con `bun run logs:list` |
 | `logs:clean` | Limpia logs anteriores a X días |
 | `check:errors` | Resume errores TypeScript |
 | `desktop:tauri` | Compila app Tauri |
@@ -38,7 +38,7 @@ Get-FileHash .\releases\$zip -Algorithm SHA256 | Out-File .\releases\$zip.sha256
 ## 3. Git hooks (Husky)
 
 ```bash
-npx husky add .husky/pre-commit "pnpm lint && pnpm biome:check"
+bunx husky add .husky/pre-commit "bun lint && bun check"
 ```
 
 ## 4. Task runner opcional: **Justfile**
@@ -47,9 +47,9 @@ npx husky add .husky/pre-commit "pnpm lint && pnpm biome:check"
 
 ```just
 build :-
-    pnpm build:vite
+    bun build:vite
 release-win :-
-    pnpm build:vite
+    bun build:vite
     pwsh scripts/ps/zip-release.ps1 1.0.0
 ```
 
@@ -60,7 +60,7 @@ release-win :-
 ## 6. Script `release:windows`
 
 ```jsonc
-"release:windows": "pnpm desktop:tauri && pwsh scripts/ps/zip-release.ps1 %npm_package_version%"
+"release:windows": "bun desktop:tauri && pwsh scripts/ps/zip-release.ps1 %npm_package_version%"
 ```
 
 ## Checklist

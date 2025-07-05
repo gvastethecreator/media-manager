@@ -80,9 +80,7 @@ const workflowBasic = await transformWorkflow(workflowData, {
 - **popularityScore**: Score basado en número de ejecuciones
 - **completenessScore**: Porcentaje de campos completados del perfil
 
-## Migración desde Prisma
 
-✅ **Completado**: Eliminadas todas las referencias a Prisma
 - Tipos base migrados a definiciones locales
 - Transformadores actualizados a lógica Drizzle
 - Validaciones con Zod

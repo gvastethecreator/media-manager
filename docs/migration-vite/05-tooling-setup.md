@@ -3,7 +3,7 @@
 ## 1. Instalar Vite y plugin React
 
 ```bash
-pnpm add -D vite@^7 @vitejs/plugin-react@^4 vite-tsconfig-paths vite-plugin-svgr
+bun add -d vite@^7 @vitejs/plugin-react@^4 vite-tsconfig-paths vite-plugin-svgr
 ```
 
 ## 2. Estructura de archivos
@@ -53,8 +53,8 @@ export default defineConfig({
 ## 5. Tailwind 4
 
 ```bash
-pnpm add -D tailwindcss@latest postcss autoprefixer @tailwindcss/postcss
-npx tailwindcss init tailwind.config.ts -p
+bun add -d tailwindcss@latest postcss autoprefixer @tailwindcss/postcss
+bunx tailwindcss init tailwind.config.ts -p
 ```
 
 Config:
@@ -69,7 +69,7 @@ plugins: [require('@tailwindcss/typography')]
 ## 6. tsup para API
 
 ```bash
-pnpm add -D tsup
+bun add -d tsup
 ```
 
 `tsup.config.ts`:
@@ -109,11 +109,11 @@ Agregar script:
 ## 8. Husky + Lint‐staged (opcional)
 
 ```bash
-pnpm add -D husky lint-staged
+bun add -d husky lint-staged
 ```
 
 ## Validación
 
-- [ ] `pnpm dev:vite` inicia sin errores en 2‒3 s.
+- [ ] `bun dev:vite` inicia sin errores en 2‒3 s.
 - [ ] ESLint y Biome funcionan en HMR.
 - [ ] Tailwind genera clases correctamente.

@@ -64,7 +64,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createUploadedImage()
-    API->>Transformer: mapCreateUploadedImageDataToPrisma()
+    
     Transformer->>DB: prisma.uploadedImage.create()
     DB-->>Transformer: UploadedImage
     Transformer-->>API: transformUploadedImage()

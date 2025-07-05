@@ -74,7 +74,7 @@ sequenceDiagram
     participant DB
     Client->>API: createSettings()
     API->>Transformer: mapCreateSettingsDataToPrisma()
-    Transformer->>DB: prisma.settings.create()
+    
     DB-->>Transformer: Settings
     Transformer-->>API: transformSettings()
     API-->>Client: SettingsBase

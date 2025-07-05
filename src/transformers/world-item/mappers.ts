@@ -1,7 +1,7 @@
 /**
  * @file Mapeadores para la entidad WorldItem
  * @module transformers/world-item/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
