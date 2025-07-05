@@ -5,7 +5,7 @@
  *
  * Estado de migración:
  * - ✅ Mappers: Convertidos a tipos Drizzle
- * - ✅ Serializers: Sin dependencias de Prisma
+ 
  * - ✅ Transformer: Usando tipos locales
  * - ✅ Documentación: Pendiente actualización
  */

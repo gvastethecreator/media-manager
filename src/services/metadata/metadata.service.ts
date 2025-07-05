@@ -15,14 +15,15 @@ import { db } from '@/lib/drizzle';
 import { metadatas } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	mapCreateMetadataDataToPrisma,
-	mapUpdateMetadataDataToPrisma,
+	mapCreateInputToDrizzle,
+	mapUpdateInputToDrizzle,
 	transformMetadata,
 	transformMetadatas,
 } from '@/transformers/metadata';
 import { MetadataExtended, MetadataToCreate } from '@/types/entities/metadata/extended';
 import { MetadataBase } from '@/types/entities/metadata/types';
 import type { MediaMetadata } from '@/types/metadata.types';
+import { NonExistentRelationError } from '#/lib/errors';
 
 const metadataLogger = serverLogger.withContext('MetadataService');
 
@@ -174,21 +175,21 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
  */
 export async function createMetadata(data: Partial<MetadataBase>): Promise<MetadataExtended | null> {
 	try {
-		const prismaData = mapCreateMetadataDataToPrisma(data);
+		const drizzleData = mapCreateInputToDrizzle(data);
 
 		// **MIGRACIÓN A DRIZZLE**
 		const result = await db
 			.insert(metadatas)
 			.values({
 				id: crypto.randomUUID(),
-				entityType: prismaData.entityType,
-				entityId: prismaData.entityId,
-				key: prismaData.key,
-				value: prismaData.value || null,
-				type: prismaData.type || 'string',
-				isPublic: prismaData.isPublic || false,
-				category: prismaData.category || null,
-				description: prismaData.description || null,
+				entityType: drizzleData.entityType,
+				entityId: drizzleData.entityId,
+				key: drizzleData.key,
+				value: drizzleData.value || null,
+				type: drizzleData.type || 'string',
+				isPublic: drizzleData.isPublic || false,
+				category: drizzleData.category || null,
+				description: drizzleData.description || null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
@@ -220,11 +221,11 @@ export async function updateMetadata(
 	data: Partial<Omit<MetadataBase, 'id' | 'entityId' | 'entityType'>>
 ): Promise<MetadataExtended | null> {
 	try {
-		const prismaData = mapUpdateMetadataDataToPrisma(data);
+		const drizzleData = mapUpdateInputToDrizzle(data);
 		// **MIGRACIÓN A DRIZZLE**
 		const result = await db
 			.update(metadatas)
-			.set({ ...prismaData, updatedAt: new Date() })
+			.set({ ...drizzleData, updatedAt: new Date() })
 			.where(eq(metadatas.id, id))
 			.returning();
 

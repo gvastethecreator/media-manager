@@ -313,7 +313,7 @@ export async function getSystemStats(): Promise<SystemRuntimeStats> {
 		// Obtener tamaño de caché (simulado con el directorio de Vite)
 		let cacheSize = 0;
 		try {
-			const viteCachePath = path.join(process.cwd(), 'node_modules/.vite');
+			const viteCachePath = path.join(process.cwd(), '.vite');
 			const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
 			cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
 		} catch (error) {

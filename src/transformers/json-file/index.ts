@@ -1,7 +1,7 @@
 /**
  * @file Punto de entrada para transformadores de JsonFile
  * @module transformers/json-file
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 // Exportar mappers, serializers, validators y schemas

@@ -1,7 +1,7 @@
 /**
  * @file Mappers para la entidad JsonFile
  * @module transformers/json-file/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { JsonFileBase, JsonFileCreateInput, JsonFileUpdateInput } from '@/types/entities/json-file';

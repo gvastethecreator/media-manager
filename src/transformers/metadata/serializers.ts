@@ -1,7 +1,7 @@
 /**
  * @file Serializadores para la entidad Metadata
  * @module transformers/metadata/serializers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { MetadataExtended } from '@/types/entities/metadata';

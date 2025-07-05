@@ -15,7 +15,7 @@ const logger = serverLogger.withContext('ImageSerializer');
  * Transforma datos planos a una entidad ImageComplete (solo campos canónicos)
  * @param data Objeto plano compatible con ImageComplete
  */
-export function fromPrismaImage(data: Partial<ImageComplete>): ImageComplete {
+export function fromDrizzleImage(data: Partial<ImageComplete>): ImageComplete {
 	if (!data.id) throw new Error('El campo id es obligatorio en ImageComplete');
 	if (!data.folder) throw new Error('El campo folder es obligatorio en ImageComplete');
 	return {

@@ -1,7 +1,7 @@
 /**
  * @file Serializadores para la entidad Profile
  * @module transformers/profile/serializers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { ProfileWithStats } from '@/types/entities/profile';

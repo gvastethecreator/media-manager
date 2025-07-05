@@ -1,7 +1,7 @@
 /**
  * @file Validadores para la entidad QueueJob
  * @module transformers/queue-job/validators
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

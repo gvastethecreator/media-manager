@@ -17,8 +17,7 @@ import type {
 
 const logger = serverLogger.withContext('FolderTransformer');
 
-// Este archivo ya no necesita tipos de Prisma, ya que la migración a Drizzle está completa.
-// Los tipos `FolderFromPrisma` y el payload `folderWithCountsPayload` se han eliminado.
+
 
 /**
  * 🔄 Calcula estadísticas avanzadas para una carpeta

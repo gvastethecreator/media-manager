@@ -2,7 +2,7 @@
  * @file Funciones para serializar y deserializar datos de álbumes
  * @module transformers/album/serializers
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * Estado: Completo, sin dependencias de Prisma
+ 
  */
 
 import type { Album, AlbumStatistics, AlbumWithStats } from '@/types/entities/album';

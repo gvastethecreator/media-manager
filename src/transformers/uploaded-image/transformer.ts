@@ -2,7 +2,7 @@
  * @file Transformer for UploadedImage entity
  * @module transformers/uploaded-image/transformer
  * @description Contains functions to transform Drizzle UploadedImage objects into application-level types.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import {
@@ -98,4 +98,4 @@ export const transformToUploadedImage = transformToUploadedImageFromDrizzle;
 /**
  * @deprecated Usar transformToUploadedImageWithRelationsFromDrizzle
  */
-export const transformToUploadedImageWithRelations = transformToUploadedImageWithRelationsFromDrizzle;
+

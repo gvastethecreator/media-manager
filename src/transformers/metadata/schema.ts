@@ -1,7 +1,7 @@
 /**
  * @file Esquemas Zod para la entidad Metadata
  * @module transformers/metadata/schema
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

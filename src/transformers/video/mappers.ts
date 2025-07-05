@@ -2,7 +2,7 @@
  * @file Funciones de mapeo para la entidad Video.
  * @module transformers/video/mappers
  * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Drizzle para la entidad Video.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -233,4 +233,4 @@ export const mapUpdateVideoDataToPrisma = mapUpdateVideoDataToDrizzle;
 /**
  * @deprecated Usar mapVideoFiltersToDrizzleArgs
  */
-export const mapVideoFiltersToPrismaArgs = mapVideoFiltersToDrizzleArgs;
+

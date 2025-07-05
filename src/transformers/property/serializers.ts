@@ -1,7 +1,7 @@
 /**
  * @file Serializadores para la entidad Property
  * @module transformers/property/serializers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { PropertyWithStats } from '@/types/entities/property';

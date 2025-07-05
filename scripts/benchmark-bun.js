@@ -6,7 +6,7 @@
 
 const { performance } = require('perf_hooks');
 
-console.log('🚀 BENCHMARK: Node.js vs Bun Runtime Performance');
+console.log('🚀 BENCHMARK: Bun vs Bun Runtime Performance');
 console.log('================================================');
 
 // Test 1: Tiempo de inicio de scripts

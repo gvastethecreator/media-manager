@@ -2,7 +2,7 @@
  * @file Funciones de serialización/deserialización para la entidad Collection.
  * @module transformers/collection/serializers
  * @description Contiene funciones para manejar la serialización de campos complejos (JSON) de la entidad Collection.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -15,7 +15,7 @@ import type {
 	CollectionUpdateInput,
 } from '@/types/entities/collection';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle
 type DrizzleCollectionCreateInput = {
 	name: string;
 	description?: string | null;

@@ -1,7 +1,7 @@
 /**
  * @file Mappers para la entidad Profile
  * @module transformers/profile/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '@/types/entities/profile';

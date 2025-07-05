@@ -1,7 +1,7 @@
 /**
  * @file Funciones de mapeo para la entidad Note
  * @module transformers/note/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -186,7 +186,7 @@ export const mapNoteSearchOptionsToPrisma = mapNoteSearchOptionsToDrizzle;
 /**
  * @deprecated Usar mapNoteFiltersToDrizzle
  */
-export const mapNoteFiltersToPrisma = mapNoteFiltersToDrizzle;
+export const mapNoteFiltersToDrizzle = mapNoteFiltersToDrizzle;
 
 // Aliases para compatibilidad con exportaciones esperadas
 export const toCreateNoteData = mapCreateNoteDataToDrizzle;

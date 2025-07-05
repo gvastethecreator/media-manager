@@ -2,7 +2,7 @@
  * @file Validadores para la entidad Group
  * @module transformers/group/validators
  * @description Funciones de validación con Zod para Group
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

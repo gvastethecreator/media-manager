@@ -2,7 +2,7 @@
 
 ## 📋 Descripción
 
-El transformer de Video implementa el patrón **EntityWithStats** para convertir datos de Prisma en objetos `VideoWithStats` optimizados, incluyendo análisis técnico avanzado, métricas de calidad y estadísticas pre-calculadas.
+El transformer de Video implementa el patrón **EntityWithStats** para convertir datos de Drizzle en objetos `VideoWithStats` optimizados, incluyendo análisis técnico avanzado, métricas de calidad y estadísticas pre-calculadas.
 
 ## 🌟 Características Principales
 
@@ -55,13 +55,13 @@ interface VideoStatistics {
 
 ## 🔧 Funciones Principales
 
-### `fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): VideoWithStats`
+### `fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts): VideoWithStats`
 
-Función principal que transforma un video de Prisma a VideoWithStats.
+Función principal que transforma un video de Drizzle a VideoWithStats.
 
 **Parámetros:**
 
-- `prismaVideo`: Objeto de video de Prisma con `_count` incluido
+- `drizzleVideo`: Objeto de video de Drizzle con `_count` incluido
 
 **Retorna:**
 
@@ -70,28 +70,23 @@ Función principal que transforma un video de Prisma a VideoWithStats.
 **Ejemplo:**
 
 ```typescript
-const prismaVideo = await db.video.findUnique({
-  where: { id },
-  include: {
-    _count: {
-      select: {
-        albums: true,
-        collections: true,
-        tags: true,
-        // ... más conteos
-      }
-    }
-  }
+const drizzleVideo = await db.query.videos.findFirst({
+  where: (videos, { eq }) => eq(videos.id, id),
+  with: {
+    albums: { columns: { id: true } },
+    collections: { columns: { id: true } },
+    tags: { columns: { id: true } },
+  },
 });
 
-const videoWithStats = fromPrismaVideoWithCounts(prismaVideo);
+const videoWithStats = fromDrizzleVideoWithCounts(drizzleVideo);
 console.log(videoWithStats.statistics.qualityScore); // 85
 console.log(videoWithStats.statistics.technicalGrade); // 'A'
 ```
 
-### `fromPrismaVideosWithCounts(videos: PrismaVideoWithCounts[]): VideoWithStats[]`
+### `fromDrizzleVideosWithCounts(videos: DrizzleVideoWithCounts[]): VideoWithStats[]`
 
-Transforma múltiples videos de Prisma.
+Transforma múltiples videos de Drizzle.
 
 ### Funciones de Store Optimizado
 
@@ -163,16 +158,25 @@ enum VideoQuality {
 
 ### Consultas Optimizadas
 
-```sql
--- ANTES: Include completo (lento)
-SELECT * FROM Video
-INCLUDE albums, collections, tags, characters...
+```typescript
+// ANTES: Select * y luego conteos manuales (o Drizzle include)
+// DESPUÉS: Drizzle con with y count (más eficiente)
+const videosWithCounts = await db.query.videos.findMany({
+  with: {
+    albums: { columns: { id: true } },
+    collections: { columns: { id: true } },
+    tags: { columns: { id: true } },
+  },
+});
 
--- DESPUÉS: Solo conteos (60-80% más rápido)
-SELECT *,
-  (SELECT COUNT(*) FROM albums WHERE videoId = Video.id) as albumsCount,
-  (SELECT COUNT(*) FROM collections WHERE videoId = Video.id) as collectionsCount
-FROM Video
+const transformedVideos = videosWithCounts.map(video => ({
+  ...video,
+  _count: {
+    albums: video.albums.length,
+    collections: video.collections.length,
+    tags: video.tags.length,
+  },
+}));
 ```
 
 ### Acceso a Datos
@@ -241,12 +245,16 @@ videos.forEach(video => {
 
 ```typescript
 export async function getVideo(id: string): Promise<VideoWithStats | null> {
-  const prismaVideo = await db.video.findUnique({
-    where: { id },
-    include: { _count: { select: { albums: true, /* ... */ } } }
+  const drizzleVideo = await db.query.videos.findFirst({
+    where: (videos, { eq }) => eq(videos.id, id),
+    with: {
+      albums: { columns: { id: true } },
+      collections: { columns: { id: true } },
+      tags: { columns: { id: true } },
+    },
   });
 
-  return prismaVideo ? fromPrismaVideoWithCounts(prismaVideo) : null;
+  return drizzleVideo ? fromDrizzleVideoWithCounts(drizzleVideo) : null;
 }
 ```
 

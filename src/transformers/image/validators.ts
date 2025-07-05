@@ -2,7 +2,7 @@
  * @file Validadores para la entidad Image
  * @module transformers/image/validators
  * @description Funciones de validación con Zod para Image
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

@@ -1,7 +1,7 @@
 /**
  * @file Validadores para la entidad Metadata
  * @module transformers/metadata/validators
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

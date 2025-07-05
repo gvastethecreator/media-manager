@@ -2,7 +2,7 @@
  * @file Validadores para la entidad Album
  * @module transformers/album/validators
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * Estado: Completo, sin dependencias de Prisma
+ 
  */
 
 import type { Album, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';

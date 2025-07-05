@@ -1,7 +1,7 @@
 /**
  * @file Transformadores para entidades Metadata
  * @module transformers/metadata
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
@@ -45,8 +45,3 @@ export {
 	// Re-exportar desde @/lib/utils/format.utils
 	formatBytes,
 };
-
-export {
-	mapCreateInputToDrizzle as mapCreateMetadataDataToPrisma,
-	mapUpdateInputToDrizzle as mapUpdateMetadataDataToPrisma,
-} from './mappers';

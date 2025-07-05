@@ -2,7 +2,7 @@
  * @file Esquemas Zod para la entidad Folder
  * @module transformers/folder/schema
  * @description Definición de esquemas de validación para la entidad Folder
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

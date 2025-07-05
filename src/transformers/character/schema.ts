@@ -2,7 +2,7 @@
  * @file Esquemas de validación Zod para la entidad Character
  * @module transformers/character/schema
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * Estado: Completo, sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

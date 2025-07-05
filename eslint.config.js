@@ -157,19 +157,27 @@ export default [
 	},
 	{
 		ignores: [
-			'node_modules/**',
-			'dist/**',
-			'build/**',
-			'coverage/**',
-			'.turbo/**',
-			'logs/**',
-			'public/**',
+			// Directorios de dependencias y build
+			'**/node_modules/**',
+			'**/dist/**',
+			'**/build/**',
+			'**/coverage/**',
+			'**/.turbo/**',
+			'**/.next/**',
+			'**/.vercel/**',
+
+			// Reportes y logs
+			'**/logs/**',
+			'**/test-results/**',
+			'**/playwright-report/**',
+
+			// Assets y configuraciones
+			'**/public/**',
 			'*.config.js',
 			'*.config.ts',
+
+			// Scripts y otros
 			'scripts/**',
-			'prisma/migrations/**',
-			'test-results/**',
-			'playwright-report/**',
 			'~/',
 		],
 	},

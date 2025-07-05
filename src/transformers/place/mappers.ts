@@ -4,7 +4,7 @@
  * @description Contiene funciones para:
  *              1. Transformar la entrada de la app (forms, actions) a tipos de Drizzle (create/update).
  *              2. Transformar los datos de Drizzle a tipos enriquecidos de la app (PlaceWithStats).
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { safeJsonParse } from '@/lib/utils/json';
@@ -12,7 +12,7 @@ import { calculateCompleteness } from '@/lib/utils/transformers/calculate-comple
 import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
-// Tipos locales equivalentes a Drizzle (sin dependencias de Prisma)
+// Tipos locales equivalentes a Drizzle
 type DrizzlePlaceWithCounts = {
 	id: string;
 	name: string;

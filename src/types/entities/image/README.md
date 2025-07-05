@@ -31,7 +31,7 @@ graph TD
 ## 🚨 Notas de migración
 
 - **Legacy eliminado:** Solo se exportan tipos canónicos.
-- **No importar tipos de Prisma ni archivos legacy.**
+
 - **Validar siempre con ImageSchema antes de persistir.**
 
 ## 📝 Ejemplo de uso

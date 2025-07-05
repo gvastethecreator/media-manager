@@ -2,7 +2,7 @@
  * @file Validadores para la entidad Audio
  * @module transformers/audio/validators
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * Estado: Completo, sin dependencias de Prisma
+ 
  */
 
 import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';

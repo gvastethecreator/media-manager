@@ -1,7 +1,7 @@
 /**
  * @file Validadores para la entidad Prompt
  * @module transformers/prompt/validators
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

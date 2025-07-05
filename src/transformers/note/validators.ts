@@ -1,7 +1,7 @@
 /**
  * @file Validadores para la entidad Note
  * @module transformers/note/validators
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';
