@@ -1,5 +1,5 @@
 /**
- * @file Mappers canónicos para la entidad Image (sin Prisma ni legacy)
+ 
  * @module transformers/image/mappers
  */
 

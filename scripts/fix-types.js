@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 /**
  * Script para corregir errores TypeScript críticos de forma sistemática

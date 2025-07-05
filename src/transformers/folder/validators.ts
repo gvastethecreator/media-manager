@@ -2,7 +2,7 @@
  * @file Validadores para la entidad Folder
  * @module transformers/folder/validators
  * @description Validación de datos usando esquemas Zod para la entidad Folder
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

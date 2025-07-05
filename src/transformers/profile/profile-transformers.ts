@@ -153,7 +153,7 @@ export function transformProfile(profile: Profile): ProfileExtended {
 
 /**
  * Transforma una lista de Profiles de Prisma a objetos extendidos
- * @param profiles - Lista de perfiles de Prisma
+ 
  * @returns Lista de perfiles extendidos
  */
 export function transformProfiles(profiles: Profile[]): ProfileExtended[] {

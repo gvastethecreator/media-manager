@@ -2,13 +2,13 @@
  * @file Transformador principal para la entidad Character
  * @module transformers/character/transformer
  * @description Contiene la lógica para convertir un objeto Character de Drizzle a nuestros tipos canónicos.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle
 type DrizzleCharacterWithCounts = {
 	id: string;
 	name: string;

@@ -12,7 +12,7 @@ import { profiles } from '../../src/lib/drizzle/schema';
  * 3. Realiza consultas de prueba
  * 4. Valida que el schema funciona correctamente
  *
- * Ejecución: pnpm drizzle:test
+ * Ejecución: bun run db:verify
  */
 
 async function testDrizzleConfiguration() {
@@ -55,7 +55,7 @@ async function testDrizzleConfiguration() {
 		const hasProfileTable = dbInfo.tableNames.includes('Profile');
 		if (!hasProfileTable) {
 			console.log('⚠️ La tabla Profile no existe. Esto es normal si la DB está vacía.');
-			console.log('   Ejecuta `pnpm db:full-reset` para poblar la base de datos.\n');
+			console.log('   Ejecuta `bun run db:reset` para poblar la base de datos.\n');
 		} else {
 			// Intentar consulta a la tabla profiles
 			const profileCount = await db.select().from(profiles);
@@ -94,7 +94,7 @@ async function testDrizzleConfiguration() {
 		console.log('   ✅ Schema: OK');
 
 		if (!hasProfileTable) {
-			console.log('\n💡 Próximo paso: Ejecutar `pnpm db:full-reset` para poblar la base de datos');
+			console.log('\n💡 Próximo paso: Ejecutar `bun run db:reset` para poblar la base de datos');
 		} else {
 			console.log('\n💡 Próximo paso: Comenzar migración de servicios de solo lectura');
 		}
@@ -102,7 +102,7 @@ async function testDrizzleConfiguration() {
 		console.error('❌ Error durante las pruebas:', error);
 		console.log('\n🔧 Posibles soluciones:');
 		console.log('   1. Verificar que DATABASE_URL esté configurada en .env');
-		console.log('   2. Ejecutar `pnpm db:full-reset` para crear/poblar la base de datos');
+		console.log('   2. Ejecutar `bun run db:reset` para crear/poblar la base de datos');
 		console.log('   3. Verificar que el archivo de base de datos exista y sea accesible');
 
 		process.exit(1);

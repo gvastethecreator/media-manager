@@ -1,7 +1,7 @@
 /**
  * @file Transformador principal para la entidad JsonFile
  * @module transformers/json-file/transformer
- * @description Contiene la lógica para convertir un objeto JsonFile de Prisma a nuestro tipo canónico.
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -60,7 +60,7 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 /**
  * 🔄 Transforma una lista de archivos JSON de Prisma a una lista de JsonFileWithStats.
  *
- * @param prismaJsonFiles - Un array de objetos JsonFile de Prisma.
+ * @param drizzleJsonFiles - Un array de objetos JsonFile de Drizzle.
  * @returns Un array de objetos JsonFileWithStats.
  */
 export function fromDrizzleJsonFiles(drizzleJsonFiles: JsonFileBase[]): JsonFileWithStats[] {

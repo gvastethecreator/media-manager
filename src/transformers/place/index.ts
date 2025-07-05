@@ -3,7 +3,7 @@
  * @module transformers/place
  * @description Centraliza la exportación de funciones de transformación y mapeo
  * para la entidad Place, asegurando una interfaz consistente para el resto de la aplicación.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 // Exportar mappers, serializers, validators y schemas

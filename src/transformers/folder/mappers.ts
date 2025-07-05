@@ -1,7 +1,7 @@
 /**
  * @file Funciones de mapeo para la entidad Folder
  * @module transformers/folder/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -17,7 +17,7 @@ import { normalizeFolderPath } from './serializers';
 
 const logger = serverLogger.withContext('FolderMappers');
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle (migración a Drizzle)
 type DrizzleFolderCreateInput = {
 	id?: string;
 	name: string;

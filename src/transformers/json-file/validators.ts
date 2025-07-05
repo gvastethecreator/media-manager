@@ -1,7 +1,7 @@
 /**
  * @file Validadores para la entidad JsonFile
  * @module transformers/json-file/validators
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

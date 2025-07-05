@@ -2,7 +2,7 @@
  * @file Transformador principal para la entidad File3D
  * @module transformers/file3d/transformer
  * @description Contiene la lógica para convertir un objeto File3D de Drizzle a nuestro tipo canónico.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';

@@ -1,5 +1,5 @@
 /**
- * Script para abrir Prisma Studio
+ * Script para abrir Drizzle Studio
  */
 import { execSync } from 'child_process';
 import fs from 'fs';
@@ -28,27 +28,27 @@ function log(message, color = colors.blue) {
 
 // Verificar que existe la base de datos
 const rootDir = path.resolve(__dirname, '../..');
-const dbPath = path.join(rootDir, 'prisma', 'dev.db');
+const dbPath = path.join(rootDir, 'dev.db');
 
 if (!fs.existsSync(dbPath)) {
 	log('⚠️ La base de datos no existe. Debes ejecutar primero:', colors.yellow);
-	log('   pnpm run db:full-reset', colors.yellow);
+	log('   bun run db:reset', colors.yellow);
 	process.exit(1);
 }
 
-// Abrir Prisma Studio
-log('🚀 Abriendo Prisma Studio...', colors.green);
+// Abrir Drizzle Studio
+log('🚀 Abriendo Drizzle Studio...', colors.green);
 log('📊 Podrás explorar y editar los datos de la base de datos', colors.cyan);
-log('🔗 URL: http://localhost:5555', colors.magenta);
-log('⌨️ Presiona Ctrl+C para cerrar Prisma Studio', colors.yellow);
+log('🔗 URL: http://localhost:4983', colors.magenta);
+log('⌨️ Presiona Ctrl+C para cerrar Drizzle Studio', colors.yellow);
 
 try {
-	execSync('npx prisma studio', { stdio: 'inherit' });
+	execSync('bunx drizzle-kit studio', { stdio: 'inherit' });
 } catch (error) {
 	if (error.signal === 'SIGINT') {
-		log('\n👋 Prisma Studio cerrado correctamente', colors.green);
+		log('\n👋 Drizzle Studio cerrado correctamente', colors.green);
 	} else {
-		log(`\n❌ Error al ejecutar Prisma Studio: ${error.message}`, colors.red);
+		log(`\n❌ Error al ejecutar Drizzle Studio: ${error.message}`, colors.red);
 		process.exit(1);
 	}
 }

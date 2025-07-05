@@ -2,7 +2,7 @@
  * @file Esquemas Zod para la entidad Group
  * @module transformers/group/schema
  * @description Definición de esquemas de validación para Group
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

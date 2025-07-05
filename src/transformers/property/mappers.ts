@@ -8,9 +8,9 @@ import { calculateCompleteness } from '@/lib/utils/transformers';
 import { PropertyStatistics, PropertyWithCounts, PropertyWithStats } from '@/types/entities/property';
 
 /**
- * Convierte un objeto Property de Prisma (con conteos) a un objeto PropertyWithStats.
+ 
  *
- * @param prismaProperty El objeto Property de Prisma, incluyendo los `_count` de sus relaciones.
+ * @param drizzleProperty El objeto Property de Drizzle, incluyendo los `_count` de sus relaciones.
  * @returns Un objeto PropertyWithStats con las estadísticas calculadas.
  */
 export function toPropertyWithStats(propertyWithCounts: PropertyWithCounts): PropertyWithStats {

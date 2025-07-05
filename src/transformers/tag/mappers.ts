@@ -2,7 +2,7 @@
  * @file Mappers para la entidad Tag.
  * @module transformers/tag/mappers
  * @description Contiene funciones para transformar datos de la entidad Tag.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { calculateCompleteness } from '@/lib/utils/transformers';

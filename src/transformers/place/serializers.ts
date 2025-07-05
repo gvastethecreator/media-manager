@@ -1,7 +1,7 @@
 /**
  * @file Serializadores para la entidad Place
  * @module transformers/place/serializers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { PlaceWithStats } from '@/types/entities/place';

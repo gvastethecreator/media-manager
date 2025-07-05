@@ -3,7 +3,7 @@
  * @module transformers/workflow/mappers
  * @description Contiene funciones para transformar datos de la entidad Workflow,
  *              enfocándose en el cálculo de estadísticas de ejecución.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { safeJsonParse } from '@/lib/utils/safe-json-parse';

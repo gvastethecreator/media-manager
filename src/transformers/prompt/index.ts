@@ -1,7 +1,7 @@
 /**
  * @file Exportaciones para el transformer de Prompt
  * @module transformers/prompt
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 // Exportar mappers, serializers, validators y schemas

@@ -11,7 +11,7 @@ import {
 	extendWildcards,
 	fromDrizzleWildcard,
 	parseChildren,
-	toPrismaWildcard,
+	
 	validateWildcard,
 	WildcardTransformOptions,
 } from './serializers';
@@ -25,7 +25,7 @@ export {
 	extendWildcards,
 	fromDrizzleWildcard,
 	parseChildren,
-	toPrismaWildcard,
+	toDrizzleWildcard,
 	validateWildcard,
 };
 
@@ -45,7 +45,7 @@ export { toBulkUpdateWildcardData, toCreateWildcardData, toSearchOptions, toUpda
  * Objeto transformador para Wildcards
  */
 export const WildcardTransformer = {
-	toPrisma: toPrismaWildcard,
+	toDrizzle: toDrizzleWildcard,
 	fromDrizzle: fromDrizzleWildcard,
 	extend: extendWildcard,
 	extendMany: extendWildcards,

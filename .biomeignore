@@ -3,9 +3,12 @@ node_modules/
 dist/
 build/
 coverage/
-
+.next/
+out/
+.vercel/
 
 # Cachés
+.cache/
 .image-cache/
 .thumbnail-cache/
 ~/
@@ -13,16 +16,21 @@ coverage/
 # Assets públicos (imágenes, fuentes, etc.)
 public/assets/
 
-# Archivos generados
-*.d.ts
-*.tsbuildinfo
-
-# Migraciones de Prisma
-prisma/migrations/
-
 # Archivos de ambiente
 .env
 .env.*
+.env.local
+.env.production.local
+.env.development.local
 
-# Archivos de cache
-.cache/
+# Archivos de log y lock
+*.log
+*.lock
+
+# Otros
+.DS_Store
+*.d.ts
+*.tsbuildinfo
+*.sqlite
+*.sqlite3
+*.sqlite-journal

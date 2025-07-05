@@ -2,7 +2,7 @@
  * @file Transformador principal para la entidad Group
  * @module transformers/group/transformer
  * @description Funciones de transformación entre Drizzle y tipos de aplicación
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';

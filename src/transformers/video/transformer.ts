@@ -3,7 +3,7 @@
  * @module transformers/video/transformer
  * @description Transforma videos de Drizzle a VideoWithStats con análisis técnico avanzado
  * Última refactorización: 2025-01-27
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -12,7 +12,7 @@ import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { VideoComplete, VideoStatistics, VideoWithStats } from '@/types/entities/video/types';
 import { VideoQuality } from '@/types/entities/video/types';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle (migración a Drizzle)
 type DrizzleVideoWithCounts = {
 	id: string;
 	name: string | null;

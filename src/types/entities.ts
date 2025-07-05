@@ -61,7 +61,7 @@ export interface EntityDiscriminator {
 
 /**
  * Representa cualquier entidad de la aplicación que pueda ser mostrada en una vista.
- * Es una unión de todos los tipos de entidad de Prisma, extendidos con el discriminador.
+ 
  */
 export type DisplayableEntity =
 	| (Image & { entityType: 'image' })

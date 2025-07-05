@@ -22,25 +22,7 @@ import { CreateProfileInput, UpdateProfileInput } from './client';
 
 const SERVICE_NAME = 'ProfileService';
 
-/**
- * Función de validación para comparar resultados entre Prisma y Drizzle
- * Solo se ejecuta en desarrollo
- */
-function validateProfileResults(drizzleResult: any, prismaResult: any, context: string) {
-	if (process.env.NODE_ENV !== 'development') return;
 
-	const drizzleJson = JSON.stringify(drizzleResult);
-	const prismaJson = JSON.stringify(prismaResult);
-
-	if (drizzleJson !== prismaJson) {
-		console.warn(`[PROFILE VALIDATION] Diferencia encontrada en ${context}:`, {
-			drizzle: drizzleResult,
-			prisma: prismaResult,
-		});
-	} else {
-		console.log(`[PROFILE VALIDATION] ✅ ${context} - Resultados idénticos`);
-	}
-}
 
 /**
  * Servicio para gestionar perfiles de usuario

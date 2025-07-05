@@ -1,7 +1,7 @@
 /**
  * @file Entry point for all Image transformers
  * @module transformers/image
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 // Exportar mappers, serializers, validators y schemas

@@ -60,7 +60,7 @@ export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase 
 }
 
 /**
- * Serializa un wildcard para Prisma
+ 
  * @param wildcard Wildcard con campos JSON deserializados
  * @param options Opciones de transformación
  * @returns Wildcard con campos serializados para Prisma
@@ -77,7 +77,7 @@ export function toPrismaWildcard(
 			validateWildcard(wildcard as WildcardBase);
 		}
 
-		// Crear objeto con solo propiedades válidas para Prisma
+		// Crear objeto con solo propiedades válidas para Drizzle
 		const result: Record<string, any> = {
 			id: wildcard.id,
 			name: wildcard.name,
