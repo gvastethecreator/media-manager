@@ -206,7 +206,7 @@ export interface ExtendedStats {
 export async function getSystemStatsExtended(): Promise<(GeneralStats & ExtendedStats) | null> {
 	const base = await getSystemStats();
 	if (!base) return null;
-	// TODO: Reemplazar por queries reales a Prisma/Drizzle
+	// TODO: Reemplazar por queries reales con Drizzle
 	return {
 		...base,
 		totalDocuments: 0,
