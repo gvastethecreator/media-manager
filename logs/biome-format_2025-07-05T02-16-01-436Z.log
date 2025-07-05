@@ -1,0 +1,444 @@
+Comando: bunx biome format --write .
+Fecha: 2025-07-05T02:16:01.438Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\panels\details-panel\registry-setup.ts:32:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `className`
+  
+    30 │ const GenericEntityDetails = ({ entity }: EntityDetailsProps) => {
+    31 │ 	return (
+  > 32 │ 		<div className="p-4 text-center text-muted-foreground">
+       │ 		     ^^^^^^^^^
+    33 │ 			Componente específico en desarrollo
+    34 │ 		</div>
+  
+  i Remove className
+  
+
+src\components\panels\details-panel\registry-setup.ts:32:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `<div className`
+  
+    30 │ const GenericEntityDetails = ({ entity }: EntityDetailsProps) => {
+    31 │ 	return (
+  > 32 │ 		<div className="p-4 text-center text-muted-foreground">
+       │ 		^^^^^^^^^^^^^^
+    33 │ 			Componente específico en desarrollo
+    34 │ 		</div>
+  
+  i This expression cannot be assigned to
+  
+
+src\components\panels\details-panel\registry-setup.ts:33:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `específico`
+  
+    31 │ 	return (
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+  > 33 │ 			Componente específico en desarrollo
+       │ 			           ^^^^^^^^^^
+    34 │ 		</div>
+    35 │ 	);
+  
+  i Remove específico
+  
+
+src\components\panels\details-panel\registry-setup.ts:33:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    31 │ 	return (
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+  > 33 │ 			Componente específico en desarrollo
+       │ 			                      ^^
+    34 │ 		</div>
+    35 │ 	);
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    31 │ 	return (
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+  > 33 │ 			Componente específico en desarrollo
+       │ 			                      ^^
+    34 │ 		</div>
+    35 │ 	);
+  
+  i ...Which is required to end this statement
+  
+    31 │ 	return (
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+  > 33 │ 			Componente específico en desarrollo
+       │ 			           ^^^^^^^^^^^^^
+    34 │ 		</div>
+    35 │ 	);
+  
+
+src\components\panels\details-panel\registry-setup.ts:33:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    31 │ 	return (
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+  > 33 │ 			Componente específico en desarrollo
+       │ 			                         ^^^^^^^^^^
+    34 │ 		</div>
+    35 │ 	);
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    31 │ 	return (
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+  > 33 │ 			Componente específico en desarrollo
+       │ 			                         ^^^^^^^^^^
+    34 │ 		</div>
+    35 │ 	);
+  
+  i ...Which is required to end this statement
+  
+    31 │ 	return (
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+  > 33 │ 			Componente específico en desarrollo
+       │ 			                      ^^^^^^^^^^^^^
+    34 │ 		</div>
+    35 │ 	);
+  
+
+src\components\panels\details-panel\registry-setup.ts:34:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+    33 │ 			Componente específico en desarrollo
+  > 34 │ 		</div>
+       │ 		      
+    35 │ 	);
+    36 │ };
+  
+  i ...but the line ends here
+  
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+    33 │ 			Componente específico en desarrollo
+  > 34 │ 		</div>
+       │ 		      
+    35 │ 	);
+    36 │ };
+  
+  i a regex literal starts there...
+  
+    32 │ 		<div className="p-4 text-center text-muted-foreground">
+    33 │ 			Componente específico en desarrollo
+  > 34 │ 		</div>
+       │ 		 ^
+    35 │ 	);
+    36 │ };
+  
+
+src\components\panels\details-panel\registry-setup.ts:35:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found ')'.
+  
+    33 │ 			Componente específico en desarrollo
+    34 │ 		</div>
+  > 35 │ 	);
+       │ 	^
+    36 │ };
+    37 │ 
+  
+  i Expected a statement here.
+  
+    33 │ 			Componente específico en desarrollo
+    34 │ 		</div>
+  > 35 │ 	);
+       │ 	^
+    36 │ };
+    37 │ 
+  
+
+src\components\panels\details-panel\registry-setup.ts:40:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `className`
+  
+    38 │ const GenericPreview = ({ entity }: EntityPreviewProps) => {
+    39 │ 	return (
+  > 40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+       │ 		     ^^^^^^^^^
+    41 │ 			Vista previa no disponible
+    42 │ 		</div>
+  
+  i Remove className
+  
+
+src\components\panels\details-panel\registry-setup.ts:40:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `<div className`
+  
+    38 │ const GenericPreview = ({ entity }: EntityPreviewProps) => {
+    39 │ 	return (
+  > 40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+       │ 		^^^^^^^^^^^^^^
+    41 │ 			Vista previa no disponible
+    42 │ 		</div>
+  
+  i This expression cannot be assigned to
+  
+
+src\components\panels\details-panel\registry-setup.ts:41:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `previa`
+  
+    39 │ 	return (
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+  > 41 │ 			Vista previa no disponible
+       │ 			      ^^^^^^
+    42 │ 		</div>
+    43 │ 	);
+  
+  i Remove previa
+  
+
+src\components\panels\details-panel\registry-setup.ts:41:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    39 │ 	return (
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+  > 41 │ 			Vista previa no disponible
+       │ 			             ^^
+    42 │ 		</div>
+    43 │ 	);
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    39 │ 	return (
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+  > 41 │ 			Vista previa no disponible
+       │ 			             ^^
+    42 │ 		</div>
+    43 │ 	);
+  
+  i ...Which is required to end this statement
+  
+    39 │ 	return (
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+  > 41 │ 			Vista previa no disponible
+       │ 			      ^^^^^^^^^
+    42 │ 		</div>
+    43 │ 	);
+  
+
+src\components\panels\details-panel\registry-setup.ts:41:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    39 │ 	return (
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+  > 41 │ 			Vista previa no disponible
+       │ 			                ^^^^^^^^^^
+    42 │ 		</div>
+    43 │ 	);
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    39 │ 	return (
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+  > 41 │ 			Vista previa no disponible
+       │ 			                ^^^^^^^^^^
+    42 │ 		</div>
+    43 │ 	);
+  
+  i ...Which is required to end this statement
+  
+    39 │ 	return (
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+  > 41 │ 			Vista previa no disponible
+       │ 			             ^^^^^^^^^^^^^
+    42 │ 		</div>
+    43 │ 	);
+  
+
+src\components\panels\details-panel\registry-setup.ts:42:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+    41 │ 			Vista previa no disponible
+  > 42 │ 		</div>
+       │ 		      
+    43 │ 	);
+    44 │ };
+  
+  i ...but the line ends here
+  
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+    41 │ 			Vista previa no disponible
+  > 42 │ 		</div>
+       │ 		      
+    43 │ 	);
+    44 │ };
+  
+  i a regex literal starts there...
+  
+    40 │ 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
+    41 │ 			Vista previa no disponible
+  > 42 │ 		</div>
+       │ 		 ^
+    43 │ 	);
+    44 │ };
+  
+
+src\components\panels\details-panel\registry-setup.ts:43:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found ')'.
+  
+    41 │ 			Vista previa no disponible
+    42 │ 		</div>
+  > 43 │ 	);
+       │ 	^
+    44 │ };
+    45 │ 
+  
+  i Expected a statement here.
+  
+    41 │ 			Vista previa no disponible
+    42 │ 		</div>
+  > 43 │ 	);
+       │ 	^
+    44 │ };
+    45 │ 
+  
+
+src\components\panels\details-panel\registry-setup.ts:48:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `className`
+  
+    46 │ const GenericToolbar = ({ entity, onAction }: EntityToolbarProps) => {
+    47 │ 	return (
+  > 48 │ 		<div className="p-2 text-xs text-muted-foreground">
+       │ 		     ^^^^^^^^^
+    49 │ 			Herramientas en desarrollo
+    50 │ 		</div>
+  
+  i Remove className
+  
+
+src\components\panels\details-panel\registry-setup.ts:48:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `<div className`
+  
+    46 │ const GenericToolbar = ({ entity, onAction }: EntityToolbarProps) => {
+    47 │ 	return (
+  > 48 │ 		<div className="p-2 text-xs text-muted-foreground">
+       │ 		^^^^^^^^^^^^^^
+    49 │ 			Herramientas en desarrollo
+    50 │ 		</div>
+  
+  i This expression cannot be assigned to
+  
+
+src\components\panels\details-panel\registry-setup.ts:49:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `en`
+  
+    47 │ 	return (
+    48 │ 		<div className="p-2 text-xs text-muted-foreground">
+  > 49 │ 			Herramientas en desarrollo
+       │ 			             ^^
+    50 │ 		</div>
+    51 │ 	);
+  
+  i Remove en
+  
+
+src\components\panels\details-panel\registry-setup.ts:49:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    47 │ 	return (
+    48 │ 		<div className="p-2 text-xs text-muted-foreground">
+  > 49 │ 			Herramientas en desarrollo
+       │ 			                ^^^^^^^^^^
+    50 │ 		</div>
+    51 │ 	);
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    47 │ 	return (
+    48 │ 		<div className="p-2 text-xs text-muted-foreground">
+  > 49 │ 			Herramientas en desarrollo
+       │ 			                ^^^^^^^^^^
+    50 │ 		</div>
+    51 │ 	);
+  
+  i ...Which is required to end this statement
+  
+    47 │ 	return (
+    48 │ 		<div className="p-2 text-xs text-muted-foreground">
+  > 49 │ 			Herramientas en desarrollo
+       │ 			             ^^^^^^^^^^^^^
+    50 │ 		</div>
+    51 │ 	);
+  
+
+src\components\panels\details-panel\registry-setup.ts:50:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    48 │ 		<div className="p-2 text-xs text-muted-foreground">
+    49 │ 			Herramientas en desarrollo
+  > 50 │ 		</div>
+       │ 		      
+    51 │ 	);
+    52 │ };
+  
+  i ...but the line ends here
+  
+    48 │ 		<div className="p-2 text-xs text-muted-foreground">
+    49 │ 			Herramientas en desarrollo
+  > 50 │ 		</div>
+       │ 		      
+    51 │ 	);
+    52 │ };
+  
+  i a regex literal starts there...
+  
+    48 │ 		<div className="p-2 text-xs text-muted-foreground">
+    49 │ 			Herramientas en desarrollo
+  > 50 │ 		</div>
+       │ 		 ^
+    51 │ 	);
+    52 │ };
+  
+
+src\components\panels\details-panel\registry-setup.ts:51:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found ')'.
+  
+    49 │ 			Herramientas en desarrollo
+    50 │ 		</div>
+  > 51 │ 	);
+       │ 	^
+    52 │ };
+    53 │ 
+  
+  i Expected a statement here.
+  
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 45.
+Formatted 1423 files in 2s. No fixes applied.
+Found 54 errors.
+    49 │ 			Herramientas en desarrollo
+    50 │ 		</div>
+  > 51 │ 	);
+       │ 	^
+    52 │ };
+    53 │ 
+  
+
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
