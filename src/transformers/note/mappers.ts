@@ -167,27 +167,6 @@ export function mapNoteFiltersToDrizzle(filters: NoteFilters): DrizzleWhereFilte
 	return where;
 }
 
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreateNoteDataToDrizzle
- */
-export const mapCreateNoteDataToPrisma = mapCreateNoteDataToDrizzle;
-
-/**
- * @deprecated Usar mapUpdateNoteDataToDrizzle
- */
-export const mapUpdateNoteDataToPrisma = mapUpdateNoteDataToDrizzle;
-
-/**
- * @deprecated Usar mapNoteSearchOptionsToDrizzle
- */
-export const mapNoteSearchOptionsToPrisma = mapNoteSearchOptionsToDrizzle;
-
-/**
- * @deprecated Usar mapNoteFiltersToDrizzle
- */
-export const mapNoteFiltersToDrizzle = mapNoteFiltersToDrizzle;
-
 // Aliases para compatibilidad con exportaciones esperadas
 export const toCreateNoteData = mapCreateNoteDataToDrizzle;
 export const toUpdateNoteData = mapUpdateNoteDataToDrizzle;

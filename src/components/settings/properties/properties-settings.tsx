@@ -1,10 +1,3 @@
-// TODO: Refactorizar para mover la lógica de transformación de datos a la capa de server actions.
-// Actualmente, la lógica de `loadProperties`, `handleCreateProperty`, etc., transforma los datos
-// de Prisma a un tipo `PropertyWithStats` local. Esto debería hacerse en un transformador
-// y ser devuelto directamente por las server actions para simplificar el componente y
-// centralizar la lógica de negocio. Esta refactorización está bloqueada por fallos
-// persistentes en la herramienta de edición de código en los archivos de `server actions` y `transformers`.
-
 import { Plus, Search, Star, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';

@@ -1,6 +1,6 @@
 import { BookOpen, ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useNote, useNoteCounts, useRecentNoteImages } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
 import type { NoteWithStats } from '@/types/entities/note';

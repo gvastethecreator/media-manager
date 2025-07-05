@@ -1,6 +1,6 @@
 import { CheckIcon, DownloadIcon, EyeIcon, FileJsonIcon, XIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useJsonFile } from '@/lib/api/json-files';
 import { cn } from '@/lib/utils';
 import type { JsonFileWithStats } from '@/types/entities/json-file';

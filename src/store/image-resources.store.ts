@@ -171,15 +171,32 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 			if (!id) return undefined;
 			const originalUrl = getImageUrl(id, 'original');
 
-			const resource = get().resources.get(id);
-			if (resource?.originalUrl !== originalUrl) {
-				const newResource = {
-					...get().resources.get(id)!,
+			const existingResource = get().resources.get(id);
+			let newResource: ImageResource;
+
+			if (existingResource) {
+				// Si el recurso existe y originalUrl es diferente, actualizarlo
+				if (existingResource.originalUrl !== originalUrl) {
+					newResource = {
+						...existingResource,
+						originalUrl,
+						lastUpdate: Date.now(),
+					};
+					get().resources.set(id, newResource);
+					set((s) => ({ version: s.version + 1 }));
+				} else {
+					// Si el recurso existe y originalUrl es el mismo, simplemente 'tocarlo'
+					get().resources.touch(id);
+				}
+			} else {
+				// Si el recurso no existe, crear uno nuevo
+				newResource = {
 					id,
-					originalUrl,
+					isLoading: false,
 					lastUpdate: Date.now(),
+					originalUrl,
 				};
-				get().resources.set(id, newResource as ImageResource);
+				get().resources.set(id, newResource);
 				set((s) => ({ version: s.version + 1 }));
 			}
 

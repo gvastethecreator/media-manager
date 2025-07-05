@@ -1,6 +1,6 @@
 import { MessageSquareQuote, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { usePrompt, useRecentPromptImages } from '@/lib/api/prompts';
 import { cn } from '@/lib/utils';
 import type { PromptWithStats } from '@/types/entities/prompt';
@@ -104,17 +104,8 @@ function PromptCardComponent({
 	const propertiesCount = prompt._count?.properties || 0;
 	const wildcardsCount = prompt._count?.wildcards || 0;
 	const groupsCount = prompt._count?.groups || 0;
-
-	// Relaciones para mostrar en el contenido
-	const relationCounts = {
-		characters: charactersCount,
-		concepts: conceptsCount,
-		notes: notesCount,
-		places: prompt._count?.places || 0,
-		worldItems: prompt._count?.worldItems || 0,
-		collections: collectionsCount,
-		albums: albumsCount,
-	};
+	const placesCount = prompt._count?.places || 0;
+	const worldItemsCount = prompt._count?.worldItems || 0;
 
 	// Colores para el gradiente
 	const primaryColor = color || '#0ea5e9';
@@ -142,6 +133,17 @@ function PromptCardComponent({
 			return '#0369a1';
 		}
 	}, [color]);
+
+	// Relaciones para mostrar en el contenido
+	const relationCounts = {
+		characters: charactersCount,
+		concepts: conceptsCount,
+		notes: notesCount,
+		places: placesCount,
+		worldItems: worldItemsCount,
+		collections: collectionsCount,
+		albums: albumsCount,
+	};
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
@@ -190,7 +192,7 @@ function PromptCardComponent({
 		const totalRelations =
 			imagesCount +
 			videosCount +
-			promptsCount +
+			(prompt._count?.prompts || 0) +
 			notesCount +
 			charactersCount +
 			placesCount +
@@ -228,7 +230,6 @@ function PromptCardComponent({
 		tcgMode,
 		imagesCount,
 		videosCount,
-		promptsCount,
 		notesCount,
 		charactersCount,
 		placesCount,
@@ -241,8 +242,65 @@ function PromptCardComponent({
 		tagsCount,
 	]);
 
-	// El componente necesita un return statement aquí
-	return null; // TODO: Implementar el JSX del componente
+	return (
+		<motion.div
+			className={cn(
+				'w-[300px] md:w-[320px]',
+				tcgMode ? 'h-[470px]' : 'h-auto',
+				compact && 'h-auto',
+				disabled && 'opacity-70 pointer-events-none',
+				className
+			)}
+			style={cardStyle}
+			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
+			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
+			onClick={disabled ? undefined : () => onClick?.(prompt)}
+			onKeyDown={handleKeyDown}
+			tabIndex={disabled || !onClick ? -1 : 0}
+			role={onClick ? 'button' : 'article'}
+			aria-label={`Prompt: ${name}`}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
+			<CardContainer
+				primaryColor={primaryColor}
+				secondaryColor={secondaryColor}
+				className={cn(
+					'transition-all duration-300',
+					isHovered && 'scale-[1.02]',
+					isSelected && 'ring-4 ring-primary/60'
+				)}
+			>
+				<div className="flex flex-col h-full relative z-1">
+					{!compact && recentImagesData && (
+						<PromptCardImages images={recentImagesData} primaryColor={primaryColor} tcgMode={tcgMode} />
+					)}
+					<PromptCardContent
+						name={name}
+						emoji={emoji}
+						color={primaryColor}
+						description={description}
+						content={content}
+						category={category}
+						parameters={parsedParameters}
+						relationCounts={relationCounts}
+						tcgMode={tcgMode}
+						compact={compact}
+					/>
+					<PromptCardFooter
+						imagesCount={imagesCount}
+						videosCount={videosCount}
+						createdAt={createdAt}
+						updatedAt={updatedAt}
+						primaryColor={primaryColor}
+						secondaryColor={secondaryColor}
+						tcgMode={tcgMode}
+						compact={compact}
+					/>
+				</div>
+			</CardContainer>
+		</motion.div>
+	);
 }
 
 export const PromptCard = memo(PromptCardComponent);

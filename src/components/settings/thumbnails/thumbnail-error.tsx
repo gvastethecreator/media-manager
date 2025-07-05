@@ -24,9 +24,7 @@ export function ThumbnailError({
 }: ThumbnailErrorProps) {
 	const errorMessage = typeof error === 'string' ? error : error?.message || 'Error desconocido';
 	const isDatabaseError =
-		errorMessage.toLowerCase().includes('database') ||
-		errorMessage.toLowerCase().includes('prisma') ||
-		errorMessage.toLowerCase().includes('conexión');
+		errorMessage.toLowerCase().includes('database') || errorMessage.toLowerCase().includes('conexión');
 
 	return (
 		<Card className="border-destructive/30 bg-destructive/5 p-0">

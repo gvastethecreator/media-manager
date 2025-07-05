@@ -1,3 +1,4 @@
+import React from 'react';
 /**
  * @file Vista de grid simple V2 - Miniaturas optimizadas
  * @module components/features/file-browser/views/simple-grid-view-v2

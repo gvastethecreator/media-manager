@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EntityWithStats } from '@/types/common/entity-with-stats';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';

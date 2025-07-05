@@ -122,7 +122,7 @@ declare global {
 
 // Modificar la función withTimeout para ser más tolerante y no fallar inmediatamente
 const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityName: string): Promise<T> => {
-	let timeoutId: NodeJS.Timeout | undefined;
+	let timeoutId: number | undefined;
 
 	const timeoutPromise = new Promise<T>((_resolve) => {
 		timeoutId = setTimeout(() => {

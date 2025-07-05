@@ -1,6 +1,6 @@
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useConcept, useConceptCounts, useRecentConceptImages } from '@/lib/api/concepts';
 import { cn } from '@/lib/utils';
 import type { ConceptWithStats } from '@/types/entities/concept';

@@ -6,20 +6,20 @@
  */
 
 import type {
+	NoteComplete,
 	NoteCreateInput,
 	NoteStatistics,
 	NoteUpdateInput,
 	NoteWithStats,
-	NoteComplete,
 } from '@/types/entities/note';
 import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
 
 /**
- * 📝 Convierte datos de Prisma con conteos a NoteWithStats optimizado
- * @param data - Datos de Prisma con _count
+ * 📝 Convierte datos de Drizzle con conteos a NoteWithStats optimizado
+ * @param data - Datos de la base de datos con _count
  * @returns Note optimizado con estadísticas pre-calculadas
  */
-export function fromPrismaNoteWithCounts(data: NoteComplete): NoteWithStats {
+export function fromDrizzleNoteWithCounts(data: NoteComplete): NoteWithStats {
 	const statistics = calculateNoteStatistics(data);
 
 	return {
@@ -264,4 +264,3 @@ export function toDrizzleNoteUpdate(input: NoteUpdateInput) {
 }
 
 // Alias para compatibilidad con importaciones esperadas
-

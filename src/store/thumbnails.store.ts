@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-// import * as thumbnailActions from '@/services/thumbnail/thumbnail.service'; // TODO: Archivo no encontrado
+import { imageService } from '@/services/image/image.service';
 import type { ThumbnailStats } from '@/types/thumbnails';
 
 export interface ProcessStatus {
@@ -107,7 +107,7 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 
 			while (retries > 0 && !stats) {
 				try {
-					stats = await thumbnailActions.getThumbnailStats();
+					stats = await imageService.getThumbnailProcessingStats();
 					break;
 				} catch (error) {
 					_lastError = error;

@@ -1,5 +1,5 @@
 import { ChevronRight, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash, WandIcon } from 'lucide-react';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -16,7 +16,13 @@ import {
 } from '@/lib/api/wildcards';
 import toastService from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
-import type { WildcardWithStats } from '@/types/entities/wildcard';
+import type {
+	WildcardComplete,
+	WildcardCreateInput,
+	WildcardExtended,
+	WildcardUpdateInput,
+	WildcardWithStats,
+} from '@/types/entities/wildcard';
 import { WildcardPreview } from './wildcard-preview';
 
 // Importar el tipo de formulario que hemos definido

@@ -203,9 +203,8 @@ export const handleContextAction = async (
 
 			case 'delete':
 				// Eliminar archivo
-				if (confirm(`¿Estás seguro de que quieres eliminar "${item.name}"?`)) {
-					await customFileOperationsService.deleteFile(item.path);
-				}
+				toast.info(`Eliminando: ${item.name}`);
+				await customFileOperationsService.deleteFile(item.path);
 				break;
 
 			case 'add-to-collection':
