@@ -22,7 +22,7 @@ router.get('/health', (_req, res) => {
 		status: 'ok',
 		module: 'local-files',
 		message: 'Módulo deshabilitado temporalmente',
-		timestamp: new Date().toISOString()
+		timestamp: new Date().toISOString(),
 	});
 });
 
