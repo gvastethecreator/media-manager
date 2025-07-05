@@ -74,7 +74,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createPrompt()
-    API->>Transformer: mapCreatePromptDataToPrisma()
+    API->>Transformer: mapCreatePromptDataToDrizzle()
     
     DB-->>Transformer: Prompt
     Transformer-->>API: transformPrompt()

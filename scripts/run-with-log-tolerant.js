@@ -2,8 +2,8 @@
 
 import { spawn } from 'node:child_process';
 import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'node:fs';
-import { join } from 'path';
 import chalk from 'chalk';
+import { join } from 'path';
 
 const [, , logName, ...commandArgs] = process.argv;
 

@@ -86,7 +86,7 @@ sequenceDiagram
 
 ### `WildcardBase`
 
-Tipo base derivado del schema de Prisma que define los campos fundamentales:
+Tipo base derivado del esquema de la base de datos que define los campos fundamentales:
 
 ```typescript
 export interface WildcardBase {

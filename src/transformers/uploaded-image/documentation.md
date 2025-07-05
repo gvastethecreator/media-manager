@@ -13,7 +13,7 @@ flowchart TD
     
     B -->|toUploadedImageListItem| C[UploadedImageListItem]
     B -->|toUploadedImageCard| D[UploadedImageCard]
-    B -->|parseUploadedImageSearchParams| E[Prisma.UploadedImageWhereInput]
+    B -->|parseUploadedImageSearchParams| E[DbQueryInput]
     A --> F[transformer.ts]
     F -->|transformUploadedImage| G[UploadedImageComplete]
 ```

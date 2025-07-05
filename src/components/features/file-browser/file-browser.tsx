@@ -66,6 +66,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	mode = 'auto',
 	items: manualItems = [],
 	folderId,
+	filterType = undefined,
 	showToolbar = false,
 	selectedIds = [],
 	onSelectionChange,

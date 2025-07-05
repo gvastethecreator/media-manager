@@ -76,7 +76,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createJsonFile()
-    API->>Transformer: mapCreateJsonFileDataToPrisma()
+    API->>Transformer: mapCreateJsonFileDataToDrizzle()
     
     DB-->>Transformer: JsonFile
     Transformer-->>API: transformJsonFile()

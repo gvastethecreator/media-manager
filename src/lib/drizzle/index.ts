@@ -17,102 +17,97 @@ import * as schema from './schema.js';
  * https://orm.drizzle.team/docs/get-started/sqlite-existing
  */
 
-import { ENV } from '../../config/env.js';
-
 // Obtener la URL de la base de datos desde las variables de entorno
 // En el servidor (Node.js) usa ENV.DATABASE_URL
 // En el cliente (browser) usa una URL por defecto que será interceptada por el proxy
 const databaseUrl = typeof window === 'undefined' ? ENV.DATABASE_URL : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
 
-// El archivo de configuración ya valida que DATABASE_URL esté definida
+let client: ReturnType<typeof createClient> | null = null;
+let dbInstance;
 
-// Crear cliente de libsql solo en el servidor
-// En el cliente (browser), exportar un objeto mock que será interceptado por el proxy
-const client =
-	typeof window === 'undefined'
-		? createClient({
-				url: databaseUrl,
-			})
-		: null; // No crear cliente en el browser
+if (typeof window === 'undefined') {
+	client = createClient({
+		url: databaseUrl,
+	});
+	dbInstance = drizzle(client, {
+		schema,
+		logger: process.env.NODE_ENV === 'development',
+	});
+} else {
+	dbInstance = {
+		// Mock object completo para el cliente - simula toda la API de Drizzle
+		select: () => {
+			const mockQuery = {
+				from: () => mockQuery,
+				leftJoin: () => mockQuery,
+				rightJoin: () => mockQuery,
+				innerJoin: () => mockQuery,
+				where: () => mockQuery,
+				orderBy: () => mockQuery,
+				limit: () => mockQuery,
+				offset: () => mockQuery,
+				groupBy: () => mockQuery,
+				having: () => mockQuery,
+				execute: () => Promise.resolve([]),
+				then: (onResolve: any) => Promise.resolve([]).then(onResolve),
+			};
+			return mockQuery;
+		},
+		insert: (table: any) => ({
+			values: (data: any) => ({
+				returning: () =>
+					Promise.resolve([
+						{
+							id: 'mock-id-' + Date.now(),
+							createdAt: new Date().toISOString(),
+							updatedAt: new Date().toISOString(),
+							...data,
+						},
+					]),
+				execute: () =>
+					Promise.resolve({
+						rowCount: 1,
+						insertId: 'mock-id-' + Date.now(),
+					}),
+				onDuplicateKeyUpdate: () =>
+					Promise.resolve([
+						{
+							id: 'mock-id-' + Date.now(),
+							createdAt: new Date().toISOString(),
+							updatedAt: new Date().toISOString(),
+							...data,
+						},
+					]),
+			}),
+		}),
+		update: (table: any) => ({
+			set: () => ({
+				where: () => ({
+					returning: () => Promise.resolve([]),
+					execute: () => Promise.resolve({ rowCount: 0 }),
+				}),
+			}),
+		}),
+		delete: (table: any) => ({
+			where: () => ({
+				execute: () => Promise.resolve({ rowCount: 0 }),
+			}),
+		}),
+		query: new Proxy(
+			{},
+			{
+				get: () => ({
+					findMany: () => Promise.resolve([]),
+					findFirst: () => Promise.resolve(null),
+					findUnique: () => Promise.resolve(null),
+				}),
+			}
+		),
+		transaction: (fn: any) => Promise.resolve(fn({})),
+	} as any; // Mock object para el cliente
+}
 
-// Crear la instancia de Drizzle con el schema completo
-export const db =
-	typeof window === 'undefined'
-		? drizzle(client!, {
-				schema,
-				logger: process.env.NODE_ENV === 'development',
-			})
-		: ({
-				// Mock object completo para el cliente - simula toda la API de Drizzle
-				select: () => {
-					const mockQuery = {
-						from: () => mockQuery,
-						leftJoin: () => mockQuery,
-						rightJoin: () => mockQuery,
-						innerJoin: () => mockQuery,
-						where: () => mockQuery,
-						orderBy: () => mockQuery,
-						limit: () => mockQuery,
-						offset: () => mockQuery,
-						groupBy: () => mockQuery,
-						having: () => mockQuery,
-						execute: () => Promise.resolve([]),
-						then: (onResolve: any) => Promise.resolve([]).then(onResolve),
-					};
-					return mockQuery;
-				},
-				insert: (table: any) => ({
-					values: (data: any) => ({
-						returning: () =>
-							Promise.resolve([
-								{
-									id: 'mock-id-' + Date.now(),
-									createdAt: new Date().toISOString(),
-									updatedAt: new Date().toISOString(),
-									...data,
-								},
-							]),
-						execute: () =>
-							Promise.resolve({
-								rowCount: 1,
-								insertId: 'mock-id-' + Date.now(),
-							}),
-						onDuplicateKeyUpdate: () =>
-							Promise.resolve([
-								{
-									id: 'mock-id-' + Date.now(),
-									createdAt: new Date().toISOString(),
-									updatedAt: new Date().toISOString(),
-									...data,
-								},
-							]),
-					}),
-				}),
-				update: (table: any) => ({
-					set: () => ({
-						where: () => ({
-							returning: () => Promise.resolve([]),
-							execute: () => Promise.resolve({ rowCount: 0 }),
-						}),
-					}),
-				}),
-				delete: (table: any) => ({
-					where: () => ({
-						execute: () => Promise.resolve({ rowCount: 0 }),
-					}),
-				}),
-				query: new Proxy(
-					{},
-					{
-						get: () => ({
-							findMany: () => Promise.resolve([]),
-							findFirst: () => Promise.resolve(null),
-							findUnique: () => Promise.resolve(null),
-						}),
-					}
-				),
-				transaction: (fn: any) => Promise.resolve(fn({})),
-			} as any); // Mock object para el cliente
+export const db = dbInstance;
 
 // Exportar el schema para uso en otros archivos
 export { schema };
@@ -126,7 +121,9 @@ export type Schema = typeof schema;
  * Útil para testing y cleanup
  */
 export function closeDatabase() {
-	client.close();
+	if (client) {
+		client.close();
+	}
 }
 
 /**
@@ -134,6 +131,9 @@ export function closeDatabase() {
  * Útil para health checks
  */
 export async function checkDatabaseConnection(): Promise<boolean> {
+	if (!client) {
+		return false; // No hay cliente en el lado del cliente
+	}
 	try {
 		const result = await client.execute('SELECT 1 as test');
 		return result.rows.length > 0 && result.rows[0][0] === 1;
@@ -148,6 +148,9 @@ export async function checkDatabaseConnection(): Promise<boolean> {
  * Útil para debugging y monitoreo
  */
 export async function getDatabaseInfo() {
+	if (!client) {
+		return null; // No hay cliente en el lado del cliente
+	}
 	try {
 		const tablesResult = await client.execute(
 			"SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"

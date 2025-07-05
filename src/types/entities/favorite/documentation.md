@@ -52,7 +52,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createFavorite()
-    API->>Transformer: mapCreateFavoriteDataToPrisma()
+    API->>Transformer: mapCreateFavoriteDataToDrizzle()
     
     DB-->>Transformer: Favorite
     Transformer-->>API: transformFavorite()

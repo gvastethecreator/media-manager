@@ -62,7 +62,7 @@ sequenceDiagram
     participant DB
     Client->>API: createProfile()
     
-    Transformer->>DB: prisma.profile.create()
+    Transformer->>DB: db.profile.create()
     DB-->>Transformer: Profile
     Transformer-->>API: transformProfile()
     API-->>Client: ProfileBase

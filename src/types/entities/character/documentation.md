@@ -44,7 +44,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createCharacter()
-    API->>Transformer: mapCreateCharacterDataToPrisma()
+    API->>Transformer: mapCreateCharacterDataToDrizzle()
     
     DB-->>Transformer: Character
     Transformer-->>API: transformCharacter()

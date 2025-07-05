@@ -42,16 +42,16 @@ Para cada entidad, seguimos este patrón:
 
 ## 🛠️ Pasos técnicos
 
-1. **Importar el tipo Prisma**:
+1. **Importar el tipo de Drizzle**:
 
    ```typescript
-   import type { Entity as PrismaEntity } from '@prisma/client';
+   import type { Entity as DrizzleEntity } from 'drizzle-orm';
    ```
 
 2. **Definir el tipo base**:
 
    ```typescript
-   export type EntityBase = PrismaEntity;
+   export type EntityBase = DrizzleEntity;
    ```
 
 3. **Crear interfaces para relaciones**:
@@ -135,6 +135,6 @@ const updateInput: EntityUpdateInput = {
 const entity: Entity = {
   id: '123',
   name: 'Entidad',
-  // otros campos requeridos por Drizzle
+  // otros campos requeridos por la base de datos
 };
 ```

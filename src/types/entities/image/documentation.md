@@ -53,7 +53,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createImage()
-    API->>Transformer: mapCreateImageDataToPrisma()
+    API->>Transformer: mapCreateImageDataToDrizzle()
     
     DB-->>Transformer: Image
     Transformer-->>API: transformImage()

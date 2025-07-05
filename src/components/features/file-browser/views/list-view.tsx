@@ -1,3 +1,4 @@
+import React from 'react';
 /**
  * @file Vista de lista V2 usando EntityWithStats
  * @module components/features/file-browser/views/list-view-v2

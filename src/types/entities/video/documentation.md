@@ -51,7 +51,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createVideo()
-    API->>Transformer: mapCreateVideoDataToPrisma()
+    API->>Transformer: mapCreateVideoDataToDrizzle()
     
     DB-->>Transformer: Video
     Transformer-->>API: transformVideo()

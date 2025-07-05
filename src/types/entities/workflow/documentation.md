@@ -60,7 +60,7 @@ Este objeto proporciona métricas clave sobre la ejecución y estructura de un w
 ```mermaid
 graph TD
     subgraph "Server-Side"
-        A[Prisma Schema] --> B{Server Actions};
+        A[Esquema de Base de Datos] --> B{Server Actions};
         
         B -- "groupBy<WorkflowExecution>" --> C;
         C -- "returns Workflow[] & Aggregates" --> B;

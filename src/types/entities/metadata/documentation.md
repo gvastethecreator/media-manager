@@ -49,7 +49,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createMetadata()
-    API->>Transformer: mapCreateMetadataDataToPrisma()
+    API->>Transformer: mapCreateMetadataDataToDrizzle()
     
     DB-->>Transformer: Metadata
     Transformer-->>API: transformMetadata()

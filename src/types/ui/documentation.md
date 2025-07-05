@@ -73,7 +73,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createSettings()
-    API->>Transformer: mapCreateSettingsDataToPrisma()
+    API->>Transformer: mapCreateSettingsDataToDrizzle()
     
     DB-->>Transformer: Settings
     Transformer-->>API: transformSettings()

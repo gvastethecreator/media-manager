@@ -20,7 +20,7 @@ import { serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');
 
-// #region Tipos locales equivalentes a Prisma (migración a Drizzle)
+// #region Tipos de datos para Drizzle
 
 type DrizzleCreatePromptData = {
 	name: string;
@@ -227,11 +227,11 @@ export function filterPrompts(prompts: PromptBase[], filters: PromptFilters = {}
 	}
 
 	if (filters.categories?.length) {
-		filtered = filtered.filter((prompt) => filters.categories!.includes(prompt.category));
+		filtered = filtered.filter((prompt) => filters.categories.includes(prompt.category));
 	}
 
 	if (filters.purposes?.length) {
-		filtered = filtered.filter((prompt) => filters.purposes!.includes(prompt.purpose));
+		filtered = filtered.filter((prompt) => filters.purposes.includes(prompt.purpose));
 	}
 
 	if (filters.onlyFavorites) {
@@ -365,24 +365,3 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 		stats,
 	};
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreatePromptDataToDrizzle
- */
-export const mapCreatePromptDataToPrisma = mapCreatePromptDataToDrizzle;
-
-/**
- * @deprecated Usar mapUpdatePromptDataToDrizzle
- */
-export const mapUpdatePromptDataToPrisma = mapUpdatePromptDataToDrizzle;
-
-/**
- * @deprecated Usar mapPromptFiltersToDrizzle
- */
-export const mapPromptFiltersToPrisma = mapPromptFiltersToDrizzle;
-
-/**
- * @deprecated Usar mapPromptSortCriteriaToDrizzle
- */
-

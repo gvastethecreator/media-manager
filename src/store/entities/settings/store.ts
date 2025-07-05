@@ -110,7 +110,7 @@ export const useInterfaceSettingsStore = create<InterfaceSettingsState>()(
 					});
 				} else {
 					// 🚨 Log de error de validación
-					// eslint-disable-next-line no-console
+
 					console.warn('Preferencias de interfaz inválidas', parsed.error);
 				}
 			},
