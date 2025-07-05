@@ -4,9 +4,11 @@ dist/
 build/
 coverage/
 
+
 # Cachés
 .image-cache/
 .thumbnail-cache/
+~/
 
 # Assets públicos (imágenes, fuentes, etc.)
 public/assets/
