@@ -94,7 +94,7 @@ router.post('/cleanup', async (req, res) => {
 	}
 });
 
-// GET /thumbnails/cleanup - Limpiar thumbnails (compatibilidad Next.js)
+// GET /thumbnails/cleanup - Limpiar thumbnails
 router.get('/cleanup', async (req, res) => {
 	try {
 		const result = await cleanThumbnails(req.query);
