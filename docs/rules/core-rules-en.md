@@ -236,7 +236,7 @@ approach contrasts with traditional monolithic architectures...
 
 - **Consistent port** - Playwright MUST always use the same port as the development application (currently 4444)
 - **Unified configuration** - Keep `playwright.config.ts`, `playwright-mcp.config.json`, and all tests synchronized
-- **Integrated scripts** - Use `pnpm test:e2e` (with automatic logs) for formal testing
+- **Integrated scripts** - Use `bun run test:e2e` (with automatic logs) for formal testing
 - **Daily usage mandatory** - Use MCP for development, debug, analysis and continuous validation
 
 ### Available MCP Tools
@@ -315,7 +315,7 @@ approach contrasts with traditional monolithic architectures...
 
 ```bash
 # 1. Start development
-pnpm dev                           # Server on 4444
+bun dev                           # Server on 4444
 
 # 2. Continuous validation with MCP
 # browser_navigate → http://localhost:5173
@@ -338,13 +338,13 @@ pnpm dev                           # Server on 4444
 
 ```bash
 # 1. Execute tests with logs
-pnpm test:e2e                      # Complete tests with automatic logs
-pnpm test:e2e:ui                   # Playwright interactive UI
-pnpm test:e2e:debug                # Step-by-step debug
+bun run test:e2e                      # Complete tests with automatic logs
+bun run test:e2e:ui                   # Playwright interactive UI
+bun run test:e2e:debug                # Step-by-step debug
 
 # 2. Results analysis
-pnpm logs list                     # View recent logs
-pnpm check:errors --tool playwright  # Analyze specific errors
+bun run logs:list                     # View recent logs
+bun run check:errors --tool playwright  # Analyze specific errors
 ```
 
 ### Test Configuration
@@ -368,7 +368,7 @@ pnpm check:errors --tool playwright  # Analyze specific errors
 ```yaml
 # Example for GitHub Actions
 - name: Run E2E tests
-  run: pnpm test:e2e
+  run: bun run test:e2e
 
 - name: Upload error screenshots
   if: failure()
