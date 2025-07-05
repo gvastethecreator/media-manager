@@ -38,20 +38,6 @@ export function createStore<T extends object>(createFn: StateCreator<T, [], []>,
 	);
 }
 
-export interface StoreOptions<T extends BaseEntity> {
-	name: string;
-	logger?: typeof clientLogger;
-	initialState?: Partial<BaseStore<T>>;
-	actions?: {
-		beforeCreate?: <C = unknown>(data: C) => Promise<C>;
-		afterCreate?: (item: T) => Promise<void>;
-		beforeUpdate?: <U = unknown>(id: string, data: U) => Promise<U>;
-		afterUpdate?: (item: T) => Promise<void>;
-		beforeDelete?: (id: string) => Promise<void>;
-		afterDelete?: (id: string) => Promise<void>;
-	};
-}
-
 export function createStoreFactory<
 	T extends BaseEntity,
 	S = Record<string, unknown>,

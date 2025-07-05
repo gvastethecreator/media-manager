@@ -36,6 +36,8 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/lib/ui/toast';
+import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useSelectionStore } from '@/store/ui/selection.slice';
@@ -98,22 +100,46 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const isInSettingsView = useMemo(() => currentView === 'settings', [currentView]);
 
 	// 🔄 Acciones para archivos seleccionados
-	const handleDeleteSelected = useCallback(() => {
+	const handleDeleteSelected = useCallback(async () => {
 		if (selectedIds.length === 0) {
 			return;
 		}
-		if (window.confirm(`¿Estás seguro de que quieres eliminar ${selectedIds.length} archivo(s)?`)) {
-			// Implementar la eliminación de archivos usando server actions
-			// TODO: Implementar server action para eliminar archivos
+		toast.info(`Eliminando ${selectedIds.length} archivo(s)...`);
+		try {
+			for (const id of selectedIds) {
+				// Asumimos que el id del item es la ruta del archivo por ahora
+				await deleteFile(id);
+			}
+			toast.success(`${selectedIds.length} archivo(s) eliminado(s) correctamente.`);
 			clearSelection();
+		} catch (error) {
+			console.error('Error al eliminar archivos:', error);
+			toast.error('Error al eliminar archivo(s).');
 		}
 	}, [selectedIds, clearSelection]);
 
-	const handleDownloadSelected = useCallback(() => {
+	const handleDownloadSelected = useCallback(async () =>{
 		if (selectedIds.length === 0) {
 			return;
 		}
-		// TODO: Implementar server action para descargar archivos
+		toast.info(`Descargando ${selectedIds.length} archivo(s)...`);
+		try {
+			for (const id of selectedIds) {
+				// Asumimos que el id del item es la ruta del archivo por ahora
+				const { dataUrl, mimeType } = await getFileAsDataUrl(id);
+				const filename = id.split(/[/]/).pop() || 'download';
+				const a = document.createElement('a');
+				a.href = dataUrl;
+				a.download = filename;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+			}
+			toast.success(`${selectedIds.length} archivo(s) descargado(s) correctamente.`);
+		} catch (error) {
+			console.error('Error al descargar archivos:', error);
+			toast.error('Error al descargar archivo(s).');
+		}
 	}, [selectedIds]);
 
 	const handleCompressFiles = useCallback(() => {
@@ -122,7 +148,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		}
 		// TODO: Implementar server action para comprimir archivos
 		console.warn('La funcionalidad de compresión no está implementada en esta versión');
-		alert('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
+		toast.info('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
 	}, [selectedIds]);
 
 	const handleCopySelected = useCallback(() => {

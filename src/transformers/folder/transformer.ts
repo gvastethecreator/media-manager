@@ -17,8 +17,6 @@ import type {
 
 const logger = serverLogger.withContext('FolderTransformer');
 
-
-
 /**
  * 🔄 Calcula estadísticas avanzadas para una carpeta
  */
@@ -261,12 +259,12 @@ export function buildFolderTree(folders: FolderWithStats[]): FolderWithStats[] {
 	// Construir jerarquía
 	folders.forEach((folder) => {
 		if (folder.parentId && folderMap.has(folder.parentId)) {
-			const parent = folderMap.get(folder.parentId)!;
-			const child = folderMap.get(folder.id)!;
+			const parent = folderMap.get(folder.parentId) as FolderWithStats & { children: FolderWithStats[] };
+			const child = folderMap.get(folder.id) as FolderWithStats & { children: FolderWithStats[] };
 			parent.children.push(child);
 		} else {
 			// Carpeta raíz
-			rootFolders.push(folderMap.get(folder.id)!);
+			rootFolders.push(folderMap.get(folder.id) as FolderWithStats & { children: FolderWithStats[] });
 		}
 	});
 

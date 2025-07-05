@@ -1,5 +1,5 @@
 import { AlertCircle, Check, Delete, Edit, Loader2, Plus, Search, Star, X } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,

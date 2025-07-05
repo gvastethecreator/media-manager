@@ -7,7 +7,7 @@
 
 import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '@/types/entities/uploaded-image/types';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos de datos para Drizzle
 type DrizzleUploadedImageCreateInput = {
 	hash: string;
 	imageId: string;
@@ -51,14 +51,3 @@ export function mapUpdateInputToDrizzle(data: UploadedImageUpdateInput): Drizzle
 	// The update input is a partial, so we can map it directly.
 	return data;
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreateInputToDrizzle
- */
-export const mapCreateInputToPrisma = mapCreateInputToDrizzle;
-
-/**
- * @deprecated Usar mapUpdateInputToDrizzle
- */
-

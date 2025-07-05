@@ -1,3 +1,4 @@
+import React from 'react';
 /**
  * @file Base TextInput component
  * @module components/core/forms/base/text-input

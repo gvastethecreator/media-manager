@@ -341,9 +341,31 @@ export const ConceptService = {
 			};
 		} catch (error) {
 			conceptLogger.error('Error getting concept stats:', error);
-			throw new Error('Error al obtener estadísticas de conceptos');
+							throw new Error('Error al obtener estadísticas de conceptos');
 		}
 	},
-};
 
-export const conceptService = ConceptService;
+	async getRecentConceptImages(conceptId: string): Promise<{ id: string; thumbnailUrl: string }[]> {
+		console.warn(`[ConceptService] getRecentConceptImages no implementado. ID: ${conceptId}. Retornando array vacío.`);
+		return [];
+	},
+
+	async getConceptCounts(conceptId: string): Promise<any> {
+		console.warn(`[ConceptService] getConceptCounts no implementado. ID: ${conceptId}. Retornando ceros.`);
+		return {
+			images: 0,
+			videos: 0,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+			characters: 0,
+			places: 0,
+			worldItems: 0,
+			prompts: 0,
+			notes: 0,
+			wildcards: 0,
+			properties: 0,
+			groups: 0,
+		};
+	},
+};

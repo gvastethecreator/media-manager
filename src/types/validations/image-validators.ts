@@ -27,7 +27,7 @@ export const BaseImageSchema = z.object({
  */
 export const ImageStatsSchema = z.object({
 	views: z.number().int().nonnegative().default(0),
-	
+
 	favorites: z.number().int().nonnegative().default(0),
 	lastAccessed: z.date().nullable().optional(),
 });

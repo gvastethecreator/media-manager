@@ -1,15 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
 import toastService from '@/lib/ui/toast';
 import { generateTagColor } from '@/lib/utils/string.utils';
-import type { TagUpdateInput } from '@/types/entities/tag';
-import { TagCategory } from '@/types/entities/tag';
-import type { TagBase as UITag } from '@/types/entities/tag/types';
+import { TagCategory } from '@/store/entities/tag/types';
+import type { TagComplete, TagCreateInput, TagExtended, TagUpdateInput } from '@/types/entities/tag';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
@@ -41,10 +41,10 @@ const createTagSchema = z.object({
 type FormValues = z.infer<typeof createTagSchema>;
 
 interface CreateTagFormProps {
-	tag?: UITag | null;
+	tag?: TagComplete | null;
 	isEditing?: boolean;
-	onCreated?: (tag: UITag) => void;
-	onUpdated?: (tag: UITag) => void;
+	onCreated?: (tag: TagComplete) => void;
+	onUpdated?: (tag: TagComplete) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -104,12 +104,12 @@ export function CreateTagForm({
 			// Crear o actualizar etiqueta
 			if (isEditing && tag) {
 				const updated = await updateTagMutation.mutateAsync({ id: tag.id, data: tagData });
-				onUpdated?.(updated as UITag);
+				onUpdated?.(updated as TagComplete);
 				onPreview?.(updated);
 				toastService.success('Etiqueta actualizada correctamente');
 			} else {
 				const created = await createTagMutation.mutateAsync(tagData);
-				onCreated?.(created as UITag);
+				onCreated?.(created as TagComplete);
 				onPreview?.(created);
 				form.reset();
 				toastService.success('Etiqueta creada correctamente');

@@ -7,4 +7,10 @@ declare global {
 			deleteFile: (path: string) => void;
 		};
 	}
+
+	interface RequestInit {
+		duplex?: 'half';
+	}
+
+	const ENV: any;
 }

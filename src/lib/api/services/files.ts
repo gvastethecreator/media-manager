@@ -55,7 +55,7 @@ export const moveFile = async (
 	destPath: string,
 	options?: FileOperationOptions
 ): Promise<FileCopyMoveResult> => {
-	const response = await apiClient.post(`${API_bASE}/move`, { sourcePath, destPath, options });
+	const response = await apiClient.post(`${API_BASE}/move`, { sourcePath, destPath, options });
 	return response.data;
 };
 

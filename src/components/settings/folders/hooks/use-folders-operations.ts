@@ -3,6 +3,7 @@ import { useCreateFolder, useDeleteFolder, useReindexFolder, useUpdateFolder } f
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import type { FolderCreateInput } from '@/types/entities/folder';
+import { useReindexAllFolders } from './use-folders';
 
 // Stub para clearMetadataCache en el cliente - la funcionalidad real está en el servidor
 const clearMetadataCache = () => {
@@ -140,6 +141,7 @@ export function useFoldersOperations({
 
 	// Reindexar todas las carpetas
 	const handleReindexAll = useCallback(async () => {
+		const reindexAllFoldersMutation = useReindexAllFolders();
 		try {
 			operationsLogger.info('🔄 Iniciando reindexación global directa');
 

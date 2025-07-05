@@ -41,7 +41,7 @@
  */
 
 import { createHash } from 'crypto';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, or, sum } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { imageConfig } from '@/lib/config';
@@ -539,8 +539,8 @@ class ImageService {
 					folder: raw.folderRealId
 						? {
 								id: raw.folderRealId,
-								name: raw.folderName!,
-								path: raw.folderPath!,
+								name: raw.folderName ?? '',
+								path: raw.folderPath ?? '',
 							}
 						: null,
 					_count: {
@@ -657,16 +657,16 @@ class ImageService {
 				throw createEntityNotFoundError('Image', imageId);
 			}
 
-			if (!image.thumbnailPath) {
-				await this.generateThumbnail(imageId);
-				const updatedImage = await this.getImage(imageId);
-				if (!updatedImage?.thumbnailPath) {
-					throw createFileNotFoundError(`Miniatura para la imagen ${imageId} no encontrada después de la generación`);
-				}
-				return fs.readFile(updatedImage.thumbnailPath);
+			if (image.thumbnail) {
+				return image.thumbnail;
 			}
 
-			return fs.readFile(image.thumbnailPath);
+			await this.generateThumbnail(imageId);
+			const updatedImage = await this.getImage(imageId);
+			if (!updatedImage || !updatedImage.thumbnail) {
+				throw createFileNotFoundError(`Miniatura para la imagen ${imageId} no encontrada después de la generación`);
+			}
+			return updatedImage.thumbnail;
 		} catch (error) {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
@@ -694,6 +694,46 @@ class ImageService {
 				code: ServiceErrorCode.FILE_READ_ERROR,
 				message: 'Error al obtener la imagen original',
 				context: { imageId },
+				serviceName: SERVICE_NAME,
+			});
+		}
+	}
+
+	/**
+	 * Obtiene estadísticas de procesamiento de miniaturas.
+	 * @returns Estadísticas de miniaturas.
+	 */
+	async getThumbnailProcessingStats(): Promise<ThumbnailStats> {
+		try {
+			const totalImages = await db.select({ count: count() }).from(images);
+			const processedImages = await db
+				.select({ count: count() })
+				.from(images)
+				.where(images.thumbnailOptimizedAt.isNotNull());
+			const erroredImages = await db.select({ count: count() }).from(images).where(images.thumbnailError.isNotNull());
+			const totalThumbnailSize = await db
+				.select({ sum: sum(images.thumbnailSize) })
+				.from(images)
+				.where(images.thumbnailSize.isNotNull());
+			const lastProcessedImage = await db
+				.select({ date: images.thumbnailOptimizedAt })
+				.from(images)
+				.where(images.thumbnailOptimizedAt.isNotNull())
+				.orderBy(desc(images.thumbnailOptimizedAt))
+				.limit(1);
+
+			return {
+				total: totalImages[0]?.count || 0,
+				processed: processedImages[0]?.count || 0,
+				errors: erroredImages[0].count,
+				totalSize: Number(totalThumbnailSize[0].sum || 0),
+				lastProcessed: lastProcessedImage[0]?.date || undefined,
+			};
+		} catch (error) {
+			imageLogger.error('Error al obtener estadísticas de miniaturas:', error);
+			throw toServiceError(error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: 'Error al obtener estadísticas de miniaturas',
 				serviceName: SERVICE_NAME,
 			});
 		}

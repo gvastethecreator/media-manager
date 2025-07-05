@@ -3,7 +3,6 @@
  * @module transformers/file3d
  */
 
-
 export {
 	fromDrizzleFile3D as mapFile3DFromDrizzle, // Mapeo simple
 	toDrizzleFile3D as mapFile3DToDrizzle, // Mapeo simple

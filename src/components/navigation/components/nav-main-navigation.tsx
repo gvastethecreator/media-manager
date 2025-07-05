@@ -8,9 +8,28 @@ import {
 	Search,
 	Star,
 	UploadCloud,
+	Files,
+	FileStack,
+	Video,
+	Music,
+	FileText,
+	Brackets,
+	Workflow,
+	Cube,
+	Album,
+	Group,
+	Tag,
+	Bookmark,
+	User,
+	Users,
+	MapPin,
+	Globe,
+	Lightbulb,
+	Asterisk,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
+import type { NavigationItem } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -38,6 +57,7 @@ const NavButton = memo(function NavButton({
 	isCollapsed?: boolean;
 	index: number;
 	onNavigate: (id: ViewType) => void;
+	icon: React.ElementType; // Añadir la propiedad icon aquí
 }) {
 	// Memoizamos la configuración de animación para evitar recreaciones de objetos
 	const initialConfig = useMemo(
@@ -184,43 +204,43 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			id: 'files',
 			label: 'Archivos',
 			color: '#3B82F6',
-			icon: Home,
+			icon: Files,
 			children: [
-				{ id: 'all-files', label: 'Todos los archivos', icon: Home },
-				{ id: 'images', label: 'Imágenes', icon: Home },
-				{ id: 'videos', label: 'Videos', icon: Home },
-				{ id: 'audio', label: 'Audio', icon: Home },
-				{ id: 'docs', label: 'Documentos', icon: Home },
-				{ id: 'json', label: 'JSON', icon: Home },
-				{ id: 'workflows', label: 'Workflows', icon: Home },
-				{ id: 'file3d', label: '3D', icon: Home },
+				{ id: 'all-files', label: 'Todos los archivos', icon: FileStack },
+				{ id: 'images', label: 'Imágenes', icon: ImageIcon },
+				{ id: 'videos', label: 'Videos', icon: Video },
+				{ id: 'audio', label: 'Audio', icon: Music },
+				{ id: 'docs', label: 'Documentos', icon: FileText },
+				{ id: 'json', label: 'JSON', icon: Brackets },
+				{ id: 'workflows', label: 'Workflows', icon: Workflow },
+				{ id: 'file3d', label: '3D', icon: Cube },
 			],
 		},
 		{
 			id: 'library',
 			label: 'Librería',
 			color: '#A21CAF',
-			icon: Palette,
+			icon: Layers,
 			children: [
-				{ id: 'favorites', label: 'Favoritos', icon: Palette },
-				{ id: 'albums', label: 'Álbumes', icon: Palette },
-				{ id: 'groups', label: 'Grupos', icon: Palette },
-				{ id: 'tags', label: 'Etiquetas', icon: Palette },
-				{ id: 'collections', label: 'Colecciones', icon: Palette },
-				{ id: 'prompts', label: 'Prompts', icon: Palette },
+				{ id: 'favorites', label: 'Favoritos', icon: Star },
+				{ id: 'albums', label: 'Álbumes', icon: Album },
+				{ id: 'groups', label: 'Grupos', icon: Users },
+				{ id: 'tags', label: 'Etiquetas', icon: Tag },
+				{ id: 'collections', label: 'Colecciones', icon: Bookmark },
+				{ id: 'prompts', label: 'Prompts', icon: MessageSquare },
 			],
 		},
 		{
 			id: 'worldbuilding',
 			label: 'Worldbuilding',
 			color: '#059669',
-			icon: IdCard,
+			icon: Globe,
 			children: [
-				{ id: 'characters', label: 'Personajes', icon: IdCard },
-				{ id: 'places', label: 'Lugares', icon: IdCard },
-				{ id: 'world-items', label: 'Objetos del mundo', icon: IdCard },
-				{ id: 'concepts', label: 'Conceptos', icon: IdCard },
-				{ id: 'wildcards', label: 'Comodines', icon: IdCard },
+				{ id: 'characters', label: 'Personajes', icon: User },
+				{ id: 'places', label: 'Lugares', icon: MapPin },
+				{ id: 'world-items', label: 'Objetos del mundo', icon: Cube },
+				{ id: 'concepts', label: 'Conceptos', icon: Lightbulb },
+				{ id: 'wildcards', label: 'Comodines', icon: Asterisk },
 			],
 		},
 	];

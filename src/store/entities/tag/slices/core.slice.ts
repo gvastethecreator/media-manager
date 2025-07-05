@@ -9,8 +9,7 @@ import { StateCreator } from 'zustand';
 import { createTagInApi, deleteTagFromApi, getTagsFromApi, updateTagInApi } from '@/lib/api/client/tag.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
-import type { TagCoreActions, TagCoreState, TagStore } from '../types';
+import type { TagCoreState, TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
 
@@ -26,28 +25,6 @@ export interface TagCoreState2 {
 	error: string | null;
 	/** Timestamp de última actualización */
 	lastUpdated: number | null;
-}
-
-/**
- * 🔄 Acciones del core slice
- */
-export interface TagCoreActions {
-	/** Carga todos los tags */
-	loadTags: () => Promise<TagWithStats[]>;
-	/** Obtiene todos los tags como array */
-	getTags: () => TagWithStats[];
-	/** Obtiene un tag por su ID */
-	getTagById: (id: string) => TagWithStats | undefined;
-	/** Crea un nuevo tag */
-	createTag: (data: TagCreateInput) => Promise<TagWithStats | null>;
-	/** Actualiza un tag existente */
-	updateTag: (id: string, data: TagUpdateInput) => Promise<void>;
-	/** Elimina un tag */
-	deleteTag: (id: string) => Promise<void>;
-	/** Actualiza múltiples tags */
-	setTags: (tags: TagWithStats[]) => void;
-	/** Recarga los tags forzando una nueva petición */
-	refreshTags: () => Promise<TagWithStats[]>;
 }
 
 /**

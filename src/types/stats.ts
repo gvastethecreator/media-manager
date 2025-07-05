@@ -76,7 +76,7 @@ export interface GeneralStats {
 	totalActivities: number;
 }
 
-export interface TagStats {
+export interface TagSummaryStats {
 	id: string;
 	name: string;
 	count: number;

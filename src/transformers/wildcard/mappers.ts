@@ -135,22 +135,3 @@ export function mapWildcardFilters(filters: {
 
 	return filters;
 }
-
-// ----------------------------------------------------------------
-// TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
-// ----------------------------------------------------------------
-
-/**
- * @deprecated Usar WildcardWithCounts en su lugar
- */
-export type PrismaWildcardWithCounts = WildcardWithCounts;
-
-/**
- * @deprecated Usar mapCreateWildcardData en su lugar
- */
-export const mapCreateWildcardDataToPrisma = mapCreateWildcardData;
-
-/**
- * @deprecated Usar mapUpdateWildcardData en su lugar
- */
-

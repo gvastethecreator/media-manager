@@ -10,6 +10,7 @@ import { desc, eq } from 'drizzle-orm';
 // Imports para extracción de metadatos (migrados desde server actions)
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
+import { NonExistentRelationError } from '#/lib/errors';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { metadatas } from '@/lib/drizzle/schema';
@@ -23,7 +24,6 @@ import {
 import { MetadataExtended, MetadataToCreate } from '@/types/entities/metadata/extended';
 import { MetadataBase } from '@/types/entities/metadata/types';
 import type { MediaMetadata } from '@/types/metadata.types';
-import { NonExistentRelationError } from '#/lib/errors';
 
 const metadataLogger = serverLogger.withContext('MetadataService');
 
@@ -320,7 +320,7 @@ export async function deleteMetadataByImageId(imageId: string): Promise<boolean>
  * Función de reintento con backoff exponencial
  */
 async function withRetry<T>(operation: () => Promise<T>, config = DEFAULT_RETRY_CONFIG): Promise<T> {
-	let lastError: Error;
+	let lastError: Error = new Error('Operación fallida después de múltiples reintentos');
 
 	for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
 		try {
@@ -338,7 +338,7 @@ async function withRetry<T>(operation: () => Promise<T>, config = DEFAULT_RETRY_
 		}
 	}
 
-	throw lastError!;
+	throw lastError;
 }
 
 /**
@@ -499,32 +499,32 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 
 	// Asegurar que todos los campos requeridos estén presentes
 	const finalMetadata: MediaMetadata = {
-		totalSize: metadata.totalSize!,
-		itemCount: metadata.itemCount!,
-		lastModified: metadata.lastModified!,
-		fileSize: metadata.fileSize!,
-		mimeType: metadata.mimeType!,
-		format: metadata.format!,
-		width: metadata.width,
-		height: metadata.height,
-		exif: metadata.exif,
-		iptc: metadata.iptc,
-		xmp: metadata.xmp,
-		icc: metadata.icc,
-		ai: metadata.ai,
-		gps: metadata.gps,
-		colorSpace: metadata.colorSpace,
-		colorProfile: metadata.colorProfile,
-		hasAlpha: metadata.hasAlpha,
-		orientation: metadata.orientation,
-		density: metadata.density,
-		isAnimated: metadata.isAnimated,
-		sizeInBytes: metadata.sizeInBytes,
-		dimensions: metadata.dimensions,
-		duration: metadata.duration,
-		encoding: metadata.encoding,
-		hash: metadata.hash,
-		customFields: metadata.customFields,
+		totalSize: metadata.totalSize !== undefined && metadata.totalSize !== null ? metadata.totalSize : 0,
+		itemCount: metadata.itemCount !== undefined && metadata.itemCount !== null ? metadata.itemCount : 0,
+		lastModified: metadata.lastModified !== undefined && metadata.lastModified !== null ? metadata.lastModified : new Date(),
+		fileSize: metadata.fileSize !== undefined && metadata.fileSize !== null ? metadata.fileSize : 0,
+		mimeType: metadata.mimeType !== undefined && metadata.mimeType !== null ? metadata.mimeType : 'image/unknown',
+		format: metadata.format !== undefined && metadata.format !== null ? metadata.format : 'unknown',
+		width: metadata.width !== undefined && metadata.width !== null ? metadata.width : undefined,
+		height: metadata.height !== undefined && metadata.height !== null ? metadata.height : undefined,
+		exif: metadata.exif !== undefined && metadata.exif !== null ? metadata.exif : undefined,
+		iptc: metadata.iptc !== undefined && metadata.iptc !== null ? metadata.iptc : undefined,
+		xmp: metadata.xmp !== undefined && metadata.xmp !== null ? metadata.xmp : undefined,
+		icc: metadata.icc !== undefined && metadata.icc !== null ? metadata.icc : undefined,
+		ai: metadata.ai !== undefined && metadata.ai !== null ? metadata.ai : undefined,
+		gps: metadata.gps !== undefined && metadata.gps !== null ? metadata.gps : undefined,
+		colorSpace: metadata.colorSpace !== undefined && metadata.colorSpace !== null ? metadata.colorSpace : undefined,
+		colorProfile: metadata.colorProfile !== undefined && metadata.colorProfile !== null ? metadata.colorProfile : undefined,
+		hasAlpha: metadata.hasAlpha !== undefined && metadata.hasAlpha !== null ? metadata.hasAlpha : undefined,
+		orientation: metadata.orientation !== undefined && metadata.orientation !== null ? metadata.orientation : undefined,
+		density: metadata.density !== undefined && metadata.density !== null ? metadata.density : undefined,
+		isAnimated: metadata.isAnimated !== undefined && metadata.isAnimated !== null ? metadata.isAnimated : undefined,
+		sizeInBytes: metadata.sizeInBytes !== undefined && metadata.sizeInBytes !== null ? metadata.sizeInBytes : undefined,
+		dimensions: metadata.dimensions !== undefined && metadata.dimensions !== null ? metadata.dimensions : undefined,
+		duration: metadata.duration !== undefined && metadata.duration !== null ? metadata.duration : undefined,
+		encoding: metadata.encoding !== undefined && metadata.encoding !== null ? metadata.encoding : undefined,
+		hash: metadata.hash !== undefined && metadata.hash !== null ? metadata.hash : undefined,
+		customFields: metadata.customFields !== undefined && metadata.customFields !== null ? metadata.customFields : undefined,
 	};
 
 	// Guardar en cache

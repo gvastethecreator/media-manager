@@ -12,12 +12,12 @@ const logger = clientLogger.withContext('ImageTransformer');
 
 import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
+	DrizzleImageWithCounts,
 	ImageCreateInput,
 	ImageMetadata,
 	ImageStatistics,
 	ImageUpdateInput,
 	ImageWithStats,
-	PrismaImageWithCounts,
 } from '@/types/entities/image';
 
 /**
@@ -25,7 +25,7 @@ import type {
  * @param drizzleImage - Datos de Drizzle con conteos
  * @returns ImageWithStats con estadísticas calculadas
  */
-export function fromDrizzleImageWithCounts(drizzleImage: PrismaImageWithCounts): ImageWithStats {
+export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts): ImageWithStats {
 	try {
 		// 📊 Calcular estadísticas
 		const statistics = calculateImageStatistics(drizzleImage);
@@ -63,12 +63,12 @@ export function fromDrizzleImageWithCounts(drizzleImage: PrismaImageWithCounts):
 /**
  * 📊 Calcula estadísticas de la imagen
  */
-function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStatistics {
+function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageStatistics {
 	// Verificar que _count existe y tiene la estructura esperada
-	if (!prismaImage._count || typeof prismaImage._count !== 'object') {
+	if (!drizzleImage._count || typeof drizzleImage._count !== 'object') {
 		logger.warn('⚠️ Image sin _count válido, usando valores por defecto', {
-			imageId: prismaImage.id,
-			countValue: prismaImage._count,
+			imageId: drizzleImage.id,
+			countValue: drizzleImage._count,
 		});
 
 		// Valores por defecto si _count no existe
@@ -87,7 +87,7 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 			groups: 0,
 		};
 
-		prismaImage._count = defaultCount;
+		drizzleImage._count = defaultCount;
 	}
 
 	const {
@@ -103,7 +103,7 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 		wildcards = 0,
 		properties = 0,
 		groups = 0,
-	} = prismaImage._count;
+	} = drizzleImage._count;
 
 	// Conteos base
 	const totalAssociations =
@@ -121,18 +121,18 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 		groups;
 
 	// Métricas técnicas con protección para valores nulos
-	const width = prismaImage.width || 0;
-	const height = prismaImage.height || 0;
-	const size = prismaImage.size || 0;
+	const width = drizzleImage.width || 0;
+	const height = drizzleImage.height || 0;
+	const size = drizzleImage.size || 0;
 
 	const megapixels = Number(((width * height) / 1_000_000).toFixed(2));
 	const aspectRatio = height > 0 ? Number((width / height).toFixed(2)) : 0;
 	const fileSize = Number((size / (1024 * 1024)).toFixed(2)); // MB
 
 	// Análisis de calidad
-	const qualityScore = calculateQualityScore(prismaImage, totalAssociations);
+	const qualityScore = calculateQualityScore(drizzleImage, totalAssociations);
 	const technicalGrade = determineTechnicalGrade(qualityScore, megapixels, aspectRatio);
-	const colorTemperature = determineColorTemperature(prismaImage);
+	const colorTemperature = determineColorTemperature(drizzleImage);
 
 	// Métricas de uso (simuladas por ahora)
 	const views = Math.floor(totalAssociations * 10 + Math.random() * 100);
@@ -141,9 +141,9 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 	const shares = Math.floor(totalAssociations * 0.8 + Math.random() * 8);
 
 	// Metadatos AI
-	const aiConfidence = calculateAIConfidence(prismaImage);
-	const autoTags = generateAutoTags(prismaImage, totalAssociations);
-	const duplicateStatus = determineDuplicateStatus(prismaImage);
+	const aiConfidence = calculateAIConfidence(drizzleImage);
+	const autoTags = generateAutoTags(drizzleImage, totalAssociations);
+	const duplicateStatus = determineDuplicateStatus(drizzleImage);
 
 	return {
 		// Conteos de relaciones
@@ -165,7 +165,7 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 		megapixels,
 		aspectRatio,
 		fileSize,
-		dimensions: `${prismaImage.width}x${prismaImage.height}`,
+		dimensions: `${drizzleImage.width}x${drizzleImage.height}`,
 
 		// Métricas de uso
 		views,
@@ -190,7 +190,7 @@ function calculateImageStatistics(prismaImage: PrismaImageWithCounts): ImageStat
 /**
  * 🎯 Calcula el score de calidad (0-100)
  */
-function calculateQualityScore(image: PrismaImageWithCounts, totalAssociations: number): number {
+function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations: number): number {
 	let score = 0;
 
 	// Resolución (30 puntos)
@@ -253,7 +253,7 @@ function determineTechnicalGrade(qualityScore: number, megapixels: number, aspec
 /**
  * 🌡️ Determina la temperatura de color (simulado)
  */
-function determineColorTemperature(image: PrismaImageWithCounts): 'warm' | 'neutral' | 'cool' {
+function determineColorTemperature(image: DrizzleImageWithCounts): 'warm' | 'neutral' | 'cool' {
 	// Simulación basada en el hash de la imagen
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
@@ -266,7 +266,7 @@ function determineColorTemperature(image: PrismaImageWithCounts): 'warm' | 'neut
 /**
  * 🤖 Calcula confianza de AI (0-100)
  */
-function calculateAIConfidence(image: PrismaImageWithCounts): number {
+function calculateAIConfidence(image: DrizzleImageWithCounts): number {
 	if (!image.metadata) return 0;
 
 	try {
@@ -289,7 +289,7 @@ function calculateAIConfidence(image: PrismaImageWithCounts): number {
 /**
  * 🏷️ Genera tags automáticos
  */
-function generateAutoTags(image: PrismaImageWithCounts, totalAssociations: number): string[] {
+function generateAutoTags(image: DrizzleImageWithCounts, totalAssociations: number): string[] {
 	const tags: string[] = [];
 
 	// Tags basados en dimensiones
@@ -314,7 +314,7 @@ function generateAutoTags(image: PrismaImageWithCounts, totalAssociations: numbe
 /**
  * 🔍 Determina estado de duplicado (simulado)
  */
-function determineDuplicateStatus(image: PrismaImageWithCounts): 'unique' | 'duplicate' | 'similar' {
+function determineDuplicateStatus(image: DrizzleImageWithCounts): 'unique' | 'duplicate' | 'similar' {
 	// Simulación basada en el hash
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
@@ -327,7 +327,7 @@ function determineDuplicateStatus(image: PrismaImageWithCounts): 'unique' | 'dup
 /**
  * 🎯 Calcula campos derivados
  */
-function calculateDerivedFields(image: PrismaImageWithCounts, statistics: ImageStatistics) {
+function calculateDerivedFields(image: DrizzleImageWithCounts, statistics: ImageStatistics) {
 	return {
 		thumbnailUrl: `/api/images/${image.id}/thumbnail`,
 		fullUrl: `/api/images/${image.id}/full`,
@@ -370,9 +370,9 @@ function parseImageMetadata(metadataString: string | null | undefined): ImageMet
 }
 
 /**
- * 🔄 Convierte ImageWithStats a datos de creación de Prisma
+ * 🔄 Convierte ImageCreateInput a datos de creación para Drizzle
  */
-export function toPrismaImageCreate(input: ImageCreateInput): any {
+export function toDrizzleImageCreate(input: ImageCreateInput): any {
 	return {
 		name: input.name,
 		description: input.description,
@@ -390,9 +390,9 @@ export function toPrismaImageCreate(input: ImageCreateInput): any {
 }
 
 /**
- * 🔄 Convierte ImageWithStats a datos de actualización de Prisma
+ * 🔄 Convierte ImageUpdateInput a datos de actualización para Drizzle
  */
-export function toPrismaImageUpdate(input: ImageUpdateInput): any {
+export function toDrizzleImageUpdate(input: ImageUpdateInput): any {
 	const updateData: any = {};
 
 	if (input.name !== undefined) updateData.name = input.name;

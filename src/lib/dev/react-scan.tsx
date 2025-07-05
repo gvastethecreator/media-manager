@@ -1,5 +1,7 @@
+import React from 'react';
+
 // React Scan integration
-'use client';
+('use client');
 
 import { useEffect } from 'react';
 

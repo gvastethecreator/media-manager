@@ -1,10 +1,10 @@
 import { StateCreator } from 'zustand';
 // Ahora usamos el cliente de API y no el servicio del servidor
 import {
-    createNoteInApi,createNoteInApi, 
-    deleteNoteFromApi,deleteNoteFromApi, 
-    getNotesFromApi,getNotesFromApi, 
-    updateNoteInApi,updateNoteInApi 
+    createNoteInApi, 
+    deleteNoteFromApi, 
+    getNotesFromApi, 
+    updateNoteInApi 
 } from '@/lib/api/client/note.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast';

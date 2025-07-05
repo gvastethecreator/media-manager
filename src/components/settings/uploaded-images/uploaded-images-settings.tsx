@@ -41,6 +41,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useUploadedImageStats, useUploadImages } from '@/lib/api/uploaded-images';
 import { clientLogger } from '@/lib/logger/client-logger';
 import toastService from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';

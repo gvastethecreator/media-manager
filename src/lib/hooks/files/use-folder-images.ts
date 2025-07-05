@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 // Migración: se reemplaza el servicio por funciones del cliente API
 import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
-import { clientLogger, clientLogger } from '@/lib/logger/client-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { getFolderImages } from '@/services/folder/folder.service';
 
 // Logger para depuración
@@ -39,8 +39,8 @@ export function useFolderImages(folderId: string | null) {
 			}
 
 			try {
-                                logger.info(`🔄 Obteniendo imágenes para carpeta: ${folderId}`);
-                                const response = await getFolderImagesFromApi(folderId);
+				logger.info(`🔄 Obteniendo imágenes para carpeta: ${folderId}`);
+				const response = await getFolderImagesFromApi(folderId);
 
 				// Verificar la estructura de la respuesta
 				if (!response) {

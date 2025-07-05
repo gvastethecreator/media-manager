@@ -1,8 +1,8 @@
 import { Library } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
-import { useCollectionImages } from '@/lib/api/collections';
+import { useCollectionImages, useRemoveImageFromCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { EntityWithStats } from '@/types/common/entity-with-stats';
@@ -23,7 +23,10 @@ export function CollectionContentView() {
 		data: collectionImagesData,
 		isLoading: isLoadingImages,
 		error: collectionError,
+		refetch: refetchCollectionImages,
 	} = useCollectionImages(selectedCollectionId);
+
+	const removeImageMutation = useRemoveImageFromCollection();
 
 	useEffect(() => {
 		if (!selectedCollectionId) {
@@ -67,21 +70,20 @@ export function CollectionContentView() {
 
 			try {
 				if (isSelected) {
-					await removeImageFromCollection(selectedCollectionId, item.id);
+					await removeImageMutation.mutateAsync({ collectionId: selectedCollectionId, imageId: item.id });
 				} else {
 					await addImageToCollection(selectedCollectionId, item.id);
 				}
 
 				// Recargar imágenes después de la operación
-				const updatedImages = await getCollectionImages(selectedCollectionId);
-				setCollectionImages(updatedImages);
+				refetchCollectionImages();
 				logger.info('✅ Colección actualizada correctamente');
 			} catch (error) {
 				logger.error('❌ Error al modificar colección:', error);
 				setError('Error al modificar la colección');
 			}
 		},
-		[selectedCollectionId, collectionImages, addImageToCollection]
+		[selectedCollectionId, collectionImages, addImageToCollection, removeImageMutation, refetchCollectionImages]
 	);
 
 	const contentProps: CollectionContentProps = {

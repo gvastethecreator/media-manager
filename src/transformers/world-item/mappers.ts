@@ -25,7 +25,7 @@ import {
 	serializeTags,
 } from './serializers';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos de datos para Drizzle
 type DrizzleWorldItemCreateInput = {
 	name: string;
 	description?: string | null;
@@ -372,19 +372,3 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		_stats: stats,
 	};
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreateWorldItemDataToDrizzle
- */
-export const mapCreateWorldItemDataToPrisma = mapCreateWorldItemDataToDrizzle;
-
-/**
- * @deprecated Usar mapUpdateWorldItemDataToDrizzle
- */
-export const mapUpdateWorldItemDataToPrisma = mapUpdateWorldItemDataToDrizzle;
-
-/**
- * @deprecated Usar mapWorldItemSearchOptionsToDrizzle
- */
-export const mapWorldItemSearchOptionsToPrisma = mapWorldItemSearchOptionsToDrizzle;

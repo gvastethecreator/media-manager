@@ -13,9 +13,8 @@ import {
 	getWorkflowsFromApi,
 	updateWorkflowInApi,
 } from '@/lib/api/client/workflow.client';
-import { clientLogger, clientLogger } from '@/lib/logger/client-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import { toastService } from '@/services/toast';
 import type { WorkflowCoreActions, WorkflowCoreState, WorkflowStore } from '../types';
 
 const logger = clientLogger.withContext('WorkflowCoreSlice');

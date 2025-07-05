@@ -6,7 +6,8 @@
 
 import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { FileItem } from '@/types/files';
+import { formatFileSize } from '@/lib/utils/format.utils';
+
 import type { EntityWithStats } from '@/types/migration';
 
 const logger = clientLogger.withContext('useEntityConversion');
@@ -25,7 +26,7 @@ export function useEntityConversion() {
 	 * Convierte un FileItem a EntityWithStats
 	 * NOTA: Esta es una conversión temporal hasta que se actualicen los server actions
 	 */
-	const convertSingleItem = useCallback((fileItem: FileItem): EntityWithStats | null => {
+	const convertSingleItem = useCallback((fileItem: EntityWithStats): EntityWithStats | null => {
 		try {
 			// Detectar tipo basándose en propiedades específicas
 			if ('width' in fileItem && 'height' in fileItem && 'hash' in fileItem) {
@@ -100,7 +101,7 @@ export function useEntityConversion() {
 	 * Convierte un array de FileItems a EntityWithStats[]
 	 */
 	const convertFileItems = useCallback(
-		(fileItems: FileItem[]): EntityWithStats[] => {
+		(fileItems: EntityWithStats[]): EntityWithStats[] => {
 			return fileItems.map(convertSingleItem).filter((entity): entity is EntityWithStats => entity !== null);
 		},
 		[convertSingleItem]
@@ -110,7 +111,7 @@ export function useEntityConversion() {
 	 * Convierte y agrupa por tipo
 	 */
 	const convertAndGroupByType = useCallback(
-		(fileItems: FileItem[]) => {
+		(fileItems: EntityWithStats[]) => {
 			const entities = convertFileItems(fileItems);
 			const grouped: Record<string, EntityWithStats[]> = {};
 

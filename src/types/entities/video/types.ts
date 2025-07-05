@@ -291,6 +291,11 @@ export interface VideoPaginationOptions {
 }
 
 /**
+ * 🎥 Tipo completo para Video con relaciones y estadísticas
+ */
+export interface VideoWithStats extends VideoBase, VideoRelations, VideoStatistics {}
+
+/**
  * 📊 Resultado paginado de búsqueda
  */
 export interface PaginatedVideos {

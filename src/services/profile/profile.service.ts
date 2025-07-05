@@ -22,8 +22,6 @@ import { CreateProfileInput, UpdateProfileInput } from './client';
 
 const SERVICE_NAME = 'ProfileService';
 
-
-
 /**
  * Servicio para gestionar perfiles de usuario
  */

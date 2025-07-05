@@ -19,6 +19,7 @@ import {
 	useLastProcessedThumbnails,
 	useOptimizeThumbnails,
 	useReprocessThumbnails,
+	useThumbnail,
 } from '@/lib/api/thumbnails';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
