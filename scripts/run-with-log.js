@@ -1,9 +1,9 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
-import { spawn } from 'node:child_process';
-import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
 import chalk from 'chalk';
+import { spawn } from 'child_process';
+import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 const [, , logName, ...commandArgs] = process.argv;
 

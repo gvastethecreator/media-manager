@@ -15,7 +15,7 @@ router.get('/health', (_req, res) => {
 	res.json({
 		status: 'ok',
 		module: 'files',
-		timestamp: new Date().toISOString()
+		timestamp: new Date().toISOString(),
 	});
 });
 
@@ -25,7 +25,7 @@ router.get('/health', (_req, res) => {
 router.get('/test', (_req, res) => {
 	res.json({
 		message: 'Files API funcionando correctamente',
-		timestamp: new Date().toISOString()
+		timestamp: new Date().toISOString(),
 	});
 });
 

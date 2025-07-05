@@ -15,7 +15,7 @@ router.get('/health', async (_req, res) => {
 	res.json({
 		status: 'ok',
 		service: 'local-files',
-		timestamp: new Date().toISOString()
+		timestamp: new Date().toISOString(),
 	});
 });
 
