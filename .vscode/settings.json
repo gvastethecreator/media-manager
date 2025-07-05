@@ -66,7 +66,6 @@
   "powermode.combo.counterEnabled": "hide",
   "powermode.combo.timerEnabled": "hide",
   "powermode.shake.enabled": false,
-  ,
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": true,
   "files.autoSaveDelay": 1000,

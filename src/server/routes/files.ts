@@ -6,11 +6,7 @@
 
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-    copyFile,
-    createDirectory, moveFile,
-    renameFile
-} from '@/services/file/file.service';
+import { copyFile, createDirectory, moveFile, renameFile } from '@/services/file/file.service';
 
 const router = express.Router();
 const logger = serverLogger.withContext('FilesAPI');

@@ -40,15 +40,15 @@ const routeFiles = [
 	'./src/server/routes/videos.js',
 	'./src/server/routes/wildcards.ts',
 	'./src/server/routes/workflows.js',
-	'./src/server/routes/world-items.ts'
+	'./src/server/routes/world-items.ts',
 ];
 
 // Buscar patrones problemáticos con RegExp
 const problematicPatterns = [
-	/\/\*(?![a-zA-Z])/,  // /* sin nada después
-	/\/\*$/,             // /* al final de línea
-	/router\.\w+\(['"`]\/\*['"`]/,  // router.verb("/*")
-	/app\.use\(['"`][^'"`]*\/\*['"`]/  // app.use con /*
+	/\/\*(?![a-zA-Z])/, // /* sin nada después
+	/\/\*$/, // /* al final de línea
+	/router\.\w+\(['"`]\/\*['"`]/, // router.verb("/*")
+	/app\.use\(['"`][^'"`]*\/\*['"`]/, // app.use con /*
 ];
 
 console.log('🔍 Buscando patrones problemáticos en rutas...\n');
