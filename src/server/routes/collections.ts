@@ -71,7 +71,7 @@ router.get('/:id/images', async (req, res) => {
 	}
 });
 
-// GET /collections/:id/images/all - Compatibilidad con Next.js
+// GET /collections/:id/images/all
 router.get('/:id/images/all', async (req, res) => {
 	try {
 		const { id } = req.params;
