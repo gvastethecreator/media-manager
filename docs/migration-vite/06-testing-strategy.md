@@ -18,7 +18,7 @@ graph LR
 ## Instalación
 
 ```bash
-pnpm add -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom happy-dom
+bun add -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom happy-dom
 ```
 
 Config `vite.config.ts`:
@@ -56,15 +56,15 @@ use: { baseURL: 'http://localhost:5173' }
 
 ```yaml
 - name: Install deps
-  run: pnpm install --frozen-lockfile
+  run: bun install --frozen-lockfile
 - name: Unit & Integration
-  run: pnpm vitest run --coverage
+  run: bun test --coverage
 - name: Playwright Install
-  run: pnpm playwright:install
+  run: bun playwright:install
 - name: Build
-  run: pnpm build:vite
+  run: bun build:vite
 - name: Playwright Tests
-  run: pnpm test:e2e
+  run: bun test:e2e
 ```
 
 ## Métricas
@@ -77,5 +77,5 @@ use: { baseURL: 'http://localhost:5173' }
 
 ## Checklist
 
-- [ ] `pnpm test` pasa en < 60 s local.
+- [ ] `bun test` pasa en < 60 s local.
 - [ ] Reportes HTML generados (`coverage/`, `playwright-report/`).

@@ -72,4 +72,4 @@
 ### Seguridad
 
 - Aplicar cabeceras OWASP via `helmet` en Express.
-- Revisar dependencias con `pnpm audit` en CI.
+- Revisar dependencias con `bun audit` en CI.

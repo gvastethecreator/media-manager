@@ -1,7 +1,7 @@
 /**
  * @file Funciones de mapeo para la entidad Prompt
  * @module transformers/prompt/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -385,4 +385,4 @@ export const mapPromptFiltersToPrisma = mapPromptFiltersToDrizzle;
 /**
  * @deprecated Usar mapPromptSortCriteriaToDrizzle
  */
-export const mapPromptSortCriteriaToPrisma = mapPromptSortCriteriaToDrizzle;
+

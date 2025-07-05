@@ -42,7 +42,7 @@
 ### Package Installation
 
 ```bash
-npm i @base-ui-components/react
+bun add @base-ui-components/react
 ```
 
 ### Portal Setup (Crítico para Dialog, Popover, etc.)

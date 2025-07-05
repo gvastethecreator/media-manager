@@ -3,7 +3,7 @@
  * @module transformers/concept/mappers
  * @description Estas funciones se encargan de transformar la entrada de la aplicación
  * (ej. desde formularios o actions) a los tipos que Drizzle espera para las operaciones de BD.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type {
@@ -15,7 +15,7 @@ import type {
 	ConceptUpdateInput,
 } from '@/types/entities/concept';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle
 type DrizzleConceptCreateInput = {
 	id?: string;
 	name: string;
@@ -268,7 +268,7 @@ export function processConcepts(
 	};
 }
 
-// Mantener funciones legacy con nombres de Prisma por compatibilidad (DEPRECATED)
+// Mantener funciones legacy con nombres de Drizzle por compatibilidad (DEPRECATED)
 /**
  * @deprecated Usar toCreateDataDrizzle en su lugar
  */

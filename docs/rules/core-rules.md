@@ -2,7 +2,7 @@
 
 1. **Español obligatorio** - Todas las respuestas, comentarios, documentación, etc. deben estar completamente en español.
 2. **Windows SIEMPRE** - Todos los comandos y rutas deben ser compatibles con Windows. Usar PowerShell Core (pwsh) como terminal por defecto.
-3. **Bun como runtime principal** - USAR BUN para todos los comandos y scripts. El proyecto ha migrado de Node.js + pnpm a Bun runtime + bun install.
+3. **Bun como runtime principal** - USAR BUN para todos los comandos y scripts. El proyecto usa Bun como runtime y gestor de paquetes.
 4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
 5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.

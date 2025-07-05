@@ -1,6 +1,6 @@
 /**
  * Script para migrar componentes de FileItem a EntityWithStats
- * Ejecutar con: node scripts/fix-fileitem-components.js
+ * Ejecutar con: bun scripts/fix-fileitem-components.js
  */
 
 import fs from 'fs';

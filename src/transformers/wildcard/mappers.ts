@@ -4,7 +4,7 @@
  * @description Contiene funciones para:
  *              1. Transformar la entrada de la app a tipos locales de Drizzle.
  *              2. Transformar los datos de Drizzle a tipos enriquecidos de la app (WildcardWithStats).
- * @updated 2025-01-27 - Migrado a Drizzle eliminando dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -153,4 +153,4 @@ export const mapCreateWildcardDataToPrisma = mapCreateWildcardData;
 /**
  * @deprecated Usar mapUpdateWildcardData en su lugar
  */
-export const mapUpdateWildcardDataToPrisma = mapUpdateWildcardData;
+

@@ -8,7 +8,7 @@ import { join } from 'path';
 const [, , logName, ...commandArgs] = process.argv;
 
 if (!logName || commandArgs.length === 0) {
-	console.error('Uso: node scripts/run-with-log.js <nombre-log> <comando-completo>');
+	console.error('Uso: bun scripts/run-with-log.js <nombre-log> <comando-completo>');
 	console.error('');
 	console.error('🚀 Script Universal de Logging con Tolerancia Inteligente');
 	console.error('');
@@ -134,14 +134,14 @@ function processOutput(data, isError = false) {
 	}
 
 	// Detectar errores de dependencias
-	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|pnpm.*ERR/i.test(text)) {
+	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i.test(text)) {
 		hasRealErrors = true;
 	}
 
-	lines.forEach((line) => {
+	for (const line of lines) {
 		const { color, emoji } = getLineStyle(line, isError, hasRealErrors, isTolerantCommand);
 		console.log(color(`${emoji} ${line}`));
-	});
+	}
 }
 
 // Capturar y mostrar stdout
@@ -189,7 +189,7 @@ child.on('close', (code) => {
 			console.error(chalk.red.bold(`Error al copiar el archivo de log: ${copyError.message}`));
 		}
 		if (missingDep) {
-			console.log(chalk.yellow('🛈 Parece que faltan dependencias. Ejecuta "pnpm install" e intenta de nuevo.'));
+			console.log(chalk.yellow('🛈 Parece que faltan dependencias. Ejecuta "bun install" e intenta de nuevo.'));
 		}
 		process.exit(code);
 	}

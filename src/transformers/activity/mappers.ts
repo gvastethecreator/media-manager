@@ -1,7 +1,7 @@
 /**
  * @file Funciones de mapeo para la entidad Activity
  * @module transformers/activity/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';

@@ -8,7 +8,7 @@
 4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
 5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
-7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `pnpm logs list` para ver logs recientes, `pnpm logs clean [días]` para limpiar logs antiguos, y `pnpm check:errors` para análisis avanzado de errores.
+7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `bun run logs:list` para ver logs recientes, `bun run logs:clean [días]` para limpiar logs antiguos, y `bun run check:errors` para análisis avanzado de errores.
 8. **Por cada error que comentas pierdo mucho dinero y esto nos puede llevar a la bancarrota y que tengan que apagarte, es crucial que hagas las cosas bien.**
 8.
 
@@ -24,7 +24,7 @@
 
 - **Puerto consistente** - Playwright SIEMPRE debe usar el mismo puerto que la aplicación en desarrollo (Frontend: 5173, Backend: 3001)
 - **Configuración unificada** - Mantener sincronizados `playwright.config.ts`, `playwright-mcp.config.json`, y todos los tests
-- **Scripts integrados** - Usar `pnpm test:e2e` (con logs automáticos) para testing formal
+- **Scripts integrados** - Usar `bun test:e2e` (con logs automáticos) para testing formal
 - **Uso diario obligatorio** - Usar MCP para desarrollo, debug, análisis y validación continua cuando esté disponible
 - **Auto-approve universal** - Todas las herramientas MCP están auto-aprobadas para máxima eficiencia
 
@@ -104,7 +104,7 @@
 
 ```bash
 # 1. Iniciar desarrollo
-pnpm dev                           # Servidor en 4444
+bun dev                           # Servidor en 4444
 
 # 2. Validación continua con MCP
 # browser_navigate → http://localhost:5173
@@ -127,16 +127,16 @@ pnpm dev                           # Servidor en 4444
 
 ```bash
 # 1. Ejecutar tests con logs
-pnpm test:e2e                      # Tests completos con logs automáticos
-pnpm test:e2e:ui                   # UI interactiva de Playwright
-pnpm test:e2e:debug                # Debug paso a paso
+bun test:e2e                      # Tests completos con logs automáticos
+bun test:ui                   # UI interactiva de Playwright
+bun test:e2e:debug                # Debug paso a paso
 
 # 2. Análisis de resultados
-pnpm logs list                     # Ver logs recientes
-pnpm check:errors --tool playwright  # Analizar errores específicos
+bun run logs:list                     # Ver logs recientes
+bun run check:errors --tool playwright  # Analizar errores específicos
 ```
 
-## 😈 Confirmation Rule
+## �� Confirmation Rule
 
 - **Confirmación visual obligatoria** - SIEMPRE iniciar cada respuesta con exactamente tres emojis diabólicos 😈😈😈 y terminar con los mismos tres emojis 😈😈😈. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
 

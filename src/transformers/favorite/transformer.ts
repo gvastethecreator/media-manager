@@ -3,7 +3,7 @@
  * @module transformers/favorite/transformer
  * @description 🚨 Migración: Todos los tipos y enums se importan desde '@/types/entities/favorite/types'.
  * No usar ni importar tipos de base.ts o extended.ts (eliminados).
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import {
@@ -16,7 +16,7 @@ import {
 	FavoritesByType,
 } from '@/types/entities/favorite';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle
 type DrizzleFavorite = {
 	id: string;
 	entityId: string;

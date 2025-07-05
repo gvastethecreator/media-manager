@@ -1,7 +1,7 @@
 /**
  * @file Esquemas Zod para la entidad Note
  * @module transformers/note/schema
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { z } from 'zod';

@@ -3,7 +3,7 @@
  * @module transformers/album/mappers
  * @description Contiene funciones para transformar datos de la entidad Album.
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * Estado: Completo, sin dependencias de Prisma
+ 
  */
 
 import type { Album, AlbumStatistics, AlbumWithStats, CreateAlbumInput } from '@/types/entities/album';

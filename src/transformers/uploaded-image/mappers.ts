@@ -2,7 +2,7 @@
  * @file Mappers for UploadedImage entity
  * @module transformers/uploaded-image/mappers
  * @description Contains functions to map application-level input types to Drizzle-compatible types for UploadedImage.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '@/types/entities/uploaded-image/types';
@@ -61,4 +61,4 @@ export const mapCreateInputToPrisma = mapCreateInputToDrizzle;
 /**
  * @deprecated Usar mapUpdateInputToDrizzle
  */
-export const mapUpdateInputToPrisma = mapUpdateInputToDrizzle;
+

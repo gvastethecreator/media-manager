@@ -29,9 +29,9 @@ type GroupCounts = {
 };
 
 /**
- * Convierte un objeto Group de Prisma y sus conteos a un objeto canónico GroupWithStats.
+ * Convierte un objeto Group de Drizzle y sus conteos a un objeto canónico GroupWithStats.
  *
- * @param group El objeto Group de Prisma.
+ 
  * @param counts Los conteos de las relaciones del grupo.
  * @returns Un objeto GroupWithStats.
  */

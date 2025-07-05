@@ -26,7 +26,7 @@ graph TD
 1. **Instalar** dependencias:
 
    ```bash
-   pnpm add react-router-dom@6.23 @types/react-router-dom -D
+   bun add react-router-dom@6.23 @types/react-router-dom -D
    ```
 
 2. **Crear** `src/router.tsx`:

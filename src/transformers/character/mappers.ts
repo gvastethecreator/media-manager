@@ -1,7 +1,7 @@
 /**
  * @file Funciones de mapeo para la entidad Character
  * @module transformers/character/mappers
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -13,7 +13,7 @@ import type {
 	CharacterUpdateInput,
 } from '@/types/entities/character';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales equivalentes a Drizzle
 type DrizzleCharacterCreateInput = {
 	id?: string;
 	name: string;

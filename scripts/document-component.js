@@ -133,7 +133,7 @@ function main() {
 		console.log('Uso: node scripts/document-component.js <componentPath>');
 		console.log('');
 		console.log('Ejemplo:');
-		console.log('  node scripts/document-component.js src/components/MyComponent.tsx');
+		console.log('  bun scripts/document-component.js src/components/MyComponent.tsx');
 		console.log('');
 		return;
 	}

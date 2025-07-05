@@ -2,7 +2,7 @@
  * @file Punto de entrada para los transformadores de la entidad Group.
  * @module transformers/group
  * @description Exporta de forma controlada las funciones de mapeo, serialización y transformación para la entidad Group.
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 // Exportar mappers, serializers, validators y schemas

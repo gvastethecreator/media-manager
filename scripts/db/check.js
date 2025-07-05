@@ -88,7 +88,7 @@ function checkDatabase() {
 	log('---------------------------------------------', colors.blue);
 
 	// Verificar base de datos SQLite
-	const dbPath = path.join(rootDir, 'prisma', 'dev.db');
+	const dbPath = path.join(rootDir, 'dev.db');
 	if (fileExists(dbPath)) {
 		try {
 			const stats = fs.statSync(dbPath);
@@ -98,12 +98,12 @@ function checkDatabase() {
 			// Intentar contar registros en algunas tablas
 			log('🔍 Verificando contenido de la base de datos...', colors.blue);
 
-			// Verificar versión de Prisma
-			const prismaVersionResult = runCommand('npx', ['prisma', '--version']);
-			if (prismaVersionResult.success) {
-				log(`✅ Versión de Prisma: ${prismaVersionResult.output.trim()}`, colors.green);
+			// Verificar versión de Drizzle
+			const drizzleVersionResult = runCommand('bunx', ['drizzle-kit', '--version']);
+			if (drizzleVersionResult.success) {
+				log(`✅ Versión de Drizzle-kit: ${drizzleVersionResult.output.trim()}`, colors.green);
 			} else {
-				log('❌ No se pudo verificar la versión de Prisma', colors.red);
+				log('❌ No se pudo verificar la versión de Drizzle-kit', colors.red);
 			}
 		} catch (error) {
 			log(`❌ Error al obtener información de la base de datos: ${error.message}`, colors.red);
@@ -115,7 +115,7 @@ function checkDatabase() {
 	log('---------------------------------------------', colors.blue);
 
 	// Verificar directorio de migraciones
-	const migrationsPath = path.join(rootDir, 'prisma', 'migrations');
+	const migrationsPath = path.join(rootDir, 'src', 'lib', 'drizzle', 'migrations');
 	if (fileExists(migrationsPath)) {
 		try {
 			const migrations = fs.readdirSync(migrationsPath);
@@ -131,35 +131,16 @@ function checkDatabase() {
 			log(`❌ Error al leer el directorio de migraciones: ${error.message}`, colors.red);
 		}
 	} else {
-		log('ℹ️ Directorio de migraciones no encontrado (usando db push)', colors.yellow);
+		log('ℹ️ Directorio de migraciones no encontrado', colors.yellow);
 	}
 
 	log('---------------------------------------------', colors.blue);
 
-	// Verificar cliente Prisma generado
-	const prismaClientPath = path.join(rootDir, 'node_modules', '.prisma');
-	if (fileExists(prismaClientPath)) {
-		log('✅ Cliente Prisma generado encontrado', colors.green);
-
-		// Verificar archivos generados
-		try {
-			const clientFiles = fs.readdirSync(prismaClientPath);
-			log(`✅ Archivos del cliente Prisma: ${clientFiles.length}`, colors.green);
-		} catch (error) {
-			log(`❌ Error al leer archivos del cliente Prisma: ${error.message}`, colors.red);
-		}
-	} else {
-		log('❌ Cliente Prisma generado no encontrado', colors.red);
-		log('   Ejecuta "npx prisma generate" para generarlo', colors.yellow);
-	}
-
-	log('---------------------------------------------', colors.blue);
 	log('🔍 Verificación completada', colors.blue);
 	log('\n📝 Resumen:', colors.magenta);
 	log('- Si la base de datos existe y tiene tamaño, está correctamente configurada', colors.magenta);
-	log('- Si no hay migraciones pero la base de datos existe, se está usando db push', colors.magenta);
-	log('- Para resetear la base de datos: pnpm run db:full-reset', colors.magenta);
-	log('- Para abrir Prisma Studio: npx prisma studio', colors.magenta);
+	log('- Para resetear la base de datos: bun run db:reset', colors.magenta);
+	log('- Para abrir Drizzle Studio: bun run db:studio', colors.magenta);
 }
 
 // Ejecutar la función principal

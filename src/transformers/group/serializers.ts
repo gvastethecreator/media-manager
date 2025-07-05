@@ -2,7 +2,7 @@
  * @file Serializadores para la entidad Group
  * @module transformers/group/serializers
  * @description Funciones para serializar datos de Group para API y UI
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ 
  */
 
 import type { GroupWithStats } from '@/types/entities/group';
