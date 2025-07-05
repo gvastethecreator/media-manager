@@ -26,7 +26,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 	const [isPolling, setIsPolling] = useState(false);
 
 	// Referencias para el polling
-	const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const pollingTimerRef = useRef<number | null>(null);
 	const processingFolderRef = useRef<string | null>(null);
 	const originalFolderIdRef = useRef<string | null>(null);
 	const lastUpdatedRef = useRef<Record<string, number>>({});

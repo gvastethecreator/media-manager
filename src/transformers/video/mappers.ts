@@ -11,7 +11,7 @@ import type { VideoCreateInput, VideoFilters, VideoUpdateInput } from '@/types/e
 
 const logger = serverLogger.withContext('VideoMapper');
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos de datos para Drizzle
 type DrizzleCreateVideoData = {
 	name: string;
 	description?: string | null;
@@ -218,19 +218,3 @@ function mapVideoFiltersToDrizzle(filters: VideoFilters): DrizzleWhereFilter {
 
 	return where;
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar mapCreateVideoDataToDrizzle
- */
-export const mapCreateVideoDataToPrisma = mapCreateVideoDataToDrizzle;
-
-/**
- * @deprecated Usar mapUpdateVideoDataToDrizzle
- */
-export const mapUpdateVideoDataToPrisma = mapUpdateVideoDataToDrizzle;
-
-/**
- * @deprecated Usar mapVideoFiltersToDrizzleArgs
- */
-

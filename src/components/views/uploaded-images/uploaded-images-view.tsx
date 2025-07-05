@@ -1,6 +1,5 @@
 import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
-import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MemoizedImageCard } from '@/components/cards/image-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -40,11 +39,11 @@ import {
 	getUploadedImages,
 	uploadImages,
 } from '@/services/uploaded-images/uploaded-images.service';
-
-import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
 import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import { UploadedImageType } from '@/types/entities/uploaded-image/types';
+import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';
+import type { UploadedImageResult } from '@/types/uploaded-image';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 
@@ -57,7 +56,7 @@ export type UploadedImageFilters = {
 
 export function UploadedImagesView() {
 	const [isLoading, setIsLoading] = useState(true);
-	const [items, setItems] = useState<UploadedImageResult[]>([]);
+	const [items, setItems] = useState<FileItem[]>([]);
 	const [filters, setFilters] = useState<UploadedImageFilters>({});
 	const [isUploading, setIsUploading] = useState(false);
 	const [showFilters, setShowFilters] = useState(false);
@@ -78,7 +77,20 @@ export function UploadedImagesView() {
 				pageSize: 20,
 			});
 
-			setItems(response.items || []);
+			setItems(
+				response.items.map((item) => ({
+					id: item.id,
+					name: item.name,
+					path: item.path,
+					type: FileType.IMAGE,
+					size: item.size,
+					mimeType: 'image/jpeg', // Default, will be refined by adaptedItems
+					metadata: typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {}),
+					processingStatus: FileProcessingStatus.COMPLETED,
+					createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+					updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+				})) || []
+			);
 			setTotalItems(response.total || 0);
 			setTotalPages(Math.ceil((response.total || 0) / (response.pageSize || 20)));
 			setIsLoading(false);
@@ -222,7 +234,9 @@ export function UploadedImagesView() {
 						mimeType = `image/${meta.format.toLowerCase()}`;
 					}
 				}
-			} catch {}
+			} catch (e) {
+				void e; /* Ignorar errores de parseo de metadata */
+			}
 			// Asegurar que metadata es string JSON
 			const metadataString = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {});
 			return {

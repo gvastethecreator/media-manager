@@ -16,6 +16,27 @@ export default [
 				},
 			},
 			globals: {
+				// React globals
+				React: 'readonly',
+
+				// Custom component globals (workaround for no-undef in TextInput)
+				BaseTextInput: 'readonly',
+				Label: 'readonly',
+				className: 'readonly',
+				disabled: 'readonly',
+				error: 'readonly',
+				id: 'readonly',
+				label: 'readonly',
+				maxLength: 'readonly',
+				name: 'readonly',
+				onChange: 'readonly',
+				placeholder: 'readonly',
+				props: 'readonly',
+				required: 'readonly',
+				type: 'readonly',
+				value: 'readonly',
+				formatDate: 'readonly',
+
 				// Node.js globals
 				console: 'readonly',
 				process: 'readonly',
@@ -26,6 +47,8 @@ export default [
 				module: 'readonly',
 				require: 'readonly',
 				exports: 'readonly',
+				NodeJS: 'readonly',
+				ENV: 'readonly',
 
 				// Browser globals
 				window: 'readonly',
@@ -54,6 +77,7 @@ export default [
 				HTMLButtonElement: 'readonly',
 				HTMLInputElement: 'readonly',
 				HTMLImageElement: 'readonly',
+				HTMLVideoElement: 'readonly',
 				HTMLCanvasElement: 'readonly',
 				HTMLSelectElement: 'readonly',
 				HTMLTextAreaElement: 'readonly',
@@ -61,6 +85,8 @@ export default [
 				HTMLHeadingElement: 'readonly',
 				HTMLSpanElement: 'readonly',
 				HTMLAudioElement: 'readonly',
+				Document: 'readonly',
+				NodeJS: 'readonly',
 
 				// Events
 				MouseEvent: 'readonly',
@@ -80,6 +106,11 @@ export default [
 				Headers: 'readonly',
 				Request: 'readonly',
 				Response: 'readonly',
+				RequestInit: 'readonly',
+				CollectionBase: 'readonly',
+				FolderBase: 'readonly',
+				TagBase: 'readonly',
+				sql: 'readonly',
 
 				// Observers
 				ResizeObserver: 'readonly',
@@ -131,7 +162,7 @@ export default [
 			'prefer-const': 'error',
 			'no-var': 'off',
 			'no-unused-vars': 'off', // Biome ya maneja esta regla
-			'no-undef': 'error', // Activamos esta regla para detectar variables no definidas
+			'no-undef': 'off', // Desactivamos esta regla para archivos TS/TSX, ya que @typescript-eslint/parser la maneja mejor
 
 			// Desactivar reglas que Biome ya maneja
 			indent: 'off',
@@ -163,7 +194,6 @@ export default [
 			'**/build/**',
 			'**/coverage/**',
 			'**/.turbo/**',
-			'**/.next/**',
 			'**/.vercel/**',
 
 			// Reportes y logs

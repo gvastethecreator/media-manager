@@ -1,5 +1,5 @@
 import { CalendarIcon, Filter, RotateCcw, Save, SearchIcon, SlidersHorizontal, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

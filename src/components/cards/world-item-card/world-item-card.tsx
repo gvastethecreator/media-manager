@@ -1,9 +1,9 @@
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useRecentWorldItemImages, useWorldItem } from '@/lib/api/world-items';
 import { cn } from '@/lib/utils';
-import { WorldItemRarity, WorldItemType } from '@/types/entities/world-item';
+import { WorldItemRarity, WorldItemType, WorldItemWithStats } from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';

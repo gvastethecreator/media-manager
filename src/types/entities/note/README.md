@@ -58,4 +58,4 @@ sequenceDiagram
 
 ## ⚠️ Advertencia
 
-**No importar tipos de Prisma ni archivos legacy. Usar solo los tipos de `types.ts`.**
+**No importar tipos de base de datos legacy. Usar solo los tipos de `types.ts`.**

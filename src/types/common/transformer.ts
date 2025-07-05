@@ -127,8 +127,8 @@ export interface TransformerOptions {
  * 🛠️ Interfaz base para transformers
  */
 export interface BaseTransformer<T, U, P = any> {
-	toPrisma(data: Partial<T>): P;
-	
+	toDbFormat(data: Partial<T>): P;
+
 	validate(data: unknown): T;
 	extend(data: T, options?: TransformerOptions): Promise<T>;
 }

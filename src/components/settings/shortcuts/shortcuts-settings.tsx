@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useSettings } from '@/lib/contexts';
+import type { InterfacePreferences } from '@/types/ui/types';
 
 const shortcutCategories = [
 	{

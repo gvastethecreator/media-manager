@@ -17,7 +17,6 @@ import {
 } from '@/lib/api/client/property.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import { toastService } from '@/services/toast';
 import { PropertyWithStats } from '@/types/entities/property';
 import type { PropertyCoreActions, PropertyCoreState, PropertyStore } from '../types';
 

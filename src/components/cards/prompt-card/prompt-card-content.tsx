@@ -1,5 +1,5 @@
 import { Album, Code, Image, Settings, Target, UserSquare } from 'lucide-react';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 

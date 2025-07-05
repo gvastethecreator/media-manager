@@ -1,6 +1,5 @@
 // Mappers para File3D
 
-
 import type { File3D } from '@/types/entities/file3d';
 
 // Tipo local equivalente a Drizzle

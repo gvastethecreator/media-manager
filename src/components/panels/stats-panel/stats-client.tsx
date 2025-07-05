@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { StatsContainer } from './base/stats-view';
 import { StatsLoading } from './components/stats-loading';

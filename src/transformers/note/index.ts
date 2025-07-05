@@ -34,17 +34,13 @@ export async function searchNotes(
 	filters: NoteFilters = {},
 	options: NoteSearchOptions = {}
 ): Promise<NoteSearchResult> {
-	try {
-		// Lógica de búsqueda con Drizzle (a implementar)
-		return {
-			items: [],
-			total: 0,
-			hasMore: false,
-		};
-	} catch (error) {
-		logger.error('Error buscando notas:', error);
-		throw new TransformerError('Error al buscar notas');
-	}
+	// Lógica de búsqueda con Drizzle (a implementar)
+	// TODO: Implementar lógica de búsqueda con Drizzle
+	return {
+		items: [],
+		total: 0,
+		hasMore: false,
+	};
 }
 
 /**
@@ -58,16 +54,9 @@ export async function getNoteById(
 		throwIfNotFound?: boolean;
 	} = {}
 ): Promise<NoteComplete | null> {
-	try {
-		// Lógica de obtención con Drizzle (a implementar)
-		return null;
-	} catch (error) {
-		if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
-			throw error;
-		}
-		logger.error(`Error obteniendo nota ${id}:`, error);
-		throw new TransformerError(`Error al obtener nota ${id}`);
-	}
+	// Lógica de obtención con Drizzle (a implementar)
+	// TODO: Implementar lógica de obtención con Drizzle
+	return null;
 }
 
 /**
@@ -80,42 +69,27 @@ export async function getNotesByIds(
 		includeUI?: boolean;
 	} = {}
 ): Promise<NoteComplete[]> {
-	try {
-		// Lógica de obtención con Drizzle (a implementar)
-		return [];
-	} catch (error) {
-		logger.error('Error obteniendo notas por IDs:', error);
-		throw new TransformerError('Error al obtener notas por IDs');
-	}
+	// Lógica de obtención con Drizzle (a implementar)
+	// TODO: Implementar lógica de obtención con Drizzle
+	return [];
 }
 
 /**
  * Crea una nueva nota
  */
 export async function createNote(data: NoteCreateInput): Promise<NoteComplete> {
-	try {
-		// Lógica de creación con Drizzle (a implementar)
-		throw new TransformerError('Función no implementada');
-	} catch (error) {
-		logger.error('Error creando nota:', error);
-		throw new TransformerError('Error al crear nota');
-	}
+	// Lógica de creación con Drizzle (a implementar)
+	// TODO: Implementar lógica de creación con Drizzle
+	throw new TransformerError('Función no implementada');
 }
 
 /**
  * Actualiza una nota existente
  */
 export async function updateNote(id: string, data: NoteUpdateInput): Promise<NoteComplete> {
-	try {
-		// Lógica de actualización con Drizzle (a implementar)
-		throw new TransformerError('Función no implementada');
-	} catch (error) {
-		if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
-			throw error;
-		}
-		logger.error(`Error actualizando nota ${id}:`, error);
-		throw new TransformerError(`Error al actualizar nota ${id}`);
-	}
+	// Lógica de actualización con Drizzle (a implementar)
+	// TODO: Implementar lógica de actualización con Drizzle
+	throw new TransformerError('Función no implementada');
 }
 
 /**
@@ -127,16 +101,9 @@ export async function deleteNote(
 		softDelete?: boolean;
 	} = {}
 ): Promise<boolean> {
-	try {
-		// Lógica de eliminación con Drizzle (a implementar)
-		return false;
-	} catch (error) {
-		if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
-			throw error;
-		}
-		logger.error(`Error eliminando nota ${id}:`, error);
-		throw new TransformerError(`Error al eliminar nota ${id}`);
-	}
+	// Lógica de eliminación con Drizzle (a implementar)
+	// TODO: Implementar lógica de eliminación con Drizzle
+	return false;
 }
 
 /**

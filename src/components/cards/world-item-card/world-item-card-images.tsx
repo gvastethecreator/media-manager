@@ -1,8 +1,10 @@
 import { ImageIcon } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-// import { getRecentWorldItemImages } from './world-item-server-actions'; // TODO: Archivo no encontrado
+import { worldItemService } from '@/services/world-item/world-item.service';
+
+const { getRecentWorldItemImages } = worldItemService;
 
 interface WorldItemCardImagesProps {
 	worldItemId: string;

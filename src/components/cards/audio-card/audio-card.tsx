@@ -1,6 +1,6 @@
 import { MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useAudio } from '@/lib/api/audio';
 import { cn } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';

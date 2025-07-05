@@ -25,6 +25,12 @@ export interface GroupCoreState {
 /**
  * Estado de UI para el store de grupos
  */
+export interface GroupDisplayState {
+	// Propiedades de estado de visualización para un grupo individual
+	isExpanded?: boolean;
+	isVisible?: boolean;
+}
+
 export interface GroupUIState {
 	/** IDs de grupos seleccionados */
 	selectedIds: string[];

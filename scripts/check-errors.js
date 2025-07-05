@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { join } from 'path';
 import chalk from 'chalk';
+import { join } from 'path';
 
 const LOGS_DIR = join(process.cwd(), 'logs');
 const [, , ...args] = process.argv;

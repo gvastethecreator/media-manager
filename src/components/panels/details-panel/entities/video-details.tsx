@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 /**
  * @file Componentes específicos para detalles de videos
  * @module components/panels/details-panel/entities/video-details

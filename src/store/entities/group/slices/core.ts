@@ -5,8 +5,8 @@
  * @updated 2025-01-27
  */
 
-import { produce, produce } from 'immer';
-import type { StateCreator, StateCreator } from 'zustand';
+import { produce } from 'immer';
+import type { StateCreator } from 'zustand';
 // Uso de cliente de API para grupos
 import {
 	createGroupInApi,
@@ -16,7 +16,6 @@ import {
 } from '@/lib/api/client/group.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import { toastService } from '@/services/toast';
 import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';
 
 const logger = clientLogger.withContext('GroupCoreSlice');

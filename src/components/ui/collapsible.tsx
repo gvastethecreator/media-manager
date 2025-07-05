@@ -1,4 +1,6 @@
-'use client';
+import React from 'react';
+
+('use client');
 
 import { Collapsible as CollapsiblePrimitive } from 'radix-ui';
 

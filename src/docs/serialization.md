@@ -76,7 +76,7 @@ Se ha implementado en `folder-crud.actions.ts` una función robusta que:
 
 - `src/app/actions/*/`: Todas las funciones que devuelven datos al cliente
 - `src/app/api/*/`: Endpoints que interactúan con datos binarios
-- `src/transformers/*/`: Funciones que transforman datos de Prisma a tipos del dominio
+- `src/transformers/*/`: Funciones que transforman datos de la base de datos a tipos del dominio
 - `src/services/*/`: Servicios que manejan imágenes, archivos o datos binarios
 
 ## 📝 Para pruebas y debugging

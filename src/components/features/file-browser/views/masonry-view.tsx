@@ -1,3 +1,4 @@
+import React from 'react';
 /**
  * @file Vista masonry V2 - Layout tipo Pinterest
  * @module components/features/file-browser/views/masonry-view-v2

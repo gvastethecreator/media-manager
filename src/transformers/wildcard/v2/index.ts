@@ -11,7 +11,7 @@ import {
 	extendWildcards,
 	fromDrizzleWildcard,
 	parseChildren,
-	
+	toDrizzleWildcard,
 	validateWildcard,
 	WildcardTransformOptions,
 } from './serializers';

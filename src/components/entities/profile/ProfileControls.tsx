@@ -1,3 +1,4 @@
+import React from 'react';
 /**
  * @file Componente de controles de perfiles
  * @module components/entities/profile/ProfileControls

@@ -1,5 +1,5 @@
 import { Loader2, Plus } from 'lucide-react';
-import { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import {
 	ContextMenuGroup,
 	ContextMenuItem,

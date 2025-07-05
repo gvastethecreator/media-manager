@@ -101,7 +101,7 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 			coreLogger.info('🗑️ Eliminando prompt:', id);
 
 			// Llamar a server action para eliminar prompt
-			await deletePrompt(id);
+			await deletePromptFromApi(id);
 
 			// Recargar prompts para actualizar la lista
 			await get().loadPrompts();

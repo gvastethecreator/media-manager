@@ -24,7 +24,7 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 	const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 	const [isStale, setIsStale] = useState<boolean>(false);
 	const [isComplete, setIsComplete] = useState<boolean>(false);
-	const staleTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const staleTimerRef = useRef<number | null>(null);
 	const initialLoadRef = useRef<boolean>(true);
 
 	// Verificar si el estado está estancado (sin actualizaciones por más de 15 segundos)

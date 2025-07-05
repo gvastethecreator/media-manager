@@ -1,20 +1,10 @@
 import { Search } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { debounce } from '@/lib/utils';
+import { getPrompts, type PromptWithStats } from '@/services/prompt/prompt.service';
 import { MemoizedPromptCard } from './prompt-card';
-
-// import type { PromptCardData } from './prompt-server-actions'; // TODO: Archivo no encontrado
-// import { searchPrompts } from './prompt-server-actions'; // TODO: Archivo no encontrado
-
-// Tipo temporal hasta que se implemente el server action
-type PromptCardData = {
-	id: string;
-	name: string;
-	description?: string;
-	content?: string;
-};
 
 interface PromptCardGridProps {
 	/** Título del grid */
@@ -24,9 +14,9 @@ interface PromptCardGridProps {
 	/** Si está cargando */
 	isLoading?: boolean;
 	/** Datos iniciales */
-	initialPrompts?: PromptCardData[];
+	initialPrompts?: PromptWithStats[];
 	/** Función a ejecutar al hacer click en un prompt */
-	onPromptClick?: (prompt: PromptCardData) => void;
+	onPromptClick?: (prompt: PromptWithStats) => void;
 	/** Si las tarjetas están en modo TCG */
 	tcgMode?: boolean;
 	/** Si las tarjetas están en modo compacto */
@@ -55,7 +45,7 @@ export function PromptCardGrid({
 	searchPlaceholder = 'Buscar prompts...',
 	maxPrompts = 50,
 }: PromptCardGridProps) {
-	const [prompts, setPrompts] = useState<PromptCardData[]>(initialPrompts);
+	const [prompts, setPrompts] = useState<PromptWithStats[]>(initialPrompts);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [loading, setLoading] = useState(isLoading || initialPrompts.length === 0);
 
@@ -66,8 +56,8 @@ export function PromptCardGrid({
 		debounce(async (query: string) => {
 			try {
 				setLoading(true);
-				const results = await searchPrompts(query, maxPrompts);
-				setPrompts(results);
+				const results = await getPrompts({ search: query }, { pageSize: maxPrompts });
+				setPrompts(results.data);
 			} catch (error) {
 				console.error('Error al buscar prompts:', error);
 			} finally {

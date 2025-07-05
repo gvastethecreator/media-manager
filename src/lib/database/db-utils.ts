@@ -2,8 +2,8 @@
  * 🛠️ Utilidades para trabajar con la base de datos a través de Drizzle
  */
 
-import { eq } from 'drizzle-orm';
-import { db } from '@/lib/drizzle';
+import { eq, sql } from 'drizzle-orm';
+import { db } from './db';
 import * as schema from './schema';
 
 type DrizzleTransactionClient = typeof db._;

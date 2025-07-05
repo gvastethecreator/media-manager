@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 /**
  * @file Cliente API centralizado para comunicación con el servidor Express
  * @module lib/api/client

@@ -63,9 +63,9 @@ export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase 
  
  * @param wildcard Wildcard con campos JSON deserializados
  * @param options Opciones de transformación
- * @returns Wildcard con campos serializados para Prisma
+ * @returns Wildcard con campos serializados para Drizzle
  */
-export function toPrismaWildcard(
+export function toDrizzleWildcard(
 	wildcard: Partial<WildcardComplete>,
 	options: WildcardTransformOptions = {}
 ): Record<string, any> {

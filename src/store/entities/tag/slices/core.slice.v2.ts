@@ -5,15 +5,9 @@
 
 import { StateCreator } from 'zustand';
 // Refactor 2025-07: se utiliza cliente de API en lugar de tag.service
-import {
-    createTagInApi,createTagInApi, 
-    deleteTagFromApi,deleteTagFromApi, 
-    getTagsFromApi,getTagsFromApi, 
-    updateTagInApi,updateTagInApi 
-} from '@/lib/api/client/tag.client';
+import { createTagInApi, deleteTagFromApi, getTagsFromApi, updateTagInApi } from '@/lib/api/client/tag.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import { toastService } from '@/services/toast';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import type { TagStore } from '../types';
 

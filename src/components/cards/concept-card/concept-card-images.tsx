@@ -3,7 +3,9 @@ import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-// import { getRecentConceptImages } from './concept-server-actions'; // TODO: Archivo no encontrado
+import { conceptService } from '@/services/concept/concept.service';
+
+const { getRecentConceptImages } = conceptService;
 
 interface ConceptCardImagesProps {
 	conceptId: string;
