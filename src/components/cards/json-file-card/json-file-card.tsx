@@ -226,7 +226,6 @@ export function JsonFileCard({
 				{/* Cabecera */}
 				<CardHeader
 					title={jsonFile.name || 'Sin nombre'}
-					emoji="📋"
 					color={primaryColor}
 					isFavorite={jsonFile.isFavorite || false}
 					compact={compact}

@@ -179,7 +179,6 @@ export function UploadedImageCard({
 				{/* Cabecera */}
 				<CardHeader
 					title={uploadedImage.name || 'Sin nombre'}
-					emoji="🖼️"
 					color={primaryColor}
 					isFavorite={uploadedImage.isFavorite || false}
 					compact={compact}
@@ -199,7 +198,7 @@ export function UploadedImageCard({
 									height: '80px',
 								}}
 							>
-								{!imageError && shouldLoad ? (
+								{!imageError ? (
 									<img
 										src={imageUrl}
 										alt={uploadedImage.name || 'Imagen subida'}

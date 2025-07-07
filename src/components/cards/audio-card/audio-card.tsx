@@ -215,7 +215,6 @@ export function AudioCard({
 					title={audio.name || 'Sin nombre'}
 					icon={<MusicIcon className="h-4 w-4" />}
 					primaryColor={primaryColor}
-					isFavorite={audio.isFavorite || false}
 					compact={compact}
 				/>
 

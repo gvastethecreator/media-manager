@@ -1,3 +1,14 @@
+import { useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
+import { useConcept, useConceptCounts } from '@/hooks/use-concept-data';
+import { cn } from '@/lib/utils';
+import { CardHeader } from '@/components/cards/components/card-header';
+import { ConceptCardImages } from './concept-card-images';
+import { ConceptCardContent } from './concept-card-content';
+import { ConceptCardFooter } from './concept-card-footer';
+import type { ConceptCardProps } from './concept-card.types';
+
 export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
 	const { data: concept, isLoading, error } = useConcept(conceptId);
 	const { data: conceptCounts } = useConceptCounts(conceptId);
