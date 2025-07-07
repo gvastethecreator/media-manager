@@ -5,7 +5,7 @@ const router = Router();
 const characterService = new CharacterService();
 
 // GET /api/characters - Obtener todos los personajes
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
 	try {
 		console.log('🔍 Obteniendo personajes con Drizzle ORM');
 		const characters = await characterService.getCharacters();

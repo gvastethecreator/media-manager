@@ -4,8 +4,6 @@
  
  */
 
-import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
-import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
@@ -16,13 +14,6 @@ import type {
 	NoteSearchResult,
 	NoteUpdateInput,
 } from '@/types/entities/note/types';
-import {
-	mapCreateNoteDataToDrizzle,
-	mapNoteFiltersToDrizzle,
-	mapNoteSearchOptionsToDrizzle,
-	mapUpdateNoteDataToDrizzle,
-} from './mappers';
-import { fromDrizzleNote, validateNote } from './serializers';
 
 // 📊 Logger específico para NoteTransformer
 const logger = serverLogger.withContext('NoteTransformer');
@@ -31,8 +22,8 @@ const logger = serverLogger.withContext('NoteTransformer');
  * Busca notas según los filtros proporcionados
  */
 export async function searchNotes(
-	filters: NoteFilters = {},
-	options: NoteSearchOptions = {}
+	_filters: NoteFilters = {},
+	_options: NoteSearchOptions = {}
 ): Promise<NoteSearchResult> {
 	// Lógica de búsqueda con Drizzle (a implementar)
 	// TODO: Implementar lógica de búsqueda con Drizzle
@@ -47,8 +38,8 @@ export async function searchNotes(
  * Obtiene una nota por su ID
  */
 export async function getNoteById(
-	id: string,
-	options: {
+	_id: string,
+	_options: {
 		includeRelations?: boolean;
 		includeUI?: boolean;
 		throwIfNotFound?: boolean;
@@ -63,8 +54,8 @@ export async function getNoteById(
  * Obtiene varias notas por sus IDs
  */
 export async function getNotesByIds(
-	ids: string[],
-	options: {
+	_ids: string[],
+	_options: {
 		includeRelations?: boolean;
 		includeUI?: boolean;
 	} = {}
@@ -77,7 +68,7 @@ export async function getNotesByIds(
 /**
  * Crea una nueva nota
  */
-export async function createNote(data: NoteCreateInput): Promise<NoteComplete> {
+export async function createNote(_data: NoteCreateInput): Promise<NoteComplete> {
 	// Lógica de creación con Drizzle (a implementar)
 	// TODO: Implementar lógica de creación con Drizzle
 	throw new TransformerError('Función no implementada');
@@ -86,7 +77,7 @@ export async function createNote(data: NoteCreateInput): Promise<NoteComplete> {
 /**
  * Actualiza una nota existente
  */
-export async function updateNote(id: string, data: NoteUpdateInput): Promise<NoteComplete> {
+export async function updateNote(_id: string, _data: NoteUpdateInput): Promise<NoteComplete> {
 	// Lógica de actualización con Drizzle (a implementar)
 	// TODO: Implementar lógica de actualización con Drizzle
 	throw new TransformerError('Función no implementada');
@@ -96,8 +87,8 @@ export async function updateNote(id: string, data: NoteUpdateInput): Promise<Not
  * Elimina una nota
  */
 export async function deleteNote(
-	id: string,
-	options: {
+	_id: string,
+	_options: {
 		softDelete?: boolean;
 	} = {}
 ): Promise<boolean> {

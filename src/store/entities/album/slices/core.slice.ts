@@ -81,7 +81,7 @@ export const createAlbumCoreSlice: StateCreator<
 			toastService.success(`Álbum "${data.name}" creado.`);
 			await get().loadAlbums();
 		} catch (error) {
-			const errorMsg = '❌ Error al crear el álbum "' + data.name + '".';
+			const errorMsg = `❌ Error al crear el álbum "${data.name}".`;
 			logger.error(errorMsg, error);
 			toastService.error(errorMsg);
 		}

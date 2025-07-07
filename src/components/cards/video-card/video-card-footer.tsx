@@ -22,7 +22,6 @@ export function VideoCardFooter({
 	secondaryColor,
 	cardId,
 	rarityLevel,
-	totalRelations,
 	tcgMode = true,
 	compact = false,
 }: VideoCardFooterProps) {

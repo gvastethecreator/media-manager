@@ -83,7 +83,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	);
 
 	// 📝 Manejar creación de tag
-	const handleTagCreated = useCallback((newTag: UITag) => {
+	const handleTagCreated = useCallback((_newTag: UITag) => {
 		setShowCreateForm(false);
 		toastService.success('Etiqueta creada correctamente');
 	}, []);
@@ -329,7 +329,6 @@ function _generateCategoryColor(category: TagCategory): string {
 			return 'bg-teal-500';
 		case TagCategory.CUSTOM:
 			return 'bg-violet-500';
-		case TagCategory.OTHER:
 		default:
 			return 'bg-gray-500';
 	}

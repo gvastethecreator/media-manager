@@ -272,11 +272,11 @@ export function matchesCharacterSearch(character: CharacterWithStats, searchTerm
 
 	return (
 		character.name.toLowerCase().includes(normalizedTerm) ||
-		(character.description && character.description.toLowerCase().includes(normalizedTerm)) ||
+		character.description?.toLowerCase().includes(normalizedTerm) ||
 		character.class.toLowerCase().includes(normalizedTerm) ||
 		character.race.toLowerCase().includes(normalizedTerm) ||
 		character.alignment.toLowerCase().includes(normalizedTerm) ||
-		(character.category && character.category.toLowerCase().includes(normalizedTerm)) ||
+		character.category?.toLowerCase().includes(normalizedTerm) ||
 		character.backstory.toLowerCase().includes(normalizedTerm)
 	);
 }

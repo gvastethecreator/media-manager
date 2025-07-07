@@ -90,7 +90,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		} finally {
 			setIsRetrying(false);
 		}
-	}, [currentFolderId, isRetrying]);
+	}, [currentFolderId, isRetrying, reindexFolderMutation.mutateAsync]);
 
 	// Efecto para cargar imágenes solo una vez por carpeta
 	useEffect(() => {
@@ -115,7 +115,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	useEffect(() => {
 		setHasAttemptedLoad(false);
 		setIsRetrying(false);
-	}, [currentFolderId]);
+	}, []);
 
 	// ️ Validación: verificar que hay una carpeta seleccionada
 	if (!currentFolderId) {

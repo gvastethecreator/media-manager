@@ -1,9 +1,5 @@
-import { and, eq } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
-import { db } from '@/lib/drizzle';
-// import { favorites, profiles } from '@/lib/drizzle/schema'; // favorites no existe
-import { profiles } from '@/lib/drizzle/schema';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const router = Router();

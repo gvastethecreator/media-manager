@@ -46,7 +46,7 @@ export function AlbumsView(_props: ViewProps) {
 	// Cachear el resultado de getSortedAlbums
 	const sortedAlbums = useMemo(() => {
 		return getSortedAlbums();
-	}, [getSortedAlbums, albumsRecord]); // Dependencias para recalcular cuando cambien
+	}, [getSortedAlbums]); // Dependencias para recalcular cuando cambien
 
 	if (error) {
 		return (

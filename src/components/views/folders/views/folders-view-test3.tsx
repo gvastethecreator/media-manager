@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { useFileStoreBase } from '@/store/entities/file';
 import type { ViewProps } from '../../types';

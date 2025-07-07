@@ -47,7 +47,6 @@ export default [
 				module: 'readonly',
 				require: 'readonly',
 				exports: 'readonly',
-				NodeJS: 'readonly',
 				ENV: 'readonly',
 
 				// Browser globals

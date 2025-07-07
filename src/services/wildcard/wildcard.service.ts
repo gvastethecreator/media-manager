@@ -228,7 +228,6 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 					return direction(wildcards.createdAt);
 				case 'updatedAt':
 					return direction(wildcards.updatedAt);
-				case 'name':
 				default:
 					// Para name, primero favoritos luego por nombre
 					return orderDirection === 'desc'

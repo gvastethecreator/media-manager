@@ -419,7 +419,7 @@ function calculateQualityScore(params: {
 function determineTechnicalGrade(
 	qualityScore: number,
 	qualityLevel: VideoQuality,
-	megabytes: number
+	_megabytes: number
 ): 'A' | 'B' | 'C' | 'D' {
 	if (qualityScore >= 80 && qualityLevel >= VideoQuality.QHD_2K) return 'A';
 	if (qualityScore >= 60 && qualityLevel >= VideoQuality.HD) return 'B';

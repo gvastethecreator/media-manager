@@ -90,7 +90,7 @@ export function mapCreateNoteDataToDrizzle(data: NoteCreateInput): DrizzleCreate
  * Retorna un objeto con data para ser usado en update
  * ✅ MIGRADO A DRIZZLE
  */
-export function mapUpdateNoteDataToDrizzle(id: string, data: NoteUpdateInput): DrizzleUpdateResult {
+export function mapUpdateNoteDataToDrizzle(_id: string, data: NoteUpdateInput): DrizzleUpdateResult {
 	try {
 		const {
 			images,

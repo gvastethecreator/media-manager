@@ -47,6 +47,21 @@ export function CharacterCardHeader({
 		return null;
 	};
 
+	if (compact) {
+		return (
+			<div className="p-2 flex items-center gap-2 bg-gray-800/50 rounded-t-lg">
+				<span className="text-lg">{emoji}</span>
+				<div className="flex-1 truncate">
+					<h3 className="font-bold text-sm truncate text-white">{name}</h3>
+					<p className="text-xs text-gray-300 truncate">
+						{characterClass} • Lvl {level}
+					</p>
+				</div>
+				{isFavorite && <Heart className="w-4 h-4 text-red-500 fill-current flex-shrink-0" />}
+			</div>
+		);
+	}
+
 	return (
 		<div className="relative">
 			{/* Fondo del título con gradiente de color */}

@@ -193,18 +193,18 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 	const addToCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			fileIds.forEach((fileId) => {
+			for (const fileId of fileIds) {
 				addToCollectionMutate({ fileId, collectionId });
-			});
+			}
 		},
 		[addToCollectionMutate]
 	);
 
 	const removeFromCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			fileIds.forEach((fileId) => {
+			for (const fileId of fileIds) {
 				removeFromCollectionMutate({ fileId, collectionId });
-			});
+			}
 		},
 		[removeFromCollectionMutate]
 	);
@@ -214,18 +214,18 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 	const addTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			fileIds.forEach((fileId) => {
+			for (const fileId of fileIds) {
 				addTagsMutate({ fileId, tags });
-			});
+			}
 		},
 		[addTagsMutate]
 	);
 
 	const removeTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			fileIds.forEach((fileId) => {
+			for (const fileId of fileIds) {
 				removeTagsMutate({ fileId, tags });
-			});
+			}
 		},
 		[removeTagsMutate]
 	);

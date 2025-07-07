@@ -95,7 +95,7 @@ router.get('/:id/counts', async (req, res) => {
 });
 
 // GET /notes/statuses - Obtener estados disponibles para notas
-router.get('/statuses', async (req, res) => {
+router.get('/statuses', async (_req, res) => {
 	try {
 		const statuses = await noteService.getNoteStatuses();
 		res.json(statuses);

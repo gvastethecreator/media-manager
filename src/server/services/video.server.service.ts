@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { folders, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
+import { createEntityNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVICE_NAME = 'VideoServerService';
 const videoLogger = serverLogger.withContext(SERVICE_NAME);

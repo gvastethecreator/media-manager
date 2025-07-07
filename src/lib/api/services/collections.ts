@@ -53,7 +53,7 @@ export const collectionsApi = {
 	/**
 	 * Remueve imágenes de una colección
 	 */
-	removeImages: (id: string, imageIds: string[]): Promise<CollectionWithStats> => {
+	removeImages: (id: string, _imageIds: string[]): Promise<CollectionWithStats> => {
 		return apiClient.delete<CollectionWithStats>(`/api/collections/${id}/images`);
 	},
 };

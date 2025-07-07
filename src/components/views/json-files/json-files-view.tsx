@@ -50,7 +50,7 @@ export function JsonFilesView(_props: ViewProps) {
 	// Cachear el resultado de getSortedJsonFiles
 	const sortedJsonFiles = useMemo(() => {
 		return getSortedJsonFiles();
-	}, [getSortedJsonFiles, jsonFilesRecord]);
+	}, [getSortedJsonFiles]);
 
 	if (error) {
 		return (

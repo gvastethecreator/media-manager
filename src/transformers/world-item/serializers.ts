@@ -41,7 +41,7 @@ const serializeArray = <T>(data: T[] | string, fieldName: string): string => {
 	}
 };
 
-const deserializeArray = <T>(jsonString: string | null | undefined, fieldName: string): T[] => {
+const deserializeArray = <T>(jsonString: string | null | undefined, _fieldName: string): T[] => {
 	if (!jsonString) return [];
 
 	// Si el string no parece JSON válido (no empieza con [ o {), tratarlo como array de strings

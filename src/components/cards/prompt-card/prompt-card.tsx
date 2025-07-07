@@ -1,4 +1,3 @@
-import { MessageSquareQuote, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { usePrompt, useRecentPromptImages } from '@/lib/api/prompts';
@@ -240,6 +239,7 @@ function PromptCardComponent({
 		albumsCount,
 		collectionsCount,
 		tagsCount,
+		prompt._count?.prompts,
 	]);
 
 	return (

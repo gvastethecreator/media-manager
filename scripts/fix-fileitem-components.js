@@ -4,7 +4,6 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 
 const componentsToFix = [
 	'src/components/views/world-items/world-item-content-view.tsx',

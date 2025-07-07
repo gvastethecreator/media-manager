@@ -78,36 +78,30 @@ function main() {
 
 	// Componentes por categoría
 	console.log('✅ COMPONENTES BASE UI:');
-	results
-		.filter((r) => r.hasBaseUIImport)
-		.forEach((r) => {
-			console.log(`  • ${r.file} - ${r.details}`);
-		});
+	for (const r of results.filter((r) => r.hasBaseUIImport)) {
+		console.log(`  • ${r.file} - ${r.details}`);
+	}
 	console.log();
 
 	console.log('⏳ COMPONENTES RADIX (PENDIENTES):');
-	results
-		.filter((r) => r.hasRadixImport)
-		.forEach((r) => {
-			console.log(`  • ${r.file} - ${r.details}`);
-		});
+	for (const r of results.filter((r) => r.hasRadixImport)) {
+		console.log(`  • ${r.file} - ${r.details}`);
+	}
 	console.log();
 
 	console.log('🔧 COMPONENTES CUSTOM:');
-	results
-		.filter((r) => !r.hasRadixImport && !r.hasBaseUIImport)
-		.forEach((r) => {
-			console.log(`  • ${r.file} - ${r.details}`);
-		});
+	for (const r of results.filter((r) => !r.hasRadixImport && !r.hasBaseUIImport)) {
+		console.log(`  • ${r.file} - ${r.details}`);
+	}
 	console.log();
 
 	// Prioridades de migración
 	const highPriority = results.filter((r) => r.priority === 'HIGH');
 	if (highPriority.length > 0) {
 		console.log('🚨 ALTA PRIORIDAD PARA MIGRACIÓN:');
-		highPriority.forEach((r) => {
+		for (const r of highPriority) {
 			console.log(`  • ${r.file}`);
-		});
+		}
 	}
 }
 

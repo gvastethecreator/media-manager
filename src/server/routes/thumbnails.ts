@@ -3,12 +3,10 @@ import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
 import { thumbnailService } from '@/services/thumbnail';
 import {
 	cleanThumbnails,
-	getLastProcessedThumbnails,
 	getThumbnail,
 	getThumbnailStats,
 	optimizeThumbnails,
 	reprocessThumbnails,
-	verifySignedToken,
 } from '../services/thumbnail.service';
 
 const router = express.Router();
@@ -27,7 +25,7 @@ router.get('/image/:imageId', async (req, res) => {
 });
 
 // GET /thumbnails/stats - Obtener estadísticas de thumbnails
-router.get('/stats', async (req, res) => {
+router.get('/stats', async (_req, res) => {
 	try {
 		const stats = await getThumbnailStats();
 		res.json(stats);

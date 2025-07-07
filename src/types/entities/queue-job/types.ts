@@ -58,15 +58,12 @@ export interface QueueJobCreateInput {
 	data: string;
 	maxAttempts?: number;
 	priority?: number;
-	metadata?: QueueJobMetadata;
 }
 
 /**
  * Input para actualización
  */
-export interface QueueJobUpdateInput extends Partial<Omit<QueueJobBase, 'id' | 'createdAt' | 'updatedAt'>> {
-	metadata?: QueueJobMetadata;
-}
+export interface QueueJobUpdateInput extends Partial<Omit<QueueJobBase, 'id' | 'createdAt' | 'updatedAt'>> {}
 
 /**
  * Input para creación (alias para compatibilidad)

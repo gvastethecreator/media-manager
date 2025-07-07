@@ -5,7 +5,7 @@
 // Todos los valores null se transforman a undefined antes de enviar a las acciones. population siempre es number o undefined.
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -18,16 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreatePlace, useUpdatePlace } from '@/lib/api/places';
-import toastService, { toast } from '@/lib/ui/toast';
-import type {
-	PlaceBase,
-	PlaceComplete,
-	PlaceCreateInput,
-	PlaceExtended,
-	PlaceUpdateInput,
-	PlaceWithStats,
-} from '@/types/entities/place';
-import { DynamicCreateForm } from '../common/dynamic-create-form';
+import { toast } from '@/lib/ui/toast';
+import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 // Opciones para los selects que antes eran enums
 const placeTypes = ['CITY', 'TOWN', 'VILLAGE', 'REGION', 'PLANET', 'OTHER'] as const;

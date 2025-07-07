@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { VideoWithStats } from '@/types/entities/video';
 import { apiClient } from './client';
 

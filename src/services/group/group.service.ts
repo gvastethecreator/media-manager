@@ -9,7 +9,6 @@ import { db } from '@/lib/drizzle';
 import { groups } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
 	GroupCreateInput,

@@ -16,13 +16,7 @@ import {
 } from '@/lib/api/wildcards';
 import toastService from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
-import type {
-	WildcardComplete,
-	WildcardCreateInput,
-	WildcardExtended,
-	WildcardUpdateInput,
-	WildcardWithStats,
-} from '@/types/entities/wildcard';
+import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { WildcardPreview } from './wildcard-preview';
 
 // Importar el tipo de formulario que hemos definido

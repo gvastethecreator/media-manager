@@ -67,9 +67,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	items: manualItems = [],
 	folderId,
 	filterType = undefined,
-	showToolbar = false,
 	selectedIds = [],
-	onSelectionChange,
 	onItemClick,
 	onItemDoubleClick,
 	className,
@@ -380,7 +378,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Función para renderizar item usando EntityCard
 	const renderItem = useCallback(
-		(item: EntityWithStats, index: number) => {
+		(item: EntityWithStats, _index: number) => {
 			return (
 				<EntityCard
 					key={item.id}

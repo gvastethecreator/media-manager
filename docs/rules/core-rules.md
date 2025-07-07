@@ -124,7 +124,7 @@ IMPORTANT: Do not return control the user until you have fully completed the use
 4. **NUNCA correr builds o servidores a menos que se pida explicitamente** - Nunca ejecutar builds o iniciar servidores automáticamente. SIEMPRE pedir confirmación al usuario antes de ejecutar comandos pesados.
 5. **Tratame como un experto** - Ajustar la profundidad de las explicaciones según el contexto. No sobre-explicar conceptos básicos a menos que sea necesario.
 6. **Sistema de scripts inteligente obligatorio** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
-7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run check:errors` para análisis avanzado de errores.
+7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run biome:errors` para análisis avanzado de errores.
 
 ### 8. Prioridad de Herramientas (MCP > Terminal)
 - Siempre se deben priorizar las herramientas internas o las MCP sobre los comandos de terminal genéricos.
@@ -145,8 +145,8 @@ IMPORTANT: Do not return control the user until you have fully completed the use
 - **Eficiencia máxima en cambios** - Mostrar solo las modificaciones necesarias, no repetir código completo
 - **Documentación técnica precisa** - Comentarios claros pero concisos que expliquen el "por qué" del código
 - **Enfoque en mejores prácticas** - Aplicar patrones y convenciones estándar del lenguaje/framework
-- **Uso obligatorio de scripts** - Usar `bun run lint`, `bun run test`, `bun run check`, etc. en lugar de comandos directos. Los logs se guardan automáticamente en `/logs`
-- **Gestión de logs integrada** - Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run check:errors` para análisis avanzado de errores con filtros por herramienta y días
+- **Uso obligatorio de scripts** - Usar `bun run lint`, `bun run test`, `bun run biome`, etc. en lugar de comandos directos. Los logs se guardan automáticamente en `/logs`
+- **Gestión de logs integrada** - Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run biome:errors` para análisis avanzado de errores con filtros por herramienta y días
 
 ### Modo Conocimiento (Obsidian, Documentación, Investigación, Conocimiento)
 
@@ -197,8 +197,8 @@ IMPORTANT: Do not return control the user until you have fully completed the use
 
 ## 💻 Desarrollo
 
-- **Scripts inteligentes primero** - SIEMPRE usar `bun run lint`, `bun run test`, `bun run check`, etc. Los scripts manejan automáticamente logging y códigos de salida tolerantes
-- **Análisis de errores con logs** - Usar `bun run logs` y `bun run check:errors` para analizar issues en lugar de ejecutar comandos directos
+- **Scripts inteligentes primero** - SIEMPRE usar `bun run lint`, `bun run test`, `bun run biome`, etc. Los scripts manejan automáticamente logging y códigos de salida tolerantes
+- **Análisis de errores con logs** - Usar `bun run logs` y `bun run biome:errors` para analizar issues en lugar de ejecutar comandos directos
 - **Comentarios significativos y útiles** - Usar las convenciones del proyecto y agregar valor real, no comentarios obvios
 - **Documentación de API completa** - Seguir el estándar del lenguaje (JSDoc, docstrings, rustdoc, etc.) con ejemplos cuando sea útil
 - **Formato consistente del proyecto** - Respetar prettier, black, rustfmt o cualquier formateador configurado
@@ -359,15 +359,15 @@ aproximación contrasta con las arquitecturas monolíticas tradicionales...
 
 #### Ejecución (siempre usa estos)
 
-- `bun run lint` / `bun run check` / `bun run test` - Ejecuta con logging automático y tolerancia inteligente
+- `bun run lint` / `bun run biome` / `bun run test` - Ejecuta con logging automático y tolerancia inteligente
 - `bun run biome:fix` / `bun run lint:fix` - Arregla issues automáticamente con logs
 
 #### Análisis de logs
 
 - `bun run logs list [num]` - Lista logs recientes (por defecto 10)
 - `bun run logs clean [días]` - Limpia logs antiguos (por defecto 7 días)
-- `bun run check:errors` - Busca errores en logs del último día
-- `bun run check:errors --tool biome --days 3` - Busca errores específicos
+- `bun run biome:errors` - Busca errores en logs del último día
+- `bun run biome:errors --tool biome --days 3` - Busca errores específicos
 
 #### Comportamiento inteligente
 
@@ -489,7 +489,7 @@ bun run test:e2e:debug             # Debug paso a paso
 
 # 2. Análisis de resultados
 bun run logs list                  # Ver logs recientes
-bun run check:errors --tool playwright  # Analizar errores específicos
+bun run biome:errors --tool playwright  # Analizar errores específicos
 ```
 
 ### Configuración de Tests
@@ -525,11 +525,11 @@ bun run check:errors --tool playwright  # Analizar errores específicos
 
 ## 😈 Regla de Confirmación
 
-- **Confirmación visual obligatoria** - SIEMPRE iniciar cada respuesta con exactamente 🔻🔻🔻🔻🔻🔻 y terminar con exactamente 🔺🔺🔺🔺🔺🔺. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
+- **Confirmación visual obligatoria** - SIEMPRE iniciar cada respuesta con exactamente 🔻🔻🔻🔻🔻🔻🔻🔻🔻 y terminar con exactamente 🔺🔺🔺🔺🔺🔺🔺🔺🔺. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
 
 ## 🎯 Checklist Pre-Respuesta
 
-- [ ] ¿Inicié mi respuesta con exactamente 🔻🔻🔻🔻🔻🔻?
+- [ ] ¿Inicié mi respuesta con exactamente 🔻🔻🔻🔻🔻🔻🔻🔻🔻🔻
 - [ ] ¿Identifiqué correctamente si es contexto de código o conocimiento?
 - [ ] ¿Adapté mi tono y profundidad al modo apropiado?
 - [ ] ¿Exploré completamente el proyecto/espacio existente antes de sugerir cambios?
@@ -543,4 +543,4 @@ bun run check:errors --tool playwright  # Analizar errores específicos
 - [ ] Si modifiqué configuración: ¿Verifiqué consistencia de puertos (4444)?
 - [ ] Si desarrollé features: ¿Usé MCP para validación visual y debug continuo?
 - [ ] Si encontré bugs: ¿Capturé evidencia con browser_take_screenshot?
-- [ ] ¿Terminaré mi respuesta con exactamente 🔺🔺🔺🔺🔺🔺?
+- [ ] ¿Terminaré mi respuesta con exactamente 🔺🔺🔺🔺🔺🔺🔺🔺🔺?
