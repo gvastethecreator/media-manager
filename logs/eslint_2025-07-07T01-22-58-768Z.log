@@ -1,0 +1,12 @@
+Comando: bunx eslint .
+Fecha: 2025-07-07T01:22:58.770Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+
+D:\DEV\image-manager\src\components\panels\details-panel\registry-setup.ts
+  32:7  error  Parsing error: '>' expected
+
+✖ 1 problem (1 error, 0 warnings)
+
