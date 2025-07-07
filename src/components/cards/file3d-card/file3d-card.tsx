@@ -244,8 +244,8 @@ export function File3DCard({
 						</div>
 
 						{/* Descripción */}
-						{file3d.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{file3d.description}</div>
+						{file3d.summary && (
+							<div className="text-sm text-muted-foreground line-clamp-2 italic">{file3d.summary}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}

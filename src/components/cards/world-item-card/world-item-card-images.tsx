@@ -2,9 +2,10 @@ import { ImageIcon } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-import { worldItemService } from '@/services/world-item/world-item.service';
+import { WorldItemService } from '@/services/world-item/world-item.service';
+import type { Image } from '@/types/entities/image';
 
-const { getRecentWorldItemImages } = worldItemService;
+const { getRecentWorldItemImages } = WorldItemService;
 
 interface WorldItemCardImagesProps {
 	worldItemId: string;

@@ -131,25 +131,25 @@ export const EntityCard: FC<EntityCardProps> = ({
 	}
 
 	if (isVideoWithStats(entity)) {
-		return <VideoCard video={entity} {...commonProps} />;
+		return <VideoCard videoId={entity.id} {...commonProps} />;
 	}
 
 	if (isAlbumWithStats(entity)) {
-		return <AlbumCard album={entity} {...commonProps} />;
+		return <AlbumCard albumId={entity.id} {...commonProps} />;
 	}
 
 	if (isCollectionWithStats(entity)) {
-		return <CollectionCard collection={entity} {...commonProps} />;
+		return <CollectionCard collectionId={entity.id} {...commonProps} />;
 	}
 
 	if (isCharacterWithStats(entity)) {
-		return <CharacterCard character={entity} {...commonProps} />;
+		return <CharacterCard characterId={entity.id} {...commonProps} />;
 	}
 
 	if (isFolderWithStats(entity)) {
 		return (
 			<FolderCard
-				folder={entity}
+				folderId={entity.id}
 				{...commonProps}
 				// Props específicas de FolderCard
 				interactive={!!onClick}
@@ -158,47 +158,47 @@ export const EntityCard: FC<EntityCardProps> = ({
 	}
 
 	if (isAudioWithStats(entity)) {
-		return <AudioCard audio={entity} {...commonProps} />;
+		return <AudioCard audioId={entity.id} {...commonProps} />;
 	}
 
 	if (isDocumentWithStats(entity)) {
-		return <DocumentCard document={entity} {...commonProps} />;
+		return <DocumentCard documentId={entity.id} {...commonProps} />;
 	}
 
 	if (isTagWithStats(entity)) {
-		return <TagCard tag={entity} {...commonProps} />;
+		return <TagCard tagId={entity.id} {...commonProps} />;
 	}
 
 	if (isNoteWithStats(entity)) {
-		return <NoteCard note={entity} {...commonProps} />;
+		return <NoteCard noteId={entity.id} {...commonProps} />;
 	}
 
 	if (isPlaceWithStats(entity)) {
-		return <PlaceCard place={entity} {...commonProps} />;
+		return <PlaceCard placeId={entity.id} {...commonProps} />;
 	}
 
 	if (isWorldItemWithStats(entity)) {
-		return <WorldItemCard worldItem={entity} {...commonProps} />;
+		return <WorldItemCard worldItemId={entity.id} {...commonProps} />;
 	}
 
 	if (isConceptWithStats(entity)) {
-		return <ConceptCard concept={entity} {...commonProps} />;
+		return <ConceptCard conceptId={entity.id} {...commonProps} />;
 	}
 
 	if (isPromptWithStats(entity)) {
-		return <PromptCard prompt={entity} {...commonProps} />;
+		return <PromptCard promptId={entity.id} {...commonProps} />;
 	}
 
 	if (isPropertyWithStats(entity)) {
-		return <PropertyCard property={entity} {...commonProps} />;
+		return <PropertyCard propertyId={entity.id} {...commonProps} />;
 	}
 
 	if (isGroupWithStats(entity)) {
-		return <GroupCard group={entity} {...commonProps} />;
+		return <GroupCard groupId={entity.id} {...commonProps} />;
 	}
 
 	if (isWildcardWithStats(entity)) {
-		return <WildcardCard wildcard={entity} {...commonProps} />;
+		return <WildcardCard wildcardId={entity.id} {...commonProps} />;
 	}
 
 	// Fallback para entidades no reconocidas

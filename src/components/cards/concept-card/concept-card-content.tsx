@@ -3,9 +3,9 @@ import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-import { conceptService } from '@/services/concept/concept.service';
+import { ConceptService } from '@/services/concept/concept.service';
 
-const { getConceptCounts } = conceptService;
+const { getConceptCounts } = ConceptService;
 
 interface ConceptCardContentProps {
 	description?: string | null;

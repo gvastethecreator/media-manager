@@ -5,6 +5,7 @@ import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { cn } from '@/lib/utils';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CardContainer } from '../card-container';
+import { adaptCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';
 import { CharacterCardHeader } from './character-card-header';
@@ -43,9 +44,14 @@ export function CharacterCard({
 	onClick,
 	isSelected = false,
 }: CharacterCardProps) {
-	const { data: character, isLoading, error } = useCharacter(characterId);
+	const { data: characterData, isLoading, error } = useCharacter(characterId);
 	const { data: recentMediaData } = useRecentCharacterMedia(characterId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	const character = useMemo(() => {
+		if (!characterData) return null;
+		return adaptCharacterWithStats(characterData);
+	}, [characterData]);
 
 	const safeJsonParse = (jsonStr: string | null | undefined): any => {
 		if (!jsonStr) return {};

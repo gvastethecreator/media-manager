@@ -2,8 +2,9 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { debounce } from '@/lib/utils';
-import { getPrompts, type PromptWithStats } from '@/services/prompt/prompt.service';
+import { debounceEvent } from '@/lib/system/event-throttler';
+import { getPrompts } from '@/services/prompt/prompt.service';
+import type { PromptWithStats } from '@/types/entities/prompt';
 import { MemoizedPromptCard } from './prompt-card';
 
 interface PromptCardGridProps {
@@ -53,7 +54,7 @@ export function PromptCardGrid({
 
 	// Función debounceada para buscar prompts
 	const debouncedSearch = useRef(
-		debounce(async (query: string) => {
+		debounceEvent(async (query: string) => {
 			try {
 				setLoading(true);
 				const results = await getPrompts({ search: query }, { pageSize: maxPrompts });

@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useNote, useNoteCounts, useRecentNoteImages } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
-import type { NoteWithStats } from '@/types/entities/note';
+import type { NoteComplete } from '@/types/entities/note';
 import { CardHeader } from '../card-header';
 import { NoteCardContent } from './note-card-content';
 import { NoteCardFooter } from './note-card-footer';
@@ -11,7 +11,7 @@ import { NoteCardImages } from './note-card-images';
 
 export interface NoteCardProps {
 	noteId: string;
-	onClick?: (noteData: NoteWithStats) => void;
+	onClick?: (noteData: NoteComplete) => void;
 	className?: string;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
@@ -38,7 +38,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		isFavorite = false,
 		createdAt,
 		updatedAt,
-		tags: noteTags,
+		tags,
 	} = note || {}; // Añadir fallback para evitar errores si note es undefined
 
 	// Calcular valores derivados
@@ -92,25 +92,6 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		},
 		[onClick, note]
 	);
-
-	// Parsear tags si es un string
-	const tags = useMemo(() => {
-		// Comprobar si note tiene la propiedad tags
-		if (note && 'tags' in note) {
-			const currentTags = note.tags;
-			// Si tags es un string, intentar parsearlo
-			if (typeof currentTags === 'string' && currentTags) {
-				try {
-					return JSON.parse(currentTags);
-				} catch (_e) {
-					return [];
-				}
-			}
-			return currentTags || [];
-		}
-		// Si no tiene tags, devolver array vacío
-		return [];
-	}, [note]);
 
 	// Definir estilos de la tarjeta
 	const cardStyle = useMemo(
@@ -172,7 +153,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 			)}
 			whileHover={{ y: -5 }}
 			whileTap={{ scale: 0.98 }}
-			onClick={onClick}
+			onClick={onClick ? (e: React.MouseEvent<HTMLDivElement>) => onClick(note) : undefined}
 			onKeyDown={handleKeyDown}
 			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
@@ -192,7 +173,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
-				title={note.title}
+				title={note.title || 'Sin título'}
 				subtitle={note.category || 'General'}
 				icon={
 					note.emoji ? (
@@ -204,7 +185,6 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 					)
 				}
 				primaryColor={primaryColor}
-				variant={tcgMode ? 'tcg' : 'default'}
 			/>
 
 			{/* Sección de imágenes */}

@@ -13,16 +13,14 @@ import type { CharacterWithStats } from '@/types/entities/character';
  * @returns Datos de personaje compatible con CharacterCard
  */
 export function adaptCharacterWithStats(character: CharacterWithStats): CharacterCardData {
-	// Mapear rarityLevel de CharacterWithStats a formato CharacterCardData
 	const rarityMap: Record<string, 'Common' | 'Uncommon' | 'Rare' | 'Mythic'> = {
 		common: 'Common',
 		uncommon: 'Uncommon',
 		rare: 'Rare',
-		epic: 'Rare', // Epic mapeado a Rare
-		legendary: 'Mythic', // Legendary mapeado a Mythic
+		epic: 'Rare',
+		legendary: 'Mythic',
 	};
 
-	// Helper para parsear JSON de forma segura
 	const safeJsonParse = (jsonStr: string | null | undefined): any => {
 		if (!jsonStr) return {};
 		try {
@@ -32,37 +30,44 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		}
 	};
 
+	const level = character.level ?? 1;
+
 	return {
-		...character,
-		_count: character._count || {
-			images: character.statistics?.totalImages || 0,
-			videos: character.statistics?.totalVideos || 0,
-			collections: character.statistics?.totalCollections || 0,
-			tags: character.statistics?.totalTags || 0,
-			places: character.statistics?.totalPlaces || 0,
-			worldItems: character.statistics?.totalWorldItems || 0,
-			concepts: character.statistics?.totalConcepts || 0,
-			prompts: character.statistics?.totalPrompts || 0,
-			notes: character.statistics?.totalNotes || 0,
-			wildcards: character.statistics?.totalWildcards || 0,
-			properties: character.statistics?.totalProperties || 0,
-			groups: character.statistics?.totalGroups || 0,
-			relatedCharacters: character.statistics?.totalRelatedCharacters || 0,
-			relatedTo: character.statistics?.totalRelatedTo || 0,
+		id: character.id,
+		name: character.name,
+		description: character.description,
+		emoji: character.emoji,
+		color: character.color,
+		isFavorite: character.isFavorite,
+		createdAt: character.createdAt,
+		updatedAt: character.updatedAt,
+		_count: {
+			images: character.statistics?.totalImages ?? 0,
+			videos: character.statistics?.totalVideos ?? 0,
+			collections: character.statistics?.totalCollections ?? 0,
+			tags: character.statistics?.totalTags ?? 0,
+			places: character.statistics?.totalPlaces ?? 0,
+			worldItems: character.statistics?.totalWorldItems ?? 0,
+			concepts: character.statistics?.totalConcepts ?? 0,
+			prompts: character.statistics?.totalPrompts ?? 0,
+			notes: character.statistics?.totalNotes ?? 0,
+			wildcards: character.statistics?.totalWildcards ?? 0,
+			properties: character.statistics?.totalProperties ?? 0,
+			groups: character.statistics?.totalGroups ?? 0,
+			relatedCharacters: character.statistics?.totalRelatedCharacters ?? 0,
+			relatedTo: character.statistics?.totalRelatedTo ?? 0,
 		},
-		// Campos adicionales para compatibilidad con CharacterCardData
 		recentImages: [],
 		recentVideos: [],
-		totalSize: character.statistics?.totalAssociations || 0,
-		// Parsear campos JSON para UI
+		totalSize: character.statistics?.totalAssociations ?? 0,
 		stats: {
-			imageCount: character.statistics?.totalImages || 0,
-			videoCount: character.statistics?.totalVideos || 0,
-			albumCount: character.statistics?.totalAlbums || 0,
-			collectionCount: character.statistics?.totalCollections || 0,
-			noteCount: character.statistics?.totalNotes || 0,
-			promptCount: character.statistics?.totalPrompts || 0,
-			totalRelations: character.statistics?.totalAssociations || 0,
+			imageCount: character.statistics?.totalImages ?? 0,
+			videoCount: character.statistics?.totalVideos ?? 0,
+			albumCount: character.statistics?.totalAlbums ?? 0,
+			collectionCount: character.statistics?.totalCollections ?? 0,
+			noteCount: character.statistics?.totalNotes ?? 0,
+			promptCount: character.statistics?.totalPrompts ?? 0,
+			totalRelations: character.statistics?.totalAssociations ?? 0,
 		},
 		parsedRelationships: safeJsonParse(character.relationships),
 		parsedGoals: safeJsonParse(character.goals),
@@ -71,16 +76,20 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		parsedPersonality: safeJsonParse(character.personality),
 		parsedSkills: safeJsonParse(character.skills),
 		parsedAbilities: safeJsonParse(character.abilities),
-		// Metadatos para la tarjeta TCG
 		metadata: {
-			power: character.statistics?.powerLevel || character.level * 10,
-			rarityLevel: rarityMap[character.statistics?.rarityLevel || 'common'] || 'Common',
-			cardId: `C${character.id.substring(0, 6)}-${character.level}`,
-			healthPoints: character.level * 20,
-			manaPoints: character.level * 10,
+			power: character.statistics?.powerLevel ?? level * 10,
+			rarityLevel: rarityMap[character.statistics?.rarityLevel ?? 'common'] ?? 'Common',
+			cardId: `C${character.id.substring(0, 6)}-${level}`,
+			healthPoints: level * 20,
+			manaPoints: level * 10,
 			totalAttacks: 0,
 		},
-	} as CharacterCardData;
+        level: character.level,
+        class: character.class,
+        race: character.race,
+        backstory: character.backstory,
+        alignment: character.alignment,
+	};
 }
 
 /**

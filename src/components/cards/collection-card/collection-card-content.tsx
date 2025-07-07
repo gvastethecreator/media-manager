@@ -1,7 +1,7 @@
 import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Badge } from '@/components/ui/badge';
-import type { CollectionEdition } from '@/types/entities/collection/types';
+import type { CollectionEdition } from '@/types/entities/collection';
 
 interface CollectionCardContentProps {
 	description?: string | null;
@@ -10,8 +10,7 @@ interface CollectionCardContentProps {
 	network?: string | null;
 	tokenId?: string | null;
 	url?: string | null;
-	editions?: CollectionEdition[];
-	parsedEditions?: Array<{ id?: string; name: string; date?: string; version?: string }>;
+	editions?: CollectionEdition[] | string;
 	primaryColor: string;
 	secondaryColor?: string;
 	featuredImage?: string | null;
@@ -34,8 +33,7 @@ export function CollectionCardContent({
 	network,
 	tokenId,
 	url,
-	editions = [],
-	parsedEditions = [],
+	editions,
 	primaryColor,
 	secondaryColor,
 	featuredImage,
@@ -43,7 +41,16 @@ export function CollectionCardContent({
 	metadata,
 }: CollectionCardContentProps) {
 	// Determinar qué ediciones usar, prefiriendo parsedEditions
-	const editionsList = parsedEditions.length > 0 ? parsedEditions : Array.isArray(editions) ? editions : [];
+	const editionsList = useMemo(() => {
+		if (typeof editions === 'string' && editions !== 'empty_array') {
+			try {
+				return JSON.parse(editions);
+			} catch (_e) {
+				return [];
+			}
+		}
+		return editions || [];
+	}, [editions]);
 
 	// Formatear precio
 	const formattedPrice = price

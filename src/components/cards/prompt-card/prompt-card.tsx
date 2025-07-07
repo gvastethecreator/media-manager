@@ -80,10 +80,10 @@ function PromptCardComponent({
 		color = '#0ea5e9',
 		description,
 		content,
-		purpose,
+		type, // Usar 'type' en lugar de 'purpose'
 		category = 'general',
 		parameters,
-		tags: promptTags,
+		tags, // 'tags' ya es un array en PromptWithStats
 		isFavorite = false,
 		featuredImage,
 		createdAt,
@@ -92,19 +92,19 @@ function PromptCardComponent({
 	} = prompt;
 
 	// Calcular valores derivados
-	const imagesCount = prompt._count?.images || 0;
-	const videosCount = prompt._count?.videos || 0;
-	const collectionsCount = prompt._count?.collections || 0;
-	const albumsCount = prompt._count?.albums || 0;
-	const tagsCount = prompt._count?.tags || 0;
-	const conceptsCount = prompt._count?.concepts || 0;
-	const notesCount = prompt._count?.notes || 0;
-	const charactersCount = prompt._count?.characters || 0;
-	const propertiesCount = prompt._count?.properties || 0;
-	const wildcardsCount = prompt._count?.wildcards || 0;
-	const groupsCount = prompt._count?.groups || 0;
-	const placesCount = prompt._count?.places || 0;
-	const worldItemsCount = prompt._count?.worldItems || 0;
+	const imagesCount = prompt.stats?.totalImages || 0;
+	const videosCount = prompt.stats?.totalVideos || 0;
+	const collectionsCount = prompt.stats?.totalCollections || 0;
+	const albumsCount = prompt.stats?.totalAlbums || 0;
+	const tagsCount = prompt.stats?.totalTags || 0;
+	const conceptsCount = prompt.stats?.totalConcepts || 0;
+	const notesCount = prompt.stats?.totalNotes || 0;
+	const charactersCount = prompt.stats?.totalCharacters || 0;
+	const propertiesCount = prompt.stats?.totalProperties || 0;
+	const wildcardsCount = prompt.stats?.totalWildcards || 0;
+	const groupsCount = prompt.stats?.totalGroups || 0;
+	const placesCount = prompt.stats?.totalPlaces || 0;
+	const worldItemsCount = prompt.stats?.totalWorldItems || 0;
 
 	// Colores para el gradiente
 	const primaryColor = color || '#0ea5e9';
@@ -147,7 +147,7 @@ function PromptCardComponent({
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			if (onClick && (e.key === 'Enter' || e.key === ' ') && prompt) {
 				e.preventDefault();
 				onClick(prompt);
 			}
@@ -155,43 +155,16 @@ function PromptCardComponent({
 		[onClick, prompt]
 	);
 
-	// Parsear tags si es un string
-	const parsedTags = useMemo(() => {
-		// Comprobar si prompt tiene la propiedad tags
-		if ('tags' in prompt) {
-			const currentTags = prompt.tags;
-			// Si tags es un string, intentar parsearlo
-			if (typeof currentTags === 'string' && currentTags) {
-				try {
-					return JSON.parse(currentTags);
-				} catch (_e) {
-					return [];
-				}
-			}
-			return currentTags || [];
-		}
-		// Si no tiene tags, devolver array vacío
-		return [];
-	}, [prompt]);
-
-	// Parsear parámetros si es un string
-	const parsedParameters = useMemo(() => {
-		if (typeof parameters === 'string' && parameters) {
-			try {
-				return JSON.parse(parameters);
-			} catch (_e) {
-				return {};
-			}
-		}
-		return parameters || {};
-	}, [parameters]);
+	// 'tags' y 'parameters' ya son arrays/objetos en PromptWithStats, no necesitan parseo manual
+	const parsedTags = tags || [];
+	const parsedParameters = parameters || {};
 
 	// Definir estilos de la tarjeta TCG
 	const cardStyle = useMemo(() => {
 		const totalRelations =
 			imagesCount +
 			videosCount +
-			(prompt._count?.prompts || 0) +
+			(prompt.stats?.totalPrompts || 0) + // Usar prompt.stats.totalPrompts
 			notesCount +
 			charactersCount +
 			placesCount +
@@ -239,7 +212,7 @@ function PromptCardComponent({
 		albumsCount,
 		collectionsCount,
 		tagsCount,
-		prompt._count?.prompts,
+		prompt.stats?.totalPrompts, // Usar prompt.stats.totalPrompts
 	]);
 
 	return (

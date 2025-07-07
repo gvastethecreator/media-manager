@@ -50,7 +50,7 @@ export const NoteCardImages = memo(function NoteCardImages({
 	return (
 		<div
 			className={cn('relative h-[150px] overflow-hidden border-b border-gray-400/30', tcgMode && 'pb-1')}
-			style={getBorderStyles()}
+			style={getBorderStyles}
 		>
 			{/* Contenedor de im?genes con grid */}
 			<div
