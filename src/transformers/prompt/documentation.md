@@ -77,7 +77,7 @@ sequenceDiagram
 
 ### `PromptBase`
 
-Tipo base derivado del schema de Prisma que define los campos fundamentales:
+Tipo base derivado del schema de Drizzle que define los campos fundamentales:
 
 ```typescript
 export interface PromptBase {

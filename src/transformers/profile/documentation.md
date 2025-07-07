@@ -10,10 +10,10 @@ Los transformadores de **Profile** permiten mapear, serializar, deserializar y e
 
 ```mermaid
 flowchart TD
-    A[Profile (Prisma/Raw)] --> B[profile-transformers.ts]
+    A[Profile (Drizzle/Raw)] --> B[profile-transformers.ts]
     B -->|toProfileListItem| C[ProfileListItem]
     B -->|toProfileCard| D[ProfileCard]
-    B -->|parseProfileSearchParams| E[Prisma.ProfileWhereInput]
+    B -->|parseProfileSearchParams| E[Drizzle.ProfileWhereInput]
 ```
 
 ---

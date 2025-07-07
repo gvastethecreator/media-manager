@@ -168,7 +168,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 
 		const [{ count: total }] = await countQuery;
 
-		// Transformar resultados de Drizzle a formato compatible con Prisma
+		// Transformar resultados de Drizzle a formato compatible con transformadores legacy
 		const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),

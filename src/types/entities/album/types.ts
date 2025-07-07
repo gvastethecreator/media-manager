@@ -28,13 +28,8 @@ export interface AlbumStatistics {
 	totalEntities: number;
 }
 
-export interface AlbumWithStats extends AlbumBase {
+export interface AlbumWithStats extends AlbumBase, EntityWithStats {
 	statistics: AlbumStatistics;
-	metadata?: {
-		itemCount?: number;
-		totalSize?: number;
-		lastModified?: string | Date;
-	};
 }
 
 export type AlbumCreateInput = Omit<AlbumBase, 'id' | 'createdAt' | 'updatedAt'>;

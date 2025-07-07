@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import type { VideoWithStats } from '@/types/entities/video';
 import type { Tag } from '@/types/entities/tag';
+import type { VideoWithStats } from '@/types/entities/video';
 
 interface VideoCardContentProps {
 	video: VideoWithStats;
@@ -70,7 +70,7 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Subtítulos:</span>
 								<span className="font-medium text-green-600">Sí</span>
-								</div>
+							</div>
 						)}
 					</div>
 				)}

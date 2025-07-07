@@ -235,22 +235,22 @@ graph TD
     P --> Q[Database Insert]
 ```
 
-## Migración desde Prisma
+## Migración desde Drizzle
 
 ### Cambios Principales
 
-1. **Base de datos:** `@prisma/client` → `drizzle-orm`
-2. **Esquemas:** Prisma schemas → Zod schemas
-3. **Tipos:** Tipos Prisma → Tipos inferidos de Drizzle
+1. **Base de datos:** `@Drizzle/client` → `drizzle-orm`
+2. **Esquemas:** Drizzle schemas → Zod schemas
+3. **Tipos:** Tipos Drizzle → Tipos inferidos de Drizzle
 4. **Estructura:** Archivo único → Arquitectura modular
 
 ### Funciones Migradas
 
-| Legacy (Prisma) | Nuevo (Drizzle) | Ubicación |
+| Legacy (Drizzle) | Nuevo (Drizzle) | Ubicación |
 |---|---|---|
-| `fromPrismaSettings` | `fromStorageSettings` | `serializers.ts` |
-| `toPrismaSettings` | `toStorageSettings` | `serializers.ts` |
-| `mapSettingsUpdateToPrisma` | `fromSettingsUpdateToDb` | `mappers.ts` |
+| `fromDrizzleSettings` | `fromStorageSettings` | `serializers.ts` |
+| `toDrizzleSettings` | `toStorageSettings` | `serializers.ts` |
+| `mapSettingsUpdateToDrizzle` | `fromSettingsUpdateToDb` | `mappers.ts` |
 
 ### Compatibilidad Legacy
 

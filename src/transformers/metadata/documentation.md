@@ -10,10 +10,10 @@ Los transformadores de **Metadata** permiten mapear, serializar, deserializar y 
 
 ```mermaid
 flowchart TD
-    A[Metadata (Prisma/Raw)] --> B[mappers.ts]
+    A[Metadata (Drizzle/Raw)] --> B[mappers.ts]
     B -->|toMetadataListItem| C[MetadataListItem]
     B -->|toMetadataCard| D[MetadataCard]
-    B -->|parseMetadataSearchParams| E[Prisma.MetadataWhereInput]
+    B -->|parseMetadataSearchParams| E[Drizzle.MetadataWhereInput]
 ```
 
 ---

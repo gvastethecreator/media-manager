@@ -6,15 +6,15 @@
 import { StateCreator } from 'zustand';
 // Refactor 2025-07: se usa cliente API para obtener info de directorio
 import { getDirectoryInfoFromApi } from '@/lib/api/client/file.client';
-import { transformFiles } from '@/transformers/file';
-import { DirectoryReadResult, FileBase } from '@/types/entities/file/base';
-import { EnhancedFile } from '@/types/entities/file/extended';
+import { toFileWithStatsList } from '@/transformers/file';
+import { FileBase, FileWithStats } from '@/types/entities/file';
+import type { DirectoryReadResult } from '@/types/entities/file/types';
 import { FileStore } from '..';
 
 // Estado
 export interface CoreState {
 	// Datos
-	files: EnhancedFile[];
+	files: FileWithStats[];
 	currentDirectory: string | null;
 	parentDirectories: string[];
 	isLoading: boolean;
@@ -30,7 +30,7 @@ export interface CoreState {
 // Acciones
 export interface CoreActions {
 	// Setters básicos
-	setFiles: (files: EnhancedFile[]) => void;
+	setFiles: (files: FileWithStats[]) => void;
 	setCurrentDirectory: (path: string | null) => void;
 	setParentDirectories: (paths: string[]) => void;
 	setIsLoading: (isLoading: boolean) => void;
@@ -38,8 +38,8 @@ export interface CoreActions {
 	setDirectoryStats: (stats: Pick<CoreState, 'fileCount' | 'directoryCount' | 'totalSize' | 'hasMore'>) => void;
 
 	// Operaciones
-	addFile: (file: EnhancedFile) => void;
-	updateFile: (id: string, file: Partial<EnhancedFile>) => void;
+	addFile: (file: FileWithStats) => void;
+	updateFile: (id: string, file: Partial<FileWithStats>) => void;
 	removeFile: (id: string) => void;
 
 	// Operaciones avanzadas
@@ -153,13 +153,13 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 	},
 
 	updateDirectoryContents: (result) => {
-		const transformedFiles = transformFiles(result.items);
+		const transformedFiles = toFileWithStatsList(result.items);
 
 		set({
 			files: transformedFiles,
-			fileCount: result.files,
-			directoryCount: result.directories,
-			totalSize: transformedFiles.reduce((acc, file) => acc + (file.size || 0), 0),
+			fileCount: result.files?.length || 0,
+			directoryCount: result.directories?.length || 0,
+			totalSize: transformedFiles.reduce((acc: number, file: FileWithStats) => acc + (file.size || 0), 0),
 			hasMore: result.hasMore,
 			currentDirectory: result.path,
 			error: null,
@@ -167,12 +167,12 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 	},
 
 	updateFilesFromRaw: (rawFiles) => {
-		const transformedFiles = transformFiles(rawFiles);
+		const transformedFiles = toFileWithStatsList(rawFiles);
 
 		// Actualizar estadísticas
-		const fileCount = transformedFiles.filter((file) => !file.isDirectory).length;
-		const directoryCount = transformedFiles.filter((file) => file.isDirectory).length;
-		const totalSize = transformedFiles.reduce((acc, file) => acc + (file.size || 0), 0);
+		const fileCount = transformedFiles.filter((file: FileWithStats) => file.type !== 'folder').length;
+		const directoryCount = transformedFiles.filter((file: FileWithStats) => file.type === 'folder').length;
+		const totalSize = transformedFiles.reduce((acc: number, file: FileWithStats) => acc + (file.size || 0), 0);
 
 		set({
 			files: transformedFiles,

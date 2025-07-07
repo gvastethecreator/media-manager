@@ -63,7 +63,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 
 		// Importar servicios migrados
 		const { getFolders } = await import('@/services/folder/folder.service');
-		const { getCollections } = await import('@/services/collection/collection.service');
+		const { getCollections } = await import('@/services/collection/collection-simple.service');
 		const { getTags } = await import('@/services/tag/tag.service');
 		const { getAlbums } = await import('@/services/album/album.service');
 		const { getCharacters } = await import('@/services/character/character.service');

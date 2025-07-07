@@ -16,9 +16,9 @@
 // --- Tipos Canónicos ---
 export type {
 	FavoriteBase,
+	FavoriteExtended,
 	FavoriteStatistics,
 	FavoriteWithStats,
-	FavoriteExtended,
 } from './base';
 
 // --- Enums ---

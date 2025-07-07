@@ -126,7 +126,7 @@ const drizzleData = toDrizzleFile3D(validFile3D);
 
 ## 🚨 Consideraciones Importantes
 
-1. **Sin Dependencies Legacy**: No usar funciones deprecated de Prisma
+1. **Sin Dependencies Legacy**: No usar funciones deprecated de Drizzle
 2. **Estadísticas Dinámicas**: Las estadísticas se calculan dinámicamente
 3. **Validación Estricta**: Siempre validar datos antes de transformar
 4. **Logging**: Errores se registran automáticamente
@@ -135,9 +135,9 @@ const drizzleData = toDrizzleFile3D(validFile3D);
 ## 🔍 Migración Completada
 
 ### Eliminado
-- ❌ Imports de Prisma
-- ❌ Funciones `fromPrismaFile3D`
-- ❌ Tipos `PrismaFile3D`
+- ❌ Imports de Drizzle
+- ❌ Funciones `fromDrizzleFile3D`
+- ❌ Tipos `DrizzleFile3D`
 - ❌ Referencias legacy
 
 ### Agregado

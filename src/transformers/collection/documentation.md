@@ -208,14 +208,14 @@ expect(result?.stats.imageCount).toBe(5);
 expect(() => validateCollectionWithStats(result)).not.toThrow();
 ```
 
-## 📝 Migración desde Prisma
+## 📝 Migración desde Drizzle
 
-**Estado Anterior:** Dependía completamente de tipos Prisma (`Collection`, `Prisma.CollectionInclude`)
+**Estado Anterior:** Dependía completamente de tipos Drizzle (`Collection`, `Drizzle.CollectionInclude`)
 **Estado Actual:** Usa solo tipos Drizzle locales (`CollectionBase`, tipos locales)
 
 ### Cambios Principales
 
-1. **Eliminación de tipos Prisma:** Todos los imports de `@prisma/client` fueron removidos
+1. **Eliminación de tipos Drizzle:** Todos los imports de `@Drizzle/client` fueron removidos
 2. **Nuevos tipos locales:** Uso de `CollectionBase` y `CollectionWithStats`
 3. **Transformadores simplificados:** Funciones más directas y eficientes
 4. **Validación mejorada:** Esquemas Zod para toda validación

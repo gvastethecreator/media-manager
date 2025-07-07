@@ -1,0 +1,168 @@
+Comando: bunx biome format --write .
+Fecha: 2025-07-07T17:33:37.229Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\cards\image-card\image-card-improved.tsx:13:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Declarations inside of a `import` declaration may not have duplicates
+  
+    11 │ import { motion } from 'motion/react';
+    12 │ import { useCallback, useEffect, useState } from 'react';
+  > 13 │ import { Link, Link } from 'react-router-dom';
+       │                ^^^^
+    14 │ import { Badge, Badge } from '@/components/ui/badge';
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+  
+  i a second declaration of `Link` is not allowed
+  
+    11 │ import { motion } from 'motion/react';
+    12 │ import { useCallback, useEffect, useState } from 'react';
+  > 13 │ import { Link, Link } from 'react-router-dom';
+       │                ^^^^
+    14 │ import { Badge, Badge } from '@/components/ui/badge';
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+  
+  i `Link` is first declared here
+  
+    11 │ import { motion } from 'motion/react';
+    12 │ import { useCallback, useEffect, useState } from 'react';
+  > 13 │ import { Link, Link } from 'react-router-dom';
+       │          ^^^^
+    14 │ import { Badge, Badge } from '@/components/ui/badge';
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+  
+
+src\components\cards\image-card\image-card-improved.tsx:14:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Declarations inside of a `import` declaration may not have duplicates
+  
+    12 │ import { useCallback, useEffect, useState } from 'react';
+    13 │ import { Link, Link } from 'react-router-dom';
+  > 14 │ import { Badge, Badge } from '@/components/ui/badge';
+       │                 ^^^^^
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+  
+  i a second declaration of `Badge` is not allowed
+  
+    12 │ import { useCallback, useEffect, useState } from 'react';
+    13 │ import { Link, Link } from 'react-router-dom';
+  > 14 │ import { Badge, Badge } from '@/components/ui/badge';
+       │                 ^^^^^
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+  
+  i `Badge` is first declared here
+  
+    12 │ import { useCallback, useEffect, useState } from 'react';
+    13 │ import { Link, Link } from 'react-router-dom';
+  > 14 │ import { Badge, Badge } from '@/components/ui/badge';
+       │          ^^^^^
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+  
+
+src\components\cards\image-card\image-card-improved.tsx:15:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Declarations inside of a `import` declaration may not have duplicates
+  
+    13 │ import { Link, Link } from 'react-router-dom';
+    14 │ import { Badge, Badge } from '@/components/ui/badge';
+  > 15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+       │                    ^^^^^^^^
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+    17 │ import { cn, cn } from '@/lib/utils';
+  
+  i a second declaration of `Skeleton` is not allowed
+  
+    13 │ import { Link, Link } from 'react-router-dom';
+    14 │ import { Badge, Badge } from '@/components/ui/badge';
+  > 15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+       │                    ^^^^^^^^
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+    17 │ import { cn, cn } from '@/lib/utils';
+  
+  i `Skeleton` is first declared here
+  
+    13 │ import { Link, Link } from 'react-router-dom';
+    14 │ import { Badge, Badge } from '@/components/ui/badge';
+  > 15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+       │          ^^^^^^^^
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+    17 │ import { cn, cn } from '@/lib/utils';
+  
+
+src\components\cards\image-card\image-card-improved.tsx:17:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Declarations inside of a `import` declaration may not have duplicates
+  
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+  > 17 │ import { cn, cn } from '@/lib/utils';
+       │              ^^
+    18 │ import { formatDate, formatDate } from '@/lib/utils/format.utils';
+    19 │ import type { Tag } from '@/types/entities/tag';
+  
+  i a second declaration of `cn` is not allowed
+  
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+  > 17 │ import { cn, cn } from '@/lib/utils';
+       │              ^^
+    18 │ import { formatDate, formatDate } from '@/lib/utils/format.utils';
+    19 │ import type { Tag } from '@/types/entities/tag';
+  
+  i `cn` is first declared here
+  
+    15 │ import { Skeleton, Skeleton } from '@/components/ui/skeleton';
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+  > 17 │ import { cn, cn } from '@/lib/utils';
+       │          ^^
+    18 │ import { formatDate, formatDate } from '@/lib/utils/format.utils';
+    19 │ import type { Tag } from '@/types/entities/tag';
+  
+
+src\components\cards\image-card\image-card-improved.tsx:18:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Declarations inside of a `import` declaration may not have duplicates
+  
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+    17 │ import { cn, cn } from '@/lib/utils';
+  > 18 │ import { formatDate, formatDate } from '@/lib/utils/format.utils';
+       │                      ^^^^^^^^^^
+    19 │ import type { Tag } from '@/types/entities/tag';
+    20 │ 
+  
+  i a second declaration of `formatDate` is not allowed
+  
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+    17 │ import { cn, cn } from '@/lib/utils';
+  > 18 │ import { formatDate, formatDate } from '@/lib/utils/format.utils';
+       │                      ^^^^^^^^^^
+    19 │ import type { Tag } from '@/types/entities/tag';
+    20 │ 
+  
+  i `formatDate` is first declared here
+  
+    16 │ import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+    17 │ import { cn, cn } from '@/lib/utils';
+  > 18 │ import { formatDate, formatDate } from '@/lib/utils/format.utils';
+       │          ^^^^^^^^^^
+    19 │ import type { Tag } from '@/types/entities/tag';
+    20 │ 
+  
+
+src\components\cards\image-card\image-card-improved.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborteFormatted 1409 files in 1397ms. No fixes applied.
+Found 5 errors.
+d due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

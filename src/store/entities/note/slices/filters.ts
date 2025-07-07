@@ -1,6 +1,7 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { NoteFilters, NoteSortOption } from '@/types/entities/note/types';
+import type { NoteFilters } from '@/types/entities/note/types';
+import { NoteSortOption } from '@/types/entities/note/enums';
 import type { NoteStore } from '../types';
 
 const filtersLogger = clientLogger.withContext('NoteStore:Filters');
@@ -39,7 +40,7 @@ export const createFiltersSlice: StateCreator<NoteStore, [], [], FiltersSlice> =
 		hasImages: false,
 		hasVideos: false,
 	},
-	sortBy: 'updated_desc',
+	sortBy: NoteSortOption.UPDATED_DESC,
 	page: 1,
 	pageSize: 20,
 

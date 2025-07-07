@@ -266,10 +266,10 @@ return (
 1. **Serialización**: Usar `serializeStats` y `serializeRelationships` al guardar datos en la base de datos para asegurar el correcto formato JSON.
 2. **Deserialización**: Usar `deserializeStats` y `deserializeRelationships` al leer datos de la base de datos para trabajar con objetos JS.
 3. **Validación**: Siempre validar los datos antes de guardarlos usando `validateCharacter`.
-4. **Relaciones**: Utilizar los métodos `mapCreateCharacterDataToPrisma` y `mapUpdateCharacterDataToPrisma` para manejar correctamente las relaciones.
+4. **Relaciones**: Utilizar los métodos `mapCreateCharacterDataToDrizzle` y `mapUpdateCharacterDataToDrizzle` para manejar correctamente las relaciones.
 5. **Extensión para UI**: Utilizar `transformCharacterToExtended` cuando se necesiten propiedades adicionales para la interfaz de usuario.
 6. **Estadísticas**: Para obtener métricas sobre el personaje, usar `transformCharacterToWithStats`.
-7. **Búsqueda eficiente**: Aprovechar `mapCharacterSearchOptionsToPrisma` para realizar búsquedas optimizadas en la base de datos.
+7. **Búsqueda eficiente**: Aprovechar `mapCharacterSearchOptionsToDrizzle` para realizar búsquedas optimizadas en la base de datos.
 
 ## Integración con otras entidades
 

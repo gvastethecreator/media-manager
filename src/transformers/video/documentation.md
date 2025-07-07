@@ -13,7 +13,7 @@ flowchart TD
     
     B -->|toVideoListItem| C[VideoListItem]
     B -->|toVideoCard| D[VideoCard]
-    B -->|parseVideoSearchParams| E[Prisma.VideoWhereInput]
+    B -->|parseVideoSearchParams| E[Drizzle.VideoWhereInput]
     A --> F[serializers.ts]
     F -->|transformVideo| G[VideoComplete]
 ```

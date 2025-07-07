@@ -220,7 +220,7 @@ const folder = getFolderById(foldersRecord, 'folder-id');
 
 ## 🚨 Consideraciones Importantes
 
-1. **Sin Dependencies Legacy**: No usar funciones deprecated de Prisma
+1. **Sin Dependencies Legacy**: No usar funciones deprecated de Drizzle
 2. **Estadísticas Dinámicas**: Las estadísticas se calculan en tiempo real
 3. **Validación Estricta**: Siempre validar datos antes de transformar
 4. **Logging**: Errores se registran automáticamente
@@ -229,9 +229,9 @@ const folder = getFolderById(foldersRecord, 'folder-id');
 ## 🔍 Migración Completada
 
 ### Eliminado
-- ❌ Imports de Prisma
-- ❌ Funciones `fromPrismaFolder*`
-- ❌ Tipos `PrismaFolder*`
+- ❌ Imports de Drizzle
+- ❌ Funciones `fromDrizzleFolder*`
+- ❌ Tipos `DrizzleFolder*`
 - ❌ Referencias legacy y aliases deprecated
 
 ### Agregado
