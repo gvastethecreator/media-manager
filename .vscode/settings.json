@@ -29,7 +29,6 @@
   "gitlens.gitCommands.skipConfirmations": ["fetch:command", "switch:command"],
   "files.autoGuessEncoding": true,
   "editor.inlineSuggest.enabled": true,
-  "files.autoSave": "afterDelay",
   "editor.suggest.preview": true,
   "terminal.integrated.fontFamily": "DroidSansMono NFM",
   "terminal.integrated.fontSize": 9,
@@ -42,12 +41,10 @@
   },
   "editor.suggest.localityBonus": true,
   "editor.stickyScroll.enabled": true,
-  "git.openRepositoryInParentFolders": "never",
+  "git.openRepositoryInParentFolders": "prompt",
   "explorer.confirmDelete": false,
   "editor.multiCursorModifier": "ctrlCmd",
   "editor.fastScrollSensitivity": 10,
-  "editor.fontSize": 12,
-  "editor.fontFamily": "DroidSansMono NFM",
   "editor.fontVariations": false,
   "diffEditor.ignoreTrimWhitespace": false,
   "typescript.tsserver.useSyntaxServer": "auto",
@@ -70,7 +67,6 @@
   "editor.guides.bracketPairs": true,
   "files.autoSaveDelay": 1000,
   "editor.detectIndentation": true,
-  "editor.insertSpaces": false,
   "python.defaultInterpreterPath": "./venv/bin/python",
   "typescript.tsserver.web.projectWideIntellisense.enabled": false,
   "typescript.tsserver.web.typeAcquisition.enabled": false,
@@ -94,13 +90,10 @@
     "typescriptreact": "javascript"
   },
   "tailwindCSS.emmetCompletions": true,
-
-  // Formateo al guardar
-  "editor.formatOnSave": true,
   "editor.formatOnPaste": false,
   "editor.formatOnType": false,
 
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.defaultProfile.windows": null,
   "terminal.integrated.profiles.windows": {
     "PowerShell": {
       "source": "PowerShell",
@@ -112,8 +105,9 @@
   "github.copilot.chat.followUps": "always",
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.nextEditSuggestions.enabled": true,
-  "github.copilot.chat.editor.temporalContext.enabled": false,
+  "github.copilot.chat.editor.temporalContext.enabled": true,
   "github.copilot.chat.edits.temporalContext.enabled": true,
   "github.copilot.chat.languageContext.typescript.enabled": true,
-  "github.copilot.chat.generateTests.codeLens": true
+  "github.copilot.chat.generateTests.codeLens": true,
+  "editor.formatOnSave": true
 }
