@@ -126,7 +126,7 @@ export function AudioCard({
 		if (!disabled && onClick) {
 			onClick(audio);
 		}
-	}, [disabled, onClick]);
+	}, [disabled, onClick, audio]);
 
 	const handleMouseEnter = useCallback(() => setIsHovered(true), []);
 	const handleMouseLeave = useCallback(() => setIsHovered(false), []);

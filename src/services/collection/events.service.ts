@@ -2,7 +2,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import type { CollectionComplete } from '@/types/entities/collection';
 
-// Tipo local equivalente a Prisma (migración a Drizzle)
+// Tipo local para eventos de colección (migración a Drizzle)
 type Collection = CollectionComplete;
 
 const collectionEventsLogger = serverLogger.withContext('CollectionEventsService');
@@ -25,7 +25,7 @@ export interface CollectionEventData {
 
 /**
  * Servicio para gestionar eventos de colecciones
- * ✅ MIGRADO A DRIZZLE - Sin dependencias de Prisma
+ * ✅ MIGRADO A DRIZZLE - Totalmente migrado a Drizzle
  * Migrado a usar serverEvents en lugar de EventEmitter
  */
 export const CollectionEventsService = {

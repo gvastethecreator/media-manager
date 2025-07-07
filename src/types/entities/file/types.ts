@@ -1,7 +1,7 @@
 /**
  * 📁 Tipos canónicos para la entidad File
  */
-import { FileType } from './enums';
+import { FileType } from './base';
 
 export type FileBase = {
 	id: string;

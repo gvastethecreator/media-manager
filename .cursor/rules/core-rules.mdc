@@ -27,7 +27,7 @@ CONTEXTO_REQUERIDO: [Archivos/módulos necesarios]
 ACEPTACIÓN: [Criterios medibles de finalización]
 STATUS: PENDING → IN_PROGRESS → COMPLETE
 
-Leyenda: [ ] No iniciado | [x] Completado | [-] Removido
+Leyenda: [ ] No iniciado | [🔄️] En Progreso | [✅] Completado | [🟥] Removido
 ```
 
 ### Sistema de Clasificación

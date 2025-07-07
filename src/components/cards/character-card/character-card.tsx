@@ -53,17 +53,17 @@ export function CharacterCard({
 		return adaptCharacterWithStats(characterData);
 	}, [characterData]);
 
-	const safeJsonParse = (jsonStr: string | null | undefined): any => {
+	const safeJsonParse = useCallback((jsonStr: string | null | undefined): any => {
 		if (!jsonStr) return {};
 		try {
 			return JSON.parse(jsonStr);
 		} catch {
 			return {};
 		}
-	};
+	}, []);
 
-	const parsedStats = useMemo(() => safeJsonParse(character?.stats), [character?.stats]);
-	const parsedAbilities = useMemo(() => safeJsonParse(character?.abilities), [character?.abilities]);
+	const parsedStats = useMemo(() => safeJsonParse(character?.stats), [character?.stats, safeJsonParse]);
+	const parsedAbilities = useMemo(() => safeJsonParse(character?.abilities), [character?.abilities, safeJsonParse]);
 
 	// Preparar las imágenes para el componente de galería
 	const cardMedia = useMemo(() => {

@@ -11,7 +11,7 @@ import {
 	type UploadedImageExtended,
 } from '@/types/entities/uploaded-image/types';
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales para uploaded image (migración a Drizzle)
 type DrizzleUploadedImageWithRelations = {
 	id: string;
 	hash: string;

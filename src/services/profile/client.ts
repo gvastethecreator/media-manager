@@ -27,7 +27,7 @@ import type {
  * Cliente para consumir funcionalidades de perfiles desde componentes de cliente
  *
  * Este cliente utiliza las Server Actions definidas en app/actions/profiles
- * en lugar de intentar ejecutar código de Prisma directamente en el navegador.
+ * en lugar de intentar ejecutar código de base de datos directamente en el navegador.
  */
 export const profileClient = {
 	/**

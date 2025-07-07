@@ -1,7 +1,23 @@
 import { memo } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-// import { FoldersView } from '@/components/views';
-import { FoldersViewMinimal } from './folders/views/folders-view-minimal';
+import { FoldersView } from './folders/views/folders-view';
+import { AllImagesView } from './all-images/all-images-view';
+import { FavoritesView } from './favorites/favorites-view';
+import { DocumentsView } from './documents/documents-view';
+import { TagsView } from './tags/tags-view';
+import { CollectionsView } from './collections/collections-view';
+import { CharactersView } from './characters/characters-view';
+import { PlacesView } from './places/places-view';
+import { WorldItemsView } from './world-items/world-items-view';
+import { PromptsView } from './prompts/prompts-view';
+import { WildcardsView } from './wildcards/wildcards-view';
+import { SearchView } from './search/search-view';
+import { AudioView } from './audio/audio-view';
+import { WorkflowsView } from './workflows/workflows-view';
+import { GroupsView } from './groups/groups-view';
+import { FolderContentView } from './folders/views/folder-content-view';
+import { AlbumsView } from './albums/albums-view';
+import { ConceptsView } from './concepts/concepts-view';
 
 export const ViewContainer = memo(function ViewContainer() {
 	const { currentView } = useNavigationStore();
@@ -9,9 +25,64 @@ export const ViewContainer = memo(function ViewContainer() {
 	const renderView = () => {
 		switch (currentView) {
 			case 'folders':
-				return <FoldersViewMinimal />;
+				return <FoldersView className="h-full" />;
+			case 'files':
+				return (
+					<div className="h-full w-full flex flex-col items-center justify-center p-6">
+						<h2 className="text-2xl font-bold mb-2">📁 Vista de Archivos</h2>
+						<p className="text-muted-foreground">Vista de todos los archivos</p>
+					</div>
+				);
+			case 'all-images':
+				return <AllImagesView className="h-full" />;
+			case 'favorites':
+				return <FavoritesView className="h-full" />;
+			case 'documents':
+				return <DocumentsView className="h-full" />;
+			case 'tags':
+				return <TagsView className="h-full" />;
+			case 'collections':
+				return <CollectionsView className="h-full" />;
+			case 'characters':
+				return <CharactersView className="h-full" />;
+			case 'places':
+				return <PlacesView className="h-full" />;
+			case 'world-items':
+				return <WorldItemsView className="h-full" />;
+			case 'prompts':
+				return <PromptsView className="h-full" />;
+			case 'wildcards':
+				return <WildcardsView className="h-full" />;
+			case 'search':
+				return <SearchView className="h-full" />;
+			case 'audios':
+				return <AudioView className="h-full" />;
+			case 'workflows':
+				return <WorkflowsView />;
+			case 'groups':
+				return <GroupsView className="h-full" />;
+			case 'albums':
+				return <AlbumsView className="h-full" />;
+			case 'concepts':
+				return <ConceptsView className="h-full" />;
+			case 'json-files':
+				return (
+					<div className="h-full w-full flex flex-col items-center justify-center p-6">
+						<h2 className="text-2xl font-bold mb-2">📄 Vista de JSON</h2>
+						<p className="text-muted-foreground">Vista de archivos JSON</p>
+					</div>
+				);
+			case 'file-3ds':
+				return (
+					<div className="h-full w-full flex flex-col items-center justify-center p-6">
+						<h2 className="text-2xl font-bold mb-2">🎨 Vista de 3D</h2>
+						<p className="text-muted-foreground">Vista de archivos 3D</p>
+					</div>
+				);
+			case 'folder-content':
+				return <FolderContentView />;
 
-			// Para el resto, usar placeholder temporal mientras los incorporo uno por uno
+			// Para el resto, usar placeholder temporal
 			default:
 				return (
 					<div className="h-full w-full flex flex-col">

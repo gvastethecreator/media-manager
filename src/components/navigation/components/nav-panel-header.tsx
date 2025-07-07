@@ -53,7 +53,7 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 }) {
 	return (
 		<Tooltip>
-			<TooltipTrigger>
+			<TooltipTrigger asChild>
 				<Button
 					variant="ghost"
 					size="icon"
@@ -213,20 +213,9 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						)}
 
 						<MemoizedHeaderButton
-							icon={
-								<Button
-									onClick={handleThemeRotate}
-									variant="ghost"
-									size="icon"
-									className="flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-md border border-border hover:bg-secondary/30 transition-colors"
-									aria-label="Cambiar tema"
-								>
-									{getThemeIcon(theme)}
-									<span className="ml-1 capitalize hidden md:inline">{theme}</span>
-								</Button>
-							}
+							icon={getThemeIcon(theme)}
 							onClick={handleThemeRotate}
-							tooltipTitle="Tema"
+							tooltipTitle="Cambiar tema"
 							tooltipContent={`Actual: ${theme}`}
 						/>
 
@@ -311,20 +300,9 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						)}
 
 						<MemoizedHeaderButton
-							icon={
-								<Button
-									onClick={handleThemeRotate}
-									variant="ghost"
-									size="icon"
-									className="flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-md border border-border hover:bg-secondary/30 transition-colors"
-									aria-label="Cambiar tema"
-								>
-									{getThemeIcon(theme)}
-									<span className="ml-1 capitalize hidden md:inline">{theme}</span>
-								</Button>
-							}
+							icon={getThemeIcon(theme)}
 							onClick={handleThemeRotate}
-							tooltipTitle="Tema"
+							tooltipTitle="Cambiar tema"
 							tooltipContent={`Actual: ${theme}`}
 						/>
 

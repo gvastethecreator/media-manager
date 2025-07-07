@@ -1,68 +1,37 @@
-import { Home, IdCard, Palette } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback } from 'react';
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
 import { useCategoryStats } from './hooks';
-
-// Nueva estructura de categorías file-centric
-const NAVIGATION_CATEGORIES = [
-	{
-		id: 'files',
-		label: 'Archivos',
-		color: '#3B82F6',
-		icon: Home,
-		children: [
-			{ id: 'all-files', label: 'Todos los archivos' },
-			{ id: 'images', label: 'Imágenes' },
-			{ id: 'videos', label: 'Videos' },
-			{ id: 'audio', label: 'Audio' },
-			{ id: 'docs', label: 'Documentos' },
-			{ id: 'json', label: 'JSON' },
-			{ id: 'workflows', label: 'Workflows' },
-			{ id: 'file3d', label: '3D' },
-		],
-	},
-	{
-		id: 'library',
-		label: 'Librería',
-		color: '#A21CAF',
-		icon: Palette,
-		children: [
-			{ id: 'favorites', label: 'Favoritos' },
-			{ id: 'albums', label: 'Álbumes' },
-			{ id: 'groups', label: 'Grupos' },
-			{ id: 'tags', label: 'Etiquetas' },
-			{ id: 'collections', label: 'Colecciones' },
-			{ id: 'prompts', label: 'Prompts' },
-		],
-	},
-	{
-		id: 'worldbuilding',
-		label: 'Worldbuilding',
-		color: '#059669',
-		icon: IdCard,
-		children: [
-			{ id: 'characters', label: 'Personajes' },
-			{ id: 'places', label: 'Lugares' },
-			{ id: 'world-items', label: 'Objetos del mundo' },
-			{ id: 'concepts', label: 'Conceptos' },
-			{ id: 'wildcards', label: 'Comodines' },
-		],
-	},
-];
+import { useNavigationStore } from './navigation.store';
+import { ViewType } from '@/components/views/types';
 
 export const NavPanel = memo(function NavPanel({
 	isCollapsed = false,
 	onToggleCollapse,
 }: Omit<NavPanelProps, 'initialData'>) {
-	const [currentView, setCurrentView] = useState('all-files');
+	const { currentView, setCurrentView } = useNavigationStore();
 	const { stats } = useCategoryStats();
 
-	const handleNavigate = useCallback((id: string) => {
+	const handleNavigate = useCallback((id: ViewType) => {
 		setCurrentView(id);
+	}, [setCurrentView]);
+
+	const handleOpenSettings = useCallback(() => {
+		// TODO: Implementar lógica para abrir configuración
+		console.log('Abrir configuración');
+	}, []);
+
+	const handleOpenDevelopment = useCallback(() => {
+		// TODO: Implementar lógica para abrir desarrollo
+		console.log('Abrir desarrollo');
+	}, []);
+
+	const handleOpenEntityCards = useCallback(() => {
+		// TODO: Implementar lógica para abrir entity cards
+		console.log('Abrir entity cards');
 	}, []);
 
 	return (
@@ -74,6 +43,9 @@ export const NavPanel = memo(function NavPanel({
 				isCollapsed={isCollapsed}
 				onToggleCollapse={onToggleCollapse}
 				totalImages={stats.totalImages || 0}
+				onOpenSettings={handleOpenSettings}
+				onOpenDevelopment={handleOpenDevelopment}
+				onOpenEntityCards={handleOpenEntityCards}
 			/>
 			<ScrollArea className="flex-1">
 				<NavMainNavigation currentView={currentView} onNavigate={handleNavigate} isCollapsed={isCollapsed} />

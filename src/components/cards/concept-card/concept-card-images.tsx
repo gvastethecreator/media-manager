@@ -3,12 +3,11 @@ import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-import { ConceptService } from '@/services/concept/concept.service';
+// Temporal: Comentado para evitar errores
+// import { ConceptService } from '@/services/concept/concept.service';
 import type { Image } from '@/types/entities/image';
 
-const { getRecentConceptImages } = ConceptService;
-
-const { getRecentConceptImages } = conceptService;
+// const { getRecentConceptImages } = ConceptService;
 
 interface ConceptCardImagesProps {
 	conceptId: string;

@@ -28,8 +28,8 @@ export interface AudioStatistics {
 
 export interface AudioWithStats extends AudioBase, EntityWithStats {}
 
-export interface AudioCreateInput extends Partial<AudioBase> {}
-export interface AudioUpdateInput extends Partial<AudioBase> {}
+export type AudioCreateInput = Partial<AudioBase>;
+export type AudioUpdateInput = Partial<AudioBase>;
 
 export interface AudioFilters {
 	search?: string;
@@ -61,3 +61,96 @@ export interface AudiosResponse {
 	pageSize: number;
 	totalPages: number;
 }
+
+export interface AudioFormData {
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	isFavorite?: boolean;
+	filePath: string;
+	fileName: string;
+	fileSize?: number;
+	format?: string;
+	duration?: number;
+	bitrate?: number;
+	sampleRate?: number;
+	channels?: number;
+	metadata?: Record<string, any>;
+	album?: string;
+	artist?: string;
+	genre?: string;
+	year?: number;
+	track?: number;
+	lyrics?: string;
+}
+
+export interface AudioUIInput {
+	name: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	isFavorite?: boolean;
+	filePath: string;
+	fileName: string;
+	fileSize?: number;
+	format?: string;
+	duration?: number;
+	bitrate?: number;
+	sampleRate?: number;
+	channels?: number;
+	metadata?: Record<string, any>;
+	album?: string;
+	artist?: string;
+	genre?: string;
+	year?: number;
+	track?: number;
+	lyrics?: string;
+}
+
+export interface AudioComplete extends AudioWithStats {
+	tags: string[];
+	relations: {
+		images: string[];
+		videos: string[];
+		notes: string[];
+		characters: string[];
+		places: string[];
+		worldItems: string[];
+		concepts: string[];
+		prompts: string[];
+		properties: string[];
+		wildcards: string[];
+		groups: string[];
+		albums: string[];
+		collections: string[];
+	};
+}
+
+export type AudioSortOption =
+	| 'name_asc'
+	| 'name_desc'
+	| 'createdAt_asc'
+	| 'createdAt_desc'
+	| 'updatedAt_asc'
+	| 'updatedAt_desc'
+	| 'fileSize_asc'
+	| 'fileSize_desc'
+	| 'duration_asc'
+	| 'duration_desc'
+	| 'bitrate_asc'
+	| 'bitrate_desc'
+	| 'sampleRate_asc'
+	| 'sampleRate_desc'
+	| 'album_asc'
+	| 'album_desc'
+	| 'artist_asc'
+	| 'artist_desc'
+	| 'genre_asc'
+	| 'genre_desc'
+	| 'year_asc'
+	| 'year_desc'
+	| 'track_asc'
+	| 'track_desc';
+
+export type AudioViewMode = 'grid' | 'list' | 'compact';

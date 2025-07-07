@@ -47,33 +47,6 @@ export function JsonFileCard({
 	const [isHovered, setIsHovered] = useState(false);
 	const [showPreview, setShowPreview] = useState(false);
 
-	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando archivo JSON...</p>
-			</div>
-		);
-	}
-
-	if (error || !jsonFile) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Archivo JSON no encontrado'}</p>
-			</div>
-		);
-	}
-
 	// Color basado en la validez del JSON
 	const primaryColor = useMemo(() => {
 		// Intentar parsear el contenido para determinar si es válido
@@ -156,6 +129,37 @@ export function JsonFileCard({
 		},
 		[showPreview]
 	);
+
+	
+
+	
+
+	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando archivo JSON...</p>
+			</div>
+		);
+	}
+
+	if (error || !jsonFile) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Archivo JSON no encontrado'}</p>
+			</div>
+		);
+	}
 
 	return (
 		<CardContainer

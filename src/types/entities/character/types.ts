@@ -7,6 +7,7 @@
 import type { AlbumWithStats } from '../album';
 import type { CollectionWithStats } from '../collection';
 import type { ConceptWithStats } from '../concept';
+import type { EntityBase } from '../entity.types';
 import type { GroupWithStats } from '../group';
 import type { ImageWithStats } from '../image';
 import type { NoteWithStats } from '../note';
@@ -17,7 +18,6 @@ import type { TagWithStats } from '../tag';
 import type { VideoWithStats } from '../video';
 import type { WildcardWithStats } from '../wildcard';
 import type { WorldItemWithStats } from '../world-item';
-import type { EntityBase } from '../entity.types';
 
 /**
  * 🧑‍🎤 Tipo base para un personaje.
@@ -73,7 +73,7 @@ export interface CharacterWithStats extends CharacterBase {
 		concepts?: number;
 		prompts?: number;
 		notes?: number;
-	wildcards?: number;
+		wildcards?: number;
 		relatedCharacters?: number;
 		relatedTo?: number;
 	};
@@ -93,7 +93,7 @@ export interface CharacterWithStats extends CharacterBase {
 		totalWildcards: number;
 		totalRelatedCharacters: number;
 		totalRelatedTo: number;
-	totalAssociations: number;
+		totalAssociations: number;
 		lastUpdated: Date;
 		powerLevel: number;
 		rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';

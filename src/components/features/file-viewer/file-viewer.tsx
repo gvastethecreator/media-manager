@@ -522,10 +522,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 		[isOpen]
 	);
 
-	// No renderizar nada si no hay imágenes o el visor está cerrado
-	if (!isOpen || !images?.length || !currentImage) {
-		return null;
-	}
+	
 
 	// Función para seleccionar una imagen específica
 	const handleSelectImage = useCallback(
@@ -541,7 +538,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 		// TODO: Implementar drag si es necesario
 	};
 
-	return (
+	const viewerContent = (
 		<dialog
 			className={dialogClassName}
 			open={isOpen}
@@ -677,4 +674,11 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 			</div>
 		</dialog>
 	);
+
+	// No renderizar nada si no hay imágenes o el visor está cerrado
+	if (!isOpen || !images?.length || !currentImage) {
+		return null;
+	}
+
+	return viewerContent;
 });

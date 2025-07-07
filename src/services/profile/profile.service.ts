@@ -46,7 +46,7 @@ class ProfileServiceImpl {
 	 * Obtiene todos los perfiles con filtros y paginación
 	 *
 	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
-	 * con validación de Prisma en desarrollo para asegurar consistencia.
+	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
 	async getProfiles(filters?: ProfileFilters, pagination?: ProfilePaginationOptions): Promise<ProfileExtended[]> {
 		try {
@@ -215,7 +215,7 @@ class ProfileServiceImpl {
 	 * Obtiene el perfil activo actual
 	 *
 	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
-	 * con validación de Prisma en desarrollo para asegurar consistencia.
+	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
 	async getActiveProfile(): Promise<ProfileExtended | null> {
 		try {
@@ -244,7 +244,7 @@ class ProfileServiceImpl {
 				.where(eq(profiles.isActive, true))
 				.limit(1);
 
-			// Restructurar el resultado para que sea compatible con el transformador de Prisma
+			// Restructurar el resultado para que sea compatible con el transformador legacy
 			let drizzleResult = null;
 			if (drizzleProfile.length > 0) {
 				const raw = drizzleProfile[0];
@@ -259,7 +259,7 @@ class ProfileServiceImpl {
 					updatedAt: raw.updatedAt,
 					settingsId: raw.settingsId,
 					imageId: raw.imageId,
-					// Crear objeto settings compatible con Prisma
+					// Crear objeto settings compatible con transformador legacy
 					settings: raw.settingsRealId
 						? {
 								id: raw.settingsRealId,
@@ -286,7 +286,7 @@ class ProfileServiceImpl {
 	 * Obtiene un perfil por ID
 	 *
 	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
-	 * con validación de Prisma en desarrollo para asegurar consistencia.
+	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
 	async getById(id: string): Promise<ProfileExtended | null> {
 		try {
@@ -315,7 +315,7 @@ class ProfileServiceImpl {
 				.where(eq(profiles.id, id))
 				.limit(1);
 
-			// Restructurar el resultado para que sea compatible con el transformador de Prisma
+			// Restructurar el resultado para que sea compatible con el transformador legacy
 			let drizzleResult = null;
 			if (drizzleProfile.length > 0) {
 				const raw = drizzleProfile[0];
@@ -330,7 +330,7 @@ class ProfileServiceImpl {
 					updatedAt: raw.updatedAt,
 					settingsId: raw.settingsId,
 					imageId: raw.imageId,
-					// Crear objeto settings compatible con Prisma
+					// Crear objeto settings compatible con transformador legacy
 					settings: raw.settingsRealId
 						? {
 								id: raw.settingsRealId,

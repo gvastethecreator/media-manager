@@ -77,7 +77,7 @@ export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithS
 			.from(places)
 			.orderBy(asc(places.name));
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedPlaces = drizzlePlaces.map((rawPlace) => ({
 			...rawPlace,
 			isFavorite: Boolean(rawPlace.isFavorite),
@@ -155,7 +155,7 @@ export async function getPlaceById(id: string): Promise<PlaceWithStats | null> {
 
 		const rawPlace = drizzlePlace[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedPlace = {
 			...rawPlace,
 			isFavorite: Boolean(rawPlace.isFavorite),

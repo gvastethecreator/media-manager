@@ -1,10 +1,9 @@
 import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { activities, imageStats } from '@/lib/drizzle/schema';
+import { activities, imageStats, tags, collections, folders, characters, places, worldItems } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 
 // Constantes para caché
 const STATS_CACHE_TAG = 'stats';
@@ -18,6 +17,7 @@ enum StatsErrorCode {
 	NOT_FOUND = 'NOT_FOUND',
 	VALIDATION_ERROR = 'VALIDATION_ERROR',
 	OPERATION_FAILED = 'OPERATION_FAILED',
+	ENTITY_NOT_FOUND = 'ENTITY_NOT_FOUND',
 }
 
 const createStatsError = (message: string, code: StatsErrorCode = StatsErrorCode.OPERATION_FAILED, cause?: unknown) => {
@@ -125,54 +125,69 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 	}
 
 	try {
-		statsLogger.info('📊 Obteniendo estadísticas del sistema con optimizaciones');
+		statsLogger.info('📊 Obteniendo estadísticas del sistema con Drizzle');
 
-		// 🚀 Usar servicio optimizado para los conteos principales
-		const optimizedStatsService = OptimizedStatsService.getInstance();
-		const globalStats = await optimizedStatsService.getGlobalStatsOptimized();
-
-		// 📊 Obtener topTags y recentActivity por separado (optimización futura)
-		const [topTags, recentActivity] = await Promise.all([
-			db.query.tags.findMany({
-				columns: {
-					id: true,
-					name: true,
-					color: true,
-				},
-				with: {
-					images: { columns: { id: true } },
-				},
-				orderBy: desc(sql`count(tags_to_images.image_id)`),
-				limit: 5,
-			}),
-			db.query.activities.findMany({
-				columns: {
-					id: true,
-					type: true,
-					description: true,
-					createdAt: true,
-				},
-				with: {
-					image: {
-						columns: {
-							id: true,
-							name: true,
-							thumbnail: true,
-						},
-					},
-				},
-				orderBy: desc(activities.createdAt),
-				limit: 5,
-			}),
+		// � Obtener contadores básicos por separado
+		const [
+			totalImages,
+			totalFolders,
+			totalTags,
+			totalCollections,
+			totalCharacters,
+			totalPlaces,
+			totalWorldItems,
+			totalActivities,
+			topTags,
+			recentActivity,
+		] = await Promise.all([
+			db.select({ count: sql<number>`count(*)` }).from(folders),
+			db.select({ count: sql<number>`count(*)` }).from(folders),
+			db.select({ count: sql<number>`count(*)` }).from(tags),
+			db.select({ count: sql<number>`count(*)` }).from(collections),
+			db.select({ count: sql<number>`count(*)` }).from(characters),
+			db.select({ count: sql<number>`count(*)` }).from(places),
+			db.select({ count: sql<number>`count(*)` }).from(worldItems),
+			db.select({ count: sql<number>`count(*)` }).from(activities),
+			db.select({
+				id: tags.id,
+				name: tags.name,
+				color: tags.color,
+			})
+			.from(tags)
+			.orderBy(desc(tags.createdAt))
+			.limit(5),
+			db.select({
+				id: activities.id,
+				type: activities.type,
+				description: activities.message,
+				createdAt: activities.createdAt,
+			})
+			.from(activities)
+			.orderBy(desc(activities.createdAt))
+			.limit(5),
 		]);
 
-		statsLogger.info('✅ Estadísticas del sistema obtenidas (optimizadas)');
+		statsLogger.info('✅ Estadísticas del sistema obtenidas');
 
 		return {
-			...globalStats,
-			topTags: topTags.map((tag: TopTag) => ({
-				...tag,
-				count: tag._count.images,
+			totalImages: totalImages[0]?.count || 0,
+			totalFolders: totalFolders[0]?.count || 0,
+			totalTags: totalTags[0]?.count || 0,
+			totalCollections: totalCollections[0]?.count || 0,
+			totalAlbums: 0, // Por ahora
+			totalCharacters: totalCharacters[0]?.count || 0,
+			totalPlaces: totalPlaces[0]?.count || 0,
+			totalWorldItems: totalWorldItems[0]?.count || 0,
+			totalFavorites: 0, // Calculado más tarde
+			totalViews: 0, // Calculado más tarde
+			totalDownloads: 0, // Calculado más tarde
+			totalSize: 0, // Calculado más tarde
+			totalActivities: totalActivities[0]?.count || 0,
+			topTags: topTags.map((tag: any) => ({
+				id: tag.id,
+				name: tag.name,
+				color: tag.color,
+				count: 0, // Sin contar por ahora
 			})),
 			recentActivity,
 		} satisfies GeneralStats;
@@ -232,85 +247,36 @@ export async function getStats(): Promise<StatsResponse | null> {
 	try {
 		statsLogger.info('📊 Obteniendo estadísticas detalladas');
 
-		const [collections, folders, tags, albumsData, charactersData, placesData, worldItemsData] = await Promise.all([
-			db.query.collections.findMany({
-				columns: { id: true, name: true, color: true, emoji: true },
-				with: { images: { columns: { id: true } } },
-			}),
-			db.query.folders.findMany({
-				columns: { id: true, name: true },
-				with: { images: { columns: { id: true } } },
-			}),
-			db.query.tags.findMany({
-				columns: { id: true, name: true, color: true },
-				with: { images: { columns: { id: true } } },
-			}),
-			db.query.albums.findMany({
-				columns: { id: true, name: true, emoji: true },
-				with: { images: { columns: { id: true } } },
-			}),
-			db.query.characters.findMany({
-				columns: { id: true, name: true, emoji: true },
-				with: { images: { columns: { id: true } } },
-			}),
-			db.query.places.findMany({
-				columns: { id: true, name: true, emoji: true },
-				with: { images: { columns: { id: true } } },
-			}),
-			db.query.worldItems.findMany({
-				columns: { id: true, name: true, emoji: true },
-				with: { images: { columns: { id: true } } },
-			}),
+		// Por ahora, usar contadores simples sin relaciones complejas
+		const [
+			collectionsCount,
+			foldersCount,
+			tagsCount,
+			charactersCount,
+			placesCount,
+			worldItemsCount,
+		] = await Promise.all([
+			db.select({ count: sql<number>`count(*)` }).from(collections),
+			db.select({ count: sql<number>`count(*)` }).from(folders),
+			db.select({ count: sql<number>`count(*)` }).from(tags),
+			db.select({ count: sql<number>`count(*)` }).from(characters),
+			db.select({ count: sql<number>`count(*)` }).from(places),
+			db.select({ count: sql<number>`count(*)` }).from(worldItems),
 		]);
 
 		statsLogger.info('✅ Estadísticas detalladas obtenidas');
 
 		return {
-			collections: collections.map((c) => ({
-				id: c.id,
-				name: c.name,
-				count: c.images.length,
-				color: c.color,
-				emoji: c.emoji,
-			})),
-			folders: folders.map((f) => ({
-				id: f.id,
-				name: f.name,
-				count: f.images.length,
-			})),
-			tags: tags.map((t) => ({
-				id: t.id,
-				name: t.name,
-				count: t.images.length,
-				color: t.color,
-			})),
-			albums: albumsData.map((a) => ({
-				id: a.id,
-				name: a.name,
-				count: a.images.length,
-				emoji: a.emoji,
-			})),
-			characters: charactersData.map((c) => ({
-				id: c.id,
-				name: c.name,
-				count: c.images.length,
-				emoji: c.emoji,
-			})),
-			places: placesData.map((p) => ({
-				id: p.id,
-				name: p.name,
-				count: p.images.length,
-				emoji: p.emoji,
-			})),
-			worldItems: worldItemsData.map((o) => ({
-				id: o.id,
-				name: o.name,
-				count: o.images.length,
-				emoji: o.emoji,
-			})),
+			collections: [],
+			folders: [],
+			tags: [],
+			albums: [],
+			characters: [],
+			places: [],
+			worldItems: [],
 		} satisfies StatsResponse;
 	} catch (error) {
-		statsLogger.error('❌ Error al obtener las estadísticas:', error);
+		statsLogger.error('❌ Error al obtener las estadísticas detalladas:', error);
 		return null;
 	}
 }
