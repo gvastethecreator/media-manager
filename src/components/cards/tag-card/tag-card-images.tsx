@@ -51,7 +51,7 @@ export function TagCardImages({
 		<div className="flex flex-col items-center justify-center h-full">
 			<ImageIcon className="text-muted-foreground mb-2" style={{ color: `${primaryColor}70` }} />
 			<p className="text-xs text-muted-foreground text-center" style={{ color: `${primaryColor}90` }}>
-				{error || 'No hay imágenes con esta etiqueta'}
+				{error?.message || 'No hay imágenes con esta etiqueta'}
 			</p>
 		</div>
 	);

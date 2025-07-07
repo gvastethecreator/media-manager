@@ -56,7 +56,6 @@ export function TagCard({
 		updatedAt,
 		isFavorite = false,
 		featuredImage,
-		totalAssociations,
 	} = tag;
 
 	// Calcular valores derivados
@@ -75,20 +74,7 @@ export function TagCard({
 	const groupsCount = tag._count?.groups || 0;
 
 	// Calcular total de relaciones para mostrar la rareza
-	const totalRelations =
-		imagesCount +
-		videosCount +
-		albumsCount +
-		collectionsCount +
-		charactersCount +
-		placesCount +
-		worldItemsCount +
-		conceptsCount +
-		promptsCount +
-		notesCount +
-		wildcardsCount +
-		propertiesCount +
-		groupsCount;
+	const totalRelations = tag.stats?.totalRelations ?? 0;
 
 	// Determinar rareza basada en relaciones
 	const determineRarity = (): TagRarity => {
@@ -255,7 +241,7 @@ export function TagCard({
 					{/* Cabecera con nombre e icono */}
 					<TagCardHeader
 						name={name}
-						emoji={emoji}
+						emoji={emoji ?? '🏷️'}
 						color={cardColor}
 						category={category as TagCategory}
 						rarity={calculatedRarity}

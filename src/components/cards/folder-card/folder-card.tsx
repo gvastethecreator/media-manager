@@ -1,8 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { FolderWithStats } from '@/types/entities/folder';
-import { useRecentFolderImages } from '@/hooks/use-recent-folder-images';
-import { useFolderStats } from '@/hooks/use-folder-stats';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
 import { FolderCardContent } from './folder-card-content';
@@ -25,17 +23,11 @@ export const FolderCard = memo(function FolderCard({
 	interactive = true,
 	tcgMode = false,
 }: FolderCardProps) {
-	// Preparar datos con fallbacks
-	const { data: recentImagesData } = useRecentFolderImages(folder?.id || '');
-	const { data: folderStatsData } = useFolderStats(folder?.id || '');
-
 	// Validar que el objeto folder exista
 	if (!folder) {
 		console.error('FolderCard recibió un objeto folder inválido');
 		return null;
 	}
-
-	// Resto del componente (se moverá dentro de un bloque condicional)
 
 	const folderData = useMemo(() => {
 		const imageCount = folder._count?.images ?? 0;
@@ -48,14 +40,13 @@ export const FolderCard = memo(function FolderCard({
 				...(folder._count || {}),
 				images: imageCount,
 			},
-			totalFiles: folderStatsData?.totalImages ?? folder.totalFiles ?? imageCount ?? 0,
-			totalSize: folderStatsData?.totalSize ?? folder.totalSize ?? 0,
-			recentImageUrls: recentImagesData || [],
-			childrenCount:
-				folderStatsData?.totalFolders ?? (isWithStats ? (folder as FolderWithStats).statistics.folderCount : 0),
-			lastIndexed: folderStatsData?.lastActivity ?? folder.lastIndexed ?? null,
+			totalFiles: folder.statistics?.totalFiles ?? 0,
+			totalSize: folder.statistics?.totalSize ?? 0,
+			recentImageUrls: folder.recentImages || [],
+			childrenCount: folder.statistics?.folderCount ?? 0,
+			lastIndexed: folder.lastIndexed ?? null,
 		};
-	}, [folder, recentImagesData, folderStatsData]);
+	}, [folder]);
 
 	// Colores para personalización
 	const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
@@ -77,13 +68,12 @@ export const FolderCard = memo(function FolderCard({
 				interactive && 'hover:shadow-md cursor-pointer',
 				className
 			)}
-			style={{
-				tcgMode
+			style={tcgMode
 					? {
 							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
 						}
 					: {}
-			}}
+			}
 		>
 			{/* Borde brillante para TCG mode */}
 			{tcgMode && (

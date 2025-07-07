@@ -18,6 +18,7 @@ export type {
 	FavoriteBase,
 	FavoriteStatistics,
 	FavoriteWithStats,
+	FavoriteExtended,
 } from './base';
 
 // --- Enums ---

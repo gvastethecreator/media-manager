@@ -46,7 +46,7 @@ export function DocumentCard({
 
 	// Colores para el gradiente basados en el tipo de documento
 	const primaryColor = useMemo(() => {
-		const ext = document.filePath?.split('.').pop()?.toLowerCase();
+		const ext = document.path?.split('.').pop()?.toLowerCase();
 		switch (ext) {
 			case 'pdf':
 				return '#dc2626'; // Rojo para PDF
@@ -60,7 +60,7 @@ export function DocumentCard({
 			default:
 				return '#6b7280'; // Gris para otros
 		}
-	}, [document.filePath]);
+	}, [document.path]);
 
 	const secondaryColor = useMemo(() => {
 		// Oscurecer el color primario para el secundario
@@ -83,8 +83,8 @@ export function DocumentCard({
 	}, [document.size]);
 
 	const fileExtension = useMemo(() => {
-		return document.filePath?.split('.').pop()?.toUpperCase() || 'DOC';
-	}, [document.filePath]);
+		return document.path?.split('.').pop()?.toUpperCase() || 'DOC';
+	}, [document.path]);
 
 	const handleClick = useCallback(() => {
 		if (!disabled && onClick) {
@@ -194,12 +194,13 @@ export function DocumentCard({
 								>
 									{fileExtension}
 								</div>
+
 							</div>
 						</div>
 
 						{/* Descripción */}
-						{document.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{document.description}</div>
+						{document.summary && (
+							<div className="text-sm text-muted-foreground line-clamp-2 italic">{document.summary}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}
@@ -217,7 +218,7 @@ export function DocumentCard({
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Páginas</span>
-									<span className="font-bold">{document.pages || '?'}</span>
+									<span className="font-bold">{document.pageCount || '?'}</span>
 								</div>
 							</div>
 						)}
@@ -269,3 +270,4 @@ export function DocumentCard({
 		</CardContainer>
 	);
 }
+

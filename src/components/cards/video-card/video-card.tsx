@@ -67,11 +67,11 @@ export function VideoCard({
 	}
 
 	// Extraer datos del video
-	const { id, name, statistics, _count } = video;
+	const { id, name, isFavorite, description, createdAt, updatedAt } = video;
 
 	// Calcular colores basados en la calidad técnica
 	const primaryColor = useMemo(() => {
-		const grade = statistics.technicalGrade;
+		const grade = video.stats.technicalGrade;
 		switch (grade) {
 			case 'A':
 				return '#10b981'; // Verde esmeralda - Ultra calidad
@@ -84,7 +84,7 @@ export function VideoCard({
 			default:
 				return '#6b7280'; // Gris - Desconocida
 		}
-	}, [statistics.technicalGrade]);
+	}, [video.stats.technicalGrade]);
 
 	const secondaryColor = useMemo(() => {
 		// Oscurecer el color primario
@@ -103,14 +103,14 @@ export function VideoCard({
 
 	// Calcular nivel de rareza basado en quality score
 	const rarityLevel = useMemo(() => {
-		const score = statistics.qualityScore;
+		const score = video.stats.qualityScore;
 		if (score >= 90) return 10; // Mítico
 		if (score >= 80) return 9; // Legendario
 		if (score >= 70) return 7; // Épico
 		if (score >= 60) return 5; // Raro
 		if (score >= 50) return 3; // Poco común
 		return 1; // Común
-	}, [statistics.qualityScore]);
+	}, [video.stats.qualityScore]);
 
 	// Manejar eventos
 	const handleClick = useCallback(() => {
@@ -133,7 +133,7 @@ export function VideoCard({
 	const cardId = `V${id.substring(0, 6).toUpperCase()}`;
 
 	// Conteos de relaciones
-	const totalRelations = statistics.totalRelations;
+	const totalRelations = video.stats.totalRelations;
 
 	return (
 		<motion.div
@@ -159,7 +159,6 @@ export function VideoCard({
 			<CardContainer
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
-				rarityLevel={rarityLevel}
 				isHovered={isHovered}
 				isSelected={isSelected}
 				tcgMode={tcgMode}

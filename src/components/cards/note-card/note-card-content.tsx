@@ -200,7 +200,7 @@ export function NoteCardContent({
 			{/* Relaciones adicionales en estilo TCG */}
 			{tcgMode && totalRelations > 0 && (
 				<div className="flex justify-center gap-2 mt-2">
-					{relationCounts?.tags > 0 && (
+					{relationCounts?.tags && relationCounts.tags > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
@@ -209,7 +209,7 @@ export function NoteCardContent({
 							<span>{relationCounts.tags}</span>
 						</Badge>
 					)}
-					{relationCounts?.prompts > 0 && (
+					{relationCounts?.prompts && relationCounts.prompts > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
@@ -218,7 +218,7 @@ export function NoteCardContent({
 							<span>{relationCounts.prompts}</span>
 						</Badge>
 					)}
-					{relationCounts?.places > 0 && (
+					{relationCounts?.places && relationCounts.places > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
@@ -227,7 +227,7 @@ export function NoteCardContent({
 							<span>{relationCounts.places}</span>
 						</Badge>
 					)}
-					{relationCounts?.worldItems > 0 && (
+					{relationCounts?.worldItems && relationCounts.worldItems > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"

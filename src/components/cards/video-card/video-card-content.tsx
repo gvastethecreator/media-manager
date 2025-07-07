@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import type { VideoWithStats } from '@/types/entities/video';
+import type { Tag } from '@/types/entities/tag';
 
 interface VideoCardContentProps {
 	video: VideoWithStats;
@@ -12,8 +13,8 @@ interface VideoCardContentProps {
  * 🎬 Contenido principal del VideoCard con estadísticas y metadatos
  */
 export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoCardContentProps) {
-	const { description, statistics } = video;
-	const { qualityScore, technicalGrade, autoTags, aspectRatio, bitrate, frameRate, hasSubtitles } = statistics;
+	const { description } = video;
+	const { qualityScore, technicalGrade, autoTags, aspectRatio, bitrate, frameRate, hasSubtitles } = video.stats;
 
 	return (
 		<div className="flex-1 p-3 space-y-3">
@@ -69,7 +70,7 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Subtítulos:</span>
 								<span className="font-medium text-green-600">Sí</span>
-							</div>
+								</div>
 						)}
 					</div>
 				)}
@@ -80,9 +81,9 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 				<div className="space-y-1">
 					<span className="text-xs font-medium text-muted-foreground">Tags automáticos:</span>
 					<div className="flex flex-wrap gap-1">
-						{autoTags.slice(0, 4).map((tag) => (
+						{autoTags.slice(0, 4).map((tag: Tag) => (
 							<Badge
-								key={tag}
+								key={tag.id}
 								variant="secondary"
 								className="text-xs px-1.5 py-0.5"
 								style={{
@@ -91,7 +92,7 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 									borderColor: `${primaryColor}30`,
 								}}
 							>
-								{tag}
+								{tag.name}
 							</Badge>
 						))}
 						{autoTags.length > 4 && (
