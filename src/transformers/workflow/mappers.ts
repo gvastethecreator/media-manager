@@ -9,7 +9,7 @@
 import { safeJsonParse } from '@/lib/utils/safe-json-parse';
 import type { WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
 
-// Tipo local equivalente a Prisma (migración a Drizzle)
+// Tipo local para workflow (migración a Drizzle)
 type DrizzleWorkflow = {
 	id: string;
 	name: string;
@@ -98,4 +98,4 @@ export function toWorkflowWithStats(
 /**
  * @deprecated Usar toWorkflowWithStats con tipos de Drizzle
  */
-export const toWorkflowWithStatsFromPrisma = toWorkflowWithStats;
+export const toWorkflowWithStatsFromDrizzle = toWorkflowWithStats;

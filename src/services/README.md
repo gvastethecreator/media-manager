@@ -12,7 +12,7 @@ entidad.
 ```mermaid
 flowchart TD
     A[Server Actions] --> B[Services]
-    B --> C[Prisma/DB]
+    B --> C[Drizzle/DB]
 ```
 
 ## Estructura Actual (Reorganizada)

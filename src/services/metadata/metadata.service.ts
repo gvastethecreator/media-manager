@@ -68,7 +68,7 @@ export async function getAllMetadata(): Promise<MetadataExtended[]> {
 			.from(metadatas)
 			.orderBy(desc(metadatas.updatedAt));
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadatas = drizzleMetadatas.map((rawMetadata) => ({
 			...rawMetadata,
 			isPublic: Boolean(rawMetadata.isPublic),
@@ -111,7 +111,7 @@ export async function getMetadataByImageId(imageId: string): Promise<MetadataExt
 			return null;
 		}
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...drizzleMetadata[0],
 			isPublic: Boolean(drizzleMetadata[0].isPublic),
@@ -154,7 +154,7 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
 			return null;
 		}
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...drizzleMetadata[0],
 			isPublic: Boolean(drizzleMetadata[0].isPublic),
@@ -196,7 +196,7 @@ export async function createMetadata(data: Partial<MetadataBase>): Promise<Metad
 
 		const newMetadata = result[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...newMetadata,
 			isPublic: Boolean(newMetadata.isPublic),
@@ -234,7 +234,7 @@ export async function updateMetadata(
 
 		const updatedMetadata = result[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...updatedMetadata,
 			isPublic: Boolean(updatedMetadata.isPublic),

@@ -116,6 +116,52 @@ export { schema };
 export type DrizzleDatabase = typeof db;
 export type Schema = typeof schema;
 
+// Tipos inferidos de Drizzle para reemplazar tipos de Prisma
+export type Profile = typeof schema.profiles.$inferSelect;
+export type NewProfile = typeof schema.profiles.$inferInsert;
+export type Settings = typeof schema.settings.$inferSelect;
+export type NewSettings = typeof schema.settings.$inferInsert;
+export type Image = typeof schema.images.$inferSelect;
+export type NewImage = typeof schema.images.$inferInsert;
+export type Video = typeof schema.videos.$inferSelect;
+export type NewVideo = typeof schema.videos.$inferInsert;
+export type Tag = typeof schema.tags.$inferSelect;
+export type NewTag = typeof schema.tags.$inferInsert;
+export type Album = typeof schema.albums.$inferSelect;
+export type NewAlbum = typeof schema.albums.$inferInsert;
+export type Collection = typeof schema.collections.$inferSelect;
+export type NewCollection = typeof schema.collections.$inferInsert;
+export type Folder = typeof schema.folders.$inferSelect;
+export type NewFolder = typeof schema.folders.$inferInsert;
+export type Note = typeof schema.notes.$inferSelect;
+export type NewNote = typeof schema.notes.$inferInsert;
+export type Character = typeof schema.characters.$inferSelect;
+export type NewCharacter = typeof schema.characters.$inferInsert;
+export type Place = typeof schema.places.$inferSelect;
+export type NewPlace = typeof schema.places.$inferInsert;
+export type Property = typeof schema.properties.$inferSelect;
+export type NewProperty = typeof schema.properties.$inferInsert;
+export type Document = typeof schema.documents.$inferSelect;
+export type NewDocument = typeof schema.documents.$inferInsert;
+export type Audio = typeof schema.audios.$inferSelect;
+export type NewAudio = typeof schema.audios.$inferInsert;
+export type JsonFile = typeof schema.jsonFiles.$inferSelect;
+export type NewJsonFile = typeof schema.jsonFiles.$inferInsert;
+export type File3D = typeof schema.file3Ds.$inferSelect;
+export type NewFile3D = typeof schema.file3Ds.$inferInsert;
+export type Prompt = typeof schema.prompts.$inferSelect;
+export type NewPrompt = typeof schema.prompts.$inferInsert;
+export type Wildcard = typeof schema.wildcards.$inferSelect;
+export type NewWildcard = typeof schema.wildcards.$inferInsert;
+export type WorldItem = typeof schema.worldItems.$inferSelect;
+export type NewWorldItem = typeof schema.worldItems.$inferInsert;
+export type Concept = typeof schema.concepts.$inferSelect;
+export type NewConcept = typeof schema.concepts.$inferInsert;
+export type UploadedImage = typeof schema.uploadedImages.$inferSelect;
+export type NewUploadedImage = typeof schema.uploadedImages.$inferInsert;
+export type QueueJob = typeof schema.queueJobs.$inferSelect;
+export type NewQueueJob = typeof schema.queueJobs.$inferInsert;
+
 /**
  * Función para cerrar la conexión a la base de datos
  * Útil para testing y cleanup

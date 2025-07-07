@@ -41,7 +41,6 @@ export interface ConceptBase {
  * Tipo completo para Concept con todas las relaciones y datos
  */
 
-
 /**
  * Tipo para items en listados de conceptos
  */

@@ -3,11 +3,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGroupCardData } from '@/lib/api/groups';
 import { cn } from '@/lib/utils';
+import type { GroupCardProps } from './group-card.types';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
-import type { GroupCardProps } from './group-card.types';
 
 export function GroupCard({
 	groupId,

@@ -11,9 +11,9 @@ La entidad **Place** gestiona todos los lugares del sistema, proporcionando una 
 ### 🔧 Correcciones Realizadas:
 
 1. **Mappers Corregidos**:
-   - ✅ Corregido error de sintaxis faltante en `mapCreatePlaceDataToPrisma`
+   - ✅ Corregido error de sintaxis faltante en `mapCreatePlaceDataToDrizzle`
    - ✅ Arreglada referencia a `rest.filters` después de destructuring
-   - ✅ Simplificado `PLACE_INCLUDE` para compatibilidad con Prisma
+   - ✅ Simplificado `PLACE_INCLUDE` para compatibilidad con Drizzle
    - ✅ Removidas configuraciones `take` y `orderBy` que causaban conflictos
 
 2. **Tipos Actualizados**:
@@ -45,7 +45,7 @@ graph TD
     B --> B2[extended.ts - Tipos extendidos]
     B --> B3[index.ts - Exportaciones]
 
-    C --> C1[mappers.ts - Mapeo Prisma]
+    C --> C1[mappers.ts - Mapeo Drizzle]
     C --> C2[serializers.ts - Serialización JSON]
     C --> C3[transformer.ts - Transformaciones]
     C --> C4[index.ts - API pública]
@@ -74,9 +74,9 @@ sequenceDiagram
 
     UI->>Store: Solicita lugares
     Store->>Actions: getPlaces()
-    Actions->>DB: prisma.place.findMany()
-    DB-->>Actions: Datos Prisma
-    Actions->>Transform: fromPrismaPlace()
+    Actions->>DB: Drizzle.place.findMany()
+    DB-->>Actions: Datos Drizzle
+    Actions->>Transform: fromDrizzlePlace()
     Transform-->>Actions: PlaceComplete[]
     Actions-->>Store: Lugares transformados
     Store-->>UI: Estado actualizado
@@ -108,9 +108,9 @@ Filtros para búsqueda y filtrado de lugares.
 ## 🛠️ Funciones Principales
 
 ### Transformers
-- `mapCreatePlaceDataToPrisma()` - ✅ Corregida
-- `mapUpdatePlaceDataToPrisma()` - ✅ Validada
-- `fromPrismaPlace()` - ✅ Funcional
+- `mapCreatePlaceDataToDrizzle()` - ✅ Corregida
+- `mapUpdatePlaceDataToDrizzle()` - ✅ Validada
+- `fromDrizzlePlace()` - ✅ Funcional
 
 ### Store
 - `selectPlace()` - ✅ Agregada
@@ -135,11 +135,11 @@ Tarjeta principal con soporte para:
 - **Errores corregidos**: 8+ errores TypeScript
 - **Archivos modificados**: 4 archivos principales
 - **Tipos agregados**: 3 propiedades/funciones
-- **Compatibilidad**: 100% con Prisma y React 19
+- **Compatibilidad**: 100% con Drizzle y React 19
 
 ## ✨ Mejoras Implementadas
 
-1. **Rendimiento**: Simplificación de consultas Prisma
+1. **Rendimiento**: Simplificación de consultas Drizzle
 2. **Tipos**: Mayor seguridad de tipos con `null/undefined`
 3. **UX**: Mejor manejo de estados de carga y error
 4. **Consistencia**: Alineación con patrones del proyecto

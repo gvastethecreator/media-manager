@@ -67,7 +67,7 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 			.from(file3Ds)
 			.orderBy(desc(file3Ds.createdAt));
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D) => ({
 			...rawFile3D,
 			isFavorite: Boolean(rawFile3D.isFavorite),
@@ -127,7 +127,7 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 
 		const rawFile3D = drizzleFile3D[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedFile3D = {
 			...rawFile3D,
 			isFavorite: Boolean(rawFile3D.isFavorite),

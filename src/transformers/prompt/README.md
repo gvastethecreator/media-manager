@@ -177,10 +177,10 @@ enum PromptSortCriteria {
 
 ### Mappers (mappers.ts) ✅
 
-- `mapCreatePromptDataToPrisma()` - Mapea datos de creación a Prisma
-- `mapUpdatePromptDataToPrisma()` - Mapea datos de actualización a Prisma
-- `mapPromptFiltersToPrisma()` - Mapea filtros a condiciones Prisma
-- `mapPromptSortCriteriaToPrisma()` - Mapea criterios de ordenación
+- `mapCreatePromptDataToDrizzle()` - Mapea datos de creación a Drizzle
+- `mapUpdatePromptDataToDrizzle()` - Mapea datos de actualización a Drizzle
+- `mapPromptFiltersToDrizzle()` - Mapea filtros a condiciones Drizzle
+- `mapPromptSortCriteriaToDrizzle()` - Mapea criterios de ordenación
 - `mapPromptToRelated()` - Mapea a formato simplificado para relaciones
 - `filterPrompts()` - Filtra prompts en memoria
 - `sortPrompts()` - Ordena prompts según criterios
@@ -189,10 +189,10 @@ enum PromptSortCriteria {
 
 ### Transformers (transformer.ts) ✅
 
-- `fromPrismaPrompt()` - Transforma desde Prisma a tipo canónico
-- `fromPrismaPrompts()` - Transforma múltiples prompts desde Prisma
-- `transformPrompt()` - Alias para fromPrismaPrompt
-- `transformPrompts()` - Alias para fromPrismaPrompts
+- `fromDrizzlePrompt()` - Transforma desde Drizzle a tipo canónico
+- `fromDrizzlePrompts()` - Transforma múltiples prompts desde Drizzle
+- `transformPrompt()` - Alias para fromDrizzlePrompt
+- `transformPrompts()` - Alias para fromDrizzlePrompts
 - `transformPromptToExtended()` - Transforma a formato extendido
 - `transformPromptToWithStats()` - Transforma con estadísticas
 

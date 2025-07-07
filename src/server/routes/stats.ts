@@ -14,6 +14,17 @@ router.get('/general', async (_req, res) => {
 	}
 });
 
+// GET /stats/system - Obtener estadísticas del sistema (compatibilidad con frontend)
+router.get('/system', async (_req, res) => {
+	try {
+		const stats = await getSystemStats();
+		res.json(stats);
+	} catch (error) {
+		console.error('Error getting system stats:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // GET /stats/extended - Obtener estadísticas extendidas del sistema
 router.get('/extended', async (_req, res) => {
 	try {

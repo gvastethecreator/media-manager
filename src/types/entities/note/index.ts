@@ -28,8 +28,11 @@ export type {
 export {
 	NoteCategory,
 	NotePriority,
-	NoteSortCriteria,
 	NoteSortOption,
 	NoteStatus,
 	NoteViewMode,
+} from './enums';
+
+export {
+	NoteSortCriteria,
 } from './types';

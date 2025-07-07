@@ -163,7 +163,7 @@ export interface ImageWithStats extends ImageBase, ImageRelations, ImageUI {
 		concepts?: number;
 		prompts?: number;
 		notes?: number;
-	wildcards?: number;
+		wildcards?: number;
 		properties?: number;
 		groups?: number;
 	};

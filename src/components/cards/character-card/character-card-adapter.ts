@@ -84,11 +84,11 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 			manaPoints: level * 10,
 			totalAttacks: 0,
 		},
-        level: character.level,
-        class: character.class,
-        race: character.race,
-        backstory: character.backstory,
-        alignment: character.alignment,
+		level: character.level,
+		class: character.class,
+		race: character.race,
+		backstory: character.backstory,
+		alignment: character.alignment,
 	};
 }
 

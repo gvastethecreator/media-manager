@@ -194,7 +194,6 @@ export function DocumentCard({
 								>
 									{fileExtension}
 								</div>
-
 							</div>
 						</div>
 
@@ -270,4 +269,3 @@ export function DocumentCard({
 		</CardContainer>
 	);
 }
-

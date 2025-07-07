@@ -5,7 +5,8 @@
 
 import { z } from 'zod';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { type VideoBase, VideoFormat } from '@/types/entities/video';
+import { type VideoBase } from '@/types/entities/video';
+import { VideoFormat } from '@/types/entities/video/enums';
 import { VideoMetadataSchema } from '@/types/entities/video/schema';
 
 type VideoMetadata = z.infer<typeof VideoMetadataSchema>;

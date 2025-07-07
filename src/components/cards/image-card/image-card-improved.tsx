@@ -9,32 +9,13 @@ import {
 	ZoomInIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-import { formatDate } from '@/lib/utils/format.utils';
-
-import {
-	CalendarIcon,
-	CameraIcon,
-	CheckCircle2,
-	FolderIcon,
-	ImageIcon,
-	InfoIcon,
-	StarIcon,
-	ZoomInIcon,
-} from 'lucide-react';
-import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
-
-import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
 import type { Tag } from '@/types/entities/tag';
 
 interface ImageCardProps {
@@ -183,7 +164,9 @@ export function ImageCardImproved({
 			>
 				<div className="text-center p-4">
 					<ImageIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-					<p className="text-sm text-gray-500 dark:text-gray-400">{error?.toString() || 'No se pudo cargar la imagen'}</p>
+					<p className="text-sm text-gray-500 dark:text-gray-400">
+						{error?.toString() || 'No se pudo cargar la imagen'}
+					</p>
 				</div>
 			</div>
 		);
@@ -412,4 +395,3 @@ export function ImageCardImproved({
 	// Si no, devolver solo el contenido
 	return cardContent;
 }
-
