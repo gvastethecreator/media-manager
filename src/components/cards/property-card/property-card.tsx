@@ -79,7 +79,7 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 	}, [primaryColor, property.color]);
 
 	// Calcular número total de relaciones desde stats o totalAssociations
-	const totalRelations = property.stats.totalAssociations;
+	const totalRelations = property.stats?.totalRelations ?? 0;
 
 	const handleClick = useCallback(() => {
 		if (onClick) {

@@ -11,11 +11,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { WildcardBase } from '@/types/entities/wildcard/types';
-import { createWildcardSchema } from '@/types/validations/wildcard';
+import type { WildcardBase } from '@/types/entities/wildcard/base';
+import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
 
 // Esquema Zod adaptado para el formulario
-const formSchema = createWildcardSchema.extend({
+const formSchema = CreateWildcardSchema.extend({
 	children: z.array(z.object({ value: z.string().min(1, 'El valor no puede estar vacío') })),
 });
 
@@ -24,7 +24,7 @@ type FormValues = z.infer<typeof formSchema>;
 interface CreateWildcardFormProps {
 	wildcard?: WildcardBase;
 	parentWildcards?: WildcardBase[];
-	onSubmit: (data: z.infer<typeof createWildcardSchema>) => Promise<void> | void;
+	onSubmit: (data: z.infer<typeof CreateWildcardSchema>) => Promise<void> | void;
 	onCancel: () => void;
 }
 
@@ -52,7 +52,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 
 	const handleSubmit = (data: FormValues) => {
 		// Validar con el esquema original antes de enviar
-		const result = createWildcardSchema.safeParse({
+		const result = CreateWildcardSchema.safeParse({
 			...data,
 			children: data.children.map((c) => c.value).filter(Boolean), // Enviar solo strings no vacíos
 		});
@@ -250,7 +250,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							render={({ field }) => (
 								<FormItem className="flex items-center gap-2">
 									<FormControl>
-										<Checkbox checked={field.checked} onCheckedChange={field.onChange} />
+										<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 									</FormControl>
 									<FormLabel>Marcar como favorito</FormLabel>
 								</FormItem>

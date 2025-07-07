@@ -23,8 +23,7 @@ export function VideoCardThumbnail({
 	tcgMode = true,
 	compact = false,
 }: VideoCardThumbnailProps) {
-	const { statistics } = video;
-	const { thumbnailUrl, resolution, hasAudio, formattedSize } = statistics;
+	const { thumbnailUrl, resolution, hasAudio, formattedSize } = video.stats;
 
 	// Placeholder si no hay thumbnail
 	const placeholderGradient = `linear-gradient(135deg, ${primaryColor}40, ${primaryColor}80)`;
