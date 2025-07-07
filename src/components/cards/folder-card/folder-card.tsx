@@ -1,10 +1,10 @@
 import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { FolderWithStats } from '@/types/entities/folder';
-import { FolderCardHeader } from './folder-card-header';
-import { FolderCardImages } from './folder-card-images';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
+import { FolderCardHeader } from './folder-card-header';
+import { FolderCardImages } from './folder-card-images';
 
 export interface FolderCardProps {
 	folder: FolderWithStats;
@@ -23,11 +23,7 @@ export const FolderCard = memo(function FolderCard({
 	interactive = true,
 	tcgMode = false,
 }: FolderCardProps) {
-	// Validar que el objeto folder exista
-	if (!folder) {
-		console.error('FolderCard recibió un objeto folder inválido');
-		return null;
-	}
+	
 
 	const folderData = useMemo(() => {
 		const imageCount = folder._count?.images ?? 0;
@@ -59,6 +55,12 @@ export const FolderCard = memo(function FolderCard({
 		}
 	}, [onClick, interactive]);
 
+	// Validar que el objeto folder exista
+	if (!folder) {
+		console.error('FolderCard recibió un objeto folder inválido');
+		return null;
+	}
+
 	// Componente de la carta
 	const cardContent = (
 		<div
@@ -68,7 +70,8 @@ export const FolderCard = memo(function FolderCard({
 				interactive && 'hover:shadow-md cursor-pointer',
 				className
 			)}
-			style={tcgMode
+			style={
+				tcgMode
 					? {
 							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
 						}

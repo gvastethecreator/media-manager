@@ -56,6 +56,28 @@ export interface CollectionFilters {
 	search?: string;
 	isPublic?: boolean;
 	hasImages?: boolean;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount' | 'emoji' | 'color' | 'isFavorite' | 'shortcut' | 'category' | 'filters' | 'featuredImage' | 'url' | 'alternativeUrl' | 'sourceImage' | 'platform' | 'price' | 'network' | 'tokenId' | 'tokenAddress' | 'contractAddress' | 'contractType' | 'editions';
+	sortBy?:
+		| 'name'
+		| 'createdAt'
+		| 'updatedAt'
+		| 'imageCount'
+		| 'emoji'
+		| 'color'
+		| 'isFavorite'
+		| 'shortcut'
+		| 'category'
+		| 'filters'
+		| 'featuredImage'
+		| 'url'
+		| 'alternativeUrl'
+		| 'sourceImage'
+		| 'platform'
+		| 'price'
+		| 'network'
+		| 'tokenId'
+		| 'tokenAddress'
+		| 'contractAddress'
+		| 'contractType'
+		| 'editions';
 	sortOrder?: 'asc' | 'desc';
 }

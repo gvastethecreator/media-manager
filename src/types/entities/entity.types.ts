@@ -3,19 +3,22 @@
  * @module types/entities/entity.types
  */
 
+export interface EntityBase {
+	id: string;
+	name: string;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export interface EntityStats {
 	imageCount?: number;
 	totalItems?: number;
 	lastUpdated?: Date;
 }
 
-export interface EntityWithStats {
-	id: string;
-	name: string;
-	description?: string;
-	entityType: string;
+export interface EntityWithStats extends EntityBase {
+	entityType: EntityType;
 	stats?: EntityStats;
-	createdAt: Date;
-	updatedAt: Date;
 	[key: string]: any;
 }

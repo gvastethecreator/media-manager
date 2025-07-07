@@ -35,10 +35,8 @@ export * from './types';
 export {
 	formatVideoDuration,
 	formatVideoSize,
-	getVideoMetadata,
-	getVideoThumbnailUrl,
+	generateVideoThumbnailUrl,
 	hasCompleteMetadata as hasCompleteVideoMetadata,
-	isVideoFile,
 	validateVideoMetadata,
 } from './video';
 export * from './wildcard';

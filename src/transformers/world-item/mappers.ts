@@ -1,28 +1,28 @@
 /**
  * @file Mapeadores para la entidad WorldItem
  * @module transformers/world-item/mappers
- 
+
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
-	WorldItemComplete,
-	WorldItemCreateInput,
-	WorldItemFilters,
-	WorldItemSearchOptions,
-	WorldItemStatistics,
-	WorldItemUpdateInput,
-	WorldItemWithStats,
+    WorldItemComplete,
+    WorldItemCreateInput,
+    WorldItemFilters,
+    WorldItemSearchOptions,
+    WorldItemStatistics,
+    WorldItemUpdateInput,
+    WorldItemWithStats,
 } from '@/types/entities/world-item';
 import {
-	serializeAttributes,
-	serializeEffects,
-	serializeFilters,
-	serializeProperties,
-	serializeRequirements,
-	serializeStats,
-	serializeTags,
+    serializeAttributes,
+    serializeEffects,
+    serializeFilters,
+    serializeProperties,
+    serializeRequirements,
+    serializeStats,
+    serializeTags,
 } from './serializers';
 
 // Tipos de datos para Drizzle
@@ -91,12 +91,12 @@ function connectRelations(input: Partial<WorldItemCreateInput>, _operation: 'con
 	const relations: any = {};
 	for (const key in relationMap) {
 		if (key in input && Array.isArray((input as any)[key])) {
-			const prismaKey = relationMap[key];
+			const dbKey = relationMap[key];
 			const ids = (input as any)[key];
 			if (ids.length > 0) {
 				// En Drizzle, las relaciones se manejan de forma diferente
 				// Esto se maneja en el servicio, no en el mapper
-				relations[`${prismaKey}Ids`] = ids;
+				relations[`${dbKey}Ids`] = ids;
 			}
 		}
 	}

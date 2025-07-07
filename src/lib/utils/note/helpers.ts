@@ -5,7 +5,7 @@
  */
 
 import type { NoteFilters, NoteWithStats } from '@/types/entities/note/types';
-import { NoteSortOption } from '@/types/entities/note/types';
+import { NoteSortOption } from '@/types/entities/note/enums';
 
 /**
  * 🔍 Filtra notas basado en criterios específicos
@@ -73,12 +73,18 @@ export function filterNotes(notes: NoteWithStats[], filters: NoteFilters): NoteW
  */
 export function sortNotes(notes: NoteWithStats[], sortBy: NoteSortOption): NoteWithStats[] {
 	const sorters: Record<NoteSortOption, (a: NoteWithStats, b: NoteWithStats) => number> = {
-		[NoteSortOption.TITLE]: (a, b) => a.title.localeCompare(b.title),
-		[NoteSortOption.PRIORITY]: (a, b) => b.priority - a.priority, // Mayor prioridad primero
-		[NoteSortOption.STATUS]: (a, b) => a.status.localeCompare(b.status),
-		[NoteSortOption.CREATED_AT]: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(), // Más reciente primero
-		[NoteSortOption.UPDATED_AT]: (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(), // Más reciente primero
-		[NoteSortOption.CATEGORY]: (a, b) => a.category.localeCompare(b.category),
+		[NoteSortOption.TITLE_ASC]: (a, b) => a.title.localeCompare(b.title),
+		[NoteSortOption.TITLE_DESC]: (a, b) => b.title.localeCompare(a.title),
+		[NoteSortOption.PRIORITY_ASC]: (a, b) => a.priority - b.priority,
+		[NoteSortOption.PRIORITY_DESC]: (a, b) => b.priority - a.priority,
+		[NoteSortOption.STATUS_ASC]: (a, b) => a.status.localeCompare(b.status),
+		[NoteSortOption.STATUS_DESC]: (a, b) => b.status.localeCompare(a.status),
+		[NoteSortOption.CREATED_ASC]: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+		[NoteSortOption.CREATED_DESC]: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+		[NoteSortOption.UPDATED_ASC]: (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
+		[NoteSortOption.UPDATED_DESC]: (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+		[NoteSortOption.CATEGORY_ASC]: (a, b) => a.category.localeCompare(b.category),
+		[NoteSortOption.CATEGORY_DESC]: (a, b) => b.category.localeCompare(a.category),
 	};
 
 	const sorter = sorters[sortBy];

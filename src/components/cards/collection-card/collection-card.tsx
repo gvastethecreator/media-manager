@@ -102,8 +102,6 @@ export function CollectionCard({
 		[onClick]
 	);
 
-	
-
 	// Definir estilos de la tarjeta TCG
 	const cardStyle = useMemo(
 		() => ({

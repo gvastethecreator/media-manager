@@ -122,7 +122,9 @@ export async function getTag(id: string): Promise<TagWithStats | null> {
 				color: tags.color,
 				emoji: tags.emoji,
 				isFavorite: tags.isFavorite,
-				isArchived: tags.isArchived,
+				isPublic: tags.isPublic,
+				totalImages: tags.totalImages,
+				totalVideos: tags.totalVideos,
 				createdAt: tags.createdAt,
 				updatedAt: tags.updatedAt,
 			})
@@ -137,7 +139,7 @@ export async function getTag(id: string): Promise<TagWithStats | null> {
 
 		const rawTag = drizzleTag[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...rawTag,
 			isFavorite: Boolean(rawTag.isFavorite),
@@ -191,7 +193,8 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 		const conditions: any[] = [];
 
 		if (!includeArchived) {
-			conditions.push(eq(tags.isArchived, false));
+			// Como no existe isArchived en el schema, no agregar condición
+			// conditions.push(eq(tags.isArchived, false));
 		}
 
 		if (onlyFavorites) {
@@ -225,8 +228,10 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 				description: tags.description,
 				color: tags.color,
 				emoji: tags.emoji,
+				isPublic: tags.isPublic,
 				isFavorite: tags.isFavorite,
-				isArchived: tags.isArchived,
+				totalImages: tags.totalImages,
+				totalVideos: tags.totalVideos,
 				createdAt: tags.createdAt,
 				updatedAt: tags.updatedAt,
 			})
@@ -249,11 +254,11 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 
 		const [{ count: total }] = await countQuery;
 
-		// Transformar resultados de Drizzle a formato compatible con Prisma
-		const transformedTags = drizzleTags.map((rawTag) => ({
+		// Transformar resultados de Drizzle a formato compatible con transformadores legacy
+		const transformedTags = drizzleTags.map((rawTag: any) => ({
 			...rawTag,
 			isFavorite: Boolean(rawTag.isFavorite),
-			isArchived: Boolean(rawTag.isArchived),
+			isArchived: false, // Campo no existe en el schema
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
 				images: 0,
@@ -310,7 +315,6 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 				color: data.color || '#3b82f6',
 				emoji: data.emoji || '🏷️',
 				category: data.category || null,
-				isPublic: data.isPublic || false,
 				isFavorite: data.isFavorite || false,
 				totalImages: 0,
 				totalVideos: 0,
@@ -321,7 +325,7 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 
 		const newTag = result[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...newTag,
 			isPublic: Boolean(newTag.isPublic),
@@ -393,7 +397,6 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 		if (data.color !== undefined) updateData.color = data.color;
 		if (data.emoji !== undefined) updateData.emoji = data.emoji;
 		if (data.category !== undefined) updateData.category = data.category;
-		if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
 		const result = await db.update(tags).set(updateData).where(eq(tags.id, id)).returning();
@@ -404,7 +407,7 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 
 		const updatedTag = result[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...updatedTag,
 			isPublic: Boolean(updatedTag.isPublic),
@@ -516,7 +519,7 @@ export async function toggleTagFavorite(id: string): Promise<TagWithStats> {
 
 		const updatedTag = result[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...updatedTag,
 			isPublic: Boolean(updatedTag.isPublic),
@@ -593,7 +596,7 @@ export async function toggleTagArchive(id: string): Promise<TagWithStats> {
 
 		const updatedTag = result[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...updatedTag,
 			isPublic: Boolean(updatedTag.isPublic),
@@ -628,7 +631,7 @@ export async function toggleTagArchive(id: string): Promise<TagWithStats> {
 		// Notificar actualización
 		await notifyTagChange('update', tagWithStats);
 
-		logger.info(`✅ Estado de archivo cambiado: ${id} -> ${tagWithStats.isPublic}`);
+		logger.info(`✅ Estado favorito cambiado: ${id} -> ${tagWithStats.isFavorite}`);
 		return tagWithStats;
 	} catch (error) {
 		logger.error(`❌ Error al cambiar estado de archivo de la etiqueta ${id}`, { error });

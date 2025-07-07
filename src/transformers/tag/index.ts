@@ -8,4 +8,4 @@
  */
 
 export { toTagWithStats } from './mappers';
-export { type TagComplete, transformTag } from './transformer';
+export { type TagComplete } from '@/types/entities/tag';

@@ -11,6 +11,12 @@ export {
 	toFileWithStats,
 	toFileWithStatsList,
 } from './mappers';
+// --- Filtros ---
+export {
+	applyFileFilters,
+	applySortToFiles,
+	applyFileFiltersAndSort,
+} from './filters';
 // --- Schema de Drizzle ---
 export {
 	type FileInsert,

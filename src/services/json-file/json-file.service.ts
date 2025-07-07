@@ -80,7 +80,7 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 			.from(jsonFiles)
 			.orderBy(asc(jsonFiles.name));
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile) => ({
 			...rawJsonFile,
 			isFavorite: Boolean(rawJsonFile.isFavorite),
@@ -136,7 +136,7 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 
 		const rawJsonFile = drizzleJsonFile[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedJsonFile = {
 			...rawJsonFile,
 			isFavorite: Boolean(rawJsonFile.isFavorite),

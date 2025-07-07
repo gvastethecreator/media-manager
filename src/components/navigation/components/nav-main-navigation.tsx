@@ -4,6 +4,8 @@ import {
 	Bookmark,
 	Box,
 	Brackets,
+	ChevronDown,
+	ChevronRight,
 	FileStack,
 	Files,
 	FileText,
@@ -21,13 +23,11 @@ import {
 	Video,
 	Workflow,
 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback, useMemo } from 'react';
-import type { NavigationItem } from '@/components/navigation/navigation.store';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { ViewType } from '@/types/files';
+import { ViewType } from '@/components/views/types';
+import { useCategoryStats } from '../hooks/use-category-stats';
+import { NavCategoryChildren } from './nav-category-children';
 
 interface NavMainNavigationProps {
 	currentView: string;
@@ -35,163 +35,28 @@ interface NavMainNavigationProps {
 	isCollapsed?: boolean;
 }
 
-// Componente memoizado para el botón de navegación individual
-const NavButton = memo(function NavButton({
-	id,
-	icon: Icon,
-	label,
-	description,
-	isActive,
-	isCollapsed,
-	index,
-	onNavigate,
-}: NavigationItem & {
-	isActive: boolean;
-	isCollapsed?: boolean;
-	index: number;
-	onNavigate: (id: ViewType) => void;
-	icon: React.ElementType; // Añadir la propiedad icon aquí
-}) {
-	// Memoizamos la configuración de animación para evitar recreaciones de objetos
-	const initialConfig = useMemo(
-		() => ({
-			opacity: 0,
-			scale: 0.95,
-		}),
-		[]
-	);
-
-	const animateConfig = useMemo(
-		() => ({
-			opacity: 1,
-			scale: 1,
-		}),
-		[]
-	);
-
-	const transitionConfig = useMemo(
-		() => ({
-			delay: index * 0.05,
-			duration: 0.3,
-			type: 'spring',
-			stiffness: 200,
-			damping: 15,
-		}),
-		[index]
-	);
-
-	const highlightTransitionConfig = useMemo(
-		() => ({
-			type: 'spring',
-			bounce: 0.2,
-			duration: 0.4,
-		}),
-		[]
-	);
-
-	// Creamos un callback estable para el handler de click
-	const handleClick = useCallback(() => {
-		onNavigate(id);
-	}, [id, onNavigate]);
-
-	// Memoizamos las clases para evitar recreaciones
-	const containerClasses = useMemo(() => cn('flex-1', isCollapsed && 'w-full'), [isCollapsed]);
-
-	const buttonClasses = useMemo(
-		() =>
-			cn(
-				'relative h-8 p-1 transition-all duration-200 rounded-sm cursor-pointer border-2 border-primary/10',
-				'flex items-center justify-center',
-				isCollapsed ? 'w-full' : 'w-full',
-				isActive
-					? 'bg-secondary/70 text-foreground'
-					: 'hover:bg-secondary/30 text-muted-foreground hover:text-foreground'
-			),
-		[isActive, isCollapsed]
-	);
-
-	const dotClasses = useMemo(
-		() =>
-			cn(
-				'absolute w-1 h-1 rounded-full bg-primary',
-				isCollapsed
-					? '-right-[0.5px] top-1/2 transform -translate-y-1/2'
-					: '-bottom-[0.5px] left-1/2 transform -translate-x-1/2'
-			),
-		[isCollapsed]
-	);
-
-	const iconClasses = useMemo(
-		() =>
-			cn(
-				'h-3.5 w-3.5 transition-colors',
-				isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-			),
-		[isActive]
-	);
-
-	return (
-		<TooltipProvider delayDuration={isCollapsed ? 200 : 1000}>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<motion.div
-						initial={initialConfig}
-						animate={animateConfig}
-						transition={transitionConfig}
-						className={containerClasses}
-					>
-						<Button variant="outline" className={buttonClasses} onClick={handleClick}>
-							{/* Highlight indicator */}
-							{isActive && (
-								<motion.div
-									layoutId="nav-highlight"
-									className="absolute inset-0 rounded-sm bg-primary/5 ring-1 ring-primary/10 z-0"
-									transition={highlightTransitionConfig}
-								/>
-							)}
-
-							{/* Indicator dot */}
-							{isActive && (
-								<motion.div
-									layoutId="nav-dot"
-									className={dotClasses}
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ delay: 0.05 }}
-								/>
-							)}
-
-							{/* Content */}
-							<motion.div
-								className="flex items-center justify-center space-x-1.5 z-10"
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-							>
-								<Icon className={iconClasses} />
-							</motion.div>
-						</Button>
-					</motion.div>
-				</TooltipTrigger>
-				<TooltipContent side={isCollapsed ? 'right' : 'bottom'} className="text-xs p-2">
-					<p className="font-medium text-amber-400">{label}</p>
-					<p>{description}</p>
-					{id === 'all-images' && (
-						<p className="text-[10px] text-zinc-400 mt-1.5">
-							Acceso rápido con <span className="px-1 py-0.5 bg-zinc-800 rounded text-[9px]">Ctrl+G</span>
-						</p>
-					)}
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
-	);
-});
-
 export const NavMainNavigation = memo(function NavMainNavigation({
 	currentView,
 	onNavigate,
 	isCollapsed = false,
 }: NavMainNavigationProps) {
-	// Nueva estructura file-centric
+	const { stats, getCategoryItemCount, getCategoryItems } = useCategoryStats();
+	const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+	// Toggle función para expandir/contraer categorías
+	const toggleCategory = useCallback((categoryId: string) => {
+		setExpandedCategories(prev => {
+			const newSet = new Set(prev);
+			if (newSet.has(categoryId)) {
+				newSet.delete(categoryId);
+			} else {
+				newSet.add(categoryId);
+			}
+			return newSet;
+		});
+	}, []);
+
+	// Nueva estructura file-centric con contadores
 	const NAVIGATION_CATEGORIES = [
 		{
 			id: 'files',
@@ -199,14 +64,14 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			color: '#3B82F6',
 			icon: Files,
 			children: [
-				{ id: 'all-files', label: 'Todos los archivos', icon: FileStack },
-				{ id: 'images', label: 'Imágenes', icon: ImageIcon },
-				{ id: 'videos', label: 'Videos', icon: Video },
-				{ id: 'audio', label: 'Audio', icon: Music },
-				{ id: 'docs', label: 'Documentos', icon: FileText },
-				{ id: 'json', label: 'JSON', icon: Brackets },
-				{ id: 'workflows', label: 'Workflows', icon: Workflow },
-				{ id: 'file3d', label: '3D', icon: Box },
+				{ id: 'files', label: 'Todos los archivos', icon: FileStack, count: stats.totalImages || 0 },
+				{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0 },
+				{ id: 'videos', label: 'Videos', icon: Video, count: getCategoryItemCount('videos') },
+				{ id: 'audios', label: 'Audio', icon: Music, count: getCategoryItemCount('audios') },
+				{ id: 'documents', label: 'Documentos', icon: FileText, count: getCategoryItemCount('documents') },
+				{ id: 'json-files', label: 'JSON', icon: Brackets, count: getCategoryItemCount('jsonFiles') },
+				{ id: 'workflows', label: 'Workflows', icon: Workflow, count: getCategoryItemCount('workflows') },
+				{ id: 'file-3ds', label: '3D', icon: Box, count: getCategoryItemCount('file3ds') },
 			],
 		},
 		{
@@ -215,12 +80,12 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			color: '#A21CAF',
 			icon: Layers,
 			children: [
-				{ id: 'favorites', label: 'Favoritos', icon: Star },
-				{ id: 'albums', label: 'Álbumes', icon: Album },
-				{ id: 'groups', label: 'Grupos', icon: Users },
-				{ id: 'tags', label: 'Etiquetas', icon: Tag },
-				{ id: 'collections', label: 'Colecciones', icon: Bookmark },
-				{ id: 'prompts', label: 'Prompts', icon: MessageSquare },
+				{ id: 'favorites', label: 'Favoritos', icon: Star, count: stats.totalFavorites || 0 },
+				{ id: 'albums', label: 'Álbumes', icon: Album, count: stats.totalAlbums || 0 },
+				{ id: 'groups', label: 'Grupos', icon: Users, count: getCategoryItemCount('groups') },
+				{ id: 'tags', label: 'Etiquetas', icon: Tag, count: stats.totalTags || 0, hasChildren: true },
+				{ id: 'collections', label: 'Colecciones', icon: Bookmark, count: stats.totalCollections || 0, hasChildren: true },
+				{ id: 'prompts', label: 'Prompts', icon: MessageSquare, count: getCategoryItemCount('prompts'), hasChildren: true },
 			],
 		},
 		{
@@ -229,11 +94,11 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			color: '#059669',
 			icon: Globe,
 			children: [
-				{ id: 'characters', label: 'Personajes', icon: User },
-				{ id: 'places', label: 'Lugares', icon: MapPin },
-				{ id: 'world-items', label: 'Objetos del mundo', icon: Box },
-				{ id: 'concepts', label: 'Conceptos', icon: Lightbulb },
-				{ id: 'wildcards', label: 'Comodines', icon: Asterisk },
+				{ id: 'characters', label: 'Personajes', icon: User, count: stats.totalCharacters || 0, hasChildren: true },
+				{ id: 'places', label: 'Lugares', icon: MapPin, count: stats.totalPlaces || 0, hasChildren: true },
+				{ id: 'world-items', label: 'Objetos del mundo', icon: Box, count: stats.totalWorldItems || 0, hasChildren: true },
+				{ id: 'concepts', label: 'Conceptos', icon: Lightbulb, count: getCategoryItemCount('concepts'), hasChildren: true },
+				{ id: 'wildcards', label: 'Comodines', icon: Asterisk, count: getCategoryItemCount('wildcards'), hasChildren: true },
 			],
 		},
 	];
@@ -241,6 +106,11 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 	const containerClasses = useMemo(() => cn('pb-1 pt-1', isCollapsed ? 'px-1' : 'px-2'), [isCollapsed]);
 	const innerContainerClasses = useMemo(() => cn('rounded-md p-0.5 shadow-sm', isCollapsed && 'p-0.5'), [isCollapsed]);
 	const flexContainerClasses = useMemo(() => cn('flex flex-col gap-1'), []);
+
+	const handleChildClick = useCallback((childId: string) => {
+		// Implementar lógica para navegar a item hijo
+		console.log('Navegando a item hijo:', childId);
+	}, []);
 
 	return (
 		<div className={containerClasses}>
@@ -256,30 +126,57 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 							</div>
 							<div className="flex flex-col gap-0.5">
 								{category.children.map((child, _idx) => (
-									<Button
-										key={child.id}
-										variant={currentView === child.id ? 'secondary' : 'ghost'}
-										className={cn(
-											'justify-between w-full text-xs px-2 py-0.5 rounded flex items-center',
-											currentView === child.id && 'font-bold'
+									<div key={child.id} className="flex flex-col">
+										<div
+											className={cn(
+												'justify-between w-full text-xs px-2 py-0.5 rounded flex items-center',
+												'hover:bg-secondary/50 transition-colors',
+												currentView === child.id && 'bg-secondary font-bold'
+											)}
+										>
+											<div
+												className="flex items-center flex-1 cursor-pointer"
+												onClick={() => onNavigate(child.id as ViewType)}
+											>
+												<child.icon className="h-3 w-3 mr-2" />
+												{child.label}
+											</div>
+											<div className="flex items-center gap-1">
+												{child.count !== undefined && (
+													<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
+														{child.count}
+													</span>
+												)}
+												{child.hasChildren && (
+													<button
+														className="h-4 w-4 p-0 hover:bg-secondary/50 rounded flex items-center justify-center"
+														onClick={(e) => {
+															e.stopPropagation();
+															toggleCategory(child.id);
+														}}
+													>
+														{expandedCategories.has(child.id) ? (
+															<ChevronDown className="h-3 w-3" />
+														) : (
+															<ChevronRight className="h-3 w-3" />
+														)}
+													</button>
+												)}
+											</div>
+										</div>
+										{child.hasChildren && expandedCategories.has(child.id) && (
+											<div className="ml-4 mt-1 border-l border-border/50 pl-2">
+												<NavCategoryChildren
+													categoryId={child.id}
+													isCollapsed={isCollapsed}
+													selectedChildId={null}
+													currentView={currentView}
+													items={getCategoryItems(child.id as any)}
+													onItemClick={handleChildClick}
+												/>
+											</div>
 										)}
-										onClick={() => onNavigate(child.id as ViewType)}
-									>
-										<span className="flex items-center">
-											<child.icon className="h-3 w-3 mr-2" />
-											{child.label}
-										</span>
-										{child.itemCount !== undefined && (
-											<span className="ml-2 text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
-												{child.itemCount}
-											</span>
-										)}
-										{child.count !== undefined && (
-											<span className="ml-2 text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
-												{child.count}
-											</span>
-										)}
-									</Button>
+									</div>
 								))}
 							</div>
 						</div>

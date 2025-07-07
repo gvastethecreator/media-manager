@@ -80,7 +80,7 @@ export async function getDocuments(): Promise<DocumentWithStats[]> {
 			.from(documents)
 			.orderBy(asc(documents.name));
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedDocuments = drizzleDocuments.map((rawDocument) => ({
 			...rawDocument,
 			isFavorite: Boolean(rawDocument.isFavorite),
@@ -136,7 +136,7 @@ export async function getDocumentById(id: string): Promise<DocumentWithStats | n
 
 		const rawDocument = drizzleDocument[0];
 
-		// Transformar a formato compatible con Prisma
+		// Transformar a formato compatible con transformadores legacy
 		const transformedDocument = {
 			...rawDocument,
 			isFavorite: Boolean(rawDocument.isFavorite),
