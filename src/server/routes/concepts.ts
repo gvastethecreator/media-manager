@@ -151,22 +151,22 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET /concepts/:id/stats - Obtener estadísticas de un concepto (métodos de escritura pendientes)
-router.get('/:id/stats', async (req, res) => {
+router.get('/:id/stats', async (_req, res) => {
 	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
 // POST /concepts - Crear nuevo concepto (métodos de escritura pendientes)
-router.post('/', async (req, res) => {
+router.post('/', async (_req, res) => {
 	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
 // PUT /concepts/:id - Actualizar concepto (métodos de escritura pendientes)
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (_req, res) => {
 	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
 // DELETE /concepts/:id - Eliminar concepto (métodos de escritura pendientes)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (_req, res) => {
 	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 

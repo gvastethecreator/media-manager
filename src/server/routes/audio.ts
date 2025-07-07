@@ -1,18 +1,11 @@
 import { Router } from 'express';
-import {
-	createAudio,
-	deleteAudio,
-	getAudioById,
-	getAudioCount,
-	getAudios,
-	updateAudio,
-} from '@/services/audio/audio.service';
+import { createAudio, deleteAudio, getAudioById, getAudios, updateAudio } from '@/services/audio/audio.service';
 
 // GET /api/audio
 const router = Router();
 
 // GET /api/audio
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
 	try {
 		const audios = await getAudios();
 		res.json(audios);
@@ -94,7 +87,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/audio/stats/formats
-router.get('/stats/formats', async (req, res) => {
+router.get('/stats/formats', async (_req, res) => {
 	try {
 		const formatStats = await getAudioFormatStats();
 		res.json({
@@ -110,7 +103,7 @@ router.get('/stats/formats', async (req, res) => {
 });
 
 // GET /api/audio/stats/genres
-router.get('/stats/genres', async (req, res) => {
+router.get('/stats/genres', async (_req, res) => {
 	try {
 		const genreStats = await getAudioGenreStats();
 		res.json({

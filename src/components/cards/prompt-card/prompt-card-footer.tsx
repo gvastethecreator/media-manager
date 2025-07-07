@@ -24,7 +24,6 @@ export function PromptCardFooter({
 	videosCount,
 	tagsCount,
 	primaryColor,
-	secondaryColor,
 	tcgMode = true,
 }: PromptCardFooterProps) {
 	const formattedDate = format(new Date(updatedAt), 'dd/MM/yyyy', { locale: es });

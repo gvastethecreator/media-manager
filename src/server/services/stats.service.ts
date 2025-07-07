@@ -1,17 +1,6 @@
-import { asc, desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import {
-	activities,
-	albums,
-	characters,
-	collections,
-	folders,
-	imageStats,
-	images,
-	places,
-	tags,
-	worldItems,
-} from '@/lib/drizzle/schema';
+import { activities, imageStats } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { revalidatePath } from '@/lib/server/revalidate';

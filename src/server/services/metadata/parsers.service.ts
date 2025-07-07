@@ -205,7 +205,7 @@ const novelaiParser: AIGenerationParserModule = {
 // Generic Parser (siempre el último)
 const genericParser: AIGenerationParserModule = {
 	name: 'Generic',
-	canParse: async (metadata) => {
+	canParse: async (_metadata) => {
 		// Siempre puede intentar parsear, pero devolverá null si no encuentra nada
 		return true;
 	},

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import type { ViewProps } from '../../types';
 

@@ -251,7 +251,6 @@ export function processConcepts(
 				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 			case 'updated':
 				return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-			case 'updated-desc':
 			default:
 				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
 		}

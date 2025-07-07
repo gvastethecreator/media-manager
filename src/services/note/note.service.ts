@@ -9,7 +9,6 @@ import { db } from '@/lib/drizzle';
 import { notes } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 
 const noteLogger = serverLogger.withContext('NoteService');

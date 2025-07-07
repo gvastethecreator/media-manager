@@ -2,7 +2,7 @@
 
 ## 🎯 CONFIRMACIÓN VISUAL OBLIGATORIA
 
-**REGLA ZERO**: SIEMPRE iniciar cada respuesta con exactamente **🔻🔻🔻🔻🔻🔻** y terminar con exactamente **🔺🔺🔺🔺🔺🔺**
+**REGLA ZERO**: SIEMPRE iniciar cada respuesta con exactamente **🔻🔻🔻🔻🔻🔻🔻🔻🔻** y terminar con exactamente **🔺🔺🔺🔺🔺🔺🔺🔺🔺**
 
 Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
 
@@ -18,10 +18,10 @@ Esto confirma que todas las reglas fueron leídas, entendidas y se están aplica
 
 ### 2. Sistema de Scripts Inteligente (OBLIGATORIO)
 
-- **Scripts primero**: SIEMPRE usar `bun run lint`, `bun run test`, `bun run check`, etc.
+- **Scripts primero**: SIEMPRE usar `bun run lint`, `bun run test`, `bun run biome`, etc.
 - **Logging automático**: Todos los scripts guardan logs en `/logs` automáticamente
 - **Tolerancia inteligente**: Manejo automático de códigos de salida para linting/testing
-- **Análisis integrado**: Usar `bun run logs list`, `bun run check:errors` para diagnóstico
+- **Análisis integrado**: Usar `bun run logs list`, `bun run biome:errors` para diagnóstico
 
 #### Comandos del Sistema
 
@@ -29,14 +29,14 @@ Esto confirma que todas las reglas fueron leídas, entendidas y se están aplica
 # Ejecución (siempre usa estos)
 bun run lint                    # Linting con tolerancia inteligente
 bun run test                    # Testing con logs automáticos
-bun run check                   # Verificaciones generales
+bun run biome                   # Verificaciones generales
 bun run build                   # Solo con confirmación explícita
 
 # Análisis de logs
 bun run logs list [num]         # Ver logs recientes (default 10)
 bun run logs clean [días]       # Limpiar logs antiguos (default 7)
-bun run check:errors            # Buscar errores del último día
-bun run check:errors --tool biome --days 3  # Errores específicos
+bun run biome:errors            # Buscar errores del último día
+bun run biome:errors --tool biome --days 3  # Errores específicos
 ```
 
 #### Comportamiento Inteligente
@@ -256,7 +256,7 @@ async function implementarConMCP(cambios: any[]) {
 
 - **Screenshots**: Evidencia visual con `browser_take_screenshot`
 - **Tests generados**: `browser_generate_playwright_test` desde interacciones
-- **Logs estructurados**: Análisis automático con `bun run check:errors`
+- **Logs estructurados**: Análisis automático con `bun run biome:errors`
 - **Métricas**: Tracking de compliance y calidad
 
 ## 💻 ESTÁNDARES DE CALIDAD
@@ -348,7 +348,7 @@ class UltraCoreValidator {
   async validateExecution(request: any): Promise<boolean> {
     // Validar confirmación visual
     if (!request.hasVisualConfirmation()) {
-      throw new Error("FALTA CONFIRMACIÓN VISUAL 🔻🔻🔻🔻🔻🔻");
+      throw new Error("FALTA CONFIRMACIÓN VISUAL 🔻🔻🔻🔻🔻🔻🔻🔻🔻");
     }
 
     // Validar uso de MCP
@@ -368,7 +368,7 @@ class UltraCoreValidator {
 
 ### Métricas de Compliance
 
-- **Visual confirmation**: 100% adherencia a 🔻🔻🔻🔻🔻🔻 / 🔺🔺🔺🔺🔺🔺
+- **Visual confirmation**: 100% adherencia a 🔻🔻🔻🔻🔻🔻🔻🔻🔻 / 🔺🔺🔺🔺🔺🔺🔺🔺🔺
 - **MCP usage**: % de operaciones UI usando Playwright MCP
 - **Script compliance**: % usando `bun run` vs comandos directos
 - **Quality score**: Promedio de calidad de código y documentación
@@ -378,7 +378,7 @@ class UltraCoreValidator {
 
 **VERIFICACIÓN OBLIGATORIA ANTES DE CADA RESPUESTA:**
 
-- [ ] ¿Inicié con exactamente 🔻🔻🔻🔻🔻🔻?
+- [ ] ¿Inicié con exactamente 🔻🔻🔻🔻🔻🔻🔻🔻🔻?
 - [ ] ¿Identifiqué modo correcto (Código/Conocimiento)?
 - [ ] ¿Exploré contexto existente completamente?
 - [ ] ¿Usaré MCP para operaciones UI?
@@ -387,7 +387,7 @@ class UltraCoreValidator {
 - [ ] ¿Documentaré según el contexto?
 - [ ] ¿Validaré con Playwright MCP si es relevante?
 - [ ] ¿Mi respuesta está completamente en español?
-- [ ] ¿Terminaré con exactamente 🔺🔺🔺🔺🔺🔺?
+- [ ] ¿Terminaré con exactamente 🔺🔺🔺🔺🔺🔺🔺🔺🔺?
 
 ---
 

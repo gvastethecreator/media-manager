@@ -4,7 +4,7 @@
  * @description Este archivo contiene tipos auxiliares para la entidad Property.
  */
 
-import type { PropertyBase, PropertyStatistics, PropertyWithStats } from './base';
+import type { PropertyBase, PropertyStatistics } from './base';
 
 // Tipos legacy - usar PropertyWithStats en su lugar
 export interface PropertyComplete extends PropertyBase {

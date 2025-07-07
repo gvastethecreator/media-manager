@@ -10,7 +10,6 @@ import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type { PropertyCreateInput, PropertyUpdateInput, PropertyWithStats } from '@/types/entities/property';
 
@@ -196,7 +195,6 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 					return direction(properties.createdAt);
 				case 'updatedAt':
 					return direction(properties.updatedAt);
-				case 'name':
 				default:
 					// Para name, primero favoritos luego por nombre
 					return orderDirection === 'desc'

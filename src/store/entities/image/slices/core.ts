@@ -9,7 +9,7 @@ import type { StateCreator } from 'zustand';
 import * as ImageApi from '@/lib/api/client/image.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
+import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
 import type { ImageState } from '../types';
 
 const imageLogger = clientLogger.withContext('ImageStore');
@@ -134,7 +134,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		try {
 			if (options.refresh) get().clearImages();
 			const result = await ImageApi.getImagesFromApi(options);
-			const validImages = result.images.filter((img) => img && img.id);
+			const validImages = result.images.filter((img) => img?.id);
 			get().addImages(validImages);
 			return validImages;
 		} catch (e: unknown) {

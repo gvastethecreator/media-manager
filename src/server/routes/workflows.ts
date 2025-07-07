@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import {
 	createWorkflow,
 	deleteWorkflow,
@@ -11,7 +10,7 @@ import {
 const router = Router();
 
 // GET /api/workflows - Obtener todos los workflows
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
 	try {
 		const workflows = await getWorkflows();
 		res.json(workflows);

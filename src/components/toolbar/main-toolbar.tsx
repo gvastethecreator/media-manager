@@ -37,8 +37,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/lib/ui/toast';
-import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
 import { cn } from '@/lib/utils';
+import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
@@ -118,7 +118,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		}
 	}, [selectedIds, clearSelection]);
 
-	const handleDownloadSelected = useCallback(async () =>{
+	const handleDownloadSelected = useCallback(async () => {
 		if (selectedIds.length === 0) {
 			return;
 		}

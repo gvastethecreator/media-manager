@@ -197,23 +197,23 @@ router.get('/:id/card-data', async (req, res) => {
 });
 
 // MÉTODOS DE ESCRITURA - PENDIENTES DE MIGRACIÓN (Status 501)
-router.post('/', async (req, res) => {
+router.post('/', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
-router.post('/:id/images/:imageId', async (req, res) => {
+router.post('/:id/images/:imageId', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
-router.delete('/:id/images/:imageId', async (req, res) => {
+router.delete('/:id/images/:imageId', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 

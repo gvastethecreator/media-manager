@@ -46,6 +46,6 @@ export interface UpdateGroupInput {
 export interface GroupFilters {
 	search?: string;
 	hasImages?: boolean;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount' | 'emoji' | 'color' | 'isFavorite' | 'shortcut' | 'category' | 'filters' | 'featuredImage';
 	sortOrder?: 'asc' | 'desc';
 }

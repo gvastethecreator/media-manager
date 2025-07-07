@@ -65,13 +65,13 @@ export function AlbumsSettings() {
 	);
 
 	// Manejar creación exitosa
-	const handleAlbumCreated = useCallback((newAlbum: AlbumWithStats) => {
+	const handleAlbumCreated = useCallback((_newAlbum: AlbumWithStats) => {
 		// React Query actualizará automáticamente la cache
 		toastService.success('Álbum creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleAlbumUpdated = useCallback((updatedAlbum: AlbumWithStats) => {
+	const handleAlbumUpdated = useCallback((_updatedAlbum: AlbumWithStats) => {
 		// React Query actualizará automáticamente la cache
 		toastService.success('Álbum actualizado');
 	}, []);

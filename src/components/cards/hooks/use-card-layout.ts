@@ -4,7 +4,7 @@
  * @description Proporciona clases CSS y estilos basados en la configuración de layout
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { BaseCardProps, CardLayoutConfig } from '../types/card-layout.types';
 import { resolveLayoutConfig } from '../types/card-layout.types';

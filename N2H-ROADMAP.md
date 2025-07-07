@@ -74,6 +74,10 @@ Canvas navegable con visualización tipo mindmap que permita explorar conexiones
 
 ---
 
+### BROWSER DE ENTIDADES
+
+Sería un sistema similar al file browser pero especificamente por entidades, las entidades pueden tener sus propias vistas que serán customizadas segun el tipo de entidad y la información que contengan, podremos customizarlas y tendran utilidades especificas para trabajar con ellas, como por ejemplo : en los personajes podremos copiar y pegar partes de sus datos o algunos botones que nos generaran prompts para casos especificos de esa entidad en particular, estadisticas, lore, etc.
+
 ### 2. Integración con IA para Generación de Contenido
 
 **🤖 [HIGH] [HEAVY] - Motor de IA Integrado**

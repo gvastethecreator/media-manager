@@ -111,12 +111,12 @@ export function CollectionsSettings() {
 	}, []);
 
 	// Manejar creación exitosa
-	const handleCollectionCreated = useCallback((newCollection: CollectionWithStats) => {
+	const handleCollectionCreated = useCallback((_newCollection: CollectionWithStats) => {
 		toastService.success('Colección creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleCollectionUpdated = useCallback((updatedCollection: CollectionWithStats) => {
+	const handleCollectionUpdated = useCallback((_updatedCollection: CollectionWithStats) => {
 		toastService.success('Colección actualizada');
 	}, []);
 

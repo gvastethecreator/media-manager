@@ -20,7 +20,6 @@ export function FolderCardHeader({
 	name,
 	emoji = '📁',
 	primaryColor,
-	secondaryColor,
 	path,
 	tcgMode = true,
 	isFavorite = false,

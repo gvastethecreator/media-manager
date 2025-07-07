@@ -7,7 +7,6 @@ import { normalizeQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
 import { folders, images } from '@/lib/drizzle/schema';
 import { imageService } from '@/services/image/image.service';
-import { thumbnailService } from '@/services/thumbnail/thumbnail.service';
 import { processImage } from '../services/image-processing.service';
 
 const router = Router();
@@ -349,27 +348,27 @@ router.get('/signed/:token', async (req, res) => {
 });
 
 // POST /api/images - Crear nueva imagen
-router.post('/', async (req, res) => {
+router.post('/', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // PUT /api/images/:id - Actualizar imagen
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // DELETE /api/images/:id - Eliminar imagen
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // POST /api/images/:id/relations/:entityType/:entityId - Agregar relación
-router.post('/:id/relations/:entityType/:entityId', async (req, res) => {
+router.post('/:id/relations/:entityType/:entityId', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 
 // DELETE /api/images/:id/relations/:entityType/:entityId - Eliminar relación
-router.delete('/:id/relations/:entityType/:entityId', async (req, res) => {
+router.delete('/:id/relations/:entityType/:entityId', async (_req, res) => {
 	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
 });
 

@@ -6,56 +6,53 @@
 
 import type { AlbumWithStats } from '../album';
 import type { CollectionWithStats } from '../collection';
-import type { ConceptComplete } from '../concept';
+import type { ConceptWithStats } from '../concept';
 import type { GroupWithStats } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
-import type { PlaceComplete } from '../place';
-import type { PromptComplete } from '../prompt';
-import type { PropertyComplete } from '../property';
+import type { ImageWithStats } from '../image';
+import type { NoteWithStats } from '../note';
+import type { PlaceWithStats } from '../place';
+import type { PromptWithStats } from '../prompt';
+import type { PropertyWithStats } from '../property';
 import type { TagWithStats } from '../tag';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { VideoWithStats } from '../video';
+import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemWithStats } from '../world-item';
+import type { EntityBase } from '../entity.types';
 
 /**
  * 🧑‍🎤 Tipo base para un personaje.
  * Contiene todos los campos primitivos y datos serializados en JSON.
  */
-export interface CharacterBase {
-	id: string;
+export interface CharacterBase extends EntityBase {
 	name: string;
 	description: string | null;
-	emoji: string;
-	color: string;
+	emoji: string | null;
+	color: string | null;
 	shortcut: string | null;
 	category: string | null;
-	level: number;
-	class: string;
-	race: string;
+	level: number | null;
+	class: string | null;
+	race: string | null;
 	type: string | null;
-	alignment: string;
-	backstory: string;
+	alignment: string | null;
+	backstory: string | null;
 	// Campos JSON serializados como strings
-	stats: string;
-	psychologicalProfile: string;
-	socialProfile: string;
-	relationships: string;
-	goals: string;
-	fears: string;
-	beliefs: string;
-	personality: string;
-	skills: string;
-	abilities: string;
+	stats: string | null;
+	psychologicalProfile: string | null;
+	socialProfile: string | null;
+	relationships: string | null;
+	goals: string | null;
+	fears: string | null;
+	beliefs: string | null;
+	personality: string | null;
+	skills: string | null;
+	abilities: string | null;
 	// Configuración
-	sortBy: string;
-	filters: string;
+	sortBy: string | null;
+	filters: string | null;
 	// Propiedades de visualización
 	featuredImage: string | null;
 	isFavorite: boolean;
-	// Timestamps
-	createdAt: Date;
-	updatedAt: Date;
 }
 
 /**
@@ -76,7 +73,7 @@ export interface CharacterWithStats extends CharacterBase {
 		concepts?: number;
 		prompts?: number;
 		notes?: number;
-		wildcards?: number;
+	wildcards?: number;
 		relatedCharacters?: number;
 		relatedTo?: number;
 	};
@@ -96,54 +93,33 @@ export interface CharacterWithStats extends CharacterBase {
 		totalWildcards: number;
 		totalRelatedCharacters: number;
 		totalRelatedTo: number;
-		totalAssociations: number;
+	totalAssociations: number;
 		lastUpdated: Date;
 		powerLevel: number;
 		rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 	};
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	tags?: TagWithStats[];
+	groups?: GroupWithStats[];
+	properties?: PropertyWithStats[];
+	collections?: CollectionWithStats[];
+	albums?: AlbumWithStats[];
+	places?: PlaceWithStats[];
+	worldItems?: WorldItemWithStats[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptWithStats[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
+	relatedCharacters?: CharacterBase[];
+	relatedTo?: CharacterBase[];
 }
 
 /**
  * 🧑‍🎤 Input para crear un nuevo personaje.
  * Las relaciones se especifican mediante arrays de IDs.
  */
-export interface CharacterCreateInput {
-	// Campos requeridos
-	name: string;
-	emoji: string;
-	color: string;
-	level: number;
-	class: string;
-	race: string;
-	alignment: string;
-	backstory: string;
-	stats: string;
-	psychologicalProfile: string;
-	socialProfile: string;
-	relationships: string;
-	goals: string;
-	fears: string;
-	beliefs: string;
-	personality: string;
-	skills: string;
-	abilities: string;
-	sortBy: string;
-	filters: string;
-
-	// Campos opcionales
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	type?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-
-	// IDs de relaciones
-	imageIds?: string[];
-	tagIds?: string[];
-	groupIds?: string[];
-	propertyIds?: string[];
-}
+export interface CharacterCreateInput extends Omit<CharacterBase, 'id' | 'createdAt' | 'updatedAt'> {}
 
 /**
  * 🧑‍🎤 Input para actualizar un personaje existente.
@@ -151,153 +127,9 @@ export interface CharacterCreateInput {
  */
 export interface CharacterUpdateInput extends Partial<CharacterCreateInput> {}
 
-/**
- * 🧑‍🎤 Relaciones de un personaje con otras entidades.
- * Solo se usa cuando se necesitan las relaciones completas.
- */
-export interface CharacterRelations {
-	images?: ImageComplete[];
-	videos?: VideoComplete[];
-	tags?: TagWithStats[];
-	groups?: GroupWithStats[];
-	properties?: PropertyComplete[];
-	collections?: CollectionWithStats[];
-	albums?: AlbumWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	relatedCharacters?: CharacterBase[];
-	relatedTo?: CharacterBase[];
-}
-
-/**
- * 🧑‍🎤 Tipo completo de un personaje con relaciones completas.
- * ⚠️ Solo usar cuando sea absolutamente necesario cargar todas las relaciones.
- */
-export interface CharacterComplete extends CharacterBase, CharacterRelations {
-	_count?: {
-		images?: number;
-		videos?: number;
-		tags?: number;
-		groups?: number;
-		properties?: number;
-		collections?: number;
-		albums?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		relatedCharacters?: number;
-		relatedTo?: number;
-	};
-}
-
 // Aliases para compatibilidad y migración gradual
 export type CreateCharacterData = CharacterCreateInput;
 export type UpdateCharacterData = CharacterUpdateInput;
-
-/**
- * 🧑‍🎤 Opciones de ordenamiento para personajes.
- */
-export type CharacterSortOption =
-	| 'name_asc'
-	| 'name_desc'
-	| 'created_asc'
-	| 'created_desc'
-	| 'updated_asc'
-	| 'updated_desc'
-	| 'level_asc'
-	| 'level_desc'
-	| 'category_asc'
-	| 'category_desc';
-
-/**
- * 🧑‍🎤 Tipos de alineamiento para personajes.
- */
-export type CharacterAlignment =
-	| 'lawful_good'
-	| 'neutral_good'
-	| 'chaotic_good'
-	| 'lawful_neutral'
-	| 'true_neutral'
-	| 'chaotic_neutral'
-	| 'lawful_evil'
-	| 'neutral_evil'
-	| 'chaotic_evil';
-
-/**
- * 🧑‍🎤 Tipos de categoría para personajes.
- */
-export type CharacterCategory =
-	| 'hero'
-	| 'villain'
-	| 'neutral'
-	| 'ally'
-	| 'enemy'
-	| 'npc'
-	| 'main'
-	| 'secondary'
-	| 'background';
-
-/**
- * 🧑‍🎤 Tipos de clase para personajes.
- */
-export type CharacterClass =
-	| 'warrior'
-	| 'mage'
-	| 'rogue'
-	| 'cleric'
-	| 'ranger'
-	| 'paladin'
-	| 'barbarian'
-	| 'bard'
-	| 'druid'
-	| 'monk'
-	| 'sorcerer'
-	| 'warlock'
-	| 'wizard'
-	| 'artificer'
-	| 'other';
-
-/**
- * 🧑‍🎤 Tipos de raza para personajes.
- */
-export type CharacterRace =
-	| 'human'
-	| 'elf'
-	| 'dwarf'
-	| 'halfling'
-	| 'dragonborn'
-	| 'gnome'
-	| 'half_elf'
-	| 'half_orc'
-	| 'tiefling'
-	| 'orc'
-	| 'goblin'
-	| 'kobold'
-	| 'other';
-
-/**
- * 🧑‍🎤 Estructura de un filtro para personajes.
- */
-export interface CharacterFilter {
-	field: string;
-	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'notIn';
-	value: unknown;
-}
-
-/**
- * 🧑‍🎤 Estructura de un filtro individual para personajes (usado en el store).
- */
-export interface CharacterFilterItem {
-	query: 'class' | 'race' | 'category' | 'alignment' | 'isFavorite' | 'level' | 'level_min' | 'level_max';
-	value: string | number | boolean;
-}
 
 /**
  * 🧑‍🎤 Filtros para buscar personajes.
@@ -365,3 +197,40 @@ export interface CharacterStats {
 	charisma?: number;
 	[key: string]: number | undefined;
 }
+
+/**
+ * ⚡ Esquema Zod para validación
+ */
+import { z } from 'zod';
+
+export const CharacterSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	description: z.string().nullable(),
+	emoji: z.string().nullable(),
+	color: z.string().nullable(),
+	shortcut: z.string().nullable(),
+	category: z.string().nullable(),
+	level: z.number().nullable(),
+	class: z.string().nullable(),
+	race: z.string().nullable(),
+	type: z.string().nullable(),
+	alignment: z.string().nullable(),
+	backstory: z.string().nullable(),
+	stats: z.string().nullable(),
+	psychologicalProfile: z.string().nullable(),
+	socialProfile: z.string().nullable(),
+	relationships: z.string().nullable(),
+	goals: z.string().nullable(),
+	fears: z.string().nullable(),
+	beliefs: z.string().nullable(),
+	personality: z.string().nullable(),
+	skills: z.string().nullable(),
+	abilities: z.string().nullable(),
+	sortBy: z.string().nullable(),
+	filters: z.string().nullable(),
+	featuredImage: z.string().nullable(),
+	isFavorite: z.boolean(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});

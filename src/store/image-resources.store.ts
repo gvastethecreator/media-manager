@@ -1,7 +1,6 @@
 // import { getThumbnail as getServerThumbnail } from '@/services/thumbnail/thumbnail.service'; // Eliminado
 import { create } from 'zustand';
 import { getImageUrl } from '@/lib/api/client/image.client';
-import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 const resourceLogger = clientLogger.withContext('ImageResources');

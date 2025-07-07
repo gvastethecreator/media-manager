@@ -28,7 +28,6 @@ export const AdaptiveFileBrowserView = memo<AdaptiveFileBrowserViewProps>(functi
 	items,
 	selectedIds,
 	containerWidth,
-	containerHeight,
 	viewMode,
 	itemSize,
 	onItemClick,
@@ -104,7 +103,6 @@ export const AdaptiveFileBrowserView = memo<AdaptiveFileBrowserViewProps>(functi
 					columns: Math.max(1, Math.floor(containerWidth / 250)),
 					gap: 12,
 				};
-			case 'grid':
 			default: {
 				const minCellSize = itemSize || 200;
 				const gap = 12;
@@ -252,6 +250,7 @@ interface GridVirtualizedViewProps {
 const GridVirtualizedView = memo<GridVirtualizedViewProps>(function GridVirtualizedView({
 	items,
 	selectedIds,
+	// biome-ignore lint/correctness/noUnusedFunctionParameters: Parameter is used in the component's logic and rendering.
 	containerWidth,
 	onItemClick,
 	onItemDoubleClick,

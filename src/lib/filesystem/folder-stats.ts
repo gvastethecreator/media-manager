@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { folders, images } from '@/lib/drizzle/schema';
+import { folders } from '@/lib/drizzle/schema';
 import { scanFolder } from './folder-scanner';
 
 /**

@@ -87,7 +87,7 @@ const relationMap: Record<string, string> = {
 	groupIds: 'groups',
 };
 
-function connectRelations(input: Partial<WorldItemCreateInput>, operation: 'connect' | 'set'): Record<string, any> {
+function connectRelations(input: Partial<WorldItemCreateInput>, _operation: 'connect' | 'set'): Record<string, any> {
 	const relations: any = {};
 	for (const key in relationMap) {
 		if (key in input && Array.isArray((input as any)[key])) {

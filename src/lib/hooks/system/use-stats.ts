@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import React from 'react';
 // Migración: se eliminan las importaciones de servicios y se usan clientes de API
 import {
 	getImageStatsFromApi,
@@ -7,7 +6,6 @@ import {
 	incrementImageDownloadInApi,
 	incrementImageViewInApi,
 } from '@/lib/api/client/stats.client';
-import type { SystemStats } from '@/lib/api/system';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { GeneralStats } from '@/types/stats';
 

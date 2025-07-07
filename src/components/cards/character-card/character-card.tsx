@@ -5,7 +5,6 @@ import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { cn } from '@/lib/utils';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CardContainer } from '../card-container';
-import { adaptCharacterWithStats, isCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';
 import { CharacterCardHeader } from './character-card-header';
@@ -48,6 +47,112 @@ export function CharacterCard({
 	const { data: recentMediaData } = useRecentCharacterMedia(characterId);
 	const [isHovered, setIsHovered] = useState(false);
 
+	const safeJsonParse = (jsonStr: string | null | undefined): any => {
+		if (!jsonStr) return {};
+		try {
+			return JSON.parse(jsonStr);
+		} catch {
+			return {};
+		}
+	};
+
+	const parsedStats = useMemo(() => safeJsonParse(character?.stats), [character?.stats]);
+	const parsedAbilities = useMemo(() => safeJsonParse(character?.abilities), [character?.abilities]);
+
+	// Preparar las imágenes para el componente de galería
+	const cardMedia = useMemo(() => {
+		return recentMediaData || [];
+	}, [recentMediaData]);
+
+	// Preparar etiquetas para el pie de la tarjeta
+	const footerTags = useMemo(() => {
+		const tags = [];
+
+		// Añadir clase y raza si están disponibles
+		if (character?.class) tags.push(character.class);
+		if (character?.race) tags.push(character.race);
+
+		// Añadir nivel si está disponible
+		if (character?.level) tags.push(`Lvl ${character.level}`);
+
+		// Añadir alineamiento si está disponible
+		if (character?.alignment) tags.push(character.alignment);
+
+		// Añadir habilidades del personaje (solo para CharacterCardData)
+		if (parsedAbilities?.length) {
+			// Solo las primeras 2 habilidades para no sobrecargar la tarjeta
+			tags.push(...parsedAbilities.slice(0, 2).map((ability: any) => ability.name || ability));
+		}
+
+		return tags;
+	}, [character?.class, character?.race, character?.level, character?.alignment, parsedAbilities]);
+
+	// Manejar eventos de teclado para accesibilidad
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick && character) {
+				e.preventDefault();
+				onClick(character);
+			}
+		},
+		[onClick, disabled, character]
+	);
+
+	// Calcular colores para la tarjeta TCG
+	const primaryColor = useMemo(() => character?.color || '#8e44ad', [character?.color]);
+	const secondaryColor = useMemo(() => {
+		// Si no hay color definido, usar color predeterminado basado en la clase
+		if (!character?.color) {
+			return character?.class === 'Warrior'
+				? '#c0392b'
+				: character?.class === 'Mage'
+					? '#2980b9'
+					: character?.class === 'Rogue'
+						? '#27ae60'
+						: '#8e44ad';
+		}
+
+		// Oscurecer el color primario para el secundario
+		try {
+			// Convertir hex a RGB
+			const r = Number.parseInt(character.color.slice(1, 3), 16);
+			const g = Number.parseInt(character.color.slice(3, 5), 16);
+			const b = Number.parseInt(character.color.slice(5, 7), 16);
+
+			// Oscurecer los componentes
+			const darkenFactor = 0.7;
+			const darkerR = Math.floor(r * darkenFactor);
+			const darkerG = Math.floor(g * darkenFactor);
+			const darkerB = Math.floor(b * darkenFactor);
+
+			// Convertir de vuelta a hex
+			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+		} catch (_e) {
+			// Si hay algún error, volver al valor por defecto
+			return '#6d28d9';
+		}
+	}, [character?.color, character?.class]);
+
+	// Determinar rareza y poder para el diseño TCG
+	const displayRarityMap: Record<string, 'Common' | 'Uncommon' | 'Rare' | 'Mythic'> = {
+		common: 'Common',
+		uncommon: 'Uncommon',
+		rare: 'Rare',
+		epic: 'Rare', // Epic mapped to Rare
+		legendary: 'Mythic', // Legendary mapped to Mythic
+	};
+	const rarityLevel = displayRarityMap[character?.statistics?.rarityLevel?.toLowerCase() || 'common'] || 'Common';
+	const power = character?.statistics?.powerLevel || (character?.level || 0) * 10;
+	const cardId = `C${character?.id.substring(0, 6)}-${character?.level}`;
+
+	const rarityMap: Record<string, number> = {
+		Common: 1,
+		Uncommon: 2,
+		Rare: 3,
+		Mythic: 4,
+	};
+	const numericRarityLevel = rarityMap[rarityLevel] || 1;
+
 	// Si no hay datos del personaje o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
 		return (
@@ -75,95 +180,6 @@ export function CharacterCard({
 		);
 	}
 
-	// Preparar las imágenes para el componente de galería
-	const cardMedia = useMemo(() => {
-		return recentMediaData || [];
-	}, [recentMediaData]);
-
-	// Preparar etiquetas para el pie de la tarjeta
-	const footerTags = useMemo(() => {
-		const tags = [];
-
-		// Añadir clase y raza si están disponibles
-		if (character.class) tags.push(character.class);
-		if (character.race) tags.push(character.race);
-
-		// Añadir nivel si está disponible
-		if (character.level) tags.push(`Lvl ${character.level}`);
-
-		// Añadir alineamiento si está disponible
-		if (character.alignment) tags.push(character.alignment);
-
-		// Añadir habilidades del personaje (solo para CharacterCardData)
-		if (character.abilities?.length) {
-			// Solo las primeras 2 habilidades para no sobrecargar la tarjeta
-			tags.push(...character.abilities.slice(0, 2));
-		}
-
-		return tags;
-	}, [character.class, character.race, character.level, character.alignment, character.abilities]);
-
-	// Manejar eventos de teclado para accesibilidad
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
-				e.preventDefault();
-				onClick(character);
-			}
-		},
-		[onClick, disabled, character]
-	);
-
-	// Calcular colores para la tarjeta TCG
-	const primaryColor = useMemo(() => character.color || '#8e44ad', [character.color]);
-	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar color predeterminado basado en la clase
-		if (!character.color) {
-			return character.class === 'Warrior'
-				? '#c0392b'
-				: character.class === 'Mage'
-					? '#2980b9'
-					: character.class === 'Rogue'
-						? '#27ae60'
-						: '#8e44ad';
-		}
-
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(character.color.slice(1, 3), 16);
-			const g = Number.parseInt(character.color.slice(3, 5), 16);
-			const b = Number.parseInt(character.color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#6d28d9';
-		}
-	}, [character.color, character.class]);
-
-	// Determinar rareza y poder para el diseño TCG
-	const rarityLevel = character.metadata?.rarityLevel || 'Common';
-	const power = character.metadata?.power || character.level * 10;
-	const cardId = character.metadata?.cardId || `C${character.id.substring(0, 6)}-${character.level}`;
-	const healthPoints = character.metadata?.healthPoints || 100;
-	const manaPoints = character.metadata?.manaPoints || 50;
-
-	const rarityMap: Record<string, number> = {
-		Common: 1,
-		Uncommon: 2,
-		Rare: 3,
-		Mythic: 4,
-	};
-	const numericRarityLevel = rarityMap[rarityLevel] || 1;
-
 	return (
 		<motion.div
 			className={cn(
@@ -175,7 +191,7 @@ export function CharacterCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled ? undefined : () => onClick && onClick(character)}
+			onClick={disabled ? undefined : () => onClick?.(character)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}
@@ -280,24 +296,19 @@ export function CharacterCard({
 					{!compact && (
 						<>
 							{/* Galería de imágenes */}
-							<CharacterCardImages
-								images={cardMedia.map((m) => m.thumbnailUrl)}
-								emoji={character.emoji}
-								tcgMode={tcgMode}
-								compact={false}
-							/>
+							<CharacterCardImages images={cardMedia.map((m) => m.thumbnailUrl)} tcgMode={tcgMode} compact={false} />
 
 							{/* Contenido con descripción y contadores */}
 							<CharacterCardContent
 								description={character.description || ''}
-								stats={character.stats}
-								abilities={character.abilities}
+								stats={parsedStats}
+								abilities={parsedAbilities}
 								backstory={character.backstory}
 								alignment={character.alignment}
 								primaryColor={primaryColor}
 								secondaryColor={secondaryColor}
-								healthPoints={healthPoints}
-								manaPoints={manaPoints}
+								healthPoints={character.statistics?.healthPoints || 100}
+								manaPoints={character.statistics?.manaPoints || 50}
 								tcgMode={tcgMode}
 							/>
 						</>
@@ -305,7 +316,7 @@ export function CharacterCard({
 
 					{/* Pie con etiquetas y metadatos */}
 					<CharacterCardFooter
-						tags={footerTags}
+						id={character.id}
 						cardId={cardId}
 						rarityLevel={numericRarityLevel}
 						primaryColor={primaryColor}

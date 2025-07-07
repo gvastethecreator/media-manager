@@ -381,7 +381,7 @@ export async function placeExists(id: string): Promise<boolean> {
 /**
  * Obtiene el conteo total de places
  */
-export async function getPlaceCount(filters?: PlaceSearchOptions): Promise<number> {
+export async function getPlaceCount(_filters?: PlaceSearchOptions): Promise<number> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		// Por ahora, conteo simple sin filtros complejos

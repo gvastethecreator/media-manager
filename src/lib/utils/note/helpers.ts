@@ -4,7 +4,7 @@
  * @description Funciones de utilidad optimizadas usando NoteWithStats
  */
 
-import type { NoteBase, NoteFilters, NoteWithStats } from '@/types/entities/note/types';
+import type { NoteFilters, NoteWithStats } from '@/types/entities/note/types';
 import { NoteSortOption } from '@/types/entities/note/types';
 
 /**

@@ -316,48 +316,12 @@ export enum NoteSortCriteria {
 /**
  * 📋 Opciones de ordenamiento para UI
  */
-export enum NoteSortOption {
-	TITLE = 'title',
-	PRIORITY = 'priority',
-	STATUS = 'status',
-	CREATED_AT = 'createdAt',
-	UPDATED_AT = 'updatedAt',
-	CATEGORY = 'category',
-}
-
-/**
- * 🎨 Modos de vista para Notes
- */
 export enum NoteViewMode {
 	GRID = 'grid',
 	LIST = 'list',
 	CARDS = 'cards',
 	COMPACT = 'compact',
 	DETAIL = 'detail',
-}
-
-/**
- * 📊 Note con estadísticas adicionales
- * @deprecated Usar NoteWithStats en su lugar
- */
-export interface NoteWithStatsLegacy extends NoteComplete {
-	stats: {
-		totalItems: number;
-		totalImages: number;
-		totalVideos: number;
-		totalAlbums: number;
-		totalCollections: number;
-		totalTags: number;
-		totalCharacters: number;
-		totalPlaces: number;
-		totalWorldItems: number;
-		totalConcepts: number;
-		totalPrompts: number;
-		totalWildcards: number;
-		totalProperties: number;
-		totalGroups: number;
-		lastUpdated: Date;
-	};
 }
 
 export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
