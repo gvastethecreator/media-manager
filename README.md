@@ -275,8 +275,8 @@ bun run db:generate # Generar migraciones
 
 ```bash
 bun run lint             # Linting con ESLint (ejecutado con Bun)
-bun run check      # Linting con Biome (ejecutado con Bun)
-bun run check:fix        # Auto-fix con Biome
+bun run biome      # Linting con Biome (ejecutado con Bun)
+bun run biome:fix        # Auto-fix con Biome
 bun run format           # Formatear código
 bun run tsc              # Verificar tipos TypeScript
 ```
@@ -295,7 +295,7 @@ bun run test:debug       # Debug de tests
 ```bash
 bun run logs:list             # Ver logs recientes
 bun run logs:clean       # Limpiar logs antiguos
-bun run check:errors     # Analizar errores en logs
+bun run biome:errors     # Analizar errores en logs
 ```
 
 ---

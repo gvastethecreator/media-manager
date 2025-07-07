@@ -1,8 +1,8 @@
-# SISTEMA UNIFICADO DE REGLAS Y ENFORCEMENT - ULTRA COMPLETO
+# MANDATORY INSTRUCTIONS
 
 ## 🔻 CONFIRMACIÓN VISUAL OBLIGATORIA
 
-**REGLA CRÍTICA DE ENFORCEMENT**: SIEMPRE iniciar cada respuesta con exactamente **🔻🔻🔻🔻🔻🔻** y terminar con exactamente **🔺🔺🔺🔺🔺🔺**. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
+**REGLA CRÍTICA DE ENFORCEMENT**: SIEMPRE iniciar cada respuesta con exactamente **🔻🔻🔻🔻🔻🔻🔻🔻🔻** y terminar con exactamente **🔺🔺🔺🔺🔺🔺🔺🔺🔺**. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
 
 ---
 
@@ -21,14 +21,14 @@
 
 ```markdown
 ## TODO: [NOMBRE_FEATURE]
-□ Tarea 1: [Implementación + criterios de aceptación]
-□ Tarea 2: [Implementación + criterios de aceptación]
+[ ] Tarea 1: [Implementación + criterios de aceptación]
+[ ] Tarea 2: [Implementación + criterios de aceptación]
 CONTEXT_REQUIRED: [Archivos/módulos necesarios]
 ACCEPTANCE: [Criterios medibles de finalización]
 STATUS: PENDING
 
 ## REGLAS DE ACTUALIZACIÓN:
-- ✅ Reemplazar □ con ✅ cuando COMPLETE
+- ✅ Reemplazar [ ] con ✅ cuando COMPLETE
 - 🔄 Usar 🔄 para IN_PROGRESS
 - ❌ Usar ❌ para FAILED
 - ACTUALIZAR STATUS: PENDING → IN_PROGRESS → COMPLETE
@@ -79,7 +79,7 @@ class StrictTODOEnforcer:
 
 6. **Scripts de package.json prioritarios** - SIEMPRE usar los scripts de package.json para ejecutar comandos (lint, test, build, etc.). El sistema automáticamente guarda logs y maneja códigos de salida tolerantes para herramientas de linting y testing.
 
-7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run check:errors` para análisis avanzado de errores.
+7. **Logging automático universal** - Todos los scripts relevantes (lint, test, build, tsc) guardan logs automáticamente en `/logs`. Usar `bun run logs list` para ver logs recientes, `bun run logs clean [días]` para limpiar logs antiguos, y `bun run biome:errors` para análisis avanzado de errores.
 
 ### Prioridad de Herramientas (OBLIGATORIO)
 
@@ -91,7 +91,7 @@ class StrictTODOEnforcer:
 
 11. **Filesystem MCP** - Para operaciones con archivos antes que comandos de terminal. Usar siempre rutas de Windows con unidad en mayúscula (ej. `D:\`).
 
-12. **Evitar TSC repetitivo** - No ejecutes compilaciones de TypeScript (`tsc`) solo para verificar tipos. Dado el tamaño del proyecto, es ineficiente. Prioriza la revisión manual del código.
+12. **Evitar TSC repetitivo** - No ejecutes compilaciones de TypeScript (`tsc`) solo para verificar tipos. Dado el tamaño del proyecto, es ineficiente. Prioriza la revisión manual del código o solo para verificar al final de todas las tareas.
 
 ---
 
@@ -103,7 +103,7 @@ class StrictTODOEnforcer:
 - **Eficiencia máxima en cambios** - Mostrar solo modificaciones necesarias, no repetir código completo
 - **Documentación técnica precisa** - Comentarios claros pero concisos que expliquen el "por qué" del código
 - **Enfoque en mejores prácticas** - Aplicar patrones y convenciones estándar del lenguaje/framework
-- **Scripts inteligentes obligatorios** - Usar `bun run lint`, `bun run test`, `bun run check`, etc. en lugar de comandos directos
+- **Scripts inteligentes obligatorios** - Usar `bun run lint`, `bun run test`, `bun run biome`, etc. en lugar de comandos directos
 
 ### Modo Conocimiento (Obsidian, Documentación, Investigación)
 
@@ -337,11 +337,11 @@ COMPLEJIDADES:
 
 ```markdown
 ## TODO: [FUNCIONALIDAD]
-□ [CRITICAL][SMALL] Buscar contexto en codebase
-□ [HIGH][MEDIUM] Implementar funcionalidad core
-□ [HIGH][SMALL] Crear tests con Playwright MCP
-□ [MEDIUM][SMALL] Documentar API con JSDoc
-□ [LOW][SMALL] Actualizar README
+[ ] [CRITICAL][SMALL] Buscar contexto en codebase
+[ ] [HIGH][MEDIUM] Implementar funcionalidad core
+[ ] [HIGH][SMALL] Crear tests con Playwright MCP
+[ ] [MEDIUM][SMALL] Documentar API con JSDoc
+[ ] [LOW][SMALL] Actualizar README
 CONTEXTO_REQUERIDO: src/, tests/, docs/
 ACEPTACIÓN: Funcionalidad implementada, testeada y documentada
 STATUS: PENDING
@@ -462,7 +462,7 @@ async function validateWithMCP(implementation: any) {
 
 - **Screenshots**: Evidencia visual con `browser_take_screenshot`
 - **Tests generados**: `browser_generate_playwright_test` desde interacciones
-- **Logs estructurados**: Análisis automático con `bun run check:errors`
+- **Logs estructurados**: Análisis automático con `bun run biome:errors`
 - **Métricas**: Tracking de compliance y calidad
 
 ## 💻 ESTÁNDARES DE CALIDAD EMPRESARIAL
@@ -610,7 +610,7 @@ class UltraStrictValidator {
     async validateExecution(request: any): Promise<boolean> {
         // 1. Validar confirmación visual
         if (!request.hasVisualConfirmation()) {
-            throw new Error("FALTA CONFIRMACIÓN VISUAL 🔻🔻🔻🔻🔻🔻");
+            throw new Error("FALTA CONFIRMACIÓN VISUAL 🔻🔻🔻🔻🔻🔻🔻🔻🔻");
         }
 
         // 2. Validar búsqueda de contexto PRIMERO
@@ -685,7 +685,7 @@ class StrictErrorHandler {
 
 **VERIFICACIÓN OBLIGATORIA ANTES DE CADA RESPUESTA:**
 
-- [ ] ¿Inicié con exactamente 🔻🔻🔻🔻🔻🔻?
+- [ ] ¿Inicié con exactamente 🔻🔻🔻🔻🔻🔻🔻🔻🔻?
 - [ ] ¿Busqué contexto en codebase PRIMERO antes de cualquier acción?
 - [ ] ¿Creé TODO después de la búsqueda de contexto?
 - [ ] ¿Identifiqué modo correcto (Código/Conocimiento)?
@@ -697,7 +697,7 @@ class StrictErrorHandler {
 - [ ] ¿Mi respuesta está completamente en español?
 - [ ] ¿Verificaré problemas con #problems antes de terminar?
 - [ ] ¿Completaré TODOS los items del TODO antes de devolver control?
-- [ ] ¿Terminaré con exactamente 🔺🔺🔺🔺🔺🔺?
+- [ ] ¿Terminaré con exactamente 🔺🔺🔺🔺🔺🔺🔺🔺🔺?
 
 ## 🚀 INTEGRACIÓN CON ECOSISTEMA
 
@@ -883,7 +883,7 @@ Todo agente que use este sistema debe implementar cada regla exactamente como se
 
 ### Reglas de Oro NO NEGOCIABLES
 
-1. **🔻🔻🔻🔻🔻🔻** al inicio y **🔺🔺🔺🔺🔺🔺** al final - SIN EXCEPCIONES
+1. **🔻🔻🔻🔻🔻🔻🔻🔻🔻** al inicio y **🔺🔺🔺🔺🔺🔺🔺🔺🔺** al final - SIN EXCEPCIONES
 2. **Buscar contexto PRIMERO** - Antes de cualquier TODO o acción
 3. **TODO obligatorio** - Después de buscar contexto, antes de implementar
 4. **MCP para UI** - Toda operación relacionada con interfaz
@@ -905,8 +905,8 @@ Todo agente que use este sistema debe implementar cada regla exactamente como se
 ```typescript
 function validateSystemCompliance(response: string): boolean {
     const checks = {
-        hasVisualStart: response.startsWith('🔻🔻🔻🔻🔻🔻'),
-        hasVisualEnd: response.endsWith('🔺🔺🔺🔺🔺🔺'),
+        hasVisualStart: response.startsWith('🔻🔻🔻🔻🔻🔻🔻🔻🔻'),
+        hasVisualEnd: response.endsWith('🔺🔺🔺🔺🔺🔺🔺🔺🔺'),
         hasContextSearch: response.includes('buscar contexto'),
         hasTODO: response.includes('TODO:'),
         usesSpanish: /[áéíóúñü]/.test(response),

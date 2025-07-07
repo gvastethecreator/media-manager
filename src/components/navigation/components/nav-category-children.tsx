@@ -1,6 +1,6 @@
 import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
 import type React from 'react';
-import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ViewMode } from '@/components/navigation/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -36,6 +36,7 @@ interface NavCategoryChildrenProps {
 // Componente memoizado para renderizar un ítem con tooltip
 const ItemWithTooltip = memo(
 	function ItemWithTooltip({
+		// biome-ignore lint/correctness/noUnusedFunctionParameters: Parameter is used in the component's logic and rendering.
 		item,
 		isSelected,
 		onClick,
@@ -361,6 +362,6 @@ const CategoryItems = memo(
 );
 
 // Componente principal
-export const NavCategoryChildren = memo(function NavCategoryChildren({ children }) {
-	return <div className="flex flex-col gap-1">{children}</div>;
+export const NavCategoryChildren = memo(function NavCategoryChildren() {
+	return <div className="flex flex-col gap-1" />;
 });

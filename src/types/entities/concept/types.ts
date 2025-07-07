@@ -40,36 +40,7 @@ export interface ConceptBase {
 /**
  * Tipo completo para Concept con todas las relaciones y datos
  */
-export interface ConceptComplete extends ConceptBase {
-	images?: ImageComplete[];
-	videos?: VideoComplete[];
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
+
 
 /**
  * Tipo para items en listados de conceptos

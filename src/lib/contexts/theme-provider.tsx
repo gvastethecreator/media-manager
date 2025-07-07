@@ -72,7 +72,7 @@ function ThemeEnforcer() {
 			console.log(`Forzando aplicación del tema: ${resolvedTheme}`);
 			document.documentElement.setAttribute('data-theme', resolvedTheme);
 		}
-	}, [theme, resolvedTheme]);
+	}, [resolvedTheme]);
 
 	return null;
 }
@@ -106,7 +106,9 @@ export function ThemeProvider({
 		const root = document.documentElement;
 
 		// Remover todas las clases de tema anteriores
-		customThemes.forEach((t) => root.classList.remove(t));
+		for (const t of customThemes) {
+			root.classList.remove(t);
+		}
 
 		// Aplicar nueva clase de tema
 		root.classList.add(themeToApply);
@@ -143,7 +145,7 @@ export function ThemeProvider({
 			mediaQuery.addEventListener('change', handleChange);
 			return () => mediaQuery.removeEventListener('change', handleChange);
 		}
-	}, [theme, enableSystem]);
+	}, [theme, enableSystem, applyTheme, resolveTheme]);
 
 	// Función para cambiar tema
 	const handleSetTheme = (newTheme: Theme) => {

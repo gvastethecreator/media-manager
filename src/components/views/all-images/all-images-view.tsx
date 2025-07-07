@@ -50,7 +50,7 @@ export function AllImagesView(_props: ViewProps) {
 	// Cachear el resultado de getSortedImages
 	const sortedImages = useMemo(() => {
 		return getSortedImages();
-	}, [getSortedImages, imagesRecord]);
+	}, [getSortedImages]);
 
 	if (error) {
 		return (

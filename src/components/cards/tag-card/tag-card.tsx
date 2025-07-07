@@ -2,7 +2,6 @@ import { Sparkles, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { useTagStats } from '@/lib/api/tags';
 import { cn } from '@/lib/utils';
 import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
 import type { TagWithStats } from '@/types/entities/tag';

@@ -112,12 +112,12 @@ export function ConceptsSettings() {
 	);
 
 	// Manejar creación exitosa
-	const handleConceptCreated = useCallback((newConcept: ConceptWithStats) => {
+	const handleConceptCreated = useCallback((_newConcept: ConceptWithStats) => {
 		toastService.success('Concepto creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleConceptUpdated = useCallback((updatedConcept: ConceptWithStats) => {
+	const handleConceptUpdated = useCallback((_updatedConcept: ConceptWithStats) => {
 		toastService.success('Concepto actualizado');
 	}, []);
 

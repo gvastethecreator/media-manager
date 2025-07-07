@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	cancelQueueJob,
@@ -130,7 +129,7 @@ queueRouter.post('/:id/retry', async (req, res) => {
 });
 
 // GET /api/queue/stats - Obtiene estadísticas de la cola
-queueRouter.get('/stats', async (req, res) => {
+queueRouter.get('/stats', async (_req, res) => {
 	try {
 		const stats = await getQueueStats();
 		res.json(stats);

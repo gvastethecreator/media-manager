@@ -7,16 +7,6 @@
 import type { ComponentType } from 'react';
 import type { EntityWithStats } from '@/types/migration';
 import { getEntityStatsType } from '@/types/migration';
-import {
-	CollectionDetails,
-	CollectionMetadata,
-	CollectionPreview,
-	CollectionToolbar,
-} from './entities/collection-details';
-import { FolderDetails, FolderMetadata, FolderPreview, FolderToolbar } from './entities/folder-details';
-// Imports de componentes específicos
-import { ImageDetails, ImageMetadata, ImagePreview, ImageToolbar } from './entities/image-details';
-import { VideoDetails, VideoMetadata, VideoPreview, VideoToolbar } from './entities/video-details';
 
 // Tipos base para los componentes de detalles
 export interface EntityDetailsProps<T extends EntityWithStats = EntityWithStats> {

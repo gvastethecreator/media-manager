@@ -50,7 +50,7 @@ export function AudioView(_props: ViewProps) {
 	// Cachear el resultado de getSortedAudios
 	const sortedAudios = useMemo(() => {
 		return getSortedAudios();
-	}, [getSortedAudios, audiosRecord]);
+	}, [getSortedAudios]);
 
 	if (error) {
 		return (

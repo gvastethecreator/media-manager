@@ -6,7 +6,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { ProfileBase, ProfileStatistics, ProfileWithStats } from '@/types/entities/profile';
+import type { ProfileStatistics, ProfileWithStats } from '@/types/entities/profile';
 
 const logger = serverLogger.withContext('ProfileTransformer');
 
@@ -29,7 +29,7 @@ export function fromDrizzleProfile(drizzleProfile: any): ProfileWithStats {
 			totalActivities: _count?.activities || 0,
 			lastActivity: _count?.lastActivity || baseData.updatedAt,
 			joinDate: baseData.createdAt,
-			isVerified: baseData.isActive && baseData.email ? true : false,
+			isVerified: !!(baseData.isActive && baseData.email),
 		};
 
 		return {

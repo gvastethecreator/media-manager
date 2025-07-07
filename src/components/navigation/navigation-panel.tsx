@@ -1,13 +1,11 @@
 import { Home, IdCard, Palette } from 'lucide-react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { type ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
-import { NavCategoryWithChildren } from './components/nav-category-with-children';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
-import { useCategoryCollapse, useCategoryHandlers, useCategoryStats, useMainNavigation } from './hooks';
+import { useCategoryStats } from './hooks';
 
 // Nueva estructura de categorías file-centric
 const NAVIGATION_CATEGORIES = [

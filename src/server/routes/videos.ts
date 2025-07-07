@@ -89,7 +89,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/videos/stats/formats - Obtener estadísticas de formatos de video
-router.get('/stats/formats', async (req, res) => {
+router.get('/stats/formats', async (_req, res) => {
 	try {
 		const formatStats = await getVideoFormatStats();
 		res.json({

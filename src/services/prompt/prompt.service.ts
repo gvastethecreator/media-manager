@@ -6,10 +6,9 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { imagePrompts, prompts, videoPrompts } from '@/lib/drizzle/schema';
+import { prompts } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { createEntityErrorObject, EntityErrorCode } from '@/lib/utils/errors/service-errors';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
 	PromptCreateInput,
@@ -557,7 +556,7 @@ export const getPromptImagesService = async (promptId: string) => {
 /**
  * Obtiene las imágenes recientes de un prompt
  */
-export const getRecentPromptImagesService = async (promptId: string, limit = 6) => {
+export const getRecentPromptImagesService = async (promptId: string, _limit = 6) => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes recientes del prompt: ${promptId}`);
 

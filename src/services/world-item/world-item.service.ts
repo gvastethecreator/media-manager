@@ -556,7 +556,7 @@ export async function worldItemExists(id: string): Promise<boolean> {
 /**
  * Obtiene el conteo total de world items
  */
-export async function getWorldItemCount(filters?: WorldItemSearchOptions['filters']): Promise<number> {
+export async function getWorldItemCount(_filters?: WorldItemSearchOptions['filters']): Promise<number> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
 		// Por ahora implementación básica sin filtros complejos

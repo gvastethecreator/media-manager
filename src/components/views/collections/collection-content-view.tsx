@@ -1,5 +1,5 @@
 import { Library } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
 import { useCollectionImages, useRemoveImageFromCollection } from '@/lib/api/collections';

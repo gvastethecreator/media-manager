@@ -72,7 +72,7 @@ function ThemeEnforcer() {
 			console.log(`Forzando aplicación del tema: ${resolvedTheme}`);
 			document.documentElement.setAttribute('data-theme', resolvedTheme);
 		}
-	}, [theme, resolvedTheme]);
+	}, [resolvedTheme]);
 
 	return null;
 }
@@ -143,7 +143,7 @@ export function ThemeProvider({
 			mediaQuery.addEventListener('change', handleChange);
 			return () => mediaQuery.removeEventListener('change', handleChange);
 		}
-	}, [theme, enableSystem]);
+	}, [theme, enableSystem, applyTheme, resolveTheme]);
 
 	// Función para cambiar tema
 	const handleSetTheme = (newTheme: Theme) => {

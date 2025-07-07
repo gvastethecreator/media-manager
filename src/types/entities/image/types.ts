@@ -143,7 +143,7 @@ export interface ImageStatistics {
 /**
  * 🖼️ Image con estadísticas optimizadas (tipo principal)
  */
-export interface ImageWithStats extends ImageBase {
+export interface ImageWithStats extends ImageBase, ImageRelations, ImageUI {
 	statistics: ImageStatistics;
 	// Campos derivados calculados
 	thumbnailUrl: string;
@@ -153,29 +153,6 @@ export interface ImageWithStats extends ImageBase {
 	formattedSize: string;
 	formattedDimensions: string;
 	aspectRatioLabel: string;
-}
-
-/**
- * 🖥️ Propiedades de UI para Image
- */
-export interface ImageUI {
-	isSelected?: boolean;
-	isLoading?: boolean;
-	isExpanded?: boolean;
-	isHovered?: boolean;
-	isHighlighted?: boolean;
-	isEditing?: boolean;
-	thumbnailLoading?: boolean;
-	hasError?: boolean;
-	isInViewport?: boolean;
-	isDragging?: boolean;
-	isDropTarget?: boolean;
-}
-
-/**
- * 🖼️ Image completo con relaciones (para casos que requieren relaciones completas)
- */
-export interface ImageComplete extends ImageBase, ImageThumbnail, ImageRelations, ImageUI {
 	_count?: {
 		albums?: number;
 		collections?: number;
@@ -186,11 +163,10 @@ export interface ImageComplete extends ImageBase, ImageThumbnail, ImageRelations
 		concepts?: number;
 		prompts?: number;
 		notes?: number;
-		wildcards?: number;
+	wildcards?: number;
 		properties?: number;
 		groups?: number;
 	};
-	parsedMetadata?: ImageMetadata | null;
 }
 
 /**

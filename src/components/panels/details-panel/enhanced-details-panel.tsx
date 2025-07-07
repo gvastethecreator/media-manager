@@ -3,7 +3,7 @@
  * @module components/panels/details-panel/enhanced-details-panel
  */
 
-import { ChevronDown, ChevronUp, Maximize2, Minimize2, MoreHorizontal, Pin, PinOff, Settings, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Maximize2, Minimize2, MoreHorizontal, Pin, PinOff, X } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,39 +23,37 @@ import { getEntityStatsType } from '@/types/migration';
 import { entityDetailsRegistry } from './entity-details-registry';
 
 // Fallback para cuando no hay configuración específica
-const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action: string, data?: any) => void }>(
-	function DefaultEntityDetails({ entity, onAction }) {
-		const entityType = getEntityStatsType(entity);
+const DefaultEntityDetails = memo<{ entity: EntityWithStats }>(function DefaultEntityDetails({ entity }) {
+	const entityType = getEntityStatsType(entity);
 
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-sm">Detalles de {entityType}</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="space-y-2 text-sm">
-						<div className="flex justify-between">
-							<span className="text-muted-foreground">Nombre:</span>
-							<span className="font-medium truncate max-w-[60%]">{entity.name || 'Sin nombre'}</span>
-						</div>
-						<div className="flex justify-between">
-							<span className="text-muted-foreground">Tipo:</span>
-							<Badge variant="secondary" className="text-xs">
-								{entityType.charAt(0).toUpperCase() + entityType.slice(1)}
-							</Badge>
-						</div>
-						{entity.createdAt && (
-							<div className="flex justify-between">
-								<span className="text-muted-foreground">Creado:</span>
-								<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
-							</div>
-						)}
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle className="text-sm">Detalles de {entityType}</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<div className="space-y-2 text-sm">
+					<div className="flex justify-between">
+						<span className="text-muted-foreground">Nombre:</span>
+						<span className="font-medium truncate max-w-[60%]">{entity.name || 'Sin nombre'}</span>
 					</div>
-				</CardContent>
-			</Card>
-		);
-	}
-);
+					<div className="flex justify-between">
+						<span className="text-muted-foreground">Tipo:</span>
+						<Badge variant="secondary" className="text-xs">
+							{entityType.charAt(0).toUpperCase() + entityType.slice(1)}
+						</Badge>
+					</div>
+					{entity.createdAt && (
+						<div className="flex justify-between">
+							<span className="text-muted-foreground">Creado:</span>
+							<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
+						</div>
+					)}
+				</div>
+			</CardContent>
+		</Card>
+	);
+});
 
 // Componente para mostrar múltiples elementos seleccionados
 const MultipleSelectionDetails = memo<{ entities: EntityWithStats[]; onAction?: (action: string, data?: any) => void }>(

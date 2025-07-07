@@ -165,7 +165,7 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 * @param characterId ID del personaje
 	 * @param isLoading Estado de carga
 	 */
-	setCharacterLoading: (characterId: string, isLoading: boolean) => {
+	setCharacterLoading: (_characterId: string, isLoading: boolean) => {
 		// El estado de carga se maneja en el estado general del store
 		// Los componentes pueden verificar isLoading del estado general
 		set({ isLoading });
@@ -176,7 +176,7 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 * @param characterId ID del personaje
 	 * @param hasError Indica si hay error
 	 */
-	setCharacterError: (characterId: string, hasError: boolean) => {
+	setCharacterError: (_characterId: string, hasError: boolean) => {
 		// El estado de error se maneja en el estado general del store
 		set({ error: hasError ? 'Error en el personaje' : null });
 	},

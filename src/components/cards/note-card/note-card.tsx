@@ -25,33 +25,6 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	const { data: recentImagesData } = useRecentNoteImages(noteId);
 	const { data: noteCounts } = useNoteCounts(noteId);
 
-	// Si no hay datos de la nota o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando nota...</p>
-			</div>
-		);
-	}
-
-	if (error || !note) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Nota no encontrada'}</p>
-			</div>
-		);
-	}
-
 	// Extraer datos relevantes
 	const {
 		id,
@@ -66,7 +39,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		createdAt,
 		updatedAt,
 		tags: noteTags,
-	} = note;
+	} = note || {}; // Añadir fallback para evitar errores si note es undefined
 
 	// Calcular valores derivados
 	const imagesCount = noteCounts?.images || 0;
@@ -112,7 +85,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			if (onClick && (e.key === 'Enter' || e.key === ' ') && note) {
 				e.preventDefault();
 				onClick(note);
 			}
@@ -123,7 +96,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	// Parsear tags si es un string
 	const tags = useMemo(() => {
 		// Comprobar si note tiene la propiedad tags
-		if ('tags' in note) {
+		if (note && 'tags' in note) {
 			const currentTags = note.tags;
 			// Si tags es un string, intentar parsearlo
 			if (typeof currentTags === 'string' && currentTags) {
@@ -152,6 +125,33 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		}),
 		[primaryColor, secondaryColor, style, tcgMode]
 	);
+
+	// Si no hay datos de la nota o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando nota...</p>
+			</div>
+		);
+	}
+
+	if (error || !note) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Nota no encontrada'}</p>
+			</div>
+		);
+	}
 
 	// Render del componente
 	return (

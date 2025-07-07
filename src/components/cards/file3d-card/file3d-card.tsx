@@ -41,8 +41,6 @@ export function File3DCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: File3DCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 	const [isRotating, setIsRotating] = useState(false);

@@ -103,12 +103,12 @@ export function PlacesSettings() {
 	}, []);
 
 	// Manejar creación exitosa
-	const handlePlaceCreated = useCallback((newPlace: PlaceWithStats) => {
+	const handlePlaceCreated = useCallback((_newPlace: PlaceWithStats) => {
 		toastService.success('Lugar creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handlePlaceUpdated = useCallback((updatedPlace: PlaceWithStats) => {
+	const handlePlaceUpdated = useCallback((_updatedPlace: PlaceWithStats) => {
 		toastService.success('Lugar actualizado');
 	}, []);
 

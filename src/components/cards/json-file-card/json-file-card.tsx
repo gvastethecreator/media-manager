@@ -42,8 +42,6 @@ export function JsonFileCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: JsonFileCardProps) {
 	const { data: jsonFile, isLoading, error } = useJsonFile(jsonFileId);
 	const [isHovered, setIsHovered] = useState(false);

@@ -3,26 +3,11 @@
  * @module components/panels/details-panel/entities/image-details
  */
 
-import {
-	Crop,
-	Download,
-	Edit,
-	Eye,
-	Heart,
-	Maximize2,
-	Pause,
-	Play,
-	RotateCcw,
-	RotateCw,
-	Share,
-	ZoomIn,
-	ZoomOut,
-} from 'lucide-react';
+import { Crop, Download, Edit, Eye, Heart, Maximize2, RotateCcw, RotateCw, Share, ZoomIn, ZoomOut } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ImageWithStats } from '@/types/entities/image.types';
@@ -35,11 +20,7 @@ import type {
 } from '../entity-details-registry';
 
 // Componente principal de detalles para imágenes
-export const ImageDetails = memo<EntityDetailsProps<ImageWithStats>>(function ImageDetails({
-	entity,
-	isSelected,
-	onAction,
-}) {
+export const ImageDetails = memo<EntityDetailsProps<ImageWithStats>>(function ImageDetails({ entity, onAction }) {
 	const handleAction = useCallback(
 		(action: string, data?: any) => {
 			onAction?.(action, data);
@@ -242,11 +223,7 @@ export const ImageToolbar = memo<EntityToolbarProps<ImageWithStats>>(function Im
 });
 
 // Componente de metadatos para imágenes
-export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function ImageMetadata({
-	entity,
-	editable = false,
-	onUpdate,
-}) {
+export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function ImageMetadata({ entity }) {
 	if (!isImageWithStats(entity)) {
 		return null;
 	}

@@ -97,7 +97,7 @@ export function useFoldersEvents({
 			eventsLogger.info('🧹 Limpiando suscripciones de eventos');
 			// TODO: Implementar cleanup cuando estén disponibles las suscripciones
 		};
-	}, [handleProgress, handleError, handleComplete, handleStats]);
+	}, []);
 
 	// También devolvemos funciones útiles para depuración
 	return {

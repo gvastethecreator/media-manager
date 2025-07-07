@@ -56,7 +56,7 @@ export enum FileProcessingStatus {
  */
 export type FileItem =
 	| ImageComplete
-	| VideoComplete
+	| VideoWithStats
 	| AlbumComplete
 	| CollectionComplete
 	| TagComplete

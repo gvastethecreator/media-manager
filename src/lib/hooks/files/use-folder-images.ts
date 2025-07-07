@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 // Migración: se reemplaza el servicio por funciones del cliente API
 import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { getFolderImages } from '@/services/folder/folder.service';
 
 // Logger para depuración
 const logger = clientLogger.withContext('useFolderImages');

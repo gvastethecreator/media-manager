@@ -1,5 +1,5 @@
 import { ImageIcon } from 'lucide-react';
-import React, { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 import { worldItemService } from '@/services/world-item/world-item.service';

@@ -4,7 +4,6 @@
  */
 
 import {
-	Calendar,
 	Collection,
 	Download,
 	Edit,
@@ -18,13 +17,10 @@ import {
 	Palette,
 	Play,
 	Plus,
-	Search,
 	Share,
 	Shuffle,
-	Star,
 	Tag,
 	Trash2,
-	User,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -37,7 +33,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -64,7 +59,6 @@ interface CollectionItem {
 // Componente principal de detalles para colecciones
 export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(function CollectionDetails({
 	entity,
-	isSelected,
 	onAction,
 }) {
 	const handleAction = useCallback(
@@ -212,7 +206,6 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 				return a.name.localeCompare(b.name);
 			case 'size':
 				return (b.size || 0) - (a.size || 0);
-			case 'date':
 			default:
 				return b.addedAt.getTime() - a.addedAt.getTime();
 		}
@@ -443,8 +436,6 @@ export const CollectionToolbar = memo<EntityToolbarProps<CollectionWithStats>>(f
 // Componente de metadatos para colecciones
 export const CollectionMetadata = memo<EntityMetadataProps<CollectionWithStats>>(function CollectionMetadata({
 	entity,
-	editable = false,
-	onUpdate,
 }) {
 	if (!isCollectionWithStats(entity)) {
 		return null;

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { apiClient } from './client';
 

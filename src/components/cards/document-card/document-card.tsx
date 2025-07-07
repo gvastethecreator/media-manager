@@ -41,8 +41,6 @@ export function DocumentCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: DocumentCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 

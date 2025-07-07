@@ -54,7 +54,7 @@ export const useUpdateTheme = () => {
 			// Devolver el estado previo en el contexto para poder hacer rollback
 			return { previousProfile };
 		},
-		onError: (err, newTheme, context) => {
+		onError: (_err, _newTheme, context) => {
 			// Revertir al estado previo en caso de error
 			if (context?.previousProfile) {
 				queryClient.setQueryData(['activeProfile'], context.previousProfile);

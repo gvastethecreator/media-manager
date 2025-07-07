@@ -243,7 +243,11 @@ function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations:
 /**
  * 🏆 Determina el grado técnico basado en calidad
  */
-function determineTechnicalGrade(qualityScore: number, megapixels: number, aspectRatio: number): 'A' | 'B' | 'C' | 'D' {
+function determineTechnicalGrade(
+	qualityScore: number,
+	megapixels: number,
+	_aspectRatio: number
+): 'A' | 'B' | 'C' | 'D' {
 	if (qualityScore >= 85 && megapixels >= 8) return 'A';
 	if (qualityScore >= 70 && megapixels >= 5) return 'B';
 	if (qualityScore >= 50 && megapixels >= 2) return 'C';

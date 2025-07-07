@@ -4,7 +4,7 @@ import { getStats, getSystemStats, getSystemStatsExtended } from '../services/st
 const router = express.Router();
 
 // GET /stats/general - Obtener estadísticas generales
-router.get('/general', async (req, res) => {
+router.get('/general', async (_req, res) => {
 	try {
 		const stats = await getStats();
 		res.json(stats);
@@ -15,7 +15,7 @@ router.get('/general', async (req, res) => {
 });
 
 // GET /stats/extended - Obtener estadísticas extendidas del sistema
-router.get('/extended', async (req, res) => {
+router.get('/extended', async (_req, res) => {
 	try {
 		const stats = await getSystemStatsExtended();
 		res.json(stats);
@@ -52,7 +52,7 @@ router.get('/top-tags', async (req, res) => {
 });
 
 // GET /stats/storage - Obtener desglose de almacenamiento
-router.get('/storage', async (req, res) => {
+router.get('/storage', async (_req, res) => {
 	try {
 		const stats = await getSystemStatsExtended();
 

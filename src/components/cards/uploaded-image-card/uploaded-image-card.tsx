@@ -41,8 +41,6 @@ export function UploadedImageCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: UploadedImageCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 	const [imageError, setImageError] = useState(false);

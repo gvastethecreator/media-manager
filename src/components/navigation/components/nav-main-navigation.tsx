@@ -1,36 +1,29 @@
 import {
-	Home,
-	IdCard,
+	Album,
+	Asterisk,
+	Bookmark,
+	Box,
+	Brackets,
+	FileStack,
+	Files,
+	FileText,
+	Globe,
 	Image as ImageIcon,
 	Layers,
+	Lightbulb,
+	MapPin,
 	MessageSquare,
-	Palette,
-	Search,
-	Star,
-	UploadCloud,
-	Files,
-	FileStack,
-	Video,
 	Music,
-	FileText,
-	Brackets,
-	Workflow,
-	Cube,
-	Album,
-	Group,
+	Star,
 	Tag,
-	Bookmark,
 	User,
 	Users,
-	MapPin,
-	Globe,
-	Lightbulb,
-	Asterisk,
+	Video,
+	Workflow,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
 import type { NavigationItem } from '@/components/navigation/navigation.store';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -213,7 +206,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 				{ id: 'docs', label: 'Documentos', icon: FileText },
 				{ id: 'json', label: 'JSON', icon: Brackets },
 				{ id: 'workflows', label: 'Workflows', icon: Workflow },
-				{ id: 'file3d', label: '3D', icon: Cube },
+				{ id: 'file3d', label: '3D', icon: Box },
 			],
 		},
 		{
@@ -238,7 +231,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			children: [
 				{ id: 'characters', label: 'Personajes', icon: User },
 				{ id: 'places', label: 'Lugares', icon: MapPin },
-				{ id: 'world-items', label: 'Objetos del mundo', icon: Cube },
+				{ id: 'world-items', label: 'Objetos del mundo', icon: Box },
 				{ id: 'concepts', label: 'Conceptos', icon: Lightbulb },
 				{ id: 'wildcards', label: 'Comodines', icon: Asterisk },
 			],
@@ -253,7 +246,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 		<div className={containerClasses}>
 			<div className={innerContainerClasses}>
 				<div className={flexContainerClasses}>
-					{NAVIGATION_CATEGORIES.map((category, catIdx) => (
+					{NAVIGATION_CATEGORIES.map((category, _catIdx) => (
 						<div key={category.id} className="mb-1">
 							<div className="flex items-center gap-1 mb-0.5">
 								<category.icon className="h-4 w-4" style={{ color: category.color }} />
@@ -262,7 +255,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 								</span>
 							</div>
 							<div className="flex flex-col gap-0.5">
-								{category.children.map((child, idx) => (
+								{category.children.map((child, _idx) => (
 									<Button
 										key={child.id}
 										variant={currentView === child.id ? 'secondary' : 'ghost'}

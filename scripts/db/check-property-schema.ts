@@ -18,7 +18,7 @@ async function main() {
 		console.log('│ CID │ Name             │ Type        │ NotNull │ Default     │ PK │');
 		console.log('├─────┼──────────────────┼─────────────┼─────────┼─────────────┼────┤');
 
-		tableInfo.forEach((column: any) => {
+		for (const column of tableInfo) {
 			const cid = String(column.cid).padEnd(3);
 			const name = String(column.name).padEnd(16);
 			const type = String(column.type).padEnd(11);
@@ -27,7 +27,7 @@ async function main() {
 			const pk = String(column.pk).padEnd(2);
 
 			console.log(`│ ${cid} │ ${name} │ ${type} │ ${notnull} │ ${dflt} │ ${pk} │`);
-		});
+		}
 
 		console.log('└─────┴──────────────────┴─────────────┴─────────┴─────────────┴────┘\n');
 
@@ -41,7 +41,7 @@ async function main() {
 		console.log('│ CID │ Name             │ Type        │ NotNull │ Default     │ PK │');
 		console.log('├─────┼──────────────────┼─────────────┼─────────┼─────────────┼────┤');
 
-		wildcardInfo.forEach((column: any) => {
+		for (const column of wildcardInfo) {
 			const cid = String(column.cid).padEnd(3);
 			const name = String(column.name).padEnd(16);
 			const type = String(column.type).padEnd(11);
@@ -50,7 +50,7 @@ async function main() {
 			const pk = String(column.pk).padEnd(2);
 
 			console.log(`│ ${cid} │ ${name} │ ${type} │ ${notnull} │ ${dflt} │ ${pk} │`);
-		});
+		}
 
 		console.log('└─────┴──────────────────┴─────────────┴─────────┴─────────────┴────┘\n');
 

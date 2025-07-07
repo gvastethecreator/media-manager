@@ -1,27 +1,3 @@
-import { motion } from 'motion/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useGroupCardData } from '@/lib/api/groups';
-import { cn } from '@/lib/utils';
-import type { GroupWithStats } from '@/types/entities/group';
-import { GroupCardContent } from './group-card-content';
-import { GroupCardFooter } from './group-card-footer';
-import { GroupCardHeader } from './group-card-header';
-import { GroupCardImages } from './group-card-images';
-
-export interface GroupCardProps {
-	groupId: string;
-	onClick?: (groupData: GroupWithStats) => void;
-	className?: string;
-	tcgMode?: boolean;
-	compact?: boolean;
-	disabled?: boolean;
-	isSelected?: boolean;
-}
-
-/**
- * Card para mostrar un grupo en estilo TCG
- */
 export function GroupCard({
 	groupId,
 	onClick,
@@ -33,6 +9,78 @@ export function GroupCard({
 }: GroupCardProps) {
 	const { data: group, isLoading, error } = useGroupCardData(groupId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Calcular colores
+	const primaryColor = useMemo(() => group?.color || '#3b82f6', [group?.color]);
+	const secondaryColor = useMemo(() => {
+		if (!group?.color) return '#2563eb';
+
+		try {
+			// Convertir hex a RGB y oscurecer
+			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
+			const g = Number.parseInt(primaryColor.slice(2, 4), 16);
+			const b = Number.parseInt(primaryColor.slice(4, 6), 16);
+
+			const darkenFactor = 0.7;
+			const darkerR = Math.floor(r * darkenFactor);
+			const darkerG = Math.floor(g * darkenFactor);
+			const darkerB = Math.floor(b * darkenFactor);
+
+			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+		} catch (_e) {
+			return '#2563eb';
+		}
+	}, [primaryColor, group?.color]);
+
+	// Preparar media para la galería
+	const allMedia = useMemo(() => {
+		return [...(group?.recentImages || []), ...(group?.recentVideos || [])];
+	}, [group?.recentImages, group?.recentVideos]);
+
+	// Función de manejadores de eventos
+	const handleClick = useCallback(() => {
+		if (onClick && !disabled && group) {
+			onClick(group);
+		}
+	}, [onClick, disabled, group]);
+
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ') && group) {
+				e.preventDefault();
+				onClick(group);
+			}
+		},
+		[onClick, disabled, group]
+	);
+
+	// Determinar el número total de entidades
+	const entityCounts = useMemo(
+		() => ({
+			images: group?._count?.images || 0,
+			videos: group?._count?.videos || 0,
+			albums: group?._count?.albums || 0,
+			collections: group?._count?.collections || 0,
+			tags: group?._count?.tags || 0,
+			characters: group?._count?.characters || 0,
+			places: group?._count?.places || 0,
+			worldItems: group?._count?.worldItems || 0,
+			concepts: group?._count?.concepts || 0,
+			prompts: group?._count?.prompts || 0,
+			notes: group?._count?.notes || 0,
+			wildcards: group?._count?.wildcards || 0,
+			properties: group?._count?.properties || 0,
+		}),
+		[group?._count]
+	);
+
+	// Preparar filters count
+	const filtersCount = useMemo(() => {
+		if (Array.isArray(group?.filters)) {
+			return group.filters.length;
+		}
+		return 0;
+	}, [group?.filters]);
 
 	// Si no hay datos del grupo o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
@@ -61,78 +109,6 @@ export function GroupCard({
 		);
 	}
 
-	// Calcular colores
-	const primaryColor = useMemo(() => group.color || '#3b82f6', [group.color]);
-	const secondaryColor = useMemo(() => {
-		if (!group.color) return '#2563eb';
-
-		try {
-			// Convertir hex a RGB y oscurecer
-			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
-			const g = Number.parseInt(primaryColor.slice(2, 4), 16);
-			const b = Number.parseInt(primaryColor.slice(4, 6), 16);
-
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			return '#2563eb';
-		}
-	}, [primaryColor]);
-
-	// Preparar media para la galería
-	const allMedia = useMemo(() => {
-		return [...(group.recentImages || []), ...(group.recentVideos || [])];
-	}, [group.recentImages, group.recentVideos]);
-
-	// Función de manejadores de eventos
-	const handleClick = useCallback(() => {
-		if (onClick && !disabled) {
-			onClick(group);
-		}
-	}, [onClick, disabled, group]);
-
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
-				e.preventDefault();
-				onClick(group);
-			}
-		},
-		[onClick, disabled, group]
-	);
-
-	// Determinar el número total de entidades
-	const entityCounts = useMemo(
-		() => ({
-			images: group._count.images,
-			videos: group._count.videos,
-			albums: group._count.albums,
-			collections: group._count.collections,
-			tags: group._count.tags,
-			characters: group._count.characters,
-			places: group._count.places,
-			worldItems: group._count.worldItems,
-			concepts: group._count.concepts,
-			prompts: group._count.prompts,
-			notes: group._count.notes,
-			wildcards: group._count.wildcards,
-			properties: group._count.properties,
-		}),
-		[group._count]
-	);
-
-	// Preparar filters count
-	const filtersCount = useMemo(() => {
-		if (Array.isArray(group.filters)) {
-			return group.filters.length;
-		}
-		return 0;
-	}, [group.filters]);
-
 	// Construir la tarjeta
 	const cardContent = (
 		<div
@@ -149,7 +125,7 @@ export function GroupCard({
 				borderRadius: tcgMode ? '0.5rem' : '0.375rem',
 				boxShadow: tcgMode ? `0 0 0 1px ${primaryColor}30, 0 2px 10px ${primaryColor}20` : undefined,
 				backgroundColor: tcgMode ? '#1a1a1a' : undefined,
-				...(isSelected && ({ '--tw-ring-color': primaryColor } as React.CSSProperties)),
+				...(isSelected && { '--tw-ring-color': primaryColor }),
 			}}
 		>
 			{/* Encabezado */}
@@ -265,6 +241,3 @@ export function GroupCard({
 		</Link>
 	);
 }
-
-// Exportar también un componente memorizado
-export const MemoizedGroupCard = React.memo(GroupCard);

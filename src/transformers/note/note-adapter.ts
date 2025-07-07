@@ -125,7 +125,7 @@ function generateExcerpt(content: string, maxLength = 150): string {
 	const truncated = cleaned.substring(0, maxLength);
 	const lastSpace = truncated.lastIndexOf(' ');
 
-	return lastSpace > maxLength * 0.8 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+	return lastSpace > maxLength * 0.8 ? `${truncated.substring(0, lastSpace)}...` : `${truncated}...`;
 }
 
 /**

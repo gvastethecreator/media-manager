@@ -11,7 +11,7 @@ interface VideoCardContentProps {
 /**
  * 🎬 Contenido principal del VideoCard con estadísticas y metadatos
  */
-export function VideoCardContent({ video, primaryColor, secondaryColor, tcgMode = true }: VideoCardContentProps) {
+export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoCardContentProps) {
 	const { description, statistics } = video;
 	const { qualityScore, technicalGrade, autoTags, aspectRatio, bitrate, frameRate, hasSubtitles } = statistics;
 

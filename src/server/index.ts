@@ -2,7 +2,6 @@
 
 import cors from 'cors';
 import express from 'express';
-import { ENV } from '../config/env.js';
 import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
@@ -38,12 +37,12 @@ import { workflowsRouter } from './routes/workflows.js';
 import worldItemsRouter from './routes/world-items';
 
 const app = express();
-const PORT = ENV.API_PORT;
+const PORT = process.env.API_PORT || process.env.PORT || '3001';
 
 // Middleware
 app.use(
 	cors({
-		origin: ENV.CORS_ORIGIN,
+		origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
 		credentials: true,
 	})
 );
@@ -51,7 +50,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
 	res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -93,7 +92,7 @@ app.use('/api/profiles', profilesRouter);
 app.use('/api/activity', activityRouter);
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
 	console.error('Error del servidor:', err);
 	res.status(500).json({
 		error: 'Error interno del servidor',

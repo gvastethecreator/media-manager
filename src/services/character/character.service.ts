@@ -6,7 +6,7 @@
  */
 
 import * as crypto from 'crypto';
-import { count, desc, eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { characters } from '@/lib/drizzle/schema';

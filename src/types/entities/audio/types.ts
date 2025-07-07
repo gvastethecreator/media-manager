@@ -1,28 +1,63 @@
-/**
- * @file Tipos para Audio
- * @module types/entities/audio/types
- * @deprecated Este archivo está siendo migrado hacia el patrón `...WithStats`
- * @see /src/types/entities/audio/base.ts para los tipos canónicos
- */
+import { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
 
-// Re-exportar los tipos canónicos desde base.ts
-export type {
-	AudioBase,
-	AudioStatistics,
-	AudioWithStats,
-} from './base';
-
-// Tipos legacy - usar AudioWithStats en su lugar
-export interface AudioComplete extends AudioBase {
-	stats?: AudioStatistics;
+export interface AudioBase extends EntityBase {
+	filePath: string;
+	fileName: string;
+	fileSize: number;
+	format: string;
+	duration: number;
+	bitrate: number;
+	sampleRate: number;
+	channels: number;
+	metadata: Record<string, any> | null;
+	album: string | null;
+	artist: string | null;
+	genre: string | null;
+	year: number | null;
+	track: number | null;
+	lyrics: string | null;
 }
 
-export interface AudioPreview extends Pick<AudioBase, 'id' | 'name' | 'format' | 'duration'> {
-	stats?: {
-		size: number;
-		duration?: number;
-	};
+export interface AudioStatistics {
+	duration: number;
+	format: string;
+	bitrate: number;
+	volumePeaks: number[];
+	sampleRate: number;
 }
 
-// Import types for legacy compatibility
-import type { AudioBase, AudioStatistics } from './base';
+export interface AudioWithStats extends AudioBase, EntityWithStats {}
+
+export interface AudioCreateInput extends Partial<AudioBase> {}
+export interface AudioUpdateInput extends Partial<AudioBase> {}
+
+export interface AudioFilters {
+	search?: string;
+	isFavorite?: boolean;
+	format?: string[];
+	genre?: string[];
+	artist?: string[];
+	year?: number[];
+	minDuration?: number;
+	maxDuration?: number;
+	minSize?: number;
+	maxSize?: number;
+}
+
+export interface AudioSortCriteria {
+	field: keyof AudioWithStats;
+	direction: 'asc' | 'desc';
+}
+
+export interface AudioPaginationOptions {
+	page?: number;
+	pageSize?: number;
+}
+
+export interface AudiosResponse {
+	audios: AudioWithStats[];
+	total: number;
+	page: number;
+	pageSize: number;
+	totalPages: number;
+}

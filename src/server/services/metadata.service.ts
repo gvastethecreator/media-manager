@@ -2,7 +2,6 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema';
-import { createMetadataError } from '@/lib/errors/metadata';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';

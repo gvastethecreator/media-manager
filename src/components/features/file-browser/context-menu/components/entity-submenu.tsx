@@ -78,15 +78,7 @@ const ErrorState = memo(function ErrorState({ entityName }: { entityName: string
 });
 
 // Componente para el botón de crear memoizado
-const CreateButton = memo(function CreateButton({
-	entityName,
-	onClick,
-	entityType,
-}: {
-	entityName: string;
-	onClick: () => void;
-	entityType: string;
-}) {
+const CreateButton = memo(function CreateButton({ entityName, onClick }: { entityName: string; onClick: () => void }) {
 	const { setCurrentView } = useNavigationStore();
 
 	// Mapeo de entidades a sus correspondientes tabs en SettingsView

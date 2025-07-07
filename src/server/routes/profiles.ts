@@ -18,7 +18,7 @@ const updateProfileSchema = z.object({
 });
 
 // GET /api/profiles/active - Obtener perfil activo
-router.get('/active', async (req, res) => {
+router.get('/active', async (_req, res) => {
 	try {
 		const profile = await profileService.getActiveProfile();
 

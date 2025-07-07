@@ -43,7 +43,7 @@ export function normalizeCoordinates(coordinates: any): { lat: number; lng: numb
 	const lat = Number.parseFloat(coordinates.lat);
 	const lng = Number.parseFloat(coordinates.lng);
 
-	if (isNaN(lat) || isNaN(lng)) return null;
+	if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
 
 	return { lat, lng };
 }

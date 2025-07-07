@@ -324,12 +324,7 @@ export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
 });
 
 // Componente para el submenú de prompts
-export const PromptsSubmenu = memo(function PromptsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	handleOpenChange,
-}: SubmenuProps) {
+export const PromptsSubmenu = memo(function PromptsSubmenu() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>
@@ -344,12 +339,7 @@ export const PromptsSubmenu = memo(function PromptsSubmenu({
 });
 
 // Componente para el submenú de notas
-export const NotesSubmenu = memo(function NotesSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	handleOpenChange,
-}: SubmenuProps) {
+export const NotesSubmenu = memo(function NotesSubmenu() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>
@@ -364,12 +354,7 @@ export const NotesSubmenu = memo(function NotesSubmenu({
 });
 
 // Componente para el submenú de conceptos
-export const ConceptsSubmenu = memo(function ConceptsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	handleOpenChange,
-}: SubmenuProps) {
+export const ConceptsSubmenu = memo(function ConceptsSubmenu() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>

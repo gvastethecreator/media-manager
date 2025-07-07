@@ -8,7 +8,58 @@
 import chalk from 'chalk';
 import { spawn } from 'child_process';
 import chokidar from 'chokidar';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const rootDir = join(__dirname, '..');
+
+// Función para cargar variables de entorno desde archivo
+function loadEnvFile(filePath) {
+	try {
+		if (!existsSync(filePath)) {
+			console.log(chalk.yellow(`⚠️ Archivo ${filePath} no encontrado`));
+			return {};
+		}
+
+		const content = readFileSync(filePath, 'utf8');
+		const env = {};
+
+		content.split('\n').forEach((line) => {
+			line = line.trim();
+			if (line && !line.startsWith('#')) {
+				const [key, ...valueParts] = line.split('=');
+				if (key && valueParts.length > 0) {
+					env[key.trim()] = valueParts.join('=').trim();
+				}
+			}
+		});
+
+		return env;
+	} catch (error) {
+		console.log(chalk.red(`❌ Error cargando archivo ${filePath}:`, error.message));
+		return {};
+	}
+}
+
+// Cargar variables de entorno
+const defaultEnv = loadEnvFile(join(rootDir, '.env'));
+const tauriEnv = loadEnvFile(join(rootDir, '.env.tauri'));
+
+// Combinar variables de entorno (prioridad: tauri > default > process.env)
+const serverEnv = {
+	...process.env,
+	...defaultEnv,
+	...tauriEnv,
+};
+
+console.log(chalk.blue('🔧 Variables de entorno cargadas:'));
+console.log(`- DATABASE_URL: ${serverEnv.DATABASE_URL || 'undefined'}`);
+console.log(`- API_PORT: ${serverEnv.API_PORT || serverEnv.PORT || 'undefined'}`);
+console.log(`- NODE_ENV: ${serverEnv.NODE_ENV || 'undefined'}`);
+console.log();
 
 const SERVER_SRC = 'src/server/index.ts';
 const SERVER_DIST = 'dist/server/index.js';
@@ -55,11 +106,12 @@ function startServer() {
 		return;
 	}
 
-	console.log(chalk.green('🚀 Iniciando servidor...'));
+	console.log(chalk.green('🚀 Iniciando servidor con variables de entorno...'));
 
 	serverProcess = spawn('bun', [SERVER_DIST], {
 		stdio: 'inherit',
 		shell: true,
+		env: serverEnv, // Usar las variables de entorno cargadas
 	});
 
 	serverProcess.on('error', (error) => {

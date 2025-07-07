@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -9,7 +9,7 @@ import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
 import toastService from '@/lib/ui/toast';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import { TagCategory } from '@/store/entities/tag/types';
-import type { TagComplete, TagCreateInput, TagExtended, TagUpdateInput } from '@/types/entities/tag';
+import type { TagComplete } from '@/types/entities/tag';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación

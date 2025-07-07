@@ -6,10 +6,10 @@
  */
 
 import * as crypto from 'crypto';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
-import { collections, imageCollections, images, videoCollections } from '@/lib/drizzle/schema';
+import { collections, images } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -668,7 +668,7 @@ export const toggleCollectionFavorite = async (id: string): Promise<CollectionWi
  * Clase de servicio para gestión de colecciones
  */
 export class CollectionService {
-	async getCollections(filters?: any): Promise<{ collections: CollectionWithStats[]; total: number }> {
+	async getCollections(_filters?: any): Promise<{ collections: CollectionWithStats[]; total: number }> {
 		const collections = await getCollections();
 		return { collections, total: collections.length };
 	}

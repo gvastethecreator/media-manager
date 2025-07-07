@@ -56,7 +56,7 @@
   },
   "workbench.preferredDarkColorTheme": "Bearded Theme Monokai Black",
   "git.enableSmartCommit": true,
-  "workbench.activityBar.location": "top",
+  "workbench.activityBar.location": "default",
   "powermode.enabled": true,
   "powermode.presets": "simple-rift",
   "powermode.combo.location": "off",

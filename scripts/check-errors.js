@@ -102,7 +102,7 @@ function showSuggestedCommands(allErrors) {
 		console.log(chalk.yellow('  bun lint:fix'));
 	}
 	if (allErrors.has('biome') || allErrors.has('biome-check') || allErrors.has('biome-fix')) {
-		console.log(chalk.yellow('  bun check:fix'));
+		console.log(chalk.yellow('  bun biome:fix'));
 	}
 	if (allErrors.has('tsc')) {
 		console.log(chalk.dim('  # Los errores de TypeScript requieren corrección manual.'));

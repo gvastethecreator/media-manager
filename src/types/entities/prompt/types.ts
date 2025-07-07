@@ -132,8 +132,8 @@ export interface PromptSearchOptions {
 	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: {
 		search?: string;
-		category?: string[];
-		purpose?: string[];
+		category?: string | string[];
+		purpose?: string | string[];
 		onlyFavorites?: boolean;
 		tags?: string[];
 		contentContains?: string;

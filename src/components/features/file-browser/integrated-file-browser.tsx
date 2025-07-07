@@ -4,7 +4,7 @@
  * @description Proporciona una experiencia completa de navegación de archivos con toolbar integrado
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { cn } from '@/lib/utils';
 import { useImageStore } from '@/store/entities/image';
