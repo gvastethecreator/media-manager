@@ -8,7 +8,7 @@
 
 import * as crypto from 'crypto';
 // Drizzle imports
-import { asc, count, desc, eq } from 'drizzle-orm';
+import { asc, count, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { documents } from '@/lib/drizzle/schema';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';

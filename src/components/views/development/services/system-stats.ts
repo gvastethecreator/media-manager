@@ -3,7 +3,7 @@
  * @description Compatible con Vite + React - ✅ MIGRADO A DRIZZLE
  */
 
-import { count, gte, sql, sum } from 'drizzle-orm';
+import { count, gte, sum } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections, folders, images, tags } from '@/lib/drizzle/schema';
 import { formatBytes } from '@/lib/utils/format.utils';

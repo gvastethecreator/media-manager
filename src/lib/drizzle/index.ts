@@ -18,9 +18,9 @@ import * as schema from './schema.js';
  */
 
 // Obtener la URL de la base de datos desde las variables de entorno
-// En el servidor (Node.js) usa ENV.DATABASE_URL
+// En el servidor (Node.js) usa process.env.DATABASE_URL directamente
 // En el cliente (browser) usa una URL por defecto que será interceptada por el proxy
-const databaseUrl = typeof window === 'undefined' ? ENV.DATABASE_URL : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
+const databaseUrl = typeof window === 'undefined' ? process.env.DATABASE_URL || 'file:./db.sqlite' : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
 
 let client: ReturnType<typeof createClient> | null = null;
 let dbInstance;
@@ -53,12 +53,12 @@ if (typeof window === 'undefined') {
 			};
 			return mockQuery;
 		},
-		insert: (table: any) => ({
+		insert: (_table: any) => ({
 			values: (data: any) => ({
 				returning: () =>
 					Promise.resolve([
 						{
-							id: 'mock-id-' + Date.now(),
+							id: `mock-id-${Date.now()}`,
 							createdAt: new Date().toISOString(),
 							updatedAt: new Date().toISOString(),
 							...data,
@@ -67,12 +67,12 @@ if (typeof window === 'undefined') {
 				execute: () =>
 					Promise.resolve({
 						rowCount: 1,
-						insertId: 'mock-id-' + Date.now(),
+						insertId: `mock-id-${Date.now()}`,
 					}),
 				onDuplicateKeyUpdate: () =>
 					Promise.resolve([
 						{
-							id: 'mock-id-' + Date.now(),
+							id: `mock-id-${Date.now()}`,
 							createdAt: new Date().toISOString(),
 							updatedAt: new Date().toISOString(),
 							...data,
@@ -80,7 +80,7 @@ if (typeof window === 'undefined') {
 					]),
 			}),
 		}),
-		update: (table: any) => ({
+		update: (_table: any) => ({
 			set: () => ({
 				where: () => ({
 					returning: () => Promise.resolve([]),
@@ -88,7 +88,7 @@ if (typeof window === 'undefined') {
 				}),
 			}),
 		}),
-		delete: (table: any) => ({
+		delete: (_table: any) => ({
 			where: () => ({
 				execute: () => Promise.resolve({ rowCount: 0 }),
 			}),

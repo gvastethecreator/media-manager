@@ -25,10 +25,15 @@ export interface UploadedImageBase {
 	id: string;
 	name: string;
 	path: string;
+	fileName: string;
+	fileSize: number;
+	mimeType: string;
 	type: UploadedFileType;
 	category: string;
 	hash: string;
 	imageId: string;
+	isProcessed: boolean;
+	processingError: string | null;
 	size: number;
 	width: number;
 	height: number;
@@ -37,6 +42,17 @@ export interface UploadedImageBase {
 	createdAt: Date;
 	updatedAt: Date;
 }
+
+/**
+ * Interfaz extendida para cliente
+ */
+export interface UploadedImageExtended extends UploadedImageBase {
+	dimensions: UploadedImageDimensions;
+	url: string;
+	thumbnailUrl?: string;
+}
+
+export interface UploadedImageWithStats extends UploadedImageExtended {}
 
 /**
  * Interfaz para dimensiones y aspect ratio

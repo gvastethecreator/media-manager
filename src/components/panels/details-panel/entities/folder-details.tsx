@@ -11,7 +11,6 @@ import {
 	Edit,
 	Eye,
 	EyeOff,
-	Filter,
 	Folder,
 	FolderOpen,
 	Grid,
@@ -25,7 +24,6 @@ import {
 	Upload,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -59,11 +57,7 @@ interface FolderContentItem {
 }
 
 // Componente principal de detalles para carpetas
-export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function FolderDetails({
-	entity,
-	isSelected,
-	onAction,
-}) {
+export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function FolderDetails({ entity, onAction }) {
 	const handleAction = useCallback(
 		(action: string, data?: any) => {
 			onAction?.(action, data);
@@ -316,7 +310,7 @@ const FolderBreadcrumb = memo<{ entity: FolderWithStats; onNavigate: (action: st
 									variant="ghost"
 									size="sm"
 									onClick={() => {
-										const path = '/' + pathSegments.slice(0, index + 1).join('/');
+										const path = `/${pathSegments.slice(0, index + 1).join('/')}`;
 										onNavigate('navigate', { path });
 									}}
 									className="h-6 px-2 text-xs"
@@ -412,11 +406,7 @@ export const FolderToolbar = memo<EntityToolbarProps<FolderWithStats>>(function 
 });
 
 // Componente de metadatos para carpetas
-export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(function FolderMetadata({
-	entity,
-	editable = false,
-	onUpdate,
-}) {
+export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(function FolderMetadata({ entity }) {
 	if (!isFolderWithStats(entity)) {
 		return null;
 	}

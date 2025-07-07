@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ViewProps } from '../../types';
 
 export function FoldersViewSimple(_props: ViewProps) {

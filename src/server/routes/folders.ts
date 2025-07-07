@@ -31,7 +31,7 @@ const CreateFolderSchema = z.object({
 const UpdateFolderSchema = CreateFolderSchema.partial().omit({ path: true });
 
 // GET /api/folders - Obtener todas las carpetas
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
 	try {
 		console.log('🔍 Obteniendo carpetas con Drizzle ORM');
 
@@ -385,7 +385,7 @@ router.get('/:id/stats', async (req, res) => {
 });
 
 // GET /api/folders/root - Obtener el ID de la carpeta raíz
-router.get('/root', async (req, res) => {
+router.get('/root', async (_req, res) => {
 	try {
 		const rootFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.parentFolderId, null));
 

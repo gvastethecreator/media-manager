@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /uploaded-images/stats - Obtener estadísticas de imágenes subidas
-router.get('/stats', async (req, res) => {
+router.get('/stats', async (_req, res) => {
 	const result = await getUploadedImageStats();
 
 	if (!result.success) {

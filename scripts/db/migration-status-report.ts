@@ -272,7 +272,7 @@ async function generateMigrationStatusReport() {
 
 	console.log('\n🔍 === DETALLE POR SERVICIO ===');
 
-	services.forEach((service) => {
+	for (const service of services) {
 		const statusIcon = service.status === 'COMPLETE' ? '✅' : service.status === 'PARTIAL' ? '🔄' : '❌';
 		console.log(`\n${statusIcon} **${service.name}** (${service.status})`);
 		console.log(`   📝 Métodos migrados: ${service.migratedMethods.join(', ')}`);
@@ -285,7 +285,7 @@ async function generateMigrationStatusReport() {
 		if (service.errors.length > 0) {
 			console.log(`   ❌ Errores: ${service.errors.join(', ')}`);
 		}
-	});
+	}
 
 	console.log('\n🎯 === PRÓXIMOS PASOS RECOMENDADOS ===');
 	console.log('1. Migrar CollectionService y CharacterService (estructura compleja)');

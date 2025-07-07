@@ -112,12 +112,12 @@ export const PromptSettings = () => {
 		setShowCreateDialog(true);
 	};
 
-	const handlePromptCreated = useCallback((newPrompt: PromptBase) => {
+	const handlePromptCreated = useCallback((_newPrompt: PromptBase) => {
 		setShowCreateDialog(false);
 		toastService.success('Prompt creado correctamente');
 	}, []);
 
-	const handlePromptUpdated = useCallback((updatedPrompt: PromptBase) => {
+	const handlePromptUpdated = useCallback((_updatedPrompt: PromptBase) => {
 		setShowCreateDialog(false);
 		setEditingPrompt(null);
 		toastService.success('Prompt actualizado correctamente');

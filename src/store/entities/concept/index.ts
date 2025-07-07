@@ -116,7 +116,7 @@ const createUISlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> =
 });
 
 // --- SLICE: Relations (Mock) ---
-const createRelationsSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> = (set, get) => ({
+const createRelationsSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> = (_set, get) => ({
 	addConceptToEntity: async (conceptId, entityId, entityType) => {
 		// Mock implementation, replace with actual server action
 		storeLogger.info(`🔗 Linking concept ${conceptId} to ${entityType} ${entityId}`);

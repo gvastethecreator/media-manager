@@ -16,9 +16,9 @@ async function main() {
 		);
 
 		console.log('📋 Tablas encontradas:');
-		tablesResult.forEach((table: any) => {
+		for (const table of tablesResult) {
 			console.log(`  - ${table.name}`);
-		});
+		}
 
 		console.log(`\n✅ Total: ${tablesResult.length} tablas\n`);
 
@@ -38,12 +38,16 @@ async function main() {
 
 		if (propertyVariations.length > 0) {
 			console.log('\n🔍 Variaciones de Property encontradas:');
-			propertyVariations.forEach((t: any) => console.log(`  - ${t.name}`));
+			for (const t of propertyVariations) {
+				console.log(`  - ${t.name}`);
+			}
 		}
 
 		if (wildcardVariations.length > 0) {
 			console.log('\n🔍 Variaciones de Wildcard encontradas:');
-			wildcardVariations.forEach((t: any) => console.log(`  - ${t.name}`));
+			for (const t of wildcardVariations) {
+				console.log(`  - ${t.name}`);
+			}
 		}
 	} catch (error) {
 		console.error('❌ Error al verificar las tablas:', error);

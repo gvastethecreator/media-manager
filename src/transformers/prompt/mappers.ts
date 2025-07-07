@@ -179,7 +179,6 @@ export function mapPromptSortCriteriaToDrizzle(
 			return { name: sortDir };
 		case 'created':
 			return { createdAt: sortDir };
-		case 'updated':
 		default:
 			return { updatedAt: sortDir };
 	}
@@ -290,7 +289,6 @@ export function sortPrompts(
 				aValue = new Date(a.createdAt);
 				bValue = new Date(b.createdAt);
 				break;
-			case 'updated':
 			default:
 				aValue = new Date(a.updatedAt);
 				bValue = new Date(b.updatedAt);

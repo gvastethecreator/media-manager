@@ -18,7 +18,7 @@ import {
 const router = express.Router();
 
 // GET /api/system/navigation - Obtener datos de navegación
-router.get('/navigation', async (req, res) => {
+router.get('/navigation', async (_req, res) => {
 	try {
 		const navigationData = await getNavigationData();
 		res.json(navigationData);
@@ -32,7 +32,7 @@ router.get('/navigation', async (req, res) => {
 });
 
 // GET /api/system/health - Health check del sistema
-router.get('/health', async (req, res) => {
+router.get('/health', async (_req, res) => {
 	try {
 		res.json({
 			status: 'ok',
@@ -51,7 +51,7 @@ router.get('/health', async (req, res) => {
 });
 
 // GET /api/system/stats - Obtener estadísticas del sistema
-router.get('/stats', async (req, res) => {
+router.get('/stats', async (_req, res) => {
 	try {
 		const stats = await getSystemStats();
 		res.json(stats);
@@ -65,7 +65,7 @@ router.get('/stats', async (req, res) => {
 });
 
 // POST /api/system/repair - Reparar el sistema
-router.post('/repair', async (req, res) => {
+router.post('/repair', async (_req, res) => {
 	try {
 		const result = await repairSystem();
 		res.json(result);
@@ -79,7 +79,7 @@ router.post('/repair', async (req, res) => {
 });
 
 // POST /api/system/reset-db - Resetear la base de datos
-router.post('/reset-db', async (req, res) => {
+router.post('/reset-db', async (_req, res) => {
 	try {
 		const result = await resetDatabase();
 		res.json(result);
@@ -93,7 +93,7 @@ router.post('/reset-db', async (req, res) => {
 });
 
 // GET /api/system/version - Obtener versión del sistema
-router.get('/version', async (req, res) => {
+router.get('/version', async (_req, res) => {
 	try {
 		const version = await getSystemVersion();
 		res.json(version);
@@ -107,7 +107,7 @@ router.get('/version', async (req, res) => {
 });
 
 // GET /api/system/settings - Obtener configuración global del sistema
-router.get('/settings', async (req, res) => {
+router.get('/settings', async (_req, res) => {
 	try {
 		const settings = await getSystemSettings();
 		res.json(settings);
@@ -135,7 +135,7 @@ router.put('/settings', async (req, res) => {
 });
 
 // POST /api/system/settings/reset - Resetear configuración global del sistema
-router.post('/settings/reset', async (req, res) => {
+router.post('/settings/reset', async (_req, res) => {
 	try {
 		const resetSettings = await resetSystemSettings();
 		res.json(resetSettings);
@@ -194,7 +194,7 @@ router.post('/profiles/:profileId/settings/reset', async (req, res) => {
 });
 
 // POST /api/system/settings/default - Crear datos de configuración por defecto
-router.post('/settings/default', async (req, res) => {
+router.post('/settings/default', async (_req, res) => {
 	try {
 		const defaultSettings = await createDefaultSettingsData();
 		res.json(defaultSettings);
@@ -208,7 +208,7 @@ router.post('/settings/default', async (req, res) => {
 });
 
 // ENDPOINT TEMPORAL PARA DEBUG DE BASE DE DATOS
-router.get('/dbinfo', async (req, res) => {
+router.get('/dbinfo', async (_req, res) => {
 	try {
 		const info = await getDatabaseInfo();
 		res.json(info);

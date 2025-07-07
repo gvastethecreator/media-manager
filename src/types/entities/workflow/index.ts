@@ -13,7 +13,13 @@
  */
 
 // --- Tipos Canónicos (NUEVO) ---
-export type { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from './base';
+export type {
+	WorkflowBase,
+	WorkflowCreateInput,
+	WorkflowStatistics,
+	WorkflowUpdateInput,
+	WorkflowWithStats,
+} from './base';
 
 // --- Esquemas de Validación ---
 export { workflowSchema } from './workflow.schema';

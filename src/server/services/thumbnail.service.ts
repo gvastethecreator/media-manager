@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
+import { count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';

@@ -8,8 +8,12 @@
 /**
  * 📁 Tipo base para una carpeta - Campos principales
  */
-export interface FolderBase {
-	id: string;
+import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
+
+/**
+ * 📁 Tipo base para una carpeta - Campos principales
+ */
+export interface FolderBase extends EntityBase {
 	name: string;
 	description: string | null;
 	path: string;
@@ -18,13 +22,9 @@ export interface FolderBase {
 	featuredImage: string | null;
 	isFavorite: boolean;
 	autoReindex: boolean;
-	totalFiles: number;
-	totalSize: number;
 	lastIndexed: Date | null;
 	parentId: string | null;
 	presetId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
 }
 
 /**
@@ -40,6 +40,8 @@ export interface FolderStatistics {
 	contentDiversity: number; // 0-100 basado en variedad de tipos
 	organizationScore: number; // 0-100 basado en estructura y nombres
 	totalItems: number;
+	totalFiles: number; // Movido de FolderBase
+	totalSize: number; // Movido de FolderBase
 
 	// Métricas de uso
 	accessFrequency: number; // Frecuencia de acceso estimada
@@ -78,69 +80,6 @@ export interface FolderStatistics {
 }
 
 /**
- * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)
- */
-export interface FolderWithStats extends FolderBase {
-	statistics: FolderStatistics;
-	_count: {
-		children: number;
-		images: number;
-		videos: number;
-	};
-}
-
-/**
- * 📁 Tipo completo para casos especiales (backward compatibility)
- */
-export interface FolderComplete extends FolderBase {
-	parent?: FolderBase | null;
-	children?: FolderBase[];
-	images?: unknown[];
-	videos?: unknown[];
-	_count?: {
-		children?: number;
-		images?: number;
-		videos?: number;
-		notes?: number;
-		documents?: number;
-	};
-}
-
-/**
- * 📁 Input para crear una nueva carpeta
- */
-export interface FolderCreateInput
-	extends Omit<
-		FolderBase,
-		| 'id'
-		| 'createdAt'
-		| 'updatedAt'
-		| 'totalFiles'
-		| 'totalSize'
-		| 'lastIndexed'
-		| 'isFavorite'
-		| 'featuredImage'
-		| 'description'
-		| 'emoji'
-		| 'color'
-		| 'parentId'
-		| 'presetId'
-	> {
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	parentId?: string | null;
-	presetId?: string | null;
-	isFavorite?: boolean;
-	featuredImage?: string | null;
-}
-
-/**
- * 📁 Input para actualizar una carpeta existente
- */
-export interface FolderUpdateInput extends Partial<FolderCreateInput> {}
-
-/**
  * 📁 Propiedades de UI para una carpeta
  */
 export interface FolderUIProps {
@@ -154,16 +93,22 @@ export interface FolderUIProps {
 }
 
 /**
- * 📁 Tipo extendido con estado de UI
+ * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)
  */
-export interface FolderExtended extends FolderComplete, FolderUIProps {}
+export interface FolderWithStats extends FolderBase, EntityWithStats, FolderUIProps {
+	statistics: FolderStatistics;
+	children?: FolderWithStats[]; // Para estructuras recursivas
+}
 
 /**
- * 📁 Tipo extendido y completo, con hijos también extendidos
+ * 📁 Input para crear una nueva carpeta
  */
-export interface FolderExtendedComplete extends FolderExtended {
-	children?: FolderExtendedComplete[];
-}
+export interface FolderCreateInput extends Omit<FolderBase, 'id' | 'createdAt' | 'updatedAt'> {}
+
+/**
+ * 📁 Input para actualizar una carpeta existente
+ */
+export type FolderUpdateInput = Partial<FolderCreateInput>;
 
 /**
  * 📁 Filtros para buscar carpetas
@@ -183,51 +128,15 @@ export interface FolderFilters {
 export interface FolderSearchOptions {
 	skip?: number;
 	take?: number;
-	orderBy?: Record<string, any>;
+	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: FolderFilters;
-	include?: Record<string, any>;
+	include?: Record<string, boolean>;
 }
 
-/**
- * 📁 Relaciones de una carpeta (para FolderComplete)
- */
-export interface FolderRelations {
-	images?: unknown[];
-	videos?: unknown[];
-	parent?: FolderBase | null;
-	children?: FolderBase[];
-}
-
-/**
- * 📁 Conteos de las relaciones (para FolderComplete)
- */
-export interface FolderCounts {
-	_count?: {
-		images?: number;
-		children?: number;
-		videos?: number;
-		notes?: number;
-		documents?: number;
-	};
-}
-
-/**
- * 📁 Estadísticas básicas de una carpeta (legacy)
- */
-export interface FolderStats {
-	totalSize: number;
-	totalFiles: number;
-	lastModified: Date;
-	imageCount: number;
-	videoCount: number;
-	directoryCount: number;
-}
-
-// Alias para retrocompatibilidad
+// Alias para retrocompatibilidad (mantener solo si es estrictamente necesario)
 export type CreateFolderData = FolderCreateInput;
 export type UpdateFolderData = FolderUpdateInput;
-export type FolderWithRelations = FolderComplete;
-export type Folder = FolderComplete; // Alias principal
+export type Folder = FolderWithStats; // Alias principal
 
 // 🟢 Documentación y advertencia:
 // - USAR FolderWithStats como tipo principal en stores, componentes y lógica de negocio

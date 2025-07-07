@@ -341,7 +341,7 @@ export const ConceptService = {
 			};
 		} catch (error) {
 			conceptLogger.error('Error getting concept stats:', error);
-							throw new Error('Error al obtener estadísticas de conceptos');
+			throw new Error('Error al obtener estadísticas de conceptos');
 		}
 	},
 

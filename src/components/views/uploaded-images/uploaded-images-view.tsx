@@ -34,12 +34,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 import { toastService } from '@/services/toast';
-import {
-	deleteUploadedImage,
-	getUploadedImages,
-	uploadImages,
-} from '@/services/uploaded-images/uploaded-images.service';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
 import { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';

@@ -133,7 +133,7 @@ export function validateFolderPath(path: string): string {
 	const normalizedPath = path.replace(/\\/g, '/').replace(/\/+/g, '/');
 
 	if (!normalizedPath.startsWith('/')) {
-		return '/' + normalizedPath;
+		return `/${normalizedPath}`;
 	}
 
 	return normalizedPath;

@@ -17,7 +17,7 @@ router.get('/app-stats', (_req, res) => {
 				pending: rawStats.requests.pending,
 				successRate:
 					rawStats.requests.total > 0
-						? ((rawStats.requests.success / rawStats.requests.total) * 100).toFixed(2) + '%'
+						? `${((rawStats.requests.success / rawStats.requests.total) * 100).toFixed(2)}%`
 						: 'N/A',
 			},
 			performance: {

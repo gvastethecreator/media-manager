@@ -14,14 +14,13 @@ import {
 	Pause,
 	Play,
 	Scissors,
-	Settings,
 	Share,
 	SkipBack,
 	SkipForward,
 	Volume2,
 	VolumeX,
 } from 'lucide-react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +30,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
@@ -57,11 +55,7 @@ const formatTime = (seconds: number): string => {
 };
 
 // Componente principal de detalles para videos
-export const VideoDetails = memo<EntityDetailsProps<VideoWithStats>>(function VideoDetails({
-	entity,
-	isSelected,
-	onAction,
-}) {
+export const VideoDetails = memo<EntityDetailsProps<VideoWithStats>>(function VideoDetails({ entity, onAction }) {
 	const handleAction = useCallback(
 		(action: string, data?: any) => {
 			onAction?.(action, data);
@@ -438,11 +432,7 @@ export const VideoToolbar = memo<EntityToolbarProps<VideoWithStats>>(function Vi
 });
 
 // Componente de metadatos para videos
-export const VideoMetadata = memo<EntityMetadataProps<VideoWithStats>>(function VideoMetadata({
-	entity,
-	editable = false,
-	onUpdate,
-}) {
+export const VideoMetadata = memo<EntityMetadataProps<VideoWithStats>>(function VideoMetadata({ entity }) {
 	if (!isVideoWithStats(entity)) {
 		return null;
 	}

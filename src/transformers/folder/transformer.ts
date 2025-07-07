@@ -20,7 +20,7 @@ const logger = serverLogger.withContext('FolderTransformer');
 /**
  * 🔄 Calcula estadísticas avanzadas para una carpeta
  */
-function calculateFolderStatistics(folder: any, allFolders?: any[]): FolderStatistics {
+function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStatistics {
 	const { _count, path, name, totalFiles, totalSize, lastIndexed, parentId, children } = folder;
 
 	// Calcular profundidad de jerarquía
@@ -74,7 +74,7 @@ function calculateFolderStatistics(folder: any, allFolders?: any[]): FolderStati
 	const breadcrumbs = pathParts.map((part, index) => ({
 		id: `breadcrumb-${index}`,
 		name: part,
-		path: '/' + pathParts.slice(0, index + 1).join('/'),
+		path: `/${pathParts.slice(0, index + 1).join('/')}`,
 	}));
 
 	// Auto-tagging basado en características

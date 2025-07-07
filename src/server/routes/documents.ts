@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import {
 	createDocument,
 	deleteDocument,
@@ -11,7 +10,7 @@ import {
 const router = Router();
 
 // GET /api/documents - Obtener todos los documentos
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
 	try {
 		const documents = await getDocuments();
 		res.json(documents);

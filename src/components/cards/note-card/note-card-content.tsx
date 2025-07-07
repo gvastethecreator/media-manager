@@ -13,7 +13,7 @@ import {
 	Video,
 } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useNoteCounts } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
@@ -41,7 +41,6 @@ export function NoteCardContent({
 	status = 'pendiente',
 	priority = 0,
 	primaryColor,
-	secondaryColor,
 	noteId,
 	tcgMode = true,
 }: NoteCardContentProps) {
@@ -259,7 +258,9 @@ function StatCounter({
 		<div className="flex flex-col items-center justify-center">
 			<div className="flex items-center gap-1">
 				{icon}
-				<span className="font-medium">{count}</span>
+				<span className="font-medium" style={{ color: primaryColor }}>
+					{count}
+				</span>
 			</div>
 			<div className="text-[0.65rem] opacity-70">{label}</div>
 		</div>

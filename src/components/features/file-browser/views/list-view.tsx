@@ -47,14 +47,7 @@ const typeIcons: Record<string, React.ComponentType<any>> = {
 	// Añadir más según necesidad
 };
 
-export const ListView = memo<ListViewProps>(function ListView({
-	items,
-	itemSize,
-	selectedIds,
-	containerWidth,
-	onItemClick,
-	onItemDoubleClick,
-}) {
+export const ListView = memo<ListViewProps>(function ListView({ items, selectedIds, onItemClick, onItemDoubleClick }) {
 	// Preparar datos de la tabla con información adicional
 	const tableData = useMemo(() => {
 		return items.map((item) => {

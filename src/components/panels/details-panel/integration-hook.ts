@@ -3,7 +3,7 @@
  * @module components/panels/details-panel/integration-hook
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import type { EntityWithStats } from '@/types/migration';
 

@@ -55,7 +55,15 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		recentVideos: [],
 		totalSize: character.statistics?.totalAssociations || 0,
 		// Parsear campos JSON para UI
-		parsedStats: safeJsonParse(character.stats),
+		stats: {
+			imageCount: character.statistics?.totalImages || 0,
+			videoCount: character.statistics?.totalVideos || 0,
+			albumCount: character.statistics?.totalAlbums || 0,
+			collectionCount: character.statistics?.totalCollections || 0,
+			noteCount: character.statistics?.totalNotes || 0,
+			promptCount: character.statistics?.totalPrompts || 0,
+			totalRelations: character.statistics?.totalAssociations || 0,
+		},
 		parsedRelationships: safeJsonParse(character.relationships),
 		parsedGoals: safeJsonParse(character.goals),
 		parsedFears: safeJsonParse(character.fears),

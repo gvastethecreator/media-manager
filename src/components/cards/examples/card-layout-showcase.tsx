@@ -4,7 +4,7 @@
  * @description Demuestra los diferentes layouts y variantes disponibles para las cards
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
 import { EntityCard } from '../entity-card';

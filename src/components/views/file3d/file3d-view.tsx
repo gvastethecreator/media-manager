@@ -51,7 +51,7 @@ export function File3DView(_props: ViewProps) {
 	// Cachear el resultado de getSortedFile3Ds
 	const sortedFile3Ds = useMemo(() => {
 		return getSortedFile3Ds();
-	}, [getSortedFile3Ds, file3dsRecord]);
+	}, [getSortedFile3Ds]);
 
 	if (error) {
 		return (

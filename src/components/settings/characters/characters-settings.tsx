@@ -1,4 +1,4 @@
-import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
+import { Filter, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -108,12 +108,12 @@ export function CharactersSettings() {
 	);
 
 	// Manejar creación exitosa
-	const handleCharacterCreated = useCallback((newCharacter: CharacterWithStats) => {
+	const handleCharacterCreated = useCallback((_newCharacter: CharacterWithStats) => {
 		toastService.success('Personaje creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleCharacterUpdated = useCallback((updatedCharacter: CharacterWithStats) => {
+	const handleCharacterUpdated = useCallback((_updatedCharacter: CharacterWithStats) => {
 		toastService.success('Personaje actualizado');
 	}, []);
 

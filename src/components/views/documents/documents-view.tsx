@@ -50,7 +50,7 @@ export function DocumentsView(_props: ViewProps) {
 	// Cachear el resultado de getSortedDocuments
 	const sortedDocuments = useMemo(() => {
 		return getSortedDocuments();
-	}, [getSortedDocuments, documentsRecord]);
+	}, [getSortedDocuments]);
 
 	if (error) {
 		return (

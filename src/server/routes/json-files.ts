@@ -28,7 +28,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET /json-files - Obtener lista de archivos JSON con filtros
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
 	try {
 		const jsonFiles = await getJsonFiles();
 		res.json(jsonFiles);

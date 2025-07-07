@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { getAlbums } from '@/services/album/album.service';
-import { getCharacters, searchCharacters } from '@/services/character/character.service';
+import { getCharacters } from '@/services/character/character.service';
 import { getCollections } from '@/services/collection/collection.service';
 import { ConceptService } from '@/services/concept/concept.service';
 import { searchGroupsService } from '@/services/group/group.service';

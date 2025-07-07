@@ -14,6 +14,10 @@ export type AlbumBase = {
 	totalImages: number;
 	totalVideos: number;
 	totalSize: number;
+	filters: string | null;
+	shortcut: string | null;
+	category: string | null;
+	metadata: Record<string, any> | null;
 	lastImageAddedAt: Date | null;
 	lastVideoAddedAt: Date | null;
 	createdAt: Date;

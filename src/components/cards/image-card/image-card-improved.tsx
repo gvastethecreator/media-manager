@@ -53,7 +53,6 @@ export function ImageCardImproved({
 	isSelected = false,
 	isHoverable = true,
 	showRelations = false,
-	priority = false,
 }: ImageCardProps) {
 	const [imageData, setImageData] = useState<ImageCardData | null>(null);
 	const [isLoading, setIsLoading] = useState(true);

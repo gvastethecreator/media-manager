@@ -23,35 +23,35 @@ import type { WildcardComplete } from '../wildcard';
 // --- ESTRUCTURAS DE DATOS SERIALIZADAS ---
 
 export interface WorldItemAttribute {
-	name: string;
-	value: number;
+	name?: string;
+	value?: number | string;
 	maxValue?: number;
 }
 export interface WorldItemEffect {
-	name: string;
-	description: string;
+	name?: string;
+	description?: string;
 	duration?: string;
 	cooldown?: string;
 }
 export interface WorldItemRequirement {
-	name: string;
-	value: number;
+	name?: string;
+	value?: number;
 	description?: string;
 }
 export interface WorldItemStat {
-	name: string;
-	value: number;
+	name?: string;
+	value?: number;
 	modifier?: string;
 }
 export interface WorldItemProperty {
-	name: string;
-	value: string | number | boolean;
+	name?: string;
+	value?: string | number | boolean;
 	description?: string;
 }
 export interface WorldItemFilter {
-	type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
-	operator: 'AND' | 'OR' | 'NOT';
-	value: string | number | boolean;
+	type?: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
+	operator?: 'AND' | 'OR' | 'NOT';
+	value?: string | number | boolean;
 	field?: string;
 }
 
@@ -66,18 +66,11 @@ export interface WorldItemBase {
 	rarity: string | null;
 	size: string | null;
 	origin: string | null;
-	attributes: string; // JSON
-	effects: string; // JSON
-	requirements: string; // JSON
-	stats: string; // JSON
-	properties: string; // JSON
-	filters: string; // JSON
-	tags: string; // JSON
 	isFavorite: boolean;
 	shortcut: string | null;
 	featuredImage: string | null;
-	emoji: string;
-	color: string;
+	emoji: string | null;
+	color: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -116,39 +109,44 @@ export interface WorldItemCounts {
 	};
 }
 
-// Omitimos los campos JSON para reemplazarlos por su versión deserializada
-type OmittedFields = 'attributes' | 'effects' | 'requirements' | 'stats' | 'properties' | 'filters' | 'tags';
+export interface WorldItemStatistics {
+	totalImages: number;
+	totalVideos: number;
+	totalAlbums: number;
+	totalCollections: number;
+	totalTags: number;
+	totalCharacters: number;
+	totalPlaces: number;
+	totalConcepts: number;
+	totalPrompts: number;
+	totalNotes: number;
+	totalWildcards: number;
+	totalProperties: number;
+	totalGroups: number;
+	totalRelations: number;
+	totalSize: number;
+	averageSize: number;
+	averageRelations: number;
+	popularityScore: number;
+	completenessScore: number;
+	usageCount: number;
+	lastUsed: Date | null;
+}
 
-export type WorldItemComplete = Omit<WorldItemBase, OmittedFields> & {
+export interface WorldItemWithStats extends WorldItemBase, WorldItemRelations {
+	_stats: WorldItemStatistics;
 	attributes: WorldItemAttribute[];
 	effects: WorldItemEffect[];
 	requirements: WorldItemRequirement[];
 	stats: WorldItemStat[];
 	properties: WorldItemProperty[];
 	filters: WorldItemFilter[];
-	tags: string[];
-} & WorldItemRelations &
-	WorldItemCounts;
+	tags: TagComplete[];
+}
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-type WorldItemRelationInput = {
-	imageIds?: string[];
-	videoIds?: string[];
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	conceptIds?: string[];
-	promptIds?: string[];
-	noteIds?: string[];
-	wildcardIds?: string[];
-	propertyIds?: string[];
-	groupIds?: string[];
-};
-
-export type WorldItemCreateInput = Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt' | OmittedFields> & {
+export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {
 	attributes?: WorldItemAttribute[];
 	effects?: WorldItemEffect[];
 	requirements?: WorldItemRequirement[];
@@ -156,7 +154,7 @@ export type WorldItemCreateInput = Omit<WorldItemBase, 'id' | 'createdAt' | 'upd
 	properties?: WorldItemProperty[];
 	filters?: WorldItemFilter[];
 	tags?: string[];
-} & WorldItemRelationInput;
+}
 
 export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 

@@ -1,10 +1,8 @@
 import type { LucideIcon } from 'lucide-react';
 import type React from 'react';
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 import { ViewType } from '@/components/views/types';
-import type { CategoryChild } from '../types';
 import { NavCategoryChildren } from './nav-category-children';
-import { NavCategoryItem } from './nav-category-item';
 
 const MemoizedNavCategoryChildren = memo(NavCategoryChildren);
 
@@ -14,14 +12,12 @@ export const NavCategoryWithChildren = memo(function NavCategoryWithChildren({
 	color,
 	icon,
 	children,
-	isNavCollapsed,
 }: {
 	id: ViewType;
 	label: string;
 	color: string;
 	icon: LucideIcon;
 	children: React.ReactNode;
-	isNavCollapsed: boolean;
 }) {
 	return (
 		<div key={id}>

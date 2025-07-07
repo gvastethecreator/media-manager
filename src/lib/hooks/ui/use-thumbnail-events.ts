@@ -1,5 +1,5 @@
 import { EventSourcePolyfill } from 'event-source-polyfill';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessStatus } from '@/store/thumbnails.store';
 import { useThumbnailStore } from '@/store/thumbnails.store';

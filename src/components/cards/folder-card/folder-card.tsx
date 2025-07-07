@@ -1,44 +1,41 @@
 import { memo, useCallback, useMemo } from 'react';
-import { useFolderStats, useRecentFolderImages } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
-import type { FolderComplete, FolderWithStats } from '@/types/entities/folder';
-import { FolderCardContent } from './folder-card-content';
-import { FolderCardFooter } from './folder-card-footer';
+import { FolderWithStats } from '@/types/entities/folder';
+import { useRecentFolderImages } from '@/hooks/use-recent-folder-images';
+import { useFolderStats } from '@/hooks/use-folder-stats';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
+import { FolderCardContent } from './folder-card-content';
+import { FolderCardFooter } from './folder-card-footer';
 
-interface FolderCardProps {
-	folder: FolderWithStats | FolderComplete;
+export interface FolderCardProps {
+	folder: FolderWithStats;
 	onClick?: () => void;
 	href?: string;
 	className?: string;
-	compact?: boolean;
 	interactive?: boolean;
 	tcgMode?: boolean;
 }
 
-/**
- * Componente para mostrar una carpeta en formato de tarjeta
- * Optimizado para usar FolderWithStats pero compatible con FolderComplete
- */
 export const FolderCard = memo(function FolderCard({
 	folder,
 	onClick,
 	href,
 	className,
-	compact = false,
 	interactive = true,
 	tcgMode = false,
 }: FolderCardProps) {
+	// Preparar datos con fallbacks
+	const { data: recentImagesData } = useRecentFolderImages(folder?.id || '');
+	const { data: folderStatsData } = useFolderStats(folder?.id || '');
+
 	// Validar que el objeto folder exista
 	if (!folder) {
 		console.error('FolderCard recibió un objeto folder inválido');
 		return null;
 	}
 
-	// Preparar datos con fallbacks
-	const { data: recentImagesData } = useRecentFolderImages(folder.id);
-	const { data: folderStatsData } = useFolderStats(folder.id);
+	// Resto del componente (se moverá dentro de un bloque condicional)
 
 	const folderData = useMemo(() => {
 		const imageCount = folder._count?.images ?? 0;
@@ -80,13 +77,13 @@ export const FolderCard = memo(function FolderCard({
 				interactive && 'hover:shadow-md cursor-pointer',
 				className
 			)}
-			style={
+			style={{
 				tcgMode
 					? {
 							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
 						}
 					: {}
-			}
+			}}
 		>
 			{/* Borde brillante para TCG mode */}
 			{tcgMode && (
@@ -154,7 +151,7 @@ export const FolderCard = memo(function FolderCard({
 				<>
 					{/* Textura de fondo sutil */}
 					<div
-						className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+						className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
 						style={{
 							background: `radial-gradient(circle at 50% 50%, ${primaryColor}10 0%, transparent 70%)`,
 							zIndex: 1,

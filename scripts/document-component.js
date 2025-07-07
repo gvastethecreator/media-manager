@@ -112,7 +112,7 @@ function appendToDocumentation(template) {
 			// Insertar antes de la sección de próximos componentes
 			const beforeSection = currentDocs.substring(0, insertPoint);
 			const afterSection = currentDocs.substring(insertPoint);
-			fs.writeFileSync(DOCS_PATH, beforeSection + template + '\n' + afterSection);
+			fs.writeFileSync(DOCS_PATH, `${beforeSection + template}\n${afterSection}`);
 		}
 
 		console.log('✅ Documentación agregada exitosamente');

@@ -1,55 +1,6 @@
-import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useMemo } from 'react';
-import { useConcept, useConceptCounts, useRecentConceptImages } from '@/lib/api/concepts';
-import { cn } from '@/lib/utils';
-import type { ConceptWithStats } from '@/types/entities/concept';
-import { CardHeader } from '../card-header';
-import { ConceptCardContent } from './concept-card-content';
-import { ConceptCardFooter } from './concept-card-footer';
-import { ConceptCardImages } from './concept-card-images';
-
-export interface ConceptCardProps {
-	conceptId: string;
-	onClick?: (conceptData: ConceptWithStats) => void;
-	className?: string;
-	style?: React.CSSProperties;
-	tcgMode?: boolean;
-}
-
-/**
- * Card para mostrar un concepto, con un diseño inspirado en cartas de TCG.
- */
 export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
 	const { data: concept, isLoading, error } = useConcept(conceptId);
 	const { data: conceptCounts } = useConceptCounts(conceptId);
-
-	// Si no hay datos del concepto o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando concepto...</p>
-			</div>
-		);
-	}
-
-	if (error || !concept) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Concepto no encontrado'}</p>
-			</div>
-		);
-	}
 
 	// Extraer propiedades básicas del objeto
 	const {
@@ -64,21 +15,21 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		updatedAt,
 		isFavorite = false,
 		tags: conceptTags,
-	} = concept;
+	} = concept || {}; // Añadir fallback para evitar errores si concept es undefined
 
 	// Calcular valores derivados
 	const imagesCount = conceptCounts?.images || 0;
-	const videosCount = concept.videos?.length || 0;
-	const promptsCount = concept.prompts?.length || 0;
-	const notesCount = concept.notes?.length || 0;
-	const charactersCount = concept.characters?.length || 0;
-	const placesCount = concept.places?.length || 0;
-	const worldItemsCount = concept.worldItems?.length || 0;
-	const propertiesCount = concept.properties?.length || 0;
-	const wildcardsCount = concept.wildcards?.length || 0;
-	const groupsCount = concept.groups?.length || 0;
-	const albumsCount = concept.albums?.length || 0;
-	const collectionsCount = concept.collections?.length || 0;
+	const videosCount = concept?.videos?.length || 0;
+	const promptsCount = concept?.prompts?.length || 0;
+	const notesCount = concept?.notes?.length || 0;
+	const charactersCount = concept?.characters?.length || 0;
+	const placesCount = concept?.places?.length || 0;
+	const worldItemsCount = concept?.worldItems?.length || 0;
+	const propertiesCount = concept?.properties?.length || 0;
+	const wildcardsCount = concept?.wildcards?.length || 0;
+	const groupsCount = concept?.groups?.length || 0;
+	const albumsCount = concept?.albums?.length || 0;
+	const collectionsCount = concept?.collections?.length || 0;
 	const tagsCount = conceptCounts?.tags || 0;
 
 	// Total de relaciones para efectos visuales
@@ -127,7 +78,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
 				e.preventDefault();
 				onClick(concept);
 			}
@@ -138,7 +89,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	// Parsear tags si es un string
 	const tags = useMemo(() => {
 		// Comprobar si concept tiene la propiedad tags
-		if ('tags' in concept) {
+		if (concept && 'tags' in concept) {
 			const conceptTags = concept.tags;
 			// Si tags es un string, intentar parsearlo
 			if (typeof conceptTags === 'string' && conceptTags) {
@@ -178,6 +129,33 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		};
 	}, [primaryColor, style, tcgMode, totalRelations]);
 
+	// Si no hay datos del concepto o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando concepto...</p>
+			</div>
+		);
+	}
+
+	if (error || !concept) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Concepto no encontrado'}</p>
+			</div>
+		);
+	}
+
 	// Render del componente
 	return (
 		<motion.div
@@ -201,8 +179,8 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 			onKeyDown={handleKeyDown}
 			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
-			aria-label={`Concepto: ${concept.name}`}
-			data-concept-id={concept.id}
+			aria-label={`Concepto: ${name}`}
+			data-concept-id={id}
 			style={cardStyle}
 		>
 			{/* Efectos decorativos de carta TCG */}
@@ -264,11 +242,11 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
-				title={concept.name}
-				subtitle={concept.category || 'General'}
+				title={name}
+				subtitle={category || 'General'}
 				icon={
-					concept.emoji ? (
-						<span className="text-lg">{concept.emoji}</span>
+					emoji ? (
+						<span className="text-lg">{emoji}</span>
 					) : tcgMode ? (
 						<BrainCircuitIcon className="w-4 h-4" />
 					) : (
@@ -279,36 +257,31 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 			/>
 
 			{/* Sección de imágenes */}
-			<ConceptCardImages
-				conceptId={concept.id}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-				tcgMode={tcgMode}
-			/>
+			<ConceptCardImages conceptId={id} primaryColor={primaryColor} secondaryColor={secondaryColor} tcgMode={tcgMode} />
 
 			{/* Contenido principal */}
 			<ConceptCardContent
-				description={concept.description}
-				content={concept.content}
-				category={concept.category}
+				description={description}
+				content={content}
+				category={category}
 				tags={tags}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
-				conceptId={concept.id}
+				conceptId={id}
 				tcgMode={tcgMode}
 			/>
 
 			{/* Pie de la tarjeta */}
 			<ConceptCardFooter
-				createdAt={concept.createdAt}
-				updatedAt={concept.updatedAt}
+				createdAt={createdAt}
+				updatedAt={updatedAt}
 				imagesCount={imagesCount}
 				videosCount={videosCount}
 				promptsCount={promptsCount}
 				notesCount={notesCount}
 				totalRelations={totalRelations}
-				isFavorite={concept.isFavorite}
-				category={concept.category}
+				isFavorite={isFavorite}
+				category={category}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 				tcgMode={tcgMode}

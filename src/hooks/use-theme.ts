@@ -90,7 +90,7 @@ export function useTheme(): UseThemeReturn {
 			mediaQuery.addEventListener('change', handleChange);
 			return () => mediaQuery.removeEventListener('change', handleChange);
 		}
-	}, [theme]);
+	}, [theme, applyTheme, resolveTheme]);
 
 	// Función para cambiar tema
 	const setTheme = (newTheme: Theme) => {

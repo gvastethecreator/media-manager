@@ -8,7 +8,7 @@ import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
-import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
+import { transformProfile } from '@/transformers/profile/profile-transformers';
 import {
 	type ProfileCreateInput,
 	type ProfileExtended,
