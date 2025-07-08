@@ -52,7 +52,7 @@ interface RightPanelProps {
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
-export const RightPanel = memo(function RightPanel({ className }: RightPanelProps) {
+export const RightPanel = memo(function RightPanel({ _className, isCollapsed, onToggleCollapse }: RightPanelProps) {
 	const { isVisible, setVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const { currentView } = useNavigationStore();
 	const [mounted, setMounted] = useState(false);

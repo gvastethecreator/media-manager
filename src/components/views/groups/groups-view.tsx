@@ -1,12 +1,15 @@
 import { Group as GroupIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
 import { GroupCard } from '@/components/cards/group-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
@@ -21,8 +24,8 @@ const MemoizedGroupCard = React.memo(
 		// Asegurarse de que el grupo tenga todas las propiedades requeridas
 		const completeGroup = {
 			...group,
-			emoji: group.emoji || '📂',
-			color: group.color || '#60a5fa',
+			emoji: '📂',
+			color: '#60a5fa',
 		};
 
 		return <GroupCard group={completeGroup} onClick={onGroupClick} className="h-full" />;
@@ -42,16 +45,19 @@ MemoizedGroupCard.displayName = 'MemoizedGroupCard';
 
 export function GroupsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const navigate = useNavigate();
 
 	// Leer el estado y las acciones directamente del store de Zustand
 	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
-		groups: Object.values(state.core.groups),
+		groups: Object.values(state.core.groups) as GroupWithStats[],
 		isLoading: state.core.isLoading,
 		error: state.core.error,
-		fetchGroups: state.fetchGroups,
-		addGroup: state.addGroup,
+		fetchGroups: state.loadGroups,
+		addGroup: state.createGroup,
 	}));
+
+	const [showForm, setShowForm] = useState(false);
+	const [newGroupName, setNewGroupName] = useState('');
+	const [newGroupDescription, setNewGroupDescription] = useState('');
 
 	// Usar el hook de eventos optimistas del cliente con los datos del store
 	const [optimisticGroups, _addEvent] = clientEvents.useEvents<GroupWithStats[]>(groups);
@@ -65,14 +71,24 @@ export function GroupsView(_props: ViewProps) {
 	const handleGroupClick = useCallback(
 		(group: GroupWithStats) => {
 			viewLogger.info('🖱️ Click en grupo:', group.name);
+			// Navegar a la vista de detalle del grupo usando el navigation store
 			setCurrentView('group-content');
-			// Actualizar la información del grupo en el store
-			addGroup(group);
-			// Navegar a la vista de detalle del grupo
-			navigate(`/groups/${group.id}`);
+			// Emitir evento para otros componentes que puedan necesitar este dato
+			clientEvents.emit('group:selected', { groupId: group.id });
 		},
-		[setCurrentView, addGroup, navigate]
+		[setCurrentView]
 	);
+
+	const handleCreateGroup = useCallback(() => {
+		if (newGroupName.trim() === '') {
+			viewLogger.error('Nombre del grupo vacío');
+			return;
+		}
+		addGroup({ name: newGroupName, description: newGroupDescription });
+		setNewGroupName('');
+		setNewGroupDescription('');
+		setShowForm(false);
+	}, [newGroupName, newGroupDescription, addGroup]);
 
 	if (error) {
 		return (
@@ -86,48 +102,77 @@ export function GroupsView(_props: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!optimisticGroups || optimisticGroups.length === 0) {
-		return (
-			<EmptyState
-				icon={GroupIcon}
-				title="No hay grupos creados"
-				description="Crea un grupo para organizar tus entidades."
-			/>
-		);
-	}
-
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticGroups.map((group, index) => {
-						// Verificar que el grupo tenga un id válido
-						if (!group || !group.id) {
-							console.error('Grupo sin id válido:', group);
-							return null;
-						}
+				<h2 className="text-xl font-bold mb-4">Vista de Grupos</h2>
 
-						// Crear una función de clic específica para este grupo
-						const onGroupClick = () => handleGroupClick(group);
+				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+					{showForm ? 'Cancelar' : 'Crear Grupo'}
+				</Button>
 
-						return (
-							<motion.div
-								key={group.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: index * 0.1 }}
-								className="perspective-1000"
-							>
-								<div
-									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-group-id={group.id}
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">Nuevo Grupo</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="groupName">Nombre</Label>
+							<Input
+								id="groupName"
+								value={newGroupName}
+								onChange={(e) => setNewGroupName(e.target.value)}
+								placeholder="Nombre del grupo"
+							/>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="groupDescription">Descripción</Label>
+							<Textarea
+								id="groupDescription"
+								value={newGroupDescription}
+								onChange={(e) => setNewGroupDescription(e.target.value)}
+								placeholder="Descripción del grupo (opcional)"
+							/>
+						</div>
+						<Button onClick={handleCreateGroup}>Guardar Grupo</Button>
+					</div>
+				)}
+
+				{!optimisticGroups || (optimisticGroups.length === 0 && !isLoading && !showForm) ? (
+					<EmptyState
+						icon={GroupIcon}
+						title="No hay grupos creados"
+						description="Crea un grupo para organizar tus entidades."
+					/>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{optimisticGroups.map((group, index) => {
+							// Verificar que el grupo tenga un id válido
+							if (!group || !group.id) {
+								console.error('Grupo sin id válido:', group);
+								return null;
+							}
+
+							// Crear una función de clic específica para este grupo
+							const onGroupClick = () => handleGroupClick(group);
+
+							return (
+								<motion.div
+									key={group.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: index * 0.1 }}
+									className="perspective-1000"
 								>
-									<MemoizedGroupCard group={group} onGroupClick={onGroupClick} />
-								</div>
-							</motion.div>
-						);
-					})}
-				</div>
+									<div
+										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										data-group-id={group.id}
+									>
+										<MemoizedGroupCard group={group} onGroupClick={onGroupClick} />
+									</div>
+								</motion.div>
+							);
+						})}
+					</div>
+				)}
 			</div>
 		</ScrollArea>
 	);

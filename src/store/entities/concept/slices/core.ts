@@ -1,7 +1,8 @@
 import type { StateCreator } from 'zustand';
 import { conceptsApi } from '@/lib/api/services/concepts';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept/types';
+import type { ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/types';
 import type { ConceptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('ConceptStore:Core');
@@ -37,7 +38,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('🔄 Cargando conceptos');
 
 			// Llamar a API para obtener conceptos
-			const concepts = await conceptsApi.getAll({});
+			const concepts = await conceptsApi.getAll();
 
 			set({ concepts, isLoading: false });
 			coreLogger.info('✅ Conceptos cargados:', { count: concepts.length });

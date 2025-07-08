@@ -1,0 +1,24 @@
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-07-08T04:54:03.329Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/views/json-files/json-files-view.tsx[0m:[93m122[0m:[93m49[0m - [91merror[0m[90m TS1127: [0mInvalid character.
+
+[7m122[0m         placeholder="Contenido JSON (ej: { \"key\": \"value\" })"
+[7m   [0m [91m                                                [0m
+
+[96msrc/components/views/json-files/json-files-view.tsx[0m:[93m122[0m:[93m63[0m - [91merror[0m[90m TS1381: [0mUnexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+[7m122[0m         placeholder="Contenido JSON (ej: { \"key\": \"value\" })"
+[7m   [0m [91m                                                              ~[0m
+
+[96msrc/components/views/json-files/json-files-view.tsx[0m:[93m123[0m:[93m9[0m - [91merror[0m[90m TS1382: [0mUnexpected token. Did you mean `{'>'}` or `&gt;`?
+
+[7m123[0m        />
+[7m   [0m [91m        ~[0m
+
+
+Found 3 errors in the same file, starting at: src/components/views/json-files/json-files-view.tsx[90m:122[0m
+

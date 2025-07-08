@@ -5,8 +5,8 @@ import { Calendar, Database, Heart, Image } from 'lucide-react';
 interface CollectionCardFooterProps {
 	createdAt: Date | string;
 	updatedAt: Date | string;
-	imagesCount: number;
-	entitiesCount: number;
+	imagesCount?: number;
+	entitiesCount?: number;
 	primaryColor: string;
 	secondaryColor: string;
 	isFavorite?: boolean;

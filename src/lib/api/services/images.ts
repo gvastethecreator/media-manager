@@ -9,22 +9,33 @@ export interface ImageCardData {
 	height?: number;
 	thumbnailWidth?: number;
 	thumbnailHeight?: number;
+	thumbnail?: string;
+	isFavorite?: boolean;
+	folderId?: string;
 	format?: string;
 	createdAt: Date;
 	updatedAt: Date;
 	metadata?: {
-		camera?: string;
+		camera?: { make?: string; model?: string; };
 		lens?: string;
 		settings?: string;
 		location?: string;
 		tags?: string[];
 		description?: string;
+		size?: number;
 	};
 	stats?: {
 		viewCount?: number;
 		favoriteCount?: number;
 		collectionCount?: number;
+		tagCount?: number;
+		albumCount?: number;
+		characterCount?: number;
+		placeCount?: number;
+		worldItemCount?: number;
+		noteCount?: number;
 	};
+	tags?: TagWithStats[];
 }
 
 export interface GetImagesOptions {

@@ -16,9 +16,9 @@ export interface AlbumCoreState {
 	lastUpdated: number | null;
 }
 
-export type AlbumUIState = {};
+export type AlbumUIState = Record<string, never>;
 
-export type AlbumFilterState = {};
+export type AlbumFilterState = Record<string, never>;
 
 // --- Acciones del Slice ---
 
@@ -31,9 +31,9 @@ export interface AlbumCoreActions {
 	getSortedAlbums: () => AlbumWithStats[];
 }
 
-export type AlbumUIActions = {};
+export type AlbumUIActions = Record<string, never>;
 
-export type AlbumFilterActions = {};
+export type AlbumFilterActions = Record<string, never>;
 
 // --- Store Completo ---
 

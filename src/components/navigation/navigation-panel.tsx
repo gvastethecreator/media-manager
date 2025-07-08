@@ -20,23 +20,20 @@ export const NavPanel = memo(function NavPanel({
 	}, [setCurrentView]);
 
 	const handleOpenSettings = useCallback(() => {
-		// TODO: Implementar lógica para abrir configuración
-		console.log('Abrir configuración');
-	}, []);
+		setCurrentView('settings');
+	}, [setCurrentView]);
 
 	const handleOpenDevelopment = useCallback(() => {
-		// TODO: Implementar lógica para abrir desarrollo
-		console.log('Abrir desarrollo');
-	}, []);
+		setCurrentView('development');
+	}, [setCurrentView]);
 
 	const handleOpenEntityCards = useCallback(() => {
-		// TODO: Implementar lógica para abrir entity cards
-		console.log('Abrir entity cards');
-	}, []);
+		setCurrentView('entity-cards');
+	}, [setCurrentView]);
 
 	return (
 		<aside
-			className={cn('h-full flex flex-col bg-background border-r border-border', isCollapsed && 'w-16')}
+			className={cn('h-full flex flex-col bg-background border-r border-border transition-all duration-300', isCollapsed && 'w-16')}
 			aria-label="Panel de navegación principal"
 		>
 			<NavPanelHeader

@@ -2,9 +2,9 @@ import type { FolderCreateInput, FolderFilters, FoldersResponse, FolderUpdateInp
 import type { FolderWithStats } from '@/types/entities/folder';
 import { apiClient } from '../client';
 
-export const findFolders = async (filters: FolderFilters): Promise<FoldersResponse> => {
-	const response = await apiClient.get('/folders', { params: filters });
-	return response.data;
+export const findFolders = async (_filters: FolderFilters): Promise<FoldersResponse> => {
+	const response = await apiClient.get<FoldersResponse>('/folders');
+	return response;
 };
 
 export const getAllFolders = async (): Promise<FolderWithStats[]> => {

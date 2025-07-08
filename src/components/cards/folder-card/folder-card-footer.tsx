@@ -1,3 +1,8 @@
+import type { ReactNode } from 'react';
+import { FolderIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { FolderBase } from '@/types/entities/folder';
+
 interface FolderCardFooterProps {
 	folder: Pick<FolderBase, 'id' | 'name' | 'color'>;
 	tcgMode?: boolean;

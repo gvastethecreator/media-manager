@@ -57,7 +57,7 @@ export function applyFileFilters(files: FileWithStats[], options: FileFilterOpti
 	}
 
 	// Filtrar por término de búsqueda (si está incluido en options)
-	if (options.searchTerm && options.searchTerm.trim()) {
+	if (options.searchTerm?.trim()) {
 		const term = options.searchTerm.toLowerCase();
 		filtered = filtered.filter(file =>
 			file.name.toLowerCase().includes(term) ||

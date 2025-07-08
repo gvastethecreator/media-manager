@@ -4,33 +4,33 @@ import { Progress } from '@/components/ui/progress';
 
 interface CharacterCardContentProps {
 	/** Descripción del personaje */
-	description?: string;
+	description?: string | null;
 	/** Color primario para estilizar la tarjeta */
 	primaryColor?: string;
 	/** Color secundario para estilizar la tarjeta */
 	secondaryColor?: string;
 	/** Trasfondo o historia del personaje */
-	backstory?: string;
+	backstory?: string | null;
 	/** Estadísticas del personaje (fuerza, destreza, etc.) */
-	stats?: Record<string, number>;
+	stats?: Record<string, number> | null;
 	/** Habilidades del personaje */
-	abilities?: string[] | { name: string; description?: string }[];
+	abilities?: Array<{ name: string; description?: string }> | null;
 	/** Personalidad del personaje */
-	personality?: string[];
+	personality?: string[] | null;
 	/** Miedos del personaje */
-	fears?: string[];
+	fears?: string[] | null;
 	/** Objetivos del personaje */
-	goals?: string[];
+	goals?: string[] | null;
 	/** Creencias del personaje */
-	beliefs?: string[];
+	beliefs?: string[] | null;
 	/** Clase del personaje */
-	characterClass?: string;
+	characterClass?: string | null;
 	/** Raza del personaje */
-	race?: string;
+	race?: string | null;
 	/** Nivel del personaje */
-	level?: number;
+	level?: number | null;
 	/** Alineamiento del personaje */
-	alignment?: string;
+	alignment?: string | null;
 	/** Metadatos adicionales */
 	metadata?: {
 		power?: number;

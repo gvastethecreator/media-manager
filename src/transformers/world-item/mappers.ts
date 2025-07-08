@@ -54,7 +54,7 @@ type DrizzleWorldItemWhereInput = {
 	category?: { in?: string[] };
 	rarity?: { in?: string[] };
 	isFavorite?: boolean;
-	images?: { some?: {} } | { none?: {} };
+	images?: { some?: Record<string, never> } | { none?: Record<string, never> };
 };
 
 type DrizzleWorldItemFindManyArgs = {

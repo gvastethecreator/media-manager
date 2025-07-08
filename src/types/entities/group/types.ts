@@ -9,6 +9,19 @@ export interface GroupBase {
 	id: string;
 	name: string;
 	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	organizationType?: string | null;
+	organizationLevel?: string | null;
+	power?: number | null;
+	hp?: number | null;
+	mp?: number | null;
+	cardId?: string | null;
+	recentImages?: string[];
+	recentVideos?: string[];
+	filters?: string | null;
+	isFavorite?: boolean;
+	rarityLevel?: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }

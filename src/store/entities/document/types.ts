@@ -16,9 +16,9 @@ export interface DocumentCoreState {
 	lastUpdated: number | null;
 }
 
-export type DocumentUIState = {};
+export type DocumentUIState = Record<string, never>;
 
-export type DocumentFilterState = {};
+export type DocumentFilterState = Record<string, never>;
 
 // --- Acciones del Slice ---
 
@@ -29,9 +29,9 @@ export interface DocumentCoreActions {
 	deleteDocument: (id: string) => Promise<void>;
 }
 
-export type DocumentUIActions = {};
+export type DocumentUIActions = Record<string, never>;
 
-export type DocumentFilterActions = {};
+export type DocumentFilterActions = Record<string, never>;
 
 // --- Store Completo ---
 
