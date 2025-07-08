@@ -1,17 +1,17 @@
 import express from 'express';
 import { getDatabaseInfo } from '@/lib/drizzle';
 import {
-    createDefaultSettingsData,
-    getSystemSettings,
-    getSystemStats,
-    getSystemVersion,
-    repairSystem,
-    resetDatabase,
-    resetProfileSettings,
-    resetSystemSettings,
-    updateProfileSettings,
-    updateSystemSettings,
-    getProfileSettings,
+	createDefaultSettingsData,
+	getProfileSettings,
+	getSystemSettings,
+	getSystemStats,
+	getSystemVersion,
+	repairSystem,
+	resetDatabase,
+	resetProfileSettings,
+	resetSystemSettings,
+	updateProfileSettings,
+	updateSystemSettings,
 } from '../services/system.service';
 import { getNavigationDataSimple as getNavigationData } from '../services/system-simple.service';
 

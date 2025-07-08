@@ -94,28 +94,34 @@ export function ThemeProvider({
 	};
 
 	// Resolver tema actual
-	const resolveTheme = React.useCallback((currentTheme: Theme): (typeof customThemes)[number] => {
-		if (currentTheme === 'system') {
-			return getSystemTheme();
-		}
-		return currentTheme as (typeof customThemes)[number];
-	}, [getSystemTheme]);
+	const resolveTheme = React.useCallback(
+		(currentTheme: Theme): (typeof customThemes)[number] => {
+			if (currentTheme === 'system') {
+				return getSystemTheme();
+			}
+			return currentTheme as (typeof customThemes)[number];
+		},
+		[getSystemTheme]
+	);
 
 	// Aplicar tema al DOM
-	const applyTheme = React.useCallback((themeToApply: (typeof customThemes)[number]) => {
-		const root = document.documentElement;
+	const applyTheme = React.useCallback(
+		(themeToApply: (typeof customThemes)[number]) => {
+			const root = document.documentElement;
 
-		// Remover todas las clases de tema anteriores
-		customThemes.forEach((t) => root.classList.remove(t));
+			// Remover todas las clases de tema anteriores
+			customThemes.forEach((t) => root.classList.remove(t));
 
-		// Aplicar nueva clase de tema
-		root.classList.add(themeToApply);
+			// Aplicar nueva clase de tema
+			root.classList.add(themeToApply);
 
-		// Aplicar atributo data-theme
-		if (attribute) {
-			root.setAttribute(attribute, themeToApply);
-		}
-	}, [attribute]);
+			// Aplicar atributo data-theme
+			if (attribute) {
+				root.setAttribute(attribute, themeToApply);
+			}
+		},
+		[attribute]
+	);
 
 	// Inicializar tema desde localStorage
 	useEffect(() => {

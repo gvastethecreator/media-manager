@@ -5,13 +5,13 @@ import { WildcardCard } from '@/components/cards/wildcard-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { useWildcards, useCreateWildcard } from '@/lib/api/wildcards';
 import { useToast } from '@/components/ui/use-toast';
+import { useCreateWildcard, useWildcards } from '@/lib/api/wildcards';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 // El store se expone desde el barrel de la entidad
@@ -134,7 +134,15 @@ export function WildcardsView({ isVisible }: ViewProps) {
 				)}
 
 				{!wildcards.length && !isLoading && !showForm ? (
-					<EmptyState icon={Sparkles} title="Sin wildcards" description={localSearch ? `No se encontraron wildcards que coincidan con "${localSearch}"` : 'No hay wildcards disponibles'} />
+					<EmptyState
+						icon={Sparkles}
+						title="Sin wildcards"
+						description={
+							localSearch
+								? `No se encontraron wildcards que coincidan con "${localSearch}"`
+								: 'No hay wildcards disponibles'
+						}
+					/>
 				) : (
 					<motion.div
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"

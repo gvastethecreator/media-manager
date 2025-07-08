@@ -168,7 +168,7 @@ export function DocumentCard({
 					color={primaryColor}
 					isFavorite={document.isFavorite || false}
 					compact={compact}
-
+				/>
 				{/* Contenido principal */}
 				{!compact && (
 					<div className="flex-1 p-4 flex flex-col gap-3">
@@ -222,7 +222,6 @@ export function DocumentCard({
 						)}
 					</div>
 				)}
-
 				{/* Pie de tarjeta */}
 				<div className="p-3 border-t border-border/20">
 					<div className="flex items-center justify-between text-xs">

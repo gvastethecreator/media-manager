@@ -522,8 +522,6 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 		[isOpen]
 	);
 
-	
-
 	// Función para seleccionar una imagen específica
 	const handleSelectImage = useCallback(
 		(index: number) => {

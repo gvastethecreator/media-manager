@@ -4,7 +4,30 @@ import type { NavigationData } from '@/components/navigation/actions/navigation.
 /**
  * Tipo para las categorías de navegación disponibles
  */
-export type NavigationCategory = 'files' | 'library' | 'worldbuilding' | 'management' | 'folders' | 'collections' | 'tags' | 'albums' | 'characters' | 'places' | 'worldItems' | 'concepts' | 'prompts' | 'notes' | 'groups' | 'properties' | 'wildcards' | 'audios' | 'documents' | 'jsonFiles' | 'file3ds' | 'workflows' | 'videos';
+export type NavigationCategory =
+	| 'files'
+	| 'library'
+	| 'worldbuilding'
+	| 'management'
+	| 'folders'
+	| 'collections'
+	| 'tags'
+	| 'albums'
+	| 'characters'
+	| 'places'
+	| 'worldItems'
+	| 'concepts'
+	| 'prompts'
+	| 'notes'
+	| 'groups'
+	| 'properties'
+	| 'wildcards'
+	| 'audios'
+	| 'documents'
+	| 'jsonFiles'
+	| 'file3ds'
+	| 'workflows'
+	| 'videos';
 
 /**
  * @description Representa una entidad que puede tener un conteo de imágenes asociadas.

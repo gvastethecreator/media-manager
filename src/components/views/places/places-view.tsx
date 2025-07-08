@@ -5,13 +5,13 @@ import { PlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { usePlaces, useCreatePlace } from '@/lib/api/places';
 import { useToast } from '@/components/ui/use-toast';
+import { useCreatePlace, usePlaces } from '@/lib/api/places';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePlaceStore } from '@/store/entities/place';
@@ -133,7 +133,15 @@ export function PlacesView({ isVisible }: ViewProps) {
 				)}
 
 				{!places.length && !isLoading && !showForm ? (
-					<EmptyState icon={MapPin} title="Sin lugares" description={localSearch ? `No se encontraron lugares que coincidan con "${localSearch}"` : 'No hay lugares disponibles'} />
+					<EmptyState
+						icon={MapPin}
+						title="Sin lugares"
+						description={
+							localSearch
+								? `No se encontraron lugares que coincidan con "${localSearch}"`
+								: 'No hay lugares disponibles'
+						}
+					/>
 				) : (
 					<motion.div
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"

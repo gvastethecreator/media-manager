@@ -16,7 +16,7 @@ export interface ImageCardData {
 	createdAt: Date;
 	updatedAt: Date;
 	metadata?: {
-		camera?: { make?: string; model?: string; };
+		camera?: { make?: string; model?: string };
 		lens?: string;
 		settings?: string;
 		location?: string;

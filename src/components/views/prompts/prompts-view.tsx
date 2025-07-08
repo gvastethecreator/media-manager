@@ -6,14 +6,14 @@ import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { usePrompts, useCreatePrompt } from '@/lib/api/prompts';
 import { useToast } from '@/components/ui/use-toast';
+import { useCreatePrompt, usePrompts } from '@/lib/api/prompts';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
@@ -165,7 +165,15 @@ export function PromptsView({ isVisible }: ViewProps) {
 				)}
 
 				{!prompts.length && !isLoading && !showForm ? (
-					<EmptyState icon={MessageSquare} title="Sin prompts" description={localSearch ? `No se encontraron prompts que coincidan con "${localSearch}"` : 'No hay prompts disponibles'} />
+					<EmptyState
+						icon={MessageSquare}
+						title="Sin prompts"
+						description={
+							localSearch
+								? `No se encontraron prompts que coincidan con "${localSearch}"`
+								: 'No hay prompts disponibles'
+						}
+					/>
 				) : (
 					<motion.div
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"

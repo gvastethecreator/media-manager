@@ -136,7 +136,7 @@ export function SearchView(_props: ViewProps) {
 										<Label>Tipo de búsqueda</Label>
 										<select
 											value={filters.type}
-											onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any }))}
+											onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value as any }))}
 											className="w-full p-2 border rounded"
 										>
 											<option value="all">Todo</option>
@@ -153,20 +153,24 @@ export function SearchView(_props: ViewProps) {
 										<Label>Fecha desde</Label>
 										<Input
 											type="date"
-											onChange={(e) => setFilters(prev => ({
-												...prev,
-												dateFrom: e.target.value ? new Date(e.target.value) : undefined
-											}))}
+											onChange={(e) =>
+												setFilters((prev) => ({
+													...prev,
+													dateFrom: e.target.value ? new Date(e.target.value) : undefined,
+												}))
+											}
 										/>
 									</div>
 									<div>
 										<Label>Fecha hasta</Label>
 										<Input
 											type="date"
-											onChange={(e) => setFilters(prev => ({
-												...prev,
-												dateTo: e.target.value ? new Date(e.target.value) : undefined
-											}))}
+											onChange={(e) =>
+												setFilters((prev) => ({
+													...prev,
+													dateTo: e.target.value ? new Date(e.target.value) : undefined,
+												}))
+											}
 										/>
 									</div>
 								</div>
@@ -175,8 +179,11 @@ export function SearchView(_props: ViewProps) {
 									<Input
 										placeholder="tag1, tag2, tag3"
 										onChange={(e) => {
-											const tags = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);
-											setFilters(prev => ({ ...prev, tags }));
+											const tags = e.target.value
+												.split(',')
+												.map((tag) => tag.trim())
+												.filter(Boolean);
+											setFilters((prev) => ({ ...prev, tags }));
 										}}
 									/>
 								</div>

@@ -4,8 +4,8 @@
  * @description Funciones de utilidad optimizadas usando NoteWithStats
  */
 
-import type { NoteFilters, NoteWithStats } from '@/types/entities/note/types';
 import { NoteSortOption } from '@/types/entities/note/enums';
+import type { NoteFilters, NoteWithStats } from '@/types/entities/note/types';
 
 /**
  * 🔍 Filtra notas basado en criterios específicos

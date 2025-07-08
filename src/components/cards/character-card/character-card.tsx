@@ -12,29 +12,15 @@ import { CharacterCardHeader } from './character-card-header';
 import { CharacterCardImages } from './character-card-images';
 
 export interface CharacterCardProps {
-	/** Datos del personaje a mostrar */
 	characterId: string;
-	/** Tamaño compacto con menos información */
 	compact?: boolean;
-	/** Modo TCG con efectos especiales de carta */
 	tcgMode?: boolean;
-	/** Deshabilitar interacciones */
 	disabled?: boolean;
-	/** Clase CSS adicional para la carta */
 	className?: string;
-	/** Función a ejecutar al hacer clic en la tarjeta */
 	onClick?: (characterData: CharacterWithStats) => void;
-	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 }
 
-/**
- * CharacterCard - Componente de tarjeta para personajes inspirado en el diseño de cartas TCG
- *
- * Este componente muestra información detallada de un personaje en un formato
- * inspirado en cartas TCG (Trading Card Game), con múltiples secciones que muestran datos
- * y miniaturas de las imágenes contenidas.
- */
 export function CharacterCard({
 	characterId,
 	compact = false,
@@ -53,113 +39,39 @@ export function CharacterCard({
 		return adaptCharacterWithStats(characterData);
 	}, [characterData]);
 
-	const safeJsonParse = useCallback((jsonStr: string | null | undefined): any => {
-		if (!jsonStr) return {};
-		try {
-			return JSON.parse(jsonStr);
-		} catch {
-			return {};
-		}
-	}, []);
-
-	const parsedStats = useMemo(() => safeJsonParse(character?.stats), [character?.stats, safeJsonParse]);
-	const parsedAbilities = useMemo(() => safeJsonParse(character?.abilities), [character?.abilities, safeJsonParse]);
-
-	// Preparar las imágenes para el componente de galería
-	const cardMedia = useMemo(() => {
-		return recentMediaData || [];
-	}, [recentMediaData]);
-
-	// Preparar etiquetas para el pie de la tarjeta
-	const footerTags = useMemo(() => {
-		const tags = [];
-
-		// Añadir clase y raza si están disponibles
-		if (character?.class) tags.push(character.class);
-		if (character?.race) tags.push(character.race);
-
-		// Añadir nivel si está disponible
-		if (character?.level) tags.push(`Lvl ${character.level}`);
-
-		// Añadir alineamiento si está disponible
-		if (character?.alignment) tags.push(character.alignment);
-
-		// Añadir habilidades del personaje (solo para CharacterCardData)
-		if (parsedAbilities?.length) {
-			// Solo las primeras 2 habilidades para no sobrecargar la tarjeta
-			tags.push(...parsedAbilities.slice(0, 2).map((ability: any) => ability.name || ability));
-		}
-
-		return tags;
-	}, [character?.class, character?.race, character?.level, character?.alignment, parsedAbilities]);
-
-	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick && character) {
+			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick && characterData) {
 				e.preventDefault();
-				onClick(character);
+				onClick(characterData);
 			}
 		},
-		[onClick, disabled, character]
+		[onClick, disabled, characterData]
 	);
 
-	// Calcular colores para la tarjeta TCG
 	const primaryColor = useMemo(() => character?.color || '#8e44ad', [character?.color]);
 	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar color predeterminado basado en la clase
 		if (!character?.color) {
-			return character?.class === 'Warrior'
-				? '#c0392b'
-				: character?.class === 'Mage'
-					? '#2980b9'
-					: character?.class === 'Rogue'
-						? '#27ae60'
-						: '#8e44ad';
+			const classLower = character?.class?.toLowerCase();
+			if (classLower === 'warrior') return '#c0392b';
+			if (classLower === 'mage') return '#2980b9';
+			if (classLower === 'rogue') return '#27ae60';
+			return '#8e44ad';
 		}
-
-		// Oscurecer el color primario para el secundario
 		try {
-			// Convertir hex a RGB
 			const r = Number.parseInt(character.color.slice(1, 3), 16);
 			const g = Number.parseInt(character.color.slice(3, 5), 16);
 			const b = Number.parseInt(character.color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
 			const darkenFactor = 0.7;
 			const darkerR = Math.floor(r * darkenFactor);
 			const darkerG = Math.floor(g * darkenFactor);
 			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
 			return '#6d28d9';
 		}
 	}, [character?.color, character?.class]);
 
-	// Determinar rareza y poder para el diseño TCG
-	const displayRarityMap: Record<string, 'Common' | 'Uncommon' | 'Rare' | 'Mythic'> = {
-		common: 'Common',
-		uncommon: 'Uncommon',
-		rare: 'Rare',
-		epic: 'Rare', // Epic mapped to Rare
-		legendary: 'Mythic', // Legendary mapped to Mythic
-	};
-	const rarityLevel = displayRarityMap[character?.statistics?.rarityLevel?.toLowerCase() || 'common'] || 'Common';
-	const power = character?.statistics?.powerLevel || (character?.level || 0) * 10;
-	const cardId = `C${character?.id.substring(0, 6)}-${character?.level}`;
-
-	const rarityMap: Record<string, number> = {
-		Common: 1,
-		Uncommon: 2,
-		Rare: 3,
-		Mythic: 4,
-	};
-	const numericRarityLevel = rarityMap[rarityLevel] || 1;
-
-	// Si no hay datos del personaje o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
 		return (
 			<div
@@ -197,7 +109,7 @@ export function CharacterCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled ? undefined : () => onClick?.(character)}
+			onClick={disabled ? undefined : () => onClick?.(characterData)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}
@@ -214,10 +126,8 @@ export function CharacterCard({
 					isSelected && 'ring-4 ring-primary/60'
 				)}
 			>
-				{/* Efectos holográficos especiales para el modo TCG */}
 				{tcgMode && (
 					<>
-						{/* Efecto holográfico de resplandor que se mueve con hover */}
 						<div
 							className="absolute inset-0 opacity-0 hover:opacity-30 transition-opacity duration-300 pointer-events-none z-1"
 							style={{
@@ -233,18 +143,16 @@ export function CharacterCard({
 								animation: 'gradient-shift 3s ease infinite',
 							}}
 						/>
-
-						{/* Efecto holográfico de rareza */}
 						<div className="absolute inset-0 opacity-0 hover:opacity-20 transition-opacity duration-300 pointer-events-none z-1">
 							<div
 								className="absolute inset-0"
 								style={{
 									background:
-										rarityLevel === 'Mythic'
+										character.metadata?.rarityLevel === 'Mythic'
 											? `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`
-											: rarityLevel === 'Rare'
+											: character.metadata?.rarityLevel === 'Rare'
 												? `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`
-												: rarityLevel === 'Uncommon'
+												: character.metadata?.rarityLevel === 'Uncommon'
 													? `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`
 													: `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`,
 									backgroundSize: '300% 300%',
@@ -252,8 +160,6 @@ export function CharacterCard({
 								}}
 							/>
 						</div>
-
-						{/* Sello de poder en el modo TCG */}
 						<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-10 pointer-events-none z-1">
 							<div
 								className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
@@ -262,12 +168,10 @@ export function CharacterCard({
 								<div className="text-xs font-bold" style={{ color: primaryColor }}>
 									POWER
 									<br />
-									{power}
+									{character.metadata?.power}
 								</div>
 							</div>
 						</div>
-
-						{/* Sello de rareza holográfico cuando es favorito */}
 						{character.isFavorite && (
 							<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
 								<div
@@ -282,52 +186,40 @@ export function CharacterCard({
 						)}
 					</>
 				)}
-
-				{/* Contenedor principal */}
 				<div className="flex flex-col h-full relative z-1">
-					{/* Cabecera con nombre, emoji, color y categoría */}
 					<CharacterCardHeader
 						name={character.name || 'Sin nombre'}
 						emoji={character.emoji || ''}
 						color={primaryColor}
 						isFavorite={character.isFavorite || false}
-						class={character.class || undefined}
-						level={character.level ?? undefined}
+						class={character.class}
+						level={character.level}
 						race={character.race}
 						tcgMode={tcgMode}
 						compact={compact}
 					/>
-
-					{/* En modo compacto solo mostrar header y footer */}
 					{!compact && (
 						<>
-							{/* Galería de imágenes */}
-							<CharacterCardImages images={cardMedia.map((m) => m.thumbnailUrl)} tcgMode={tcgMode} compact={false} />
-
-							{/* Contenido con descripción y contadores */}
+							<CharacterCardImages images={recentMediaData?.map((m) => m.thumbnailUrl) ?? []} tcgMode={tcgMode} compact={false} />
 							<CharacterCardContent
-								description={character.description || ''}
-								stats={parsedStats}
-								abilities={parsedAbilities}
+								description={character.description}
+								stats={character.stats}
+								abilities={character.parsedAbilities}
 								backstory={character.backstory}
 								alignment={character.alignment}
 								primaryColor={primaryColor}
 								secondaryColor={secondaryColor}
-															healthPoints={character.statistics?.healthPoints}
-							manaPoints={character.statistics?.manaPoints}
+								metadata={character.metadata}
 								tcgMode={tcgMode}
 							/>
 						</>
 					)}
-
-					{/* Pie con etiquetas y metadatos */}
 					<CharacterCardFooter
 						id={character.id}
-						cardId={cardId}
-						rarityLevel={numericRarityLevel}
+						cardId={character.metadata?.cardId ?? ''}
+						rarityLevel={character.metadata?.rarityLevel ? { Common: 1, Uncommon: 2, Rare: 3, Mythic: 4 }[character.metadata.rarityLevel] ?? 1 : 1}
 						primaryColor={primaryColor}
-						secondaryColor={secondaryColor}
-						level={character.level ?? undefined}
+						level={character.level}
 						compact={compact}
 					/>
 				</div>

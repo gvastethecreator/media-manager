@@ -74,7 +74,18 @@ export function useNavigation() {
 				(store as any).select(null);
 			}
 		}
-	}, [collectionStore, folderStore, tagStore, albumStore, characterStore, placeStore, worldItemStore, conceptStore, promptStore, noteStore]);
+	}, [
+		collectionStore,
+		folderStore,
+		tagStore,
+		albumStore,
+		characterStore,
+		placeStore,
+		worldItemStore,
+		conceptStore,
+		promptStore,
+		noteStore,
+	]);
 
 	/**
 	 * Navega a una vista específica, limpiando otras selecciones si es necesario

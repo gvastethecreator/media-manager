@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { FolderIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import type { FolderBase } from '@/types/entities/folder';
 

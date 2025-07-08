@@ -1,17 +1,27 @@
-import { memo, useState, useCallback } from 'react';
-import { ViewContainer } from '@/components/views/view-container';
-import { ViewProps } from '@/components/views/types';
-import { useCategoryData } from '@/lib/api/navigation';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit, Trash2 } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreateNote, useUpdateNote, useDeleteNote } from '@/lib/api/notes'; // Importar los hooks de mutación
 import { useToast } from '@/components/ui/use-toast';
-import { Edit, Trash2 } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ViewProps } from '@/components/views/types';
+import { ViewContainer } from '@/components/views/view-container';
+import { useCategoryData } from '@/lib/api/navigation';
+import { useCreateNote, useDeleteNote, useUpdateNote } from '@/lib/api/notes'; // Importar los hooks de mutación
 
 export const NotesView = memo(function NotesView({ className }: ViewProps) {
 	const { data: notes, isLoading } = useCategoryData<any>('notes');
@@ -31,9 +41,12 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 		setShowForm(true);
 	}, []);
 
-	const handleDeleteNote = useCallback((noteId: string) => {
-		deleteNote(noteId);
-	}, [deleteNote]);
+	const handleDeleteNote = useCallback(
+		(noteId: string) => {
+			deleteNote(noteId);
+		},
+		[deleteNote]
+	);
 
 	const { toast } = useToast();
 	const handleSubmitForm = useCallback(() => {
@@ -68,12 +81,15 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 			<div className="p-4">
 				<h2 className="text-xl font-bold mb-4">Vista de Notas</h2>
 
-				<Button onClick={() => {
-					setShowForm(!showForm);
-					setEditingNote(null);
-					setNoteTitle('');
-					setNoteContent('');
-				}} className="mb-4">
+				<Button
+					onClick={() => {
+						setShowForm(!showForm);
+						setEditingNote(null);
+						setNoteTitle('');
+						setNoteContent('');
+					}}
+					className="mb-4"
+				>
 					{showForm ? 'Cancelar' : 'Crear Nota'}
 				</Button>
 
@@ -133,7 +149,10 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 													</AlertDialogHeader>
 													<AlertDialogFooter>
 														<AlertDialogCancel>Cancelar</AlertDialogCancel>
-														<AlertDialogAction onClick={() => handleDeleteNote(note.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+														<AlertDialogAction
+															onClick={() => handleDeleteNote(note.id)}
+															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+														>
 															Eliminar
 														</AlertDialogAction>
 													</AlertDialogFooter>

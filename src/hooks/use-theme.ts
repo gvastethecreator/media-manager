@@ -43,12 +43,15 @@ export function useTheme(): UseThemeReturn {
 	}, []);
 
 	// Resolver tema actual
-	const resolveTheme = useCallback((currentTheme: Theme): (typeof customThemes)[number] => {
-		if (currentTheme === 'system') {
-			return getSystemTheme();
-		}
-		return currentTheme as (typeof customThemes)[number];
-	}, [getSystemTheme]);
+	const resolveTheme = useCallback(
+		(currentTheme: Theme): (typeof customThemes)[number] => {
+			if (currentTheme === 'system') {
+				return getSystemTheme();
+			}
+			return currentTheme as (typeof customThemes)[number];
+		},
+		[getSystemTheme]
+	);
 
 	// Aplicar tema al DOM
 	const applyTheme = useCallback((themeToApply: (typeof customThemes)[number]) => {

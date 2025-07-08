@@ -3,9 +3,8 @@
  * @module components/cards/character-card/character-card-adapter
  */
 
-import { CharacterCardData } from '@/lib/api/services/characters';
+import type { CharacterCardData } from '@/lib/api/services/characters';
 import type { CharacterWithStats } from '@/types/entities/character';
-// import type { CharacterCardData } from './character-server-actions'; // TODO: Archivo no encontrado
 
 /**
  * 🎭 Convierte CharacterWithStats a CharacterCardData para compatibilidad con CharacterCard
@@ -60,15 +59,7 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		recentImages: [],
 		recentVideos: [],
 		totalSize: character.statistics?.totalAssociations ?? 0,
-		stats: {
-			imageCount: character.statistics?.totalImages ?? 0,
-			videoCount: character.statistics?.totalVideos ?? 0,
-			albumCount: character.statistics?.totalAlbums ?? 0,
-			collectionCount: character.statistics?.totalCollections ?? 0,
-			noteCount: character.statistics?.totalNotes ?? 0,
-			promptCount: character.statistics?.totalPrompts ?? 0,
-			totalRelations: character.statistics?.totalAssociations ?? 0,
-		},
+		stats: safeJsonParse(character.stats),
 		parsedRelationships: safeJsonParse(character.relationships),
 		parsedGoals: safeJsonParse(character.goals),
 		parsedFears: safeJsonParse(character.fears),
@@ -80,8 +71,8 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 			power: character.statistics?.powerLevel ?? level * 10,
 			rarityLevel: rarityMap[character.statistics?.rarityLevel ?? 'common'] ?? 'Common',
 			cardId: `C${character.id.substring(0, 6)}-${level}`,
-			healthPoints: level * 20,
-			manaPoints: level * 10,
+			healthPoints: character.statistics?.healthPoints,
+			manaPoints: character.statistics?.manaPoints,
 			totalAttacks: 0,
 		},
 		level: character.level,

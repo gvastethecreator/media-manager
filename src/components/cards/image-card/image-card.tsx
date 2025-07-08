@@ -396,7 +396,7 @@ export function ImageCard({
 			</div>
 
 			{/* Etiquetas estándar (visible al hacer hover) */}
-			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
+			{showTags && imageData.tags?.length > 0 && !tcgMode && (
 				<div
 					className={cn(
 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
@@ -405,7 +405,7 @@ export function ImageCard({
 					)}
 				>
 					<div className="flex flex-wrap gap-1">
-						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
 							<Badge
 								key={tag.id}
 								variant="outline"
@@ -419,7 +419,7 @@ export function ImageCard({
 								{tag.name}
 							</Badge>
 						))}
-													{imageData.tags?.length > 5 && (
+						{imageData.tags?.length > 5 && (
 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
 								+{imageData.tags?.length - 5}
 							</Badge>

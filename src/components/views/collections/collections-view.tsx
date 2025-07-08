@@ -5,17 +5,17 @@ import { CollectionCard } from '@/components/cards/collection-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { useCreateCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ViewProps } from '../types';
-import { useCreateCollection } from '@/lib/api/collections';
-import { useToast } from '@/components/ui/use-toast';
 
 const viewLogger = clientLogger.withContext('CollectionsView');
 

@@ -153,8 +153,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 	const { theme, setTheme, themes } = useTheme();
 	const { setView } = useUIStore();
 
-	
-
 	const handleHomeClick = useCallback(() => {
 		setCurrentView('dashboard');
 	}, [setCurrentView]);
@@ -214,7 +212,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							/>
 						)}
 
-												<DropdownMenu>
+						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
@@ -243,8 +241,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipTitle="Configuración"
 							tooltipContent="Personaliza tu experiencia"
 						/>
-
-						
 					</div>
 				</div>
 			) : (
@@ -317,7 +313,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							/>
 						)}
 
-												<DropdownMenu>
+						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
@@ -346,8 +342,6 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipTitle="Configuración"
 							tooltipContent="Personaliza tu experiencia"
 						/>
-
-						
 					</div>
 				</div>
 			)}

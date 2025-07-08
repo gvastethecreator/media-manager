@@ -244,7 +244,6 @@ export function File3DCard({
 						</div>
 
 						{/* Descripción */}
-						
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && (
