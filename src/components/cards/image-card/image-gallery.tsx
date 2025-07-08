@@ -93,7 +93,7 @@ export function ImageGallery({
 			return (
 				image.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				image.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-												image.tags?.some((tag: TagWithStats) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
+				image.tags?.some((tag: TagWithStats) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
 			);
 		});
 	}, [images, searchTerm]);

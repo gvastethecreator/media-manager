@@ -25,44 +25,45 @@ export function applyFileFilters(files: FileWithStats[], options: FileFilterOpti
 
 	// Filtrar por tipos de archivo
 	if (options.fileTypes && options.fileTypes.length > 0) {
-		filtered = filtered.filter(file => options.fileTypes?.includes(file.type as FileType));
+		filtered = filtered.filter((file) => options.fileTypes?.includes(file.type as FileType));
 	}
 
 	// Filtrar por extensiones
 	if (options.extensions && options.extensions.length > 0) {
-		filtered = filtered.filter(file => {
+		filtered = filtered.filter((file) => {
 			const extension = file.name.toLowerCase().split('.').pop() || '';
-			return options.extensions?.some(ext => ext.toLowerCase() === extension);
+			return options.extensions?.some((ext) => ext.toLowerCase() === extension);
 		});
 	}
 
 	// Filtrar por tamaño mínimo
 	if (options.minSize !== undefined) {
-		filtered = filtered.filter(file => (file.size || 0) >= (options.minSize || 0));
+		filtered = filtered.filter((file) => (file.size || 0) >= (options.minSize || 0));
 	}
 
 	// Filtrar por tamaño máximo
 	if (options.maxSize !== undefined) {
-		filtered = filtered.filter(file => (file.size || 0) <= (options.maxSize || 0));
+		filtered = filtered.filter((file) => (file.size || 0) <= (options.maxSize || 0));
 	}
 
 	// Filtrar por fecha de modificación después
 	if (options.modifiedAfter) {
-		filtered = filtered.filter(file => new Date(file.modifiedAt) >= (options.modifiedAfter || new Date(0)));
+		filtered = filtered.filter((file) => new Date(file.modifiedAt) >= (options.modifiedAfter || new Date(0)));
 	}
 
 	// Filtrar por fecha de modificación antes
 	if (options.modifiedBefore) {
-		filtered = filtered.filter(file => new Date(file.modifiedAt) <= (options.modifiedBefore || new Date()));
+		filtered = filtered.filter((file) => new Date(file.modifiedAt) <= (options.modifiedBefore || new Date()));
 	}
 
 	// Filtrar por término de búsqueda (si está incluido en options)
 	if (options.searchTerm?.trim()) {
 		const term = options.searchTerm.toLowerCase();
-		filtered = filtered.filter(file =>
-			file.name.toLowerCase().includes(term) ||
-			file.path.toLowerCase().includes(term) ||
-			file.type.toLowerCase().includes(term)
+		filtered = filtered.filter(
+			(file) =>
+				file.name.toLowerCase().includes(term) ||
+				file.path.toLowerCase().includes(term) ||
+				file.type.toLowerCase().includes(term)
 		);
 	}
 

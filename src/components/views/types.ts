@@ -55,7 +55,6 @@ export type ViewType =
 	| 'notes'
 	| 'note-content'
 	| 'properties'
-
 	| 'property-content'
 	| 'entity-cards'
 	| 'development'

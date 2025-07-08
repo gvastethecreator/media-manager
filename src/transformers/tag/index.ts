@@ -7,5 +7,5 @@
  * @updated 2025-01-27
  */
 
-export { toTagWithStats } from './mappers';
 export type { TagComplete } from '@/types/entities/tag';
+export { toTagWithStats } from './mappers';

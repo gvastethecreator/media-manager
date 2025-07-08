@@ -1,0 +1,3846 @@
+Comando: bunx biome check --max-diagnostics=500 --write .
+Fecha: 2025-07-08T16:00:58.172Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\cards\card-header.tsx:18:53 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                     ^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\card-header.tsx:18:85 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                                                     ^^^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\collection-card\collection-card-content.tsx:3:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    1 │ import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
+    2 │ import { motion } from 'motion/react';
+  > 3 │ import { useCallback, useMemo } from 'react';
+      │          ^^^^^^^^^^^
+    4 │ import { Badge } from '@/components/ui/badge';
+    5 │ import type { CollectionEdition } from '@/types/entities/collection';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    3 │ import·{·useCallback,·useMemo·}·from·'react';
+      │          -------------                       
+
+src\components\cards\concept-card\concept-card.tsx:97:11 lint/complexity/noCommaOperator ━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    95 │ 			},
+    96 │ 			[onClick]
+  > 97 │ 		[onClick, concept]
+       │ 		        ^
+    98 │ 	);
+    99 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+src\components\cards\concept-card\concept-card.tsx:10:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+     8 │ import { ConceptCardContent } from './concept-card-content';
+     9 │ import { ConceptCardFooter } from './concept-card-footer';
+  > 10 │ import { ConceptCardImages } from './concept-card-images';
+       │        ^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      8   8 │   import { ConceptCardContent } from './concept-card-content';
+      9   9 │   import { ConceptCardFooter } from './concept-card-footer';
+     10     │ - import·{·ConceptCardImages·}·from·'./concept-card-images';
+     11  10 │   
+     12  11 │   export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+  
+
+src\components\cards\concept-card\concept-card.tsx:96:4 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! This dependencies list is not an array literal.
+  
+    94 │ 				}
+    95 │ 			},
+  > 96 │ 			[onClick]
+       │ 			^^^^^^^^^
+  > 97 │ 		[onClick, concept]
+       │ 		^^^^^^^^^^^^^^^^^^
+    98 │ 	);
+    99 │ 
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+  
+  i Replace with an array literal and list your dependencies within it.
+  
+
+src\components\cards\concept-card\concept-card.tsx:101:15 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on concept.
+  
+    100 │ 	// Parsear tags si es un string
+  > 101 │ 	const tags = useMemo(() => {
+        │ 	             ^^^^^^^
+    102 │ 		// Comprobar si concept tiene la propiedad tags
+    103 │ 		if (concept && 'tags' in concept) {
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    101 │ 	const tags = useMemo(() => {
+    102 │ 		// Comprobar si concept tiene la propiedad tags
+  > 103 │ 		if (concept && 'tags' in concept) {
+        │ 		                         ^^^^^^^
+    104 │ 			const conceptTags = concept.tags;
+    105 │ 			// Si tags es un string, intentar parsearlo
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    101 │ 	const tags = useMemo(() => {
+    102 │ 		// Comprobar si concept tiene la propiedad tags
+  > 103 │ 		if (concept && 'tags' in concept) {
+        │ 		    ^^^^^^^
+    104 │ 			const conceptTags = concept.tags;
+    105 │ 			// Si tags es un string, intentar parsearlo
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    117 │ → },·[concept]);
+        │       +++++++   
+
+src\components\cards\concept-card\concept-card.tsx:101:15 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on concept.tags.
+  
+    100 │ 	// Parsear tags si es un string
+  > 101 │ 	const tags = useMemo(() => {
+        │ 	             ^^^^^^^
+    102 │ 		// Comprobar si concept tiene la propiedad tags
+    103 │ 		if (concept && 'tags' in concept) {
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    102 │ 		// Comprobar si concept tiene la propiedad tags
+    103 │ 		if (concept && 'tags' in concept) {
+  > 104 │ 			const conceptTags = concept.tags;
+        │ 			                    ^^^^^^^^^^^^
+    105 │ 			// Si tags es un string, intentar parsearlo
+    106 │ 			if (typeof conceptTags === 'string' && conceptTags) {
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    117 │ → },·[concept.tags]);
+        │       ++++++++++++   
+
+src\components\cards\concept-card\concept-card.types.ts:1:34 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+  > 1 │ import type { ConceptStatistics, ConceptWithStats } from '@/types/entities/concept';
+      │                                  ^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ export interface ConceptCardProps {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·type·{·ConceptStatistics,·ConceptWithStats·}·from·'@/types/entities/concept';
+      │                                  -----------------                                  
+
+src\components\navigation\components\nav-panel-header.tsx:158:26 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: setCurrentView
+  
+  > 158 │ 	const handleHomeClick = useCallback(() => {
+        │ 	                        ^^^^^^^^^^^
+    159 │ 		setCurrentView('dashboard');
+    160 │ 	}, [setCurrentView]);
+  
+  i This dependency can be removed from the list.
+  
+    158 │ 	const handleHomeClick = useCallback(() => {
+    159 │ 		setCurrentView('dashboard');
+  > 160 │ 	}, [setCurrentView]);
+        │ 	    ^^^^^^^^^^^^^^
+    161 │ 
+    162 │ 	return (
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    160 │ → },·[setCurrentView]);
+        │       --------------   
+
+src\components\ui\particles.tsx:93:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: clearContext
+  
+    91 │ 	const resizeTimeout = useRef<NodeJS.Timeout>();
+    92 │ 
+  > 93 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    94 │ 		if (canvasRef.current) {
+    95 │ 			context.current = canvasRef.current.getContext('2d');
+  
+  i This dependency can be removed from the list.
+  
+    118 │ 			window.removeEventListener('resize', handleResize);
+    119 │ 		};
+  > 120 │ 	}, [animate, initCanvas, clearContext]);
+        │ 	                         ^^^^^^^^^^^^
+    121 │ 
+    122 │ 	useEffect(() => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    120 │ → },·[animate,·initCanvas,·clearContext]);
+        │                          --------------   
+
+src\components\ui\theme-provider.tsx:102:6 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! getSystemTheme changes on every re-render and should not be used as a hook dependency.
+  
+    100 │ 		}
+    101 │ 		return currentTheme as (typeof customThemes)[number];
+  > 102 │ 	}, [getSystemTheme]);
+        │ 	    ^^^^^^^^^^^^^^
+    103 │ 
+    104 │ 	// Aplicar tema al DOM
+  
+  i To fix this, wrap the definition of getSystemTheme in its own useCallback() hook.
+  
+
+src\components\views\json-files\json-files-view.tsx:62:31 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on toast.
+  
+    61 │ 	const { toast } = useToast();
+  > 62 │ 	const handleCreateJsonFile = useCallback(() => {
+       │ 	                             ^^^^^^^^^^^
+    63 │ 		if (newJsonFileName.trim() === '' || newJsonFileContent.trim() === '') {
+    64 │ 			toast({
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    73 │ 			JSON.parse(newJsonFileContent);
+    74 │ 		} catch (e) {
+  > 75 │ 			toast({
+       │ 			^^^^^
+    76 │ 				title: '❌ Error de formato',
+    77 │ 				description: 'El contenido no es un JSON válido.',
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    62 │ 	const handleCreateJsonFile = useCallback(() => {
+    63 │ 		if (newJsonFileName.trim() === '' || newJsonFileContent.trim() === '') {
+  > 64 │ 			toast({
+       │ 			^^^^^
+    65 │ 				title: '❌ Error',
+    66 │ 				description: 'El nombre y el contenido del archivo JSON no pueden estar vacíos.',
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    86 │ → },·[newJsonFileName,·newJsonFileContent,·createJsonFile,·toast]);
+       │                                                          +++++++   
+
+src\components\views\notes\notes-view.tsx:39:27 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on toast.
+  
+    38 │ 	const { toast } = useToast();
+  > 39 │ 	const handleSubmitForm = useCallback(() => {
+       │ 	                         ^^^^^^^^^^^
+    40 │ 		if (noteTitle.trim() === '') {
+    41 │ 			toast({
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    39 │ 	const handleSubmitForm = useCallback(() => {
+    40 │ 		if (noteTitle.trim() === '') {
+  > 41 │ 			toast({
+       │ 			^^^^^
+    42 │ 				title: '❌ Error',
+    43 │ 				description: 'El título de la nota no puede estar vacío.',
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    58 │ → },·[noteTitle,·noteContent,·editingNote,·createNote,·updateNote,·toast]);
+       │                                                                  +++++++   
+
+src\components\views\places\places-view.tsx:61:28 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on toast.
+  
+    60 │ 	const { toast } = useToast();
+  > 61 │ 	const handleCreatePlace = useCallback(() => {
+       │ 	                          ^^^^^^^^^^^
+    62 │ 		if (newPlaceName.trim() === '') {
+    63 │ 			toast({
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    61 │ 	const handleCreatePlace = useCallback(() => {
+    62 │ 		if (newPlaceName.trim() === '') {
+  > 63 │ 			toast({
+       │ 			^^^^^
+    64 │ 				title: '❌ Error',
+    65 │ 				description: 'El nombre del lugar no puede estar vacío.',
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    74 │ → },·[newPlaceName,·newPlaceDescription,·createPlace,·toast]);
+       │                                                     +++++++   
+
+src\components\views\prompts\prompts-view.tsx:73:29 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on toast.
+  
+    72 │ 	const { toast } = useToast();
+  > 73 │ 	const handleCreatePrompt = useCallback(() => {
+       │ 	                           ^^^^^^^^^^^
+    74 │ 		if (newPromptName.trim() === '' || newPromptContent.trim() === '') {
+    75 │ 			toast({
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    73 │ 	const handleCreatePrompt = useCallback(() => {
+    74 │ 		if (newPromptName.trim() === '' || newPromptContent.trim() === '') {
+  > 75 │ 			toast({
+       │ 			^^^^^
+    76 │ 				title: '❌ Error',
+    77 │ 				description: 'El nombre y el contenido del prompt no pueden estar vacíos.',
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    87 │ → },·[newPromptName,·newPromptContent,·newPromptDescription,·createPrompt,·toast]);
+       │                                                                          +++++++   
+
+src\components\views\properties\properties-view.tsx:38:27 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on toast.
+  
+    37 │ 	const { toast } = useToast();
+  > 38 │ 	const handleSubmitForm = useCallback(() => {
+       │ 	                         ^^^^^^^^^^^
+    39 │ 		if (propertyName.trim() === '') {
+    40 │ 			toast({
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    38 │ 	const handleSubmitForm = useCallback(() => {
+    39 │ 		if (propertyName.trim() === '') {
+  > 40 │ 			toast({
+       │ 			^^^^^
+    41 │ 				title: '❌ Error',
+    42 │ 				description: 'El nombre de la propiedad no puede estar vacío.',
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    57 │ → },·[propertyName,·propertyValue,·editingProperty,·createProperty,·updateProperty,·toast]);
+       │                                                                                   +++++++   
+
+src\components\views\wildcards\wildcards-view.tsx:62:31 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on toast.
+  
+    61 │ 	const { toast } = useToast();
+  > 62 │ 	const handleCreateWildcard = useCallback(() => {
+       │ 	                             ^^^^^^^^^^^
+    63 │ 		if (newWildcardName.trim() === '') {
+    64 │ 			toast({
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    62 │ 	const handleCreateWildcard = useCallback(() => {
+    63 │ 		if (newWildcardName.trim() === '') {
+  > 64 │ 			toast({
+       │ 			^^^^^
+    65 │ 				title: '❌ Error',
+    66 │ 				description: 'El nombre del wildcard no puede estar vacío.',
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    75 │ → },·[newWildcardName,·newWildcardDescription,·createWildcard,·toast]);
+       │                                                              +++++++   
+
+src\components\views\workflows\workflows-view.tsx:39:31 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on toast.
+  
+    38 │ 	const { toast } = useToast();
+  > 39 │ 	const handleCreateWorkflow = useCallback(async () => {
+       │ 	                             ^^^^^^^^^^^
+    40 │ 		if (newWorkflowName.trim() === '') {
+    41 │ 			toast({
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    39 │ 	const handleCreateWorkflow = useCallback(async () => {
+    40 │ 		if (newWorkflowName.trim() === '') {
+  > 41 │ 			toast({
+       │ 			^^^^^
+    42 │ 				title: '❌ Error',
+    43 │ 				description: 'El nombre del workflow no puede estar vacío.',
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    52 │ → },·[newWorkflowName,·newWorkflowDescription,·createWorkflow,·toast]);
+       │                                                              +++++++   
+
+src\lib\client\events.client.ts:24:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: setState
+  
+    22 │ 	// ✅ Sincronizar con el estado real cuando initialState cambia
+    23 │ 	// Usar JSON.stringify para comparar contenido, no referencia
+  > 24 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    25 │ 		const currentStateStr = JSON.stringify(state);
+    26 │ 		const newStateStr = JSON.stringify(initialState);
+  
+  i This dependency can be removed from the list.
+  
+    29 │ 			setState(initialState);
+    30 │ 		}
+  > 31 │ 	}, [initialState, state, setState]);
+       │ 	                         ^^^^^^^^
+    32 │ 
+    33 │ 	const addEvent = useCallback((event: EventData) => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    31 │ → },·[initialState,·state,·setState]);
+       │                          ----------   
+
+src\lib\contexts\theme-provider.tsx:148:27 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! applyTheme changes on every re-render and should not be used as a hook dependency.
+  
+    146 │ 			return () => mediaQuery.removeEventListener('change', handleChange);
+    147 │ 		}
+  > 148 │ 	}, [theme, enableSystem, applyTheme, resolveTheme]);
+        │ 	                         ^^^^^^^^^^
+    149 │ 
+    150 │ 	// Función para cambiar tema
+  
+  i To fix this, wrap the definition of applyTheme in its own useCallback() hook.
+  
+
+src\lib\contexts\theme-provider.tsx:148:39 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! resolveTheme changes on every re-render and should not be used as a hook dependency.
+  
+    146 │ 			return () => mediaQuery.removeEventListener('change', handleChange);
+    147 │ 		}
+  > 148 │ 	}, [theme, enableSystem, applyTheme, resolveTheme]);
+        │ 	                                     ^^^^^^^^^^^^
+    149 │ 
+    150 │ 	// Función para cambiar tema
+  
+  i To fix this, wrap the definition of resolveTheme in its own useCallback() hook.
+  
+
+src\types\entities\favorite\types.ts:46:33 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use '{}' as a type.
+  
+    44 │  * Por ahora, un favorito no tiene relaciones directas complejas.
+    45 │  */
+  > 46 │ export type FavoriteRelations = {};
+       │                                 ^^
+    47 │ 
+    48 │ /**
+  
+  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  
+
+src\types\entities\file\types.ts:37:29 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use '{}' as a type.
+  
+    35 │ };
+    36 │ 
+  > 37 │ export type FileRelations = {
+       │                             ^
+  > 38 │ 	// relaciones con otras entidades
+  > 39 │ };
+       │ ^
+    40 │ 
+    41 │ export type FileCreateInput = Omit<FileBase, 'id' | 'createdAt' | 'updatedAt' | 'accessedAt' | 'modifiedAt'>;
+  
+  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  
+
+src\types\entities\task\types.ts:24:29 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use '{}' as a type.
+  
+    22 │ };
+    23 │ 
+  > 24 │ export type TaskRelations = {
+       │                             ^
+  > 25 │ 	// relaciones con otras entidades
+  > 26 │ };
+       │ ^
+    27 │ 
+    28 │ export type TaskCreateInput = Omit<TaskBase, 'id' | 'createdAt' | 'updatedAt'>;
+  
+  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  
+
+src\types\files.ts:19:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    17 │ import type { PropertyComplete } from './entities/property';
+    18 │ import type { TagComplete } from './entities/tag';
+  > 19 │ import type { VideoComplete } from './entities/video';
+       │             ^^^^^^^^^^^^^^^^^
+    20 │ import type { WildcardComplete } from './entities/wildcard';
+    21 │ import type { WorldItemComplete } from './entities/world-item';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    17 17 │   import type { PropertyComplete } from './entities/property';
+    18 18 │   import type { TagComplete } from './entities/tag';
+    19    │ - import·type·{·VideoComplete·}·from·'./entities/video';
+    20 19 │   import type { WildcardComplete } from './entities/wildcard';
+    21 20 │   import type { WorldItemComplete } from './entities/world-item';
+  
+
+scripts\dev-server-hot.js:31:4 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Assigning a function parameter is confusing.
+  
+    30 │ 		content.split('\n').forEach((line) => {
+  > 31 │ 			line = line.trim();
+       │ 			^^^^
+    32 │ 			if (line && !line.startsWith('#')) {
+    33 │ 				const [key, ...valueParts] = line.split('=');
+  
+  i The parameter is declared here:
+  
+    28 │ 		const env = {};
+    29 │ 
+  > 30 │ 		content.split('\n').forEach((line) => {
+       │ 		                             ^^^^
+    31 │ 			line = line.trim();
+    32 │ 			if (line && !line.startsWith('#')) {
+  
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
+  
+
+scripts\dev-server-hot.js:30:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    28 │ 		const env = {};
+    29 │ 
+  > 30 │ 		content.split('\n').forEach((line) => {
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 31 │ 			line = line.trim();
+        ...
+  > 37 │ 			}
+  > 38 │ 		});
+       │ 		^^
+    39 │ 
+    40 │ 		return env;
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\components\cards\character-card\character-card-images.tsx:112:3 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    111 │ 	return (
+  > 112 │ 		<div
+        │ 		^^^^
+  > 113 │ 			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-b border-white/10')}
+  > 114 │ 			onMouseMove={handleMouseMove}
+  > 115 │ 			onMouseLeave={handleMouseLeave}
+  > 116 │ 		>
+        │ 		^
+    117 │ 			{/* Fondo decorativo para cartas TCG */}
+    118 │ 			{tcgMode && (
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\cards\character-card\character-card-images.tsx:163:11 lint/a11y/noRedundantAlt ━━━━━━━━━━
+
+  × Avoid the words "image", "picture", or "photo" in img element alt text.
+  
+    161 │ 					<img
+    162 │ 						src={displayImage as string}
+  > 163 │ 						alt="Character image"
+        │ 						    ^^^^^^^^^^^^^^^^^
+    164 │ 						className={cn(
+    165 │ 							'object-cover w-full h-full',
+  
+  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+
+src\components\cards\document-card\document-card.tsx:163:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected corresponding JSX closing tag for 'div'.
+  
+    162 │ 			{/* Contenedor principal */}
+  > 163 │ 			<div className="flex flex-col h-full relative z-1">
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    164 │ 				{/* Cabecera */}
+    165 │ 				<CardHeader
+  
+  i Opening tag
+  
+    162 │ 			{/* Contenedor principal */}
+  > 163 │ 			<div className="flex flex-col h-full relative z-1">
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    164 │ 				{/* Cabecera */}
+    165 │ 				<CardHeader
+  
+  i closing tag
+  
+    266 │ 				</div>
+    267 │ 			</div>
+  > 268 │ 		</CardContainer>
+        │ 		^^^^^^^^^^^^^^^^
+    269 │ 	);
+    270 │ }
+  
+
+src\components\cards\document-card\document-card.tsx:270:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    268 │ 		</CardContainer>
+    269 │ 	);
+  > 270 │ }
+        │ ^
+    271 │ 
+  
+
+src\components\cards\document-card\document-card.tsx:271:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `<` but instead the file ends
+  
+    269 │ 	);
+    270 │ }
+  > 271 │ 
+        │ 
+  
+  i the file ends here
+  
+    269 │ 	);
+    270 │ }
+  > 271 │ 
+        │ 
+  
+
+src\components\cards\document-card\document-card.tsx:172:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `}`
+  
+    170 │ 					compact={compact}
+    171 │ 
+  > 172 │ 				{/* Contenido principal */}
+        │ 				                          ^
+    173 │ 				{!compact && (
+    174 │ 					<div className="flex-1 p-4 flex flex-col gap-3">
+  
+  i Remove }
+  
+
+src\components\cards\document-card\document-card.tsx:173:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `!`
+  
+    172 │ 				{/* Contenido principal */}
+  > 173 │ 				{!compact && (
+        │ 				 ^
+    174 │ 					<div className="flex-1 p-4 flex flex-col gap-3">
+    175 │ 						{/* Icono del documento */}
+  
+  i Remove !
+  
+
+src\components\cards\document-card\document-card.tsx:226:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `}`
+  
+    224 │ 				)}
+    225 │ 
+  > 226 │ 				{/* Pie de tarjeta */}
+        │ 				                     ^
+    227 │ 				<div className="p-3 border-t border-border/20">
+    228 │ 					<div className="flex items-center justify-between text-xs">
+  
+  i Remove }
+  
+
+src\components\cards\document-card\document-card.tsx:227:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `<`
+  
+    226 │ 				{/* Pie de tarjeta */}
+  > 227 │ 				<div className="p-3 border-t border-border/20">
+        │ 				^
+    228 │ 					<div className="flex items-center justify-between text-xs">
+    229 │ 						{/* Acciones rápidas */}
+  
+  i Remove <
+  
+
+src\components\cards\document-card\document-card.tsx:165:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected corresponding JSX closing tag for 'CardHeader'.
+  
+    163 │ 			<div className="flex flex-col h-full relative z-1">
+    164 │ 				{/* Cabecera */}
+  > 165 │ 				<CardHeader
+        │ 				^^^^^^^^^^^
+  > 166 │ 					title={document.name || 'Sin nombre'}
+         ...
+  > 225 │ 
+  > 226 │ 				{/* Pie de tarjeta */}
+        │ 				^^^^^^^^^^^^^^^^^^^^^^
+    227 │ 				<div className="p-3 border-t border-border/20">
+    228 │ 					<div className="flex items-center justify-between text-xs">
+  
+  i Opening tag
+  
+    163 │ 			<div className="flex flex-col h-full relative z-1">
+    164 │ 				{/* Cabecera */}
+  > 165 │ 				<CardHeader
+        │ 				^^^^^^^^^^^
+  > 166 │ 					title={document.name || 'Sin nombre'}
+         ...
+  > 225 │ 
+  > 226 │ 				{/* Pie de tarjeta */}
+        │ 				^^^^^^^^^^^^^^^^^^^^^^
+    227 │ 				<div className="p-3 border-t border-border/20">
+    228 │ 					<div className="flex items-center justify-between text-xs">
+  
+  i closing tag
+  
+    265 │ 					)}
+    266 │ 				</div>
+  > 267 │ 			</div>
+        │ 			^^^^^^
+    268 │ 		</CardContainer>
+    269 │ 	);
+  
+
+src\components\cards\document-card\document-card.tsx:172:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `}`
+  
+    170 │ 					compact={compact}
+    171 │ 
+  > 172 │ 				{/* Contenido principal */}
+        │ 				                          ^
+    173 │ 				{!compact && (
+    174 │ 					<div className="flex-1 p-4 flex flex-col gap-3">
+  
+  i Remove }
+  
+
+src\components\cards\document-card\document-card.tsx:270:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    268 │ 		</CardContainer>
+    269 │ 	);
+  > 270 │ }
+        │ ^
+    271 │ 
+  
+
+src\components\cards\document-card\document-card.tsx:271:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `<` but instead the file ends
+  
+    269 │ 	);
+    270 │ }
+  > 271 │ 
+        │ 
+  
+  i the file ends here
+  
+    269 │ 	);
+    270 │ }
+  > 271 │ 
+        │ 
+  
+
+src\components\cards\document-card\document-card.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+src\components\cards\document-card\document-card.tsx:173:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `!`
+  
+    172 │ 				{/* Contenido principal */}
+  > 173 │ 				{!compact && (
+        │ 				 ^
+    174 │ 					<div className="flex-1 p-4 flex flex-col gap-3">
+    175 │ 						{/* Icono del documento */}
+  
+  i Remove !
+  
+
+src\components\cards\document-card\document-card.tsx:226:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `...` but instead found `}`
+  
+    224 │ 				)}
+    225 │ 
+  > 226 │ 				{/* Pie de tarjeta */}
+        │ 				                     ^
+    227 │ 				<div className="p-3 border-t border-border/20">
+    228 │ 					<div className="flex items-center justify-between text-xs">
+  
+  i Remove }
+  
+
+src\components\cards\document-card\document-card.tsx:227:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `<`
+  
+    226 │ 				{/* Pie de tarjeta */}
+  > 227 │ 				<div className="p-3 border-t border-border/20">
+        │ 				^
+    228 │ 					<div className="flex items-center justify-between text-xs">
+    229 │ 						{/* Acciones rápidas */}
+  
+  i Remove <
+  
+
+src\components\cards\document-card\document-card.tsx:165:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected corresponding JSX closing tag for 'CardHeader'.
+  
+    163 │ 			<div className="flex flex-col h-full relative z-1">
+    164 │ 				{/* Cabecera */}
+  > 165 │ 				<CardHeader
+        │ 				^^^^^^^^^^^
+  > 166 │ 					title={document.name || 'Sin nombre'}
+         ...
+  > 225 │ 
+  > 226 │ 				{/* Pie de tarjeta */}
+        │ 				^^^^^^^^^^^^^^^^^^^^^^
+    227 │ 				<div className="p-3 border-t border-border/20">
+    228 │ 					<div className="flex items-center justify-between text-xs">
+  
+  i Opening tag
+  
+    163 │ 			<div className="flex flex-col h-full relative z-1">
+    164 │ 				{/* Cabecera */}
+  > 165 │ 				<CardHeader
+        │ 				^^^^^^^^^^^
+  > 166 │ 					title={document.name || 'Sin nombre'}
+         ...
+  > 225 │ 
+  > 226 │ 				{/* Pie de tarjeta */}
+        │ 				^^^^^^^^^^^^^^^^^^^^^^
+    227 │ 				<div className="p-3 border-t border-border/20">
+    228 │ 					<div className="flex items-center justify-between text-xs">
+  
+  i closing tag
+  
+    265 │ 					)}
+    266 │ 				</div>
+  > 267 │ 			</div>
+        │ 			^^^^^^
+    268 │ 		</CardContainer>
+    269 │ 	);
+  
+
+src\components\cards\document-card\document-card.tsx:163:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected corresponding JSX closing tag for 'div'.
+  
+    162 │ 			{/* Contenedor principal */}
+  > 163 │ 			<div className="flex flex-col h-full relative z-1">
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    164 │ 				{/* Cabecera */}
+    165 │ 				<CardHeader
+  
+  i Opening tag
+  
+    162 │ 			{/* Contenedor principal */}
+  > 163 │ 			<div className="flex flex-col h-full relative z-1">
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    164 │ 				{/* Cabecera */}
+    165 │ 				<CardHeader
+  
+  i closing tag
+  
+    266 │ 				</div>
+    267 │ 			</div>
+  > 268 │ 		</CardContainer>
+        │ 		^^^^^^^^^^^^^^^^
+    269 │ 	);
+    270 │ }
+  
+
+src\components\cards\group-card\group-card-images.tsx:107:3 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    106 │ 	return (
+  > 107 │ 		<div
+        │ 		^^^^
+  > 108 │ 			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-b border-white/10')}
+  > 109 │ 			onMouseMove={handleMouseMove}
+  > 110 │ 			onMouseLeave={handleMouseLeave}
+  > 111 │ 		>
+        │ 		^
+    112 │ 			{/* Fondo decorativo para cartas TCG */}
+    113 │ 			{tcgMode && (
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\cards\image-card\image-card.tsx:430:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '<'.
+  
+    428 │ 				</div>
+    429 │ 			)}
+  > 430 │ 		</div>
+        │ 		^
+    431 │ 	);
+    432 │ 
+  
+  i Expected an expression here.
+  
+    428 │ 				</div>
+    429 │ 			)}
+  > 430 │ 		</div>
+        │ 		^
+    431 │ 	);
+    432 │ 
+  
+
+src\components\cards\image-card\image-card.tsx:419:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parenthesis '(' but instead found '{'.
+  
+    417 │ 								}}
+    418 │ 							>
+  > 419 │ 								{tag.name}
+        │ 								^
+    420 │ 							</Badge>
+    421 │ 						))}
+  
+  i Expected a parenthesis '(' here.
+  
+    417 │ 								}}
+    418 │ 							>
+  > 419 │ 								{tag.name}
+        │ 								^
+    420 │ 							</Badge>
+    421 │ 						))}
+  
+
+src\components\cards\image-card\image-card.tsx:420:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `<`
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+  i Remove <
+  
+
+src\components\cards\image-card\image-card.tsx:420:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '/'.
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							 ^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+  i Expected a type parameter here.
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							 ^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+
+src\components\cards\image-card\image-card.tsx:401:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `className`
+  
+    399 │ 			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
+    400 │ 				<div
+  > 401 │ 					className={cn(
+        │ 					^^^^^^^^^
+    402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+  
+  i Remove className
+  
+
+src\components\cards\image-card\image-card.tsx:421:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parenthesis '(' but instead found ')'.
+  
+    419 │ 								{tag.name}
+    420 │ 							</Badge>
+  > 421 │ 						))}
+        │ 						^
+    422 │ 													{imageData.tags?.length > 5 && (
+    423 │ 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
+  
+  i Expected a parenthesis '(' here.
+  
+    419 │ 								{tag.name}
+    420 │ 							</Badge>
+  > 421 │ 						))}
+        │ 						^
+    422 │ 													{imageData.tags?.length > 5 && (
+    423 │ 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
+  
+
+src\components\cards\image-card\image-card.tsx:421:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    419 │ 								{tag.name}
+    420 │ 							</Badge>
+  > 421 │ 						))}
+        │ 						  ^
+    422 │ 													{imageData.tags?.length > 5 && (
+    423 │ 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
+  
+
+src\components\cards\image-card\image-card.tsx:430:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '<'.
+  
+    428 │ 				</div>
+    429 │ 			)}
+  > 430 │ 		</div>
+        │ 		^
+    431 │ 	);
+    432 │ 
+  
+  i Expected an expression here.
+  
+    428 │ 				</div>
+    429 │ 			)}
+  > 430 │ 		</div>
+        │ 		^
+    431 │ 	);
+    432 │ 
+  
+
+src\components\cards\image-card\image-card.tsx:435:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    433 │ 	// Si hay un onClick, devolver directamente el contenido
+    434 │ 	if (onClick) {
+  > 435 │ 		return cardContent;
+        │ 		^^^^^^^^^^^^^^^^^^^
+    436 │ 	}
+    437 │ 
+  
+
+src\components\cards\image-card\image-card.tsx:439:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    438 │ 	// Si no hay onClick, envolver en un Link (si route es proporcionado)
+  > 439 │ 	return (
+        │ 	^^^^^^^^
+  > 440 │ 		<div className={className}>
+  > 441 │ 			<Link to={`/images/${imageId}`}>{cardContent}</Link>
+  > 442 │ 		</div>
+  > 443 │ 	);
+        │ 	^^
+    444 │ }
+    445 │ 
+  
+
+src\components\cards\image-card\image-card.tsx:444:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    442 │ 		</div>
+    443 │ 	);
+  > 444 │ }
+        │ ^
+    445 │ 
+  
+  i Expected a statement here.
+  
+    442 │ 		</div>
+    443 │ 	);
+  > 444 │ }
+        │ ^
+    445 │ 
+  
+
+src\components\cards\image-card\image-card.tsx:162:3 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    161 │ 	const cardContent = (
+  > 162 │ 		<div
+        │ 		^^^^
+  > 163 │ 			className={cn(
+         ...
+  > 177 │ 			})}
+  > 178 │ 		>
+        │ 		^
+    179 │ 			{/* Elementos decorativos TCG */}
+    180 │ 			{tcgMode && (
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\cards\image-card\image-card.tsx:69:6 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    67 │ 				className={cn(
+    68 │ 					'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900',
+  > 69 │ 					getAspectRatioClass(),
+       │ 					^^^^^^^^^^^^^^^^^^^
+    70 │ 					getVariantClasses(),
+    71 │ 					className
+  
+  i The variable is declared here:
+  
+    125 │ 	};
+    126 │ 
+  > 127 │ 	const getAspectRatioClass = () => {
+        │ 	      ^^^^^^^^^^^^^^^^^^^
+    128 │ 		switch (aspectRatio) {
+    129 │ 			case 'square':
+  
+
+src\components\cards\image-card\image-card.tsx:70:6 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    68 │ 					'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900',
+    69 │ 					getAspectRatioClass(),
+  > 70 │ 					getVariantClasses(),
+       │ 					^^^^^^^^^^^^^^^^^
+    71 │ 					className
+    72 │ 				)}
+  
+  i The variable is declared here:
+  
+    141 │ 	};
+    142 │ 
+  > 143 │ 	const getVariantClasses = () => {
+        │ 	      ^^^^^^^^^^^^^^^^^
+    144 │ 		switch (variant) {
+    145 │ 			case 'minimal':
+  
+
+src\components\cards\image-card\image-card.tsx:85:6 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    83 │ 				className={cn(
+    84 │ 					'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+  > 85 │ 					getAspectRatioClass(),
+       │ 					^^^^^^^^^^^^^^^^^^^
+    86 │ 					getVariantClasses(),
+    87 │ 					className
+  
+  i The variable is declared here:
+  
+    125 │ 	};
+    126 │ 
+  > 127 │ 	const getAspectRatioClass = () => {
+        │ 	      ^^^^^^^^^^^^^^^^^^^
+    128 │ 		switch (aspectRatio) {
+    129 │ 			case 'square':
+  
+
+src\components\cards\image-card\image-card.tsx:86:6 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    84 │ 					'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+    85 │ 					getAspectRatioClass(),
+  > 86 │ 					getVariantClasses(),
+       │ 					^^^^^^^^^^^^^^^^^
+    87 │ 					className
+    88 │ 				)}
+  
+  i The variable is declared here:
+  
+    141 │ 	};
+    142 │ 
+  > 143 │ 	const getVariantClasses = () => {
+        │ 	      ^^^^^^^^^^^^^^^^^
+    144 │ 		switch (variant) {
+    145 │ 			case 'minimal':
+  
+
+src\components\cards\image-card\image-card.tsx:399:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `&&`
+  
+    398 │ 			{/* Etiquetas estándar (visible al hacer hover) */}
+  > 399 │ 			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
+        │ 			 							          ^^
+    400 │ 				<div
+    401 │ 					className={cn(
+  
+  i Remove &&
+  
+
+src\components\cards\image-card\image-card.tsx:400:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `<`
+  
+    398 │ 			{/* Etiquetas estándar (visible al hacer hover) */}
+    399 │ 			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
+  > 400 │ 				<div
+        │ 				^
+    401 │ 					className={cn(
+    402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+  
+  i Remove <
+  
+
+src\components\cards\image-card\image-card.tsx:401:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `className`
+  
+    399 │ 			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
+    400 │ 				<div
+  > 401 │ 					className={cn(
+        │ 					^^^^^^^^^
+    402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+  
+  i Remove className
+  
+
+src\components\cards\image-card\image-card.tsx:402:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parameter but instead found ''absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent''.
+  
+    400 │ 				<div
+    401 │ 					className={cn(
+  > 402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+        │ 						^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  
+  i Expected a parameter here.
+  
+    400 │ 				<div
+    401 │ 					className={cn(
+  > 402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+        │ 						^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  
+
+src\components\cards\image-card\image-card.tsx:403:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ';' expected'
+  
+    401 │ 					className={cn(
+    402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+  > 403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+        │ 						            ^^^^^^^^^^^^^
+    404 │ 						'transition-opacity duration-300'
+    405 │ 					)}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+
+src\components\cards\image-card\image-card.tsx:405:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, or a signature but instead found ')'.
+  
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  > 405 │ 					)}
+        │ 					^
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  
+  i Expected a property, or a signature here.
+  
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  > 405 │ 					)}
+        │ 					^
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  
+
+src\components\cards\image-card\image-card.tsx:405:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  > 405 │ 					)}
+        │ 					 ^
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  
+
+src\components\cards\image-card\image-card.tsx:406:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'>'}` or `&gt;`?
+  
+    404 │ 						'transition-opacity duration-300'
+    405 │ 					)}
+  > 406 │ 				>
+        │ 				^
+    407 │ 					<div className="flex flex-wrap gap-1">
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+  
+
+src\components\cards\image-card\image-card.tsx:408:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `.`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						          ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove .
+  
+
+src\components\cards\image-card\image-card.tsx:408:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `)`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						                           ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove )
+  
+
+src\components\cards\image-card\image-card.tsx:408:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						                                     ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove :
+  
+
+src\components\cards\image-card\image-card.tsx:408:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						                                                   ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove )
+  
+
+src\components\cards\image-card\image-card.tsx:409:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `<`
+  
+    407 │ 					<div className="flex flex-wrap gap-1">
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+  > 409 │ 							<Badge
+        │ 							^
+    410 │ 								key={tag.id}
+    411 │ 								variant="outline"
+  
+  i Remove <
+  
+
+src\components\cards\image-card\image-card.tsx:410:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `key`
+  
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+    409 │ 							<Badge
+  > 410 │ 								key={tag.id}
+        │ 								^^^
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  
+  i Remove key
+  
+
+src\components\cards\image-card\image-card.tsx:410:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ';' expected'
+  
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+    409 │ 							<Badge
+  > 410 │ 								key={tag.id}
+        │ 								        ^
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  
+  i An explicit or implicit semicolon is expected here...
+  
+
+src\components\cards\image-card\image-card.tsx:411:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `variant`
+  
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  > 411 │ 								variant="outline"
+        │ 								^^^^^^^
+    412 │ 								className="py-0 h-5 text-[10px]"
+    413 │ 								style={{
+  
+  i Remove variant
+  
+
+src\components\cards\image-card\image-card.tsx:412:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `className`
+  
+    410 │ 								key={tag.id}
+    411 │ 								variant="outline"
+  > 412 │ 								className="py-0 h-5 text-[10px]"
+        │ 								^^^^^^^^^
+    413 │ 								style={{
+    414 │ 									backgroundColor: `${tag.color}30`,
+  
+  i Remove className
+  
+
+src\components\cards\image-card\image-card.tsx:413:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `style`
+  
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  > 413 │ 								style={{
+        │ 								^^^^^
+    414 │ 									backgroundColor: `${tag.color}30`,
+    415 │ 									borderColor: `${tag.color}40`,
+  
+  i Remove style
+  
+
+src\components\cards\image-card\image-card.tsx:413:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, or a signature but instead found '{'.
+  
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  > 413 │ 								style={{
+        │ 								       ^
+    414 │ 									backgroundColor: `${tag.color}30`,
+    415 │ 									borderColor: `${tag.color}40`,
+  
+  i Expected a property, or a signature here.
+  
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  > 413 │ 								style={{
+        │ 								       ^
+    414 │ 									backgroundColor: `${tag.color}30`,
+    415 │ 									borderColor: `${tag.color}40`,
+  
+
+src\components\cards\image-card\image-card.tsx:417:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    415 │ 									borderColor: `${tag.color}40`,
+    416 │ 									color: `${tag.color}`,
+  > 417 │ 								}}
+        │ 								 ^
+    418 │ 							>
+    419 │ 								{tag.name}
+  
+  i Remove }
+  
+
+src\components\cards\image-card\image-card.tsx:419:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parenthesis '(' but instead found '{'.
+  
+    417 │ 								}}
+    418 │ 							>
+  > 419 │ 								{tag.name}
+        │ 								^
+    420 │ 							</Badge>
+    421 │ 						))}
+  
+  i Expected a parenthesis '(' here.
+  
+    417 │ 								}}
+    418 │ 							>
+  > 419 │ 								{tag.name}
+        │ 								^
+    420 │ 							</Badge>
+    421 │ 						))}
+  
+
+src\components\cards\image-card\image-card.tsx:420:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `<`
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+  i Remove <
+  
+
+src\components\cards\image-card\image-card.tsx:420:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '/'.
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							 ^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+  i Expected a type parameter here.
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							 ^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+
+src\components\cards\image-card\image-card.tsx:420:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `Badge`
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							  ^^^^^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+  i Remove Badge
+  
+
+src\components\cards\image-card\image-card.tsx:421:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parenthesis '(' but instead found ')'.
+  
+    419 │ 								{tag.name}
+    420 │ 							</Badge>
+  > 421 │ 						))}
+        │ 						^
+    422 │ 													{imageData.tags?.length > 5 && (
+    423 │ 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
+  
+  i Expected a parenthesis '(' here.
+  
+    419 │ 								{tag.name}
+    420 │ 							</Badge>
+  > 421 │ 						))}
+        │ 						^
+    422 │ 													{imageData.tags?.length > 5 && (
+    423 │ 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
+  
+
+src\components\cards\image-card\image-card.tsx:421:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    419 │ 								{tag.name}
+    420 │ 							</Badge>
+  > 421 │ 						))}
+        │ 						  ^
+    422 │ 													{imageData.tags?.length > 5 && (
+    423 │ 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
+  
+
+src\components\cards\image-card\image-card.tsx:400:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `<`
+  
+    398 │ 			{/* Etiquetas estándar (visible al hacer hover) */}
+    399 │ 			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
+  > 400 │ 				<div
+        │ 				^
+    401 │ 					className={cn(
+    402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+  
+  i Remove <
+  
+
+src\components\cards\image-card\image-card.tsx:435:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    433 │ 	// Si hay un onClick, devolver directamente el contenido
+    434 │ 	if (onClick) {
+  > 435 │ 		return cardContent;
+        │ 		^^^^^^^^^^^^^^^^^^^
+    436 │ 	}
+    437 │ 
+  
+
+src\components\cards\image-card\image-card.tsx:439:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    438 │ 	// Si no hay onClick, envolver en un Link (si route es proporcionado)
+  > 439 │ 	return (
+        │ 	^^^^^^^^
+  > 440 │ 		<div className={className}>
+  > 441 │ 			<Link to={`/images/${imageId}`}>{cardContent}</Link>
+  > 442 │ 		</div>
+  > 443 │ 	);
+        │ 	^^
+    444 │ }
+    445 │ 
+  
+
+src\components\cards\image-card\image-card.tsx:444:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    442 │ 		</div>
+    443 │ 	);
+  > 444 │ }
+        │ ^
+    445 │ 
+  
+  i Expected a statement here.
+  
+    442 │ 		</div>
+    443 │ 	);
+  > 444 │ }
+        │ ^
+    445 │ 
+  
+
+src\components\cards\image-card\image-card.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+src\components\cards\image-card\image-card.tsx:402:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parameter but instead found ''absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent''.
+  
+    400 │ 				<div
+    401 │ 					className={cn(
+  > 402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+        │ 						^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  
+  i Expected a parameter here.
+  
+    400 │ 				<div
+    401 │ 					className={cn(
+  > 402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+        │ 						^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  
+
+src\components\cards\image-card\image-card.tsx:399:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `&&`
+  
+    398 │ 			{/* Etiquetas estándar (visible al hacer hover) */}
+  > 399 │ 			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
+        │ 			 							          ^^
+    400 │ 				<div
+    401 │ 					className={cn(
+  
+  i Remove &&
+  
+
+src\components\cards\image-card\image-card.tsx:403:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ';' expected'
+  
+    401 │ 					className={cn(
+    402 │ 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+  > 403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+        │ 						            ^^^^^^^^^^^^^
+    404 │ 						'transition-opacity duration-300'
+    405 │ 					)}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+
+src\components\cards\image-card\image-card.tsx:405:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, or a signature but instead found ')'.
+  
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  > 405 │ 					)}
+        │ 					^
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  
+  i Expected a property, or a signature here.
+  
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  > 405 │ 					)}
+        │ 					^
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  
+
+src\components\cards\image-card\image-card.tsx:405:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    403 │ 						isHovered ? 'opacity-100' : 'opacity-0',
+    404 │ 						'transition-opacity duration-300'
+  > 405 │ 					)}
+        │ 					 ^
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  
+
+src\components\cards\image-card\image-card.tsx:406:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'>'}` or `&gt;`?
+  
+    404 │ 						'transition-opacity duration-300'
+    405 │ 					)}
+  > 406 │ 				>
+        │ 				^
+    407 │ 					<div className="flex flex-wrap gap-1">
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+  
+
+src\components\cards\image-card\image-card.tsx:408:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `.`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						          ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove .
+  
+
+src\components\cards\image-card\image-card.tsx:408:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `)`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						                           ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove )
+  
+
+src\components\cards\image-card\image-card.tsx:408:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						                                     ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove :
+  
+
+src\components\cards\image-card\image-card.tsx:408:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    406 │ 				>
+    407 │ 					<div className="flex flex-wrap gap-1">
+  > 408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+        │ 						 						                                                   ^
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  
+  i Remove )
+  
+
+src\components\cards\image-card\image-card.tsx:409:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `<`
+  
+    407 │ 					<div className="flex flex-wrap gap-1">
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+  > 409 │ 							<Badge
+        │ 							^
+    410 │ 								key={tag.id}
+    411 │ 								variant="outline"
+  
+  i Remove <
+  
+
+src\components\cards\image-card\image-card.tsx:410:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `key`
+  
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+    409 │ 							<Badge
+  > 410 │ 								key={tag.id}
+        │ 								^^^
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  
+  i Remove key
+  
+
+src\components\cards\image-card\image-card.tsx:410:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ';' expected'
+  
+    408 │ 						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
+    409 │ 							<Badge
+  > 410 │ 								key={tag.id}
+        │ 								        ^
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  
+  i An explicit or implicit semicolon is expected here...
+  
+
+src\components\cards\image-card\image-card.tsx:411:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `variant`
+  
+    409 │ 							<Badge
+    410 │ 								key={tag.id}
+  > 411 │ 								variant="outline"
+        │ 								^^^^^^^
+    412 │ 								className="py-0 h-5 text-[10px]"
+    413 │ 								style={{
+  
+  i Remove variant
+  
+
+src\components\cards\image-card\image-card.tsx:412:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `className`
+  
+    410 │ 								key={tag.id}
+    411 │ 								variant="outline"
+  > 412 │ 								className="py-0 h-5 text-[10px]"
+        │ 								^^^^^^^^^
+    413 │ 								style={{
+    414 │ 									backgroundColor: `${tag.color}30`,
+  
+  i Remove className
+  
+
+src\components\cards\image-card\image-card.tsx:413:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `style`
+  
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  > 413 │ 								style={{
+        │ 								^^^^^
+    414 │ 									backgroundColor: `${tag.color}30`,
+    415 │ 									borderColor: `${tag.color}40`,
+  
+  i Remove style
+  
+
+src\components\cards\image-card\image-card.tsx:413:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property, or a signature but instead found '{'.
+  
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  > 413 │ 								style={{
+        │ 								       ^
+    414 │ 									backgroundColor: `${tag.color}30`,
+    415 │ 									borderColor: `${tag.color}40`,
+  
+  i Expected a property, or a signature here.
+  
+    411 │ 								variant="outline"
+    412 │ 								className="py-0 h-5 text-[10px]"
+  > 413 │ 								style={{
+        │ 								       ^
+    414 │ 									backgroundColor: `${tag.color}30`,
+    415 │ 									borderColor: `${tag.color}40`,
+  
+
+src\components\cards\image-card\image-card.tsx:417:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    415 │ 									borderColor: `${tag.color}40`,
+    416 │ 									color: `${tag.color}`,
+  > 417 │ 								}}
+        │ 								 ^
+    418 │ 							>
+    419 │ 								{tag.name}
+  
+  i Remove }
+  
+
+src\components\cards\image-card\image-card.tsx:420:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `Badge`
+  
+    418 │ 							>
+    419 │ 								{tag.name}
+  > 420 │ 							</Badge>
+        │ 							  ^^^^^
+    421 │ 						))}
+    422 │ 													{imageData.tags?.length > 5 && (
+  
+  i Remove Badge
+  
+
+src\components\cards\place-card\place-card-images.tsx:103:3 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    102 │ 	return (
+  > 103 │ 		<div
+        │ 		^^^^
+  > 104 │ 			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-b border-white/10')}
+  > 105 │ 			onMouseMove={handleMouseMove}
+  > 106 │ 			onMouseLeave={handleMouseLeave}
+  > 107 │ 		>
+        │ 		^
+    108 │ 			{/* Fondo decorativo para cartas TCG */}
+    109 │ 			{tcgMode && (
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\cards\place-card\place-card-images.tsx:154:11 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━
+
+  × Avoid the words "image", "picture", or "photo" in img element alt text.
+  
+    152 │ 					<img
+    153 │ 						src={displayImage as string}
+  > 154 │ 						alt="Place image"
+        │ 						    ^^^^^^^^^^^^^
+    155 │ 						className={cn(
+    156 │ 							'object-cover w-full h-full',
+  
+  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+
+src\components\cards\place-card\place-card.tsx:95:20 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    94 │ 	// Preparar los medios para el componente de galería
+  > 95 │ 	const cardMedia = useMemo(() => {
+       │ 	                  ^^^^^^^
+    96 │ 		return recentMediaData || [];
+    97 │ 	}, [recentMediaData]);
+  
+  i Hooks should not be called after an early return.
+  
+    58 │ 	}
+    59 │ 
+  > 60 │ 	if (error || !place) {
+       │ 	                      
+  > 61 │ 		return (
+        ...
+  > 69 │ 			</div>
+  > 70 │ 		);
+       │ 		^^
+    71 │ 	}
+    72 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\place-card\place-card.tsx:101:25 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+     99 │ 	// Calcular colores para la tarjeta TCG
+    100 │ 	const primaryColor = color || '#10b981';
+  > 101 │ 	const secondaryColor = useMemo(() => {
+        │ 	                       ^^^^^^^
+    102 │ 		// Si no hay color definido, usar color predeterminado basado en el tipo
+    103 │ 		if (!color) {
+  
+  i Hooks should not be called after an early return.
+  
+    58 │ 	}
+    59 │ 
+  > 60 │ 	if (error || !place) {
+       │ 	                      
+  > 61 │ 		return (
+        ...
+  > 69 │ 			</div>
+  > 70 │ 		);
+       │ 		^^
+    71 │ 	}
+    72 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\place-card\place-card.tsx:148:24 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    147 │ 	// Manejar eventos de teclado para accesibilidad
+  > 148 │ 	const handleKeyDown = useCallback(
+        │ 	                      ^^^^^^^^^^^
+    149 │ 		(e: React.KeyboardEvent) => {
+    150 │ 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
+  
+  i Hooks should not be called after an early return.
+  
+    58 │ 	}
+    59 │ 
+  > 60 │ 	if (error || !place) {
+       │ 	                      
+  > 61 │ 		return (
+        ...
+  > 69 │ 			</div>
+  > 70 │ 		);
+       │ 		^^
+    71 │ 	}
+    72 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\prompt-card\prompt-card.tsx:111:25 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    109 │ 	// Colores para el gradiente
+    110 │ 	const primaryColor = color || '#0ea5e9';
+  > 111 │ 	const secondaryColor = useMemo(() => {
+        │ 	                       ^^^^^^^
+    112 │ 		// Si no hay color definido, usar un valor por defecto
+    113 │ 		if (!color) return '#0369a1';
+  
+  i Hooks should not be called after an early return.
+  
+    60 │ 	}
+    61 │ 
+  > 62 │ 	if (error || !prompt) {
+       │ 	                       
+  > 63 │ 		return (
+        ...
+  > 71 │ 			</div>
+  > 72 │ 		);
+       │ 		^^
+    73 │ 	}
+    74 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\prompt-card\prompt-card.tsx:148:24 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    147 │ 	// Manejar eventos de teclado para accesibilidad
+  > 148 │ 	const handleKeyDown = useCallback(
+        │ 	                      ^^^^^^^^^^^
+    149 │ 		(e: React.KeyboardEvent<HTMLDivElement>) => {
+    150 │ 			if (onClick && (e.key === 'Enter' || e.key === ' ') && prompt) {
+  
+  i Hooks should not be called after an early return.
+  
+    60 │ 	}
+    61 │ 
+  > 62 │ 	if (error || !prompt) {
+       │ 	                       
+  > 63 │ 		return (
+        ...
+  > 71 │ 			</div>
+  > 72 │ 		);
+       │ 		^^
+    73 │ 	}
+    74 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\prompt-card\prompt-card.tsx:163:20 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    162 │ 	// Definir estilos de la tarjeta TCG
+  > 163 │ 	const cardStyle = useMemo(() => {
+        │ 	                  ^^^^^^^
+    164 │ 		const totalRelations =
+    165 │ 			imagesCount +
+  
+  i Hooks should not be called after an early return.
+  
+    60 │ 	}
+    61 │ 
+  > 62 │ 	if (error || !prompt) {
+       │ 	                       
+  > 63 │ 		return (
+        ...
+  > 71 │ 			</div>
+  > 72 │ 		);
+       │ 		^^
+    73 │ 	}
+    74 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\property-card\property-card.tsx:60:23 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    59 │ 	// Calcular colores
+  > 60 │ 	const primaryColor = useMemo(() => property.color || '#3b82f6', [property.color]);
+       │ 	                     ^^^^^^^
+    61 │ 	const secondaryColor = useMemo(() => {
+    62 │ 		if (!property.color) return '#2563eb';
+  
+  i Hooks should not be called after an early return.
+  
+    44 │ 	}
+    45 │ 
+  > 46 │ 	if (error || !property) {
+       │ 	                         
+  > 47 │ 		return (
+        ...
+  > 55 │ 			</div>
+  > 56 │ 		);
+       │ 		^^
+    57 │ 	}
+    58 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\property-card\property-card.tsx:61:25 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    59 │ 	// Calcular colores
+    60 │ 	const primaryColor = useMemo(() => property.color || '#3b82f6', [property.color]);
+  > 61 │ 	const secondaryColor = useMemo(() => {
+       │ 	                       ^^^^^^^
+    62 │ 		if (!property.color) return '#2563eb';
+    63 │ 
+  
+  i Hooks should not be called after an early return.
+  
+    44 │ 	}
+    45 │ 
+  > 46 │ 	if (error || !property) {
+       │ 	                         
+  > 47 │ 		return (
+        ...
+  > 55 │ 			</div>
+  > 56 │ 		);
+       │ 		^^
+    57 │ 	}
+    58 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\property-card\property-card.tsx:84:22 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    82 │ 	const totalRelations = property.stats?.totalRelations ?? 0;
+    83 │ 
+  > 84 │ 	const handleClick = useCallback(() => {
+       │ 	                    ^^^^^^^^^^^
+    85 │ 		if (onClick) {
+    86 │ 			onClick(property);
+  
+  i Hooks should not be called after an early return.
+  
+    44 │ 	}
+    45 │ 
+  > 46 │ 	if (error || !property) {
+       │ 	                         
+  > 47 │ 		return (
+        ...
+  > 55 │ 			</div>
+  > 56 │ 		);
+       │ 		^^
+    57 │ 	}
+    58 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\property-card\property-card.tsx:90:24 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    88 │ 	}, [onClick, property]);
+    89 │ 
+  > 90 │ 	const handleKeyDown = useCallback(
+       │ 	                      ^^^^^^^^^^^
+    91 │ 		(e: React.KeyboardEvent) => {
+    92 │ 			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+  
+  i Hooks should not be called after an early return.
+  
+    44 │ 	}
+    45 │ 
+  > 46 │ 	if (error || !property) {
+       │ 	                         
+  > 47 │ 		return (
+        ...
+  > 55 │ 			</div>
+  > 56 │ 		);
+       │ 		^^
+    57 │ 	}
+    58 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\video-card\video-card-footer.tsx:140:14 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    138 │ 						{Array.from({ length: 5 }, (_, i) => (
+    139 │ 							<div
+  > 140 │ 								key={i}
+        │ 								     ^
+    141 │ 								className={cn('w-1 h-1 rounded-full', i < Math.floor(rarityLevel / 2) ? 'opacity-100' : 'opacity-30')}
+    142 │ 								style={{ backgroundColor: primaryColor }}
+  
+  i This is the source of the key value.
+  
+    136 │ 				<div className="flex justify-center mt-2">
+    137 │ 					<div className="flex gap-1">
+  > 138 │ 						{Array.from({ length: 5 }, (_, i) => (
+        │ 						                               ^
+    139 │ 							<div
+    140 │ 								key={i}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\cards\video-card\video-card.tsx:156:4 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    154 │ 			whileTap={!disabled ? { scale: 0.98 } : {}}
+    155 │ 			tabIndex={disabled ? -1 : 0}
+  > 156 │ 			role="button"
+        │ 			^^^^^^^^^^^^^
+    157 │ 			aria-label={`Video: ${name}`}
+    158 │ 		>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+src\components\cards\video-card\video-card.tsx:73:23 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    72 │ 	// Calcular colores basados en la calidad técnica
+  > 73 │ 	const primaryColor = useMemo(() => {
+       │ 	                     ^^^^^^^
+    74 │ 		const grade = video.stats.technicalGrade;
+    75 │ 		switch (grade) {
+  
+  i Hooks should not be called after an early return.
+  
+    54 │ 	}
+    55 │ 
+  > 56 │ 	if (error || !video) {
+       │ 	                      
+  > 57 │ 		return (
+        ...
+  > 65 │ 			</div>
+  > 66 │ 		);
+       │ 		^^
+    67 │ 	}
+    68 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\video-card\video-card.tsx:89:25 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    87 │ 	}, [video.stats.technicalGrade]);
+    88 │ 
+  > 89 │ 	const secondaryColor = useMemo(() => {
+       │ 	                       ^^^^^^^
+    90 │ 		// Oscurecer el color primario
+    91 │ 		const hex = primaryColor.slice(1);
+  
+  i Hooks should not be called after an early return.
+  
+    54 │ 	}
+    55 │ 
+  > 56 │ 	if (error || !video) {
+       │ 	                      
+  > 57 │ 		return (
+        ...
+  > 65 │ 			</div>
+  > 66 │ 		);
+       │ 		^^
+    67 │ 	}
+    68 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\video-card\video-card.tsx:105:22 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    104 │ 	// Calcular nivel de rareza basado en quality score
+  > 105 │ 	const rarityLevel = useMemo(() => {
+        │ 	                    ^^^^^^^
+    106 │ 		const score = video.stats.qualityScore;
+    107 │ 		if (score >= 90) return 10; // Mítico
+  
+  i Hooks should not be called after an early return.
+  
+    54 │ 	}
+    55 │ 
+  > 56 │ 	if (error || !video) {
+       │ 	                      
+  > 57 │ 		return (
+        ...
+  > 65 │ 			</div>
+  > 66 │ 		);
+       │ 		^^
+    67 │ 	}
+    68 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\video-card\video-card.tsx:116:22 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    115 │ 	// Manejar eventos
+  > 116 │ 	const handleClick = useCallback(() => {
+        │ 	                    ^^^^^^^^^^^
+    117 │ 		if (!disabled && onClick) {
+    118 │ 			onClick(video);
+  
+  i Hooks should not be called after an early return.
+  
+    54 │ 	}
+    55 │ 
+  > 56 │ 	if (error || !video) {
+       │ 	                      
+  > 57 │ 		return (
+        ...
+  > 65 │ 			</div>
+  > 66 │ 		);
+       │ 		^^
+    67 │ 	}
+    68 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\video-card\video-card.tsx:122:24 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    120 │ 	}, [onClick, disabled, video]);
+    121 │ 
+  > 122 │ 	const handleKeyDown = useCallback(
+        │ 	                      ^^^^^^^^^^^
+    123 │ 		(e: React.KeyboardEvent) => {
+    124 │ 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
+  
+  i Hooks should not be called after an early return.
+  
+    54 │ 	}
+    55 │ 
+  > 56 │ 	if (error || !video) {
+       │ 	                      
+  > 57 │ 		return (
+        ...
+  > 65 │ 			</div>
+  > 66 │ 		);
+       │ 		^^
+    67 │ 	}
+    68 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\world-item-card\world-item-card.tsx:127:66 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    126 │ 	// Colores para el gradiente y el icono - derivados del tipo y rareza del objeto
+  > 127 │ 	const { primaryColor, secondaryColor, icon, intensityFactor } = useMemo(() => {
+        │ 	                                                                ^^^^^^^
+    128 │ 		// Color base desde la propiedad o predeterminado
+    129 │ 		const baseColor = color || '#4F46E5';
+  
+  i Hooks should not be called after an early return.
+  
+    57 │ 	}
+    58 │ 
+  > 59 │ 	if (error || !worldItem) {
+       │ 	                          
+  > 60 │ 		return (
+        ...
+  > 68 │ 			</div>
+  > 69 │ 		);
+       │ 		^^
+    70 │ 	}
+    71 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\world-item-card\world-item-card.tsx:211:24 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    210 │ 	// Manejar eventos de teclado para accesibilidad
+  > 211 │ 	const handleKeyDown = useCallback(
+        │ 	                      ^^^^^^^^^^^
+    212 │ 		(e: React.KeyboardEvent<HTMLDivElement>) => {
+    213 │ 			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
+  
+  i Hooks should not be called after an early return.
+  
+    57 │ 	}
+    58 │ 
+  > 59 │ 	if (error || !worldItem) {
+       │ 	                          
+  > 60 │ 		return (
+        ...
+  > 68 │ 			</div>
+  > 69 │ 		);
+       │ 		^^
+    70 │ 	}
+    71 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\world-item-card\world-item-card.tsx:222:27 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    221 │ 	// Procesar propiedades si es un string o formato JSON
+  > 222 │ 	const parsedProperties = useMemo(() => {
+        │ 	                         ^^^^^^^
+    223 │ 		if (typeof properties === 'string' && properties) {
+    224 │ 			try {
+  
+  i Hooks should not be called after an early return.
+  
+    57 │ 	}
+    58 │ 
+  > 59 │ 	if (error || !worldItem) {
+       │ 	                          
+  > 60 │ 		return (
+        ...
+  > 68 │ 			</div>
+  > 69 │ 		);
+       │ 		^^
+    70 │ 	}
+    71 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\world-item-card\world-item-card.tsx:234:29 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    233 │ 	// Procesar requerimientos si es un string o formato JSON
+  > 234 │ 	const parsedRequirements = useMemo(() => {
+        │ 	                           ^^^^^^^
+    235 │ 		if (typeof requirements === 'string' && requirements) {
+    236 │ 			try {
+  
+  i Hooks should not be called after an early return.
+  
+    57 │ 	}
+    58 │ 
+  > 59 │ 	if (error || !worldItem) {
+       │ 	                          
+  > 60 │ 		return (
+        ...
+  > 68 │ 			</div>
+  > 69 │ 		);
+       │ 		^^
+    70 │ 	}
+    71 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\world-item-card\world-item-card.tsx:246:27 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    245 │ 	// Procesar atributos si es un string o formato JSON
+  > 246 │ 	const parsedAttributes = useMemo(() => {
+        │ 	                         ^^^^^^^
+    247 │ 		if (typeof attributes === 'string' && attributes) {
+    248 │ 			try {
+  
+  i Hooks should not be called after an early return.
+  
+    57 │ 	}
+    58 │ 
+  > 59 │ 	if (error || !worldItem) {
+       │ 	                          
+  > 60 │ 		return (
+        ...
+  > 68 │ 			</div>
+  > 69 │ 		);
+       │ 		^^
+    70 │ 	}
+    71 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\world-item-card\world-item-card.tsx:258:24 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    257 │ 	// Procesar efectos si es un string o formato JSON
+  > 258 │ 	const parsedEffects = useMemo(() => {
+        │ 	                      ^^^^^^^
+    259 │ 		if (typeof effects === 'string' && effects) {
+    260 │ 			try {
+  
+  i Hooks should not be called after an early return.
+  
+    57 │ 	}
+    58 │ 
+  > 59 │ 	if (error || !worldItem) {
+       │ 	                          
+  > 60 │ 		return (
+        ...
+  > 68 │ 			</div>
+  > 69 │ 		);
+       │ 		^^
+    70 │ 	}
+    71 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\cards\world-item-card\world-item-card.tsx:270:22 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    269 │ 	// Procesar estadísticas si es un string o formato JSON
+  > 270 │ 	const parsedStats = useMemo(() => {
+        │ 	                    ^^^^^^^
+    271 │ 		if (typeof stats === 'string' && stats) {
+    272 │ 			try {
+  
+  i Hooks should not be called after an early return.
+  
+    57 │ 	}
+    58 │ 
+  > 59 │ 	if (error || !worldItem) {
+       │ 	                          
+  > 60 │ 		return (
+        ...
+  > 68 │ 			</div>
+  > 69 │ 		);
+       │ 		^^
+    70 │ 	}
+    71 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\core\interactive\clickable-container.tsx:26:5 lint/a11y/useSemanticElements ━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    24 │ 			<div
+    25 │ 				ref={ref}
+  > 26 │ 				role="button"
+       │ 				^^^^^^^^^^^^^
+    27 │ 				tabIndex={0}
+    28 │ 				onClick={onClick}
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+src\components\features\file-browser\views\virtualizer-wrapper.tsx:511:34 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    510 │ 							return (
+  > 511 │ 								<div key={`masonry-col-${colIndex}`} className="flex-1 flex flex-col" style={{ gap: `${gridGap}px` }}>
+        │ 								                         ^^^^^^^^
+    512 │ 									{columnItems.map((item, idx) => {
+    513 │ 										const originalIndex = colIndex + idx * columnCount;
+  
+  i This is the source of the key value.
+  
+    502 │ 					<div className="flex" style={{ gap: `${gridGap}px`, minHeight: '100%' }}>
+    503 │ 						{/* Crear columnas */}
+  > 504 │ 						{Array.from({ length: columnCount }).map((_, colIndex) => {
+        │ 						                                             ^^^^^^^^
+    505 │ 							// Más elementos por columna para masonry
+    506 │ 							const itemsPerColumn = Math.ceil(loadedItems / columnCount) + 5;
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\features\file-viewer\file-viewer.tsx:557:4 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    555 │ 			aria-modal="true"
+    556 │ 		>
+  > 557 │ 			<div
+        │ 			^^^^
+  > 558 │ 				ref={imageContainerRef}
+         ...
+  > 581 │ 				aria-label="Visor de imágenes"
+  > 582 │ 			>
+        │ 			^
+    583 │ 				{/* Toolbar */}
+    584 │ 				<ToolbarActions
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\features\file-viewer\file-viewer.tsx:557:4 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━
+
+  × The ARIA attribute 'aria-label' is not supported by this element.
+  
+    555 │ 			aria-modal="true"
+    556 │ 		>
+  > 557 │ 			<div
+        │ 			^^^^
+  > 558 │ 				ref={imageContainerRef}
+         ...
+  > 581 │ 				aria-label="Visor de imágenes"
+  > 582 │ 			>
+        │ 			^
+    583 │ 				{/* Toolbar */}
+    584 │ 				<ToolbarActions
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+src\components\navigation\components\nav-main-navigation.tsx:171:14 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    169 │ 												)}
+    170 │ 												{child.hasChildren && (
+  > 171 │ 													<button
+        │ 													^^^^^^^
+  > 172 │ 														className="h-4 w-4 p-0 hover:bg-secondary/50 rounded flex items-center justify-center"
+         ...
+  > 176 │ 														}}
+  > 177 │ 													>
+        │ 													^
+    178 │ 														{expandedCategories.has(child.id) ? (
+    179 │ 															<ChevronDown className="h-3 w-3" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src\components\navigation\components\nav-main-navigation.tsx:157:12 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    155 │ 											)}
+    156 │ 										>
+  > 157 │ 											<div
+        │ 											^^^^
+  > 158 │ 												className="flex items-center flex-1 cursor-pointer"
+  > 159 │ 												onClick={() => onNavigate(child.id as ViewType)}
+  > 160 │ 											>
+        │ 											^
+    161 │ 												<child.icon className="h-3 w-3 mr-2" />
+    162 │ 												{child.label}
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src\components\navigation\components\nav-main-navigation.tsx:157:12 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    155 │ 											)}
+    156 │ 										>
+  > 157 │ 											<div
+        │ 											^^^^
+  > 158 │ 												className="flex items-center flex-1 cursor-pointer"
+  > 159 │ 												onClick={() => onNavigate(child.id as ViewType)}
+  > 160 │ 											>
+        │ 											^
+    161 │ 												<child.icon className="h-3 w-3 mr-2" />
+    162 │ 												{child.label}
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\panels\details-panel\actions-system.tsx:152:5 lint/complexity/noForEach ━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    150 │ 			if (action.requiresInput && action.inputFields) {
+    151 │ 				const defaultValues: Record<string, any> = {};
+  > 152 │ 				action.inputFields.forEach((field) => {
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 153 │ 					defaultValues[field.id] = field.defaultValue || '';
+  > 154 │ 				});
+        │ 				^^
+    155 │ 				setInputValues(defaultValues);
+    156 │ 				setShowInputDialog(true);
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\components\panels\details-panel\entities\collection-details.tsx:270:10 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    268 │ 							<div className="grid grid-cols-2 gap-2">
+    269 │ 								{sortedItems.map((item) => (
+  > 270 │ 									<div
+        │ 									^^^^
+  > 271 │ 										key={item.id}
+  > 272 │ 										className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+  > 273 │ 										onClick={() => onAction?.('open-item', { item })}
+  > 274 │ 									>
+        │ 									^
+    275 │ 										{item.thumbnailUrl ? (
+    276 │ 											<img src={item.thumbnailUrl} alt={item.name} className="w-12 h-12 object-cover rounded mb-1" />
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\panels\details-panel\entities\collection-details.tsx:270:10 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    268 │ 							<div className="grid grid-cols-2 gap-2">
+    269 │ 								{sortedItems.map((item) => (
+  > 270 │ 									<div
+        │ 									^^^^
+  > 271 │ 										key={item.id}
+  > 272 │ 										className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+  > 273 │ 										onClick={() => onAction?.('open-item', { item })}
+  > 274 │ 									>
+        │ 									^
+    275 │ 										{item.thumbnailUrl ? (
+    276 │ 											<img src={item.thumbnailUrl} alt={item.name} className="w-12 h-12 object-cover rounded mb-1" />
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src\components\panels\details-panel\entities\collection-details.tsx:289:10 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    287 │ 							<div className="space-y-1">
+    288 │ 								{sortedItems.map((item) => (
+  > 289 │ 									<div
+        │ 									^^^^
+  > 290 │ 										key={item.id}
+  > 291 │ 										className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+  > 292 │ 										onClick={() => onAction?.('open-item', { item })}
+  > 293 │ 									>
+        │ 									^
+    294 │ 										{getTypeIcon(item.type)}
+    295 │ 										<div className="flex-1 min-w-0">
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src\components\panels\details-panel\entities\collection-details.tsx:289:10 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    287 │ 							<div className="space-y-1">
+    288 │ 								{sortedItems.map((item) => (
+  > 289 │ 									<div
+        │ 									^^^^
+  > 290 │ 										key={item.id}
+  > 291 │ 										className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+  > 292 │ 										onClick={() => onAction?.('open-item', { item })}
+  > 293 │ 									>
+        │ 									^
+    294 │ 										{getTypeIcon(item.type)}
+    295 │ 										<div className="flex-1 min-w-0">
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\panels\details-panel\entities\folder-details.tsx:216:11 lint/a11y/useSemanticElements ━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    214 │ 										}}
+    215 │ 										tabIndex={0}
+  > 216 │ 										role="button"
+        │ 										^^^^^^^^^^^^^
+    217 │ 										aria-label={`Abrir ${item.name}`}
+    218 │ 									>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+src\components\panels\details-panel\entities\folder-details.tsx:248:11 lint/a11y/useSemanticElements ━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    246 │ 										}}
+    247 │ 										tabIndex={0}
+  > 248 │ 										role="button"
+        │ 										^^^^^^^^^^^^^
+    249 │ 										aria-label={`Abrir ${item.name}`}
+    250 │ 									>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+src\components\panels\details-panel\entities\folder-details.tsx:307:18 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    305 │ 						</Button>
+    306 │ 						{pathSegments.map((segment, index) => (
+  > 307 │ 							<div key={index} className="flex items-center gap-1">
+        │ 							          ^^^^^
+    308 │ 								<ChevronRight className="h-3 w-3 text-muted-foreground" />
+    309 │ 								<Button
+  
+  i This is the source of the key value.
+  
+    304 │ 							<Home className="h-3 w-3" />
+    305 │ 						</Button>
+  > 306 │ 						{pathSegments.map((segment, index) => (
+        │ 						                            ^^^^^
+    307 │ 							<div key={index} className="flex items-center gap-1">
+    308 │ 								<ChevronRight className="h-3 w-3 text-muted-foreground" />
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\panels\details-panel\entities\video-details.tsx:229:5 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    227 │ 		<Card className="overflow-hidden">
+    228 │ 			<CardContent className="p-0">
+  > 229 │ 				<div
+        │ 				^^^^
+  > 230 │ 					className={cn('relative bg-black flex items-center justify-center group', sizeClasses[size])}
+  > 231 │ 					onMouseEnter={() => setShowControlsOverlay(true)}
+  > 232 │ 					onMouseLeave={() => setShowControlsOverlay(false)}
+  > 233 │ 				>
+        │ 				^
+    234 │ 					{videoUrl ? (
+    235 │ 						<video
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\settings\folders\hooks\use-folders-operations.ts:144:37 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    142 │ 	// Reindexar todas las carpetas
+    143 │ 	const handleReindexAll = useCallback(async () => {
+  > 144 │ 		const reindexAllFoldersMutation = useReindexAllFolders();
+        │ 		                                  ^^^^^^^^^^^^^^^^^^^^
+    145 │ 		try {
+    146 │ 			operationsLogger.info('🔄 Iniciando reindexación global directa');
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\settings\folders\hooks\use-folders-operations.ts:34:33 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    32 │ 	const handleAddFolder = useCallback(
+    33 │ 		async (folderPath: string) => {
+  > 34 │ 			const createFolderMutation = useCreateFolder();
+       │ 			                             ^^^^^^^^^^^^^^^
+    35 │ 			try {
+    36 │ 				operationsLogger.info('➕ Agregando carpeta:', { path: folderPath });
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\settings\folders\hooks\use-folders-operations.ts:69:34 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    67 │ 	const handleReindexFolder = useCallback(
+    68 │ 		async (folderId: string) => {
+  > 69 │ 			const reindexFolderMutation = useReindexFolder();
+       │ 			                              ^^^^^^^^^^^^^^^^
+    70 │ 			try {
+    71 │ 				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\settings\folders\hooks\use-folders-operations.ts:95:33 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    93 │ 	const handleRemoveFolder = useCallback(
+    94 │ 		async (folderId: string) => {
+  > 95 │ 			const deleteFolderMutation = useDeleteFolder();
+       │ 			                             ^^^^^^^^^^^^^^^
+    96 │ 			try {
+    97 │ 				operationsLogger.info('🗑� Eliminando carpeta:', { folderId });
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\settings\folders\hooks\use-folders-operations.ts:120:33 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    118 │ 	const handleAutoReindexToggle = useCallback(
+    119 │ 		async (folderId: string, value: boolean) => {
+  > 120 │ 			const updateFolderMutation = useUpdateFolder();
+        │ 			                             ^^^^^^^^^^^^^^^
+    121 │ 			try {
+    122 │ 				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\settings\folders\hooks\use-folders.ts:245:37 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    243 │ 	const reindexAll = useCallback(async () => {
+    244 │ 		folderLogger.info('🔄 Iniciando reindexación global');
+  > 245 │ 		const reindexAllFoldersMutation = useReindexAllFolders();
+        │ 		                                  ^^^^^^^^^^^^^^^^^^^^
+    246 │ 
+    247 │ 		try {
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\ui\breadcrumb.tsx:44:3 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element with the interactive role "link" is not focusable.
+  
+    42 │ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
+    43 │ 	return (
+  > 44 │ 		<span
+       │ 		^^^^^
+  > 45 │ 			data-slot="breadcrumb-page"
+        ...
+  > 50 │ 			{...props}
+  > 51 │ 		/>
+       │ 		^^
+    52 │ 	);
+    53 │ }
+  
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "link".
+  
+  i Add a tabIndex attribute to make this element focusable.
+  
+
+src\components\ui\carousel.tsx:120:5 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <section>
+  
+    118 │ 				onKeyDownCapture={handleKeyDown}
+    119 │ 				className={cn('relative', className)}
+  > 120 │ 				role="region"
+        │ 				^^^^^^^^^^^^^
+    121 │ 				aria-roledescription="carousel"
+    122 │ 				data-slot="carousel"
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+src\components\ui\chart.tsx:74:4 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    72 │ 	return (
+    73 │ 		<style
+  > 74 │ 			dangerouslySetInnerHTML={{
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^
+    75 │ 				__html: Object.entries(THEMES)
+    76 │ 					.map(
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+src\components\ui\input-otp.tsx:62:3 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element with the interactive role "separator" is not focusable.
+  
+    60 │ function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
+    61 │ 	return (
+  > 62 │ 		<div data-slot="input-otp-separator" role="separator" {...props}>
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 			<MinusIcon />
+    64 │ 		</div>
+  
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "separator".
+  
+  i Add a tabIndex attribute to make this element focusable.
+  
+
+src\components\ui\input-otp.tsx:62:40 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <hr>
+  
+    60 │ function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
+    61 │ 	return (
+  > 62 │ 		<div data-slot="input-otp-separator" role="separator" {...props}>
+       │ 		                                     ^^^^^^^^^^^^^^^^
+    63 │ 			<MinusIcon />
+    64 │ 		</div>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+src\components\ui\input-otp.tsx:62:40 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the separator ARIA role does not have the required ARIA attributes.
+  
+    60 │ function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
+    61 │ 	return (
+  > 62 │ 		<div data-slot="input-otp-separator" role="separator" {...props}>
+       │ 		                                     ^^^^^^^^^^^^^^^^
+    63 │ 			<MinusIcon />
+    64 │ 		</div>
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
+  
+
+src\components\ui\particles.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+src\components\ui\particles.tsx:274:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    272 │ 		});
+    273 │ 		rafID.current = window.requestAnimationFrame(animate);
+  > 274 │ 	};
+        │ 	 ^
+    275 │ 
+    276 │ 	return (
+  
+  i Remove ;
+  
+
+src\components\ui\particles.tsx:120:6 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    118 │ 			window.removeEventListener('resize', handleResize);
+    119 │ 		};
+  > 120 │ 	}, [animate, initCanvas, clearContext]);
+        │ 	    ^^^^^^^
+    121 │ 
+    122 │ 	useEffect(() => {
+  
+  i The variable is declared here:
+  
+    230 │ 	};
+    231 │ 
+  > 232 │ 	const animate = useCallback(() => {
+        │ 	      ^^^^^^^
+    233 │ 		clearContext();
+    234 │ 		circles.current.forEach((circle: Circle, i: number) => {
+  
+
+src\components\ui\particles.tsx:120:15 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    118 │ 			window.removeEventListener('resize', handleResize);
+    119 │ 		};
+  > 120 │ 	}, [animate, initCanvas, clearContext]);
+        │ 	             ^^^^^^^^^^
+    121 │ 
+    122 │ 	useEffect(() => {
+  
+  i The variable is declared here:
+  
+    128 │ 	}, [initCanvas]);
+    129 │ 
+  > 130 │ 	const initCanvas = useCallback(() => {
+        │ 	      ^^^^^^^^^^
+    131 │ 		resizeCanvas();
+    132 │ 		drawParticles();
+  
+
+src\components\ui\particles.tsx:120:27 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    118 │ 			window.removeEventListener('resize', handleResize);
+    119 │ 		};
+  > 120 │ 	}, [animate, initCanvas, clearContext]);
+        │ 	                         ^^^^^^^^^^^^
+    121 │ 
+    122 │ 	useEffect(() => {
+  
+  i The variable is declared here:
+  
+    210 │ 	};
+    211 │ 
+  > 212 │ 	const clearContext = useCallback(() => {
+        │ 	      ^^^^^^^^^^^^
+    213 │ 		if (context.current) {
+    214 │ 			context.current.clearRect(0, 0, canvasSize.current.w, canvasSize.current.h);
+  
+
+src\components\ui\particles.tsx:124:6 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    122 │ 	useEffect(() => {
+    123 │ 		onMouseMove();
+  > 124 │ 	}, [onMouseMove]);
+        │ 	    ^^^^^^^^^^^
+    125 │ 
+    126 │ 	useEffect(() => {
+  
+  i The variable is declared here:
+  
+    133 │ 	};
+    134 │ 
+  > 135 │ 	const onMouseMove = useCallback(() => {
+        │ 	      ^^^^^^^^^^^
+    136 │ 		if (canvasRef.current) {
+    137 │ 			const rect = canvasRef.current.getBoundingClientRect();
+  
+
+src\components\ui\particles.tsx:128:6 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━
+
+  × This variable is used before its declaration.
+  
+    126 │ 	useEffect(() => {
+    127 │ 		initCanvas();
+  > 128 │ 	}, [initCanvas]);
+        │ 	    ^^^^^^^^^^
+    129 │ 
+    130 │ 	const initCanvas = useCallback(() => {
+  
+  i The variable is declared here:
+  
+    128 │ 	}, [initCanvas]);
+    129 │ 
+  > 130 │ 	const initCanvas = useCallback(() => {
+        │ 	      ^^^^^^^^^^
+    131 │ 		resizeCanvas();
+    132 │ 		drawParticles();
+  
+
+src\components\ui\particles.tsx:133:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    131 │ 		resizeCanvas();
+    132 │ 		drawParticles();
+  > 133 │ 	};
+        │ 	 ^
+    134 │ 
+    135 │ 	const onMouseMove = useCallback(() => {
+  
+  i Remove ;
+  
+
+src\components\ui\particles.tsx:147:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    145 │ 			}
+    146 │ 		}
+  > 147 │ 	};
+        │ 	 ^
+    148 │ 
+    149 │ 	const resizeCanvas = () => {
+  
+  i Remove ;
+  
+
+src\components\ui\particles.tsx:274:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    272 │ 		});
+    273 │ 		rafID.current = window.requestAnimationFrame(animate);
+  > 274 │ 	};
+        │ 	 ^
+    275 │ 
+    276 │ 	return (
+  
+  i Remove ;
+  
+
+src\components\ui\particles.tsx:133:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    131 │ 		resizeCanvas();
+    132 │ 		drawParticles();
+  > 133 │ 	};
+        │ 	 ^
+    134 │ 
+    135 │ 	const onMouseMove = useCallback(() => {
+  
+  i Remove ;
+  
+
+src\components\ui\particles.tsx:147:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    145 │ 			}
+    146 │ 		}
+  > 147 │ 	};
+        │ 	 ^
+    148 │ 
+    149 │ 	const resizeCanvas = () => {
+  
+  i Remove ;
+  
+
+src\components\ui\slider.tsx:48:11 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    46 │ 				<SliderPrimitive.Thumb
+    47 │ 					data-slot="slider-thumb"
+  > 48 │ 					key={index}
+       │ 					     ^^^^^
+    49 │ 					className="border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+    50 │ 				/>
+  
+  i This is the source of the key value.
+  
+    43 │ 				/>
+    44 │ 			</SliderPrimitive.Track>
+  > 45 │ 			{Array.from({ length: _values.length }, (_, index) => (
+       │ 			                                            ^^^^^
+    46 │ 				<SliderPrimitive.Thumb
+    47 │ 					data-slot="slider-thumb"
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\ui\tag\index.tsx:124:26 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    122 │ 				{tags.map((tag, index) => (
+    123 │ 					<Badge
+  > 124 │ 						key={`tag-${tag}-${index}`}
+        │ 						                   ^^^^^
+    125 │ 						variant="secondary"
+    126 │ 						className={cn('px-2 py-1 text-xs', disabled && 'opacity-50')}
+  
+  i This is the source of the key value.
+  
+    120 │ 		return (
+    121 │ 			<div ref={ref} className={cn('flex flex-wrap gap-2', className)} {...props}>
+  > 122 │ 				{tags.map((tag, index) => (
+        │ 				                ^^^^^
+    123 │ 					<Badge
+    124 │ 						key={`tag-${tag}-${index}`}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\ui\theme-provider.tsx:109:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    108 │ 		// Remover todas las clases de tema anteriores
+  > 109 │ 		customThemes.forEach((t) => root.classList.remove(t));
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │ 
+    111 │ 		// Aplicar nueva clase de tema
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\components\views\characters\characters-view.tsx:61:24 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    60 │ 	const handleCreateCharacter = useCallback(() => {
+  > 61 │ 					const { toast } = useToast();
+       │ 					                  ^^^^^^^^
+    62 │ 			if (newCharacterName.trim() === '') {
+    63 │ 				toast({
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\views\collections\collections-view.tsx:53:21 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    52 │ 	const handleCreateCollection = useCallback(() => {
+  > 53 │ 		const { toast } = useToast();
+       │ 		                  ^^^^^^^^
+    54 │ 		if (newCollectionName.trim() === '') {
+    55 │ 			toast({
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\views\development\server-stats.tsx:209:22 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    207 │ 									<div className="space-y-3">
+    208 │ 										{systemStats.network.map((net, index) => (
+  > 209 │ 											<div key={index} className="p-3 border rounded-lg">
+        │ 											          ^^^^^
+    210 │ 												<div className="grid grid-cols-2 gap-2 text-sm">
+    211 │ 													<div>
+  
+  i This is the source of the key value.
+  
+    206 │ 								<CardContent>
+    207 │ 									<div className="space-y-3">
+  > 208 │ 										{systemStats.network.map((net, index) => (
+        │ 										                               ^^^^^
+    209 │ 											<div key={index} className="p-3 border rounded-lg">
+    210 │ 												<div className="grid grid-cols-2 gap-2 text-sm">
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\views\documents\documents-view.tsx:66:21 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    65 │ 	const handleCreateDocument = useCallback(async () => {
+  > 66 │ 		const { toast } = useToast();
+       │ 		                  ^^^^^^^^
+    67 │ 		if (newDocumentName.trim() === '' || !newDocumentFile) {
+    68 │ 			toast({
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\views\favorites\favorites-view.tsx:61:21 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    60 │ 	const handleCreateFavorite = useCallback(() => {
+  > 61 │ 		const { toast } = useToast();
+       │ 		                  ^^^^^^^^
+    62 │ 		if (newFavoriteName.trim() === '') {
+    63 │ 			toast({
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\views\file3d\file3d-view.tsx:66:21 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━
+
+  × This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    65 │ 	const handleCreateFile3D = useCallback(async () => {
+  > 66 │ 		const { toast } = useToast();
+       │ 		                  ^^^^^^^^
+    67 │ 		if (newFile3DName.trim() === '' || !newFile3DFile) {
+    68 │ 			toast({
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+src\components\views\prompts\prompts-view.tsx:115:7 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    113 │ 					<AlertDescription>
+    114 │ 						{error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+  > 115 │ 						<button onClick={handleRetry} className="ml-2 underline hover:no-underline">
+        │ 						^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    116 │ 							Reintentar
+    117 │ 						</button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src\components\views\uploaded-images\uploaded-images-view.tsx:277:3 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    276 │ 	return (
+  > 277 │ 		<div className="w-full h-full flex flex-col" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    278 │ 			{/* Barra de herramientas */}
+    279 │ 			<div className="flex items-center justify-between p-2 border-b">
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\hooks\use-theme.ts:58:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    57 │ 		// Remover todas las clases de tema anteriores
+  > 58 │ 		customThemes.forEach((t) => root.classList.remove(t));
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 
+    60 │ 		// Aplicar nueva clase de tema
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\lib\drizzle\index.ts:26:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable implicitly has the any type.
+  
+    25 │ let client: ReturnType<typeof createClient> | null = null;
+  > 26 │ let dbInstance;
+       │     ^^^^^^^^^^
+    27 │ 
+    28 │ if (typeof window === 'undefined') {
+  
+  i Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
+  
+
+src\lib\drizzle\index.ts:52:5 lint/suspicious/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not add then to an object.
+  
+    50 │ 				having: () => mockQuery,
+    51 │ 				execute: () => Promise.resolve([]),
+  > 52 │ 				then: (onResolve: any) => Promise.resolve([]).then(onResolve),
+       │ 				^^^^
+    53 │ 			};
+    54 │ 			return mockQuery;
+  
+
+src\lib\utils\character\index.ts:144:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    142 │ 	// Distribución por clase
+    143 │ 	const classCounts: Record<string, number> = {};
+  > 144 │ 	characters.forEach((character) => {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 145 │ 		const characterClass = character.class || 'unknown';
+  > 146 │ 		classCounts[characterClass] = (classCounts[characterClass] || 0) + 1;
+  > 147 │ 	});
+        │ 	^^
+    148 │ 
+    149 │ 	// Distribución por raza
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\lib\utils\character\index.ts:151:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    149 │ 	// Distribución por raza
+    150 │ 	const raceCounts: Record<string, number> = {};
+  > 151 │ 	characters.forEach((character) => {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 152 │ 		const race = character.race || 'unknown';
+  > 153 │ 		raceCounts[race] = (raceCounts[race] || 0) + 1;
+  > 154 │ 	});
+        │ 	^^
+    155 │ 
+    156 │ 	// Distribución por nivel
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\lib\utils\character\index.ts:165:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    163 │ 	};
+    164 │ 
+  > 165 │ 	characters.forEach((character) => {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 166 │ 		const level = character.level;
+         ...
+  > 171 │ 		else levelRanges['20+']++;
+  > 172 │ 	});
+        │ 	^^
+    173 │ 
+    174 │ 	// Estadísticas de asociaciones usando las estadísticas pre-calculadas
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\lib\utils\character\index.ts:197:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    195 │ 	};
+    196 │ 
+  > 197 │ 	characters.forEach((character) => {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 198 │ 		const rarity = character.statistics?.rarityLevel || 'common';
+  > 199 │ 		rarityDistribution[rarity]++;
+  > 200 │ 	});
+        │ 	^^
+    201 │ 
+    202 │ 	return {
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\services\album\album.service.ts:377:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    376 │ 		// Revalidar rutas
+  > 377 │ 		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    378 │ 		revalidatePath(`/albums/${albumId}`);
+    379 │ 
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\services\album\album.service.ts:399:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    398 │ 		// Revalidar rutas
+  > 399 │ 		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    400 │ 		revalidatePath(`/albums/${albumId}`);
+    401 │ 
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\store\entities\folder\slices\core.ts:31:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    29 │ 	const index: Record<string, string[]> = {};
+    30 │ 
+  > 31 │ 	Object.values(folders).forEach((folder) => {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 32 │ 		const parentKey = folder.parentId || 'root';
+        ...
+  > 36 │ 		index[parentKey].push(folder.id);
+  > 37 │ 	});
+       │ 	^^
+    38 │ 
+    39 │ 	return index;
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\store\entities\folder\slices\core.ts:58:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    57 │ 		const allDescendants = [...directChildren];
+  > 58 │ 		directChildren.forEach((childId) => {
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 59 │ 			allDescendants.push(...getDescendants(childId, visited));
+  > 60 │ 		});
+       │ 		^^
+    61 │ 
+    62 │ 		return allDescendants;
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\store\entities\folder\slices\core.ts:65:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    63 │ 	}
+    64 │ 
+  > 65 │ 	Object.keys(folders).forEach((folderISkipped 16 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+Checked 1419 files in 2s. Fixed 76 files.
+Found 181 errors.
+Found 26 warnings.
+d) => {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 66 │ 		tree[folderId] = getDescendants(folderId);
+  > 67 │ 	});
+       │ 	^^
+    68 │ 
+    69 │ 	return tree;
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\store\entities\folder\slices\core.ts:217:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    215 │ 		const newExpanded = new Set(expandedFolders);
+    216 │ 
+  > 217 │ 		path.forEach((id) => newExpanded.add(id));
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    218 │ 
+    219 │ 		set({
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\store\entities\video\slices\core.ts:192:4 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    190 │ 			const folderVideos = { ...state.folderVideos };
+    191 │ 
+  > 192 │ 			videos.forEach((video) => {
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 193 │ 				newVideos[video.id] = video;
+         ...
+  > 202 │ 				}
+  > 203 │ 			});
+        │ 			^^
+    204 │ 
+    205 │ 			return {
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\transformers\folder\transformer.ts:253:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    252 │ 	// Crear mapa de carpetas con array de hijos
+  > 253 │ 	folders.forEach((folder) => {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 254 │ 		folderMap.set(folder.id, { ...folder, children: [] });
+  > 255 │ 	});
+        │ 	^^
+    256 │ 
+    257 │ 	const rootFolders: FolderWithStats[] = [];
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src\transformers\folder\transformer.ts:260:2 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    259 │ 	// Construir jerarquía
+  > 260 │ 	folders.forEach((folder) => {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 261 │ 		if (folder.parentId && folderMap.has(folder.parentId)) {
+         ...
+  > 268 │ 		}
+  > 269 │ 	});
+        │ 	^^
+    270 │ 
+    271 │ 	return rootFolders;
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while applying fixes.
+  
+

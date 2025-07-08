@@ -4,10 +4,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { File3DCard } from '@/components/cards/file3d-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFile3DStore } from '@/store/entities/file-3d';
@@ -133,7 +133,11 @@ export function File3DView(_props: ViewProps) {
 				)}
 
 				{sortedFile3Ds.length === 0 && !isLoading && !showForm ? (
-					<EmptyState icon={Box} title="No hay archivos 3D" description="Sube archivos 3D para comenzar a usar el visor." />
+					<EmptyState
+						icon={Box}
+						title="No hay archivos 3D"
+						description="Sube archivos 3D para comenzar a usar el visor."
+					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{sortedFile3Ds.map((file3d, index) => {
@@ -171,4 +175,3 @@ export function File3DView(_props: ViewProps) {
  * - Animaciones fluidas con motion/react
  * - Lazy loading y memoización para rendimiento
  */
-

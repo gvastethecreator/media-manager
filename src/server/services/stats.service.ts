@@ -1,6 +1,15 @@
 import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { activities, imageStats, tags, collections, folders, characters, places, worldItems } from '@/lib/drizzle/schema';
+import {
+	activities,
+	characters,
+	collections,
+	folders,
+	imageStats,
+	places,
+	tags,
+	worldItems,
+} from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -148,23 +157,25 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 			db.select({ count: sql<number>`count(*)` }).from(places),
 			db.select({ count: sql<number>`count(*)` }).from(worldItems),
 			db.select({ count: sql<number>`count(*)` }).from(activities),
-			db.select({
-				id: tags.id,
-				name: tags.name,
-				color: tags.color,
-			})
-			.from(tags)
-			.orderBy(desc(tags.createdAt))
-			.limit(5),
-			db.select({
-				id: activities.id,
-				type: activities.type,
-				description: activities.message,
-				createdAt: activities.createdAt,
-			})
-			.from(activities)
-			.orderBy(desc(activities.createdAt))
-			.limit(5),
+			db
+				.select({
+					id: tags.id,
+					name: tags.name,
+					color: tags.color,
+				})
+				.from(tags)
+				.orderBy(desc(tags.createdAt))
+				.limit(5),
+			db
+				.select({
+					id: activities.id,
+					type: activities.type,
+					description: activities.message,
+					createdAt: activities.createdAt,
+				})
+				.from(activities)
+				.orderBy(desc(activities.createdAt))
+				.limit(5),
 		]);
 
 		statsLogger.info('✅ Estadísticas del sistema obtenidas');
@@ -248,21 +259,15 @@ export async function getStats(): Promise<StatsResponse | null> {
 		statsLogger.info('📊 Obteniendo estadísticas detalladas');
 
 		// Por ahora, usar contadores simples sin relaciones complejas
-		const [
-			collectionsCount,
-			foldersCount,
-			tagsCount,
-			charactersCount,
-			placesCount,
-			worldItemsCount,
-		] = await Promise.all([
-			db.select({ count: sql<number>`count(*)` }).from(collections),
-			db.select({ count: sql<number>`count(*)` }).from(folders),
-			db.select({ count: sql<number>`count(*)` }).from(tags),
-			db.select({ count: sql<number>`count(*)` }).from(characters),
-			db.select({ count: sql<number>`count(*)` }).from(places),
-			db.select({ count: sql<number>`count(*)` }).from(worldItems),
-		]);
+		const [collectionsCount, foldersCount, tagsCount, charactersCount, placesCount, worldItemsCount] =
+			await Promise.all([
+				db.select({ count: sql<number>`count(*)` }).from(collections),
+				db.select({ count: sql<number>`count(*)` }).from(folders),
+				db.select({ count: sql<number>`count(*)` }).from(tags),
+				db.select({ count: sql<number>`count(*)` }).from(characters),
+				db.select({ count: sql<number>`count(*)` }).from(places),
+				db.select({ count: sql<number>`count(*)` }).from(worldItems),
+			]);
 
 		statsLogger.info('✅ Estadísticas detalladas obtenidas');
 
