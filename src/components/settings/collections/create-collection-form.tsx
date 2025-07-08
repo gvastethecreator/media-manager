@@ -61,7 +61,7 @@ export function CreateCollectionForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel,
+	onCancel: _onCancel,
 }: CreateCollectionFormProps) {
 	// React Query mutations
 	const createCollectionMutation = useCreateCollection();

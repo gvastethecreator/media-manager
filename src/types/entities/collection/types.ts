@@ -5,6 +5,11 @@
 
 import type { ImageBase } from '../image/base';
 
+export interface CollectionEdition {
+	name: string;
+	year: number;
+}
+
 export interface CollectionBase {
 	id: string;
 	name: string;

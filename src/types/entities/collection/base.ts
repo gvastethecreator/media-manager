@@ -23,9 +23,29 @@ export type CollectionBase = {
 	lastImageAddedAt: Date | null;
 	lastVideoAddedAt: Date | null;
 	parentId: string | null;
+	category: string | null;
+	platform: string | null;
+	price: number | null;
+	network: string | null;
+	tokenId: string | null;
+	url: string | null;
+	alternativeUrl: string | null;
+	editions: CollectionEdition[] | null;
+	sourceImage: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+export interface CollectionEdition {
+	id: string;
+	name: string;
+	price: number;
+	currency: string;
+	quantity: number;
+	available: number;
+	releaseDate: Date;
+	metadata?: Record<string, any>;
+}
 
 /**
  * 📊 Estadísticas calculadas y derivadas para una Collection.

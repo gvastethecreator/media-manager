@@ -93,7 +93,7 @@ export function ImageGallery({
 			return (
 				image.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				image.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				image.tags?.some((tag) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
+												image.tags?.some((tag: TagWithStats) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
 			);
 		});
 	}, [images, searchTerm]);
@@ -113,7 +113,7 @@ export function ImageGallery({
 					comparison = new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
 					break;
 				case 'size':
-					comparison = (a.metadata?.size || 0) - (b.metadata?.size || 0);
+					comparison = (a.size || 0) - (b.size || 0);
 					break;
 				case 'dimensions': {
 					const aArea = (a.width || 0) * (a.height || 0);

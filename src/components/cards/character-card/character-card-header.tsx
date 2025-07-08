@@ -5,17 +5,17 @@ interface CharacterCardHeaderProps {
 	/** Nombre del personaje */
 	name: string;
 	/** Emoji que representa el personaje */
-	emoji: string;
+		emoji: string | null;
 	/** Color principal para el tema */
 	color: string;
 	/** Si el personaje está marcado como favorito */
 	isFavorite?: boolean;
 	/** Clase del personaje (Warrior, Mage, etc.) */
-	class?: string;
+		class?: string | null;
 	/** Nivel del personaje */
-	level?: number;
+			level?: number | null;
 	/** Raza del personaje */
-	race?: string;
+		race?: string | null;
 	/** Si está en modo TCG con efectos especiales */
 	tcgMode?: boolean;
 	/** Si está en modo compacto */

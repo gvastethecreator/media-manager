@@ -117,7 +117,7 @@ const Particles: React.FC<ParticlesProps> = ({
 			}
 			window.removeEventListener('resize', handleResize);
 		};
-	}, [animate, initCanvas]);
+	}, [animate, initCanvas, clearContext]);
 
 	useEffect(() => {
 		onMouseMove();
@@ -127,12 +127,12 @@ const Particles: React.FC<ParticlesProps> = ({
 		initCanvas();
 	}, [initCanvas]);
 
-	const initCanvas = () => {
+	const initCanvas = useCallback(() => {
 		resizeCanvas();
 		drawParticles();
 	};
 
-	const onMouseMove = () => {
+	const onMouseMove = useCallback(() => {
 		if (canvasRef.current) {
 			const rect = canvasRef.current.getBoundingClientRect();
 			const { w, h } = canvasSize.current;
@@ -209,11 +209,11 @@ const Particles: React.FC<ParticlesProps> = ({
 		}
 	};
 
-	const clearContext = () => {
+	const clearContext = useCallback(() => {
 		if (context.current) {
 			context.current.clearRect(0, 0, canvasSize.current.w, canvasSize.current.h);
 		}
-	};
+	}, []);
 
 	const drawParticles = () => {
 		clearContext();
@@ -229,7 +229,7 @@ const Particles: React.FC<ParticlesProps> = ({
 		return remapped > 0 ? remapped : 0;
 	};
 
-	const animate = () => {
+	const animate = useCallback(() => {
 		clearContext();
 		circles.current.forEach((circle: Circle, i: number) => {
 			// Handle the alpha value

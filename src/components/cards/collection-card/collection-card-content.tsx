@@ -1,6 +1,7 @@
 import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Badge } from '@/components/ui/badge';
+import { useCallback, useMemo } from 'react';
 import type { CollectionEdition } from '@/types/entities/collection';
 
 interface CollectionCardContentProps {
@@ -10,7 +11,7 @@ interface CollectionCardContentProps {
 	network?: string | null;
 	tokenId?: string | null;
 	url?: string | null;
-	editions?: CollectionEdition[] | string;
+	editions?: CollectionEdition[] | string | null;
 	primaryColor: string;
 	secondaryColor?: string;
 	featuredImage?: string | null;
@@ -184,7 +185,7 @@ export function CollectionCardContent({
 								<span className="font-medium">Ediciones</span>
 							</div>
 							<ul className="text-xs space-y-0.5 max-h-12 overflow-y-auto scrollbar-thin overflow-x-hidden">
-								{editionsList.slice(0, 2).map((edition) => {
+								{editionsList.slice(0, 2).map((edition: CollectionEdition) => {
 									const date = 'date' in edition ? edition.date : edition.releaseDate;
 									return (
 										<li

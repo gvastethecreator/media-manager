@@ -27,7 +27,7 @@ const useTagInput = () => {
 	return context;
 };
 
-export interface TagInputProps extends React.PropsWithChildren<{}> {
+export interface TagInputProps extends React.PropsWithChildren<Record<string, never>> {
 	value?: string[];
 	defaultValue?: string[];
 	onChange?: (tags: string[]) => void;

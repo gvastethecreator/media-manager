@@ -78,7 +78,18 @@ router.get('/', async (_req, res) => {
 		}));
 
 		console.log(`✅ ${transformedFolders.length} carpetas obtenidas con Drizzle`);
-		res.json(transformedFolders);
+
+		// Devolver estructura compatible con FoldersResponse
+		res.json({
+			data: transformedFolders,
+			pagination: {
+				total: transformedFolders.length,
+				limit: 100, // Default limit
+				offset: 0,
+				hasNext: false,
+				hasPrevious: false,
+			},
+		});
 	} catch (error) {
 		console.error('❌ Error al obtener carpetas:', error);
 		res.status(500).json({

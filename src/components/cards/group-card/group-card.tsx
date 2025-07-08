@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGroupCardData } from '@/lib/api/groups';
 import { cn } from '@/lib/utils';
-import type { GroupCardProps } from './group-card.types';
+
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
@@ -24,24 +24,29 @@ export function GroupCard({
 	// Calcular colores
 	const primaryColor = useMemo(() => group?.color || '#3b82f6', [group?.color]);
 	const secondaryColor = useMemo(() => {
+		// Si no hay color definido, usar un valor por defecto
 		if (!group?.color) return '#2563eb';
 
+		// Oscurecer el color primario para el secundario
 		try {
-			// Convertir hex a RGB y oscurecer
-			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
-			const g = Number.parseInt(primaryColor.slice(2, 4), 16);
-			const b = Number.parseInt(primaryColor.slice(4, 6), 16);
+			// Convertir hex a RGB
+			const r = Number.parseInt(group.color.slice(1, 3), 16);
+			const g = Number.parseInt(group.color.slice(3, 5), 16);
+			const b = Number.parseInt(group.color.slice(5, 7), 16);
 
+			// Oscurecer los componentes
 			const darkenFactor = 0.7;
 			const darkerR = Math.floor(r * darkenFactor);
 			const darkerG = Math.floor(g * darkenFactor);
 			const darkerB = Math.floor(b * darkenFactor);
 
+			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 		} catch (_e) {
+			// Si hay algún error, volver al valor por defecto
 			return '#2563eb';
 		}
-	}, [primaryColor, group?.color]);
+	}, [group?.color]);
 
 	// Preparar media para la galería
 	const allMedia = useMemo(() => {
@@ -68,21 +73,21 @@ export function GroupCard({
 	// Determinar el número total de entidades
 	const entityCounts = useMemo(
 		() => ({
-			images: group?._count?.images || 0,
-			videos: group?._count?.videos || 0,
-			albums: group?._count?.albums || 0,
-			collections: group?._count?.collections || 0,
-			tags: group?._count?.tags || 0,
-			characters: group?._count?.characters || 0,
-			places: group?._count?.places || 0,
-			worldItems: group?._count?.worldItems || 0,
-			concepts: group?._count?.concepts || 0,
-			prompts: group?._count?.prompts || 0,
-			notes: group?._count?.notes || 0,
-			wildcards: group?._count?.wildcards || 0,
-			properties: group?._count?.properties || 0,
+			images: group?.stats?.totalImages || 0,
+			videos: group?.stats?.totalVideos || 0,
+			albums: group?.stats?.totalAlbums || 0,
+			collections: group?.stats?.totalCollections || 0,
+			tags: group?.stats?.totalTags || 0,
+			characters: group?.stats?.totalCharacters || 0,
+			places: group?.stats?.totalPlaces || 0,
+			worldItems: group?.stats?.totalWorldItems || 0,
+			concepts: group?.stats?.totalConcepts || 0,
+			prompts: group?.stats?.totalPrompts || 0,
+			notes: group?.stats?.totalNotes || 0,
+			wildcards: group?.stats?.totalWildcards || 0,
+			properties: group?.stats?.totalProperties || 0,
 		}),
-		[group?._count]
+		[group?.stats]
 	);
 
 	// Preparar filters count
@@ -192,8 +197,8 @@ export function GroupCard({
 				cardId={group.cardId}
 				tcgMode={tcgMode}
 				compact={compact}
-				imagesCount={group._count.images}
-				videosCount={group._count.videos}
+				imagesCount={group.stats.totalImages}
+				videosCount={group.stats.totalVideos}
 			/>
 
 			{/* Efecto holográfico general en modo TCG */}

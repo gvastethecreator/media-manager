@@ -3,11 +3,10 @@ import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-// Temporal: Comentado para evitar errores
-// import { ConceptService } from '@/services/concept/concept.service';
-import type { Image } from '@/types/entities/image';
+import { ConceptService } from '@/services/concept/concept.service';
+import type { ImageWithStats } from '@/types/entities/image';
 
-// const { getRecentConceptImages } = ConceptService;
+const { getRecentConceptImages } = ConceptService;
 
 interface ConceptCardImagesProps {
 	conceptId: string;
@@ -34,7 +33,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 				setIsLoading(true);
 				const data = await getRecentConceptImages(conceptId);
 				// Filtrar solo imágenes con thumbnailUrl válida
-				const validImages = data.filter((img: Image) => img.thumbnailUrl);
+				const validImages = data.filter((img: ImageWithStats) => img.thumbnail);
 				setImages(validImages);
 			} catch (err) {
 				console.error('Error cargando imágenes:', err);

@@ -68,7 +68,7 @@ interface CreatePlaceFormProps {
 	onPreview?: (data: any) => void;
 }
 
-export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCancel, onPreview }: CreatePlaceFormProps) {
+export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCancel, onPreview: _onPreview }: CreatePlaceFormProps) {
 	const createPlaceMutation = useCreatePlace();
 	const updatePlaceMutation = useUpdatePlace();
 

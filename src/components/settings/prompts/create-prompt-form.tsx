@@ -49,7 +49,7 @@ export function CreatePromptForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel,
+	onCancel: _onCancel,
 	onPreview,
 }: CreatePromptFormProps) {
 	// React Query mutations
