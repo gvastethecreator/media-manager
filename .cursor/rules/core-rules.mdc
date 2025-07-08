@@ -1,92 +1,6 @@
-# REGLAS UNIFICADAS DEL SISTEMA
-
-## 🔻 CONFIRMACIÓN VISUAL OBLIGATORIA
-
-**REGLA CRÍTICA**: SIEMPRE iniciar cada respuesta con exactamente **🔻🔻🔻🔻🔻🔻🔻🔻🔻** y terminar con exactamente **🔺🔺🔺🔺🔺🔺🔺🔺🔺**. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
-
 ---
-
-## 🚨 PROTOCOLO TODO OBLIGATORIO
-
-### Enforcement Automático
-
-**ANTES DE CUALQUIER ACCIÓN**:
-
-1. **CREAR TODO** con todas las tareas identificadas
-2. **MARCAR** cada tarea como COMPLETA al terminarla
-3. **ACTUALIZAR** estado en tiempo real durante ejecución
-4. **FALLAR** si alguna tarea queda sin marcar como completa
-
-### Formato Obligatorio
-
-```markdown
-## TODO: [NOMBRE_FEATURE]
-[ ] [PRIORIDAD][COMPLEJIDAD] Tarea 1: Descripción + criterios
-[ ] [PRIORIDAD][COMPLEJIDAD] Tarea 2: Descripción + criterios
-CONTEXTO_REQUERIDO: [Archivos/módulos necesarios]
-ACEPTACIÓN: [Criterios medibles de finalización]
-STATUS: PENDING → IN_PROGRESS → COMPLETE
-
-Leyenda: [ ] No iniciado | [🔄️] En Progreso | [✅] Completado | [🟥] Removido
-```
-
-### Sistema de Clasificación
-
-**Prioridades:**
-
-- `[CRITICAL]` - Bloqueante crítico, resolución inmediata
-- `[HIGH]` - Necesario pronto, puede bloquear otros trabajos
-- `[MEDIUM]` - Importante pero no urgente
-- `[LOW]` - Puede esperar sin consecuencias
-
-**Complejidades:**
-
-- `[HEAVY]` - Cambio sistémico/arquitectural
-- `[BIG]` - Análisis profundo y planificación detallada
-- `[MEDIUM]` - Complejidad moderada, análisis cuidadoso
-- `[SMALL]` - Cambio simple y localizado
-
+alwaysApply: true
 ---
-
-## 🌐 CONFIGURACIÓN BASE INQUEBRANTABLE
-
-### Reglas Fundamentales
-
-1. **Español obligatorio** - Todas las respuestas, comentarios, documentación
-2. **Windows compatible** - Comandos y rutas para PowerShell Core (pwsh)
-3. **Bun como runtime** - Usar BUN para todos los comandos y scripts del proyecto
-4. **Confirmación explícita** - NUNCA ejecutar builds/servidores sin permiso
-5. **Tratamiento de experto** - Ajustar profundidad según contexto
-
-### Prioridad de Herramientas
-
-1. **Scripts package.json** - SIEMPRE usar scripts definidos con logging automático
-2. **MCP > Terminal** - Priorizar herramientas MCP sobre comandos genéricos
-3. **Playwright MCP obligatorio** - Para todas las interacciones UI y testing
-4. **Filesystem MCP** - Para operaciones de archivos, rutas Windows (`D:\`)
-5. **Evitar TSC repetitivo** - No compilar TypeScript solo para verificar tipos
-
----
-
-## 🎭 MODOS DE OPERACIÓN
-
-### Modo Código (Desarrollo)
-
-- **Conciso y directo** - Solución primero, explicaciones después
-- **Cambios mínimos** - Solo modificaciones necesarias
-- **Type safety estricto** - Evitar `any`, interfaces claras
-- **TODO obligatorio** - Para cada tarea de codificación
-- **Scripts Bun** - `bun run lint`, `bun run test`, etc.
-
-### Modo Conocimiento (Documentación/Investigación)
-
-- **Expansivo y exploratorio** - Desarrollar ideas en profundidad
-- **Conexiones creativas** - Vínculos entre conceptos
-- **Formato enriquecido** - Enlaces `[[]]`, tags `#tema`, metadatos
-- **TODO para documentación** - Estructurar investigación
-
----
-
 ## 🔍 WORKFLOW DE EJECUCIÓN
 
 ### Flujo Obligatorio
@@ -237,10 +151,10 @@ browser_generate_playwright_test → Tests automáticos
 
 ```markdown
 ## TODO: [FUNCIONALIDAD]
-[ ] [HIGH][SMALL] Buscar contexto en codebase
-[ ] [HIGH][MEDIUM] Implementar funcionalidad core
-[ ] [MEDIUM][SMALL] Crear tests con Playwright MCP
-[ ] [LOW][SMALL] Documentar con JSDoc
+- [ ] [HIGH][SMALL] Buscar contexto en codebase
+- [ ] [HIGH][MEDIUM] Implementar funcionalidad core
+- [ ] [MEDIUM][SMALL] Crear tests con Playwright MCP
+- [ ] [LOW][SMALL] Documentar con JSDoc
 
 ## Diagrama
 

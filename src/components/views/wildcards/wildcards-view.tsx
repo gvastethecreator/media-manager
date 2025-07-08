@@ -6,7 +6,12 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useWildcards } from '@/lib/api/wildcards';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useWildcards, useCreateWildcard } from '@/lib/api/wildcards';
+import { useToast } from '@/components/ui/use-toast';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 // El store se expone desde el barrel de la entidad
@@ -18,7 +23,12 @@ const viewLogger = clientLogger.withContext('WildcardsView');
 export function WildcardsView({ isVisible }: ViewProps) {
 	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
 	const { selectedWildcardId, setSelectedWildcardId } = useWildcardStore();
+	const { mutate: createWildcard } = useCreateWildcard();
+
 	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [showForm, setShowForm] = useState(false);
+	const [newWildcardName, setNewWildcardName] = useState('');
+	const [newWildcardDescription, setNewWildcardDescription] = useState('');
 
 	// Usar React Query hook en lugar de server action
 	const {
@@ -48,6 +58,22 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		[setSelectedWildcardId]
 	);
 
+	const { toast } = useToast();
+	const handleCreateWildcard = useCallback(() => {
+		if (newWildcardName.trim() === '') {
+			toast({
+				title: '❌ Error',
+				description: 'El nombre del wildcard no puede estar vacío.',
+				variant: 'destructive',
+			});
+			return;
+		}
+		createWildcard({ name: newWildcardName, description: newWildcardDescription });
+		setNewWildcardName('');
+		setNewWildcardDescription('');
+		setShowForm(false);
+	}, [newWildcardName, newWildcardDescription, createWildcard]);
+
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar wildcards');
 		refetch();
@@ -73,38 +99,65 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		);
 	}
 
-	if (!wildcards.length) {
-		const emptyMessage = localSearch
-			? `No se encontraron wildcards que coincidan con "${localSearch}"`
-			: 'No hay wildcards disponibles';
-
-		return <EmptyState icon={Sparkles} title="Sin wildcards" description={emptyMessage} />;
-	}
-
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<motion.div
-					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.3 }}
-				>
-					{wildcards.map((wildcard, index) => (
-						<motion.div
-							key={wildcard.id}
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3, delay: index * 0.05 }}
-						>
-							<WildcardCard
-								wildcard={wildcard}
-								isSelected={wildcard.id === selectedWildcardId}
-								onSelect={() => handleWildcardSelect(wildcard.id)}
+				<h2 className="text-xl font-bold mb-4">Vista de Wildcards</h2>
+
+				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+					{showForm ? 'Cancelar' : 'Crear Wildcard'}
+				</Button>
+
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">Nuevo Wildcard</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="wildcardName">Nombre</Label>
+							<Input
+								id="wildcardName"
+								value={newWildcardName}
+								onChange={(e) => setNewWildcardName(e.target.value)}
+								placeholder="Nombre del wildcard"
 							/>
-						</motion.div>
-					))}
-				</motion.div>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="wildcardDescription">Descripción</Label>
+							<Textarea
+								id="wildcardDescription"
+								value={newWildcardDescription}
+								onChange={(e) => setNewWildcardDescription(e.target.value)}
+								placeholder="Descripción del wildcard (opcional)"
+							/>
+						</div>
+						<Button onClick={handleCreateWildcard}>Guardar Wildcard</Button>
+					</div>
+				)}
+
+				{!wildcards.length && !isLoading && !showForm ? (
+					<EmptyState icon={Sparkles} title="Sin wildcards" description={localSearch ? `No se encontraron wildcards que coincidan con "${localSearch}"` : 'No hay wildcards disponibles'} />
+				) : (
+					<motion.div
+						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.3 }}
+					>
+						{wildcards.map((wildcard, index) => (
+							<motion.div
+								key={wildcard.id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.3, delay: index * 0.05 }}
+							>
+								<WildcardCard
+									wildcard={wildcard}
+									isSelected={wildcard.id === selectedWildcardId}
+									onSelect={() => handleWildcardSelect(wildcard.id)}
+								/>
+							</motion.div>
+						))}
+					</motion.div>
+				)}
 			</div>
 		</ScrollArea>
 	);

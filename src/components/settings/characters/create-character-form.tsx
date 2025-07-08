@@ -67,7 +67,7 @@ export function CreateCharacterForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel,
+	onCancel: _onCancel,
 }: CreateCharacterFormProps) {
 	const [_isSubmitting, setIsSubmitting] = useState(false);
 

@@ -1,14 +1,20 @@
 import { Braces } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { JsonFileCard } from '@/components/cards/json-file-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import type { ViewProps } from '../types';
+import { useToast } from '@/components/ui/use-toast';
+import { useCreateJsonFile } from '@/lib/api/json-files';
 
 const viewLogger = clientLogger.withContext('JsonFilesView');
 
@@ -34,6 +40,11 @@ export function JsonFilesView(_props: ViewProps) {
 	const error = useJsonFileStore((s) => s.error);
 	const loadJsonFiles = useJsonFileStore((s) => s.loadJsonFiles);
 	const getSortedJsonFiles = useJsonFileStore((s) => s.getSortedJsonFiles);
+	const { mutate: createJsonFile } = useCreateJsonFile();
+
+	const [showForm, setShowForm] = useState(false);
+	const [newJsonFileName, setNewJsonFileName] = useState('');
+	const [newJsonFileContent, setNewJsonFileContent] = useState('');
 
 	useEffect(() => {
 		if (Object.keys(jsonFilesRecord).length === 0) {
@@ -46,6 +57,33 @@ export function JsonFilesView(_props: ViewProps) {
 		viewLogger.info('🖱️ Click en archivo JSON:', jsonFile.name);
 		// Lógica de navegación o apertura de editor aquí
 	}, []);
+
+	const { toast } = useToast();
+	const handleCreateJsonFile = useCallback(() => {
+		if (newJsonFileName.trim() === '' || newJsonFileContent.trim() === '') {
+			toast({
+				title: '❌ Error',
+				description: 'El nombre y el contenido del archivo JSON no pueden estar vacíos.',
+				variant: 'destructive',
+			});
+			return;
+		}
+		// Validar si el contenido es JSON válido
+		try {
+			JSON.parse(newJsonFileContent);
+		} catch (e) {
+			toast({
+				title: '❌ Error de formato',
+				description: 'El contenido no es un JSON válido.',
+				variant: 'destructive',
+			});
+			return;
+		}
+		createJsonFile({ name: newJsonFileName, content: newJsonFileContent });
+		setNewJsonFileName('');
+		setNewJsonFileContent('');
+		setShowForm(false);
+	}, [newJsonFileName, newJsonFileContent, createJsonFile]);
 
 	// Cachear el resultado de getSortedJsonFiles
 	const sortedJsonFiles = useMemo(() => {
@@ -64,40 +102,69 @@ export function JsonFilesView(_props: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (sortedJsonFiles.length === 0) {
-		return (
-			<EmptyState
-				icon={Braces}
-				title="No hay archivos JSON"
-				description="Sube archivos JSON para comenzar a usar el editor."
-			/>
-		);
-	}
-
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{sortedJsonFiles.map((jsonFile, index) => {
-						const onJsonFileClick = () => handleJsonFileClick(jsonFile);
-						return (
-							<motion.div
-								key={jsonFile.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: index * 0.1 }}
-								className="perspective-1000"
-							>
-								<div
-									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-json-file-id={jsonFile.id}
+				<h2 className="text-xl font-bold mb-4">Vista de Archivos JSON</h2>
+
+				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+					{showForm ? 'Cancelar' : 'Crear Archivo JSON'}
+				</Button>
+
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">Nuevo Archivo JSON</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="jsonFileName">Nombre</Label>
+							<Input
+								id="jsonFileName"
+								value={newJsonFileName}
+								onChange={(e) => setNewJsonFileName(e.target.value)}
+								placeholder="Nombre del archivo JSON"
+							/>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="jsonFileContent">Contenido JSON</Label>
+							<Textarea
+								id="jsonFileContent"
+								value={newJsonFileContent}
+								onChange={(e) => setNewJsonFileContent(e.target.value)}
+								placeholder='Contenido JSON (ej: { "key": "value" })'
+							/>
+						</div>
+						<Button onClick={handleCreateJsonFile}>Guardar Archivo JSON</Button>
+					</div>
+				)}
+
+				{sortedJsonFiles.length === 0 && !isLoading && !showForm ? (
+					<EmptyState
+						icon={Braces}
+						title="No hay archivos JSON"
+						description="Sube archivos JSON para comenzar a usar el editor."
+					/>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{sortedJsonFiles.map((jsonFile, index) => {
+							const onJsonFileClick = () => handleJsonFileClick(jsonFile);
+							return (
+								<motion.div
+									key={jsonFile.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: index * 0.1 }}
+									className="perspective-1000"
 								>
-									<MemoizedJsonFileCard jsonFile={jsonFile} onJsonFileClick={onJsonFileClick} />
-								</div>
-							</motion.div>
-						);
-					})}
-				</div>
+									<div
+										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										data-json-file-id={jsonFile.id}
+									>
+										<MemoizedJsonFileCard jsonFile={jsonFile} onJsonFileClick={onJsonFileClick} />
+									</div>
+								</motion.div>
+							);
+						})}
+					</div>
+				)}
 			</div>
 		</ScrollArea>
 	);

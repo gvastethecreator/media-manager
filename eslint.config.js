@@ -194,6 +194,7 @@ export default [
 			'**/coverage/**',
 			'**/.turbo/**',
 			'**/.vercel/**',
+			'**/src-tauri/target/**',
 
 			// Reportes y logs
 			'**/logs/**',

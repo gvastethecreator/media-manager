@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { EventData } from '../server/events.server';
 
@@ -18,6 +18,17 @@ const eventSubscribers = new Map<string, Set<EventCallback<unknown>>>();
  */
 export function useEvents<T>(initialState: T) {
 	const [state, setState] = useState<T>(initialState);
+
+	// ✅ Sincronizar con el estado real cuando initialState cambia
+	// Usar JSON.stringify para comparar contenido, no referencia
+	useEffect(() => {
+		const currentStateStr = JSON.stringify(state);
+		const newStateStr = JSON.stringify(initialState);
+
+		if (currentStateStr !== newStateStr) {
+			setState(initialState);
+		}
+	}, [initialState, state, setState]);
 
 	const addEvent = useCallback((event: EventData) => {
 		eventsLogger.info('📨 Evento recibido (MOCK):', event);

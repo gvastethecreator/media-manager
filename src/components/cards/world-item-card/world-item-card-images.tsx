@@ -3,7 +3,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 import { WorldItemService } from '@/services/world-item/world-item.service';
-import type { Image } from '@/types/entities/image';
 
 const { getRecentWorldItemImages } = WorldItemService;
 

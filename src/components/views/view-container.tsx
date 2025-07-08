@@ -18,6 +18,10 @@ import { GroupsView } from './groups/groups-view';
 import { FolderContentView } from './folders/views/folder-content-view';
 import { AlbumsView } from './albums/albums-view';
 import { ConceptsView } from './concepts/concepts-view';
+import { NotesView } from './notes/notes-view';
+import { PropertiesView } from './properties/properties-view';
+import { DashboardView } from './dashboard/dashboard-view';
+import { EntityCardsView } from './entity-cards/entity-cards-view';
 
 export const ViewContainer = memo(function ViewContainer() {
 	const { currentView } = useNavigationStore();
@@ -65,6 +69,10 @@ export const ViewContainer = memo(function ViewContainer() {
 				return <AlbumsView className="h-full" />;
 			case 'concepts':
 				return <ConceptsView className="h-full" />;
+			case 'notes':
+				return <NotesView className="h-full" />;
+			case 'properties':
+				return <PropertiesView className="h-full" />;
 			case 'json-files':
 				return (
 					<div className="h-full w-full flex flex-col items-center justify-center p-6">
@@ -79,6 +87,10 @@ export const ViewContainer = memo(function ViewContainer() {
 						<p className="text-muted-foreground">Vista de archivos 3D</p>
 					</div>
 				);
+			case 'dashboard':
+				return <DashboardView />;
+			case 'entity-cards':
+				return <EntityCardsView />;
 			case 'folder-content':
 				return <FolderContentView />;
 

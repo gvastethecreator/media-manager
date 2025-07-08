@@ -6,6 +6,7 @@ import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -76,11 +77,11 @@ export function SearchView(_props: ViewProps) {
 		(item: EntityWithStats) => {
 			// ✅ MIGRADO: Usar EntityWithStats en lugar de FileItem
 			if (item.type === 'image') {
-				const imageItems = items.filter((i) => i.type === 'image');
-				const currentIndex = imageItems.findIndex((i) => i.id === item.id);
+				const imageItems = items.filter((i: EntityWithStats) => i.type === 'image');
+				const currentIndex = imageItems.findIndex((i: EntityWithStats) => i.id === item.id);
 
 				// Convertir EntityWithStats a formato compatible con viewer
-				const viewerItems = imageItems.map((img) => ({
+				const viewerItems = imageItems.map((img: EntityWithStats) => ({
 					id: img.id,
 					name: img.name || '',
 					src: img.thumbnailUrl || `/api/images/${img.id}/content`,
@@ -126,11 +127,60 @@ export function SearchView(_props: ViewProps) {
 
 						<Tabs defaultValue="basic" className="w-full">
 							<TabsList>
-								<TabsTrigger value="basic">Básica</TabsTrigger>
-								<TabsTrigger value="advanced">Avanzada</TabsTrigger>
+								<TabsTrigger value="basic">Búsqueda Básica</TabsTrigger>
+								<TabsTrigger value="advanced">Filtros Avanzados</TabsTrigger>
 							</TabsList>
-							<TabsContent value="basic">{/* TODO: Implementar filtros básicos */}</TabsContent>
-							<TabsContent value="advanced">{/* TODO: Implementar filtros avanzados */}</TabsContent>
+							<TabsContent value="basic" className="space-y-4">
+								<div className="grid grid-cols-2 gap-4">
+									<div>
+										<Label>Tipo de búsqueda</Label>
+										<select
+											value={filters.type}
+											onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as any }))}
+											className="w-full p-2 border rounded"
+										>
+											<option value="all">Todo</option>
+											<option value="name">Nombre</option>
+											<option value="content">Contenido</option>
+											<option value="metadata">Metadatos</option>
+										</select>
+									</div>
+								</div>
+							</TabsContent>
+							<TabsContent value="advanced" className="space-y-4">
+								<div className="grid grid-cols-2 gap-4">
+									<div>
+										<Label>Fecha desde</Label>
+										<Input
+											type="date"
+											onChange={(e) => setFilters(prev => ({
+												...prev,
+												dateFrom: e.target.value ? new Date(e.target.value) : undefined
+											}))}
+										/>
+									</div>
+									<div>
+										<Label>Fecha hasta</Label>
+										<Input
+											type="date"
+											onChange={(e) => setFilters(prev => ({
+												...prev,
+												dateTo: e.target.value ? new Date(e.target.value) : undefined
+											}))}
+										/>
+									</div>
+								</div>
+								<div>
+									<Label>Tags (separados por comas)</Label>
+									<Input
+										placeholder="tag1, tag2, tag3"
+										onChange={(e) => {
+											const tags = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);
+											setFilters(prev => ({ ...prev, tags }));
+										}}
+									/>
+								</div>
+							</TabsContent>
 						</Tabs>
 					</div>
 				</CardContent>
@@ -140,7 +190,7 @@ export function SearchView(_props: ViewProps) {
 				{isLoading ? (
 					<LoadingScreen />
 				) : items && items.length > 0 ? (
-					<FileBrowser entityType="image" onItemSelect={handleItemSelect} onItemDoubleClick={handleItemDoubleClick} />
+					<FileBrowser entityType="mixed" onItemSelect={handleItemSelect} onItemDoubleClick={handleItemDoubleClick} />
 				) : filters.query ? (
 					<EmptyState
 						icon={Search}

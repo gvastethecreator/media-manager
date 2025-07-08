@@ -37,21 +37,21 @@ export function useTheme(): UseThemeReturn {
 	const [resolvedTheme, setResolvedTheme] = useState<(typeof customThemes)[number]>('light');
 
 	// Detectar preferencia del sistema
-	const getSystemTheme = (): (typeof customThemes)[number] => {
+	const getSystemTheme = useCallback((): (typeof customThemes)[number] => {
 		if (typeof window === 'undefined') return 'light';
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	};
+	}, []);
 
 	// Resolver tema actual
-	const resolveTheme = (currentTheme: Theme): (typeof customThemes)[number] => {
+	const resolveTheme = useCallback((currentTheme: Theme): (typeof customThemes)[number] => {
 		if (currentTheme === 'system') {
 			return getSystemTheme();
 		}
 		return currentTheme as (typeof customThemes)[number];
-	};
+	}, [getSystemTheme]);
 
 	// Aplicar tema al DOM
-	const applyTheme = (themeToApply: (typeof customThemes)[number]) => {
+	const applyTheme = useCallback((themeToApply: (typeof customThemes)[number]) => {
 		const root = document.documentElement;
 
 		// Remover todas las clases de tema anteriores
@@ -62,7 +62,7 @@ export function useTheme(): UseThemeReturn {
 
 		// Aplicar atributo data-theme
 		root.setAttribute('data-theme', themeToApply);
-	};
+	}, []);
 
 	// Inicializar tema desde localStorage
 	useEffect(() => {

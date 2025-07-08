@@ -153,7 +153,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 			)}
 			whileHover={{ y: -5 }}
 			whileTap={{ scale: 0.98 }}
-			onClick={onClick ? (e: React.MouseEvent<HTMLDivElement>) => onClick(note) : undefined}
+			onClick={onClick ? (_e: React.MouseEvent<HTMLDivElement>) => onClick(note) : undefined}
 			onKeyDown={handleKeyDown}
 			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}

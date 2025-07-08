@@ -36,21 +36,21 @@ export function ThemeProvider({
 	const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('light');
 
 	// Detectar preferencia del sistema
-	const getSystemTheme = (): 'dark' | 'light' => {
+	const getSystemTheme = React.useCallback((): 'dark' | 'light' => {
 		if (typeof window === 'undefined') return 'light';
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	};
+	}, []);
 
 	// Resolver tema actual
-	const resolveTheme = (currentTheme: Theme): 'dark' | 'light' => {
+	const resolveTheme = React.useCallback((currentTheme: Theme): 'dark' | 'light' => {
 		if (currentTheme === 'system') {
 			return getSystemTheme();
 		}
 		return currentTheme;
-	};
+	}, [getSystemTheme]);
 
 	// Aplicar tema al DOM
-	const applyTheme = (themeToApply: 'dark' | 'light') => {
+	const applyTheme = React.useCallback((themeToApply: 'dark' | 'light') => {
 		const root = document.documentElement;
 
 		// Remover clases anteriores
@@ -63,7 +63,7 @@ export function ThemeProvider({
 		if (attribute && attribute !== 'class') {
 			root.setAttribute(attribute, themeToApply);
 		}
-	};
+	}, [attribute]);
 
 	// Inicializar tema desde localStorage
 	useEffect(() => {

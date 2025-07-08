@@ -29,15 +29,15 @@ export function FolderCardHeader({
 
 	// Analizar el tipo de carpeta basado en componentes del path
 	let folderType = 'Folder';
-	if (path && path.includes('system')) {
+	if (path?.includes('system')) {
 		folderType = 'System';
-	} else if (path && path.includes('media')) {
+	} else if (path?.includes('media')) {
 		folderType = 'Media';
 	} else if (isRootFolder) {
 		folderType = 'Root';
-	} else if (path && path.includes('archive')) {
+	} else if (path?.includes('archive')) {
 		folderType = 'Archive';
-	} else if (path && path.includes('backups')) {
+	} else if (path?.includes('backups')) {
 		folderType = 'Backup';
 	} else if (path && path.split('/').length > 3) {
 		folderType = 'Deep';

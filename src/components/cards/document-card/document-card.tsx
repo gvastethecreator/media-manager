@@ -168,7 +168,6 @@ export function DocumentCard({
 					color={primaryColor}
 					isFavorite={document.isFavorite || false}
 					compact={compact}
-				/>
 
 				{/* Contenido principal */}
 				{!compact && (

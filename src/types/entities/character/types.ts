@@ -37,7 +37,7 @@ export interface CharacterBase extends EntityBase {
 	alignment: string | null;
 	backstory: string | null;
 	// Campos JSON serializados como strings
-	stats: string | null;
+	stats: CharacterStatistics | null;
 	psychologicalProfile: string | null;
 	socialProfile: string | null;
 	relationships: string | null;
@@ -97,6 +97,8 @@ export interface CharacterWithStats extends CharacterBase {
 		lastUpdated: Date;
 		powerLevel: number;
 		rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+		healthPoints: number;
+		manaPoints: number;
 	};
 	images?: ImageWithStats[];
 	videos?: VideoWithStats[];

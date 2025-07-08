@@ -53,7 +53,7 @@ export function ImageCard({
 	// Determinar color primario para efectos TCG
 	const getPrimaryColor = () => {
 		// Usar el color de la primera etiqueta si hay etiquetas
-		if (imageData?.tags && imageData.tags.length > 0) {
+		if (imageData?.tags?.length > 0) {
 			return imageData.tags[0].color || '#3b82f6';
 		}
 		// Color predeterminado
@@ -112,15 +112,15 @@ export function ImageCard({
 
 	// Calcular contador total de relaciones
 	const getTotalRelationsCount = () => {
-		if (!imageData._count) return 0;
+		if (!imageData.stats) return 0;
 		return (
-			(imageData._count.tags || 0) +
-			(imageData._count.albums || 0) +
-			(imageData._count.collections || 0) +
-			(imageData._count.characters || 0) +
-			(imageData._count.places || 0) +
-			(imageData._count.worldItems || 0) +
-			(imageData._count.notes || 0)
+			(imageData.stats.tagCount || 0) +
+			(imageData.stats.albumCount || 0) +
+			(imageData.stats.collectionCount || 0) +
+			(imageData.stats.characterCount || 0) +
+			(imageData.stats.places || 0) +
+			(imageData.stats.worldItems || 0) +
+			(imageData.stats.notes || 0)
 		);
 	};
 
@@ -323,16 +323,16 @@ export function ImageCard({
 							{/* Relaciones */}
 							{showRelations && (tcgMode || isHovered) && (
 								<div className="mt-2 flex items-center gap-2">
-									{imageData._count?.tags && imageData._count.tags > 0 && (
+									{imageData.stats?.tagCount && imageData.stats.tagCount > 0 && (
 										<Badge variant="secondary" className="bg-black/40 border-none gap-1">
 											<TagIcon className="h-3 w-3" />
-											{imageData._count.tags}
+											{imageData.stats.tagCount}
 										</Badge>
 									)}
-									{imageData._count?.albums && imageData._count.albums > 0 && (
+									{imageData.stats?.albumCount && imageData.stats.albumCount > 0 && (
 										<Badge variant="secondary" className="bg-black/40 border-none gap-1">
 											<FolderIcon className="h-3 w-3" />
-											{imageData._count.albums}
+											{imageData.stats.albumCount}
 										</Badge>
 									)}
 									{getTotalRelationsCount() > 0 && (
@@ -358,10 +358,10 @@ export function ImageCard({
 						{/* Información TCG en parte inferior (siempre visible) */}
 						<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black to-transparent pt-2">
 							{/* Etiquetas en modo TCG (visible siempre) */}
-							{showTags && imageData.tags && imageData.tags.length > 0 && (
+							{showTags && imageData.tags?.length > 0 && (
 								<div className="px-3">
 									<div className="flex flex-wrap gap-1 mb-1">
-										{imageData.tags.slice(0, 3).map((tag) => (
+										{imageData.tags?.slice(0, 3).map((tag: TagWithStats) => (
 											<Badge
 												key={tag.id}
 												variant="outline"
@@ -375,11 +375,11 @@ export function ImageCard({
 												{tag.name}
 											</Badge>
 										))}
-										{imageData.tags.length > 3 && (
-											<Badge variant="outline" className="py-0 h-4 text-[10px] bg-gray-800/60 border-gray-700/60">
-												+{imageData.tags.length - 3}
-											</Badge>
-										)}
+										{imageData.tags?.length > 3 && (
+								<Badge variant="outline" className="py-0 h-4 text-[10px] bg-gray-800/60 border-gray-700/60">
+									+{imageData.tags.length - 3}
+								</Badge>
+							)}
 									</div>
 								</div>
 							)}
@@ -396,7 +396,7 @@ export function ImageCard({
 			</div>
 
 			{/* Etiquetas estándar (visible al hacer hover) */}
-			{showTags && imageData.tags && imageData.tags.length > 0 && !tcgMode && (
+			{							{showTags && imageData.tags?.length > 0 && !tcgMode && (
 				<div
 					className={cn(
 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
@@ -405,7 +405,7 @@ export function ImageCard({
 					)}
 				>
 					<div className="flex flex-wrap gap-1">
-						{imageData.tags.slice(0, 5).map((tag) => (
+						{						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
 							<Badge
 								key={tag.id}
 								variant="outline"
@@ -419,9 +419,9 @@ export function ImageCard({
 								{tag.name}
 							</Badge>
 						))}
-						{imageData.tags.length > 5 && (
+													{imageData.tags?.length > 5 && (
 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
-								+{imageData.tags.length - 5}
+								+{imageData.tags?.length - 5}
 							</Badge>
 						)}
 					</div>

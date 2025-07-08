@@ -13,7 +13,7 @@ interface PropertyContentViewProps {
  * 🏷️ Vista de contenido de una propiedad específica
  * Muestra detalles, valores asociados e imágenes relacionadas
  */
-export const PropertyContentView = memo(function PropertyContentView({ className }: PropertyContentViewProps) {
+export const PropertyContentView = memo(function PropertyContentView({ _className }: PropertyContentViewProps) {
 	// TODO: Implementar lógica de selección de propiedad desde el store
 	// const { selectedProperty } = usePropertyStore();
 

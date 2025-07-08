@@ -64,15 +64,6 @@ export interface UploadedImageDimensions {
 }
 
 /**
- * Interfaz extendida para cliente
- */
-export interface UploadedImageExtended extends UploadedImageBase {
-	dimensions: UploadedImageDimensions;
-	url: string;
-	thumbnailUrl?: string;
-}
-
-/**
  * Input para creación
  */
 export type UploadedImageCreateInput = Omit<UploadedImageBase, 'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'>;

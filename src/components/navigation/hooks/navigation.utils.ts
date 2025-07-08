@@ -38,7 +38,6 @@ type ContentVewType = keyof typeof navigationMap;
 export function useNavigation() {
 	const { setCurrentView } = useNavigationStore();
 
-	// Se obtienen las stores en el nivel superior para cumplir las reglas de los hooks
 	const collectionStore = useCollectionStore();
 	const folderStore = useFolderStore();
 	const tagStore = useTagStore();
@@ -50,25 +49,24 @@ export function useNavigation() {
 	const promptStore = usePromptStore();
 	const noteStore = useNoteStore();
 
-	const allStores = [
-		collectionStore,
-		folderStore,
-		tagStore,
-		albumStore,
-		characterStore,
-		placeStore,
-		worldItemStore,
-		conceptStore,
-		promptStore,
-		noteStore,
-	];
-
 	/**
 	 * Limpia todas las selecciones actuales de todas las entidades
 	 */
 	const clearAllSelections = useCallback(() => {
 		navLogger.info('🧹 Limpiando todas las selecciones de entidades');
-		for (const store of allStores) {
+		const stores = [
+			collectionStore,
+			folderStore,
+			tagStore,
+			albumStore,
+			characterStore,
+			placeStore,
+			worldItemStore,
+			conceptStore,
+			promptStore,
+			noteStore,
+		];
+		for (const store of stores) {
 			if ('clearSelection' in store && typeof store.clearSelection === 'function') {
 				store.clearSelection();
 			} else if ('select' in store && typeof store.select === 'function') {
@@ -76,7 +74,7 @@ export function useNavigation() {
 				(store as any).select(null);
 			}
 		}
-	}, [allStores]);
+	}, [collectionStore, folderStore, tagStore, albumStore, characterStore, placeStore, worldItemStore, conceptStore, promptStore, noteStore]);
 
 	/**
 	 * Navega a una vista específica, limpiando otras selecciones si es necesario

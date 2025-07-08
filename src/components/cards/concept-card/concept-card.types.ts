@@ -1,5 +1,4 @@
-import type { MouseEvent } from 'react';
-import type { Concept, ConceptStatistics } from '@/types/entities/concept';
+import type { ConceptWithStats, ConceptStatistics } from '@/types/entities/concept';
 
 export interface ConceptCardProps {
 	conceptId: string;

@@ -1,29 +1,7 @@
 import { apiClient } from '../client';
+import type { CharacterWithStats } from '@/types/entities/character/types';
 
-export interface CharacterCardData {
-	id: string;
-	name: string;
-	description?: string | null;
-	category?: string | null;
-	color?: string | null;
-	emoji?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	stats: {
-		imageCount: number;
-		videoCount: number;
-		albumCount: number;
-		collectionCount: number;
-		noteCount: number;
-		promptCount: number;
-		totalRelations: number;
-	};
-	metadata?: {
-		coverImageUrl?: string | null;
-		lastModified?: Date | string;
-		relationTypes?: string[];
-	};
-}
+export interface CharacterCardData extends CharacterWithStats {}
 
 export interface GetCharactersOptions {
 	limit?: number;

@@ -54,7 +54,7 @@ export function CreateTagForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel,
+	onCancel: _onCancel,
 	onPreview,
 }: CreateTagFormProps) {
 	// React Query hooks

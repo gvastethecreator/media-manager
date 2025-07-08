@@ -1,18 +1,34 @@
-import { FileIcon } from 'lucide-react';
+import { FileIcon, Upload } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback } from 'react';
-import { EntityCard } from '@/components/cards/entity-card';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/components/ui/use-toast';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { EntityWithStats } from '@/types/migration';
+import { useFileStoreBase } from '@/store/entities/file';
+import type { FileWithStats } from '@/types/entities/file';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('FilesView');
 
 const MemoizedEntityCard = React.memo(
-	({ file, onFileClick }: { file: EntityWithStats; onFileClick: () => void }) => (
-		<EntityCard entity={file} onClick={onFileClick} className="h-full" />
+	({ file, onFileClick }: { file: FileWithStats; onFileClick: () => void }) => (
+		<button
+			className="p-4 border rounded-lg shadow-sm h-full w-full text-left hover:bg-gray-50"
+			onClick={onFileClick}
+			type="button"
+		>
+			<h3 className="font-medium">{file.name}</h3>
+			<p className="text-sm text-gray-600">{file.path}</p>
+		</button>
 	),
 	(prevProps, nextProps) =>
 		prevProps.file.id === nextProps.file.id &&
@@ -26,56 +42,126 @@ MemoizedEntityCard.displayName = 'MemoizedEntityCard';
  * Muestra una galería con todos los archivos (imágenes, documentos, etc.)
  */
 export function FilesView({ className }: ViewProps) {
-	const handleFileClick = useCallback((file: EntityWithStats) => {
-		viewLogger.info('🖱️ Click en archivo:', file.name);
-		// Lógica de navegación o apertura de visor aquí
-	}, []);
+	const files = useFileStoreBase((state) => state.files);
+	const isLoading = useFileStoreBase((state) => state.isLoading);
+	const error = useFileStoreBase((state) => state.error);
+	const navigateToDirectory = useFileStoreBase((state) => state.navigateToDirectory);
+	const fileCount = useFileStoreBase((state) => state.fileCount);
+	const { toast } = useToast();
+	const { setCurrentView, setCurrentItem } = useNavigationStore();
 
-	// Crear mock de archivos
-	const mockFiles: EntityWithStats[] = React.useMemo(() => {
-		return [
-			{
-				id: 'file-1',
-				name: 'document.pdf',
-				entityType: 'file',
-				type: 'file' as const,
-				size: 1024000,
-				path: '/documents/document.pdf',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				_count: { children: 0 }
-			},
-			{
-				id: 'file-2',
-				name: 'image.jpg',
-				entityType: 'file',
-				type: 'file' as const,
-				size: 2048000,
-				path: '/images/image.jpg',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				_count: { children: 0 }
-			},
-			{
-				id: 'file-3',
-				name: 'presentation.pptx',
-				entityType: 'file',
-				type: 'file' as const,
-				size: 5120000,
-				path: '/presentations/presentation.pptx',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				_count: { children: 0 }
+	// Estados para el upload de archivos
+	const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+	const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+	const [uploadProgress, setUploadProgress] = useState(0);
+	const [isUploading, setIsUploading] = useState(false);
+
+	useEffect(() => {
+		// Cargar el directorio raíz al montar el componente
+		if (files.length === 0 && !isLoading) {
+			viewLogger.info('Store de archivos vacío, cargando directorio raíz...');
+			navigateToDirectory('/');
+		}
+	}, [files.length, isLoading, navigateToDirectory]);
+
+	const handleFileClick = useCallback(
+		(file: FileWithStats) => {
+			viewLogger.info('🖱️ Click en archivo:', file.name);
+
+			// Navegar a la vista de detalle del archivo
+			setCurrentItem({
+				id: file.id,
+				name: file.name || '',
+				path: file.path || '',
+				description: undefined,
+				count: 1,
+				createdAt: file.createdAt,
+				itemType: 'file',
+			});
+
+			// Abrir el archivo según su tipo
+			if (file.type === 'image') {
+				setCurrentView('all-images');
+			} else {
+				// Para otros tipos de archivo, podemos implementar un visor genérico
+				viewLogger.info('Abriendo archivo:', file.name);
 			}
-		];
+		},
+		[setCurrentView, setCurrentItem]
+	);
+
+	// Función para manejar el upload de archivos
+	const handleFileUpload = useCallback(
+		async (files: File[]) => {
+			setIsUploading(true);
+			setUploadProgress(0);
+
+			try {
+				const formData = new FormData();
+				for (const file of files) {
+					formData.append('files', file);
+				}
+
+				const response = await fetch('/api/files/upload', {
+					method: 'POST',
+					body: formData,
+				});
+
+				if (!response.ok) {
+					throw new Error('Error al subir los archivos');
+				}
+
+				const result = await response.json();
+
+				toast({
+					title: '✅ Archivos subidos exitosamente',
+					description: `${result.uploaded} archivos agregados`,
+				});
+
+				// Recargar archivos
+				navigateToDirectory('/');
+			} catch (error) {
+				viewLogger.error('Error al subir archivos:', error);
+				toast({
+					title: '❌ Error al subir archivos',
+					description: error instanceof Error ? error.message : 'Error desconocido',
+					variant: 'destructive',
+				});
+			} finally {
+				setIsUploading(false);
+				setUploadProgress(0);
+				setUploadFiles([]);
+				setIsUploadDialogOpen(false);
+			}
+		},
+		[toast, navigateToDirectory]
+	);
+
+	const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			const files = Array.from(event.target.files);
+			setUploadFiles(files);
+		}
 	}, []);
 
-	if (mockFiles.length === 0) {
+	if (isLoading) {
+		return <LoadingScreen message="Cargando archivos..." />;
+	}
+
+	if (error) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<p className="text-destructive">Error: {error}</p>
+			</div>
+		);
+	}
+
+	if (files.length === 0) {
 		return (
 			<EmptyState
 				icon={FileIcon}
 				title="No hay archivos"
-				description="Indexa carpetas para comenzar a ver archivos."
+				description="No se encontraron archivos. Asegúrate de que las carpetas estén indexadas."
 			/>
 		);
 	}
@@ -91,12 +177,8 @@ export function FilesView({ className }: ViewProps) {
 						transition={{ duration: 0.5 }}
 						className="mb-6"
 					>
-						<h1 className="text-3xl font-bold text-foreground mb-2">
-							📁 Todos los Archivos
-						</h1>
-						<p className="text-muted-foreground text-lg">
-							{mockFiles.length} archivos encontrados
-						</p>
+						<h1 className="text-3xl font-bold text-foreground mb-2">📁 Todos los Archivos</h1>
+						<p className="text-muted-foreground text-lg">{fileCount} archivos encontrados</p>
 					</motion.div>
 
 					{/* Grid de archivos */}
@@ -106,20 +188,86 @@ export function FilesView({ className }: ViewProps) {
 						transition={{ delay: 0.1 }}
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4"
 					>
-						{mockFiles.map((file, index) => (
+						{files.map((file: FileWithStats, index: number) => (
 							<motion.div
 								key={file.id}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: index * 0.05 }}
 							>
-								<MemoizedEntityCard
-									file={file}
-									onFileClick={() => handleFileClick(file)}
-								/>
+								<MemoizedEntityCard file={file} onFileClick={() => handleFileClick(file)} />
 							</motion.div>
 						))}
 					</motion.div>
+
+					{/* Dialog para upload de archivos */}
+					<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+						<DialogTrigger asChild>
+							<Button
+								variant="default"
+								className="fixed bottom-4 right-4 z-50"
+								onClick={() => setIsUploadDialogOpen(true)}
+							>
+								<Upload className="w-4 h-4 mr-2" />
+								Subir Archivos
+							</Button>
+						</DialogTrigger>
+						<DialogContent className="sm:max-w-[425px]">
+							<DialogHeader>
+								<DialogTitle>Subir Archivos</DialogTitle>
+							</DialogHeader>
+
+							<div className="grid gap-4 py-2">
+								{/* Instrucciones */}
+								<Card>
+									<CardHeader>
+										<CardTitle className="text-base font-semibold">Instrucciones</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<p className="text-sm text-muted-foreground">
+											1. Selecciona los archivos que deseas subir desde tu dispositivo.
+										</p>
+										<p className="text-sm text-muted-foreground">
+											2. Puedes subir imágenes, documentos, videos y otros tipos de archivos.
+										</p>
+										<p className="text-sm text-muted-foreground">
+											3. Haz clic en "Subir Archivos" para iniciar el proceso de carga.
+										</p>
+									</CardContent>
+								</Card>
+
+								{/* Selector de archivos */}
+								<div>
+									<Label htmlFor="file-upload" className="block text-sm font-medium">
+										Seleccionar Archivos
+									</Label>
+									<Input id="file-upload" type="file" multiple onChange={handleFileSelect} className="mt-1" />
+								</div>
+
+								{/* Progreso de carga */}
+								{isUploading && (
+									<div className="flex flex-col gap-2">
+										<Progress value={uploadProgress} className="h-2" />
+										<span className="text-xs text-muted-foreground">Cargando... {uploadProgress}%</span>
+									</div>
+								)}
+
+								{/* Botones de acción */}
+								<div className="flex justify-end gap-2">
+									<Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} className="h-9">
+										Cancelar
+									</Button>
+									<Button
+										onClick={() => handleFileUpload(uploadFiles)}
+										className="h-9"
+										disabled={isUploading || uploadFiles.length === 0}
+									>
+										{isUploading ? 'Subiendo...' : 'Subir Archivos'}
+									</Button>
+								</div>
+							</div>
+						</DialogContent>
+					</Dialog>
 				</div>
 			</ScrollArea>
 		</div>

@@ -7,6 +7,8 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { findFolders } from '@/lib/api/services/folders';
 import { clientEvents } from '@/lib/client/events.client';
@@ -15,6 +17,7 @@ import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { ViewProps } from '../../types';
+import { useCreateFolder } from '@/lib/api/folders'; // Importar el hook useCreateFolder
 
 const viewLogger = clientLogger.withContext('FoldersView');
 
@@ -40,13 +43,18 @@ export function FoldersView(_props: ViewProps) {
 
 	// 🆕 Usar los nuevos stores específicos
 	const { selectFolder, getFolder } = useFolderStore();
+	const { mutate: createFolder } = useCreateFolder(); // Obtener la función de mutación
 
 	// 🧹 Para limpiar selección - usar el hook base directamente
 	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
 
 	const [folders, setFolders] = useState<FolderEntity[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	const [showForm, setShowForm] = useState(false);
+	const [newFolderName, setNewFolderName] = useState('');
+	const [newFolderPath, setNewFolderPath] = useState('');
 
 	// Usar el nuevo hook de eventos optimistas del cliente
 	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderEntity[]>(folders);
@@ -55,91 +63,96 @@ export function FoldersView(_props: ViewProps) {
 	const [isManualRetry, setIsManualRetry] = useState(false);
 	const maxRetries = 3;
 
-	const loadFolders = useCallback(
-		async (isManual = false) => {
-			try {
-				if (isManual) {
-					setIsManualRetry(true);
-				}
-				setIsLoading(true);
-				viewLogger.info('🔄 Cargando carpetas...');
-				const result = await findFolders({ limit: 100 });
-				const data = result.data;
-
-				// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
-				if (Array.isArray(data)) {
-					const transformedData = data.map((folderData: FolderWithStats): FolderEntity => {
-						return {
-							...folderData,
-							lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
-							createdAt: new Date(folderData.createdAt),
-							updatedAt: new Date(folderData.updatedAt),
-							// Las estadísticas ya vienen del servicio, no necesitamos modificarlas
-							// _count ya viene del transformer
-							// totalSize y totalFiles ya vienen del transformer
-						};
-					});
-
-					setFolders(transformedData);
-					setRetryCount(0);
-					setError(null);
-					viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
-				} else {
-					throw new Error('Respuesta del servicio no es un array válido');
-				}
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-
-				// Gestionar los casos de errores de concurrencia o transitorios solo en carga automática
-				const isTransientError =
-					(errorMessage.includes('Operación') && errorMessage.includes('en progreso')) ||
-					errorMessage.includes('ECONNREFUSED') ||
-					errorMessage.includes('timeout') ||
-					errorMessage.includes('network');
-
-				if (isTransientError && retryCount < maxRetries && !isManual) {
-					// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
-					const retryDelay = 300 * 3 ** retryCount;
-					viewLogger.debug(
-						`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
-					);
-
-					// Incrementar contador de reintentos y programar un nuevo intento
-					setRetryCount((prev) => prev + 1);
-					setTimeout(() => {
-						loadFolders(false);
-					}, retryDelay);
-					return;
-				}
-
-				// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
-				if (retryCount >= maxRetries && !isManual) {
-					viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
-				}
-
-				viewLogger.error('❌ Error cargando carpetas:', error);
-				setError(errorMessage);
-			} finally {
-				setIsLoading(false);
-				if (isManual) {
-					setIsManualRetry(false);
-				}
+	// Separar la lógica de carga para evitar dependencias circulares
+	const executeLoad = useCallback(async (isManual = false) => {
+		try {
+			if (isManual) {
+				setIsManualRetry(true);
 			}
-		},
-		[retryCount]
-	);
+			setIsLoading(true);
+			viewLogger.info('🔄 Cargando carpetas...');
+			const result = await findFolders({ limit: 100 });
 
+			// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
+			if (result?.data && Array.isArray(result.data)) {
+				const transformedData = result.data.map((folderData: FolderWithStats): FolderEntity => {
+					return {
+						...folderData,
+						lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
+						createdAt: new Date(folderData.createdAt),
+						updatedAt: new Date(folderData.updatedAt),
+						// Las estadísticas ya vienen del servicio, no necesitamos modificarlas
+						// _count ya viene del transformer
+						// totalSize y totalFiles ya vienen del transformer
+					};
+				});
+
+				setFolders(transformedData);
+				setRetryCount(0);
+				setError(null);
+				viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
+			} else {
+				throw new Error('Respuesta del servicio no es un array válido');
+			}
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+
+			// Gestionar los casos de errores de concurrencia o transitorios solo en carga automática
+			const isTransientError =
+				(errorMessage.includes('Operación') && errorMessage.includes('en progreso')) ||
+				errorMessage.includes('ECONNREFUSED') ||
+				errorMessage.includes('timeout') ||
+				errorMessage.includes('network');
+
+			if (isTransientError && retryCount < maxRetries && !isManual) {
+				// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
+				const retryDelay = 300 * 3 ** retryCount;
+				viewLogger.debug(
+					`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
+				);
+
+				// Incrementar contador de reintentos y programar un nuevo intento
+				setRetryCount((prev) => prev + 1);
+				setTimeout(() => {
+					executeLoad(false);
+				}, retryDelay);
+				return;
+			}
+
+			// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
+			if (retryCount >= maxRetries && !isManual) {
+				viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
+			}
+
+			viewLogger.error('❌ Error cargando carpetas:', error);
+			setError(errorMessage);
+		} finally {
+			setIsLoading(false);
+			if (isManual) {
+				setIsManualRetry(false);
+			}
+		}
+	}, [retryCount]);
+
+	// Hook para carga inicial - sin dependencias que causen loops
 	useEffect(() => {
 		viewLogger.debug('🟢 FoldersView Montado');
-		// Solo cargar automáticamente si no hay carpetas y no estamos cargando
+		// Cargar carpetas solo una vez al montar
 		if (folders.length === 0 && !isLoading) {
-			loadFolders(false);
+			viewLogger.debug('📁 Iniciando carga de carpetas...');
+			executeLoad(false);
 		}
 
 		return () => {
 			viewLogger.debug('🔴 FoldersView Desmontado');
 		};
-	}, [folders.length, isLoading, loadFolders]); // Especificar todas las dependencias
+	}, [executeLoad, folders.length, isLoading]); // Solo ejecutar al montar/desmontar
+
+	// Función pública para recargar
+	const loadFolders = useCallback((isManual = false) => {
+		setRetryCount(0); // Resetear contador en cargas manuales
+		executeLoad(isManual);
+	}, [executeLoad]);
 
 	const handleFolderClick = useCallback(
 		(folder: FolderEntity) => {
@@ -195,7 +208,6 @@ export function FoldersView(_props: ViewProps) {
 
 	// Función para reintento manual
 	const handleManualRetry = useCallback(() => {
-		setRetryCount(0); // Resetear contador para reintento manual
 		loadFolders(true);
 	}, [loadFolders]);
 
@@ -229,63 +241,84 @@ export function FoldersView(_props: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!optimisticFolders || optimisticFolders.length === 0) {
-		return (
-			<EmptyState
-				icon={FolderIcon}
-				title="No hay carpetas indexadas"
-				description="Agrega carpetas desde el panel de configuración para comenzar a indexar tus imágenes."
-			/>
-		);
-	}
-
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				{/* Header con estadísticas */}
-				<div className="mb-6">
-					<h2 className="text-2xl font-bold text-foreground mb-2">Carpetas</h2>
-					<p className="text-muted-foreground">
-						{optimisticFolders.length} {optimisticFolders.length === 1 ? 'carpeta' : 'carpetas'} indexadas
-					</p>
-				</div>
+				<h2 className="text-xl font-bold mb-4">Vista de Carpetas</h2>
 
-				{/* Grid de carpetas */}
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-					{optimisticFolders.map((folder, index) => {
-						// Verificar que la carpeta tenga un id válido
-						if (!folder || !folder.id) {
-							console.error('Carpeta sin id válido:', folder);
-							return null;
-						}
+				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+					{showForm ? 'Cancelar' : 'Crear Carpeta'}
+				</Button>
 
-						// Crear una función de clic específica para esta carpeta
-						const onFolderClick = () => handleFolderClick(folder);
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">Nueva Carpeta</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="folderName">Nombre</Label>
+							<Input
+								id="folderName"
+								value={newFolderName}
+								onChange={(e) => setNewFolderName(e.target.value)}
+								placeholder="Nombre de la carpeta"
+							/>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="folderPath">Ruta</Label>
+							<Input
+								id="folderPath"
+								value={newFolderPath}
+								onChange={(e) => setNewFolderPath(e.target.value)}
+								placeholder="Ruta de la carpeta (ej: /ruta/a/mi/carpeta)"
+							/>
+						</div>
+						<Button onClick={handleCreateFolder}>Guardar Carpeta</Button>
+					</div>
+				)}
 
-						return (
-							<motion.div
-								key={folder.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{
-									delay: index * 0.1,
-									duration: 0.4,
-									type: 'spring',
-									stiffness: 100,
-									damping: 12,
-								}}
-								className="perspective-1000"
-							>
-								<div
-									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-folder-id={folder.id}
+				{!optimisticFolders || optimisticFolders.length === 0 ? (
+					<EmptyState
+						icon={FolderIcon}
+						title="No hay carpetas indexadas"
+						description="Agrega carpetas desde el panel de configuración para comenzar a indexar tus imágenes."
+					/>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+						{optimisticFolders.map((folder, index) => {
+							// Verificar que la carpeta tenga un id válido
+							if (!folder || !folder.id) {
+								console.error('Carpeta sin id válido:', folder);
+								return null;
+							}
+
+							// Crear una función de clic específica para esta carpeta
+							const onFolderClick = () => handleFolderClick(folder);
+
+							return (
+								<motion.div
+									key={folder.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+
+									transition={{
+										delay: index * 0.1,
+										duration: 0.4,
+										type: 'spring',
+										stiffness: 100,
+										damping: 12,
+									}}
+									className="perspective-1000"
 								>
-									<MemoizedFolderCard folder={folder} onFolderClick={onFolderClick} />
-								</div>
-							</motion.div>
-						);
-					})}
-				</div>
+									<div
+										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										data-folder-id={folder.id}
+									>
+										<MemoizedFolderCard folder={folder} onFolderClick={onFolderClick} />
+									</div>
+								</motion.div>
+							);
+						})}
+					</div>
+				)}
 
 				{/* Footer con información adicional */}
 				{optimisticFolders.length > 0 && (

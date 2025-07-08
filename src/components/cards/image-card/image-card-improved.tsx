@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
-import type { Tag } from '@/types/entities/tag';
+import type { TagWithStats } from '@/types/entities/tag';
 
 interface ImageCardProps {
 	imageId: string;
@@ -25,7 +25,7 @@ interface ImageCardProps {
 	showTags?: boolean;
 	showDetails?: boolean;
 	aspectRatio?: 'square' | 'auto' | 'video' | string;
-	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg' | 'gallery';
+	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg' | 'gallery' | 'elevated';
 	isSelected?: boolean;
 	isHoverable?: boolean;
 	showRelations?: boolean;
@@ -129,7 +129,7 @@ export function ImageCardImproved({
 
 	// Determinar color primario para efectos visuales
 	const getPrimaryColor = useCallback(() => {
-		if (imageData?.tags && imageData.tags.length > 0) {
+		if (imageData?.tags?.length > 0) {
 			return imageData.tags[0].color || '#3b82f6';
 		}
 		return '#3b82f6'; // Color predeterminado
@@ -173,10 +173,10 @@ export function ImageCardImproved({
 	}
 
 	const primaryColor = getPrimaryColor();
-	const imageFormat = imageData.metadata?.format || 'unknown';
+	const imageFormat = imageData.format || 'unknown';
 	const cameraInfo =
 		imageData.metadata?.camera?.make || imageData.metadata?.camera?.model
-			? `${imageData.metadata.camera.make || ''} ${imageData.metadata.camera.model || ''}`.trim()
+			? `${imageData.metadata.camera?.make || ''} ${imageData.metadata.camera?.model || ''}`.trim()
 			: null;
 
 	// Calcular total de relaciones
@@ -316,9 +316,9 @@ export function ImageCardImproved({
 					</div>
 
 					{/* Etiquetas */}
-					{showTags && imageData.tags && imageData.tags.length > 0 && (
+					{showTags && imageData.tags?.length > 0 && (
 						<div className="mt-3 flex flex-wrap gap-1">
-							{imageData.tags.slice(0, 3).map((tag: Tag) => (
+							{imageData.tags.slice(0, 3).map((tag: TagWithStats) => (
 								<Badge
 									key={tag.id}
 									variant="outline"

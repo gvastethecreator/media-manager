@@ -2,8 +2,14 @@
 import { Bug, ChevronLeft, ChevronRight, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { ThemeToggle } from '@/components/core/theme/theme-toggle';
+
 import { Button } from '@/components/ui/button';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ui/theme-provider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUIStore } from '@/store/ui.store';
@@ -147,21 +153,17 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 	const { theme, setTheme, themes } = useTheme();
 	const { setView } = useUIStore();
 
-	const handleThemeRotate = () => {
-		const idx = themes.indexOf(theme as string);
-		const nextTheme = themes[(idx + 1) % themes.length];
-		setTheme(nextTheme as any);
-	};
+	
 
 	const handleHomeClick = useCallback(() => {
-		setView('grid');
-	}, [setView]);
+		setCurrentView('dashboard');
+	}, [setCurrentView]);
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: -10 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.1, ease: 'easeOut' }}
+			initial={{ opacity: 0, y: -10, scale: 0.95 }}
+			animate={{ opacity: 1, y: 0, scale: 1 }}
+			transition={{ duration: 0.2, ease: 'easeInOut' }}
 			className="relative bg-gradient-to-b from-background/90 to-transparent py-2 border-b border-border/20 shadow-sm"
 		>
 			{/* Si está colapsado, mostramos en formato vertical con avatar arriba */}
@@ -212,12 +214,28 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							/>
 						)}
 
-						<MemoizedHeaderButton
-							icon={getThemeIcon(theme)}
-							onClick={handleThemeRotate}
-							tooltipTitle="Cambiar tema"
-							tooltipContent={`Actual: ${theme}`}
-						/>
+												<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+								>
+									{getThemeIcon(theme)}
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								{themes.map((t) => (
+									<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
+										{t.charAt(0).toUpperCase() + t.slice(1)}
+										{theme === t && <span className="ml-2 text-xs text-primary">(actual)</span>}
+									</DropdownMenuItem>
+								))}
+								<DropdownMenuItem onClick={() => setTheme('system')}>
+									Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 
 						<MemoizedHeaderButton
 							icon={<Settings2 className="h-3.5 w-3.5" />}
@@ -226,7 +244,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipContent="Personaliza tu experiencia"
 						/>
 
-						<ThemeToggle />
+						
 					</div>
 				</div>
 			) : (
@@ -299,12 +317,28 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							/>
 						)}
 
-						<MemoizedHeaderButton
-							icon={getThemeIcon(theme)}
-							onClick={handleThemeRotate}
-							tooltipTitle="Cambiar tema"
-							tooltipContent={`Actual: ${theme}`}
-						/>
+												<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+								>
+									{getThemeIcon(theme)}
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								{themes.map((t) => (
+									<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
+										{t.charAt(0).toUpperCase() + t.slice(1)}
+										{theme === t && <span className="ml-2 text-xs text-primary">(actual)</span>}
+									</DropdownMenuItem>
+								))}
+								<DropdownMenuItem onClick={() => setTheme('system')}>
+									Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 
 						<MemoizedHeaderButton
 							icon={<Settings2 className="h-3.5 w-3.5" />}
@@ -313,7 +347,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipContent="Personaliza tu experiencia"
 						/>
 
-						<ThemeToggle />
+						
 					</div>
 				</div>
 			)}
