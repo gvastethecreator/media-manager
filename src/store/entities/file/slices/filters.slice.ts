@@ -4,9 +4,8 @@
  */
 
 import { StateCreator } from 'zustand';
-import { applyFileFilters } from '@/transformers/file';
+import { applyFileFilters, FileWithStats } from '@/transformers/file';
 import { FileFilterOptions } from '@/types/entities/file/types';
-import { FileWithStats } from '@/transformers/file';
 import { FileStore } from '..';
 
 // Tipos para filtros

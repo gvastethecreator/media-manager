@@ -4,17 +4,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { JsonFileCard } from '@/components/cards/json-file-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { useCreateJsonFile } from '@/lib/api/json-files';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import type { ViewProps } from '../types';
-import { useToast } from '@/components/ui/use-toast';
-import { useCreateJsonFile } from '@/lib/api/json-files';
 
 const viewLogger = clientLogger.withContext('JsonFilesView');
 

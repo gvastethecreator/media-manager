@@ -130,10 +130,6 @@ export function JsonFileCard({
 		[showPreview]
 	);
 
-	
-
-	
-
 	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
 		return (

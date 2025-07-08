@@ -5,6 +5,13 @@
  * @description Este barrel ha sido limpiado para evitar dependencias legacy. Usar únicamente '@/types/entities/note/types'.
  */
 
+export {
+	NoteCategory,
+	NotePriority,
+	NoteSortOption,
+	NoteStatus,
+	NoteViewMode,
+} from './enums';
 export type {
 	NoteBase,
 	NoteComplete,
@@ -25,14 +32,4 @@ export type {
 	RelatedNote,
 } from './types';
 
-export {
-	NoteCategory,
-	NotePriority,
-	NoteSortOption,
-	NoteStatus,
-	NoteViewMode,
-} from './enums';
-
-export {
-	NoteSortCriteria,
-} from './types';
+export { NoteSortCriteria } from './types';

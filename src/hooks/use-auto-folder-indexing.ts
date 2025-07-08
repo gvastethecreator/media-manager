@@ -191,9 +191,7 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 			toastService.success(`✅ ${indexedCount} carpetas indexadas automáticamente`);
 			logger.info(`✅ Indexación automática completada: ${indexedCount} carpetas procesadas`);
 		} else {
-			toastService.warning(
-				`⚠️ Indexación completada con errores: ${indexedCount} exitosas, ${errors.length} errores`
-			);
+			toastService.warning(`⚠️ Indexación completada con errores: ${indexedCount} exitosas, ${errors.length} errores`);
 			logger.warn(`⚠️ Indexación con errores: ${indexedCount} exitosas, ${errors.length} errores`);
 		}
 	}, [

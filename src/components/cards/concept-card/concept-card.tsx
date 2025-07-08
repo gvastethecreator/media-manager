@@ -2,11 +2,11 @@ import { motion } from 'framer-motion';
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { CardHeader } from '@/components/cards/card-header';
+import { useConcept, useConceptCounts } from '@/lib/api/concepts';
 import { cn } from '@/lib/utils';
 import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
-import { useConcept, useConceptCounts } from '@/lib/api/concepts';
 import { ConceptCardImages } from './concept-card-images';
 
 export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
@@ -89,12 +89,11 @@ export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = t
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-							if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
-					onClick(concept);
-				}
-			},
-			[onClick]
-		[onClick, concept]
+			if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
+				onClick(concept);
+			}
+		},
+		[onClick][(onClick, concept)]
 	);
 
 	// Parsear tags si es un string

@@ -5,13 +5,13 @@ import { FavoriteCard } from '@/components/cards/favorite-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { useFavorites, useCreateFavorite } from '@/lib/api/favorites';
 import { useToast } from '@/components/ui/use-toast';
+import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFavoriteStore } from '@/store/entities/favorite';
@@ -133,7 +133,15 @@ export function FavoritesView({ isVisible }: ViewProps) {
 				)}
 
 				{!favorites.length && !isLoading && !showForm ? (
-					<EmptyState icon={Heart} title="Sin favoritos" description={localSearch ? `No se encontraron favoritos que coincidan con "${localSearch}"` : 'No hay favoritos disponibles'} />
+					<EmptyState
+						icon={Heart}
+						title="Sin favoritos"
+						description={
+							localSearch
+								? `No se encontraron favoritos que coincidan con "${localSearch}"`
+								: 'No hay favoritos disponibles'
+						}
+					/>
 				) : (
 					<motion.div
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"

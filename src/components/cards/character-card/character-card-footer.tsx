@@ -27,7 +27,7 @@ interface CharacterCardFooterProps {
 	/** Si está en modo TCG con efectos especiales */
 	tcgMode?: boolean;
 	cardId?: string;
-			level?: number | null;
+	level?: number | null;
 	compact?: boolean;
 }
 
