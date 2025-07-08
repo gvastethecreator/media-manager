@@ -2,8 +2,8 @@
  * @file Servicio simplificado para datos de navegación (temporal para migración Drizzle)
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import type { NavigationData } from '@/lib/api/navigation';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const navLogger = serverLogger.withContext('NavActions');
 
@@ -44,22 +44,22 @@ export async function getNavigationDataSimple(): Promise<NavigationData> {
 			totalViews: 0,
 			totalDownloads: 0,
 			topTags: [],
-			recentActivity: []
-		} as any
+			recentActivity: [],
+		} as any,
 	};
 }
 
 // Copiar funciones del sistema original
 export {
+	createDefaultSettingsData,
+	getProfileSettings,
+	getSystemSettings,
 	getSystemStats,
 	getSystemVersion,
-	getSystemSettings,
-	updateSystemSettings,
-	resetSystemSettings,
-	getProfileSettings,
-	updateProfileSettings,
-	resetProfileSettings,
-	createDefaultSettingsData,
 	repairSystem,
-	resetDatabase
+	resetDatabase,
+	resetProfileSettings,
+	resetSystemSettings,
+	updateProfileSettings,
+	updateSystemSettings,
 } from '../services/system.service';

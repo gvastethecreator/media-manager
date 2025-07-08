@@ -1,17 +1,17 @@
+import { Workflow } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { WorkflowCard } from '@/components/entities/workflow/workflow-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { WorkflowCard } from '@/components/entities/workflow/workflow-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { useWorkflowStore } from '@/store/entities/workflow';
-import { clientLogger } from '@/lib/logger/client-logger';
 import { useToast } from '@/components/ui/use-toast';
-import { Workflow } from 'lucide-react';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useWorkflowStore } from '@/store/entities/workflow';
 
 const viewLogger = clientLogger.withContext('WorkflowsView');
 

@@ -1,5 +1,5 @@
-import { apiClient } from '../client';
 import type { CharacterWithStats } from '@/types/entities/character/types';
+import { apiClient } from '../client';
 
 export interface CharacterCardData extends CharacterWithStats {}
 

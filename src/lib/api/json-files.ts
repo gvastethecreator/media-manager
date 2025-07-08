@@ -59,12 +59,10 @@ export function useJsonFile(id: string) {
 export function useCreateJsonFile() {
 	const queryClient = useQueryClient();
 
-	return useMutation<JsonFileWithStats, Error, { name: string; content: string }>(
-		{
-			mutationFn: (data) => apiClient.post<JsonFileWithStats>('/json-files', data),
-			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: jsonFileKeys.lists() });
-			},
-		}
-	);
+	return useMutation<JsonFileWithStats, Error, { name: string; content: string }>({
+		mutationFn: (data) => apiClient.post<JsonFileWithStats>('/json-files', data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: jsonFileKeys.lists() });
+		},
+	});
 }

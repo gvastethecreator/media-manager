@@ -6,10 +6,10 @@ import { CharacterCard } from '@/components/cards/character-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { clientEvents } from '@/lib/client/events.client';
@@ -58,15 +58,15 @@ export function CharactersView({ isVisible }: ViewProps) {
 	);
 
 	const handleCreateCharacter = useCallback(() => {
-					const { toast } = useToast();
-			if (newCharacterName.trim() === '') {
-				toast({
-					title: '❌ Error',
-					description: 'El nombre del personaje no puede estar vacío.',
-					variant: 'destructive',
-				});
-				return;
-			}
+		const { toast } = useToast();
+		if (newCharacterName.trim() === '') {
+			toast({
+				title: '❌ Error',
+				description: 'El nombre del personaje no puede estar vacío.',
+				variant: 'destructive',
+			});
+			return;
+		}
 		createCharacter({ name: newCharacterName, description: newCharacterDescription });
 		setNewCharacterName('');
 		setNewCharacterDescription('');
@@ -133,7 +133,15 @@ export function CharactersView({ isVisible }: ViewProps) {
 				)}
 
 				{!characters.length && !isLoading && !showForm ? (
-					<EmptyState icon={Users} title="Sin personajes" description={localSearch ? `No se encontraron personajes que coincidan con "${localSearch}"` : 'No hay personajes disponibles'} />
+					<EmptyState
+						icon={Users}
+						title="Sin personajes"
+						description={
+							localSearch
+								? `No se encontraron personajes que coincidan con "${localSearch}"`
+								: 'No hay personajes disponibles'
+						}
+					/>
 				) : (
 					<motion.div
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"

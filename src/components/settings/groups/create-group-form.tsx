@@ -41,7 +41,13 @@ interface CreateGroupFormProps {
 	onPreview?: () => void;
 }
 
-export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel: _onCancel, onPreview: _onPreview }: CreateGroupFormProps) {
+export function CreateGroupForm({
+	group,
+	isEditing = false,
+	onSubmit,
+	onCancel: _onCancel,
+	onPreview: _onPreview,
+}: CreateGroupFormProps) {
 	// Inicializar el formulario con el tipo correcto
 	const form = useForm<FormData>({
 		resolver: zodResolver(groupFormSchema),

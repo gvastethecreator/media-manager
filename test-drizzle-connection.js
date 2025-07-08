@@ -8,13 +8,19 @@ async function testDrizzleConnection() {
 
 	try {
 		// Intentar una query simple
-		const result = await db.select().from({
-			name: 'sqlite_master',
-			columns: { type: 'text', name: 'text', tbl_name: 'text' }
-		}).where({ type: 'table' });
+		const result = await db
+			.select()
+			.from({
+				name: 'sqlite_master',
+				columns: { type: 'text', name: 'text', tbl_name: 'text' },
+			})
+			.where({ type: 'table' });
 
 		console.log('✅ Conexión exitosa');
-		console.log('📋 Tablas encontradas:', result.map(r => r.tbl_name));
+		console.log(
+			'📋 Tablas encontradas:',
+			result.map((r) => r.tbl_name)
+		);
 		return result;
 	} catch (error) {
 		console.error('❌ Error de conexión:', error);

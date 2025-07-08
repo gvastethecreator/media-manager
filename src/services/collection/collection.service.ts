@@ -16,11 +16,11 @@ import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';
 import type {
-    CollectionBase,
-    CollectionCreateInput,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
-    CollectionWithStats,
+	CollectionBase,
+	CollectionCreateInput,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
+	CollectionWithStats,
 } from '@/types/entities/collection';
 
 // Logger específico para el servicio
@@ -209,9 +209,9 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		}));
 
 		// Transformar usando el transformer correcto
-		const result = transformedCollections.map((collection) =>
-			fromDrizzleCollection(collection, collection._count)
-		).filter((c): c is CollectionWithStats => c !== null);
+		const result = transformedCollections
+			.map((collection) => fromDrizzleCollection(collection, collection._count))
+			.filter((c): c is CollectionWithStats => c !== null);
 
 		logger.info(`✅ ${result.length} colecciones encontradas`);
 		return result;

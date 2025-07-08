@@ -1,23 +1,23 @@
-import { ImageIcon, FolderSync, AlertTriangle, Upload } from 'lucide-react';
+import { AlertTriangle, FolderSync, ImageIcon, Upload } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
+import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing';
 import type { ImageWithStats } from '@/types/entities/image';
 import { EntityStatsType, type EntityWithStats, isImageWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
@@ -37,7 +37,12 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 	const getSortedImages = useImageStore((s) => s.getSortedImages);
 
 	// Hook para indexación automática de carpetas
-	const { status: indexingStatus, isIndexing, progress, startIndexing } = useAutoFolderIndexing({
+	const {
+		status: indexingStatus,
+		isIndexing,
+		progress,
+		startIndexing,
+	} = useAutoFolderIndexing({
 		autoStart: true,
 		maxFoldersPerBatch: 3,
 		onIndexingStart: () => {
@@ -75,119 +80,132 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 		return getSortedImages();
 	}, [getSortedImages]);
 
-	const handleImageClick = useCallback((item: EntityWithStats) => {
-		// Verificar que sea una imagen usando type guard
-		if (isImageWithStats(item)) {
-			const image = item as ImageWithStats;
-			viewLogger.info('🖱️ Click en imagen:', image.name);
+	const handleImageClick = useCallback(
+		(item: EntityWithStats) => {
+			// Verificar que sea una imagen usando type guard
+			if (isImageWithStats(item)) {
+				const image = item as ImageWithStats;
+				viewLogger.info('🖱️ Click en imagen:', image.name);
 
-			// Navegar a la vista de detalle de imagen
-			setCurrentItem({
-				id: image.id,
-				name: image.name || '',
-				path: image.path || '',
-				description: image.description || undefined,
-				count: 1,
-				createdAt: image.createdAt,
-				itemType: 'image',
-			});
-			setCurrentView('all-images'); // Usamos vista existente por ahora
-		} else {
-			viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
-		}
-	}, [setCurrentView, setCurrentItem]);
+				// Navegar a la vista de detalle de imagen
+				setCurrentItem({
+					id: image.id,
+					name: image.name || '',
+					path: image.path || '',
+					description: image.description || undefined,
+					count: 1,
+					createdAt: image.createdAt,
+					itemType: 'image',
+				});
+				setCurrentView('all-images'); // Usamos vista existente por ahora
+			} else {
+				viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
+			}
+		},
+		[setCurrentView, setCurrentItem]
+	);
 
-	const handleImageDoubleClick = useCallback((item: EntityWithStats) => {
-		// Verificar que sea una imagen usando type guard
-		if (isImageWithStats(item)) {
-			const image = item as ImageWithStats;
-			viewLogger.info('🖱️ Doble click en imagen:', image.name);
+	const handleImageDoubleClick = useCallback(
+		(item: EntityWithStats) => {
+			// Verificar que sea una imagen usando type guard
+			if (isImageWithStats(item)) {
+				const image = item as ImageWithStats;
+				viewLogger.info('🖱️ Doble click en imagen:', image.name);
 
-			// Abrir visor de imágenes
-			const imageItems = sortedImages.filter((img: EntityWithStats) => isImageWithStats(img)).map((img: EntityWithStats) => ({
-				id: img.id,
-				name: img.name || '',
-				src: img.thumbnailUrl || `/api/images/${img.id}/content`,
-				alt: img.name || '',
-				width: 'width' in img ? img.width : 0,
-				height: 'height' in img ? img.height : 0,
-				thumbnail: img.thumbnailUrl || null,
-				type: 'image',
-				path: img.path || '',
-				size: 'size' in img ? img.size : 0,
-				mimeType: 'mimeType' in img ? img.mimeType : '',
-				metadata: null,
-				url: img.thumbnailUrl || `/api/images/${img.id}/content`,
-				parsedMetadata: undefined,
-			}));
+				// Abrir visor de imágenes
+				const imageItems = sortedImages
+					.filter((img: EntityWithStats) => isImageWithStats(img))
+					.map((img: EntityWithStats) => ({
+						id: img.id,
+						name: img.name || '',
+						src: img.thumbnailUrl || `/api/images/${img.id}/content`,
+						alt: img.name || '',
+						width: 'width' in img ? img.width : 0,
+						height: 'height' in img ? img.height : 0,
+						thumbnail: img.thumbnailUrl || null,
+						type: 'image',
+						path: img.path || '',
+						size: 'size' in img ? img.size : 0,
+						mimeType: 'mimeType' in img ? img.mimeType : '',
+						metadata: null,
+						url: img.thumbnailUrl || `/api/images/${img.id}/content`,
+						parsedMetadata: undefined,
+					}));
 
-			const currentIndex = imageItems.findIndex((img: any) => img.id === image.id);
-			openViewer(imageItems, currentIndex);
-		} else {
-			viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
-		}
-	}, [sortedImages, openViewer]);
+				const currentIndex = imageItems.findIndex((img: any) => img.id === image.id);
+				openViewer(imageItems, currentIndex);
+			} else {
+				viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
+			}
+		},
+		[sortedImages, openViewer]
+	);
 
 	// Función para manejar el upload de archivos
-	const handleFileUpload = useCallback(async (files: File[]) => {
-		setIsUploading(true);
-		setUploadProgress(0);
-
-		try {
-			const formData = new FormData();
-			for (const file of files) {
-				formData.append('images', file);
-			}
-
-			const response = await fetch('/api/images/upload', {
-				method: 'POST',
-				body: formData,
-			});
-
-			if (!response.ok) {
-				throw new Error('Error al subir las imágenes');
-			}
-
-			const result = await response.json();
-
-			toast({
-				title: '✅ Imágenes subidas exitosamente',
-				description: `${result.uploaded} imágenes agregadas`,
-			});
-
-			// Recargar imágenes
-			loadImages({ refresh: true });
-
-		} catch (error) {
-			viewLogger.error('Error al subir imágenes:', error);
-			toast({
-				title: '❌ Error al subir imágenes',
-				description: error instanceof Error ? error.message : 'Error desconocido',
-				variant: 'destructive',
-			});
-		} finally {
-			setIsUploading(false);
+	const handleFileUpload = useCallback(
+		async (files: File[]) => {
+			setIsUploading(true);
 			setUploadProgress(0);
-			setUploadFiles([]);
-			setIsUploadDialogOpen(false);
-		}
-	}, [toast, loadImages]);
 
-	const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		if (event.target.files) {
-			const files = Array.from(event.target.files);
-			const imageFiles = files.filter(file => file.type.startsWith('image/'));
+			try {
+				const formData = new FormData();
+				for (const file of files) {
+					formData.append('images', file);
+				}
 
-			if (imageFiles.length !== files.length) {
-				toast({
-					title: '⚠️ Algunos archivos no son imágenes',
-					description: 'Solo se procesarán los archivos de imagen válidos',
+				const response = await fetch('/api/images/upload', {
+					method: 'POST',
+					body: formData,
 				});
-			}
 
-			setUploadFiles(imageFiles);
-		}
-	}, [toast]);
+				if (!response.ok) {
+					throw new Error('Error al subir las imágenes');
+				}
+
+				const result = await response.json();
+
+				toast({
+					title: '✅ Imágenes subidas exitosamente',
+					description: `${result.uploaded} imágenes agregadas`,
+				});
+
+				// Recargar imágenes
+				loadImages({ refresh: true });
+			} catch (error) {
+				viewLogger.error('Error al subir imágenes:', error);
+				toast({
+					title: '❌ Error al subir imágenes',
+					description: error instanceof Error ? error.message : 'Error desconocido',
+					variant: 'destructive',
+				});
+			} finally {
+				setIsUploading(false);
+				setUploadProgress(0);
+				setUploadFiles([]);
+				setIsUploadDialogOpen(false);
+			}
+		},
+		[toast, loadImages]
+	);
+
+	const handleFileSelect = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			if (event.target.files) {
+				const files = Array.from(event.target.files);
+				const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+
+				if (imageFiles.length !== files.length) {
+					toast({
+						title: '⚠️ Algunos archivos no son imágenes',
+						description: 'Solo se procesarán los archivos de imagen válidos',
+					});
+				}
+
+				setUploadFiles(imageFiles);
+			}
+		},
+		[toast]
+	);
 
 	// Renderizar barra de estado de indexación
 	const renderIndexingStatus = () => {
@@ -209,12 +227,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 						</span>
 					</div>
 					{!isIndexing && (
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={startIndexing}
-							className="h-7 text-xs"
-						>
+						<Button size="sm" variant="outline" onClick={startIndexing} className="h-7 text-xs">
 							Reindexar
 						</Button>
 					)}
@@ -228,9 +241,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 								{indexingStatus.indexedFolders} de {indexingStatus.totalFolders} carpetas
 							</span>
 							{indexingStatus.currentFolder && (
-								<span className="truncate max-w-40">
-									Procesando: {indexingStatus.currentFolder}
-								</span>
+								<span className="truncate max-w-40">Procesando: {indexingStatus.currentFolder}</span>
 							)}
 						</div>
 					</>
@@ -352,9 +363,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 							{/* Instrucciones */}
 							<Card>
 								<CardHeader>
-									<CardTitle className="text-base font-semibold">
-										Instrucciones
-									</CardTitle>
+									<CardTitle className="text-base font-semibold">Instrucciones</CardTitle>
 								</CardHeader>
 								<CardContent>
 									<p className="text-sm text-muted-foreground">
@@ -388,19 +397,13 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 							{isUploading && (
 								<div className="flex flex-col gap-2">
 									<Progress value={uploadProgress} className="h-2" />
-									<span className="text-xs text-muted-foreground">
-										Cargando... {uploadProgress}%
-									</span>
+									<span className="text-xs text-muted-foreground">Cargando... {uploadProgress}%</span>
 								</div>
 							)}
 
 							{/* Botones de acción */}
 							<div className="flex justify-end gap-2">
-								<Button
-									variant="outline"
-									onClick={() => setIsUploadDialogOpen(false)}
-									className="h-9"
-								>
+								<Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} className="h-9">
 									Cancelar
 								</Button>
 								<Button
@@ -417,7 +420,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 			</div>
 		</ScrollArea>
 	);
-}
+};
 
 /**
  * 📝 Documentación:

@@ -17,10 +17,7 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
 		logger.info('📚 Obteniendo todas las colecciones');
 
-		const drizzleCollections = await db
-			.select()
-			.from(collections)
-			.orderBy(desc(collections.createdAt));
+		const drizzleCollections = await db.select().from(collections).orderBy(desc(collections.createdAt));
 
 		const result = drizzleCollections.map((collection: any) => ({
 			...collection,

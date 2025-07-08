@@ -23,8 +23,6 @@ export const FolderCard = memo(function FolderCard({
 	interactive = true,
 	tcgMode = false,
 }: FolderCardProps) {
-	
-
 	const folderData = useMemo(() => {
 		const imageCount = folder._count?.images ?? 0;
 		const isWithStats = 'statistics' in folder;

@@ -42,28 +42,34 @@ export function ThemeProvider({
 	}, []);
 
 	// Resolver tema actual
-	const resolveTheme = React.useCallback((currentTheme: Theme): 'dark' | 'light' => {
-		if (currentTheme === 'system') {
-			return getSystemTheme();
-		}
-		return currentTheme;
-	}, [getSystemTheme]);
+	const resolveTheme = React.useCallback(
+		(currentTheme: Theme): 'dark' | 'light' => {
+			if (currentTheme === 'system') {
+				return getSystemTheme();
+			}
+			return currentTheme;
+		},
+		[getSystemTheme]
+	);
 
 	// Aplicar tema al DOM
-	const applyTheme = React.useCallback((themeToApply: 'dark' | 'light') => {
-		const root = document.documentElement;
+	const applyTheme = React.useCallback(
+		(themeToApply: 'dark' | 'light') => {
+			const root = document.documentElement;
 
-		// Remover clases anteriores
-		root.classList.remove('light', 'dark');
+			// Remover clases anteriores
+			root.classList.remove('light', 'dark');
 
-		// Aplicar nueva clase
-		root.classList.add(themeToApply);
+			// Aplicar nueva clase
+			root.classList.add(themeToApply);
 
-		// Aplicar atributo si se especifica y no es 'class'
-		if (attribute && attribute !== 'class') {
-			root.setAttribute(attribute, themeToApply);
-		}
-	}, [attribute]);
+			// Aplicar atributo si se especifica y no es 'class'
+			if (attribute && attribute !== 'class') {
+				root.setAttribute(attribute, themeToApply);
+			}
+		},
+		[attribute]
+	);
 
 	// Inicializar tema desde localStorage
 	useEffect(() => {

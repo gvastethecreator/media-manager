@@ -1,16 +1,26 @@
-import { memo, useState, useCallback } from 'react';
-import { ViewContainer } from '@/components/views/view-container';
-import { ViewProps } from '@/components/views/types';
-import { useCategoryData } from '@/lib/api/navigation';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit, Trash2 } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCreateProperty, useUpdateProperty, useDeleteProperty } from '@/lib/api/properties'; // Importar los hooks de mutación
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import { Edit, Trash2 } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ViewProps } from '@/components/views/types';
+import { ViewContainer } from '@/components/views/view-container';
+import { useCategoryData } from '@/lib/api/navigation';
+import { useCreateProperty, useDeleteProperty, useUpdateProperty } from '@/lib/api/properties'; // Importar los hooks de mutación
 
 export const PropertiesView = memo(function PropertiesView({ className }: ViewProps) {
 	const { data: properties, isLoading } = useCategoryData<any>('properties');
@@ -30,9 +40,12 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 		setShowForm(true);
 	}, []);
 
-	const handleDeleteProperty = useCallback((propertyId: string) => {
-		deleteProperty(propertyId);
-	}, [deleteProperty]);
+	const handleDeleteProperty = useCallback(
+		(propertyId: string) => {
+			deleteProperty(propertyId);
+		},
+		[deleteProperty]
+	);
 
 	const { toast } = useToast();
 	const handleSubmitForm = useCallback(() => {
@@ -67,12 +80,15 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 			<div className="p-4">
 				<h2 className="text-xl font-bold mb-4">Vista de Propiedades</h2>
 
-				<Button onClick={() => {
-					setShowForm(!showForm);
-					setEditingProperty(null);
-					setPropertyName('');
-					setPropertyValue('');
-				}} className="mb-4">
+				<Button
+					onClick={() => {
+						setShowForm(!showForm);
+						setEditingProperty(null);
+						setPropertyName('');
+						setPropertyValue('');
+					}}
+					className="mb-4"
+				>
 					{showForm ? 'Cancelar' : 'Crear Propiedad'}
 				</Button>
 
@@ -132,7 +148,10 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 													</AlertDialogHeader>
 													<AlertDialogFooter>
 														<AlertDialogCancel>Cancelar</AlertDialogCancel>
-														<AlertDialogAction onClick={() => handleDeleteProperty(property.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+														<AlertDialogAction
+															onClick={() => handleDeleteProperty(property.id)}
+															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+														>
 															Eliminar
 														</AlertDialogAction>
 													</AlertDialogFooter>
