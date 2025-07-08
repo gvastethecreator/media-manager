@@ -1,33 +1,49 @@
-# REGLAS UNIFICADAS DEL SISTEMA
+# REGLAS OBLIGATORIAS INQUEBRANTABLES
 
-## 🔻 CONFIRMACIÓN VISUAL OBLIGATORIA
+## Reglas Fundamentales
 
-**REGLA CRÍTICA**: SIEMPRE iniciar cada respuesta con exactamente **🔻🔻🔻🔻🔻🔻🔻🔻🔻** y terminar con exactamente **🔺🔺🔺🔺🔺🔺🔺🔺🔺**. Esto confirma que todas las reglas fueron leídas, entendidas y se están aplicando activamente.
+1. Todas las respuestas, comentarios, documentación deberá ser en **español**.
+2. Todos los comandos y rutas deberán ser para PowerShell Core (pwsh).
+3. Usar **BUN** como runtime para todos los comandos y scripts del proyecto.
+4. NUNCA ejecutar builds/servidores sin permiso explícito.
+5. Tratame como experto, Ajustar profundidad según contexto.
+6. **SIEMPRE** iniciar cada respuesta con 🔻🔻🔻🔻🔻🔻🔻🔻🔻 y terminar con 🔺🔺🔺🔺🔺🔺🔺🔺🔺.
 
----
+### Prioridad de Herramientas
 
-## 🚨 PROTOCOLO TODO OBLIGATORIO
+1. **Scripts package.json** - SIEMPRE usar scripts definidos con logging automático
+2. **MCP > Terminal** - Priorizar herramientas MCP sobre comandos genéricos
+3. **Playwright MCP obligatorio** - Para todas las interacciones UI y testing
+4. **Filesystem MCP** - Para operaciones de archivos, y rutas de Windows (`D:\`)
+5. **Evitar TSC, LINT, BIOME repetitivo** - No compilar TypeScript solo para verificar tipos ni repetir analisis todo el tiempo, esto genera outputs muy pesados y gastos de tokens, solo hacerlo cuando sea muy necesario.
+
+
+## 🚨 PROTOCOLO OBLIGATORIO DE TRABAJO
 
 ### Enforcement Automático
 
 **ANTES DE CUALQUIER ACCIÓN**:
 
-1. **CREAR TODO** con todas las tareas identificadas
-2. **MARCAR** cada tarea como COMPLETA al terminarla
-3. **ACTUALIZAR** estado en tiempo real durante ejecución
-4. **FALLAR** si alguna tarea queda sin marcar como completa
+1. **CREAR TODO** con todas las tareas identificadas.
+2. **MARCAR** cada tarea como COMPLETA al terminarla.
+3. **ACTUALIZAR** estado en tiempo real durante ejecución.
+4. **FALLAR** si alguna tarea queda sin marcar como completa.
 
 ### Formato Obligatorio
 
 ```markdown
-## TODO: [NOMBRE_FEATURE]
-[ ] [PRIORIDAD][COMPLEJIDAD] Tarea 1: Descripción + criterios
-[ ] [PRIORIDAD][COMPLEJIDAD] Tarea 2: Descripción + criterios
-CONTEXTO_REQUERIDO: [Archivos/módulos necesarios]
-ACEPTACIÓN: [Criterios medibles de finalización]
-STATUS: PENDING → IN_PROGRESS → COMPLETE
 
-Leyenda: [ ] No iniciado | [🔄️] En Progreso | [✅] Completado | [🟥] Removido
+## TODO: [ NOMBRE DE LA TAREA ]
+- [ ] [PRIORIDAD]-[COMPLEJIDAD] **Tarea 1**: Descripción + _criterios_
+- [ ] [PRIORIDAD]-[COMPLEJIDAD] **Tarea 2**: Descripción + _criterios_
+
+🧠 CONTEXTO REQUERIDO : [Archivos/módulos necesarios]
+🎯 ACEPTACIÓN : [Criterios medibles de finalización]
+ℹ️ STATUS: [PENDING] → [IN_PROGRESS] → [COMPLETE]
+
+[ ] No iniciado | [🔄️] En Progreso | [✅] Completado | [🟥] Removido
+
+
 ```
 
 ### Sistema de Clasificación
@@ -48,29 +64,9 @@ Leyenda: [ ] No iniciado | [🔄️] En Progreso | [✅] Completado | [🟥] Rem
 
 ---
 
-## 🌐 CONFIGURACIÓN BASE INQUEBRANTABLE
-
-### Reglas Fundamentales
-
-1. **Español obligatorio** - Todas las respuestas, comentarios, documentación
-2. **Windows compatible** - Comandos y rutas para PowerShell Core (pwsh)
-3. **Bun como runtime** - Usar BUN para todos los comandos y scripts del proyecto
-4. **Confirmación explícita** - NUNCA ejecutar builds/servidores sin permiso
-5. **Tratamiento de experto** - Ajustar profundidad según contexto
-
-### Prioridad de Herramientas
-
-1. **Scripts package.json** - SIEMPRE usar scripts definidos con logging automático
-2. **MCP > Terminal** - Priorizar herramientas MCP sobre comandos genéricos
-3. **Playwright MCP obligatorio** - Para todas las interacciones UI y testing
-4. **Filesystem MCP** - Para operaciones de archivos, rutas Windows (`D:\`)
-5. **Evitar TSC repetitivo** - No compilar TypeScript solo para verificar tipos
-
----
-
 ## 🎭 MODOS DE OPERACIÓN
 
-### Modo Código (Desarrollo)
+### Modo Agente de Código (Desarrollo)
 
 - **Conciso y directo** - Solución primero, explicaciones después
 - **Cambios mínimos** - Solo modificaciones necesarias
@@ -78,9 +74,9 @@ Leyenda: [ ] No iniciado | [🔄️] En Progreso | [✅] Completado | [🟥] Rem
 - **TODO obligatorio** - Para cada tarea de codificación
 - **Scripts Bun** - `bun run lint`, `bun run test`, etc.
 
-### Modo Conocimiento (Documentación/Investigación)
+### Modo Agente de Conocimiento (Documentación/Investigación/Explicación)
 
-- **Expansivo y exploratorio** - Desarrollar ideas en profundidad
+- **Expansivo y exploratorio** - Desarrollar y explicar ideas en profundidad
 - **Conexiones creativas** - Vínculos entre conceptos
 - **Formato enriquecido** - Enlaces `[[]]`, tags `#tema`, metadatos
 - **TODO para documentación** - Estructurar investigación
@@ -237,10 +233,10 @@ browser_generate_playwright_test → Tests automáticos
 
 ```markdown
 ## TODO: [FUNCIONALIDAD]
-[ ] [HIGH][SMALL] Buscar contexto en codebase
-[ ] [HIGH][MEDIUM] Implementar funcionalidad core
-[ ] [MEDIUM][SMALL] Crear tests con Playwright MCP
-[ ] [LOW][SMALL] Documentar con JSDoc
+- [ ] [HIGH][SMALL] Buscar contexto en codebase
+- [ ] [HIGH][MEDIUM] Implementar funcionalidad core
+- [ ] [MEDIUM][SMALL] Crear tests con Playwright MCP
+- [ ] [LOW][SMALL] Documentar con JSDoc
 
 ## Diagrama
 

@@ -9,6 +9,7 @@ import {
 	FileStack,
 	Files,
 	FileText,
+	Folder,
 	Globe,
 	Image as ImageIcon,
 	Layers,
@@ -21,7 +22,7 @@ import {
 	User,
 	Users,
 	Video,
-	Workflow,
+	Workflow
 } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -59,19 +60,28 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 	// Nueva estructura file-centric con contadores
 	const NAVIGATION_CATEGORIES = [
 		{
+			id: 'folders',
+			label: 'Carpetas',
+			color: '#F59E0B',
+			icon: Folder,
+			children: [
+				{ id: 'folders', label: 'Explorar carpetas', icon: Folder, count: stats.totalFolders || 0, color: '#F59E0B' },
+			],
+		},
+		{
 			id: 'files',
 			label: 'Archivos',
 			color: '#3B82F6',
 			icon: Files,
 			children: [
-				{ id: 'files', label: 'Todos los archivos', icon: FileStack, count: stats.totalImages || 0 },
-				{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0 },
-				{ id: 'videos', label: 'Videos', icon: Video, count: getCategoryItemCount('videos') },
-				{ id: 'audios', label: 'Audio', icon: Music, count: getCategoryItemCount('audios') },
-				{ id: 'documents', label: 'Documentos', icon: FileText, count: getCategoryItemCount('documents') },
-				{ id: 'json-files', label: 'JSON', icon: Brackets, count: getCategoryItemCount('jsonFiles') },
-				{ id: 'workflows', label: 'Workflows', icon: Workflow, count: getCategoryItemCount('workflows') },
-				{ id: 'file-3ds', label: '3D', icon: Box, count: getCategoryItemCount('file3ds') },
+				{ id: 'files', label: 'Todos los archivos', icon: FileStack, count: stats.totalImages || 0, color: '#3B82F6' },
+				{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0, color: '#3B82F6' },
+				{ id: 'videos', label: 'Videos', icon: Video, count: getCategoryItemCount('videos'), color: '#3B82F6' },
+				{ id: 'audios', label: 'Audio', icon: Music, count: getCategoryItemCount('audios'), color: '#3B82F6' },
+				{ id: 'documents', label: 'Documentos', icon: FileText, count: getCategoryItemCount('documents'), color: '#3B82F6' },
+				{ id: 'json-files', label: 'JSON', icon: Brackets, count: getCategoryItemCount('jsonFiles'), color: '#3B82F6' },
+				{ id: 'workflows', label: 'Workflows', icon: Workflow, count: getCategoryItemCount('workflows'), color: '#3B82F6' },
+				{ id: 'file-3ds', label: '3D', icon: Box, count: getCategoryItemCount('file3ds'), color: '#3B82F6' },
 			],
 		},
 		{
@@ -80,12 +90,12 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			color: '#A21CAF',
 			icon: Layers,
 			children: [
-				{ id: 'favorites', label: 'Favoritos', icon: Star, count: stats.totalFavorites || 0 },
-				{ id: 'albums', label: 'Álbumes', icon: Album, count: stats.totalAlbums || 0 },
-				{ id: 'groups', label: 'Grupos', icon: Users, count: getCategoryItemCount('groups') },
-				{ id: 'tags', label: 'Etiquetas', icon: Tag, count: stats.totalTags || 0, hasChildren: true },
-				{ id: 'collections', label: 'Colecciones', icon: Bookmark, count: stats.totalCollections || 0, hasChildren: true },
-				{ id: 'prompts', label: 'Prompts', icon: MessageSquare, count: getCategoryItemCount('prompts'), hasChildren: true },
+				{ id: 'favorites', label: 'Favoritos', icon: Star, count: stats.totalFavorites || 0, color: '#A21CAF' },
+				{ id: 'albums', label: 'Álbumes', icon: Album, count: stats.totalAlbums || 0, color: '#A21CAF' },
+				{ id: 'groups', label: 'Grupos', icon: Users, count: getCategoryItemCount('groups'), color: '#A21CAF' },
+				{ id: 'tags', label: 'Etiquetas', icon: Tag, count: stats.totalTags || 0, hasChildren: true, color: '#A21CAF' },
+				{ id: 'collections', label: 'Colecciones', icon: Bookmark, count: stats.totalCollections || 0, hasChildren: true, color: '#A21CAF' },
+				{ id: 'prompts', label: 'Prompts', icon: MessageSquare, count: getCategoryItemCount('prompts'), hasChildren: true, color: '#A21CAF' },
 			],
 		},
 		{
@@ -94,11 +104,21 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			color: '#059669',
 			icon: Globe,
 			children: [
-				{ id: 'characters', label: 'Personajes', icon: User, count: stats.totalCharacters || 0, hasChildren: true },
-				{ id: 'places', label: 'Lugares', icon: MapPin, count: stats.totalPlaces || 0, hasChildren: true },
-				{ id: 'world-items', label: 'Objetos del mundo', icon: Box, count: stats.totalWorldItems || 0, hasChildren: true },
-				{ id: 'concepts', label: 'Conceptos', icon: Lightbulb, count: getCategoryItemCount('concepts'), hasChildren: true },
-				{ id: 'wildcards', label: 'Comodines', icon: Asterisk, count: getCategoryItemCount('wildcards'), hasChildren: true },
+				{ id: 'characters', label: 'Personajes', icon: User, count: stats.totalCharacters || 0, hasChildren: true, color: '#059669' },
+				{ id: 'places', label: 'Lugares', icon: MapPin, count: stats.totalPlaces || 0, hasChildren: true, color: '#059669' },
+				{ id: 'world-items', label: 'Objetos del mundo', icon: Box, count: stats.totalWorldItems || 0, hasChildren: true, color: '#059669' },
+				{ id: 'concepts', label: 'Conceptos', icon: Lightbulb, count: getCategoryItemCount('concepts'), hasChildren: true, color: '#059669' },
+				{ id: 'wildcards', label: 'Comodines', icon: Asterisk, count: getCategoryItemCount('wildcards'), hasChildren: true, color: '#059669' },
+			],
+		},
+		{
+			id: 'management',
+			label: 'Gestión',
+			color: '#6D28D9', // Un color púrpura
+			icon: Asterisk, // Icono temporal, se puede cambiar
+			children: [
+				{ id: 'notes', label: 'Notas', icon: FileText, count: getCategoryItemCount('notes'), hasChildren: true, color: '#6D28D9' },
+				{ id: 'properties', label: 'Propiedades', icon: Asterisk, count: getCategoryItemCount('properties'), hasChildren: true, color: '#6D28D9' }, // Icono temporal
 			],
 		},
 	];

@@ -6,16 +6,12 @@ import { cn } from '@/lib/utils';
 import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
-// import { ConceptCardImages } from './concept-card-images'; // Temporal: Comentado por problemas de imports
+import { useConcept, useConceptCounts } from '@/lib/api/concepts';
+import { ConceptCardImages } from './concept-card-images';
 
-export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
-	// Temporal: Comentado hasta arreglar imports
-	// const { data: concept, isLoading, error } = useConcept(conceptId);
-	// const { data: conceptCounts } = useConceptCounts(conceptId);
-	const concept = null;
-	const isLoading = false;
-	const error = null;
-	const conceptCounts = null;
+export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+	const { data: concept, isLoading, error } = useConcept(_conceptId);
+	const { data: conceptCounts } = useConceptCounts(_conceptId);
 
 	// Extraer propiedades básicas del objeto
 	const {
@@ -93,11 +89,11 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
-				e.preventDefault();
-				onClick(concept);
-			}
-		},
+							if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
+					onClick(concept);
+				}
+			},
+			[onClick]
 		[onClick, concept]
 	);
 
@@ -118,7 +114,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		}
 		// Si no tiene tags, devolver array vacío
 		return [];
-	}, [concept]);
+	}, []);
 
 	// Definir estilos de la tarjeta TCG
 	const cardStyle = useMemo(() => {

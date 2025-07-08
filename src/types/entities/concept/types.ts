@@ -6,19 +6,6 @@
  */
 
 import { z } from 'zod';
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
-import type { GroupComplete } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
-import type { PlaceComplete } from '../place';
-import type { PromptComplete } from '../prompt';
-import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
 
 /**
  * Tipo base canónico para Concept

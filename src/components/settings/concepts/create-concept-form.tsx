@@ -41,7 +41,7 @@ export function CreateConceptForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel,
+	onCancel: _onCancel,
 	onPreview,
 }: CreateConceptFormProps) {
 	const [_isSubmitting, setIsSubmitting] = useState(false);

@@ -27,6 +27,6 @@
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
-export type ImageFiltersSlice = {};
+export type ImageFiltersSlice = Record<string, never>;
 
 export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFiltersSlice> = () => ({});

@@ -288,11 +288,11 @@ export function CharacterCard({
 					{/* Cabecera con nombre, emoji, color y categoría */}
 					<CharacterCardHeader
 						name={character.name || 'Sin nombre'}
-						emoji={character.emoji}
+						emoji={character.emoji || ''}
 						color={primaryColor}
 						isFavorite={character.isFavorite || false}
-						class={character.class}
-						level={character.level}
+						class={character.class || undefined}
+						level={character.level ?? undefined}
 						race={character.race}
 						tcgMode={tcgMode}
 						compact={compact}
@@ -313,8 +313,8 @@ export function CharacterCard({
 								alignment={character.alignment}
 								primaryColor={primaryColor}
 								secondaryColor={secondaryColor}
-								healthPoints={character.statistics?.healthPoints || 100}
-								manaPoints={character.statistics?.manaPoints || 50}
+															healthPoints={character.statistics?.healthPoints}
+							manaPoints={character.statistics?.manaPoints}
 								tcgMode={tcgMode}
 							/>
 						</>
@@ -327,7 +327,7 @@ export function CharacterCard({
 						rarityLevel={numericRarityLevel}
 						primaryColor={primaryColor}
 						secondaryColor={secondaryColor}
-						level={character.level}
+						level={character.level ?? undefined}
 						compact={compact}
 					/>
 				</div>
