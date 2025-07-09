@@ -47,6 +47,33 @@ export function JsonFileCard({
 	const [isHovered, setIsHovered] = useState(false);
 	const [showPreview, setShowPreview] = useState(false);
 
+		// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando archivo JSON...</p>
+			</div>
+		);
+	}
+
+	if (error || !jsonFile) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Archivo JSON no encontrado'}</p>
+			</div>
+		);
+	}
+
 	// Color basado en la validez del JSON
 	const primaryColor = useMemo(() => {
 		// Intentar parsear el contenido para determinar si es válido
@@ -93,69 +120,6 @@ export function JsonFileCard({
 			};
 		}
 	}, [jsonFile.content]);
-
-	// Formatear tamaño
-	const formatSize = useCallback((bytes: number) => {
-		if (bytes < 1024) return `${bytes} B`;
-		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-	}, []);
-
-	// Preview del contenido JSON
-	const jsonPreview = useMemo(() => {
-		if (!jsonFile.content) return 'Archivo vacío';
-
-		try {
-			const parsed = JSON.parse(jsonFile.content);
-			return `${JSON.stringify(parsed, null, 2).substring(0, 200)}...`;
-		} catch {
-			return 'JSON inválido';
-		}
-	}, [jsonFile.content]);
-
-	const handleClick = useCallback(() => {
-		if (!disabled && onClick) {
-			onClick(jsonFile);
-		}
-	}, [disabled, onClick, jsonFile]);
-
-	const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-	const handleMouseLeave = useCallback(() => setIsHovered(false), []);
-
-	const togglePreview = useCallback(
-		(e: React.MouseEvent) => {
-			e.stopPropagation();
-			setShowPreview(!showPreview);
-		},
-		[showPreview]
-	);
-
-	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando archivo JSON...</p>
-			</div>
-		);
-	}
-
-	if (error || !jsonFile) {
-		return (
-			<div
-				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Archivo JSON no encontrado'}</p>
-			</div>
-		);
-	}
 
 	return (
 		<CardContainer
@@ -226,8 +190,7 @@ export function JsonFileCard({
 				{/* Cabecera */}
 				<CardHeader
 					title={jsonFile.name || 'Sin nombre'}
-					color={primaryColor}
-					isFavorite={jsonFile.isFavorite || false}
+					primaryColor={primaryColor}
 					compact={compact}
 				/>
 
@@ -270,10 +233,7 @@ export function JsonFileCard({
 							</motion.div>
 						)}
 
-						{/* Descripción */}
-						{jsonFile.description && !showPreview && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{jsonFile.description}</div>
-						)}
+						
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && !showPreview && (

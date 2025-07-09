@@ -87,7 +87,7 @@ export function WorldItemCard({
 		attributes,
 		effects,
 		requirements,
-		stats,
+		stats: rawStats,
 		properties,
 		featuredImage,
 	} = worldItem;
@@ -194,7 +194,7 @@ export function WorldItemCard({
 	};
 
 	// Color de efecto basado en rareza
-	const rarityColor = rarityColorMap[rarity?.toLowerCase()] || rarityColorMap.common;
+	const rarityColor = rarityColorMap[rarity?.toLowerCase() || 'common'];
 
 	// Nivel de brillo basado en rareza para efectos
 	const rarityGlowMap: Record<string, number> = {
@@ -205,7 +205,7 @@ export function WorldItemCard({
 		legendary: 20,
 	};
 
-	const rarityGlow = rarityGlowMap[rarity?.toLowerCase()] || 0;
+	const rarityGlow = rarityGlowMap[rarity?.toLowerCase() || 'common'] || 0;
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
@@ -268,15 +268,15 @@ export function WorldItemCard({
 
 	// Procesar estadísticas si es un string o formato JSON
 	const parsedStats = useMemo(() => {
-		if (typeof stats === 'string' && stats) {
+		if (typeof rawStats === 'string' && rawStats) {
 			try {
-				return JSON.parse(stats);
+				return JSON.parse(rawStats);
 			} catch (_e) {
 				return {};
 			}
 		}
-		return stats || {};
-	}, [stats]);
+		return rawStats || {};
+	}, [rawStats]);
 
 	// Procesar la imagen destacada
 	const _processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
@@ -300,7 +300,7 @@ export function WorldItemCard({
 			}}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled || !interactive ? undefined : onClick}
+			onClick={disabled || !interactive || !onClick ? undefined : () => onClick(worldItem)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
 			role={onClick && interactive ? 'button' : 'article'}

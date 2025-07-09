@@ -88,7 +88,6 @@ function PromptCardComponent({
 		featuredImage,
 		createdAt,
 		updatedAt,
-		model,
 	} = prompt;
 
 	// Calcular valores derivados
@@ -164,7 +163,6 @@ function PromptCardComponent({
 		const totalRelations =
 			imagesCount +
 			videosCount +
-			(prompt.stats?.totalPrompts || 0) + // Usar prompt.stats.totalPrompts
 			notesCount +
 			charactersCount +
 			placesCount +
@@ -212,7 +210,6 @@ function PromptCardComponent({
 		albumsCount,
 		collectionsCount,
 		tagsCount,
-		prompt.stats?.totalPrompts, // Usar prompt.stats.totalPrompts
 	]);
 
 	return (
@@ -246,15 +243,19 @@ function PromptCardComponent({
 			>
 				<div className="flex flex-col h-full relative z-1">
 					{!compact && recentImagesData && (
-						<PromptCardImages images={recentImagesData} primaryColor={primaryColor} tcgMode={tcgMode} />
+						<PromptCardImages
+							images={recentImagesData.map((img) => img.thumbnailUrl)}
+							primaryColor={primaryColor}
+							tcgMode={tcgMode}
+						/>
 					)}
 					<PromptCardContent
 						name={name}
 						emoji={emoji}
 						color={primaryColor}
-						description={description}
-						content={content}
-						category={category}
+						description={description || ''}
+						content={content || ''}
+						category={category || 'general'}
 						parameters={parsedParameters}
 						relationCounts={relationCounts}
 						tcgMode={tcgMode}
@@ -268,7 +269,6 @@ function PromptCardComponent({
 						primaryColor={primaryColor}
 						secondaryColor={secondaryColor}
 						tcgMode={tcgMode}
-						compact={compact}
 					/>
 				</div>
 			</CardContainer>

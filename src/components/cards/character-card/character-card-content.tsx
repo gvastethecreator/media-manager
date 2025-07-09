@@ -44,9 +44,8 @@ export function CharacterCardContent({
 	compact = false,
 	tcgMode = true,
 }: CharacterCardContentProps) {
-	const displayDescription = compact && description
-		? `${description.substring(0, 60)}${description.length > 60 ? '...' : ''}`
-		: description;
+	const displayDescription =
+		compact && description ? `${description.substring(0, 60)}${description.length > 60 ? '...' : ''}` : description;
 
 	const getAlignmentColor = () => {
 		const align = alignment?.toLowerCase() ?? 'neutral';
@@ -89,9 +88,8 @@ export function CharacterCardContent({
 		return formatted;
 	};
 
-	const normalizedAbilities = abilities?.map((ability) =>
-		typeof ability === 'string' ? { name: ability, description: '' } : ability
-	) ?? [];
+	const normalizedAbilities =
+		abilities?.map((ability) => (typeof ability === 'string' ? { name: ability, description: '' } : ability)) ?? [];
 
 	if (compact) {
 		return (
@@ -270,7 +268,7 @@ export function CharacterCardContent({
 					</div>
 				</div>
 			)}
-			{(goals && goals.length > 0 || personality && personality.length > 0) && (
+			{((goals && goals.length > 0) || (personality && personality.length > 0)) && (
 				<div className="mt-2 grid grid-cols-2 gap-1.5 text-[10px] opacity-90">
 					{goals && goals.length > 0 && (
 						<div className="px-1.5 py-1 rounded" style={{ backgroundColor: `${primaryColor}15` }}>

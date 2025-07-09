@@ -12,13 +12,13 @@ const logger = clientLogger.withContext('ImageTransformer');
 
 import { formatFileSize } from '@/lib/utils/format.utils';
 import type {
-	DrizzleImageWithCounts,
 	ImageCreateInput,
 	ImageMetadata,
 	ImageStatistics,
 	ImageUpdateInput,
 	ImageWithStats,
 } from '@/types/entities/image';
+import type { DrizzleImageWithCounts } from '@/types/entities/image/base';
 
 /**
  * 🔄 Transforma DrizzleImageWithCounts a ImageWithStats
@@ -41,6 +41,7 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
 			statistics,
 			...derivedFields,
 			parsedMetadata,
+			tags: drizzleImage.tags || [],
 		};
 
 		logger.debug('🖼️ Image transformado exitosamente', {
@@ -389,6 +390,7 @@ export function toDrizzleImageCreate(input: ImageCreateInput): any {
 		isFavorite: input.isFavorite ?? false,
 		folderId: input.folderId,
 		addedAt: new Date(),
+		tags: input.tags ? JSON.stringify(input.tags) : null,
 		// Relaciones se manejan por separado
 	};
 }
@@ -404,6 +406,7 @@ export function toDrizzleImageUpdate(input: ImageUpdateInput): any {
 	if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
 	if (input.folderId !== undefined) updateData.folderId = input.folderId;
 	if (input.metadata !== undefined) updateData.metadata = input.metadata;
+	if (input.tags !== undefined) updateData.tags = input.tags ? JSON.stringify(input.tags) : null;
 
 	return updateData;
 }

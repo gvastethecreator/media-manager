@@ -113,7 +113,7 @@ export function CollectionCardFooter({
 							textShadow: `0 0 5px ${primaryColor}30`,
 						}}
 					>
-						♦ Colección digital ♦ {imagesCount > 0 ? `${imagesCount} items` : 'Sin items'}
+						♦ Colección digital ♦ {(imagesCount ?? 0 > 0) ? `${imagesCount} items` : 'Sin items'}
 					</div>
 				</>
 			)}

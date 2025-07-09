@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type { ImageWithStats } from '@/types/entities/image';
+import type { ImageWithStats } from '@/types/entities/image/base';
 import { ImageCardImproved } from './image-card-improved';
 
 interface ImageGalleryProps {

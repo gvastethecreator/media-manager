@@ -92,8 +92,14 @@ export function GroupCard({
 
 	// Preparar filters count
 	const filtersCount = useMemo(() => {
-		if (Array.isArray(group?.filters)) {
-			return group.filters.length;
+		if (typeof group?.filters === 'string' && group.filters) {
+			try {
+				const parsedFilters = JSON.parse(group.filters);
+				return Array.isArray(parsedFilters) ? parsedFilters.length : 0;
+			} catch (e) {
+				console.error('Error parsing group filters:', e);
+				return 0;
+			}
 		}
 		return 0;
 	}, [group?.filters]);
@@ -147,23 +153,23 @@ export function GroupCard({
 			{/* Encabezado */}
 			<GroupCardHeader
 				name={group.name}
-				emoji={group.emoji}
+				emoji={group.emoji || ''}
 				color={primaryColor}
 				category={group.category || undefined}
-				organizationType={group.organizationType}
-				organizationLevel={group.organizationLevel}
-				isFavorite={group.isFavorite}
+				organizationType={group.organizationType || ''}
+				organizationLevel={group.organizationLevel || ''}
+				isFavorite={group.isFavorite || false}
 				tcgMode={tcgMode}
 				compact={compact}
 			/>
 
 			{/* Imágenes */}
 			<GroupCardImages
-				images={group.recentImages}
-				videos={group.recentVideos}
-				emoji={group.emoji}
+				images={group.recentImages || []}
+				videos={group.recentVideos || []}
+				emoji={group.emoji || ''}
 				primaryColor={primaryColor}
-				rarityLevel={group.rarityLevel}
+				rarityLevel={group.rarityLevel || ''}
 				holographicEffect={isHovered}
 				tcgMode={tcgMode}
 				compact={compact}
@@ -173,8 +179,8 @@ export function GroupCard({
 			<GroupCardContent
 				description={group.description || undefined}
 				category={group.category || undefined}
-				organizationType={group.organizationType}
-				flexibilityScore={group.flexibilityScore}
+				organizationType={group.organizationType || ''}
+				flexibilityScore={group.flexibilityScore || 0}
 				filtersCount={filtersCount}
 				entityCounts={entityCounts}
 				primaryColor={primaryColor}
@@ -186,15 +192,15 @@ export function GroupCard({
 			<GroupCardFooter
 				id={group.id}
 				name={group.name}
-				isFavorite={group.isFavorite}
+				isFavorite={group.isFavorite || false}
 				category={group.category || undefined}
-				organizationType={group.organizationType}
-				power={group.power}
-				rarityLevel={group.rarityLevel}
-				hp={group.hp}
-				mp={group.mp}
+				organizationType={group.organizationType || ''}
+				power={group.power || 0}
+				rarityLevel={group.rarityLevel || ''}
+				hp={group.hp || 0}
+				mp={group.mp || 0}
 				primaryColor={primaryColor}
-				cardId={group.cardId}
+				cardId={group.cardId || ''}
 				tcgMode={tcgMode}
 				compact={compact}
 				imagesCount={group.stats.totalImages}

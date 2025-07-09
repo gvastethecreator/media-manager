@@ -74,19 +74,19 @@ export type PlaceWithStats = PlaceBase & {
 	/** Estadísticas calculadas de la entidad */
 	_stats: PlaceStatistics;
 	/** Conteos de relaciones desde Drizzle */
-	_count: {
-		images?: number;
-		tags?: number;
-		notes?: number;
-		characters?: number;
-		collections?: number;
-		concepts?: number;
-	};
+	images?: number;
+	videos?: number;
+	tags?: number;
+	notes?: number;
+	characters?: number;
+	collections?: number;
+	concepts?: number;
 	/** Campos JSON parseados */
-	dangers: any[];
-	resources: any[];
-	stats: any;
-	filters: any;
+	parsedDangers: any[];
+	parsedResources: any[];
+	parsedStats: any;
+	metadata: any;
+	region: string | null;
 };
 
 /**

@@ -12,9 +12,6 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-// --- Tipos Canónicos ---
-export type { ConceptBase, ConceptStatistics, ConceptWithStats } from './base';
-
 // --- Enumeraciones ---
 export {
 	ConceptCategory,
@@ -22,6 +19,21 @@ export {
 	ConceptStatus,
 	ConceptViewMode,
 } from './enums';
+// --- Tipos Canónicos ---
+export type {
+	ConceptBase,
+	ConceptComplete,
+	ConceptCreateInput,
+	ConceptExtended,
+	ConceptFilters,
+	ConceptListItem,
+	ConceptSearchOptions,
+	ConceptSearchResult,
+	ConceptSortOption,
+	ConceptUpdateInput,
+	ConceptViewMode,
+	ConceptWithStats,
+} from './types';
 
 // --- Tipos de compatibilidad e interfaces ---
 import type { ConceptBase, ConceptWithStats } from './base';

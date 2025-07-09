@@ -166,7 +166,7 @@ export function PlaceCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled ? undefined : onClick}
+						onClick={disabled || !onClick ? undefined : () => onClick(place)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}
@@ -257,11 +257,11 @@ export function PlaceCard({
 					{/* Cabecera con nombre, emoji, región y tipo */}
 					<PlaceCardHeader
 						name={name}
-						emoji={emoji}
+						emoji={emoji || '📍'}
 						color={primaryColor}
-						region={region}
-						type={type}
-						climate={climate}
+						region={region || 'desconocido'}
+						type={type || 'desconocido'}
+						climate={climate || 'templado'}
 						isFavorite={isFavorite}
 						tcgMode={tcgMode}
 						compact={compact}
@@ -283,11 +283,11 @@ export function PlaceCard({
 							{/* Contenido principal con descripción, recursos y estadísticas */}
 							<PlaceCardContent
 								description={description || undefined}
-								region={region}
-								type={type}
-								climate={climate}
-								population={population}
-								government={government}
+								region={region || 'desconocido'}
+								type={type || 'desconocido'}
+								climate={climate || 'templado'}
+								population={population || 0}
+								government={government || 'desconocido'}
 								parsedResources={parsedResources}
 								parsedDangers={parsedDangers}
 								parsedStats={place.parsedStats}

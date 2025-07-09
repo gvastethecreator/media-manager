@@ -1,25 +1,34 @@
 import { memo } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { AlbumsView } from './albums/albums-view';
-import { AllImagesView } from './all-images/all-images-view';
-import { AudioView } from './audio/audio-view';
-import { CharactersView } from './characters/characters-view';
-import { CollectionsView } from './collections/collections-view';
-import { ConceptsView } from './concepts/concepts-view';
-import { DashboardView } from './dashboard/dashboard-view';
-import { DocumentsView } from './documents/documents-view';
-import { EntityCardsView } from './entity-cards/entity-cards-view';
-import { FavoritesView } from './favorites/favorites-view';
+import AlbumsContentView from './albums/albums-content-view';
+import AllImagesContentView from './all-images/all-images-content-view';
+import AudioContentView from './audio/audio-content-view';
+import CharactersContentView from './characters/characters-content-view';
+import CollectionsContentView from './collections/collections-content-view';
+import ConceptsContentView from './concepts/concepts-content-view';
+import DashboardContentView from './dashboard/dashboard-content-view';
+import DevelopmentContentView from './development/development-content-view';
+// Importar content views
+import { DocumentContentView } from './documents/document-content-view';
+import DocumentsContentView from './documents/documents-content-view';
+import EntityCardsContentView from './entity-cards/entity-cards-content-view';
+import FavoritesContentView from './favorites/favorites-content-view';
+import File3DContentView from './file3d/file3d-content-view';
+import FilesContentView from './files/files-content-view';
+import FoldersContentView from './folders/folders-content-view';
 import { FolderContentView } from './folders/views/folder-content-view';
-import { FoldersView } from './folders/views/folders-view';
-import { GroupsView } from './groups/groups-view';
+import GroupsContentView from './groups/groups-content-view';
+import { JsonFileContentView } from './json-files/json-file-content-view';
+import { JsonFilesView } from './json-files/json-files-view';
 import { NotesView } from './notes/notes-view';
 import { PlacesView } from './places/places-view';
 import { PromptsView } from './prompts/prompts-view';
 import { PropertiesView } from './properties/properties-view';
 import { SearchView } from './search/search-view';
+import SettingsContentView from './settings/settings-content-view';
 import { TagsView } from './tags/tags-view';
 import { WildcardsView } from './wildcards/wildcards-view';
+import { WorkflowContentView } from './workflows/workflow-content-view';
 import { WorkflowsView } from './workflows/workflows-view';
 import { WorldItemsView } from './world-items/world-items-view';
 
@@ -28,71 +37,85 @@ export const ViewContainer = memo(function ViewContainer() {
 
 	const renderView = () => {
 		switch (currentView) {
+			case 'dashboard':
+				return <DashboardContentView />;
+			case 'settings':
+				return <SettingsContentView />;
+
+			case 'development':
+				return <DevelopmentContentView />;
+
+			// Carpetas y archivos
 			case 'folders':
-				return <FoldersView className="h-full" />;
+				return <FoldersContentView className="h-full" />;
+			case 'folder-content':
+				return <FolderContentView />;
 			case 'files':
-				return (
-					<div className="h-full w-full flex flex-col items-center justify-center p-6">
-						<h2 className="text-2xl font-bold mb-2">📁 Vista de Archivos</h2>
-						<p className="text-muted-foreground">Vista de todos los archivos</p>
-					</div>
-				);
+				return <FilesContentView className="h-full" />;
 			case 'all-images':
-				return <AllImagesView className="h-full" />;
-			case 'favorites':
-				return <FavoritesView className="h-full" />;
+				return <AllImagesContentView className="h-full" />;
+
+			// Multimedia
+			case 'audios':
+				return <AudioContentView className="h-full" />;
 			case 'documents':
-				return <DocumentsView className="h-full" />;
-			case 'tags':
-				return <TagsView className="h-full" />;
+				return <DocumentsContentView className="h-full" />;
+			case 'json-files':
+				return <JsonFilesView className="h-full" />;
+			case 'workflows':
+				return <WorkflowsView />;
+			case 'file-3ds':
+				return <File3DContentView className="h-full" />;
+
+			// Organizadores
+			case 'favorites':
+				return <FavoritesContentView className="h-full" />;
 			case 'collections':
-				return <CollectionsView className="h-full" />;
+				return <CollectionsContentView className="h-full" />;
+			case 'albums':
+				return <AlbumsContentView className="h-full" />;
+			case 'groups':
+				return <GroupsContentView className="h-full" />;
+			case 'tags':
+				return <TagsView />;
+
+			// Worldbuilding
 			case 'characters':
-				return <CharactersView className="h-full" />;
+				return <CharactersContentView className="h-full" />;
 			case 'places':
 				return <PlacesView className="h-full" />;
 			case 'world-items':
 				return <WorldItemsView className="h-full" />;
-			case 'prompts':
-				return <PromptsView className="h-full" />;
+			case 'concepts':
+				return <ConceptsContentView />;
 			case 'wildcards':
 				return <WildcardsView className="h-full" />;
-			case 'search':
-				return <SearchView className="h-full" />;
-			case 'audios':
-				return <AudioView className="h-full" />;
-			case 'workflows':
-				return <WorkflowsView />;
-			case 'groups':
-				return <GroupsView className="h-full" />;
-			case 'albums':
-				return <AlbumsView className="h-full" />;
-			case 'concepts':
-				return <ConceptsView className="h-full" />;
+
+			// Gestión
+			case 'prompts':
+				return <PromptsView className="h-full" />;
 			case 'notes':
 				return <NotesView className="h-full" />;
 			case 'properties':
 				return <PropertiesView className="h-full" />;
-			case 'json-files':
-				return (
-					<div className="h-full w-full flex flex-col items-center justify-center p-6">
-						<h2 className="text-2xl font-bold mb-2">📄 Vista de JSON</h2>
-						<p className="text-muted-foreground">Vista de archivos JSON</p>
-					</div>
-				);
-			case 'file-3ds':
-				return (
-					<div className="h-full w-full flex flex-col items-center justify-center p-6">
-						<h2 className="text-2xl font-bold mb-2">🎨 Vista de 3D</h2>
-						<p className="text-muted-foreground">Vista de archivos 3D</p>
-					</div>
-				);
-			case 'dashboard':
-				return <DashboardView />;
+
+			// Utilidades
+			case 'search':
+				return <SearchView className="h-full" />;
 			case 'entity-cards':
-				return <EntityCardsView />;
-			case 'folder-content':
-				return <FolderContentView />;
+				return <EntityCardsContentView />;
+
+			// Content Views - Vistas de detalle
+			case 'document-content':
+				return <DocumentContentView />;
+			case 'audio-content':
+				return <AudioContentView />;
+			case 'json-file-content':
+				return <JsonFileContentView />;
+			case 'workflow-content':
+				return <WorkflowContentView />;
+			case 'file-3d-content':
+				return <File3DContentView />;
 
 			// Para el resto, usar placeholder temporal
 			default:

@@ -38,9 +38,7 @@ MemoizedTagCard.displayName = 'MemoizedTagCard';
  */
 export function TagsView() {
 	const { setCurrentView } = useNavigationStore();
-	const { selectTag } = useTagStore((state) => ({
-		selectTag: state.selectTag,
-	}));
+	const selectTag = useTagStore((state) => state.selectTag);
 
 	const { data: tagsResponse, isLoading, error } = useTags();
 	const { mutate: createTag } = useCreateTag();

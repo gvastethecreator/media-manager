@@ -54,26 +54,34 @@ export async function getAudios(): Promise<AudioWithStats[]> {
 			.select({
 				id: audios.id,
 				name: audios.name,
-				description: audios.description,
-				emoji: audios.emoji,
-				color: audios.color,
-				shortcut: audios.shortcut,
-				category: audios.category,
-				filePath: audios.filePath,
-				fileName: audios.fileName,
-				fileSize: audios.fileSize,
+				path: audios.path,
+				size: audios.size,
+				hash: audios.hash,
 				mimeType: audios.mimeType,
+				extension: audios.extension,
+				folderId: audios.folderId,
+				isFavorite: audios.isFavorite,
+				isArchived: audios.isArchived,
 				duration: audios.duration,
 				bitrate: audios.bitrate,
 				sampleRate: audios.sampleRate,
 				channels: audios.channels,
+				format: audios.format,
 				codec: audios.codec,
-				tags: audios.tags,
-				metadata: audios.metadata,
-				sortBy: audios.sortBy,
-				filters: audios.filters,
-				featuredImage: audios.featuredImage,
-				isFavorite: audios.isFavorite,
+				title: audios.title,
+				artist: audios.artist,
+				album: audios.album,
+				year: audios.year,
+				genre: audios.genre,
+				track: audios.track,
+				disc: audios.disc,
+				albumArtist: audios.albumArtist,
+				composer: audios.composer,
+				comment: audios.comment,
+				lyrics: audios.lyrics,
+				bpm: audios.bpm,
+				key: audios.key,
+				mood: audios.mood,
 				createdAt: audios.createdAt,
 				updatedAt: audios.updatedAt,
 			})
@@ -81,17 +89,16 @@ export async function getAudios(): Promise<AudioWithStats[]> {
 			.orderBy(desc(audios.createdAt));
 
 		// Transformar usando deserializer moderno
+		// Normalización defensiva: solo campos válidos según schema Drizzle
 		const audioList = drizzleAudios.map((rawAudio) => {
 			const audio = deserializeAudio({
 				...rawAudio,
-				size: rawAudio.fileSize || 0,
-				filePath: rawAudio.filePath || '',
-				format: rawAudio.codec || null,
-				metadata: rawAudio.metadata || null,
-				thumbnail: rawAudio.featuredImage || null,
-				isPublic: false, // TODO: agregar campo isPublic al schema
+				// Normalización mínima para compatibilidad con el schema de la app
+				size: rawAudio.size || 0,
+				filePath: rawAudio.path || '',
+				format: rawAudio.format || rawAudio.codec || '',
 				isFavorite: Boolean(rawAudio.isFavorite),
-				folderId: '', // TODO: agregar relación con folder
+				folderId: rawAudio.folderId || '',
 			} as any);
 			return addStatsToAudio(audio);
 		});
@@ -115,26 +122,34 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 			.select({
 				id: audios.id,
 				name: audios.name,
-				description: audios.description,
-				emoji: audios.emoji,
-				color: audios.color,
-				shortcut: audios.shortcut,
-				category: audios.category,
-				filePath: audios.filePath,
-				fileName: audios.fileName,
-				fileSize: audios.fileSize,
+				path: audios.path,
+				size: audios.size,
+				hash: audios.hash,
 				mimeType: audios.mimeType,
+				extension: audios.extension,
+				folderId: audios.folderId,
+				isFavorite: audios.isFavorite,
+				isArchived: audios.isArchived,
 				duration: audios.duration,
 				bitrate: audios.bitrate,
 				sampleRate: audios.sampleRate,
 				channels: audios.channels,
+				format: audios.format,
 				codec: audios.codec,
-				tags: audios.tags,
-				metadata: audios.metadata,
-				sortBy: audios.sortBy,
-				filters: audios.filters,
-				featuredImage: audios.featuredImage,
-				isFavorite: audios.isFavorite,
+				title: audios.title,
+				artist: audios.artist,
+				album: audios.album,
+				year: audios.year,
+				genre: audios.genre,
+				track: audios.track,
+				disc: audios.disc,
+				albumArtist: audios.albumArtist,
+				composer: audios.composer,
+				comment: audios.comment,
+				lyrics: audios.lyrics,
+				bpm: audios.bpm,
+				key: audios.key,
+				mood: audios.mood,
 				createdAt: audios.createdAt,
 				updatedAt: audios.updatedAt,
 			})
@@ -148,12 +163,14 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 		}
 
 		const rawAudio = drizzleAudio[0];
-
 		const transformedAudio = {
 			...rawAudio,
 			isFavorite: Boolean(rawAudio.isFavorite),
+			size: rawAudio.size || 0,
+			filePath: rawAudio.path || '',
+			format: rawAudio.format || rawAudio.codec || '',
+			folderId: rawAudio.folderId || '',
 		};
-
 		return deserializeAudio(transformedAudio as any);
 	} catch (error) {
 		audioLogger.error(`Error al obtener audio ${id}:`, error);
@@ -174,26 +191,34 @@ export async function createAudio(data: AudioCreateInput): Promise<AudioWithStat
 			.values({
 				id: crypto.randomUUID(),
 				name: data.name,
-				description: data.description || null,
-				emoji: data.emoji || '🎵',
-				color: data.color || '#3b82f6',
-				shortcut: data.shortcut || null,
-				category: data.category || null,
-				filePath: data.filePath,
-				fileName: data.fileName,
-				fileSize: data.fileSize || null,
-				mimeType: data.mimeType || null,
+				path: data.path,
+				size: data.size || 0,
+				hash: data.hash,
+				mimeType: data.mimeType,
+				extension: data.extension,
+				folderId: data.folderId,
+				isFavorite: data.isFavorite || false,
+				isArchived: data.isArchived || false,
 				duration: data.duration || null,
 				bitrate: data.bitrate || null,
 				sampleRate: data.sampleRate || null,
 				channels: data.channels || null,
+				format: data.format || null,
 				codec: data.codec || null,
-				tags: data.tags || null,
-				metadata: data.metadata || null,
-				sortBy: data.sortBy || null,
-				filters: data.filters || null,
-				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
+				title: data.title || null,
+				artist: data.artist || null,
+				album: data.album || null,
+				year: data.year || null,
+				genre: data.genre || null,
+				track: data.track || null,
+				disc: data.disc || null,
+				albumArtist: data.albumArtist || null,
+				composer: data.composer || null,
+				comment: data.comment || null,
+				lyrics: data.lyrics || null,
+				bpm: data.bpm || null,
+				key: data.key || null,
+				mood: data.mood || null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
@@ -231,26 +256,34 @@ export async function updateAudio(id: string, data: AudioUpdateInput): Promise<A
 
 		// Solo actualizar campos que se envían
 		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.filePath !== undefined) updateData.filePath = data.filePath;
-		if (data.fileName !== undefined) updateData.fileName = data.fileName;
-		if (data.fileSize !== undefined) updateData.fileSize = data.fileSize;
+		if (data.path !== undefined) updateData.path = data.path;
+		if (data.size !== undefined) updateData.size = data.size;
+		if (data.hash !== undefined) updateData.hash = data.hash;
 		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
+		if (data.extension !== undefined) updateData.extension = data.extension;
+		if (data.folderId !== undefined) updateData.folderId = data.folderId;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
 		if (data.duration !== undefined) updateData.duration = data.duration;
 		if (data.bitrate !== undefined) updateData.bitrate = data.bitrate;
 		if (data.sampleRate !== undefined) updateData.sampleRate = data.sampleRate;
 		if (data.channels !== undefined) updateData.channels = data.channels;
+		if (data.format !== undefined) updateData.format = data.format;
 		if (data.codec !== undefined) updateData.codec = data.codec;
-		if (data.tags !== undefined) updateData.tags = data.tags;
-		if (data.metadata !== undefined) updateData.metadata = data.metadata;
-		if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
-		if (data.filters !== undefined) updateData.filters = data.filters;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.title !== undefined) updateData.title = data.title;
+		if (data.artist !== undefined) updateData.artist = data.artist;
+		if (data.album !== undefined) updateData.album = data.album;
+		if (data.year !== undefined) updateData.year = data.year;
+		if (data.genre !== undefined) updateData.genre = data.genre;
+		if (data.track !== undefined) updateData.track = data.track;
+		if (data.disc !== undefined) updateData.disc = data.disc;
+		if (data.albumArtist !== undefined) updateData.albumArtist = data.albumArtist;
+		if (data.composer !== undefined) updateData.composer = data.composer;
+		if (data.comment !== undefined) updateData.comment = data.comment;
+		if (data.lyrics !== undefined) updateData.lyrics = data.lyrics;
+		if (data.bpm !== undefined) updateData.bpm = data.bpm;
+		if (data.key !== undefined) updateData.key = data.key;
+		if (data.mood !== undefined) updateData.mood = data.mood;
 
 		await db.update(audios).set(updateData).where(eq(audios.id, id));
 

@@ -26,7 +26,7 @@ import { CharactersSettings } from './characters/characters-settings';
 import { CollectionsSettings } from './collections/collections-settings';
 import { ConceptsSettings } from './concepts/concepts-settings';
 import { DocumentSettings } from './document/document-settings';
-// import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings'; // TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE
+import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings';
 import { File3DSettings } from './file3d/file3d-settings';
 import { FoldersSettings } from './folders/folders-settings';
 import { GroupsSettings } from './groups/groups-settings';
@@ -259,7 +259,7 @@ export function SettingsView() {
 					</TabsContent>
 
 					<TabsContent value="entities-cards" className="h-full w-full p-2 m-0 border-none">
-						{/* <EntitiesCardsSettings /> */} {/* TEMPORALMENTE COMENTADO - ARCHIVO NO EXISTE */}
+						<EntitiesCardsSettings />
 					</TabsContent>
 
 					<TabsContent value="albums" className="h-full w-full p-2 m-0 border-none">

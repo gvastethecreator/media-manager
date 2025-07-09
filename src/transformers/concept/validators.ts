@@ -44,7 +44,7 @@ export function validateConceptBase(data: unknown): ConceptBase {
  * @returns Los datos validados como ConceptStatistics.
  * @throws {TransformerError} Si la validación falla.
  */
-export function validateConceptStatistics(data: unknown): ConceptStatistics {
+export function validateConceptStatistics(data: unknown): ConceptStats {
 	try {
 		return ConceptStatisticsSchema.parse(data);
 	} catch (error) {

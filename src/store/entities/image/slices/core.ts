@@ -134,7 +134,8 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		try {
 			if (options.refresh) get().clearImages();
 			const result = await ImageApi.getImagesFromApi(options);
-			const validImages = result.images.filter((img) => img?.id);
+			const images = result?.images || [];
+			const validImages = Array.isArray(images) ? images.filter((img) => img?.id) : [];
 			get().addImages(validImages);
 			return validImages;
 		} catch (e: unknown) {
