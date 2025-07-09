@@ -28,8 +28,11 @@ export interface FavoriteBase {
 	id: string;
 	entityId: string;
 	entityType: FavoriteEntityType;
-	userId?: string; // Opcional para compatibilidad
-	profileId?: string; // Opcional para compatibilidad
+	userId: string | null;
+	addedAt: Date;
+	notes: string | null;
+	category: string | null;
+	priority: number | null;
 	createdAt: Date;
 	updatedAt: Date;
 }

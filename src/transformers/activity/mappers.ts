@@ -8,7 +8,8 @@ import { type ActivityFilters, ActivityType, type CreateActivityData } from '../
 
 type DrizzleCreateActivityData = {
 	type: string;
-	description: string;
+	message: string;
+	data?: string | null;
 	imageId?: string | null;
 };
 
@@ -18,7 +19,7 @@ type DrizzleWhereFilter = {
 	type?: { in?: string[] };
 	imageId?: string;
 	createdAt?: { gte?: Date; lte?: Date };
-	description?: { contains?: string };
+	message?: { contains?: string };
 };
 
 type DrizzleFindManyArgs = {
@@ -38,7 +39,8 @@ type DrizzleFindManyArgs = {
 export function mapCreateActivityDataToDrizzle(data: CreateActivityData): DrizzleCreateActivityData {
 	return {
 		type: data.type,
-		description: data.description,
+		message: data.message,
+		data: data.data || null,
 		imageId: data.imageId || null,
 	};
 }
@@ -77,7 +79,7 @@ export function mapActivityFiltersToDrizzle(filters: ActivityFilters): DrizzleFi
 
 	// Filtrar por búsqueda en descripción
 	if (filters.searchQuery) {
-		where.description = {
+		where.message = {
 			contains: filters.searchQuery,
 		};
 	}

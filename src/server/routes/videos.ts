@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import {
 	createVideo,
 	deleteVideo,
@@ -9,6 +10,28 @@ import {
 } from '../services/video.server.service';
 
 const router = Router();
+
+const VideoCreateSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().nullable().optional(),
+	path: z.string().min(1),
+	hash: z.string().min(1),
+	size: z.number().min(0),
+	duration: z.number().min(0),
+	width: z.number().int().min(0).nullable().optional(),
+	height: z.number().int().min(0).nullable().optional(),
+	metadata: z.string().nullable().optional(),
+	thumbnail: z.string().nullable().optional(),
+	thumbnailSize: z.number().int().min(0).nullable().optional(),
+	thumbnailWidth: z.number().int().min(0).nullable().optional(),
+	thumbnailHeight: z.number().int().min(0).nullable().optional(),
+	isPublic: z.boolean().optional(),
+	isFavorite: z.boolean().optional(),
+	isHidden: z.boolean().optional(),
+	folderId: z.string().min(1),
+});
+
+const VideoUpdateSchema = VideoCreateSchema.partial();
 
 // GET /api/videos - Obtener videos con filtros
 router.get('/', async (req, res) => {
@@ -43,7 +66,8 @@ router.get('/:id', async (req, res) => {
 // POST /api/videos - Crear nuevo video
 router.post('/', async (req, res) => {
 	try {
-		const newVideo = await createVideo(req.body);
+		const validatedData = VideoCreateSchema.parse(req.body);
+		const newVideo = await createVideo(validatedData);
 		res.status(201).json(newVideo);
 	} catch (error) {
 		console.error('Error al crear video:', error);
@@ -58,7 +82,8 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const updatedVideo = await updateVideo(id, req.body);
+		const validatedData = VideoUpdateSchema.parse(req.body);
+		const updatedVideo = await updateVideo(id, validatedData);
 		res.json(updatedVideo);
 	} catch (error) {
 		console.error('Error al actualizar video:', error);
@@ -73,7 +98,10 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		await deleteVideo(id);
+		const result = await deleteVideo(id);
+		if (!result.success) {
+			return res.status(404).json({ error: 'Video no encontrado' });
+		}
 		res.json({
 			success: true,
 			message: 'Video eliminado correctamente',

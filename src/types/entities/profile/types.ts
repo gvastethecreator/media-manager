@@ -34,12 +34,12 @@ export interface ProfileBase {
 	name: string;
 	emoji: string;
 	color: string;
-	description?: string | null;
+	description: string | null;
 	isActive: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	settingsId?: string | null;
-	imageId?: string | null;
+	settingsId: string | null;
+	imageId: string | null;
 }
 
 /**

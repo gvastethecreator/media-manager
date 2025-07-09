@@ -8,13 +8,17 @@ export interface AlbumBase extends EntityBase {
 	featuredImage: string | null;
 	isPublic: boolean;
 	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	totalSize: number;
+	filters: string | null; // JSON string of filters
 	shortcut: string | null;
 	category: string | null;
-	sortBy: string | null;
-	filters: string | null; // JSON string of filters
-	viewConfig: string | null; // JSON string of view configuration
-	recentImages?: string[];
-	recentVideos?: string[];
+	metadata: string | null;
+	lastImageAddedAt: Date | null;
+	lastVideoAddedAt: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface AlbumStatistics {

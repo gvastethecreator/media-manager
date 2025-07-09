@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 			search: search as string,
 			limit: Number.parseInt(limit as string),
 			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'imageCount',
+			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};
 

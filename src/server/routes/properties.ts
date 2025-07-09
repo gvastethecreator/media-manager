@@ -1,9 +1,15 @@
-import express from 'express';
-import { PropertyService } from '@/services/property/property.service';
-import { toPropertyWithStats } from '@/transformers/property';
+const PropertyCreateSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().nullable().optional(),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean().optional(),
+});
 
-const router = express.Router();
-const propertyService = new PropertyService();
+const PropertyUpdateSchema = PropertyCreateSchema.partial();
 
 // GET /properties - Listar properties con filtros
 router.get('/', async (req, res) => {

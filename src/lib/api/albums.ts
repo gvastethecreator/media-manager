@@ -7,22 +7,48 @@ export interface AlbumFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface AlbumCreateInput {
 	name: string;
-	description?: string;
-	color?: string;
-	isPrivate?: boolean;
+	description?: string | null;
+	color?: string | null;
+	isPublic?: boolean;
+	emoji?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	totalSize?: number;
+	filters?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	metadata?: string | null;
+	lastImageAddedAt?: Date | null;
+	lastVideoAddedAt?: Date | null;
+	parentId?: string | null;
 }
 
 export interface AlbumUpdateInput {
 	name?: string;
-	description?: string;
-	color?: string;
-	isPrivate?: boolean;
+	description?: string | null;
+	color?: string | null;
+	isPublic?: boolean;
+	emoji?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	totalSize?: number;
+	filters?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	metadata?: string | null;
+	lastImageAddedAt?: Date | null;
+	lastVideoAddedAt?: Date | null;
+	parentId?: string | null;
 }
 
 export interface AlbumsResponse {

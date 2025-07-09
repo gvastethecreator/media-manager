@@ -6,7 +6,7 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { groups } from '@/lib/drizzle/schema';
+import { groups, groupImages, groupVideos, groupAlbums, groupTags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
@@ -89,49 +89,9 @@ export const getGroupService = async (id: string): Promise<GroupWithStats | null
 
 		const group = groupResult[0];
 
-		// Obtener conteos de relaciones
-		const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
-			db
-				.select({ count: count() })
-				.from(groupImages)
-				.where(eq(groupImages.groupId, id))
-				.then((res) => res[0]?.count || 0),
-			db
-				.select({ count: count() })
-				.from(groupVideos)
-				.where(eq(groupVideos.groupId, id))
-				.then((res) => res[0]?.count || 0),
-			db
-				.select({ count: count() })
-				.from(groupAlbums)
-				.where(eq(groupAlbums.groupId, id))
-				.then((res) => res[0]?.count || 0),
-			db
-				.select({ count: count() })
-				.from(groupTags)
-				.where(eq(groupTags.groupId, id))
-				.then((res) => res[0]?.count || 0),
-		]);
-
 		// Construir grupo con estadísticas
 		const groupWithStats: GroupWithStats = {
 			...group,
-			_count: {
-				images: imageCount,
-				videos: videoCount,
-				albums: albumCount,
-				tags: tagCount,
-				collections: 0, // TODO: implementar cuando exista la relación
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
 		};
 
 		logger.info(`✅ Grupo encontrado: ${group.name}`);

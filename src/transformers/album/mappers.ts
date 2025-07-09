@@ -16,9 +16,18 @@ type DrizzleCreateAlbumData = {
 	description?: string | null;
 	emoji?: string | null;
 	color?: string | null;
-	category?: string | null;
-	isFavorite?: boolean;
 	featuredImage?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	totalSize?: number;
+	filters?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	metadata?: string | null;
+	lastImageAddedAt?: Date | null;
+	lastVideoAddedAt?: Date | null;
 };
 
 /**
@@ -40,56 +49,7 @@ type DrizzleFindManyArgs = {
 	orderBy?: { [key: string]: 'asc' | 'desc' };
 };
 
-/**
- * Representa la estructura del objeto de agregación de conteos para un Album.
- */
-type AlbumCounts = {
-	_count: {
-		images: number;
-		videos: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-};
 
-/**
- * Convierte un objeto Album y sus conteos a un objeto canónico AlbumWithStats.
- *
- * @param album El objeto Album.
- * @param counts Los conteos de las relaciones del álbum.
- * @returns Un objeto AlbumWithStats.
- */
-export function toAlbumWithStats(album: Album, counts: AlbumCounts['_count']): AlbumWithStats {
-	const stats: AlbumStatistics = {
-		imageCount: counts.images,
-		videoCount: counts.videos,
-		collectionCount: counts.collections,
-		tagCount: counts.tags,
-		characterCount: counts.characters,
-		placeCount: counts.places,
-		worldItemCount: counts.worldItems,
-		conceptCount: counts.concepts,
-		promptCount: counts.prompts,
-		noteCount: counts.notes,
-		wildcardCount: counts.wildcards,
-		propertyCount: counts.properties,
-		groupCount: counts.groups,
-	};
-
-	return {
-		...album,
-		stats,
-	};
-}
 
 /**
  * Mapea datos de creación de álbum a formato compatible con Drizzle
@@ -103,9 +63,18 @@ export function mapCreateAlbumDataToDrizzle(data: CreateAlbumInput): DrizzleCrea
 		description: data.description || null,
 		emoji: data.emoji || null,
 		color: data.color || null,
-		category: data.category || null,
-		isFavorite: data.isFavorite || false,
 		featuredImage: data.featuredImage || null,
+		isPublic: data.isPublic || false,
+		isFavorite: data.isFavorite || false,
+		totalImages: data.totalImages || 0,
+		totalVideos: data.totalVideos || 0,
+		totalSize: data.totalSize || 0,
+		filters: data.filters || null,
+		shortcut: data.shortcut || null,
+		category: data.category || null,
+		metadata: data.metadata || null,
+		lastImageAddedAt: data.lastImageAddedAt || null,
+		lastVideoAddedAt: data.lastVideoAddedAt || null,
 	};
 }
 

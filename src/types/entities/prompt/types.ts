@@ -18,39 +18,41 @@ import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
 
+
 /**
- * Define la estructura de un parámetro dentro de un prompt.
+ * 🎯 Tipo base canónico para Prompt
  */
-export interface PromptParameter {
+export interface PromptBase {
+	id: string;
 	name: string;
-	type: 'string' | 'number' | 'boolean' | 'array' | 'object';
-	description?: string;
-	required?: boolean;
-	defaultValue?: unknown;
-	options?: string[];
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	content: string | null;
+	parameters: string | null; // JSON string
+	style: string | null;
+	mood: string | null;
+	lighting: string | null;
+	composition: string | null;
+	technique: string | null;
+	inspiration: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
  * 🎯 Tipo completo para Prompt con todas las relaciones y campos JSON deserializados.
  */
-export interface PromptComplete {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	content: string;
-	purpose: string;
-	category: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-
-	// Campos JSON deserializados
-	parameters: PromptParameter[];
-	tags: string[]; // El campo `tags` es un array de strings serializado
-
+export interface PromptComplete extends PromptBase {
 	// Relaciones
 	images?: ImageComplete[];
 	videos?: VideoComplete[];
@@ -89,33 +91,26 @@ export interface PromptComplete {
  */
 export interface PromptCreateInput {
 	name: string;
-	emoji?: string;
-	color?: string;
 	description?: string | null;
-	content?: string;
-	purpose?: string;
-	category?: string;
-	featuredImage?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
 	isFavorite?: boolean;
-
-	// Campos JSON
-	parameters?: PromptParameter[];
-	tags?: string[];
-
-	// IDs de relaciones
-	imageIds?: string[];
-	videoIds?: string[];
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagEntityIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	worldItemIds?: string[];
-	conceptIds?: string[];
-	noteIds?: string[];
-	wildcardIds?: string[];
-	propertyIds?: string[];
-	groupIds?: string[];
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 /**

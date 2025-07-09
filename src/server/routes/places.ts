@@ -1,10 +1,31 @@
-import express from 'express';
-import { PlaceService } from '@/services/place/place.service';
-import { toImageWithStats } from '@/transformers/image';
-import { toPlaceWithStats } from '@/transformers/place';
+const PlaceCreateSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().nullable().optional(),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	isPublic: z.boolean().optional(),
+	isFavorite: z.boolean().optional(),
+	totalImages: z.number().int().min(0).optional(),
+	totalVideos: z.number().int().min(0).optional(),
+	type: z.string().nullable().optional(),
+	location: z.string().nullable().optional(),
+	climate: z.string().nullable().optional(),
+	population: z.string().nullable().optional(),
+	government: z.string().nullable().optional(),
+	economy: z.string().nullable().optional(),
+	culture: z.string().nullable().optional(),
+	history: z.string().nullable().optional(),
+	geography: z.string().nullable().optional(),
+	landmarks: z.string().nullable().optional(),
+	dangers: z.string().nullable().optional(),
+	resources: z.string().nullable().optional(),
+	notes: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	parentId: z.string().nullable().optional(),
+});
 
-const router = express.Router();
-const placeService = new PlaceService();
+const PlaceUpdateSchema = PlaceCreateSchema.partial();
 
 // GET /places - Listar lugares con filtros
 router.get('/', async (req, res) => {
@@ -15,7 +36,7 @@ router.get('/', async (req, res) => {
 			search: search as string,
 			limit: Number.parseInt(limit as string),
 			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'imageCount',
+			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};
 
@@ -86,19 +107,8 @@ router.get('/:id/media', async (req, res) => {
 // POST /places - Crear nuevo lugar
 router.post('/', async (req, res) => {
 	try {
-		const { name, description, color, location, coordinates } = req.body;
-
-		if (!name) {
-			return res.status(400).json({ error: 'El nombre es requerido' });
-		}
-
-		const place = await placeService.createPlace({
-			name,
-			description,
-			color,
-			location,
-			coordinates,
-		});
+		const validatedData = PlaceCreateSchema.parse(req.body);
+		const place = await placeService.createPlace(validatedData);
 
 		res.status(201).json(toPlaceWithStats(place));
 	} catch (error) {
@@ -111,15 +121,8 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { name, description, color, location, coordinates } = req.body;
-
-		const place = await placeService.updatePlace(id, {
-			name,
-			description,
-			color,
-			location,
-			coordinates,
-		});
+		const validatedData = PlaceUpdateSchema.parse(req.body);
+		const place = await placeService.updatePlace(id, validatedData);
 
 		if (!place) {
 			return res.status(404).json({ error: 'Lugar no encontrado' });

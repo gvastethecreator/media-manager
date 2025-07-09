@@ -1,10 +1,28 @@
-import express from 'express';
-import { WorldItemService } from '@/services/world-item/world-item.service';
-import { toImageWithStats } from '@/transformers/image';
-import { toWorldItemWithStats } from '@/transformers/world-item';
+const WorldItemCreateSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().nullable().optional(),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	isPublic: z.boolean().optional(),
+	isFavorite: z.boolean().optional(),
+	totalImages: z.number().int().min(0).optional(),
+	totalVideos: z.number().int().min(0).optional(),
+	type: z.string().nullable().optional(),
+	rarity: z.string().nullable().optional(),
+	value: z.string().nullable().optional(),
+	weight: z.string().nullable().optional(),
+	materials: z.string().nullable().optional(),
+	origin: z.string().nullable().optional(),
+	properties: z.string().nullable().optional(),
+	uses: z.string().nullable().optional(),
+	history: z.string().nullable().optional(),
+	notes: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	parentId: z.string().nullable().optional(),
+});
 
-const router = express.Router();
-const worldItemService = new WorldItemService();
+const WorldItemUpdateSchema = WorldItemCreateSchema.partial();
 
 // GET /world-items - Listar world items con filtros
 router.get('/', async (req, res) => {
@@ -15,7 +33,7 @@ router.get('/', async (req, res) => {
 			search: search as string,
 			limit: Number.parseInt(limit as string),
 			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'imageCount',
+			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos',
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};
 
@@ -85,19 +103,8 @@ router.get('/:id/recent-images', async (req, res) => {
 // POST /world-items - Crear nuevo world item
 router.post('/', async (req, res) => {
 	try {
-		const { name, description, color, category, rarity } = req.body;
-
-		if (!name) {
-			return res.status(400).json({ error: 'El nombre es requerido' });
-		}
-
-		const worldItem = await worldItemService.createWorldItem({
-			name,
-			description,
-			color,
-			category,
-			rarity,
-		});
+		const validatedData = WorldItemCreateSchema.parse(req.body);
+		const worldItem = await worldItemService.createWorldItem(validatedData);
 
 		res.status(201).json(toWorldItemWithStats(worldItem));
 	} catch (error) {
@@ -110,15 +117,8 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { name, description, color, category, rarity } = req.body;
-
-		const worldItem = await worldItemService.updateWorldItem(id, {
-			name,
-			description,
-			color,
-			category,
-			rarity,
-		});
+		const validatedData = WorldItemUpdateSchema.parse(req.body);
+		const worldItem = await worldItemService.updateWorldItem(id, validatedData);
 
 		if (!worldItem) {
 			return res.status(404).json({ error: 'World item no encontrado' });

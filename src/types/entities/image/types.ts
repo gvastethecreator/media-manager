@@ -51,124 +51,32 @@ export const ImageSchema = z.object({
 export interface ImageBase {
 	id: string;
 	name: string;
-	description?: string | null;
+	description: string | null;
 	path: string;
 	hash: string;
 	size: number;
 	width: number;
 	height: number;
-	metadata?: string | null; // JSON string en DB
+	metadata: string | null;
+	thumbnail: string | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailMimeType: string | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
 	isFavorite: boolean;
-	folderId: string | null;
-	addedAt: Date;
+	folderId: string;
+	noteId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+	addedAt: Date;
 }
 
-/**
- * 🖼️ Datos de thumbnail
- */
-export interface ImageThumbnail {
-	thumbnail?: Buffer | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
-	thumbnailError?: string | null;
-	thumbnailErrorAt?: Date | null;
-	thumbnailOptimizedAt?: Date | null;
-}
 
-/**
- * 🔗 Relaciones de Image optimizadas (usando tipos WithStats)
- */
-export interface ImageRelations {
-	folder?: FolderComplete | null;
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
-}
 
-/**
- * 📊 Estadísticas específicas de Image
- */
-export interface ImageStatistics {
-	// Conteos de relaciones
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalWildcards: number;
-	totalProperties: number;
-	totalGroups: number;
-	totalAssociations: number;
 
-	// Métricas técnicas
-	megapixels: number;
-	aspectRatio: number;
-	fileSize: number; // En MB
-	dimensions: string; // "1920x1080"
-
-	// Métricas de uso
-	views: number;
-	likes: number;
-	downloads: number;
-	shares: number;
-
-	// Análisis de calidad
-	qualityScore: number; // 0-100
-	technicalGrade: 'A' | 'B' | 'C' | 'D';
-	colorTemperature: 'warm' | 'neutral' | 'cool';
-
-	// Metadatos AI
-	aiConfidence: number; // 0-100
-	autoTags: string[];
-	duplicateStatus: 'unique' | 'duplicate' | 'similar';
-
-	lastUpdated: Date;
-}
-
-/**
- * 🖼️ Image con estadísticas optimizadas (tipo principal)
- */
-export interface ImageWithStats extends ImageBase, ImageRelations, ImageUI {
-	statistics: ImageStatistics;
-	// Campos derivados calculados
-	thumbnailUrl: string;
-	fullUrl: string;
-	displayName: string;
-	parsedMetadata: ImageMetadata | null;
-	formattedSize: string;
-	formattedDimensions: string;
-	aspectRatioLabel: string;
-	_count?: {
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
 
 /**
  * 📝 Datos para crear una Image

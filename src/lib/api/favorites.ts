@@ -7,25 +7,33 @@ export interface FavoriteFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'addedAt' | 'createdAt' | 'updatedAt' | 'priority' | 'entityType' | 'category';
 	sortOrder?: 'asc' | 'desc';
-	type?: string;
+	entityType?: string;
+	entityId?: string;
+	userId?: string;
+	category?: string;
+	priority?: number;
+	startDate?: Date;
+	endDate?: Date;
 }
 
 export interface FavoriteCreateInput {
-	name: string;
-	description?: string;
-	type?: string;
-	color?: string;
-	emoji?: string;
+	entityId: string;
+	entityType: string;
+	userId?: string | null;
+	notes?: string | null;
+	category?: string | null;
+	priority?: number | null;
 }
 
 export interface FavoriteUpdateInput {
-	name?: string;
-	description?: string;
-	type?: string;
-	color?: string;
-	emoji?: string;
+	entityId?: string;
+	entityType?: string;
+	userId?: string | null;
+	notes?: string | null;
+	category?: string | null;
+	priority?: number | null;
 }
 
 export interface FavoritesResponse {

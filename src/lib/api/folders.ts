@@ -32,13 +32,27 @@ export interface FolderFilters {
 export interface FolderCreateInput {
 	name: string;
 	path: string;
-	parentId?: string;
-	isRoot?: boolean;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	autoReindex?: boolean;
+	parentId?: string | null;
+	presetId?: string | null;
 }
 
 export interface FolderUpdateInput {
 	name?: string;
-	description?: string;
+	description?: string | null;
+	path?: string;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	autoReindex?: boolean;
+	parentId?: string | null;
+	presetId?: string | null;
 }
 
 export interface FoldersResponse {

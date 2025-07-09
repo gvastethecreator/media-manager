@@ -7,15 +7,15 @@ const router = Router();
 // Schema para validación
 const createProfileSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido'),
-	theme: z.enum(['light', 'dark', 'system']).default('system'),
-	language: z.string().default('es'),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	description: z.string().nullable().optional(),
+	isActive: z.boolean().optional(),
+	settingsId: z.string().nullable().optional(),
+	imageId: z.string().nullable().optional(),
 });
 
-const updateProfileSchema = z.object({
-	name: z.string().min(1).optional(),
-	theme: z.enum(['light', 'dark', 'system']).optional(),
-	language: z.string().optional(),
-});
+const updateProfileSchema = createProfileSchema.partial();
 
 // GET /api/profiles/active - Obtener perfil activo
 router.get('/active', async (_req, res) => {

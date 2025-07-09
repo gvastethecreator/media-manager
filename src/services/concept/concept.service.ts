@@ -1,17 +1,5 @@
 // Tipo local para crear conceptos
-interface ConceptCreate {
-	name: string;
-	content?: string | null;
-	description?: string | null;
-	category?: string | null;
-	emoji?: string;
-	color?: string;
-	shortcut?: string | null;
-	sortBy?: string | null;
-	filters?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-}
+import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept';
 
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
@@ -39,50 +27,36 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 	[EVENTS.CONCEPTS_CHANGED]: 'update',
 };
 
-interface ConceptFilters {
-	category?: string;
-	search?: string;
-	sortBy?: 'createdAt' | 'name' | 'category';
-	sortOrder?: 'asc' | 'desc';
-	page?: number;
-	pageSize?: number;
-}
-
-interface ConceptStats {
-	total: number;
-	byCategory: Record<string, number>;
-}
-
-interface ConceptResults {
-	items: Concept[];
-	total: number;
-	page: number;
-	pageSize: number;
-	stats: ConceptStats;
-}
+import type { Concept, ConceptFilters, ConceptResults, ConceptStats } from '@/types/entities/concept';
 
 /**
  * Servicio para gestionar los conceptos
  * Completamente migrado a Drizzle ORM
  */
 export const ConceptService = {
-	async createConcept(data: ConceptCreate): Promise<Concept> {
+	async createConcept(data: ConceptCreateInput): Promise<Concept> {
 		try {
 			const result = await db
 				.insert(concepts)
 				.values({
 					id: crypto.randomUUID(),
 					name: data.name,
-					content: data.content || null,
 					description: data.description || null,
-					category: data.category || null,
 					emoji: data.emoji || '💡',
 					color: data.color || '#3b82f6',
-					shortcut: data.shortcut || null,
-					sortBy: data.sortBy || null,
-					filters: data.filters || null,
-					featuredImage: data.featuredImage || null,
+					category: data.category || null,
+					isPublic: data.isPublic || false,
 					isFavorite: data.isFavorite || false,
+					totalImages: data.totalImages || 0,
+					totalVideos: data.totalVideos || 0,
+					type: data.type || null,
+					complexity: data.complexity || null,
+					applications: data.applications || null,
+					examples: data.examples || null,
+					relatedConcepts: data.relatedConcepts || null,
+					notes: data.notes || null,
+					featuredImage: data.featuredImage || null,
+					parentId: data.parentId || null,
 					createdAt: new Date(),
 					updatedAt: new Date(),
 				})
@@ -108,23 +82,29 @@ export const ConceptService = {
 		}
 	},
 
-	async updateConcept(id: string, data: Partial<ConceptCreate>): Promise<Concept> {
+	async updateConcept(id: string, data: ConceptUpdateInput): Promise<Concept> {
 		try {
 			const updateData: any = {
 				updatedAt: new Date(),
 			};
 
 			if (data.name !== undefined) updateData.name = data.name;
-			if (data.content !== undefined) updateData.content = data.content;
 			if (data.description !== undefined) updateData.description = data.description;
-			if (data.category !== undefined) updateData.category = data.category;
 			if (data.emoji !== undefined) updateData.emoji = data.emoji;
 			if (data.color !== undefined) updateData.color = data.color;
-			if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-			if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
-			if (data.filters !== undefined) updateData.filters = data.filters;
-			if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+			if (data.category !== undefined) updateData.category = data.category;
+			if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
 			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+			if (data.totalImages !== undefined) updateData.totalImages = data.totalImages;
+			if (data.totalVideos !== undefined) updateData.totalVideos = data.totalVideos;
+			if (data.type !== undefined) updateData.type = data.type;
+			if (data.complexity !== undefined) updateData.complexity = data.complexity;
+			if (data.applications !== undefined) updateData.applications = data.applications;
+			if (data.examples !== undefined) updateData.examples = data.examples;
+			if (data.relatedConcepts !== undefined) updateData.relatedConcepts = data.relatedConcepts;
+			if (data.notes !== undefined) updateData.notes = data.notes;
+			if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+			if (data.parentId !== undefined) updateData.parentId = data.parentId;
 
 			const result = await db.update(concepts).set(updateData).where(eq(concepts.id, id)).returning();
 

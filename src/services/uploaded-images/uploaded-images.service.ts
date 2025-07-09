@@ -79,25 +79,21 @@ class UploadedImagesService {
 				.values({
 					name,
 					path,
-					type,
-					category: category || null,
 					size,
-					width,
-					height,
+					hash: crypto.randomUUID(),
 					metadata: processedMetadata ? JSON.stringify(processedMetadata) : null,
+					imageId: crypto.randomUUID(),
+					createdAt: new Date(),
 				})
 				.returning({
 					id: uploadedImages.id,
 					name: uploadedImages.name,
 					path: uploadedImages.path,
-					type: uploadedImages.type,
-					category: uploadedImages.category,
 					size: uploadedImages.size,
-					width: uploadedImages.width,
-					height: uploadedImages.height,
+					hash: uploadedImages.hash,
 					metadata: uploadedImages.metadata,
+					imageId: uploadedImages.imageId,
 					createdAt: uploadedImages.createdAt,
-					updatedAt: uploadedImages.updatedAt,
 				});
 
 			// Usar el transformer para convertir el registro a la respuesta

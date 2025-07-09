@@ -21,76 +21,15 @@ export interface FolderBase extends EntityBase {
 	color: string | null;
 	featuredImage: string | null;
 	isFavorite: boolean;
+	totalFiles: number;
+	totalSize: number;
 	autoReindex: boolean;
 	lastIndexed: Date | null;
 	parentId: string | null;
 	presetId: string | null;
 }
 
-/**
- * 📁 Estadísticas calculadas para una carpeta
- */
-export interface FolderStatistics {
-	// Métricas de jerarquía
-	hierarchyDepth: number;
-	totalDescendants: number;
-	directChildren: number;
 
-	// Métricas de contenido
-	contentDiversity: number; // 0-100 basado en variedad de tipos
-	organizationScore: number; // 0-100 basado en estructura y nombres
-	totalItems: number;
-	totalFiles: number; // Movido de FolderBase
-	totalSize: number; // Movido de FolderBase
-
-	// Métricas de uso
-	accessFrequency: number; // Frecuencia de acceso estimada
-	lastActivity: Date | null;
-
-	// Distribución de contenido
-	imageCount: number;
-	videoCount: number;
-	noteCount: number;
-	documentCount: number;
-	folderCount: number;
-
-	// Métricas de tamaño
-	formattedSize: string; // "1.2 GB", "500 MB"
-	averageFileSize: number;
-	largestFile: number;
-
-	// Análisis de nombres y organización
-	hasConsistentNaming: boolean;
-	hasDeepHierarchy: boolean; // >3 niveles
-	isWellOrganized: boolean;
-
-	// Breadcrumbs y navegación
-	breadcrumbs: Array<{ id: string; name: string; path: string }>;
-	fullPath: string;
-	relativePath: string;
-
-	// Auto-tags generados
-	autoTags: string[];
-
-	// Calidad general
-	qualityGrade: 'A' | 'B' | 'C' | 'D'; // A: Excelente, D: Necesita organización
-
-	// Relaciones
-	totalRelations: number;
-}
-
-/**
- * 📁 Propiedades de UI para una carpeta
- */
-export interface FolderUIProps {
-	isSelected?: boolean;
-	isOpen?: boolean;
-	isLoading?: boolean;
-	hasError?: boolean;
-	isDragging?: boolean;
-	isDropTarget?: boolean;
-	level?: number;
-}
 
 /**
  * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)

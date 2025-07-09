@@ -28,21 +28,49 @@ const AlbumFiltersSchema = z.object({
 	search: z.string().optional(),
 	limit: z.coerce.number().min(1).max(100).default(20),
 	offset: z.coerce.number().min(0).default(0),
-	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'imageCount']).default('updatedAt'),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt']).default('updatedAt'),
 	sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
 const AlbumCreateSchema = z.object({
 	name: z.string().min(1).max(255),
-	description: z.string().optional(),
-	color: z
-		.string()
-		.regex(/^#[0-9A-Fa-f]{6}$/)
-		.optional(),
-	isPublic: z.boolean().default(true),
+	description: z.string().nullable().optional(),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	isPublic: z.boolean().default(false),
+	isFavorite: z.boolean().default(false),
+	totalImages: z.number().int().min(0).default(0),
+	totalVideos: z.number().int().min(0).default(0),
+	totalSize: z.number().int().min(0).default(0),
+	filters: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	metadata: z.string().nullable().optional(),
+	lastImageAddedAt: z.date().nullable().optional(),
+	lastVideoAddedAt: z.date().nullable().optional(),
+	parentId: z.string().nullable().optional(),
 });
 
-const AlbumUpdateSchema = AlbumCreateSchema.partial();
+const AlbumUpdateSchema = z.object({
+	name: z.string().min(1).max(255).optional(),
+	description: z.string().nullable().optional(),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	isPublic: z.boolean().optional(),
+	isFavorite: z.boolean().optional(),
+	totalImages: z.number().int().min(0).optional(),
+	totalVideos: z.number().int().min(0).optional(),
+	totalSize: z.number().int().min(0).optional(),
+	filters: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	metadata: z.string().nullable().optional(),
+	lastImageAddedAt: z.date().nullable().optional(),
+	lastVideoAddedAt: z.date().nullable().optional(),
+	parentId: z.string().nullable().optional(),
+});
 
 const albumLogger = serverLogger.withContext('AlbumsAPI');
 

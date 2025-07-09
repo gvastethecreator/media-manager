@@ -59,10 +59,10 @@ const NoteServiceImpl = {
 				.values({
 					id: crypto.randomUUID(),
 					title: data.title,
-					content: data.content || null,
+					content: data.content || '',
 					category: data.category || 'general',
 					priority: data.priority || 0,
-					status: data.status || 'draft',
+					status: data.status || 'active',
 					featuredImage: data.featuredImage || null,
 					isFavorite: data.isFavorite || false,
 					createdAt: new Date(),
@@ -82,10 +82,6 @@ const NoteServiceImpl = {
 				totalVideos: 0,
 				type: 'general',
 				tags: [],
-				dueDate: null,
-				completedAt: null,
-				parentId: null,
-				isFavorite: Boolean(newNote.isFavorite),
 				_count: {
 					images: 0,
 					albums: 0,
@@ -124,10 +120,10 @@ const NoteServiceImpl = {
 				.update(notes)
 				.set({
 					title: data.title,
-					content: data.content || null,
+					content: data.content || '',
 					category: data.category || 'general',
 					priority: data.priority || 0,
-					status: data.status || 'draft',
+					status: data.status || 'active',
 					featuredImage: data.featuredImage || null,
 					isFavorite: data.isFavorite || false,
 					updatedAt: new Date(),
@@ -150,10 +146,6 @@ const NoteServiceImpl = {
 				totalVideos: 0,
 				type: 'general',
 				tags: [],
-				dueDate: null,
-				completedAt: null,
-				parentId: null,
-				isFavorite: Boolean(updatedNote.isFavorite),
 				_count: {
 					images: 0,
 					albums: 0,
