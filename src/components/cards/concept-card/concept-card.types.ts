@@ -2,18 +2,18 @@ import type { ConceptStatistics, ConceptWithStats } from '@/types/entities/conce
 
 export interface ConceptCardProps {
 	conceptId: string;
-	onClick?: (concept: Concept) => void;
+	onClick?: (concept: ConceptWithStats) => void;
 	className?: string;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
 }
 
 export interface UseConceptData {
-	data: Concept | undefined;
+	data: ConceptWithStats | undefined;
 	isLoading: boolean;
 	error: Error | null;
 }
 
 export interface UseConceptCountsData {
-	data: ConceptStatistics | undefined;
+	data: ConceptStats | undefined;
 }

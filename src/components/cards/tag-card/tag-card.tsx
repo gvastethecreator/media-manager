@@ -78,10 +78,10 @@ export function TagCard({
 
 	// Determinar rareza basada en relaciones
 	const determineRarity = (): TagRarity => {
-		if (totalAssociations > 200) return TagRarity.LEGENDARY;
-		if (totalAssociations > 100) return TagRarity.VERY_RARE;
-		if (totalAssociations > 50) return TagRarity.RARE;
-		if (totalAssociations > 10) return TagRarity.UNCOMMON;
+		if (totalRelations > 200) return TagRarity.LEGENDARY;
+		if (totalRelations > 100) return TagRarity.VERY_RARE;
+		if (totalRelations > 50) return TagRarity.RARE;
+		if (totalRelations > 10) return TagRarity.UNCOMMON;
 		return TagRarity.COMMON;
 	};
 

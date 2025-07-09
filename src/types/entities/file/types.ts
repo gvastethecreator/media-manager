@@ -34,9 +34,7 @@ export type DirectoryInfo = FileBase & {
 	childCount?: number;
 };
 
-export type FileRelations = {
-	// relaciones con otras entidades
-};
+export type FileRelations = Record<string, never>;
 
 export type FileCreateInput = Omit<FileBase, 'id' | 'createdAt' | 'updatedAt' | 'accessedAt' | 'modifiedAt'>;
 

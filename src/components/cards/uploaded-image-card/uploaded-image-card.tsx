@@ -159,30 +159,13 @@ export function UploadedImageCard({
 					)}
 
 					{/* Brillo en favoritos */}
-					{uploadedImage.isFavorite && (
-						<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
-							<div
-								className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
-								style={{
-									background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
-									backgroundSize: '600% 600%',
-									animation: 'shine 3s linear infinite',
-								}}
-							/>
-						</div>
-					)}
 				</>
 			)}
 
 			{/* Contenedor principal */}
 			<div className="flex flex-col h-full relative z-1">
 				{/* Cabecera */}
-				<CardHeader
-					title={uploadedImage.name || 'Sin nombre'}
-					color={primaryColor}
-					isFavorite={uploadedImage.isFavorite || false}
-					compact={compact}
-				/>
+				<CardHeader title={uploadedImage.name || 'Sin nombre'} primaryColor={primaryColor} compact={compact} />
 
 				{/* Contenido principal */}
 				{!compact && (

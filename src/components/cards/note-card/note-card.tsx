@@ -39,7 +39,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		createdAt,
 		updatedAt,
 		tags,
-	} = note || {}; // Añadir fallback para evitar errores si note es undefined
+	} = note;
 
 	// Calcular valores derivados
 	const imagesCount = noteCounts?.images || 0;

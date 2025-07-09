@@ -1,5 +1,22 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import GetEmojis from './get-emojis';
+import { EmojiData, getEmojisByCategory } from './get-emojis';
+
+interface EmojiCategoryProps {
+	category: string;
+}
+
+const GetEmojis = ({ category }: EmojiCategoryProps) => {
+	const emojis = getEmojisByCategory(category as any);
+	return (
+		<div className="grid grid-cols-8 gap-2">
+			{emojis.map((emoji: EmojiData) => (
+				<span key={emoji.emoji} className="text-2xl cursor-pointer hover:scale-110 transition-transform">
+					{emoji.emoji}
+				</span>
+			))}
+		</div>
+	);
+};
 
 const list = [
 	{

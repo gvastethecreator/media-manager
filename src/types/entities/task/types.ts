@@ -21,9 +21,7 @@ export type TaskBase = {
 	// otros campos base
 };
 
-export type TaskRelations = {
-	// relaciones con otras entidades
-};
+export type TaskRelations = Record<string, never>;
 
 export type TaskCreateInput = Omit<TaskBase, 'id' | 'createdAt' | 'updatedAt'>;
 

@@ -185,22 +185,15 @@ export function CollectionCardContent({
 								<span className="font-medium">Ediciones</span>
 							</div>
 							<ul className="text-xs space-y-0.5 max-h-12 overflow-y-auto scrollbar-thin overflow-x-hidden">
-								{editionsList.slice(0, 2).map((edition: CollectionEdition) => {
-									const date = 'date' in edition ? edition.date : edition.releaseDate;
-									return (
-										<li
-											key={edition.id || `edition-${edition.name.substring(0, 15)}`}
-											className="flex justify-between text-xs text-muted-foreground"
-										>
-											<span className="font-medium truncate">{edition.name}</span>
-											{date && (
-												<span className="ml-1 text-muted-foreground whitespace-nowrap">
-													({new Date(date).getFullYear()})
-												</span>
-											)}
-										</li>
-									);
-								})}
+								{editionsList.slice(0, 2).map((edition: CollectionEdition) => (
+									<li key={edition.name} className="flex justify-between text-xs text-muted-foreground">
+										<span className="font-medium truncate">{edition.name}</span>
+										{edition.year && (
+											<span className="ml-1 text-muted-foreground whitespace-nowrap">({edition.year})</span>
+										)}
+									</li>
+								))}
+
 								{editionsList.length > 2 && (
 									<li className="text-xs italic text-muted-foreground">...y {editionsList.length - 2} más</li>
 								)}

@@ -30,7 +30,7 @@ export function ProfileCard({
 	onExpand,
 	className,
 }: ProfileCardProps) {
-	const { name, avatarUrl, isActive, theme, language, description, stats } = profile;
+	const { name, imageId, isActive, description, preferences } = profile;
 
 	return (
 		<motion.div
@@ -54,7 +54,7 @@ export function ProfileCard({
 				<CardHeader className="space-y-4">
 					<div className="flex items-start justify-between">
 						<Avatar className="h-16 w-16">
-							<AvatarImage src={avatarUrl} alt={name} />
+							<AvatarImage src={imageId || undefined} alt={name} />
 							<AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
 						</Avatar>
 						<Badge variant={isActive ? 'default' : 'secondary'}>{isActive ? 'Activo' : 'Inactivo'}</Badge>
@@ -62,14 +62,14 @@ export function ProfileCard({
 					<div>
 						<CardTitle className="line-clamp-1">{name}</CardTitle>
 						<CardDescription className="flex gap-2 mt-1">
-							{theme && (
+							{preferences?.theme && (
 								<Badge variant="outline" className="capitalize">
-									{theme}
+									{preferences.theme}
 								</Badge>
 							)}
-							{language && (
+							{preferences?.language && (
 								<Badge variant="outline" className="capitalize">
-									{language}
+									{preferences.language}
 								</Badge>
 							)}
 						</CardDescription>
@@ -81,23 +81,6 @@ export function ProfileCard({
 						<p className={cn('text-sm text-muted-foreground', isExpanded ? 'line-clamp-none' : 'line-clamp-2')}>
 							{description}
 						</p>
-					)}
-
-					{stats && (
-						<div className="grid grid-cols-3 gap-4 mt-4">
-							<div className="text-center">
-								<p className="text-2xl font-bold">{stats.images}</p>
-								<p className="text-xs text-muted-foreground">Imágenes</p>
-							</div>
-							<div className="text-center">
-								<p className="text-2xl font-bold">{stats.albums}</p>
-								<p className="text-xs text-muted-foreground">Álbumes</p>
-							</div>
-							<div className="text-center">
-								<p className="text-2xl font-bold">{stats.collections}</p>
-								<p className="text-xs text-muted-foreground">Colecciones</p>
-							</div>
-						</div>
 					)}
 
 					{isExpanded && (

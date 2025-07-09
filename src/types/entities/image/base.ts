@@ -5,6 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+import type { TagWithStats } from '../tag';
+
 /**
  * 🖼️ Modelo base de Image, basado en el esquema de Drizzle.
  */
@@ -32,6 +34,7 @@ export type ImageBase = {
 	createdAt: Date;
 	updatedAt: Date;
 	addedAt: Date;
+	tags?: TagWithStats[];
 };
 
 /**
@@ -63,4 +66,23 @@ export interface ImageStatistics {
  */
 export interface ImageWithStats extends ImageBase {
 	stats: ImageStatistics;
+	thumbnailUrl: string;
+	fullUrl: string;
+}
+
+export interface DrizzleImageWithCounts extends ImageBase {
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }

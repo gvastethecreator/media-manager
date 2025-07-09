@@ -71,7 +71,7 @@ export function VideoCard({
 
 	// Calcular colores basados en la calidad técnica
 	const primaryColor = useMemo(() => {
-		const grade = video.stats.technicalGrade;
+		const grade = video.technicalGrade;
 		switch (grade) {
 			case 'A':
 				return '#10b981'; // Verde esmeralda - Ultra calidad
@@ -84,7 +84,7 @@ export function VideoCard({
 			default:
 				return '#6b7280'; // Gris - Desconocida
 		}
-	}, [video.stats.technicalGrade]);
+	}, [video.technicalGrade]);
 
 	const secondaryColor = useMemo(() => {
 		// Oscurecer el color primario
@@ -103,14 +103,14 @@ export function VideoCard({
 
 	// Calcular nivel de rareza basado en quality score
 	const rarityLevel = useMemo(() => {
-		const score = video.stats.qualityScore;
+		const score = video.qualityScore;
 		if (score >= 90) return 10; // Mítico
 		if (score >= 80) return 9; // Legendario
 		if (score >= 70) return 7; // Épico
 		if (score >= 60) return 5; // Raro
 		if (score >= 50) return 3; // Poco común
 		return 1; // Común
-	}, [video.stats.qualityScore]);
+	}, [video.qualityScore]);
 
 	// Manejar eventos
 	const handleClick = useCallback(() => {
@@ -133,7 +133,7 @@ export function VideoCard({
 	const cardId = `V${id.substring(0, 6).toUpperCase()}`;
 
 	// Conteos de relaciones
-	const totalRelations = video.stats.totalRelations;
+	const totalRelations = video.totalRelations;
 
 	return (
 		<motion.div

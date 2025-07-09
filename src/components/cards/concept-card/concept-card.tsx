@@ -9,24 +9,11 @@ import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
 import { ConceptCardImages } from './concept-card-images';
 
-export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
-	const { data: concept, isLoading, error } = useConcept(_conceptId);
-	const { data: conceptCounts } = useConceptCounts(_conceptId);
+export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+	const { data: concept, isLoading, error } = useConcept(conceptId);
+	const { data: conceptCounts } = useConceptCounts(conceptId);
 
-	// Extraer propiedades básicas del objeto
-	const {
-		id,
-		name,
-		emoji = '💡',
-		color,
-		category,
-		description,
-		content,
-		createdAt,
-		updatedAt,
-		isFavorite = false,
-		tags: conceptTags,
-	} = concept || {}; // Añadir fallback para evitar errores si concept es undefined
+	
 
 	// Calcular valores derivados
 	const imagesCount = conceptCounts?.images || 0;
@@ -81,7 +68,6 @@ export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = t
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
 			return '#1e40af';
 		}
 	}, [color]);
@@ -93,7 +79,7 @@ export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = t
 				onClick(concept);
 			}
 		},
-		[onClick][(onClick, concept)]
+		[onClick, concept]
 	);
 
 	// Parsear tags si es un string
@@ -189,8 +175,8 @@ export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = t
 			onKeyDown={handleKeyDown}
 			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
-			aria-label={`Concepto: ${name}`}
-			data-concept-id={id}
+			aria-label={`Concepto: ${concept.name}`}
+			data-concept-id={concept.id}
 			style={cardStyle}
 		>
 			{/* Efectos decorativos de carta TCG */}
@@ -252,11 +238,11 @@ export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = t
 
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
-				title={name}
-				subtitle={category || 'General'}
+				title={concept.name}
+				subtitle={concept.category || 'General'}
 				icon={
-					emoji ? (
-						<span className="text-lg">{emoji}</span>
+					concept.emoji ? (
+						<span className="text-lg">{concept.emoji}</span>
 					) : tcgMode ? (
 						<BrainCircuitIcon className="w-4 h-4" />
 					) : (
@@ -272,27 +258,27 @@ export function ConceptCard({ _conceptId, onClick, className, style, tcgMode = t
 
 			{/* Contenido principal */}
 			<ConceptCardContent
-				description={description}
-				content={content}
-				category={category}
-				tags={tags}
+				description={concept.description}
+				content={concept.content}
+				category={concept.category}
+				tags={parsedTags}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
-				conceptId={id}
+				conceptId={concept.id}
 				tcgMode={tcgMode}
 			/>
 
 			{/* Pie de la tarjeta */}
 			<ConceptCardFooter
-				createdAt={createdAt}
-				updatedAt={updatedAt}
+				createdAt={concept.createdAt}
+				updatedAt={concept.updatedAt}
 				imagesCount={imagesCount}
 				videosCount={videosCount}
 				promptsCount={promptsCount}
 				notesCount={notesCount}
 				totalRelations={totalRelations}
-				isFavorite={isFavorite}
-				category={category}
+				isFavorite={concept.isFavorite}
+				category={concept.category}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 				tcgMode={tcgMode}

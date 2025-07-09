@@ -3,23 +3,13 @@ import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { cn } from '@/lib/utils';
-import type { CharacterWithStats } from '@/types/entities/character';
 import { CardContainer } from '../card-container';
+import type { CharacterCardData, CharacterCardProps } from './character-card.types';
 import { adaptCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';
 import { CharacterCardHeader } from './character-card-header';
 import { CharacterCardImages } from './character-card-images';
-
-export interface CharacterCardProps {
-	characterId: string;
-	compact?: boolean;
-	tcgMode?: boolean;
-	disabled?: boolean;
-	className?: string;
-	onClick?: (characterData: CharacterWithStats) => void;
-	isSelected?: boolean;
-}
 
 export function CharacterCard({
 	characterId,
@@ -41,12 +31,12 @@ export function CharacterCard({
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick && characterData) {
+			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick && character) {
 				e.preventDefault();
-				onClick(characterData);
+				onClick(character);
 			}
 		},
-		[onClick, disabled, characterData]
+		[onClick, disabled, character]
 	);
 
 	const primaryColor = useMemo(() => character?.color || '#8e44ad', [character?.color]);
@@ -109,7 +99,7 @@ export function CharacterCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled ? undefined : () => onClick?.(characterData)}
+			onClick={disabled || !character ? undefined : () => onClick && onClick(character)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}
@@ -200,7 +190,11 @@ export function CharacterCard({
 					/>
 					{!compact && (
 						<>
-							<CharacterCardImages images={recentMediaData?.map((m) => m.thumbnailUrl) ?? []} tcgMode={tcgMode} compact={false} />
+							<CharacterCardImages
+								images={recentMediaData?.map((m) => m.thumbnailUrl) ?? []}
+								tcgMode={tcgMode}
+								compact={false}
+							/>
 							<CharacterCardContent
 								description={character.description}
 								stats={character.stats}
@@ -217,7 +211,11 @@ export function CharacterCard({
 					<CharacterCardFooter
 						id={character.id}
 						cardId={character.metadata?.cardId ?? ''}
-						rarityLevel={character.metadata?.rarityLevel ? { Common: 1, Uncommon: 2, Rare: 3, Mythic: 4 }[character.metadata.rarityLevel] ?? 1 : 1}
+						rarityLevel={
+							character.metadata?.rarityLevel
+								? ({ Common: 1, Uncommon: 2, Rare: 3, Mythic: 4 }[character.metadata.rarityLevel] ?? 1)
+								: 1
+						}
 						primaryColor={primaryColor}
 						level={character.level}
 						compact={compact}

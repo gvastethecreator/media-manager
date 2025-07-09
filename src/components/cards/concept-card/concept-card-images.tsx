@@ -27,13 +27,13 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 	// Generar un ID de renderizado único
 	const renderKey = React.useMemo(() => nanoid(), []);
 
-	useEffect(() => {
+		useEffect(() => {
 		const loadImages = async () => {
 			try {
 				setIsLoading(true);
 				const data = await getRecentConceptImages(conceptId);
 				// Filtrar solo imágenes con thumbnailUrl válida
-				const validImages = data.filter((img: ImageWithStats) => img.thumbnail);
+				const validImages = data.filter((img) => img.thumbnailUrl);
 				setImages(validImages);
 			} catch (err) {
 				console.error('Error cargando imágenes:', err);

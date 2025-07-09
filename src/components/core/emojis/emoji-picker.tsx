@@ -1,4 +1,5 @@
-import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
+import EmojiPickerReact from 'emoji-picker-react';
+
 import { Smile } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -61,7 +62,7 @@ const frequentEmojis = [
 /**
  * 🎨 Componente EmojiPicker para core/emojis
  *
- * Proporciona un selector de emojis usando Frimousse con:
+ * Proporciona un selector de emojis usando EmojiPickerReact con:
  * - Modo compacto para formularios
  * - Emojis frecuentes para acceso rápido
  * - Búsqueda completa de emojis
@@ -80,8 +81,8 @@ export function EmojiPicker({
 
 	// 🎯 Manejar selección de emoji
 	const handleEmojiSelect = useCallback(
-		(emoji: { native: string }) => {
-			const emojiValue = emoji.native;
+		(emojiData: { emoji: string }) => {
+			const emojiValue = emojiData.emoji;
 			setSelectedEmoji(emojiValue);
 
 			// 📢 Notificar a los callbacks
@@ -146,25 +147,9 @@ export function EmojiPicker({
 						</div>
 					</div>
 
-					{/* 🎨 Picker principal con Frimousse */}
+					{/* 🎨 Picker principal con EmojiPickerReact */}
 					<div className="p-3">
-						<FrimousseEmojiPicker.Root onEmojiSelect={handleEmojiSelect} className="w-full">
-							<FrimousseEmojiPicker.Search
-								placeholder="Buscar emoji..."
-								className="w-full mb-3 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-							/>
-							<FrimousseEmojiPicker.Viewport
-								className={cn('overflow-hidden rounded-md border', compact ? 'h-48' : 'h-64')}
-							>
-								<FrimousseEmojiPicker.Loading className="flex items-center justify-center h-full text-sm text-muted-foreground">
-									Cargando emojis...
-								</FrimousseEmojiPicker.Loading>
-								<FrimousseEmojiPicker.Empty className="flex items-center justify-center h-full text-sm text-muted-foreground">
-									No se encontraron emojis
-								</FrimousseEmojiPicker.Empty>
-								<FrimousseEmojiPicker.List className={cn('grid gap-1 p-2', compact ? 'grid-cols-8' : 'grid-cols-10')} />
-							</FrimousseEmojiPicker.Viewport>
-						</FrimousseEmojiPicker.Root>
+						<EmojiPickerReact onEmojiClick={handleEmojiSelect} width="100%" height={compact ? 200 : 250} />
 					</div>
 				</div>
 			</PopoverContent>

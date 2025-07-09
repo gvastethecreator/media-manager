@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import type { Tag } from '@/types/entities/tag';
+
+import type { TagWithStats } from '@/types/entities/tag';
 import type { VideoWithStats } from '@/types/entities/video';
 
 interface VideoCardContentProps {
@@ -14,7 +15,7 @@ interface VideoCardContentProps {
  */
 export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoCardContentProps) {
 	const { description } = video;
-	const { qualityScore, technicalGrade, autoTags, aspectRatio, bitrate, frameRate, hasSubtitles } = video.stats;
+	const { qualityScore, technicalGrade, autoTags, aspectRatio, bitrate, frameRate, hasSubtitles } = video;
 
 	return (
 		<div className="flex-1 p-3 space-y-3">
@@ -81,7 +82,7 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 				<div className="space-y-1">
 					<span className="text-xs font-medium text-muted-foreground">Tags automáticos:</span>
 					<div className="flex flex-wrap gap-1">
-						{autoTags.slice(0, 4).map((tag: Tag) => (
+						{autoTags.slice(0, 4).map((tag: TagWithStats) => (
 							<Badge
 								key={tag.id}
 								variant="secondary"

@@ -162,13 +162,7 @@ export function DocumentCard({
 			{/* Contenedor principal */}
 			<div className="flex flex-col h-full relative z-1">
 				{/* Cabecera */}
-				<CardHeader
-					title={document.name || 'Sin nombre'}
-					emoji="📄"
-					color={primaryColor}
-					isFavorite={document.isFavorite || false}
-					compact={compact}
-				/>
+				<CardHeader title={document.name || 'Sin nombre'} emoji="📄" primaryColor={primaryColor} compact={compact} />
 				{/* Contenido principal */}
 				{!compact && (
 					<div className="flex-1 p-4 flex flex-col gap-3">

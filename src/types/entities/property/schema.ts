@@ -5,7 +5,8 @@
 
 import { z } from 'zod';
 import { PropertySortCriteria, PropertyViewMode } from '@/store/entities/property/types';
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
+import { BaseEntitySchema } from '@/types/common/base';
+import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 
 /**
  * 🔍 Esquema para filtros de búsqueda

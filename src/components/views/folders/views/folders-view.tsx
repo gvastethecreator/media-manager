@@ -1,15 +1,5 @@
-import { DatabaseIcon, FolderIcon, RefreshCw, XCircle } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FolderCard } from '@/components/cards/folder-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCreateFolder } from '@/lib/api/folders'; // Importar el hook useCreateFolder
 import { findFolders } from '@/lib/api/services/folders';
 import { clientEvents } from '@/lib/client/events.client';
@@ -18,25 +8,9 @@ import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { ViewProps } from '../../types';
+import FoldersContentView from './folders-content-view';
 
 const viewLogger = clientLogger.withContext('FoldersView');
-
-// Simplificar tipo para FolderCard
-type FolderEntity = FolderWithStats;
-
-const MemoizedFolderCard = React.memo(
-	({ folder, onFolderClick }: { folder: FolderEntity; onFolderClick: () => void }) => (
-		<FolderCard folder={folder} onClick={onFolderClick} className="h-full" />
-	),
-	(prevProps, nextProps) =>
-		prevProps.folder.id === nextProps.folder.id &&
-		prevProps.folder.name === nextProps.folder.name &&
-		prevProps.folder.updatedAt === nextProps.folder.updatedAt &&
-		(prevProps.folder._count?.images || 0) === (nextProps.folder._count?.images || 0) &&
-		prevProps.folder.totalSize === nextProps.folder.totalSize &&
-		prevProps.folder.totalFiles === nextProps.folder.totalFiles
-);
-MemoizedFolderCard.displayName = 'MemoizedFolderCard';
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView, setCurrentItem } = useNavigationStore();
@@ -48,7 +22,7 @@ export function FoldersView(_props: ViewProps) {
 	// 🧹 Para limpiar selección - usar el hook base directamente
 	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
 
-	const [folders, setFolders] = useState<FolderEntity[]>([]);
+	const [folders, setFolders] = useState<FolderWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +31,7 @@ export function FoldersView(_props: ViewProps) {
 	const [newFolderPath, setNewFolderPath] = useState('');
 
 	// Usar el nuevo hook de eventos optimistas del cliente
-	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderEntity[]>(folders);
+	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderWithStats[]>(folders);
 	// Mantener un contador de reintentos
 	const [retryCount, setRetryCount] = useState(0);
 	const [isManualRetry, setIsManualRetry] = useState(false);
@@ -76,7 +50,7 @@ export function FoldersView(_props: ViewProps) {
 
 				// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
 				if (result?.data && Array.isArray(result.data)) {
-					const transformedData = result.data.map((folderData: FolderWithStats): FolderEntity => {
+					const transformedData = result.data.map((folderData: FolderWithStats): FolderWithStats => {
 						return {
 							...folderData,
 							lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
@@ -161,7 +135,7 @@ export function FoldersView(_props: ViewProps) {
 	);
 
 	const handleFolderClick = useCallback(
-		(folder: FolderEntity) => {
+		(folder: FolderWithStats) => {
 			try {
 				viewLogger.info('🖱️ Click en carpeta:', folder.name);
 				viewLogger.debug('ℹ️ Carpeta clickeada:', folder);
@@ -217,134 +191,39 @@ export function FoldersView(_props: ViewProps) {
 		loadFolders(true);
 	}, [loadFolders]);
 
-	if (error) {
-		return (
-			<div className="flex flex-col items-center justify-center h-full p-6">
-				<div className="max-w-md w-full bg-destructive/10 rounded-lg p-6 text-center">
-					<XCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
-					<h3 className="text-xl font-semibold text-destructive mb-2">Error al cargar carpetas</h3>
-					<p className="text-sm mb-4">{error}</p>
-					<p className="text-xs text-muted-foreground mb-4">
-						Este error podría estar relacionado con problemas de conexión a la base de datos o problemas con la
-						estructura de tablas.
-					</p>
-					<div className="flex flex-col gap-2">
-						<Button variant="outline" onClick={handleManualRetry}>
-							<RefreshCw className="h-4 w-4 mr-2" />
-							Reintentar
-						</Button>
-						<Link to="/diagnostics/database" className={buttonVariants({ variant: 'default' })}>
-							<DatabaseIcon className="h-4 w-4 mr-2" />
-							Ejecutar diagnóstico
-						</Link>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
+	const handleCreateFolder = useCallback(async () => {
+		if (newFolderName.trim() === '') {
+			console.error('El nombre de la carpeta no puede estar vacío.');
+			return;
+		}
+		// Aquí se asume que createFolder es una función que interactúa con el backend
+		// y que, al completarse, recargará la lista de carpetas o actualizará el store.
+		try {
+			await createFolder({ name: newFolderName, path: newFolderPath });
+			setNewFolderName('');
+			setNewFolderPath('');
+			setShowForm(false);
+			loadFolders(true); // Recargar carpetas después de crear una nueva
+		} catch (err) {
+			console.error('Error al crear carpeta:', err);
+		}
+	}, [newFolderName, newFolderPath, createFolder, loadFolders]);
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Carpetas</h2>
-
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
-					{showForm ? 'Cancelar' : 'Crear Carpeta'}
-				</Button>
-
-				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nueva Carpeta</h3>
-						<div className="grid gap-2 mb-3">
-							<Label htmlFor="folderName">Nombre</Label>
-							<Input
-								id="folderName"
-								value={newFolderName}
-								onChange={(e) => setNewFolderName(e.target.value)}
-								placeholder="Nombre de la carpeta"
-							/>
-						</div>
-						<div className="grid gap-2 mb-4">
-							<Label htmlFor="folderPath">Ruta</Label>
-							<Input
-								id="folderPath"
-								value={newFolderPath}
-								onChange={(e) => setNewFolderPath(e.target.value)}
-								placeholder="Ruta de la carpeta (ej: /ruta/a/mi/carpeta)"
-							/>
-						</div>
-						<Button onClick={handleCreateFolder}>Guardar Carpeta</Button>
-					</div>
-				)}
-
-				{!optimisticFolders || optimisticFolders.length === 0 ? (
-					<EmptyState
-						icon={FolderIcon}
-						title="No hay carpetas indexadas"
-						description="Agrega carpetas desde el panel de configuración para comenzar a indexar tus imágenes."
-					/>
-				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-						{optimisticFolders.map((folder, index) => {
-							// Verificar que la carpeta tenga un id válido
-							if (!folder || !folder.id) {
-								console.error('Carpeta sin id válido:', folder);
-								return null;
-							}
-
-							// Crear una función de clic específica para esta carpeta
-							const onFolderClick = () => handleFolderClick(folder);
-
-							return (
-								<motion.div
-									key={folder.id}
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{
-										delay: index * 0.1,
-										duration: 0.4,
-										type: 'spring',
-										stiffness: 100,
-										damping: 12,
-									}}
-									className="perspective-1000"
-								>
-									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-										data-folder-id={folder.id}
-									>
-										<MemoizedFolderCard folder={folder} onFolderClick={onFolderClick} />
-									</div>
-								</motion.div>
-							);
-						})}
-					</div>
-				)}
-
-				{/* Footer con información adicional */}
-				{optimisticFolders.length > 0 && (
-					<div className="mt-8 pt-6 border-t border-border">
-						<p className="text-sm text-muted-foreground text-center">
-							Mostrando {optimisticFolders.length} {optimisticFolders.length === 1 ? 'carpeta' : 'carpetas'}
-						</p>
-					</div>
-				)}
-			</div>
-		</ScrollArea>
+		<FoldersContentView
+			folders={folders}
+			isLoading={isLoading}
+			error={error}
+			showForm={showForm}
+			newFolderName={newFolderName}
+			newFolderPath={newFolderPath}
+			optimisticFolders={optimisticFolders}
+			setShowForm={setShowForm}
+			setNewFolderName={setNewFolderName}
+			setNewFolderPath={setNewFolderPath}
+			handleFolderClick={handleFolderClick}
+			handleCreateFolder={handleCreateFolder}
+			handleManualRetry={handleManualRetry}
+		/>
 	);
 }
-
-/**
- * 📝 Documentación:
- * - Vista optimizada que usa EntityCard TCG con efectos holográficos
- * - Integra store Zustand para gestión eficiente de estado
- * - Grid responsivo que se adapta a diferentes tamaños de pantalla
- * - Animaciones escalonadas para carga suave
- * - Lazy loading y memoización para rendimiento óptimo
- * - Consistente con las otras 19 vistas del sistema
- * - Estadísticas y información contextual
- */

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/context-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ContextMenuAction } from '../types';
 import { SubmenuSearch } from './submenu-search';
 

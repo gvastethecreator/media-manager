@@ -10,7 +10,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
 // Logger para el componente
