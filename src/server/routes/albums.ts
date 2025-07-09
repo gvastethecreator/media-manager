@@ -1,4 +1,4 @@
-import { asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
@@ -39,7 +39,7 @@ const AlbumCreateSchema = z.object({
 		.string()
 		.regex(/^#[0-9A-Fa-f]{6}$/)
 		.optional(),
-	isPrivate: z.boolean().default(false),
+	isPublic: z.boolean().default(true),
 });
 
 const AlbumUpdateSchema = AlbumCreateSchema.partial();
@@ -199,7 +199,7 @@ albumsRouter.post('/', async (req, res) => {
 			name: albums.name,
 			description: albums.description,
 			color: albums.color,
-			isPrivate: albums.isPrivate,
+			isPublic: albums.isPublic,
 			createdAt: albums.createdAt,
 			updatedAt: albums.updatedAt,
 			featuredImage: albums.featuredImage,
@@ -246,7 +246,7 @@ albumsRouter.put('/:id', async (req, res) => {
 			name: albums.name,
 			description: albums.description,
 			color: albums.color,
-			isPrivate: albums.isPrivate,
+			isPublic: albums.isPublic,
 			createdAt: albums.createdAt,
 			updatedAt: albums.updatedAt,
 			featuredImage: albums.featuredImage,
@@ -298,8 +298,8 @@ albumsRouter.post('/:id/images/:imageId', async (req, res) => {
 
 	try {
 		await db.insert(imageAlbums).values({
-			albumId: id,
-			imageId: imageId,
+			A: imageId, // imageId
+			B: id, // albumId
 		});
 
 		res.status(204).send();
@@ -314,7 +314,7 @@ albumsRouter.delete('/:id/images/:imageId', async (req, res) => {
 	const { id, imageId } = req.params;
 
 	try {
-		await db.delete(imageAlbums).where(and(eq(imageAlbums.albumId, id), eq(imageAlbums.imageId, imageId)));
+		await db.delete(imageAlbums).where(and(eq(imageAlbums.A, imageId), eq(imageAlbums.B, id)));
 
 		res.status(204).send();
 	} catch (error) {

@@ -9,7 +9,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { VideoComplete, VideoStatistics, VideoWithStats } from '@/types/entities/video/types';
+import type { VideoComplete, VideoStats, VideoWithStats } from '@/types/entities/video/types';
 import { VideoQuality } from '@/types/entities/video/types';
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)

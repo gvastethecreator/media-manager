@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { Group, GroupStatistics, GroupWithStats } from '@/types/entities/group';
+import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 
 /**
  * Representa la estructura del objeto de agregación de conteos de Prisma para un Group.

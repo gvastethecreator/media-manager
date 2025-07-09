@@ -11,7 +11,7 @@ import type {
 	WorldItemCreateInput,
 	WorldItemFilters,
 	WorldItemSearchOptions,
-	WorldItemStatistics,
+	WorldItemStats,
 	WorldItemUpdateInput,
 	WorldItemWithStats,
 } from '@/types/entities/world-item';

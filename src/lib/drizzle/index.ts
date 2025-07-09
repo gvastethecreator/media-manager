@@ -1,5 +1,6 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
+import * as relations from './relations.js';
 import * as schema from './schema.js';
 
 /**
@@ -7,6 +8,9 @@ import * as schema from './schema.js';
  * CONFIGURACIÓN DE LA BASE DE DATOS CON DRIZZLE ORM
  * =================================================================================
  * Este archivo maneja la conexión a la base de datos SQLite usando Drizzle ORM.
+ *
+ * ✅ UNIFICADO A SQLITE - Enero 2025
+ * 🔧 RELACIONES COMPLETAS - Enero 2025
  *
  * Coexistencia con Prisma:
  * - Drizzle y Prisma apuntan a la misma base de datos física (prisma/dev.db)
@@ -16,6 +20,9 @@ import * as schema from './schema.js';
  * Configuración según documentación oficial:
  * https://orm.drizzle.team/docs/get-started/sqlite-existing
  */
+
+// Combinar schema y relaciones para Drizzle
+const fullSchema = { ...schema, ...relations.allRelations };
 
 // Obtener la URL de la base de datos desde las variables de entorno
 // En el servidor (Node.js) usa process.env.DATABASE_URL directamente
@@ -30,7 +37,7 @@ if (typeof window === 'undefined') {
 		url: databaseUrl,
 	});
 	dbInstance = drizzle(client, {
-		schema,
+		schema: fullSchema,
 		logger: process.env.NODE_ENV === 'development',
 	});
 } else {
@@ -109,12 +116,13 @@ if (typeof window === 'undefined') {
 
 export const db = dbInstance;
 
-// Exportar el schema para uso en otros archivos
-export { schema };
+// Exportar el schema y relaciones para uso en otros archivos
+export { schema, relations };
 
 // Exportar tipos útiles
 export type DrizzleDatabase = typeof db;
 export type Schema = typeof schema;
+export type Relations = typeof relations;
 
 // Tipos inferidos de Drizzle para reemplazar tipos de Prisma
 export type Profile = typeof schema.profiles.$inferSelect;
@@ -161,6 +169,10 @@ export type UploadedImage = typeof schema.uploadedImages.$inferSelect;
 export type NewUploadedImage = typeof schema.uploadedImages.$inferInsert;
 export type QueueJob = typeof schema.queueJobs.$inferSelect;
 export type NewQueueJob = typeof schema.queueJobs.$inferInsert;
+export type Favorite = typeof schema.favorites.$inferSelect;
+export type NewFavorite = typeof schema.favorites.$inferInsert;
+export type File = typeof schema.files.$inferSelect;
+export type NewFile = typeof schema.files.$inferInsert;
 
 /**
  * Función para cerrar la conexión a la base de datos

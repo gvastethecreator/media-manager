@@ -85,9 +85,9 @@ export const createCoreSlice: StateCreator<FavoriteStore, [], [], CoreState & Co
 	},
 
 	// Verificación de favoritos
-	isFavorited: (id: string) => {
-		const state = get();
-		const result = state.favorites.some((favorite) => favorite.id === id);
+			isFavorited: (id: string) => {
+		const { favorites } = get();
+		const result = favorites.some((favorite) => favorite.id === id);
 		logger.debug(`Verificando favorito para ID ${id}: ${result}`);
 		return result;
 	},

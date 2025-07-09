@@ -29,9 +29,7 @@ export type {
 	ConceptListItem,
 	ConceptSearchOptions,
 	ConceptSearchResult,
-	ConceptSortOption,
 	ConceptUpdateInput,
-	ConceptViewMode,
 	ConceptWithStats,
 } from './types';
 

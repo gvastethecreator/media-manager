@@ -57,6 +57,12 @@ export interface UpdateCollectionInput {
 	isPublic?: boolean; // Cambiado de isPrivate a isPublic
 }
 
+export interface CollectionFilter {
+	field: string;
+	value: any;
+	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'between';
+}
+
 export interface CollectionFilters {
 	search?: string;
 	isPublic?: boolean;
@@ -78,11 +84,16 @@ export interface CollectionFilters {
 		| 'sourceImage'
 		| 'platform'
 		| 'price'
-		| 'network'
+			| 'network'
 		| 'tokenId'
 		| 'tokenAddress'
 		| 'contractAddress'
 		| 'contractType'
 		| 'editions';
 	sortOrder?: 'asc' | 'desc';
+}
+
+export interface CollectionViewConfig {
+	gridColumns: number;
+	cardSize: 'small' | 'medium' | 'large';
 }

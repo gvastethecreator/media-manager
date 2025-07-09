@@ -3,7 +3,7 @@
  * @module store/entities/world-item/selectors
  */
 
-import type { WorldItem } from '@/types/entities/world-item';
+import type { WorldItemWithStats as WorldItem } from '@/types/entities/world-item/types';
 import { useWorldItemStore } from './index';
 
 /**

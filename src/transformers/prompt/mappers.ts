@@ -10,7 +10,7 @@ import type {
 	PromptComplete,
 	PromptCreateInput,
 	PromptFilters,
-	PromptStatistics,
+	PromptStats,
 	PromptUpdateInput,
 	PromptWithRelations,
 	PromptWithStats,

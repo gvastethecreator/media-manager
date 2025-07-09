@@ -12,7 +12,7 @@ import type {
 	WorldItemSortCriteria,
 	WorldItemViewMode,
 	WorldItemWithStats,
-} from '@/types/entities/world-item';
+} from './types';
 
 /**
  * Tipo de WorldItem usado en el store

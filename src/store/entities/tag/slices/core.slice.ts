@@ -16,16 +16,7 @@ const logger = clientLogger.withContext('TagCoreSlice');
 /**
  * 📊 Estado principal (core) del store de Tag - Patrón Record optimizado
  */
-export interface TagCoreState2 {
-	/** Tags organizados por ID para acceso O(1) */
-	tags: Record<string, TagWithStats>;
-	/** Si se están cargando datos */
-	isLoading: boolean;
-	/** Mensaje de error si existe */
-	error: string | null;
-	/** Timestamp de última actualización */
-	lastUpdated: number | null;
-}
+
 
 /**
  * 🔄 Convierte array de tags a Record para acceso O(1)

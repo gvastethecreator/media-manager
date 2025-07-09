@@ -25,7 +25,7 @@ export type {
 	FolderRelations,
 	FolderSearchOptions,
 	FolderStatistics,
-	FolderStats,
+	FolderStatistics as FolderStats,
 	FolderUIProps,
 	FolderUpdateInput,
 	FolderWithRelations,

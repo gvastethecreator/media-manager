@@ -12,8 +12,8 @@ export interface WorldItemFiltersSlice {
 	filters: WorldItemFilters;
 	updateFilters: (filters: Partial<WorldItemFilters>) => void;
 	clearFilters: () => void;
-	getFilteredWorldItems: () => any[];
-	getSortedWorldItems: () => any[];
+	getFilteredWorldItems: () => WorldItem[];
+	getSortedWorldItems: () => WorldItem[];
 	setSearchQuery: (query: string) => void;
 }
 
