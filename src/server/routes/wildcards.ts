@@ -1,8 +1,17 @@
-import express from 'express';
-import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
-import { toWildcardWithStats } from '@/transformers/wildcard';
+const WildcardCreateSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().nullable().optional(),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	children: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean().optional(),
+	parentId: z.string().nullable().optional(),
+});
 
-const router = express.Router();
+const WildcardUpdateSchema = WildcardCreateSchema.partial();
 
 // GET /wildcards/cards - Obtener wildcards para mostrar en galería de cards (migrado desde server actions)
 router.get('/cards', async (req, res) => {

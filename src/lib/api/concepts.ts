@@ -7,22 +7,59 @@ export interface ConceptFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos' | 'type' | 'complexity' | 'applications' | 'examples' | 'relatedConcepts' | 'notes' | 'featuredImage' | 'parentId';
 	sortOrder?: 'asc' | 'desc';
+	category?: string;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	type?: string;
+	complexity?: string;
+	applications?: string;
+	examples?: string;
+	relatedConcepts?: string;
+	notes?: string;
+	featuredImage?: string;
+	parentId?: string;
 }
 
 export interface ConceptCreateInput {
 	name: string;
-	description?: string;
-	color?: string;
-	category?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	complexity?: string | null;
+	applications?: string | null;
+	examples?: string | null;
+	relatedConcepts?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface ConceptUpdateInput {
 	name?: string;
-	description?: string;
-	color?: string;
-	category?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	complexity?: string | null;
+	applications?: string | null;
+	examples?: string | null;
+	relatedConcepts?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface ConceptsResponse {

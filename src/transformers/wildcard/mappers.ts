@@ -43,7 +43,6 @@ export function toWildcardWithStats(wildcard: WildcardWithCounts): WildcardWithS
 
 	const stats: WildcardWithStats = {
 		...rest,
-		children: safeJsonParse(rest.children, null),
 		statistics: {
 			popularity,
 			usageDiversity,

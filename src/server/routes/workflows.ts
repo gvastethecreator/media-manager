@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import {
 	createWorkflow,
 	deleteWorkflow,
@@ -8,6 +9,31 @@ import {
 } from '@/services/workflow/workflow.service';
 
 const router = Router();
+
+const WorkflowCreateSchema = z.object({
+	name: z.string().min(1),
+	description: z.string().nullable().optional(),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	isPublic: z.boolean().optional(),
+	isFavorite: z.boolean().optional(),
+	isActive: z.boolean().optional(),
+	version: z.string().nullable().optional(),
+	config: z.string().nullable().optional(),
+	steps: z.string().nullable().optional(),
+	triggers: z.string().nullable().optional(),
+	conditions: z.string().nullable().optional(),
+	actions: z.string().nullable().optional(),
+	schedule: z.string().nullable().optional(),
+	lastRun: z.date().nullable().optional(),
+	nextRun: z.date().nullable().optional(),
+	runCount: z.number().int().min(0).optional(),
+	successCount: z.number().int().min(0).optional(),
+	errorCount: z.number().int().min(0).optional(),
+});
+
+const WorkflowUpdateSchema = WorkflowCreateSchema.partial();
 
 // GET /api/workflows - Obtener todos los workflows
 router.get('/', async (_req, res) => {
@@ -38,8 +64,8 @@ router.get('/:id', async (req, res) => {
 // POST /api/workflows - Crear un nuevo workflow
 router.post('/', async (req, res) => {
 	try {
-		// Aquí se podría añadir validación con Zod si fuera necesario
-		const newWorkflow = await createWorkflow(req.body);
+		const validatedData = WorkflowCreateSchema.parse(req.body);
+		const newWorkflow = await createWorkflow(validatedData);
 		res.status(201).json(newWorkflow);
 	} catch (error) {
 		console.error('Error al crear workflow:', error);
@@ -51,8 +77,8 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		// Aquí se podría añadir validación con Zod si fuera necesario
-		const updatedWorkflow = await updateWorkflow(id, req.body);
+		const validatedData = WorkflowUpdateSchema.parse(req.body);
+		const updatedWorkflow = await updateWorkflow(id, validatedData);
 		res.json(updatedWorkflow);
 	} catch (error) {
 		console.error('Error al actualizar workflow:', error);

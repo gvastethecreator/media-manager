@@ -31,8 +31,6 @@ export interface NoteBase {
 	category: string;
 	priority: number;
 	status: string;
-	color?: string;
-	emoji?: string;
 	featuredImage: string | null;
 	isFavorite: boolean;
 	presetId: string | null;
@@ -40,99 +38,7 @@ export interface NoteBase {
 	updatedAt: Date;
 }
 
-/**
- * 🔗 Relaciones de Note optimizadas (usando tipos WithStats)
- */
-export interface NoteRelations {
-	albums?: AlbumWithStats[];
-	characters?: CharacterWithStats[];
-	collections?: CollectionWithStats[];
-	concepts?: ConceptComplete[];
-	groups?: GroupWithStats[];
-	images?: ImageComplete[];
-	places?: PlaceComplete[];
-	prompts?: PromptComplete[];
-	properties?: PropertyComplete[];
-	tags?: TagWithStats[];
-	videos?: VideoComplete[];
-	wildcards?: WildcardComplete[];
-	worldItems?: WorldItemComplete[];
-}
 
-/**
- * 📊 Estadísticas pre-calculadas para Note
- */
-export interface NoteStatistics {
-	totalItems: number;
-	totalImages: number;
-	totalVideos: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalWildcards: number;
-	totalProperties: number;
-	totalGroups: number;
-	wordCount: number;
-	characterCount: number;
-	readingTime: number; // en minutos
-	completionScore: number; // 0-100 basado en contenido y relaciones
-	lastUpdated: Date;
-}
-
-/**
- * 📝 Note optimizado con estadísticas pre-calculadas
- */
-export interface NoteWithStats extends NoteBase {
-	statistics: NoteStatistics;
-	// Campos derivados calculados
-	excerpt: string;
-	formattedDate: string;
-	priorityLabel: string;
-	statusLabel: string;
-	categoryLabel: string;
-}
-
-/**
- * 🖥️ Propiedades de UI para Note
- */
-export interface NoteUI {
-	isSelected?: boolean;
-	isEditing?: boolean;
-	isExpanded?: boolean;
-	isHovered?: boolean;
-	isNew?: boolean;
-	isHighlighted?: boolean;
-	isLoading?: boolean;
-	hasError?: boolean;
-	isDragging?: boolean;
-	isDropTarget?: boolean;
-}
-
-/**
- * 📝 Note completo con relaciones (para casos que requieren relaciones completas)
- */
-export interface NoteComplete extends NoteBase, NoteRelations, NoteUI {
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
 
 /**
  * 🆕 Datos para crear un Note

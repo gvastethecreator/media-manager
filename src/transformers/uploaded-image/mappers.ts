@@ -9,14 +9,14 @@ import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '@/types
 
 // Tipos de datos para Drizzle
 type DrizzleUploadedImageCreateInput = {
+	id?: string;
+	name: string;
+	path: string;
+	size: number;
 	hash: string;
+	metadata?: string | null;
 	imageId: string;
-	fileName?: string | null;
-	fileSize?: number | null;
-	mimeType?: string | null;
-	uploadedAt?: Date;
-	isProcessed?: boolean;
-	processingError?: string | null;
+	createdAt?: Date;
 };
 
 type DrizzleUploadedImageUpdateInput = Partial<Omit<DrizzleUploadedImageCreateInput, 'hash' | 'imageId'>>;
@@ -28,16 +28,15 @@ type DrizzleUploadedImageUpdateInput = Partial<Omit<DrizzleUploadedImageCreateIn
  * @returns The Drizzle-compatible create input.
  */
 export function mapCreateInputToDrizzle(data: UploadedImageCreateInput): DrizzleUploadedImageCreateInput {
-	// The type `UploadedImageCreateInput` is a subset of `UploadedImageBase`,
-	// but Drizzle's `UploadedImageCreateInput` requires `hash` and `imageId`.
-	// We'll spread the input and ensure required fields are present.
 	return {
-		...data,
-		// Assuming hash and imageId will be generated or provided later,
-		// but they are required by Drizzle's type.
-		// These might need to be handled upstream or defaulted.
-		hash: data.hash || '',
-		imageId: data.imageId || '',
+		id: crypto.randomUUID(),
+		name: data.name,
+		path: data.path,
+		size: data.size,
+		hash: data.hash,
+		metadata: data.metadata || null,
+		imageId: data.imageId,
+		createdAt: new Date(),
 	};
 }
 

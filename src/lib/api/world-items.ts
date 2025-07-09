@@ -7,24 +7,68 @@ export interface WorldItemFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos' | 'type' | 'rarity' | 'value' | 'weight' | 'materials' | 'origin' | 'properties' | 'uses' | 'history' | 'notes' | 'featuredImage' | 'parentId';
 	sortOrder?: 'asc' | 'desc';
+	type?: string;
+	rarity?: string;
+	value?: string;
+	weight?: string;
+	materials?: string;
+	origin?: string;
+	properties?: string;
+	uses?: string;
+	history?: string;
+	notes?: string;
+	featuredImage?: string;
+	parentId?: string;
 }
 
 export interface WorldItemCreateInput {
 	name: string;
-	description?: string;
-	color?: string;
-	category?: string;
-	rarity?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	rarity?: string | null;
+	value?: string | null;
+	weight?: string | null;
+	materials?: string | null;
+	origin?: string | null;
+	properties?: string | null;
+	uses?: string | null;
+	history?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface WorldItemUpdateInput {
 	name?: string;
-	description?: string;
-	color?: string;
-	category?: string;
-	rarity?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	rarity?: string | null;
+	value?: string | null;
+	weight?: string | null;
+	materials?: string | null;
+	origin?: string | null;
+	properties?: string | null;
+	uses?: string | null;
+	history?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface WorldItemsResponse {

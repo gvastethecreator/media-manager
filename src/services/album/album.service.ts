@@ -69,25 +69,9 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 		const transformedAlbum = {
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
-			// Counts vacíos por ahora (TODO: implementar subqueries)
-			_count: {
-				images: 0,
-				videos: 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
 		};
 
-		return toAlbumWithStats(transformedAlbum as any, transformedAlbum._count);
+		return toAlbumWithStats(transformedAlbum as any);
 	} catch (error) {
 		logger.error(`❌ Error al obtener el álbum ${id}`, { error });
 		throw new Error(`No se pudo obtener el álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
@@ -169,28 +153,12 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		const [{ count: total }] = await countQuery;
 
 		// Transformar resultados de Drizzle a formato compatible con transformadores legacy
-		const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
-			...rawAlbum,
-			isFavorite: Boolean(rawAlbum.isFavorite),
-			// Counts vacíos por ahora (TODO: implementar subqueries)
-			_count: {
-				images: 0,
-				videos: 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
-		}));
+					const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
+				...rawAlbum,
+				isFavorite: Boolean(rawAlbum.isFavorite),
+			}));
 
-		const finalAlbums = transformedAlbums.map((album) => toAlbumWithStats(album as any, album._count));
+			const finalAlbums = transformedAlbums.map((album) => toAlbumWithStats(album as any));
 
 		return {
 			albums: finalAlbums,
@@ -219,12 +187,18 @@ export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStat
 				emoji: data.emoji || '📸',
 				color: data.color || '#3b82f6',
 				description: data.description || null,
-				shortcut: data.shortcut || null,
-				category: data.category || 'general',
-				sortBy: data.sortBy || 'name',
-				filters: data.filters || '[]',
 				featuredImage: data.featuredImage || null,
+				isPublic: data.isPublic || false,
 				isFavorite: data.isFavorite || false,
+				totalImages: data.totalImages || 0,
+				totalVideos: data.totalVideos || 0,
+				totalSize: data.totalSize || 0,
+				filters: data.filters || null,
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				metadata: data.metadata || null,
+				lastImageAddedAt: data.lastImageAddedAt || null,
+				lastVideoAddedAt: data.lastVideoAddedAt || null,
 			})
 			.returning();
 
@@ -233,21 +207,7 @@ export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStat
 			revalidatePath(path);
 		}
 
-		const result = toAlbumWithStats(newAlbum, {
-			images: 0,
-			videos: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		});
+		const result = toAlbumWithStats(newAlbum);
 		logger.info(`✅ Álbum creado exitosamente: ${result.id}`);
 
 		return result;
@@ -271,12 +231,18 @@ export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<A
 				emoji: data.emoji,
 				color: data.color,
 				description: data.description,
+				featuredImage: data.featuredImage,
+				isPublic: data.isPublic,
+				isFavorite: data.isFavorite,
+				totalImages: data.totalImages,
+				totalVideos: data.totalVideos,
+				totalSize: data.totalSize,
+				filters: data.filters,
 				shortcut: data.shortcut,
 				category: data.category,
-				sortBy: data.sortBy,
-				filters: data.filters,
-				featuredImage: data.featuredImage,
-				isFavorite: data.isFavorite,
+				metadata: data.metadata,
+				lastImageAddedAt: data.lastImageAddedAt,
+				lastVideoAddedAt: data.lastVideoAddedAt,
 				updatedAt: sql`(strftime('%s', 'now'))`,
 			})
 			.where(eq(albums.id, id))
@@ -288,21 +254,7 @@ export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<A
 		}
 		revalidatePath(`/albums/${id}`);
 
-		const result = toAlbumWithStats(updatedAlbum, {
-			images: 0,
-			videos: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		});
+		const result = toAlbumWithStats(updatedAlbum);
 		logger.info(`✅ Álbum actualizado exitosamente: ${id}`);
 
 		return result;

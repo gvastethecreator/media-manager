@@ -20,11 +20,21 @@ type DrizzleConceptCreateInput = {
 	id?: string;
 	name: string;
 	description?: string | null;
-	content?: string | null;
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
+	isPublic?: boolean;
 	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	complexity?: string | null;
+	applications?: string | null;
+	examples?: string | null;
+	relatedConcepts?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
 };
@@ -32,11 +42,21 @@ type DrizzleConceptCreateInput = {
 type DrizzleConceptUpdateInput = {
 	name?: string;
 	description?: string | null;
-	content?: string | null;
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
+	isPublic?: boolean;
 	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	complexity?: string | null;
+	applications?: string | null;
+	examples?: string | null;
+	relatedConcepts?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 	updatedAt?: Date;
 };
 
@@ -44,10 +64,17 @@ type DrizzleConceptWhereInput = {
 	id?: string;
 	name?: { contains?: string };
 	description?: { contains?: string };
-	content?: { contains?: string };
 	category?: { in?: string[] } | string;
+	isPublic?: boolean;
 	isFavorite?: boolean;
-	AND?: DrizzleConceptWhereInput[];
+	type?: { in?: string[] };
+	complexity?: { in?: string[] };
+	applications?: { contains?: string };
+	examples?: { contains?: string };
+	relatedConcepts?: { contains?: string };
+	notes?: { contains?: string };
+	featuredImage?: { contains?: string };
+	parentId?: string;
 	OR?: DrizzleConceptWhereInput[];
 	tagEntities?: { some?: { id?: { in?: string[] } } };
 };
@@ -97,6 +124,18 @@ export function toCreateDataDrizzle(input: ConceptCreateInput): DrizzleConceptCr
 		emoji: input.emoji || '💡',
 		color: input.color || '#3b82f6',
 		category: input.category || 'general',
+		isPublic: input.isPublic || false,
+		isFavorite: input.isFavorite || false,
+		totalImages: input.totalImages || 0,
+		totalVideos: input.totalVideos || 0,
+		type: input.type || null,
+		complexity: input.complexity || null,
+		applications: input.applications || null,
+		examples: input.examples || null,
+		relatedConcepts: input.relatedConcepts || null,
+		notes: input.notes || null,
+		featuredImage: input.featuredImage || null,
+		parentId: input.parentId || null,
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		// Nota: Las relaciones se manejan por separado en Drizzle
@@ -164,7 +203,14 @@ export function createFilterDrizzle(filters: ConceptSearchOptions['filters'] = {
 	if (filters?.search) {
 		const search = filters.search.trim();
 		conditions.push({
-			OR: [{ name: { contains: search } }, { description: { contains: search } }, { content: { contains: search } }],
+			OR: [
+				{ name: { contains: search } },
+				{ description: { contains: search } },
+				{ applications: { contains: search } },
+				{ examples: { contains: search } },
+				{ relatedConcepts: { contains: search } },
+				{ notes: { contains: search } },
+			],
 		});
 	}
 

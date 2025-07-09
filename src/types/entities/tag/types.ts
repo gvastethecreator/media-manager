@@ -7,34 +7,17 @@ import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types'
 
 export interface TagBase extends EntityBase {
 	name: string;
-	description?: string | null;
-	color?: string | null;
-	emoji?: string | null;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
 }
 
-export interface TagStatistics {
-	totalAssociations: number;
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-	lastUsed: Date | null;
-	popularityScore: number;
-	usageDiversity: number;
-}
 
-export interface TagWithStats extends TagBase, EntityWithStats {
-	stats: TagStatistics;
-}
 
 export interface TagCreateInput extends Omit<TagBase, 'id' | 'createdAt' | 'updatedAt'> {}
 export interface TagUpdateInput extends Partial<TagCreateInput> {}

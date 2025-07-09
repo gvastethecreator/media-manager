@@ -10,6 +10,42 @@ export interface JsonFileFilters {
 	sortOrder?: 'asc' | 'desc';
 }
 
+export interface JsonFileCreateInput {
+	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	folderId: string;
+	isFavorite?: boolean;
+	isArchived?: boolean;
+	content?: string | null;
+	schema?: string | null;
+	isValid?: boolean;
+	validationErrors?: string | null;
+	keyCount?: number | null;
+	depth?: number | null;
+}
+
+export interface JsonFileUpdateInput {
+	name?: string;
+	path?: string;
+	size?: number;
+	hash?: string;
+	mimeType?: string;
+	extension?: string;
+	folderId?: string;
+	isFavorite?: boolean;
+	isArchived?: boolean;
+	content?: string | null;
+	schema?: string | null;
+	isValid?: boolean;
+	validationErrors?: string | null;
+	keyCount?: number | null;
+	depth?: number | null;
+}
+
 export interface JsonFilesResponse {
 	data: JsonFileWithStats[];
 	pagination: {
@@ -59,10 +95,34 @@ export function useJsonFile(id: string) {
 export function useCreateJsonFile() {
 	const queryClient = useQueryClient();
 
-	return useMutation<JsonFileWithStats, Error, { name: string; content: string }>({
+	return useMutation<JsonFileWithStats, Error, JsonFileCreateInput>({
 		mutationFn: (data) => apiClient.post<JsonFileWithStats>('/json-files', data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: jsonFileKeys.lists() });
+		},
+	});
+}
+
+export function useUpdateJsonFile() {
+	const queryClient = useQueryClient();
+
+	return useMutation<JsonFileWithStats, Error, { id: string; data: JsonFileUpdateInput }>({
+		mutationFn: ({ id, data }) => apiClient.put<JsonFileWithStats>(`/json-files/${id}`, data),
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: jsonFileKeys.lists() });
+			queryClient.setQueryData(jsonFileKeys.detail(data.id), data);
+		},
+	});
+}
+
+export function useDeleteJsonFile() {
+	const queryClient = useQueryClient();
+
+	return useMutation<void, Error, string>({
+		mutationFn: (id) => apiClient.delete(`/json-files/${id}`),
+		onSuccess: (_, id) => {
+			queryClient.invalidateQueries({ queryKey: jsonFileKeys.lists() });
+			queryClient.removeQueries({ queryKey: jsonFileKeys.detail(id) });
 		},
 	});
 }

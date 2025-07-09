@@ -6,14 +6,4 @@
 
 import type { PropertyBase, PropertyStatistics } from './base';
 
-// Tipos legacy - usar PropertyWithStats en su lugar
-export interface PropertyComplete extends PropertyBase {
-	// Relaciones completas cuando sea necesario
-	stats?: PropertyStatistics;
-}
 
-export interface PropertyPreview extends Pick<PropertyBase, 'id' | 'name' | 'emoji' | 'color'> {
-	stats?: {
-		usageCount?: number;
-	};
-}

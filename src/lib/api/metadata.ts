@@ -27,8 +27,15 @@ export interface MetadataExtractionResult {
 }
 
 export interface MetadataUpdateInput {
-	imageId: string;
-	metadata: Record<string, unknown>;
+	id: string;
+	entityType?: string | null;
+	entityId?: string | null;
+	key?: string | null;
+	value?: string | null;
+	type?: string | null;
+	isPublic?: boolean;
+	category?: string | null;
+	description?: string | null;
 }
 
 export interface BulkMetadataUpdateInput {

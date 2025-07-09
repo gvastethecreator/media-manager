@@ -29,18 +29,7 @@ const createAudioError = (
 };
 
 // Función helper para convertir Audio a AudioWithStats
-const addStatsToAudio = (audio: Audio): AudioWithStats => {
-	return {
-		...audio,
-		stats: {
-			duration: audio.duration ?? 0,
-			format: audio.format || 'unknown',
-			bitrate: audio.bitrate || 0,
-			volumePeaks: [],
-			sampleRate: audio.sampleRate || 0,
-		},
-	};
-};
+
 
 /**
  * Obtiene todos los archivos de audio
@@ -95,12 +84,12 @@ export async function getAudios(): Promise<AudioWithStats[]> {
 				...rawAudio,
 				// Normalización mínima para compatibilidad con el schema de la app
 				size: rawAudio.size || 0,
-				filePath: rawAudio.path || '',
+				path: rawAudio.path || '',
 				format: rawAudio.format || rawAudio.codec || '',
 				isFavorite: Boolean(rawAudio.isFavorite),
 				folderId: rawAudio.folderId || '',
 			} as any);
-			return addStatsToAudio(audio);
+			return audio;
 		});
 
 		return audioList;
@@ -167,7 +156,7 @@ export async function getAudioById(id: string): Promise<AudioWithStats | null> {
 			...rawAudio,
 			isFavorite: Boolean(rawAudio.isFavorite),
 			size: rawAudio.size || 0,
-			filePath: rawAudio.path || '',
+			path: rawAudio.path || '',
 			format: rawAudio.format || rawAudio.codec || '',
 			folderId: rawAudio.folderId || '',
 		};

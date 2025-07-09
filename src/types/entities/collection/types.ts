@@ -5,41 +5,28 @@
 
 import type { ImageBase } from '../image/base';
 
-export interface CollectionEdition {
-	name: string;
-	year: number;
-}
+
 
 export interface CollectionBase {
 	id: string;
 	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	isPublic: boolean; // Cambiado de isPrivate a isPublic
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	featuredImage: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	totalSize: number;
+	lastImageAddedAt: Date | null;
+	lastVideoAddedAt: Date | null;
+	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-export interface CollectionWithImages extends CollectionBase {
-	images: ImageBase[];
-}
 
-export interface CollectionWithStats extends CollectionBase {
-	stats: {
-		totalImages: number;
-		recentlyAdded: number;
-		averageRating: number;
-		totalSize: number;
-	};
-}
-
-export interface CollectionWithRelations extends CollectionBase {
-	images: ImageBase[];
-	_count: {
-		images: number;
-	};
-}
 
 export interface CreateCollectionInput {
 	name: string;

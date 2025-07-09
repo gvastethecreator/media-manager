@@ -7,24 +7,30 @@ export interface GroupFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface GroupCreateInput {
 	name: string;
-	description?: string;
-	color?: string;
-	emoji?: string;
-	isPrivate?: boolean;
+	description?: string | null;
+	color?: string | null;
+	emoji?: string | null;
+	isFavorite?: boolean;
+	category?: string | null;
+	filters?: string | null;
+	isActive?: boolean;
 }
 
 export interface GroupUpdateInput {
 	name?: string;
-	description?: string;
-	color?: string;
-	emoji?: string;
-	isPrivate?: boolean;
+	description?: string | null;
+	color?: string | null;
+	emoji?: string | null;
+	isFavorite?: boolean;
+	category?: string | null;
+	filters?: string | null;
+	isActive?: boolean;
 }
 
 export interface GroupsResponse {

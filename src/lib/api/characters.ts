@@ -7,22 +7,56 @@ export interface CharacterFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface CharacterCreateInput {
 	name: string;
-	description?: string;
-	color?: string;
-	avatarUrl?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	age?: string | null;
+	gender?: string | null;
+	species?: string | null;
+	occupation?: string | null;
+	personality?: string | null;
+	background?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	equipment?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface CharacterUpdateInput {
 	name?: string;
-	description?: string;
-	color?: string;
-	avatarUrl?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	age?: string | null;
+	gender?: string | null;
+	species?: string | null;
+	occupation?: string | null;
+	personality?: string | null;
+	background?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	equipment?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface CharactersResponse {

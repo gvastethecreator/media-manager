@@ -21,15 +21,8 @@ type DrizzleUpdateMetadataData = Partial<DrizzleCreateMetadataData>;
  * ✅ MIGRADO A DRIZZLE
  */
 export function fromDrizzleMetadata(metadata: MetadataBase): MetadataExtended {
-	const aspectRatio = metadata.width && metadata.height ? metadata.width / metadata.height : 0;
-	const formattedSize = formatBytes(metadata.size || 0);
-	const dimensions = `${metadata.width || 0}x${metadata.height || 0}`;
-
 	return {
 		...metadata,
-		aspectRatio,
-		formattedSize,
-		dimensions,
 	};
 }
 

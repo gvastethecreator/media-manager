@@ -31,24 +31,34 @@ export enum PlaceViewMode {
 export interface PlaceBase {
 	id: string;
 	name: string;
-	description?: string;
-	location?: string;
-	coordinates?: string;
-	category?: PlaceCategory;
-	type?: PlaceType;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	location: string | null;
+	climate: string | null;
+	population: string | null;
+	government: string | null;
+	economy: string | null;
+	culture: string | null;
+	history: string | null;
+	geography: string | null;
+	landmarks: string | null;
+	dangers: string | null;
+	resources: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-export interface PlaceComplete extends PlaceBase {
-	// Relaciones completas cuando sea necesario
-}
 
-export interface PlacePreview extends Pick<PlaceBase, 'id' | 'name' | 'location' | 'category'> {
-	stats?: {
-		imageCount?: number;
-	};
-}
 
 export interface PlaceSearchOptions {
 	query?: string;

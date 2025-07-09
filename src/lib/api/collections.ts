@@ -7,22 +7,40 @@ export interface CollectionFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface CollectionCreateInput {
 	name: string;
-	description?: string;
-	color?: string;
-	isPrivate?: boolean;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	totalSize?: number;
+	lastImageAddedAt?: Date | null;
+	lastVideoAddedAt?: Date | null;
+	parentId?: string | null;
 }
 
 export interface CollectionUpdateInput {
 	name?: string;
-	description?: string;
-	color?: string;
-	isPrivate?: boolean;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	totalSize?: number;
+	lastImageAddedAt?: Date | null;
+	lastVideoAddedAt?: Date | null;
+	parentId?: string | null;
 }
 
 export interface CollectionsResponse {

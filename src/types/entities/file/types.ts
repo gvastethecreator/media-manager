@@ -7,32 +7,28 @@ export type FileBase = {
 	id: string;
 	name: string;
 	path: string;
-	type: FileType | string;
 	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	fileType: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	isHidden: boolean;
+	description: string | null;
+	tags: string | null;
+	metadata: string | null;
+	lastAccessed: Date | null;
+	accessCount: number | null;
+	isProcessed: boolean | null;
+	processingError: string | null;
+	processingStatus: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-	modifiedAt: Date;
-	accessedAt: Date;
-	isDirectory: boolean;
-	parentPath: string;
-	absolutePath: string;
-	relativePath: string;
-	extension: string;
-	mimeType: string;
 };
 
-export type FileInfo = FileBase;
 
-export type ImageFileInfo = FileBase & {
-	type: FileType.IMAGE;
-	width?: number;
-	height?: number;
-};
-
-export type DirectoryInfo = FileBase & {
-	isDirectory: true;
-	childCount?: number;
-};
 
 export type FileRelations = Record<string, never>;
 

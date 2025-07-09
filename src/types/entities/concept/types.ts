@@ -13,49 +13,27 @@ import { z } from 'zod';
 export interface ConceptBase {
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 	description: string | null;
-	content: string;
-	category: string;
-	featuredImage: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
 	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	complexity: string | null;
+	applications: string | null;
+	examples: string | null;
+	relatedConcepts: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-/**
- * Tipo completo para Concept con todas las relaciones y datos
- */
-export interface ConceptComplete extends ConceptBase {
-	// Relaciones
-	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceWithStats[];
-	worldItems?: WorldItemWithStats[];
-	prompts?: PromptWithStats[];
-	notes?: NoteWithStats[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyWithStats[];
-	groups?: GroupWithStats[];
-}
 
-/**
- * Tipo para items en listados de conceptos
- */
-export interface ConceptListItem {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	category: string;
-	isFavorite: boolean;
-	itemType: 'concept';
-}
 
 /**
  * Input para creación

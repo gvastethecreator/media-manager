@@ -4,15 +4,20 @@ import { apiClient } from './client';
 
 export interface UploadedImageCreateInput {
 	name: string;
-	type: string;
-	category: string;
-	file: File;
+	path: string;
+	size: number;
+	hash: string;
+	metadata?: string | null;
+	imageId: string;
 }
 
 export interface UploadedImageUpdateInput {
 	name?: string;
-	type?: string;
-	category?: string;
+	path?: string;
+	size?: number;
+	hash?: string;
+	metadata?: string | null;
+	imageId?: string;
 }
 
 export interface UploadedImagesResponse {

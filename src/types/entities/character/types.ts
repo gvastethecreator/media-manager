@@ -28,31 +28,25 @@ export interface CharacterBase extends EntityBase {
 	description: string | null;
 	emoji: string | null;
 	color: string | null;
-	shortcut: string | null;
 	category: string | null;
-	level: number | null;
-	class: string | null;
-	race: string | null;
-	type: string | null;
-	alignment: string | null;
-	backstory: string | null;
-	// Campos JSON serializados como strings
-	statistics: CharacterStatistics | null;
-	psychologicalProfile: string | null;
-	socialProfile: string | null;
-	relationships: string | null;
-	goals: string | null;
-	fears: string | null;
-	beliefs: string | null;
-	personality: string | null;
-	skills: string | null;
-	abilities: string | null;
-	// Configuración
-	sortBy: string | null;
-	filters: string | null;
-	// Propiedades de visualización
-	featuredImage: string | null;
+	isPublic: boolean;
 	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	age: string | null;
+	gender: string | null;
+	species: string | null;
+	occupation: string | null;
+	personality: string | null;
+	background: string | null;
+	relationships: string | null;
+	skills: string | null;
+	equipment: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -63,58 +57,9 @@ export interface CharacterWithStats extends CharacterBase {
 	_count?: {
 		images?: number;
 		videos?: number;
-		tags?: number;
-		groups?: number;
-		properties?: number;
-		collections?: number;
-		albums?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		relatedCharacters?: number;
-		relatedTo?: number;
-	};
-	statistics: {
-		totalImages: number;
-		totalVideos: number;
-		totalTags: number;
-		totalGroups: number;
-		totalProperties: number;
-		totalCollections: number;
-		totalAlbums: number;
-		totalPlaces: number;
-		totalWorldItems: number;
-		totalConcepts: number;
-		totalPrompts: number;
-		totalNotes: number;
-		totalWildcards: number;
-		totalRelatedCharacters: number;
-		totalRelatedTo: number;
-		totalAssociations: number;
-		lastUpdated: Date;
-		powerLevel: number;
-		rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-		healthPoints: number;
-		manaPoints: number;
 	};
 	images?: ImageWithStats[];
 	videos?: VideoWithStats[];
-	tags?: TagWithStats[];
-	groups?: GroupWithStats[];
-	properties?: PropertyWithStats[];
-	collections?: CollectionWithStats[];
-	albums?: AlbumWithStats[];
-	places?: PlaceWithStats[];
-	worldItems?: WorldItemWithStats[];
-	concepts?: ConceptWithStats[];
-	prompts?: PromptWithStats[];
-	notes?: NoteWithStats[];
-	wildcards?: WildcardWithStats[];
-	relatedCharacters?: CharacterBase[];
-	relatedTo?: CharacterBase[];
 }
 
 /**

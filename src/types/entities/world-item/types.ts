@@ -20,40 +20,7 @@ import type { TagWithStats as TagComplete } from '../tag/types';
 import type { VideoWithStats } from '../video';
 import type { WildcardComplete } from '../wildcard';
 
-// --- ESTRUCTURAS DE DATOS SERIALIZADAS ---
 
-export interface WorldItemAttribute {
-	name?: string;
-	value?: number | string;
-	maxValue?: number;
-}
-export interface WorldItemEffect {
-	name?: string;
-	description?: string;
-	duration?: string;
-	cooldown?: string;
-}
-export interface WorldItemRequirement {
-	name?: string;
-	value?: number;
-	description?: string;
-}
-export interface WorldItemStat {
-	name?: string;
-	value?: number;
-	modifier?: string;
-}
-export interface WorldItemProperty {
-	name?: string;
-	value?: string | number | boolean;
-	description?: string;
-}
-export interface WorldItemFilter {
-	type?: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
-	operator?: 'AND' | 'OR' | 'NOT';
-	value?: string | number | boolean;
-	field?: string;
-}
 
 // --- TIPOS BASE Y RELACIONES ---
 
@@ -61,16 +28,25 @@ export interface WorldItemBase {
 	id: string;
 	name: string;
 	description: string | null;
-	type: string | null;
-	category: string | null;
-	rarity: string | null;
-	size: string | null;
-	origin: string | null;
-	isFavorite: boolean;
-	shortcut: string | null;
-	featuredImage: string | null;
 	emoji: string | null;
 	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	rarity: string | null;
+	value: string | null;
+	weight: string | null;
+	materials: string | null;
+	origin: string | null;
+	properties: string | null;
+	uses: string | null;
+	history: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -135,26 +111,11 @@ export interface WorldItemStatistics {
 
 export interface WorldItemWithStats extends WorldItemBase, WorldItemRelations {
 	_stats: WorldItemStatistics;
-	attributes: WorldItemAttribute[];
-	effects: WorldItemEffect[];
-	requirements: WorldItemRequirement[];
-	stats: WorldItemStat[];
-	properties: WorldItemProperty[];
-	filters: WorldItemFilter[];
-	tags: TagComplete[];
 }
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {
-	attributes?: WorldItemAttribute[];
-	effects?: WorldItemEffect[];
-	requirements?: WorldItemRequirement[];
-	stats?: WorldItemStat[];
-	properties?: WorldItemProperty[];
-	filters?: WorldItemFilter[];
-	tags?: string[];
-}
+export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {}
 
 export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 

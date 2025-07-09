@@ -310,7 +310,7 @@ class ImageService {
 			const imageWithStats: ImageWithStats = {
 				...image,
 				isFavorite: Boolean(image.isFavorite),
-				isPublic: Boolean(image.isPublic),
+				// TODO: Implementar lógica para obtener conteos reales
 				_count: {
 					tags: 0,
 					albums: 0,

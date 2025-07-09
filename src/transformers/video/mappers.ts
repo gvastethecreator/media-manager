@@ -18,15 +18,16 @@ type DrizzleCreateVideoData = {
 	path: string;
 	size: number;
 	duration: number;
-	width: number;
-	height: number;
+	width?: number | null;
+	height?: number | null;
 	metadata?: string | null;
 	thumbnail?: string | null;
 	thumbnailSize?: number | null;
 	thumbnailWidth?: number | null;
 	thumbnailHeight?: number | null;
-	isPublic: boolean;
-	isFavorite: boolean;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	isHidden?: boolean;
 	folderId: string;
 };
 
@@ -81,8 +82,9 @@ export function mapCreateVideoDataToDrizzle(input: VideoCreateInput): DrizzleCre
 			thumbnailSize: rest.thumbnailSize || null,
 			thumbnailWidth: rest.thumbnailWidth || null,
 			thumbnailHeight: rest.thumbnailHeight || null,
-			isPublic: rest.isPublic || false,
-			isFavorite: rest.isFavorite || false,
+			isPublic: rest.isPublic ?? false,
+			isFavorite: rest.isFavorite ?? false,
+			isHidden: rest.isHidden ?? false,
 			folderId: input.folderId,
 		};
 

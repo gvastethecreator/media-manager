@@ -9,7 +9,7 @@ const tagService = new TagService();
 // GET /tags - Listar tags con filtros
 router.get('/', async (req, res) => {
 	try {
-		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc' } = req.query;
+		const { search, limit = '50', offset = '0', sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'totalImages', 'totalVideos']).default('name').optional(),, sortOrder = 'asc' } = req.query;
 
 		const filters = {
 			search: search as string,

@@ -139,26 +139,18 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 			.select({
 				id: collections.id,
 				name: collections.name,
+				description: collections.description,
 				emoji: collections.emoji,
 				color: collections.color,
-				description: collections.description,
-				shortcut: collections.shortcut,
-				category: collections.category,
-				sortBy: collections.sortBy,
-				filters: collections.filters,
-				url: collections.url,
-				alternativeUrl: collections.alternativeUrl,
-				sourceImage: collections.sourceImage,
-				platform: collections.platform,
-				price: collections.price,
-				network: collections.network,
-				tokenId: collections.tokenId,
-				tokenAddress: collections.tokenAddress,
-				contractAddress: collections.contractAddress,
-				contractType: collections.contractType,
-				editions: collections.editions,
 				featuredImage: collections.featuredImage,
+				isPublic: collections.isPublic,
 				isFavorite: collections.isFavorite,
+				totalImages: collections.totalImages,
+				totalVideos: collections.totalVideos,
+				totalSize: collections.totalSize,
+				lastImageAddedAt: collections.lastImageAddedAt,
+				lastVideoAddedAt: collections.lastVideoAddedAt,
+				parentId: collections.parentId,
 				createdAt: collections.createdAt,
 				updatedAt: collections.updatedAt,
 			})
@@ -190,27 +182,11 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		const transformedCollections = drizzleCollections.map((rawCollection) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
-			// Counts vacíos por ahora (TODO: implementar subqueries)
-			_count: {
-				images: 0,
-				videos: 0,
-				albums: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
 		}));
 
 		// Transformar usando el transformer correcto
 		const result = transformedCollections
-			.map((collection) => fromDrizzleCollection(collection, collection._count))
+			.map((collection) => fromDrizzleCollection(collection))
 			.filter((c): c is CollectionWithStats => c !== null);
 
 		logger.info(`✅ ${result.length} colecciones encontradas`);

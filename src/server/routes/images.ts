@@ -14,15 +14,25 @@ const router = Router();
 // Schema de validación para crear imagen
 const CreateImageSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido').max(255),
-	description: z.string().max(1000).optional().nullable(),
+	description: z.string().max(1000).nullable().optional(),
 	path: z.string().min(1, 'La ruta es requerida').max(500),
 	hash: z.string().min(1, 'El hash es requerido'),
 	size: z.number().int().positive('El tamaño debe ser positivo'),
 	width: z.number().int().positive('El ancho debe ser positivo'),
 	height: z.number().int().positive('El alto debe ser positivo'),
-	metadata: z.string().optional().nullable(),
+	metadata: z.string().nullable().optional(),
+	thumbnail: z.string().nullable().optional(),
+	thumbnailSize: z.number().int().min(0).nullable().optional(),
+	thumbnailWidth: z.number().int().min(0).nullable().optional(),
+	thumbnailHeight: z.number().int().min(0).nullable().optional(),
+	thumbnailMimeType: z.string().nullable().optional(),
+	thumbnailError: z.string().nullable().optional(),
+	thumbnailErrorAt: z.date().nullable().optional(),
+	thumbnailOptimizedAt: z.date().nullable().optional(),
 	isFavorite: z.boolean().default(false).optional(),
 	folderId: z.string().uuid('El ID de carpeta debe ser un UUID válido'),
+	noteId: z.string().uuid().nullable().optional(),
+	addedAt: z.date().optional(),
 });
 
 // Schema de validación para actualizar imagen
@@ -33,6 +43,7 @@ const UpdateImageSchema = CreateImageSchema.partial().omit({
 	width: true,
 	height: true,
 	folderId: true,
+	addedAt: true,
 });
 
 // Schema para filtros de búsqueda

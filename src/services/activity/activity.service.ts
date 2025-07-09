@@ -99,7 +99,8 @@ export class ActivityServiceImpl implements ActivityService {
 				.values({
 					id: crypto.randomUUID(),
 					type: data.type,
-					message: data.description, // Mapeo: description en app -> message en BD
+					message: data.message, // Mapeo: message en app -> message en BD
+					data: data.data || null,
 					data: null,
 					imageId: data.imageId || null,
 					createdAt: new Date(),
