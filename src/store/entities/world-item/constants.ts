@@ -3,7 +3,7 @@
  * @module store/entities/world-item/constants
  */
 
-import { WorldItemViewMode } from '../../../types/entities/world-item';
+import { WorldItemViewMode } from '@/types/entities/world-item/types';
 
 /**
  * Clave para el almacenamiento persistente

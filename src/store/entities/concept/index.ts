@@ -16,7 +16,7 @@ import {
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import {
-	ConceptComplete,
+	
 	ConceptCreateInput,
 	ConceptSortOption,
 	ConceptUpdateInput,
@@ -28,7 +28,7 @@ import type { ConceptStore } from './types';
 const storeLogger = clientLogger.withContext('ConceptStore');
 
 // --- SLICE: Core ---
-const transformConceptToWithStats = (concept: ConceptComplete): ConceptWithStats => ({
+const transformConceptToWithStats = (concept: any): ConceptWithStats => ({
 	...concept,
 	stats: {
 		imageCount: concept._count?.images ?? 0,
@@ -39,7 +39,7 @@ const transformConceptToWithStats = (concept: ConceptComplete): ConceptWithStats
 	},
 });
 
-const createCoreSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> = (set, get) => ({
+const createCoreSlice: StateCreator<ConceptStore, [], [], ConceptCoreSlice> = (set, get) => ({
 	concepts: [],
 	selectedConcept: null,
 	isLoading: false,
@@ -81,7 +81,7 @@ const createCoreSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>>
 });
 
 // --- SLICE: Filters ---
-const createFiltersSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> = (set) => ({
+const createFiltersSlice: StateCreator<ConceptStore, [], [], ConceptFiltersSlice> = (set) => ({
 	filters: { search: '', category: undefined, tags: [], onlyFavorites: false },
 	sortBy: ConceptSortOption.NAME_ASC,
 	page: 1,
@@ -91,6 +91,30 @@ const createFiltersSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStor
 	setPage: (page) => set({ page }),
 	setPageSize: (pageSize) => set({ pageSize, page: 1 }),
 	clearFilters: () => set({ filters: { search: '', category: undefined, tags: [], onlyFavorites: false }, page: 1 }),
+	setCategoryFilter: (category: string | null) => {
+		set((state) => ({
+			filters: { ...state.filters, category: category || undefined },
+			page: 1,
+		}));
+	},
+	setSearchFilter: (search: string) => {
+		set((state) => ({
+			filters: { ...state.filters, search },
+			page: 1,
+		}));
+	},
+	setTagsFilter: (tags: string[]) => {
+		set((state) => ({
+			filters: { ...state.filters, tags },
+			page: 1,
+		}));
+	},
+	setOnlyFavoritesFilter: (onlyFavorites: boolean) => {
+		set((state) => ({
+			filters: { ...state.filters, onlyFavorites },
+			page: 1,
+		}));
+	},
 });
 
 // --- SLICE: UI ---
@@ -101,7 +125,7 @@ const initialUIState = {
 	isDetailsDrawerOpen: false,
 	viewMode: ConceptViewMode.GRID,
 };
-const createUISlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> = (set) => ({
+const createUISlice: StateCreator<ConceptStore, [], [], ConceptUISlice> = (set) => ({
 	...initialUIState,
 	openCreateModal: () => set({ isCreateModalOpen: true }),
 	closeCreateModal: () => set({ isCreateModalOpen: false }),
@@ -116,7 +140,7 @@ const createUISlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> =
 });
 
 // --- SLICE: Relations (Mock) ---
-const createRelationsSlice: StateCreator<ConceptStore, [], [], Partial<ConceptStore>> = (_set, get) => ({
+const createRelationsSlice: StateCreator<ConceptStore, [], [], ConceptRelationsSlice> = (_set, get) => ({
 	addConceptToEntity: async (conceptId, entityId, entityType) => {
 		// Mock implementation, replace with actual server action
 		storeLogger.info(`🔗 Linking concept ${conceptId} to ${entityType} ${entityId}`);
@@ -157,6 +181,4 @@ export const useConceptStore = create<ConceptStore>()(
 	)
 );
 
-export { selectSelectedConcept } from './store';
-// --- RE-EXPORTS ---
-export * from './types';
+

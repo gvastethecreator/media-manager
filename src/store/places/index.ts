@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { extendPlace, extendPlaces } from '../../transformers/place';
-import type { Place, PlaceFilters } from '../../types/entities/place';
+import type { PlaceWithStats as Place, PlaceFilters } from '../../types/entities/place';
 import { PlaceSortCriteria, PlaceViewMode } from '../../types/entities/place';
 import { filterPlaces, findPlaceById, findPlacesByIds, sortPlaces } from '../../utils/place';
 

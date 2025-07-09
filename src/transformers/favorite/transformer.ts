@@ -14,7 +14,7 @@ import {
 	FavoriteEntityType,
 	FavoriteStats,
 	FavoritesByType,
-} from '@/types/entities/favorite';
+} from '@/types/entities/favorite/types';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleFavorite = {

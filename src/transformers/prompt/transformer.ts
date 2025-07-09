@@ -6,7 +6,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { PromptBase, PromptStatistics, PromptWithStats } from '@/types/entities/prompt';
+import type { PromptBase, PromptStats, PromptWithStats } from '@/types/entities/prompt';
 
 const logger = serverLogger.withContext('PromptTransformer');
 

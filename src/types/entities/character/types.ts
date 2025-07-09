@@ -37,7 +37,7 @@ export interface CharacterBase extends EntityBase {
 	alignment: string | null;
 	backstory: string | null;
 	// Campos JSON serializados como strings
-	stats: CharacterStatistics | null;
+	statistics: CharacterStatistics | null;
 	psychologicalProfile: string | null;
 	socialProfile: string | null;
 	relationships: string | null;

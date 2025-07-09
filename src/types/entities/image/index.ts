@@ -24,9 +24,7 @@ export type {
 	ImageListItem,
 	ImageSearchOptions,
 	ImageSearchResult,
-	ImageSortOption,
 	ImageUpdateInput,
-	ImageViewMode,
 	ImageWithStats,
 } from './types';
 
