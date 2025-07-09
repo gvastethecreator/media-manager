@@ -71,11 +71,6 @@ class ProfileServiceImpl {
 					updatedAt: profiles.updatedAt,
 					settingsId: profiles.settingsId,
 					imageId: profiles.imageId,
-					// Campos de settings (planos para luego restructurar)
-					settingsRealId: settings.id,
-					settingsData: settings.data,
-					settingsTheme: settings.theme,
-					settingsLanguage: settings.language,
 				})
 				.from(profiles)
 				.leftJoin(settings, eq(settings.profileId, profiles.id));

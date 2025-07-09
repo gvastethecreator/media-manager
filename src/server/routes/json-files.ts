@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import {
 	createJsonFile,
 	deleteJsonFile,
@@ -8,6 +9,26 @@ import {
 } from '@/services/json-file/json-file.service';
 
 const router = Router();
+
+const JsonFileCreateSchema = z.object({
+	name: z.string().min(1),
+	path: z.string().min(1),
+	size: z.number().min(0),
+	hash: z.string().min(1),
+	mimeType: z.string().min(1),
+	extension: z.string().min(1),
+	folderId: z.string().min(1),
+	isFavorite: z.boolean().optional(),
+	isArchived: z.boolean().optional(),
+	content: z.string().nullable().optional(),
+	schema: z.string().nullable().optional(),
+	isValid: z.boolean().optional(),
+	validationErrors: z.string().nullable().optional(),
+	keyCount: z.number().int().min(0).nullable().optional(),
+	depth: z.number().int().min(0).nullable().optional(),
+});
+
+const JsonFileUpdateSchema = JsonFileCreateSchema.partial();
 
 // GET /json-files/:id - Obtener datos de un archivo JSON por ID
 router.get('/:id', async (req, res) => {
@@ -54,7 +75,8 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const updatedJsonFile = await updateJsonFile(id, req.body);
+		const validatedData = JsonFileUpdateSchema.parse(req.body);
+		const updatedJsonFile = await updateJsonFile(id, validatedData);
 		res.json(updatedJsonFile);
 	} catch (error) {
 		console.error('Error al actualizar archivo JSON:', error);
@@ -65,7 +87,8 @@ router.put('/:id', async (req, res) => {
 // POST /json-files - Crear un nuevo archivo JSON
 router.post('/', async (req, res) => {
 	try {
-		const newJsonFile = await createJsonFile(req.body);
+		const validatedData = JsonFileCreateSchema.parse(req.body);
+		const newJsonFile = await createJsonFile(validatedData);
 		res.status(201).json(newJsonFile);
 	} catch (error) {
 		console.error('Error al crear archivo JSON:', error);

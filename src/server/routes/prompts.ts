@@ -13,12 +13,12 @@ const legacyPromptService = new PromptService(); // Para métodos legacy
 // Schema para filtros de búsqueda
 const PromptFiltersSchema = z.object({
 	search: z.string().optional(),
-	category: z.string().optional(),
+	category: z.string().nullable().optional(),
 	isPublic: z.boolean().optional(),
 	isFavorite: z.boolean().optional(),
 	limit: z.number().int().positive().max(100).default(50).optional(),
 	offset: z.number().int().min(0).default(0).optional(),
-	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'totalImages']).default('name').optional(),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'totalImages', 'totalVideos', 'type', 'complexity', 'applications', 'examples', 'relatedConcepts', 'notes', 'featuredImage', 'parentId']).default('name').optional(),
 	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
 });
 

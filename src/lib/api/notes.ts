@@ -7,22 +7,34 @@ export interface NoteFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'title' | 'createdAt' | 'updatedAt' | 'priority' | 'status' | 'category';
 	sortOrder?: 'asc' | 'desc';
+	category?: string;
+	priority?: number;
+	status?: string;
+	isFavorite?: boolean;
 }
 
 export interface NoteCreateInput {
-	name: string;
-	content?: string;
-	color?: string;
-	category?: string;
+	title: string;
+	content?: string | null;
+	category?: string | null;
+	priority?: number;
+	status?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	presetId?: string | null;
 }
 
 export interface NoteUpdateInput {
-	name?: string;
-	content?: string;
-	color?: string;
-	category?: string;
+	title?: string;
+	content?: string | null;
+	category?: string | null;
+	priority?: number;
+	status?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	presetId?: string | null;
 }
 
 export interface NotesResponse {

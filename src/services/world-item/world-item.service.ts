@@ -53,28 +53,23 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 				description: worldItems.description,
 				emoji: worldItems.emoji,
 				color: worldItems.color,
-				shortcut: worldItems.shortcut,
 				category: worldItems.category,
+				isPublic: worldItems.isPublic,
+				isFavorite: worldItems.isFavorite,
+				totalImages: worldItems.totalImages,
+				totalVideos: worldItems.totalVideos,
 				type: worldItems.type,
-				subtype: worldItems.subtype,
 				rarity: worldItems.rarity,
 				value: worldItems.value,
 				weight: worldItems.weight,
-				size: worldItems.size,
-				material: worldItems.material,
+				materials: worldItems.materials,
 				origin: worldItems.origin,
-				crafting: worldItems.crafting,
-				requirements: worldItems.requirements,
-				effects: worldItems.effects,
 				properties: worldItems.properties,
-				lore: worldItems.lore,
+				uses: worldItems.uses,
 				history: worldItems.history,
 				notes: worldItems.notes,
-				sortBy: worldItems.sortBy,
-				filters: worldItems.filters,
 				featuredImage: worldItems.featuredImage,
-				isFavorite: worldItems.isFavorite,
-				isArchived: worldItems.isArchived,
+				parentId: worldItems.parentId,
 				createdAt: worldItems.createdAt,
 				updatedAt: worldItems.updatedAt,
 			})
@@ -85,23 +80,7 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 		const transformedWorldItems = drizzleWorldItems.map((rawWorldItem) => ({
 			...rawWorldItem,
 			isFavorite: Boolean(rawWorldItem.isFavorite),
-			isArchived: Boolean(rawWorldItem.isArchived),
-			// Counts vacíos por ahora (TODO: implementar subqueries)
-			_count: {
-				images: 0,
-				videos: 0,
-				albums: 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
+			isPublic: Boolean(rawWorldItem.isPublic),
 		}));
 
 		// Transformar a WorldItemWithStats
@@ -231,28 +210,23 @@ export async function createWorldItem(input: WorldItemCreateInput): Promise<Worl
 				description: input.description || null,
 				emoji: input.emoji || '🌍',
 				color: input.color || '#3b82f6',
-				shortcut: input.shortcut || null,
 				category: input.category || null,
+				isPublic: input.isPublic || false,
+				isFavorite: input.isFavorite || false,
+				totalImages: input.totalImages || 0,
+				totalVideos: input.totalVideos || 0,
 				type: input.type || null,
-				subtype: input.subtype || null,
 				rarity: input.rarity || null,
 				value: input.value || null,
 				weight: input.weight || null,
-				size: input.size || null,
-				material: input.material || null,
+				materials: input.materials || null,
 				origin: input.origin || null,
-				crafting: input.crafting || null,
-				requirements: input.requirements || null,
-				effects: input.effects || null,
 				properties: input.properties || null,
-				lore: input.lore || null,
+				uses: input.uses || null,
 				history: input.history || null,
 				notes: input.notes || null,
-				sortBy: input.sortBy || null,
-				filters: input.filters || null,
 				featuredImage: input.featuredImage || null,
-				isFavorite: input.isFavorite || false,
-				isArchived: input.isArchived || false,
+				parentId: input.parentId || null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
@@ -264,23 +238,7 @@ export async function createWorldItem(input: WorldItemCreateInput): Promise<Worl
 		const complete: WorldItemComplete = {
 			...worldItem,
 			isFavorite: Boolean(worldItem.isFavorite),
-			isArchived: Boolean(worldItem.isArchived),
-			// Counts vacíos para nueva entidad
-			_count: {
-				images: 0,
-				videos: 0,
-				albums: 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
+			isPublic: Boolean(worldItem.isPublic),
 		};
 
 		// Emitir eventos
@@ -315,28 +273,23 @@ export async function updateWorldItem(id: string, input: WorldItemUpdateInput): 
 		if (input.description !== undefined) updateData.description = input.description;
 		if (input.emoji !== undefined) updateData.emoji = input.emoji;
 		if (input.color !== undefined) updateData.color = input.color;
-		if (input.shortcut !== undefined) updateData.shortcut = input.shortcut;
 		if (input.category !== undefined) updateData.category = input.category;
+		if (input.isPublic !== undefined) updateData.isPublic = input.isPublic;
+		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
+		if (input.totalImages !== undefined) updateData.totalImages = input.totalImages;
+		if (input.totalVideos !== undefined) updateData.totalVideos = input.totalVideos;
 		if (input.type !== undefined) updateData.type = input.type;
-		if (input.subtype !== undefined) updateData.subtype = input.subtype;
 		if (input.rarity !== undefined) updateData.rarity = input.rarity;
 		if (input.value !== undefined) updateData.value = input.value;
 		if (input.weight !== undefined) updateData.weight = input.weight;
-		if (input.size !== undefined) updateData.size = input.size;
-		if (input.material !== undefined) updateData.material = input.material;
+		if (input.materials !== undefined) updateData.materials = input.materials;
 		if (input.origin !== undefined) updateData.origin = input.origin;
-		if (input.crafting !== undefined) updateData.crafting = input.crafting;
-		if (input.requirements !== undefined) updateData.requirements = input.requirements;
-		if (input.effects !== undefined) updateData.effects = input.effects;
 		if (input.properties !== undefined) updateData.properties = input.properties;
-		if (input.lore !== undefined) updateData.lore = input.lore;
+		if (input.uses !== undefined) updateData.uses = input.uses;
 		if (input.history !== undefined) updateData.history = input.history;
 		if (input.notes !== undefined) updateData.notes = input.notes;
-		if (input.sortBy !== undefined) updateData.sortBy = input.sortBy;
-		if (input.filters !== undefined) updateData.filters = input.filters;
 		if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
-		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
-		if (input.isArchived !== undefined) updateData.isArchived = input.isArchived;
+		if (input.parentId !== undefined) updateData.parentId = input.parentId;
 
 		const result = await db.update(worldItems).set(updateData).where(eq(worldItems.id, id)).returning();
 
@@ -350,23 +303,7 @@ export async function updateWorldItem(id: string, input: WorldItemUpdateInput): 
 		const complete: WorldItemComplete = {
 			...worldItem,
 			isFavorite: Boolean(worldItem.isFavorite),
-			isArchived: Boolean(worldItem.isArchived),
-			// TODO: implementar conteos reales con subqueries
-			_count: {
-				images: 0,
-				videos: 0,
-				albums: 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
+			isPublic: Boolean(worldItem.isPublic),
 		};
 
 		// Emitir eventos

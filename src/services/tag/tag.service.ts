@@ -143,27 +143,6 @@ export async function getTag(id: string): Promise<TagWithStats | null> {
 		const transformedTag = {
 			...rawTag,
 			isFavorite: Boolean(rawTag.isFavorite),
-			isArchived: Boolean(rawTag.isArchived),
-			// Counts vacíos por ahora (TODO: implementar subqueries)
-			_count: {
-				images: 0,
-				videos: 0,
-				documents: 0,
-				file3Ds: 0,
-				jsonFiles: 0,
-				audios: 0,
-				albums: 0,
-				collections: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
 		};
 
 		const result = toTagWithStats(transformedTag as any);
@@ -258,27 +237,6 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 		const transformedTags = drizzleTags.map((rawTag: any) => ({
 			...rawTag,
 			isFavorite: Boolean(rawTag.isFavorite),
-			isArchived: false, // Campo no existe en el schema
-			// Counts vacíos por ahora (TODO: implementar subqueries)
-			_count: {
-				images: 0,
-				videos: 0,
-				documents: 0,
-				file3Ds: 0,
-				jsonFiles: 0,
-				audios: 0,
-				albums: 0,
-				collections: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
 		}));
 
 		const finalTags = transformedTags.map(toTagWithStats);
