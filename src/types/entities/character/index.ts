@@ -25,7 +25,7 @@ export type {
 	CharacterRelations,
 	CharacterRelationship,
 	CharacterSearchOptions,
-	CharacterStats,
+	CharacterStatistics as CharacterStats,
 	CharacterUpdateInput,
 	CharacterViewConfig,
 	CharacterWithStats,

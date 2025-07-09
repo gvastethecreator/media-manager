@@ -170,8 +170,22 @@ export interface ConceptStatistics {
 /**
  * Concepto con estadísticas calculadas
  */
-export interface ConceptWithStats extends ConceptComplete {
-	stats: ConceptStatistics;
+export interface ConceptWithStats extends ConceptBase {
+	// Relaciones
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceWithStats[];
+	worldItems?: WorldItemWithStats[];
+	prompts?: PromptWithStats[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyWithStats[];
+	groups?: GroupWithStats[];
+	stats: ConceptStats;
 }
 
 /**

@@ -101,7 +101,7 @@ router.get('/:id/media', async (req, res) => {
 // POST /collections - Crear nueva colección
 router.post('/', async (req, res) => {
 	try {
-		const { name, description, color, isPrivate } = req.body;
+		const { name, description, color, isPublic } = req.body;
 
 		if (!name) {
 			return res.status(400).json({ error: 'El nombre es requerido' });
@@ -111,7 +111,7 @@ router.post('/', async (req, res) => {
 			name,
 			description,
 			color,
-			isPrivate: isPrivate || false,
+			isPublic: isPublic || false,
 		});
 
 		res.status(201).json(toCollectionWithStats(collection));
@@ -125,13 +125,13 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { name, description, color, isPrivate } = req.body;
+		const { name, description, color, isPublic } = req.body;
 
 		const collection = await collectionService.updateCollection(id, {
 			name,
 			description,
 			color,
-			isPrivate,
+			isPublic,
 		});
 
 		if (!collection) {

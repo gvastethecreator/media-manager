@@ -36,8 +36,4 @@ export type DocumentFilterActions = Record<string, never>;
 // --- Store Completo ---
 
 export type DocumentStore = DocumentCoreState &
-	DocumentCoreActions &
-	DocumentUIState &
-	DocumentUIActions &
-	DocumentFilterState &
-	DocumentFilterActions;
+	DocumentCoreActions;

@@ -22,6 +22,8 @@ export const MetadataFieldsSchema = z.object({
 /**
  * 🔄 Tipo base para entidades
  */
+import { BaseEntitySchema } from './base';
+
 export interface BaseEntity extends z.infer<typeof BaseEntitySchema>, UIFields, MetadataFields {}
 
 /**
