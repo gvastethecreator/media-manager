@@ -219,7 +219,7 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 		if (hasError && (!entities || entities.length === 0)) {
 			return (
 				<>
-					<CreateButton entityName={entityName} onClick={handleCreate} entityType={entityName} />
+					<CreateButton entityName={entityName} onClick={handleCreate} />
 					<MemoizedContextMenuSeparator />
 					<ErrorState entityName={entityName} />
 				</>
@@ -229,7 +229,7 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 		// Incluso con error, si tenemos datos los mostramos
 		return (
 			<>
-				<CreateButton entityName={entityName} onClick={handleCreate} entityType={entityName} />
+				<CreateButton entityName={entityName} onClick={handleCreate} />
 				<MemoizedContextMenuSeparator />
 
 				{entities && entities.length > 0 ? (

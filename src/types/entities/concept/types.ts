@@ -27,6 +27,22 @@ export interface ConceptBase {
 /**
  * Tipo completo para Concept con todas las relaciones y datos
  */
+export interface ConceptComplete extends ConceptBase {
+	// Relaciones
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceWithStats[];
+	worldItems?: WorldItemWithStats[];
+	prompts?: PromptWithStats[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyWithStats[];
+	groups?: GroupWithStats[];
+}
 
 /**
  * Tipo para items en listados de conceptos
@@ -128,14 +144,34 @@ export interface ConceptExtended extends ConceptComplete {
 /**
  * Concepto con estadísticas calculadas
  */
+/**
+ * 💡 Estadísticas de un concepto.
+ */
+export interface ConceptStatistics {
+	imageCount: number;
+	tagCount: number;
+	noteCount: number;
+	totalContentItems: number;
+	lastUpdated: Date;
+	totalImages: number;
+	totalAssociations: number;
+	videoCount?: number;
+	albumCount?: number;
+	collectionCount?: number;
+	characterCount?: number;
+	placeCount?: number;
+	worldItemCount?: number;
+	promptCount?: number;
+	wildcardCount?: number;
+	propertyCount?: number;
+	groupCount?: number;
+}
+
+/**
+ * Concepto con estadísticas calculadas
+ */
 export interface ConceptWithStats extends ConceptComplete {
-	stats: {
-		imageCount: number;
-		tagCount: number;
-		noteCount: number;
-		totalContentItems: number;
-		lastUpdated: Date;
-	};
+	stats: ConceptStatistics;
 }
 
 /**

@@ -1,5 +1,6 @@
 import React from 'react';
 import packageJson from '../../../package.json';
+import { GlobalErrorFallback } from '../global-error-handler';
 
 interface ErrorBoundaryProps {
 	children: React.ReactNode;
@@ -47,6 +48,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 	render() {
 		if (this.state.hasError) {
 			if (this.props.fallback) return this.props.fallback;
+			// Render GlobalErrorFallback if no specific fallback is provided
+			if (this.state.error) {
+				return <GlobalErrorFallback error={this.state.error} resetError={this.handleReload} />;
+			}
 			const stack = this.state.error?.stack || '';
 			const affectedFiles = this.getAffectedFiles(stack);
 			const envInfo = {

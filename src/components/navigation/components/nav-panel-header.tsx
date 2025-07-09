@@ -14,25 +14,6 @@ import { useTheme } from '@/components/ui/theme-provider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUIStore } from '@/store/ui.store';
 
-// MOCK DATA para reemplazar useProfileContext
-const mockProfileData = {
-	settings: {
-		avatar: {
-			color: '#3B82F6',
-			emoji: '🎨',
-		},
-		profiles: [
-			{
-				id: '1',
-				name: 'Default',
-				emoji: '🎨',
-				color: '#3B82F6',
-			},
-		],
-		activeProfile: '1',
-	},
-};
-
 interface NavPanelHeaderProps {
 	totalImages: number;
 	onOpenSettings: () => void;
@@ -136,26 +117,27 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 	isCollapsed = false,
 	onToggleCollapse,
 }: NavPanelHeaderProps) {
-	const { settings } = mockProfileData;
-	const { profiles = [], activeProfile } = settings;
-
-	const activeProfileData = useMemo(() => {
-		return (
-			profiles.find((p) => p.id === activeProfile) ||
-			profiles[0] || {
-				name: 'Default',
-				emoji: '👤',
-				color: '#3b82f6',
-			}
-		);
-	}, [profiles, activeProfile]);
+	// Perfil por defecto - reemplazar con datos reales del contexto de usuario
+	const activeProfileData = useMemo(
+		() => ({
+			name: 'Usuario',
+			emoji: '🎨',
+			color: '#3b82f6',
+		}),
+		[]
+	);
 
 	const { theme, setTheme, themes } = useTheme();
 	const { setView } = useUIStore();
 
-	const handleHomeClick = useCallback(() => {
-		setCurrentView('dashboard');
-	}, [setCurrentView]);
+	/**
+	 * Callback para el botón Inicio.
+	 * @description Navega a la vista principal de carpetas
+	 * @returns void
+	 */
+	const handleHomeClick = useCallback((): void => {
+		setView('grid');
+	}, [setView]);
 
 	return (
 		<motion.div

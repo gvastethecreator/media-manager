@@ -12,11 +12,23 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-// --- Tipos Canónicos ---
-export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
-
 // --- Enumeraciones ---
 export { ImageFormat, ImageStatus } from './enums';
+// --- Tipos Canónicos ---
+export type {
+	ImageBase,
+	ImageComplete,
+	ImageCreateInput,
+	ImageExtended,
+	ImageFilters,
+	ImageListItem,
+	ImageSearchOptions,
+	ImageSearchResult,
+	ImageSortOption,
+	ImageUpdateInput,
+	ImageViewMode,
+	ImageWithStats,
+} from './types';
 
 // --- Tipos de compatibilidad e interfaces ---
 import type { ImageBase, ImageWithStats } from './base';

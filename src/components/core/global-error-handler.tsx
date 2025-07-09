@@ -47,9 +47,5 @@ export function GlobalErrorHandler({ children }: { children: React.ReactNode }) 
 		setKey((prev) => prev + 1);
 	}, []);
 
-	return (
-		<ErrorBoundary key={key} fallback={(error) => <GlobalErrorFallback error={error} resetError={handleReset} />}>
-			{children}
-		</ErrorBoundary>
-	);
+	return <ErrorBoundary key={key}>{children}</ErrorBoundary>;
 }

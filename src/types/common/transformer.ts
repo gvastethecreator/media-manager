@@ -2,19 +2,6 @@ import { z } from 'zod';
 import type { MetadataFields, UIFields } from '@/lib/utils/transformers/common';
 
 /**
- * 🔍 Esquema base para validación de campos comunes
- */
-export const BaseEntitySchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	description: z.string().nullable().optional(),
-	shortcut: z.string().nullable().optional(),
-	category: z.string().nullable().optional(),
-	sortBy: z.string().default('name'),
-	filters: z.string().default('{}'),
-});
-
-/**
  * 🎨 Esquema para campos de UI
  */
 export const UIFieldsSchema = z.object({
