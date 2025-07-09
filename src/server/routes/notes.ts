@@ -1,10 +1,15 @@
-import express from 'express';
-import { NoteService } from '@/services/note/note.service';
-import { toImageWithStats } from '@/transformers/image';
-import { toNoteWithStats } from '@/transformers/note';
+const NoteCreateSchema = z.object({
+	title: z.string().min(1),
+	content: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	priority: z.number().int().min(0).max(4).optional(),
+	status: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean().optional(),
+	presetId: z.string().nullable().optional(),
+});
 
-const router = express.Router();
-const noteService = new NoteService();
+const NoteUpdateSchema = NoteCreateSchema.partial();
 
 // GET /notes - Listar notas con filtros
 router.get('/', async (req, res) => {
@@ -15,7 +20,7 @@ router.get('/', async (req, res) => {
 			search: search as string,
 			limit: Number.parseInt(limit as string),
 			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'imageCount',
+			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};
 
@@ -108,20 +113,9 @@ router.get('/statuses', async (_req, res) => {
 // POST /notes - Crear nueva nota
 router.post('/', async (req, res) => {
 	try {
-		const { name, content, color, category } = req.body;
-
-		if (!name) {
-			return res.status(400).json({ error: 'El nombre es requerido' });
-		}
-
-		const note = await noteService.createNote({
-			name,
-			content,
-			color,
-			category,
-		});
-
-		res.status(201).json(toNoteWithStats(note));
+		const validatedData = NoteCreateSchema.parse(req.body);
+		const newNote = await noteService.createNote(validatedData);
+		res.status(201).json(toNoteWithStats(newNote));
 	} catch (error) {
 		console.error('Error creating note:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
@@ -132,14 +126,8 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { name, content, color, category } = req.body;
-
-		const note = await noteService.updateNote(id, {
-			name,
-			content,
-			color,
-			category,
-		});
+		const validatedData = NoteUpdateSchema.parse(req.body);
+		const note = await noteService.updateNote(id, validatedData);
 
 		if (!note) {
 			return res.status(404).json({ error: 'Nota no encontrada' });

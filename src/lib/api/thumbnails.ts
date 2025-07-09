@@ -2,14 +2,19 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 
 export interface ThumbnailInfo {
-	imageId: string;
-	thumbnailPath: string;
-	size: 'small' | 'medium' | 'large';
+	id: string;
+	entityType: string;
+	entityId: string;
+	size: string;
+	path: string;
 	width: number;
 	height: number;
+	format: string;
+	quality: number;
 	fileSize: number;
-	createdAt: string;
-	updatedAt: string;
+	isGenerated: boolean;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface ThumbnailGenerationOptions {

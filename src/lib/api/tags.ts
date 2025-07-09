@@ -7,22 +7,35 @@ export interface TagFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos';
 	sortOrder?: 'asc' | 'desc';
+	category?: string;
+	isPublic?: boolean;
+	isFavorite?: boolean;
 }
 
 export interface TagCreateInput {
 	name: string;
-	description?: string;
-	color?: string;
-	emoji?: string;
+	description?: string | null;
+	color?: string | null;
+	emoji?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
 }
 
 export interface TagUpdateInput {
 	name?: string;
-	description?: string;
-	color?: string;
-	emoji?: string;
+	description?: string | null;
+	color?: string | null;
+	emoji?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
 }
 
 export interface TagsResponse {

@@ -13,7 +13,7 @@ const GroupFiltersSchema = z.object({
 	search: z.string().optional(),
 	limit: z.number().int().positive().max(100).default(50).optional(),
 	offset: z.number().int().min(0).default(0).optional(),
-	sortBy: z.enum(['name', 'createdAt', 'updatedAt']).default('name').optional(),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'totalImages', 'totalVideos']).default('name').optional(),
 	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
 });
 
@@ -50,6 +50,10 @@ router.get('/', async (req, res) => {
 					description: groups.description,
 					createdAt: groups.createdAt,
 					updatedAt: groups.updatedAt,
+					isFavorite: groups.isFavorite,
+					category: groups.category,
+					totalImages: groups.totalImages,
+					totalVideos: groups.totalVideos,
 				})
 				.from(groups)
 				.where(whereClause)

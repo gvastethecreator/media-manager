@@ -13,7 +13,8 @@ import { z } from 'zod';
 export interface ActivityBase {
 	id: string;
 	type: string;
-	description: string;
+	message: string;
+	data?: string | null;
 	imageId?: string | null;
 	createdAt: Date;
 }
@@ -53,7 +54,8 @@ export type ActivityComplete = Activity;
  */
 export interface CreateActivityData {
 	type: string;
-	description: string;
+	message: string;
+	data?: string;
 	imageId?: string;
 }
 
@@ -90,7 +92,8 @@ export interface ActivityListResponse {
 export const ActivitySchema = z.object({
 	id: z.string(),
 	type: z.string(),
-	description: z.string(),
+	message: z.string(),
+	data: z.string().nullable().optional(),
 	imageId: z.string().nullable().optional(),
 	createdAt: z.date(),
 });

@@ -13,18 +13,24 @@ export interface PropertyFilters {
 
 export interface PropertyCreateInput {
 	name: string;
-	value: string;
-	type?: string;
-	description?: string;
-	isPublic?: boolean;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	shortcut?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
 }
 
 export interface PropertyUpdateInput {
 	name?: string;
-	value?: string;
-	type?: string;
-	description?: string;
-	isPublic?: boolean;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	shortcut?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
 }
 
 export interface PropertiesResponse {

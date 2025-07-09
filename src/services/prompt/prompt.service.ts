@@ -86,27 +86,9 @@ export const getPromptService = async (id: string): Promise<PromptWithStats | nu
 
 		const prompt = promptResult[0];
 
-		// Obtener conteos de relaciones
-		const [imageCount, videoCount] = await Promise.all([
-			db
-				.select({ count: count() })
-				.from(promptImages)
-				.where(eq(promptImages.promptId, id))
-				.then((res) => res[0]?.count || 0),
-			db
-				.select({ count: count() })
-				.from(promptVideos)
-				.where(eq(promptVideos.promptId, id))
-				.then((res) => res[0]?.count || 0),
-		]);
-
 		// Construir prompt con estadísticas
 		const promptWithStats: PromptWithStats = {
 			...prompt,
-			_count: {
-				images: imageCount,
-				videos: videoCount,
-			},
 		};
 
 		logger.info(`✅ Prompt encontrado: ${prompt.name}`);

@@ -1,29 +1,46 @@
 import { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
 
 export interface AudioBase extends EntityBase {
-	filePath: string;
-	fileName: string;
-	fileSize: number;
-	format: string;
-	duration: number;
-	bitrate: number;
-	sampleRate: number;
-	channels: number;
-	metadata: Record<string, any> | null;
-	album: string | null;
+	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	duration: number | null;
+	bitrate: number | null;
+	sampleRate: number | null;
+	channels: number | null;
+	format: string | null;
+	codec: string | null;
+	title: string | null;
 	artist: string | null;
-	genre: string | null;
+	album: string | null;
 	year: number | null;
+	genre: string | null;
 	track: number | null;
+	disc: number | null;
+	albumArtist: string | null;
+	composer: string | null;
+	comment: string | null;
 	lyrics: string | null;
+	bpm: number | null;
+	key: string | null;
+	mood: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface AudioStatistics {
-	duration: number;
-	format: string;
-	bitrate: number;
-	volumePeaks: number[];
-	sampleRate: number;
+	duration: number | null;
+	bitrate: number | null;
+	sampleRate: number | null;
+	channels: number | null;
+	format: string | null;
+	codec: string | null;
 }
 
 export interface AudioWithStats extends AudioBase, EntityWithStats {}

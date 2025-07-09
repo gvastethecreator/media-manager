@@ -76,79 +76,7 @@ export enum VideoViewMode {
 	TIMELINE = 'timeline',
 }
 
-/**
- * 🔗 Relaciones de Video optimizadas (usando tipos WithStats)
- */
-export interface VideoRelations {
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
-}
 
-/**
- * 📊 Estadísticas específicas de Video
- */
-export interface VideoStatistics {
-	// Conteos de relaciones (12 tipos)
-	albumsCount: number;
-	collectionsCount: number;
-	tagsCount: number;
-	charactersCount: number;
-	placesCount: number;
-	worldItemsCount: number;
-	conceptsCount: number;
-	promptsCount: number;
-	notesCount: number;
-	wildcardsCount: number;
-	propertiesCount: number;
-	groupsCount: number;
-	totalRelations: number;
-
-	// Métricas técnicas de video
-	durationMinutes: number;
-	durationHours: number;
-	megabytes: number;
-	gigabytes: number;
-	aspectRatio: string;
-	resolution: string;
-	qualityLevel: VideoQuality;
-
-	// Métricas de uso
-	views: number;
-	likes: number;
-	downloads: number;
-	shares: number;
-	lastViewed: Date | null;
-
-	// Análisis de calidad técnica
-	qualityScore: number; // 0-100
-	technicalGrade: 'A' | 'B' | 'C' | 'D';
-	hasAudio: boolean;
-	hasSubtitles: boolean;
-	bitrate: number | null;
-	frameRate: number | null;
-
-	// Metadatos AI y análisis
-	aiConfidence: number; // 0-1
-	autoTags: string[];
-	duplicateStatus: 'unique' | 'duplicate' | 'similar';
-
-	// Campos derivados
-	thumbnailUrl: string | null;
-	displayName: string;
-	formattedSize: string;
-	formattedDuration: string;
-	qualityLabel: string;
-}
 
 /**
  * 📝 Tipo base para Video - definición canónica
@@ -164,12 +92,13 @@ export interface VideoBase {
 	width: number | null;
 	height: number | null;
 	metadata: string | null;
-	thumbnail: Buffer | null;
+	thumbnail: string | null;
 	thumbnailSize: number | null;
 	thumbnailWidth: number | null;
 	thumbnailHeight: number | null;
 	isPublic: boolean;
 	isFavorite: boolean;
+	isHidden: boolean;
 	folderId: string;
 	createdAt: Date;
 	updatedAt: Date;

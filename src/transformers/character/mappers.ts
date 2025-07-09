@@ -20,22 +20,23 @@ type DrizzleCharacterCreateInput = {
 	description?: string | null;
 	emoji?: string | null;
 	color?: string | null;
-	level?: number;
-	class?: string | null;
-	race?: string | null;
-	alignment?: string | null;
-	stats?: string;
-	skills?: string;
-	relationships?: string;
-	goals?: string;
-	fears?: string;
-	beliefs?: string;
-	personality?: string;
-	abilities?: string;
-	backstory?: string;
-	psychologicalProfile?: string;
-	socialProfile?: string;
+	category?: string | null;
+	isPublic?: boolean;
 	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	age?: string | null;
+	gender?: string | null;
+	species?: string | null;
+	occupation?: string | null;
+	personality?: string | null;
+	background?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	equipment?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
 };
@@ -45,22 +46,23 @@ type DrizzleCharacterUpdateInput = {
 	description?: string | null;
 	emoji?: string | null;
 	color?: string | null;
-	level?: number;
-	class?: string | null;
-	race?: string | null;
-	alignment?: string | null;
-	stats?: string;
-	skills?: string;
-	relationships?: string;
-	goals?: string;
-	fears?: string;
-	beliefs?: string;
-	personality?: string;
-	abilities?: string;
-	backstory?: string;
-	psychologicalProfile?: string;
-	socialProfile?: string;
+	category?: string | null;
+	isPublic?: boolean;
 	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	age?: string | null;
+	gender?: string | null;
+	species?: string | null;
+	occupation?: string | null;
+	personality?: string | null;
+	background?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	equipment?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 	updatedAt?: Date;
 };
 
@@ -68,12 +70,21 @@ type DrizzleCharacterWhereInput = {
 	id?: string;
 	name?: { contains?: string };
 	description?: { contains?: string };
-	backstory?: { contains?: string };
-	level?: { gte?: number; lte?: number };
-	class?: { in?: string[] };
-	race?: { in?: string[] };
-	alignment?: { in?: string[] };
+	category?: { in?: string[] };
+	isPublic?: boolean;
 	isFavorite?: boolean;
+	age?: { gte?: number; lte?: number };
+	gender?: { in?: string[] };
+	species?: { in?: string[] };
+	occupation?: { contains?: string };
+	personality?: { contains?: string };
+	background?: { contains?: string };
+	relationships?: { contains?: string };
+	skills?: { contains?: string };
+	equipment?: { contains?: string };
+	notes?: { contains?: string };
+	featuredImage?: { contains?: string };
+	parentId?: string;
 	OR?: DrizzleCharacterWhereInput[];
 	tags?: { some?: { id?: { in?: string[] } } };
 };
@@ -96,17 +107,6 @@ export function mapCreateCharacterDataToDrizzle(data: CharacterCreateInput): Dri
 		const drizzleData: DrizzleCharacterCreateInput = {
 			...rest,
 			id: crypto.randomUUID(),
-			stats: data.stats ?? '',
-			skills: data.skills ?? '[]',
-			relationships: data.relationships ?? '[]',
-			goals: data.goals ?? '[]',
-			fears: data.fears ?? '[]',
-			beliefs: data.beliefs ?? '[]',
-			personality: data.personality ?? '[]',
-			abilities: data.abilities ?? '[]',
-			backstory: data.backstory ?? '',
-			psychologicalProfile: data.psychologicalProfile ?? '',
-			socialProfile: data.socialProfile ?? '',
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
@@ -164,32 +164,20 @@ function mapCharacterFiltersToDrizzle(filters: CharacterFilters): DrizzleCharact
 		where.OR = [
 			{ name: { contains: filters.search } },
 			{ description: { contains: filters.search } },
-			{ backstory: { contains: filters.search } },
+			{ age: { contains: filters.search } },
+			{ gender: { contains: filters.search } },
+			{ species: { contains: filters.search } },
+			{ occupation: { contains: filters.search } },
+			{ personality: { contains: filters.search } },
+			{ background: { contains: filters.search } },
+			{ relationships: { contains: filters.search } },
+			{ skills: { contains: filters.search } },
+			{ equipment: { contains: filters.search } },
+			{ notes: { contains: filters.search } },
 		];
 	}
 
-	if (filters.level) {
-		const levelFilter: { gte?: number; lte?: number } = {};
-		if (filters.level.min !== undefined) {
-			levelFilter.gte = filters.level.min;
-		}
-		if (filters.level.max !== undefined) {
-			levelFilter.lte = filters.level.max;
-		}
-		if (Object.keys(levelFilter).length > 0) {
-			where.level = levelFilter;
-		}
-	}
-
-	if (filters.class?.length) {
-		where.class = { in: filters.class };
-	}
-	if (filters.race?.length) {
-		where.race = { in: filters.race };
-	}
-	if (filters.alignment?.length) {
-		where.alignment = { in: filters.alignment };
-	}
+	
 	if (filters.isFavorite !== undefined) {
 		where.isFavorite = filters.isFavorite;
 	}

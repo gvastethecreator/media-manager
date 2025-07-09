@@ -7,24 +7,71 @@ export interface PromptFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'imageCount';
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos' | 'type' | 'content' | 'parameters' | 'style' | 'mood' | 'lighting' | 'composition' | 'technique' | 'inspiration' | 'notes' | 'featuredImage' | 'parentId';
 	sortOrder?: 'asc' | 'desc';
+	category?: string;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	type?: string;
+	content?: string;
+	parameters?: string;
+	style?: string;
+	mood?: string;
+	lighting?: string;
+	composition?: string;
+	technique?: string;
+	inspiration?: string;
+	notes?: string;
+	featuredImage?: string;
+	parentId?: string;
 }
 
 export interface PromptCreateInput {
 	name: string;
-	content: string;
-	description?: string;
-	category?: string;
-	tags?: string[];
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface PromptUpdateInput {
 	name?: string;
-	content?: string;
-	description?: string;
-	category?: string;
-	tags?: string[];
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 export interface PromptsResponse {

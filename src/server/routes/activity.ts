@@ -8,7 +8,7 @@ const activityService = new ActivityService();
 // Schema para validación
 const createActivitySchema = z.object({
 	type: z.string().min(1, 'El tipo de actividad es requerido'),
-	description: z.string().min(1, 'La descripción es requerida'),
+	message: z.string().min(1, 'El mensaje es requerido'),
 	imageId: z.string().optional(),
 	albumId: z.string().optional(),
 	folderId: z.string().optional(),
@@ -33,7 +33,12 @@ router.post('/', async (req, res) => {
 	try {
 		const validatedData = createActivitySchema.parse(req.body);
 
-		const activity = await activityService.create(validatedData);
+		const activity = await activityService.create({
+			type: validatedData.type,
+			message: validatedData.message,
+			imageId: validatedData.imageId,
+			data: validatedData.metadata ? JSON.stringify(validatedData.metadata) : undefined,
+		});
 
 		res.status(201).json({
 			data: activity,
