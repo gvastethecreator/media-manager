@@ -13,7 +13,7 @@
  */
 
 // --- Tipos Canónicos ---
-export type { CollectionBase, CollectionStatistics, CollectionWithStats } from './base';
+export type { CollectionBase, CollectionEdition, CollectionStatistics, CollectionWithStats } from './base';
 
 // --- Enumeraciones ---
 export {

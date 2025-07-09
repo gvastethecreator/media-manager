@@ -22,6 +22,7 @@ export interface GroupBase {
 	filters?: string | null;
 	isFavorite?: boolean;
 	rarityLevel?: string | null;
+	flexibilityScore?: number | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -36,6 +37,18 @@ export interface GroupWithStats extends GroupBase {
 		recentlyAdded: number;
 		averageRating: number;
 		totalSize: number;
+		totalVideos: number;
+		totalAlbums: number;
+		totalCollections: number;
+		totalTags: number;
+		totalCharacters: number;
+		totalPlaces: number;
+		totalWorldItems: number;
+		totalConcepts: number;
+		totalPrompts: number;
+		totalNotes: number;
+		totalWildcards: number;
+		totalProperties: number;
 	};
 }
 

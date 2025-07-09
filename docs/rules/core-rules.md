@@ -105,7 +105,6 @@ I need to identify the correct hook or component to add the Supabase Realtime lo
 I'm now checking to ensure that these changes will correctly update the UI when the deletion occurs.
 
     Do not use code blocks for explanations or comments.
-
     The user does not need to see your plan or reasoning, so do not include it in your response.
 
 Important Notes

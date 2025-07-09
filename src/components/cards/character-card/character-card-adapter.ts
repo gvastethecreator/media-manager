@@ -3,11 +3,11 @@
  * @module components/cards/character-card/character-card-adapter
  */
 
-import type { CharacterCardData } from '@/lib/api/services/characters';
-import type { CharacterWithStats } from '@/types/entities/character';
+import type { CharacterStatistics, CharacterWithStats } from '@/types/entities/character';
+import type { CharacterCardData } from './character-card.types';
 
 /**
- * 🎭 Convierte CharacterWithStats a CharacterCardData para compatibilidad con CharacterCard
+ * 🎭 Adaptador para convertir CharacterWithStats a CharacterCardData para compatibilidad con CharacterCard
  * @param character Personaje con estadísticas
  * @returns Datos de personaje compatible con CharacterCard
  */
@@ -20,53 +20,30 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		legendary: 'Mythic',
 	};
 
-	const safeJsonParse = (jsonStr: string | null | undefined): any => {
-		if (!jsonStr) return {};
+	const safeJsonParse = <T>(jsonStr: string | null | undefined, fallback: T): T => {
+		if (!jsonStr) return fallback;
 		try {
-			return JSON.parse(jsonStr);
+			return JSON.parse(jsonStr) as T;
 		} catch {
-			return {};
+			return fallback;
 		}
 	};
 
 	const level = character.level ?? 1;
 
 	return {
-		id: character.id,
-		name: character.name,
-		description: character.description,
-		emoji: character.emoji,
-		color: character.color,
-		isFavorite: character.isFavorite,
-		createdAt: character.createdAt,
-		updatedAt: character.updatedAt,
-		_count: {
-			images: character.statistics?.totalImages ?? 0,
-			videos: character.statistics?.totalVideos ?? 0,
-			collections: character.statistics?.totalCollections ?? 0,
-			tags: character.statistics?.totalTags ?? 0,
-			places: character.statistics?.totalPlaces ?? 0,
-			worldItems: character.statistics?.totalWorldItems ?? 0,
-			concepts: character.statistics?.totalConcepts ?? 0,
-			prompts: character.statistics?.totalPrompts ?? 0,
-			notes: character.statistics?.totalNotes ?? 0,
-			wildcards: character.statistics?.totalWildcards ?? 0,
-			properties: character.statistics?.totalProperties ?? 0,
-			groups: character.statistics?.totalGroups ?? 0,
-			relatedCharacters: character.statistics?.totalRelatedCharacters ?? 0,
-			relatedTo: character.statistics?.totalRelatedTo ?? 0,
-		},
+		...character,
 		recentImages: [],
 		recentVideos: [],
 		totalSize: character.statistics?.totalAssociations ?? 0,
-		stats: safeJsonParse(character.stats),
-		parsedRelationships: safeJsonParse(character.relationships),
-		parsedGoals: safeJsonParse(character.goals),
-		parsedFears: safeJsonParse(character.fears),
-		parsedBeliefs: safeJsonParse(character.beliefs),
-		parsedPersonality: safeJsonParse(character.personality),
-		parsedSkills: safeJsonParse(character.skills),
-		parsedAbilities: safeJsonParse(character.abilities),
+		stats: safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats),
+		parsedRelationships: safeJsonParse(character.relationships, {}),
+		parsedGoals: safeJsonParse(character.goals, {}),
+		parsedFears: safeJsonParse(character.fears, {}),
+		parsedBeliefs: safeJsonParse(character.beliefs, {}),
+		parsedPersonality: safeJsonParse(character.personality, {}),
+		parsedSkills: safeJsonParse(character.skills, {}),
+		parsedAbilities: safeJsonParse(character.abilities, {}),
 		metadata: {
 			power: character.statistics?.powerLevel ?? level * 10,
 			rarityLevel: rarityMap[character.statistics?.rarityLevel ?? 'common'] ?? 'Common',
@@ -75,11 +52,6 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 			manaPoints: character.statistics?.manaPoints,
 			totalAttacks: 0,
 		},
-		level: character.level,
-		class: character.class,
-		race: character.race,
-		backstory: character.backstory,
-		alignment: character.alignment,
 	};
 }
 
@@ -99,4 +71,4 @@ export function isCharacterCardData(character: any): character is CharacterCardD
  */
 export function isCharacterWithStats(character: any): character is CharacterWithStats {
 	return character && 'statistics' in character;
-}
+}''

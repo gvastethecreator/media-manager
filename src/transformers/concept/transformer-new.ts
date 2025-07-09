@@ -40,7 +40,7 @@ export function fromDrizzleConcept(
 	}
 
 	try {
-		const stats: ConceptStatistics = {
+		const stats: ConceptStats = {
 			imageCount: counts.images,
 			videoCount: counts.videos,
 			albumCount: counts.albums,

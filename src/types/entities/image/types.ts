@@ -6,7 +6,8 @@
  */
 
 import { z } from 'zod';
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
+import { BaseEntitySchema } from '@/types/common/base';
+import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -19,7 +20,7 @@ import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
 import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { WorldItemWithStats } from '../world-item';
 
 /**
  * 🔍 Esquema de validación para Image
