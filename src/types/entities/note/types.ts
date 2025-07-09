@@ -19,7 +19,7 @@ import type { TagWithStats } from '../tag';
 import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
-import type { NoteSchema } from './schema';
+
 
 /**
  * 📝 Tipo base canónico para Note

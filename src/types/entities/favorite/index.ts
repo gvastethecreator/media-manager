@@ -19,7 +19,7 @@ export type {
 	FavoriteExtended,
 	FavoriteStatistics,
 	FavoriteWithStats,
-} from './base';
+} from './types';
 
 // --- Enums ---
 export { FavoriteEntityType } from './base';

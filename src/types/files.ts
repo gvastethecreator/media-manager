@@ -15,7 +15,7 @@ import type { NoteComplete } from './entities/note';
 import type { PlaceComplete } from './entities/place';
 import type { PromptComplete } from './entities/prompt';
 import type { PropertyComplete } from './entities/property';
-import type { TagComplete } from './entities/tag';
+import type { TagWithStats as TagComplete } from './entities/tag/types';
 import type { VideoComplete } from './entities/video';
 import type { WildcardComplete } from './entities/wildcard';
 import type { WorldItemComplete } from './entities/world-item';

@@ -1,6 +1,6 @@
 import React from 'react';
 import packageJson from '../../../package.json';
-import { GlobalErrorFallback } from '../global-error-handler';
+import { GlobalErrorFallback } from './global-error-handler';
 
 interface ErrorBoundaryProps {
 	children: React.ReactNode;

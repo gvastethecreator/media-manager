@@ -180,8 +180,9 @@ export const useProfileStore = create<ProfileStore>()(
 				// ===== GESTIÓN DE PREFERENCIAS =====
 
 				updateTheme: (theme: ThemeMode) => {
-					const { mutate } = useUpdateTheme();
-					mutate(theme);
+					// TODO: Implement theme update logic. This should not directly call React hooks.
+					// Consider dispatching an event or calling a utility function that handles theme updates.
+					console.warn('Theme update logic needs to be implemented outside the store.');
 				},
 
 				updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => {

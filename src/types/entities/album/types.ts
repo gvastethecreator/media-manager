@@ -1,4 +1,4 @@
-import { EntityBase } from '@/types/entities/entity.types';
+import { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
 
 export interface AlbumBase extends EntityBase {
 	name: string;

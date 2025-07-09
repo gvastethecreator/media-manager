@@ -16,7 +16,7 @@ import type { NoteComplete } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
+import type { TagWithStats as TagComplete } from '../tag/types';
 import type { VideoWithStats } from '../video';
 import type { WildcardComplete } from '../wildcard';
 

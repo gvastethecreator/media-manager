@@ -39,17 +39,17 @@ export function sortCharacters(
 		case CharacterSortOption.DATE_DESC:
 			return sortedCharacters.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 		case CharacterSortOption.LEVEL_ASC:
-			return sortedCharacters.sort((a, b) => a.level - b.level);
+			return sortedCharacters.sort((a, b) => (a.level || 0) - (b.level || 0));
 		case CharacterSortOption.LEVEL_DESC:
-			return sortedCharacters.sort((a, b) => b.level - a.level);
+			return sortedCharacters.sort((a, b) => (b.level || 0) - (a.level || 0));
 		case CharacterSortOption.CLASS_ASC:
-			return sortedCharacters.sort((a, b) => a.class.localeCompare(b.class));
+			return sortedCharacters.sort((a, b) => (a.class || '').localeCompare(b.class || ''));
 		case CharacterSortOption.CLASS_DESC:
-			return sortedCharacters.sort((a, b) => b.class.localeCompare(a.class));
+			return sortedCharacters.sort((a, b) => (b.class || '').localeCompare(a.class || ''));
 		case CharacterSortOption.RACE_ASC:
-			return sortedCharacters.sort((a, b) => a.race.localeCompare(b.race));
+			return sortedCharacters.sort((a, b) => (a.race || '').localeCompare(b.race || ''));
 		case CharacterSortOption.RACE_DESC:
-			return sortedCharacters.sort((a, b) => b.race.localeCompare(a.race));
+			return sortedCharacters.sort((a, b) => (b.race || '').localeCompare(a.race || ''));
 		default:
 			return sortedCharacters;
 	}
@@ -85,7 +85,7 @@ export function groupCharacters(
 				groupKey = character.category || 'Sin categoría';
 				break;
 			case 'level': {
-				const level = character.level;
+				const level = character.level || 0;
 				if (level <= 5) groupKey = 'Novato (1-5)';
 				else if (level <= 10) groupKey = 'Intermedio (6-10)';
 				else if (level <= 15) groupKey = 'Avanzado (11-15)';
@@ -141,17 +141,17 @@ export function getCharacterStats(characters: CharacterWithStats[]) {
 
 	// Distribución por clase
 	const classCounts: Record<string, number> = {};
-	characters.forEach((character) => {
+	for (const character of characters) {
 		const characterClass = character.class || 'unknown';
 		classCounts[characterClass] = (classCounts[characterClass] || 0) + 1;
-	});
+	}
 
 	// Distribución por raza
 	const raceCounts: Record<string, number> = {};
-	characters.forEach((character) => {
+	for (const character of characters) {
 		const race = character.race || 'unknown';
 		raceCounts[race] = (raceCounts[race] || 0) + 1;
-	});
+	}
 
 	// Distribución por nivel
 	const levelRanges = {
@@ -162,14 +162,14 @@ export function getCharacterStats(characters: CharacterWithStats[]) {
 		'20+': 0,
 	};
 
-	characters.forEach((character) => {
-		const level = character.level;
+	for (const character of characters) {
+		const level = character.level || 0;
 		if (level <= 5) levelRanges['1-5']++;
 		else if (level <= 10) levelRanges['6-10']++;
 		else if (level <= 15) levelRanges['11-15']++;
 		else if (level <= 20) levelRanges['16-20']++;
 		else levelRanges['20+']++;
-	});
+	}
 
 	// Estadísticas de asociaciones usando las estadísticas pre-calculadas
 	const totalAssociations = characters.reduce(
@@ -194,10 +194,10 @@ export function getCharacterStats(characters: CharacterWithStats[]) {
 		legendary: 0,
 	};
 
-	characters.forEach((character) => {
+	for (const character of characters) {
 		const rarity = character.statistics?.rarityLevel || 'common';
 		rarityDistribution[rarity]++;
-	});
+	}
 
 	return {
 		totalCharacters,
@@ -232,17 +232,17 @@ export function compareCharacters(
 		case CharacterSortOption.NAME_DESC:
 			return b.name.localeCompare(a.name);
 		case CharacterSortOption.LEVEL_ASC:
-			return a.level - b.level;
+			return (a.level || 0) - (b.level || 0);
 		case CharacterSortOption.LEVEL_DESC:
-			return b.level - a.level;
+			return (b.level || 0) - (a.level || 0);
 		case CharacterSortOption.CLASS_ASC:
-			return a.class.localeCompare(b.class);
+			return (a.class || '').localeCompare(b.class || '');
 		case CharacterSortOption.CLASS_DESC:
-			return b.class.localeCompare(a.class);
+			return (b.class || '').localeCompare(a.class || '');
 		case CharacterSortOption.RACE_ASC:
-			return a.race.localeCompare(b.race);
+			return (a.race || '').localeCompare(b.race || '');
 		case CharacterSortOption.RACE_DESC:
-			return b.race.localeCompare(a.race);
+			return (b.race || '').localeCompare(a.race || '');
 		case CharacterSortOption.DATE_ASC:
 			return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 		case CharacterSortOption.DATE_DESC:
@@ -258,7 +258,7 @@ export function compareCharacters(
  * @returns Nivel numérico
  */
 export function getCharacterLevelAsNumber(character: CharacterWithStats): number {
-	return character.level || 1;
+	return character.level ?? 1;
 }
 
 /**
@@ -273,11 +273,11 @@ export function matchesCharacterSearch(character: CharacterWithStats, searchTerm
 	return (
 		character.name.toLowerCase().includes(normalizedTerm) ||
 		character.description?.toLowerCase().includes(normalizedTerm) ||
-		character.class.toLowerCase().includes(normalizedTerm) ||
-		character.race.toLowerCase().includes(normalizedTerm) ||
-		character.alignment.toLowerCase().includes(normalizedTerm) ||
+		(character.class || '').toLowerCase().includes(normalizedTerm) ||
+		(character.race || '').toLowerCase().includes(normalizedTerm) ||
+		(character.alignment || '').toLowerCase().includes(normalizedTerm) ||
 		character.category?.toLowerCase().includes(normalizedTerm) ||
-		character.backstory.toLowerCase().includes(normalizedTerm)
+		(character.backstory || '').toLowerCase().includes(normalizedTerm)
 	);
 }
 

@@ -7,6 +7,11 @@ import type { StateCreator } from 'zustand';
 import type { CharacterViewConfig } from '@/types/entities/character';
 import type { CharacterState, CharacterUISlice } from '../types';
 
+const defaultViewConfig: CharacterViewConfig = {
+	gridColumns: 4, // Default to 4 columns
+	cardSize: 'medium', // Default card size
+};
+
 /**
  * Crea el slice de UI para Character
  * Contiene operaciones relacionadas con el estado visual y la interacción
@@ -27,7 +32,7 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 * Actualiza la configuración de visualización
 	 * @param config Configuración parcial para aplicar
 	 */
-	setViewConfig: (config: Partial<CharacterViewConfig>) => {
+	updateViewConfig: (config: Partial<CharacterViewConfig>) => {
 		set((state) => ({
 			viewConfig: {
 				...state.viewConfig,
@@ -71,10 +76,27 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	},
 
 	/**
+	 * Alterna la selección de un personaje
+	 * @param characterId ID del personaje
+	 */
+	toggleCharacterSelection: (characterId: string) => {
+		set((state) => ({
+			selectedCharacterId: state.selectedCharacterId === characterId ? null : characterId,
+		}));
+	},
+
+	/**
+	 * Limpia la selección de personaje
+	 */
+	clearSelection: () => {
+		set({ selectedCharacterId: null });
+	},
+
+	/**
 	 * Establece el estado de hover sobre un personaje
 	 * @param characterId ID del personaje o null para quitar hover
 	 */
-	hoverCharacter: (characterId: string | null) => {
+	setHoveredCharacter: (characterId: string | null) => {
 		set({ hoveredCharacterId: characterId });
 	},
 
@@ -82,7 +104,7 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 * Alterna el estado expandido de un personaje
 	 * @param characterId ID del personaje
 	 */
-	toggleExpandCharacter: (characterId: string) => {
+	toggleCharacterExpansion: (characterId: string) => {
 		set((state) => {
 			const isCurrentlyExpanded = state.expandedCharacterIds.includes(characterId);
 
@@ -179,6 +201,13 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	setCharacterError: (_characterId: string, hasError: boolean) => {
 		// El estado de error se maneja en el estado general del store
 		set({ error: hasError ? 'Error en el personaje' : null });
+	},
+
+	/**
+	 * Restablece la configuración de vista a los valores predeterminados
+	 */
+	resetViewConfig: () => {
+		set({ viewConfig: defaultViewConfig });
 	},
 
 	/**

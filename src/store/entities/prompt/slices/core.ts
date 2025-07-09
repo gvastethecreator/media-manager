@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { getPrompts, createPrompt, updatePrompt, deletePromptFromApi } from '@/lib/api/client/prompt.client';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
 import type { PromptStore } from '../types';
 

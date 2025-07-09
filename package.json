@@ -155,6 +155,7 @@
     "dotenv": "^17.0.1",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.30.1",
+    "eslint-plugin-react-hooks-extra": "^1.52.2",
     "glob": "^11.0.3",
     "happy-dom": "^18.0.1",
     "node-mocks-http": "^1.17.2",

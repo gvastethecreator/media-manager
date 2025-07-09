@@ -13,7 +13,7 @@ import type { ImageComplete } from '../image';
 import type { NoteComplete } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
+import type { TagWithStats as TagComplete } from '../tag/types';
 import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';

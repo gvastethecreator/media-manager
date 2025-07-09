@@ -1,4 +1,4 @@
-import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
+import EmojiPicker from 'emoji-picker-react';
 import { Smile } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 // Tema eliminado - no se usa en este componente
@@ -68,10 +68,10 @@ export function EmojiPicker({
 		}
 	}, [value]);
 
-	// 🎯 Manejar selección de emoji desde Frimousse
+	// 🎯 Manejar selección de emoji desde EmojiPicker
 	const handleEmojiSelect = useCallback(
-		(emoji: { native: string }) => {
-			const emojiValue = emoji.native;
+		(emojiData: any) => {
+			const emojiValue = emojiData.emoji;
 			setSelectedEmoji(emojiValue);
 
 			// 📢 Notificar cambios a los callbacks
@@ -128,23 +128,14 @@ export function EmojiPicker({
 							</div>
 						</div>
 
-						{/* 🎨 Picker principal con Frimousse */}
+						{/* 🎨 Picker principal con EmojiPicker */}
 						<div className="p-2">
-							<FrimousseEmojiPicker.Root onEmojiSelect={handleEmojiSelect} className="w-full">
-								<FrimousseEmojiPicker.Search
-									placeholder="Buscar emoji..."
-									className="w-full mb-2 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-								/>
-								<FrimousseEmojiPicker.Viewport className="h-48 overflow-hidden">
-									<FrimousseEmojiPicker.Loading className="flex items-center justify-center h-full text-sm text-muted-foreground">
-										Cargando emojis...
-									</FrimousseEmojiPicker.Loading>
-									<FrimousseEmojiPicker.Empty className="flex items-center justify-center h-full text-sm text-muted-foreground">
-										No se encontraron emojis
-									</FrimousseEmojiPicker.Empty>
-									<FrimousseEmojiPicker.List className="grid grid-cols-8 gap-1 p-1" />
-								</FrimousseEmojiPicker.Viewport>
-							</FrimousseEmojiPicker.Root>
+							<EmojiPicker
+								onEmojiClick={handleEmojiSelect}
+								width={300}
+								height={200}
+								searchPlaceholder="Buscar emoji..."
+							/>
 						</div>
 					</div>
 				</PopoverContent>
@@ -175,21 +166,12 @@ export function EmojiPicker({
 
 			{/* 🎨 Picker principal */}
 			<div className="p-4">
-				<FrimousseEmojiPicker.Root onEmojiSelect={handleEmojiSelect} className="w-full">
-					<FrimousseEmojiPicker.Search
-						placeholder="Buscar emoji..."
-						className="w-full mb-4 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-					/>
-					<FrimousseEmojiPicker.Viewport className="h-64 overflow-hidden">
-						<FrimousseEmojiPicker.Loading className="flex items-center justify-center h-full text-muted-foreground">
-							Cargando emojis...
-						</FrimousseEmojiPicker.Loading>
-						<FrimousseEmojiPicker.Empty className="flex items-center justify-center h-full text-muted-foreground">
-							No se encontraron emojis
-						</FrimousseEmojiPicker.Empty>
-						<FrimousseEmojiPicker.List className="grid grid-cols-10 gap-2" />
-					</FrimousseEmojiPicker.Viewport>
-				</FrimousseEmojiPicker.Root>
+				<EmojiPicker
+					onEmojiClick={handleEmojiSelect}
+					width={350}
+					height={300}
+					searchPlaceholder="Buscar emoji..."
+				/>
 			</div>
 		</div>
 	);

@@ -167,6 +167,7 @@ export const videos = sqliteTable(
 		thumbnailHeight: integer('thumbnailHeight'),
 		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		isHidden: integer('isHidden', { mode: 'boolean' }).notNull().default(false),
 		folderId: text('folderId').notNull(),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
@@ -257,6 +258,10 @@ export const albums = sqliteTable(
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
 		totalSize: integer('totalSize').notNull().default(0),
+		filters: text('filters'),
+		shortcut: text('shortcut'),
+		category: text('category'),
+		metadata: text('metadata'),
 		lastImageAddedAt: integer('lastImageAddedAt', { mode: 'timestamp_ms' }),
 		lastVideoAddedAt: integer('lastVideoAddedAt', { mode: 'timestamp_ms' }),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
@@ -790,6 +795,70 @@ export const workflows = sqliteTable(
 	},
 	(table) => ({
 		nameIdx: uniqueIndex('Workflow_name_key').on(table.name),
+	})
+);
+
+// Modelo para favoritos
+export const favorites = sqliteTable(
+	'Favorite',
+	{
+		id: text('id').primaryKey(),
+		entityType: text('entityType').notNull(), // 'image', 'video', 'album', etc.
+		entityId: text('entityId').notNull(),
+		userId: text('userId'), // Opcional por ahora
+		addedAt: integer('addedAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		notes: text('notes'), // Notas opcionales del usuario sobre por qué es favorito
+		category: text('category'), // Categoría personalizada de favorito
+		priority: integer('priority').default(0), // Prioridad del favorito (0-10)
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
+	},
+	(table) => ({
+		entityTypeEntityIdIdx: uniqueIndex('Favorite_entityType_entityId_key').on(table.entityType, table.entityId),
+		entityTypeIdx: index('Favorite_entityType_idx').on(table.entityType),
+		userIdIdx: index('Favorite_userId_idx').on(table.userId),
+		addedAtIdx: index('Favorite_addedAt_idx').on(table.addedAt),
+		categoryIdx: index('Favorite_category_idx').on(table.category),
+		priorityIdx: index('Favorite_priority_idx').on(table.priority),
+	})
+);
+
+// Modelo para archivos genéricos
+export const files = sqliteTable(
+	'File',
+	{
+		id: text('id').primaryKey(),
+		name: text('name').notNull(),
+		path: text('path').notNull(),
+		size: integer('size').notNull(),
+		hash: text('hash').notNull(),
+		mimeType: text('mimeType').notNull(),
+		extension: text('extension').notNull(),
+		fileType: text('fileType').notNull(), // 'image', 'video', 'audio', 'document', etc.
+		folderId: text('folderId').notNull(),
+		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
+		isHidden: integer('isHidden', { mode: 'boolean' }).notNull().default(false),
+		description: text('description'),
+		tags: text('tags'), // JSON array de tags
+		metadata: text('metadata'), // JSON con metadatos específicos del tipo
+		lastAccessed: integer('lastAccessed', { mode: 'timestamp_ms' }),
+		accessCount: integer('accessCount').default(0),
+		isProcessed: integer('isProcessed', { mode: 'boolean' }).default(false),
+		processingError: text('processingError'),
+		processingStatus: text('processingStatus').default('pending'), // 'pending', 'processing', 'completed', 'failed'
+		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
+	},
+	(table) => ({
+		pathIdx: uniqueIndex('File_path_key').on(table.path),
+		folderId_idx: index('File_folderId_idx').on(table.folderId),
+		hash_idx: index('File_hash_idx').on(table.hash),
+		fileType_idx: index('File_fileType_idx').on(table.fileType),
+		createdAt_idx: index('File_createdAt_idx').on(table.createdAt),
+		updatedAt_idx: index('File_updatedAt_idx').on(table.updatedAt),
+		isFavorite_idx: index('File_isFavorite_idx').on(table.isFavorite),
+		processingStatus_idx: index('File_processingStatus_idx').on(table.processingStatus),
 	})
 );
 

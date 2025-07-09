@@ -25,7 +25,7 @@ export function charactersToRecord(characters: CharacterWithStats[]): Record<str
 /**
  * Crea el slice principal optimizado para Character.
  */
-export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCoreSlice, [], [], CharacterCoreSlice> = (
+export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCoreSlice, [], [], CharacterState & CharacterCoreSlice> = (
 	set,
 	get
 ) => ({
@@ -40,6 +40,11 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	getAllCharacters: () => {
 		const { characters } = get();
 		return Object.values(characters);
+	},
+
+	getCharactersByIds: (ids: string[]) => {
+		const { characters } = get();
+		return ids.map((id) => characters[id]).filter(Boolean);
 	},
 
 	// Operaciones principales CRUD optimizadas
@@ -160,7 +165,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 				return state;
 			}
 
-			return {
+						return {
 				characters: {
 					...state.characters,
 					[characterId]: {

@@ -144,6 +144,7 @@ export default [
 		},
 		plugins: {
 			'@typescript-eslint': typescript,
+			'react-hooks-extra': 'eslint-plugin-react-hooks-extra'
 		},
 		rules: {
 			// Reglas que complementan Biome (no duplican su funcionalidad)
@@ -153,6 +154,9 @@ export default [
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/prefer-as-const': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'warn',
+
+			// React Hooks Extra rules
+			'react-hooks-extra/no-direct-set-state-in-use-effect': 'error',
 
 			// Reglas generales que complementan Biome
 			'no-console': 'off',

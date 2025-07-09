@@ -47,45 +47,47 @@ export const createCollectionFiltersSlice: StateCreator<
 > = (set, get) => ({
 	// Filtros básicos
 	filterByCategory: (category: string | null) => {
-		const collections = get().getCollections();
-		if (!category) return collections;
-		return collections.filter((collection) => collection.category === category);
+		set((state) => {
+			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'category');
+			if (category) {
+				newFilters.push({ field: 'category', value: category, operator: 'equals' });
+			}
+			return { activeFilters: newFilters };
+		});
 	},
 
 	filterByRarity: (rarity: string | null) => {
-		const collections = get().getCollections();
-		if (!rarity) return collections;
-
-		return collections.filter((collection) => {
-			const totalItems = collection.stats?.totalItems || 0;
-			switch (rarity) {
-				case 'Mítica':
-					return totalItems > 100;
-				case 'Rara':
-					return totalItems > 50 && totalItems <= 100;
-				case 'Poco común':
-					return totalItems > 20 && totalItems <= 50;
-				case 'Común':
-					return totalItems <= 20;
-				default:
-					return true;
+		set((state) => {
+			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'rarity');
+			if (rarity) {
+				newFilters.push({ field: 'rarity', value: rarity, operator: 'equals' });
 			}
+			return { activeFilters: newFilters };
 		});
 	},
 
 	filterByPrice: (minPrice: number | null, maxPrice: number | null) => {
-		const collections = get().getCollections();
-		return collections.filter((collection) => {
-			const price = collection.price || 0;
-			if (minPrice !== null && price < minPrice) return false;
-			if (maxPrice !== null && price > maxPrice) return false;
-			return true;
+		set((state) => {
+			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'price');
+			if (minPrice !== null && maxPrice !== null) {
+				newFilters.push({ field: 'price', value: [minPrice, maxPrice], operator: 'between' });
+			} else if (minPrice !== null) {
+				newFilters.push({ field: 'price', value: minPrice, operator: 'gte' });
+			} else if (maxPrice !== null) {
+				newFilters.push({ field: 'price', value: maxPrice, operator: 'lte' });
+			}
+			return { activeFilters: newFilters };
 		});
 	},
 
 	filterByName: (searchTerm: string) => {
-		const collections = get().getCollections();
-		return filterCollectionsBySearch(collections, searchTerm);
+		set((state) => {
+			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'name');
+			if (searchTerm) {
+				newFilters.push({ field: 'name', value: searchTerm, operator: 'contains' });
+			}
+			return { activeFilters: newFilters };
+		});
 	},
 
 	// Ordenamiento y agrupamiento
