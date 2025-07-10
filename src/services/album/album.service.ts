@@ -10,7 +10,7 @@ import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { toAlbumWithStats } from '@/transformers/album';
+import { toAlbumWithStats } from '@/transformers/album/mappers';
 import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
 
 const logger = serverLogger.withContext('AlbumService');

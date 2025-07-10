@@ -1,12 +1,13 @@
-import express from 'express';
-import {
-	deleteUploadedImage,
-	getUploadedImageStats,
-	getUploadedImages,
-	uploadImages,
-} from '../services/uploaded-images.api.service';
+const UploadedImageCreateSchema = z.object({
+	name: z.string().min(1),
+	path: z.string().min(1),
+	size: z.number().min(0),
+	hash: z.string().min(1),
+	metadata: z.string().nullable().optional(),
+	imageId: z.string().min(1),
+});
 
-const router = express.Router();
+const UploadedImageUpdateSchema = UploadedImageCreateSchema.partial();
 
 // GET /uploaded-images/:id - Obtener datos de una imagen subida por ID
 router.get('/:id', async (req, res) => {
