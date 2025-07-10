@@ -135,3 +135,18 @@ export interface PromptSearchOptions {
 	};
 	includeRelations?: boolean;
 }
+
+export enum PromptSortCriteria {
+	NAME_ASC = 'name_asc',
+	NAME_DESC = 'name_desc',
+	CREATED_AT_ASC = 'createdAt_asc',
+	CREATED_AT_DESC = 'createdAt_desc',
+	UPDATED_AT_ASC = 'updatedAt_asc',
+	UPDATED_AT_DESC = 'updatedAt_desc',
+}
+
+export enum PromptViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	CARDS = 'cards',
+}
