@@ -8,7 +8,7 @@
 // --- Transformadores principales ---
 export { toDocumentWithStats, toDocumentWithStatsList } from './mappers';
 // --- Schema de Drizzle ---
-export { type DocumentInsert, type DocumentSchema, documentsTable } from './schema';
+export { type DocumentInsert, type DocumentSchema, documentsTable } from './schema.ts';
 // --- Serializadores ---
 export {
 	serializeDocumentBase,

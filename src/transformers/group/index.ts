@@ -7,6 +7,7 @@
 
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
+export { toGroupWithStats } from './mappers';
 export * from './schema';
 export * from './serializers';
 // Exportar funciones principales de transformación
