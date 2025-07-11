@@ -76,8 +76,6 @@ export enum VideoViewMode {
 	TIMELINE = 'timeline',
 }
 
-
-
 /**
  * 📝 Tipo base para Video - definición canónica
  */

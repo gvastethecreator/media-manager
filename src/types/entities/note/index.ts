@@ -16,14 +16,13 @@ export type {
 	NoteBase,
 	NoteComplete,
 	NoteCreateInput as CreateNoteData, // Alias para retrocompatibilidad
-	NoteCreateInput, // Alias para retrocompatibilidad
+	NoteCreateInput,
 	NoteFilters,
-	NoteRelations,
 	NoteSearchOptions,
 	NoteSearchResult,
 	NoteStatistics,
+	NoteStats,
 	NoteTransformerOptions,
-	NoteUI,
 	NoteUpdateInput,
 	NoteValidated,
 	// Alias para retrocompatibilidad

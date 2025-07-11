@@ -23,7 +23,7 @@ import {
 } from '@/lib/api/thumbnails';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { useThumbnailStore } from '@/store/thumbnails.store';

@@ -8,7 +8,7 @@
 
 import { asc, count, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { workflows } from '@/lib/drizzle/schema';
+import { workflows } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { WorkflowCreateInput, WorkflowUpdateInput, WorkflowWithStats } from '@/types/entities/workflow';

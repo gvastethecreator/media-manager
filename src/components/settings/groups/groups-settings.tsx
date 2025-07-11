@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { useCreateGroup, useDeleteGroup, useGroups, useUpdateGroup } from '@/lib/api/groups';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria } from '@/types/entities/group';
 import { CreateGroupForm } from './create-group-form';

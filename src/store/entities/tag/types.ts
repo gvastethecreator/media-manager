@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
+import type { TagCreateInput, TagSortCriteria, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 
 // --- ENUMS ESPECÍFICOS DEL STORE ---
 
@@ -39,19 +39,7 @@ export enum TagRarity {
 	LEGENDARY = 'legendary',
 }
 
-/**
- * Criterios de ordenación para etiquetas
- */
-export enum TagSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	USAGE_ASC = 'usage:asc',
-	USAGE_DESC = 'usage:desc',
-	CREATED_ASC = 'createdAt:asc',
-	CREATED_DESC = 'createdAt:desc',
-	UPDATED_ASC = 'updatedAt:desc',
-	UPDATED_DESC = 'updatedAt:desc',
-}
+// TagSortCriteria se importa desde @/types/entities/tag
 
 /**
  * Modos de visualización para etiquetas

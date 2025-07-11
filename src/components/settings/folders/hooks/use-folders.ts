@@ -382,6 +382,9 @@ export function useFolders() {
 	};
 }
 
+// Re-export hook específico para operaciones
+export { useReindexAllFolders };
+
 /**
  * 🛠️ FIX: Se fuerza la recarga de carpetas y estadísticas tras la finalización de un proceso
  * para asegurar que la UI refleje el estado actualizado en tiempo real, incluso si hay delays

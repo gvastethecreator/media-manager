@@ -1,7 +1,70 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
 import * as relations from './relations.js';
-import * as schema from './schema.js';
+import {
+	activities,
+	albums,
+	audios,
+	characters,
+	collections,
+	concepts,
+	documents,
+	favorites,
+	file3Ds,
+	files,
+	// Media
+	folders,
+	groupAlbums,
+	groupImages,
+	// Organization
+	groups,
+	groupTags,
+	groupVideos,
+	// Relations
+	imageAlbums,
+	imageCharacters,
+	imageCollections,
+	imageConcepts,
+	imageNotes,
+	imagePlaces,
+	imagePrompts,
+	imageProperties,
+	// Content
+	imageStats,
+	images,
+	imageTags,
+	imageWildcards,
+	imageWorldItems,
+	jsonFiles,
+	metadatas,
+	notes,
+	places,
+	profiles,
+	prompts,
+	properties,
+	// Core
+	queueJobs,
+	settings,
+	// Taxonomy
+	tags,
+	thumbnails,
+	uploadedImages,
+	videoAlbums,
+	videoCharacters,
+	videoCollections,
+	videoConcepts,
+	videoNotes,
+	videoPlaces,
+	videoPrompts,
+	videoProperties,
+	videos,
+	videoTags,
+	videoWildcards,
+	videoWorldItems,
+	wildcards,
+	workflows,
+	worldItems,
+} from './schema/index.js';
 
 /**
  * =================================================================================
@@ -21,8 +84,75 @@ import * as schema from './schema.js';
  * https://orm.drizzle.team/docs/get-started/sqlite-existing
  */
 
+// Crear el objeto schema con todas las tablas
+const schema = {
+	// Core
+	queueJobs,
+	profiles,
+	settings,
+	// Media
+	folders,
+	images,
+	videos,
+	uploadedImages,
+	// Organization
+	groups,
+	albums,
+	collections,
+	favorites,
+	files,
+	// Taxonomy
+	tags,
+	properties,
+	wildcards,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	prompts,
+	notes,
+	// Content
+	imageStats,
+	activities,
+	audios,
+	documents,
+	jsonFiles,
+	file3Ds,
+	metadatas,
+	thumbnails,
+	workflows,
+	// Relations
+	imageAlbums,
+	videoAlbums,
+	imageCollections,
+	videoCollections,
+	imageTags,
+	videoTags,
+	imageProperties,
+	videoProperties,
+	imageWildcards,
+	videoWildcards,
+	imageCharacters,
+	videoCharacters,
+	imagePlaces,
+	videoPlaces,
+	imageWorldItems,
+	videoWorldItems,
+	imageConcepts,
+	videoConcepts,
+	imagePrompts,
+	videoPrompts,
+	imageNotes,
+	videoNotes,
+	groupImages,
+	groupVideos,
+	groupAlbums,
+	groupTags,
+};
+
 // Combinar schema y relaciones para Drizzle
-const fullSchema = { ...schema, ...relations.allRelations };
+// Temporalmente sin relaciones para debugging
+const fullSchema = { ...schema }; // ...relations.allRelations };
 
 // Obtener la URL de la base de datos desde las variables de entorno
 // En el servidor (Node.js) usa process.env.DATABASE_URL directamente

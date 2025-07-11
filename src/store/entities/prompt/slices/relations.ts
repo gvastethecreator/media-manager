@@ -1,5 +1,5 @@
-import { linkEntityToPrompt, unlinkEntityFromPrompt } from '@/lib/api/client/prompt.client';
 import type { StateCreator } from 'zustand';
+import { linkEntityToPrompt, unlinkEntityFromPrompt } from '@/lib/api/client/prompt.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { EntityType } from '@/types/entities/entities';
 import type { PromptStore } from '../types';

@@ -1,3 +1,15 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import {
+	deleteUploadedImage,
+	getUploadedImage,
+	getUploadedImageStats,
+	getUploadedImages,
+	uploadImages,
+} from '@/server/services/uploaded-images.api.service';
+
+const router = Router();
+
 const UploadedImageCreateSchema = z.object({
 	name: z.string().min(1),
 	path: z.string().min(1),
@@ -91,7 +103,7 @@ router.post('/', async (req, res) => {
 	res.status(201).json(result);
 });
 
-export { router as uploadedImagesRouter };
+export type { router as uploadedImagesRouter };
 
 // Exportación default para compatibilidad con server/index.ts
 export default router;

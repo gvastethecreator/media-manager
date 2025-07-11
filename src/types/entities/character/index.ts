@@ -17,15 +17,11 @@ export {
 
 export type {
 	CharacterBase,
-	CharacterComplete,
 	CharacterCreateInput,
-	CharacterFilter,
-	CharacterFilterItem,
 	CharacterFilters,
-	CharacterRelations,
 	CharacterRelationship,
 	CharacterSearchOptions,
-	CharacterStatistics as CharacterStats,
+	CharacterStats,
 	CharacterUpdateInput,
 	CharacterViewConfig,
 	CharacterWithStats,

@@ -7,6 +7,8 @@
 
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { properties } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -613,5 +615,11 @@ const propertyService = {
 	PROPERTY_EVENTS,
 	PropertyServiceError,
 };
+
+// Exportar instancia de PropertyService para compatibilidad con routes
+const propertyServiceInstance = new PropertyService();
+
+// Exportar métodos individuales para compatibilidad con import * as propertyService
+export const getPropertyById = propertyServiceInstance.getPropertyById.bind(propertyServiceInstance);
 
 export default propertyService;

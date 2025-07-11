@@ -6,7 +6,7 @@ import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import { TagCategory } from '@/store/entities/tag/types';
 import type { TagComplete } from '@/types/entities/tag';

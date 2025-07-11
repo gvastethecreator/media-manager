@@ -28,8 +28,6 @@ export type MetadataBase = {
 	updatedAt: Date;
 };
 
-
-
 export type MetadataCreateInput = Omit<MetadataBase, 'id' | 'createdAt' | 'updatedAt'>;
 
 export type MetadataUpdateInput = Partial<MetadataBase>;

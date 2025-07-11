@@ -5,7 +5,7 @@ import { asc, count, desc, eq } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { folders, images, videos } from '@/lib/drizzle/schema';
+import { folders, images, videos } from '@/lib/drizzle/schema/index';
 
 const router = Router();
 
@@ -780,6 +780,76 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 		res.json(updatedFolder);
 	} catch (error) {
 		console.error('Error al actualizar el estado de auto-reindexación de la carpeta:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// POST /api/folders/:id/reindex - Reindexar una carpeta específica
+router.post('/:id/reindex', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		if (!id || typeof id !== 'string' || id.trim().length === 0) {
+			return res.status(400).json({ error: 'ID de carpeta inválido' });
+		}
+
+		console.log(`🔄 Iniciando reindexación de carpeta: ${id}`);
+
+		// Obtener la carpeta para verificar que existe
+		const folder = await db
+			.select({
+				id: folders.id,
+				path: folders.path,
+				name: folders.name,
+			})
+			.from(folders)
+			.where(eq(folders.id, id))
+			.limit(1);
+
+		if (folder.length === 0) {
+			return res.status(404).json({ error: 'Carpeta no encontrada' });
+		}
+
+		const targetFolder = folder[0];
+
+		// Importar la función updateFolderStats que maneja el reindexado
+		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+
+		// Ejecutar la reindexación usando la misma lógica que el resto del sistema
+		await updateFolderStats(id);
+
+		console.log(`✅ Reindexación completada para carpeta: ${targetFolder.name}`);
+
+		// Obtener la carpeta actualizada para devolverla
+		const updatedFolder = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			})
+			.from(folders)
+			.where(eq(folders.id, id))
+			.limit(1);
+
+		res.json(updatedFolder[0]);
+	} catch (error) {
+		console.error('Error al reindexar la carpeta:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

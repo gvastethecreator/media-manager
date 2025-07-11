@@ -7,10 +7,10 @@
 
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { albums, imageAlbums, images } from '@/lib/drizzle/schema';
+import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { toAlbumWithStats } from '@/transformers/album/mappers';
+import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
 
 const logger = serverLogger.withContext('AlbumService');
@@ -153,12 +153,12 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		const [{ count: total }] = await countQuery;
 
 		// Transformar resultados de Drizzle a formato compatible con transformadores legacy
-					const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
-				...rawAlbum,
-				isFavorite: Boolean(rawAlbum.isFavorite),
-			}));
+		const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
+			...rawAlbum,
+			isFavorite: Boolean(rawAlbum.isFavorite),
+		}));
 
-			const finalAlbums = transformedAlbums.map((album) => toAlbumWithStats(album as any));
+		const finalAlbums = transformedAlbums.map((album) => toAlbumWithStats(album as any));
 
 		return {
 			albums: finalAlbums,

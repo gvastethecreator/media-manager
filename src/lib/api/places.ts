@@ -7,7 +7,27 @@ export interface PlaceFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos' | 'type' | 'location' | 'climate' | 'population' | 'government' | 'economy' | 'culture' | 'history' | 'geography' | 'landmarks' | 'dangers' | 'resources' | 'notes' | 'featuredImage' | 'parentId';
+	sortBy?:
+		| 'name'
+		| 'createdAt'
+		| 'updatedAt'
+		| 'totalImages'
+		| 'totalVideos'
+		| 'type'
+		| 'location'
+		| 'climate'
+		| 'population'
+		| 'government'
+		| 'economy'
+		| 'culture'
+		| 'history'
+		| 'geography'
+		| 'landmarks'
+		| 'dangers'
+		| 'resources'
+		| 'notes'
+		| 'featuredImage'
+		| 'parentId';
 	sortOrder?: 'asc' | 'desc';
 	category?: string;
 	isPublic?: boolean;

@@ -2,7 +2,7 @@ import { count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
-import { images } from '@/lib/drizzle/schema';
+import { images } from '@/lib/drizzle/schema/index';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto

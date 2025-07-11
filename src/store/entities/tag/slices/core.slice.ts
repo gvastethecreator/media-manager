@@ -17,7 +17,6 @@ const logger = clientLogger.withContext('TagCoreSlice');
  * 📊 Estado principal (core) del store de Tag - Patrón Record optimizado
  */
 
-
 /**
  * 🔄 Convierte array de tags a Record para acceso O(1)
  * @param tags - Array de tags

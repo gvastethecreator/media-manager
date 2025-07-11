@@ -5,7 +5,7 @@
  */
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import { settings } from '@/lib/drizzle/schema';
+import { settings } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { Settings } from '@/types/settings';
 

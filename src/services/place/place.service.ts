@@ -9,7 +9,7 @@
 import * as crypto from 'crypto';
 import { asc, count, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { places } from '@/lib/drizzle/schema';
+import { places } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
@@ -431,3 +431,12 @@ export class PlaceService {
 		return [];
 	}
 }
+
+// Exportar instancia de PlaceService para compatibilidad con routes
+const placeServiceInstance = new PlaceService();
+
+// Exportar métodos individuales para compatibilidad con import * as placeService
+export const getPlaceImages = placeServiceInstance.getPlaceImages.bind(placeServiceInstance);
+export const getRecentPlaceMedia = placeServiceInstance.getRecentPlaceMedia.bind(placeServiceInstance);
+
+export default placeServiceInstance;

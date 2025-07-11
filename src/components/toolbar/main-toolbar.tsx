@@ -1,34 +1,34 @@
 import {
-	Archive,
-	ArrowDown,
-	ArrowLeft,
-	ArrowRight,
-	ArrowUp,
-	BookImage,
-	Box,
-	Calendar,
-	Camera,
-	Clock,
-	Copy,
-	Download,
-	Edit,
-	FileText,
-	FolderIcon,
-	GalleryHorizontal,
-	Grid,
-	ImageIcon,
-	Info,
-	LayoutGrid,
-	List,
-	MapPin,
-	Plus,
-	Search,
-	Share2,
-	Star,
-	TagIcon,
-	Trash2,
-	User2,
-	X,
+    Archive,
+    ArrowDown,
+    ArrowLeft,
+    ArrowRight,
+    ArrowUp,
+    BookImage,
+    Box,
+    Calendar,
+    Camera,
+    Clock,
+    Copy,
+    Download,
+    Edit,
+    FileText,
+    FolderIcon,
+    GalleryHorizontal,
+    Grid,
+    ImageIcon,
+    Info,
+    LayoutGrid,
+    List,
+    MapPin,
+    Plus,
+    Search,
+    Share2,
+    Star,
+    TagIcon,
+    Trash2,
+    User2,
+    X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
@@ -36,7 +36,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -104,17 +104,17 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		if (selectedIds.length === 0) {
 			return;
 		}
-		toast.info(`Eliminando ${selectedIds.length} archivo(s)...`);
+		toastService.info(`Eliminando ${selectedIds.length} archivo(s)...`);
 		try {
 			for (const id of selectedIds) {
 				// Asumimos que el id del item es la ruta del archivo por ahora
 				await deleteFile(id);
 			}
-			toast.success(`${selectedIds.length} archivo(s) eliminado(s) correctamente.`);
+			toastService.success(`${selectedIds.length} archivo(s) eliminado(s) correctamente.`);
 			clearSelection();
 		} catch (error) {
 			console.error('Error al eliminar archivos:', error);
-			toast.error('Error al eliminar archivo(s).');
+			toastService.error('Error al eliminar archivo(s).');
 		}
 	}, [selectedIds, clearSelection]);
 
@@ -122,7 +122,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		if (selectedIds.length === 0) {
 			return;
 		}
-		toast.info(`Descargando ${selectedIds.length} archivo(s)...`);
+		toastService.info(`Descargando ${selectedIds.length} archivo(s)...`);
 		try {
 			for (const id of selectedIds) {
 				// Asumimos que el id del item es la ruta del archivo por ahora
@@ -135,10 +135,10 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				a.click();
 				document.body.removeChild(a);
 			}
-			toast.success(`${selectedIds.length} archivo(s) descargado(s) correctamente.`);
+			toastService.success(`${selectedIds.length} archivo(s) descargado(s) correctamente.`);
 		} catch (error) {
 			console.error('Error al descargar archivos:', error);
-			toast.error('Error al descargar archivo(s).');
+			toastService.error('Error al descargar archivo(s).');
 		}
 	}, [selectedIds]);
 
@@ -148,7 +148,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		}
 		// TODO: Implementar server action para comprimir archivos
 		console.warn('La funcionalidad de compresión no está implementada en esta versión');
-		toast.info('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
+		toastService.info('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
 	}, [selectedIds]);
 
 	const handleCopySelected = useCallback(() => {

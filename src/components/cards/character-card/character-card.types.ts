@@ -1,4 +1,4 @@
-import type { CharacterWithStats, CharacterStats } from '@/types/entities/character';
+import type { CharacterStats, CharacterWithStats } from '@/types/entities/character';
 
 export type CharacterCardData = Omit<CharacterWithStats, 'stats'> & {
 	recentImages: string[];

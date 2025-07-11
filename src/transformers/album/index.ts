@@ -13,8 +13,8 @@
 
 // Exportar todas las funciones de transformación
 export * from './mappers';
-// Alias para compatibilidad con rutas del servidor
-export { toAlbumWithStats as serializeAlbum } from './mappers';
 export * from './schema';
 export * from './serializers';
+// Alias para compatibilidad con rutas del servidor
+export { serializeAlbum as toAlbumWithStats } from './serializers';
 export * from './validators';

@@ -357,8 +357,6 @@ export const createCharacterFiltersSlice: StateCreator<
 		return charactersArray;
 	},
 
-	
-
 	/**
 	 * Agrega un filtro personalizado
 	 * @param filter Filtro a agregar
@@ -395,20 +393,15 @@ export const createCharacterFiltersSlice: StateCreator<
 	 */
 	toggleFilter: (filter: CharacterFilterItem) => {
 		set((state) => {
-			const existingFilter = state.activeFilters.find(
-				(f) => f.query === filter.query && f.value === filter.value
-			);
+			const existingFilter = state.activeFilters.find((f) => f.query === filter.query && f.value === filter.value);
 			if (existingFilter) {
 				return {
-					activeFilters: state.activeFilters.filter(
-						(f) => !(f.query === filter.query && f.value === filter.value)
-					),
-				};
-			} else {
-				return {
-					activeFilters: [...state.activeFilters, filter],
+					activeFilters: state.activeFilters.filter((f) => !(f.query === filter.query && f.value === filter.value)),
 				};
 			}
+			return {
+				activeFilters: [...state.activeFilters, filter],
+			};
 		});
 	},
 

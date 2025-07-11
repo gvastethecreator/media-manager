@@ -9,7 +9,7 @@
 import * as crypto from 'crypto';
 import { count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { file3Ds } from '@/lib/drizzle/schema';
+import { file3Ds } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';

@@ -6,7 +6,7 @@
 import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Importar Drizzle para coexistencia
 import { db } from '@/lib/drizzle';
-import { profiles, settings } from '@/lib/drizzle/schema';
+import { profiles, settings } from '@/lib/drizzle/schema/index';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { transformProfile } from '@/transformers/profile/profile-transformers';
 import {

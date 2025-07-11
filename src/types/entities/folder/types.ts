@@ -29,8 +29,6 @@ export interface FolderBase extends EntityBase {
 	presetId: string | null;
 }
 
-
-
 /**
  * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)
  */

@@ -16,7 +16,6 @@ import {
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import {
-	
 	ConceptCreateInput,
 	ConceptSortOption,
 	ConceptUpdateInput,
@@ -180,5 +179,3 @@ export const useConceptStore = create<ConceptStore>()(
 		}
 	)
 );
-
-

@@ -6,7 +6,7 @@ import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreatePrompt, useUpdatePrompt } from '@/lib/api/prompts';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { DynamicCreateForm } from '../common/dynamic-create-form';

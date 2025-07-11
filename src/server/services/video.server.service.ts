@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { folders, videos } from '@/lib/drizzle/schema';
+import { folders, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
 
