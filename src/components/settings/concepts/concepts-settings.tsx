@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useConcepts, useDeleteConcept } from '@/lib/api/concepts';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import { CreateConceptForm } from './create-concept-form';
 

@@ -1,3 +1,11 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import * as placeService from '@/services/place/place.service';
+import { toImageWithStats } from '@/transformers/image';
+import { toPlaceWithStats } from '@/transformers/place';
+
+const router = Router();
+
 const PlaceCreateSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().nullable().optional(),

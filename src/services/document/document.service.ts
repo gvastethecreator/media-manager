@@ -10,7 +10,7 @@ import * as crypto from 'crypto';
 // Drizzle imports
 import { asc, count, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { documents } from '@/lib/drizzle/schema';
+import { documents } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';

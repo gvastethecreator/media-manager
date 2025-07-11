@@ -6,7 +6,7 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { notes } from '@/lib/drizzle/schema';
+import { notes } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
@@ -549,3 +549,19 @@ export class NoteService {
 }
 
 export const noteService = NoteServiceImpl;
+
+// Exportar instancia de NoteService para compatibilidad con routes
+const noteServiceInstance = new NoteService();
+
+// Exportar métodos individuales para compatibilidad con import * as noteService
+export const getNotes = noteServiceInstance.getNotes.bind(noteServiceInstance);
+export const getNoteById = noteServiceInstance.getNoteById.bind(noteServiceInstance);
+export const createNote = noteServiceInstance.createNote.bind(noteServiceInstance);
+export const updateNote = noteServiceInstance.updateNote.bind(noteServiceInstance);
+export const deleteNote = noteServiceInstance.deleteNote.bind(noteServiceInstance);
+export const getNoteImages = noteServiceInstance.getNoteImages.bind(noteServiceInstance);
+export const getRecentNoteImages = noteServiceInstance.getRecentNoteImages.bind(noteServiceInstance);
+export const getNoteCounts = noteServiceInstance.getNoteCounts.bind(noteServiceInstance);
+export const getNoteStatuses = noteServiceInstance.getNoteStatuses.bind(noteServiceInstance);
+
+export default noteServiceInstance;

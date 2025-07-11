@@ -20,7 +20,6 @@ import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
 
-
 /**
  * 📝 Tipo base canónico para Note
  */
@@ -37,8 +36,6 @@ export interface NoteBase {
 	createdAt: Date;
 	updatedAt: Date;
 }
-
-
 
 /**
  * 🆕 Datos para crear un Note
@@ -243,5 +240,91 @@ export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.UPDATED_DESC]: 'updatedAt',
 };
 
+/**
+ * 📊 Estadísticas de Note
+ */
+export interface NoteStatistics {
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	collectionCount: number;
+	tagCount: number;
+	characterCount: number;
+	placeCount: number;
+	worldItemCount: number;
+	conceptCount: number;
+	promptCount: number;
+	wildcardCount: number;
+	propertyCount: number;
+	groupCount: number;
+	wordCount: number;
+	characterCount: number;
+	readingTime: number;
+	completionScore: number;
+	totalItems: number;
+}
+
+/**
+ * 📝 Note completo con relaciones
+ */
+export interface NoteComplete extends NoteBase {
+	// Relaciones
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+
+	// Conteos
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * 📊 Note con estadísticas
+ */
+export interface NoteWithStats extends NoteBase {
+	statistics?: NoteStatistics;
+	_count?: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+}
+
 // Tipos inferidos de Zod
 export type NoteValidated = z.infer<typeof NoteSchema>;
+
+// Alias para compatibilidad
+export type NoteStats = NoteStatistics;

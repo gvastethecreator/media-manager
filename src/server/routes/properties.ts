@@ -1,3 +1,10 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import * as propertyService from '@/services/property/property.service';
+import { toPropertyWithStats } from '@/transformers/property';
+
+const router = Router();
+
 const PropertyCreateSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().nullable().optional(),

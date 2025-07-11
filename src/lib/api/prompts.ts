@@ -7,7 +7,24 @@ export interface PromptFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos' | 'type' | 'content' | 'parameters' | 'style' | 'mood' | 'lighting' | 'composition' | 'technique' | 'inspiration' | 'notes' | 'featuredImage' | 'parentId';
+	sortBy?:
+		| 'name'
+		| 'createdAt'
+		| 'updatedAt'
+		| 'totalImages'
+		| 'totalVideos'
+		| 'type'
+		| 'content'
+		| 'parameters'
+		| 'style'
+		| 'mood'
+		| 'lighting'
+		| 'composition'
+		| 'technique'
+		| 'inspiration'
+		| 'notes'
+		| 'featuredImage'
+		| 'parentId';
 	sortOrder?: 'asc' | 'desc';
 	category?: string;
 	isPublic?: boolean;

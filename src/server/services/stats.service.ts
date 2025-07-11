@@ -9,7 +9,7 @@ import {
 	places,
 	tags,
 	worldItems,
-} from '@/lib/drizzle/schema';
+} from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { revalidatePath } from '@/lib/server/revalidate';

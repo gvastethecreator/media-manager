@@ -1,3 +1,11 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import * as worldItemService from '@/services/world-item/world-item.service';
+import { toImageWithStats } from '@/transformers/image';
+import { toWorldItemWithStats } from '@/transformers/world-item';
+
+const router = Router();
+
 const WorldItemCreateSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().nullable().optional(),

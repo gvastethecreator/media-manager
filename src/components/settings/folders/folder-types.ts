@@ -7,14 +7,17 @@ import type { ProcessStatus } from '@/types/folders';
  */
 export interface ExtendedFolder extends FolderExtended {
 	error?: string; // Error temporal durante el procesamiento
+	lastIndexed?: Date; // Última fecha de indexación
 }
 
 // 🔄 Estado extendido del proceso con propiedades adicionales
 export interface ExtendedProcessStatus extends ProcessStatus {
+	folderId?: string; // ID de la carpeta siendo procesada
 	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
 	timestamp?: number;
 	startTime?: number;
 	filesProcessed?: number; // Añadido ya que se usa en use-folders.ts
+	totalFiles?: number; // Necesario para calcular progreso
 	globalProgress?: {
 		current: number;
 		total: number;

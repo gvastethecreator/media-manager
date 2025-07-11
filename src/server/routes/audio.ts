@@ -1,6 +1,14 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { createAudio, deleteAudio, getAudioById, getAudios, getAudioFormatStats, getAudioGenreStats, updateAudio } from '@/services/audio/audio.service';
+import {
+	createAudio,
+	deleteAudio,
+	getAudioById,
+	getAudioFormatStats,
+	getAudioGenreStats,
+	getAudios,
+	updateAudio,
+} from '@/services/audio/audio.service';
 
 const router = Router();
 

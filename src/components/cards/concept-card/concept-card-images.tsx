@@ -27,7 +27,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 	// Generar un ID de renderizado único
 	const renderKey = React.useMemo(() => nanoid(), []);
 
-		useEffect(() => {
+	useEffect(() => {
 		const loadImages = async () => {
 			try {
 				setIsLoading(true);

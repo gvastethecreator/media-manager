@@ -32,6 +32,9 @@ export type UpdateAlbumInput = z.infer<typeof UpdateAlbumSchema>;
 // --- Tipos de compatibilidad legacy ---
 export type AlbumComplete = AlbumWithStats;
 
+// --- Enumeraciones ---
+export * from './enums';
+
 // --- Tipos Legacy (OBSOLETOS) ---
 /**
  * @deprecated Los tipos monolíticos y fragmentados están obsoletos.

@@ -8,12 +8,19 @@ export interface ProcessStatus {
 	progress?: number;
 	message?: string;
 	error?: string;
+	folderId?: string; // ID de la carpeta siendo procesada
+	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
+	timestamp?: number;
+	filesProcessed?: number;
+	totalFiles?: number;
 }
 
 export interface ErrorResponse {
 	error: string;
+	message?: string; // Agregar message que se usa en el código
 	code?: string;
 	details?: Record<string, unknown>;
+	folderId?: string; // Agregar folderId que se usa
 }
 
 export interface FolderResponse {

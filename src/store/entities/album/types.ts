@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { CreateAlbumInput, UpdateAlbumInput, AlbumWithStats } from '@/types/entities/album';
+import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
 
 // --- Estado del Slice ---
 
@@ -37,5 +37,4 @@ export type AlbumFilterActions = Record<string, never>;
 
 // --- Store Completo ---
 
-export type AlbumStore = AlbumCoreState &
-	AlbumCoreActions;
+export type AlbumStore = AlbumCoreState & AlbumCoreActions;

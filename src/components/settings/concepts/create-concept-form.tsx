@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateConcept, useUpdateConcept } from '@/lib/api/concepts';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type {
 	ConceptComplete,
 	ConceptCreateInput,

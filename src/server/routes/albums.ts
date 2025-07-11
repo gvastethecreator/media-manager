@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { albums, imageAlbums, images, videos } from '@/lib/drizzle/schema';
+import { albums, imageAlbums, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 import { serializeAlbum } from '@/transformers/album';

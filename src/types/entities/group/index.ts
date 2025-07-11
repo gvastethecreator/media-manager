@@ -12,4 +12,7 @@
  * @updated 2025-01-27
  */
 
+export type { GroupStatistics, GroupWithStats } from './base';
+export { GroupViewMode } from './base';
+export * from './enums';
 export * from './types';

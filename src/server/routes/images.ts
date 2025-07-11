@@ -5,7 +5,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
-import { folders, images } from '@/lib/drizzle/schema';
+import { folders, images } from '@/lib/drizzle/schema/index';
 import { imageService } from '@/services/image/image.service';
 import { processImage } from '../services/image-processing.service';
 
