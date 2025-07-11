@@ -1,6 +1,49 @@
+## 🚨 REGLAS CRÍTICAS DE CUMPLIMIENTO OBLIGATORIO
+
+### ⚡ ENFORCEMENT ABSOLUTO
+
+**DETENER EJECUCIÓN INMEDIATAMENTE SI:**
+- No se crea TODO antes de cualquier acción
+- No se busca contexto PRIMERO
+- No se marcan tareas como completadas
+- No se valida implementación antes de continuar
+
+### 🔻 CONFIRMACIÓN VISUAL OBLIGATORIA
+
+**INICIAR:** 🔻🔻🔻🔻🔻🔻🔻🔻🔻 (Confirma lectura y aplicación de reglas)
+**TERMINAR:** 🔺🔺🔺🔺🔺🔺🔺🔺🔺 (Confirma cumplimiento completo)
+
 ---
-alwaysApply: true
+
+## 🎯 PROTOCOLO TODO ESTRICTO
+
+### Formato Obligatorio
+
+```markdown
+## TODO: [FEATURE_NAME]
+□ Task 1: [Implementation + acceptance criteria]
+□ Task 2: [Implementation + acceptance criteria]
+CONTEXT_REQUIRED: [Files/modules needed]
+ACCEPTANCE: [Measurable completion criteria]
+STATUS: PENDING
+```
+
+### Estados y Símbolos
+
+- **□** = PENDING (No iniciado)
+- **🔄** = IN_PROGRESS (En progreso)
+- **✅** = COMPLETED (Completado)
+- **❌** = FAILED (Falló)
+
+### Reglas de Actualización
+
+1. **CREAR TODO PRIMERO** - Antes de cualquier acción
+2. **ACTUALIZAR EN TIEMPO REAL** - Cada cambio de estado
+3. **MARCAR COMPLETO** - Inmediatamente después de terminar
+4. **VALIDAR ANTES DE CONTINUAR** - Verificar implementación
+
 ---
+
 ## 🌍 CONFIGURACIÓN UNIVERSAL
 
 ### Idioma y Plataforma
@@ -23,10 +66,15 @@ alwaysApply: true
 ### Secuencia Estricta
 
 1. **BUSCAR CONTEXTO PRIMERO** - Explorar codebase antes de crear TODO
-2. **CREAR TODO** - Después de buscar contexto
-3. **ANALIZAR CONTEXTO** - Obtener contexto comprehensivo
-4. **EJECUTAR TAREAS** - Con actualizaciones TODO obligatorias
-5. **VALIDAR** - Verificar problemas antes de terminar
+2. Look at folder structure
+3. Check file names
+4. Read imports and dependencies
+5. Follow logical connections
+6. **CREAR TODO** - Después de buscar contexto
+7. **ANALIZAR CONTEXTO** - Obtener contexto comprehensivo
+8. **EJECUTAR TAREAS** - Con actualizaciones TODO obligatorias
+9. **VALIDAR** - Verificar problemas antes de terminar
+10. **DESCUBRIR** - Construir comprensión a través de la exploración
 
 ### Análisis de Contexto
 
