@@ -101,3 +101,6 @@ export class ApiClient {
 
 // Instancia singleton del cliente API
 export const apiClient = new ApiClient();
+
+// Export default para compatibilidad
+export default apiClient;

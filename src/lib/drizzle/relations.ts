@@ -11,7 +11,7 @@
  */
 
 import { relations } from 'drizzle-orm';
-import * as schema from './schema.js';
+import * as schema from './schema/index.js';
 
 // =================================================================================
 // RELACIONES DE ENTIDADES PRINCIPALES
@@ -99,6 +99,7 @@ export const imageRelations = relations(schema.images, ({ one, many }) => ({
 	concepts: many(schema.imageConcepts),
 	prompts: many(schema.imagePrompts),
 	notes: many(schema.imageNotes),
+	groups: many(schema.groupImages),
 
 	// Actividades relacionadas
 	activities: many(schema.activities),
@@ -129,6 +130,7 @@ export const videoRelations = relations(schema.videos, ({ one, many }) => ({
 	concepts: many(schema.videoConcepts),
 	prompts: many(schema.videoPrompts),
 	notes: many(schema.videoNotes),
+	groups: many(schema.groupVideos),
 }));
 
 /**
@@ -193,6 +195,7 @@ export const albumRelations = relations(schema.albums, ({ many }) => ({
 	// Relaciones many-to-many
 	images: many(schema.imageAlbums),
 	videos: many(schema.videoAlbums),
+	groups: many(schema.groupAlbums),
 }));
 
 /**
@@ -218,6 +221,7 @@ export const tagRelations = relations(schema.tags, ({ many }) => ({
 	// Relaciones many-to-many
 	images: many(schema.imageTags),
 	videos: many(schema.videoTags),
+	groups: many(schema.groupTags),
 }));
 
 /**
@@ -338,7 +342,11 @@ export const noteRelations = relations(schema.notes, ({ many }) => ({
  * 👥 Relaciones de Group
  */
 export const groupRelations = relations(schema.groups, ({ many }) => ({
-	// TODO: Agregar relaciones cuando se definan las tablas de relación
+	// Relaciones many-to-many
+	images: many(schema.groupImages),
+	videos: many(schema.groupVideos),
+	albums: many(schema.groupAlbums),
+	tags: many(schema.groupTags),
 }));
 
 // =================================================================================
@@ -711,6 +719,62 @@ export const videoNoteRelations = relations(schema.videoNotes, ({ one }) => ({
 	}),
 }));
 
+/**
+ * 👥🖼️ Relaciones Group-Image
+ */
+export const groupImageRelations = relations(schema.groupImages, ({ one }) => ({
+	group: one(schema.groups, {
+		fields: [schema.groupImages.groupId],
+		references: [schema.groups.id],
+	}),
+	image: one(schema.images, {
+		fields: [schema.groupImages.imageId],
+		references: [schema.images.id],
+	}),
+}));
+
+/**
+ * 👥🎬 Relaciones Group-Video
+ */
+export const groupVideoRelations = relations(schema.groupVideos, ({ one }) => ({
+	group: one(schema.groups, {
+		fields: [schema.groupVideos.groupId],
+		references: [schema.groups.id],
+	}),
+	video: one(schema.videos, {
+		fields: [schema.groupVideos.videoId],
+		references: [schema.videos.id],
+	}),
+}));
+
+/**
+ * 👥📔 Relaciones Group-Album
+ */
+export const groupAlbumRelations = relations(schema.groupAlbums, ({ one }) => ({
+	group: one(schema.groups, {
+		fields: [schema.groupAlbums.groupId],
+		references: [schema.groups.id],
+	}),
+	album: one(schema.albums, {
+		fields: [schema.groupAlbums.albumId],
+		references: [schema.albums.id],
+	}),
+}));
+
+/**
+ * 👥🏷️ Relaciones Group-Tag
+ */
+export const groupTagRelations = relations(schema.groupTags, ({ one }) => ({
+	group: one(schema.groups, {
+		fields: [schema.groupTags.groupId],
+		references: [schema.groups.id],
+	}),
+	tag: one(schema.tags, {
+		fields: [schema.groupTags.tagId],
+		references: [schema.tags.id],
+	}),
+}));
+
 // =================================================================================
 // EXPORTACIÓN COMPLETA DE RELACIONES
 // =================================================================================
@@ -771,4 +835,8 @@ export const allRelations = {
 	videoPromptRelations,
 	imageNoteRelations,
 	videoNoteRelations,
+	groupImageRelations,
+	groupVideoRelations,
+	groupAlbumRelations,
+	groupTagRelations,
 };

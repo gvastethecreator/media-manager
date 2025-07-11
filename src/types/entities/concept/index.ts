@@ -22,28 +22,15 @@ export {
 // --- Tipos Canónicos ---
 export type {
 	ConceptBase,
-	ConceptComplete,
 	ConceptCreateInput,
 	ConceptExtended,
 	ConceptFilters,
-	ConceptListItem,
 	ConceptSearchOptions,
 	ConceptSearchResult,
+	ConceptStatistics,
+	ConceptStats,
 	ConceptUpdateInput,
 	ConceptWithStats,
 } from './types';
-
-// --- Tipos de compatibilidad e interfaces ---
-import type { ConceptBase, ConceptWithStats } from './base';
-
-export type ConceptComplete = ConceptWithStats;
-export type ConceptCreateInput = Partial<ConceptBase>;
-export type ConceptUpdateInput = Partial<Omit<ConceptBase, 'id' | 'createdAt' | 'updatedAt'>>;
-export type ConceptSearchOptions = {
-	skip?: number;
-	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
-	where?: Record<string, unknown>;
-};
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

@@ -18,7 +18,6 @@ import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
 
-
 /**
  * 🎯 Tipo base canónico para Prompt
  */
@@ -136,17 +135,48 @@ export interface PromptSearchOptions {
 	includeRelations?: boolean;
 }
 
-export enum PromptSortCriteria {
-	NAME_ASC = 'name_asc',
-	NAME_DESC = 'name_desc',
-	CREATED_AT_ASC = 'createdAt_asc',
-	CREATED_AT_DESC = 'createdAt_desc',
-	UPDATED_AT_ASC = 'updatedAt_asc',
-	UPDATED_AT_DESC = 'updatedAt_desc',
+/**
+ * 📊 Estadísticas de un prompt.
+ */
+export interface PromptStats {
+	imageCount: number;
+	videoCount: number;
+	tagCount: number;
+	noteCount: number;
+	totalContentItems: number;
+	lastUpdated: Date;
+	totalImages: number;
+	totalAssociations: number;
+	albumCount?: number;
+	collectionCount?: number;
+	characterCount?: number;
+	placeCount?: number;
+	worldItemCount?: number;
+	conceptCount?: number;
+	wildcardCount?: number;
+	propertyCount?: number;
+	groupCount?: number;
 }
 
-export enum PromptViewMode {
-	GRID = 'grid',
-	LIST = 'list',
-	CARDS = 'cards',
+/**
+ * 🎯 Prompt con estadísticas calculadas
+ */
+export interface PromptWithStats extends PromptBase {
+	// Contadores de relaciones
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tagEntities?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+	stats?: PromptStats;
 }

@@ -7,7 +7,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
-import type { ViewProps } from '../../types';
+import type { ViewProps } from '../types';
 import FoldersContentView from './folders-content-view';
 
 const viewLogger = clientLogger.withContext('FoldersView');

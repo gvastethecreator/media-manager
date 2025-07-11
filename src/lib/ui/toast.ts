@@ -1,1 +1,1 @@
-export { toast, toastService } from '@/services/toast/toast.service';
+export { default as toastService } from '@/services/toast/toast.service';

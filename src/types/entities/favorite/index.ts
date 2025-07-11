@@ -16,10 +16,17 @@
 // --- Tipos Canónicos ---
 export type {
 	FavoriteBase,
-	FavoriteExtended,
 	FavoriteStatistics,
 	FavoriteWithStats,
-} from './types';
-
+} from './base';
 // --- Enums ---
 export { FavoriteEntityType } from './base';
+
+// --- Tipos adicionales ---
+export type {
+	FavoriteCreateInput,
+	FavoriteFilters,
+	FavoriteSearchOptions,
+	FavoriteSearchResult,
+	FavoriteUpdateInput,
+} from './types';

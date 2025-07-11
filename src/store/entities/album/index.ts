@@ -20,7 +20,6 @@ export const useAlbumStore = create<AlbumStore>()(
 	devtools(
 		immer((...a) => ({
 			...createAlbumCoreSlice(...a),
-			
 		})),
 		{ name: 'AlbumStore' }
 	)

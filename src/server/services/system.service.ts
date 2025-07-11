@@ -5,7 +5,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { db } from '@/lib/drizzle';
-import { albums, collections, images, notes, tags } from '@/lib/drizzle/schema';
+import { albums, collections, images, notes, tags } from '@/lib/drizzle/schema/index';
 import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
 import { createSystemError } from '@/lib/errors/system';
 import { serverLogger } from '@/lib/logger/server-logger';

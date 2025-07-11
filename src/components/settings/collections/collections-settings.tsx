@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCollections, useDeleteCollection } from '@/lib/api/collections';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,

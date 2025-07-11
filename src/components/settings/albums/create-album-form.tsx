@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { type AlbumCreateInput, type AlbumUpdateInput, useCreateAlbum, useUpdateAlbum } from '@/lib/api/albums';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 
 // Props del componente

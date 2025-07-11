@@ -6,7 +6,7 @@ import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateCollection, useUpdateCollection } from '@/lib/api/collections';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,

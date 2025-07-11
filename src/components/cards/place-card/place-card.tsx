@@ -166,7 +166,7 @@ export function PlaceCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-						onClick={disabled || !onClick ? undefined : () => onClick(place)}
+			onClick={disabled || !onClick ? undefined : () => onClick(place)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}

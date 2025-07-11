@@ -71,4 +71,5 @@ export function isCharacterCardData(character: any): character is CharacterCardD
  */
 export function isCharacterWithStats(character: any): character is CharacterWithStats {
 	return character && 'statistics' in character;
-}''
+}
+('');

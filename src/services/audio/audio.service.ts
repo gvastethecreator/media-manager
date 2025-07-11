@@ -9,7 +9,7 @@
 import * as crypto from 'crypto';
 import { count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { audios } from '@/lib/drizzle/schema';
+import { audios } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
@@ -29,7 +29,6 @@ const createAudioError = (
 };
 
 // Función helper para convertir Audio a AudioWithStats
-
 
 /**
  * Obtiene todos los archivos de audio

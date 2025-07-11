@@ -13,8 +13,6 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	const { data: concept, isLoading, error } = useConcept(conceptId);
 	const { data: conceptCounts } = useConceptCounts(conceptId);
 
-	
-
 	// Calcular valores derivados
 	const imagesCount = conceptCounts?.images || 0;
 	const videosCount = concept?.videos?.length || 0;

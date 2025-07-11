@@ -46,7 +46,7 @@ import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { imageConfig } from '@/lib/config';
 import { db } from '@/lib/drizzle';
-import { folders, imageStats, images } from '@/lib/drizzle/schema';
+import { folders, imageStats, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import {

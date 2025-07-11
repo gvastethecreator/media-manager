@@ -6,5 +6,3 @@
  */
 
 import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
-
-

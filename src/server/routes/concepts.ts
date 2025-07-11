@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { concepts } from '@/lib/drizzle/schema';
+import { concepts } from '@/lib/drizzle/schema/index';
 
 const router = express.Router();
 
@@ -11,7 +11,10 @@ const ConceptFiltersSchema = z.object({
 	category: z.string().optional(),
 	limit: z.number().int().positive().max(100).default(50).optional(),
 	offset: z.number().int().min(0).default(0).optional(),
-	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'category', 'totalImages', 'totalVideos', 'type', 'complexity']).default('name').optional(),
+	sortBy: z
+		.enum(['name', 'createdAt', 'updatedAt', 'category', 'totalImages', 'totalVideos', 'type', 'complexity'])
+		.default('name')
+		.optional(),
 	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
 });
 

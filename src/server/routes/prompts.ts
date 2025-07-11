@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { prompts } from '@/lib/drizzle/schema';
+import { prompts } from '@/lib/drizzle/schema/index';
 import { PromptService, promptService } from '@/services/prompt/prompt.service';
 import { toImageWithStats } from '@/transformers/image';
 import { toPromptWithStats } from '@/transformers/prompt';
@@ -18,7 +18,24 @@ const PromptFiltersSchema = z.object({
 	isFavorite: z.boolean().optional(),
 	limit: z.number().int().positive().max(100).default(50).optional(),
 	offset: z.number().int().min(0).default(0).optional(),
-	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'totalImages', 'totalVideos', 'type', 'complexity', 'applications', 'examples', 'relatedConcepts', 'notes', 'featuredImage', 'parentId']).default('name').optional(),
+	sortBy: z
+		.enum([
+			'name',
+			'createdAt',
+			'updatedAt',
+			'totalImages',
+			'totalVideos',
+			'type',
+			'complexity',
+			'applications',
+			'examples',
+			'relatedConcepts',
+			'notes',
+			'featuredImage',
+			'parentId',
+		])
+		.default('name')
+		.optional(),
 	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
 });
 

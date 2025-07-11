@@ -7,7 +7,20 @@ export interface ConceptFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos' | 'type' | 'complexity' | 'applications' | 'examples' | 'relatedConcepts' | 'notes' | 'featuredImage' | 'parentId';
+	sortBy?:
+		| 'name'
+		| 'createdAt'
+		| 'updatedAt'
+		| 'totalImages'
+		| 'totalVideos'
+		| 'type'
+		| 'complexity'
+		| 'applications'
+		| 'examples'
+		| 'relatedConcepts'
+		| 'notes'
+		| 'featuredImage'
+		| 'parentId';
 	sortOrder?: 'asc' | 'desc';
 	category?: string;
 	isPublic?: boolean;

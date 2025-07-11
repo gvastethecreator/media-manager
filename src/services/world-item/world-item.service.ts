@@ -11,7 +11,7 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { images, imageWorldItems, worldItems } from '@/lib/drizzle/schema';
+import { images, imageWorldItems, worldItems } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
@@ -565,3 +565,12 @@ export class WorldItemService {
 		return [];
 	}
 }
+
+// Exportar instancia de WorldItemService para compatibilidad con routes
+const worldItemServiceInstance = new WorldItemService();
+
+// Exportar métodos individuales para compatibilidad con import * as worldItemService
+export const getRecentWorldItemImages =
+	worldItemServiceInstance.getRecentWorldItemImages.bind(worldItemServiceInstance);
+
+export default worldItemServiceInstance;

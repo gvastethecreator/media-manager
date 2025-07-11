@@ -47,7 +47,7 @@ export function JsonFileCard({
 	const [isHovered, setIsHovered] = useState(false);
 	const [showPreview, setShowPreview] = useState(false);
 
-		// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
+	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
 		return (
 			<div
@@ -188,11 +188,7 @@ export function JsonFileCard({
 			{/* Contenedor principal */}
 			<div className="flex flex-col h-full relative z-1">
 				{/* Cabecera */}
-				<CardHeader
-					title={jsonFile.name || 'Sin nombre'}
-					primaryColor={primaryColor}
-					compact={compact}
-				/>
+				<CardHeader title={jsonFile.name || 'Sin nombre'} primaryColor={primaryColor} compact={compact} />
 
 				{/* Contenido principal */}
 				{!compact && (
@@ -232,8 +228,6 @@ export function JsonFileCard({
 								<pre className="whitespace-pre-wrap text-muted-foreground">{jsonPreview}</pre>
 							</motion.div>
 						)}
-
-						
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && !showPreview && (

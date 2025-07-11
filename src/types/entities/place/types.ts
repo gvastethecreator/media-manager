@@ -12,9 +12,16 @@ export enum PlaceCategory {
 }
 
 export enum PlaceSortCriteria {
-	NAME = 'name',
-	DATE = 'date',
-	CATEGORY = 'category',
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	DATE_ASC = 'date:asc',
+	DATE_DESC = 'date:desc',
+	CATEGORY_ASC = 'category:asc',
+	CATEGORY_DESC = 'category:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:asc',
+	UPDATED_DESC = 'updatedAt:desc',
 }
 
 export enum PlaceType {
@@ -57,8 +64,6 @@ export interface PlaceBase {
 	createdAt: Date;
 	updatedAt: Date;
 }
-
-
 
 export interface PlaceSearchOptions {
 	query?: string;

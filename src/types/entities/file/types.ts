@@ -28,8 +28,6 @@ export type FileBase = {
 	updatedAt: Date;
 };
 
-
-
 export type FileRelations = Record<string, never>;
 
 export type FileCreateInput = Omit<FileBase, 'id' | 'createdAt' | 'updatedAt' | 'accessedAt' | 'modifiedAt'>;

@@ -1,3 +1,11 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import * as noteService from '@/services/note/note.service';
+import { toImageWithStats } from '@/transformers/image';
+import { toNoteWithStats } from '@/transformers/note';
+
+const router = Router();
+
 const NoteCreateSchema = z.object({
 	title: z.string().min(1),
 	content: z.string().nullable().optional(),

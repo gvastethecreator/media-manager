@@ -7,7 +7,24 @@ export interface WorldItemFilters {
 	search?: string;
 	limit?: number;
 	offset?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos' | 'type' | 'rarity' | 'value' | 'weight' | 'materials' | 'origin' | 'properties' | 'uses' | 'history' | 'notes' | 'featuredImage' | 'parentId';
+	sortBy?:
+		| 'name'
+		| 'createdAt'
+		| 'updatedAt'
+		| 'totalImages'
+		| 'totalVideos'
+		| 'type'
+		| 'rarity'
+		| 'value'
+		| 'weight'
+		| 'materials'
+		| 'origin'
+		| 'properties'
+		| 'uses'
+		| 'history'
+		| 'notes'
+		| 'featuredImage'
+		| 'parentId';
 	sortOrder?: 'asc' | 'desc';
 	type?: string;
 	rarity?: string;

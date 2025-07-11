@@ -13,8 +13,6 @@ export interface GroupBase {
 	updatedAt: Date;
 }
 
-
-
 export interface CreateGroupInput {
 	name: string;
 	description?: string;

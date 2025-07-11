@@ -49,8 +49,6 @@ type DrizzleFindManyArgs = {
 	orderBy?: { [key: string]: 'asc' | 'desc' };
 };
 
-
-
 /**
  * Mapea datos de creación de álbum a formato compatible con Drizzle
  * ✅ MIGRADO A DRIZZLE

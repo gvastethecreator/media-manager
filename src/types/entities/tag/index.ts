@@ -32,3 +32,5 @@ export {
 } from './schema';
 // --- Tipos Complete ---
 export type { TagComplete, TagPreview } from './types';
+// --- Enumeraciones ---
+export { TagSortCriteria } from './types';

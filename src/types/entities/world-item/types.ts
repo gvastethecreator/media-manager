@@ -20,8 +20,6 @@ import type { TagWithStats as TagComplete } from '../tag/types';
 import type { VideoWithStats } from '../video';
 import type { WildcardComplete } from '../wildcard';
 
-
-
 // --- TIPOS BASE Y RELACIONES ---
 
 export interface WorldItemBase {

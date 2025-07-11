@@ -8,7 +8,7 @@
 import { and, asc, count, desc, eq, isNull, like, or } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
-import { wildcards } from '@/lib/drizzle/schema';
+import { wildcards } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';

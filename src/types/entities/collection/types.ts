@@ -5,8 +5,6 @@
 
 import type { ImageBase } from '../image/base';
 
-
-
 export interface CollectionBase {
 	id: string;
 	name: string;
@@ -25,8 +23,6 @@ export interface CollectionBase {
 	createdAt: Date;
 	updatedAt: Date;
 }
-
-
 
 export interface CreateCollectionInput {
 	name: string;
@@ -71,7 +67,7 @@ export interface CollectionFilters {
 		| 'sourceImage'
 		| 'platform'
 		| 'price'
-			| 'network'
+		| 'network'
 		| 'tokenId'
 		| 'tokenAddress'
 		| 'contractAddress'

@@ -5,7 +5,7 @@
 
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { profiles, settings } from '@/lib/drizzle/schema';
+import { profiles, settings } from '@/lib/drizzle/schema/index';
 import { createSettingsError } from '@/lib/errors/settings';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';

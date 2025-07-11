@@ -371,14 +371,20 @@ export function applyConstraints(tableName: string, constraints: Record<string, 
  * 📊 Función para crear índices compuestos
  */
 export function createCompositeIndex(tableName: string, indexName: string, columns: string[]) {
-	return sql`CREATE INDEX IF NOT EXISTS ${sql.identifier(`${tableName}_${indexName}_idx`)} ON ${sql.identifier(tableName)} (${sql.join(columns.map(col => sql.identifier(col)), sql`, `)})`;
+	return sql`CREATE INDEX IF NOT EXISTS ${sql.identifier(`${tableName}_${indexName}_idx`)} ON ${sql.identifier(tableName)} (${sql.join(
+		columns.map((col) => sql.identifier(col)),
+		sql`, `
+	)})`;
 }
 
 /**
  * 🎯 Función para crear índices parciales
  */
 export function createPartialIndex(tableName: string, indexName: string, columns: string[], whereClause: any) {
-	return sql`CREATE INDEX IF NOT EXISTS ${sql.identifier(`${tableName}_${indexName}_idx`)} ON ${sql.identifier(tableName)} (${sql.join(columns.map(col => sql.identifier(col)), sql`, `)}) WHERE ${whereClause}`;
+	return sql`CREATE INDEX IF NOT EXISTS ${sql.identifier(`${tableName}_${indexName}_idx`)} ON ${sql.identifier(tableName)} (${sql.join(
+		columns.map((col) => sql.identifier(col)),
+		sql`, `
+	)}) WHERE ${whereClause}`;
 }
 
 // =================================================================================

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAlbums, useDeleteAlbum } from '@/lib/api/albums';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { CreateAlbumForm } from './create-album-form';

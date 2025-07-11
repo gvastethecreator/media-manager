@@ -1,4 +1,4 @@
-import EmojiPicker from 'emoji-picker-react';
+import EmojiPickerReact from 'emoji-picker-react';
 import { Smile } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 // Tema eliminado - no se usa en este componente
@@ -130,7 +130,7 @@ export function EmojiPicker({
 
 						{/* 🎨 Picker principal con EmojiPicker */}
 						<div className="p-2">
-							<EmojiPicker
+							<EmojiPickerReact
 								onEmojiClick={handleEmojiSelect}
 								width={300}
 								height={200}
@@ -166,7 +166,7 @@ export function EmojiPicker({
 
 			{/* 🎨 Picker principal */}
 			<div className="p-4">
-				<EmojiPicker
+				<EmojiPickerReact
 					onEmojiClick={handleEmojiSelect}
 					width={350}
 					height={300}

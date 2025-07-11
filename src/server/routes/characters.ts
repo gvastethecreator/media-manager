@@ -1,6 +1,13 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { createCharacter, deleteCharacter, getCharacter, getCharacters, toggleCharacterFavorite, updateCharacter } from '@/services/character/character.service';
+import {
+	createCharacter,
+	deleteCharacter,
+	getCharacter,
+	getCharacters,
+	toggleCharacterFavorite,
+	updateCharacter,
+} from '@/services/character/character.service';
 
 const router = Router();
 

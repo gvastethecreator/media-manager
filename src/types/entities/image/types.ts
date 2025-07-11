@@ -74,10 +74,6 @@ export interface ImageBase {
 	addedAt: Date;
 }
 
-
-
-
-
 /**
  * 📝 Datos para crear una Image
  */

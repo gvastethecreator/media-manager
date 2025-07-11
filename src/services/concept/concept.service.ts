@@ -1,13 +1,12 @@
 // Tipo local para crear conceptos
-import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept';
 
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { concepts } from '@/lib/drizzle/schema';
+import { concepts } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { Concept } from '@/types/entities/concept';
+import type { Concept, ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 
