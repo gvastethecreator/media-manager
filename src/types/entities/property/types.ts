@@ -5,5 +5,3 @@
  */
 
 import type { PropertyBase, PropertyStatistics } from './base';
-
-

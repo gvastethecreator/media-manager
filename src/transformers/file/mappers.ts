@@ -78,8 +78,6 @@ export function toFileWithStatsList(files: FileBase[]): FileWithStats[] {
 	return files.map(toFileWithStats);
 }
 
-
-
 /**
  * 📂 Agrupa archivos por tipo.
  *
@@ -103,5 +101,3 @@ export function groupFilesByType(files: FileWithStats[]): Record<FileType, FileW
 
 	return grouped;
 }
-
-

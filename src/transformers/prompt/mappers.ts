@@ -1,7 +1,7 @@
 /**
  * @file Funciones de mapeo para la entidad Prompt
  * @module transformers/prompt/mappers
- 
+
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -10,12 +10,11 @@ import type {
 	PromptComplete,
 	PromptCreateInput,
 	PromptFilters,
-	PromptStats,
 	PromptUpdateInput,
 	PromptWithRelations,
 	PromptWithStats,
 } from '@/types/entities/prompt';
-import { PromptSortCriteria } from '@/types/entities/prompt';
+import { PromptSortCriteria } from '@/types/entities/prompt/enums';
 import { serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');

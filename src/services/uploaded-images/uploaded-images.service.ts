@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, gte, like, or, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { uploadedImages } from '@/lib/drizzle/schema';
+import { uploadedImages } from '@/lib/drizzle/schema/index';
 import { processImage } from '@/lib/image/image-processing';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';

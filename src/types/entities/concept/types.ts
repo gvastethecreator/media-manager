@@ -33,8 +33,6 @@ export interface ConceptBase {
 	updatedAt: Date;
 }
 
-
-
 /**
  * Input para creación
  */
@@ -91,7 +89,7 @@ export interface ConceptSearchOptions {
  * Resultado de búsqueda de conceptos
  */
 export interface ConceptSearchResult {
-	items: ConceptComplete[];
+	items: ConceptWithStats[];
 	total: number;
 	page: number;
 	pageSize: number;
@@ -111,7 +109,7 @@ export interface ConceptFilters {
 /**
  * Concepto extendido con propiedades adicionales para UI
  */
-export interface ConceptExtended extends ConceptComplete {
+export interface ConceptExtended extends ConceptWithStats {
 	isSelected?: boolean;
 	isHighlighted?: boolean;
 	previewContent?: string;
@@ -120,12 +118,9 @@ export interface ConceptExtended extends ConceptComplete {
 }
 
 /**
- * Concepto con estadísticas calculadas
- */
-/**
  * 💡 Estadísticas de un concepto.
  */
-export interface ConceptStatistics {
+export interface ConceptStats {
 	imageCount: number;
 	tagCount: number;
 	noteCount: number;
@@ -145,25 +140,30 @@ export interface ConceptStatistics {
 	groupCount?: number;
 }
 
+// Alias para compatibilidad
+export type ConceptStatistics = ConceptStats;
+
 /**
  * Concepto con estadísticas calculadas
  */
 export interface ConceptWithStats extends ConceptBase {
-	// Relaciones
-	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceWithStats[];
-	worldItems?: WorldItemWithStats[];
-	prompts?: PromptWithStats[];
-	notes?: NoteWithStats[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyWithStats[];
-	groups?: GroupWithStats[];
-	stats: ConceptStats;
+	// Contadores de relaciones
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+	stats?: ConceptStats;
 }
 
 /**

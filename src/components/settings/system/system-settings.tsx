@@ -19,7 +19,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useRepairSystem, useResetDatabase, useSystemStats } from '@/lib/api/system';
-import toastService from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 
 // Tipo para estadísticas del sistema
 interface SystemData {

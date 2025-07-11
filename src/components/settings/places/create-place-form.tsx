@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreatePlace, useUpdatePlace } from '@/lib/api/places';
-import { toast } from '@/lib/ui/toast';
+import { toastService } from '@/lib/ui/toast';
 import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 // Opciones para los selects que antes eran enums
@@ -131,7 +131,7 @@ export function CreatePlaceForm({
 					shortcut: normalize(values.shortcut),
 				};
 				result = await updatePlaceMutation.mutateAsync({ id: place.id, data: updateData });
-				toast(`Lugar actualizado: ${result.name}`);
+				toastService.success(`Lugar actualizado: ${result.name}`);
 				onUpdated?.(result as PlaceWithStats);
 			} else {
 				const createData: PlaceCreateInput = {
@@ -149,12 +149,12 @@ export function CreatePlaceForm({
 					isFavorite: !!values.isFavorite,
 				};
 				result = await createPlaceMutation.mutateAsync(createData);
-				toast(`Lugar creado: ${result.name}`);
+				toastService.success(`Lugar creado: ${result.name}`);
 				form.reset();
 				onCreated?.(result as PlaceWithStats);
 			}
 		} catch (error) {
-			toast(error instanceof Error ? error.message : 'No se pudo guardar el lugar.');
+			toastService.error(error instanceof Error ? error.message : 'No se pudo guardar el lugar.');
 		}
 	};
 

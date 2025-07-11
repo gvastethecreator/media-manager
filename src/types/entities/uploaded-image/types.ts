@@ -32,8 +32,6 @@ export interface UploadedImageBase {
 	createdAt: Date;
 }
 
-
-
 /**
  * Input para creación
  */

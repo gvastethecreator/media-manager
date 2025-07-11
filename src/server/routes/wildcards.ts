@@ -1,3 +1,10 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
+import { toWildcardWithStats } from '@/transformers/wildcard';
+
+const router = Router();
+
 const WildcardCreateSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().nullable().optional(),

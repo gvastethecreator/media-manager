@@ -4,7 +4,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { WorldItemViewMode } from '@/types/entities/world-item/types';
+import { WorldItemViewMode } from '@/types/entities/world-item';
 import type { WorldItemActions, WorldItemState, WorldItemUIState } from '../types';
 
 export interface WorldItemUISlice {

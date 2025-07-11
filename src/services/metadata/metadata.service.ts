@@ -12,7 +12,7 @@ import { promises as fs } from 'fs';
 import sharp from 'sharp';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
-import { metadatas } from '@/lib/drizzle/schema';
+import { metadatas } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	mapCreateInputToDrizzle,

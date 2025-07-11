@@ -144,7 +144,7 @@ export default [
 		},
 		plugins: {
 			'@typescript-eslint': typescript,
-			'react-hooks-extra': 'eslint-plugin-react-hooks-extra'
+			'react-hooks-extra': 'eslint-plugin-react-hooks-extra',
 		},
 		rules: {
 			// Reglas que complementan Biome (no duplican su funcionalidad)

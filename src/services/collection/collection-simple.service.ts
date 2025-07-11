@@ -4,7 +4,7 @@
 
 import { desc } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { collections } from '@/lib/drizzle/schema';
+import { collections } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CollectionWithStats } from '@/types/entities/collection';
 

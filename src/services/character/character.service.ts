@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { desc, eq } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
-import { characters } from '@/lib/drizzle/schema';
+import { characters } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';

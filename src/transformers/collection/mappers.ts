@@ -6,5 +6,3 @@
  */
 
 import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
-
-

@@ -177,7 +177,6 @@ function mapCharacterFiltersToDrizzle(filters: CharacterFilters): DrizzleCharact
 		];
 	}
 
-	
 	if (filters.isFavorite !== undefined) {
 		where.isFavorite = filters.isFavorite;
 	}

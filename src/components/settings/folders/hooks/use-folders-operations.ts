@@ -28,10 +28,16 @@ export function useFoldersOperations({
 	onError,
 	onReindexAllStart,
 }: UseOperationsOptions) {
+	// ✅ Llamar todos los hooks al nivel superior
+	const createFolderMutation = useCreateFolder();
+	const reindexFolderMutation = useReindexFolder();
+	const deleteFolderMutation = useDeleteFolder();
+	const updateFolderMutation = useUpdateFolder();
+	const reindexAllFoldersMutation = useReindexAllFolders();
+
 	// Añadir una nueva carpeta
 	const handleAddFolder = useCallback(
 		async (folderPath: string) => {
-			const createFolderMutation = useCreateFolder();
 			try {
 				operationsLogger.info('➕ Agregando carpeta:', { path: folderPath });
 
@@ -39,7 +45,17 @@ export function useFoldersOperations({
 				const input: FolderCreateInput = {
 					path: folderPath,
 					name: folderPath.split('/').pop() || folderPath,
+					description: null,
+					emoji: null,
+					color: null,
+					featuredImage: null,
+					isFavorite: false,
+					totalFiles: 0,
+					totalSize: 0,
 					autoReindex: false,
+					lastIndexed: null,
+					parentId: null,
+					presetId: null,
 				};
 
 				// Llamar a la acción del servidor
@@ -60,13 +76,12 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onStartProcessing, onLoadData, onError]
+		[onStartProcessing, onLoadData, onError, createFolderMutation.mutateAsync]
 	);
 
 	// Reindexar una carpeta
 	const handleReindexFolder = useCallback(
 		async (folderId: string) => {
-			const reindexFolderMutation = useReindexFolder();
 			try {
 				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
 
@@ -86,13 +101,12 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onStartProcessing, onError]
+		[onStartProcessing, onError, reindexFolderMutation.mutateAsync]
 	);
 
 	// Eliminar una carpeta
 	const handleRemoveFolder = useCallback(
 		async (folderId: string) => {
-			const deleteFolderMutation = useDeleteFolder();
 			try {
 				operationsLogger.info('🗑️ Eliminando carpeta:', { folderId });
 
@@ -111,13 +125,12 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onLoadData, onError]
+		[onLoadData, onError, deleteFolderMutation.mutateAsync]
 	);
 
 	// Actualizar configuración de autoreindexado
 	const handleAutoReindexToggle = useCallback(
 		async (folderId: string, value: boolean) => {
-			const updateFolderMutation = useUpdateFolder();
 			try {
 				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
 
@@ -136,12 +149,11 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onLoadData, onError]
+		[onLoadData, onError, updateFolderMutation.mutateAsync]
 	);
 
 	// Reindexar todas las carpetas
 	const handleReindexAll = useCallback(async () => {
-		const reindexAllFoldersMutation = useReindexAllFolders();
 		try {
 			operationsLogger.info('🔄 Iniciando reindexación global directa');
 
@@ -156,7 +168,7 @@ export function useFoldersOperations({
 
 			toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 		}
-	}, [onReindexAllStart, onError]);
+	}, [onReindexAllStart, onError, reindexAllFoldersMutation.mutateAsync]);
 
 	// Limpiar caché
 	const handleClearCache = useCallback(async () => {

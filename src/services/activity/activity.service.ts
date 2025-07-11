@@ -6,7 +6,7 @@
 
 import { and, count, desc, eq, gte, ilike, inArray, lte } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { activities, images } from '@/lib/drizzle/schema';
+import { activities, images } from '@/lib/drizzle/schema/index';
 import type { Activity, ActivityFilters, ActivityListResponse, CreateActivityData } from '@/types/entities/activity';
 
 /**

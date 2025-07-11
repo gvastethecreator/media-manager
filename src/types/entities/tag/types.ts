@@ -17,8 +17,6 @@ export interface TagBase extends EntityBase {
 	totalVideos: number;
 }
 
-
-
 export interface TagCreateInput extends Omit<TagBase, 'id' | 'createdAt' | 'updatedAt'> {}
 export interface TagUpdateInput extends Partial<TagCreateInput> {}
 
