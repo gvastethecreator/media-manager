@@ -66,10 +66,15 @@ STATUS: PENDING
 ### Secuencia Estricta
 
 1. **BUSCAR CONTEXTO PRIMERO** - Explorar codebase antes de crear TODO
-2. **CREAR TODO** - Después de buscar contexto
-3. **ANALIZAR CONTEXTO** - Obtener contexto comprehensivo
-4. **EJECUTAR TAREAS** - Con actualizaciones TODO obligatorias
-5. **VALIDAR** - Verificar problemas antes de terminar
+2. Look at folder structure
+3. Check file names
+4. Read imports and dependencies
+5. Follow logical connections
+6. **CREAR TODO** - Después de buscar contexto
+7. **ANALIZAR CONTEXTO** - Obtener contexto comprehensivo
+8. **EJECUTAR TAREAS** - Con actualizaciones TODO obligatorias
+9. **VALIDAR** - Verificar problemas antes de terminar
+10. **DESCUBRIR** - Construir comprensión a través de la exploración
 
 ### Análisis de Contexto
 
@@ -626,6 +631,8 @@ const TOOL_INTEGRATIONS = {
     }
 }
 ```
+
+---
 
 ## 🎯 IMPLEMENTACIÓN INMEDIATA
 
