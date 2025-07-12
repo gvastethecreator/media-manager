@@ -13,10 +13,8 @@ const clearMetadataCache = () => {
 const operationsLogger = clientLogger.withContext('FoldersOperations');
 
 interface UseOperationsOptions {
-	onStartProcessing: (folderId: string) => void;
 	onLoadData: () => Promise<void>;
 	onError: (error: Error | string) => void;
-	onReindexAllStart: () => void;
 }
 
 /**
@@ -85,11 +83,11 @@ export function useFoldersOperations({
 			try {
 				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
 
-				// Notificar inicio de procesamiento
-				onStartProcessing(folderId);
-
-				// Usar la nueva función de reindexado
+				// Usar la nueva función de reindexado (síncrona)
 				await reindexFolderMutation.mutateAsync(folderId);
+
+				// Recargar datos después de la reindexación
+				await onLoadData();
 
 				operationsLogger.info('✅ Reindexación completada');
 				toastService.success('Carpeta reindexada correctamente');
@@ -101,7 +99,7 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onStartProcessing, onError, reindexFolderMutation.mutateAsync]
+		[onLoadData, onError, reindexFolderMutation.mutateAsync]
 	);
 
 	// Eliminar una carpeta
@@ -157,9 +155,12 @@ export function useFoldersOperations({
 		try {
 			operationsLogger.info('🔄 Iniciando reindexación global directa');
 
-			// Iniciar directamente el proceso de reindexado sin diálogo
-			onReindexAllStart();
+			// Ejecutar reindexación global (síncrona)
 			await reindexAllFoldersMutation.mutateAsync();
+
+			// Recargar datos después de la reindexación global
+			await onLoadData();
+
 			toastService.success('Reindexación global completada');
 		} catch (error) {
 			operationsLogger.error('❌ Error al iniciar reindexación global:', error);
@@ -168,7 +169,7 @@ export function useFoldersOperations({
 
 			toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 		}
-	}, [onReindexAllStart, onError, reindexAllFoldersMutation.mutateAsync]);
+	}, [onLoadData, onError, reindexAllFoldersMutation.mutateAsync]);
 
 	// Limpiar caché
 	const handleClearCache = useCallback(async () => {

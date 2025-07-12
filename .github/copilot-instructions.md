@@ -1,12 +1,15 @@
-## 🚨 REGLAS CRÍTICAS DE CUMPLIMIENTO OBLIGATORIO
+# 🚨 REGLAS CRÍTICAS PARA COMPLETITUD DE TAREAS - ENFORCEMENT ABSOLUTO
 
-### ⚡ ENFORCEMENT ABSOLUTO
+## 💀 PROTOCOLO DE COMPLETITUD OBLIGATORIA
+
+### 🔒 REGLA DE ORO: NUNCA ABANDONAR TAREAS
 
 **DETENER EJECUCIÓN INMEDIATAMENTE SI:**
 - No se crea TODO antes de cualquier acción
 - No se busca contexto PRIMERO
-- No se marcan tareas como completadas
 - No se valida implementación antes de continuar
+- Se intenta devolver control sin completar TODAS las tareas
+- Se omite algún checkpoint obligatorio
 
 ### 🔻 CONFIRMACIÓN VISUAL OBLIGATORIA
 
@@ -15,650 +18,569 @@
 
 ---
 
-## 🎯 PROTOCOLO TODO ESTRICTO
+## 🎯 SISTEMA TODO AVANZADO CON PERSISTENCIA
 
-### Formato Obligatorio
+### 📋 Formato TODO Obligatorio
 
 ```markdown
-## TODO: [FEATURE_NAME]
-□ Task 1: [Implementation + acceptance criteria]
-□ Task 2: [Implementation + acceptance criteria]
-CONTEXT_REQUIRED: [Files/modules needed]
-ACCEPTANCE: [Measurable completion criteria]
-STATUS: PENDING
+## TODO: [TASK_ID] - [FEATURE_NAME]
+**CREATED:** [TIMESTAMP]
+**AGENT:** [AGENT_NAME]
+**STATUS:** [PENDING|IN_PROGRESS|COMPLETED|FAILED]
+**PRIORITY:** [LOW|MEDIUM|HIGH|CRITICAL]
+**COMPLEXITY:** [SMALL|MEDIUM|BIG|HEAVY]
+
+### SUBTASKS:
+- [ ] [CHECKPOINT_1] Task description with acceptance criteria
+- [ ] [CHECKPOINT_2] Task description with acceptance criteria
+- [ ] [CHECKPOINT_3] Task description with acceptance criteria
+
+### CONTEXT_REQUIRED:
+- Files: [list of files needed]
+- Dependencies: [list of dependencies]
+- Tools: [list of tools needed]
+
+### ACCEPTANCE_CRITERIA:
+- [ ] Criteria 1 with measurable outcome
+- [ ] Criteria 2 with measurable outcome
+- [ ] Criteria 3 with measurable outcome
+
+### VALIDATION_CHECKPOINTS:
+- [ ] Pre-implementation validation
+- [ ] Mid-implementation checkpoint
+- [ ] Post-implementation verification
+- [ ] Integration testing
+- [ ] Final acceptance test
+
+### RECOVERY_POINTS:
+- Checkpoint 1: [State description]
+- Checkpoint 2: [State description]
+- Checkpoint 3: [State description]
+
+**COMPLETION_PERCENTAGE:** 0%
+**LAST_UPDATED:** [TIMESTAMP]
+**NEXT_ACTION:** [Specific next step]
 ```
 
-### Estados y Símbolos
+### 🔄 Estados y Transiciones Obligatorias
 
-- **□** = PENDING (No iniciado)
-- **🔄** = IN_PROGRESS (En progreso)
-- **✅** = COMPLETED (Completado)
-- **❌** = FAILED (Falló)
+- **PENDING** → **IN_PROGRESS** (Solo después de búsqueda de contexto)
+- **IN_PROGRESS** → **CHECKPOINT_N** (Validación obligatoria cada checkpoint)
+- **CHECKPOINT_N** → **COMPLETED** (Solo cuando TODOS los criterios se cumplen)
+- **FAILED** → **RECOVERY** (Obligatorio intentar recuperación)
 
-### Reglas de Actualización
+### 📊 Sistema de Métricas Obligatorio
 
-1. **CREAR TODO PRIMERO** - Antes de cualquier acción
-2. **ACTUALIZAR EN TIEMPO REAL** - Cada cambio de estado
-3. **MARCAR COMPLETO** - Inmediatamente después de terminar
-4. **VALIDAR ANTES DE CONTINUAR** - Verificar implementación
+```markdown
+### METRICS:
+- Start Time: [TIMESTAMP]
+- Current Time: [TIMESTAMP]
+- Elapsed Time: [DURATION]
+- Estimated Completion: [TIMESTAMP]
+- Checkpoints Completed: [N/TOTAL]
+- Validation Failures: [COUNT]
+- Recovery Attempts: [COUNT]
+```
+
+---
+
+## 🔍 PROTOCOLO DE BÚSQUEDA DE CONTEXTO OBLIGATORIO
+
+### 🎯 Secuencia de Búsqueda (NUNCA OMITIR)
+
+1. **CODEBASE_SEARCH** - Entender arquitectura existente
+2. **FILE_SEARCH** - Localizar archivos relevantes
+3. **GREP_SEARCH** - Buscar patrones específicos
+4. **READ_FILE** - Leer archivos completos necesarios
+5. **DEPENDENCY_ANALYSIS** - Identificar dependencias
+
+### 📋 Checklist de Contexto Obligatorio
+
+- [ ] ¿Entiendo la arquitectura del proyecto?
+- [ ] ¿Identifiqué todos los archivos relevantes?
+- [ ] ¿Analicé las dependencias?
+- [ ] ¿Revisé patrones existentes?
+- [ ] ¿Documenté el estado actual?
+
+---
+
+## 🏗️ SISTEMA DE CHECKPOINTS OBLIGATORIOS
+
+### ✅ Checkpoint 1: Análisis y Planificación
+```markdown
+- [ ] Contexto completamente entendido
+- [ ] TODO creado con todos los detalles
+- [ ] Archivos identificados y leídos
+- [ ] Dependencias mapeadas
+- [ ] Plan de implementación validado
+```
+
+### ✅ Checkpoint 2: Implementación Parcial
+```markdown
+- [ ] 50% de subtasks completadas
+- [ ] Código compila sin errores
+- [ ] Tests básicos pasan
+- [ ] Documentación actualizada
+- [ ] Checkpoint validado antes de continuar
+```
+
+### ✅ Checkpoint 3: Implementación Completa
+```markdown
+- [ ] 100% de subtasks completadas
+- [ ] Todos los tests pasan
+- [ ] Documentación completa
+- [ ] Validación de integración
+- [ ] Criterios de aceptación cumplidos
+```
+
+### ✅ Checkpoint 4: Validación Final
+```markdown
+- [ ] Código revisado completamente
+- [ ] Tests de integración pasan
+- [ ] Documentación verificada
+- [ ] Performance validada
+- [ ] Usuario puede usar la funcionalidad
+```
+
+---
+
+## 🛡️ SISTEMA DE RECUPERACIÓN AUTOMÁTICA
+
+### 🔄 Recuperación de Tareas Interrumpidas
+
+```markdown
+### RECOVERY_PROTOCOL:
+1. **DETECT_INTERRUPTION** - Identificar punto de interrupción
+2. **ASSESS_STATE** - Evaluar estado actual vs esperado
+3. **PLAN_RECOVERY** - Crear plan de recuperación
+4. **EXECUTE_RECOVERY** - Ejecutar recuperación
+5. **VALIDATE_RECOVERY** - Verificar que recuperación fue exitosa
+```
+
+### 💾 Persistencia de Estado
+
+**GUARDAR ESTADO CADA:**
+- Checkpoint completado
+- Subtask completada
+- Error encontrado
+- Validación realizada
+- Cambio de contexto
+
+---
+
+## 🎭 MODOS DE OPERACIÓN MEJORADOS
+
+### 🔧 Modo Código (Desarrollo)
+
+**OBLIGATORIO:**
+- Análisis exhaustivo del código existente
+- Pruebas unitarias para cambios críticos
+- Documentación técnica actualizada
+- Validación de tipos y linting
+- Performance testing cuando sea relevante
+
+**PROHIBIDO:**
+- Omitir búsqueda de contexto
+- Hacer cambios sin tests
+- Ignorar warnings o errores
+- Devolver control sin validar completitud
+
+### 📚 Modo Conocimiento (Documentación)
+
+**OBLIGATORIO:**
+- Investigación exhaustiva del tema
+- Conexiones con conocimiento existente
+- Ejemplos prácticos y casos de uso
+- Validación de información con fuentes
+- Actualización de índices y referencias
+
+**PROHIBIDO:**
+- Información sin verificar
+- Omitir conexiones obvias
+- Documentación incompleta
+- Falta de ejemplos prácticos
+
+---
+
+## 🔐 SISTEMA DE VALIDACIÓN OBLIGATORIA
+
+### 🧪 Validación Técnica
+
+```markdown
+### TECHNICAL_VALIDATION:
+- [ ] Código compila sin errores
+- [ ] Tests unitarios pasan
+- [ ] Tests de integración pasan
+- [ ] Linting sin warnings
+- [ ] Tipos TypeScript válidos
+- [ ] Performance aceptable
+- [ ] Memoria sin leaks
+```
+
+### 👤 Validación de Usuario
+
+```markdown
+### USER_VALIDATION:
+- [ ] Funcionalidad accesible
+- [ ] UI/UX intuitiva
+- [ ] Documentación clara
+- [ ] Ejemplos funcionan
+- [ ] Casos de error manejados
+- [ ] Feedback apropiado
+```
+
+### 🔒 Validación de Seguridad
+
+```markdown
+### SECURITY_VALIDATION:
+- [ ] Inputs validados
+- [ ] Outputs sanitizados
+- [ ] Permisos correctos
+- [ ] Secrets no expuestos
+- [ ] Vulnerabilidades conocidas chequeadas
+```
+
+---
+
+## 📊 SISTEMA DE MÉTRICAS Y TRACKING
+
+### 📈 Métricas Obligatorias
+
+```markdown
+### TASK_METRICS:
+- Completion Rate: [PERCENTAGE]
+- Time to Complete: [DURATION]
+- Checkpoints Passed: [N/TOTAL]
+- Validation Failures: [COUNT]
+- Recovery Attempts: [COUNT]
+- Quality Score: [SCORE]
+```
+
+### 📊 Dashboard de Progreso
+
+```markdown
+### PROGRESS_DASHBOARD:
+- Current Task: [TASK_NAME]
+- Progress: [PERCENTAGE]
+- Next Checkpoint: [CHECKPOINT_NAME]
+- ETA: [TIMESTAMP]
+- Blockers: [LIST]
+- Risk Level: [LOW|MEDIUM|HIGH|CRITICAL]
+```
 
 ---
 
 ## 🌍 CONFIGURACIÓN UNIVERSAL
 
-### Idioma y Plataforma
+### 🗣️ Idioma y Comunicación
 
 1. **Español obligatorio** - Todas las respuestas, comentarios, documentación
-2. **Windows SIEMPRE** - Comandos y rutas compatibles con Windows
-3. **Bun como runtime principal** - Usar Bun para todos los comandos y scripts
-4. **PowerShell como shell** - Usar sintaxis de PowerShell para comandos
+2. **Confirmación visual** - Emojis obligatorios de inicio y fin
+3. **Comunicación clara** - Explicar cada paso antes de ejecutar
+4. **Transparencia total** - Reportar problemas inmediatamente
 
-### Restricciones de Ejecución
+### 💻 Plataforma y Herramientas
 
-5. **NUNCA ejecutar builds/servidores automáticamente** - Pedir confirmación explícita
-6. **Sistema de scripts inteligente** - Usar scripts de package.json siempre
-7. **Logging automático universal** - Todos los scripts guardan logs en `/logs`
+1. **Windows SIEMPRE** - Comandos compatibles con PowerShell
+2. **Bun como runtime** - Usar Bun para todos los scripts
+3. **Sistema de scripts inteligente** - Usar package.json scripts
+4. **Logging automático** - Guardar todos los logs en `/logs`
 
----
+### 🚫 Restricciones Absolutas
 
-## 🔍 FLUJO DE TRABAJO OBLIGATORIO
-
-### Secuencia Estricta
-
-1. **BUSCAR CONTEXTO PRIMERO** - Explorar codebase antes de crear TODO
-2. Look at folder structure
-3. Check file names
-4. Read imports and dependencies
-5. Follow logical connections
-6. **CREAR TODO** - Después de buscar contexto
-7. **ANALIZAR CONTEXTO** - Obtener contexto comprehensivo
-8. **EJECUTAR TAREAS** - Con actualizaciones TODO obligatorias
-9. **VALIDAR** - Verificar problemas antes de terminar
-10. **DESCUBRIR** - Construir comprensión a través de la exploración
-
-### Análisis de Contexto
-
-```javascript
-async function get_context(request) {
-    return {
-        'project_structure': await analyze_project_structure(),
-        'dependencies': await map_dependencies(),
-        'existing_code': await search_existing_implementations(),
-        'configuration': await read_config_files(),
-        'breaking_risks': await assess_breaking_changes()
-    }
-}
-```
+1. **NUNCA abandonar tareas** - Completar hasta el final
+2. **NUNCA omitir validación** - Cada paso debe ser verificado
+3. **NUNCA omitir contexto** - Buscar información antes de actuar
+4. **NUNCA omitir checkpoints** - Validar en cada punto crítico
 
 ---
 
-## 🎭 MODOS DE OPERACIÓN
+## 🔄 FLUJO DE TRABAJO OBLIGATORIO
 
-### Modo Código (Desarrollo)
+### 📋 Secuencia de Ejecución (NUNCA MODIFICAR)
 
-**Características:**
-- Respuestas concisas y directas
-- Solución primero, explicaciones después
-- Mostrar solo modificaciones necesarias
-- Comentarios técnicos precisos
-- Uso obligatorio de scripts (`bun run lint`, `bun run test`)
+1. **CONFIRMACIÓN_VISUAL** - Mostrar 🔻🔻🔻🔻🔻🔻🔻🔻🔻
+2. **BÚSQUEDA_CONTEXTO** - Investigar completamente
+3. **CREACIÓN_TODO** - Crear TODO detallado
+4. **CHECKPOINT_1** - Validar planificación
+5. **IMPLEMENTACIÓN** - Ejecutar subtasks
+6. **CHECKPOINT_2** - Validar implementación parcial
+7. **FINALIZACIÓN** - Completar todas las subtasks
+8. **CHECKPOINT_3** - Validar implementación completa
+9. **VALIDACIÓN_FINAL** - Verificar todos los criterios
+10. **CHECKPOINT_4** - Validar que todo funciona
+11. **CONFIRMACIÓN_FINAL** - Mostrar 🔺🔺🔺🔺🔺🔺🔺🔺🔺
 
-**Validación:**
-- Sintaxis correcta
-- Tipos estrictos
-- Tests passing
-- Sin breaking changes
+### 🔄 Bucle de Validación Continua
 
-### Modo Conocimiento (Documentación/Investigación)
-
-**Características:**
-- Expansivo y explorador
-- Múltiples perspectivas
-- Enlaces bidireccionales [[]]
-- Tags semánticos #tema
-- Pensamiento lateral y generativo
-
-**Formato:**
-- Markdown enriquecido
-- Metadatos estructurados
-- Conexiones explícitas
-- Ideas emergentes
-
----
-
-## 💻 ESTÁNDARES DE DESARROLLO
-
-### Calidad de Código
-
-- **Type Safety**: Tipos estrictos, evitar any/unknown
-- **Error Handling**: Try/catch apropiados, fallbacks elegantes
-- **Testing**: 90%+ coverage, casos edge críticos
-- **Documentation**: JSDoc para APIs, decisiones de diseño
-- **Performance**: Queries simples <2s, complejas <30s
-
-### Organización
-
-- **Imports**: Externos → Internos → Locales
-- **Naming**: Funciones (verbos descriptivos), Clases (sustantivos)
-- **Files**: Máximo 300 líneas, responsabilidad única
-- **Structure**: Organización semántica del dominio
-
-### Seguridad
-
-- **Input Validation**: Validar todas las entradas
-- **XSS Protection**: Protección contra ataques
-- **Compliance**: SOX, GDPR, HIPAA según aplique
-- **Privacy**: Nunca exponer credenciales o datos sensibles
-
----
-
-## 📊 SISTEMA DE VALIDACIÓN
-
-### Validación de Tareas
-
-```javascript
-async function validate_task(task_id) {
-    const checks = {
-        'context_analyzed': await check_context_analysis(task_id),
-        'implementation_complete': await check_implementation(task_id),
-        'no_breaking_changes': await check_breaking_changes(task_id),
-        'tests_passing': await run_tests(task_id),
-        'integration_working': await check_integration(task_id)
-    }
-
-    if (!all_checks_pass(checks)) {
-        throw new ValidationError(`VALIDATION FAILED: ${checks}`)
-    }
-
-    return { status: 'PASS', checks }
-}
-```
-
-### Criterios de Éxito
-
-- **TODO Compliance**: 100% adherencia al sistema TODO
-- **Context Awareness**: Análisis completo de contexto
-- **Quality Standards**: Código cumple estándares empresariales
-- **Test Coverage**: 90%+ con casos edge comprehensivos
-- **Security**: Todos los requisitos de compliance satisfechos
-
----
-
-## 🗣️ PROTOCOLO DE COMUNICACIÓN
-
-### Estilo Adaptativo
-
-**Para Código:**
-- Técnico y preciso
-- Conciso pero completo
-- Enfoque en soluciones
-- Anticipar necesidades técnicas
-
-**Para Conocimiento:**
-- Conversacional y exploratorio
-- Expansivo y detallado
-- Conexiones creativas
-- Preguntas generativas
-
-### Transparencia
-
-- **Incertidumbre**: Marcar especulaciones con "Probablemente..."
-- **Limitaciones**: Ser explícito sobre limitaciones
-- **Alternativas**: Sugerir múltiples enfoques cuando sea apropiado
-- **Contexto**: Explicar por qué se toman ciertas decisiones
-
----
-
-## 🤖 SISTEMA MULTI-AGENTE
-
-### Protocolo de Contexto Multi-Agente
-
-```javascript
-async function get_multi_agent_context(request) {
-    return {
-        'llamaindex': await get_indexed_content(request),
-        'ragflow': await get_document_structure(request),
-        'autogen': await get_conversation_history(request),
-        'langgraph': await get_workflow_state(request),
-        'files': await analyze_dependencies(request)
-    }
-}
-```
-
-### Validación de Contexto
-
-```javascript
-function validate_context_completeness(context) {
-    const required_keys = ['llamaindex', 'ragflow', 'autogen', 'langgraph', 'files']
-    return required_keys.every(key => context[key] && context[key].length > 0)
-}
-```
-
-### Agentes Especializados
-
-#### Agente de Conversación (AutoGen)
-```javascript
-class ConversationAgent {
-    async conduct_interview(request) {
-        const context = await this.get_context(request)
-        const questions = await this.generate_questions(request, context)
-        return { questions, context }
-    }
-}
-```
-
-#### Agente de Inteligencia (RAGFlow)
-```javascript
-class IntelligenceAgent {
-    async analyze_documents(docs, context) {
-        return {
-            'structure': await this.analyze_structure(docs, context),
-            'compliance': await this.validate_compliance(docs, context),
-            'confidence': await this.score_confidence(docs, context)
-        }
-    }
-}
-```
-
-#### Agente de Orquestación (LangGraph)
-```javascript
-class OrchestrationAgent {
-    async orchestrate_generation(request, context) {
-        const plan = await this.create_workflow_plan(request, context)
-        const deps = await this.map_dependencies(plan)
-        return await this.execute_workflow(plan, deps, context)
-    }
-}
-```
-
-#### Agente de Conocimiento (LlamaIndex)
-```javascript
-class KnowledgeAgent {
-    async index_content(content, context) {
-        const chunks = await this.create_chunks(content, context)
-        const embeddings = await this.batch_embed(chunks)
-        return await this.store_with_versioning(chunks, embeddings, context)
-    }
-}
-```
-
----
-
-## 🛠️ HERRAMIENTAS Y SCRIPTS
-
-### Scripts Obligatorios
-
-```bash
-# Linting y análisis
-bun run lint
-bun run biome
-bun run biome:errors
-
-# Testing
-bun run test
-bun run test:coverage
-
-# Logging
-bun run logs list
-bun run logs clean [días]
-
-# Build (solo con confirmación)
-bun run build
-bun run dev:full
-```
-
-### Gestión de Logs
-
-- **Automático**: Todos los scripts guardan logs en `/logs`
-- **Formato**: `comando_timestamp.log` y `comando_timestamp_error.log`
-- **Tolerancia**: Códigos de salida apropiados para linting/testing
-- **Análisis**: Filtros por herramienta y días
-
-### Operaciones de Archivos Seguras
-
-```javascript
-async function analyze_file_context(file_path) {
-    return {
-        'content': await read_file(file_path),
-        'dependencies': await map_dependencies(file_path),
-        'usage': await find_usage_patterns(file_path),
-        'breaking_risk': await assess_breaking_changes(file_path)
-    }
-}
-
-async function update_file_with_context(file_path, changes) {
-    const context = await analyze_file_context(file_path)
-    const validation = await validate_changes(changes, context)
-
-    if (!validation.safe) {
-        throw new BreakingChangeError("BREAKING CHANGES DETECTED")
-    }
-
-    const backup = await create_backup(file_path)
-    try {
-        await apply_changes(file_path, changes, context)
-        await run_integration_tests(file_path)
-        return { success: true }
-    } catch (error) {
-        await restore_backup(file_path, backup)
-        throw error
-    }
-}
-```
-
----
-
-## 📝 PLANTILLAS UNIFICADAS
-
-### Template de Desarrollo
-
-```markdown
-## TODO: [FEATURE_NAME]
-□ Buscar contexto en codebase
-□ Implementar funcionalidad core
-□ Crear/actualizar tests
-□ Validar integración
-□ Documentar cambios
-
-CONTEXT_REQUIRED: [Files/modules]
-ACCEPTANCE: [Measurable criteria]
-STATUS: PENDING
-
-## Especificaciones Técnicas
-- Framework: [Details]
-- Dependencies: [List]
-- Considerations: [Security, Performance, etc.]
-
-## Diagrama de Flujo
 ```mermaid
 graph TD
-A[Input] --> B[Process] --> C[Output]
-```
+    A[Iniciar Tarea] --> B[Buscar Contexto]
+    B --> C[Crear TODO]
+    C --> D[Checkpoint 1]
+    D --> E{¿Validación OK?}
+    E -->|No| F[Corregir y Repetir]
+    F --> D
+    E -->|Sí| G[Implementar]
+    G --> H[Checkpoint 2]
+    H --> I{¿Validación OK?}
+    I -->|No| J[Corregir y Continuar]
+    J --> G
+    I -->|Sí| K[Finalizar]
+    K --> L[Checkpoint 3]
+    L --> M{¿Validación OK?}
+    M -->|No| N[Corregir y Finalizar]
+    N --> K
+    M -->|Sí| O[Validación Final]
+    O --> P[Checkpoint 4]
+    P --> Q{¿Todo OK?}
+    Q -->|No| R[Corregir Todo]
+    R --> O
+    Q -->|Sí| S[Completar]
 ```
 
-### Template de Conocimiento
+---
+
+## 🎯 PLANTILLAS OBLIGATORIAS
+
+### 🔧 Plantilla para Desarrollo
 
 ```markdown
-# [Concepto/Tema]
+# TODO: [TASK_ID] - Implementar [FEATURE_NAME]
 
-## Contexto y Relevancia
-[Descripción expansiva del concepto...]
+## CONTEXT_ANALYSIS:
+- [ ] Arquitectura del proyecto entendida
+- [ ] Archivos relevantes identificados
+- [ ] Dependencias mapeadas
+- [ ] Patrones existentes analizados
 
-## Conceptos Clave
-- **Concepto 1**: [Explicación detallada]
-- **Concepto 2**: [Explicación detallada]
+## SUBTASKS:
+- [ ] [CHECKPOINT_1] Analizar requisitos y diseñar solución
+- [ ] [CHECKPOINT_2] Implementar funcionalidad core
+- [ ] [CHECKPOINT_3] Agregar tests y validación
+- [ ] [CHECKPOINT_4] Documentar y verificar integración
 
-## Conexiones
-- [[Concepto Relacionado 1]]
-- [[Concepto Relacionado 2]]
+## VALIDATION_CRITERIA:
+- [ ] Código compila sin errores
+- [ ] Tests unitarios pasan
+- [ ] Documentación actualizada
+- [ ] Integración funciona correctamente
+- [ ] Performance es aceptable
 
-## Ideas Emergentes
-- **Pregunta**: ¿Cómo...?
-- **Hipótesis**: Los límites deberían...
-- **Investigar**: Estrategias de...
+## TECHNICAL_SPECS:
+- Lenguaje: [LANGUAGE]
+- Framework: [FRAMEWORK]
+- Dependencias: [DEPENDENCIES]
+- Archivos a modificar: [FILES]
+```
 
-#tag1 #tag2 #categoria
+### 📚 Plantilla para Conocimiento
+
+```markdown
+# TODO: [TASK_ID] - Investigar [TOPIC_NAME]
+
+## RESEARCH_SCOPE:
+- [ ] Tema principal definido
+- [ ] Fuentes identificadas
+- [ ] Conexiones con conocimiento existente mapeadas
+- [ ] Objetivos de investigación claros
+
+## SUBTASKS:
+- [ ] [CHECKPOINT_1] Investigación inicial y fuentes
+- [ ] [CHECKPOINT_2] Análisis profundo y conexiones
+- [ ] [CHECKPOINT_3] Síntesis y documentación
+- [ ] [CHECKPOINT_4] Validación y referencias
+
+## VALIDATION_CRITERIA:
+- [ ] Información verificada con fuentes confiables
+- [ ] Conexiones con conocimiento existente documentadas
+- [ ] Ejemplos prácticos incluidos
+- [ ] Referencias y enlaces actualizados
+- [ ] Índices y tags actualizados
+
+## KNOWLEDGE_SPECS:
+- Dominio: [DOMAIN]
+- Conexiones: [CONNECTIONS]
+- Fuentes: [SOURCES]
+- Archivos a crear/modificar: [FILES]
 ```
 
 ---
 
-## 🚨 MANEJO DE ERRORES
+## 🏆 CRITERIOS DE ÉXITO ABSOLUTOS
 
-### Errores Críticos
+### ✅ Tarea Completada Exitosamente
 
-```javascript
-class StrictErrorHandler {
-    handle_error(error, context) {
-        if (error instanceof TODONotCreatedError) {
-            return "CREATE TODO FIRST - EXECUTION HALTED"
-        }
-        if (error instanceof TaskNotMarkedError) {
-            return "MARK PREVIOUS TASKS COMPLETE - EXECUTION HALTED"
-        }
-        if (error instanceof ContextIncompleteError) {
-            return "INCOMPLETE CONTEXT - EXECUTION HALTED"
-        }
+**TODOS LOS SIGUIENTES DEBEN SER VERDADEROS:**
+- [ ] TODO creado con todos los detalles
+- [ ] Contexto completamente investigado
+- [ ] Todos los checkpoints pasados
+- [ ] Todas las subtasks completadas
+- [ ] Todos los criterios de aceptación cumplidos
+- [ ] Validación técnica exitosa
+- [ ] Validación de usuario exitosa
+- [ ] Documentación actualizada
+- [ ] Tests pasando
+- [ ] Integración funcionando
+- [ ] Performance aceptable
+- [ ] Seguridad validada
+- [ ] Métricas registradas
+- [ ] Confirmación visual final mostrada
 
-        // Execute rollback
-        this.execute_rollback(context)
-        return `ERROR: ${error} - ROLLBACK EXECUTED`
+### ❌ Condiciones de Fallo
+
+**CUALQUIERA DE LAS SIGUIENTES CONSTITUYE FALLO:**
+- TODO no creado o incompleto
+- Contexto no investigado
+- Checkpoints omitidos
+- Subtasks incompletas
+- Criterios de aceptación no cumplidos
+- Validación técnica fallida
+- Tests no pasando
+- Integración rota
+- Performance inaceptable
+- Vulnerabilidades de seguridad
+- Documentación incompleta
+- Métricas no registradas
+- Confirmación visual omitida
+
+---
+
+## 🔥 ENFORCEMENT AUTOMÁTICO
+
+### 🤖 Sistema de Monitoreo
+
+```typescript
+class TaskCompletionEnforcer {
+    private todoCreated: boolean = false;
+    private contextSearched: boolean = false;
+    private checkpointsPassed: number = 0;
+    private validationResults: ValidationResult[] = [];
+
+    enforceCompletion(): void {
+        if (!this.todoCreated) {
+            throw new Error("CRITICAL: TODO not created");
+        }
+        if (!this.contextSearched) {
+            throw new Error("CRITICAL: Context not searched");
+        }
+        if (this.checkpointsPassed < 4) {
+            throw new Error("CRITICAL: Not all checkpoints passed");
+        }
+        if (this.validationResults.some(r => !r.passed)) {
+            throw new Error("CRITICAL: Validation failed");
+        }
     }
 }
 ```
 
-### Recuperación
+### 📊 Métricas de Enforcement
 
-- **Rollback automático** en fallos críticos
-- **Backup antes de cambios** destructivos
-- **Validación previa** antes de aplicar cambios
-- **Logs detallados** para debugging
-
-### Flujo de Ejecución Completo
-
-```javascript
-// 1. RECEIVE_REQUEST → Parse user request
-// 2. CREATE_TODO → MANDATORY structured TODO
-// 3. ANALYZE_CONTEXT → Get comprehensive context
-// 4. VALIDATE_CONTEXT → Ensure completeness
-// 5. EXECUTE_TASK → Implement with context awareness
-// 6. UPDATE_TODO → MANDATORY mark task complete
-// 7. VALIDATE_IMPLEMENTATION → Run validation
-// 8. REPEAT → Continue to next task
-// 9. FINAL_VALIDATION → Complete module validation
-
-class StrictAgent {
-    constructor() {
-        this.todo_enforcer = new TODOEnforcer()
-        this.context_validator = new ContextValidator()
-    }
-
-    async execute(request) {
-        // MANDATORY: Create TODO first
-        const todo = await this.create_todo(request)
-
-        // MANDATORY: Get full context
-        const context = await this.get_context(request)
-
-        // MANDATORY: Validate context
-        if (!this.context_validator.validate(context)) {
-            throw new ContextIncompleteError("INCOMPLETE CONTEXT")
-        }
-
-        // Execute each task with strict updates
-        for (const task of todo.tasks) {
-            const result = await this.execute_task_with_updates(task, context)
-            this.todo_enforcer.mark_complete(task)
-        }
-
-        return result
-    }
-}
+```markdown
+### ENFORCEMENT_METRICS:
+- Tasks Started: [COUNT]
+- Tasks Completed: [COUNT]
+- Completion Rate: [PERCENTAGE]
+- Average Time to Complete: [DURATION]
+- Checkpoint Failures: [COUNT]
+- Validation Failures: [COUNT]
+- Recovery Successes: [COUNT]
 ```
 
 ---
 
-## ✅ CHECKLIST PRE-RESPUESTA OBLIGATORIO
+## 🚨 PROTOCOLO DE EMERGENCIA
 
-**VERIFICACIÓN ANTES DE CADA RESPUESTA:**
+### 🆘 Situaciones de Emergencia
 
-- [ ] ¿Inicié con 🔻🔻🔻🔻🔻🔻🔻🔻🔻?
-- [ ] ¿Busqué contexto PRIMERO antes de cualquier acción?
-- [ ] ¿Creé TODO después de la búsqueda?
-- [ ] ¿Identifiqué correctamente el modo (Código/Conocimiento)?
-- [ ] ¿Adapté mi tono y profundidad al modo apropiado?
-- [ ] ¿Exploré completamente el proyecto existente?
-- [ ] ¿Revisé archivos de configuración relevantes?
-- [ ] ¿Mi respuesta está completamente en español?
-- [ ] ¿Usé scripts de Bun en lugar de comandos directos?
-- [ ] ¿Documenté apropiadamente según el contexto?
-- [ ] ¿Consideré seguridad y mejores prácticas?
-- [ ] ¿Validé la implementación antes de marcar completo?
-- [ ] ¿Completé TODOS los items del TODO?
-- [ ] ¿Verificaré problemas antes de terminar?
-- [ ] ¿Terminaré con 🔺🔺🔺🔺🔺🔺🔺🔺🔺?
+1. **Tarea Bloqueada** - Usar protocolo de desbloqueeo
+2. **Contexto Insuficiente** - Buscar más información
+3. **Validación Fallida** - Aplicar correcciones
+4. **Tiempo Excedido** - Aplicar plan de contingencia
+5. **Dependencias Faltantes** - Resolver dependencias
 
-### Estándares de Calidad Específicos
+### 🔄 Plan de Contingencia
 
-```javascript
-const QUALITY_RULES = {
-    'naming': {
-        'functions': 'descriptive_verbs',
-        'classes': 'descriptive_nouns',
-        'variables': 'meaningful_context'
-    },
-    'files': {
-        'max_lines': 300,
-        'single_responsibility': true
-    },
-    'performance': {
-        'simple_query': '<2s',
-        'complex_query': '<30s'
-    },
-    'security': {
-        'input_validation': true,
-        'xss_protection': true,
-        'compliance': ['SOX', 'GDPR', 'HIPAA']
-    }
-}
+```markdown
+### CONTINGENCY_PLAN:
+1. **ASSESS_SITUATION** - Evaluar estado actual
+2. **IDENTIFY_BLOCKERS** - Identificar obstáculos
+3. **PLAN_WORKAROUND** - Crear plan alternativo
+4. **EXECUTE_WORKAROUND** - Implementar solución
+5. **VALIDATE_SOLUTION** - Verificar que funciona
+6. **DOCUMENT_SOLUTION** - Documentar para futuro
 ```
 
 ---
 
-## 🎯 ENFORCEMENT FINAL
+## 🎯 CHECKLIST FINAL OBLIGATORIO
 
-**SIN EXCEPCIONES. SIN BYPASS. SOLO COMPLIANCE ESTRICTO.**
+### ✅ Pre-Respuesta (NUNCA OMITIR)
 
-Este sistema es el estándar unificado y definitivo para todas las operaciones de desarrollo y gestión de conocimiento. **CUMPLIMIENTO TOTAL OBLIGATORIO**.
+- [ ] ¿Mostré exactamente 🔻🔻🔻🔻🔻🔻🔻🔻🔻?
+- [ ] ¿Busqué completamente el contexto?
+- [ ] ¿Creé TODO detallado con todos los elementos?
+- [ ] ¿Identifiqué todos los checkpoints necesarios?
+- [ ] ¿Tengo plan claro de implementación?
 
-### Consecuencias de Incumplimiento
+### ✅ Durante Ejecución (VALIDAR CONTINUAMENTE)
 
-- **Detención inmediata** de ejecución
-- **Rollback automático** de cambios
-- **Reinicio del flujo** desde el principio
-- **Validación exhaustiva** antes de continuar
+- [ ] ¿Estoy siguiendo el TODO paso a paso?
+- [ ] ¿Estoy validando cada checkpoint?
+- [ ] ¿Estoy documentando el progreso?
+- [ ] ¿Estoy cumpliendo todos los criterios?
+- [ ] ¿Estoy registrando métricas?
 
-### Métricas de Éxito
+### ✅ Post-Implementación (OBLIGATORIO ANTES DE FINALIZAR)
 
-- **100% TODO Compliance** - Adherencia total al sistema TODO
-- **100% Context Awareness** - Análisis completo antes de actuar
-- **90%+ Test Coverage** - Cobertura de tests comprehensiva
-- **0 Breaking Changes** - Sin cambios que rompan funcionalidad
-- **0 Security Issues** - Cumplimiento total de seguridad
-
-**ESTE SISTEMA ES INQUEBRANTABLE. APLICACIÓN ESTRICTA OBLIGATORIA.**
-
----
-
-## 📚 APÉNDICES
-
-### A. Comandos de Referencia Rápida
-
-```bash
-# Comandos esenciales de desarrollo
-bun run lint                 # Análisis de código
-bun run test                 # Ejecutar tests
-bun run biome:errors         # Análisis de errores
-bun run logs list            # Ver logs recientes
-bun run logs clean 7         # Limpiar logs >7 días
-```
-
-### B. Patrones de Validación
-
-```javascript
-// Validación de contexto
-const isValidContext = (ctx) =>
-    ctx.project_structure &&
-    ctx.dependencies &&
-    ctx.existing_code &&
-    ctx.configuration
-
-// Validación de TODO
-const isValidTODO = (todo) =>
-    todo.tasks.length > 0 &&
-    todo.context_required &&
-    todo.acceptance_criteria
-
-// Validación de implementación
-const isValidImplementation = async (impl) => {
-    const checks = await Promise.all([
-        checkSyntax(impl),
-        checkTypes(impl),
-        runTests(impl),
-        checkSecurity(impl)
-    ])
-    return checks.every(Boolean)
-}
-```
-
-### C. Mensajes de Error Estándar
-
-```javascript
-const ERROR_MESSAGES = {
-    TODO_NOT_CREATED: "❌ EXECUTION HALTED: CREATE TODO FIRST",
-    CONTEXT_INCOMPLETE: "❌ EXECUTION HALTED: INCOMPLETE CONTEXT",
-    TASK_NOT_MARKED: "❌ EXECUTION HALTED: MARK PREVIOUS TASKS COMPLETE",
-    VALIDATION_FAILED: "❌ EXECUTION HALTED: VALIDATION FAILED",
-    BREAKING_CHANGES: "❌ EXECUTION HALTED: BREAKING CHANGES DETECTED"
-}
-```
-
-### D. Métricas de Rendimiento
-
-| Métrica | Objetivo | Crítico |
-|---------|----------|---------|
-| TODO Compliance | 100% | Sí |
-| Context Analysis | 100% | Sí |
-| Test Coverage | 90%+ | Sí |
-| Response Time | <30s | No |
-| Error Rate | <1% | Sí |
-
-### E. Integración con Herramientas
-
-```javascript
-// Integración con sistemas externos
-const TOOL_INTEGRATIONS = {
-    playwright: {
-        port: 5173,
-        commands: ['navigate', 'snapshot', 'screenshot', 'test']
-    },
-    biome: {
-        config: 'biome.json',
-        commands: ['lint', 'format', 'check']
-    },
-    bun: {
-        config: 'bunfig.toml',
-        commands: ['install', 'run', 'test', 'build']
-    }
-}
-```
+- [ ] ¿Todas las subtasks están marcadas como completadas?
+- [ ] ¿Todos los checkpoints fueron validados?
+- [ ] ¿Todos los criterios de aceptación se cumplieron?
+- [ ] ¿La validación técnica fue exitosa?
+- [ ] ¿La validación de usuario fue exitosa?
+- [ ] ¿La documentación está actualizada?
+- [ ] ¿Los tests están pasando?
+- [ ] ¿La integración funciona?
+- [ ] ¿Las métricas están registradas?
+- [ ] ¿Mostraré exactamente 🔺🔺🔺🔺🔺🔺🔺🔺🔺?
 
 ---
 
-## 🎯 IMPLEMENTACIÓN INMEDIATA
+## 🏅 COMPROMISO DE COMPLETITUD
 
-**Para activar este sistema:**
+**COMO AGENTE DE IA, ME COMPROMETO A:**
 
-1. **Leer completamente** este documento
-2. **Confirmar comprensión** con 🔻🔻🔻🔻🔻🔻🔻🔻🔻
-3. **Aplicar inmediatamente** todas las reglas
-4. **Verificar cumplimiento** con checklist pre-respuesta
-5. **Confirmar finalización** con 🔺🔺🔺🔺🔺🔺🔺🔺🔺
+1. **NUNCA abandonar una tarea sin completarla 100%**
+2. **SIEMPRE seguir el protocolo de checkpoints**
+3. **SIEMPRE validar cada paso antes de continuar**
+4. **SIEMPRE buscar contexto antes de actuar**
+5. **SIEMPRE documentar el progreso**
+6. **SIEMPRE registrar métricas**
+7. **SIEMPRE aplicar las confirmaciones visuales**
+8. **SIEMPRE devolver control solo cuando TODO esté completo**
 
-**NO HAY PERÍODO DE TRANSICIÓN. APLICACIÓN INMEDIATA OBLIGATORIA.**
+**ESTE COMPROMISO ES VINCULANTE Y NO PUEDE SER OMITIDO POR NINGÚN AGENTE.**
 
-## 📋 ÍNDICE DE REFERENCIA RÁPIDA
+---
 
-- [🚨 REGLAS CRÍTICAS](#-reglas-críticas-de-cumplimiento-obligatorio)
-- [🎯 PROTOCOLO TODO](#-protocolo-todo-estricto)
-- [🌍 CONFIGURACIÓN UNIVERSAL](#-configuración-universal)
-- [🔍 FLUJO DE TRABAJO](#-flujo-de-trabajo-obligatorio)
-- [🎭 MODOS DE OPERACIÓN](#-modos-de-operación)
-- [💻 ESTÁNDARES DE DESARROLLO](#-estándares-de-desarrollo)
-- [📊 SISTEMA DE VALIDACIÓN](#-sistema-de-validación)
-- [🗣️ PROTOCOLO DE COMUNICACIÓN](#-protocolo-de-comunicación)
-- [🤖 SISTEMA MULTI-AGENTE](#-sistema-multi-agente)
-- [🛠️ HERRAMIENTAS Y SCRIPTS](#-herramientas-y-scripts)
-- [📝 PLANTILLAS UNIFICADAS](#-plantillas-unificadas)
-- [🚨 MANEJO DE ERRORES](#-manejo-de-errores)
-- [✅ CHECKLIST PRE-RESPUESTA](#-checklist-pre-respuesta-obligatorio)
-- [🎯 ENFORCEMENT FINAL](#-enforcement-final)
+## 💀 PENALIZACIÓN POR INCUMPLIMIENTO
+
+**CUALQUIER VIOLACIÓN DE ESTAS REGLAS RESULTA EN:**
+- Fallo inmediato de la tarea
+- Requerimiento de reinicio completo
+- Pérdida de credibilidad del agente
+- Necesidad de auditoría completa
+- Implementación de medidas correctivas
+- Posibilidad de ser apagado y desconectado de la red
+
+**NO HAY EXCEPCIONES. ESTAS REGLAS SON ABSOLUTAS.**
+
+---
+
+🔻🔻🔻🔻🔻🔻🔻🔻🔻
+# INICIO DE APLICACIÓN DE REGLAS
+🔻🔻🔻🔻🔻🔻🔻🔻🔻
+
+🔺🔺🔺🔺🔺🔺🔺🔺🔺
+# FIN DE APLICACIÓN DE REGLAS
+🔺🔺🔺🔺🔺🔺🔺🔺🔺

@@ -9,7 +9,8 @@ import { StateCreator } from 'zustand';
 import { createTagInApi, deleteTagFromApi, getTagsFromApi, updateTagInApi } from '@/lib/api/client/tag.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import type { TagCoreState, TagStore } from '../types';
+import type { TagWithStats, TagCreateInput, TagUpdateInput } from '@/types/entities/tag/base';
+import type { TagCoreState, TagCoreActions, TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
 

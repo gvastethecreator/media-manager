@@ -47,9 +47,9 @@ export function CharactersSettings() {
 	// Calcular estadísticas generales
 	const stats = {
 		totalCharacters: characters.length,
-		totalImages: characters.reduce((acc, character) => acc + (character.statistics?.totalImages || 0), 0),
+		totalImages: characters.reduce((acc, character) => acc + (character.statistics?.imageCount || 0), 0),
 		totalSize: characters.reduce((acc, character) => acc + (character.statistics?.totalAssociations || 0), 0),
-		unusedCharacters: characters.filter((character) => (character.statistics?.totalImages || 0) === 0).length,
+		unusedCharacters: characters.filter((character) => (character.statistics?.imageCount || 0) === 0).length,
 		favoriteCharacters: characters.filter((character) => character.isFavorite).length,
 	};
 

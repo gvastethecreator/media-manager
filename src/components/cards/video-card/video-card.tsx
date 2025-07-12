@@ -71,7 +71,7 @@ export function VideoCard({
 
 	// Calcular colores basados en la calidad técnica
 	const primaryColor = useMemo(() => {
-		const grade = video.technicalGrade;
+		const grade = video.stats?.technicalGrade || 'unknown';
 		switch (grade) {
 			case 'A':
 				return '#10b981'; // Verde esmeralda - Ultra calidad
@@ -84,7 +84,7 @@ export function VideoCard({
 			default:
 				return '#6b7280'; // Gris - Desconocida
 		}
-	}, [video.technicalGrade]);
+	}, [video.stats?.technicalGrade]);
 
 	const secondaryColor = useMemo(() => {
 		// Oscurecer el color primario
@@ -103,14 +103,14 @@ export function VideoCard({
 
 	// Calcular nivel de rareza basado en quality score
 	const rarityLevel = useMemo(() => {
-		const score = video.qualityScore;
+		const score = video.stats?.qualityScore || 0;
 		if (score >= 90) return 10; // Mítico
 		if (score >= 80) return 9; // Legendario
 		if (score >= 70) return 7; // Épico
 		if (score >= 60) return 5; // Raro
 		if (score >= 50) return 3; // Poco común
 		return 1; // Común
-	}, [video.qualityScore]);
+	}, [video.stats?.qualityScore]);
 
 	// Manejar eventos
 	const handleClick = useCallback(() => {
@@ -132,8 +132,8 @@ export function VideoCard({
 	// ID de carta para TCG
 	const cardId = `V${id.substring(0, 6).toUpperCase()}`;
 
-	// Conteos de relaciones
-	const totalRelations = video.totalRelations;
+	// Conteos de relaciones - usar stats en lugar de acceso directo
+	const totalRelations = video.stats?.totalRelations || 0;
 
 	return (
 		<motion.div
@@ -159,11 +159,12 @@ export function VideoCard({
 			<CardContainer
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
-				isHovered={isHovered}
-				isSelected={isSelected}
-				tcgMode={tcgMode}
-				compact={compact}
-				className="h-full"
+				glowLevel={isHovered ? 2 : 0} // Añadir glowLevel basado en isHovered
+				className={cn(
+					'transition-all duration-300',
+					isHovered && 'scale-[1.02]',
+					isSelected && 'ring-4 ring-primary/60'
+				)}
 			>
 				<div className="flex flex-col h-full relative z-10">
 					{/* Header con nombre, duración y calidad */}

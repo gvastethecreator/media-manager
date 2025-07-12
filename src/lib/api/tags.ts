@@ -10,7 +10,6 @@ export interface TagFilters {
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'totalImages' | 'totalVideos';
 	sortOrder?: 'asc' | 'desc';
 	category?: string;
-	isPublic?: boolean;
 	isFavorite?: boolean;
 }
 
@@ -20,7 +19,6 @@ export interface TagCreateInput {
 	color?: string | null;
 	emoji?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -32,7 +30,6 @@ export interface TagUpdateInput {
 	color?: string | null;
 	emoji?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;

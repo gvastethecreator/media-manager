@@ -7,14 +7,7 @@ import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';
 
-// 📝 Tipo local para FileBrowser que soporta miniaturas serializables
-type FileBrowserFileItem = EntityWithStats & {
-	thumbnail?: string | null; // Siempre string o null, nunca Buffer/Uint8Array
-	createdAt: string; // ISO string, no Date
-	updatedAt: string; // ISO string, no Date
-	modifiedAt: string; // ISO string, no Date
-	accessedAt: string; // ISO string, no Date
-};
+import { FileItem } from '@/lib/contexts/file-context';
 
 // 🛠️ Utilidad para formatear tamaño de archivo
 const formatFileSize = (bytes: number): string => {
@@ -26,13 +19,13 @@ const formatFileSize = (bytes: number): string => {
 };
 
 interface GridItemProps {
-	item: FileBrowserFileItem;
+	item: FileItem;
 	isSelected: boolean;
 	isFavorite: boolean;
 	onClick: (e?: React.MouseEvent) => void;
 	onDoubleClick: () => void;
 	onContextMenu: () => void;
-	onContextAction: (action: ContextMenuAction, item: EntityWithStats, data?: Record<string, unknown>) => void;
+	onContextAction: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
 }
 
 /**
@@ -57,7 +50,7 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 }) {
 	// 🎯 Función para manejar las acciones del menú contextual
 	const handleAction = useCallback(
-		(action: ContextMenuAction, file: EntityWithStats, data?: Record<string, unknown>) => {
+		(action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => {
 			onContextAction(action, file, data);
 		},
 		[onContextAction]

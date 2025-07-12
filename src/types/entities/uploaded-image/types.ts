@@ -45,6 +45,41 @@ export type UploadedImageUpdateInput = Partial<
 >;
 
 /**
+ * Dimensiones de imagen
+ */
+export interface UploadedImageDimensions {
+	width: number;
+	height: number;
+	aspectRatio: number;
+}
+
+/**
+ * Estadísticas de imagen subida
+ */
+export interface UploadedImageStatistics {
+	totalViews: number;
+	lastAccessed: string;
+	processingTime?: number;
+}
+
+/**
+ * Versión extendida con dimensiones y estadísticas
+ */
+export interface UploadedImageExtended extends UploadedImageBase {
+	dimensions: UploadedImageDimensions;
+	url: string;
+	thumbnailUrl?: string;
+	stats?: UploadedImageStatistics;
+}
+
+/**
+ * Versión con estadísticas calculadas
+ */
+export interface UploadedImageWithStats extends UploadedImageExtended {
+	stats: UploadedImageStatistics;
+}
+
+/**
  * Esquema Zod para validación de UploadedImage
  */
 export const UploadedImageSchema = z.object({

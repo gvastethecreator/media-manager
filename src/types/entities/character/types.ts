@@ -47,6 +47,18 @@ export interface CharacterBase extends EntityBase {
 	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+	// Additional properties used in the codebase but stored as JSON strings
+	level?: number;
+	class?: string;
+	race?: string;
+	alignment?: string;
+	backstory?: string;
+	goals?: string; // JSON string
+	fears?: string; // JSON string
+	beliefs?: string; // JSON string
+	abilities?: string; // JSON string
+	stats?: string; // JSON string
+	statistics?: CharacterStats;
 }
 
 /**
@@ -54,12 +66,16 @@ export interface CharacterBase extends EntityBase {
  * Optimizado para rendimiento con conteos en lugar de relaciones completas.
  */
 export interface CharacterWithStats extends CharacterBase {
+	entityType: 'character';
 	_count?: {
 		images?: number;
 		videos?: number;
 	};
 	images?: ImageWithStats[];
 	videos?: VideoWithStats[];
+	// Estadísticas principales
+	statistics?: CharacterStats;
+	// stats is inherited from CharacterBase as string (JSON)
 }
 
 /**
@@ -143,6 +159,14 @@ export interface CharacterStats {
 	wisdom?: number;
 	charisma?: number;
 	[key: string]: number | undefined;
+}
+
+/**
+ * 🧑‍🎤 Item de filtro para el store de personajes.
+ */
+export interface CharacterFilterItem {
+	query: string;
+	value: any;
 }
 
 /**

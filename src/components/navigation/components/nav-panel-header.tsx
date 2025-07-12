@@ -15,7 +15,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useUIStore } from '@/store/ui.store';
 
 interface NavPanelHeaderProps {
-	totalImages: number;
 	onOpenSettings: () => void;
 	onOpenDevelopment: () => void;
 	onOpenEntityCards: () => void;
@@ -109,7 +108,6 @@ function getThemeIcon(theme: string | undefined) {
 
 // Componente principal memoizado
 export const NavPanelHeader = memo(function NavPanelHeader({
-	totalImages,
 	onOpenSettings,
 	onOpenDevelopment,
 	onOpenEntityCards,
@@ -244,86 +242,84 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 									<span className="text-xs leading-tight text-foreground/80 font-medium">
 										{activeProfileData?.name}
 									</span>
-									<span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-accent/30 rounded-full text-muted-foreground">
-										📸 {totalImages.toLocaleString()} imágenes
+									<span className="text-xs leading-tight text-foreground/80 font-medium">
+										{activeProfileData?.name}
 									</span>
 								</motion.div>
 							</div>
 						</div>
 
-						{/* Botón de colapsar */}
-						<MemoizedHeaderButton
-							icon={<ChevronLeft className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => {})}
-							tooltipTitle="Colapsar Panel"
-							tooltipContent=""
-						/>
-					</div>
-
-					{/* 🔹 Segunda fila: Botones de acción */}
-					<div className="flex items-center justify-center gap-1">
-						<MemoizedHeaderButton
-							icon={<Home className="h-3.5 w-3.5" />}
-							onClick={handleHomeClick}
-							tooltipTitle="Inicio"
-							tooltipContent="Volver a la vista de carpetas"
-						/>
-
-						<MemoizedHeaderButton
-							icon={<IdCard className="h-3.5 w-3.5" />}
-							onClick={onOpenEntityCards}
-							tooltipTitle="Entity Cards"
-							tooltipContent="Visualizador y herramientas para tarjetas de entidades"
-						/>
-
-						<MemoizedHeaderButton
-							icon={<Bug className="h-3.5 w-3.5" />}
-							onClick={onOpenDevelopment}
-							tooltipTitle="Modo Desarrollador"
-							tooltipContent="Accede a herramientas de desarrollo y depuración"
-							tooltipNote="Solo para administradores"
-						/>
-
-						{/* 🧘 Botón de modo zen */}
-						{onToggleZenMode && (
+						{/* Botones de acción y colapsar */}
+						<div className="flex items-center justify-end gap-1">
 							<MemoizedHeaderButton
-								icon={<Eye className="h-3.5 w-3.5" />}
-								onClick={onToggleZenMode}
-								tooltipTitle="Modo Zen"
-								tooltipContent="Activa el modo de concentración"
-								tooltipNote="Oculta distracciones"
+								icon={<Home className="h-3.5 w-3.5" />}
+								onClick={handleHomeClick}
+								tooltipTitle="Inicio"
+								tooltipContent="Volver a la vista de carpetas"
 							/>
-						)}
 
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-								>
-									{getThemeIcon(theme)}
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								{themes.map((t) => (
-									<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
-										{t.charAt(0).toUpperCase() + t.slice(1)}
-										{theme === t && <span className="ml-2 text-xs text-primary">(actual)</span>}
+							<MemoizedHeaderButton
+								icon={<IdCard className="h-3.5 w-3.5" />}
+								onClick={onOpenEntityCards}
+								tooltipTitle="Entity Cards"
+								tooltipContent="Visualizador y herramientas para tarjetas de entidades"
+							/>
+
+							<MemoizedHeaderButton
+								icon={<Bug className="h-3.5 w-3.5" />}
+								onClick={onOpenDevelopment}
+								tooltipTitle="Modo Desarrollador"
+								tooltipContent="Accede a herramientas de desarrollo y depuración"
+								tooltipNote="Solo para administradores"
+							/>
+
+							{/* 🧘 Botón de modo zen */}
+							{onToggleZenMode && (
+								<MemoizedHeaderButton
+									icon={<Eye className="h-3.5 w-3.5" />}
+									onClick={onToggleZenMode}
+									tooltipTitle="Modo Zen"
+									tooltipContent="Activa el modo de concentración"
+									tooltipNote="Oculta distracciones"
+								/>
+							)}
+
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+									>
+										{getThemeIcon(theme)}
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									{themes.map((t) => (
+										<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
+											{t.charAt(0).toUpperCase() + t.slice(1)}
+											{theme === t && <span className="ml-2 text-xs text-primary">(actual)</span>}
+										</DropdownMenuItem>
+									))}
+									<DropdownMenuItem onClick={() => setTheme('system')}>
+										Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}
 									</DropdownMenuItem>
-								))}
-								<DropdownMenuItem onClick={() => setTheme('system')}>
-									Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+								</DropdownMenuContent>
+							</DropdownMenu>
 
-						<MemoizedHeaderButton
-							icon={<Settings2 className="h-3.5 w-3.5" />}
-							onClick={onOpenSettings}
-							tooltipTitle="Configuración"
-							tooltipContent="Personaliza tu experiencia"
-						/>
+							<MemoizedHeaderButton
+								icon={<Settings2 className="h-3.5 w-3.5" />}
+								onClick={onOpenSettings}
+								tooltipTitle="Configuración"
+								tooltipContent="Personaliza tu experiencia"
+							/>
+							<MemoizedHeaderButton
+								icon={<ChevronLeft className="h-3.5 w-3.5" />}
+								onClick={onToggleCollapse || (() => {})}
+								tooltipTitle="Colapsar Panel"
+								tooltipContent=""
+							/>
+						</div>
 					</div>
 				</div>
 			)}

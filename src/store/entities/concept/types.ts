@@ -1,6 +1,6 @@
-import type { ConceptBase, ConceptBase, ConceptWithStats, ConceptWithStats } from '@/types/entities/concept/base';
-import type { ConceptFilters, ConceptFilters, ConceptSortOption, ConceptSortOption, ConceptViewMode, ConceptViewMode } from '@/types/entities/concept/types';
-import { EntityType, EntityType } from '@/types/entities/entities';
+import type { ConceptBase, ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptFilters, ConceptSortOption, ConceptViewMode } from '@/types/entities/concept/types';
+import { EntityType } from '@/types/entities/entities';
 
 /**
  * Slice de estado y acciones para el core de Conceptos

@@ -16,11 +16,14 @@ router.get('/general', async (_req, res) => {
 
 // GET /stats/system - Obtener estadísticas del sistema (compatibilidad con frontend)
 router.get('/system', async (_req, res) => {
+	console.log('🎯 [ROUTER] /stats/system endpoint llamado');
 	try {
+		console.log('🎯 [ROUTER] Llamando a getSystemStats()...');
 		const stats = await getSystemStats();
+		console.log('🎯 [ROUTER] Resultado de getSystemStats:', stats);
 		res.json(stats);
 	} catch (error) {
-		console.error('Error getting system stats:', error);
+		console.error('🚨 [ROUTER] Error getting system stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

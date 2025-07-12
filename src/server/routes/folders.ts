@@ -791,12 +791,13 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 router.post('/:id/reindex', async (req, res) => {
 	try {
 		const { id } = req.params;
+		const { enableSync = true } = req.body; // Permitir deshabilitar sincronización
 
 		if (!id || typeof id !== 'string' || id.trim().length === 0) {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		console.log(`🔄 Iniciando reindexación de carpeta: ${id}`);
+		console.log(`🔄 Iniciando reindexación de carpeta: ${id}`, { enableSync });
 
 		// Obtener la carpeta para verificar que existe
 		const folder = await db
@@ -818,10 +819,14 @@ router.post('/:id/reindex', async (req, res) => {
 		// Importar la función updateFolderStats que maneja el reindexado
 		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
 
-		// Ejecutar la reindexación usando la misma lógica que el resto del sistema
-		await updateFolderStats(id);
+		// Ejecutar la reindexación con sincronización automática
+		const indexResult = await updateFolderStats(id, new Set(), 10, 0, enableSync);
 
-		console.log(`✅ Reindexación completada para carpeta: ${targetFolder.name}`);
+		console.log(`✅ Reindexación completada para carpeta: ${targetFolder.name}`, {
+			entitiesCreated: indexResult.created,
+			entitiesUpdated: indexResult.updated,
+			syncResult: indexResult.syncResult,
+		});
 
 		// Obtener la carpeta actualizada para devolverla
 		const updatedFolder = await db
@@ -847,9 +852,152 @@ router.post('/:id/reindex', async (req, res) => {
 			.where(eq(folders.id, id))
 			.limit(1);
 
-		res.json(updatedFolder[0]);
+		// Incluir información de sincronización en la respuesta
+		res.json({
+			folder: updatedFolder[0],
+			indexResult: {
+				created: indexResult.created,
+				updated: indexResult.updated,
+				errors: indexResult.errors,
+			},
+			...(indexResult.syncResult && { syncResult: indexResult.syncResult }),
+		});
 	} catch (error) {
 		console.error('Error al reindexar la carpeta:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// POST /api/folders/reindex-all - Reindexar todas las carpetas
+router.post('/reindex-all', async (req, res) => {
+	try {
+		const { enableSync = true } = req.body; // Permitir deshabilitar sincronización
+		console.log('🔄 Iniciando reindexación global de todas las carpetas', { enableSync });
+
+		// Obtener todas las carpetas
+		const allFolders = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				path: folders.path,
+			})
+			.from(folders)
+			.orderBy(asc(folders.name));
+
+		if (allFolders.length === 0) {
+			return res.json({ processed: 0, errors: [], syncResult: null });
+		}
+
+		// Importar la función updateFolderStats
+		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+
+		let processed = 0;
+		const errors: string[] = [];
+		let globalSyncResult = null;
+
+		// Procesar cada carpeta (solo la primera ejecutará la sincronización global)
+		for (let i = 0; i < allFolders.length; i++) {
+			const folder = allFolders[i];
+			try {
+				console.log(`🔄 Reindexando carpeta: ${folder.name} (${folder.id})`);
+				// Solo ejecutar sincronización en la primera carpeta para evitar duplicados
+				const shouldSync = enableSync && i === 0;
+				const indexResult = await updateFolderStats(folder.id, new Set(), 10, 0, shouldSync);
+
+				// Capturar resultado de sincronización de la primera carpeta
+				if (shouldSync && indexResult.syncResult) {
+					globalSyncResult = indexResult.syncResult;
+				}
+
+				processed++;
+				console.log(`✅ Carpeta reindexada: ${folder.name}`);
+			} catch (error) {
+				const errorMessage = `Error en carpeta ${folder.name}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
+				console.error(`❌ ${errorMessage}`);
+				errors.push(errorMessage);
+			}
+		}
+
+		console.log(`✅ Reindexación global completada: ${processed} carpetas procesadas, ${errors.length} errores`);
+
+		res.json({
+			processed,
+			errors,
+			...(globalSyncResult && { syncResult: globalSyncResult }),
+		});
+	} catch (error) {
+		console.error('Error en reindexación global:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// POST /api/folders/sync - Sincronizar carpetas con el sistema de archivos
+router.post('/sync', async (req, res) => {
+	try {
+		const { dryRun = false, maxDepth = 10, includeHidden = false } = req.body;
+		console.log('🔄 Iniciando sincronización de carpetas', { dryRun, maxDepth, includeHidden });
+
+		// Importar la función de sincronización
+		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
+
+		// Ejecutar sincronización
+		const syncResult = await syncFoldersWithFileSystem({
+			dryRun,
+			maxDepth,
+			includeHidden,
+			forceSync: true,
+		});
+
+		console.log('✅ Sincronización completada:', {
+			added: syncResult.added.length,
+			removed: syncResult.removed.length,
+			updated: syncResult.updated.length,
+			errors: syncResult.errors.length,
+			duration: `${syncResult.stats.duration}ms`,
+			dryRun,
+		});
+
+		res.json(syncResult);
+	} catch (error) {
+		console.error('Error en sincronización de carpetas:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/sync/status - Verificar estado de sincronización (dry run)
+router.get('/sync/status', async (req, res) => {
+	try {
+		const { maxDepth = 10, includeHidden = false } = req.query;
+		console.log('🔍 Verificando estado de sincronización');
+
+		// Importar la función de verificación
+		const { checkSyncStatus } = await import('@/lib/filesystem/folder-sync');
+
+		// Verificar estado sin hacer cambios
+		const syncStatus = await checkSyncStatus({
+			maxDepth: Number(maxDepth),
+			includeHidden: includeHidden === 'true',
+		});
+
+		console.log('✅ Verificación completada:', {
+			toAdd: syncStatus.added.length,
+			toRemove: syncStatus.removed.length,
+			toUpdate: syncStatus.updated.length,
+			errors: syncStatus.errors.length,
+		});
+
+		res.json(syncStatus);
+	} catch (error) {
+		console.error('Error verificando estado de sincronización:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

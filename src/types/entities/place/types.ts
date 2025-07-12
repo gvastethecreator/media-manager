@@ -3,6 +3,8 @@
  * @module types/entities/place/types
  */
 
+import type { PlaceWithStats } from './base';
+
 export enum PlaceCategory {
 	CITY = 'city',
 	COUNTRY = 'country',
@@ -74,3 +76,6 @@ export interface PlaceSearchOptions {
 	sortBy?: PlaceSortCriteria;
 	sortOrder?: 'asc' | 'desc';
 }
+
+// Alias para compatibilidad
+export type PlaceComplete = PlaceWithStats;

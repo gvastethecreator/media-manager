@@ -1,3 +1,4 @@
+import { ENV } from '@/config/env';
 import type { ProcessStatus } from '@/types/process';
 
 // Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
@@ -112,7 +113,15 @@ export async function emit(event: EventData) {
 	console.log('🚀 Emitiendo evento (cliente):', event);
 
 	try {
-		const response = await fetch('/api/events', {
+		// Detectar si estamos en el servidor (Node.js) o cliente (navegador)
+		const isServer = typeof window === 'undefined';
+
+		// Construir URL apropiada según el contexto
+		const apiUrl = isServer
+			? `${ENV.VITE_API_URL}/events` // URL absoluta para servidor
+			: '/api/events'; // URL relativa para cliente
+
+		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(event),

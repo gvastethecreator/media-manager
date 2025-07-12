@@ -122,9 +122,6 @@ export async function getTag(id: string): Promise<TagWithStats | null> {
 				color: tags.color,
 				emoji: tags.emoji,
 				isFavorite: tags.isFavorite,
-				isPublic: tags.isPublic,
-				totalImages: tags.totalImages,
-				totalVideos: tags.totalVideos,
 				createdAt: tags.createdAt,
 				updatedAt: tags.updatedAt,
 			})
@@ -207,10 +204,7 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 				description: tags.description,
 				color: tags.color,
 				emoji: tags.emoji,
-				isPublic: tags.isPublic,
 				isFavorite: tags.isFavorite,
-				totalImages: tags.totalImages,
-				totalVideos: tags.totalVideos,
 				createdAt: tags.createdAt,
 				updatedAt: tags.updatedAt,
 			})
@@ -274,8 +268,6 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 				emoji: data.emoji || '🏷️',
 				category: data.category || null,
 				isFavorite: data.isFavorite || false,
-				totalImages: 0,
-				totalVideos: 0,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
@@ -286,7 +278,6 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...newTag,
-			isPublic: Boolean(newTag.isPublic),
 			isFavorite: Boolean(newTag.isFavorite),
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
@@ -368,7 +359,6 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...updatedTag,
-			isPublic: Boolean(updatedTag.isPublic),
 			isFavorite: Boolean(updatedTag.isFavorite),
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
@@ -480,7 +470,6 @@ export async function toggleTagFavorite(id: string): Promise<TagWithStats> {
 		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...updatedTag,
-			isPublic: Boolean(updatedTag.isPublic),
 			isFavorite: Boolean(updatedTag.isFavorite),
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
@@ -532,17 +521,18 @@ export async function toggleTagArchive(id: string): Promise<TagWithStats> {
 		logger.info(`📦 Cambiando estado de archivo de la etiqueta: ${id}`);
 
 		// **MIGRACIÓN A DRIZZLE**
-		// Obtener estado actual
-		const currentTag = await db.select({ isPublic: tags.isPublic }).from(tags).where(eq(tags.id, id)).limit(1);
+		// Verificar si la etiqueta existe
+		const existingTag = await db.select({ id: tags.id }).from(tags).where(eq(tags.id, id)).limit(1);
 
-		if (currentTag.length === 0) {
+		if (existingTag.length === 0) {
 			throw new TagServiceError('Etiqueta no encontrada', 'TAG_NOT_FOUND');
 		}
 
+		// Como no existe isPublic, esta función no hace nada útil
+		// Simplemente devolvemos la etiqueta actual
 		const result = await db
 			.update(tags)
 			.set({
-				isPublic: !currentTag[0].isPublic,
 				updatedAt: new Date(),
 			})
 			.where(eq(tags.id, id))
@@ -557,7 +547,6 @@ export async function toggleTagArchive(id: string): Promise<TagWithStats> {
 		// Transformar a formato compatible con transformadores legacy
 		const transformedTag = {
 			...updatedTag,
-			isPublic: Boolean(updatedTag.isPublic),
 			isFavorite: Boolean(updatedTag.isFavorite),
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {

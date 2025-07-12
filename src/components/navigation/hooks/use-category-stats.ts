@@ -14,8 +14,10 @@ type NavItem = {
 	totalFiles?: number;
 	totalSize?: number;
 	imageCount?: number;
+	itemCount?: number; // Conteo total de elementos
 	_count?: {
 		images?: number;
+		videos?: number;
 		folders?: number;
 		collections?: number;
 		tags?: number;
@@ -52,6 +54,7 @@ export function useCategoryStats() {
 			jsonFiles: navigationData.jsonFiles || [],
 			file3ds: navigationData.file3ds || [],
 			workflows: navigationData.workflows || [],
+			videos: navigationData.videos || [],
 		};
 	}, [navigationData]);
 
@@ -90,6 +93,7 @@ export function useCategoryStats() {
 					color: item.color,
 					path: item.path,
 					description: item.description,
+					itemCount: item.itemCount || item.imageCount || (item._count?.images ?? 0) + (item._count?.videos ?? 0),
 					totalFiles: item.totalFiles || 0,
 					totalSize: item.totalSize || 0,
 					_count: item._count

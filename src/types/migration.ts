@@ -4,16 +4,37 @@
  * @description Funciones utilitarias para type checking y migración de tipos legacy a EntityWithStats
  */
 
+import type { CharacterWithStats } from '@/types/entities/character';
+import type { ConceptWithStats } from '@/types/entities/concept';
 import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { FolderWithStats } from '@/types/entities/folder';
+import type { GroupWithStats } from '@/types/entities/group';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { NoteWithStats } from '@/types/entities/note';
 import type { PlaceWithStats } from '@/types/entities/place';
+import type { PromptWithStats } from '@/types/entities/prompt';
 import type { PropertyWithStats } from '@/types/entities/property';
 import type { TagWithStats } from '@/types/entities/tag';
 import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
+
+// Tipos temporales para entidades que aún no tienen definiciones completas
+export interface AudioWithStats extends AudioBase {
+	entityType: 'audio';
+}
+
+export interface DocumentWithStats extends DocumentBase {
+	entityType: 'document';
+}
+
+export interface CollectionWithStats extends CollectionBase {
+	entityType: 'collection';
+}
+
+export interface AlbumWithStats extends EntityWithStats {
+	entityType: 'album';
+}
 
 // Tipo unión de todas las entidades con estadísticas que realmente existen
 export type AnyEntityWithStats =
@@ -25,7 +46,15 @@ export type AnyEntityWithStats =
 	| WorldItemWithStats
 	| NoteWithStats
 	| PropertyWithStats
-	| WildcardWithStats;
+	| WildcardWithStats
+	| CharacterWithStats
+	| ConceptWithStats
+	| PromptWithStats
+	| GroupWithStats
+	| AudioWithStats
+	| DocumentWithStats
+	| CollectionWithStats
+	| AlbumWithStats;
 
 // Export del tipo principal para compatibilidad
 export type { EntityWithStats };
@@ -139,8 +168,8 @@ export function isWildcardWithStats(entity: unknown): entity is WildcardWithStat
 	);
 }
 
-// Stubs para funciones que no tienen tipos definidos pero se esperan en el código
-export function isAudioWithStats(entity: unknown): entity is EntityWithStats {
+// Type guards para entidades con tipos temporales
+export function isAudioWithStats(entity: unknown): entity is AudioWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&
@@ -150,7 +179,7 @@ export function isAudioWithStats(entity: unknown): entity is EntityWithStats {
 	);
 }
 
-export function isDocumentWithStats(entity: unknown): entity is EntityWithStats {
+export function isDocumentWithStats(entity: unknown): entity is DocumentWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&
@@ -160,7 +189,7 @@ export function isDocumentWithStats(entity: unknown): entity is EntityWithStats 
 	);
 }
 
-export function isCollectionWithStats(entity: unknown): entity is EntityWithStats {
+export function isCollectionWithStats(entity: unknown): entity is CollectionWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&
@@ -170,7 +199,7 @@ export function isCollectionWithStats(entity: unknown): entity is EntityWithStat
 	);
 }
 
-export function isAlbumWithStats(entity: unknown): entity is EntityWithStats {
+export function isAlbumWithStats(entity: unknown): entity is AlbumWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&
@@ -180,7 +209,7 @@ export function isAlbumWithStats(entity: unknown): entity is EntityWithStats {
 	);
 }
 
-export function isCharacterWithStats(entity: unknown): entity is EntityWithStats {
+export function isCharacterWithStats(entity: unknown): entity is CharacterWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&
@@ -190,7 +219,7 @@ export function isCharacterWithStats(entity: unknown): entity is EntityWithStats
 	);
 }
 
-export function isConceptWithStats(entity: unknown): entity is EntityWithStats {
+export function isConceptWithStats(entity: unknown): entity is ConceptWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&
@@ -200,7 +229,7 @@ export function isConceptWithStats(entity: unknown): entity is EntityWithStats {
 	);
 }
 
-export function isPromptWithStats(entity: unknown): entity is EntityWithStats {
+export function isPromptWithStats(entity: unknown): entity is PromptWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&
@@ -210,7 +239,7 @@ export function isPromptWithStats(entity: unknown): entity is EntityWithStats {
 	);
 }
 
-export function isGroupWithStats(entity: unknown): entity is EntityWithStats {
+export function isGroupWithStats(entity: unknown): entity is GroupWithStats {
 	return (
 		typeof entity === 'object' &&
 		entity !== null &&

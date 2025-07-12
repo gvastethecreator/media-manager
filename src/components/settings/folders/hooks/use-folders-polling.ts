@@ -66,8 +66,8 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 			});
 
 			// TODO: Implementar getFolderProcessingStatus cuando esté disponible
-			// Por ahora retornamos un estado simulado
-			const data = { isComplete: false };
+			// Por ahora, como la reindexación es síncrona, marcamos como completo inmediatamente
+			const data = { isComplete: true };
 
 			pollingErrorCountRef.current = 0;
 

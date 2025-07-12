@@ -80,3 +80,11 @@ export interface CollectionViewConfig {
 	gridColumns: number;
 	cardSize: 'small' | 'medium' | 'large';
 }
+
+/**
+ * 📊 Configuración de ordenamiento para colecciones.
+ */
+export interface CollectionSortBy {
+	field: string;
+	order: 'asc' | 'desc';
+}

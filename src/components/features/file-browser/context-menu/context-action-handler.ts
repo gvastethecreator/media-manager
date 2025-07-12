@@ -6,7 +6,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import { addImageToTag } from '@/services/tag/tag.service';
+import tagService from '@/services/tag/tag.service';
 
 // Importaciones de stores en entidades
 
@@ -14,7 +14,7 @@ import { addImageToTag } from '@/services/tag/tag.service';
 import { deleteFile as deleteFileAction } from '@/services/file/file.service';
 
 // Importar el tipo local en lugar del tipo global
-import type { FileItem } from '@/types/files';
+import type { FileItem } from '@/lib/contexts/file-context';
 import type { ContextMenuAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');
@@ -229,7 +229,7 @@ export const handleContextAction = async (
 				if (data?.tagId) {
 					// Añadir etiqueta
 					const tagId = data.tagId as string;
-					await addImageToTag(tagId, item.id);
+					await tagService.addImageToTag(tagId, item.id);
 					toastService.success('Etiqueta añadida a la imagen');
 				}
 				break;

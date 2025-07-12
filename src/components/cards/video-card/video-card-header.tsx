@@ -14,7 +14,8 @@ interface VideoCardHeaderProps {
  */
 export function VideoCardHeader({ video, primaryColor, tcgMode = true, compact = false }: VideoCardHeaderProps) {
 	const { name, isFavorite } = video;
-	const { formattedDuration, qualityLabel, technicalGrade } = video;
+	const { formattedDuration, technicalGrade } = video.stats;
+	const qualityLabel = video.stats.qualityLevel;
 
 	return (
 		<div className={cn('border-b relative z-10', compact ? 'p-2' : 'p-3')} style={{ borderColor: `${primaryColor}30` }}>

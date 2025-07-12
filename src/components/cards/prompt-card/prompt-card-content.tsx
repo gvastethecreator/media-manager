@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface PromptCardContentProps {
+	name: string;
 	description?: string | null;
 	content?: string;
 	purpose?: string;

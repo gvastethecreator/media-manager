@@ -44,6 +44,7 @@ export interface CollectionEdition {
 	quantity: number;
 	available: number;
 	releaseDate: Date;
+	year: number;
 	metadata?: Record<string, any>;
 }
 
@@ -73,4 +74,5 @@ export interface CollectionStatistics {
  */
 export interface CollectionWithStats extends CollectionBase {
 	stats: CollectionStatistics;
+	isRecent?: boolean;
 }
