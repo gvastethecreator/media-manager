@@ -11,7 +11,7 @@ graph TD
     CharacterBase --> UpdateCharacterData
     CharacterBase --> CharacterSummary
     CharacterBase --> CharacterAttributes
-    CharacterBase --> CharacterFilter
+    CharacterBase --> CharacterFilters
     CharacterBase --> CharacterRelationship
     CharacterBase --> CharacterRelations
     CharacterBase --> CharacterWithRelations

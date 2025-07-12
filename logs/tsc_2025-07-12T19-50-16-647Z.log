@@ -1,0 +1,7 @@
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-07-12T19:50:16.647Z
+Directorio: /workspace/image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+sh: 1: bunx: not found

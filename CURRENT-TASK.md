@@ -32,7 +32,7 @@ Resolve all missing export errors that are causing TypeScript compilation failur
 - [x] `AppSettings` → should be `Settings`
 
 #### Entity-Specific Issues
-- [ ] `CharacterFilter` → should be `CharacterFilters`
+- [x] `CharacterFilter` → `CharacterFilters`
 - [x] `CharacterFilterItem` → should be `CharacterFilters`
 - [x] `CharacterRelations` → should be `CharacterRelationship`
 - [x] `CollectionSortBy` → should be `CollectionRarity`
@@ -45,8 +45,8 @@ Resolve all missing export errors that are causing TypeScript compilation failur
 2. [x] Fix Statistics/Stats type exports
 3. [x] Fix WithStats type exports
 4. [x] Fix component/service exports
-5. [ ] Fix entity-specific export issues (pending CharacterFilter)
-6. [ ] Run type check to verify all fixes
+5. [x] Fix entity-specific export issues (CharacterFilter updated)
+6. [x] Run type check to verify all fixes
 7. [ ] Update task status to completed
 
 ### Acceptance Criteria
