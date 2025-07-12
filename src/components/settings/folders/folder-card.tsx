@@ -1,4 +1,4 @@
-import { AlertCircle, Folder, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertCircle, ChevronRight, Folder, RefreshCw, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -20,6 +20,7 @@ interface FolderCardProps {
 	isProcessing: boolean;
 	processStatus: ExtendedProcessStatus;
 	isGloballyProcessing: boolean;
+	allFolders?: ExtendedFolder[]; // Para buscar información del padre
 	onReindex: (folderId: string) => void;
 	onToggleAutoReindex: (folderId: string, value: boolean) => void;
 	onFolderClick: (folderId: string) => void;
@@ -32,11 +33,18 @@ export function FolderCard({
 	isProcessing,
 	processStatus,
 	isGloballyProcessing,
+	allFolders = [],
 	onReindex,
 	onToggleAutoReindex,
 	onFolderClick,
 	getFolderIndexStatus,
 }: FolderCardProps) {
+	// Función helper para encontrar el nombre de la carpeta padre
+	const getParentFolderName = useCallback(() => {
+		if (!folder.parentId || !allFolders.length) return null;
+		const parentFolder = allFolders.find((f) => f.id === folder.parentId);
+		return parentFolder?.name || null;
+	}, [folder.parentId, allFolders]);
 	// Determinar si esta carpeta está siendo procesada actualmente
 	const isReindexing = isProcessing && processStatus?.folderId === folder.id;
 
@@ -150,10 +158,20 @@ export function FolderCard({
 					<div className="space-y-2">
 						{/* Cabecera de la carpeta */}
 						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-1">
-								<Folder className="h-4 w-4 text-blue-500" />
-								<span className="font-medium text-sm">{folder.name}</span>
-								{getStatusMessage()}
+							<div className="flex flex-col gap-0.5">
+								<div className="flex items-center gap-1">
+									<Folder className="h-4 w-4 text-blue-500" />
+									<span className="font-medium text-sm">{folder.name}</span>
+									{getStatusMessage()}
+								</div>
+								{/* Información del padre */}
+								{getParentFolderName() && (
+									<div className="flex items-center gap-1 text-xs text-muted-foreground ml-5">
+										<span>en</span>
+										<ChevronRight className="h-3 w-3" />
+										<span className="font-medium">{getParentFolderName()}</span>
+									</div>
+								)}
 							</div>
 
 							<div className="flex items-center gap-1">

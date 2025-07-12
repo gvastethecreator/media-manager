@@ -2,13 +2,15 @@ import { ArrowUpRight, Brain, Heart, Shield, Sparkles, Star, Swords, User, Wand,
 import { motion } from 'motion/react';
 import { Progress } from '@/components/ui/progress';
 
+import type { CharacterStats } from '@/types/entities/character';
+
 interface CharacterCardContentProps {
 	description?: string | null;
 	primaryColor?: string;
 	secondaryColor?: string;
 	backstory?: string | null;
-	stats?: Record<string, number> | null;
-	abilities?: Array<{ name: string; description?: string }> | null;
+	stats?: CharacterStats | null;
+	abilities?: Array<{ name: string; description?: string }> | Record<string, any> | null;
 	personality?: string[] | null;
 	fears?: string[] | null;
 	goals?: string[] | null;
@@ -26,6 +28,7 @@ interface CharacterCardContentProps {
 	};
 	compact?: boolean;
 	tcgMode?: boolean;
+	onImageClick?: (imageId: string) => void;
 }
 
 export function CharacterCardContent({
@@ -88,8 +91,17 @@ export function CharacterCardContent({
 		return formatted;
 	};
 
-	const normalizedAbilities =
-		abilities?.map((ability) => (typeof ability === 'string' ? { name: ability, description: '' } : ability)) ?? [];
+	const normalizedAbilities = (() => {
+		if (!abilities) return [];
+		if (Array.isArray(abilities)) {
+			return abilities.map((ability) => (typeof ability === 'string' ? { name: ability, description: '' } : ability));
+		}
+		// Si es un Record, convertir a array
+		return Object.entries(abilities).map(([name, description]) => ({
+			name,
+			description: typeof description === 'string' ? description : '',
+		}));
+	})();
 
 	if (compact) {
 		return (
@@ -182,6 +194,7 @@ export function CharacterCardContent({
 			{stats && Object.keys(stats).length > 0 && (
 				<div className="mt-1 grid grid-cols-3 gap-x-2 gap-y-1 text-xs">
 					{Object.entries(stats)
+						.filter(([_, value]) => value !== undefined && typeof value === 'number')
 						.slice(0, 6)
 						.map(([key, value]) => (
 							<motion.div

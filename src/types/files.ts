@@ -6,19 +6,19 @@
  */
 
 import type { AlbumComplete } from './entities/album';
-import type { CharacterComplete } from './entities/character';
-import type { CollectionComplete } from './entities/collection';
-import type { ConceptComplete } from './entities/concept';
-import type { GroupComplete } from './entities/group';
+import type { CharacterWithStats } from './entities/character';
+import type { CollectionWithStats } from './entities/collection';
+import type { ConceptWithStats } from './entities/concept';
+import type { GroupWithStats } from './entities/group';
 import type { ImageComplete } from './entities/image';
 import type { NoteComplete } from './entities/note';
 import type { PlaceComplete } from './entities/place';
 import type { PromptComplete } from './entities/prompt';
 import type { PropertyComplete } from './entities/property';
-import type { TagWithStats as TagComplete } from './entities/tag/types';
-import type { VideoComplete } from './entities/video';
-import type { WildcardComplete } from './entities/wildcard';
-import type { WorldItemComplete } from './entities/world-item';
+import type { TagWithStats } from './entities/tag/types';
+import type { VideoWithStats } from './entities/video';
+import type { WildcardWithStats } from './entities/wildcard';
+import type { WorldItemWithStats } from './entities/world-item';
 
 /**
  * Tipo de vista para archivos
@@ -58,17 +58,17 @@ export type FileItem =
 	| ImageComplete
 	| VideoWithStats
 	| AlbumComplete
-	| CollectionComplete
-	| TagComplete
-	| CharacterComplete
+	| CollectionWithStats
+	| TagWithStats
+	| CharacterWithStats
 	| PlaceComplete
-	| WorldItemComplete
-	| ConceptComplete
+	| WorldItemWithStats
+	| ConceptWithStats
 	| PromptComplete
 	| NoteComplete
-	| WildcardComplete
+	| WildcardWithStats
 	| PropertyComplete
-	| GroupComplete;
+	| GroupWithStats;
 
 /**
  * Etiqueta relacionada para archivos

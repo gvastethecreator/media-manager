@@ -26,7 +26,7 @@ export const NavCategoryChildren = memo(function NavCategoryChildren({
 	}
 
 	return (
-		<div className="flex flex-col gap-0.5">
+		<div className="flex flex-col gap-0">
 			{items.map((item) => (
 				<Button
 					key={item.id}
@@ -41,9 +41,9 @@ export const NavCategoryChildren = memo(function NavCategoryChildren({
 						{item.emoji && <span className="mr-1">{item.emoji}</span>}
 						<span className="truncate">{item.name || item.label}</span>
 					</span>
-					{item._count?.images && (
+					{(item.itemCount || item._count?.images) && (
 						<span className="ml-2 text-[9px] text-muted-foreground tabular-nums min-w-[12px] text-right">
-							{item._count.images}
+							{item.itemCount || item._count?.images || 0}
 						</span>
 					)}
 				</Button>

@@ -61,10 +61,16 @@ export interface ImageStatistics {
 }
 
 /**
+ * 📊 Alias para compatibilidad - ImageStats apunta a ImageStatistics
+ */
+export type ImageStats = ImageStatistics;
+
+/**
  * ✨ Modelo extendido de Image con estadísticas.
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface ImageWithStats extends ImageBase {
+	entityType: 'image';
 	stats: ImageStatistics;
 	thumbnailUrl: string;
 	fullUrl: string;

@@ -59,6 +59,21 @@ export function fromDrizzleConcept(
 		return {
 			...conceptData,
 			stats,
+			_count: {
+				images: counts.images,
+				videos: counts.videos,
+				albums: counts.albums,
+				collections: counts.collections,
+				tags: counts.tags,
+				characters: counts.characters,
+				places: counts.places,
+				worldItems: counts.worldItems,
+				prompts: counts.prompts,
+				notes: counts.notes,
+				wildcards: counts.wildcards,
+				properties: counts.properties,
+				groups: counts.groups,
+			},
 		};
 	} catch (error) {
 		logger.error('Error transformando concepto desde Drizzle', {

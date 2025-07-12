@@ -24,7 +24,7 @@ import {
 	Video,
 	Workflow,
 } from 'lucide-react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
 import { useCategoryStats } from '../hooks/use-category-stats';
@@ -42,7 +42,197 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 	isCollapsed = false,
 }: NavMainNavigationProps) {
 	const { stats, getCategoryItemCount, getCategoryItems } = useCategoryStats();
+
+	// Nueva estructura file-centric con contadores y colores únicos
+	const NAVIGATION_CATEGORIES = useMemo(
+		() => [
+			{
+				id: 'folders',
+				label: 'Carpetas',
+				color: '#F59E0B', // Amber
+				icon: Folder,
+				children: [
+					{
+						id: 'folders',
+						label: 'Explorar carpetas',
+						icon: Folder,
+						count: stats.totalFolders || 0,
+						hasChildren: true,
+						color: '#F59E0B',
+					},
+				],
+			},
+			{
+				id: 'files',
+				label: 'Archivos',
+				color: '#3B82F6', // Blue
+				icon: Files,
+				children: [
+					{
+						id: 'files',
+						label: 'Todos los archivos',
+						icon: FileStack,
+						count: stats.totalImages || 0,
+						color: '#6B7280',
+					},
+					{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0, color: '#10B981' },
+					{ id: 'videos', label: 'Videos', icon: Video, count: getCategoryItemCount('videos'), color: '#EF4444' },
+					{ id: 'audios', label: 'Audio', icon: Music, count: getCategoryItemCount('audios'), color: '#8B5CF6' },
+					{
+						id: 'documents',
+						label: 'Documentos',
+						icon: FileText,
+						count: getCategoryItemCount('documents'),
+						color: '#F97316',
+					},
+					{
+						id: 'json-files',
+						label: 'JSON',
+						icon: Brackets,
+						count: getCategoryItemCount('jsonFiles'),
+						color: '#06B6D4',
+					},
+					{
+						id: 'workflows',
+						label: 'Workflows',
+						icon: Workflow,
+						count: getCategoryItemCount('workflows'),
+						color: '#84CC16',
+					},
+					{ id: 'file-3ds', label: '3D', icon: Box, count: getCategoryItemCount('file3ds'), color: '#EC4899' },
+				],
+			},
+			{
+				id: 'library',
+				label: 'Librería',
+				color: '#A21CAF', // Fuchsia
+				icon: Layers,
+				children: [
+					{ id: 'favorites', label: 'Favoritos', icon: Star, count: stats.totalFavorites || 0, color: '#FBBF24' },
+					{
+						id: 'albums',
+						label: 'Álbumes',
+						icon: Album,
+						count: stats.totalAlbums || 0,
+						hasChildren: true,
+						color: '#8B5CF6',
+					},
+					{
+						id: 'groups',
+						label: 'Grupos',
+						icon: Users,
+						count: getCategoryItemCount('groups'),
+						hasChildren: true,
+						color: '#06B6D4',
+					},
+					{
+						id: 'tags',
+						label: 'Etiquetas',
+						icon: Tag,
+						count: stats.totalTags || 0,
+						hasChildren: true,
+						color: '#10B981',
+					},
+					{
+						id: 'collections',
+						label: 'Colecciones',
+						icon: Bookmark,
+						count: stats.totalCollections || 0,
+						hasChildren: true,
+						color: '#F97316',
+					},
+					{
+						id: 'prompts',
+						label: 'Prompts',
+						icon: MessageSquare,
+						count: getCategoryItemCount('prompts'),
+						hasChildren: true,
+						color: '#EF4444',
+					},
+				],
+			},
+			{
+				id: 'worldbuilding',
+				label: 'Worldbuilding',
+				color: '#059669', // Emerald
+				icon: Globe,
+				children: [
+					{
+						id: 'characters',
+						label: 'Personajes',
+						icon: User,
+						count: stats.totalCharacters || 0,
+						hasChildren: true,
+						color: '#3B82F6',
+					},
+					{
+						id: 'places',
+						label: 'Lugares',
+						icon: MapPin,
+						count: stats.totalPlaces || 0,
+						hasChildren: true,
+						color: '#EF4444',
+					},
+					{
+						id: 'world-items',
+						label: 'Objetos del mundo',
+						icon: Box,
+						count: stats.totalWorldItems || 0,
+						hasChildren: true,
+						color: '#F59E0B',
+					},
+					{
+						id: 'concepts',
+						label: 'Conceptos',
+						icon: Lightbulb,
+						count: getCategoryItemCount('concepts'),
+						hasChildren: true,
+						color: '#FBBF24',
+					},
+					{
+						id: 'wildcards',
+						label: 'Comodines',
+						icon: Asterisk,
+						count: getCategoryItemCount('wildcards'),
+						hasChildren: true,
+						color: '#8B5CF6',
+					},
+				],
+			},
+			{
+				id: 'management',
+				label: 'Gestión',
+				color: '#6D28D9', // Violet
+				icon: Asterisk,
+				children: [
+					{
+						id: 'notes',
+						label: 'Notas',
+						icon: FileText,
+						count: getCategoryItemCount('notes'),
+						hasChildren: true,
+						color: '#06B6D4',
+					},
+					{
+						id: 'properties',
+						label: 'Propiedades',
+						icon: Asterisk,
+						count: getCategoryItemCount('properties'),
+						hasChildren: true,
+						color: '#EC4899',
+					},
+				],
+			},
+		],
+		[stats, getCategoryItemCount]
+	);
+
 	const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+	// Inicializar categorías expandidas cuando NAVIGATION_CATEGORIES esté disponible
+	useEffect(() => {
+		setExpandedCategories(new Set(NAVIGATION_CATEGORIES.map((c) => c.id)));
+	}, [NAVIGATION_CATEGORIES]);
 
 	// Toggle función para expandir/contraer categorías
 	const toggleCategory = useCallback((categoryId: string) => {
@@ -56,147 +246,6 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			return newSet;
 		});
 	}, []);
-
-	// Nueva estructura file-centric con contadores
-	const NAVIGATION_CATEGORIES = [
-		{
-			id: 'folders',
-			label: 'Carpetas',
-			color: '#F59E0B',
-			icon: Folder,
-			children: [
-				{ id: 'folders', label: 'Explorar carpetas', icon: Folder, count: stats.totalFolders || 0, color: '#F59E0B' },
-			],
-		},
-		{
-			id: 'files',
-			label: 'Archivos',
-			color: '#3B82F6',
-			icon: Files,
-			children: [
-				{ id: 'files', label: 'Todos los archivos', icon: FileStack, count: stats.totalImages || 0, color: '#3B82F6' },
-				{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0, color: '#3B82F6' },
-				{ id: 'videos', label: 'Videos', icon: Video, count: getCategoryItemCount('videos'), color: '#3B82F6' },
-				{ id: 'audios', label: 'Audio', icon: Music, count: getCategoryItemCount('audios'), color: '#3B82F6' },
-				{
-					id: 'documents',
-					label: 'Documentos',
-					icon: FileText,
-					count: getCategoryItemCount('documents'),
-					color: '#3B82F6',
-				},
-				{ id: 'json-files', label: 'JSON', icon: Brackets, count: getCategoryItemCount('jsonFiles'), color: '#3B82F6' },
-				{
-					id: 'workflows',
-					label: 'Workflows',
-					icon: Workflow,
-					count: getCategoryItemCount('workflows'),
-					color: '#3B82F6',
-				},
-				{ id: 'file-3ds', label: '3D', icon: Box, count: getCategoryItemCount('file3ds'), color: '#3B82F6' },
-			],
-		},
-		{
-			id: 'library',
-			label: 'Librería',
-			color: '#A21CAF',
-			icon: Layers,
-			children: [
-				{ id: 'favorites', label: 'Favoritos', icon: Star, count: stats.totalFavorites || 0, color: '#A21CAF' },
-				{ id: 'albums', label: 'Álbumes', icon: Album, count: stats.totalAlbums || 0, color: '#A21CAF' },
-				{ id: 'groups', label: 'Grupos', icon: Users, count: getCategoryItemCount('groups'), color: '#A21CAF' },
-				{ id: 'tags', label: 'Etiquetas', icon: Tag, count: stats.totalTags || 0, hasChildren: true, color: '#A21CAF' },
-				{
-					id: 'collections',
-					label: 'Colecciones',
-					icon: Bookmark,
-					count: stats.totalCollections || 0,
-					hasChildren: true,
-					color: '#A21CAF',
-				},
-				{
-					id: 'prompts',
-					label: 'Prompts',
-					icon: MessageSquare,
-					count: getCategoryItemCount('prompts'),
-					hasChildren: true,
-					color: '#A21CAF',
-				},
-			],
-		},
-		{
-			id: 'worldbuilding',
-			label: 'Worldbuilding',
-			color: '#059669',
-			icon: Globe,
-			children: [
-				{
-					id: 'characters',
-					label: 'Personajes',
-					icon: User,
-					count: stats.totalCharacters || 0,
-					hasChildren: true,
-					color: '#059669',
-				},
-				{
-					id: 'places',
-					label: 'Lugares',
-					icon: MapPin,
-					count: stats.totalPlaces || 0,
-					hasChildren: true,
-					color: '#059669',
-				},
-				{
-					id: 'world-items',
-					label: 'Objetos del mundo',
-					icon: Box,
-					count: stats.totalWorldItems || 0,
-					hasChildren: true,
-					color: '#059669',
-				},
-				{
-					id: 'concepts',
-					label: 'Conceptos',
-					icon: Lightbulb,
-					count: getCategoryItemCount('concepts'),
-					hasChildren: true,
-					color: '#059669',
-				},
-				{
-					id: 'wildcards',
-					label: 'Comodines',
-					icon: Asterisk,
-					count: getCategoryItemCount('wildcards'),
-					hasChildren: true,
-					color: '#059669',
-				},
-			],
-		},
-		{
-			id: 'management',
-			label: 'Gestión',
-			color: '#6D28D9', // Un color púrpura
-			icon: Asterisk, // Icono temporal, se puede cambiar
-			children: [
-				{
-					id: 'notes',
-					label: 'Notas',
-					icon: FileText,
-					count: getCategoryItemCount('notes'),
-					hasChildren: true,
-					color: '#6D28D9',
-				},
-				{
-					id: 'properties',
-					label: 'Propiedades',
-					icon: Asterisk,
-					count: getCategoryItemCount('properties'),
-					hasChildren: true,
-					color: '#6D28D9',
-				}, // Icono temporal
-			],
-		},
-	];
 
 	const containerClasses = useMemo(() => cn('pb-1 pt-1', isCollapsed ? 'px-1' : 'px-2'), [isCollapsed]);
 	const innerContainerClasses = useMemo(() => cn('rounded-md p-0.5 shadow-sm', isCollapsed && 'p-0.5'), [isCollapsed]);
@@ -213,67 +262,77 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 				<div className={flexContainerClasses}>
 					{NAVIGATION_CATEGORIES.map((category, _catIdx) => (
 						<div key={category.id} className="mb-1">
-							<div className="flex items-center gap-1 mb-0.5">
+							<div
+								className="flex items-center gap-1 mb-0.5 cursor-pointer"
+								onClick={() => toggleCategory(category.id)}
+							>
 								<category.icon className="h-4 w-4" style={{ color: category.color }} />
-								<span className="font-semibold text-xs" style={{ color: category.color }}>
+								<span className="font-semibold text-xs flex-1" style={{ color: category.color }}>
 									{category.label}
 								</span>
+								{expandedCategories.has(category.id) ? (
+									<ChevronDown className="h-4 w-4 text-muted-foreground" />
+								) : (
+									<ChevronRight className="h-4 w-4 text-muted-foreground" />
+								)}
 							</div>
-							<div className="flex flex-col gap-0.5">
-								{category.children.map((child, _idx) => (
-									<div key={child.id} className="flex flex-col">
-										<div
-											className={cn(
-												'justify-between w-full text-xs px-2 py-0.5 rounded flex items-center',
-												'hover:bg-secondary/50 transition-colors',
-												currentView === child.id && 'bg-secondary font-bold'
-											)}
-										>
+							{expandedCategories.has(category.id) && (
+								<div className="flex flex-col gap-0.5">
+									{category.children.map((child, _idx) => (
+										<div key={child.id} className="flex flex-col">
 											<div
-												className="flex items-center flex-1 cursor-pointer"
-												onClick={() => onNavigate(child.id as ViewType)}
+												className={cn(
+													'justify-between w-full text-xs px-2 py-1 rounded flex items-center',
+													'hover:bg-secondary/50 transition-colors',
+													currentView === child.id && 'bg-secondary font-bold'
+												)}
 											>
-												<child.icon className="h-3 w-3 mr-2" />
-												{child.label}
+												<div
+													className="flex items-center flex-1 cursor-pointer"
+													onClick={() => onNavigate(child.id as ViewType)}
+												>
+													<child.icon className="h-3 w-3 mr-2" style={{ color: child.color }} />
+													{child.label}
+												</div>
+												<div className="flex items-center gap-1">
+													{child.count !== undefined && (
+														<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
+															{child.count}
+														</span>
+													)}
+													{child.hasChildren && (
+														<button
+															className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
+															onClick={(e) => {
+																e.stopPropagation();
+																toggleCategory(child.id);
+															}}
+														>
+															{expandedCategories.has(child.id) ? (
+																<ChevronDown className="h-3 w-3" />
+															) : (
+																<ChevronRight className="h-3 w-3" />
+															)}
+														</button>
+													)}
+												</div>
 											</div>
-											<div className="flex items-center gap-1">
-												{child.count !== undefined && (
-													<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
-														{child.count}
-													</span>
-												)}
-												{child.hasChildren && (
-													<button
-														className="h-4 w-4 p-0 hover:bg-secondary/50 rounded flex items-center justify-center"
-														onClick={(e) => {
-															e.stopPropagation();
-															toggleCategory(child.id);
-														}}
-													>
-														{expandedCategories.has(child.id) ? (
-															<ChevronDown className="h-3 w-3" />
-														) : (
-															<ChevronRight className="h-3 w-3" />
-														)}
-													</button>
-												)}
-											</div>
+											{child.hasChildren && expandedCategories.has(child.id) && (
+												<div className="ml-4 mt-1 border-l border-border/50 pl-2">
+													<NavCategoryChildren
+														categoryId={child.id}
+														isCollapsed={isCollapsed}
+														selectedChildId={null}
+														currentView={currentView}
+														items={getCategoryItems(child.id as any)}
+														onItemClick={handleChildClick}
+													/>
+												</div>
+											)}
 										</div>
-										{child.hasChildren && expandedCategories.has(child.id) && (
-											<div className="ml-4 mt-1 border-l border-border/50 pl-2">
-												<NavCategoryChildren
-													categoryId={child.id}
-													isCollapsed={isCollapsed}
-													selectedChildId={null}
-													currentView={currentView}
-													items={getCategoryItems(child.id as any)}
-													onItemClick={handleChildClick}
-												/>
-											</div>
-										)}
-									</div>
-								))}
-							</div>
+									))}
+								</div>
+							)}
 						</div>
 					))}
 				</div>

@@ -1,5 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
-import { tags } from '../schema';
+import { tags } from '../schema/index';
 import { seedLogger } from './index';
 
 /**
@@ -17,10 +17,7 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🎨',
 				color: '#8b5cf6',
 				category: 'arte',
-				isPublic: true,
 				isFavorite: true,
-				totalImages: 0,
-				totalVideos: 0,
 			},
 			{
 				id: 'tag-2',
@@ -29,10 +26,7 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				emoji: '🌿',
 				color: '#10b981',
 				category: 'temática',
-				isPublic: true,
 				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
 			},
 		];
 

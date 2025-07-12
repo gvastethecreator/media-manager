@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid';
 import React, { useMemo } from 'react';
 import { useTheme } from '@/lib/contexts/theme-context';
 import { cn } from '@/lib/utils';
-import { WorldItemService } from '@/services/world-item/world-item.service';
+import worldItemService from '@/services/world-item/world-item.service';
 import type {
 	WorldItemEffect,
 	WorldItemProperty,
@@ -10,7 +10,7 @@ import type {
 	WorldItemStats,
 } from '@/types/entities/world-item/stats-types';
 
-const { getRecentWorldItemImages } = WorldItemService;
+const { getRecentWorldItemImages } = worldItemService;
 
 interface WorldItemCardContentProps {
 	description?: string | null;

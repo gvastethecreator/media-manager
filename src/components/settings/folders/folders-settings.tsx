@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { FolderCard } from './folder-card';
 import { FolderForm } from './folder-form';
+import { FolderGroup } from './folder-group';
 import { getFolderIndexStatus } from './folder-utils';
 import { FoldersStats } from './folders-stats';
 import { useFolders } from './hooks/use-folders';
@@ -122,40 +123,55 @@ export function FoldersSettings() {
 					{/* Formulario para agregar carpetas */}
 					<FolderForm isProcessing={isProcessing} isLoading={isLoading} onAddFolder={handleAddFolder} />
 
-					{/* Lista de carpetas con scroll compacto */}
+					{/* Lista de carpetas con jerarquía mejorada */}
 					<ScrollArea className="h-[300px] w-full">
-						<div className="grid grid-cols-2 gap-2 pr-3">
-							{folders.map((folder) => (
-								<FolderCard
-									key={folder.id}
-									folder={folder}
-									selectedFolder={selectedFolder}
-									isProcessing={isProcessing}
-									processStatus={processStatus}
-									isGloballyProcessing={isGloballyProcessing}
-									onReindex={handleReindexFolder}
-									onToggleAutoReindex={handleAutoReindexToggle}
-									onFolderClick={handleFolderClick}
-									getFolderIndexStatus={getFolderIndexStatus}
-								/>
-							))}
+						<div className="space-y-3 pr-3">
+							{(() => {
+								// Separar carpetas padre de subcarpetas
+								const parentFolders = folders.filter((folder) => !folder.parentId);
+								const subfolders = folders.filter((folder) => folder.parentId);
+
+								// Agrupar subcarpetas por padre
+								const folderGroups = parentFolders.map((parent) => {
+									const children = subfolders.filter((sub) => sub.parentId === parent.id);
+									return { parent, children };
+								});
+
+								// Ordenar grupos por nombre del padre
+								folderGroups.sort((a, b) => a.parent.name.localeCompare(b.parent.name));
+
+								return folderGroups.map(({ parent, children }) => (
+									<FolderGroup
+										key={parent.id}
+										parentFolder={parent}
+										subfolders={children}
+										allFolders={folders}
+										selectedFolder={selectedFolder}
+										isProcessing={isProcessing}
+										processStatus={processStatus}
+										isGloballyProcessing={isGloballyProcessing}
+										onReindex={handleReindexFolder}
+										onToggleAutoReindex={handleAutoReindexToggle}
+										onFolderClick={handleFolderClick}
+										getFolderIndexStatus={getFolderIndexStatus}
+									/>
+								));
+							})()}
 
 							{folders.length === 0 && (
-								<div className="col-span-2">
-									<motion.div
-										animate={{
-											opacity: [0, 1],
-											y: [20, 0],
-										}}
-										className="py-8 text-center"
-									>
-										<Folder className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-										<p className="text-sm text-muted-foreground">No hay carpetas indexadas</p>
-										<p className="text-xs mt-1 text-muted-foreground/75">
-											Agrega una carpeta para comenzar a indexar imágenes
-										</p>
-									</motion.div>
-								</div>
+								<motion.div
+									animate={{
+										opacity: [0, 1],
+										y: [20, 0],
+									}}
+									className="py-8 text-center"
+								>
+									<Folder className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+									<p className="text-sm text-muted-foreground">No hay carpetas indexadas</p>
+									<p className="text-xs mt-1 text-muted-foreground/75">
+										Agrega una carpeta para comenzar a indexar imágenes
+									</p>
+								</motion.div>
 							)}
 						</div>
 					</ScrollArea>

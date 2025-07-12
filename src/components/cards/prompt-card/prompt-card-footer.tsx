@@ -9,6 +9,7 @@ interface PromptCardFooterProps {
 	imagesCount: number;
 	videosCount: number;
 	tagsCount: number;
+	tagsCount: number;
 	primaryColor: string;
 	secondaryColor?: string;
 	tcgMode?: boolean;

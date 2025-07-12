@@ -26,7 +26,7 @@ export function VideoCardFooter({
 	compact = false,
 }: VideoCardFooterProps) {
 	const { isFavorite } = video;
-	const { albumCount: albumsCount, collectionCount: collectionsCount, tagCount: tagsCount, technicalGrade } = video;
+	const { albumCount: albumsCount, collectionCount: collectionsCount, tagCount: tagsCount, technicalGrade } = video.stats;
 
 	// Efecto de brillo para rareza alta
 	const glow = rarityLevel >= 7 ? 4 : rarityLevel >= 5 ? 2 : 0;

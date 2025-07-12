@@ -16,12 +16,13 @@
 // --- Tipos Canónicos ---
 export type {
 	VideoBase,
+	VideoComplete,
 	VideoCreateInput,
 	VideoFilters,
 	VideoPaginationOptions,
 	VideoPlayState,
 	VideoSortCriteria,
-	VideoStatistics,
+
 	VideoStats,
 	VideoUpdateInput,
 	VideoViewMode,

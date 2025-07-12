@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGroupCardData } from '@/lib/api/groups';
 import { cn } from '@/lib/utils';
-
+import type { GroupCardProps } from './group-card.types';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
@@ -73,19 +73,19 @@ export function GroupCard({
 	// Determinar el número total de entidades
 	const entityCounts = useMemo(
 		() => ({
-			images: group?.stats?.totalImages || 0,
-			videos: group?.stats?.totalVideos || 0,
-			albums: group?.stats?.totalAlbums || 0,
-			collections: group?.stats?.totalCollections || 0,
-			tags: group?.stats?.totalTags || 0,
-			characters: group?.stats?.totalCharacters || 0,
-			places: group?.stats?.totalPlaces || 0,
-			worldItems: group?.stats?.totalWorldItems || 0,
-			concepts: group?.stats?.totalConcepts || 0,
-			prompts: group?.stats?.totalPrompts || 0,
-			notes: group?.stats?.totalNotes || 0,
-			wildcards: group?.stats?.totalWildcards || 0,
-			properties: group?.stats?.totalProperties || 0,
+			images: group?.stats?.imageCount || 0,
+			videos: group?.stats?.videoCount || 0,
+			albums: group?.stats?.albumCount || 0,
+			collections: group?.stats?.collectionCount || 0,
+			tags: group?.stats?.tagCount || 0,
+			characters: group?.stats?.characterCount || 0,
+			places: group?.stats?.placeCount || 0,
+			worldItems: group?.stats?.worldItemCount || 0,
+			concepts: group?.stats?.conceptCount || 0,
+			prompts: group?.stats?.promptCount || 0,
+			notes: group?.stats?.noteCount || 0,
+			wildcards: group?.stats?.wildcardCount || 0,
+			properties: group?.stats?.propertyCount || 0,
 		}),
 		[group?.stats]
 	);
@@ -152,28 +152,28 @@ export function GroupCard({
 		>
 			{/* Encabezado */}
 			<GroupCardHeader
-				name={group.name}
-				emoji={group.emoji || ''}
-				color={primaryColor}
-				category={group.category || undefined}
-				organizationType={group.organizationType || ''}
-				organizationLevel={group.organizationLevel || ''}
-				isFavorite={group.isFavorite || false}
-				tcgMode={tcgMode}
-				compact={compact}
-			/>
+					name={group.name}
+					emoji={group.emoji || ''}
+					color={primaryColor}
+					category={group.category || undefined}
+					organizationType={group.organizationType || ''}
+					organizationLevel={Number(group.organizationLevel) || 1}
+					isFavorite={group.isFavorite || false}
+					tcgMode={tcgMode}
+					compact={compact}
+				/>
 
 			{/* Imágenes */}
 			<GroupCardImages
-				images={group.recentImages || []}
-				videos={group.recentVideos || []}
-				emoji={group.emoji || ''}
-				primaryColor={primaryColor}
-				rarityLevel={group.rarityLevel || ''}
-				holographicEffect={isHovered}
-				tcgMode={tcgMode}
-				compact={compact}
-			/>
+					images={group.recentImages || []}
+					videos={group.recentVideos || []}
+					emoji={group.emoji || ''}
+					primaryColor={primaryColor}
+					rarityLevel={Number(group.rarityLevel) || 1}
+					holographicEffect={isHovered}
+					tcgMode={tcgMode}
+					compact={compact}
+				/>
 
 			{/* Contenido */}
 			<GroupCardContent
@@ -196,15 +196,15 @@ export function GroupCard({
 				category={group.category || undefined}
 				organizationType={group.organizationType || ''}
 				power={group.power || 0}
-				rarityLevel={group.rarityLevel || ''}
+				rarityLevel={Number(group.rarityLevel) || 1}
 				hp={group.hp || 0}
 				mp={group.mp || 0}
 				primaryColor={primaryColor}
 				cardId={group.cardId || ''}
 				tcgMode={tcgMode}
 				compact={compact}
-				imagesCount={group.stats.totalImages}
-				videosCount={group.stats.totalVideos}
+				imagesCount={group.stats.imageCount}
+				videosCount={group.stats.videoCount}
 			/>
 
 			{/* Efecto holográfico general en modo TCG */}

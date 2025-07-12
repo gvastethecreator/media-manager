@@ -80,6 +80,7 @@ export interface PropertyStatistics {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface PropertyWithStats extends PropertyBase {
+	entityType: 'property';
 	stats: PropertyStatistics;
 	_count: {
 		images: number;

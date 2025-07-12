@@ -8,9 +8,10 @@ interface TagCardImagesProps {
 	primaryColor: string;
 	secondaryColor: string;
 	rarity?: TagRarity;
-	featuredImage?: { id: string; thumbnailUrl: string; url?: string } | null;
+	featuredImage?: { id: string; thumbnailUrl: string; url?: string; name?: string | null; isVideo?: boolean } | null;
 	tcgMode?: boolean;
 	compact?: boolean;
+	images?: Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>;
 }
 
 /**

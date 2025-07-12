@@ -13,6 +13,11 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Tipos de Input ---
+export type {
+	DocumentCreateInput,
+	DocumentUpdateInput,
+} from '../../transformers/document/validators';
 // --- Tipos Canónicos ---
 export type {
 	DocumentBase,

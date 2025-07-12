@@ -64,6 +64,11 @@ export interface FavoriteStatistics {
 }
 
 /**
+ * 📊 Alias para compatibilidad - FavoriteStats apunta a FavoriteStatistics
+ */
+export type FavoriteStats = FavoriteStatistics;
+
+/**
  * ⭐ Tipo enriquecido de Favorite que incluye estadísticas calculadas.
  * Este es el tipo canónico que debe usarse en la aplicación.
  */

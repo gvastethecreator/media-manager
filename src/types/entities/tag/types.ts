@@ -11,7 +11,6 @@ export interface TagBase extends EntityBase {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -50,6 +49,27 @@ export enum TagSortCriteria {
 	USAGE_DESC = 'usage:desc',
 	POPULARITY_ASC = 'popularity:asc',
 	POPULARITY_DESC = 'popularity:desc',
+}
+
+export interface TagStatistics {
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	collectionCount: number;
+	characterCount: number;
+	placeCount: number;
+	worldItemCount: number;
+	conceptCount: number;
+	promptCount: number;
+	noteCount: number;
+	wildcardCount: number;
+	propertyCount: number;
+	groupCount: number;
+	totalRelations: number;
+}
+
+export interface TagWithStats extends TagBase {
+	stats: TagStatistics;
 }
 
 export interface TagPaginationOptions {

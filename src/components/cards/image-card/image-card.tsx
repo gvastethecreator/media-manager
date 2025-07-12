@@ -51,6 +51,36 @@ export function ImageCard({
 		}
 	};
 
+	// Funciones de utilidad para clases CSS
+	const getAspectRatioClass = () => {
+		switch (aspectRatio) {
+			case 'square':
+				return 'aspect-square';
+			case 'video':
+				return 'aspect-video';
+			case 'auto':
+				return '';
+			default:
+				if (typeof aspectRatio === 'string' && aspectRatio.includes('/')) {
+					return `aspect-[${aspectRatio}]`;
+				}
+				return 'aspect-[3/2]';
+		}
+	};
+
+	const getVariantClasses = () => {
+		switch (variant) {
+			case 'minimal':
+				return 'border-0 shadow-none bg-transparent';
+			case 'polaroid':
+				return 'border-8 border-white dark:border-gray-800 bg-white dark:bg-gray-800 shadow-md p-1 rotate-1';
+			case 'tcg':
+				return 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black text-white';
+			default:
+				return 'border border-gray-200 dark:border-gray-800 bg-card';
+		}
+	};
+
 	// Determinar color primario para efectos TCG
 	const getPrimaryColor = () => {
 		// Usar el color de la primera etiqueta si hay etiquetas
@@ -119,39 +149,10 @@ export function ImageCard({
 			(imageData.stats.albumCount || 0) +
 			(imageData.stats.collectionCount || 0) +
 			(imageData.stats.characterCount || 0) +
-			(imageData.stats.places || 0) +
-			(imageData.stats.worldItems || 0) +
-			(imageData.stats.notes || 0)
+			(imageData.stats.placeCount || 0) +
+			(imageData.stats.worldItemCount || 0) +
+			(imageData.stats.noteCount || 0)
 		);
-	};
-
-	const getAspectRatioClass = () => {
-		switch (aspectRatio) {
-			case 'square':
-				return 'aspect-square';
-			case 'video':
-				return 'aspect-video';
-			case 'auto':
-				return '';
-			default:
-				if (typeof aspectRatio === 'string' && aspectRatio.includes('/')) {
-					return `aspect-[${aspectRatio}]`;
-				}
-				return 'aspect-[3/2]';
-		}
-	};
-
-	const getVariantClasses = () => {
-		switch (variant) {
-			case 'minimal':
-				return 'border-0 shadow-none bg-transparent';
-			case 'polaroid':
-				return 'border-8 border-white dark:border-gray-800 bg-white dark:bg-gray-800 shadow-md p-1 rotate-1';
-			case 'tcg':
-				return 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black text-white';
-			default:
-				return 'border border-gray-200 dark:border-gray-800 bg-card';
-		}
 	};
 
 	const getHumanReadableDimensions = () => {

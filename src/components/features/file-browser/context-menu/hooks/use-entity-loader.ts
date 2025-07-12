@@ -5,7 +5,7 @@ import { getCharacters } from '@/services/character/character.service';
 import { getCollections } from '@/services/collection/collection.service';
 import { ConceptService } from '@/services/concept/concept.service';
 import { searchGroupsService } from '@/services/group/group.service';
-import { NoteService } from '@/services/note/note.service';
+import { getNotes } from '@/services/note/note.service';
 import { getPlaces } from '@/services/place/place.service';
 import { searchPromptsService } from '@/services/prompt/prompt.service';
 import { getProperties } from '@/services/property/property.service';

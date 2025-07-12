@@ -2,6 +2,7 @@
 
 import cors from 'cors';
 import express from 'express';
+import { errorLogger, logInfo, requestLogger } from './middleware/logging';
 import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
@@ -49,9 +50,73 @@ app.use(
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Health check
-app.get('/health', (_req, res) => {
-	res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// 🚨 LOGGING DIRECTO ANTES DEL MIDDLEWARE
+console.log('🔥 [PRE-MIDDLEWARE] Aplicando requestLogger...');
+process.stdout.write('🔥 [PRE-MIDDLEWARE-STDOUT] Aplicando requestLogger...\n');
+
+// Middleware de logging directo sin función externa
+app.use((req, res, next) => {
+	const timestamp = new Date().toISOString();
+	const method = req.method;
+	const url = req.originalUrl || req.url;
+	const ip = req.ip || req.connection.remoteAddress || 'unknown';
+
+	console.log(`🌐 [DIRECT-LOG] [${timestamp}] ${method} ${url} - IP: ${ip} - START`);
+	process.stdout.write(`🌐 [DIRECT-STDOUT] [${timestamp}] ${method} ${url} - IP: ${ip} - START\n`);
+
+	const startTime = Date.now();
+
+	res.on('finish', () => {
+		const duration = Date.now() - startTime;
+		const statusCode = res.statusCode;
+		const endTimestamp = new Date().toISOString();
+		const statusEmoji = statusCode >= 400 ? '❌' : statusCode >= 300 ? '⚠️' : '✅';
+
+		console.log(
+			`${statusEmoji} [DIRECT-LOG] [${endTimestamp}] ${method} ${url} - ${statusCode} - ${duration}ms - IP: ${ip} - END`
+		);
+		process.stdout.write(
+			`${statusEmoji} [DIRECT-STDOUT] [${endTimestamp}] ${method} ${url} - ${statusCode} - ${duration}ms - IP: ${ip} - END\n`
+		);
+	});
+
+	next();
+});
+
+// Middleware de logging original (como backup)
+app.use(requestLogger);
+
+console.log('🔥 [POST-MIDDLEWARE] requestLogger aplicado');
+process.stdout.write('🔥 [POST-MIDDLEWARE-STDOUT] requestLogger aplicado\n');
+logInfo('🔧 Middleware de logging robusto configurado');
+console.log('🚨 [CRITICAL DEBUG] Este log debe aparecer SIEMPRE');
+console.log('🚨 [CRITICAL DEBUG] Timestamp:', new Date().toISOString());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+	// 🚨 LOGS EXTREMOS PARA DEBUGGING
+	console.log('🔥🔥🔥 [EXTREME-DEBUG] Health endpoint INICIANDO');
+	console.log('🔥🔥🔥 [EXTREME-DEBUG] Timestamp:', new Date().toISOString());
+	console.log('🔥🔥🔥 [EXTREME-DEBUG] Method:', req.method);
+	console.log('🔥🔥🔥 [EXTREME-DEBUG] URL:', req.url);
+
+	process.stdout.write('🔥🔥🔥 [EXTREME-STDOUT] Health endpoint INICIANDO\n');
+	process.stderr.write('🔥🔥🔥 [EXTREME-STDERR] Health endpoint INICIANDO\n');
+
+	const uptime = process.uptime();
+	const timestamp = new Date().toISOString();
+
+	console.log('🔥🔥🔥 [EXTREME-DEBUG] Enviando respuesta JSON');
+	process.stdout.write('🔥🔥🔥 [EXTREME-STDOUT] Enviando respuesta JSON\n');
+
+	res.json({
+		status: 'ok',
+		timestamp,
+		uptime,
+	});
+
+	console.log('🔥🔥🔥 [EXTREME-DEBUG] Respuesta JSON enviada');
+	process.stdout.write('🔥🔥🔥 [EXTREME-STDOUT] Respuesta JSON enviada\n');
 });
 
 // API Routes - Entidades principales
@@ -91,17 +156,7 @@ app.use('/api/stats', statsRouter);
 app.use('/api/profiles', profilesRouter);
 app.use('/api/activity', activityRouter);
 
-// Error handling middleware
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-	console.error('Error del servidor:', err);
-	res.status(500).json({
-		error: 'Error interno del servidor',
-		message: err.message,
-		timestamp: new Date().toISOString(),
-	});
-});
-
-// 404 handler - Usar middleware sin patrón wildcard para compatibilidad con Express 5
+// 404 handler - DEBE ir antes de los middlewares de error
 app.use((req, res) => {
 	res.status(404).json({
 		error: 'Endpoint no encontrado',
@@ -110,6 +165,9 @@ app.use((req, res) => {
 		timestamp: new Date().toISOString(),
 	});
 });
+
+// Middleware de manejo de errores (DEBE ir al final)
+app.use(errorLogger);
 
 app.listen(PORT, () => {
 	console.log(`🚀 Servidor Express iniciado en puerto ${PORT}`);

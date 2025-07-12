@@ -25,6 +25,7 @@ export { FavoriteEntityType } from './base';
 // --- Tipos adicionales ---
 export type {
 	FavoriteCreateInput,
+	FavoriteExtended,
 	FavoriteFilters,
 	FavoriteSearchOptions,
 	FavoriteSearchResult,

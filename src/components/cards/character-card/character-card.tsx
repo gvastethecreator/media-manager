@@ -196,16 +196,16 @@ export function CharacterCard({
 								compact={false}
 							/>
 							<CharacterCardContent
-								description={character.description}
-								stats={character.stats}
-								abilities={character.parsedAbilities}
-								backstory={character.backstory}
-								alignment={character.alignment}
-								primaryColor={primaryColor}
-								secondaryColor={secondaryColor}
-								metadata={character.metadata}
-								tcgMode={tcgMode}
-							/>
+							description={character.description}
+							stats={character.statistics}
+							abilities={character.parsedAbilities}
+							backstory={character.backstory}
+							alignment={character.alignment}
+							primaryColor={primaryColor}
+							secondaryColor={secondaryColor}
+							metadata={character.metadata}
+							tcgMode={tcgMode}
+						/>
 						</>
 					)}
 					<CharacterCardFooter

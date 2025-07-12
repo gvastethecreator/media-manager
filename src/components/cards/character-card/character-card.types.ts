@@ -4,7 +4,7 @@ export type CharacterCardData = Omit<CharacterWithStats, 'stats'> & {
 	recentImages: string[];
 	recentVideos: string[];
 	totalSize: number;
-	stats: CharacterStatistics;
+	stats: CharacterStats;
 	parsedRelationships: Record<string, any>;
 	parsedGoals: Record<string, any>;
 	parsedFears: Record<string, any>;

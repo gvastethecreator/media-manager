@@ -45,7 +45,6 @@ export const NavPanel = memo(function NavPanel({
 			<NavPanelHeader
 				isCollapsed={isCollapsed}
 				onToggleCollapse={onToggleCollapse}
-				totalImages={stats.totalImages || 0}
 				onOpenSettings={handleOpenSettings}
 				onOpenDevelopment={handleOpenDevelopment}
 				onOpenEntityCards={handleOpenEntityCards}

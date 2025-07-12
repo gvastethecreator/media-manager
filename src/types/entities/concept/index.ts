@@ -20,17 +20,22 @@ export {
 	ConceptViewMode,
 } from './enums';
 // --- Tipos Canónicos ---
+// Tipos base desde base.ts
 export type {
 	ConceptBase,
+	ConceptStatistics,
+	ConceptStats,
+	ConceptWithStats,
+} from './base';
+
+// Tipos adicionales desde types.ts
+export type {
 	ConceptCreateInput,
 	ConceptExtended,
 	ConceptFilters,
 	ConceptSearchOptions,
 	ConceptSearchResult,
-	ConceptStatistics,
-	ConceptStats,
 	ConceptUpdateInput,
-	ConceptWithStats,
 } from './types';
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

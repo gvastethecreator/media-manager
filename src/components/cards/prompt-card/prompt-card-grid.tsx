@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { debounceEvent } from '@/lib/system/event-throttler';
 import { getPrompts } from '@/services/prompt/prompt.service';
 import type { PromptWithStats } from '@/types/entities/prompt';
-import { MemoizedPromptCard } from './prompt-card';
+import { PromptCard } from './prompt-card';
 
 interface PromptCardGridProps {
 	/** Título del grid */
