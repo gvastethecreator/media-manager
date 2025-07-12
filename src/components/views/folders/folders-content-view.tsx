@@ -40,10 +40,7 @@ export default function FoldersContentView({
 	className = '',
 }: FoldersContentViewProps) {
 	// Combinar carpetas reales con optimísticas evitando duplicados
-	const allFolders = [
-		...folders,
-		...optimisticFolders.filter(opt => !folders.some(f => f.id === opt.id))
-	];
+	const allFolders = [...folders, ...optimisticFolders.filter((opt) => !folders.some((f) => f.id === opt.id))];
 
 	if (isLoading && folders.length === 0) {
 		return <LoadingScreen message="Cargando carpetas..." />;
@@ -148,7 +145,7 @@ export default function FoldersContentView({
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
 					{allFolders.map((folder, index) => {
 						// Crear key único que diferencia entre carpetas reales y optimísticas
-						const isOptimistic = optimisticFolders.some(opt => opt.id === folder.id);
+						const isOptimistic = optimisticFolders.some((opt) => opt.id === folder.id);
 						const uniqueKey = `${folder.id}-${isOptimistic ? 'optimistic' : 'real'}-${index}`;
 
 						return (
@@ -158,19 +155,19 @@ export default function FoldersContentView({
 								className="group cursor-pointer rounded-lg border p-4 hover:bg-muted/50 transition-colors text-left w-full"
 								onClick={() => handleFolderClick(folder)}
 							>
-							<div className="flex items-start space-x-3">
-								<Folder className="h-8 w-8 text-blue-500 flex-shrink-0" />
-								<div className="flex-1 min-w-0">
-									<h3 className="font-medium truncate">{folder.name}</h3>
-									<p className="text-sm text-muted-foreground truncate">{folder.path}</p>
-									<div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
-										<span>{folder.stats?.imageCount || 0} imágenes</span>
-										<span>0MB</span>
+								<div className="flex items-start space-x-3">
+									<Folder className="h-8 w-8 text-blue-500 flex-shrink-0" />
+									<div className="flex-1 min-w-0">
+										<h3 className="font-medium truncate">{folder.name}</h3>
+										<p className="text-sm text-muted-foreground truncate">{folder.path}</p>
+										<div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
+											<span>{folder.stats?.imageCount || 0} imágenes</span>
+											<span>0MB</span>
+										</div>
 									</div>
 								</div>
-							</div>
-						</button>
-					);
+							</button>
+						);
 					})}
 				</div>
 			</ScrollArea>

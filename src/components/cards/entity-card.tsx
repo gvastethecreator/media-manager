@@ -48,13 +48,14 @@ import { PromptCard } from './prompt-card/prompt-card';
 import { PropertyCard } from './property-card/property-card';
 import { TagCard } from './tag-card/tag-card';
 // Importar el nuevo sistema de layouts
-import type { BaseCardProps } from './types/card-layout.types';
+import type { BaseCardProps, CardVariant } from './types/card-layout.types';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface EntityCardProps extends BaseCardProps {
-	entity: EntityWithStats;
+	entity: AnyEntityWithStats;
 	/** Preset de layout específico para el contexto */
 	preset?: string;
 }
@@ -119,20 +120,52 @@ export const EntityCard: FC<EntityCardProps> = ({
 		...props,
 	};
 
+	// Función para mapear CardVariant a variantes específicas de ImageCard
+	const mapToImageCardVariant = (variant: CardVariant): 'default' | 'minimal' | 'polaroid' | 'tcg' => {
+		switch (variant) {
+			case 'minimal':
+				return 'minimal';
+			case 'polaroid':
+				return 'polaroid';
+			case 'tcg':
+				return 'tcg';
+			case 'elevated':
+			case 'outlined':
+			case 'glass':
+			case 'default':
+			default:
+				return 'default';
+		}
+	};
+
 	// Renderizar componente específico basado en type guards
 	if (isImageWithStats(entity)) {
 		return (
 			<ImageCard
 				imageId={entity.id}
-				{...commonProps}
-				// Props específicas de ImageCard
+				onClick={onClick}
+				className={className}
+				showTags={config.showTags}
+				showDetails={config.showDetails}
 				aspectRatio={config.aspectRatio as string}
+				variant={mapToImageCardVariant(config.variant)}
+				tcgMode={config.variant === 'tcg'}
+				showRelations={config.showMetadata}
 			/>
 		);
 	}
 
 	if (isVideoWithStats(entity)) {
-		return <VideoCard videoId={entity.id} {...commonProps} />;
+		return (
+			<VideoCard
+				videoId={entity.id}
+				onClick={onClick}
+				className={className}
+				compact={config.layout === 'compact' || config.size === 'sm'}
+				isSelected={isSelected}
+				tcgMode={config.variant === 'tcg'}
+			/>
+		);
 	}
 
 	if (isAlbumWithStats(entity)) {
@@ -141,67 +174,79 @@ export const EntityCard: FC<EntityCardProps> = ({
 	}
 
 	if (isCollectionWithStats(entity)) {
-		return <CollectionCard collectionId={entity.id} {...commonProps} />;
-	}
-
-	if (isCharacterWithStats(entity)) {
-		return <CharacterCard characterId={entity.id} character={adaptCharacterWithStats(entity)} {...commonProps} />;
-	}
-
-	if (isFolderWithStats(entity)) {
 		return (
-			<FolderCard
-				folderId={entity.id}
-				{...commonProps}
-				// Props específicas de FolderCard
-				interactive={!!onClick}
+			<CollectionCard
+				collection={entity}
+				onClick={onClick}
+				className={className}
+				compact={config.layout === 'compact' || config.size === 'sm'}
+				showEntitiesCount={config.showStats}
+				showImagesCount={config.showStats}
 			/>
 		);
 	}
 
+	if (isCharacterWithStats(entity)) {
+		return (
+			<CharacterCard
+				characterId={entity.id}
+				character={adaptCharacterWithStats(entity)}
+				onClick={onClick}
+				className={className}
+				tcgMode={config.variant === 'tcg'}
+				compact={config.layout === 'compact' || config.size === 'sm'}
+				isSelected={isSelected}
+			/>
+		);
+	}
+
+	if (isFolderWithStats(entity)) {
+		return <FolderCard folder={entity} onClick={onClick} className={className} interactive={!!onClick} />;
+	}
+
 	if (isAudioWithStats(entity)) {
-		return <AudioCard audioId={entity.id} {...commonProps} />;
+		return <AudioCard audio={entity} onClick={onClick} className={className} />;
 	}
 
 	if (isDocumentWithStats(entity)) {
-		return <DocumentCard documentId={entity.id} {...commonProps} />;
+		return <DocumentCard document={entity} onClick={onClick} className={className} />;
 	}
 
 	if (isTagWithStats(entity)) {
-		return <TagCard tagId={entity.id} {...commonProps} />;
+		return <TagCard tag={entity} onClick={onClick} className={className} />;
 	}
 
 	if (isNoteWithStats(entity)) {
-		return <NoteCard noteId={entity.id} {...commonProps} />;
+		return <NoteCard noteId={entity.id} onClick={onClick} className={className} />;
 	}
 
 	if (isPlaceWithStats(entity)) {
-		return <PlaceCard placeId={entity.id} {...commonProps} />;
+		return <PlaceCard placeId={entity.id} onClick={onClick} className={className} />;
 	}
 
 	if (isWorldItemWithStats(entity)) {
-		return <WorldItemCard worldItemId={entity.id} {...commonProps} />;
+		return <WorldItemCard worldItemId={entity.id} onClick={onClick} className={className} />;
 	}
 
 	if (isConceptWithStats(entity)) {
-		return <ConceptCard conceptId={entity.id} {...commonProps} />;
+		return <ConceptCard conceptId={entity.id} onClick={onClick} className={className} />;
 	}
 
 	if (isPromptWithStats(entity)) {
-		return <PromptCard promptId={entity.id} {...commonProps} />;
+		return <PromptCard promptId={entity.id} onClick={onClick} className={className} />;
 	}
 
 	if (isPropertyWithStats(entity)) {
-		return <PropertyCard propertyId={entity.id} {...commonProps} />;
+		return <PropertyCard propertyId={entity.id} onClick={onClick} className={className} />;
 	}
 
 	if (isGroupWithStats(entity)) {
 		// @ts-expect-error - TODO: Fix GroupCard props
-		return <GroupCard group={entity} {...commonProps} />;
+		return <GroupCard group={entity} onClick={onClick} className={className} />;
 	}
 
 	if (isWildcardWithStats(entity)) {
-		return <WildcardCard wildcardId={entity.id} {...commonProps} />;
+		return <WildcardCard wildcard={entity} onClick={onClick} className={className} />;
 	}
 
 	// Fallback para entidades no reconocidas

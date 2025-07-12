@@ -5,6 +5,21 @@ export type GroupBase = {
 	id: string;
 	name: string;
 	description: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isFavorite?: boolean;
+	organizationType?: string | null;
+	organizationLevel?: number;
+	rarityLevel?: string | null;
+	flexibilityScore?: number;
+	power?: number;
+	hp?: number;
+	mp?: number;
+	cardId?: string;
+	filters?: any;
+	recentImages?: any[];
+	recentVideos?: any[];
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -27,6 +42,20 @@ export interface GroupStatistics {
 	noteCount: number;
 	wildcardCount: number;
 	propertyCount: number;
+	// Alias para compatibilidad
+	totalImages?: number;
+	totalVideos?: number;
+	totalAlbums?: number;
+	totalCollections?: number;
+	totalTags?: number;
+	totalCharacters?: number;
+	totalPlaces?: number;
+	totalWorldItems?: number;
+	totalConcepts?: number;
+	totalPrompts?: number;
+	totalNotes?: number;
+	totalWildcards?: number;
+	totalProperties?: number;
 }
 
 /**
@@ -34,6 +63,7 @@ export interface GroupStatistics {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface GroupWithStats extends GroupBase {
+	entityType: 'group';
 	stats: GroupStatistics;
 }
 

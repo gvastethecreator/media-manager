@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useJsonFile } from '@/lib/api/json-files';
 import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format'; // Importar formatBytes
 import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
@@ -46,6 +47,25 @@ export function JsonFileCard({
 	const { data: jsonFile, isLoading, error } = useJsonFile(jsonFileId);
 	const [isHovered, setIsHovered] = useState(false);
 	const [showPreview, setShowPreview] = useState(false);
+
+	// Funciones para manejar eventos
+	const handleClick = useCallback(() => {
+		if (onClick && jsonFile) {
+			onClick(jsonFile);
+		}
+	}, [onClick, jsonFile]);
+
+	const handleMouseEnter = useCallback(() => {
+		setIsHovered(true);
+	}, []);
+
+	const handleMouseLeave = useCallback(() => {
+		setIsHovered(false);
+	}, []);
+
+	const togglePreview = useCallback(() => {
+		setShowPreview((prev) => !prev);
+	}, []);
 
 	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
@@ -118,6 +138,16 @@ export function JsonFileCard({
 				keys: 0,
 				size: jsonFile.content ? new Blob([jsonFile.content]).size : 0,
 			};
+		}
+	}, [jsonFile.content]);
+
+	// Preview del JSON formateado
+	const jsonPreview = useMemo(() => {
+		if (!jsonFile.content) return '';
+		try {
+			return JSON.stringify(JSON.parse(jsonFile.content), null, 2);
+		} catch {
+			return jsonFile.content; // Mostrar contenido sin formatear si es inválido
 		}
 	}, [jsonFile.content]);
 
@@ -244,7 +274,7 @@ export function JsonFileCard({
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Tamaño</span>
-									<span className="font-bold">{formatSize(jsonStats.size)}</span>
+									<span className="font-bold">{formatBytes(jsonStats.size)}</span>
 								</div>
 								<div
 									className="col-span-2 flex items-center justify-between px-2 py-1 rounded"
@@ -283,7 +313,7 @@ export function JsonFileCard({
 						</div>
 
 						{/* Estado y fecha */}
-						<div className="flex items-center gap-2">
+						<div className="flex items-center justify-between text-xs">
 							<span
 								className="px-2 py-1 rounded text-xs font-medium"
 								style={{

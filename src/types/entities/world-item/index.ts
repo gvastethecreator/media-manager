@@ -6,4 +6,5 @@
  */
 
 export * from './enums';
+export * from './stats-types';
 export * from './types';

@@ -1,37 +1,12 @@
 /**
- * @file Tipos canónicos para la entidad Concept
+ * @file Tipos para la entidad Concept
  * @module types/entities/concept/types
- * @description Estructura unificada y validada para Concept.
- * Última migración: 2025-06-18
+ * @description Tipos y interfaces para la entidad Concept
  */
 
 import { z } from 'zod';
-
-/**
- * Tipo base canónico para Concept
- */
-export interface ConceptBase {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	isPublic: boolean;
-	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	type: string | null;
-	complexity: string | null;
-	applications: string | null;
-	examples: string | null;
-	relatedConcepts: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-}
+// Re-export tipos base desde base.ts para evitar duplicación
+export type { ConceptBase, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
 
 /**
  * Input para creación
@@ -117,54 +92,7 @@ export interface ConceptExtended extends ConceptWithStats {
 	importance?: number;
 }
 
-/**
- * 💡 Estadísticas de un concepto.
- */
-export interface ConceptStats {
-	imageCount: number;
-	tagCount: number;
-	noteCount: number;
-	totalContentItems: number;
-	lastUpdated: Date;
-	totalImages: number;
-	totalAssociations: number;
-	videoCount?: number;
-	albumCount?: number;
-	collectionCount?: number;
-	characterCount?: number;
-	placeCount?: number;
-	worldItemCount?: number;
-	promptCount?: number;
-	wildcardCount?: number;
-	propertyCount?: number;
-	groupCount?: number;
-}
-
-// Alias para compatibilidad
-export type ConceptStatistics = ConceptStats;
-
-/**
- * Concepto con estadísticas calculadas
- */
-export interface ConceptWithStats extends ConceptBase {
-	// Contadores de relaciones
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-	stats?: ConceptStats;
-}
+// Los tipos ConceptStats, ConceptStatistics y ConceptWithStats se importan desde base.ts
 
 /**
  * Opciones de ordenación para conceptos

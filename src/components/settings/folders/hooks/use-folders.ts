@@ -193,7 +193,7 @@ export function useFolders() {
 		[handleProcessComplete]
 	);
 
-	// Iniciar un proceso
+	// Función de procesamiento simplificada (sin polling)
 	const startProcessing = useCallback((folderId: string) => {
 		setIsProcessing(true);
 		setProcessStatus({
@@ -222,22 +222,15 @@ export function useFolders() {
 	});
 
 	const foldersOperations = useFoldersOperations({
-		onStartProcessing: startProcessing,
 		onLoadData: loadFolders,
 		onError: (error) => setError(error.toString()),
-		onReindexAllStart: () => {
-			folderLogger.info('🔄 Ejecutando reindexación global directa');
-			// Ejecutar la función de reindexado directamente
-			void (async () => {
-				await reindexAll();
-			})();
-		},
 	});
 
-	const foldersPolling = useFoldersPolling({
-		onStatusUpdate: handleStatusUpdate,
-		onComplete: handleProcessComplete,
-	});
+	// Polling removido - la reindexación es síncrona
+	// const foldersPolling = useFoldersPolling({
+	//	onStatusUpdate: handleStatusUpdate,
+	//	onComplete: handleProcessComplete,
+	// });
 
 	// Función para reiniciar todas las carpetas
 	const reindexAll = useCallback(async () => {
@@ -331,9 +324,9 @@ export function useFolders() {
 	useEffect(() => {
 		return () => {
 			foldersEvents.cleanup?.();
-			foldersPolling.cleanup?.();
+			// foldersPolling.cleanup?.(); // Polling removido
 		};
-	}, [foldersEvents, foldersPolling]);
+	}, [foldersEvents]);
 
 	return {
 		// Datos

@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
+import { DashboardView } from '@/components/views/dashboard/dashboard-view';
 
 // import { MainLayoutTest } from '@/components/layout/main-layout-test';
 // import { MainLayoutSimpleNavPanel } from '@/components/layout/main-layout-simple-navpanel';
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
 		children: [
 			{
 				index: true,
-				element: <div>Página principal</div>,
+				element: <DashboardView />,
 			},
 		],
 	},

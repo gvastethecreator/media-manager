@@ -60,6 +60,9 @@ export interface CategoryChild {
 	path?: string;
 	description?: string;
 	icon?: LucideIcon;
+	itemCount?: number; // Conteo total de elementos
+	totalFiles?: number;
+	totalSize?: number;
 	_count?: {
 		images?: number;
 		folders?: number;

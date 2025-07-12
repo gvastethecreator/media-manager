@@ -1,0 +1,3 @@
+JPEG image simulation file.
+This file should be detected as IMAGE type by FileEntityMapperService.
+Testing the entity creation process.

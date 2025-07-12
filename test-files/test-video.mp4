@@ -1,0 +1,3 @@
+Fake MP4 video file content for testing purposes.
+This simulates a video file to test entity mapping.
+FileEntityMapperService should detect this as VIDEO type.

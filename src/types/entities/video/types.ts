@@ -8,18 +8,19 @@
 import { z } from 'zod';
 
 // Imports optimizados usando tipos WithStats
+import type { VideoStatistics } from './base';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
-import type { ConceptComplete } from '../concept';
+import type { ConceptWithStats } from '../concept';
 import type { GroupWithStats } from '../group';
 import type { NoteComplete } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemWithStats } from '../world-item';
 
 /**
  * 🎥 Enums para Video
@@ -208,6 +209,56 @@ export interface VideoFilters {
 }
 
 /**
+ * 🔗 Relaciones de Video
+ */
+export interface VideoRelations {
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemWithStats[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+}
+
+/**
+ * 🎥 Video completo con relaciones
+ */
+export interface VideoComplete extends VideoBase {
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemWithStats[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
  * 📄 Opciones de paginación
  */
 export interface VideoPaginationOptions {
@@ -220,7 +271,24 @@ export interface VideoPaginationOptions {
 /**
  * 🎥 Tipo completo para Video con relaciones y estadísticas
  */
-export interface VideoWithStats extends VideoBase, VideoRelations, VideoStatistics {}
+export interface VideoWithStats extends VideoBase {
+	stats: VideoStatistics;
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+	statistics?: VideoStatistics;
+}
 
 /**
  * 📊 Resultado paginado de búsqueda

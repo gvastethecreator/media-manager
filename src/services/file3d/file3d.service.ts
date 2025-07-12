@@ -332,3 +332,36 @@ export async function getFile3DCount(): Promise<number> {
 		throw createFile3DError('Error al obtener conteo de archivos 3D', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
+
+/**
+ * Busca un archivo 3D por su hash
+ * @param hash Hash del archivo 3D
+ * @returns Archivo 3D o null
+ */
+export async function getFile3DByHash(hash: string): Promise<File3DWithStats | null> {
+	try {
+		file3dLogger.info('🔍 Buscando archivo 3D por hash:', hash);
+
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select().from(file3Ds).where(eq(file3Ds.hash, hash)).limit(1);
+
+		if (result.length === 0) {
+			file3dLogger.info('Archivo 3D no encontrado por hash:', hash);
+			return null;
+		}
+
+		const rawFile3D = result[0];
+		// Transformar el campo isFavorite de number a boolean
+		const transformedFile3D = {
+			...rawFile3D,
+			isFavorite: Boolean(rawFile3D.isFavorite),
+		};
+
+		const file3D = fromDrizzleFile3D(transformedFile3D as any);
+		file3dLogger.info('✅ Archivo 3D encontrado por hash:', file3D.name);
+		return file3D;
+	} catch (error) {
+		file3dLogger.error('❌ Error al buscar archivo 3D por hash:', error);
+		throw createFile3DError('No se pudo buscar el archivo 3D por hash', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}

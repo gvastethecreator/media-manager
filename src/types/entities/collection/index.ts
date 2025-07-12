@@ -14,7 +14,6 @@
 
 // --- Tipos Canónicos ---
 export type { CollectionBase, CollectionEdition, CollectionStatistics, CollectionWithStats } from './base';
-
 // --- Enumeraciones ---
 export {
 	COLLECTION_CATEGORY_COLORS,
@@ -24,6 +23,15 @@ export {
 	CollectionRarity,
 	CollectionSortOption,
 } from './enums';
+// --- Tipos adicionales ---
+export type {
+	CollectionFilter,
+	CollectionFilters,
+	CollectionSortBy,
+	CollectionViewConfig,
+	CreateCollectionInput,
+	UpdateCollectionInput,
+} from './types';
 
 // --- Tipos de compatibilidad e interfaces ---
 import type { CollectionBase, CollectionWithStats } from './base';

@@ -82,6 +82,7 @@ export interface WildcardWithCounts extends WildcardBase {
  * debe usar en toda la UI y la lógica de negocio.
  */
 export interface WildcardWithStats extends WildcardBase {
+	entityType: 'wildcard';
 	statistics?: WildcardStatistics;
 	_count: {
 		tags: number;

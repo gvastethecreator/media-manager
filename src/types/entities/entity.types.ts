@@ -13,7 +13,21 @@ export interface EntityBase {
 
 export interface EntityStats {
 	imageCount?: number;
+	videoCount?: number;
+	albumCount?: number;
+	collectionCount?: number;
+	tagCount?: number;
+	characterCount?: number;
+	placeCount?: number;
+	worldItemCount?: number;
+	conceptCount?: number;
+	promptCount?: number;
+	noteCount?: number;
+	wildcardCount?: number;
+	propertyCount?: number;
+	groupCount?: number;
 	totalItems?: number;
+	totalAssociations?: number;
 	lastUpdated?: Date;
 }
 

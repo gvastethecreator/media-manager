@@ -2,6 +2,7 @@ import express from 'express';
 import { getDatabaseInfo } from '@/lib/drizzle';
 import {
 	createDefaultSettingsData,
+	getNavigationData,
 	getProfileSettings,
 	getSystemSettings,
 	getSystemStats,
@@ -13,21 +14,21 @@ import {
 	updateProfileSettings,
 	updateSystemSettings,
 } from '../services/system.service';
-import { getNavigationDataSimple as getNavigationData } from '../services/system-simple.service';
 
 const router = express.Router();
 
 // GET /api/system/navigation - Obtener datos de navegación
-router.get('/navigation', async (_req, res) => {
+router.get('/navigation', async (req, res) => {
 	try {
+		console.log('🧭 [SystemRouter] Iniciando obtención de datos de navegación');
+		console.log('🔍 [DEBUG] Petición recibida en /api/system/navigation');
 		const navigationData = await getNavigationData();
+		console.log('✅ [SystemRouter] Datos de navegación obtenidos exitosamente');
+		console.log('📊 [DEBUG] Folders encontradas:', navigationData.folders.length);
 		res.json(navigationData);
 	} catch (error) {
-		console.error('Error obteniendo datos de navegación:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: 'No se pudieron obtener los datos de navegación',
-		});
+		console.error('❌ [SystemRouter] Error al obtener datos de navegación:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 

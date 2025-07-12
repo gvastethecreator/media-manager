@@ -18,6 +18,7 @@ export {
 export type {
 	CharacterBase,
 	CharacterCreateInput,
+	CharacterFilterItem,
 	CharacterFilters,
 	CharacterRelationship,
 	CharacterSearchOptions,

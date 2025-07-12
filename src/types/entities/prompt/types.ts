@@ -4,19 +4,19 @@
  * @description Define las estructuras de datos, inputs y tipos para la entidad Prompt.
  */
 
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
-import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
+import type { ConceptWithStats } from '../concept';
+import type { GroupWithStats } from '../group';
+import type { ImageWithStats } from '../image';
+import type { NoteWithStats } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PropertyComplete } from '../property';
-import type { TagWithStats as TagComplete } from '../tag/types';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { TagWithStats } from '../tag';
+import type { VideoWithStats } from '../video';
+import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemWithStats } from '../world-item';
 
 /**
  * 🎯 Tipo base canónico para Prompt
@@ -53,19 +53,19 @@ export interface PromptBase {
  */
 export interface PromptComplete extends PromptBase {
 	// Relaciones
-	images?: ImageComplete[];
-	videos?: VideoComplete[];
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tagEntities?: TagComplete[];
-	characters?: CharacterComplete[];
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tagEntities?: TagWithStats[];
+	characters?: CharacterWithStats[];
 	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
+	worldItems?: WorldItemWithStats[];
+	concepts?: ConceptWithStats[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
 	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
+	groups?: GroupWithStats[];
 
 	// Conteos
 	_count?: {
@@ -141,6 +141,7 @@ export interface PromptSearchOptions {
 export interface PromptStats {
 	imageCount: number;
 	videoCount: number;
+	totalVideos?: number; // Para compatibilidad con prompt-card.tsx
 	tagCount: number;
 	noteCount: number;
 	totalContentItems: number;
@@ -162,6 +163,7 @@ export interface PromptStats {
  * 🎯 Prompt con estadísticas calculadas
  */
 export interface PromptWithStats extends PromptBase {
+	entityType: 'prompt';
 	// Contadores de relaciones
 	_count?: {
 		images?: number;
@@ -178,5 +180,6 @@ export interface PromptWithStats extends PromptBase {
 		properties?: number;
 		groups?: number;
 	};
+	tags?: any; // Para compatibilidad con prompt-card.tsx
 	stats?: PromptStats;
 }

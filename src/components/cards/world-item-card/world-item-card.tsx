@@ -87,25 +87,25 @@ export function WorldItemCard({
 		attributes,
 		effects,
 		requirements,
-		stats: rawStats,
+		_stats,
 		properties,
 		featuredImage,
 	} = worldItem;
 
 	// Calcular valores derivados
-	const imagesCount = worldItem._count?.images || 0;
-	const videosCount = worldItem._count?.videos || 0;
-	const albumsCount = worldItem._count?.albums || 0;
-	const collectionsCount = worldItem._count?.collections || 0;
-	const tagsCount = worldItem._count?.tags || 0;
-	const charactersCount = worldItem._count?.characters || 0;
-	const placesCount = worldItem._count?.places || 0;
-	const conceptsCount = worldItem._count?.concepts || 0;
-	const promptsCount = worldItem._count?.prompts || 0;
-	const notesCount = worldItem._count?.notes || 0;
-	const wildcardsCount = worldItem._count?.wildcards || 0;
-	const propertiesCount = worldItem._count?.properties || 0;
-	const groupsCount = worldItem._count?.groups || 0;
+	const imagesCount = _stats?.totalImages || worldItem._count?.images || 0;
+	const videosCount = _stats?.totalVideos || worldItem._count?.videos || 0;
+	const albumsCount = _stats?.totalAlbums || worldItem._count?.albums || 0;
+	const collectionsCount = _stats?.totalCollections || worldItem._count?.collections || 0;
+	const tagsCount = _stats?.totalTags || worldItem._count?.tags || 0;
+	const charactersCount = _stats?.totalCharacters || worldItem._count?.characters || 0;
+	const placesCount = _stats?.totalPlaces || worldItem._count?.places || 0;
+	const conceptsCount = _stats?.totalConcepts || worldItem._count?.concepts || 0;
+	const promptsCount = _stats?.totalPrompts || worldItem._count?.prompts || 0;
+	const notesCount = _stats?.totalNotes || worldItem._count?.notes || 0;
+	const wildcardsCount = _stats?.totalWildcards || worldItem._count?.wildcards || 0;
+	const propertiesCount = _stats?.totalProperties || worldItem._count?.properties || 0;
+	const groupsCount = _stats?.totalGroups || worldItem._count?.groups || 0;
 
 	// Calcular total de relaciones para efectos visuales
 	const _totalRelations =
@@ -376,11 +376,11 @@ export function WorldItemCard({
 				{/* Contenido principal */}
 				<WorldItemCardContent
 					description={description}
-					properties={parsedProperties}
-					requirements={parsedRequirements}
-					attributes={parsedAttributes}
-					effects={parsedEffects}
-					stats={parsedStats}
+					properties={properties}
+					requirements={requirements}
+					attributes={attributes}
+					effects={effects}
+					stats={_stats}
 					origin={origin}
 					rarity={rarity}
 					primaryColor={primaryColor}
@@ -388,15 +388,17 @@ export function WorldItemCard({
 
 				{/* Pie de la tarjeta */}
 				<WorldItemCardFooter
-					createdAt={createdAt}
-					updatedAt={updatedAt}
-					imagesCount={imagesCount}
-					isFavorite={isFavorite}
-					category={category}
-					type={type}
-					primaryColor={primaryColor}
-					secondaryColor={secondaryColor}
-				/>
+						createdAt={createdAt}
+						updatedAt={updatedAt}
+						imagesCount={imagesCount}
+						videosCount={videosCount}
+						totalRelations={_totalRelations}
+						isFavorite={isFavorite}
+						category={category}
+						type={type}
+						primaryColor={primaryColor}
+						secondaryColor={secondaryColor}
+					/>
 			</div>
 		</motion.article>
 	);

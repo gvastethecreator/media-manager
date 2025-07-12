@@ -14,6 +14,8 @@ interface CardContainerProps extends React.HTMLAttributes<HTMLDivElement> {
 	style?: React.CSSProperties;
 	/** Contenido del componente */
 	children: React.ReactNode;
+	/** Si la tarjeta está siendo hovereada */
+	isHovered?: boolean;
 }
 
 /**

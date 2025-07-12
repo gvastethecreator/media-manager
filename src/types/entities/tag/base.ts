@@ -69,6 +69,19 @@ export interface TagWithCounts extends TagBase {
  * 📊 Estadísticas calculadas para un Tag.
  */
 export interface TagStatistics {
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	collectionCount: number;
+	characterCount: number;
+	placeCount: number;
+	worldItemCount: number;
+	conceptCount: number;
+	promptCount: number;
+	noteCount: number;
+	wildcardCount: number;
+	propertyCount: number;
+	groupCount: number;
 	totalRelations: number; // Suma de todas las relaciones
 	usageDiversity: number; // Cuán distribuido está el uso del tag entre diferentes tipos de entidades
 	popularity: number; // Un score de popularidad general
@@ -80,6 +93,7 @@ export interface TagStatistics {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface TagWithStats extends TagBase {
+	entityType: 'tag';
 	stats: TagStatistics;
 	_count: {
 		images: number;

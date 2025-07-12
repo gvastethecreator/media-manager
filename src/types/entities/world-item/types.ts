@@ -6,19 +6,19 @@
  * @updated 2025-07-01
  */
 
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
-import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
+import type { ConceptWithStats } from '../concept';
+import type { GroupWithStats } from '../group';
+import type { ImageWithStats } from '../image';
+import type { NoteWithStats } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagWithStats as TagComplete } from '../tag/types';
+import type { TagWithStats } from '../tag/types';
 import type { VideoWithStats } from '../video';
-import type { WildcardComplete } from '../wildcard';
+import type { WildcardWithStats } from '../wildcard';
 
 // --- TIPOS BASE Y RELACIONES ---
 
@@ -50,19 +50,19 @@ export interface WorldItemBase {
 }
 
 export interface WorldItemRelations {
-	images?: ImageComplete[];
+	images?: ImageWithStats[];
 	videos?: VideoWithStats[];
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
 	places?: PlaceComplete[];
-	concepts?: ConceptComplete[];
+	concepts?: ConceptWithStats[];
 	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
 	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
+	groups?: GroupWithStats[];
 }
 
 export interface WorldItemCounts {
@@ -107,8 +107,72 @@ export interface WorldItemStatistics {
 	lastUsed: Date | null;
 }
 
-export interface WorldItemWithStats extends WorldItemBase, WorldItemRelations {
+export interface WorldItemWithStats extends Omit<WorldItemBase, 'totalImages' | 'totalVideos'> {
+	entityType: 'world-item';
 	_stats: WorldItemStatistics;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+	// Relaciones opcionales
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptComplete[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+}
+
+/**
+ * 🌍 WorldItem completo con relaciones
+ */
+export interface WorldItemComplete extends WorldItemBase {
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptComplete[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---

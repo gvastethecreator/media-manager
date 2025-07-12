@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/context-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { FileItem } from '@/lib/contexts/file-context';
 import type { ContextMenuAction } from '../types';
 import { SubmenuSearch } from './submenu-search';
 
@@ -28,8 +28,8 @@ interface EnhancedSubmenuProps {
 	icon: React.ReactNode;
 	items: EnhancedSubmenuItem[];
 	isLoading: boolean;
-	file: EntityWithStats;
-	onAction: (action: ContextMenuAction, file: EntityWithStats, data?: Record<string, unknown>) => void;
+	file: FileItem;
+	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 	actionType: ContextMenuAction;
 	createActionType: ContextMenuAction;
 	onOpenChange?: (isOpen: boolean) => void;

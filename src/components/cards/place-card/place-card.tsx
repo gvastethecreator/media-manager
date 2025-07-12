@@ -80,7 +80,7 @@ export function PlaceCard({
 		region = 'desconocido',
 		type = 'desconocido',
 		climate = 'templado',
-		population = 0,
+		population: rawPopulation = 0, // Renombrar para evitar conflicto
 		government = 'desconocido',
 		createdAt,
 		updatedAt,
@@ -91,10 +91,22 @@ export function PlaceCard({
 		metadata,
 	} = place;
 
+	// Asegurar que population sea un número
+	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
+
 	// Preparar los medios para el componente de galería
 	const cardMedia = useMemo(() => {
-		return recentMediaData || [];
+		return (recentMediaData || []).map((media) => ({
+			id: media.id,
+			name: media.name,
+			thumbnailUrl: media.thumbnailUrl,
+			url: media.url,
+			isVideo: media.type === 'video',
+		}));
 	}, [recentMediaData]);
+
+	// Asegurar que population sea un número
+	const numericPopulation = typeof population === 'string' ? Number.parseInt(population, 10) : population;
 
 	// Calcular colores para la tarjeta TCG
 	const primaryColor = color || '#10b981';

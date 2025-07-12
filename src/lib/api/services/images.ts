@@ -1,4 +1,5 @@
 import { apiClient } from '../client';
+import type { TagWithStats } from '@/types/entities/tag/base';
 
 export interface ImageCardData {
 	id: string;

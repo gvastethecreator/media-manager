@@ -2,11 +2,19 @@ import { motion } from 'motion/react';
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
+interface CardMediaItem {
+	id: string;
+	name?: string | null;
+	thumbnailUrl: string;
+	url?: string;
+	isVideo?: boolean;
+}
+
 interface PlaceCardImagesProps {
 	/** Imágenes a mostrar (rutas) */
-	images?: string[];
+	images?: CardMediaItem[];
 	/** URL de la imagen destacada */
-	mainImage?: string;
+	mainImage?: CardMediaItem;
 	/** Color primario para estilizado */
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */

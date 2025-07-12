@@ -3,7 +3,7 @@
  * @module components/cards/character-card/character-card-adapter
  */
 
-import type { CharacterStatistics, CharacterWithStats } from '@/types/entities/character';
+import type { CharacterStats, CharacterWithStats } from '@/types/entities/character';
 import type { CharacterCardData } from './character-card.types';
 
 /**
@@ -36,14 +36,14 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		recentImages: [],
 		recentVideos: [],
 		totalSize: character.statistics?.totalAssociations ?? 0,
-		stats: safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats),
-		parsedRelationships: safeJsonParse(character.relationships, {}),
-		parsedGoals: safeJsonParse(character.goals, {}),
-		parsedFears: safeJsonParse(character.fears, {}),
-		parsedBeliefs: safeJsonParse(character.beliefs, {}),
-		parsedPersonality: safeJsonParse(character.personality, {}),
-		parsedSkills: safeJsonParse(character.skills, {}),
-		parsedAbilities: safeJsonParse(character.abilities, {}),
+		stats: typeof character.stats === 'string' ? safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats) : (character.stats ?? {} as CharacterStats),
+		parsedRelationships: safeJsonParse<Record<string, any>>(character.relationships, {}),
+		parsedGoals: safeJsonParse<Record<string, any>>(character.goals, {}),
+		parsedFears: safeJsonParse<Record<string, any>>(character.fears, {}),
+		parsedBeliefs: safeJsonParse<Record<string, any>>(character.beliefs, {}),
+		parsedPersonality: safeJsonParse<Record<string, any>>(character.personality, {}),
+		parsedSkills: safeJsonParse<Record<string, any>>(character.skills, {}),
+		parsedAbilities: safeJsonParse<Record<string, any>>(character.abilities, {}),
 		metadata: {
 			power: character.statistics?.powerLevel ?? level * 10,
 			rarityLevel: rarityMap[character.statistics?.rarityLevel ?? 'common'] ?? 'Common',

@@ -466,3 +466,29 @@ export async function getAudioGenreStats() {
 		);
 	}
 }
+
+/**
+ * Busca un audio por su hash
+ * @param hash Hash del audio
+ * @returns Audio o null
+ */
+export async function getAudioByHash(hash: string): Promise<AudioWithStats | null> {
+	try {
+		audioLogger.info('🔍 Buscando audio por hash:', hash);
+
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select().from(audios).where(eq(audios.hash, hash)).limit(1);
+
+		if (result.length === 0) {
+			audioLogger.info('Audio no encontrado por hash:', hash);
+			return null;
+		}
+
+		const audio = result[0];
+		audioLogger.info('✅ Audio encontrado por hash:', audio.name);
+		return audio as AudioWithStats;
+	} catch (error) {
+		audioLogger.error('❌ Error al buscar audio por hash:', error);
+		throw createAudioError('No se pudo buscar el audio por hash', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}

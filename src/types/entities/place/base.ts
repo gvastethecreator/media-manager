@@ -71,9 +71,25 @@ export interface PlaceStatistics {
  * Este es el tipo que se debe usar en toda la UI y la lógica de negocio.
  */
 export type PlaceWithStats = PlaceBase & {
+	entityType: 'place';
 	/** Estadísticas calculadas de la entidad */
 	_stats: PlaceStatistics;
 	/** Conteos de relaciones desde Drizzle */
+	_count?: {
+		images?: number;
+		videos?: number;
+		tags?: number;
+		notes?: number;
+		characters?: number;
+		collections?: number;
+		concepts?: number;
+		albums?: number;
+		worldItems?: number;
+		prompts?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 	images?: number;
 	videos?: number;
 	tags?: number;

@@ -188,8 +188,10 @@ export function CollectionCardContent({
 								{editionsList.slice(0, 2).map((edition: CollectionEdition) => (
 									<li key={edition.name} className="flex justify-between text-xs text-muted-foreground">
 										<span className="font-medium truncate">{edition.name}</span>
-										{edition.year && (
-											<span className="ml-1 text-muted-foreground whitespace-nowrap">({edition.year})</span>
+										{edition.releaseDate && (
+											<span className="ml-1 text-muted-foreground whitespace-nowrap">
+												({new Date(edition.releaseDate).getFullYear()})
+											</span>
 										)}
 									</li>
 								))}

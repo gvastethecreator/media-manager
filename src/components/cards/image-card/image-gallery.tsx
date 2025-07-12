@@ -11,6 +11,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { ImageWithStats } from '@/types/entities/image/base';
+import type { TagWithStats } from '@/types/entities/tag/base';
+import type { ImageCardData } from '@/lib/api/services/images';
 import { ImageCardImproved } from './image-card-improved';
 
 interface ImageGalleryProps {
@@ -22,7 +24,7 @@ interface ImageGalleryProps {
 	selectable?: boolean;
 	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg' | 'gallery';
 	defaultLayout?: 'grid' | 'grid-dense' | 'list';
-	onImageClick?: (image: ImageWithStats) => void;
+	onImageClick?: (image: ImageCardData) => void;
 	onSelectionChange?: (selectedImages: string[]) => void;
 	aspectRatio?: 'square' | 'auto' | 'video' | string;
 	showControls?: boolean;
@@ -133,7 +135,7 @@ export function ImageGallery({
 
 	// Manejar selección de imagen
 	const handleImageSelect = useCallback(
-		(image: ImageWithStats) => {
+		(image: ImageCardData) => {
 			if (!selectable) return;
 
 			setSelectedImages((prev) => {
@@ -153,7 +155,7 @@ export function ImageGallery({
 
 	// Manejar clic en imagen
 	const handleImageClick = useCallback(
-		(image: ImageWithStats) => {
+		(image: ImageCardData) => {
 			if (selectable) {
 				handleImageSelect(image);
 			} else if (onImageClick) {
@@ -336,7 +338,7 @@ export function ImageGallery({
 									imageId={image.id}
 									variant={variant}
 									aspectRatio={layout === 'list' ? 'auto' : aspectRatio}
-									onClick={() => handleImageClick(image)}
+									onClick={onImageClick ? handleImageClick : undefined}
 									isSelected={isSelected}
 									className={layout === 'list' ? 'flex flex-row items-center h-20' : undefined}
 									priority={index < 8}

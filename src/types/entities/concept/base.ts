@@ -43,9 +43,30 @@ export interface ConceptStatistics {
 }
 
 /**
+ * 📊 Alias para compatibilidad - ConceptStats apunta a ConceptStatistics
+ */
+export type ConceptStats = ConceptStatistics;
+
+/**
  * ✨ Modelo extendido de Concept con estadísticas.
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface ConceptWithStats extends ConceptBase {
+	entityType: 'concept';
 	stats: ConceptStatistics;
+	_count: {
+		images: number;
+		videos: number;
+		prompts: number;
+		notes: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		properties: number;
+		wildcards: number;
+		groups: number;
+		albums: number;
+		collections: number;
+		tags: number;
+	};
 }
