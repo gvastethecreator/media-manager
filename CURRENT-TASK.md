@@ -8,44 +8,44 @@ Resolve all missing export errors that are causing TypeScript compilation failur
 ### Critical Missing Exports Found
 
 #### Statistics/Stats Types
-- [ ] `CharacterStatistics` → should be `CharacterStats`
-- [ ] `ConceptStatistics` → should be `ConceptStats` 
-- [ ] `ImageStatistics` → should be `ImageStats`
-- [ ] `VideoStatistics` → should be `VideoStats`
-- [ ] `FavoriteStatistics` → should be `FavoriteStats`
+- [x] `CharacterStatistics` → should be `CharacterStats`
+- [x] `ConceptStatistics` → should be `ConceptStats`
+- [x] `ImageStatistics` → should be `ImageStats`
+- [x] `VideoStatistics` → should be `VideoStats`
+- [x] `FavoriteStatistics` → should be `FavoriteStats`
 
 #### WithStats Types
-- [ ] `PromptWithStats` (multiple files)
-- [ ] `ConceptWithStats`
-- [ ] `NoteWithStats`
-- [ ] `CharacterWithStats`
-- [ ] `FavoriteWithStats`
-- [ ] `WorldItemWithStats`
-- [ ] `WildcardWithCounts` → should be `WildcardWithStats`
+- [x] `PromptWithStats` (multiple files)
+- [x] `ConceptWithStats`
+- [x] `NoteWithStats`
+- [x] `CharacterWithStats`
+- [x] `FavoriteWithStats`
+- [x] `WorldItemWithStats`
+- [x] `WildcardWithCounts` → should be `WildcardWithStats`
 
 #### Component/Service Exports
-- [ ] `BaseContentView` (multiple content views)
-- [ ] `DetailsPanel` → should be `DetailsPanelV2`
-- [ ] `ViewOptionsStore` → should be `useViewOptionsStore`
-- [ ] `SystemStats` → should be `useSystemStats`
-- [ ] `NavigationData` → should be `useNavigationData`
-- [ ] `AppSettings` → should be `Settings`
+- [x] `BaseContentView` (multiple content views)
+- [x] `DetailsPanel` → should be `DetailsPanelV2`
+- [x] `ViewOptionsStore` → should be `useViewOptionsStore`
+- [x] `SystemStats` → should be `useSystemStats`
+- [x] `NavigationData` → should be `useNavigationData`
+- [x] `AppSettings` → should be `Settings`
 
 #### Entity-Specific Issues
 - [ ] `CharacterFilter` → should be `CharacterFilters`
-- [ ] `CharacterFilterItem` → should be `CharacterFilters`
-- [ ] `CharacterRelations` → should be `CharacterRelationship`
-- [ ] `CollectionSortBy` → should be `CollectionRarity`
-- [ ] `UploadedImageType` → should be `UploadedFileType`
-- [ ] `WorldItemUpdateInput` → should be `WorldItemUpdateData`
-- [ ] `WorldItemStats` → should be `WorldItemWithStats`
+- [x] `CharacterFilterItem` → should be `CharacterFilters`
+- [x] `CharacterRelations` → should be `CharacterRelationship`
+- [x] `CollectionSortBy` → should be `CollectionRarity`
+- [x] `UploadedImageType` → should be `UploadedFileType`
+- [x] `WorldItemUpdateInput` → should be `WorldItemUpdateData`
+- [x] `WorldItemStats` → should be `WorldItemWithStats`
 
 ### Steps
 1. [x] Search for all missing export errors
-2. [ ] Fix Statistics/Stats type exports
-3. [ ] Fix WithStats type exports
-4. [ ] Fix component/service exports
-5. [ ] Fix entity-specific export issues
+2. [x] Fix Statistics/Stats type exports
+3. [x] Fix WithStats type exports
+4. [x] Fix component/service exports
+5. [ ] Fix entity-specific export issues (pending CharacterFilter)
 6. [ ] Run type check to verify all fixes
 7. [ ] Update task status to completed
 

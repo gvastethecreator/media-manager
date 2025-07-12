@@ -22,10 +22,11 @@ export {
 // --- Tipos Canónicos ---
 // Tipos base desde base.ts
 export type {
-	ConceptBase,
-	ConceptStatistics,
-	ConceptStats,
-	ConceptWithStats,
+        ConceptBase,
+        ConceptComplete,
+        ConceptStatistics,
+        ConceptStats,
+        ConceptWithStats,
 } from './base';
 
 // Tipos adicionales desde types.ts

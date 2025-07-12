@@ -23,6 +23,17 @@ export type ConceptBase = {
 };
 
 /**
+ * 💾 Representación completa de un Concepto con conteos opcionales.
+ */
+export interface ConceptComplete extends ConceptBase {
+        _count?: {
+                images?: number;
+                notes?: number;
+                tags?: number;
+        };
+}
+
+/**
  * 📊 Estadísticas calculadas y derivadas para un Concept.
  * Principalmente, los conteos de las relaciones.
  */

@@ -1,6 +1,6 @@
 import { AlertCircle, Clock } from 'lucide-react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/lib/api/stats';
+import { useStats } from '@/lib/hooks/system/use-stats';
 import { Activity } from './activity';
 
 export function RecentActivity() {

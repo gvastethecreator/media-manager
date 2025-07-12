@@ -85,6 +85,7 @@
     "exifreader": "^4.31.1",
     "express": "^5.1.0",
     "express-jwt": "^8.5.1",
+    "framer-motion": "^12.23.3",
     "helmet": "^8.1.0",
     "html2canvas": "^1.4.1",
     "immer": "^10.1.1",

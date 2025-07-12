@@ -1,3 +1,3 @@
-export * from './base-content-view';
+export { default as BaseContentView } from './base-content-view';
 export * from './content-view-provider';
 export * from './types';

@@ -97,3 +97,4 @@ export function formatDuration(milliseconds: number): string {
 	}
 	return `${seconds}s`;
 }
+export { truncateText } from './format.utils';

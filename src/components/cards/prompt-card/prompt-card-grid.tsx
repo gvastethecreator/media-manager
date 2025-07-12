@@ -128,15 +128,15 @@ export function PromptCardGrid({
 						<p className="text-muted-foreground">No se encontraron prompts</p>
 					</div>
 				) : (
-					prompts.map((prompt) => (
-						<MemoizedPromptCard
-							key={prompt.id}
-							prompt={prompt}
-							tcgMode={tcgMode}
-							compact={compact}
-							onClick={onPromptClick ? () => onPromptClick(prompt) : undefined}
-							isSelected={selectedPromptId === prompt.id}
-						/>
+                                        prompts.map((prompt) => (
+                                                <PromptCard
+                                                        key={prompt.id}
+                                                        prompt={prompt}
+                                                        tcgMode={tcgMode}
+                                                        compact={compact}
+                                                        onClick={onPromptClick ? () => onPromptClick(prompt) : undefined}
+                                                        isSelected={selectedPromptId === prompt.id}
+                                                />
 					))
 				)}
 			</div>

@@ -1,0 +1,7 @@
+Comando: bunx eslint .
+Fecha: 2025-07-12T18:17:04.962Z
+Directorio: /workspace/image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+sh: 1: bunx: not found

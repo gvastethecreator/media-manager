@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSystemInit } from '@/lib/api/system';
+import { useInitServer } from '@/lib/api/system';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger específico para este componente
@@ -14,7 +14,7 @@ const logger = clientLogger.withContext('ServerInitializer');
  */
 export function ServerInitializer() {
 	// Usar React Query mutation en lugar de server action
-	const initServerMutation = useSystemInit();
+        const initServerMutation = useInitServer();
 
 	useEffect(() => {
 		// Función para inicializar el servidor
