@@ -183,3 +183,17 @@ export async function getVideoStats(): Promise<VideoStats> {
 	}
 	return response.json();
 }
+
+/**
+ * Busca un video por su hash
+ * @param hash Hash del video
+ * @returns Video con estadísticas o null
+ */
+export async function getVideoByHash(hash: string): Promise<VideoWithStats | null> {
+	const response = await fetch(`/api/videos/hash/${hash}`);
+	if (!response.ok) {
+		if (response.status === 404) return null;
+		throw new Error('No se pudo obtener el video por hash.');
+	}
+	return response.json();
+}

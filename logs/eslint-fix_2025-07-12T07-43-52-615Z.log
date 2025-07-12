@@ -1,0 +1,22 @@
+Comando: bunx eslint . --fix
+Fecha: 2025-07-12T07:43:52.616Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+
+Oops! Something went wrong! :(
+
+ESLint: 9.31.0
+
+ConfigError: Config (unnamed): Key "plugins": Key "react-hooks-extra": Expected an object.
+    at rethrowConfigError (D:\DEV\image-manager\node_modules\@eslint\config-array\dist\cjs\index.cjs:340:8)
+    at D:\DEV\image-manager\node_modules\@eslint\config-array\dist\cjs\index.cjs:1400:5
+    at Array.reduce (<anonymous>)
+    at FlatConfigArray.getConfigWithStatus (D:\DEV\image-manager\node_modules\@eslint\config-array\dist\cjs\index.cjs:1393:43)
+    at FlatConfigArray.getConfig (D:\DEV\image-manager\node_modules\@eslint\config-array\dist\cjs\index.cjs:1422:15)
+    at entryFilter (D:\DEV\image-manager\node_modules\eslint\lib\eslint\eslint-helpers.js:290:27)
+    at async NodeHfs.<anonymous> (file:///D:/DEV/image-manager/node_modules/@humanfs/core/src/hfs.js:574:24)
+    at async NodeHfs.<anonymous> (file:///D:/DEV/image-manager/node_modules/@humanfs/core/src/hfs.js:604:6)
+    at async NodeHfs.<anonymous> (file:///D:/DEV/image-manager/node_modules/@humanfs/core/src/hfs.js:604:6)
+    at async NodeHfs.<anonymous> (file:///D:/DEV/image-manager/node_modules/@humanfs/core/src/hfs.js:604:6)

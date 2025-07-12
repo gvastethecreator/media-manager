@@ -15,7 +15,9 @@ interface VideoCardContentProps {
  */
 export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoCardContentProps) {
 	const { description } = video;
-	const { qualityScore, technicalGrade, autoTags, aspectRatio, bitrate, frameRate, hasSubtitles } = video;
+	const { qualityScore, technicalGrade, aspectRatio, bitrate, frameRate, hasSubtitles } = video.stats;
+	// autoTags no está definido en VideoStatistics, usar un array vacío por ahora
+	const autoTags: TagWithStats[] = [];
 
 	return (
 		<div className="flex-1 p-3 space-y-3">

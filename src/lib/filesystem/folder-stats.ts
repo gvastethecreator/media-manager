@@ -1,14 +1,48 @@
+import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
+import path from 'path';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema/index';
+import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
+import type { EntityCreationStats } from '@/types/file-entity-mapper';
+import type { DirectoryInfo } from './folder-scanner';
 import { scanFolder } from './folder-scanner';
+import { type FolderSyncResult, syncFoldersWithFileSystem } from './folder-sync';
 
 /**
- * 🔧 FIXED: Actualiza estadísticas usando el mismo criterio que el reindexado
- * Ahora usa scanFolder() para obtener totalFiles y totalSize reales del sistema de archivos
- * en lugar de contar solo las imágenes en la BD
+ * 🔧 ENHANCED: Actualiza estadísticas, crea entidades automáticamente y procesa subcarpetas
+ * Ahora usa scanFolder() para obtener totalFiles y totalSize reales del sistema de archivos,
+ * crea entidades correspondientes para cada archivo encontrado y agrega subcarpetas a la BD
+ * 🆕 NUEVA FUNCIONALIDAD: Sincronización automática de carpetas con el sistema de archivos
  */
-export async function updateFolderStats(folderId: string) {
+export async function updateFolderStats(
+	folderId: string,
+	processedPaths: Set<string> = new Set(),
+	maxDepth = 10,
+	currentDepth = 0,
+	enableSync = true
+): Promise<EntityCreationStats & { syncResult?: FolderSyncResult }> {
+	// 🆕 SINCRONIZACIÓN AUTOMÁTICA: Ejecutar antes del indexado si está habilitada
+	let syncResult: FolderSyncResult | undefined;
+	if (enableSync && currentDepth === 0) {
+		try {
+			console.log('🔄 Ejecutando sincronización automática de carpetas...');
+			syncResult = await syncFoldersWithFileSystem({
+				maxDepth,
+				includeHidden: false,
+				forceSync: true,
+			});
+			console.log('✅ Sincronización completada:', {
+				added: syncResult.added.length,
+				removed: syncResult.removed.length,
+				errors: syncResult.errors.length,
+			});
+		} catch (error) {
+			console.warn('⚠️ Error en sincronización automática:', error);
+			// Continuar con el indexado aunque falle la sincronización
+		}
+	}
+
 	// Obtener la carpeta para acceder a su path
 	const folder = await db.query.folders.findFirst({
 		where: eq(folders.id, folderId),
@@ -26,6 +60,26 @@ export async function updateFolderStats(folderId: string) {
 		includeHidden: false,
 	});
 
+	// Evitar procesamiento duplicado y bucles infinitos
+	if (processedPaths.has(folder.path) || currentDepth >= maxDepth) {
+		return { created: 0, updated: 0, errors: 0 };
+	}
+	processedPaths.add(folder.path);
+
+	// 🎯 NUEVA FUNCIONALIDAD: Crear entidades automáticamente
+	const fileEntityMapper = FileEntityMapperService.getInstance();
+	const filePaths = scanResult.files.map((file) => file.path);
+	const entityStats = await fileEntityMapper.processFiles(filePaths, folderId);
+
+	// 🆕 PROCESAR SUBCARPETAS: Crear carpetas para directorios encontrados
+	const subfolderStats = await processSubfolders(
+		scanResult.directories,
+		folderId,
+		processedPaths,
+		maxDepth,
+		currentDepth + 1
+	);
+
 	// Actualizar con los mismos valores que usa el reindexado
 	await db
 		.update(folders)
@@ -35,6 +89,16 @@ export async function updateFolderStats(folderId: string) {
 			lastIndexed: new Date(),
 		})
 		.where(eq(folders.id, folderId));
+
+	// Combinar estadísticas de archivos y subcarpetas
+	const result = {
+		created: entityStats.created + subfolderStats.created,
+		updated: entityStats.updated + subfolderStats.updated,
+		errors: entityStats.errors + subfolderStats.errors,
+		...(syncResult && { syncResult }),
+	};
+
+	return result;
 }
 
 export async function getFolderStats(folderId: string) {
@@ -56,6 +120,66 @@ export async function getFolderStats(folderId: string) {
 		lastIndexed: folder?.lastIndexed,
 		imageCount: folder?.images.length || 0,
 	};
+}
+
+/**
+ * 🆕 Procesa subcarpetas encontradas durante el escaneo
+ * Crea nuevas carpetas en la BD para directorios que no existan y las indexa recursivamente
+ */
+async function processSubfolders(
+	directories: DirectoryInfo[],
+	parentFolderId: string,
+	processedPaths: Set<string>,
+	maxDepth: number,
+	currentDepth: number
+): Promise<EntityCreationStats> {
+	const totalStats: EntityCreationStats = { created: 0, updated: 0, errors: 0 };
+
+	for (const directory of directories) {
+		try {
+			// Verificar si ya existe una carpeta con esta ruta
+			const existingFolder = await db.query.folders.findFirst({
+				where: eq(folders.path, directory.path),
+				columns: { id: true },
+			});
+
+			let subfolderId: string;
+
+			if (existingFolder) {
+				// La carpeta ya existe, usar su ID
+				subfolderId = existingFolder.id;
+				totalStats.updated++;
+			} else {
+				// Crear nueva carpeta
+				subfolderId = randomUUID();
+				const folderName = path.basename(directory.path);
+
+				await db.insert(folders).values({
+					id: subfolderId,
+					name: folderName,
+					path: directory.path,
+					parentId: parentFolderId,
+					totalFiles: 0,
+					totalSize: 0,
+					lastIndexed: new Date(),
+					autoReindex: false,
+				});
+
+				totalStats.created++;
+			}
+
+			// Indexar recursivamente la subcarpeta
+			const subfolderStats = await updateFolderStats(subfolderId, processedPaths, maxDepth, currentDepth);
+			totalStats.created += subfolderStats.created;
+			totalStats.updated += subfolderStats.updated;
+			totalStats.errors += subfolderStats.errors;
+		} catch (error) {
+			console.error(`Error procesando subcarpeta ${directory.path}:`, error);
+			totalStats.errors++;
+		}
+	}
+
+	return totalStats;
 }
 
 export async function updateAllFolderStats() {

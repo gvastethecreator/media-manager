@@ -188,7 +188,7 @@ export function getCollectionStats(collections: CollectionWithStats[]) {
 		}
 
 		// Con imágenes (usar estadísticas pre-calculadas)
-		if (collection.stats?.totalImages && collection.stats.totalImages > 0) {
+		if (collection.stats?.imageCount && collection.stats.imageCount > 0) {
 			stats.withImages++;
 		}
 

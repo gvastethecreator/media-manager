@@ -16,9 +16,10 @@ import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { VideoWithStats } from '../video';
+import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemWithStats } from '../world-item';
+import { z } from 'zod';
 
 /**
  * 📝 Tipo base canónico para Note
@@ -27,12 +28,15 @@ export interface NoteBase {
 	id: string;
 	title: string;
 	content: string;
+	emoji?: string | null;
+	color?: string | null;
 	category: string;
 	priority: number;
 	status: string;
 	featuredImage: string | null;
 	isFavorite: boolean;
 	presetId: string | null;
+	tags?: any;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -258,7 +262,6 @@ export interface NoteStatistics {
 	propertyCount: number;
 	groupCount: number;
 	wordCount: number;
-	characterCount: number;
 	readingTime: number;
 	completionScore: number;
 	totalItems: number;
@@ -270,16 +273,16 @@ export interface NoteStatistics {
 export interface NoteComplete extends NoteBase {
 	// Relaciones
 	images?: ImageComplete[];
-	videos?: VideoComplete[];
+	videos?: VideoWithStats[];
 	albums?: AlbumWithStats[];
 	collections?: CollectionWithStats[];
 	tags?: TagWithStats[];
 	characters?: CharacterWithStats[];
 	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
+	worldItems?: WorldItemWithStats[];
+	concepts?: ConceptWithStats[];
 	prompts?: PromptComplete[];
-	wildcards?: WildcardComplete[];
+	wildcards?: WildcardWithStats[];
 	properties?: PropertyComplete[];
 	groups?: GroupWithStats[];
 
@@ -305,6 +308,7 @@ export interface NoteComplete extends NoteBase {
  * 📊 Note con estadísticas
  */
 export interface NoteWithStats extends NoteBase {
+	entityType: 'note';
 	statistics?: NoteStatistics;
 	_count?: {
 		images: number;
@@ -322,6 +326,23 @@ export interface NoteWithStats extends NoteBase {
 		groups: number;
 	};
 }
+
+// Esquema Zod para validación
+export const NoteSchema = z.object({
+	id: z.string(),
+	title: z.string(),
+	content: z.string().nullable(),
+	excerpt: z.string().nullable(),
+	category: z.string().nullable(),
+	status: z.string().nullable(),
+	priority: z.number().nullable(),
+	tags: z.string().nullable(),
+	isPublic: z.boolean(),
+	isFavorite: z.boolean(),
+	parentId: z.string().nullable(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
 // Tipos inferidos de Zod
 export type NoteValidated = z.infer<typeof NoteSchema>;

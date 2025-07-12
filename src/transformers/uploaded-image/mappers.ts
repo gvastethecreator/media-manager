@@ -50,3 +50,54 @@ export function mapUpdateInputToDrizzle(data: UploadedImageUpdateInput): Drizzle
 	// The update input is a partial, so we can map it directly.
 	return data;
 }
+
+/**
+ * Convierte un UploadedImageBase a UploadedImageExtended con dimensiones y estadísticas.
+ * @param uploadedImage - Datos base de la imagen subida
+ * @param dimensions - Dimensiones de la imagen (opcional)
+ * @param stats - Estadísticas de la imagen (opcional)
+ * @returns UploadedImageExtended
+ */
+export function toUploadedImageExtended(
+	uploadedImage: any,
+	dimensions?: { width: number; height: number },
+	stats?: any
+): any {
+	// Calcular dimensiones si no se proporcionan
+	const imageDimensions = dimensions || {
+		width: 800,
+		height: 600,
+		aspectRatio: 800 / 600,
+	};
+	
+	// Calcular estadísticas básicas si no se proporcionan
+	const imageStats = stats || {
+		totalViews: 0,
+		lastAccessed: new Date().toISOString(),
+		processingTime: 0,
+	};
+	
+	// Construir URL de la imagen
+	const imageUrl = `/uploads/${uploadedImage.name || uploadedImage.id}`;
+	const thumbnailUrl = `/uploads/thumbnails/${uploadedImage.name || uploadedImage.id}`;
+	
+	return {
+		...uploadedImage,
+		dimensions: {
+			...imageDimensions,
+			aspectRatio: imageDimensions.width / imageDimensions.height,
+		},
+		url: imageUrl,
+		thumbnailUrl,
+		stats: imageStats,
+	};
+}
+
+/**
+ * Convierte una lista de UploadedImageBase a UploadedImageExtended.
+ * @param uploadedImages - Lista de imágenes base
+ * @returns Lista de UploadedImageExtended
+ */
+export function toUploadedImageExtendedList(uploadedImages: any[]): any[] {
+	return uploadedImages.map(image => toUploadedImageExtended(image));
+}

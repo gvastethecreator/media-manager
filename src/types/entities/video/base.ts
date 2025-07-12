@@ -97,9 +97,16 @@ export interface VideoStatistics {
 }
 
 /**
+ * 📊 Alias para compatibilidad - VideoStats apunta a VideoStatistics
+ */
+export type VideoStats = VideoStatistics;
+
+/**
  * 🎥 Tipo enriquecido de Video que incluye estadísticas calculadas.
  * Este es el tipo canónico que debe usarse en la aplicación.
  */
 export interface VideoWithStats extends VideoBase {
+	entityType: 'video';
 	stats: VideoStatistics;
+	thumbnailUrl: string | null;
 }

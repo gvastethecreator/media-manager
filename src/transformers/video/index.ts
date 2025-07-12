@@ -8,4 +8,5 @@
  */
 
 export { toVideoWithStats } from './mappers';
-export { fromDrizzleVideo, type VideoComplete } from './transformer';
+export { fromDrizzleVideo } from './transformer';
+export type { VideoComplete } from '@/types/entities/video/types';

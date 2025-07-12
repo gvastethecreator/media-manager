@@ -257,6 +257,7 @@ class ImageService {
 
 			// Crear estadísticas iniciales
 			await db.insert(imageStats).values({
+				id: crypto.randomUUID(),
 				imageId: newImage.id,
 				views: 0,
 			});
@@ -734,6 +735,57 @@ class ImageService {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.DATABASE_ERROR,
 				message: 'Error al obtener estadísticas de miniaturas',
+				serviceName: SERVICE_NAME,
+			});
+		}
+	}
+
+	/**
+	 * Obtiene una imagen por su hash.
+	 * @param hash Hash de la imagen
+	 * @returns Imagen con estadísticas o null si no se encuentra
+	 */
+	async getImageByHash(hash: string): Promise<ImageWithStats | null> {
+		try {
+			imageLogger.info('🔍 Buscando imagen por hash:', hash);
+
+			// **MIGRACIÓN A DRIZZLE**
+			const result = await db.select().from(images).where(eq(images.hash, hash)).limit(1);
+
+			if (result.length === 0) {
+				imageLogger.info('Imagen no encontrada por hash:', hash);
+				return null;
+			}
+
+			const image = result[0];
+			imageLogger.info('✅ Imagen encontrada por hash:', image.name);
+
+			// Construir imagen con estadísticas
+			const imageWithStats: ImageWithStats = {
+				...image,
+				isFavorite: Boolean(image.isFavorite),
+				// TODO: Implementar lógica para obtener conteos reales
+				_count: {
+					tags: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					concepts: 0,
+					prompts: 0,
+					notes: 0,
+					wilcards: 0,
+					properties: 0,
+					groups: 0,
+				},
+			};
+
+			return imageWithStats;
+		} catch (error) {
+			imageLogger.error('❌ Error al buscar imagen por hash:', error);
+			throw toServiceError(error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: 'Error al buscar imagen por hash',
+				context: { hash },
 				serviceName: SERVICE_NAME,
 			});
 		}

@@ -14,19 +14,19 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	const { data: conceptCounts } = useConceptCounts(conceptId);
 
 	// Calcular valores derivados
-	const imagesCount = conceptCounts?.images || 0;
-	const videosCount = concept?.videos?.length || 0;
-	const promptsCount = concept?.prompts?.length || 0;
-	const notesCount = concept?.notes?.length || 0;
-	const charactersCount = concept?.characters?.length || 0;
-	const placesCount = concept?.places?.length || 0;
-	const worldItemsCount = concept?.worldItems?.length || 0;
-	const propertiesCount = concept?.properties?.length || 0;
-	const wildcardsCount = concept?.wildcards?.length || 0;
-	const groupsCount = concept?.groups?.length || 0;
-	const albumsCount = concept?.albums?.length || 0;
-	const collectionsCount = concept?.collections?.length || 0;
-	const tagsCount = conceptCounts?.tags || 0;
+	const imagesCount = conceptCounts?.images || concept?.stats?.imageCount || concept?._count?.images || 0;
+	const videosCount = concept?.stats?.videoCount || concept?._count?.videos || 0;
+	const promptsCount = concept?.stats?.promptCount || concept?._count?.prompts || 0;
+	const notesCount = concept?.stats?.noteCount || concept?._count?.notes || 0;
+	const charactersCount = concept?.stats?.characterCount || concept?._count?.characters || 0;
+	const placesCount = concept?.stats?.placeCount || concept?._count?.places || 0;
+	const worldItemsCount = concept?.stats?.worldItemCount || concept?._count?.worldItems || 0;
+	const propertiesCount = concept?.stats?.propertyCount || concept?._count?.properties || 0;
+	const wildcardsCount = concept?.stats?.wildcardCount || concept?._count?.wildcards || 0;
+	const groupsCount = concept?.stats?.groupCount || concept?._count?.groups || 0;
+	const albumsCount = concept?.stats?.albumCount || concept?._count?.albums || 0;
+	const collectionsCount = concept?.stats?.collectionCount || concept?._count?.collections || 0;
+	const tagsCount = conceptCounts?.tags || concept?.stats?.tagCount || concept?._count?.tags || 0;
 
 	// Total de relaciones para efectos visuales
 	const totalRelations =
@@ -45,17 +45,17 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		tagsCount;
 
 	// Colores para el gradiente
-	const primaryColor = useMemo(() => color || '#3b82f6', [color]);
+	const primaryColor = useMemo(() => concept?.color || '#3b82f6', [concept?.color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!color) return '#1e40af';
+		if (!concept?.color) return '#1e40af';
 
 		// Oscurecer el color primario para el secundario
 		try {
 			// Convertir hex a RGB
-			const r = Number.parseInt(color.slice(1, 3), 16);
-			const g = Number.parseInt(color.slice(3, 5), 16);
-			const b = Number.parseInt(color.slice(5, 7), 16);
+			const r = Number.parseInt(concept.color.slice(1, 3), 16);
+			const g = Number.parseInt(concept.color.slice(3, 5), 16);
+			const b = Number.parseInt(concept.color.slice(5, 7), 16);
 
 			// Oscurecer los componentes
 			const darkenFactor = 0.6;
@@ -68,12 +68,24 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		} catch (_e) {
 			return '#1e40af';
 		}
-	}, [color]);
+	}, [concept?.color]);
+
+	// Manejar click del mouse
+	const handleClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			if (onClick && concept) {
+				e.preventDefault();
+				onClick(concept);
+			}
+		},
+		[onClick, concept]
+	);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
 			if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
+				e.preventDefault();
 				onClick(concept);
 			}
 		},
@@ -97,7 +109,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		}
 		// Si no tiene tags, devolver array vacío
 		return [];
-	}, []);
+	}, [concept]);
 
 	// Definir estilos de la tarjeta TCG
 	const cardStyle = useMemo(() => {
@@ -169,7 +181,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 			)}
 			whileHover={{ y: -5 }}
 			whileTap={{ scale: 0.98 }}
-			onClick={onClick}
+			onClick={handleClick}
 			onKeyDown={handleKeyDown}
 			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
@@ -232,8 +244,6 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 				/>
 			</div>
 
-			{/* Contenido estructurado de la tarjeta */}
-
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
 				title={concept.name}
@@ -259,7 +269,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 				description={concept.description}
 				content={concept.content}
 				category={concept.category}
-				tags={parsedTags}
+				tags={tags}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 				conceptId={concept.id}

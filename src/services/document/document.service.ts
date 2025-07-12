@@ -339,3 +339,36 @@ export async function getDocumentCount(): Promise<number> {
 		throw createDocumentError('No se pudo obtener el conteo de documentos', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
+
+/**
+ * Busca un documento por su hash
+ * @param hash Hash del documento
+ * @returns Documento o null
+ */
+export async function getDocumentByHash(hash: string): Promise<DocumentWithStats | null> {
+	try {
+		documentLogger.info('🔍 Buscando documento por hash:', hash);
+
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select().from(documents).where(eq(documents.hash, hash)).limit(1);
+
+		if (result.length === 0) {
+			documentLogger.info('Documento no encontrado por hash:', hash);
+			return null;
+		}
+
+		const rawDocument = result[0];
+		// Transformar el campo isFavorite de number a boolean
+		const transformedDocument = {
+			...rawDocument,
+			isFavorite: Boolean(rawDocument.isFavorite),
+		};
+
+		const document = toDocumentWithStats(transformedDocument as any);
+		documentLogger.info('✅ Documento encontrado por hash:', document.name);
+		return document;
+	} catch (error) {
+		documentLogger.error('❌ Error al buscar documento por hash:', error);
+		throw createDocumentError('No se pudo buscar el documento por hash', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}
