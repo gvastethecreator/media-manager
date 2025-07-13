@@ -13,5 +13,5 @@ export default defineConfig({
 		url: process.env.DATABASE_URL,
 	},
 	verbose: true,
-	strict: true,
+	strict: false, // Cambiado de true a false para deshabilitar la confirmación
 });
