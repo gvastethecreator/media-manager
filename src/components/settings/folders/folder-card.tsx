@@ -178,13 +178,19 @@ export function FolderCard({
 								<TooltipProvider>
 									<Tooltip>
 										<TooltipTrigger asChild>
-											<div className="flex items-center gap-1">
+											<div className="flex items-center gap-1 cursor-pointer">
 												<Switch
-													checked={folder.autoReindex}
-													onCheckedChange={(checked) => onToggleAutoReindex(folder.id, checked)}
-													disabled={isGloballyProcessing}
-													className="scale-75"
-												/>
+																checked={folder.autoReindex}
+																onCheckedChange={(checked) => {
+																	if (!folder.id) {
+																		console.error('[FolderCard] ❌ Error: folder.id is undefined for auto-reindex', { folder });
+																		return;
+																	}
+																	onToggleAutoReindex(folder.id, checked);
+																}}
+																disabled={isGloballyProcessing || !folder.id}
+																className="scale-75"
+															/>
 												<span className="text-[10px] text-muted-foreground">Auto</span>
 											</div>
 										</TooltipTrigger>
@@ -200,19 +206,27 @@ export function FolderCard({
 											<Button
 												size="icon"
 												variant="ghost"
-												className="h-6 w-6"
-												onClick={() => onReindex(folder.id)}
-												disabled={isGloballyProcessing}
+												className="h-6 w-6 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+												onClick={() => {
+													if (!folder.id) {
+														console.error('[FolderCard] ❌ Error: folder.id is undefined', { folder });
+														return;
+													}
+													onReindex(folder.id);
+												}}
+												disabled={isGloballyProcessing || isReindexing || !folder.id}
 											>
 												<RefreshCw
 													className={cn(
-														'h-3.5 w-3.5',
+														'h-3.5 w-3.5 transition-transform',
 														isProcessing && processStatus.folderId === folder.id && 'animate-spin'
 													)}
 												/>
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent className="text-xs">Reindexar carpeta</TooltipContent>
+										<TooltipContent className="text-xs">
+											{isReindexing ? 'Reindexando...' : 'Reindexar carpeta'}
+										</TooltipContent>
 									</Tooltip>
 								</TooltipProvider>
 
@@ -223,15 +237,23 @@ export function FolderCard({
 												size="icon"
 												variant="ghost"
 												className={cn(
-													'h-6 w-6',
-													selectedFolder === folder.id && 'bg-destructive hover:bg-destructive/90'
+													'h-6 w-6 cursor-pointer transition-colors',
+													selectedFolder === folder.id 
+														? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' 
+														: 'hover:bg-destructive/10 hover:text-destructive'
 												)}
-												onClick={() => onFolderClick(folder.id)}
-												disabled={isGloballyProcessing}
+												onClick={() => {
+													if (!folder.id) {
+														console.error('[FolderCard] ❌ Error: folder.id is undefined for delete', { folder });
+														return;
+													}
+													onFolderClick(folder.id);
+												}}
+												disabled={isGloballyProcessing || !folder.id}
 											>
 												<Trash2
 													className={cn(
-														'h-3.5 w-3.5',
+														'h-3.5 w-3.5 transition-colors',
 														selectedFolder === folder.id ? 'text-background' : 'text-muted-foreground'
 													)}
 												/>

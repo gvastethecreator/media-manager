@@ -13,6 +13,7 @@ export interface ProcessStatus {
 	timestamp?: number;
 	filesProcessed?: number;
 	totalFiles?: number;
+	status?: 'processing' | 'completed' | 'error'; // Estado del proceso
 }
 
 export interface ErrorResponse {
@@ -21,6 +22,7 @@ export interface ErrorResponse {
 	code?: string;
 	details?: Record<string, unknown>;
 	folderId?: string; // Agregar folderId que se usa
+	timestamp?: number; // Para compatibilidad con eventos
 }
 
 export interface FolderResponse {
@@ -30,6 +32,8 @@ export interface FolderResponse {
 	parentId?: string;
 	createdAt: string;
 	updatedAt: string;
+	folderId?: string; // Para compatibilidad con eventos
+	success?: boolean; // Para respuestas de operaciones
 }
 
 export interface FolderStats {
