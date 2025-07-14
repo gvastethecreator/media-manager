@@ -7284,3 +7284,5 @@
 [2025-07-14T23:42:55.630Z] [INFO] ℹ️  ✅ [2025-07-14T23:42:55.630Z] POST /api/folders/folder-3/reindex - 200 - 10944ms - IP: ::1 - END
 [2025-07-14T23:42:55.637Z] [INFO] ℹ️  🌐 [2025-07-14T23:42:55.637Z] GET /api/folders - IP: ::1 - START
 [2025-07-14T23:42:55.640Z] [INFO] ℹ️  ✅ [2025-07-14T23:42:55.640Z] GET /api/folders - 200 - 3ms - IP: ::1 - END
+[2025-07-14T23:44:19.937Z] [INFO] ℹ️  🌐 [2025-07-14T23:44:19.937Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-14T23:44:19.951Z] [INFO] ℹ️  ✅ [2025-07-14T23:44:19.951Z] GET /api/system/stats - 200 - 14ms - IP: ::1 - END
