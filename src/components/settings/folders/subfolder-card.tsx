@@ -112,12 +112,14 @@ export function SubfolderCard({
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Switch
-									checked={folder.autoReindex}
-									onCheckedChange={(checked) => onToggleAutoReindex(folder.id, checked)}
-									disabled={isGloballyProcessing}
-									className="scale-[0.6] data-[state=checked]:bg-primary"
-								/>
+								<div className="cursor-pointer">
+									<Switch
+										checked={folder.autoReindex}
+										onCheckedChange={(checked) => onToggleAutoReindex(folder.id, checked)}
+										disabled={isGloballyProcessing}
+										className="scale-[0.6] data-[state=checked]:bg-primary"
+									/>
+								</div>
 							</TooltipTrigger>
 							<TooltipContent className="text-xs">
 								{folder.autoReindex ? 'Desactivar auto-reindex' : 'Activar auto-reindex'}
@@ -134,12 +136,14 @@ export function SubfolderCard({
 									size="sm"
 									onClick={() => onReindex(folder.id)}
 									disabled={isGloballyProcessing || isReindexing}
-									className="h-6 w-6 p-0"
+									className="h-6 w-6 p-0 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
 								>
-									<RefreshCw className={cn('h-3 w-3', isReindexing && 'animate-spin')} />
+									<RefreshCw className={cn('h-3 w-3 transition-transform', isReindexing && 'animate-spin')} />
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent className="text-xs">Reindexar subcarpeta</TooltipContent>
+							<TooltipContent className="text-xs">
+								{isReindexing ? 'Reindexando...' : 'Reindexar subcarpeta'}
+							</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
 				</div>

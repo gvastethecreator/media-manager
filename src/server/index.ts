@@ -12,6 +12,7 @@ import conceptsRouter from './routes/concepts';
 import debugRouter from './routes/debug.js';
 import { documentsRouter } from './routes/documents.js';
 import downloadRouter from './routes/download.js';
+import eventsRouter from './routes/events';
 import favoritesRouter from './routes/favorites';
 import filesRouter from './routes/files-temp.js';
 import { foldersRouter } from './routes/folders.js';
@@ -155,6 +156,7 @@ app.use('/api/thumbnails', thumbnailsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/profiles', profilesRouter);
 app.use('/api/activity', activityRouter);
+app.use('/api/events', eventsRouter);
 
 // 404 handler - DEBE ir antes de los middlewares de error
 app.use((req, res) => {

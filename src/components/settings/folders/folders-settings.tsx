@@ -72,7 +72,18 @@ export function FoldersSettings() {
 				<CardTitle className="text-base text-muted-foreground font-medium flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<FolderIcon className="h-4 w-4 text-primary" />
-						<span>Carpetas</span>
+						<span>Carpetas de Imágenes</span>
+						{(isGloballyProcessing || isProcessing) && (
+							<div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+								<RefreshCw className="h-4 w-4 animate-spin text-primary" />
+								<span className="font-medium">
+									{processStatus?.message || (isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...')}
+									{processStatus?.progress !== undefined && (
+										<span className="ml-1">({Math.round(processStatus.progress)}%)</span>
+									)}
+								</span>
+							</div>
+						)}
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -92,7 +103,7 @@ export function FoldersSettings() {
 							variant="outline"
 							size="sm"
 							onClick={handleClearCache}
-							className="h-7 text-xs"
+							className="h-7 text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors"
 							disabled={isLoading || isProcessing}
 						>
 							<EraserIcon className="h-3.5 w-3.5 mr-1" />
@@ -104,13 +115,13 @@ export function FoldersSettings() {
 							variant="outline"
 							size="sm"
 							onClick={() => reindexAll()}
-							className="h-7 text-xs"
+							className="h-7 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
 							disabled={isLoading || isGloballyProcessing}
 						>
 							<RefreshCw
-								className={cn('h-3.5 w-3.5 mr-1', (isLoading || globalReindexStatus.isProcessing) && 'animate-spin')}
+								className={cn('h-3.5 w-3.5 mr-1 transition-transform', (isLoading || globalReindexStatus.isProcessing) && 'animate-spin')}
 							/>
-							{globalReindexStatus.isProcessing ? `${Math.round(globalReindexStatus.progress)}%` : 'Reindexar todo'}
+							{globalReindexStatus.isProcessing ? `Reindexando... ${Math.round(globalReindexStatus.progress)}%` : 'Reindexar todo'}
 						</Button>
 					</div>
 				</CardTitle>

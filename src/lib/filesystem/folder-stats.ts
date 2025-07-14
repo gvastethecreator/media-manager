@@ -8,6 +8,7 @@ import type { EntityCreationStats } from '@/types/file-entity-mapper';
 import type { DirectoryInfo } from './folder-scanner';
 import { scanFolder } from './folder-scanner';
 import { type FolderSyncResult, syncFoldersWithFileSystem } from './folder-sync';
+import { emitProgress } from '@/lib/server/events.server';
 
 /**
  * 🔧 ENHANCED: Actualiza estadísticas, crea entidades automáticamente y procesa subcarpetas
@@ -20,7 +21,8 @@ export async function updateFolderStats(
 	processedPaths: Set<string> = new Set(),
 	maxDepth = 10,
 	currentDepth = 0,
-	enableSync = true
+	enableSync = true,
+	emitProgressEvents = true
 ): Promise<EntityCreationStats & { syncResult?: FolderSyncResult }> {
 	// 🆕 SINCRONIZACIÓN AUTOMÁTICA: Ejecutar antes del indexado si está habilitada
 	let syncResult: FolderSyncResult | undefined;
@@ -66,10 +68,32 @@ export async function updateFolderStats(
 	}
 	processedPaths.add(folder.path);
 
-	// 🎯 NUEVA FUNCIONALIDAD: Crear entidades automáticamente
+	// 🎯 NUEVA FUNCIONALIDAD: Crear entidades automáticamente con progreso
 	const fileEntityMapper = FileEntityMapperService.getInstance();
 	const filePaths = scanResult.files.map((file) => file.path);
-	const entityStats = await fileEntityMapper.processFiles(filePaths, folderId);
+	
+	// Emitir progreso inicial
+	if (emitProgressEvents && currentDepth === 0) {
+		await emitProgress({
+			type: 'folder:progress',
+			data: {
+				folderId,
+				status: 'processing',
+				progress: 0,
+				totalFiles: filePaths.length,
+				processedFiles: 0,
+				message: 'Iniciando indexación de archivos...'
+			}
+		});
+	}
+	
+	// Procesar archivos con progreso
+	const entityStats = await processFilesWithProgress(
+		filePaths,
+		folderId,
+		fileEntityMapper,
+		emitProgressEvents && currentDepth === 0
+	);
 
 	// 🆕 PROCESAR SUBCARPETAS: Crear carpetas para directorios encontrados
 	const subfolderStats = await processSubfolders(
@@ -123,6 +147,69 @@ export async function getFolderStats(folderId: string) {
 }
 
 /**
+ * 🆕 Procesa archivos con emisión de eventos de progreso
+ */
+async function processFilesWithProgress(
+	filePaths: string[],
+	folderId: string,
+	fileEntityMapper: FileEntityMapperService,
+	emitEvents: boolean
+): Promise<EntityCreationStats> {
+	const totalFiles = filePaths.length;
+	let processedFiles = 0;
+	const stats: EntityCreationStats = { created: 0, updated: 0, errors: 0 };
+	
+	// Procesar archivos en lotes para evitar sobrecarga
+	const batchSize = 10;
+	const progressUpdateInterval = Math.max(1, Math.floor(totalFiles / 20)); // Actualizar progreso cada 5%
+	
+	for (let i = 0; i < filePaths.length; i += batchSize) {
+		const batch = filePaths.slice(i, i + batchSize);
+		
+		// Procesar lote
+		for (const filePath of batch) {
+			try {
+				const result = await fileEntityMapper.createEntityFromFile(filePath, folderId);
+				if (result) {
+					stats.created++;
+				} else {
+					stats.updated++;
+				}
+			} catch (error) {
+				console.error(`Error procesando archivo ${filePath}:`, error);
+				stats.errors++;
+			}
+			
+			processedFiles++;
+			
+			// Emitir progreso cada cierto intervalo
+			if (emitEvents && (processedFiles % progressUpdateInterval === 0 || processedFiles === totalFiles)) {
+				const progress = Math.round((processedFiles / totalFiles) * 100);
+				await emitProgress({
+					folderId,
+					isProcessing: processedFiles < totalFiles,
+					progress,
+					totalFiles,
+					filesProcessed: processedFiles,
+					phase: processedFiles === totalFiles ? 'complete' : 'processing',
+					message: processedFiles === totalFiles 
+						? 'Indexación completada'
+						: `Procesando archivos... ${processedFiles}/${totalFiles}`,
+					timestamp: Date.now()
+				});
+			}
+		}
+		
+		// Pequeña pausa entre lotes para evitar bloqueo
+		if (i + batchSize < filePaths.length) {
+			await new Promise(resolve => setTimeout(resolve, 10));
+		}
+	}
+	
+	return stats;
+}
+
+/**
  * 🆕 Procesa subcarpetas encontradas durante el escaneo
  * Crea nuevas carpetas en la BD para directorios que no existan y las indexa recursivamente
  */
@@ -168,8 +255,15 @@ async function processSubfolders(
 				totalStats.created++;
 			}
 
-			// Indexar recursivamente la subcarpeta
-			const subfolderStats = await updateFolderStats(subfolderId, processedPaths, maxDepth, currentDepth);
+			// Indexar recursivamente la subcarpeta (sin emitir eventos de progreso)
+			const subfolderStats = await updateFolderStats(
+				subfolderId, 
+				processedPaths, 
+				maxDepth, 
+				currentDepth,
+				false, // No sincronizar subcarpetas
+				false  // No emitir eventos de progreso en subcarpetas
+			);
 			totalStats.created += subfolderStats.created;
 			totalStats.updated += subfolderStats.updated;
 			totalStats.errors += subfolderStats.errors;
