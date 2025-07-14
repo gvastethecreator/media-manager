@@ -1,0 +1,425 @@
+Comando: bunx tsc --noEmit --pretty --noEmit src/components/core/error-boundary.tsx
+Fecha: 2025-07-13T23:20:10.646Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m13[0m:[93m10[0m - [91merror[0m[90m TS2724: [0m'"react-router"' has no exported member named 'match'. Did you mean 'UIMatch'?
+
+[7m13[0m import { match } from 'react-router';
+[7m  [0m [91m         ~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m19[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'PromptProps'.
+
+[7m19[0m     PromptProps,
+[7m  [0m [91m    ~~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'Prompt'.
+
+[7m20[0m     Prompt,
+[7m  [0m [91m    ~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m23[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'RedirectProps'.
+
+[7m23[0m     RedirectProps,
+[7m  [0m [91m    ~~~~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m24[0m:[93m5[0m - [91merror[0m[90m TS2724: [0m'"react-router"' has no exported member named 'Redirect'. Did you mean 'redirect'?
+
+[7m24[0m     Redirect,
+[7m  [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m25[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'RouteChildrenProps'.
+
+[7m25[0m     RouteChildrenProps,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m26[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'RouteComponentProps'.
+
+[7m26[0m     RouteComponentProps,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m33[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'SwitchProps'.
+
+[7m33[0m     SwitchProps,
+[7m  [0m [91m    ~~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m34[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'Switch'.
+
+[7m34[0m     Switch,
+[7m  [0m [91m    ~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m35[0m:[93m5[0m - [91merror[0m[90m TS2724: [0m'"react-router"' has no exported member named 'match'. Did you mean 'UIMatch'?
+
+[7m35[0m     match,
+[7m  [0m [91m    ~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m37[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'withRouter'.
+
+[7m37[0m     withRouter,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m38[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'RouterChildContext'.
+
+[7m38[0m     RouterChildContext,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m39[0m:[93m5[0m - [91merror[0m[90m TS2305: [0mModule '"react-router"' has no exported member 'useHistory'.
+
+[7m39[0m     useHistory,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+[96mnode_modules/@types/react-router-dom/index.d.ts[0m:[93m42[0m:[93m5[0m - [91merror[0m[90m TS2724: [0m'"react-router"' has no exported member named 'useRouteMatch'. Did you mean 'RouteMatch'?
+
+[7m42[0m     useRouteMatch,
+[7m  [0m [91m    ~~~~~~~~~~~~~[0m
+
+[96mnode_modules/glob/dist/commonjs/pattern.d.ts[0m:[93m19[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m19[0m     #private;
+[7m  [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/glob/dist/commonjs/walker.d.ts[0m:[93m54[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m54[0m     #private;
+[7m  [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/glob/node_modules/minimatch/dist/commonjs/ast.d.ts[0m:[93m4[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m4[0m     #private;
+[7m [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/lru-cache/dist/commonjs/index.d.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m20[0m     #private;
+[7m  [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/lru-cache/dist/commonjs/index.d.ts[0m:[93m866[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m866[0m     #private;
+[7m   [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/path-scurry/dist/commonjs/index.d.ts[0m:[93m115[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m115[0m     #private;
+[7m   [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/path-scurry/dist/commonjs/index.d.ts[0m:[93m586[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m586[0m     #private;
+[7m   [0m [91m    ~~~~~~~~[0m
+
+[96mnode_modules/react-router/dist/development/register-COAKzST_.d.ts[0m:[93m297[0m:[93m5[0m - [91merror[0m[90m TS18028: [0mPrivate identifiers are only available when targeting ECMAScript 2015 and higher.
+
+[7m297[0m     #private;
+[7m   [0m [91m    ~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m1[0m:[93m8[0m - [91merror[0m[90m TS1259: [0mModule '"D:/DEV/image-manager/node_modules/@types/react/index"' can only be default-imported using the 'esModuleInterop' flag
+
+[7m1[0m import React from 'react';
+[7m [0m [91m       ~~~~~[0m
+
+  [96mnode_modules/@types/react/index.d.ts[0m:[93m66[0m:[93m1[0m
+    [7m66[0m export = React;
+    [7m  [0m [96m~~~~~~~~~~~~~~~[0m
+    This module is declared with 'export =', and can only be used with a default import when using the 'esModuleInterop' flag.
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m2[0m:[93m25[0m - [91merror[0m[90m TS2732: [0mCannot find module '../../../package.json'. Consider using '--resolveJsonModule' to import module with '.json' extension.
+
+[7m2[0m import packageJson from '../../../package.json';
+[7m [0m [91m                        ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m3[0m:[93m37[0m - [91merror[0m[90m TS6142: [0mModule './global-error-handler' was resolved to 'D:/DEV/image-manager/src/components/core/global-error-handler.tsx', but '--jsx' is not set.
+
+[7m3[0m import { GlobalErrorFallback } from './global-error-handler';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m19[0m:[93m8[0m - [91merror[0m[90m TS2339: [0mProperty 'state' does not exist on type 'ErrorBoundary'.
+
+[7m19[0m   this.state = { hasError: false, error: null };
+[7m  [0m [91m       ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m33[0m:[93m8[0m - [91merror[0m[90m TS2339: [0mProperty 'setState' does not exist on type 'ErrorBoundary'.
+
+[7m33[0m   this.setState({ hasError: false, error: null });
+[7m  [0m [91m       ~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m49[0m:[93m12[0m - [91merror[0m[90m TS2339: [0mProperty 'state' does not exist on type 'ErrorBoundary'.
+
+[7m49[0m   if (this.state.hasError) {
+[7m  [0m [91m           ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m50[0m:[93m13[0m - [91merror[0m[90m TS2339: [0mProperty 'props' does not exist on type 'ErrorBoundary'.
+
+[7m50[0m    if (this.props.fallback) return this.props.fallback;
+[7m  [0m [91m            ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m50[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'props' does not exist on type 'ErrorBoundary'.
+
+[7m50[0m    if (this.props.fallback) return this.props.fallback;
+[7m  [0m [91m                                        ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m53[0m:[93m13[0m - [91merror[0m[90m TS2339: [0mProperty 'state' does not exist on type 'ErrorBoundary'.
+
+[7m53[0m    if (this.state.error) {
+[7m  [0m [91m            ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m54[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'state' does not exist on type 'ErrorBoundary'.
+
+[7m54[0m     const stack = this.state.error.stack || '';
+[7m  [0m [91m                       ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m58[0m:[93m15[0m - [91merror[0m[90m TS1343: [0mThe 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+
+[7m58[0m      branch: (import.meta as any).env?.VITE_GIT_BRANCH || 'desconocida',
+[7m  [0m [91m              ~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m65[0m:[93m13[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m65[0m      return <GlobalErrorFallback error={this.state.error} resetError={this.handleReload} />;
+[7m  [0m [91m            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m65[0m:[93m46[0m - [91merror[0m[90m TS2339: [0mProperty 'state' does not exist on type 'ErrorBoundary'.
+
+[7m65[0m      return <GlobalErrorFallback error={this.state.error} resetError={this.handleReload} />;
+[7m  [0m [91m                                             ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m70[0m:[93m6[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m70[0m      <div className="flex flex-row items-stretch justify-center h-full p-8 gap-8 bg-neutral-900 text-neutral-100">
+[7m  [0m [91m     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m71[0m:[93m7[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m71[0m       <div className="flex flex-col items-center justify-center flex-1 max-w-2xl">
+[7m  [0m [91m      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m72[0m:[93m8[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m72[0m        <div className="bg-neutral-800 rounded-xl shadow-lg p-8 w-full flex flex-col items-center border border-neutral-700">
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m73[0m:[93m9[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m73[0m         <h1 className="text-3xl font-bold mb-4 text-red-400">¡Algo salió mal!</h1>
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m74[0m:[93m9[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m74[0m         <p className="mb-4 text-neutral-200">Intenta recargar la página o reporta el error.</p>
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m75[0m:[93m9[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m75[0m         <button type="button" onClick={this.handleReload} className="btn btn-primary mb-4">
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m78[0m:[93m9[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m78[0m         <div className="w-full mt-4 flex flex-col gap-6 items-start">
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m79[0m:[93m10[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m79[0m          <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
+[7m  [0m [91m         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m80[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m80[0m           <strong className="text-red-300">Archivos afectados:</strong>
+[7m  [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m81[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m81[0m           <ul className="list-disc ml-6 text-xs mt-2 text-neutral-200">
+[7m  [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m82[0m:[93m43[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m82[0m            {affectedFiles.length === 0 && <li>No detectados en el stack trace.</li>}
+[7m  [0m [91m                                          ~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m84[0m:[93m13[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m84[0m             <li key={`${f.file}:${f.line}`}>
+[7m  [0m [91m            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m85[0m:[93m14[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m85[0m              <span className="font-mono text-blue-300">
+[7m  [0m [91m             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m92[0m:[93m10[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m92[0m          <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
+[7m  [0m [91m         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m93[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m93[0m           <div className="flex items-center mb-2">
+[7m  [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m94[0m:[93m12[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m94[0m            <strong className="text-blue-300">Stack trace:</strong>
+[7m  [0m [91m           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m95[0m:[93m12[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m 95[0m            <button
+[7m   [0m [91m           ~~~~~~~[0m
+[7m 96[0m             type="button"
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m 98[0m             onClick={() => navigator.clipboard.writeText(stack)}
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m 99[0m            >
+[7m   [0m [91m~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m103[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m103[0m           <pre className="bg-neutral-800 p-2 rounded text-xs max-w-xl overflow-x-auto mt-2 text-neutral-200">
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m107[0m:[93m10[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m107[0m          <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
+[7m   [0m [91m         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m108[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m108[0m           <strong className="text-green-300">Información de entorno:</strong>
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m109[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m109[0m           <ul className="text-xs ml-4 mt-2 text-neutral-200">
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m110[0m:[93m12[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m110[0m            <li>
+[7m   [0m [91m           ~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m111[0m:[93m22[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m111[0m             Versión: <span className="font-mono text-green-200">{envInfo.version}</span>
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m113[0m:[93m12[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m113[0m            <li>
+[7m   [0m [91m           ~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m114[0m:[93m19[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m114[0m             Rama: <span className="font-mono text-green-200">{envInfo.branch}</span>
+[7m   [0m [91m                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m116[0m:[93m12[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m116[0m            <li>
+[7m   [0m [91m           ~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m117[0m:[93m20[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m117[0m             Fecha: <span className="font-mono text-green-200">{envInfo.date}</span>
+[7m   [0m [91m                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m119[0m:[93m12[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m119[0m            <li>
+[7m   [0m [91m           ~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m120[0m:[93m19[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m120[0m             Ruta: <span className="font-mono text-green-200">{envInfo.path}</span>
+[7m   [0m [91m                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m124[0m:[93m10[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m124[0m          <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
+[7m   [0m [91m         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m125[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m125[0m           <strong className="text-yellow-300">Estado de stores (debug):</strong>
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m126[0m:[93m11[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m126[0m           <pre className="text-xs bg-neutral-800 rounded p-2 mt-2 text-yellow-200 max-h-40 overflow-auto">
+[7m   [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m137[0m:[93m13[0m - [91merror[0m[90m TS2339: [0mProperty 'props' does not exist on type 'ErrorBoundary'.
+
+[7m137[0m       {this.props.lastLogContent && (
+[7m   [0m [91m            ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m138[0m:[93m8[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m138[0m        <aside className="w-[420px] max-w-full bg-neutral-950 border-l border-neutral-800 p-4 overflow-auto rounded-lg shadow-inner flex flex-col">
+[7m   [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m139[0m:[93m9[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m139[0m         <h2 className="font-semibold text-sm mb-2 text-neutral-200">
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m140[0m:[93m22[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m140[0m          Último log: <span className="font-mono text-xs text-blue-300">{this.props.lastLogContent.file}</span>
+[7m   [0m [91m                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m140[0m:[93m78[0m - [91merror[0m[90m TS2339: [0mProperty 'props' does not exist on type 'ErrorBoundary'.
+
+[7m140[0m          Último log: <span className="font-mono text-xs text-blue-300">{this.props.lastLogContent.file}</span>
+[7m   [0m [91m                                                                             ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m142[0m:[93m9[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m142[0m         <pre className="text-xs bg-neutral-900 rounded p-2 max-h-[400px] overflow-auto text-neutral-300">
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m143[0m:[93m16[0m - [91merror[0m[90m TS2339: [0mProperty 'props' does not exist on type 'ErrorBoundary'.
+
+[7m143[0m          {this.props.lastLogContent.lines.join('\n')}
+[7m   [0m [91m               ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m151[0m:[93m15[0m - [91merror[0m[90m TS2339: [0mProperty 'props' does not exist on type 'ErrorBoundary'.
+
+[7m151[0m   return this.props.children;
+[7m   [0m [91m              ~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m158[0m:[93m4[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m158[0m    <ErrorBoundary fallback={fallback}>
+[7m   [0m [91m   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m158[0m:[93m5[0m - [91merror[0m[90m TS2741: [0mProperty 'children' is missing in type '{ fallback: React.ReactNode; }' but required in type 'ErrorBoundaryProps'.
+
+[7m158[0m    <ErrorBoundary fallback={fallback}>
+[7m   [0m [91m    ~~~~~~~~~~~~~[0m
+
+  [96msrc/components/core/error-boundary.tsx[0m:[93m6[0m:[93m2[0m
+    [7m6[0m  children: React.ReactNode;
+    [7m [0m [96m ~~~~~~~~[0m
+    'children' is declared here.
+
+[96msrc/components/core/error-boundary.tsx[0m:[93m159[0m:[93m5[0m - [91merror[0m[90m TS17004: [0mCannot use JSX unless the '--jsx' flag is provided.
+
+[7m159[0m     <Component {...props} />
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Found 78 errors in 8 files.
+
+Errors  Files
+    14  node_modules/@types/react-router-dom/index.d.ts[90m:13[0m
+     1  node_modules/glob/dist/commonjs/pattern.d.ts[90m:19[0m
+     1  node_modules/glob/dist/commonjs/walker.d.ts[90m:54[0m
+     1  node_modules/glob/node_modules/minimatch/dist/commonjs/ast.d.ts[90m:4[0m
+     2  node_modules/lru-cache/dist/commonjs/index.d.ts[90m:20[0m
+     2  node_modules/path-scurry/dist/commonjs/index.d.ts[90m:115[0m
+     1  node_modules/react-router/dist/development/register-COAKzST_.d.ts[90m:297[0m
+    56  src/components/core/error-boundary.tsx[90m:1[0m

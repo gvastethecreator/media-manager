@@ -90,7 +90,7 @@ const _entityActionMap = {
 		storeMethod: 'setPrompts',
 	},
 	notes: {
-		action: NoteService.getNotes,
+		action: getNotes,
 		storeMethod: 'setNotes',
 	},
 	concepts: {
