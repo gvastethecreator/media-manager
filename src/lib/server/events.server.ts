@@ -106,32 +106,82 @@ export interface EventData<T = unknown> {
 	data?: T;
 }
 
+// Store para eventos en memoria (compartido con el endpoint)
+const eventStore = new Map<string, EventData[]>();
+const eventSubscribers = new Set<(event: EventData) => void>();
+
 /**
- * Emite un evento (versión cliente - usa fetch() para comunicarse con API)
+ * Obtener el store de eventos (para uso compartido)
+ */
+export function getEventStore() {
+	return eventStore;
+}
+
+/**
+ * Obtener los suscriptores de eventos (para uso compartido)
+ */
+export function getEventSubscribers() {
+	return eventSubscribers;
+}
+
+/**
+ * Emite un evento directamente en el servidor (sin HTTP)
+ */
+function emitDirect(event: EventData) {
+	console.log('🚀 Emitiendo evento (servidor directo):', event);
+
+	// Almacenar evento
+	const eventKey = event.type;
+	if (!eventStore.has(eventKey)) {
+		eventStore.set(eventKey, []);
+	}
+	eventStore.get(eventKey)?.push({
+		...event,
+		timestamp: Date.now()
+	});
+
+	// Mantener solo los últimos 100 eventos por tipo
+	const events = eventStore.get(eventKey);
+	if (events && events.length > 100) {
+		events.splice(0, events.length - 100);
+	}
+
+	// Notificar a suscriptores
+	eventSubscribers.forEach(subscriber => {
+		try {
+			subscriber(event);
+		} catch (error) {
+			console.error('Error notificando suscriptor:', error);
+		}
+	});
+}
+
+/**
+ * Emite un evento (versión híbrida - directo en servidor, HTTP en cliente)
  */
 export async function emit(event: EventData) {
-	console.log('🚀 Emitiendo evento (cliente):', event);
-
 	try {
 		// Detectar si estamos en el servidor (Node.js) o cliente (navegador)
 		const isServer = typeof window === 'undefined';
 
-		// Construir URL apropiada según el contexto
-		const apiUrl = isServer
-			? `${ENV.VITE_API_URL}/events` // URL absoluta para servidor
-			: '/api/events'; // URL relativa para cliente
+		if (isServer) {
+			// En el servidor, emitir directamente
+			emitDirect(event);
+		} else {
+			// En el cliente, usar HTTP
+			console.log('🚀 Emitiendo evento (cliente HTTP):', event);
+			const response = await fetch('/api/events', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(event),
+			});
 
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(event),
-		});
-
-		if (!response.ok) {
-			console.warn('❌ Error al emitir evento:', response.statusText);
+			if (!response.ok) {
+				console.warn('❌ Error al emitir evento:', response.statusText);
+			}
 		}
 	} catch (error) {
-		console.warn('❌ Error al conectar con API de eventos:', error);
+		console.warn('❌ Error al emitir evento:', error);
 		// En modo desarrollo, no fallar por errores de eventos
 	}
 }
