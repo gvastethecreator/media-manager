@@ -1,34 +1,10 @@
 /**
  * @file Transformador principal para la entidad WorldItem.
  * @module transformers/world-item/transformer
- * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
+ * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
  */
 
-import { CharacterWithStats } from '@/types/entities/character';
-import type { Prisma } from '@prisma/client';
-// import type { AlbumWithStats } from '@/types/entities/album'; // No usado - transformer comentado
-import type { CollectionComplete } from '@/types/entities/collection';
-import type { ConceptComplete } from '@/types/entities/concept';
-// import type { GroupWithStats } from '@/types/entities/group'; // No usado - transformer comentado
-import type { ImageWithStats } from '@/types/entities/image';
-// import type { PlaceComplete } from '@/types/entities/place'; // No usado - transformer comentado
-import type { PromptComplete } from '@/types/entities/prompt';
-import type { VideoComplete } from '@/types/entities/video';
-import type { WildcardComplete } from '@/types/entities/wildcard';
 import type { WorldItemComplete } from '@/types/entities/world-item';
-// import { fromPrismaAlbum } from '../album/transformer';
-import { fromPrismaCharacter } from '../character/transformer';
-import { fromPrismaCollection } from '../collection/transformer';
-import { fromPrismaConcept } from '../concept/transformer';
-// import { fromPrismaGroup } from '../group/transformer'; // No existe transformer.ts
-import { fromPrismaImageWithCounts } from '../image/transformer';
-import { fromPrismaNote } from '../note/transformer';
-// import { fromPrismaPlace } from '../place/transformer'; // No existe transformer.ts
-import { fromPrismaPrompt } from '../prompt/transformer';
-import { fromPrismaProperty, PropertyComplete } from '../property/transformer';
-import { fromPrismaTag, TagComplete } from '../tag/transformer';
-import { fromPrismaVideo } from '../video/transformer';
-import { fromPrismaWildcard } from '../wildcard/transformer';
 import {
 	deserializeAttributes,
 	deserializeEffects,
@@ -37,86 +13,63 @@ import {
 	deserializeStats,
 } from './serializers';
 
-// --- TIPO DE PAYLOAD DE PRISMA ---
-
-export const worldItemPayload = {
-	include: {
-		images: {
-			include: {
-				tags: true,
-				albums: true,
-				collections: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				prompts: true,
-				notes: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-				folder: { select: { id: true, name: true, path: true } },
-				_count: {
-					select: {
-						tags: true,
-						albums: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		},
-		videos: {
-			include: {
-				_count: {
-					select: {
-						albums: true,
-						collections: true,
-						tags: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
-					},
-				},
-			},
-		},
-		albums: true,
-		collections: true,
-		tags: true,
-		characters: true,
-		places: true,
-		concepts: true,
-		prompts: true,
-		notes: true,
-		wildcards: true,
-		properties: true,
-		groups: true,
-		_count: true,
-	},
+// Tipos locales equivalentes a Drizzle
+type DrizzleWorldItemFromDrizzle = {
+	id: string;
+	name: string;
+	description: string | null;
+	type: string;
+	category: string;
+	rarity: string;
+	value: number | null;
+	weight: number | null;
+	featuredImage: string | null;
+	attributes: string;
+	effects: string;
+	requirements: string;
+	stats: string;
+	properties: string;
+	filters: string;
+	tags: string;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	images?: any[];
+	videos?: any[];
+	albums?: any[];
+	collections?: any[];
+	tags?: any[];
+	characters?: any[];
+	places?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 };
 
-export type WorldItemFromPrisma = Prisma.WorldItemGetPayload<typeof worldItemPayload>;
-
 /**
- * 🔄 Transforma un objeto WorldItem de Prisma a un WorldItemComplete.
- * @param worldItem - El objeto WorldItem obtenido de Prisma.
+ * 🔄 Transforma un objeto WorldItem de Drizzle a un WorldItemComplete.
+ * @param worldItem - El objeto WorldItem obtenido de Drizzle.
  * @returns Un objeto WorldItemComplete.
  */
-export function fromPrismaWorldItem(worldItem: WorldItemFromPrisma | null): WorldItemComplete | null {
+export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | null): WorldItemComplete | null {
 	if (!worldItem) return null;
 
 	const { _count, tags: relationTags, properties: relationProperties, ...baseData } = worldItem;
@@ -131,23 +84,22 @@ export function fromPrismaWorldItem(worldItem: WorldItemFromPrisma | null): Worl
 		stats: deserializeStats(worldItem.stats),
 		filters: deserializeFilters(worldItem.filters),
 
-		// Mapeo de relaciones - usando transformer optimizado para imágenes y videos
-		images: worldItem.images?.map(fromPrismaImageWithCounts).filter((i): i is ImageWithStats => i !== null) || [],
-		videos: worldItem.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
-		// albums: worldItem.albums?.map(fromPrismaAlbum).filter((a): a is AlbumWithStats => a !== null) || [], // No existe transformer
-		collections:
-			worldItem.collections?.map(fromPrismaCollection).filter((c): c is CollectionComplete => c !== null) || [],
-		characters: worldItem.characters?.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null) || [],
-		// places: worldItem.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [], // No existe transformer
-		concepts: worldItem.concepts?.map(fromPrismaConcept).filter((c): c is ConceptComplete => c !== null) || [],
-		prompts: worldItem.prompts?.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null) || [],
-		notes: worldItem.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
-		wildcards: worldItem.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
-		// groups: worldItem.groups?.map(fromPrismaGroup).filter((g): g is GroupWithStats => g !== null) || [], // No existe transformer
+		// Mapeo de relaciones - simplificado para evitar dependencias circulares
+		images: worldItem.images || [],
+		videos: worldItem.videos || [],
+		albums: worldItem.albums || [],
+		collections: worldItem.collections || [],
+		characters: worldItem.characters || [],
+		places: worldItem.places || [],
+		concepts: worldItem.concepts || [],
+		prompts: worldItem.prompts || [],
+		notes: worldItem.notes || [],
+		wildcards: worldItem.wildcards || [],
+		groups: worldItem.groups || [],
 
 		// Asignación correcta de relaciones
-		tags: relationTags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],
-		properties: relationProperties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
+		tags: relationTags || [],
+		properties: relationProperties || [],
 
 		// Conteo de relaciones
 		_count: {
@@ -169,10 +121,10 @@ export function fromPrismaWorldItem(worldItem: WorldItemFromPrisma | null): Worl
 }
 
 /**
- * 🔄 Transforma una lista de objetos WorldItem de Prisma a un array de WorldItemComplete.
- * @param worldItems - Los objetos WorldItem obtenidos de Prisma.
+ * 🔄 Transforma una lista de objetos WorldItem de Drizzle a un array de WorldItemComplete.
+ * @param worldItems - Los objetos WorldItem obtenidos de Drizzle.
  * @returns Un array de objetos WorldItemComplete.
  */
-export function fromPrismaWorldItems(worldItems: WorldItemFromPrisma[]): WorldItemComplete[] {
-	return worldItems.map(fromPrismaWorldItem).filter((w): w is WorldItemComplete => w !== null);
+export function fromDrizzleWorldItems(worldItems: DrizzleWorldItemFromDrizzle[]): WorldItemComplete[] {
+	return worldItems.map(fromDrizzleWorldItem).filter((w): w is WorldItemComplete => w !== null);
 }

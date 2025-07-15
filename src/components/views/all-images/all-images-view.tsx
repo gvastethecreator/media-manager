@@ -1,41 +1,49 @@
-'use client';
-
-import { EntityCard } from '@/components/cards/entity-card';
-import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { LoadingScreen } from '@/components/core/feedback';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
+import { useImageViewer } from '@/store/image-viewer.store';
 import type { ImageWithStats } from '@/types/entities/image';
-import { ImageIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { type EntityWithStats, isImageWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
+import AllImagesContentView from './all-images-content-view';
 
 const viewLogger = clientLogger.withContext('AllImagesView');
 
-const MemoizedEntityCard = React.memo(
-	({ image, onImageClick }: { image: ImageWithStats; onImageClick: () => void }) => (
-		<EntityCard entity={image} onClick={onImageClick} className="h-full" />
-	),
-	(prevProps, nextProps) =>
-		prevProps.image.id === nextProps.image.id &&
-		prevProps.image.name === nextProps.image.name &&
-		prevProps.image.updatedAt === nextProps.image.updatedAt
-);
-MemoizedEntityCard.displayName = 'MemoizedEntityCard';
-
 /**
  * Vista principal de todas las imágenes
- * Muestra una galería optimizada con EntityCard TCG y efectos holográficos.
+ * Muestra una galería con todas las imágenes disponibles
  */
-export function AllImagesView(_props: ViewProps) {
+export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 	// Usar selectores individuales para evitar recrear objetos
 	const imagesRecord = useImageStore((s) => s.images);
 	const isLoading = useImageStore((s) => s.isLoading);
 	const error = useImageStore((s) => s.error);
 	const loadImages = useImageStore((s) => s.loadImages);
 	const getSortedImages = useImageStore((s) => s.getSortedImages);
+
+	// Hook para indexación automática de carpetas
+	const {
+		status: indexingStatus,
+		isIndexing,
+		progress,
+		startIndexing,
+	} = useAutoFolderIndexing({
+		autoStart: true,
+		maxFoldersPerBatch: 3,
+		onIndexingStart: () => {
+			viewLogger.info('🔄 Iniciando indexación automática de carpetas');
+		},
+		onIndexingComplete: (status) => {
+			viewLogger.info(`✅ Indexación completada: ${status.indexedFolders} carpetas procesadas`);
+			// Recargar imágenes después de la indexación
+			loadImages({ refresh: true });
+		},
+		onProgress: (status) => {
+			viewLogger.debug(`📊 Progreso de indexación: ${status.indexedFolders}/${status.totalFolders}`);
+		},
+	});
 
 	useEffect(() => {
 		if (Object.keys(imagesRecord).length === 0) {
@@ -44,92 +52,102 @@ export function AllImagesView(_props: ViewProps) {
 		}
 	}, [loadImages, imagesRecord]);
 
-	const handleImageClick = useCallback((image: ImageWithStats) => {
-		viewLogger.info('🖱️ Click en imagen:', image.name);
-		// Lógica de navegación o apertura de visor aquí
-	}, []);
+	const { setCurrentView, setCurrentItem } = useNavigationStore();
+	const { openViewer } = useImageViewer();
 
 	// Cachear el resultado de getSortedImages
 	const sortedImages = useMemo(() => {
-		return getSortedImages();
-	}, [getSortedImages, imagesRecord]);
+		const images = getSortedImages();
+		return Array.isArray(images) ? images : [];
+	}, [getSortedImages]);
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
+	const handleImageClick = useCallback(
+		(item: EntityWithStats) => {
+			// Verificar que sea una imagen usando type guard
+			if (isImageWithStats(item)) {
+				const image = item as ImageWithStats;
+				viewLogger.info('🖱️ Click en imagen:', image.name);
 
-	if (isLoading && Object.keys(imagesRecord).length === 0) {
-		return <LoadingScreen />;
-	}
+				// Navegar a la vista de detalle de imagen
+				setCurrentItem({
+					id: image.id,
+					name: image.name || '',
+					path: image.path || '',
+					description: image.description || undefined,
+					count: 1,
+					createdAt: image.createdAt,
+					itemType: 'image',
+				});
+				setCurrentView('all-images'); // Usamos vista existente por ahora
+			} else {
+				viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
+			}
+		},
+		[setCurrentView, setCurrentItem]
+	);
 
-	if (sortedImages.length === 0) {
-		return (
-			<EmptyState
-				icon={ImageIcon}
-				title="No hay imágenes"
-				description="Sube imágenes para comenzar a usar la galería."
-			/>
-		);
-	}
+	const handleImageDoubleClick = useCallback(
+		(item: EntityWithStats) => {
+			// Verificar que sea una imagen usando type guard
+			if (isImageWithStats(item)) {
+				const image = item as ImageWithStats;
+				viewLogger.info('🖱️ Doble click en imagen:', image.name);
+
+				// Abrir visor de imágenes
+				const imageItems = sortedImages
+					.filter((img: EntityWithStats) => isImageWithStats(img))
+					.map((img: EntityWithStats) => ({
+						id: img.id,
+						name: img.name || '',
+						src: img.thumbnailUrl || `/api/images/${img.id}/content`,
+						alt: img.name || '',
+						width: 'width' in img ? img.width : 0,
+						height: 'height' in img ? img.height : 0,
+						thumbnail: img.thumbnailUrl || null,
+						type: 'image',
+						path: img.path || '',
+						size: 'size' in img ? img.size : 0,
+						mimeType: 'mimeType' in img ? img.mimeType : '',
+						metadata: null,
+						url: img.thumbnailUrl || `/api/images/${img.id}/content`,
+						parsedMetadata: undefined,
+					}));
+
+				const currentIndex = imageItems.findIndex((img: any) => img.id === image.id);
+				openViewer(imageItems, currentIndex);
+			} else {
+				viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
+			}
+		},
+		[sortedImages, openViewer]
+	);
+
+	// Función para manejar el upload de archivos
+	const handleFileUpload = useCallback(
+		async (files: File[]) => {
+			// Esto debería ser manejado por el content view, pero aquí se recargan las imágenes
+			loadImages({ refresh: true });
+		},
+		[loadImages]
+	);
+
+	const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		// Esto debería ser manejado por el content view
+	}, []);
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				{/* Header con estadísticas */}
-				<div className="mb-6">
-					<h2 className="text-2xl font-bold text-foreground mb-2">Todas las Imágenes</h2>
-					<p className="text-muted-foreground">
-						{sortedImages.length} {sortedImages.length === 1 ? 'imagen' : 'imágenes'} en total
-					</p>
-				</div>
-
-				{/* Grid de imágenes */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-					{sortedImages.map((image, index) => {
-						const onImageClick = () => handleImageClick(image);
-						return (
-							<motion.div
-								key={image.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: index * 0.05, duration: 0.3 }}
-								className="perspective-1000"
-							>
-								<div
-									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-image-id={image.id}
-								>
-									<MemoizedEntityCard image={image} onImageClick={onImageClick} />
-								</div>
-							</motion.div>
-						);
-					})}
-				</div>
-
-				{/* Footer con información adicional */}
-				{sortedImages.length > 0 && (
-					<div className="mt-8 pt-6 border-t border-border">
-						<p className="text-sm text-muted-foreground text-center">
-							Mostrando {sortedImages.length} {sortedImages.length === 1 ? 'imagen' : 'imágenes'}
-						</p>
-					</div>
-				)}
-			</div>
-		</ScrollArea>
+		<AllImagesContentView
+			images={sortedImages}
+			isLoading={isLoading}
+			error={error}
+			indexingStatus={indexingStatus}
+			isIndexing={isIndexing}
+			progress={progress}
+			startIndexing={startIndexing}
+			handleImageClick={handleImageClick}
+			handleImageDoubleClick={handleImageDoubleClick}
+			handleFileUpload={handleFileUpload}
+			handleFileSelect={handleFileSelect}
+		/>
 	);
-}
-
-/**
- * 📝 Documentación:
- * - Vista principal optimizada que usa EntityCard TCG con efectos holográficos
- * - Integra store Zustand para gestión eficiente de estado
- * - Grid responsivo que se adapta a diferentes tamaños de pantalla
- * - Animaciones escalonadas para carga suave
- * - Lazy loading y memoización para rendimiento óptimo
- * - Reemplaza FileBrowser por sistema de cards consistente
- * - Estadísticas y información contextual
- */
+};

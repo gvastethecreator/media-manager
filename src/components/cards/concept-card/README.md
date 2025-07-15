@@ -1,6 +1,6 @@
 # Componente ConceptCard
 
-El componente `ConceptCard` proporciona una visualización estilizada en formato de carta TCG (Trading Card Game) para los conceptos de la aplicación, alineado con el esquema Prisma actual.
+El componente `ConceptCard` proporciona una visualización estilizada en formato de carta TCG (Trading Card Game) para los conceptos de la aplicación, alineado con el esquema de base de datos actual.
 
 ## Características
 
@@ -8,7 +8,7 @@ El componente `ConceptCard` proporciona una visualización estilizada en formato
 - Modo TCG con efectos visuales y estilo mejorado
 - Sistema dinámico de rareza basado en el número total de relaciones
 - Estadísticas avanzadas con cálculo de atributos (Conocimiento, Influencia, Visibilidad, Conectividad)
-- Soporte completo para todas las relaciones del esquema Prisma actual
+- Soporte completo para todas las relaciones del esquema de base de datos actual
 - Visualización de imágenes asociadas al concepto
 - Indicador de nivel de poder basado en las relaciones y contenido
 - Animaciones y efectos visuales al interactuar con la carta
@@ -80,7 +80,7 @@ interface ConceptCardProps {
 
 ## Alineación con Prisma
 
-El componente está completamente alineado con el modelo `Concept` de Prisma y todas sus relaciones:
+El componente está completamente alineado con el modelo `Concept` de Drizzle y todas sus relaciones:
 
 ### Multimedia
 

@@ -1,10 +1,8 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { DocumentWithStats } from '@/types/entities/document';
 import { DownloadIcon, EyeIcon, FileTextIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { DocumentWithStats } from '@/types/entities/document';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
@@ -43,14 +41,12 @@ export function DocumentCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: DocumentCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 
 	// Colores para el gradiente basados en el tipo de documento
 	const primaryColor = useMemo(() => {
-		const ext = document.filePath?.split('.').pop()?.toLowerCase();
+		const ext = document.path?.split('.').pop()?.toLowerCase();
 		switch (ext) {
 			case 'pdf':
 				return '#dc2626'; // Rojo para PDF
@@ -64,7 +60,7 @@ export function DocumentCard({
 			default:
 				return '#6b7280'; // Gris para otros
 		}
-	}, [document.filePath]);
+	}, [document.path]);
 
 	const secondaryColor = useMemo(() => {
 		// Oscurecer el color primario para el secundario
@@ -87,8 +83,8 @@ export function DocumentCard({
 	}, [document.size]);
 
 	const fileExtension = useMemo(() => {
-		return document.filePath?.split('.').pop()?.toUpperCase() || 'DOC';
-	}, [document.filePath]);
+		return document.path?.split('.').pop()?.toUpperCase() || 'DOC';
+	}, [document.path]);
 
 	const handleClick = useCallback(() => {
 		if (!disabled && onClick) {
@@ -166,14 +162,7 @@ export function DocumentCard({
 			{/* Contenedor principal */}
 			<div className="flex flex-col h-full relative z-1">
 				{/* Cabecera */}
-				<CardHeader
-					title={document.name || 'Sin nombre'}
-					emoji="📄"
-					color={primaryColor}
-					isFavorite={document.isFavorite || false}
-					compact={compact}
-				/>
-
+				<CardHeader title={document.name || 'Sin nombre'} emoji="📄" primaryColor={primaryColor} compact={compact} />
 				{/* Contenido principal */}
 				{!compact && (
 					<div className="flex-1 p-4 flex flex-col gap-3">
@@ -202,8 +191,8 @@ export function DocumentCard({
 						</div>
 
 						{/* Descripción */}
-						{document.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{document.description}</div>
+						{document.summary && (
+							<div className="text-sm text-muted-foreground line-clamp-2 italic">{document.summary}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}
@@ -221,13 +210,12 @@ export function DocumentCard({
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Páginas</span>
-									<span className="font-bold">{document.pages || '?'}</span>
+									<span className="font-bold">{document.pageCount || '?'}</span>
 								</div>
 							</div>
 						)}
 					</div>
 				)}
-
 				{/* Pie de tarjeta */}
 				<div className="p-3 border-t border-border/20">
 					<div className="flex items-center justify-between text-xs">

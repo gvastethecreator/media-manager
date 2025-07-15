@@ -1,0 +1,14 @@
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-07-11T16:25:21.191Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/cards/concept-card/concept-card.tsx[0m:[93m269[0m:[93m4[0m - [91merror[0m[90m TS1005: [0m'}' expected.
+
+[7m269[0m    {/* Pie de la tarjeta */}
+[7m   [0m [91m   ~[0m
+
+
+Found 1 error in src/components/cards/concept-card/concept-card.tsx[90m:269[0m
+

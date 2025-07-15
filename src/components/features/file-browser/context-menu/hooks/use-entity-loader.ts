@@ -1,19 +1,17 @@
-'use client';
-
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { getAlbums } from '@/app/actions/albums/album.actions';
-import { searchCharacters } from '@/app/actions/characters/character.actions';
-import { getCollections } from '@/app/actions/collections/collection.actions';
-import { getConcepts } from '@/app/actions/concepts/concept.actions';
-import { getGroups } from '@/app/actions/groups/group.actions';
-import { getNotes } from '@/app/actions/notes/note.actions';
-import { getPlaces } from '@/app/actions/places/place.actions';
-import { getPrompts } from '@/app/actions/prompts/prompt.actions';
-import { getProperties } from '@/app/actions/properties/property.actions';
-import { getTagsAction } from '@/app/actions/tags';
-import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
-import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { getAlbums } from '@/services/album/album.service';
+import { getCharacters } from '@/services/character/character.service';
+import { getCollections } from '@/services/collection/collection.service';
+import { ConceptService } from '@/services/concept/concept.service';
+import { searchGroupsService } from '@/services/group/group.service';
+import { getNotes } from '@/services/note/note.service';
+import { getPlaces } from '@/services/place/place.service';
+import { searchPromptsService } from '@/services/prompt/prompt.service';
+import { getProperties } from '@/services/property/property.service';
+import { getTags } from '@/services/tag/tag.service';
+import { getWildcards } from '@/services/wildcard/wildcard.service';
+import { getWorldItems } from '@/services/world-item/world-item.service';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -64,7 +62,7 @@ const _initialLoadingStates: LoadingStates = {
 // Mapeo de entidades a funciones de acción del servidor
 const _entityActionMap = {
 	tags: {
-		action: getTagsAction,
+		action: getTags,
 		storeMethod: 'setTags',
 	},
 	albums: {
@@ -76,7 +74,7 @@ const _entityActionMap = {
 		storeMethod: 'setCollections',
 	},
 	characters: {
-		action: searchCharacters,
+		action: getCharacters,
 		storeMethod: 'setCharacters',
 	},
 	places: {
@@ -88,7 +86,7 @@ const _entityActionMap = {
 		storeMethod: 'setWorldItems',
 	},
 	prompts: {
-		action: getPrompts,
+		action: searchPromptsService,
 		storeMethod: 'setPrompts',
 	},
 	notes: {
@@ -96,11 +94,11 @@ const _entityActionMap = {
 		storeMethod: 'setNotes',
 	},
 	concepts: {
-		action: getConcepts,
+		action: ConceptService.getConcepts,
 		storeMethod: 'setConcepts',
 	},
 	groups: {
-		action: getGroups,
+		action: searchGroupsService,
 		storeMethod: 'setGroups',
 	},
 	properties: {
@@ -124,7 +122,7 @@ declare global {
 
 // Modificar la función withTimeout para ser más tolerante y no fallar inmediatamente
 const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityName: string): Promise<T> => {
-	let timeoutId: NodeJS.Timeout | undefined;
+	let timeoutId: number | undefined;
 
 	const timeoutPromise = new Promise<T>((_resolve) => {
 		timeoutId = setTimeout(() => {

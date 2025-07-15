@@ -5,23 +5,22 @@
  *   Este archivo centraliza las exportaciones de tipos para la entidad Document.
  *   El tipo canónico para usar en la aplicación es **`DocumentWithStats`**.
  *
- *   - `DocumentBase`: Tipo base de Prisma (modificado).
- *   - `DocumentWithStats`: Tipo enriquecido con estadísticas de contenido.
+ *   - `DocumentBase`: Tipo base desde Drizzle.
+ *   - `DocumentStatistics`: Estadísticas calculadas.
+ *   - `DocumentWithStats`: Tipo enriquecido con estadísticas (CANÓNICO).
  *
  * @see /src/types/entities/document/base.ts
- * @updated 2025-01-27
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-// --- Tipos Canónicos (NUEVO) ---
-export type { DocumentBase, DocumentStatistics, DocumentWithStats } from './base';
-
-// --- Esquemas de Validación ---
-export { documentSchema } from './document.schema';
-
-// --- Tipos Legacy (OBSOLETOS) ---
-/**
- * @deprecated Los tipos monolíticos de `types.ts` están obsoletos.
- * Usar `DocumentWithStats` y otros tipos canónicos desde `base.ts`.
- * @see /src/types/entities/document/base.ts
- */
-// export * from './types';
+// --- Tipos de Input ---
+export type {
+	DocumentCreateInput,
+	DocumentUpdateInput,
+} from '../../transformers/document/validators';
+// --- Tipos Canónicos ---
+export type {
+	DocumentBase,
+	DocumentStatistics,
+	DocumentWithStats,
+} from './base';

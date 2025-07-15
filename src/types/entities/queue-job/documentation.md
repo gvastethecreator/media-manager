@@ -49,8 +49,8 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createQueueJob()
-    API->>Transformer: mapCreateQueueJobDataToPrisma()
-    Transformer->>DB: prisma.queueJob.create()
+    
+    Transformer->>DB: db.queueJob.create()
     DB-->>Transformer: QueueJob
     Transformer-->>API: transformQueueJob()
     API-->>Client: QueueJobComplete

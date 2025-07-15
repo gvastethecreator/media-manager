@@ -57,14 +57,14 @@ sequenceDiagram
     participant DB as Base de Datos
 
     Client->>Actions: Solicitud (Ej: getProperties)
-    Actions->>DB: Query con Prisma
+    Actions->>DB: Query con Drizzle
     DB-->>Actions: Datos crudos
     Actions->>Transformer: transformProperty(datos)
     Transformer-->>Actions: PropertyComplete
     Actions-->>Client: Respuesta procesada
 
     Client->>Actions: createProperty(data)
-    Actions->>Transformer: mapCreatePropertyDataToPrisma
+    Actions->>Transformer: mapCreatePropertyDataToDrizzle
     Transformer-->>Actions: Datos formateados
     Actions->>DB: Crear Property
     DB-->>Actions: Property creada
@@ -85,8 +85,8 @@ Los transformadores de Property gestionan la conversión entre diferentes format
 
 ### Serializadores
 
-- `fromPrismaProperty`: Convierte objetos de Prisma a formato interno
-- `toPrismaProperty`: Prepara datos para enviar a Prisma
+- `fromDrizzleProperty`: Convierte objetos de Drizzle a formato interno
+- `toDrizzleProperty`: Prepara datos para enviar a Drizzle
 - `extendProperty`: Agrega campos calculados para UI
 
 ### Mappers

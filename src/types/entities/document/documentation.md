@@ -54,7 +54,7 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createDocument()
-    API->>Transformer: mapCreateDocumentDataToPrisma()
+    
     Transformer->>DB: prisma.document.create()
     DB-->>Transformer: Document
     Transformer-->>API: transformDocument()

@@ -33,13 +33,11 @@ export * from './transformers';
 export * from './types';
 // Exportaciones específicas de video para evitar conflicto con hasCompleteMetadata de image
 export {
-    formatVideoDuration,
-    formatVideoSize,
-    getVideoMetadata,
-    getVideoThumbnailUrl,
-    hasCompleteMetadata as hasCompleteVideoMetadata,
-    isVideoFile,
-    validateVideoMetadata
+	formatVideoDuration,
+	formatVideoSize,
+	generateVideoThumbnailUrl,
+	hasCompleteMetadata as hasCompleteVideoMetadata,
+	validateVideoMetadata,
 } from './video';
 export * from './wildcard';
 export * from './world-item';

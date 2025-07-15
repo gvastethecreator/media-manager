@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useUpdateTheme } from '@/lib/api/profiles';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { transformProfile } from '@/transformers/profile/profile-transformers';
 import {
@@ -179,25 +180,9 @@ export const useProfileStore = create<ProfileStore>()(
 				// ===== GESTIÓN DE PREFERENCIAS =====
 
 				updateTheme: (theme: ThemeMode) => {
-					if (!get().activeProfile) return;
-
-					set((state) => {
-						if (state.activeProfile) {
-							state.activeProfile.theme = theme;
-
-							// Aplicar tema según selección
-							if (theme === ThemeMode.DARK) {
-								document.documentElement.classList.add('dark');
-								document.documentElement.classList.remove('light');
-							} else if (theme === ThemeMode.LIGHT) {
-								document.documentElement.classList.add('light');
-								document.documentElement.classList.remove('dark');
-							} else {
-								// System: aplicar según preferencia del sistema
-								get().applySystemTheme();
-							}
-						}
-					});
+					// TODO: Implement theme update logic. This should not directly call React hooks.
+					// Consider dispatching an event or calling a utility function that handles theme updates.
+					console.warn('Theme update logic needs to be implemented outside the store.');
 				},
 
 				updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => {

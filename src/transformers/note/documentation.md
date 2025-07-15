@@ -45,7 +45,7 @@ sequenceDiagram
 
     Client->>Actions: fetchNotes()
     Actions->>Service: getNotes()
-    Service->>Database: prisma.note.findMany()
+    Service->>Database: Drizzle.note.findMany()
     Database-->>Service: Notes[]
     Service->>Transformer: transformNotes()
     Transformer-->>Service: transformed Notes[]
@@ -125,32 +125,32 @@ interface NoteWithStats extends Note {
 
 ### Serializers
 
-- `fromPrismaNote(prismaNote: any): Note` - Deserializa datos de Note desde Prisma.
-- `toPrismaNote(note: Note): any` - Serializa un Note para operaciones con Prisma.
+- `fromDrizzleNote(DrizzleNote: any): Note` - Deserializa datos de Note desde Drizzle.
+- `toDrizzleNote(note: Note): any` - Serializa un Note para operaciones con Drizzle.
 - `extendNote(note: any): Note` - Extiende un objeto base a un Note completo.
 - `validateNote(note: any): Note` - Valida la estructura de un objeto Note.
 
 ### Mappers
 
-- `mapSearchOptionsToNoteWhereInput(options: any)` - Convierte opciones de búsqueda a condiciones Prisma.
-- `mapNoteToNoteCreateInput(note: Note)` - Mapea un Note a formato de creación para Prisma.
-- `mapNoteToNoteUpdateInput(note: Note)` - Mapea un Note a formato de actualización para Prisma.
+- `mapSearchOptionsToNoteWhereInput(options: any)` - Convierte opciones de búsqueda a condiciones Drizzle.
+- `mapNoteToNoteCreateInput(note: Note)` - Mapea un Note a formato de creación para Drizzle.
+- `mapNoteToNoteUpdateInput(note: Note)` - Mapea un Note a formato de actualización para Drizzle.
 
 ## Ejemplos de uso
 
-### Transformar una nota desde Prisma
+### Transformar una nota desde Drizzle
 
 ```typescript
 import { transformNote } from '@/transformers/note';
 
-// Datos de Prisma
-const prismaNote = await prisma.note.findUnique({
+// Datos de Drizzle
+const DrizzleNote = await Drizzle.note.findUnique({
   where: { id: 'note-id-here' },
   include: { _count: true }
 });
 
 // Transformar a Note
-const note = transformNote(prismaNote);
+const note = transformNote(DrizzleNote);
 ```
 
 ### Transformar a versión extendida para UI

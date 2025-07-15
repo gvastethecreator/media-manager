@@ -1,9 +1,20 @@
 /**
  * @file Punto de entrada para los transformadores de la entidad Album.
  * @module transformers/album
- * @description Exporta la función `toAlbumWithStats` como el transformador canónico.
- * @see /src/transformers/album/mappers.ts
- * @updated 2025-01-27
+ * ✅ MIGRADO A DRIZZLE - Julio 2025
+ *
+ * Estado de migración:
+ * - ✅ Mappers: Convertidos a tipos Drizzle
+ 
+ * - ✅ Validators: Usando tipos locales
+ * - ✅ Schema: Esquemas Zod puros
+ * - ✅ Documentación: Actualizada a Drizzle
  */
 
-export { toAlbumWithStats } from './mappers';
+// Exportar todas las funciones de transformación
+export * from './mappers';
+export * from './schema';
+export * from './serializers';
+// Alias para compatibilidad con rutas del servidor
+export { serializeAlbum as toAlbumWithStats } from './serializers';
+export * from './validators';

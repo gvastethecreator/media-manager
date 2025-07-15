@@ -1,6 +1,5 @@
-'use client';
-
-import { deleteCharacter, searchCharacters } from '@/app/actions/characters/character.actions';
+import { Filter, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,11 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import toastService from '@/services/toast';
+import { useCharacters, useDeleteCharacter } from '@/lib/api/characters';
+import { toastService } from '@/lib/ui/toast';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
-import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateCharacterForm } from './create-character-form';
 
 // Tipos seguros para el manejo de eventos y datos de preview
@@ -30,9 +28,6 @@ interface PreviewData {
 }
 
 export function CharactersSettings() {
-	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 	const [selectedCharacter, setSelectedCharacter] = useState<CharacterWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<PreviewData | null>(null);
@@ -43,94 +38,60 @@ export function CharactersSettings() {
 	const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
-	// Cargar personajes al montar el componente
-	useEffect(() => {
-		const loadCharacters = async () => {
-			try {
-				setIsLoading(true);
-				const data = await searchCharacters('');
-				setCharacters(data);
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				setError(errorMessage);
-				toastService.error('Error al cargar los personajes', {
-					description: errorMessage,
-				});
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	// React Query hooks
+	const { data: charactersResponse, isLoading, error } = useCharacters({ search: searchQuery });
+	const deleteCharacterMutation = useDeleteCharacter();
 
-		loadCharacters();
-	}, []);
+	const characters = charactersResponse?.data || [];
 
-	// Calcular estadísticas generales - 📊 Verificar que characters sea un array válido
-	const stats = Array.isArray(characters)
-		? {
-				totalCharacters: characters.length,
-				totalImages: characters.reduce((acc, character) => acc + (character.statistics?.totalImages || 0), 0),
-				totalSize: characters.reduce((acc, character) => acc + (character.statistics?.totalAssociations || 0), 0),
-				unusedCharacters: characters.filter((character) => (character.statistics?.totalImages || 0) === 0).length,
-				favoriteCharacters: characters.filter((character) => character.isFavorite).length,
-			}
-		: {
-				totalCharacters: 0,
-				totalImages: 0,
-				totalSize: 0,
-				unusedCharacters: 0,
-				favoriteCharacters: 0,
-			};
+	// Calcular estadísticas generales
+	const stats = {
+		totalCharacters: characters.length,
+		totalImages: characters.reduce((acc, character) => acc + (character.statistics?.imageCount || 0), 0),
+		totalSize: characters.reduce((acc, character) => acc + (character.statistics?.totalAssociations || 0), 0),
+		unusedCharacters: characters.filter((character) => (character.statistics?.imageCount || 0) === 0).length,
+		favoriteCharacters: characters.filter((character) => character.isFavorite).length,
+	};
 
-	// Filtrar personajes basados en los criterios seleccionados - 🔍 Verificar que characters sea un array
-	const filteredCharacters = Array.isArray(characters)
-		? characters.filter((character) => {
-				let matches = true;
+	// Filtrar personajes basados en los criterios seleccionados
+	const filteredCharacters = characters.filter((character) => {
+		let matches = true;
 
-				// Filtrar por búsqueda
-				if (searchQuery) {
-					const normalizedQuery = searchQuery.toLowerCase();
-					matches =
-						matches &&
-						Boolean(
-							character.name.toLowerCase().includes(normalizedQuery) ||
-								character.description?.toLowerCase().includes(normalizedQuery)
-						);
-				}
+		// Filtrar por categorías
+		if (selectedCategories.length > 0) {
+			matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
+		}
 
-				// Filtrar por categorías
-				if (selectedCategories.length > 0) {
-					matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
-				}
+		// Filtrar por clases
+		if (selectedClasses.length > 0) {
+			matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
+		}
 
-				// Filtrar por clases
-				if (selectedClasses.length > 0) {
-					matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
-				}
+		// Filtrar por favoritos
+		if (onlyFavorites) {
+			matches = matches && !!character.isFavorite;
+		}
 
-				// Filtrar por favoritos
-				if (onlyFavorites) {
-					matches = matches && !!character.isFavorite;
-				}
-
-				return matches;
-			})
-		: [];
+		return matches;
+	});
 
 	// Manejar eliminación de personaje
-	const handleDeleteCharacter = useCallback(async (id: string) => {
-		try {
-			await deleteCharacter(id);
-			setCharacters((prev) => prev.filter((character) => character.id !== id));
-			setSelectedCharacter(null);
-			setIsEditing(false);
-			toastService.success('Personaje eliminado');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el personaje', {
-				description: errorMessage,
-			});
-		}
-	}, []);
+	const handleDeleteCharacter = useCallback(
+		async (id: string) => {
+			try {
+				await deleteCharacterMutation.mutateAsync(id);
+				setSelectedCharacter(null);
+				setIsEditing(false);
+				toastService.success('Personaje eliminado');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar el personaje', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteCharacterMutation]
+	);
 
 	// Manejar edición de personaje
 	const handleEditCharacter = useCallback((character: CharacterWithStats) => {
@@ -147,18 +108,12 @@ export function CharactersSettings() {
 	);
 
 	// Manejar creación exitosa
-	const handleCharacterCreated = useCallback((newCharacter: CharacterWithStats) => {
-		setCharacters((prev) => [...prev, newCharacter]);
+	const handleCharacterCreated = useCallback((_newCharacter: CharacterWithStats) => {
 		toastService.success('Personaje creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleCharacterUpdated = useCallback((updatedCharacter: CharacterWithStats) => {
-		setCharacters((prev) =>
-			prev.map((character) =>
-				character.id === updatedCharacter.id ? { ...character, ...updatedCharacter } : character
-			)
-		);
+	const handleCharacterUpdated = useCallback((_updatedCharacter: CharacterWithStats) => {
 		toastService.success('Personaje actualizado');
 	}, []);
 
@@ -205,12 +160,9 @@ export function CharactersSettings() {
 		return (
 			<Card className="rounded-sm bg-muted/30 border-none">
 				<CardContent>
-					<EmptyState
-						icon={Info}
-						title="Error al cargar personajes"
-						description={error}
-						actions={<Button onClick={() => globalThis.location?.reload()}>Intentar de nuevo</Button>}
-					/>
+					<div className="flex items-center justify-center gap-2 p-3">
+						<p className="text-sm text-destructive">Error al cargar personajes: {error.message}</p>
+					</div>
 				</CardContent>
 			</Card>
 		);

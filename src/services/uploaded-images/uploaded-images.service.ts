@@ -1,7 +1,10 @@
-import { prisma } from '@/lib/database/prisma';
+import { and, asc, count, desc, eq, gte, like, or, sql } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { uploadedImages } from '@/lib/drizzle/schema/index';
 import { processImage } from '@/lib/image/image-processing';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
 import { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
@@ -16,35 +19,9 @@ import type {
 	UploadedImageResults,
 	UploadedImageStats,
 } from '@/types/uploaded-images';
-import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 
 const SERVICE_NAME = 'UploadedImagesService';
 const uploadedImagesLogger = serverLogger.withContext(SERVICE_NAME);
-
-interface WhereClause {
-	type?: UploadedImageType;
-	category?: string;
-	size?: {
-		gte?: number;
-		lte?: number;
-	};
-	width?: {
-		gte?: number;
-		lte?: number;
-	};
-	height?: {
-		gte?: number;
-		lte?: number;
-	};
-	OR?: Array<
-		| {
-				name: { contains: string };
-		  }
-		| {
-				category: { contains: string };
-		  }
-	>;
-}
 
 class UploadedImagesService {
 	private static instance: UploadedImagesService;
@@ -79,6 +56,8 @@ class UploadedImagesService {
 
 	public async createImage(params: CreateUploadedImageParams): Promise<UploadedImageResult> {
 		try {
+			uploadedImagesLogger.info('🆕 Creando imagen subida');
+
 			const { name, type, category, file, dimensions, metadata = {}, processingOptions = {} } = params;
 			const { path, size } = file;
 			const { width, height } = dimensions;
@@ -94,19 +73,28 @@ class UploadedImagesService {
 				};
 			}
 
-			// Crear la imagen en la base de datos
-			const image = await prisma.uploadedImage.create({
-				data: {
+			// Crear la imagen en la base de datos con Drizzle
+			const [image] = await db
+				.insert(uploadedImages)
+				.values({
 					name,
 					path,
-					type,
-					category,
 					size,
-					width,
-					height,
+					hash: crypto.randomUUID(),
 					metadata: processedMetadata ? JSON.stringify(processedMetadata) : null,
-				},
-			});
+					imageId: crypto.randomUUID(),
+					createdAt: new Date(),
+				})
+				.returning({
+					id: uploadedImages.id,
+					name: uploadedImages.name,
+					path: uploadedImages.path,
+					size: uploadedImages.size,
+					hash: uploadedImages.hash,
+					metadata: uploadedImages.metadata,
+					imageId: uploadedImages.imageId,
+					createdAt: uploadedImages.createdAt,
+				});
 
 			// Usar el transformer para convertir el registro a la respuesta
 			const entity = fromDB(image);
@@ -116,8 +104,10 @@ class UploadedImagesService {
 			await this.emitEvent(this.EVENTS.IMAGE_CREATED, result);
 			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { action: 'create', image: result });
 
+			uploadedImagesLogger.info('✅ Imagen subida creada:', result.id);
 			return result;
 		} catch (error) {
+			uploadedImagesLogger.error('❌ Error al crear imagen subida:', error);
 			// Usar el nuevo sistema de manejo de errores
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
@@ -129,15 +119,32 @@ class UploadedImagesService {
 
 	public async updateImage(id: string, params: UpdateUploadedImageParams): Promise<UploadedImageResult> {
 		try {
-			// Verificar que la imagen existe
-			const existingImage = await prisma.uploadedImage.findUnique({
-				where: { id },
-			});
+			uploadedImagesLogger.info(`🔄 Actualizando imagen subida: ${id}`);
 
-			if (!existingImage) {
+			// Verificar que la imagen existe con Drizzle
+			const existingImageQuery = await db
+				.select({
+					id: uploadedImages.id,
+					name: uploadedImages.name,
+					path: uploadedImages.path,
+					type: uploadedImages.type,
+					category: uploadedImages.category,
+					size: uploadedImages.size,
+					width: uploadedImages.width,
+					height: uploadedImages.height,
+					metadata: uploadedImages.metadata,
+					createdAt: uploadedImages.createdAt,
+					updatedAt: uploadedImages.updatedAt,
+				})
+				.from(uploadedImages)
+				.where(eq(uploadedImages.id, id))
+				.limit(1);
+
+			if (existingImageQuery.length === 0) {
 				throw createEntityNotFoundError('UploadedImage', id, SERVICE_NAME);
 			}
 
+			const existingImage = existingImageQuery[0];
 			const { name, type, category, file, dimensions, metadata, processingOptions } = params;
 
 			let updatedMetadata = existingImage.metadata ? JSON.parse(existingImage.metadata) : {};
@@ -181,10 +188,10 @@ class UploadedImagesService {
 				};
 			}
 
-			// Actualizar la imagen en la base de datos
-			const image = await prisma.uploadedImage.update({
-				where: { id },
-				data: {
+			// Actualizar la imagen en la base de datos con Drizzle
+			const [image] = await db
+				.update(uploadedImages)
+				.set({
 					name: name ?? existingImage.name,
 					path: imagePath,
 					type: type ?? existingImage.type,
@@ -193,8 +200,21 @@ class UploadedImagesService {
 					width: imageWidth,
 					height: imageHeight,
 					metadata: Object.keys(updatedMetadata).length > 0 ? JSON.stringify(updatedMetadata) : null,
-				},
-			});
+				})
+				.where(eq(uploadedImages.id, id))
+				.returning({
+					id: uploadedImages.id,
+					name: uploadedImages.name,
+					path: uploadedImages.path,
+					type: uploadedImages.type,
+					category: uploadedImages.category,
+					size: uploadedImages.size,
+					width: uploadedImages.width,
+					height: uploadedImages.height,
+					metadata: uploadedImages.metadata,
+					createdAt: uploadedImages.createdAt,
+					updatedAt: uploadedImages.updatedAt,
+				});
 
 			// Usar el transformer para convertir el registro a la respuesta
 			const entity = fromDB(image);
@@ -204,8 +224,10 @@ class UploadedImagesService {
 			await this.emitEvent(this.EVENTS.IMAGE_UPDATED, result);
 			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { action: 'update', image: result });
 
+			uploadedImagesLogger.info('✅ Imagen subida actualizada:', result.id);
 			return result;
 		} catch (error) {
+			uploadedImagesLogger.error('❌ Error al actualizar imagen subida:', error);
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al actualizar imagen subida',
@@ -218,21 +240,26 @@ class UploadedImagesService {
 	public async deleteImage(id: string): Promise<void> {
 		try {
 			// Verificar que la imagen existe
-			const image = await prisma.uploadedImage.findUnique({
-				where: { id },
-			});
+			const image = await db
+				.select({
+					id: uploadedImages.id,
+					path: uploadedImages.path,
+				})
+				.from(uploadedImages)
+				.where(eq(uploadedImages.id, id))
+				.limit(1);
 
-			if (!image) {
+			if (image.length === 0) {
 				throw createEntityNotFoundError('UploadedImage', id, SERVICE_NAME);
 			}
 
+			const { path } = image[0];
+
 			// Eliminar el archivo físico
-			await this.deleteImageFile(image.path);
+			await this.deleteImageFile(path);
 
 			// Eliminar la entrada de la base de datos
-			await prisma.uploadedImage.delete({
-				where: { id },
-			});
+			await db.delete(uploadedImages).where(eq(uploadedImages.id, id));
 
 			// Emitir evento de eliminación
 			await this.emitEvent(this.EVENTS.IMAGE_DELETED, { id });
@@ -249,6 +276,8 @@ class UploadedImagesService {
 
 	public async getImages(params: GetUploadedImagesParams = {}): Promise<UploadedImageResults> {
 		try {
+			uploadedImagesLogger.info('🔍 Obteniendo imágenes subidas con filtros');
+
 			const { filters = {}, includeDimensions = true, includeThumbnails = true, targetDimensions } = params;
 
 			const {
@@ -267,73 +296,78 @@ class UploadedImagesService {
 				pageSize = 20,
 			} = filters;
 
-			// Construir la cláusula where para el filtrado
-			const where: WhereClause = {};
+			// Construir condiciones de filtrado con Drizzle
+			const conditions = [];
 
 			if (type) {
-				where.type = type;
+				conditions.push(eq(uploadedImages.type, type));
 			}
 
 			if (category) {
-				where.category = category;
+				conditions.push(eq(uploadedImages.category, category));
 			}
 
 			// Filtrar por tamaño
-			if (minSize || maxSize) {
-				where.size = {};
-				if (minSize) {
-					where.size.gte = minSize;
-				}
-				if (maxSize) {
-					where.size.lte = maxSize;
-				}
+			if (minSize) {
+				conditions.push(gte(uploadedImages.size, minSize));
+			}
+			if (maxSize) {
+				conditions.push(lte(uploadedImages.size, maxSize));
 			}
 
 			// Filtrar por dimensiones
-			if (minWidth || maxWidth) {
-				where.width = {};
-				if (minWidth) {
-					where.width.gte = minWidth;
-				}
-				if (maxWidth) {
-					where.width.lte = maxWidth;
-				}
+			if (minWidth) {
+				conditions.push(gte(uploadedImages.width, minWidth));
 			}
-
-			if (minHeight || maxHeight) {
-				where.height = {};
-				if (minHeight) {
-					where.height.gte = minHeight;
-				}
-				if (maxHeight) {
-					where.height.lte = maxHeight;
-				}
+			if (maxWidth) {
+				conditions.push(lte(uploadedImages.width, maxWidth));
+			}
+			if (minHeight) {
+				conditions.push(gte(uploadedImages.height, minHeight));
+			}
+			if (maxHeight) {
+				conditions.push(lte(uploadedImages.height, maxHeight));
 			}
 
 			// Búsqueda por nombre o categoría
 			if (search) {
-				where.OR = [
-					{
-						name: { contains: search },
-					},
-					{
-						category: { contains: search },
-					},
-				];
+				conditions.push(or(like(uploadedImages.name, `%${search}%`), like(uploadedImages.category, `%${search}%`)));
 			}
 
+			const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
+
 			// Calcular el número total de imágenes que coinciden con los filtros
-			const total = await prisma.uploadedImage.count({ where });
+			const totalResult = await db
+				.select({ count: count(uploadedImages.id) })
+				.from(uploadedImages)
+				.where(whereCondition);
+
+			// Determinar el orden
+			const orderBy =
+				sortOrder === 'desc'
+					? desc(uploadedImages[sortBy as keyof typeof uploadedImages] || uploadedImages.createdAt)
+					: asc(uploadedImages[sortBy as keyof typeof uploadedImages] || uploadedImages.createdAt);
 
 			// Obtener las imágenes paginadas
-			const rawImages = await prisma.uploadedImage.findMany({
-				where,
-				orderBy: {
-					[sortBy]: sortOrder,
-				},
-				skip: (page - 1) * pageSize,
-				take: pageSize,
-			});
+			const rawImages = await db
+				.select({
+					id: uploadedImages.id,
+					name: uploadedImages.name,
+					path: uploadedImages.path,
+					type: uploadedImages.type,
+					category: uploadedImages.category,
+					size: uploadedImages.size,
+					width: uploadedImages.width,
+					height: uploadedImages.height,
+					metadata: uploadedImages.metadata,
+					createdAt: uploadedImages.createdAt,
+					updatedAt: uploadedImages.updatedAt,
+				})
+				.from(uploadedImages)
+				.where(whereCondition)
+				.orderBy(orderBy)
+				.limit(pageSize)
+				.offset((page - 1) * pageSize);
 
 			// Transformar los resultados usando el transformer
 			const items = rawImages.map((image) => {
@@ -344,14 +378,17 @@ class UploadedImagesService {
 			// Obtener estadísticas si se incluyen en la respuesta
 			const stats = await this.getImageStats();
 
+			uploadedImagesLogger.info(`✅ ${items.length} imágenes obtenidas`);
+
 			return {
 				items,
-				total,
+				total: totalResult[0].count,
 				page,
 				pageSize,
 				stats,
 			};
 		} catch (error) {
+			uploadedImagesLogger.error('❌ Error al obtener imágenes subidas:', error);
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al obtener imágenes subidas',
@@ -363,40 +400,43 @@ class UploadedImagesService {
 
 	public async getImageStats(): Promise<UploadedImageStats> {
 		try {
-			// Contar el número total de imágenes
-			const total = await prisma.uploadedImage.count();
+			uploadedImagesLogger.info('📊 Calculando estadísticas de imágenes subidas');
 
-			// Agrupar por tipo
-			const byType = await prisma.uploadedImage.groupBy({
-				by: ['type'],
-				_count: {
-					type: true,
-				},
-				_sum: {
-					size: true,
-				},
-			});
+			// Contar el número total de imágenes
+			const totalResult = await db.select({ count: count(uploadedImages.id) }).from(uploadedImages);
+
+			// Agrupar por tipo usando una consulta SQL raw para obtener suma
+			const byTypeQuery = await db.execute(sql`
+				SELECT
+					type,
+					COUNT(*) as count,
+					COALESCE(SUM(size), 0) as total_size
+				FROM ${uploadedImages}
+				GROUP BY type
+			`);
 
 			// Calcular el tamaño total
-			const totalSize = byType.reduce((sum, item) => sum + (item._sum?.size || 0), 0);
+			const totalSize = byTypeQuery.rows.reduce((sum, item: any) => sum + (Number(item.total_size) || 0), 0);
 
 			// Convertir a formato de respuesta
 			const stats: Record<UploadedImageType, number> = {} as Record<UploadedImageType, number>;
 
-			for (const item of byType) {
-				stats[item.type as UploadedImageType] = item._count.type;
+			for (const item of byTypeQuery.rows as any[]) {
+				stats[item.type as UploadedImageType] = Number(item.count);
 			}
 
+			uploadedImagesLogger.info('✅ Estadísticas calculadas');
+
 			return {
-				total,
+				total: totalResult[0].count,
 				byType: stats,
 				totalSize,
-				averageSize: total > 0 ? totalSize / total : 0,
 			};
 		} catch (error) {
+			uploadedImagesLogger.error('❌ Error al obtener estadísticas:', error);
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
-				message: 'Error al obtener estadísticas de imágenes',
+				message: 'Error al obtener estadísticas de imágenes subidas',
 				serviceName: SERVICE_NAME,
 			});
 		}

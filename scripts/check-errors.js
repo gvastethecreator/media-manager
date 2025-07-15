@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { join } from 'node:path';
 import chalk from 'chalk';
+import { join } from 'path';
 
 const LOGS_DIR = join(process.cwd(), 'logs');
 const [, , ...args] = process.argv;
@@ -33,7 +33,7 @@ function showHelp() {
 🔍 Revisor de Errores de Logs (Node.js)
 
 ${chalk.bold('Uso:')}
-  node scripts/check-errors.js [opciones]
+  bun scripts/check-errors.js [opciones]
 
 ${chalk.bold('Opciones:')}
   ${chalk.green('--tool, -t')} <nombre>   - Filtra por herramienta (eslint, biome, tsc, all). Por defecto: 'all'.
@@ -41,9 +41,9 @@ ${chalk.bold('Opciones:')}
   ${chalk.green('--help, -h')}            - Mostrar esta ayuda.
 
 ${chalk.bold('Ejemplos:')}
-  node scripts/check-errors.js
-  node scripts/check-errors.js --tool eslint
-  node scripts/check-errors.js -t biome -d 7
+  bun scripts/check-errors.js
+  bun scripts/check-errors.js --tool eslint
+  bun scripts/check-errors.js -t biome -d 7
 `)
 	);
 }
@@ -99,10 +99,10 @@ function displayResults(allErrors, totalErrors) {
 function showSuggestedCommands(allErrors) {
 	console.log(chalk.cyan('\n💡 Comandos sugeridos para corregir:'));
 	if (allErrors.has('eslint') || allErrors.has('eslint-fix')) {
-		console.log(chalk.yellow('  pnpm lint:fix'));
+		console.log(chalk.yellow('  bun lint:fix'));
 	}
 	if (allErrors.has('biome') || allErrors.has('biome-check') || allErrors.has('biome-fix')) {
-		console.log(chalk.yellow('  pnpm biome:fix'));
+		console.log(chalk.yellow('  bun biome:fix'));
 	}
 	if (allErrors.has('tsc')) {
 		console.log(chalk.dim('  # Los errores de TypeScript requieren corrección manual.'));

@@ -9,9 +9,9 @@ import {
 	DEFAULT_WILDCARD_EMOJI,
 	extendWildcard,
 	extendWildcards,
-	fromPrismaWildcard,
+	fromDrizzleWildcard,
 	parseChildren,
-	toPrismaWildcard,
+	toDrizzleWildcard,
 	validateWildcard,
 	WildcardTransformOptions,
 } from './serializers';
@@ -23,9 +23,9 @@ export {
 	WildcardTransformOptions,
 	extendWildcard,
 	extendWildcards,
-	fromPrismaWildcard,
+	fromDrizzleWildcard,
 	parseChildren,
-	toPrismaWildcard,
+	toDrizzleWildcard,
 	validateWildcard,
 };
 
@@ -45,8 +45,8 @@ export { toBulkUpdateWildcardData, toCreateWildcardData, toSearchOptions, toUpda
  * Objeto transformador para Wildcards
  */
 export const WildcardTransformer = {
-	toPrisma: toPrismaWildcard,
-	fromPrisma: fromPrismaWildcard,
+	toDrizzle: toDrizzleWildcard,
+	fromDrizzle: fromDrizzleWildcard,
 	extend: extendWildcard,
 	extendMany: extendWildcards,
 	validate: validateWildcard,

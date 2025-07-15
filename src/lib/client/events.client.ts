@@ -1,23 +1,37 @@
 'use client';
 
-import { useOptimistic } from 'react';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { useCallback, useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { EventData } from '../server/events.server';
 
-const eventsLogger = serverLogger.withContext('ClientEvents');
+const eventsLogger = clientLogger.withContext('ClientEvents');
 
 // Mapa de suscriptores de eventos
 type EventCallback<T = unknown> = (data: T) => void;
 const eventSubscribers = new Map<string, Set<EventCallback<unknown>>>();
 
 /**
- * Hook para manejar eventos optimistas
+ * Hook para manejar eventos - MIGRADO PARA VITE
+ * Reemplaza useOptimistic por useState simple para evitar loops infinitos
  * @param initialState Estado inicial
  * @returns [state, addEvent] - Estado actual y función para añadir eventos
  */
 export function useEvents<T>(initialState: T) {
-	return useOptimistic<T, EventData>(initialState, (state, event) => {
-		eventsLogger.info('📨 Evento recibido:', event);
+	const [state, setState] = useState<T>(initialState);
+
+	// ✅ Sincronizar con el estado real cuando initialState cambia
+	// Usar JSON.stringify para comparar contenido, no referencia
+	useEffect(() => {
+		const currentStateStr = JSON.stringify(state);
+		const newStateStr = JSON.stringify(initialState);
+
+		if (currentStateStr !== newStateStr) {
+			setState(initialState);
+		}
+	}, [initialState, state, setState]);
+
+	const addEvent = useCallback((event: EventData) => {
+		eventsLogger.info('📨 Evento recibido (MOCK):', event);
 
 		// Emitir el evento a los suscriptores
 		const eventType = event.type;
@@ -25,8 +39,12 @@ export function useEvents<T>(initialState: T) {
 			emitToSubscribers(eventType, event.data);
 		}
 
-		return state;
-	});
+		// En lugar de useOptimistic, simplemente mantenemos el estado actual
+		// En una implementación real, aquí aplicaríamos los cambios optimistas
+		eventsLogger.debug('Estado mantenido sin cambios optimistas');
+	}, []);
+
+	return [state, addEvent] as const;
 }
 
 /**

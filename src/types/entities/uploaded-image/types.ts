@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad UploadedImage
  * @module types/entities/uploaded-image/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para UploadedImage.
  * Última migración: 2025-06-18
  */
@@ -26,35 +25,11 @@ export interface UploadedImageBase {
 	id: string;
 	name: string;
 	path: string;
-	type: UploadedFileType;
-	category: string;
-	hash: string;
-	imageId: string;
 	size: number;
-	width: number;
-	height: number;
-	metadata?: string | null;
-	uploadedAt: Date;
+	hash: string;
+	metadata: string | null;
+	imageId: string;
 	createdAt: Date;
-	updatedAt: Date;
-}
-
-/**
- * Interfaz para dimensiones y aspect ratio
- */
-export interface UploadedImageDimensions {
-	width: number;
-	height: number;
-	aspectRatio: number;
-}
-
-/**
- * Interfaz extendida para cliente
- */
-export interface UploadedImageExtended extends UploadedImageBase {
-	dimensions: UploadedImageDimensions;
-	url: string;
-	thumbnailUrl?: string;
 }
 
 /**
@@ -68,6 +43,41 @@ export type UploadedImageCreateInput = Omit<UploadedImageBase, 'id' | 'createdAt
 export type UploadedImageUpdateInput = Partial<
 	Omit<UploadedImageBase, 'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'>
 >;
+
+/**
+ * Dimensiones de imagen
+ */
+export interface UploadedImageDimensions {
+	width: number;
+	height: number;
+	aspectRatio: number;
+}
+
+/**
+ * Estadísticas de imagen subida
+ */
+export interface UploadedImageStatistics {
+	totalViews: number;
+	lastAccessed: string;
+	processingTime?: number;
+}
+
+/**
+ * Versión extendida con dimensiones y estadísticas
+ */
+export interface UploadedImageExtended extends UploadedImageBase {
+	dimensions: UploadedImageDimensions;
+	url: string;
+	thumbnailUrl?: string;
+	stats?: UploadedImageStatistics;
+}
+
+/**
+ * Versión con estadísticas calculadas
+ */
+export interface UploadedImageWithStats extends UploadedImageExtended {
+	stats: UploadedImageStatistics;
+}
 
 /**
  * Esquema Zod para validación de UploadedImage
@@ -89,7 +99,6 @@ export const UploadedImageSchema = z.object({
 	updatedAt: z.date(),
 });
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con UploadedImageSchema antes de persistir.

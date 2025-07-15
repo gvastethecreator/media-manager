@@ -1,39 +1,29 @@
 /**
- * @file Exportaciones principales para la entidad Video
+ * @file Exportaciones principales de tipos para la entidad Video.
  * @module types/entities/video
- * @description Barrel de exportaciones optimizado para Video con patrón EntityWithStats
+ * @description
+ *   Este archivo centraliza las exportaciones de tipos para la entidad Video.
+ *   El tipo canónico para usar en la aplicación es **`VideoWithStats`**.
+ *
+ *   - `VideoBase`: Tipo base desde Drizzle.
+ *   - `VideoStatistics`: Estadísticas calculadas.
+ *   - `VideoWithStats`: Tipo enriquecido con estadísticas (CANÓNICO).
+ *
+ * @see /src/types/entities/video/base.ts
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-// 🎬 Tipos principales (solo canónicos)
-// 🔄 Inputs y operaciones
-// 📊 Estadísticas y estado
+// --- Tipos Canónicos ---
 export type {
-	PaginatedVideos,
-	PrismaVideoWithCounts,
 	VideoBase,
 	VideoComplete,
 	VideoCreateInput,
 	VideoFilters,
 	VideoPaginationOptions,
 	VideoPlayState,
-	VideoRelations,
-	VideoStatistics,
+	VideoSortCriteria,
 	VideoStats,
 	VideoUpdateInput,
+	VideoViewMode,
 	VideoWithStats,
 } from './types';
-// 🎯 Enums
-// ⚡ Validación
-export {
-	VideoCodec,
-	VideoFormat,
-	VideoQuality,
-	VideoSchema,
-	VideoSortCriteria,
-	VideoViewMode,
-} from './types';
-
-// 🟢 Documentación:
-// - VideoWithStats es el tipo principal para toda la aplicación
-// - VideoComplete solo para casos especiales con relaciones completas
-// - PrismaVideoWithCounts para consultas optimizadas con _count

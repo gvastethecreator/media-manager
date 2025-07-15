@@ -1,13 +1,11 @@
-'use client';
-
+import { Code, File, FileWarning, Folder, HelpCircle } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { Code, File, FileWarning, Folder, HelpCircle } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ExtendedProcessStatus } from './hooks/use-folders';
 
 // Crear una instancia de logger para este componente
@@ -26,7 +24,7 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 	const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 	const [isStale, setIsStale] = useState<boolean>(false);
 	const [isComplete, setIsComplete] = useState<boolean>(false);
-	const staleTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const staleTimerRef = useRef<number | null>(null);
 	const initialLoadRef = useRef<boolean>(true);
 
 	// Verificar si el estado está estancado (sin actualizaciones por más de 15 segundos)

@@ -58,7 +58,7 @@ sequenceDiagram
     participant DB
     Client->>API: createAudio()
     API->>Transformer: mapCreateAudioDataToPrisma()
-    Transformer->>DB: prisma.audio.create()
+    
     DB-->>Transformer: Audio
     Transformer-->>API: transformAudio()
     API-->>Client: AudioBase

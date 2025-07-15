@@ -1,44 +1,62 @@
-import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 import { useCallback, useMemo } from 'react';
+import { useNavigationData, useNavigationStats } from '@/lib/api/navigation';
 import type { CategoryChild, NavigationCategory } from '../types';
 
-type AnyNavItem = NonNullable<NavigationData[keyof Omit<NavigationData, 'stats'>]>[number];
-
 // Tipo que representa cualquier posible item de navegación
-type NavItem = AnyNavItem & {
+type NavItem = {
+	id: string;
+	name?: string;
 	title?: string;
+	emoji?: string;
+	color?: string;
+	path?: string;
+	description?: string;
+	totalFiles?: number;
+	totalSize?: number;
+	imageCount?: number;
+	itemCount?: number; // Conteo total de elementos
+	_count?: {
+		images?: number;
+		videos?: number;
+		folders?: number;
+		collections?: number;
+		tags?: number;
+	};
 };
 
 /**
  * Hook que proporciona funciones para calcular estadísticas de categorías
- * @param initialData Datos iniciales de navegación
+ * Migrado para usar API calls en lugar de datos mock
  */
-export function useCategoryStats(initialData: NavigationData) {
-	const data = initialData || {};
+export function useCategoryStats() {
+	const { data: navigationData, isLoading: isLoadingNavigation } = useNavigationData();
+	const { data: statsData, isLoading: isLoadingStats } = useNavigationStats();
 
-	const categoryDataMap = useMemo(
-		() => ({
-			folders: data.folders || [],
-			collections: data.collections || [],
-			tags: data.tags || [],
-			albums: data.albums || [],
-			characters: data.characters || [],
-			places: data.places || [],
-			worldItems: data.worldItems || [],
-			concepts: data.concepts || [],
-			prompts: data.prompts || [],
-			notes: data.notes || [],
-			groups: data.groups || [],
-			properties: data.properties || [],
-			wildcards: data.wildcards || [],
-			audios: data.audios || [],
-			documents: data.documents || [],
-			jsonFiles: data.jsonFiles || [],
-			file3ds: data.file3ds || [],
-			workflows: data.workflows || [],
-		}),
-		[data]
-	);
+	const categoryDataMap = useMemo(() => {
+		if (!navigationData) return {};
+
+		return {
+			folders: navigationData.folders || [],
+			collections: navigationData.collections || [],
+			tags: navigationData.tags || [],
+			albums: navigationData.albums || [],
+			characters: navigationData.characters || [],
+			places: navigationData.places || [],
+			worldItems: navigationData.worldItems || [],
+			concepts: navigationData.concepts || [],
+			prompts: navigationData.prompts || [],
+			notes: navigationData.notes || [],
+			groups: navigationData.groups || [],
+			properties: navigationData.properties || [],
+			wildcards: navigationData.wildcards || [],
+			audios: navigationData.audios || [],
+			documents: navigationData.documents || [],
+			jsonFiles: navigationData.jsonFiles || [],
+			file3ds: navigationData.file3ds || [],
+			workflows: navigationData.workflows || [],
+			videos: navigationData.videos || [],
+		};
+	}, [navigationData]);
 
 	const getCategoryItemCount = useCallback(
 		(categoryId: NavigationCategory): number => {
@@ -71,21 +89,21 @@ export function useCategoryStats(initialData: NavigationData) {
 					id: item.id || '',
 					name: item.name || item.title || '',
 					title: item.title,
-					emoji: 'emoji' in item ? item.emoji : undefined,
-					color: 'color' in item ? item.color : undefined,
-					path: 'path' in item ? item.path : undefined,
-					description: 'description' in item ? item.description : undefined,
-					totalFiles: 'totalFiles' in item ? item.totalFiles : 0,
-					totalSize: 'totalSize' in item ? item.totalSize : 0,
-					_count:
-						'_count' in item && typeof item._count === 'object' && item._count !== null
-							? {
-									images: 'images' in item._count ? item._count.images : 0,
-									folders: 'folders' in item._count ? item._count.folders : undefined,
-									collections: 'collections' in item._count ? item._count.collections : undefined,
-									tags: 'tags' in item._count ? item._count.tags : undefined,
-								}
-							: undefined,
+					emoji: item.emoji,
+					color: item.color,
+					path: item.path,
+					description: item.description,
+					itemCount: item.itemCount || item.imageCount || (item._count?.images ?? 0) + (item._count?.videos ?? 0),
+					totalFiles: item.totalFiles || 0,
+					totalSize: item.totalSize || 0,
+					_count: item._count
+						? {
+								images: item._count.images || 0,
+								folders: item._count.folders,
+								collections: item._count.collections,
+								tags: item._count.tags,
+							}
+						: undefined,
 				})
 			);
 		},
@@ -94,10 +112,30 @@ export function useCategoryStats(initialData: NavigationData) {
 
 	const stats = useMemo(
 		() => ({
-			totalImages: data.stats?.totalImages || 0,
+			totalImages: statsData?.totalImages || navigationData?.stats?.totalImages || 0,
+			totalFolders: statsData?.totalFolders || navigationData?.stats?.totalFolders || 0,
+			totalCollections: statsData?.totalCollections || navigationData?.stats?.totalCollections || 0,
+			totalTags: statsData?.totalTags || navigationData?.stats?.totalTags || 0,
+			totalAlbums: statsData?.totalAlbums || navigationData?.stats?.totalAlbums || 0,
+			totalCharacters: statsData?.totalCharacters || navigationData?.stats?.totalCharacters || 0,
+			totalPlaces: statsData?.totalPlaces || navigationData?.stats?.totalPlaces || 0,
+			totalWorldItems: statsData?.totalWorldItems || navigationData?.stats?.totalWorldItems || 0,
+			totalFavorites: statsData?.totalFavorites || navigationData?.stats?.totalFavorites || 0,
+			totalActivities: statsData?.totalActivities || navigationData?.stats?.totalActivities || 0,
+			totalSize: statsData?.totalSize || navigationData?.stats?.totalSize || 0,
+			totalViews: statsData?.totalViews || navigationData?.stats?.totalViews || 0,
+			totalDownloads: statsData?.totalDownloads || navigationData?.stats?.totalDownloads || 0,
 		}),
-		[data.stats]
+		[statsData, navigationData]
 	);
 
-	return { stats, getCategoryItemCount, getImagesForCategory, getCategoryItems };
+	return {
+		stats,
+		getCategoryItemCount,
+		getImagesForCategory,
+		getCategoryItems,
+		isLoading: isLoadingNavigation || isLoadingStats,
+		navigationData,
+		statsData,
+	};
 }

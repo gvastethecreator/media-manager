@@ -43,7 +43,7 @@ sequenceDiagram
 
     Client->>Actions: fetchPlaces()
     Actions->>Service: getPlaces()
-    Service->>Database: prisma.place.findMany()
+    Service->>Database: Drizzle.place.findMany()
     Database-->>Service: Places[]
     Service->>Transformer: transformPlaces()
     Transformer-->>Service: transformed Places[]
@@ -128,32 +128,32 @@ interface PlaceWithStats extends Place {
 
 ### Serializers
 
-- `fromPrismaPlace(prismaPlace: any): Place` - Deserializa datos de Place desde Prisma.
-- `toPrismaPlace(place: Place): any` - Serializa un Place para operaciones con Prisma.
+- `fromDrizzlePlace(DrizzlePlace: any): Place` - Deserializa datos de Place desde Drizzle.
+- `toDrizzlePlace(place: Place): any` - Serializa un Place para operaciones con Drizzle.
 - `extendPlace(place: any): Place` - Extiende un objeto base a un Place completo.
 - `validatePlace(place: any): Place` - Valida la estructura de un objeto Place.
 
 ### Mappers
 
-- `mapSearchOptionsToPlaceWhereInput(options: any)` - Convierte opciones de búsqueda a condiciones Prisma.
-- `mapPlaceToPlaceCreateInput(place: Place)` - Mapea un Place a formato de creación para Prisma.
-- `mapPlaceToPlaceUpdateInput(place: Place)` - Mapea un Place a formato de actualización para Prisma.
+- `mapSearchOptionsToPlaceWhereInput(options: any)` - Convierte opciones de búsqueda a condiciones Drizzle.
+- `mapPlaceToPlaceCreateInput(place: Place)` - Mapea un Place a formato de creación para Drizzle.
+- `mapPlaceToPlaceUpdateInput(place: Place)` - Mapea un Place a formato de actualización para Drizzle.
 
 ## Ejemplos de uso
 
-### Transformar un lugar desde Prisma
+### Transformar un lugar desde Drizzle
 
 ```typescript
 import { transformPlace } from '@/transformers/place';
 
-// Datos de Prisma
-const prismaPlace = await prisma.place.findUnique({
+// Datos de Drizzle
+const DrizzlePlace = await Drizzle.place.findUnique({
   where: { id: 'place-id-here' },
   include: { _count: true }
 });
 
 // Transformar a Place
-const place = transformPlace(prismaPlace);
+const place = transformPlace(DrizzlePlace);
 ```
 
 ### Transformar a versión extendida para UI

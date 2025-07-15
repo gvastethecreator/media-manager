@@ -1,21 +1,57 @@
-# Documentación de Transformadores de File
+# 📁 Transformador File
 
-## Descripción
+**Transformaciones y validaciones para la entidad File en el sistema de gestión de archivos.**
+✅ MIGRADO A DRIZZLE - Enero 2025
 
-Los transformadores de **File** permiten mapear, serializar, deserializar y extender la entidad File para distintos usos (UI, API, persistencia, etc.), asegurando siempre el uso de tipos canónicos y validación robusta.
+## Visión General
 
----
+El transformador File gestiona archivos del sistema con capacidades de análisis de metadatos, clasificación por tipo, cálculo de estadísticas y organización jerárquica.
 
-## Diagrama de Flujo (Mermaid)
+## Funcionalidades Principales
+
+### 🔄 Transformaciones
+
+* **toFileWithStats**: Enriquece archivos base con estadísticas calculadas
+* **toFileWithStatsList**: Procesa listas de archivos con estadísticas
+
+### 📊 Estadísticas Calculadas
+
+* **formattedSize**: Tamaño legible para humanos (KB, MB, GB)
+* **typeLabel**: Tipo de archivo legible (Imagen, Video, Documento)
+* **iconName**: Ícono recomendado para el tipo de archivo
+* **colorCode**: Color recomendado para el tipo de archivo
+* **daysSinceModified**: Días desde la última modificación
+* **daysSinceAccessed**: Días desde el último acceso
+* **isRecent**: Indicador de archivo reciente (≤ 7 días)
+* **isLarge**: Indicador de archivo grande (> 100MB)
+
+### 🔒 Serialización y Estructura
+
+* **serializeFileWithStats**: Serialización completa con estadísticas
+* **serializeDirectoryStructure**: Estructura jerárquica de directorios
+* **serializeFileGroupedStats**: Agrupación por tipo con totales
+
+## Arquitectura
 
 ```mermaid
-flowchart TD
-    A[File (Prisma/Raw)] --> B[mappers.ts]
-    B -->|toFileListItem| C[FileListItem]
-    B -->|toFileCard| D[FileCard]
-    B -->|parseFileSearchParams| E[Prisma.FileWhereInput]
-    A --> F[serializers.ts]
-    F -->|transformFile| G[FileComplete]
+graph TD
+    A[FileBase] --> B[calculateFileStats]
+    B --> C[FileStatistics]
+    A --> D[toFileWithStats]
+    C --> D
+    D --> E[FileWithStats]
+
+    E --> F[groupFilesByType]
+    F --> G[Archivos Agrupados]
+
+    E --> H[serializeDirectoryStructure]
+    H --> I[Estructura Jerárquica]
+
+    E --> J[serializeFileWithStats]
+    J --> K[API Response]
+
+    L[validators] --> M[Validación Zod]
+    M --> N[Datos Validados]
 ```
 
 ---

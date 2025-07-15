@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad Profile
  * @module types/entities/profile/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Profile.
  * Última migración: 2025-06-18
  */
@@ -35,12 +34,12 @@ export interface ProfileBase {
 	name: string;
 	emoji: string;
 	color: string;
-	description?: string | null;
+	description: string | null;
 	isActive: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	settingsId?: string | null;
-	imageId?: string | null;
+	settingsId: string | null;
+	imageId: string | null;
 }
 
 /**
@@ -138,17 +137,18 @@ export interface PaginatedProfiles {
 export const ProfileSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	emoji: z.string(),
-	color: z.string(),
-	description: z.string().nullable().optional(),
+	emoji: z.string().nullable(),
+	color: z.string().nullable(),
+	description: z.string().nullable(),
 	isActive: z.boolean(),
+	theme: z.nativeEnum(ThemeMode).nullable(),
+	language: z.nativeEnum(Language).nullable(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 	settingsId: z.string().nullable().optional(),
 	imageId: z.string().nullable().optional(),
 });
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con ProfileSchema antes de persistir.

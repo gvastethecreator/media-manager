@@ -1,5 +1,3 @@
-'use client';
-
 // TODO: Refactorizar para usar el tipo canónico `PropertyWithStats`.
 // Este componente actualmente define su propio tipo extendido para la prop `property`,
 // lo que causa inconsistencias. Debería recibir una prop `property` del tipo `PropertyWithStats`
@@ -7,20 +5,19 @@
 // por los mismos fallos en la herramienta de edición que impiden corregir las
 // server actions de la entidad `Property`.
 
+import { Microscope } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { useProperty } from '@/lib/api/properties';
 import { cn } from '@/lib/utils';
 import type { PropertyWithStats } from '@/types/entities/property';
-import { Microscope } from 'lucide-react';
-import Link from 'next/link';
-import React, { useMemo } from 'react';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface PropertyCardProps {
-	property: PropertyWithStats & {
-		totalAssociations?: number;
-	};
-	onClick?: (property: PropertyWithStats) => void;
+	propertyId: string;
+	onClick?: (propertyData: PropertyWithStats) => void;
 	className?: string;
 	showBadges?: boolean;
 }
@@ -29,7 +26,36 @@ export interface PropertyCardProps {
  * Card para mostrar una propiedad
  * Sigue el diseño de los otros componentes de tarjetas
  */
-export function PropertyCard({ property, onClick, className, showBadges = true }: PropertyCardProps) {
+export function PropertyCard({ propertyId, onClick, className, showBadges = true }: PropertyCardProps) {
+	const { data: property, isLoading, error } = useProperty(propertyId);
+
+	// Si no hay datos de la propiedad o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando propiedad...</p>
+			</div>
+		);
+	}
+
+	if (error || !property) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Propiedad no encontrada'}</p>
+			</div>
+		);
+	}
+
 	// Calcular colores
 	const primaryColor = useMemo(() => property.color || '#3b82f6', [property.color]);
 	const secondaryColor = useMemo(() => {
@@ -37,9 +63,9 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 
 		try {
 			// Convertir hex a RGB y oscurecer
-			const r = Number.parseInt(property.color.slice(1, 3), 16);
-			const g = Number.parseInt(property.color.slice(3, 5), 16);
-			const b = Number.parseInt(property.color.slice(5, 7), 16);
+			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
+			const g = Number.parseInt(primaryColor.slice(3, 5), 16);
+			const b = Number.parseInt(primaryColor.slice(5, 7), 16);
 
 			const darkenFactor = 0.7;
 			const darkerR = Math.floor(r * darkenFactor);
@@ -50,23 +76,26 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 		} catch (_e) {
 			return '#2563eb';
 		}
-	}, [property.color]);
+	}, [primaryColor, property.color]);
 
 	// Calcular número total de relaciones desde stats o totalAssociations
-	const totalRelations = property.totalAssociations ?? property.stats.totalRelations;
+	const totalRelations = property.stats?.totalRelations ?? 0;
 
-	const handleClick = () => {
+	const handleClick = useCallback(() => {
 		if (onClick) {
 			onClick(property);
 		}
-	};
+	}, [onClick, property]);
 
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-			e.preventDefault();
-			onClick(property);
-		}
-	};
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+				e.preventDefault();
+				onClick(property);
+			}
+		},
+		[onClick, property]
+	);
 
 	const cardContent = (
 		<CardContainer
@@ -119,7 +148,7 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 
 	// Si no hay onClick, lo envolvemos en Link para navegar a la página de la propiedad
 	return (
-		<Link href={`/dashboard/properties/${property.id}`} className="block">
+		<Link to={`/dashboard/properties/${property.id}`} className="block">
 			{cardContent}
 		</Link>
 	);

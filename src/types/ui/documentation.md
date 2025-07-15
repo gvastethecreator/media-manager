@@ -73,8 +73,8 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createSettings()
-    API->>Transformer: mapCreateSettingsDataToPrisma()
-    Transformer->>DB: prisma.settings.create()
+    API->>Transformer: mapCreateSettingsDataToDrizzle()
+    
     DB-->>Transformer: Settings
     Transformer-->>API: transformSettings()
     API-->>Client: SettingsBase

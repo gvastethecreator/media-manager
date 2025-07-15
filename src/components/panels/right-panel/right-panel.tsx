@@ -1,20 +1,14 @@
-'use client';
-
-import { DetailsPanel } from '@/components/features/file-browser/details/details-panel';
+import { PanelRightClose, X } from 'lucide-react';
+import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { PanelRightClose, X } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { memo, Suspense, useCallback, useEffect, useState } from 'react';
 
-// Lazy load del StatsPanel para reducir carga inicial
-const StatsPanel = dynamic(() => import('../stats/stats-panel'), {
-	ssr: false,
-	loading: () => <div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>,
-});
+// Carga perezosa del StatsPanel compatible con Vite/React 19
+const StatsPanel = lazy(() => import('../stats-panel/stats-panel'));
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = memo(function LazyStatsPanel() {
@@ -58,7 +52,7 @@ interface RightPanelProps {
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
-export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPanelProps) {
+export const RightPanel = memo(function RightPanel({ _className, isCollapsed, onToggleCollapse }: RightPanelProps) {
 	const { isVisible, setVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const { currentView } = useNavigationStore();
 	const [mounted, setMounted] = useState(false);
@@ -122,7 +116,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				(hasSelectedItems ? (
 					<ScrollArea className="flex-1">
 						<div className="p-2">
-							<DetailsPanel selectedItems={selectedItems} />
+							<DetailsPanelV2 selectedItems={selectedItems} />
 						</div>
 					</ScrollArea>
 				) : (
@@ -130,7 +124,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				))}
 		</div>
 	);
-}
+});
 
 /**
  * 📝 Actualizado para usar DetailsPanelV2

@@ -1,8 +1,8 @@
 'use client';
 
-import type { ThemeProviderProps } from 'next-themes';
-import { ThemeProvider as NextThemeProvider, useTheme } from 'next-themes';
 import { useEffect } from 'react';
+import type { ThemeProviderProps } from '@/lib/contexts/theme-context';
+import { ThemeProvider as NativeThemeProvider, useTheme } from '@/lib/contexts/theme-context';
 
 // Definimos los temas personalizados
 const customThemes = [
@@ -48,11 +48,21 @@ function ThemeEnforcer() {
 	useEffect(() => {
 		// Solo aplicar si el tema cambió realmente y no está ya aplicado
 		if (theme && typeof globalThis !== 'undefined' && globalThis.document) {
-			const currentTheme = globalThis.document.documentElement.getAttribute('data-theme');
+			const root = globalThis.document.documentElement;
 
-			// Verificar si realmente necesitamos cambiar el tema
-			if (currentTheme !== theme) {
-				globalThis.document.documentElement.setAttribute('data-theme', theme);
+			// Remover clases anteriores
+			root.classList.remove('light', 'dark', 'system');
+
+			// Aplicar clase del tema resuelto
+			if (theme === 'system') {
+				const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				root.classList.add(systemTheme);
+				// Actualizar el atributo solo para debug
+				root.setAttribute('data-theme', systemTheme);
+			} else {
+				root.classList.add(theme);
+				// Actualizar el atributo solo para debug
+				root.setAttribute('data-theme', theme);
 			}
 		}
 	}, [theme]);
@@ -62,10 +72,10 @@ function ThemeEnforcer() {
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 	return (
-		<NextThemeProvider attribute="data-theme" defaultTheme="light" themes={customThemes} {...props}>
+		<NativeThemeProvider {...props}>
 			{children}
 			<ThemeDebugger />
 			<ThemeEnforcer />
-		</NextThemeProvider>
+		</NativeThemeProvider>
 	);
 }

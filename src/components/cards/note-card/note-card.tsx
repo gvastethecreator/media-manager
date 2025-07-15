@@ -1,34 +1,17 @@
-'use client';
-
 import { BookOpen, ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import { useNote, useNoteCounts, useRecentNoteImages } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
-import type { NoteComplete as Note } from '@/types/entities/note/types';
+import type { NoteComplete } from '@/types/entities/note';
 import { CardHeader } from '../card-header';
 import { NoteCardContent } from './note-card-content';
 import { NoteCardFooter } from './note-card-footer';
 import { NoteCardImages } from './note-card-images';
 
 export interface NoteCardProps {
-	note: Note & {
-		_count?: {
-			images?: number;
-			videos?: number;
-			albums?: number;
-			collections?: number;
-			tags?: number;
-			characters?: number;
-			places?: number;
-			worldItems?: number;
-			concepts?: number;
-			prompts?: number;
-			wildcards?: number;
-			properties?: number;
-			groups?: number;
-		};
-	};
-	onClick?: () => void;
+	noteId: string;
+	onClick?: (noteData: NoteComplete) => void;
 	className?: string;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
@@ -37,33 +20,37 @@ export interface NoteCardProps {
 /**
  * Card para mostrar una nota, con un diseño inspirado en cartas de TCG.
  */
-export function NoteCard({ note, onClick, className, style, tcgMode = true }: NoteCardProps) {
+export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: NoteCardProps) {
+	const { data: note, isLoading, error } = useNote(noteId);
+	const { data: recentImagesData } = useRecentNoteImages(noteId);
+	const { data: noteCounts } = useNoteCounts(noteId);
+
 	// Calcular valores derivados
-	const imagesCount = note._count?.images || 0;
-	const videosCount = note._count?.videos || 0;
-	const charactersCount = note._count?.characters || 0;
+	const imagesCount = noteCounts?.images || 0;
+	const videosCount = noteCounts?.videos || 0;
+	const charactersCount = noteCounts?.characters || 0;
 	const relationsCount =
-		(note._count?.places || 0) +
-		(note._count?.worldItems || 0) +
-		(note._count?.concepts || 0) +
-		(note._count?.prompts || 0) +
-		(note._count?.groups || 0) +
-		(note._count?.properties || 0) +
-		(note._count?.wildcards || 0) +
+		(noteCounts?.places || 0) +
+		(noteCounts?.worldItems || 0) +
+		(noteCounts?.concepts || 0) +
+		(noteCounts?.prompts || 0) +
+		(noteCounts?.groups || 0) +
+		(noteCounts?.properties || 0) +
+		(noteCounts?.wildcards || 0) +
 		charactersCount;
 
 	// Colores para el gradiente
-	const primaryColor = useMemo(() => note.color || '#ec4899', [note.color]);
+	const primaryColor = useMemo(() => color || '#ec4899', [color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!note.color) return '#db2777';
+		if (!color) return '#db2777';
 
 		// Oscurecer el color primario para el secundario
 		try {
 			// Convertir hex a RGB
-			const r = Number.parseInt(note.color.slice(1, 3), 16);
-			const g = Number.parseInt(note.color.slice(3, 5), 16);
-			const b = Number.parseInt(note.color.slice(5, 7), 16);
+			const r = Number.parseInt(color.slice(1, 3), 16);
+			const g = Number.parseInt(color.slice(3, 5), 16);
+			const b = Number.parseInt(color.slice(5, 7), 16);
 
 			// Oscurecer los componentes
 			const darkenFactor = 0.7;
@@ -77,30 +64,18 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 			// Si hay algún error, volver al valor por defecto
 			return '#db2777';
 		}
-	}, [note.color]);
+	}, [color]);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			if (onClick && (e.key === 'Enter' || e.key === ' ') && note) {
 				e.preventDefault();
-				onClick();
+				onClick(note);
 			}
 		},
-		[onClick]
+		[onClick, note]
 	);
-
-	// Parsear tags si es un string
-	const tags = useMemo(() => {
-		if (typeof note.tags === 'string' && note.tags) {
-			try {
-				return JSON.parse(note.tags);
-			} catch (_e) {
-				return [];
-			}
-		}
-		return note.tags || [];
-	}, [note.tags]);
 
 	// Definir estilos de la tarjeta
 	const cardStyle = useMemo(
@@ -115,6 +90,49 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 		}),
 		[primaryColor, secondaryColor, style, tcgMode]
 	);
+
+	// Si no hay datos de la nota o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando nota...</p>
+			</div>
+		);
+	}
+
+	if (error || !note) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Nota no encontrada'}</p>
+			</div>
+		);
+	}
+
+	// Extraer datos relevantes
+	const {
+		id,
+		title,
+		emoji = '📝',
+		color,
+		category,
+		content,
+		status,
+		priority,
+		isFavorite = false,
+		createdAt,
+		updatedAt,
+		tags,
+	} = note;
 
 	// Render del componente
 	return (
@@ -135,7 +153,7 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 			)}
 			whileHover={{ y: -5 }}
 			whileTap={{ scale: 0.98 }}
-			onClick={onClick}
+			onClick={onClick ? (_e: React.MouseEvent<HTMLDivElement>) => onClick(note) : undefined}
 			onKeyDown={handleKeyDown}
 			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
@@ -155,7 +173,7 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
-				title={note.title}
+				title={note.title || 'Sin título'}
 				subtitle={note.category || 'General'}
 				icon={
 					note.emoji ? (
@@ -167,7 +185,6 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 					)
 				}
 				primaryColor={primaryColor}
-				variant={tcgMode ? 'tcg' : 'default'}
 			/>
 
 			{/* Sección de imágenes */}

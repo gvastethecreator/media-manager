@@ -22,7 +22,7 @@ graph TD
 ## 🚨 Notas de migración
 
 - **Legacy eliminado:** Solo se exportan tipos y enums canónicos.
-- **No importar tipos de Prisma ni archivos legacy.**
+
 - **Validar siempre con ConceptSchema antes de persistir.**
 
 ## 📝 Ejemplo de uso

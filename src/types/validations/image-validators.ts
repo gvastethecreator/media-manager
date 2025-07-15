@@ -23,11 +23,11 @@ export const BaseImageSchema = z.object({
 
 /**
  * Esquema para validar un objeto de estadísticas de imagen
- * NOTA: Campo downloads eliminado - no existe en el esquema Prisma ImageStats
+ * NOTA: Campo downloads eliminado - no existe en el esquema de base de datos ImageStats
  */
 export const ImageStatsSchema = z.object({
 	views: z.number().int().nonnegative().default(0),
-	// downloads: z.number().int().nonnegative().default(0), // ❌ ELIMINADO - No existe en esquema Prisma
+
 	favorites: z.number().int().nonnegative().default(0),
 	lastAccessed: z.date().nullable().optional(),
 });

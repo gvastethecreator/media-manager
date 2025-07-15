@@ -16,8 +16,8 @@ graph TD
     Wildcard --> Store[Store]
     Wildcard --> Actions[Actions]
 
-    Transformers --> T1[fromPrismaWildcard]
-    Transformers --> T2[fromPrismaWildcards]
+    Transformers --> T1[fromDrizzleWildcard]
+    
     Transformers --> T3[extendWildcard]
     Transformers --> T4[extendWildcards]
     Transformers --> T5[Serializers]
@@ -61,7 +61,7 @@ sequenceDiagram
     Store->>Actions: fetchWildcards()
     Actions->>DB: Consultar wildcards
     DB-->>Actions: Datos de wildcards
-    Actions->>Transformer: fromPrismaWildcards()
+    Actions->>Transformer: fromDrizzleWildcards()
     Transformer-->>Actions: Wildcards transformados
     Actions-->>Store: Devolver wildcards
     Store->>Transformer: extendWildcards()
@@ -74,7 +74,7 @@ sequenceDiagram
     Transformer-->>Actions: Datos validados
     Actions->>DB: Persistir cambios
     DB-->>Actions: Confirmación
-    Actions->>Transformer: fromPrismaWildcard()
+    Actions->>Transformer: fromDrizzleWildcard()
     Transformer-->>Actions: Wildcard transformado
     Actions-->>Store: Devolver wildcard
     Store->>Transformer: extendWildcard()
@@ -86,7 +86,7 @@ sequenceDiagram
 
 ### `WildcardBase`
 
-Tipo base derivado del schema de Prisma que define los campos fundamentales:
+Tipo base derivado del esquema de la base de datos que define los campos fundamentales:
 
 ```typescript
 export interface WildcardBase {

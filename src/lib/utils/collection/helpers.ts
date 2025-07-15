@@ -86,14 +86,14 @@ export function filterCollections(collections: CollectionWithStats[], filters: a
 
 		// Filtrar por número de imágenes
 		if (filters.minImages !== undefined) {
-			const imageCount = collection.stats?.totalImages || 0;
+			const imageCount = collection.stats?.imageCount || 0;
 			if (imageCount < filters.minImages) {
 				return false;
 			}
 		}
 
 		if (filters.maxImages !== undefined) {
-			const imageCount = collection.stats?.totalImages || 0;
+			const imageCount = collection.stats?.imageCount || 0;
 			if (imageCount > filters.maxImages) {
 				return false;
 			}

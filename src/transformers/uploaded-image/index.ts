@@ -1,9 +1,15 @@
 /**
- * @file Punto de entrada para los módulos de transformación de UploadedImage
+ * @file Punto de entrada para los transformadores de la entidad UploadedImage.
  * @module transformers/uploaded-image
- * @description Exporta todos los componentes necesarios (mappers, serializers, transformers) para la entidad UploadedImage.
+ * @description Exporta las funciones de transformación canónicas para UploadedImage.
+ * @see /src/transformers/uploaded-image/mappers.ts
+ * @see /src/transformers/uploaded-image/transformer.ts
+ * @updated 2025-01-27
  */
 
-export * from './mappers';
-export * from './serializers';
-export * from './transformer';
+export { toUploadedImageExtended } from './mappers';
+export {
+	transformToUploadedImageFromDrizzle as transformUploadedImage,
+	transformToUploadedImageWithRelationsFromDrizzle as fromDB,
+	type UploadedImageComplete,
+} from './transformer';

@@ -10,10 +10,10 @@ Los transformadores de **Image** permiten mapear, serializar, deserializar y ext
 
 ```mermaid
 flowchart TD
-    A[Image (Prisma/Raw)] --> B[mappers.ts]
-    B -->|fromPrismaImage| C[Image]
-    B -->|fromPrismaImages| D[Image[]]
-    B -->|toPrismaImage| E[PrismaImageCreateInput]
+    A[Image (Drizzle/Raw)] --> B[mappers.ts]
+    B -->|fromDrizzleImage| C[Image]
+    B -->|fromDrizzleImages| D[Image[]]
+    B -->|toDrizzleImage| E[DrizzleImageCreateInput]
 
     F[Image] --> G[serializers.ts]
     G -->|extendImage| H[ImageExtended]
@@ -39,13 +39,13 @@ flowchart TD
 Conversión entre formatos de datos internos y externos:
 
 ```typescript
-// De Prisma a dominio
-export function fromPrismaImage(prismaImage: PrismaImage): Image;
-export function fromPrismaImages(prismaImages: PrismaImage[]): Image[];
+// De Drizzle a dominio
+export function fromDrizzleImage(DrizzleImage: DrizzleImage): Image;
+export function fromDrizzleImages(DrizzleImages: DrizzleImage[]): Image[];
 
-// De dominio a Prisma (para operaciones de creación/actualización)
-export function toPrismaImage(image: ImageCreateInput): PrismaImageCreateInput;
-export function toPrismaImageUpdate(image: ImageUpdateInput): PrismaImageUpdateInput;
+// De dominio a Drizzle (para operaciones de creación/actualización)
+export function toDrizzleImage(image: ImageCreateInput): DrizzleImageCreateInput;
+export function toDrizzleImageUpdate(image: ImageUpdateInput): DrizzleImageUpdateInput;
 
 // Mapeos específicos para UI
 export function toImageListItem(image: Image): ImageListItem;
@@ -84,9 +84,9 @@ Las Server Actions utilizan estos transformers para procesar datos antes de devo
 ```typescript
 // En src/app/actions/images/crud.actions.ts
 export async function getImage(id: string): Promise<Image | null> {
-  const prismaImage = await prisma.image.findUnique({ where: { id } });
-  if (!prismaImage) return null;
-  return fromPrismaImage(prismaImage);
+  const DrizzleImage = await Drizzle.image.findUnique({ where: { id } });
+  if (!DrizzleImage) return null;
+  return fromDrizzleImage(DrizzleImage);
 }
 
 // En un componente/hook cliente
@@ -111,9 +111,9 @@ if (image) {
 
 ## Buenas Prácticas
 
-1. **Nunca** importar tipos de Prisma en archivos que puedan ser usados por el cliente
+1. **Nunca** importar tipos de Drizzle en archivos que puedan ser usados por el cliente
 2. Usar funciones de **extensión** (`extendImage`) para agregar propiedades calculadas
 3. Validar siempre los datos de entrada con Zod antes de procesarlos
-4. Mantener la consistencia en el nombrado de funciones: `fromPrisma*`, `extend*`, etc.
+4. Mantener la consistencia en el nombrado de funciones: `fromDrizzle*`, `extend*`, etc.
 
 Para más detalles sobre la implementación, consulta los archivos específicos en `src/transformers/image/`.

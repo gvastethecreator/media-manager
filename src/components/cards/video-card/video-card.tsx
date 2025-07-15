@@ -1,9 +1,8 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { VideoWithStats } from '@/types/entities/video';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useVideo } from '@/lib/api/videos';
+import { cn } from '@/lib/utils';
+import type { VideoWithStats } from '@/types/entities/video';
 import { CardContainer } from '../card-container';
 import { VideoCardContent } from './video-card-content';
 import { VideoCardFooter } from './video-card-footer';
@@ -11,8 +10,8 @@ import { VideoCardHeader } from './video-card-header';
 import { VideoCardThumbnail } from './video-card-thumbnail';
 
 export interface VideoCardProps {
-	video: VideoWithStats;
-	onClick?: () => void;
+	videoId: string;
+	onClick?: (videoData: VideoWithStats) => void;
 	className?: string;
 	style?: React.CSSProperties;
 	compact?: boolean;
@@ -28,7 +27,7 @@ export interface VideoCardProps {
  * incluyendo thumbnail, estadísticas técnicas, calidad y metadatos.
  */
 export function VideoCard({
-	video,
+	videoId,
 	onClick,
 	className,
 	style,
@@ -37,14 +36,42 @@ export function VideoCard({
 	tcgMode = true,
 	disabled = false,
 }: VideoCardProps) {
+	const { data: video, isLoading, error } = useVideo(videoId);
 	const [isHovered, setIsHovered] = useState(false);
 
+	// Si no hay datos del video o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando video...</p>
+			</div>
+		);
+	}
+
+	if (error || !video) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Video no encontrado'}</p>
+			</div>
+		);
+	}
+
 	// Extraer datos del video
-	const { id, name, statistics, _count } = video;
+	const { id, name, isFavorite, description, createdAt, updatedAt } = video;
 
 	// Calcular colores basados en la calidad técnica
 	const primaryColor = useMemo(() => {
-		const grade = statistics.technicalGrade;
+		const grade = video.stats?.technicalGrade || 'unknown';
 		switch (grade) {
 			case 'A':
 				return '#10b981'; // Verde esmeralda - Ultra calidad
@@ -57,7 +84,7 @@ export function VideoCard({
 			default:
 				return '#6b7280'; // Gris - Desconocida
 		}
-	}, [statistics.technicalGrade]);
+	}, [video.stats?.technicalGrade]);
 
 	const secondaryColor = useMemo(() => {
 		// Oscurecer el color primario
@@ -76,37 +103,37 @@ export function VideoCard({
 
 	// Calcular nivel de rareza basado en quality score
 	const rarityLevel = useMemo(() => {
-		const score = statistics.qualityScore;
+		const score = video.stats?.qualityScore || 0;
 		if (score >= 90) return 10; // Mítico
 		if (score >= 80) return 9; // Legendario
 		if (score >= 70) return 7; // Épico
 		if (score >= 60) return 5; // Raro
 		if (score >= 50) return 3; // Poco común
 		return 1; // Común
-	}, [statistics.qualityScore]);
+	}, [video.stats?.qualityScore]);
 
 	// Manejar eventos
 	const handleClick = useCallback(() => {
 		if (!disabled && onClick) {
-			onClick();
+			onClick(video);
 		}
-	}, [onClick, disabled]);
+	}, [onClick, disabled, video]);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
 				e.preventDefault();
-				onClick();
+				onClick(video);
 			}
 		},
-		[onClick, disabled]
+		[onClick, disabled, video]
 	);
 
 	// ID de carta para TCG
 	const cardId = `V${id.substring(0, 6).toUpperCase()}`;
 
-	// Conteos de relaciones
-	const totalRelations = statistics.totalRelations;
+	// Conteos de relaciones - usar stats en lugar de acceso directo
+	const totalRelations = video.stats?.totalRelations || 0;
 
 	return (
 		<motion.div
@@ -132,12 +159,12 @@ export function VideoCard({
 			<CardContainer
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
-				rarityLevel={rarityLevel}
-				isHovered={isHovered}
-				isSelected={isSelected}
-				tcgMode={tcgMode}
-				compact={compact}
-				className="h-full"
+				glowLevel={isHovered ? 2 : 0} // Añadir glowLevel basado en isHovered
+				className={cn(
+					'transition-all duration-300',
+					isHovered && 'scale-[1.02]',
+					isSelected && 'ring-4 ring-primary/60'
+				)}
 			>
 				<div className="flex flex-col h-full relative z-10">
 					{/* Header con nombre, duración y calidad */}

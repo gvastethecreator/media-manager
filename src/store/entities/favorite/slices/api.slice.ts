@@ -5,7 +5,6 @@
 
 import { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { FavoriteExtended } from '@/types/entities/favorite';
 import { FavoriteStore } from '..';
 
 // Logger específico para este slice

@@ -1,13 +1,3 @@
-'use client';
-
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { useDetailsPanel } from '@/store/details-panel.store';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import {
 	Archive,
 	ArrowDown,
@@ -41,7 +31,17 @@ import {
 	X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { toastService } from '@/lib/ui/toast';
+import { cn } from '@/lib/utils';
+import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
+import { useDetailsPanel } from '@/store/details-panel.store';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
 
 export interface ViewToolbarProps {
@@ -51,12 +51,12 @@ export interface ViewToolbarProps {
 	allItemIds?: string[]; // IDs de todos los elementos disponibles para selección
 }
 
-export function ViewToolbar({
+export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	isRightPanelCollapsed,
 	toggleRightPanelCollapse,
 	isRightPanelVisible,
 	allItemIds = [],
-}: ViewToolbarProps) {
+}) {
 	const { currentView, getCurrentItem } = useNavigationStore();
 
 	// 🔄 Usar los nuevos stores de Zustand
@@ -77,42 +77,69 @@ export function ViewToolbar({
 
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 
-	// Lista de vistas que requieren el panel de detalles
-	const viewsWithDetails = [
-		'all-images',
-		'favorites',
-		'search',
-		'collection-content',
-		'folder-content',
-		'tag-content',
-		'album-content',
-		'character-content',
-		'place-content',
-		'world-item-content',
-	];
+	// Lista de vistas que requieren el panel de detalles - memoizada
+	const viewsWithDetails = useMemo(
+		() => [
+			'all-images',
+			'favorites',
+			'search',
+			'collection-content',
+			'folder-content',
+			'tag-content',
+			'album-content',
+			'character-content',
+			'place-content',
+			'world-item-content',
+		],
+		[]
+	);
 
-	const showDetailsButton = viewsWithDetails.includes(currentView);
+	const showDetailsButton = useMemo(() => viewsWithDetails.includes(currentView), [viewsWithDetails, currentView]);
 
 	// Determinar si estamos en la vista de settings para ocultar controles innecesarios
-	const isInSettingsView = currentView === 'settings';
+	const isInSettingsView = useMemo(() => currentView === 'settings', [currentView]);
 
 	// 🔄 Acciones para archivos seleccionados
-	const handleDeleteSelected = useCallback(() => {
+	const handleDeleteSelected = useCallback(async () => {
 		if (selectedIds.length === 0) {
 			return;
 		}
-		if (window.confirm(`¿Estás seguro de que quieres eliminar ${selectedIds.length} archivo(s)?`)) {
-			// Implementar la eliminación de archivos usando server actions
-			// TODO: Implementar server action para eliminar archivos
+		toastService.info(`Eliminando ${selectedIds.length} archivo(s)...`);
+		try {
+			for (const id of selectedIds) {
+				// Asumimos que el id del item es la ruta del archivo por ahora
+				await deleteFile(id);
+			}
+			toastService.success(`${selectedIds.length} archivo(s) eliminado(s) correctamente.`);
 			clearSelection();
+		} catch (error) {
+			console.error('Error al eliminar archivos:', error);
+			toastService.error('Error al eliminar archivo(s).');
 		}
 	}, [selectedIds, clearSelection]);
 
-	const handleDownloadSelected = useCallback(() => {
+	const handleDownloadSelected = useCallback(async () => {
 		if (selectedIds.length === 0) {
 			return;
 		}
-		// TODO: Implementar server action para descargar archivos
+		toastService.info(`Descargando ${selectedIds.length} archivo(s)...`);
+		try {
+			for (const id of selectedIds) {
+				// Asumimos que el id del item es la ruta del archivo por ahora
+				const { dataUrl, mimeType } = await getFileAsDataUrl(id);
+				const filename = id.split(/[/]/).pop() || 'download';
+				const a = document.createElement('a');
+				a.href = dataUrl;
+				a.download = filename;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+			}
+			toastService.success(`${selectedIds.length} archivo(s) descargado(s) correctamente.`);
+		} catch (error) {
+			console.error('Error al descargar archivos:', error);
+			toastService.error('Error al descargar archivo(s).');
+		}
 	}, [selectedIds]);
 
 	const handleCompressFiles = useCallback(() => {
@@ -121,7 +148,7 @@ export function ViewToolbar({
 		}
 		// TODO: Implementar server action para comprimir archivos
 		console.warn('La funcionalidad de compresión no está implementada en esta versión');
-		alert('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
+		toastService.info('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
 	}, [selectedIds]);
 
 	const handleCopySelected = useCallback(() => {
@@ -512,4 +539,4 @@ export function ViewToolbar({
 			</div>
 		</div>
 	);
-}
+});

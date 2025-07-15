@@ -1,151 +1,172 @@
-'use client';
-
-import { getProperties } from '@/app/actions/properties/property.actions';
-import { PropertyCard } from '@/components/cards/property-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Edit, Trash2 } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { usePropertyStore } from '@/store/entities/property';
-import type { PropertyWithStats as PropertyWithStatsBase } from '@/types/entities/property';
-import { Variable } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { ViewProps } from '../types';
+import { useToast } from '@/components/ui/use-toast';
+import { ViewProps } from '@/components/views/types';
+import { ViewContainer } from '@/components/views/view-container';
+import { useCategoryData } from '@/lib/api/navigation';
+import { useCreateProperty, useDeleteProperty, useUpdateProperty } from '@/lib/api/properties'; // Importar los hooks de mutación
 
-// Definir el tipo extendido para propiedades con estadísticas de asociaciones
-export type PropertyWithStats = PropertyWithStatsBase & {
-	totalAssociations: number;
-};
+export const PropertiesView = memo(function PropertiesView({ className }: ViewProps) {
+	const { data: properties, isLoading } = useCategoryData<any>('properties');
+	const { mutate: createProperty } = useCreateProperty();
+	const { mutate: updateProperty } = useUpdateProperty();
+	const { mutate: deleteProperty } = useDeleteProperty();
 
-const viewLogger = clientLogger.withContext('PropertiesView');
+	const [showForm, setShowForm] = useState(false);
+	const [editingProperty, setEditingProperty] = useState<any | null>(null);
+	const [propertyName, setPropertyName] = useState('');
+	const [propertyValue, setPropertyValue] = useState('');
 
-// Componente memoizado para cada tarjeta de propiedad
-const MemoizedPropertyCard = React.memo(
-	({ property, onPropertyClick }: { property: PropertyWithStats; onPropertyClick: () => void }) => {
-		return <PropertyCard property={property} onClick={onPropertyClick} className="h-full" />;
-	},
-	(prevProps, nextProps) => {
-		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes
-		return (
-			prevProps.property.id === nextProps.property.id &&
-			prevProps.property.name === nextProps.property.name &&
-			prevProps.property.updatedAt === nextProps.property.updatedAt
-		);
-	}
-);
+	const handleEditProperty = useCallback((property: any) => {
+		setEditingProperty(property);
+		setPropertyName(property.name);
+		setPropertyValue(property.value || '');
+		setShowForm(true);
+	}, []);
 
-// Para evitar advertencias de displayName
-MemoizedPropertyCard.displayName = 'MemoizedPropertyCard';
-
-export function PropertiesView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
-	const { setProperties: setStoreProperties } = usePropertyStore();
-	const router = useRouter();
-	const [properties, setProperties] = useState<PropertyWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticProperties, _addEvent] = clientEvents.useEvents<PropertyWithStats[]>(properties);
-
-	const fetchProperties = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando propiedades...');
-			const data = await getProperties();
-
-			// Convertir PropertyWithStats a PropertyWithStats local (con totalAssociations)
-			const propertiesWithStats: PropertyWithStats[] = data.map((property) => ({
-				...property,
-				totalAssociations: property.stats.totalRelations, // Usar el valor de stats
-			}));
-
-			setProperties(propertiesWithStats);
-			setStoreProperties(data); // Actualizar el store con las propiedades originales
-			viewLogger.info(`✅ ${data.length} propiedades cargadas`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando propiedades:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [setStoreProperties]);
-
-	useEffect(() => {
-		// Cargar propiedades inicialmente
-		fetchProperties();
-	}, [fetchProperties]);
-
-	const handlePropertyClick = useCallback(
-		(property: PropertyWithStats) => {
-			viewLogger.info('🖱️ Click en propiedad:', property.name);
-			setCurrentView('property-content');
-			// Navegar a la vista de detalle de la propiedad
-			router.push(`/properties/${property.id}`);
+	const handleDeleteProperty = useCallback(
+		(propertyId: string) => {
+			deleteProperty(propertyId);
 		},
-		[setCurrentView, router]
+		[deleteProperty]
 	);
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
+	const { toast } = useToast();
+	const handleSubmitForm = useCallback(() => {
+		if (propertyName.trim() === '') {
+			toast({
+				title: '❌ Error',
+				description: 'El nombre de la propiedad no puede estar vacío.',
+				variant: 'destructive',
+			});
+			return;
+		}
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!optimisticProperties || optimisticProperties.length === 0) {
-		return (
-			<EmptyState
-				icon={Variable}
-				title="No hay propiedades creadas"
-				description="Crea propiedades para enriquecer tus entidades con metadatos personalizados."
-			/>
-		);
-	}
+		if (editingProperty) {
+			updateProperty({ id: editingProperty.id, data: { name: propertyName, value: propertyValue } });
+		} else {
+			createProperty({ name: propertyName, value: propertyValue });
+		}
+		setPropertyName('');
+		setPropertyValue('');
+		setEditingProperty(null);
+		setShowForm(false);
+	}, [propertyName, propertyValue, editingProperty, createProperty, updateProperty]);
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticProperties.map((property, index) => {
-						// Verificar que la propiedad tenga un id válido
-						if (!property || !(property as any).id) {
-							console.error('Propiedad sin id válido:', property);
-							return null;
-						}
+		<ViewContainer
+			className={className}
+			viewKey="properties"
+			data={properties}
+			isLoading={isLoading}
+			noResultsMessage="No hay propiedades disponibles."
+		>
+			<div className="p-4">
+				<h2 className="text-xl font-bold mb-4">Vista de Propiedades</h2>
 
-						// Crear una función de clic específica para esta propiedad
-						const onPropertyClick = () => handlePropertyClick(property);
+				<Button
+					onClick={() => {
+						setShowForm(!showForm);
+						setEditingProperty(null);
+						setPropertyName('');
+						setPropertyValue('');
+					}}
+					className="mb-4"
+				>
+					{showForm ? 'Cancelar' : 'Crear Propiedad'}
+				</Button>
 
-						return (
-							<motion.div
-								key={(property as any).id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: index * 0.1 }}
-								className="perspective-1000"
-							>
-								<div
-									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-property-id={(property as any).id}
-								>
-									<MemoizedPropertyCard property={property} onPropertyClick={onPropertyClick} />
-								</div>
-							</motion.div>
-						);
-					})}
-				</div>
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">{editingProperty ? 'Editar Propiedad' : 'Nueva Propiedad'}</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="propertyName">Nombre</Label>
+							<Input
+								id="propertyName"
+								value={propertyName}
+								onChange={(e) => setPropertyName(e.target.value)}
+								placeholder="Nombre de la propiedad"
+							/>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="propertyValue">Valor</Label>
+							<Input
+								id="propertyValue"
+								value={propertyValue}
+								onChange={(e) => setPropertyValue(e.target.value)}
+								placeholder="Valor de la propiedad"
+							/>
+						</div>
+						<Button onClick={handleSubmitForm}>{editingProperty ? 'Guardar Cambios' : 'Guardar Propiedad'}</Button>
+					</div>
+				)}
+
+				{isLoading ? (
+					<p>Cargando propiedades...</p>
+				) : properties && properties.length > 0 ? (
+					<ScrollArea className="h-[calc(100vh-200px)]">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+							{properties.map((property: any) => (
+								<Card key={property.id}>
+									<CardHeader>
+										<CardTitle>{property.name}</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<p className="text-sm text-muted-foreground">{property.value}</p>
+										<div className="flex gap-2 mt-2">
+											<Button variant="outline" size="sm" onClick={() => handleEditProperty(property)}>
+												<Edit className="h-4 w-4 mr-1" /> Editar
+											</Button>
+											<AlertDialog>
+												<AlertDialogTrigger asChild>
+													<Button variant="destructive" size="sm">
+														<Trash2 className="h-4 w-4 mr-1" /> Eliminar
+													</Button>
+												</AlertDialogTrigger>
+												<AlertDialogContent>
+													<AlertDialogHeader>
+														<AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+														<AlertDialogDescription>
+															Esta acción eliminará permanentemente la propiedad "{property.name}".
+														</AlertDialogDescription>
+													</AlertDialogHeader>
+													<AlertDialogFooter>
+														<AlertDialogCancel>Cancelar</AlertDialogCancel>
+														<AlertDialogAction
+															onClick={() => handleDeleteProperty(property.id)}
+															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+														>
+															Eliminar
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
+										</div>
+									</CardContent>
+								</Card>
+							))}
+						</div>
+					</ScrollArea>
+				) : (
+					<p>No hay propiedades disponibles.</p>
+				)}
 			</div>
-		</ScrollArea>
+		</ViewContainer>
 	);
-}
+});

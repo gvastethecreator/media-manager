@@ -45,7 +45,7 @@ sequenceDiagram
 
     Client->>Actions: fetchWorldItems()
     Actions->>Service: getWorldItems()
-    Service->>Database: prisma.worldItem.findMany()
+    
     Database-->>Service: WorldItems[]
     Service->>Transformer: transformWorldItems()
     Transformer-->>Service: transformed WorldItems[]
@@ -133,32 +133,32 @@ interface WorldItemWithStats extends WorldItem {
 
 ### Serializers
 
-- `fromPrismaWorldItem(prismaWorldItem: any): WorldItem` - Deserializa datos de WorldItem desde Prisma.
-- `toPrismaWorldItem(worldItem: WorldItem): any` - Serializa un WorldItem para operaciones con Prisma.
+- `fromDrizzleWorldItem(drizzleWorldItem: any): WorldItem` - Deserializa datos de WorldItem desde Drizzle.
+- `toDrizzleWorldItem(worldItem: WorldItem): any` - Serializa un WorldItem para operaciones con Drizzle.
 - `extendWorldItem(worldItem: any): WorldItem` - Extiende un objeto base a un WorldItem completo.
 - `validateWorldItem(worldItem: any): WorldItem` - Valida la estructura de un objeto WorldItem.
 
 ### Mappers
 
-- `mapSearchOptionsToWorldItemWhereInput(options: any)` - Convierte opciones de búsqueda a condiciones Prisma.
-- `mapWorldItemToWorldItemCreateInput(worldItem: WorldItem)` - Mapea un WorldItem a formato de creación para Prisma.
-- `mapWorldItemToWorldItemUpdateInput(worldItem: WorldItem)` - Mapea un WorldItem a formato de actualización para Prisma.
+- `mapSearchOptionsToWorldItemWhereInput(options: any)` - Convierte opciones de búsqueda a condiciones Drizzle.
+- `mapWorldItemToWorldItemCreateData(worldItem: WorldItem)` - Mapea un WorldItem a formato de creación para Drizzle.
+- `mapWorldItemToWorldItemUpdateData(worldItem: WorldItem)` - Mapea un WorldItem a formato de actualización para Drizzle.
 
 ## Ejemplos de uso
 
-### Transformar un objeto del mundo desde Prisma
+### Transformar un objeto del mundo desde Drizzle
 
 ```typescript
 import { transformWorldItem } from '@/transformers/world-item';
 
-// Datos de Prisma
-const prismaWorldItem = await prisma.worldItem.findUnique({
-  where: { id: 'worlditem-id-here' },
-  include: { _count: true }
+// Datos de Drizzle
+const drizzleWorldItem = await db.query.worldItems.findFirst({
+  where: (worldItems, { eq }) => eq(worldItems.id, 'worlditem-id-here'),
+  with: { _count: true }
 });
 
 // Transformar a WorldItem
-const worldItem = transformWorldItem(prismaWorldItem);
+const worldItem = transformWorldItem(drizzleWorldItem);
 ```
 
 ### Transformar a versión extendida para UI

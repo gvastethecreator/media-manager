@@ -10,16 +10,16 @@ Los transformadores de **Group** permiten mapear, serializar, deserializar y ext
 
 ```mermaid
 flowchart TD
-    A[Group (Prisma/Raw)] --> B[serializers.ts]
-    B -->|toPrismaGroup| C[Prisma.GroupCreateInput]
-    B -->|fromPrismaGroup| D[GroupComplete]
+    A[Group (Drizzle/Raw)] --> B[serializers.ts]
+    B -->|toDrizzleGroup| C[Drizzle.GroupCreateInput]
+    B -->|fromDrizzleGroup| D[GroupComplete]
     B -->|extendGroup| E[GroupComplete]
     B -->|validateGroup| F[Validación Zod]
     B -->|toExtendedGroup| G[GroupComplete]
     A --> H[mappers.ts]
     H -->|toGroupListItem| I[GroupListItem]
     H -->|toGroupCard| J[GroupCard]
-    H -->|parseGroupSearchParams| K[Prisma.GroupWhereInput]
+    H -->|parseGroupSearchParams| K[Drizzle.GroupWhereInput]
     A --> L[transformer.ts]
     L -->|transformGroup| D
     L -->|transformGroupToWithStats| M[GroupWithStats]
@@ -42,12 +42,12 @@ flowchart TD
 ```typescript
 import { transformGroup, transformGroupToWithStats } from '@/transformers/group/transformer';
 import { toGroupListItem } from '@/transformers/group/mappers';
-import { toPrismaGroup } from '@/transformers/group/serializers';
+import { toDrizzleGroup } from '@/transformers/group/serializers';
 
 const group = transformGroup(rawGroup);
 const groupStats = transformGroupToWithStats(group);
 const listItem = toGroupListItem(group);
-const prismaInput = toPrismaGroup(group);
+const DrizzleInput = toDrizzleGroup(group);
 ```
 
 ---

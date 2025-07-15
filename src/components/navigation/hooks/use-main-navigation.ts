@@ -1,31 +1,38 @@
 import { useCallback } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { ViewType } from '@/components/views/types';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useUIStore } from '@/store/ui.store';
-import { ViewType } from '@/types/files';
+
+const logger = clientLogger.withContext('MainNavigation');
 
 /**
- * Hook que proporciona funciones para la navegación principal
+ * Hook que proporciona funciones para la navegación principal - VERSIÓN TEMPORAL
  * Maneja la navegación entre vistas principales como configuración y desarrollo
  */
 export function useMainNavigation() {
-	const { setCurrentView } = useNavigationStore();
 	const { toggleSettings } = useUIStore();
+	const { setCurrentView } = useNavigationStore();
 
 	const handleOpenSettings = useCallback(() => {
+		logger.info('⚙️ Abriendo configuración');
 		setCurrentView('settings');
 		toggleSettings();
 	}, [toggleSettings, setCurrentView]);
 
 	const handleOpenDevelopment = useCallback(() => {
+		logger.info('🛠️ Abriendo desarrollo');
 		setCurrentView('development');
 	}, [setCurrentView]);
 
 	const handleOpenEntityCards = useCallback(() => {
+		logger.info('🃏 Abriendo entity cards');
 		setCurrentView('entity-cards');
 	}, [setCurrentView]);
 
 	const handleMainNavigate = useCallback(
 		(id: ViewType) => {
+			logger.info(`🧭 Navegando a: ${id}`);
 			setCurrentView(id);
 		},
 		[setCurrentView]

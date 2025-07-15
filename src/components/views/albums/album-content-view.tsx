@@ -1,14 +1,12 @@
-'use client';
-
 import { Album } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { useAlbumImages } from '@/lib/api/albums';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 const viewLogger = clientLogger.withContext('AlbumContentView');
 
@@ -16,12 +14,15 @@ export function AlbumContentView() {
 	const currentAlbumId = useAlbumStore((state) => state.ui.currentAlbumId);
 	const album = useAlbumStore((state) => (currentAlbumId ? state.core.albums[currentAlbumId] : null));
 
-	const [items, setItems] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// React Query hook must be at top level
+	const { data: albumImages, isLoading: isLoadingImages, error: albumError } = useAlbumImages(currentAlbumId);
+
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
+	const [optimisticItems, _addEvent] = clientEvents.useEvents<EntityWithStats[]>(items);
 
 	const loadAlbumImages = useCallback(async () => {
 		if (!currentAlbumId) {
@@ -29,26 +30,28 @@ export function AlbumContentView() {
 		}
 
 		try {
+			setError(null);
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando imágenes del álbum...');
-			const data = await getAlbumImages(currentAlbumId);
-			setItems(data as unknown as FileItem[]);
+			if (albumImages) {
+				setItems(albumImages as EntityWithStats[]);
+			}
 			viewLogger.info('✅ Imágenes cargadas');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando imágenes:', errorMessage);
 			setError(errorMessage);
+			viewLogger.error('❌ Error cargando imágenes del álbum:', errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
-	}, [currentAlbumId]);
+	}, [currentAlbumId, albumImages]);
 
 	useEffect(() => {
 		// Cargar imágenes inicialmente
 		loadAlbumImages();
 	}, [loadAlbumImages]);
 
-	const handleItemSelection = useCallback((item: FileItem) => {
+	const handleItemSelection = useCallback((item: EntityWithStats) => {
 		viewLogger.info('🖱️ Item seleccionado:', item.name);
 	}, []);
 
@@ -72,6 +75,20 @@ export function AlbumContentView() {
 				},
 		onRefresh: loadAlbumImages,
 	};
+
+	if (isLoading || isLoadingImages) {
+		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
+	}
+
+	if (error || albumError) {
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || albumError?.message}</div>
+		);
+	}
+
+	if (!items || items.length === 0) {
+		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	}
 
 	return (
 		<ContentViewProvider {...contentProps}>

@@ -1,6 +1,6 @@
 /**
- * Script mejorado para resetear la base de datos
- * Incluye mejor manejo de errores y más información de depuración
+ * Script para resetear la base de datos usando Drizzle
+ * Migrado de Prisma a Drizzle ORM
  */
 
 import { spawnSync } from 'child_process';
@@ -106,7 +106,7 @@ function ensureEnvFile() {
 	if (!fileExists(envPath)) {
 		log('Creando archivo .env...', 'info');
 		try {
-			fs.writeFileSync(envPath, 'DATABASE_URL="file:./prisma/dev.db"\n');
+			fs.writeFileSync(envPath, 'DATABASE_URL="file:./db.sqlite"\n');
 			log('Archivo .env creado correctamente', 'success');
 		} catch (error) {
 			log(`Error al crear el archivo .env: ${error.message}`, 'error');
@@ -119,7 +119,7 @@ function ensureEnvFile() {
 			const envContent = fs.readFileSync(envPath, 'utf8');
 			if (!envContent.includes('DATABASE_URL=')) {
 				log('Añadiendo DATABASE_URL al archivo .env...', 'info');
-				fs.appendFileSync(envPath, '\nDATABASE_URL="file:./prisma/dev.db"\n');
+				fs.appendFileSync(envPath, '\nDATABASE_URL="file:./db.sqlite"\n');
 				log('DATABASE_URL añadido al archivo .env', 'success');
 			} else {
 				log('DATABASE_URL ya existe en el archivo .env', 'info');
@@ -133,9 +133,9 @@ function ensureEnvFile() {
 	return true;
 }
 
-// Función principal para resetear la base de datos
+// Función principal para resetear la base de datos con Drizzle
 async function resetDatabase() {
-	log('Iniciando reset de la base de datos...', 'info');
+	log('Iniciando reset de la base de datos con Drizzle...', 'info');
 
 	const rootDir = path.resolve(__dirname, '../..');
 
@@ -145,46 +145,42 @@ async function resetDatabase() {
 	}
 
 	// Paso 2: Eliminar la base de datos si existe
-	const dbPath = path.join(rootDir, 'prisma', 'dev.db');
+	const dbPath = path.join(rootDir, 'db.sqlite');
 	if (!deleteFileIfExists(dbPath)) {
 		return false;
 	}
 
-	// Paso 3: Eliminar el directorio de migraciones si existe
-	const migrationsPath = path.join(rootDir, 'prisma', 'migrations');
-	if (!deleteDirIfExists(migrationsPath)) {
+	// Paso 3: Eliminar directorio de migraciones de Drizzle si existe
+	const drizzlePath = path.join(rootDir, 'drizzle');
+	if (!deleteDirIfExists(drizzlePath)) {
 		return false;
 	}
 
-	// Paso 4: Eliminar archivos temporales de Prisma si existen
-	const prismaClientPath = path.join(rootDir, 'node_modules', '.prisma');
-	deleteDirIfExists(prismaClientPath);
-
-	// Paso 5: Generar cliente Prisma
-	log('Generando cliente Prisma...', 'info');
-	if (!runCommand('npx', ['prisma', 'generate'])) {
-		log('Falló la generación del cliente Prisma, pero intentaremos continuar...', 'warning');
-	} else {
-		log('Cliente Prisma generado correctamente', 'success');
-	}
-
-	// Paso 6: Usar db push para crear la base de datos según el esquema
-	log('Sincronizando esquema con la base de datos...', 'info');
-	if (!runCommand('npx', ['prisma', 'db', 'push', '--accept-data-loss'])) {
-		log('Falló la sincronización del esquema con la base de datos', 'error');
+	// Paso 4: Generar migraciones con Drizzle
+	log('Generando migraciones con Drizzle...', 'info');
+	if (!runCommand('bunx', ['drizzle-kit', 'generate'])) {
+		log('Falló la generación de migraciones con Drizzle', 'error');
 		return false;
 	}
-	log('Esquema sincronizado correctamente', 'success');
+	log('Migraciones de Drizzle generadas correctamente', 'success');
 
-	// Paso 7: Ejecutar seed para poblar la base de datos
+	// Paso 5: Aplicar migraciones con Drizzle Push
+	log('Aplicando esquema con Drizzle Push...', 'info');
+	if (!runCommand('bunx', ['drizzle-kit', 'push'])) {
+		log('Falló la aplicación del esquema con Drizzle', 'error');
+		return false;
+	}
+	log('Esquema aplicado correctamente con Drizzle', 'success');
+
+	// Paso 6: Ejecutar seed con el nuevo sistema
 	log('Ejecutando seed para poblar la base de datos...', 'info');
-	if (!runCommand('npx', ['prisma', 'db', 'seed'])) {
-		log('Falló la ejecución del seed', 'error');
+	if (!runCommand('tsx', ['scripts/db/seed-drizzle.ts'])) {
+		log('Falló la ejecución del seed con Drizzle', 'error');
 		return false;
 	}
-	log('Seed ejecutado correctamente', 'success');
+	log('Seed ejecutado correctamente con Drizzle', 'success');
 
-	log('Reset de la base de datos completado con éxito', 'success');
+	log('Reset de la base de datos completado con éxito usando Drizzle', 'success');
 	return true;
 }
 

@@ -4,9 +4,9 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { WildcardBase, WildcardChild, WildcardComplete, WildcardDeserialized } from '@/types/entities/wildcard';
 import { WildcardSchema } from '@/types/entities/wildcard';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext({ module: 'WildcardTransformer:Serializers' });
@@ -60,12 +60,12 @@ export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase 
 }
 
 /**
- * Serializa un wildcard para Prisma
+ 
  * @param wildcard Wildcard con campos JSON deserializados
  * @param options Opciones de transformación
- * @returns Wildcard con campos serializados para Prisma
+ * @returns Wildcard con campos serializados para Drizzle
  */
-export function toPrismaWildcard(
+export function toDrizzleWildcard(
 	wildcard: Partial<WildcardComplete>,
 	options: WildcardTransformOptions = {}
 ): Record<string, any> {
@@ -77,7 +77,7 @@ export function toPrismaWildcard(
 			validateWildcard(wildcard as WildcardBase);
 		}
 
-		// Crear objeto con solo propiedades válidas para Prisma
+		// Crear objeto con solo propiedades válidas para Drizzle
 		const result: Record<string, any> = {
 			id: wildcard.id,
 			name: wildcard.name,
@@ -120,12 +120,12 @@ export function toPrismaWildcard(
 }
 
 /**
- * Deserializa un wildcard desde Prisma
- * @param wildcard Wildcard con campos serializados de Prisma
+ * Deserializa un wildcard desde Drizzle
+ * @param wildcard Wildcard con campos serializados de Drizzle
  * @param options Opciones de transformación
  * @returns Wildcard con campos deserializados
  */
-export function fromPrismaWildcard<T extends WildcardBase>(
+export function fromDrizzleWildcard<T extends WildcardBase>(
 	wildcard: T,
 	options: WildcardTransformOptions = {}
 ): T & WildcardDeserialized {
@@ -218,7 +218,7 @@ function calculateItemCount(wildcard: WildcardBase & { _count?: Record<string, n
  * @returns Wildcard extendido con datos UI
  */
 export function extendWildcard<T extends WildcardBase>(wildcard: T): T & WildcardWithUI {
-	return fromPrismaWildcard(wildcard, { includeUI: true }) as T & WildcardWithUI;
+	return fromDrizzleWildcard(wildcard, { includeUI: true }) as T & WildcardWithUI;
 }
 
 /**

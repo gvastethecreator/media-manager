@@ -10,10 +10,10 @@ Los transformadores de **Video** permiten mapear, serializar, deserializar y ext
 
 ```mermaid
 flowchart TD
-    A[Video (Prisma/Raw)] --> B[mappers.ts]
+    
     B -->|toVideoListItem| C[VideoListItem]
     B -->|toVideoCard| D[VideoCard]
-    B -->|parseVideoSearchParams| E[Prisma.VideoWhereInput]
+    B -->|parseVideoSearchParams| E[Drizzle.VideoWhereInput]
     A --> F[serializers.ts]
     F -->|transformVideo| G[VideoComplete]
 ```

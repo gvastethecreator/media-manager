@@ -1,26 +1,39 @@
 /**
- * @file Tipos base para la entidad Prompt
- * @module types/entities/prompt/base
- * @description Define los tipos base de Prompt siguiendo el patrón EntityWithStats
+ * 🎯 PROMPT BASE TYPES
+ *
+ * Tipos base para prompts usando tipos locales de Drizzle.
+ *
+ * @updated 2025-01-27
  */
-
-import type { BaseEntity } from '@/types/common/base';
 
 /**
- * 🎯 Tipo base para Prompt derivado del schema de Prisma
+ * 🗿 Modelo base de Prompt, derivado del schema de Drizzle.
  */
-export interface PromptBase extends BaseEntity {
+export interface PromptBase {
+	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 	description: string | null;
-	content: string;
-	purpose: string;
-	category: string;
-	parameters: string; // JSON serializado de PromptParameter[]
-	tags: string; // JSON serializado de string[]
-	featuredImage: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
 	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	content: string | null;
+	parameters: string | null;
+	style: string | null;
+	mood: string | null;
+	lighting: string | null;
+	composition: string | null;
+	technique: string | null;
+	inspiration: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -65,11 +78,15 @@ export interface PromptStatistics {
 	hasDescription: boolean;
 	hasFeaturedImage: boolean;
 	isWellStructured: boolean; // Tiene parámetros y tags
-	qualityScore: number; // 0-100
+	qualityGrade: 'A' | 'B' | 'C' | 'D';
+	completenessScore: number;
+	creativityScore: number;
+	technicalScore: number;
+	usabilityScore: number;
 }
 
 /**
- * 🔢 Conteos de Prisma para Prompt
+ * 🔢 Conteos de Drizzle para Prompt
  */
 export interface PromptCounts {
 	_count: {
@@ -77,7 +94,7 @@ export interface PromptCounts {
 		videos: number;
 		albums: number;
 		collections: number;
-		tagEntities: number;
+		tags: number;
 		characters: number;
 		places: number;
 		worldItems: number;
@@ -90,103 +107,68 @@ export interface PromptCounts {
 }
 
 /**
- * 🎯 Tipo principal optimizado de Prompt con estadísticas pre-calculadas
- * Sigue el patrón EntityWithStats para máximo rendimiento
+ * ✨ Modelo extendido de Prompt con estadísticas.
+ * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
-export interface PromptWithStats extends Omit<PromptBase, 'parameters' | 'tags'>, PromptCounts {
-	// Campos JSON deserializados (override de los campos string)
-	parameters: Array<{
-		name: string;
-		type: 'string' | 'number' | 'boolean' | 'array' | 'object';
-		description?: string;
-		required?: boolean;
-		defaultValue?: unknown;
-		options?: string[];
-	}>;
-	tags: string[];
-
-	// Estadísticas pre-calculadas
-	statistics: PromptStatistics;
-
-	// Metadatos de IA
-	aiMetadata?: {
-		model?: string;
-		temperature?: number;
-		maxTokens?: number;
-		topP?: number;
-		frequencyPenalty?: number;
-		presencePenalty?: number;
-		lastModelUsed?: string;
-		averageResponseTime?: number;
-	};
-
-	// Análisis de rendimiento
-	performance?: {
-		averageTokensGenerated: number;
-		averageExecutionTime: number;
-		successfulExecutions: number;
-		failedExecutions: number;
-		lastErrorMessage?: string;
-		lastExecutionTimestamp?: Date;
-	};
+export interface PromptWithStats extends PromptBase {
+	stats: PromptStatistics;
 }
 
 /**
- * 🔍 Consulta optimizada de Prisma para PromptWithStats
+ * 📝 Datos para crear un Prompt
  */
-export const PrismaPromptWithCounts = {
-	include: {
-		_count: {
-			select: {
-				images: true,
-				videos: true,
-				albums: true,
-				collections: true,
-				tagEntities: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				notes: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-			},
-		},
-	},
-} as const;
-
-/**
- * 📋 Tipo derivado de la consulta de Prisma
- */
-export type PrismaPromptWithCountsType = {
-	id: string;
+export interface PromptCreateInput {
 	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	content: string;
-	purpose: string;
-	category: string;
-	parameters: string;
-	tags: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tagEntities: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-};
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
+}
+
+/**
+ * 📝 Datos para actualizar un Prompt
+ */
+export interface PromptUpdateInput {
+	name?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
+}
+
+// ----------------------------------------------------------------
+// TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
+// ----------------------------------------------------------------
+
+/**
+ * @deprecated Usar PromptWithStats
+ */
+export type PromptComplete = PromptWithStats;

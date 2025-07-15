@@ -10,10 +10,10 @@ Los transformadores de **QueueJob** permiten mapear, serializar, deserializar y 
 
 ```mermaid
 flowchart TD
-    A[QueueJob (Prisma/Raw)] --> B[queue-job-transformers.ts]
+    A[QueueJob (Drizzle/Raw)] --> B[queue-job-transformers.ts]
     B -->|toQueueJobListItem| C[QueueJobListItem]
     B -->|toQueueJobCard| D[QueueJobCard]
-    B -->|parseQueueJobSearchParams| E[Prisma.QueueJobWhereInput]
+    B -->|parseQueueJobSearchParams| E[Drizzle.QueueJobWhereInput]
 ```
 
 ---

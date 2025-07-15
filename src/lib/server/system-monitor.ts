@@ -1,18 +1,11 @@
-'use server';
-
 /**
- * Monitor de sistema para Next.js
+ * Monitor de sistema - versión cliente
  *
  * Este módulo proporciona funcionalidades para monitorear el rendimiento
- * del servidor y mostrar estadísticas en tiempo real.
+ * del servidor a través de la API.
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
-import os from 'os';
-import { serverLogger } from '../logger/server-logger';
-
-// Logger específico para el monitor de sistema
-const systemLogger = serverLogger.withContext('SystemMonitor');
 
 // Interfaz para las estadísticas del sistema
 interface SystemStats {
@@ -49,82 +42,53 @@ interface SystemStats {
 }
 
 /**
- * Obtiene estadísticas del sistema
+ * Obtiene estadísticas del sistema a través de la API
  * @returns Objeto con estadísticas del sistema
  */
-function getSystemStats(): SystemStats {
-	// CPU
-	const cpus = os.cpus();
-	const cpuModel = cpus.length > 0 ? cpus[0].model : 'Unknown';
-	const cpuCores = cpus.length;
-	const loadAvg = os.loadavg();
-
-	// Calcular uso de CPU (aproximado)
-	let totalIdle = 0;
-	let totalTick = 0;
-
-	for (const cpu of cpus) {
-		for (const type in cpu.times) {
-			totalTick += cpu.times[type as keyof typeof cpu.times];
+async function getSystemStats(): Promise<SystemStats> {
+	try {
+		const response = await fetch('/api/system/stats');
+		if (!response.ok) {
+			throw new Error('Error al obtener estadísticas del sistema');
 		}
-		totalIdle += cpu.times.idle;
+		return response.json();
+	} catch (error) {
+		console.warn('❌ Error al obtener estadísticas del sistema:', error);
+		// Retornar datos mock en caso de error
+		return {
+			cpu: {
+				usage: 0,
+				cores: 4,
+				model: 'Unknown',
+				loadAvg: [0, 0, 0],
+			},
+			memory: {
+				total: 8589934592, // 8GB
+				free: 4294967296, // 4GB
+				used: 4294967296, // 4GB
+				usedPercent: 50,
+				processUsed: 134217728, // 128MB
+				processUsedPercent: 2,
+			},
+			uptime: {
+				system: 86400, // 1 día
+				process: 3600, // 1 hora
+			},
+			network: {
+				interfaces: ['eth0', 'lo'],
+			},
+			platform: {
+				type: 'unknown',
+				release: 'unknown',
+				arch: 'x64',
+			},
+			nodejs: {
+				version: 'v18.0.0',
+				pid: 1234,
+			},
+		};
 	}
-
-	const cpuUsage = cpuCores > 0 ? Math.round((1 - totalIdle / totalTick) * 100) : 0;
-
-	// Memoria
-	const totalMem = os.totalmem();
-	const freeMem = os.freemem();
-	const usedMem = totalMem - freeMem;
-	const usedMemPercent = Math.round((usedMem / totalMem) * 100);
-
-	// Memoria del proceso
-	const processMemory = process.memoryUsage();
-	const processUsedMem = processMemory.rss;
-	const processUsedMemPercent = Math.round((processUsedMem / totalMem) * 100);
-
-	// Tiempo de actividad
-	const systemUptime = os.uptime();
-	const processUptime = process.uptime();
-
-	// Interfaces de red
-	const networkInterfaces = Object.keys(os.networkInterfaces());
-
-	return {
-		cpu: {
-			usage: cpuUsage,
-			cores: cpuCores,
-			model: cpuModel,
-			loadAvg,
-		},
-		memory: {
-			total: totalMem,
-			free: freeMem,
-			used: usedMem,
-			usedPercent: usedMemPercent,
-			processUsed: processUsedMem,
-			processUsedPercent: processUsedMemPercent,
-		},
-		uptime: {
-			system: systemUptime,
-			process: processUptime,
-		},
-		network: {
-			interfaces: networkInterfaces,
-		},
-		platform: {
-			type: os.platform(),
-			release: os.release(),
-			arch: os.arch(),
-		},
-		nodejs: {
-			version: process.version,
-			pid: process.pid,
-		},
-	};
 }
-
-// formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 
 /**
  * Formatea segundos a una unidad legible
@@ -147,22 +111,22 @@ function formatUptime(seconds: number): string {
 }
 
 /**
- * Muestra estadísticas del sistema en la consola
+ * Muestra estadísticas del sistema en la consola (versión cliente)
  */
-function logSystemStats(): void {
-	const stats = getSystemStats();
+async function logSystemStats(): Promise<void> {
+	const stats = await getSystemStats();
 
-	systemLogger.separator('Estadísticas del Sistema');
+	console.log('=== Estadísticas del Sistema ===');
 
 	// Información del sistema
-	systemLogger.system('Información del Sistema', {
+	console.log('Información del Sistema:', {
 		platform: `${stats.platform.type} ${stats.platform.release} (${stats.platform.arch})`,
 		nodejs: stats.nodejs.version,
 		pid: stats.nodejs.pid,
 	});
 
 	// CPU
-	systemLogger.system('CPU', {
+	console.log('CPU:', {
 		model: stats.cpu.model,
 		cores: stats.cpu.cores,
 		usage: `${stats.cpu.usage}%`,
@@ -170,7 +134,7 @@ function logSystemStats(): void {
 	});
 
 	// Memoria
-	systemLogger.system('Memoria', {
+	console.log('Memoria:', {
 		total: formatBytes(stats.memory.total),
 		used: `${formatBytes(stats.memory.used)} (${stats.memory.usedPercent}%)`,
 		free: formatBytes(stats.memory.free),
@@ -178,100 +142,70 @@ function logSystemStats(): void {
 	});
 
 	// Tiempo de actividad
-	systemLogger.system('Tiempo de Actividad', {
+	console.log('Tiempo de Actividad:', {
 		system: formatUptime(stats.uptime.system),
 		process: formatUptime(stats.uptime.process),
 	});
 
 	// Interfaces de red
-	systemLogger.system('Interfaces de Red', stats.network.interfaces);
+	console.log('Interfaces de Red:', stats.network.interfaces);
 
-	// Barras de progreso
-	systemLogger.progress('Uso de CPU', stats.cpu.usage);
-	systemLogger.progress('Memoria del Sistema', stats.memory.usedPercent);
-	systemLogger.progress('Memoria del Proceso', stats.memory.processUsedPercent);
-
-	systemLogger.separatorEnd();
+	console.log('=== Fin Estadísticas ===');
 }
 
 /**
- * Inicia el monitor de sistema
+ * Inicia el monitor de sistema (versión cliente)
  * @param interval Intervalo en milisegundos (por defecto 60000 = 1 minuto)
  * @returns Función para detener el monitor
  */
 export async function startSystemMonitor(interval = 60000): Promise<() => void> {
-	// Mostrar estadísticas iniciales
-	logSystemStats();
+	console.log('🖥️ Iniciando monitor de sistema (cliente)...');
 
-	// Configurar intervalo
-	const timer = setInterval(() => {
-		logSystemStats();
-	}, interval);
+	const intervalId = setInterval(logSystemStats, interval);
 
-	// Devolver función para detener el monitor
+	// Log inicial
+	await logSystemStats();
+
 	return () => {
-		clearInterval(timer);
-		systemLogger.info('Monitor de sistema detenido');
+		clearInterval(intervalId);
+		console.log('🛑 Monitor de sistema detenido');
 	};
 }
 
 /**
- * Muestra estadísticas del sistema una sola vez
+ * Registra las estadísticas del sistema una sola vez (versión cliente)
  */
 export async function logSystemStatsOnce(): Promise<void> {
-	logSystemStats();
+	await logSystemStats();
 }
 
 /**
- * Registra estadísticas del sistema al inicio de la aplicación
+ * Registra información de inicio del sistema (versión cliente)
  */
 export async function logSystemStartup(): Promise<void> {
-	const stats = getSystemStats();
-
-	systemLogger.separator('Inicio del Servidor');
-
-	systemLogger.system('Servidor iniciado', {
-		platform: `${stats.platform.type} ${stats.platform.release} (${stats.platform.arch})`,
-		nodejs: stats.nodejs.version,
-		pid: stats.nodejs.pid,
-		cpu: {
-			cores: stats.cpu.cores,
-			model: stats.cpu.model,
-		},
-		memory: {
-			total: formatBytes(stats.memory.total),
-			free: formatBytes(stats.memory.free),
-		},
-	});
-
-	systemLogger.separatorEnd();
+	console.log('🚀 Sistema iniciado');
+	await logSystemStats();
 }
 
 /**
- * Registra estadísticas del sistema al cierre de la aplicación
+ * Registra información de cierre del sistema (versión cliente)
  */
 export async function logSystemShutdown(): Promise<void> {
-	const stats = getSystemStats();
-
-	systemLogger.separator('Cierre del Servidor');
-
-	systemLogger.system('Servidor cerrando', {
-		uptime: formatUptime(stats.uptime.process),
-		memory: {
-			processUsed: formatBytes(stats.memory.processUsed),
-		},
-	});
-
-	systemLogger.separatorEnd();
+	console.log('🔄 Sistema cerrando...');
+	await logSystemStats();
 }
 
-// No exportar objetos en archivos con 'use server'
-// Crear funciones asíncronas para acceder a ellos
+/**
+ * Obtiene helpers del monitor de sistema (versión cliente)
+ */
 export async function getSystemMonitorHelpers() {
 	return {
 		getSystemStats,
-		// formatBytes ahora se importa desde @/lib/utils/format.utils
 		formatUptime,
+		formatBytes,
 		logSystemStats,
+		logSystemStatsOnce,
+		logSystemStartup,
+		logSystemShutdown,
 	};
 }

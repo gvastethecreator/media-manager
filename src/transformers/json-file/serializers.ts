@@ -29,7 +29,7 @@ export function validateJsonFile(input: unknown): JsonFileWithStats {
 
 	const content = JSON.stringify(data.content);
 
-	// Crear JsonFile basándose en el schema de Prisma
+	// Crear JsonFile basándose en el schema de Drizzle
 	const jsonFile: JsonFileWithStats = {
 		id: (data.id as string) || generateId(),
 		name: data.name as string,

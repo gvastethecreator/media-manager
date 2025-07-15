@@ -1,9 +1,3 @@
-'use client';
-
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-import { formatDate } from '@/lib/utils/format.utils';
 import {
 	CalendarIcon,
 	CameraIcon,
@@ -15,10 +9,14 @@ import {
 	ZoomInIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { getImageCardData, type ImageCardData } from './image-server-actions';
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
+import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/format.utils';
+import type { TagWithStats } from '@/types/entities/tag';
 
 interface ImageCardProps {
 	imageId: string;
@@ -27,7 +25,7 @@ interface ImageCardProps {
 	showTags?: boolean;
 	showDetails?: boolean;
 	aspectRatio?: 'square' | 'auto' | 'video' | string;
-	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg' | 'gallery';
+	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg' | 'gallery' | 'elevated';
 	isSelected?: boolean;
 	isHoverable?: boolean;
 	showRelations?: boolean;
@@ -37,7 +35,7 @@ interface ImageCardProps {
 /**
  * Componente Card mejorado para mostrar una imagen con sus metadatos principales.
  * Incluye múltiples variantes de diseño y características avanzadas como:
- * - Optimización de imágenes con next/image
+ * - Optimización de imágenes con img nativo
  * - Animaciones con motion
  * - Diseño responsivo
  * - Modo oscuro integrado
@@ -55,7 +53,6 @@ export function ImageCardImproved({
 	isSelected = false,
 	isHoverable = true,
 	showRelations = false,
-	priority = false,
 }: ImageCardProps) {
 	const [imageData, setImageData] = useState<ImageCardData | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +61,39 @@ export function ImageCardImproved({
 
 	// Determinar si estamos en modo TCG basado en la variante
 	const isTcgMode = variant === 'tcg';
+
+	// Gestionar las clases de aspect ratio
+	const getAspectRatioClass = useCallback(() => {
+		switch (aspectRatio) {
+			case 'square':
+				return 'aspect-square';
+			case 'video':
+				return 'aspect-video';
+			case 'auto':
+				return '';
+			default:
+				if (typeof aspectRatio === 'string' && aspectRatio.includes('/')) {
+					return `aspect-[${aspectRatio}]`;
+				}
+				return 'aspect-[3/2]'; // Relación predeterminada para fotos
+		}
+	}, [aspectRatio]);
+
+	// Obtener clases específicas para cada variante
+	const getVariantClasses = useCallback(() => {
+		switch (variant) {
+			case 'minimal':
+				return 'border-0 shadow-none bg-transparent';
+			case 'polaroid':
+				return 'border-8 border-white dark:border-gray-800 bg-white dark:bg-gray-800 shadow-md p-1 rotate-1';
+			case 'tcg':
+				return 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black text-white';
+			case 'gallery':
+				return 'border-0 shadow-none overflow-hidden';
+			default:
+				return 'border border-gray-200 dark:border-gray-800 bg-card';
+		}
+	}, [variant]);
 
 	useEffect(() => {
 		const loadImageData = async () => {
@@ -84,59 +114,26 @@ export function ImageCardImproved({
 		}
 	}, [imageId]);
 
-	// Gestionar las clases de aspect ratio
-	const getAspectRatioClass = () => {
-		switch (aspectRatio) {
-			case 'square':
-				return 'aspect-square';
-			case 'video':
-				return 'aspect-video';
-			case 'auto':
-				return '';
-			default:
-				if (typeof aspectRatio === 'string' && aspectRatio.includes('/')) {
-					return `aspect-[${aspectRatio}]`;
-				}
-				return 'aspect-[3/2]'; // Relación predeterminada para fotos
-		}
-	};
-
 	// Formatear dimensiones para mostrar
-	const getHumanReadableDimensions = () => {
+	const getHumanReadableDimensions = useCallback(() => {
 		if (!imageData?.width || !imageData?.height) return '';
 		return `${imageData.width} × ${imageData.height}`;
-	};
-
-	// Obtener clases específicas para cada variante
-	const getVariantClasses = () => {
-		switch (variant) {
-			case 'minimal':
-				return 'border-0 shadow-none bg-transparent';
-			case 'polaroid':
-				return 'border-8 border-white dark:border-gray-800 bg-white dark:bg-gray-800 shadow-md p-1 rotate-1';
-			case 'tcg':
-				return 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black text-white';
-			case 'gallery':
-				return 'border-0 shadow-none overflow-hidden';
-			default:
-				return 'border border-gray-200 dark:border-gray-800 bg-card';
-		}
-	};
+	}, [imageData?.width, imageData?.height]);
 
 	// Manejar clic en la tarjeta
-	const handleClick = () => {
+	const handleClick = useCallback(() => {
 		if (onClick && imageData) {
 			onClick(imageData);
 		}
-	};
+	}, [onClick, imageData]);
 
 	// Determinar color primario para efectos visuales
-	const getPrimaryColor = () => {
+	const getPrimaryColor = useCallback(() => {
 		if (imageData?.tags && imageData.tags.length > 0) {
-			return imageData.tags[0].color || '#3b82f6';
+			return imageData.tags[0]?.color || '#3b82f6';
 		}
 		return '#3b82f6'; // Color predeterminado
-	};
+	}, [imageData?.tags]);
 
 	// Renderizar estado de carga
 	if (isLoading) {
@@ -167,29 +164,31 @@ export function ImageCardImproved({
 			>
 				<div className="text-center p-4">
 					<ImageIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-					<p className="text-sm text-gray-500 dark:text-gray-400">{error || 'No se pudo cargar la imagen'}</p>
+					<p className="text-sm text-gray-500 dark:text-gray-400">
+						{error?.toString() || 'No se pudo cargar la imagen'}
+					</p>
 				</div>
 			</div>
 		);
 	}
 
 	const primaryColor = getPrimaryColor();
-	const imageFormat = imageData.metadata?.format || 'unknown';
+	const imageFormat = imageData.format || 'unknown';
 	const cameraInfo =
 		imageData.metadata?.camera?.make || imageData.metadata?.camera?.model
-			? `${imageData.metadata.camera.make || ''} ${imageData.metadata.camera.model || ''}`.trim()
+			? `${imageData.metadata.camera?.make || ''} ${imageData.metadata.camera?.model || ''}`.trim()
 			: null;
 
 	// Calcular total de relaciones
 	const totalRelations =
-		showRelations && imageData._count
-			? (imageData._count.tags || 0) +
-				(imageData._count.albums || 0) +
-				(imageData._count.collections || 0) +
-				(imageData._count.characters || 0) +
-				(imageData._count.places || 0) +
-				(imageData._count.worldItems || 0) +
-				(imageData._count.notes || 0)
+		showRelations && imageData.stats
+			? (imageData.stats.tagCount || 0) +
+				(imageData.stats.albumCount || 0) +
+				(imageData.stats.collectionCount || 0) +
+				(imageData.stats.characterCount || 0) +
+				(imageData.stats.placeCount || 0) +
+				(imageData.stats.worldItemCount || 0) +
+				(imageData.stats.noteCount || 0)
 			: 0;
 
 	// Contenido de la tarjeta
@@ -214,14 +213,12 @@ export function ImageCardImproved({
 		>
 			{/* Imagen principal */}
 			<div className="relative w-full h-0 pb-[75%]">
-				{imageData.thumbnailUrl ? (
-					<Image
-						src={imageData.thumbnailUrl}
+				{imageData.thumbnail ? (
+					<img
+						src={imageData.thumbnail}
 						alt={imageData.name || 'Imagen'}
-						fill
-						sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-						className="object-cover rounded-t-lg"
-						priority={priority}
+						className="w-full h-full object-cover"
+						loading="lazy"
 					/>
 				) : (
 					<div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
@@ -321,7 +318,7 @@ export function ImageCardImproved({
 					{/* Etiquetas */}
 					{showTags && imageData.tags && imageData.tags.length > 0 && (
 						<div className="mt-3 flex flex-wrap gap-1">
-							{imageData.tags.slice(0, 3).map((tag) => (
+							{imageData.tags.slice(0, 3).map((tag: TagWithStats) => (
 								<Badge
 									key={tag.id}
 									variant="outline"
@@ -389,7 +386,7 @@ export function ImageCardImproved({
 	// Si no hay onClick, envolver en un Link para navegación
 	if (!onClick) {
 		return (
-			<Link href={`/images/${imageData.id}`} className="block h-full">
+			<Link to={`/images/${imageData.id}`} className="block h-full">
 				{cardContent}
 			</Link>
 		);

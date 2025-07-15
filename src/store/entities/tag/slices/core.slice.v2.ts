@@ -3,17 +3,12 @@
  * @module store/entities/tag/slices/core.slice
  */
 
-import {
-	createTag as createTagAction,
-	deleteTag as deleteTagAction,
-	updateTag as updateTagAction,
-} from '@/app/actions/tags/crud.actions';
-import { getTags as getTagsAction } from '@/app/actions/tags/query.actions';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
-import type { TagWithStats } from '@/types/entities/tag';
-import type { Prisma } from '@prisma/client';
 import { StateCreator } from 'zustand';
+// Refactor 2025-07: se utiliza cliente de API en lugar de tag.service
+import { createTagInApi, deleteTagFromApi, getTagsFromApi, updateTagInApi } from '@/lib/api/client/tag.client';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
+import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 import type { TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
@@ -43,9 +38,9 @@ export interface TagCoreActions {
 	/** Obtiene un tag por su ID */
 	getTagById: (id: string) => TagWithStats | undefined;
 	/** Crea un nuevo tag */
-	createTag: (data: Prisma.TagCreateInput) => Promise<TagWithStats | null>;
+	createTag: (data: TagCreateInput) => Promise<TagWithStats | null>;
 	/** Actualiza un tag existente */
-	updateTag: (id: string, data: Prisma.TagUpdateInput) => Promise<void>;
+	updateTag: (id: string, data: TagUpdateInput) => Promise<void>;
 	/** Elimina un tag */
 	deleteTag: (id: string) => Promise<void>;
 	/** Actualiza múltiples tags */
@@ -108,7 +103,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Cargando tags...');
 
-			const tags = await getTagsAction();
+			const tags = await getTagsFromApi();
 
 			set({
 				tags: tagsToRecord(tags),
@@ -134,12 +129,12 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 	},
 
 	// ➕ Crea un nuevo tag
-	createTag: async (data: Prisma.TagCreateInput) => {
+	createTag: async (data: TagCreateInput) => {
 		try {
 			set({ isLoading: true, error: null });
 			logger.info('➕ Creando tag:', data);
 
-			const newTag = await createTagAction(data);
+			const newTag = await createTagInApi(data);
 
 			if (!newTag) {
 				throw new Error('La acción del servidor no devolvió una etiqueta creada.');
@@ -167,12 +162,12 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 	},
 
 	// 🔄 Actualiza un tag existente
-	updateTag: async (id: string, data: Prisma.TagUpdateInput) => {
+	updateTag: async (id: string, data: TagUpdateInput) => {
 		try {
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Actualizando tag:', { id, data });
 
-			const updatedTag = await updateTagAction(id, data);
+			const updatedTag = await updateTagInApi(id, data);
 
 			set((state) => ({
 				tags: {
@@ -199,7 +194,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🗑️ Eliminando tag:', id);
 
-			await deleteTagAction(id);
+			await deleteTagFromApi(id);
 
 			set((state) => {
 				const { [id]: deletedTag, ...remainingTags } = state.tags;

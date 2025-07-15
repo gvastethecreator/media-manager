@@ -1,6 +1,6 @@
 /**
  * @file Exportación del componente UploadedImageCard
- * @module components/cards/uploadedimage-card
+ * @module components/cards/uploaded-image-card
  */
 
-export { UploadedImageCard } from './uploadedimage-card';
+export { UploadedImageCard } from './uploaded-image-card';

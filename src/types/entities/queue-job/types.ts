@@ -1,7 +1,6 @@
 /**
  * @file Tipos canónicos para la entidad QueueJob
  * @module types/entities/queue-job/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para QueueJob.
  * Última migración: 2025-06-18
  */
@@ -59,15 +58,12 @@ export interface QueueJobCreateInput {
 	data: string;
 	maxAttempts?: number;
 	priority?: number;
-	metadata?: QueueJobMetadata;
 }
 
 /**
  * Input para actualización
  */
-export interface QueueJobUpdateInput extends Partial<Omit<QueueJobBase, 'id' | 'createdAt' | 'updatedAt'>> {
-	metadata?: QueueJobMetadata;
-}
+export interface QueueJobUpdateInput extends Partial<Omit<QueueJobBase, 'id' | 'createdAt' | 'updatedAt'>> {}
 
 /**
  * Input para creación (alias para compatibilidad)
@@ -151,7 +147,6 @@ export interface QueueStats {
 	averageProcessingTime?: number; // Tiempo promedio de procesamiento en ms
 }
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con QueueJobSchema antes de persistir.

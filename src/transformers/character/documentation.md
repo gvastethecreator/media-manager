@@ -57,9 +57,9 @@ sequenceDiagram
     Client->>Actions: createCharacter(data)
     Actions->>Transformer: validateCharacter(data)
     Transformer-->>Actions: validatedData
-    Actions->>Transformer: mapCreateCharacterDataToPrisma(validatedData)
-    Transformer-->>Actions: prismaData
-    Actions->>DB: prisma.character.create(prismaData)
+    Actions->>Transformer: mapCreateCharacterDataToDrizzle(validatedData)
+    Transformer-->>Actions: drizzleData
+    Actions->>DB: drizzle.character.create(drizzleData)
     DB-->>Actions: createdCharacter
     Actions->>Transformer: transformCharacter(createdCharacter)
     Transformer-->>Actions: transformedCharacter
@@ -67,7 +67,7 @@ sequenceDiagram
     Actions-->>Client: transformedCharacter
 
     Client->>Actions: getCharacter(id)
-    Actions->>DB: prisma.character.findUnique({ where: { id } })
+    Actions->>DB: drizzle.character.findUnique({ where: { id } })
     DB-->>Actions: characterData
     Actions->>Transformer: transformCharacterToExtended(characterData)
     Transformer-->>Actions: extendedCharacter
@@ -168,8 +168,9 @@ interface CharacterWithStats extends CharacterComplete {
 
 ### Serializers
 
-- `fromPrismaCharacter`: Transforma un objeto de Prisma a CharacterComplete.
-- `toPrismaCharacter`: Transforma un CharacterComplete a formato Prisma para operaciones CRUD.
+- `fromDrizzleCharacter`: Transforma un objeto de Drizzle a CharacterComplete.
+- `serializeCharacter`: Serializa un CharacterComplete para API o almacenamiento.
+- `deserializeCharacter`: Deserializa datos para uso en la aplicación.
 - `validateCharacter`: Valida un objeto como Character.
 - `deserializeStats`: Deserializa un string JSON de estadísticas a objeto.
 - `serializeStats`: Serializa un objeto de estadísticas a string JSON.
@@ -178,23 +179,54 @@ interface CharacterWithStats extends CharacterComplete {
 
 ### Mappers
 
-- `mapCharacterSearchOptionsToPrisma`: Mapea opciones de búsqueda a formato Prisma.
-- `mapCreateCharacterDataToPrisma`: Mapea datos de creación a formato Prisma.
-- `mapUpdateCharacterDataToPrisma`: Mapea datos de actualización a formato Prisma.
+- `mapCharacterSearchOptionsToDrizzle`: Mapea opciones de búsqueda a formato Drizzle.
+- `mapCreateCharacterDataToDrizzle`: Mapea datos de creación a formato Drizzle.
+- `mapUpdateCharacterDataToDrizzle`: Mapea datos de actualización a formato Drizzle.
 - `filterCharacters`: Filtra personajes según criterios.
 - `sortCharacters`: Ordena personajes según criterio.
 - `paginateCharacters`: Aplica paginación a un array de personajes.
 
+### Validators
+
+- `validateCreateCharacterData`: Valida datos para crear un personaje.
+- `validateUpdateCharacterData`: Valida datos para actualizar un personaje.
+- `isValidCharacter`: Verifica si un objeto es un personaje válido.
+- `isValidCharacterName`: Valida un nombre de personaje.
+- `isValidCharacterClass`: Valida una clase de personaje.
+- `normalizeCharacterFilters`: Normaliza filtros con valores por defecto.
+
+### Schema
+
+- `characterBaseSchema`: Esquema Zod para validación base.
+- `characterWithStatsSchema`: Esquema para personajes con estadísticas.
+- `createCharacterSchema`: Esquema para creación.
+- `updateCharacterSchema`: Esquema para actualización.
+- `characterFiltersSchema`: Esquema para filtros.
+
 ## Ejemplos de uso
 
-### Transformar un personaje desde Prisma
+### Transformar un personaje desde Drizzle
 
 ```typescript
-// Obtener personaje de Prisma
-const prismaCharacter = await prisma.character.findUnique({ where: { id } });
+// Obtener personaje de Drizzle
+const drizzleCharacter = await db.character.findFirst({ where: eq(character.id, id) });
 
-// Transformar a CharacterComplete
-const character = transformCharacter(prismaCharacter, { deserializeFields: true });
+// Transformar a CharacterWithStats
+const character = fromDrizzleCharacter(drizzleCharacter);
+```
+
+### Validar datos de creación
+
+```typescript
+import { validateCreateCharacterData } from '@/transformers/character/validators';
+
+const validation = validateCreateCharacterData(inputData);
+if (validation.success) {
+  // Crear personaje con datos validados
+  const character = await createCharacter(validation.data);
+} else {
+  console.error(validation.error);
+}
 ```
 
 ### Extender un personaje para UI
@@ -234,10 +266,10 @@ return (
 1. **Serialización**: Usar `serializeStats` y `serializeRelationships` al guardar datos en la base de datos para asegurar el correcto formato JSON.
 2. **Deserialización**: Usar `deserializeStats` y `deserializeRelationships` al leer datos de la base de datos para trabajar con objetos JS.
 3. **Validación**: Siempre validar los datos antes de guardarlos usando `validateCharacter`.
-4. **Relaciones**: Utilizar los métodos `mapCreateCharacterDataToPrisma` y `mapUpdateCharacterDataToPrisma` para manejar correctamente las relaciones.
+4. **Relaciones**: Utilizar los métodos `mapCreateCharacterDataToDrizzle` y `mapUpdateCharacterDataToDrizzle` para manejar correctamente las relaciones.
 5. **Extensión para UI**: Utilizar `transformCharacterToExtended` cuando se necesiten propiedades adicionales para la interfaz de usuario.
 6. **Estadísticas**: Para obtener métricas sobre el personaje, usar `transformCharacterToWithStats`.
-7. **Búsqueda eficiente**: Aprovechar `mapCharacterSearchOptionsToPrisma` para realizar búsquedas optimizadas en la base de datos.
+7. **Búsqueda eficiente**: Aprovechar `mapCharacterSearchOptionsToDrizzle` para realizar búsquedas optimizadas en la base de datos.
 
 ## Integración con otras entidades
 

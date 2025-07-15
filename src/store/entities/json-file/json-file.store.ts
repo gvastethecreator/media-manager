@@ -2,19 +2,22 @@
  * 🗂️ Store de JsonFile
  * @module store/entities/json-file/json-file.store
  * @description Store Zustand para gestionar el estado de archivos JSON
+ * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
+ * 👉 2025-07 Refactor: ahora consume la API mediante json-file.client
  */
 
-import {
-	createJsonFile,
-	deleteJsonFile,
-	getJsonFiles,
-	updateJsonFile,
-} from '@/app/actions/json-file/json-file.actions';
-import type { JsonFileWithStats } from '@/types/entities/json-file';
-import { createSelectors } from '@/lib/utils/store/create-selectors';
-import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+// Refactor: se eliminan dependencias directas del servicio del servidor
+// y se utilizan funciones cliente que consumen la API REST
+import {
+	createJsonFileInApi,
+	deleteJsonFileFromApi,
+	getJsonFilesFromApi,
+	updateJsonFileInApi,
+} from '@/lib/api/client/json-file.client';
+import { createSelectors } from '@/lib/utils/store/create-selectors';
+import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
 
 // Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
 export type JsonFileFilters = Record<string, any>;
@@ -35,8 +38,8 @@ export interface JsonFileState {
 
 	// Acciones de datos
 	fetchJsonFiles: () => Promise<void>;
-	createJsonFile: (data: Prisma.JsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
-	updateJsonFile: (id: string, data: Prisma.JsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
+	createJsonFile: (data: JsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
+	updateJsonFile: (id: string, data: JsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
 	deleteJsonFile: (id: string) => Promise<void>;
 
 	// Acciones de selección
@@ -68,17 +71,17 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			fetchJsonFiles: async () => {
 				set({ loading: true, error: null });
 				try {
-					const jsonFiles = await getJsonFiles();
+					const jsonFiles = await getJsonFilesFromApi();
 					set({ jsonFiles, loading: false });
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
 				}
 			},
 
-			createJsonFile: async (data: Prisma.JsonFileCreateInput) => {
+			createJsonFile: async (data: JsonFileCreateInput) => {
 				set({ loading: true, error: null });
 				try {
-					const newJsonFile = await createJsonFile(data);
+					const newJsonFile = await createJsonFileInApi(data);
 					set((state) => ({
 						jsonFiles: [...state.jsonFiles, newJsonFile],
 						loading: false,
@@ -90,10 +93,10 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				}
 			},
 
-			updateJsonFile: async (id: string, data: Prisma.JsonFileUpdateInput) => {
+			updateJsonFile: async (id: string, data: JsonFileUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
-					const updatedJsonFile = await updateJsonFile(id, data);
+					const updatedJsonFile = await updateJsonFileInApi(id, data);
 					set((state) => ({
 						jsonFiles: state.jsonFiles.map((j) => (j.id === id ? updatedJsonFile : j)),
 						currentJsonFile: state.currentJsonFile?.id === id ? updatedJsonFile : state.currentJsonFile,
@@ -109,7 +112,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			deleteJsonFile: async (id: string) => {
 				set({ loading: true, error: null });
 				try {
-					await deleteJsonFile(id);
+					await deleteJsonFileFromApi(id);
 					set((state) => ({
 						jsonFiles: state.jsonFiles.filter((j) => j.id !== id),
 						selectedJsonFiles: state.selectedJsonFiles.filter((j) => j.id !== id),

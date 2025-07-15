@@ -65,8 +65,8 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createWildcard()
-    API->>Transformer: mapCreateWildcardDataToPrisma()
-    Transformer->>DB: prisma.wildcard.create()
+    API->>Transformer: mapCreateWildcardDataToDrizzle()
+    
     DB-->>Transformer: Wildcard
     Transformer-->>API: transformWildcard()
     API-->>Client: WildcardComplete

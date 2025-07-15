@@ -2,7 +2,9 @@
 
 ## Resumen
 
-Este documento describe el proceso de migración de los tipos en el sistema a una estructura de "tipos canónicos" basada en Prisma, con el objetivo de reducir la duplicación, simplificar la jerarquía de tipos y resolver errores de TypeScript.
+
+
+> **⚠️ NOTA DE MIGRACIÓN**: Este proyecto está migrando gradualmente de Prisma a Drizzle ORM. Durante la transición, ambos ORMs coexisten. Ver [Guía de Coexistencia](../../../docs/migration-drizzle/02-coexistence-guide.md) para detalles sobre la migración en curso.
 
 ## ✅ Entidades migradas
 
@@ -40,17 +42,20 @@ Para cada entidad, seguimos este patrón:
 
 ## 🛠️ Pasos técnicos
 
-1. **Importar el tipo Prisma**:
+1. **Importar el tipo de Drizzle**:
+
    ```typescript
-   import type { Entity as PrismaEntity } from '@prisma/client';
+   import type { Entity as DrizzleEntity } from 'drizzle-orm';
    ```
 
 2. **Definir el tipo base**:
+
    ```typescript
-   export type EntityBase = PrismaEntity;
+   export type EntityBase = DrizzleEntity;
    ```
 
 3. **Crear interfaces para relaciones**:
+
    ```typescript
    export interface EntityRelations {
      images?: Image[];
@@ -59,6 +64,7 @@ Para cada entidad, seguimos este patrón:
    ```
 
 4. **Crear interfaces para contadores**:
+
    ```typescript
    export interface EntityCounts {
      images?: number;
@@ -67,6 +73,7 @@ Para cada entidad, seguimos este patrón:
    ```
 
 5. **Definir tipos para inputs**:
+
    ```typescript
    export interface EntityCreateInput {
      name: string;
@@ -82,11 +89,13 @@ Para cada entidad, seguimos este patrón:
    ```
 
 6. **Definir el tipo principal**:
+
    ```typescript
    export type Entity = EntityBase;
    ```
 
 7. **Agregar alias para compatibilidad**:
+
    ```typescript
    export type { EntityCreateInput as CreateEntityData };
    ```
@@ -126,6 +135,6 @@ const updateInput: EntityUpdateInput = {
 const entity: Entity = {
   id: '123',
   name: 'Entidad',
-  // otros campos requeridos por Prisma
+  // otros campos requeridos por la base de datos
 };
 ```

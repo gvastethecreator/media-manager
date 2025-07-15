@@ -4,8 +4,8 @@
  */
 
 import type { StateCreator } from 'zustand';
+import { foldersToRecord, getFolderById } from '@/transformers/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
-import { foldersToRecord, getAllFolders, getFolderById, fromPrismaFoldersWithCounts } from '@/transformers/folder';
 import type { FolderStore } from '../types';
 
 // Estado inicial

@@ -10,10 +10,10 @@ Los transformadores de **UploadedImage** permiten mapear, serializar, deserializ
 
 ```mermaid
 flowchart TD
-    A[UploadedImage (Prisma/Raw)] --> B[transformers.ts]
+    
     B -->|toUploadedImageListItem| C[UploadedImageListItem]
     B -->|toUploadedImageCard| D[UploadedImageCard]
-    B -->|parseUploadedImageSearchParams| E[Prisma.UploadedImageWhereInput]
+    B -->|parseUploadedImageSearchParams| E[DbQueryInput]
     A --> F[transformer.ts]
     F -->|transformUploadedImage| G[UploadedImageComplete]
 ```

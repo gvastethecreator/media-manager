@@ -66,8 +66,8 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createWorldItem()
-    API->>Transformer: mapCreateWorldItemDataToPrisma()
-    Transformer->>DB: prisma.worldItem.create()
+    
+    Transformer->>DB: db.worldItem.create()
     DB-->>Transformer: WorldItem
     Transformer-->>API: transformWorldItem()
     API-->>Client: WorldItemComplete

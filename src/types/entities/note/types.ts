@@ -1,12 +1,12 @@
 /**
  * @file Tipos canónicos para la entidad Note
  * @module types/entities/note/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Note. Todos los campos clave son obligatorios.
  * Última migración: 2025-06-18
  */
 
 import type { z } from 'zod';
+import { z } from 'zod';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -17,10 +17,9 @@ import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
-import type { NoteSchema } from './schema';
+import type { VideoWithStats } from '../video';
+import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemWithStats } from '../world-item';
 
 /**
  * 📝 Tipo base canónico para Note
@@ -29,131 +28,17 @@ export interface NoteBase {
 	id: string;
 	title: string;
 	content: string;
+	emoji?: string | null;
+	color?: string | null;
 	category: string;
 	priority: number;
 	status: string;
-	color?: string;
-	emoji?: string;
 	featuredImage: string | null;
 	isFavorite: boolean;
 	presetId: string | null;
+	tags?: any;
 	createdAt: Date;
 	updatedAt: Date;
-}
-
-/**
- * 🔗 Relaciones de Note optimizadas (usando tipos WithStats)
- */
-export interface NoteRelations {
-	albums?: AlbumWithStats[];
-	characters?: CharacterWithStats[];
-	collections?: CollectionWithStats[];
-	concepts?: ConceptComplete[];
-	groups?: GroupWithStats[];
-	images?: ImageComplete[];
-	places?: PlaceComplete[];
-	prompts?: PromptComplete[];
-	properties?: PropertyComplete[];
-	tags?: TagWithStats[];
-	videos?: VideoComplete[];
-	wildcards?: WildcardComplete[];
-	worldItems?: WorldItemComplete[];
-}
-
-/**
- * 📊 Tipo Prisma con conteos para transformación optimizada
- */
-export interface PrismaNoteWithCounts extends NoteBase {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-}
-
-/**
- * 📊 Estadísticas pre-calculadas para Note
- */
-export interface NoteStatistics {
-	totalItems: number;
-	totalImages: number;
-	totalVideos: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalWildcards: number;
-	totalProperties: number;
-	totalGroups: number;
-	wordCount: number;
-	characterCount: number;
-	readingTime: number; // en minutos
-	completionScore: number; // 0-100 basado en contenido y relaciones
-	lastUpdated: Date;
-}
-
-/**
- * 📝 Note optimizado con estadísticas pre-calculadas
- */
-export interface NoteWithStats extends NoteBase {
-	statistics: NoteStatistics;
-	// Campos derivados calculados
-	excerpt: string;
-	formattedDate: string;
-	priorityLabel: string;
-	statusLabel: string;
-	categoryLabel: string;
-}
-
-/**
- * 🖥️ Propiedades de UI para Note
- */
-export interface NoteUI {
-	isSelected?: boolean;
-	isEditing?: boolean;
-	isExpanded?: boolean;
-	isHovered?: boolean;
-	isNew?: boolean;
-	isHighlighted?: boolean;
-	isLoading?: boolean;
-	hasError?: boolean;
-	isDragging?: boolean;
-	isDropTarget?: boolean;
-}
-
-/**
- * 📝 Note completo con relaciones (para casos que requieren relaciones completas)
- */
-export interface NoteComplete extends NoteBase, NoteRelations, NoteUI {
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
 }
 
 /**
@@ -338,48 +223,12 @@ export enum NoteSortCriteria {
 /**
  * 📋 Opciones de ordenamiento para UI
  */
-export enum NoteSortOption {
-	TITLE = 'title',
-	PRIORITY = 'priority',
-	STATUS = 'status',
-	CREATED_AT = 'createdAt',
-	UPDATED_AT = 'updatedAt',
-	CATEGORY = 'category',
-}
-
-/**
- * 🎨 Modos de vista para Notes
- */
 export enum NoteViewMode {
 	GRID = 'grid',
 	LIST = 'list',
 	CARDS = 'cards',
 	COMPACT = 'compact',
 	DETAIL = 'detail',
-}
-
-/**
- * 📊 Note con estadísticas adicionales
- * @deprecated Usar NoteWithStats en su lugar
- */
-export interface NoteWithStatsLegacy extends NoteComplete {
-	stats: {
-		totalItems: number;
-		totalImages: number;
-		totalVideos: number;
-		totalAlbums: number;
-		totalCollections: number;
-		totalTags: number;
-		totalCharacters: number;
-		totalPlaces: number;
-		totalWorldItems: number;
-		totalConcepts: number;
-		totalPrompts: number;
-		totalWildcards: number;
-		totalProperties: number;
-		totalGroups: number;
-		lastUpdated: Date;
-	};
 }
 
 export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
@@ -395,5 +244,108 @@ export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.UPDATED_DESC]: 'updatedAt',
 };
 
+/**
+ * 📊 Estadísticas de Note
+ */
+export interface NoteStatistics {
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	collectionCount: number;
+	tagCount: number;
+	characterCount: number;
+	placeCount: number;
+	worldItemCount: number;
+	conceptCount: number;
+	promptCount: number;
+	wildcardCount: number;
+	propertyCount: number;
+	groupCount: number;
+	wordCount: number;
+	readingTime: number;
+	completionScore: number;
+	totalItems: number;
+}
+
+/**
+ * 📝 Note completo con relaciones
+ */
+export interface NoteComplete extends NoteBase {
+	// Relaciones
+	images?: ImageComplete[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemWithStats[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptComplete[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+
+	// Conteos
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * 📊 Note con estadísticas
+ */
+export interface NoteWithStats extends NoteBase {
+	entityType: 'note';
+	statistics?: NoteStatistics;
+	_count?: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+}
+
+// Esquema Zod para validación
+export const NoteSchema = z.object({
+	id: z.string(),
+	title: z.string(),
+	content: z.string().nullable(),
+	excerpt: z.string().nullable(),
+	category: z.string().nullable(),
+	status: z.string().nullable(),
+	priority: z.number().nullable(),
+	tags: z.string().nullable(),
+	isPublic: z.boolean(),
+	isFavorite: z.boolean(),
+	parentId: z.string().nullable(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
+
 // Tipos inferidos de Zod
 export type NoteValidated = z.infer<typeof NoteSchema>;
+
+// Alias para compatibilidad
+export type NoteStats = NoteStatistics;

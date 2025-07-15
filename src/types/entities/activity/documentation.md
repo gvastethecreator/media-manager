@@ -52,7 +52,7 @@ sequenceDiagram
     participant DB
     Client->>API: createActivity()
     API->>Transformer: mapCreateActivityDataToPrisma()
-    Transformer->>DB: prisma.activity.create()
+    
     DB-->>Transformer: Activity
     Transformer-->>API: transformActivity()
     API-->>Client: ActivityComplete

@@ -1,5 +1,3 @@
-'use client';
-
 import { X } from 'lucide-react';
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +27,7 @@ const useTagInput = () => {
 	return context;
 };
 
-export interface TagInputProps extends React.PropsWithChildren<{}> {
+export interface TagInputProps extends React.PropsWithChildren<Record<string, never>> {
 	value?: string[];
 	defaultValue?: string[];
 	onChange?: (tags: string[]) => void;

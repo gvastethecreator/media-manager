@@ -1,8 +1,5 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import { useState } from 'react';
+import { motion } from 'motion/react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 // Imágenes con thumbnails para el componente de galería
@@ -161,12 +158,11 @@ export function CharacterCardImages({
 					}}
 				>
 					{/* Imagen del personaje */}
-					<Image
+					<img
 						src={displayImage as string}
 						alt="Character image"
-						fill
 						className={cn(
-							'object-cover',
+							'object-cover w-full h-full',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 						)}
 						style={{

@@ -15,8 +15,8 @@ export type {
 
 // Re-exportar esquemas Zod para validación
 export {
-	QueueJobSchema,
 	createQueueJobSchema,
+	QueueJobSchema,
 	queueJobFiltersSchema,
 	queueJobMetadataSchema,
 	queueJobPaginationSchema,

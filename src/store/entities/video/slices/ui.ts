@@ -4,8 +4,8 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { VideoStore } from '..';
 import type { VideoViewMode } from '../../../../types/entities/video';
+import type { VideoStore } from '..';
 
 export interface VideoUIState {
 	selectedIds: string[];

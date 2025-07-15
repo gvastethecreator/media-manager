@@ -20,7 +20,7 @@ El tipo principal y canónico que debe usarse en componentes de React, stores de
     ```
 
 - **Contiene**:
-  - `PropertyBase`: El modelo `Property` base, directamente alineado con `schema.prisma`.
+  - `PropertyBase`: El modelo `Property` base, directamente alineado con el esquema de Drizzle.
   - `stats`: Un objeto `PropertyStatistics` con metadatos calculados y derivados.
 
 ### 2. Estadísticas: `PropertyStatistics`
@@ -34,20 +34,15 @@ Este objeto proporciona métricas clave sobre el uso y la completitud de una pro
   - `popularity`: Un score numérico que refleja la popularidad general.
   - `completenessScore`: Un porcentaje que indica qué tan "completo" está el perfil de la propiedad (ej. si tiene descripción, categoría, etc.).
 
-### 3. Tipos de Prisma
-
-- **`PrismaPropertyWithCounts`**: Es el tipo que se recibe directamente de las consultas de Prisma que usan el `include` de `propertyCounts`. Contiene el modelo base y un objeto `_count` con el número de relaciones.
-- **`propertyCounts`**: Objeto de configuración de Prisma (`Prisma.PropertyInclude`) exportado desde `src/types/entities/property/base.ts`. Se usa en las **Server Actions** para obtener los conteos de manera eficiente.
-
 ## Flujo de Datos
 
 1. **Server Actions (`@/app/actions/properties`)**:
-    - Las funciones (`getProperties`, `getProperty`, etc.) usan `prisma.property.findMany/findUnique`.
-    - **IMPRESCINDIBLE**: Todas las consultas deben incluir el objeto `propertyCounts` para obtener los `_count` de las relaciones.
-    - **Ejemplo**: `include: propertyCounts`
+    - Las funciones (`getProperties`, `getProperty`, etc.) usan el cliente de Drizzle.
+    - **IMPRESCINDIBLE**: Todas las consultas deben incluir los conteos de relaciones para obtener los `_count` de las relaciones.
+    - **Ejemplo**: `with(relations)`
 
 2. **Transformers (`@/transformers/property`)**:
-    - La función `toPropertyWithStats` (en `mappers.ts`) es la única responsable de convertir el dato de Prisma (`PrismaPropertyWithCounts`) al tipo canónico (`PropertyWithStats`).
+    - La función `toPropertyWithStats` (en `mappers.ts`) es la única responsable de convertir el dato de Drizzle (`PropertyWithCounts`) al tipo canónico (`PropertyWithStats`).
     - Calcula todas las `PropertyStatistics` a partir del objeto `_count`.
 
 3. **Zustand Store (`@/store/entities/property`)**:
@@ -65,9 +60,9 @@ Este objeto proporciona métricas clave sobre el uso y la completitud de una pro
 ```mermaid
 graph TD
     subgraph "Server-Side"
-        A[Prisma Schema] --> B{Server Actions};
-        B -- "query with `propertyCounts`" --> C[Prisma Client];
-        C -- "returns `PrismaPropertyWithCounts`" --> D(Transformer);
+        A[Drizzle Schema] --> B{Server Actions};
+        B -- "query with relations" --> C[Drizzle Client];
+        C -- "returns `PropertyWithCounts`" --> D(Transformer);
     end
 
     subgraph "Transformation"

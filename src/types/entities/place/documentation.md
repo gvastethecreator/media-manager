@@ -55,8 +55,8 @@ sequenceDiagram
     participant Transformer
     participant DB
     Client->>API: createPlace()
-    API->>Transformer: mapCreatePlaceDataToPrisma()
-    Transformer->>DB: prisma.place.create()
+    
+    Transformer->>DB: db.place.create()
     DB-->>Transformer: Place
     Transformer-->>API: transformPlace()
     API-->>Client: PlaceComplete
