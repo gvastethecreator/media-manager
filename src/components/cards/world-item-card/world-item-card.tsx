@@ -388,17 +388,17 @@ export function WorldItemCard({
 
 				{/* Pie de la tarjeta */}
 				<WorldItemCardFooter
-						createdAt={createdAt}
-						updatedAt={updatedAt}
-						imagesCount={imagesCount}
-						videosCount={videosCount}
-						totalRelations={_totalRelations}
-						isFavorite={isFavorite}
-						category={category}
-						type={type}
-						primaryColor={primaryColor}
-						secondaryColor={secondaryColor}
-					/>
+					createdAt={createdAt}
+					updatedAt={updatedAt}
+					imagesCount={imagesCount}
+					videosCount={videosCount}
+					totalRelations={_totalRelations}
+					isFavorite={isFavorite}
+					category={category}
+					type={type}
+					primaryColor={primaryColor}
+					secondaryColor={secondaryColor}
+				/>
 			</div>
 		</motion.article>
 	);

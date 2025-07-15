@@ -194,33 +194,30 @@ export function useFolders() {
 	);
 
 	// Función para manejar el progreso del reindexado global
-	const handleReindexAllProgress = useCallback(
-		(status: ProcessStatus & { currentFolder?: string }) => {
-			folderLogger.info('🌍 Progreso de reindexado global:', status);
+	const handleReindexAllProgress = useCallback((status: ProcessStatus & { currentFolder?: string }) => {
+		folderLogger.info('🌍 Progreso de reindexado global:', status);
 
+		setGlobalReindexStatus((prev) => ({
+			...prev,
+			isProcessing: status.isProcessing,
+			progress: status.progress || 0,
+			currentFolder: status.currentFolder || prev.currentFolder,
+			processedFolders: status.filesProcessed || prev.processedFolders,
+			totalFolders: status.totalFiles || prev.totalFolders,
+			lastUpdate: Date.now(),
+		}));
+
+		// Si el reindexado global ha terminado
+		if (!status.isProcessing && status.progress === 100) {
+			folderLogger.info('✅ Reindexado global completado');
 			setGlobalReindexStatus((prev) => ({
 				...prev,
-				isProcessing: status.isProcessing,
-				progress: status.progress || 0,
-				currentFolder: status.currentFolder || prev.currentFolder,
-				processedFolders: status.filesProcessed || prev.processedFolders,
-				totalFolders: status.totalFiles || prev.totalFolders,
-				lastUpdate: Date.now(),
+				isProcessing: false,
+				endTime: Date.now(),
 			}));
-
-			// Si el reindexado global ha terminado
-			if (!status.isProcessing && status.progress === 100) {
-				folderLogger.info('✅ Reindexado global completado');
-				setGlobalReindexStatus((prev) => ({
-					...prev,
-					isProcessing: false,
-					endTime: Date.now(),
-				}));
-				toastService.success('Reindexado global completado correctamente');
-			}
-		},
-		[]
-	);
+			toastService.success('Reindexado global completado correctamente');
+		}
+	}, []);
 
 	// Función de procesamiento simplificada (sin polling)
 	const startProcessing = useCallback((folderId: string) => {
@@ -363,22 +360,25 @@ export function useFolders() {
 	);
 
 	// Función para manejar click en carpeta (seleccionar o eliminar)
-	const handleFolderClick = useCallback(async (folderId: string) => {
-		if (selectedFolder === folderId) {
-			// Si ya está seleccionada, eliminar
-			try {
-				await foldersOperations.handleRemoveFolder(folderId);
-				setSelectedFolder(null);
-				toastService.success('Carpeta eliminada correctamente');
-			} catch (error) {
-				folderLogger.error('❌ Error eliminando carpeta:', error);
-				toastService.error('Error al eliminar la carpeta');
+	const handleFolderClick = useCallback(
+		async (folderId: string) => {
+			if (selectedFolder === folderId) {
+				// Si ya está seleccionada, eliminar
+				try {
+					await foldersOperations.handleRemoveFolder(folderId);
+					setSelectedFolder(null);
+					toastService.success('Carpeta eliminada correctamente');
+				} catch (error) {
+					folderLogger.error('❌ Error eliminando carpeta:', error);
+					toastService.error('Error al eliminar la carpeta');
+				}
+			} else {
+				// Si no está seleccionada, seleccionar para eliminar
+				setSelectedFolder(folderId);
 			}
-		} else {
-			// Si no está seleccionada, seleccionar para eliminar
-			setSelectedFolder(folderId);
-		}
-	}, [selectedFolder, foldersOperations]);
+		},
+		[selectedFolder, foldersOperations]
+	);
 
 	// Función para seleccionar carpeta
 	const selectFolder = useCallback((folderId: string | null) => {

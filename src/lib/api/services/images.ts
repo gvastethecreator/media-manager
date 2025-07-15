@@ -1,5 +1,5 @@
-import { apiClient } from '../client';
 import type { TagWithStats } from '@/types/entities/tag/base';
+import { apiClient } from '../client';
 
 export interface ImageCardData {
 	id: string;

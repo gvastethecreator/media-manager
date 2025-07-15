@@ -12,13 +12,6 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-// --- Enumeraciones ---
-export {
-	ConceptCategory,
-	ConceptSortOption,
-	ConceptStatus,
-	ConceptViewMode,
-} from './enums';
 // --- Tipos Canónicos ---
 // Tipos base desde base.ts
 export type {
@@ -27,6 +20,13 @@ export type {
 	ConceptStats,
 	ConceptWithStats,
 } from './base';
+// --- Enumeraciones ---
+export {
+	ConceptCategory,
+	ConceptSortOption,
+	ConceptStatus,
+	ConceptViewMode,
+} from './enums';
 
 // Tipos adicionales desde types.ts
 export type {

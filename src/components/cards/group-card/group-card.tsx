@@ -152,28 +152,28 @@ export function GroupCard({
 		>
 			{/* Encabezado */}
 			<GroupCardHeader
-					name={group.name}
-					emoji={group.emoji || ''}
-					color={primaryColor}
-					category={group.category || undefined}
-					organizationType={group.organizationType || ''}
-					organizationLevel={Number(group.organizationLevel) || 1}
-					isFavorite={group.isFavorite || false}
-					tcgMode={tcgMode}
-					compact={compact}
-				/>
+				name={group.name}
+				emoji={group.emoji || ''}
+				color={primaryColor}
+				category={group.category || undefined}
+				organizationType={group.organizationType || ''}
+				organizationLevel={Number(group.organizationLevel) || 1}
+				isFavorite={group.isFavorite || false}
+				tcgMode={tcgMode}
+				compact={compact}
+			/>
 
 			{/* Imágenes */}
 			<GroupCardImages
-					images={group.recentImages || []}
-					videos={group.recentVideos || []}
-					emoji={group.emoji || ''}
-					primaryColor={primaryColor}
-					rarityLevel={Number(group.rarityLevel) || 1}
-					holographicEffect={isHovered}
-					tcgMode={tcgMode}
-					compact={compact}
-				/>
+				images={group.recentImages || []}
+				videos={group.recentVideos || []}
+				emoji={group.emoji || ''}
+				primaryColor={primaryColor}
+				rarityLevel={Number(group.rarityLevel) || 1}
+				holographicEffect={isHovered}
+				tcgMode={tcgMode}
+				compact={compact}
+			/>
 
 			{/* Contenido */}
 			<GroupCardContent
