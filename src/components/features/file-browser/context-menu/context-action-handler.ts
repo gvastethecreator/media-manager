@@ -10,11 +10,10 @@ import tagService from '@/services/tag/tag.service';
 
 // Importaciones de stores en entidades
 
-// Importaciones de actions de archivos
-import { deleteFile as deleteFileAction } from '@/services/file/file.service';
-
 // Importar el tipo local en lugar del tipo global
 import type { FileItem } from '@/lib/contexts/file-context';
+// Importaciones de actions de archivos
+import { deleteFile as deleteFileAction } from '@/services/file/file.service';
 import type { ContextMenuAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');

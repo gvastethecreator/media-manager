@@ -77,7 +77,8 @@ export function FoldersSettings() {
 							<div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
 								<RefreshCw className="h-4 w-4 animate-spin text-primary" />
 								<span className="font-medium">
-									{processStatus?.message || (isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...')}
+									{processStatus?.message ||
+										(isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...')}
 									{processStatus?.progress !== undefined && (
 										<span className="ml-1">({Math.round(processStatus.progress)}%)</span>
 									)}
@@ -119,9 +120,14 @@ export function FoldersSettings() {
 							disabled={isLoading || isGloballyProcessing}
 						>
 							<RefreshCw
-								className={cn('h-3.5 w-3.5 mr-1 transition-transform', (isLoading || globalReindexStatus.isProcessing) && 'animate-spin')}
+								className={cn(
+									'h-3.5 w-3.5 mr-1 transition-transform',
+									(isLoading || globalReindexStatus.isProcessing) && 'animate-spin'
+								)}
 							/>
-							{globalReindexStatus.isProcessing ? `Reindexando... ${Math.round(globalReindexStatus.progress)}%` : 'Reindexar todo'}
+							{globalReindexStatus.isProcessing
+								? `Reindexando... ${Math.round(globalReindexStatus.progress)}%`
+								: 'Reindexar todo'}
 						</Button>
 					</div>
 				</CardTitle>

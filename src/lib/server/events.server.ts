@@ -137,7 +137,7 @@ function emitDirect(event: EventData) {
 	}
 	eventStore.get(eventKey)?.push({
 		...event,
-		timestamp: Date.now()
+		timestamp: Date.now(),
 	});
 
 	// Mantener solo los últimos 100 eventos por tipo
@@ -147,7 +147,7 @@ function emitDirect(event: EventData) {
 	}
 
 	// Notificar a suscriptores
-	eventSubscribers.forEach(subscriber => {
+	eventSubscribers.forEach((subscriber) => {
 		try {
 			subscriber(event);
 		} catch (error) {

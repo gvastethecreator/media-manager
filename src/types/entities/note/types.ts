@@ -6,6 +6,7 @@
  */
 
 import type { z } from 'zod';
+import { z } from 'zod';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -19,7 +20,6 @@ import type { TagWithStats } from '../tag';
 import type { VideoWithStats } from '../video';
 import type { WildcardWithStats } from '../wildcard';
 import type { WorldItemWithStats } from '../world-item';
-import { z } from 'zod';
 
 /**
  * 📝 Tipo base canónico para Note

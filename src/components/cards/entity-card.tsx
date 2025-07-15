@@ -8,6 +8,7 @@
  */
 
 import type { FC } from 'react';
+import type { AnyEntityWithStats } from '@/types/migration';
 import {
 	type EntityWithStats,
 	getEntityStatsType,
@@ -29,7 +30,6 @@ import {
 	isWildcardWithStats,
 	isWorldItemWithStats,
 } from '@/types/migration';
-
 // Importar componentes de tarjetas
 import { AlbumCard } from './album-card/album-card';
 import { AudioCard } from './audio-card/audio-card';
@@ -52,7 +52,6 @@ import type { BaseCardProps, CardVariant } from './types/card-layout.types';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
-import type { AnyEntityWithStats } from '@/types/migration';
 
 interface EntityCardProps extends BaseCardProps {
 	entity: AnyEntityWithStats;

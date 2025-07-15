@@ -7,6 +7,6 @@
  * @updated 2025-01-27
  */
 
+export type { WorldItemComplete } from '@/types/entities/world-item/types';
 export { toWorldItemWithStats } from './mappers';
 export { fromDrizzleWorldItem } from './transformer';
-export type { WorldItemComplete } from '@/types/entities/world-item/types';

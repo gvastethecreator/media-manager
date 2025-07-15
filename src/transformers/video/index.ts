@@ -7,6 +7,6 @@
  * @updated 2025-01-27
  */
 
+export type { VideoComplete } from '@/types/entities/video/types';
 export { toVideoWithStats } from './mappers';
 export { fromDrizzleVideo } from './transformer';
-export type { VideoComplete } from '@/types/entities/video/types';

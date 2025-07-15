@@ -22,7 +22,6 @@ export type {
 	VideoPaginationOptions,
 	VideoPlayState,
 	VideoSortCriteria,
-
 	VideoStats,
 	VideoUpdateInput,
 	VideoViewMode,

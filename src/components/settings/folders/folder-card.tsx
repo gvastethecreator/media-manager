@@ -180,17 +180,19 @@ export function FolderCard({
 										<TooltipTrigger asChild>
 											<div className="flex items-center gap-1 cursor-pointer">
 												<Switch
-																checked={folder.autoReindex}
-																onCheckedChange={(checked) => {
-																	if (!folder.id) {
-																		console.error('[FolderCard] ❌ Error: folder.id is undefined for auto-reindex', { folder });
-																		return;
-																	}
-																	onToggleAutoReindex(folder.id, checked);
-																}}
-																disabled={isGloballyProcessing || !folder.id}
-																className="scale-75"
-															/>
+													checked={folder.autoReindex}
+													onCheckedChange={(checked) => {
+														if (!folder.id) {
+															console.error('[FolderCard] ❌ Error: folder.id is undefined for auto-reindex', {
+																folder,
+															});
+															return;
+														}
+														onToggleAutoReindex(folder.id, checked);
+													}}
+													disabled={isGloballyProcessing || !folder.id}
+													className="scale-75"
+												/>
 												<span className="text-[10px] text-muted-foreground">Auto</span>
 											</div>
 										</TooltipTrigger>
@@ -238,8 +240,8 @@ export function FolderCard({
 												variant="ghost"
 												className={cn(
 													'h-6 w-6 cursor-pointer transition-colors',
-													selectedFolder === folder.id 
-														? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' 
+													selectedFolder === folder.id
+														? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
 														: 'hover:bg-destructive/10 hover:text-destructive'
 												)}
 												onClick={() => {

@@ -466,8 +466,6 @@ router.get('/:id/stats', async (req, res) => {
 	}
 });
 
-
-
 // GET /api/folders/:id/path - Obtener la ruta de una carpeta por su ID
 router.get('/:id/path', async (req, res) => {
 	try {
@@ -955,49 +953,47 @@ router.post('/reindex-all', async (req, res) => {
 		const errors: string[] = [];
 		let globalSyncResult = null;
 
-	
+		// Procesar cada carpeta (solo la primera ejecutará la sincronización global)
+		for (let i = 0; i < allFolders.length; i++) {
+			const folder = allFolders[i];
+			try {
+				console.log(`🔄 Reindexando carpeta: ${folder.name} (${folder.id})`);
 
-	// Procesar cada carpeta (solo la primera ejecutará la sincronización global)
-	for (let i = 0; i < allFolders.length; i++) {
-		const folder = allFolders[i];
-		try {
-			console.log(`🔄 Reindexando carpeta: ${folder.name} (${folder.id})`);
-			
-			// Emitir progreso global
-			const progress = Math.round(((i + 1) / allFolders.length) * 100);
-			const { emit } = await import('@/lib/server/events.server');
-			await emit({
-				type: 'folder:reindexAll:progress',
-				data: {
-					folderId: null, // Para reindex global, folderId puede ser null
-					isProcessing: i < allFolders.length - 1,
-					progress,
-					totalFiles: allFolders.length,
-					filesProcessed: i + 1,
-					phase: i === allFolders.length - 1 ? 'complete' : 'processing',
-					message: `Reindexando carpetas... ${i + 1}/${allFolders.length} (${folder.name})`,
-					timestamp: Date.now(),
-					currentFolder: folder.name
+				// Emitir progreso global
+				const progress = Math.round(((i + 1) / allFolders.length) * 100);
+				const { emit } = await import('@/lib/server/events.server');
+				await emit({
+					type: 'folder:reindexAll:progress',
+					data: {
+						folderId: null, // Para reindex global, folderId puede ser null
+						isProcessing: i < allFolders.length - 1,
+						progress,
+						totalFiles: allFolders.length,
+						filesProcessed: i + 1,
+						phase: i === allFolders.length - 1 ? 'complete' : 'processing',
+						message: `Reindexando carpetas... ${i + 1}/${allFolders.length} (${folder.name})`,
+						timestamp: Date.now(),
+						currentFolder: folder.name,
+					},
+				});
+
+				// Solo ejecutar sincronización en la primera carpeta para evitar duplicados
+				const shouldSync = enableSync && i === 0;
+				const indexResult = await updateFolderStats(folder.id, new Set(), 10, 0, shouldSync, true);
+
+				// Capturar resultado de sincronización de la primera carpeta
+				if (shouldSync && indexResult.syncResult) {
+					globalSyncResult = indexResult.syncResult;
 				}
-			});
 
-			// Solo ejecutar sincronización en la primera carpeta para evitar duplicados
-			const shouldSync = enableSync && i === 0;
-			const indexResult = await updateFolderStats(folder.id, new Set(), 10, 0, shouldSync, true);
-
-			// Capturar resultado de sincronización de la primera carpeta
-			if (shouldSync && indexResult.syncResult) {
-				globalSyncResult = indexResult.syncResult;
+				processed++;
+				console.log(`✅ Carpeta reindexada: ${folder.name}`);
+			} catch (error) {
+				const errorMessage = `Error en carpeta ${folder.name}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
+				console.error(`❌ ${errorMessage}`);
+				errors.push(errorMessage);
 			}
-
-			processed++;
-			console.log(`✅ Carpeta reindexada: ${folder.name}`);
-		} catch (error) {
-			const errorMessage = `Error en carpeta ${folder.name}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
-			console.error(`❌ ${errorMessage}`);
-			errors.push(errorMessage);
 		}
-	}
 
 		console.log(`✅ Reindexación global completada: ${processed} carpetas procesadas, ${errors.length} errores`);
 
