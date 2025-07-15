@@ -1,10 +1,15 @@
-import { prisma } from '@/lib/database/prisma';
+/**
+ * @file Servicio para la gestión de notas
+ * @module services/note
+ */
+
+import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { notes } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { fromPrismaNote } from '@/transformers/note';
-import { mapCreateNoteDataToPrisma, mapUpdateNoteDataToPrisma } from '@/transformers/note/mappers';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import type { Prisma } from '@prisma/client';
 
 const noteLogger = serverLogger.withContext('NoteService');
 
@@ -46,41 +51,52 @@ interface NoteResults {
  * Servicio para gestionar las notas
  * Refactorizado para usar tipos canónicos y transformadores
  */
-export const NoteService = {
+const NoteServiceImpl = {
 	async createNote(data: NoteCreateInput): Promise<NoteComplete> {
 		try {
-			// Usar el transformador para mapear los datos
-			const prismaData = mapCreateNoteDataToPrisma(data);
+			const [newNote] = await db
+				.insert(notes)
+				.values({
+					id: crypto.randomUUID(),
+					title: data.title,
+					content: data.content || '',
+					category: data.category || 'general',
+					priority: data.priority || 0,
+					status: data.status || 'active',
+					featuredImage: data.featuredImage || null,
+					isFavorite: data.isFavorite || false,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					presetId: data.presetId || null,
+				})
+				.returning();
 
-			const note = await prisma.note.create({
-				data: prismaData,
-				include: {
-					_count: {
-						select: {
-							images: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							groups: true,
-							properties: true,
-							wildcards: true,
-						},
-					},
+			const noteComplete: NoteComplete = {
+				...newNote,
+				name: newNote.title,
+				description: '',
+				emoji: '📝',
+				color: '#3b82f6',
+				isPublic: false,
+				totalImages: 0,
+				totalVideos: 0,
+				type: 'general',
+				tags: [],
+				_count: {
+					images: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					groups: 0,
+					properties: 0,
+					wildcards: 0,
 				},
-			});
+			};
 
-			// Transformar usando el transformador canónico
-			const noteComplete = fromPrismaNote(note, {
-				includeRelations: true,
-				includeUI: true,
-				deserializeFields: true,
-			});
-
-			// Emitir eventos con el nuevo sistema
 			await emit({
 				type: EVENT_TYPE_MAPPING[EVENTS.NOTE_CREATED],
 				data: { action: 'create', entity: noteComplete, eventType: EVENTS.NOTE_CREATED },
@@ -100,23 +116,51 @@ export const NoteService = {
 
 	async updateNote(id: string, data: NoteUpdateInput): Promise<NoteComplete> {
 		try {
-			// Usar el transformador para mapear los datos
-			const { data: prismaData, include } = mapUpdateNoteDataToPrisma(id, data);
+			const [updatedNote] = await db
+				.update(notes)
+				.set({
+					title: data.title,
+					content: data.content || '',
+					category: data.category || 'general',
+					priority: data.priority || 0,
+					status: data.status || 'active',
+					featuredImage: data.featuredImage || null,
+					isFavorite: data.isFavorite || false,
+					updatedAt: new Date(),
+				})
+				.where(eq(notes.id, id))
+				.returning();
 
-			const note = await prisma.note.update({
-				where: { id },
-				data: prismaData,
-				include,
-			});
+			if (!updatedNote) {
+				throw new Error('Nota no encontrada');
+			}
 
-			// Transformar usando el transformador canónico
-			const noteComplete = fromPrismaNote(note, {
-				includeRelations: true,
-				includeUI: true,
-				deserializeFields: true,
-			});
+			const noteComplete: NoteComplete = {
+				...updatedNote,
+				name: updatedNote.title,
+				description: '',
+				emoji: '📝',
+				color: '#3b82f6',
+				isPublic: false,
+				totalImages: 0,
+				totalVideos: 0,
+				type: 'general',
+				tags: [],
+				_count: {
+					images: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					groups: 0,
+					properties: 0,
+					wildcards: 0,
+				},
+			};
 
-			// Emitir eventos con el nuevo sistema
 			await emit({
 				type: EVENT_TYPE_MAPPING[EVENTS.NOTE_UPDATED],
 				data: { action: 'update', entity: noteComplete, eventType: EVENTS.NOTE_UPDATED },
@@ -136,9 +180,7 @@ export const NoteService = {
 
 	async deleteNote(id: string): Promise<void> {
 		try {
-			await prisma.note.delete({
-				where: { id },
-			});
+			await db.delete(notes).where(eq(notes.id, id));
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -158,37 +200,66 @@ export const NoteService = {
 
 	async getNote(id: string): Promise<NoteComplete | null> {
 		try {
-			const note = await prisma.note.findUnique({
-				where: { id },
-				include: {
-					_count: {
-						select: {
-							images: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							groups: true,
-							properties: true,
-							wildcards: true,
-						},
-					},
-				},
-			});
+			// **MIGRACIÓN A DRIZZLE**
+			noteLogger.info(`🔍 Obteniendo nota por ID: ${id}`);
 
-			if (!note) {
+			const drizzleNote = await db
+				.select({
+					id: notes.id,
+					title: notes.title, // Campo real
+					content: notes.content,
+					category: notes.category,
+					priority: notes.priority, // INTEGER en BD real
+					status: notes.status,
+					featuredImage: notes.featuredImage,
+					isFavorite: notes.isFavorite,
+					createdAt: notes.createdAt,
+					updatedAt: notes.updatedAt,
+					presetId: notes.presetId, // Campo real
+				})
+				.from(notes)
+				.where(eq(notes.id, id))
+				.limit(1);
+
+			if (drizzleNote.length === 0) {
+				noteLogger.warn(`Nota no encontrada: ${id}`);
 				return null;
 			}
 
-			// Transformar usando el transformador canónico
-			return fromPrismaNote(note, {
-				includeRelations: true,
-				includeUI: true,
-				deserializeFields: true,
-			});
+			const rawNote = drizzleNote[0];
+
+			const result: NoteComplete = {
+				...rawNote,
+				name: rawNote.title,
+				description: '',
+				emoji: '📝',
+				color: '#3b82f6',
+				isPublic: false,
+				totalImages: 0,
+				totalVideos: 0,
+				type: 'general',
+				tags: [],
+				dueDate: null,
+				completedAt: null,
+				parentId: null,
+				isFavorite: Boolean(rawNote.isFavorite),
+				_count: {
+					images: 0,
+					albums: 0,
+					collections: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					groups: 0,
+					properties: 0,
+					wildcards: 0,
+				},
+			};
+
+			noteLogger.info(`✅ Nota encontrada: ${result.name}`);
+			return result;
 		} catch (error) {
 			noteLogger.error('Error getting note:', { id, error });
 			throw new Error('Error al obtener nota');
@@ -197,6 +268,9 @@ export const NoteService = {
 
 	async getNotes(filters: NoteServiceFilters = {}): Promise<NoteResults> {
 		try {
+			// **MIGRACIÓN A DRIZZLE**
+			noteLogger.info('🔍 Obteniendo notas con filtros:', filters);
+
 			const {
 				category,
 				priority,
@@ -208,97 +282,113 @@ export const NoteService = {
 				pageSize = 50,
 			} = filters;
 
-			// Construir where usando filtros compatibles
-			const where: Prisma.NoteWhereInput = {};
+			// Construir condiciones WHERE para Drizzle
+			const conditions = [];
+
 			if (category) {
-				where.category = category;
+				conditions.push(eq(notes.category, category));
 			}
 			if (priority !== undefined) {
-				where.priority = priority;
+				// priority es INTEGER en BD real
+				conditions.push(eq(notes.priority, priority));
 			}
 			if (status) {
-				where.status = status;
+				conditions.push(eq(notes.status, status));
 			}
 			if (search) {
-				where.OR = [{ title: { contains: search } }, { content: { contains: search } }];
+				conditions.push(or(like(notes.title, `%${search}%`), like(notes.content, `%${search}%`)));
 			}
 
-			// Obtener total
-			const total = await prisma.note.count({ where });
+			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-			// Obtener notas con conteos
-			const notes = await prisma.note.findMany({
-				where,
-				include: {
-					_count: {
-						select: {
-							images: true,
-							albums: true,
-							collections: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							groups: true,
-							properties: true,
-							wildcards: true,
-						},
-					},
-				},
-				orderBy: {
-					[sortBy]: sortOrder,
-				},
-				skip: page * pageSize,
-				take: pageSize,
-			});
+			// Determinar orden
+			const orderByClause = sortOrder === 'desc' ? desc(notes[sortBy] as any) : asc(notes[sortBy] as any);
 
-			// Transformar notas usando transformador y construir NoteWithStats manualmente
-			const items: NoteWithStats[] = notes.map((note) => {
-				const noteComplete = fromPrismaNote(note, {
-					includeRelations: true,
-					includeUI: true,
-					deserializeFields: true,
-				});
+			// Ejecutar consultas en paralelo
+			const [drizzleNotes, totalCount] = await Promise.all([
+				db
+					.select({
+						id: notes.id,
+						title: notes.title, // Campo real
+						content: notes.content,
+						category: notes.category,
+						priority: notes.priority, // INTEGER en BD real
+						status: notes.status,
+						featuredImage: notes.featuredImage,
+						isFavorite: notes.isFavorite,
+						createdAt: notes.createdAt,
+						updatedAt: notes.updatedAt,
+						presetId: notes.presetId, // Campo real
+					})
+					.from(notes)
+					.where(whereClause)
+					.orderBy(orderByClause)
+					.limit(pageSize)
+					.offset(page * pageSize),
 
-				// Calcular estadísticas básicas
-				const totalItems = Object.values(note._count).reduce((sum, count) => sum + count, 0);
+				db
+					.select({ count: count() })
+					.from(notes)
+					.where(whereClause)
+					.then((result) => result[0]?.count || 0),
+			]);
 
-				// Convertir a NoteWithStats siguiendo la estructura esperada
+			const items: NoteWithStats[] = drizzleNotes.map((note) => {
+				// Calcular estadísticas básicas de contenido
+				const content = note.content || '';
+				const wordCount = content.trim() ? content.split(/\s+/).length : 0;
+				const characterCount = content.length;
+				const readingTime = Math.ceil(wordCount / 200);
+				const completionScore = Math.min(100, Math.max(0, wordCount / 10 + characterCount / 100));
+
 				return {
-					...noteComplete,
+					...note,
+					name: note.title,
+					description: '',
+					emoji: '📝',
+					color: '#3b82f6',
+					isPublic: false,
+					totalImages: 0,
+					totalVideos: 0,
+					type: 'general',
+					tags: [],
+					dueDate: null,
+					completedAt: null,
+					parentId: null,
+					isFavorite: Boolean(note.isFavorite),
 					statistics: {
-						totalItems,
-						totalImages: note._count.images || 0,
-						totalVideos: 0, // No incluido en schema actual
-						totalAlbums: note._count.albums || 0,
-						totalCollections: note._count.collections || 0,
-						totalTags: 0, // No incluido en schema actual
-						totalCharacters: note._count.characters || 0,
-						totalPlaces: note._count.places || 0,
-						totalWorldItems: note._count.worldItems || 0,
-						totalConcepts: note._count.concepts || 0,
-						totalPrompts: note._count.prompts || 0,
-						totalWildcards: note._count.wildcards || 0,
-						totalProperties: note._count.properties || 0,
-						totalGroups: note._count.groups || 0,
-						wordCount: noteComplete.content.split(/\s+/).length,
-						characterCount: noteComplete.content.length,
-						readingTime: Math.ceil(noteComplete.content.split(/\s+/).length / 200), // aprox. 200 palabras por minuto
-						completionScore: Math.min(100, Math.max(0, totalItems * 10 + noteComplete.content.length / 10)),
-						lastUpdated: noteComplete.updatedAt,
+						totalItems: 0,
+						totalImages: 0,
+						totalVideos: 0,
+						totalAlbums: 0,
+						totalCollections: 0,
+						totalTags: 0,
+						totalCharacters: 0,
+						totalPlaces: 0,
+						totalWorldItems: 0,
+						totalConcepts: 0,
+						totalPrompts: 0,
+						totalWildcards: 0,
+						totalProperties: 0,
+						totalGroups: 0,
+						wordCount,
+						characterCount,
+						readingTime,
+						completionScore,
+						lastUpdated: note.updatedAt,
 					},
-					excerpt: noteComplete.content.substring(0, 150) + (noteComplete.content.length > 150 ? '...' : ''),
-					formattedDate: noteComplete.updatedAt.toLocaleDateString(),
-					priorityLabel: this.getPriorityLabel(noteComplete.priority),
-					statusLabel: this.getStatusLabel(noteComplete.status),
-					categoryLabel: this.getCategoryLabel(noteComplete.category),
+					excerpt: content.substring(0, 150) + (content.length > 150 ? '...' : ''),
+					formattedDate: note.updatedAt.toLocaleDateString(),
+					priorityLabel: NoteService.getPriorityLabel(note.priority),
+					statusLabel: NoteService.getStatusLabel(note.status),
+					categoryLabel: NoteService.getCategoryLabel(note.category),
 				};
 			});
 
+			noteLogger.info(`✅ Notas obtenidas: ${items.length}/${totalCount}`);
 			return {
 				items,
-				total,
+				total: totalCount,
 				page,
 				pageSize,
 			};
@@ -352,4 +442,126 @@ export const NoteService = {
 	},
 };
 
-export const noteService = NoteService;
+/**
+ * Clase de servicio para gestión de notas (wrapper para compatibilidad)
+ */
+export class NoteService {
+	async getNotes(filters?: any): Promise<{ notes: NoteWithStats[]; total: number }> {
+		const result = await NoteServiceImpl.getNotes(filters || {});
+		return { notes: result.items, total: result.total };
+	}
+
+	async getNoteById(id: string): Promise<NoteWithStats | null> {
+		const note = await NoteServiceImpl.getNote(id);
+		if (!note) return null;
+
+		// Convertir a NoteWithStats
+		const content = note.content || '';
+		const wordCount = content.trim() ? content.split(/\s+/).length : 0;
+		const characterCount = content.length;
+		const readingTime = Math.ceil(wordCount / 200);
+		const completionScore = Math.min(100, Math.max(0, wordCount / 10 + characterCount / 100));
+
+		return {
+			...note,
+			statistics: {
+				totalItems: 0,
+				totalImages: 0,
+				totalVideos: 0,
+				totalAlbums: 0,
+				totalCollections: 0,
+				totalTags: 0,
+				totalCharacters: 0,
+				totalPlaces: 0,
+				totalWorldItems: 0,
+				totalConcepts: 0,
+				totalPrompts: 0,
+				totalWildcards: 0,
+				totalProperties: 0,
+				totalGroups: 0,
+				wordCount,
+				characterCount,
+				readingTime,
+				completionScore,
+				lastUpdated: note.updatedAt,
+			},
+			excerpt: content.substring(0, 150) + (content.length > 150 ? '...' : ''),
+			formattedDate: note.updatedAt.toLocaleDateString(),
+			priorityLabel: NoteServiceImpl.getPriorityLabel(note.priority),
+			statusLabel: NoteServiceImpl.getStatusLabel(note.status),
+			categoryLabel: NoteServiceImpl.getCategoryLabel(note.category),
+		};
+	}
+
+	async createNote(data: NoteCreateInput): Promise<NoteWithStats> {
+		const note = await NoteServiceImpl.createNote(data);
+		return this.getNoteById(note.id) as Promise<NoteWithStats>;
+	}
+
+	async updateNote(id: string, data: NoteUpdateInput): Promise<NoteWithStats | null> {
+		try {
+			await NoteServiceImpl.updateNote(id, data);
+			return this.getNoteById(id);
+		} catch (error) {
+			if (error instanceof Error && error.message.includes('Nota no encontrada')) {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteNote(id: string): Promise<boolean> {
+		try {
+			await NoteServiceImpl.deleteNote(id);
+			return true;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	async getNoteImages(id: string): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes de la nota
+		noteLogger.info(`Obteniendo imágenes de la nota ${id}`);
+		return [];
+	}
+
+	async getRecentNoteImages(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes recientes de la nota
+		noteLogger.info(`Obteniendo imágenes recientes de la nota ${id} (limit: ${limit})`);
+		return [];
+	}
+
+	async getNoteCounts(id: string): Promise<any> {
+		// TODO: Implementar lógica para obtener conteos de la nota
+		noteLogger.info(`Obteniendo conteos de la nota ${id}`);
+		return {
+			images: 0,
+			videos: 0,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+		};
+	}
+
+	async getNoteStatuses(): Promise<string[]> {
+		return ['draft', 'published', 'archived', 'pending'];
+	}
+}
+
+export const noteService = NoteServiceImpl;
+
+// Exportar instancia de NoteService para compatibilidad con routes
+const noteServiceInstance = new NoteService();
+
+// Exportar métodos individuales para compatibilidad con import * as noteService
+export const getNotes = noteServiceInstance.getNotes.bind(noteServiceInstance);
+export const getNoteById = noteServiceInstance.getNoteById.bind(noteServiceInstance);
+export const createNote = noteServiceInstance.createNote.bind(noteServiceInstance);
+export const updateNote = noteServiceInstance.updateNote.bind(noteServiceInstance);
+export const deleteNote = noteServiceInstance.deleteNote.bind(noteServiceInstance);
+export const getNoteImages = noteServiceInstance.getNoteImages.bind(noteServiceInstance);
+export const getRecentNoteImages = noteServiceInstance.getRecentNoteImages.bind(noteServiceInstance);
+export const getNoteCounts = noteServiceInstance.getNoteCounts.bind(noteServiceInstance);
+export const getNoteStatuses = noteServiceInstance.getNoteStatuses.bind(noteServiceInstance);
+
+export default noteServiceInstance;

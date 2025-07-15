@@ -3,14 +3,25 @@
  * @module transformers/workflow/mappers
  * @description Contiene funciones para transformar datos de la entidad Workflow,
  *              enfocándose en el cálculo de estadísticas de ejecución.
+ 
  */
 
-import type { WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
 import { safeJsonParse } from '@/lib/utils/safe-json-parse';
-import type { Workflow } from '@prisma/client';
+import type { WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
+
+// Tipo local para workflow (migración a Drizzle)
+type DrizzleWorkflow = {
+	id: string;
+	name: string;
+	description: string | null;
+	definition: string;
+	isActive: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 /**
- * Datos agregados de las ejecuciones de un workflow, obtenidos de Prisma.
+ * Datos agregados de las ejecuciones de un workflow, obtenidos de Drizzle.
  */
 export type WorkflowExecutionAggregates = {
 	totalExecutions: number;
@@ -33,12 +44,16 @@ type WorkflowDefinition = {
 
 /**
  * Calcula las estadísticas de un workflow a partir de sus datos y las agregaciones de sus ejecuciones.
+ * ✅ MIGRADO A DRIZZLE
  *
- * @param workflow El objeto Workflow base de Prisma.
+ * @param workflow El objeto Workflow base de Drizzle.
  * @param aggregates Los datos agregados de las ejecuciones del workflow.
  * @returns Un objeto de tipo WorkflowStatistics.
  */
-function calculateWorkflowStats(workflow: Workflow, aggregates: WorkflowExecutionAggregates): WorkflowStatistics {
+function calculateWorkflowStats(
+	workflow: DrizzleWorkflow,
+	aggregates: WorkflowExecutionAggregates
+): WorkflowStatistics {
 	const { totalExecutions, successfulExecutions, _avg, _max } = aggregates;
 
 	// Parsear la definición para contar nodos y conexiones
@@ -50,7 +65,7 @@ function calculateWorkflowStats(workflow: Workflow, aggregates: WorkflowExecutio
 
 	return {
 		totalExecutions,
-		successRate: parseFloat(successRate.toFixed(1)),
+		successRate: Number.parseFloat(successRate.toFixed(1)),
 		averageDuration: Math.round(_avg.duration ?? 0),
 		lastExecutedAt: _max.startedAt ?? null,
 		nodeCount,
@@ -59,14 +74,18 @@ function calculateWorkflowStats(workflow: Workflow, aggregates: WorkflowExecutio
 }
 
 /**
- * Convierte un objeto Workflow de Prisma y sus estadísticas agregadas
+ * Convierte un objeto Workflow de Drizzle y sus estadísticas agregadas
  * a un objeto canónico WorkflowWithStats.
+ * ✅ MIGRADO A DRIZZLE
  *
- * @param workflow El objeto Workflow de Prisma.
+ * @param workflow El objeto Workflow de Drizzle.
  * @param aggregates Los datos agregados de las ejecuciones del workflow.
  * @returns Un objeto WorkflowWithStats.
  */
-export function toWorkflowWithStats(workflow: Workflow, aggregates: WorkflowExecutionAggregates): WorkflowWithStats {
+export function toWorkflowWithStats(
+	workflow: DrizzleWorkflow,
+	aggregates: WorkflowExecutionAggregates
+): WorkflowWithStats {
 	const stats = calculateWorkflowStats(workflow, aggregates);
 
 	return {
@@ -74,3 +93,9 @@ export function toWorkflowWithStats(workflow: Workflow, aggregates: WorkflowExec
 		stats,
 	};
 }
+
+// Mantener función legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar toWorkflowWithStats con tipos de Drizzle
+ */
+export const toWorkflowWithStatsFromDrizzle = toWorkflowWithStats;

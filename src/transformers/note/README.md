@@ -11,10 +11,10 @@ La entidad **Note** gestiona todas las notas del sistema, proporcionando una her
 ### 🔧 Correcciones Realizadas
 
 1. **Mappers Corregidos**:
-   - ✅ Agregada exportación de `mapNoteFiltersToPrisma`
-   - ✅ Corregida función `mapUpdateNoteDataToPrisma` para retornar objeto con `data` e `include`
+   - ✅ Agregada exportación de `mapNoteFiltersToDrizzle`
+   - ✅ Corregida función `mapUpdateNoteDataToDrizzle` para retornar objeto con `data` e `include`
    - ✅ Agregadas funciones alias `toCreateNoteData` y `toUpdateNoteData`
-   - ✅ Mejorada estructura de retorno para compatibilidad con Prisma
+   - ✅ Mejorada estructura de retorno para compatibilidad con Drizzle
 
 2. **Test Corregido**:
    - ✅ Corregido uso de `page/pageSize` por `skip/take` en `NoteSearchOptions`
@@ -176,23 +176,23 @@ interface NoteSearchOptions {
 
 ### Mappers (mappers.ts) ✅
 
-- `mapCreateNoteDataToPrisma()` - Mapea datos de creación a Prisma
-- `mapUpdateNoteDataToPrisma()` - Mapea datos de actualización con estructura correcta
-- `mapNoteFiltersToPrisma()` - Mapea filtros a condiciones Prisma (ahora exportada)
-- `mapNoteSearchOptionsToPrisma()` - Mapea opciones de búsqueda
+- `mapCreateNoteDataToDrizzle()` - Mapea datos de creación a Drizzle
+- `mapUpdateNoteDataToDrizzle()` - Mapea datos de actualización con estructura correcta
+- `mapNoteFiltersToDrizzle()` - Mapea filtros a condiciones Drizzle (ahora exportada)
+- `mapNoteSearchOptionsToDrizzle()` - Mapea opciones de búsqueda
 - `toCreateNoteData()` - Alias para compatibilidad
 - `toUpdateNoteData()` - Alias para compatibilidad
 
 ### Transformers (transformer.ts) ✅
 
-- `fromPrismaNote()` - Transforma desde Prisma a tipo canónico
+- `fromDrizzleNote()` - Transforma desde Drizzle a tipo canónico
 - Manejo completo de relaciones y conteos
 - Transformación segura con valores por defecto
 
 ### Serializers (serializers.ts) ✅
 
-- `fromPrismaNote()` - Deserializa desde Prisma con opciones
-- `toPrismaNote()` - Serializa para operaciones Prisma
+- `fromDrizzleNote()` - Deserializa desde Drizzle con opciones
+- `toDrizzleNote()` - Serializa para operaciones Drizzle
 - `validateNote()` - Validación con esquema Zod
 - `extendNote()` - Extensión con propiedades UI
 - `extendNotes()` - Extensión de múltiples notas
@@ -291,12 +291,12 @@ const notaActualizada = await updateNote(notaId, {
 ### Errores Resueltos: 7+ ✅
 
 1. **Exportaciones Faltantes**: ❌ → ✅
-   - `mapNoteFiltersToPrisma` exportada
+   - `mapNoteFiltersToDrizzle` exportada
    - `toCreateNoteData` y `toUpdateNoteData` agregadas
 
 2. **Estructura de Funciones**: ❌ → ✅
-   - `mapUpdateNoteDataToPrisma` retorna objeto con `data` e `include`
-   - Compatibilidad con expectativas de Prisma
+   - `mapUpdateNoteDataToDrizzle` retorna objeto con `data` e `include`
+   - Compatibilidad con expectativas de Drizzle
 
 3. **Tests**: ❌ → ✅
    - Corregido uso de `page/pageSize` por `skip/take`
@@ -335,8 +335,8 @@ La entidad Note sigue el patrón optimizado establecido con tipos canónicos, es
 
 ```mermaid
 graph TD
-    A[Prisma Note] --> B[PrismaNoteWithCounts]
-    B --> C[fromPrismaNoteWithCounts]
+    A[Drizzle Note] --> B[DrizzleNoteWithCounts]
+    B --> C[fromDrizzleNoteWithCounts]
     C --> D[NoteWithStats]
 
     E[NoteComplete] --> F[note-adapter.ts]
@@ -381,8 +381,8 @@ interface NoteStatistics {
 
 #### 2. **Transformer Principal** (`transformer.ts`)
 ```typescript
-export function fromPrismaNoteWithCounts(
-  note: PrismaNoteWithCounts
+export function fromDrizzleNoteWithCounts(
+  note: DrizzleNoteWithCounts
 ): NoteWithStats {
   // Calcula estadísticas desde _count
   // Genera excerpt automático

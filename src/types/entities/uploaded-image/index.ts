@@ -9,11 +9,12 @@ export type {
 	UploadedImageDimensions,
 	UploadedImageExtended,
 	UploadedImageUpdateInput,
+	UploadedImageWithStats,
 } from './types';
 
 export {
 	UploadedFileType,
-	UploadedImageSchema,
 	// Alias para retrocompatibilidad
 	UploadedFileType as UploadedImageType,
+	UploadedImageSchema,
 } from './types';

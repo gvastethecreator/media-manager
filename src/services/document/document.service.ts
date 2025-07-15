@@ -6,12 +6,17 @@
  * @updated 2025-06-27
  */
 
+import * as crypto from 'crypto';
+// Drizzle imports
+import { asc, count, eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { documents } from '@/lib/drizzle/schema/index';
+import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/database/prisma';
-import { type EventType, emit } from '@/lib/server/events.server';
+import { emit } from '@/lib/server/events.server';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toDocumentWithStats } from '@/transformers/document';
-import type { DocumentWithStats } from '@/types/entities/document';
-import type { Document, Prisma } from '@prisma/client';
+import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 
@@ -31,15 +36,63 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 	[EVENTS.DOCUMENTS_CHANGED]: 'update',
 };
 
+// Función auxiliar para crear errores
+const createDocumentError = (
+	message: string,
+	code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
+	cause?: unknown
+) => {
+	return createEntityErrorObject('DocumentError', message, code, cause);
+};
+
 /**
  * Obtiene todos los documentos con sus estadísticas
  */
 export async function getDocuments(): Promise<DocumentWithStats[]> {
 	try {
-		const documents = await prisma.document.findMany({
-			orderBy: { name: 'asc' },
-		});
-		return documents.map(toDocumentWithStats);
+		// **MIGRACIÓN A DRIZZLE**
+		documentLogger.info('📄 Obteniendo documentos');
+
+		const drizzleDocuments = await db
+			.select({
+				id: documents.id,
+				name: documents.name,
+				path: documents.path,
+				size: documents.size,
+				hash: documents.hash,
+				mimeType: documents.mimeType,
+				extension: documents.extension,
+				folderId: documents.folderId,
+				isFavorite: documents.isFavorite,
+				isArchived: documents.isArchived,
+				pageCount: documents.pageCount,
+				wordCount: documents.wordCount,
+				language: documents.language,
+				title: documents.title,
+				author: documents.author,
+				subject: documents.subject,
+				keywords: documents.keywords,
+				creator: documents.creator,
+				producer: documents.producer,
+				creationDate: documents.creationDate,
+				modificationDate: documents.modificationDate,
+				encrypted: documents.encrypted,
+				version: documents.version,
+				content: documents.content,
+				summary: documents.summary,
+				createdAt: documents.createdAt,
+				updatedAt: documents.updatedAt,
+			})
+			.from(documents)
+			.orderBy(asc(documents.name));
+
+		// Transformar a formato compatible con transformadores legacy
+		const transformedDocuments = drizzleDocuments.map((rawDocument) => ({
+			...rawDocument,
+			isFavorite: Boolean(rawDocument.isFavorite),
+		}));
+
+		return transformedDocuments.map(toDocumentWithStats);
 	} catch (error) {
 		documentLogger.error('Error obteniendo documentos:', { error });
 		throw new Error('Error al obtener documentos');
@@ -49,11 +102,53 @@ export async function getDocuments(): Promise<DocumentWithStats[]> {
 /**
  * Obtiene un documento por su ID
  */
-export async function getDocumentById(id: string): Promise<Document | null> {
+export async function getDocumentById(id: string): Promise<DocumentWithStats | null> {
 	try {
-		return await prisma.document.findUnique({
-			where: { id },
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		documentLogger.info(`🔍 Obteniendo documento por ID: ${id}`);
+
+		const drizzleDocument = await db
+			.select({
+				id: documents.id,
+				name: documents.name,
+				description: documents.description,
+				emoji: documents.emoji,
+				color: documents.color,
+				shortcut: documents.shortcut,
+				category: documents.category,
+				filePath: documents.filePath,
+				fileName: documents.fileName,
+				fileSize: documents.fileSize,
+				mimeType: documents.mimeType,
+				pageCount: documents.pageCount,
+				content: documents.content,
+				tags: documents.tags,
+				metadata: documents.metadata,
+				sortBy: documents.sortBy,
+				filters: documents.filters,
+				featuredImage: documents.featuredImage,
+				isFavorite: documents.isFavorite,
+				createdAt: documents.createdAt,
+				updatedAt: documents.updatedAt,
+			})
+			.from(documents)
+			.where(eq(documents.id, id))
+			.limit(1);
+
+		if (drizzleDocument.length === 0) {
+			documentLogger.warn(`Documento no encontrado: ${id}`);
+			return null;
+		}
+
+		const rawDocument = drizzleDocument[0];
+
+		// Transformar a formato compatible con transformadores legacy
+		const transformedDocument = {
+			...rawDocument,
+			isFavorite: Boolean(rawDocument.isFavorite),
+		};
+
+		return toDocumentWithStats(transformedDocument as any);
 	} catch (error) {
 		documentLogger.error('Error obteniendo documento por ID:', { id, error });
 		throw new Error('Error al obtener documento');
@@ -63,57 +158,123 @@ export async function getDocumentById(id: string): Promise<Document | null> {
 /**
  * Crea un nuevo documento
  */
-export async function createDocument(data: Prisma.DocumentCreateInput): Promise<DocumentWithStats> {
+export async function createDocument(data: DocumentCreateInput): Promise<DocumentWithStats> {
 	try {
-		const newDocument = await prisma.document.create({
-			data,
-		});
+		documentLogger.info('📝 Creando documento:', data.name);
 
-		// Emitir eventos con el nuevo sistema
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.insert(documents)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				path: data.path,
+				size: data.size,
+				hash: data.hash,
+				mimeType: data.mimeType,
+				extension: data.extension,
+				folderId: data.folderId,
+				isFavorite: data.isFavorite || false,
+				isArchived: data.isArchived || false,
+				pageCount: data.pageCount || null,
+				wordCount: data.wordCount || null,
+				language: data.language || null,
+				title: data.title || null,
+				author: data.author || null,
+				subject: data.subject || null,
+				keywords: data.keywords || null,
+				creator: data.creator || null,
+				producer: data.producer || null,
+				creationDate: data.creationDate || null,
+				modificationDate: data.modificationDate || null,
+				encrypted: data.encrypted || false,
+				version: data.version || null,
+				content: data.content || null,
+				summary: data.summary || null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
+
+		const newDocument = result[0];
+		const documentWithStats = toDocumentWithStats(newDocument);
+
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_CREATED],
-			data: { action: 'create', entity: newDocument, eventType: EVENTS.DOCUMENT_CREATED },
+			type: 'files:modified',
+			data: { action: 'create', document: newDocument },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENTS_CHANGED],
-			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
-		});
-
-		documentLogger.info('Documento creado:', newDocument.name);
-		return toDocumentWithStats(newDocument);
+		documentLogger.info('✅ Documento creado:', documentWithStats.name);
+		return documentWithStats;
 	} catch (error) {
-		documentLogger.error('Error creando documento:', { data, error });
-		throw new Error('Error al crear documento');
+		documentLogger.error('❌ Error al crear documento:', error);
+		throw createDocumentError('No se pudo crear el documento', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
  * Actualiza un documento existente
  */
-export async function updateDocument(id: string, data: Prisma.DocumentUpdateInput): Promise<DocumentWithStats> {
+export async function updateDocument(id: string, data: DocumentUpdateInput): Promise<DocumentWithStats> {
 	try {
-		const updatedDocument = await prisma.document.update({
-			where: { id },
-			data,
-		});
+		documentLogger.info('🔄 Actualizando documento:', id);
 
-		// Emitir eventos con el nuevo sistema
+		// Verificar que el documento existe
+		const exists = await documentExists(id);
+		if (!exists) {
+			throw createDocumentError('Documento no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+		}
+
+		// **MIGRACIÓN A DRIZZLE**
+		// Solo actualizar campos que están presentes en data
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
+
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.path !== undefined) updateData.path = data.path;
+		if (data.size !== undefined) updateData.size = data.size;
+		if (data.hash !== undefined) updateData.hash = data.hash;
+		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
+		if (data.extension !== undefined) updateData.extension = data.extension;
+		if (data.folderId !== undefined) updateData.folderId = data.folderId;
+		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
+		if (data.isArchived !== undefined) updateData.isArchived = Boolean(data.isArchived);
+		if (data.pageCount !== undefined) updateData.pageCount = data.pageCount;
+		if (data.wordCount !== undefined) updateData.wordCount = data.wordCount;
+		if (data.language !== undefined) updateData.language = data.language;
+		if (data.title !== undefined) updateData.title = data.title;
+		if (data.author !== undefined) updateData.author = data.author;
+		if (data.subject !== undefined) updateData.subject = data.subject;
+		if (data.keywords !== undefined) updateData.keywords = data.keywords;
+		if (data.creator !== undefined) updateData.creator = data.creator;
+		if (data.producer !== undefined) updateData.producer = data.producer;
+		if (data.creationDate !== undefined) updateData.creationDate = data.creationDate;
+		if (data.modificationDate !== undefined) updateData.modificationDate = data.modificationDate;
+		if (data.encrypted !== undefined) updateData.encrypted = Boolean(data.encrypted);
+		if (data.version !== undefined) updateData.version = data.version;
+		if (data.content !== undefined) updateData.content = data.content;
+		if (data.summary !== undefined) updateData.summary = data.summary;
+
+		const result = await db.update(documents).set(updateData).where(eq(documents.id, id)).returning();
+
+		const updatedDocument = result[0];
+		const documentWithStats = toDocumentWithStats(updatedDocument);
+
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_UPDATED],
-			data: { action: 'update', entity: updatedDocument, eventType: EVENTS.DOCUMENT_UPDATED },
+			type: 'files:modified',
+			data: { action: 'update', document: updatedDocument },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENTS_CHANGED],
-			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
-		});
-
-		documentLogger.info('Documento actualizado:', updatedDocument.name);
-		return toDocumentWithStats(updatedDocument);
+		documentLogger.info('✅ Documento actualizado:', documentWithStats.name);
+		return documentWithStats;
 	} catch (error) {
-		documentLogger.error('Error actualizando documento:', { id, data, error });
-		throw new Error('Error al actualizar documento');
+		documentLogger.error('❌ Error al actualizar documento:', error);
+		throw createDocumentError('No se pudo actualizar el documento', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -122,25 +283,30 @@ export async function updateDocument(id: string, data: Prisma.DocumentUpdateInpu
  */
 export async function deleteDocument(id: string): Promise<void> {
 	try {
-		await prisma.document.delete({
-			where: { id },
-		});
+		documentLogger.info('🗑️ Eliminando documento:', id);
 
-		// Emitir eventos con el nuevo sistema
+		// Verificar que el documento existe
+		const exists = await documentExists(id);
+		if (!exists) {
+			throw createDocumentError('Documento no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+		}
+
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.delete(documents).where(eq(documents.id, id)).returning();
+
+		const deletedDocument = result[0];
+
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENT_DELETED],
-			data: { action: 'delete', entity: { id }, eventType: EVENTS.DOCUMENT_DELETED },
+			type: 'files:modified',
+			data: { action: 'delete', document: deletedDocument },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.DOCUMENTS_CHANGED],
-			data: { action: 'change', eventType: EVENTS.DOCUMENTS_CHANGED },
-		});
-
-		documentLogger.info('Documento eliminado:', id);
+		documentLogger.info('✅ Documento eliminado:', deletedDocument.name);
 	} catch (error) {
-		documentLogger.error('Error eliminando documento:', { id, error });
-		throw new Error('Error al eliminar documento');
+		documentLogger.error('❌ Error al eliminar documento:', error);
+		throw createDocumentError('No se pudo eliminar el documento', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -149,13 +315,12 @@ export async function deleteDocument(id: string): Promise<void> {
  */
 export async function documentExists(id: string): Promise<boolean> {
 	try {
-		const document = await prisma.document.findUnique({
-			where: { id },
-			select: { id: true },
-		});
-		return document !== null;
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select({ count: count() }).from(documents).where(eq(documents.id, id));
+
+		return result[0].count > 0;
 	} catch (error) {
-		documentLogger.error('Error verificando existencia de documento:', { id, error });
+		documentLogger.error('❌ Error verificando existencia de documento:', { id, error });
 		return false;
 	}
 }
@@ -165,9 +330,45 @@ export async function documentExists(id: string): Promise<boolean> {
  */
 export async function getDocumentCount(): Promise<number> {
 	try {
-		return await prisma.document.count();
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select({ count: count() }).from(documents);
+
+		return result[0].count;
 	} catch (error) {
-		documentLogger.error('Error obteniendo conteo de documentos:', { error });
-		throw new Error('Error al obtener conteo de documentos');
+		documentLogger.error('❌ Error obteniendo conteo de documentos:', error);
+		throw createDocumentError('No se pudo obtener el conteo de documentos', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Busca un documento por su hash
+ * @param hash Hash del documento
+ * @returns Documento o null
+ */
+export async function getDocumentByHash(hash: string): Promise<DocumentWithStats | null> {
+	try {
+		documentLogger.info('🔍 Buscando documento por hash:', hash);
+
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select().from(documents).where(eq(documents.hash, hash)).limit(1);
+
+		if (result.length === 0) {
+			documentLogger.info('Documento no encontrado por hash:', hash);
+			return null;
+		}
+
+		const rawDocument = result[0];
+		// Transformar el campo isFavorite de number a boolean
+		const transformedDocument = {
+			...rawDocument,
+			isFavorite: Boolean(rawDocument.isFavorite),
+		};
+
+		const document = toDocumentWithStats(transformedDocument as any);
+		documentLogger.info('✅ Documento encontrado por hash:', document.name);
+		return document;
+	} catch (error) {
+		documentLogger.error('❌ Error al buscar documento por hash:', error);
+		throw createDocumentError('No se pudo buscar el documento por hash', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }

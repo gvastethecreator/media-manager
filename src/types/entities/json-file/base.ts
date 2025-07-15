@@ -4,12 +4,29 @@
  * @description Define los tipos canónicos para la entidad JsonFile, siguiendo el nuevo patrón de `...WithStats`.
  */
 
-import type { JsonFile } from '@prisma/client';
-
 /**
- * 🟫 Tipo base de JsonFile directamente desde el schema de Prisma.
+ * 🟫 Tipo base de JsonFile directamente desde el schema de Drizzle.
  */
-export type JsonFileBase = JsonFile;
+export type JsonFileBase = {
+	id: string;
+	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	content: string | null;
+	schema: string | null;
+	isValid: boolean | null;
+	validationErrors: string | null;
+	keyCount: number | null;
+	depth: number | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 /**
  * 📊 Métricas y estadísticas calculadas para un archivo JSON.
@@ -39,3 +56,17 @@ export interface JsonFileWithStats extends JsonFileBase {
  * Alias de compatibilidad para código legacy
  */
 export type JsonFileComplete = JsonFileWithStats;
+
+// --- TIPOS PARA MUTACIONES ---
+
+/**
+ * 🆕 Tipo para crear un nuevo JsonFile
+ * Omite campos autogenerados (id, timestamps)
+ */
+export type JsonFileCreateInput = Omit<JsonFileBase, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * ✏️ Tipo para actualizar un JsonFile existente
+ * Todos los campos son opcionales excepto id
+ */
+export type JsonFileUpdateInput = Partial<JsonFileCreateInput>;

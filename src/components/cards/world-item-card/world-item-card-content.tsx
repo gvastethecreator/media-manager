@@ -1,15 +1,16 @@
-'use client';
-
 import { nanoid } from 'nanoid';
-import { useTheme } from 'next-themes';
 import React, { useMemo } from 'react';
+import { useTheme } from '@/lib/contexts/theme-context';
 import { cn } from '@/lib/utils';
+import worldItemService from '@/services/world-item/world-item.service';
 import type {
 	WorldItemEffect,
 	WorldItemProperty,
 	WorldItemRequirement,
 	WorldItemStats,
 } from '@/types/entities/world-item/stats-types';
+
+const { getRecentWorldItemImages } = worldItemService;
 
 interface WorldItemCardContentProps {
 	description?: string | null;
@@ -200,7 +201,9 @@ export function WorldItemCardContent({
 					{Object.entries(parsedRequirements).map(([key, req]) => (
 						<div key={`req-${renderKey}-${key}`} className="text-[10px] mb-0.5">
 							<span className="font-medium">{key}: </span>
-							<span className="text-muted-foreground">{typeof req === 'object' ? req.value : req}</span>
+							<span className="text-muted-foreground">
+								{typeof req === 'object' && req !== null && 'value' in req ? req.value : String(req)}
+							</span>
 						</div>
 					))}
 				</div>

@@ -1,6 +1,5 @@
-'use client';
-
-import { deleteConcept, getConcepts } from '@/app/actions/concepts/concept.actions';
+import { Filter, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,11 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { calculateConceptsStats } from '@/lib/utils/concept/helpers';
-import toastService from '@/services/toast';
-import type { ConceptComplete, ConceptExtended } from '@/types/entities/concept';
-import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useConcepts, useDeleteConcept } from '@/lib/api/concepts';
+import { toastService } from '@/lib/ui/toast';
+import type { ConceptWithStats } from '@/types/entities/concept';
 import { CreateConceptForm } from './create-concept-form';
 
 // Tipos seguros para preview data
@@ -29,10 +26,7 @@ interface PreviewData {
 }
 
 export function ConceptsSettings() {
-	const [concepts, setConcepts] = useState<ConceptComplete[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [selectedConcept, setSelectedConcept] = useState<ConceptExtended | null>(null);
+	const [selectedConcept, setSelectedConcept] = useState<ConceptWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<PreviewData | null>(null);
 
@@ -46,46 +40,27 @@ export function ConceptsSettings() {
 	const categorySelectId = useId();
 	const favoritesCheckboxId = useId();
 
-	// Cargar conceptos al montar el componente
-	useEffect(() => {
-		const loadConcepts = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getConcepts({});
-				setConcepts(data);
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				setError(errorMessage);
-				toastService.error('Error al cargar los conceptos', {
-					description: errorMessage,
-				});
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	// React Query hooks
+	const { data: conceptsResponse, isLoading, error } = useConcepts({ search: searchQuery });
+	const deleteConceptMutation = useDeleteConcept();
 
-		loadConcepts();
-	}, []);
+	const concepts = conceptsResponse?.data || [];
 
 	// Calcular estadísticas generales
-	const stats = calculateConceptsStats(concepts);
+	const stats = useMemo(() => {
+		return {
+			totalConcepts: concepts.length,
+			totalImages: concepts.reduce((acc, concept) => acc + (concept.statistics?.imageCount || 0), 0),
+			totalAssociations: concepts.reduce((acc, concept) => acc + (concept.statistics?.totalAssociations || 0), 0),
+			unusedConcepts: concepts.filter((concept) => (concept.statistics?.imageCount || 0) === 0).length,
+			favoriteConcepts: concepts.filter((concept) => concept.isFavorite).length,
+		};
+	}, [concepts]);
 
 	// Filtrar conceptos basados en los criterios seleccionados
 	const getFilteredConcepts = useCallback(() => {
 		return concepts.filter((concept) => {
 			let matches = true;
-
-			// Filtrar por búsqueda
-			if (searchQuery) {
-				const normalizedQuery = searchQuery.toLowerCase();
-				matches =
-					matches &&
-					Boolean(
-						concept.name.toLowerCase().includes(normalizedQuery) ||
-							concept.description?.toLowerCase().includes(normalizedQuery) ||
-							concept.content?.toLowerCase().includes(normalizedQuery)
-					);
-			}
 
 			// Filtrar por categoría
 			if (selectedCategory) {
@@ -99,30 +74,32 @@ export function ConceptsSettings() {
 
 			return matches;
 		});
-	}, [concepts, searchQuery, selectedCategory, onlyFavorites]);
+	}, [concepts, selectedCategory, onlyFavorites]);
 
 	// Memoizar los resultados filtrados para evitar cálculos repetidos
 	const filteredConcepts = useMemo(() => getFilteredConcepts(), [getFilteredConcepts]);
 
 	// Manejar eliminación de concepto
-	const handleDeleteConcept = useCallback(async (id: string) => {
-		try {
-			await deleteConcept(id);
-			setConcepts((prev) => prev.filter((concept) => concept.id !== id));
-			setSelectedConcept(null);
-			setIsEditing(false);
-			toastService.success('Concepto eliminado');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el concepto', {
-				description: errorMessage,
-			});
-		}
-	}, []);
+	const handleDeleteConcept = useCallback(
+		async (id: string) => {
+			try {
+				await deleteConceptMutation.mutateAsync(id);
+				setSelectedConcept(null);
+				setIsEditing(false);
+				toastService.success('Concepto eliminado');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar el concepto', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteConceptMutation]
+	);
 
 	// Manejar edición de concepto
-	const handleEditConcept = useCallback((concept: ConceptComplete) => {
-		setSelectedConcept(concept as unknown as ConceptExtended);
+	const handleEditConcept = useCallback((concept: ConceptWithStats) => {
+		setSelectedConcept(concept);
 		setIsEditing(true);
 	}, []);
 
@@ -135,31 +112,12 @@ export function ConceptsSettings() {
 	);
 
 	// Manejar creación exitosa
-	const handleConceptCreated = useCallback((newConcept: ConceptExtended) => {
-		setConcepts((prev) => [
-			{
-				...newConcept,
-				_count: {
-					characters: 0,
-					places: 0,
-					worldItems: 0,
-					notes: 0,
-					prompts: 0,
-					images: 0,
-				},
-			} as ConceptComplete,
-			...prev,
-		]);
+	const handleConceptCreated = useCallback((_newConcept: ConceptWithStats) => {
 		toastService.success('Concepto creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleConceptUpdated = useCallback((updatedConcept: ConceptExtended) => {
-		setConcepts((prev) =>
-			prev.map((concept) =>
-				concept.id === updatedConcept.id ? ({ ...concept, ...updatedConcept } as ConceptComplete) : concept
-			)
-		);
+	const handleConceptUpdated = useCallback((_updatedConcept: ConceptWithStats) => {
 		toastService.success('Concepto actualizado');
 	}, []);
 
@@ -202,12 +160,9 @@ export function ConceptsSettings() {
 		return (
 			<Card className="rounded-sm bg-muted/30 border-none">
 				<CardContent>
-					<EmptyState
-						icon={Info}
-						title="Error al cargar conceptos"
-						description={error}
-						actions={<Button onClick={() => globalThis.location?.reload()}>Intentar de nuevo</Button>}
-					/>
+					<div className="flex items-center justify-center gap-2 p-3">
+						<p className="text-sm text-destructive">Error al cargar conceptos: {error.message}</p>
+					</div>
 				</CardContent>
 			</Card>
 		);
@@ -303,17 +258,17 @@ export function ConceptsSettings() {
 							</div>
 						</div>
 						<div className="flex gap-2 text-xs text-muted-foreground">
-							<span>{stats.total} conceptos</span>
-							{stats.favorites > 0 && (
+							<span>{stats.totalConcepts} conceptos</span>
+							{stats.favoriteConcepts > 0 && (
 								<>
 									<span>•</span>
-									<span>{stats.favorites} favoritos</span>
+									<span>{stats.favoriteConcepts} favoritos</span>
 								</>
 							)}
-							{stats.withRelations > 0 && (
+							{stats.unusedConcepts > 0 && (
 								<>
 									<span>•</span>
-									<span>{stats.withRelations} con relaciones</span>
+									<span>{stats.unusedConcepts} sin imágenes</span>
 								</>
 							)}
 						</div>
@@ -362,7 +317,7 @@ export function ConceptsSettings() {
 												<div className="flex-1 min-w-0">
 													<h4 className="text-xs font-medium truncate">{concept.name}</h4>
 													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-														<span>{concept._count?.images || 0} imágenes</span>
+														<span>{concept.statistics?.imageCount || 0} imágenes</span>
 														{concept.category && (
 															<>
 																<span>•</span>

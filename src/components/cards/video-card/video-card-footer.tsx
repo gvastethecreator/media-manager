@@ -1,8 +1,6 @@
-'use client';
-
+import { Heart, Image, Tag, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
-import { Heart, Image, Tag, Users } from 'lucide-react';
 
 interface VideoCardFooterProps {
 	video: VideoWithStats;
@@ -24,17 +22,16 @@ export function VideoCardFooter({
 	secondaryColor,
 	cardId,
 	rarityLevel,
-	totalRelations,
 	tcgMode = true,
 	compact = false,
 }: VideoCardFooterProps) {
-	const { isFavorite, _count, statistics } = video;
-	const { technicalGrade } = statistics;
-
-	// Conteos principales
-	const albumsCount = _count?.albums || 0;
-	const collectionsCount = _count?.collections || 0;
-	const tagsCount = _count?.tags || 0;
+	const { isFavorite } = video;
+	const {
+		albumCount: albumsCount,
+		collectionCount: collectionsCount,
+		tagCount: tagsCount,
+		technicalGrade,
+	} = video.stats;
 
 	// Efecto de brillo para rareza alta
 	const glow = rarityLevel >= 7 ? 4 : rarityLevel >= 5 ? 2 : 0;

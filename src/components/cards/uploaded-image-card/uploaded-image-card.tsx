@@ -1,11 +1,8 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { UploadedImageWithStats } from '@/types/entities/uploaded-image';
 import { CheckCircleIcon, DownloadIcon, EyeIcon, ImageIcon, InfoIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { UploadedImageWithStats } from '@/types/entities/uploaded-image';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
@@ -44,8 +41,6 @@ export function UploadedImageCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: UploadedImageCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 	const [imageError, setImageError] = useState(false);
@@ -164,31 +159,13 @@ export function UploadedImageCard({
 					)}
 
 					{/* Brillo en favoritos */}
-					{uploadedImage.isFavorite && (
-						<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
-							<div
-								className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
-								style={{
-									background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
-									backgroundSize: '600% 600%',
-									animation: 'shine 3s linear infinite',
-								}}
-							/>
-						</div>
-					)}
 				</>
 			)}
 
 			{/* Contenedor principal */}
 			<div className="flex flex-col h-full relative z-1">
 				{/* Cabecera */}
-				<CardHeader
-					title={uploadedImage.name || 'Sin nombre'}
-					emoji="🖼️"
-					color={primaryColor}
-					isFavorite={uploadedImage.isFavorite || false}
-					compact={compact}
-				/>
+				<CardHeader title={uploadedImage.name || 'Sin nombre'} primaryColor={primaryColor} compact={compact} />
 
 				{/* Contenido principal */}
 				{!compact && (
@@ -204,14 +181,12 @@ export function UploadedImageCard({
 									height: '80px',
 								}}
 							>
-								{!imageError && shouldLoad ? (
-									<Image
+								{!imageError ? (
+									<img
 										src={imageUrl}
 										alt={uploadedImage.name || 'Imagen subida'}
-										fill
-										className="object-cover"
+										className="object-cover w-full h-full"
 										onError={handleImageError}
-										sizes="120px"
 									/>
 								) : (
 									<div className="w-full h-full flex items-center justify-center">

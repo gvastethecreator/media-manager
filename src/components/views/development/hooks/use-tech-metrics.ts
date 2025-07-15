@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useEffect, useState } from 'react';
 import { getFileSystemPerformance, getImageProcessingPerformance, getTechnicalMetrics } from '../services/tech-metrics';
 

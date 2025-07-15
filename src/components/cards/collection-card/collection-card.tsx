@@ -1,16 +1,6 @@
-'use client';
-
-// TODO: Refactorizar para usar un tipo canónico `CollectionWithStats`.
-// Este componente, al igual que los otros componentes de tarjeta, sufre de inconsistencias
-// de tipo porque la prop `collection` no garantiza la existencia de `_count`.
-// Se necesita una refactorización de la capa de datos (server actions, transformers) para que
-// devuelvan un tipo `CollectionWithStats` que incluya `totalEntities` y `totalMedia`
-// calculados. Esta tarea está bloqueada por problemas con la herramienta de edición
-// en los archivos de transformadores.
-
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities
 import type { CollectionWithStats } from '@/types/entities/collection';
 import { CollectionCardContent } from './collection-card-content';
@@ -44,8 +34,35 @@ export function CollectionCard({
 	showEntitiesCount = true,
 	showImagesCount = true,
 }: CollectionCardProps) {
-	// Usar estadísticas pre-calculadas
-	const { totalMedia, totalEntities } = collection.stats;
+	const {
+		imageCount,
+		videoCount,
+		albumCount,
+		tagCount,
+		characterCount,
+		placeCount,
+		worldItemCount,
+		conceptCount,
+		promptCount,
+		noteCount,
+		wildcardCount,
+		propertyCount,
+		groupCount,
+	} = collection.stats;
+
+	const totalMedia = imageCount + videoCount;
+	const totalEntities =
+		albumCount +
+		tagCount +
+		characterCount +
+		placeCount +
+		worldItemCount +
+		conceptCount +
+		promptCount +
+		noteCount +
+		wildcardCount +
+		propertyCount +
+		groupCount;
 
 	// Calcular color primario y secundario
 	const primaryColor = useMemo(() => collection.color || '#10b981', [collection.color]);
@@ -84,30 +101,6 @@ export function CollectionCard({
 		},
 		[onClick]
 	);
-
-	// Parsear los filtros si están almacenados como JSON string
-	const _filters = useMemo(() => {
-		if (typeof collection.filters === 'string' && collection.filters !== 'empty_array') {
-			try {
-				return JSON.parse(collection.filters);
-			} catch (_e) {
-				return [];
-			}
-		}
-		return collection.filters || [];
-	}, [collection.filters]);
-
-	// Parsear las ediciones si están almacenadas como JSON string
-	const editions = useMemo(() => {
-		if (typeof collection.editions === 'string' && collection.editions !== 'empty_array') {
-			try {
-				return JSON.parse(collection.editions);
-			} catch (_e) {
-				return [];
-			}
-		}
-		return collection.editions || [];
-	}, [collection.editions]);
 
 	// Definir estilos de la tarjeta TCG
 	const cardStyle = useMemo(
@@ -217,10 +210,10 @@ export function CollectionCard({
 				{/* Encabezado de la tarjeta */}
 				<CollectionCardHeader
 					name={collection.name}
-					emoji={collection.emoji}
+					emoji={collection.emoji ?? '📦'}
 					color={primaryColor}
-					category={collection.category}
-					platform={collection.platform}
+					category={collection.category ?? 'Colección'}
+					platform={collection.platform ?? 'General'}
 				/>
 
 				{/* En modo compacto, solo mostrar encabezado y pie */}
@@ -241,7 +234,7 @@ export function CollectionCard({
 							network={collection.network}
 							tokenId={collection.tokenId}
 							url={collection.url}
-							editions={editions}
+							editions={collection.editions}
 							primaryColor={primaryColor}
 							featuredImage={collection.featuredImage}
 							sourceImage={collection.sourceImage}

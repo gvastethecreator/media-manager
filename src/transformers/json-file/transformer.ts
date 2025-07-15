@@ -1,12 +1,12 @@
 /**
  * @file Transformador principal para la entidad JsonFile
  * @module transformers/json-file/transformer
- * @description Contiene la lógica para convertir un objeto JsonFile de Prisma a nuestro tipo canónico.
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file';
 
 const logger = serverLogger.withContext('JsonFileTransformer');
 
@@ -17,9 +17,9 @@ const logger = serverLogger.withContext('JsonFileTransformer');
  * @returns Un objeto JsonFileWithStats compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaJsonFile(prismaJsonFile: JsonFileBase): JsonFileWithStats {
-	if (!prismaJsonFile) {
-		throw new TransformerError('El objeto de archivo JSON de Prisma no puede ser nulo.');
+export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWithStats {
+	if (!drizzleJsonFile) {
+		throw new TransformerError('El objeto de archivo JSON de Drizzle no puede ser nulo.');
 	}
 
 	try {
@@ -32,8 +32,8 @@ export function fromPrismaJsonFile(prismaJsonFile: JsonFileBase): JsonFileWithSt
 		};
 
 		try {
-			const content = JSON.parse(prismaJsonFile.content);
-			stats.size = prismaJsonFile.content.length;
+			const content = JSON.parse(drizzleJsonFile.content);
+			stats.size = drizzleJsonFile.content.length;
 			stats.isValid = true;
 			// TODO: Implementar lógica real para nestingDepth y keyCount
 			stats.keyCount = Object.keys(content).length;
@@ -43,15 +43,15 @@ export function fromPrismaJsonFile(prismaJsonFile: JsonFileBase): JsonFileWithSt
 		}
 
 		const jsonFileWithStats: JsonFileWithStats = {
-			...prismaJsonFile,
+			...drizzleJsonFile,
 			stats,
 		};
 
 		return jsonFileWithStats;
 	} catch (error) {
-		logger.error('Error transformando archivo JSON desde Prisma', {
+		logger.error('Error transformando archivo JSON desde Drizzle', {
 			error,
-			jsonFileId: prismaJsonFile?.id,
+			jsonFileId: drizzleJsonFile?.id,
 		});
 		throw new TransformerError(`Error al transformar el archivo JSON: ${(error as Error).message}`);
 	}
@@ -60,9 +60,9 @@ export function fromPrismaJsonFile(prismaJsonFile: JsonFileBase): JsonFileWithSt
 /**
  * 🔄 Transforma una lista de archivos JSON de Prisma a una lista de JsonFileWithStats.
  *
- * @param prismaJsonFiles - Un array de objetos JsonFile de Prisma.
+ * @param drizzleJsonFiles - Un array de objetos JsonFile de Drizzle.
  * @returns Un array de objetos JsonFileWithStats.
  */
-export function fromPrismaJsonFiles(prismaJsonFiles: JsonFileBase[]): JsonFileWithStats[] {
-	return prismaJsonFiles.map(fromPrismaJsonFile);
+export function fromDrizzleJsonFiles(drizzleJsonFiles: JsonFileBase[]): JsonFileWithStats[] {
+	return drizzleJsonFiles.map(fromDrizzleJsonFile);
 }

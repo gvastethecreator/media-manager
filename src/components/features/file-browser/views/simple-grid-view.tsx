@@ -1,15 +1,15 @@
+import React from 'react';
 /**
  * @file Vista de grid simple V2 - Miniaturas optimizadas
  * @module components/features/file-browser/views/simple-grid-view-v2
  */
-'use client';
 
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatsType, isImageWithStats, isVideoWithStats } from '@/types/migration';
 import { FileIcon, FileTextIcon, FolderIcon, ImageIcon, MusicIcon, PlayCircleIcon, VideoIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo } from 'react';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
+import { getEntityStatsType, isImageWithStats, isVideoWithStats } from '@/types/migration';
 
 interface SimpleGridViewProps {
 	items: EntityWithStats[];

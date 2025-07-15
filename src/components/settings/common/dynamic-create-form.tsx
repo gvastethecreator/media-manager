@@ -3,11 +3,11 @@
 // Muestra solo el campo nombre inicialmente y permite agregar campos opcionales uno a uno
 // ⚠️ No usar para carpetas (folders)
 
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import React, { useState } from 'react';
 
 // Tipos genéricos para flexibilidad
 export interface DynamicCreateFormProps {

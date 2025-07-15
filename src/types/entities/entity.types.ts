@@ -3,19 +3,36 @@
  * @module types/entities/entity.types
  */
 
+export interface EntityBase {
+	id: string;
+	name: string;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export interface EntityStats {
 	imageCount?: number;
+	videoCount?: number;
+	albumCount?: number;
+	collectionCount?: number;
+	tagCount?: number;
+	characterCount?: number;
+	placeCount?: number;
+	worldItemCount?: number;
+	conceptCount?: number;
+	promptCount?: number;
+	noteCount?: number;
+	wildcardCount?: number;
+	propertyCount?: number;
+	groupCount?: number;
 	totalItems?: number;
+	totalAssociations?: number;
 	lastUpdated?: Date;
 }
 
-export interface EntityWithStats {
-	id: string;
-	name: string;
-	description?: string;
-	entityType: string;
+export interface EntityWithStats extends EntityBase {
+	entityType: EntityType;
 	stats?: EntityStats;
-	createdAt: Date;
-	updatedAt: Date;
 	[key: string]: any;
 }

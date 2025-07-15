@@ -27,7 +27,7 @@ export const createWorkflowFilterSlice: StateCreator<
 	[['zustand/immer', never]],
 	[],
 	WorkflowFilterState & WorkflowFilterActions
-> = (set, get) => ({
+> = (set, _get) => ({
 	...initialState,
 
 	updateFilters: (newFilters: Partial<WorkflowFilters>) => {

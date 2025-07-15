@@ -1,6 +1,5 @@
-'use client';
-
-import { deleteTagAction as deleteTag, searchTagsAction as searchTags } from '@/app/actions/tags';
+import { Filter, Loader2, PlusCircle, TagIcon, Trash } from 'lucide-react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,12 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import toastService from '@/services/toast';
-import type { TagWithStats } from '@/types/entities/tag';
+import { useDeleteTag, useTags } from '@/lib/api/tags';
+import { toastService } from '@/lib/ui/toast';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagBase as UITag } from '@/types/entities/tag/types';
-import { Filter, Loader2, PlusCircle, TagIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useId, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
 
 interface TagsSettingsProps {
@@ -23,107 +20,98 @@ interface TagsSettingsProps {
 }
 
 export function TagsSettings({ className }: TagsSettingsProps) {
-	const [tags, setTags] = useState<TagWithStats[]>([]);
-	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState<TagCategory | null>(null);
 	const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 	const [showCreateForm, setShowCreateForm] = useState(false);
-	const [deletingTagId, setDeletingTagId] = useState<string | null>(null);
 
 	const formId = useId();
 
-	// 📊 Estadísticas calculadas
-	const stats = {
-		total: tags.length,
-		favorites: tags.filter((tag) => tag.isFavorite).length,
-		byCategory: Object.values(TagCategory).reduce(
-			(acc, category) => {
-				acc[category] = tags.filter((tag) => tag.category === category).length;
-				return acc;
-			},
-			{} as Record<TagCategory, number>
-		),
-	};
+	// React Query hooks
+	const {
+		data: tagsResponse,
+		isLoading,
+		error,
+	} = useTags({
+		search: searchTerm,
+		limit: 1000,
+	});
+	const deleteTagMutation = useDeleteTag();
 
-	// 🔄 Cargar tags
-	const loadTags = useCallback(async () => {
-		try {
-			setLoading(true);
-			const result = await searchTags('', {
-				limit: 1000,
-				includeStats: true,
-			});
-			setTags(result);
-		} catch (error) {
-			toastService.system.error('Error al cargar etiquetas');
-		} finally {
-			setLoading(false);
-		}
-	}, []);
+	const tags = tagsResponse?.data || [];
+
+	// 📊 Estadísticas calculadas
+	const stats = useMemo(
+		() => ({
+			total: tags.length,
+			favorites: tags.filter((tag) => tag.isFavorite).length,
+			byCategory: Object.values(TagCategory).reduce(
+				(acc, category) => {
+					acc[category] = tags.filter((tag) => tag.category === category).length;
+					return acc;
+				},
+				{} as Record<TagCategory, number>
+			),
+		}),
+		[tags]
+	);
 
 	// 🔍 Filtrar tags
-	const filteredTags = tags.filter((tag) => {
-		const matchesSearch =
-			!searchTerm ||
-			tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			tag.description?.toLowerCase().includes(searchTerm.toLowerCase());
+	const filteredTags = useMemo(() => {
+		return tags.filter((tag) => {
+			const matchesCategory = !selectedCategory || tag.category === selectedCategory;
+			const matchesFavorites = !showOnlyFavorites || tag.isFavorite;
 
-		const matchesCategory = !selectedCategory || tag.category === selectedCategory;
-		const matchesFavorites = !showOnlyFavorites || tag.isFavorite;
-
-		return matchesSearch && matchesCategory && matchesFavorites;
-	});
+			return matchesCategory && matchesFavorites;
+		});
+	}, [tags, selectedCategory, showOnlyFavorites]);
 
 	// 🗑️ Eliminar tag
-	const handleDeleteTag = async (tagId: string) => {
-		try {
-			setDeletingTagId(tagId);
-			await deleteTag(tagId);
-			setTags((prev) => prev.filter((tag) => tag.id !== tagId));
-			toastService.system.success('Etiqueta eliminada correctamente');
-		} catch (error) {
-			toastService.system.error('Error al eliminar etiqueta');
-		} finally {
-			setDeletingTagId(null);
-		}
-	};
+	const handleDeleteTag = useCallback(
+		async (tagId: string) => {
+			try {
+				await deleteTagMutation.mutateAsync(tagId);
+				toastService.success('Etiqueta eliminada correctamente');
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+				toastService.error('Error al eliminar etiqueta', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteTagMutation]
+	);
 
 	// 📝 Manejar creación de tag
-	const handleTagCreated = (newTag: UITag) => {
-		// Convertir el tag base a TagWithStats agregando estadísticas vacías
-		const tagWithStats: TagWithStats = {
-			...newTag,
-			// Propiedades faltantes del tipo TagWithStats (desde Prisma)
-			emoji: newTag.emoji || '🏷️',
-			color: newTag.color || '#64748b',
-			shortcut: null,
-			category: null,
-			featuredImage: null,
-			isFavorite: false,
-			stats: {
-				totalRelations: 0,
-				usageDiversity: 0,
-				popularity: 0,
-				completenessScore: 0,
-			},
-		};
-		setTags((prev) => [...prev, tagWithStats]);
+	const handleTagCreated = useCallback((_newTag: UITag) => {
 		setShowCreateForm(false);
-		toastService.system.success('Etiqueta creada correctamente');
-	};
+		toastService.success('Etiqueta creada correctamente');
+	}, []);
 
-	// 🔄 Cargar tags al montar
-	useEffect(() => {
-		loadTags();
-	}, [loadTags]);
-
-	if (loading) {
+	// Estado de carga
+	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center p-8">
-				<Loader2 className="h-8 w-8 animate-spin" />
-				<span className="ml-2">Cargando etiquetas...</span>
-			</div>
+			<Card className="rounded-sm bg-muted/30 border-none">
+				<CardContent>
+					<div className="flex items-center justify-center gap-2 p-8">
+						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+						<span className="text-sm text-muted-foreground">Cargando etiquetas...</span>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	// Estado de error
+	if (error) {
+		return (
+			<Card className="rounded-sm bg-muted/30 border-none">
+				<CardContent>
+					<div className="flex items-center justify-center gap-2 p-8">
+						<p className="text-sm text-destructive">Error al cargar etiquetas: {error.message}</p>
+					</div>
+				</CardContent>
+			</Card>
 		);
 	}
 
@@ -178,7 +166,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 					<div className="flex gap-2">
 						{/* Filtro por categoría */}
 						<Popover>
-							<PopoverTrigger asChild>
+							<PopoverTrigger>
 								<Button variant="outline" size="sm">
 									<Filter className="h-4 w-4 mr-2" />
 									{selectedCategory || 'Todas las categorías'}
@@ -281,14 +269,9 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 													variant="ghost"
 													size="sm"
 													onClick={() => handleDeleteTag(tag.id)}
-													disabled={deletingTagId === tag.id}
 													className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
 												>
-													{deletingTagId === tag.id ? (
-														<Loader2 className="h-4 w-4 animate-spin" />
-													) : (
-														<Trash className="h-4 w-4" />
-													)}
+													<Trash className="h-4 w-4" />
 												</Button>
 											</div>
 										</div>
@@ -346,7 +329,6 @@ function _generateCategoryColor(category: TagCategory): string {
 			return 'bg-teal-500';
 		case TagCategory.CUSTOM:
 			return 'bg-violet-500';
-		case TagCategory.OTHER:
 		default:
 			return 'bg-gray-500';
 	}

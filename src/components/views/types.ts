@@ -18,6 +18,7 @@ export interface ViewProps {
  * currentView en el NavigationStore.
  */
 export type ViewType =
+	| 'dashboard'
 	| 'settings'
 	| 'all-images'
 	| 'files'
@@ -51,6 +52,10 @@ export type ViewType =
 	| 'property-content'
 	| 'wildcards'
 	| 'wildcard-content'
+	| 'notes'
+	| 'note-content'
+	| 'properties'
+	| 'property-content'
 	| 'entity-cards'
 	| 'development'
 	| 'documents'

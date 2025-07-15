@@ -1,15 +1,20 @@
-'use client';
-
 import { motion } from 'motion/react';
-import Image from 'next/image';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
+
+interface CardMediaItem {
+	id: string;
+	name?: string | null;
+	thumbnailUrl: string;
+	url?: string;
+	isVideo?: boolean;
+}
 
 interface PlaceCardImagesProps {
 	/** Imágenes a mostrar (rutas) */
-	images?: string[];
+	images?: CardMediaItem[];
 	/** URL de la imagen destacada */
-	mainImage?: string;
+	mainImage?: CardMediaItem;
 	/** Color primario para estilizado */
 	primaryColor?: string;
 	/** Nivel de rareza (1-10) para determinar efectos */
@@ -152,14 +157,11 @@ export function PlaceCardImages({
 					}}
 				>
 					{/* Imagen del lugar */}
-					<Image
+					<img
 						src={displayImage as string}
 						alt="Place image"
-						fill
-						sizes="(max-width: 640px) 300px, 320px"
-						priority={true}
 						className={cn(
-							'object-cover',
+							'object-cover w-full h-full',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 						)}
 						style={{

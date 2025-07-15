@@ -14,7 +14,6 @@ export type {
 	PlaceStatistics,
 	PlaceUpdateInput,
 	PlaceWithStats,
-	PrismaPlaceWithCounts,
 } from './base';
 
 // --- 📚 Tipos Adicionales ---
@@ -32,6 +31,8 @@ export type { PlaceSearchOptions } from './types';
 // 	PlaceStats,
 // } from './types';
 
+// --- Tipos Complete ---
+export type { PlaceComplete } from './types';
 // --- 🎨 Enums (Se Mueven a su Propio Archivo) ---
 // TODO: Mover estos enums a un archivo `enums.ts` dedicado.
 export {
@@ -40,6 +41,3 @@ export {
 	PlaceType,
 	PlaceViewMode,
 } from './types';
-
-// --- Tipos Complete ---
-export type { PlaceComplete } from './types';

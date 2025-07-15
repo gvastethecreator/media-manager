@@ -9,6 +9,8 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+/dist
+~/
 
 # testing
 /coverage
@@ -16,9 +18,6 @@
 /playwright-report/
 /playwright/.cache/
 
-# next.js
-/.next/
-/out/
 
 # production
 /build
@@ -41,13 +40,12 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # project
 .image-cache
 .thumbnail-cache
 
-prisma/dev.db
-prisma/migrations/
+db.sqlite
+/src/lib/drizzle/migrations/
 
 .qodo

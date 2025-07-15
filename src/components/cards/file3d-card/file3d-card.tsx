@@ -1,10 +1,8 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { File3DWithStats } from '@/types/entities/file3d';
 import { BoxIcon, DownloadIcon, EyeIcon, RotateCcwIcon, ZoomInIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { File3DWithStats } from '@/types/entities/file3d';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
@@ -43,8 +41,6 @@ export function File3DCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: File3DCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 	const [isRotating, setIsRotating] = useState(false);
@@ -191,13 +187,7 @@ export function File3DCard({
 			{/* Contenedor principal */}
 			<div className="flex flex-col h-full relative z-1">
 				{/* Cabecera */}
-				<CardHeader
-					title={file3d.name || 'Sin nombre'}
-					emoji="🎲"
-					color={primaryColor}
-					isFavorite={file3d.isFavorite || false}
-					compact={compact}
-				/>
+				<CardHeader title={file3d.name || 'Sin nombre'} emoji="🎲" primaryColor={primaryColor} compact={compact} />
 
 				{/* Contenido principal */}
 				{!compact && (
@@ -248,9 +238,6 @@ export function File3DCard({
 						</div>
 
 						{/* Descripción */}
-						{file3d.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{file3d.description}</div>
-						)}
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && (

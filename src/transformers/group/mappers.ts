@@ -2,57 +2,46 @@
  * @file Mappers para la entidad Group.
  * @module transformers/group/mappers
  * @description Contiene funciones para transformar datos de la entidad Group.
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
-import type { GroupStatistics, GroupWithStats } from '@/types/entities/group';
-import type { Group } from '@prisma/client';
+
+import { calculateCompleteness } from '@/lib/utils/transformers';
+import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 
 /**
- * Representa la estructura del objeto de agregación de conteos de Prisma para un Group.
+ * Convierte un GroupBase a GroupWithStats calculando estadísticas.
+ * @param group - Datos base del grupo
+ * @param counts - Conteos de relaciones (opcional)
+ * @returns GroupWithStats
  */
-type GroupCounts = {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-	};
-};
+export function toGroupWithStats(group: GroupBase, counts?: any): GroupWithStats {
+	// Calcular estadísticas básicas
+	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0) : 0;
 
-/**
- * Convierte un objeto Group de Prisma y sus conteos a un objeto canónico GroupWithStats.
- *
- * @param group El objeto Group de Prisma.
- * @param counts Los conteos de las relaciones del grupo.
- * @returns Un objeto GroupWithStats.
- */
-export function toGroupWithStats(group: Group, counts: GroupCounts['_count']): GroupWithStats {
+	// Calcular completitud basada en campos importantes
+	const completenessScore = calculateCompleteness(group, ['name', 'description', 'category']);
+
+	// Calcular popularidad basada en el total de items
+	const popularity = Math.log1p(totalItems);
+
 	const stats: GroupStatistics = {
-		imageCount: counts.images,
-		videoCount: counts.videos,
-		albumCount: counts.albums,
-		collectionCount: counts.collections,
-		tagCount: counts.tags,
-		characterCount: counts.characters,
-		placeCount: counts.places,
-		worldItemCount: counts.worldItems,
-		conceptCount: counts.concepts,
-		promptCount: counts.prompts,
-		noteCount: counts.notes,
-		wildcardCount: counts.wildcards,
-		propertyCount: counts.properties,
+		totalItems,
+		completeness: completenessScore,
+		popularity: Number.parseFloat(popularity.toFixed(2)),
+		lastUpdated: new Date().toISOString(),
 	};
 
 	return {
 		...group,
 		stats,
 	};
+}
+
+/**
+ * Convierte una lista de GroupBase a GroupWithStats.
+ * @param groups - Lista de grupos base
+ * @returns Lista de GroupWithStats
+ */
+export function toGroupWithStatsList(groups: GroupBase[]): GroupWithStats[] {
+	return groups.map((group) => toGroupWithStats(group));
 }

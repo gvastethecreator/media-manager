@@ -1,34 +1,21 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { AudioWithStats } from '@/types/entities/audio';
 import { MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { AudioWithStats } from '@/types/entities/audio';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface AudioCardProps {
-	/** Datos del audio a mostrar */
 	audio: AudioWithStats;
-	/** Tamaño compacto con menos información */
-	compact?: boolean;
-	/** Modo TCG con efectos especiales de carta */
-	tcgMode?: boolean;
-	/** Deshabilitar interacciones */
-	disabled?: boolean;
-	/** Clase CSS adicional para la carta */
+	onClick?: (audioData: AudioWithStats) => void;
 	className?: string;
-	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
-	/** Si la tarjeta está seleccionada */
+	style?: React.CSSProperties;
+	compact?: boolean;
 	isSelected?: boolean;
-	/** Si la tarjeta está activa */
 	isActive?: boolean;
-	/** Si está en modo scroll (para optimización) */
-	isScrolling?: boolean;
-	/** Si debe cargar contenido */
-	shouldLoad?: boolean;
+	tcgMode?: boolean;
+	disabled?: boolean;
 }
 
 /**
@@ -43,8 +30,6 @@ export function AudioCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: AudioCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
@@ -139,9 +124,9 @@ export function AudioCard({
 
 	const handleClick = useCallback(() => {
 		if (!disabled && onClick) {
-			onClick();
+			onClick(audio);
 		}
-	}, [disabled, onClick]);
+	}, [disabled, onClick, audio]);
 
 	const handleMouseEnter = useCallback(() => setIsHovered(true), []);
 	const handleMouseLeave = useCallback(() => setIsHovered(false), []);
@@ -169,7 +154,7 @@ export function AudioCard({
 			{/* Audio element oculto */}
 			<audio
 				ref={audioRef}
-				src={audio.filePath}
+				src={audio.path}
 				onTimeUpdate={handleTimeUpdate}
 				onLoadedMetadata={handleLoadedMetadata}
 				onEnded={() => setIsPlaying(false)}
@@ -228,10 +213,8 @@ export function AudioCard({
 				{/* Cabecera */}
 				<CardHeader
 					title={audio.name || 'Sin nombre'}
-					emoji="🎵"
-					color={primaryColor}
-					isFavorite={audio.isFavorite || false}
-					compact={compact}
+					icon={<MusicIcon className="h-4 w-4" />}
+					primaryColor={primaryColor}
 				/>
 
 				{/* Contenido principal */}
@@ -277,11 +260,6 @@ export function AudioCard({
 								)}
 							</div>
 						</div>
-
-						{/* Descripción */}
-						{audio.description && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{audio.description}</div>
-						)}
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && (

@@ -1,11 +1,8 @@
-'use client';
-
 import { Terminal } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
+import { useCallback } from 'react';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { usePromptImages } from '@/lib/api/prompts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
 
@@ -13,45 +10,31 @@ const viewLogger = clientLogger.withContext('PromptContentView');
 
 export function PromptContentView() {
 	const selectedPrompt = usePromptStore((state) => state.selectedPrompt);
-	const [items, setItems] = useState([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState(null);
 
-	const loadPromptImages = useCallback(async () => {
-		if (!selectedPrompt) {
-			setItems([]);
-			return;
-		}
-
-		try {
-			viewLogger.info('🔄 Cargando imágenes del prompt:', selectedPrompt.id);
-			setIsLoading(true);
-			const images = await getPromptImages(selectedPrompt.id);
-			setItems(images);
-			viewLogger.info(`✅ ${images.length} imágenes cargadas`);
-		} catch (error) {
-			viewLogger.error('❌ Error cargando imágenes:', error);
-			toast.error('Error al cargar las imágenes del prompt');
-			setItems([]);
-			setError(error instanceof Error ? error.message : 'Error desconocido');
-		} finally {
-			setIsLoading(false);
-		}
-	}, [selectedPrompt]);
-
-	useEffect(() => {
-		loadPromptImages();
-	}, [loadPromptImages]);
+	// Usar React Query hook en lugar de server action
+	const {
+		data: images = [],
+		isLoading,
+		error,
+		refetch: loadPromptImages,
+	} = usePromptImages(selectedPrompt?.id || '', {
+		enabled: !!selectedPrompt?.id,
+	});
 
 	const toggleItemSelection = useCallback((item) => {
 		// Implementar la lógica de selección de items si es necesaria
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);
 
+	const handleRefresh = useCallback(() => {
+		viewLogger.info('🔄 Refrescando imágenes del prompt:', selectedPrompt?.id);
+		loadPromptImages();
+	}, [loadPromptImages, selectedPrompt?.id]);
+
 	const contentProps: BaseContentProps = {
-		items,
+		items: images,
 		isLoading,
-		error,
+		error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
 		toggleItemSelection,
 		currentContainerId: selectedPrompt?.id ?? null,
 		containerName: selectedPrompt?.name ?? null,
@@ -63,7 +46,7 @@ export function PromptContentView() {
 				selectedPrompt?.name || 'este prompt'
 			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
-		onRefresh: loadPromptImages,
+		onRefresh: handleRefresh,
 	};
 
 	return (

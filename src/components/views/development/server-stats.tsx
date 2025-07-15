@@ -1,13 +1,11 @@
-'use client';
-
 import { RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { getAppStats, getSystemStats } from '@/app/actions/debug/debug-stats.actions';
+import { useCallback, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSystemStats } from '@/lib/api/stats';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger específico para este componente
@@ -75,44 +73,26 @@ interface AppStats {
  * Componente para visualizar estadísticas del servidor
  */
 export function ServerStats() {
-	const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
-	const [appStats, setAppStats] = useState<AppStats | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState('system');
 
-	// Función para cargar las estadísticas
-	const fetchStats = useCallback(async () => {
-		try {
-			setLoading(true);
-			setError(null);
+	// Usar React Query hook en lugar de server actions
+	const {
+		data: statsData,
+		isLoading: loading,
+		error,
+		refetch: fetchStats,
+	} = useSystemStats({
+		refetchInterval: 30000, // Actualizar cada 30 segundos
+		refetchIntervalInBackground: false,
+	});
 
-			// Cargar estadísticas del sistema
-			const systemData = await getSystemStats();
-			setSystemStats(systemData);
+	// Extraer datos del response
+	const systemStats = statsData?.system as SystemStats | null;
+	const appStats = statsData?.app as AppStats | null;
 
-			// Cargar estadísticas de la aplicación
-			const appData = await getAppStats();
-			setAppStats(appData);
-
-			logger.info('Estadísticas cargadas correctamente');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : String(err);
-			setError(errorMessage);
-			logger.error('Error al cargar estadísticas', { error: errorMessage });
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// Cargar estadísticas al montar el componente
-	useEffect(() => {
+	const handleRefresh = useCallback(() => {
+		logger.info('🔄 Refrescando estadísticas del servidor');
 		fetchStats();
-
-		// Actualizar cada 30 segundos
-		const interval = setInterval(fetchStats, 30000);
-
-		return () => clearInterval(interval);
 	}, [fetchStats]);
 
 	return (
@@ -123,7 +103,7 @@ export function ServerStats() {
 					type="button"
 					variant="outline"
 					size="sm"
-					onClick={fetchStats}
+					onClick={handleRefresh}
 					disabled={loading}
 					className="flex items-center gap-2"
 				>
@@ -135,7 +115,9 @@ export function ServerStats() {
 			{error && (
 				<Card className="border-destructive">
 					<CardContent className="pt-6">
-						<p className="text-destructive">{error}</p>
+						<p className="text-destructive">
+							{error instanceof Error ? error.message : 'Error al cargar estadísticas'}
+						</p>
 					</CardContent>
 				</Card>
 			)}
@@ -199,50 +181,48 @@ export function ServerStats() {
 										<CardDescription>Uso actual de memoria</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-2">
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Uso</span>
-											<span className="font-medium">{systemStats.memory.usedPercentage.toFixed(1)}%</span>
+										<div className="flex justify-between items-center text-sm">
+											<span className="text-muted-foreground">Total</span>
+											<span>{systemStats.memory.total}</span>
 										</div>
-										<Progress value={systemStats.memory.usedPercentage} className="h-2" />
-										<div className="grid grid-cols-3 gap-2 text-sm mt-2">
-											<div>
-												<p className="text-muted-foreground">Total</p>
-												<p className="font-medium">{systemStats.memory.total}</p>
-											</div>
-											<div>
-												<p className="text-muted-foreground">Usado</p>
-												<p className="font-medium">{systemStats.memory.used}</p>
-											</div>
-											<div>
-												<p className="text-muted-foreground">Libre</p>
-												<p className="font-medium">{systemStats.memory.free}</p>
-											</div>
+										<div className="flex justify-between items-center text-sm">
+											<span className="text-muted-foreground">Usado</span>
+											<span>{systemStats.memory.used}</span>
 										</div>
+										<div className="flex justify-between items-center text-sm">
+											<span className="text-muted-foreground">Libre</span>
+											<span>{systemStats.memory.free}</span>
+										</div>
+										<Progress value={systemStats.memory.usedPercentage} className="h-2 mt-2" />
 									</CardContent>
 								</Card>
 							</div>
 
 							<Card>
 								<CardHeader>
-									<CardTitle>Interfaces de Red</CardTitle>
-									<CardDescription>Información sobre las conexiones de red</CardDescription>
+									<CardTitle>Red</CardTitle>
+									<CardDescription>Interfaces de red disponibles</CardDescription>
 								</CardHeader>
 								<CardContent>
-									<div className="space-y-4">
-										{systemStats.network.map((net) => (
-											<div key={`network-${net.interface}-${net.mac}`} className="border rounded-md p-3">
-												<div className="flex items-center justify-between mb-2">
-													<span className="font-medium">{net.interface}</span>
-													<Badge variant="outline">{net.mac}</Badge>
-												</div>
+									<div className="space-y-3">
+										{systemStats.network.map((net, index) => (
+											<div key={index} className="p-3 border rounded-lg">
 												<div className="grid grid-cols-2 gap-2 text-sm">
 													<div>
-														<p className="text-muted-foreground">Dirección IP</p>
-														<p>{net.address}</p>
+														<span className="text-muted-foreground">Interfaz:</span>
+														<span className="ml-2 font-medium">{net.interface}</span>
 													</div>
 													<div>
-														<p className="text-muted-foreground">Máscara de red</p>
-														<p>{net.netmask}</p>
+														<span className="text-muted-foreground">Dirección:</span>
+														<span className="ml-2 font-mono">{net.address}</span>
+													</div>
+													<div>
+														<span className="text-muted-foreground">Máscara:</span>
+														<span className="ml-2 font-mono">{net.netmask}</span>
+													</div>
+													<div>
+														<span className="text-muted-foreground">MAC:</span>
+														<span className="ml-2 font-mono">{net.mac}</span>
 													</div>
 												</div>
 											</div>
@@ -251,12 +231,16 @@ export function ServerStats() {
 								</CardContent>
 							</Card>
 						</>
+					) : loading ? (
+						<Card>
+							<CardContent className="pt-6">
+								<p className="text-center text-muted-foreground">Cargando estadísticas del sistema...</p>
+							</CardContent>
+						</Card>
 					) : (
 						<Card>
 							<CardContent className="pt-6">
-								<p className="text-center text-muted-foreground">
-									{loading ? 'Cargando estadísticas del sistema...' : 'No hay datos disponibles'}
-								</p>
+								<p className="text-center text-muted-foreground">No se pudieron cargar las estadísticas del sistema</p>
 							</CardContent>
 						</Card>
 					)}
@@ -268,38 +252,29 @@ export function ServerStats() {
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<Card>
 									<CardHeader>
-										<CardTitle>Solicitudes</CardTitle>
-										<CardDescription>Estadísticas de solicitudes HTTP</CardDescription>
+										<CardTitle>Solicitudes HTTP</CardTitle>
+										<CardDescription>Estadísticas de las peticiones</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<p className="text-sm text-muted-foreground">Total</p>
-												<p className="font-medium">{appStats.requests.total}</p>
+											<div className="text-center p-3 bg-green-50 rounded-lg">
+												<p className="text-2xl font-bold text-green-600">{appStats.requests.success}</p>
+												<p className="text-sm text-green-700">Exitosas</p>
 											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Exitosas</p>
-												<p className="font-medium">{appStats.requests.success}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Errores</p>
-												<p className="font-medium">{appStats.requests.error}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Pendientes</p>
-												<p className="font-medium">{appStats.requests.pending}</p>
+											<div className="text-center p-3 bg-red-50 rounded-lg">
+												<p className="text-2xl font-bold text-red-600">{appStats.requests.error}</p>
+												<p className="text-sm text-red-700">Errores</p>
 											</div>
 										</div>
-
-										{appStats.requests.successRate && (
-											<div className="space-y-2">
-												<div className="flex justify-between items-center">
-													<span className="text-sm text-muted-foreground">Tasa de éxito</span>
-													<span className="font-medium">{appStats.requests.successRate}</span>
-												</div>
-												<Progress value={Number.parseFloat(appStats.requests.successRate)} className="h-2" />
-											</div>
-										)}
+										<div className="text-center">
+											<p className="text-sm text-muted-foreground">Total de solicitudes</p>
+											<p className="text-lg font-semibold">{appStats.requests.total}</p>
+											{appStats.requests.successRate && (
+												<Badge variant="secondary" className="mt-1">
+													{appStats.requests.successRate} éxito
+												</Badge>
+											)}
+										</div>
 									</CardContent>
 								</Card>
 
@@ -308,24 +283,22 @@ export function ServerStats() {
 										<CardTitle>Rendimiento</CardTitle>
 										<CardDescription>Tiempos de respuesta</CardDescription>
 									</CardHeader>
-									<CardContent>
-										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<p className="text-sm text-muted-foreground">Promedio</p>
-												<p className="font-medium">{appStats.performance.avgResponseTime}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Mínimo</p>
-												<p className="font-medium">{appStats.performance.minResponseTime}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Máximo</p>
-												<p className="font-medium">{appStats.performance.maxResponseTime}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Percentil 95</p>
-												<p className="font-medium">{appStats.performance.p95ResponseTime}</p>
-											</div>
+									<CardContent className="space-y-3">
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Promedio</span>
+											<span className="font-medium">{appStats.performance.avgResponseTime}</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Mínimo</span>
+											<span className="font-medium">{appStats.performance.minResponseTime}</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Máximo</span>
+											<span className="font-medium">{appStats.performance.maxResponseTime}</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">P95</span>
+											<span className="font-medium">{appStats.performance.p95ResponseTime}</span>
 										</div>
 									</CardContent>
 								</Card>
@@ -337,20 +310,18 @@ export function ServerStats() {
 										<CardTitle>Base de Datos</CardTitle>
 										<CardDescription>Estadísticas de consultas</CardDescription>
 									</CardHeader>
-									<CardContent>
-										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<p className="text-sm text-muted-foreground">Total de consultas</p>
-												<p className="font-medium">{appStats.database.queries}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Tiempo promedio</p>
-												<p className="font-medium">{appStats.database.avgQueryTime}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Consultas lentas</p>
-												<p className="font-medium">{appStats.database.slowQueries}</p>
-											</div>
+									<CardContent className="space-y-3">
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Consultas totales</span>
+											<span className="font-medium">{appStats.database.queries}</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Tiempo promedio</span>
+											<span className="font-medium">{appStats.database.avgQueryTime}</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Consultas lentas</span>
+											<span className="font-medium">{appStats.database.slowQueries}</span>
 										</div>
 									</CardContent>
 								</Card>
@@ -358,73 +329,73 @@ export function ServerStats() {
 								<Card>
 									<CardHeader>
 										<CardTitle>Caché</CardTitle>
-										<CardDescription>Estadísticas de uso de caché</CardDescription>
+										<CardDescription>Estadísticas de caché</CardDescription>
 									</CardHeader>
-									<CardContent className="space-y-4">
-										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<p className="text-sm text-muted-foreground">Aciertos</p>
-												<p className="font-medium">{appStats.cache.hits}</p>
-											</div>
-											<div>
-												<p className="text-sm text-muted-foreground">Fallos</p>
-												<p className="font-medium">{appStats.cache.misses}</p>
-											</div>
+									<CardContent className="space-y-3">
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Aciertos</span>
+											<span className="font-medium">{appStats.cache.hits}</span>
 										</div>
-
-										<div className="space-y-2">
-											<div className="flex justify-between items-center">
-												<span className="text-sm text-muted-foreground">Ratio de caché</span>
-												<span className="font-medium">{appStats.cache.ratio}</span>
-											</div>
-											<Progress value={Number.parseFloat(appStats.cache.ratio)} className="h-2" />
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Fallos</span>
+											<span className="font-medium">{appStats.cache.misses}</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Ratio</span>
+											<Badge variant="secondary">{appStats.cache.ratio}</Badge>
 										</div>
 									</CardContent>
 								</Card>
 							</div>
 
-							<Card>
-								<CardHeader>
-									<CardTitle>Errores</CardTitle>
-									<CardDescription>Información sobre errores registrados</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<div className="space-y-4">
-										<div>
-											<p className="text-sm text-muted-foreground">Total de errores</p>
-											<p className="font-medium">{appStats.errors.count}</p>
+							{appStats.errors.count > 0 && (
+								<Card>
+									<CardHeader>
+										<CardTitle>Errores</CardTitle>
+										<CardDescription>Últimos errores registrados</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-3">
+										<div className="flex justify-between items-center">
+											<span className="text-sm text-muted-foreground">Total de errores</span>
+											<Badge variant="destructive">{appStats.errors.count}</Badge>
 										</div>
-
 										{appStats.errors.last && (
-											<div className="border rounded-md p-3 bg-muted/50">
-												<p className="text-sm text-muted-foreground mb-1">Último error</p>
-												<p className="font-medium">{appStats.errors.last.tipo}</p>
-												<p className="text-sm">{appStats.errors.last.mensaje}</p>
+											<div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+												<p className="font-medium text-red-800">Último error:</p>
+												<p className="text-sm text-red-700 mt-1">{appStats.errors.last.mensaje}</p>
+												<Badge variant="outline" className="mt-2">
+													{appStats.errors.last.tipo}
+												</Badge>
 											</div>
 										)}
-
 										{Object.keys(appStats.errors.byType).length > 0 && (
 											<div>
-												<p className="text-sm text-muted-foreground mb-2">Errores por tipo</p>
-												<div className="grid grid-cols-2 gap-2">
+												<p className="text-sm font-medium mb-2">Errores por tipo:</p>
+												<div className="space-y-1">
 													{Object.entries(appStats.errors.byType).map(([type, count]) => (
-														<div key={type} className="flex justify-between items-center">
-															<span className="text-sm">{type}</span>
+														<div key={type} className="flex justify-between items-center text-sm">
+															<span className="text-muted-foreground">{type}</span>
 															<Badge variant="outline">{count}</Badge>
 														</div>
 													))}
 												</div>
 											</div>
 										)}
-									</div>
-								</CardContent>
-							</Card>
+									</CardContent>
+								</Card>
+							)}
 						</>
+					) : loading ? (
+						<Card>
+							<CardContent className="pt-6">
+								<p className="text-center text-muted-foreground">Cargando estadísticas de la aplicación...</p>
+							</CardContent>
+						</Card>
 					) : (
 						<Card>
 							<CardContent className="pt-6">
 								<p className="text-center text-muted-foreground">
-									{loading ? 'Cargando estadísticas de la aplicación...' : 'No hay datos disponibles'}
+									No se pudieron cargar las estadísticas de la aplicación
 								</p>
 							</CardContent>
 						</Card>

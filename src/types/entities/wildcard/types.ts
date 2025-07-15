@@ -5,110 +5,45 @@
 
 import type { WildcardWithStats } from './base';
 
+/**
+ * Criterios de ordenación para wildcards
+ */
 export enum WildcardSortCriteria {
-	NAME = 'name',
-	DATE = 'date',
-	CATEGORY = 'category',
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	CREATED_ASC = 'created:asc',
+	CREATED_DESC = 'created:desc',
+	UPDATED_ASC = 'updated:asc',
+	UPDATED_DESC = 'updated:desc',
+	CATEGORY_ASC = 'category:asc',
+	CATEGORY_DESC = 'category:desc',
 }
 
+/**
+ * Modos de visualización para wildcards
+ */
 export enum WildcardViewMode {
 	GRID = 'grid',
 	LIST = 'list',
-	DETAIL = 'detail',
+	CARDS = 'cards',
+	COMPACT = 'compact',
+	TREE = 'tree',
 }
 
-export const WILDCARD_SORT_PROPERTY_MAP = {
-	name: 'Nombre',
-	date: 'Fecha',
-	category: 'Categoría',
+/**
+ * Mapa de propiedades de ordenamiento para wildcards
+ */
+export const WILDCARD_SORT_PROPERTY_MAP: Record<WildcardSortCriteria, string> = {
+	[WildcardSortCriteria.NAME_ASC]: 'name',
+	[WildcardSortCriteria.NAME_DESC]: 'name',
+	[WildcardSortCriteria.USAGE_ASC]: 'usage',
+	[WildcardSortCriteria.USAGE_DESC]: 'usage',
+	[WildcardSortCriteria.CREATED_ASC]: 'createdAt',
+	[WildcardSortCriteria.CREATED_DESC]: 'createdAt',
+	[WildcardSortCriteria.UPDATED_ASC]: 'updatedAt',
+	[WildcardSortCriteria.UPDATED_DESC]: 'updatedAt',
+	[WildcardSortCriteria.CATEGORY_ASC]: 'category',
+	[WildcardSortCriteria.CATEGORY_DESC]: 'category',
 };
-
-// --- 💀 Tipos Legacy (Compatibilidad Temporal) ---
-// @deprecated - Usar WildcardWithStats en su lugar
-export type WildcardComplete = WildcardWithStats;
-
-// @deprecated - Definir filtros con Zod schemas
-export interface WildcardSearchOptions {
-	query?: string;
-	category?: string;
-	sortBy?: WildcardSortCriteria;
-	sortOrder?: 'asc' | 'desc';
-	limit?: number;
-	offset?: number;
-	page?: number;
-	searchQuery?: string;
-	filters?: WildcardSearchFilters;
-	includeStats?: boolean;
-	includeImages?: boolean;
-	includeVideos?: boolean;
-	includeAlbums?: boolean;
-	includeCollections?: boolean;
-	includeCharacters?: boolean;
-	includePlaces?: boolean;
-	includeWorldItems?: boolean;
-	includeConcepts?: boolean;
-	includeNotes?: boolean;
-	includeWildcards?: boolean;
-	includeGroups?: boolean;
-	includePrompts?: boolean;
-}
-
-// @deprecated - Usar propiedades directas de WildcardWithStats
-export interface WildcardChild {
-	id: string;
-	name: string;
-	description?: string;
-	category?: string;
-}
-
-// @deprecated - Usar WildcardCreateInput/UpdateInput
-export interface CreateWildcardData {
-	id?: string;
-	name: string;
-	description?: string;
-	category?: string;
-	emoji?: string;
-	color?: string;
-	shortcut?: string;
-	parentId?: string;
-	isFavorite?: boolean;
-	featuredImage?: string;
-	tags?: string[];
-	properties?: Record<string, unknown>;
-	children?: string;
-}
-
-export interface UpdateWildcardData extends Partial<CreateWildcardData> {
-	id: string;
-}
-
-export interface WildcardBulkUpdateData {
-	ids: string[];
-	data: Partial<Omit<CreateWildcardData, 'name' | 'id'>>;
-}
-
-export interface WildcardRelated {
-	id?: string;
-	name?: string;
-	properties: Array<{ id: string; name: string }>;
-	tags: Array<{ id: string; name: string }>;
-}
-
-export interface WildcardSearchFilters {
-	searchQuery?: string;
-	category?: string;
-	tags?: string[];
-}
-
-// @deprecated - Usar WildcardWithStats base + relaciones
-export interface WildcardDeserialized {
-	id: string;
-	name: string;
-	description?: string | null;
-	category?: string | null;
-	properties: Array<{ id: string; name: string; value?: unknown }>;
-	children: Array<{ id: string; name: string }>;
-	tags: Array<{ id: string; name: string }>;
-	createdAt: Date;
-	updatedAt: Date;
-}

@@ -1,16 +1,16 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { CheckIcon, DownloadIcon, EyeIcon, FileJsonIcon, XIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useJsonFile } from '@/lib/api/json-files';
+import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format'; // Importar formatBytes
+import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 interface JsonFileCardProps {
-	/** Datos del archivo JSON a mostrar */
-	jsonFile: JsonFileWithStats;
+	/** ID del archivo JSON a mostrar */
+	jsonFileId: string;
 	/** Tamaño compacto con menos información */
 	compact?: boolean;
 	/** Modo TCG con efectos especiales de carta */
@@ -20,7 +20,7 @@ interface JsonFileCardProps {
 	/** Clase CSS adicional para la carta */
 	className?: string;
 	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
+	onClick?: (jsonFileData: JsonFileWithStats) => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 	/** Si la tarjeta está activa */
@@ -35,7 +35,7 @@ interface JsonFileCardProps {
  * JsonFileCard - Componente de tarjeta para archivos JSON con preview integrado
  */
 export function JsonFileCard({
-	jsonFile,
+	jsonFileId,
 	compact = false,
 	tcgMode = true,
 	disabled = false,
@@ -43,11 +43,56 @@ export function JsonFileCard({
 	onClick,
 	isSelected = false,
 	isActive = false,
-	isScrolling = false,
-	shouldLoad = true,
 }: JsonFileCardProps) {
+	const { data: jsonFile, isLoading, error } = useJsonFile(jsonFileId);
 	const [isHovered, setIsHovered] = useState(false);
 	const [showPreview, setShowPreview] = useState(false);
+
+	// Funciones para manejar eventos
+	const handleClick = useCallback(() => {
+		if (onClick && jsonFile) {
+			onClick(jsonFile);
+		}
+	}, [onClick, jsonFile]);
+
+	const handleMouseEnter = useCallback(() => {
+		setIsHovered(true);
+	}, []);
+
+	const handleMouseLeave = useCallback(() => {
+		setIsHovered(false);
+	}, []);
+
+	const togglePreview = useCallback(() => {
+		setShowPreview((prev) => !prev);
+	}, []);
+
+	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando archivo JSON...</p>
+			</div>
+		);
+	}
+
+	if (error || !jsonFile) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Archivo JSON no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Color basado en la validez del JSON
 	const primaryColor = useMemo(() => {
@@ -96,41 +141,15 @@ export function JsonFileCard({
 		}
 	}, [jsonFile.content]);
 
-	// Formatear tamaño
-	const formatSize = useCallback((bytes: number) => {
-		if (bytes < 1024) return `${bytes} B`;
-		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-	}, []);
-
-	// Preview del contenido JSON
+	// Preview del JSON formateado
 	const jsonPreview = useMemo(() => {
-		if (!jsonFile.content) return 'Archivo vacío';
-
+		if (!jsonFile.content) return '';
 		try {
-			const parsed = JSON.parse(jsonFile.content);
-			return `${JSON.stringify(parsed, null, 2).substring(0, 200)}...`;
+			return JSON.stringify(JSON.parse(jsonFile.content), null, 2);
 		} catch {
-			return 'JSON inválido';
+			return jsonFile.content; // Mostrar contenido sin formatear si es inválido
 		}
 	}, [jsonFile.content]);
-
-	const handleClick = useCallback(() => {
-		if (!disabled && onClick) {
-			onClick();
-		}
-	}, [disabled, onClick]);
-
-	const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-	const handleMouseLeave = useCallback(() => setIsHovered(false), []);
-
-	const togglePreview = useCallback(
-		(e: React.MouseEvent) => {
-			e.stopPropagation();
-			setShowPreview(!showPreview);
-		},
-		[showPreview]
-	);
 
 	return (
 		<CardContainer
@@ -199,13 +218,7 @@ export function JsonFileCard({
 			{/* Contenedor principal */}
 			<div className="flex flex-col h-full relative z-1">
 				{/* Cabecera */}
-				<CardHeader
-					title={jsonFile.name || 'Sin nombre'}
-					emoji="📋"
-					color={primaryColor}
-					isFavorite={jsonFile.isFavorite || false}
-					compact={compact}
-				/>
+				<CardHeader title={jsonFile.name || 'Sin nombre'} primaryColor={primaryColor} compact={compact} />
 
 				{/* Contenido principal */}
 				{!compact && (
@@ -246,11 +259,6 @@ export function JsonFileCard({
 							</motion.div>
 						)}
 
-						{/* Descripción */}
-						{jsonFile.description && !showPreview && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{jsonFile.description}</div>
-						)}
-
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && !showPreview && (
 							<div className="grid grid-cols-2 gap-2 text-xs">
@@ -266,7 +274,7 @@ export function JsonFileCard({
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Tamaño</span>
-									<span className="font-bold">{formatSize(jsonStats.size)}</span>
+									<span className="font-bold">{formatBytes(jsonStats.size)}</span>
 								</div>
 								<div
 									className="col-span-2 flex items-center justify-between px-2 py-1 rounded"
@@ -305,7 +313,7 @@ export function JsonFileCard({
 						</div>
 
 						{/* Estado y fecha */}
-						<div className="flex items-center gap-2">
+						<div className="flex items-center justify-between text-xs">
 							<span
 								className="px-2 py-1 rounded text-xs font-medium"
 								style={{

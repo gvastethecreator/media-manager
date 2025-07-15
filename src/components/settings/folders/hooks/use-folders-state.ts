@@ -1,10 +1,9 @@
-'use client';
-
+import { useCallback, useState } from 'react';
+// Migración: se reemplaza el servicio directo por funciones del cliente API
+import { findFolders } from '@/lib/api/services/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { getFolders } from '@/services/folder';
 import type { FolderStats } from '@/types/entities/folder';
-import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
 const stateLogger = clientLogger.withContext('FoldersState');
@@ -24,7 +23,7 @@ export function useFoldersState() {
 		try {
 			setIsLoading(true);
 			setError(null);
-			const folders = await getFolders();
+			const { data: folders } = await findFolders({});
 
 			// Transformar datos de manera segura
 			const transformedFolders = folders.map((folder) => ({

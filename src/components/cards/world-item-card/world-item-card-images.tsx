@@ -1,9 +1,9 @@
-'use client';
-
 import { ImageIcon } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
+
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getRecentWorldItemImages } from './world-item-server-actions';
+
+import { WorldItemService } from '@/services/world-item/world-item.service';
 
 interface WorldItemCardImagesProps {
 	worldItemId: string;
@@ -20,11 +20,13 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	const worldItemService = useMemo(() => new WorldItemService(), []);
+
 	useEffect(() => {
 		const loadImages = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getRecentWorldItemImages(worldItemId);
+				const data = await worldItemService.getRecentWorldItemImages(worldItemId);
 				// Filtrar solo imágenes con thumbnailUrl válida
 				const validImages = data.filter((img) => img.thumbnailUrl);
 				setImages(validImages);
@@ -37,7 +39,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 		};
 
 		loadImages();
-	}, [worldItemId]);
+	}, [worldItemId, worldItemService]);
 
 	return (
 		<div className="relative h-[160px] overflow-hidden border-b border-gray-400/30">

@@ -1,5 +1,5 @@
-import { ViewType } from '@/components/views/types';
 import React, { useCallback, useState } from 'react';
+import { ViewType } from '@/components/views/types';
 
 /**
  * Hook que maneja el estado de colapso de las categorías en el panel de navegación

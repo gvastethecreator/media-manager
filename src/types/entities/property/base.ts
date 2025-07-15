@@ -1,9 +1,27 @@
-import type { Prisma, Property } from '@prisma/client';
+/**
+ * 🏠 PROPERTY BASE TYPES
+ *
+ * Tipos base para properties usando tipos locales de Drizzle.
+ *
+ * @updated 2025-01-27
+ */
 
 /**
- * 🗿 Modelo base de Property, directamente desde Prisma.
+ * 🗿 Modelo base de Property, derivado del schema de Drizzle.
  */
-export type PropertyBase = Property;
+export interface PropertyBase {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	shortcut: string | null;
+	category: string | null;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /**
  *  COUNTS
@@ -27,34 +45,25 @@ export const PROPERTY_COUNTS_RELATIONS = [
 ] as const;
 
 /**
- * 🏭 Prisma `include` para conteos de Property.
+ * 🤖 El tipo de una Property con sus conteos de relaciones.
  */
-export const propertyCounts = {
+export interface PropertyWithCounts extends PropertyBase {
 	_count: {
-		select: {
-			images: true,
-			videos: true,
-			albums: true,
-			collections: true,
-			tags: true,
-			characters: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			groups: true,
-		},
-	},
-} satisfies Prisma.PropertyInclude;
-
-/**
- * 🤖 El tipo de una Property de Prisma con sus conteos de relaciones.
- */
-export type PrismaPropertyWithCounts = Prisma.PropertyGetPayload<{
-	include: typeof propertyCounts;
-}>;
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		groups: number;
+	};
+}
 
 /**
  * 📊 Estadísticas calculadas para una Property.
@@ -71,7 +80,23 @@ export interface PropertyStatistics {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface PropertyWithStats extends PropertyBase {
+	entityType: 'property';
 	stats: PropertyStatistics;
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		groups: number;
+	};
 }
 
 /**
@@ -80,8 +105,8 @@ export interface PropertyWithStats extends PropertyBase {
 export interface PropertyCreateInput {
 	name: string;
 	description?: string | null;
-	emoji?: string;
-	color?: string;
+	emoji?: string | null;
+	color?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
 	featuredImage?: string | null;
@@ -94,10 +119,14 @@ export interface PropertyCreateInput {
 export interface PropertyUpdateInput {
 	name?: string;
 	description?: string | null;
-	emoji?: string;
-	color?: string;
+	emoji?: string | null;
+	color?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }
+
+// ----------------------------------------------------------------
+// TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
+// ----------------------------------------------------------------

@@ -1,10 +1,7 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { VideoWithStats } from '@/types/entities/video';
 import { Play, Volume2, VolumeX } from 'lucide-react';
 import { motion } from 'motion/react';
-import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import type { VideoWithStats } from '@/types/entities/video';
 
 interface VideoCardThumbnailProps {
 	video: VideoWithStats;
@@ -26,8 +23,8 @@ export function VideoCardThumbnail({
 	tcgMode = true,
 	compact = false,
 }: VideoCardThumbnailProps) {
-	const { statistics } = video;
-	const { thumbnailUrl, resolution, hasAudio, formattedSize } = statistics;
+	const { thumbnailUrl } = video;
+	const { resolution, hasAudio, formattedSize } = video.stats;
 
 	// Placeholder si no hay thumbnail
 	const placeholderGradient = `linear-gradient(135deg, ${primaryColor}40, ${primaryColor}80)`;
@@ -39,13 +36,7 @@ export function VideoCardThumbnail({
 
 			{/* Thumbnail o placeholder */}
 			{thumbnailUrl ? (
-				<Image
-					src={thumbnailUrl}
-					alt={`Thumbnail de ${video.name}`}
-					fill
-					className="object-cover"
-					sizes="(max-width: 768px) 100vw, 300px"
-				/>
+				<img src={thumbnailUrl} alt={`Thumbnail de ${video.name}`} className="object-cover w-full h-full" />
 			) : (
 				<div className="w-full h-full flex items-center justify-center" style={{ background: placeholderGradient }}>
 					<Play className="w-8 h-8 text-white/80" />

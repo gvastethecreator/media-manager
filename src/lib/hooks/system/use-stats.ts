@@ -1,8 +1,27 @@
-import type { ImageStats } from '@prisma/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { GeneralStats } from '@/app/actions/stats/stats.actions';
+// Migración: se eliminan las importaciones de servicios y se usan clientes de API
+import {
+	getImageStatsFromApi,
+	getSystemStatsFromApi,
+	incrementImageDownloadInApi,
+	incrementImageViewInApi,
+} from '@/lib/api/client/stats.client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { statsService } from '@/services/stats';
+import type { GeneralStats } from '@/types/stats';
+
+// Tipo local para ImageStats (equivalente a Drizzle)
+type DrizzleImageStats = {
+	id: string;
+	imageId: string;
+	views: number;
+	downloads: number;
+	shares: number;
+	favorites: number;
+	lastViewedAt: Date | null;
+	lastDownloadedAt: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 const statsLogger = serverLogger.withContext('StatsHook');
 
@@ -12,6 +31,10 @@ export const STATS_QUERY_KEYS = {
 	image: (imageId: string) => [...STATS_QUERY_KEYS.all, 'image', imageId] as const,
 };
 
+/**
+ * Hook para obtener estadísticas generales del sistema
+ * ✅ MIGRADO A DRIZZLE
+ */
 export function useStats() {
 	const queryClient = useQueryClient();
 
@@ -24,7 +47,7 @@ export function useStats() {
 		queryKey: STATS_QUERY_KEYS.general(),
 		queryFn: async () => {
 			try {
-				return await statsService.getGeneralStats();
+				return await getSystemStatsFromApi();
 			} catch (error) {
 				statsLogger.error('Error al obtener estadísticas', { error });
 				throw error;
@@ -46,6 +69,10 @@ export function useStats() {
 	};
 }
 
+/**
+ * Hook para obtener estadísticas de una imagen específica
+ * ✅ MIGRADO A DRIZZLE
+ */
 export function useImageStats(imageId: string) {
 	const queryClient = useQueryClient();
 
@@ -54,11 +81,11 @@ export function useImageStats(imageId: string) {
 		error,
 		isLoading,
 		isError,
-	} = useQuery<ImageStats>({
+	} = useQuery<DrizzleImageStats>({
 		queryKey: STATS_QUERY_KEYS.image(imageId),
 		queryFn: async () => {
 			try {
-				return await statsService.getOrCreateImageStats(imageId);
+				return await getImageStatsFromApi(imageId);
 			} catch (error) {
 				statsLogger.error('Error al obtener estadísticas de imagen', {
 					error,
@@ -71,7 +98,7 @@ export function useImageStats(imageId: string) {
 
 	const incrementView = async () => {
 		try {
-			const updatedStats = await statsService.incrementViewCount(imageId);
+			const updatedStats = await incrementImageViewInApi(imageId);
 			queryClient.setQueryData(STATS_QUERY_KEYS.image(imageId), updatedStats);
 			queryClient.invalidateQueries({ queryKey: STATS_QUERY_KEYS.general() });
 		} catch (error) {
@@ -82,7 +109,7 @@ export function useImageStats(imageId: string) {
 
 	const incrementDownload = async () => {
 		try {
-			const updatedStats = await statsService.incrementDownloadCount(imageId);
+			const updatedStats = await incrementImageDownloadInApi(imageId);
 			queryClient.setQueryData(STATS_QUERY_KEYS.image(imageId), updatedStats);
 			queryClient.invalidateQueries({ queryKey: STATS_QUERY_KEYS.general() });
 		} catch (error) {

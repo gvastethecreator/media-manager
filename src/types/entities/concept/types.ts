@@ -1,89 +1,13 @@
 /**
- * @file Tipos canónicos para la entidad Concept
+ * @file Tipos para la entidad Concept
  * @module types/entities/concept/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
- * @description Estructura unificada y validada para Concept.
- * Última migración: 2025-06-18
+ * @description Tipos y interfaces para la entidad Concept
  */
 
 import { z } from 'zod';
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
-import type { GroupComplete } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
-import type { PlaceComplete } from '../place';
-import type { PromptComplete } from '../prompt';
-import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
 
-/**
- * Tipo base canónico para Concept
- */
-export interface ConceptBase {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	content: string;
-	category: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-/**
- * Tipo completo para Concept con todas las relaciones y datos
- */
-export interface ConceptComplete extends ConceptBase {
-	images?: ImageComplete[];
-	videos?: VideoComplete[];
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
-
-/**
- * Tipo para items en listados de conceptos
- */
-export interface ConceptListItem {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	category: string;
-	isFavorite: boolean;
-	itemType: 'concept';
-}
+// Re-export tipos base desde base.ts para evitar duplicación
+export type { ConceptBase, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
 
 /**
  * Input para creación
@@ -141,7 +65,7 @@ export interface ConceptSearchOptions {
  * Resultado de búsqueda de conceptos
  */
 export interface ConceptSearchResult {
-	items: ConceptComplete[];
+	items: ConceptWithStats[];
 	total: number;
 	page: number;
 	pageSize: number;
@@ -161,7 +85,7 @@ export interface ConceptFilters {
 /**
  * Concepto extendido con propiedades adicionales para UI
  */
-export interface ConceptExtended extends ConceptComplete {
+export interface ConceptExtended extends ConceptWithStats {
 	isSelected?: boolean;
 	isHighlighted?: boolean;
 	previewContent?: string;
@@ -169,18 +93,7 @@ export interface ConceptExtended extends ConceptComplete {
 	importance?: number;
 }
 
-/**
- * Concepto con estadísticas calculadas
- */
-export interface ConceptWithStats extends ConceptComplete {
-	stats: {
-		imageCount: number;
-		tagCount: number;
-		noteCount: number;
-		totalContentItems: number;
-		lastUpdated: Date;
-	};
-}
+// Los tipos ConceptStats, ConceptStatistics y ConceptWithStats se importan desde base.ts
 
 /**
  * Opciones de ordenación para conceptos
@@ -220,7 +133,6 @@ export const ConceptSchema = z.object({
 	updatedAt: z.date(),
 });
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con ConceptSchema antes de persistir.

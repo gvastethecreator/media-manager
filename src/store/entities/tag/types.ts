@@ -1,10 +1,12 @@
 /**
- * @file Definición de tipos para el store de Tag
+ * @file Tipos para el store de la entidad Tag.
  * @module store/entities/tag/types
+ * @description Define la forma del estado y las acciones para el store de Tag.
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { TagWithStats } from '@/types/entities/tag';
-import type { Prisma } from '@prisma/client';
+import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag/base';
+import type { TagSortCriteria } from '@/types/entities/tag/types';
 
 // --- ENUMS ESPECÍFICOS DEL STORE ---
 
@@ -38,19 +40,7 @@ export enum TagRarity {
 	LEGENDARY = 'legendary',
 }
 
-/**
- * Criterios de ordenación para etiquetas
- */
-export enum TagSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	USAGE_ASC = 'usage:asc',
-	USAGE_DESC = 'usage:desc',
-	CREATED_ASC = 'createdAt:asc',
-	CREATED_DESC = 'createdAt:desc',
-	UPDATED_ASC = 'updatedAt:desc',
-	UPDATED_DESC = 'updatedAt:desc',
-}
+// TagSortCriteria se importa desde @/types/entities/tag
 
 /**
  * Modos de visualización para etiquetas
@@ -125,9 +115,9 @@ export interface TagCoreActions {
 	/** Obtiene un tag por su ID */
 	getTagById: (id: string) => TagWithStats | undefined;
 	/** Crea un nuevo tag */
-	createTag: (data: Prisma.TagCreateInput) => Promise<TagWithStats | null>;
+	createTag: (data: TagCreateInput) => Promise<TagWithStats | null>;
 	/** Actualiza un tag existente */
-	updateTag: (id: string, data: Prisma.TagUpdateInput) => Promise<void>;
+	updateTag: (id: string, data: TagUpdateInput) => Promise<void>;
 	/** Elimina un tag */
 	deleteTag: (id: string) => Promise<void>;
 	/** Actualiza múltiples tags */

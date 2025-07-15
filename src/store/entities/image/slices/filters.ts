@@ -18,17 +18,15 @@
  *   puede manejar de forma nativa.
  *
  * El nuevo enfoque consiste en:
- * 1. Usar hooks de Next.js (`useRouter`, `useSearchParams`) para leer y escribir
- *    los filtros en la URL.
- * 2. Pasar estos filtros a los hooks de React Query, que a su vez los pasarán a
- *    las Server Actions.
- * 3. Las Server Actions utilizan estos filtros en la cláusula `where` de Prisma
- *    para que la base de datos realice el trabajo pesado.
+ * 1. (Legacy) Usaba hooks de Next.js (`useRouter`, `useSearchParams`) para leer y escribir los filtros en la URL.
+ *    Ahora se manejan con React Router.
+ * 2. Pasar estos filtros a los hooks de React Query, que a su vez se comunican con la API.
+ * 3. Las APIs aplican estos filtros directamente en Drizzle.
  */
 
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
-export type ImageFiltersSlice = {};
+export type ImageFiltersSlice = Record<string, never>;
 
 export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFiltersSlice> = () => ({});

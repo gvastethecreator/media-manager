@@ -3,9 +3,12 @@
  * @module services/profile
  */
 
-import { prisma } from '@/lib/database/prisma';
+import { and, asc, desc, eq, like, or } from 'drizzle-orm';
+// Importar Drizzle para coexistencia
+import { db } from '@/lib/drizzle';
+import { profiles, settings } from '@/lib/drizzle/schema/index';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
-import { transformProfiles } from '@/transformers/profile/profile-transformers';
+import { transformProfile } from '@/transformers/profile/profile-transformers';
 import {
 	type ProfileCreateInput,
 	type ProfileExtended,
@@ -41,6 +44,9 @@ class ProfileServiceImpl {
 
 	/**
 	 * Obtiene todos los perfiles con filtros y paginación
+	 *
+	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
+	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
 	async getProfiles(filters?: ProfileFilters, pagination?: ProfilePaginationOptions): Promise<ProfileExtended[]> {
 		try {
@@ -51,23 +57,96 @@ class ProfileServiceImpl {
 			const { search, isActive, theme, language } = validatedFilters;
 			const { page = 1, limit = 50, sortBy = 'name', sortDirection = 'asc' } = validatedPagination;
 
-			// Construir where clause
-			const where: any = {};
+			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
+			let query = db
+				.select({
+					// Campos del perfil
+					id: profiles.id,
+					name: profiles.name,
+					emoji: profiles.emoji,
+					color: profiles.color,
+					description: profiles.description,
+					isActive: profiles.isActive,
+					createdAt: profiles.createdAt,
+					updatedAt: profiles.updatedAt,
+					settingsId: profiles.settingsId,
+					imageId: profiles.imageId,
+				})
+				.from(profiles)
+				.leftJoin(settings, eq(settings.profileId, profiles.id));
+
+			// 2. Construir filtros dinámicos
+			const conditions = [];
+
+			// Filtro de búsqueda (name OR description)
 			if (search) {
-				where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
+				conditions.push(or(like(profiles.name, `%${search}%`), like(profiles.description, `%${search}%`)));
 			}
-			if (typeof isActive === 'boolean') where.isActive = isActive;
-			if (theme) where.theme = theme;
-			if (language) where.language = language;
 
-			const profiles = await prisma.profile.findMany({
-				where,
-				orderBy: { [sortBy]: sortDirection },
-				skip: (page - 1) * limit,
-				take: limit,
-			});
+			// Filtro de estado activo
+			if (typeof isActive === 'boolean') {
+				conditions.push(eq(profiles.isActive, isActive));
+			}
 
-			return transformProfiles(profiles);
+			// Filtros de theme y language (en settings)
+			if (theme) {
+				conditions.push(eq(settings.theme, theme));
+			}
+			if (language) {
+				conditions.push(eq(settings.language, language));
+			}
+
+			// Aplicar condiciones si existen
+			if (conditions.length > 0) {
+				query = query.where(and(...conditions));
+			}
+
+			// 3. Aplicar ordenamiento dinámico
+			const orderColumn =
+				sortBy === 'name'
+					? profiles.name
+					: sortBy === 'isActive'
+						? profiles.isActive
+						: sortBy === 'createdAt'
+							? profiles.createdAt
+							: sortBy === 'updatedAt'
+								? profiles.updatedAt
+								: profiles.name; // default fallback
+
+			const orderDirection = sortDirection === 'desc' ? desc(orderColumn) : asc(orderColumn);
+			query = query.orderBy(orderDirection);
+
+			// 4. Aplicar paginación
+			query = query.limit(limit).offset((page - 1) * limit);
+
+			// 5. Ejecutar consulta
+			const drizzleProfiles = await query;
+
+			// 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
+			const drizzleResults = drizzleProfiles.map((raw) => ({
+				id: raw.id,
+				name: raw.name,
+				emoji: raw.emoji,
+				color: raw.color,
+				description: raw.description,
+				isActive: raw.isActive,
+				createdAt: raw.createdAt,
+				updatedAt: raw.updatedAt,
+				settingsId: raw.settingsId,
+				imageId: raw.imageId,
+				settings: raw.settingsRealId
+					? {
+							id: raw.settingsRealId,
+							theme: raw.settingsTheme,
+							language: raw.settingsLanguage,
+							data: raw.settingsData,
+							profileId: raw.id,
+						}
+					: null,
+			}));
+
+			// 7. Retornar resultados de Drizzle
+			return drizzleResults;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -81,9 +160,8 @@ class ProfileServiceImpl {
 	 */
 	async createProfile(data: ProfileCreateInput): Promise<ProfileExtended> {
 		try {
-			const validatedData = profileCreateInputSchema.parse(data);
-			const profile = await prisma.profile.create({ data: validatedData });
-			return toEntity(profile) || profile;
+			const [newProfile] = await db.insert(profiles).values(data).returning();
+			return transformProfile(newProfile);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -98,12 +176,8 @@ class ProfileServiceImpl {
 	 */
 	async updateProfile(id: string, data: ProfileUpdateInput): Promise<ProfileExtended> {
 		try {
-			const validatedData = profileUpdateInputSchema.parse(data);
-			const profile = await prisma.profile.update({
-				where: { id },
-				data: validatedData,
-			});
-			return toEntity(profile) || profile;
+			const [updatedProfile] = await db.update(profiles).set(data).where(eq(profiles.id, id)).returning();
+			return transformProfile(updatedProfile);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -119,16 +193,10 @@ class ProfileServiceImpl {
 	async setActiveProfile(id: string): Promise<void> {
 		try {
 			// Desactivar todos los perfiles
-			await prisma.profile.updateMany({
-				where: { isActive: true },
-				data: { isActive: false },
-			});
+			await db.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
 
 			// Activar el perfil seleccionado
-			await prisma.profile.update({
-				where: { id },
-				data: { isActive: true },
-			});
+			await db.update(profiles).set({ isActive: true }).where(eq(profiles.id, id));
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -140,13 +208,67 @@ class ProfileServiceImpl {
 
 	/**
 	 * Obtiene el perfil activo actual
+	 *
+	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
+	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
 	async getActiveProfile(): Promise<ProfileExtended | null> {
 		try {
-			const profile = await prisma.profile.findFirst({
-				where: { isActive: true },
-			});
-			return profile ? toEntity(profile) || profile : null;
+			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
+			const drizzleProfile = await db
+				.select({
+					// Campos del perfil
+					id: profiles.id,
+					name: profiles.name,
+					emoji: profiles.emoji,
+					color: profiles.color,
+					description: profiles.description,
+					isActive: profiles.isActive,
+					createdAt: profiles.createdAt,
+					updatedAt: profiles.updatedAt,
+					settingsId: profiles.settingsId,
+					imageId: profiles.imageId,
+					// Campos de settings (planos para luego restructurar)
+					settingsRealId: settings.id,
+					settingsData: settings.data,
+					settingsTheme: settings.theme,
+					settingsLanguage: settings.language,
+				})
+				.from(profiles)
+				.leftJoin(settings, eq(settings.profileId, profiles.id))
+				.where(eq(profiles.isActive, true))
+				.limit(1);
+
+			// Restructurar el resultado para que sea compatible con el transformador legacy
+			let drizzleResult = null;
+			if (drizzleProfile.length > 0) {
+				const raw = drizzleProfile[0];
+				drizzleResult = {
+					id: raw.id,
+					name: raw.name,
+					emoji: raw.emoji,
+					color: raw.color,
+					description: raw.description,
+					isActive: raw.isActive,
+					createdAt: raw.createdAt,
+					updatedAt: raw.updatedAt,
+					settingsId: raw.settingsId,
+					imageId: raw.imageId,
+					// Crear objeto settings compatible con transformador legacy
+					settings: raw.settingsRealId
+						? {
+								id: raw.settingsRealId,
+								theme: raw.settingsTheme,
+								language: raw.settingsLanguage,
+								data: raw.settingsData,
+								profileId: raw.id,
+							}
+						: null,
+				};
+			}
+
+			// 2. Transformar y retornar resultado de Drizzle
+			return drizzleResult ? transformProfile(drizzleResult) : null;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -157,13 +279,67 @@ class ProfileServiceImpl {
 
 	/**
 	 * Obtiene un perfil por ID
+	 *
+	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
+	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
 	async getById(id: string): Promise<ProfileExtended | null> {
 		try {
-			const profile = await prisma.profile.findUnique({
-				where: { id },
-			});
-			return profile ? toEntity(profile) || profile : null;
+			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
+			const drizzleProfile = await db
+				.select({
+					// Campos del perfil
+					id: profiles.id,
+					name: profiles.name,
+					emoji: profiles.emoji,
+					color: profiles.color,
+					description: profiles.description,
+					isActive: profiles.isActive,
+					createdAt: profiles.createdAt,
+					updatedAt: profiles.updatedAt,
+					settingsId: profiles.settingsId,
+					imageId: profiles.imageId,
+					// Campos de settings (planos para luego restructurar)
+					settingsRealId: settings.id,
+					settingsData: settings.data,
+					settingsTheme: settings.theme,
+					settingsLanguage: settings.language,
+				})
+				.from(profiles)
+				.leftJoin(settings, eq(settings.profileId, profiles.id))
+				.where(eq(profiles.id, id))
+				.limit(1);
+
+			// Restructurar el resultado para que sea compatible con el transformador legacy
+			let drizzleResult = null;
+			if (drizzleProfile.length > 0) {
+				const raw = drizzleProfile[0];
+				drizzleResult = {
+					id: raw.id,
+					name: raw.name,
+					emoji: raw.emoji,
+					color: raw.color,
+					description: raw.description,
+					isActive: raw.isActive,
+					createdAt: raw.createdAt,
+					updatedAt: raw.updatedAt,
+					settingsId: raw.settingsId,
+					imageId: raw.imageId,
+					// Crear objeto settings compatible con transformador legacy
+					settings: raw.settingsRealId
+						? {
+								id: raw.settingsRealId,
+								theme: raw.settingsTheme,
+								language: raw.settingsLanguage,
+								data: raw.settingsData,
+								profileId: raw.id,
+							}
+						: null,
+				};
+			}
+
+			// 2. Transformar y retornar resultado de Drizzle
+			return drizzleResult ? transformProfile(drizzleResult) : null;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -178,9 +354,7 @@ class ProfileServiceImpl {
 	 */
 	async delete(id: string): Promise<void> {
 		try {
-			await prisma.profile.delete({
-				where: { id },
-			});
+			await db.delete(profiles).where(eq(profiles.id, id));
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -193,6 +367,22 @@ class ProfileServiceImpl {
 
 // Exportar instancia única del servicio
 export const profileService = ProfileServiceImpl.getInstance();
+
+// Exportar funciones individuales para compatibilidad con el cliente
+export const getProfiles = (filters?: ProfileFilters, pagination?: ProfilePaginationOptions) =>
+	profileService.getProfiles(filters, pagination);
+
+export const createProfile = (data: ProfileCreateInput) => profileService.createProfile(data);
+
+export const updateProfile = (id: string, data: ProfileUpdateInput) => profileService.updateProfile(id, data);
+
+export const activateProfile = (id: string) => profileService.setActiveProfile(id);
+
+export const getActiveProfile = () => profileService.getActiveProfile();
+
+export const getProfile = (id: string) => profileService.getById(id);
+
+export const deleteProfile = (id: string) => profileService.delete(id);
 
 // Exportar tipos útiles para los consumidores del servicio
 export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };

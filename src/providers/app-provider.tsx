@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { ThemeSync } from '@/components/theme-sync';
 import { Toaster } from '@/components/ui/sonner';
 import { FileProvider, SettingsProvider } from '@/lib/contexts';
 import { CacheProvider } from '@/providers/cache-provider';
@@ -9,28 +10,9 @@ import { ThemeProvider } from '@/providers/theme-provider';
 
 export function AppProvider({ children }: { children: ReactNode }) {
 	return (
-		<ThemeProvider
-			attribute="data-theme"
-			defaultTheme="light"
-			enableSystem={false}
-			themes={[
-				'light',
-				'dark',
-				'cafe',
-				'violeta',
-				'madera',
-				'nocturno',
-				'verde',
-				'atardecer',
-				'corporativo',
-				'carbon',
-				'teal',
-				'citrico',
-			]}
-			enableColorScheme
-			disableTransitionOnChange
-		>
+		<ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
 			<SettingsProvider>
+				<ThemeSync />
 				<QueryProvider>
 					<CacheProvider>
 						<FileProvider>

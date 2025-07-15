@@ -2,13 +2,12 @@
  * @file Vista de tarjetas V2 usando EntityWithStats
  * @module components/features/file-browser/views/cards-view-v2
  */
-'use client';
 
+import { motion } from 'motion/react';
+import React, { memo } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
-import { motion } from 'motion/react';
-import React, { memo } from 'react';
 
 interface CardsViewProps {
 	items: EntityWithStats[];

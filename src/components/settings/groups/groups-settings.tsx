@@ -1,6 +1,5 @@
-'use client';
-
-import { createGroup, deleteGroup, getGroups, updateGroup } from '@/app/actions/groups/group.actions';
+import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,12 +7,10 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import toastService from '@/services/toast';
-import type { GroupWithStats } from '@/types/entities/group';
+import { useCreateGroup, useDeleteGroup, useGroups, useUpdateGroup } from '@/lib/api/groups';
+import { toastService } from '@/lib/ui/toast';
+import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria } from '@/types/entities/group';
-import { Prisma } from '@prisma/client';
-import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
 
@@ -23,127 +20,47 @@ const SORT_OPTIONS = [
 	{ label: 'Fecha', value: GroupSortCriteria.DATE_CREATED_DESC },
 ] as const;
 
-type FilterKey = 'searchQuery' | 'onlyFavorites' | 'sortBy';
-
-interface State {
-	groups: GroupWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	selectedGroup: GroupWithStats | null;
-	isCreateDialogOpen: boolean;
-	isEditMode: boolean;
-	searchQuery: string;
-	selectedCategories: string[];
-	onlyFavorites: boolean;
-	sortBy: GroupSortCriteria;
-}
-
-type Action =
-	| { type: 'LOAD_START' }
-	| { type: 'LOAD_SUCCESS'; payload: GroupWithStats[] }
-	| { type: 'LOAD_ERROR'; payload: string }
-	| { type: 'SELECT_GROUP'; payload: GroupWithStats | null }
-	| { type: 'SET_CREATE_DIALOG'; payload: boolean }
-	| { type: 'SET_EDIT_MODE'; payload: boolean }
-	| { type: 'SET_FILTER'; payload: { key: FilterKey; value: string | boolean | GroupSortCriteria } }
-	| { type: 'ADD_GROUP'; payload: GroupWithStats }
-	| { type: 'UPDATE_GROUP'; payload: GroupWithStats }
-	| { type: 'REMOVE_GROUP'; payload: string };
-
-const initialState: State = {
-	groups: [],
-	isLoading: true,
-	error: null,
-	selectedGroup: null,
-	isCreateDialogOpen: false,
-	isEditMode: false,
-	searchQuery: '',
-	selectedCategories: [],
-	onlyFavorites: false,
-	sortBy: GroupSortCriteria.NAME_ASC,
-};
-
-function reducer(state: State, action: Action): State {
-	switch (action.type) {
-		case 'LOAD_START':
-			return { ...state, isLoading: true, error: null };
-		case 'LOAD_SUCCESS':
-			return { ...state, isLoading: false, groups: action.payload };
-		case 'LOAD_ERROR':
-			return { ...state, isLoading: false, error: action.payload };
-		case 'SELECT_GROUP':
-			return { ...state, selectedGroup: action.payload, isEditMode: false };
-		case 'SET_CREATE_DIALOG':
-			return { ...state, isCreateDialogOpen: action.payload };
-		case 'SET_EDIT_MODE':
-			return { ...state, isEditMode: action.payload };
-		case 'SET_FILTER':
-			return { ...state, [action.payload.key]: action.payload.value };
-		case 'ADD_GROUP':
-			return { ...state, groups: [...state.groups, action.payload] };
-		case 'UPDATE_GROUP':
-			return {
-				...state,
-				groups: state.groups.map((g) => (g.id === action.payload.id ? action.payload : g)),
-				selectedGroup: state.selectedGroup?.id === action.payload.id ? action.payload : state.selectedGroup,
-			};
-		case 'REMOVE_GROUP':
-			return {
-				...state,
-				groups: state.groups.filter((g) => g.id !== action.payload),
-				selectedGroup: state.selectedGroup?.id === action.payload ? null : state.selectedGroup,
-			};
-		default:
-			return state;
-	}
-}
-
 export function GroupsSettings() {
-	const [state, dispatch] = useReducer(reducer, initialState);
+	// State local
+	const [selectedGroup, setSelectedGroup] = useState<GroupWithStats | null>(null);
+	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+	const [isEditMode, setIsEditMode] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [onlyFavorites, setOnlyFavorites] = useState(false);
+	const [sortBy, setSortBy] = useState(GroupSortCriteria.NAME_ASC);
 
-	const loadGroups = useCallback(async () => {
-		dispatch({ type: 'LOAD_START' });
-		try {
-			const data = await getGroups();
-			if (!data) {
-				throw new Error('Respuesta de servidor inválida');
-			}
-			dispatch({ type: 'LOAD_SUCCESS', payload: data });
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			dispatch({ type: 'LOAD_ERROR', payload: errorMessage });
-			toastService.error('Error al cargar los grupos', { description: errorMessage });
-		}
-	}, []);
+	// React Query hooks
+	const { data: groupsResponse, isLoading, error } = useGroups({ search: searchQuery });
+	const createGroupMutation = useCreateGroup();
+	const updateGroupMutation = useUpdateGroup();
+	const deleteGroupMutation = useDeleteGroup();
 
-	useEffect(() => {
-		loadGroups();
-	}, [loadGroups]);
+	const groups = groupsResponse?.data || [];
 
 	const filteredGroups = useMemo(
 		() =>
-			state.groups.filter((group) => {
-				const query = state.searchQuery.toLowerCase();
+			groups.filter((group) => {
+				const query = searchQuery.toLowerCase();
 				const matchesQuery =
 					!query ||
 					group.name.toLowerCase().includes(query) ||
 					group.description?.toLowerCase().includes(query) === true;
 
 				const matchesCategory =
-					state.selectedCategories.length === 0 ||
-					(group.category && state.selectedCategories.includes(group.category));
+					selectedCategories.length === 0 || (group.category && selectedCategories.includes(group.category));
 
-				const matchesFavorites = !state.onlyFavorites || group.isFavorite;
+				const matchesFavorites = !onlyFavorites || group.isFavorite;
 
 				return matchesQuery && matchesCategory && matchesFavorites;
 			}),
-		[state.groups, state.searchQuery, state.selectedCategories, state.onlyFavorites]
+		[groups, searchQuery, selectedCategories, onlyFavorites]
 	);
 
 	const sortedGroups = useMemo(
 		() =>
 			[...filteredGroups].sort((a, b) => {
-				switch (state.sortBy) {
+				switch (sortBy) {
 					case GroupSortCriteria.NAME_ASC:
 						return a.name.localeCompare(b.name);
 					case GroupSortCriteria.CATEGORY_ASC:
@@ -154,11 +71,11 @@ export function GroupsSettings() {
 						return 0;
 				}
 			}),
-		[filteredGroups, state.sortBy]
+		[filteredGroups, sortBy]
 	);
 
 	const stats = useMemo(() => {
-		const totalElements = state.groups.reduce((acc, group) => {
+		const totalElements = groups.reduce((acc, group) => {
 			const stats = group.stats;
 			if (!stats) return acc;
 			return (
@@ -179,7 +96,7 @@ export function GroupsSettings() {
 			);
 		}, 0);
 
-		const emptyGroups = state.groups.filter((group) => {
+		const emptyGroups = groups.filter((group) => {
 			const stats = group.stats;
 			if (!stats) return true;
 			return (
@@ -201,21 +118,17 @@ export function GroupsSettings() {
 		}).length;
 
 		return {
-			totalGroups: state.groups.length,
+			totalGroups: groups.length,
 			totalElements,
 			emptyGroups,
-			favoriteGroups: state.groups.filter((group) => group.isFavorite).length,
+			favoriteGroups: groups.filter((group) => group.isFavorite).length,
 		};
-	}, [state.groups]);
+	}, [groups]);
 
-	const handleCreateGroup = async (data: Prisma.GroupCreateInput) => {
+	const handleCreateGroup = async (data: GroupCreateInput) => {
 		try {
-			const newGroup = await createGroup(data);
-			if (!newGroup) {
-				throw new Error('Error al crear grupo: respuesta vacía');
-			}
-			dispatch({ type: 'ADD_GROUP', payload: newGroup });
-			dispatch({ type: 'SET_CREATE_DIALOG', payload: false });
+			await createGroupMutation.mutateAsync(data);
+			setIsCreateDialogOpen(false);
 			toastService.success('Grupo creado correctamente');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -223,15 +136,11 @@ export function GroupsSettings() {
 		}
 	};
 
-	const handleUpdateGroup = async (id: string, data: Prisma.GroupUpdateInput) => {
+	const handleUpdateGroup = async (id: string, data: GroupUpdateInput) => {
 		try {
-			const updatedGroup = await updateGroup(id, data);
-			if (!updatedGroup) {
-				throw new Error('Error al actualizar grupo: respuesta vacía');
-			}
-			dispatch({ type: 'UPDATE_GROUP', payload: updatedGroup });
-			dispatch({ type: 'SELECT_GROUP', payload: null });
-			dispatch({ type: 'SET_EDIT_MODE', payload: false });
+			await updateGroupMutation.mutateAsync({ id, data });
+			setSelectedGroup(null);
+			setIsEditMode(false);
 			toastService.success('Grupo actualizado correctamente');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -241,8 +150,10 @@ export function GroupsSettings() {
 
 	const handleDeleteGroup = async (id: string) => {
 		try {
-			await deleteGroup(id);
-			dispatch({ type: 'REMOVE_GROUP', payload: id });
+			await deleteGroupMutation.mutateAsync(id);
+			if (selectedGroup?.id === id) {
+				setSelectedGroup(null);
+			}
 			toastService.success('Grupo eliminado correctamente');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -250,9 +161,29 @@ export function GroupsSettings() {
 		}
 	};
 
-	const setFilter = (key: FilterKey, value: string | boolean | GroupSortCriteria) => {
-		dispatch({ type: 'SET_FILTER', payload: { key, value } });
-	};
+	// Mostrar loading state
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" />
+					<p className="mt-2 text-sm text-gray-500">Cargando grupos...</p>
+				</div>
+			</div>
+		);
+	}
+
+	// Mostrar error state
+	if (error) {
+		return (
+			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+				<div className="text-center">
+					<p className="text-red-500">Error al cargar los grupos</p>
+					<p className="text-sm text-gray-500 mt-1">{error instanceof Error ? error.message : 'Error desconocido'}</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="grid grid-cols-12 gap-3">
@@ -261,7 +192,7 @@ export function GroupsSettings() {
 					<CardHeader className="space-y-1 py-2 px-3">
 						<div className="flex items-center justify-between">
 							<CardTitle className="text-xl font-bold">Grupos</CardTitle>
-							<Button size="sm" variant="ghost" onClick={() => dispatch({ type: 'SET_CREATE_DIALOG', payload: true })}>
+							<Button size="sm" variant="ghost" onClick={() => setIsCreateDialogOpen(true)}>
 								<PlusIcon className="h-4 w-4" />
 							</Button>
 						</div>
@@ -270,14 +201,14 @@ export function GroupsSettings() {
 								<SearchIcon className="h-4 w-4 opacity-50" />
 								<Input
 									placeholder="Buscar grupos..."
-									value={state.searchQuery}
-									onChange={(e) => setFilter('searchQuery', e.target.value)}
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
 									className="h-8 p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
 								/>
 							</div>
 						</div>
 						<div className="flex gap-2">
-							<Select value={state.sortBy} onValueChange={(value: GroupSortCriteria) => setFilter('sortBy', value)}>
+							<Select value={sortBy} onValueChange={(value: GroupSortCriteria) => setSortBy(value)}>
 								<SelectTrigger className="h-8">
 									<SelectValue placeholder="Ordenar por..." />
 								</SelectTrigger>
@@ -289,11 +220,7 @@ export function GroupsSettings() {
 									))}
 								</SelectContent>
 							</Select>
-							<Toggle
-								pressed={state.onlyFavorites}
-								onPressedChange={(value) => setFilter('onlyFavorites', value)}
-								size="sm"
-							>
+							<Toggle pressed={onlyFavorites} onPressedChange={(value) => setOnlyFavorites(value)} size="sm">
 								<StarIcon className="h-4 w-4" />
 							</Toggle>
 						</div>
@@ -305,13 +232,13 @@ export function GroupsSettings() {
 									<div
 										key={group.id}
 										className={`relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
-											state.selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
+											selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
 										}`}
 									>
 										<Button
 											variant="ghost"
 											className="w-full justify-start h-12 relative"
-											onClick={() => dispatch({ type: 'SELECT_GROUP', payload: group })}
+											onClick={() => setSelectedGroup(group)}
 										>
 											<div className="flex items-center gap-2">
 												<span role="img" aria-label="emoji">
@@ -346,18 +273,18 @@ export function GroupsSettings() {
 			</div>
 			{/* Panel derecho: Detalles o creación */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				{state.selectedGroup && !state.isEditMode ? (
+				{selectedGroup && !isEditMode ? (
 					<GroupPreview
-						group={state.selectedGroup}
-						onEdit={() => dispatch({ type: 'SET_EDIT_MODE', payload: true })}
-						onDelete={() => handleDeleteGroup(state.selectedGroup.id)}
+						group={selectedGroup}
+						onEdit={() => setIsEditMode(true)}
+						onDelete={() => handleDeleteGroup(selectedGroup.id)}
 						stats={stats}
 					/>
-				) : state.isEditMode && state.selectedGroup ? (
+				) : isEditMode && selectedGroup ? (
 					<CreateGroupForm
-						group={state.selectedGroup}
-						onSubmit={(data) => handleUpdateGroup(state.selectedGroup.id, data)}
-						onCancel={() => dispatch({ type: 'SET_EDIT_MODE', payload: false })}
+						group={selectedGroup}
+						onSubmit={(data) => handleUpdateGroup(selectedGroup.id, data)}
+						onCancel={() => setIsEditMode(false)}
 					/>
 				) : (
 					<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
@@ -370,18 +297,12 @@ export function GroupsSettings() {
 				)}
 			</div>
 
-			<Dialog
-				open={state.isCreateDialogOpen}
-				onOpenChange={(isOpen) => dispatch({ type: 'SET_CREATE_DIALOG', payload: isOpen })}
-			>
+			<Dialog open={isCreateDialogOpen} onOpenChange={(isOpen) => setIsCreateDialogOpen(isOpen)}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Crear Nuevo Grupo</DialogTitle>
 					</DialogHeader>
-					<CreateGroupForm
-						onSubmit={handleCreateGroup}
-						onCancel={() => dispatch({ type: 'SET_CREATE_DIALOG', payload: false })}
-					/>
+					<CreateGroupForm onSubmit={handleCreateGroup} onCancel={() => setIsCreateDialogOpen(false)} />
 				</DialogContent>
 			</Dialog>
 		</div>

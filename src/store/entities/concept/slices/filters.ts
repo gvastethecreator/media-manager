@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { ConceptSortOption } from '@/types/entities/concept/enums';
-import type { ConceptFilters } from '@/types/entities/concept/extended';
+import type { ConceptFilters } from '@/types/entities/concept/types';
 import type { ConceptStore } from '../types';
 
 const filtersLogger = clientLogger.withContext('ConceptStore:Filters');
@@ -33,7 +33,7 @@ export const createFiltersSlice: StateCreator<ConceptStore, [], [], FiltersSlice
 		tags: [],
 		onlyFavorites: false,
 	},
-	sortBy: 'name_asc',
+	sortBy: ConceptSortOption.NAME_ASC,
 	page: 1,
 	pageSize: 20,
 

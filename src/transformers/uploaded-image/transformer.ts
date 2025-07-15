@@ -1,7 +1,8 @@
 /**
  * @file Transformer for UploadedImage entity
  * @module transformers/uploaded-image/transformer
- * @description Contains functions to transform Prisma UploadedImage objects into application-level types.
+ * @description Contains functions to transform Drizzle UploadedImage objects into application-level types.
+ 
  */
 
 import {
@@ -9,23 +10,55 @@ import {
 	type UploadedImageDimensions,
 	type UploadedImageExtended,
 } from '@/types/entities/uploaded-image/types';
-import type { Prisma } from '@prisma/client';
 
-// Prisma payload for a complete uploaded image record with its relations (if any)
-type UploadedImageFromPrisma = Prisma.UploadedImageGetPayload<{
-	include: { image: true };
-}>;
+// Tipos locales para uploaded image (migración a Drizzle)
+type DrizzleUploadedImageWithRelations = {
+	id: string;
+	hash: string;
+	imageId: string;
+	fileName: string | null;
+	fileSize: number | null;
+	mimeType: string | null;
+	uploadedAt: Date;
+	isProcessed: boolean;
+	processingError: string | null;
+	width: number;
+	height: number;
+	metadata: string | null;
+	name: string;
+	createdAt: Date;
+	updatedAt: Date;
+	image?: {
+		thumbnailPath?: string;
+	} | null;
+};
 
-// Prisma payload for a basic uploaded image record
-type UploadedImageBaseFromPrisma = Prisma.UploadedImageGetPayload<{}>;
+type DrizzleUploadedImageBase = {
+	id: string;
+	hash: string;
+	imageId: string;
+	fileName: string | null;
+	fileSize: number | null;
+	mimeType: string | null;
+	uploadedAt: Date;
+	isProcessed: boolean;
+	processingError: string | null;
+	width: number;
+	height: number;
+	metadata: string | null;
+	name: string;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 /**
- * Transforms a base Prisma UploadedImage object into a canonical UploadedImageBase.
- * @param uploadedImage - The Prisma object.
+ * Transforms a base Drizzle UploadedImage object into a canonical UploadedImageBase.
+ * ✅ MIGRADO A DRIZZLE
+ * @param uploadedImage - The Drizzle object.
  * @returns The canonical UploadedImageBase.
  */
-export function transformToUploadedImage(uploadedImage: UploadedImageBaseFromPrisma): UploadedImageBase {
-	// Metadata is already a string or null from Prisma, aligning with UploadedImageBase.
+export function transformToUploadedImageFromDrizzle(uploadedImage: DrizzleUploadedImageBase): UploadedImageBase {
+	// Metadata is already a string or null from Drizzle, aligning with UploadedImageBase.
 	return {
 		...uploadedImage,
 		metadata: uploadedImage.metadata ?? null,
@@ -33,11 +66,14 @@ export function transformToUploadedImage(uploadedImage: UploadedImageBaseFromPri
 }
 
 /**
- * Transforms a Prisma UploadedImage object (with relations) into a canonical UploadedImageExtended.
- * @param uploadedImage - The Prisma object, including relations.
+ * Transforms a Drizzle UploadedImage object (with relations) into a canonical UploadedImageExtended.
+ * ✅ MIGRADO A DRIZZLE
+ * @param uploadedImage - The Drizzle object, including relations.
  * @returns The canonical UploadedImageExtended.
  */
-export function transformToUploadedImageWithRelations(uploadedImage: UploadedImageFromPrisma): UploadedImageExtended {
+export function transformToUploadedImageWithRelationsFromDrizzle(
+	uploadedImage: DrizzleUploadedImageWithRelations
+): UploadedImageExtended {
 	const dimensions: UploadedImageDimensions = {
 		width: uploadedImage.width,
 		height: uploadedImage.height,
@@ -52,3 +88,13 @@ export function transformToUploadedImageWithRelations(uploadedImage: UploadedIma
 		thumbnailUrl: uploadedImage.image?.thumbnailPath, // Assuming 'image' relation has a thumbnail path
 	};
 }
+
+// Mantener funciones legacy para compatibilidad (DEPRECATED)
+/**
+ * @deprecated Usar transformToUploadedImageFromDrizzle
+ */
+export const transformToUploadedImage = transformToUploadedImageFromDrizzle;
+
+/**
+ * @deprecated Usar transformToUploadedImageWithRelationsFromDrizzle
+ */

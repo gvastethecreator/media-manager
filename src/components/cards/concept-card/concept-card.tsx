@@ -1,125 +1,32 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { ConceptComplete } from '@/types/entities/concept';
+import { motion } from 'framer-motion';
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useCallback, useMemo } from 'react';
-import { CardHeader } from '../card-header';
+import { CardHeader } from '@/components/cards/card-header';
+import { useConcept, useConceptCounts } from '@/lib/api/concepts';
+import { cn } from '@/lib/utils';
+import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
 import { ConceptCardImages } from './concept-card-images';
 
-interface ConceptCardProps {
-	concept: ConceptComplete & {
-		_count?: {
-			images: number;
-			videos: number;
-			albums: number;
-			collections: number;
-			tags: number;
-			characters: number;
-			places: number;
-			worldItems: number;
-			prompts: number;
-			notes: number;
-			wildcards: number;
-			properties: number;
-			groups: number;
-		};
-		imageCount?: number;
-		promptCount?: number;
-		videoCount?: number;
-		albumCount?: number;
-		collectionCount?: number;
-		tagCount?: number;
-		characterCount?: number;
-		placeCount?: number;
-		worldItemCount?: number;
-		noteCount?: number;
-		wildcardCount?: number;
-		propertyCount?: number;
-		groupCount?: number;
-		tags?: string[] | string;
-	};
-	onClick?: () => void;
-	className?: string;
-	style?: React.CSSProperties;
-	tcgMode?: boolean;
-}
+export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+	const { data: concept, isLoading, error } = useConcept(conceptId);
+	const { data: conceptCounts } = useConceptCounts(conceptId);
 
-/**
- * Card para mostrar un concepto, con un diseño inspirado en cartas de TCG.
- */
-export function ConceptCard({ concept, onClick, className, style, tcgMode = true }: ConceptCardProps) {
-	// Verificar si concept tiene _count o campos individuales
-	const hasCount = '_count' in concept;
-
-	// Calcular valores derivados (usando _count o valores directos)
-	const imagesCount =
-		hasCount && concept._count?.images !== undefined
-			? concept._count.images
-			: ('imageCount' in concept ? concept.imageCount : 0) || 0;
-
-	const videosCount =
-		hasCount && concept._count?.videos !== undefined
-			? concept._count.videos
-			: ('videoCount' in concept ? concept.videoCount : 0) || 0;
-
-	const promptsCount =
-		hasCount && concept._count?.prompts !== undefined
-			? concept._count.prompts
-			: ('promptCount' in concept ? concept.promptCount : 0) || 0;
-
-	const notesCount =
-		hasCount && concept._count?.notes !== undefined
-			? concept._count.notes
-			: ('noteCount' in concept ? concept.noteCount : 0) || 0;
-
-	const charactersCount =
-		hasCount && concept._count?.characters !== undefined
-			? concept._count.characters
-			: ('characterCount' in concept ? concept.characterCount : 0) || 0;
-
-	const placesCount =
-		hasCount && concept._count?.places !== undefined
-			? concept._count.places
-			: ('placeCount' in concept ? concept.placeCount : 0) || 0;
-
-	const worldItemsCount =
-		hasCount && concept._count?.worldItems !== undefined
-			? concept._count.worldItems
-			: ('worldItemCount' in concept ? concept.worldItemCount : 0) || 0;
-
-	const propertiesCount =
-		hasCount && concept._count?.properties !== undefined
-			? concept._count.properties
-			: ('propertyCount' in concept ? concept.propertyCount : 0) || 0;
-
-	const wildcardsCount =
-		hasCount && concept._count?.wildcards !== undefined
-			? concept._count.wildcards
-			: ('wildcardCount' in concept ? concept.wildcardCount : 0) || 0;
-
-	const groupsCount =
-		hasCount && concept._count?.groups !== undefined
-			? concept._count.groups
-			: ('groupCount' in concept ? concept.groupCount : 0) || 0;
-
-	const albumsCount =
-		hasCount && concept._count?.albums !== undefined
-			? concept._count.albums
-			: ('albumCount' in concept ? concept.albumCount : 0) || 0;
-
-	const collectionsCount =
-		hasCount && concept._count?.collections !== undefined
-			? concept._count.collections
-			: ('collectionCount' in concept ? concept.collectionCount : 0) || 0;
-
-	const tagsCount =
-		hasCount && concept._count?.tags !== undefined
-			? concept._count.tags
-			: ('tagCount' in concept ? concept.tagCount : 0) || 0;
+	// Calcular valores derivados
+	const imagesCount = conceptCounts?.images || concept?.stats?.imageCount || concept?._count?.images || 0;
+	const videosCount = concept?.stats?.videoCount || concept?._count?.videos || 0;
+	const promptsCount = concept?.stats?.promptCount || concept?._count?.prompts || 0;
+	const notesCount = concept?.stats?.noteCount || concept?._count?.notes || 0;
+	const charactersCount = concept?.stats?.characterCount || concept?._count?.characters || 0;
+	const placesCount = concept?.stats?.placeCount || concept?._count?.places || 0;
+	const worldItemsCount = concept?.stats?.worldItemCount || concept?._count?.worldItems || 0;
+	const propertiesCount = concept?.stats?.propertyCount || concept?._count?.properties || 0;
+	const wildcardsCount = concept?.stats?.wildcardCount || concept?._count?.wildcards || 0;
+	const groupsCount = concept?.stats?.groupCount || concept?._count?.groups || 0;
+	const albumsCount = concept?.stats?.albumCount || concept?._count?.albums || 0;
+	const collectionsCount = concept?.stats?.collectionCount || concept?._count?.collections || 0;
+	const tagsCount = conceptCounts?.tags || concept?.stats?.tagCount || concept?._count?.tags || 0;
 
 	// Total de relaciones para efectos visuales
 	const totalRelations =
@@ -138,10 +45,10 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 		tagsCount;
 
 	// Colores para el gradiente
-	const primaryColor = useMemo(() => concept.color || '#3b82f6', [concept.color]);
+	const primaryColor = useMemo(() => concept?.color || '#3b82f6', [concept?.color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!concept.color) return '#1e40af';
+		if (!concept?.color) return '#1e40af';
 
 		// Oscurecer el color primario para el secundario
 		try {
@@ -159,26 +66,36 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
 			return '#1e40af';
 		}
-	}, [concept.color]);
+	}, [concept?.color]);
+
+	// Manejar click del mouse
+	const handleClick = useCallback(
+		(e: React.MouseEvent<HTMLDivElement>) => {
+			if (onClick && concept) {
+				e.preventDefault();
+				onClick(concept);
+			}
+		},
+		[onClick, concept]
+	);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
 				e.preventDefault();
-				onClick();
+				onClick(concept);
 			}
 		},
-		[onClick]
+		[onClick, concept]
 	);
 
 	// Parsear tags si es un string
 	const tags = useMemo(() => {
 		// Comprobar si concept tiene la propiedad tags
-		if ('tags' in concept) {
+		if (concept && 'tags' in concept) {
 			const conceptTags = concept.tags;
 			// Si tags es un string, intentar parsearlo
 			if (typeof conceptTags === 'string' && conceptTags) {
@@ -218,6 +135,33 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 		};
 	}, [primaryColor, style, tcgMode, totalRelations]);
 
+	// Si no hay datos del concepto o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando concepto...</p>
+			</div>
+		);
+	}
+
+	if (error || !concept) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Concepto no encontrado'}</p>
+			</div>
+		);
+	}
+
 	// Render del componente
 	return (
 		<motion.div
@@ -237,7 +181,7 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 			)}
 			whileHover={{ y: -5 }}
 			whileTap={{ scale: 0.98 }}
-			onClick={onClick}
+			onClick={handleClick}
 			onKeyDown={handleKeyDown}
 			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
@@ -300,8 +244,6 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 				/>
 			</div>
 
-			{/* Contenido estructurado de la tarjeta */}
-
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
 				title={concept.name}
@@ -319,12 +261,8 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 			/>
 
 			{/* Sección de imágenes */}
-			<ConceptCardImages
-				conceptId={concept.id}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-				tcgMode={tcgMode}
-			/>
+			{/* Temporal: Comentado por problemas de imports */}
+			{/* <ConceptCardImages conceptId={id} primaryColor={primaryColor} secondaryColor={secondaryColor} tcgMode={tcgMode} /> */}
 
 			{/* Contenido principal */}
 			<ConceptCardContent

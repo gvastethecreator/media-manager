@@ -3,6 +3,7 @@
  * @module transformers/favorite/transformer
  * @description 🚨 Migración: Todos los tipos y enums se importan desde '@/types/entities/favorite/types'.
  * No usar ni importar tipos de base.ts o extended.ts (eliminados).
+ 
  */
 
 import {
@@ -13,8 +14,25 @@ import {
 	FavoriteEntityType,
 	FavoriteStats,
 	FavoritesByType,
-} from '@/types/entities/favorite';
-import type { Favorite as PrismaFavorite } from '@prisma/client';
+} from '@/types/entities/favorite/types';
+
+// Tipos locales equivalentes a Drizzle
+type DrizzleFavorite = {
+	id: string;
+	entityId: string;
+	entityType: string;
+	profileId: string;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+// Tipo extendido local para UI
+type FavoriteExtended = FavoriteComplete & {
+	entityName: string;
+	entityPreview: string;
+	entityIcon: string;
+	entityColor: string;
+};
 
 interface TransformFavoriteOptions {
 	includeEntityDetails?: boolean;
@@ -22,8 +40,9 @@ interface TransformFavoriteOptions {
 
 /**
  * Transforma un objeto favorito a su formato base
+ * ✅ MIGRADO A DRIZZLE
  */
-export function transformFavorite(favorite: PrismaFavorite, options: TransformFavoriteOptions = {}): FavoriteComplete {
+export function transformFavorite(favorite: DrizzleFavorite, options: TransformFavoriteOptions = {}): FavoriteComplete {
 	// Valores por defecto para opciones
 	const { includeEntityDetails = false } = options;
 
@@ -39,9 +58,10 @@ export function transformFavorite(favorite: PrismaFavorite, options: TransformFa
 
 /**
  * Transforma un array de favoritos
+ * ✅ MIGRADO A DRIZZLE
  */
 export function transformFavorites(
-	favorites: PrismaFavorite[],
+	favorites: DrizzleFavorite[],
 	options?: TransformFavoriteOptions
 ): FavoriteComplete[] {
 	return favorites.map((favorite) => transformFavorite(favorite, options));
@@ -49,6 +69,7 @@ export function transformFavorites(
 
 /**
  * Transforma un favorito a su versión extendida con propiedades de UI
+ * ✅ MIGRADO A DRIZZLE
  */
 export function transformFavoriteToExtended(
 	favorite: FavoriteComplete,
@@ -79,6 +100,7 @@ export function transformFavoriteToExtended(
 
 /**
  * Agrupa favoritos por tipo de entidad
+ * ✅ MIGRADO A DRIZZLE
  */
 export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesByType[] {
 	// Crear mapa para agrupar por tipo
@@ -108,6 +130,7 @@ export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesBy
 
 /**
  * Calcula estadísticas para favoritos
+ * ✅ MIGRADO A DRIZZLE
  */
 export function calculateFavoriteStats(favorites: FavoriteComplete[], recentLimit = 5): FavoriteStats {
 	// Contar por tipo

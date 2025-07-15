@@ -1,6 +1,5 @@
-'use client';
-
-import { deletePrompt, getPrompts } from '@/app/actions/prompts/prompt.actions';
+import { AlertCircle, Check, Delete, Edit, Loader2, Plus, Search, Star, X } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -15,11 +14,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import toastService from '@/services/toast';
+import { useDeletePrompt, usePrompts } from '@/lib/api/prompts';
+import { toastService } from '@/lib/ui/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory } from '@/types/entities/prompt/enums';
-import { Check, Delete, Edit, Plus, Search, Star, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreatePromptForm } from './create-prompt-form';
 
 // Interfaz para PropntWithNullable que funciona como adaptador para el componente CreatePromptForm
@@ -59,51 +57,41 @@ interface CreatePromptFormPrompt {
 }
 
 export const PromptSettings = () => {
-	const [loading, setLoading] = useState(true);
-	const [prompts, setPrompts] = useState<PromptWithNullable[]>([]);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [categoryFilter, setCategoryFilter] = useState<string>('all');
 	const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [editingPrompt, setEditingPrompt] = useState<CreatePromptFormPrompt | null>(null);
 
-	const loadPrompts = useCallback(async () => {
-		try {
-			setLoading(true);
-			const loadedPrompts = await getPrompts();
-			// Convertir los datos para que coincidan con nuestra interfaz
-			const formattedPrompts = loadedPrompts.map((prompt) => ({
-				...prompt,
-				emoji: prompt.emoji || null,
-				description: prompt.description || null,
-				category: prompt.category || null,
-				isFavorite: prompt.isFavorite || false,
-			})) as PromptWithNullable[];
-			setPrompts(formattedPrompts);
-		} catch (error) {
-			toastService.error('Error al cargar prompts', {
-				description: error instanceof Error ? error.message : 'Error desconocido',
-			});
-		} finally {
-			setLoading(false);
-		}
-	}, []);
+	// React Query hooks
+	const { data: promptsData = [], isLoading: loading, error } = usePrompts({});
+	const deletePromptMutation = useDeletePrompt();
 
-	useEffect(() => {
-		loadPrompts();
-	}, [loadPrompts]);
+	// Convertir los datos para que coincidan con nuestra interfaz usando useMemo
+	const prompts = useMemo(() => {
+		return promptsData.map((prompt) => ({
+			...prompt,
+			emoji: prompt.emoji || null,
+			description: prompt.description || null,
+			category: prompt.category || null,
+			isFavorite: prompt.isFavorite || false,
+		})) as PromptWithNullable[];
+	}, [promptsData]);
 
-	const handleDelete = async (id: string) => {
-		try {
-			await deletePrompt(id);
-			setPrompts(prompts.filter((p) => p.id !== id));
-			toastService.success('Prompt eliminado correctamente');
-		} catch (error) {
-			toastService.error('Error al eliminar prompt', {
-				description: error instanceof Error ? error.message : 'Error desconocido',
-			});
-		}
-	};
+	const handleDelete = useCallback(
+		async (id: string) => {
+			try {
+				await deletePromptMutation.mutateAsync(id);
+				toastService.success('Prompt eliminado correctamente');
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+				toastService.error('Error al eliminar prompt', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deletePromptMutation]
+	);
 
 	const handleDeleteButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
@@ -124,45 +112,67 @@ export const PromptSettings = () => {
 		setShowCreateDialog(true);
 	};
 
-	const handlePromptCreated = (newPrompt: PromptBase) => {
-		const formattedPrompt: PromptWithNullable = {
-			...newPrompt,
-			emoji: newPrompt.emoji || null,
-			description: newPrompt.description || null,
-			category: newPrompt.category || null,
-			isFavorite: newPrompt.isFavorite || false,
-		};
-		setPrompts([formattedPrompt, ...prompts]);
+	const handlePromptCreated = useCallback((_newPrompt: PromptBase) => {
 		setShowCreateDialog(false);
 		toastService.success('Prompt creado correctamente');
-	};
+	}, []);
 
-	const handlePromptUpdated = (updatedPrompt: PromptBase) => {
-		const formattedPrompt: PromptWithNullable = {
-			...updatedPrompt,
-			emoji: updatedPrompt.emoji || null,
-			description: updatedPrompt.description || null,
-			category: updatedPrompt.category || null,
-			isFavorite: updatedPrompt.isFavorite || false,
-		};
-		setPrompts(prompts.map((p) => (p.id === updatedPrompt.id ? formattedPrompt : p)));
+	const handlePromptUpdated = useCallback((_updatedPrompt: PromptBase) => {
 		setShowCreateDialog(false);
 		setEditingPrompt(null);
 		toastService.success('Prompt actualizado correctamente');
-	};
+	}, []);
 
-	const filteredPrompts = prompts.filter((prompt) => {
-		const matchesSearch = searchTerm
-			? prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				prompt.description?.toLowerCase().includes(searchTerm.toLowerCase())
-			: true;
+	// Filtrar prompts usando useMemo para optimización
+	const filteredPrompts = useMemo(() => {
+		return prompts.filter((prompt) => {
+			const matchesSearch = searchTerm
+				? prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					prompt.description?.toLowerCase().includes(searchTerm.toLowerCase())
+				: true;
 
-		const matchesCategory = categoryFilter && categoryFilter !== 'all' ? prompt.category === categoryFilter : true;
+			const matchesCategory = categoryFilter && categoryFilter !== 'all' ? prompt.category === categoryFilter : true;
 
-		const matchesFavorites = showOnlyFavorites ? prompt.isFavorite : true;
+			const matchesFavorites = showOnlyFavorites ? prompt.isFavorite : true;
 
-		return matchesSearch && matchesCategory && matchesFavorites;
-	});
+			return matchesSearch && matchesCategory && matchesFavorites;
+		});
+	}, [prompts, searchTerm, categoryFilter, showOnlyFavorites]);
+
+	// Estados de carga y error
+	if (loading) {
+		return (
+			<ScrollArea className="h-[calc(100vh-8rem)] w-full">
+				<div className="flex items-center justify-center h-full">
+					<div className="flex flex-col items-center gap-3">
+						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+						<p className="text-sm text-muted-foreground">Cargando prompts...</p>
+					</div>
+				</div>
+			</ScrollArea>
+		);
+	}
+
+	if (error) {
+		return (
+			<ScrollArea className="h-[calc(100vh-8rem)] w-full">
+				<div className="p-6">
+					<div className="flex flex-col items-center gap-4 text-center">
+						<AlertCircle className="h-12 w-12 text-destructive" />
+						<div>
+							<h3 className="text-lg font-semibold">Error al cargar prompts</h3>
+							<p className="text-sm text-muted-foreground mt-1">
+								{error instanceof Error ? error.message : 'Error desconocido'}
+							</p>
+						</div>
+						<Button onClick={() => window.location.reload()} variant="outline">
+							Intentar de nuevo
+						</Button>
+					</div>
+				</div>
+			</ScrollArea>
+		);
+	}
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">

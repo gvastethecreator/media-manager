@@ -1,6 +1,20 @@
-'use client';
-
-import { getUploadedImageStats, uploadImages } from '@/app/actions/uploaded-images/uploaded-images.actions';
+import {
+	FileSpreadsheet,
+	Filter,
+	FolderUp,
+	Grid3X3,
+	ImagePlus,
+	ImportIcon,
+	Plus,
+	RefreshCw,
+	SlidersHorizontal,
+	Trash2,
+	UploadCloud,
+	X,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useCallback, useId, useState } from 'react';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -27,36 +41,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useUploadedImageStats, useUploadImages } from '@/lib/api/uploaded-images';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
-import toastService from '@/services/toast';
-import type { UploadedImageStats } from '@/types/uploaded-images';
-import {
-	FileSpreadsheet,
-	Filter,
-	FolderUp,
-	Grid3X3,
-	ImagePlus,
-	ImportIcon,
-	Plus,
-	RefreshCw,
-	SlidersHorizontal,
-	Trash2,
-	UploadCloud,
-	X,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { useCallback, useEffect, useId, useState } from 'react';
 
 const sectionLogger = clientLogger.withContext('UploadedImagesSettings');
 
 export function UploadedImagesSettings() {
 	const [activeTab, setActiveTab] = useState('general');
-	const [stats, setStats] = useState<UploadedImageStats | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isUploading, setIsUploading] = useState(false);
 	const [showFilters, setShowFilters] = useState(false);
+
+	// React Query hooks
+	const { data: stats, isLoading, error, refetch } = useUploadedImageStats();
+	const uploadImagesMutation = useUploadImages();
 
 	const idImageUpload = useId();
 	const idSearchImages = useId();
@@ -66,35 +64,16 @@ export function UploadedImagesSettings() {
 	const idImportCategory = useId();
 	const idOptimizeImport = useId();
 
-	// Cargar estadísticas de imágenes
-	const loadStats = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			const response = await getUploadedImageStats();
-
-			if (response.success) {
-				setStats(response.stats as UploadedImageStats);
-			} else {
-				toastService.error(response.error || 'No se pudieron cargar las estadísticas de imágenes subidas.');
-			}
-			setIsLoading(false);
-		} catch (error) {
-			sectionLogger.error('Error al cargar estadísticas:', error);
-			toastService.error('No se pudieron cargar las estadísticas de imágenes subidas.');
-			setIsLoading(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		loadStats();
-	}, [loadStats]);
+	// Mostrar error si hay problemas al cargar estadísticas
+	if (error) {
+		sectionLogger.error('Error al cargar estadísticas:', error);
+		toastService.error('No se pudieron cargar las estadísticas de imágenes subidas.');
+	}
 
 	// Función para manejar la subida de imágenes
 	const handleFileUpload = useCallback(
 		async (files: FileList) => {
 			try {
-				setIsUploading(true);
-
 				// Crear FormData para la carga
 				const formData = new FormData();
 				for (const file of Array.from(files)) {
@@ -113,25 +92,23 @@ export function UploadedImagesSettings() {
 					formData.append('category', categorySelect.value);
 				}
 
-				// Usar Server Action para subir las imágenes
-				const result = await uploadImages(formData);
+				// Usar React Query mutation para subir las imágenes
+				const result = await uploadImagesMutation.mutateAsync(formData);
 
 				if (result.success && result.items) {
 					toastService.success(
 						`Se ${result.items.length === 1 ? 'ha subido' : 'han subido'} ${result.items.length} ${result.items.length === 1 ? 'imagen' : 'imágenes'} correctamente.`
 					);
-					loadStats(); // Recargamos las estadísticas
+					refetch(); // Recargamos las estadísticas
 				} else {
 					toastService.error(result.error || 'No se pudieron subir las imágenes.');
 				}
-				setIsUploading(false);
 			} catch (error) {
 				sectionLogger.error('Error al subir imágenes:', error);
 				toastService.error('No se pudieron subir las imágenes.');
-				setIsUploading(false);
 			}
 		},
-		[loadStats]
+		[uploadImagesMutation, refetch]
 	);
 
 	// Manejador para la entrada de archivos
@@ -170,7 +147,7 @@ export function UploadedImagesSettings() {
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="w-56">
-									<DropdownMenuItem onClick={loadStats} className="text-xs cursor-pointer">
+									<DropdownMenuItem onClick={() => refetch()} className="text-xs cursor-pointer">
 										<RefreshCw className="h-3.5 w-3.5 mr-2" /> Actualizar estadísticas
 									</DropdownMenuItem>
 								</DropdownMenuContent>
@@ -181,9 +158,9 @@ export function UploadedImagesSettings() {
 								size="sm"
 								className="h-7 w-7 p-0"
 								onClick={() => document.getElementById('image-upload')?.click()}
-								disabled={isUploading}
+								disabled={uploadImagesMutation.isPending}
 							>
-								{isUploading ? (
+								{uploadImagesMutation.isPending ? (
 									<RefreshCw className="h-3.5 w-3.5 animate-spin" />
 								) : (
 									<ImagePlus className="h-3.5 w-3.5" />
@@ -352,7 +329,7 @@ export function UploadedImagesSettings() {
 													className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 													onClick={() => {
 														toastService.success('Se han eliminado todas las imágenes subidas.');
-														loadStats();
+														refetch();
 													}}
 												>
 													Eliminar

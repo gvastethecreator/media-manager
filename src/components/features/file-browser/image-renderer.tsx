@@ -1,6 +1,3 @@
-'use client';
-
-import Image from 'next/image';
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -72,8 +69,9 @@ const processNextPreload = () => {
 /**
  * 🖼️ Componente para renderizar imágenes optimizado
  *
- * Utiliza Image de Next.js para imágenes estáticas cuando es posible,
- * y cae de vuelta a img para imágenes dinámicas o externas.
+ * Optimiza la carga diferenciando entre imágenes locales y remotas.
+ * Para imágenes locales se usa `<img>` con atributos ajustados;
+ * para remotas o blobs se emplea el mismo elemento estándar.
  */
 export const ImageRenderer = React.memo(function ImageRenderer({
 	src,
@@ -106,9 +104,10 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 	// Determinar si la imagen es local o remota
 	const isRemoteImage = src.startsWith('http') && !isBlobOrDataUrl;
 
-	// Si la imagen es local y no es un blob ni una URL de datos, usar Image de Next.js
+	// Si la imagen es local y no es un blob ni una URL de datos, se renderiza
+	// directamente con `<img>` ignorando props innecesarias
 	if (!isRemoteImage && !isBlobOrDataUrl && src.startsWith('/')) {
-		// Filtrar las propiedades no soportadas por Next Image
+		// Filtrar las propiedades que no aplican al elemento nativo
 		const {
 			onLoad,
 			onError,
@@ -124,7 +123,7 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 		} = rest;
 
 		return (
-			<Image
+			<img
 				src={src}
 				alt={alt}
 				width={width || 300}

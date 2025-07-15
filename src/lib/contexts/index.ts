@@ -13,5 +13,8 @@ export {
 	useCollectionTagContext,
 	useProfileContext,
 	useSettings,
-	useTheme,
+	useThemeSync,
 } from './settings-context';
+
+// Exportaciones del contexto de tema
+export { ThemeProvider as NativeThemeProvider, useTheme as useNativeTheme } from './theme-context';

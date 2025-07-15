@@ -1,7 +1,21 @@
 /**
- * @file Exportaciones principales para la entidad Task
+ * @file Punto de entrada para los tipos de Task
  * @module types/entities/task
+ * @updated 2025-01-27 - Migrado a estructura canónica Base+Statistics+WithStats
  */
 
-// Exportar todos los tipos canónicos de la entidad.
-export * from './types';
+// ✅ EXPORTACIONES PRINCIPALES (estructura canónica)
+export type {
+	TaskBase,
+	// Legacy para compatibilidad temporal
+	TaskComplete,
+	TaskCreateInput,
+	TaskStatistics,
+	TaskUpdateInput,
+	TaskWithStats,
+} from './base';
+
+export {
+	TaskPriority,
+	TaskStatus,
+} from './base';

@@ -3,14 +3,11 @@
 // Revisar si hay cambios futuros en la API de shadcn/ui para evitar este tipo de errores.
 // 🛠️ Fix biome/TS: Reemplazo de useToast por toast de services/toast.service y ajuste de tipos para PlaceCreateInput/PlaceUpdateInput
 // Todos los valores null se transforman a undefined antes de enviar a las acciones. population siempre es number o undefined.
-'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
-import { createPlace, updatePlace } from '@/app/actions/places/place.actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -20,7 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast';
+import { useCreatePlace, useUpdatePlace } from '@/lib/api/places';
+import { toastService } from '@/lib/ui/toast';
 import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 // Opciones para los selects que antes eran enums
@@ -70,7 +68,17 @@ interface CreatePlaceFormProps {
 	onPreview?: (data: any) => void;
 }
 
-export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCancel, onPreview }: CreatePlaceFormProps) {
+export function CreatePlaceForm({
+	place,
+	isEditing,
+	onCreated,
+	onUpdated,
+	onCancel,
+	onPreview: _onPreview,
+}: CreatePlaceFormProps) {
+	const createPlaceMutation = useCreatePlace();
+	const updatePlaceMutation = useUpdatePlace();
+
 	const form = useForm<PlaceFormValues>({
 		resolver: zodResolver(placeFormSchema) as any, // Forzamos el tipo para evitar conflicto de opcionales
 		defaultValues: placeFormSchema.parse({}),
@@ -122,8 +130,8 @@ export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCanc
 					featuredImage: normalize(values.featuredImage),
 					shortcut: normalize(values.shortcut),
 				};
-				result = await updatePlace(place.id, updateData);
-				toast(`Lugar actualizado: ${result.name}`);
+				result = await updatePlaceMutation.mutateAsync({ id: place.id, data: updateData });
+				toastService.success(`Lugar actualizado: ${result.name}`);
 				onUpdated?.(result as PlaceWithStats);
 			} else {
 				const createData: PlaceCreateInput = {
@@ -140,13 +148,13 @@ export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCanc
 					shortcut: normalize(values.shortcut),
 					isFavorite: !!values.isFavorite,
 				};
-				result = await createPlace(createData);
-				toast(`Lugar creado: ${result.name}`);
+				result = await createPlaceMutation.mutateAsync(createData);
+				toastService.success(`Lugar creado: ${result.name}`);
 				form.reset();
 				onCreated?.(result as PlaceWithStats);
 			}
 		} catch (error) {
-			toast(error instanceof Error ? error.message : 'No se pudo guardar el lugar.');
+			toastService.error(error instanceof Error ? error.message : 'No se pudo guardar el lugar.');
 		}
 	};
 
@@ -457,7 +465,9 @@ export function CreatePlaceForm({ place, isEditing, onCreated, onUpdated, onCanc
 							Cancelar
 						</Button>
 					)}
-					<Button type="submit">{isEditing ? 'Guardar Cambios' : 'Crear Lugar'}</Button>
+					<Button type="submit" disabled={createPlaceMutation.isPending || updatePlaceMutation.isPending}>
+						{isEditing ? 'Guardar Cambios' : 'Crear Lugar'}
+					</Button>
 				</div>
 			</form>
 		</Form>

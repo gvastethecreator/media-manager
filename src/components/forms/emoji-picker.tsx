@@ -1,9 +1,7 @@
-'use client';
-
+import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
+import { memo, useCallback, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
-import { useState } from 'react';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -150,15 +148,27 @@ const emojisByCategory = {
 	],
 };
 
-export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
+export const EmojiPicker = memo(function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState('activities');
 
 	// 🎯 Manejar selección con Frimousse
-	const handleFrimousseSelect = (emoji: { native: string }) => {
-		onChange(emoji.native);
-		setOpen(false);
-	};
+	const handleFrimousseSelect = useCallback(
+		(emoji: { native: string }) => {
+			onChange(emoji.native);
+			setOpen(false);
+		},
+		[onChange]
+	);
+
+	// Callback para manejar selección de emojis del grid
+	const handleEmojiSelect = useCallback(
+		(emoji: string) => {
+			onChange(emoji);
+			setOpen(false);
+		},
+		[onChange]
+	);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -206,10 +216,7 @@ export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 												'h-9 w-9 p-0 text-lg hover:bg-accent',
 												value === emoji && 'bg-accent text-accent-foreground'
 											)}
-											onClick={() => {
-												onChange(emoji);
-												setOpen(false);
-											}}
+											onClick={() => handleEmojiSelect(emoji)}
 										>
 											{emoji}
 										</Button>
@@ -250,4 +257,4 @@ export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 			</PopoverContent>
 		</Popover>
 	);
-}
+});

@@ -6,7 +6,7 @@ Esta vista permite editar y previsualizar archivos Markdown usando `@uiw/react-m
 
 - Edición WYSIWYG y preview en vivo.
 - Botón de guardar (puede conectarse a persistencia real).
-- Import dinámico para compatibilidad SSR (Next.js).
+- Import dinámico para compatibilidad SSR.
 
 ## Ejemplo de uso
 
@@ -16,7 +16,7 @@ Esta vista permite editar y previsualizar archivos Markdown usando `@uiw/react-m
 
 ## Dependencias
 
-- `@uiw/react-md-editor` (agregar con `pnpm add @uiw/react-md-editor`)
+- `@uiw/react-md-editor` (agregar con `bun add @uiw/react-md-editor`)
 
 ## Extensiones futuras
 

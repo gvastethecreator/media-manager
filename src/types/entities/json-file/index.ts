@@ -9,7 +9,9 @@
 export type {
 	JsonFileBase,
 	JsonFileComplete,
+	JsonFileCreateInput,
 	JsonFileStatistics,
+	JsonFileUpdateInput,
 	JsonFileWithStats,
 } from './base';
 

@@ -3,19 +3,95 @@
  * @module types/entities/tag/types
  */
 
-export interface TagBase {
-	id: string;
+import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
+
+export interface TagBase extends EntityBase {
 	name: string;
-	description?: string;
-	color?: string;
-	emoji?: string;
-	createdAt: Date;
-	updatedAt: Date;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
 }
 
-export interface TagComplete extends TagBase {
-	// Relaciones completas cuando sea necesario
+export interface TagCreateInput extends Omit<TagBase, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface TagUpdateInput extends Partial<TagCreateInput> {}
+
+export interface TagFilters {
+	search?: string;
+	isFavorite?: boolean;
+	category?: string;
+	hasImage?: boolean;
+	hasVideo?: boolean;
+	hasAlbum?: boolean;
+	hasCollection?: boolean;
+	hasCharacter?: boolean;
+	hasPlace?: boolean;
+	hasWorldItem?: boolean;
+	hasConcept?: boolean;
+	hasPrompt?: boolean;
+	hasNote?: boolean;
+	hasWildcard?: boolean;
+	hasProperty?: boolean;
+	hasGroup?: boolean;
 }
+
+export enum TagSortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:asc',
+	UPDATED_DESC = 'updatedAt:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	POPULARITY_ASC = 'popularity:asc',
+	POPULARITY_DESC = 'popularity:desc',
+}
+
+export interface TagStatistics {
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	collectionCount: number;
+	characterCount: number;
+	placeCount: number;
+	worldItemCount: number;
+	conceptCount: number;
+	promptCount: number;
+	noteCount: number;
+	wildcardCount: number;
+	propertyCount: number;
+	groupCount: number;
+	totalRelations: number;
+}
+
+export interface TagWithStats extends TagBase {
+	stats: TagStatistics;
+}
+
+export interface TagPaginationOptions {
+	page?: number;
+	limit?: number;
+	sortBy?: TagSortCriteria;
+	sortDirection?: 'asc' | 'desc';
+}
+
+export interface TagsResponse {
+	tags: TagWithStats[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+		hasNextPage: boolean;
+		hasPreviousPage: boolean;
+	};
+}
+
+export type TagComplete = TagWithStats;
 
 export interface TagPreview extends Pick<TagBase, 'id' | 'name' | 'color' | 'emoji'> {
 	stats?: {

@@ -1,43 +1,42 @@
-'use client';
-
-import { getConceptImages } from '@/app/actions/concepts';
+import { Lightbulb } from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { useConceptImages } from '@/lib/api/concepts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { selectSelectedConcept, useConceptStore } from '@/store/entities/concept';
-import { Lightbulb } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 const viewLogger = clientLogger.withContext('ConceptContentView');
 
-export function ConceptContentView() {
+export const ConceptContentView = memo(function ConceptContentView() {
 	const selectedConcept = useConceptStore(selectSelectedConcept);
-	const [items, setItems] = useState([]);
+	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const [error, setError] = useState<string | null>(null);
+	const [currentConceptId, setCurrentConceptId] = useState(selectedConcept?.id);
+
+	const { data: conceptImages, isLoading: isLoadingImages, error: conceptError } = useConceptImages(currentConceptId);
 
 	const loadConceptImages = useCallback(async () => {
-		if (!selectedConcept) {
-			setItems([]);
-			return;
-		}
+		if (!currentConceptId) return;
 
 		try {
-			viewLogger.info('🔄 Cargando imágenes del concepto:', selectedConcept.id);
+			setError(null);
 			setIsLoading(true);
-			const images = await getConceptImages(selectedConcept.id);
-			setItems(images);
-			viewLogger.info(`✅ ${images.length} imágenes cargadas`);
-		} catch (error) {
-			viewLogger.error('❌ Error cargando imágenes:', error);
-			toast.error('Error al cargar las imágenes del concepto');
-			setItems([]);
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			viewLogger.info('🔄 Cargando imágenes del concepto...');
+			if (conceptImages) {
+				setItems(conceptImages as EntityWithStats[]);
+			}
+			viewLogger.info('✅ Imágenes cargadas');
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			setError(errorMessage);
+			viewLogger.error('❌ Error cargando imágenes del concepto:', errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
-	}, [selectedConcept]);
+	}, [currentConceptId, conceptImages]);
 
 	useEffect(() => {
 		loadConceptImages();
@@ -48,27 +47,58 @@ export function ConceptContentView() {
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);
 
-	const contentProps: BaseContentProps = {
-		items,
-		isLoading,
-		error,
-		toggleItemSelection,
-		currentContainerId: selectedConcept?.id ?? null,
-		containerName: selectedConcept?.name ?? null,
-		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
-		emptyState: {
+	const emptyState = useMemo(
+		() => ({
 			icon: Lightbulb,
 			title: 'Concepto vacío',
 			description: `No se encontraron imágenes en ${
 				selectedConcept?.name || 'este concepto'
 			}. Puedes agregar imágenes arrastrándolas aquí.`,
-		},
-		onRefresh: loadConceptImages,
-	};
+		}),
+		[selectedConcept?.name]
+	);
+
+	const contentProps: BaseContentProps = useMemo(
+		() => ({
+			items,
+			isLoading,
+			error,
+			toggleItemSelection,
+			currentContainerId: selectedConcept?.id ?? null,
+			containerName: selectedConcept?.name ?? null,
+			setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
+			emptyState,
+			onRefresh: loadConceptImages,
+		}),
+		[
+			items,
+			isLoading,
+			error,
+			toggleItemSelection,
+			selectedConcept?.id,
+			selectedConcept?.name,
+			emptyState,
+			loadConceptImages,
+		]
+	);
+
+	if (isLoading || isLoadingImages) {
+		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
+	}
+
+	if (error || conceptError) {
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || conceptError?.message}</div>
+		);
+	}
+
+	if (!items || items.length === 0) {
+		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	}
 
 	return (
 		<ContentViewProvider {...contentProps}>
 			<BaseContentView />
 		</ContentViewProvider>
 	);
-}
+});

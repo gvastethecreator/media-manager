@@ -112,7 +112,7 @@ function appendToDocumentation(template) {
 			// Insertar antes de la sección de próximos componentes
 			const beforeSection = currentDocs.substring(0, insertPoint);
 			const afterSection = currentDocs.substring(insertPoint);
-			fs.writeFileSync(DOCS_PATH, beforeSection + template + '\n' + afterSection);
+			fs.writeFileSync(DOCS_PATH, `${beforeSection + template}\n${afterSection}`);
 		}
 
 		console.log('✅ Documentación agregada exitosamente');
@@ -133,7 +133,7 @@ function main() {
 		console.log('Uso: node scripts/document-component.js <componentPath>');
 		console.log('');
 		console.log('Ejemplo:');
-		console.log('  node scripts/document-component.js src/components/MyComponent.tsx');
+		console.log('  bun scripts/document-component.js src/components/MyComponent.tsx');
 		console.log('');
 		return;
 	}

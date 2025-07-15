@@ -1,12 +1,6 @@
 import { EntityType } from '@/types/entities/entities';
-import type {
-	NoteCreateInput,
-	NoteFilters,
-	NoteSortOption,
-	NoteUpdateInput,
-	NoteViewMode,
-	NoteWithStats,
-} from '@/types/entities/note/types';
+import type { NoteSortOption, NoteViewMode } from '@/types/entities/note/enums';
+import type { NoteCreateInput, NoteFilters, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
 
 /**
  * Store completo de Notas combinando todas las slices

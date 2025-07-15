@@ -1,5 +1,6 @@
-'use client';
-
+import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -8,15 +9,14 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import type { ImageCardData } from '@/lib/api/services/images';
 import { cn } from '@/lib/utils';
-import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ImageWithStats } from '@/types/entities/image/base';
+import type { TagWithStats } from '@/types/entities/tag/base';
 import { ImageCardImproved } from './image-card-improved';
-import { type ImageCardData } from './image-server-actions';
 
 interface ImageGalleryProps {
-	images: string[] | ImageCardData[];
+	images: string[] | ImageWithStats[];
 	title?: string;
 	className?: string;
 	emptyMessage?: string;
@@ -69,7 +69,7 @@ export function ImageGallery({
 	const [layout, setLayout] = useState(defaultLayout);
 	const [selectedImages, setSelectedImages] = useState<string[]>([]);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [_imagesData, setImagesData] = useState<ImageCardData[]>([]);
+	const [_imagesData, setImagesData] = useState<ImageWithStats[]>([]);
 
 	// Convertir IDs de imágenes a array de ImageCardData si es necesario
 	useEffect(() => {
@@ -80,7 +80,7 @@ export function ImageGallery({
 
 		// Si ya recibimos objetos ImageCardData
 		if (typeof images[0] !== 'string') {
-			setImagesData(images as ImageCardData[]);
+			setImagesData(images as ImageWithStats[]);
 		}
 		// Si solo tenemos IDs, los datos se cargarán en cada tarjeta
 	}, [images]);
@@ -95,7 +95,7 @@ export function ImageGallery({
 			return (
 				image.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				image.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				image.tags?.some((tag) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
+				image.tags?.some((tag: TagWithStats) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
 			);
 		});
 	}, [images, searchTerm]);
@@ -104,7 +104,7 @@ export function ImageGallery({
 	const sortedImages = useMemo(() => {
 		if (typeof filteredImages[0] === 'string') return filteredImages; // No podemos ordenar IDs sin datos
 
-		const sorted = [...(filteredImages as ImageCardData[])].sort((a, b) => {
+		const sorted = [...(filteredImages as ImageWithStats[])].sort((a, b) => {
 			let comparison = 0;
 
 			switch (sortBy) {
@@ -115,7 +115,7 @@ export function ImageGallery({
 					comparison = new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
 					break;
 				case 'size':
-					comparison = (a.metadata?.size || 0) - (b.metadata?.size || 0);
+					comparison = (a.size || 0) - (b.size || 0);
 					break;
 				case 'dimensions': {
 					const aArea = (a.width || 0) * (a.height || 0);
@@ -338,7 +338,7 @@ export function ImageGallery({
 									imageId={image.id}
 									variant={variant}
 									aspectRatio={layout === 'list' ? 'auto' : aspectRatio}
-									onClick={() => handleImageClick(image)}
+									onClick={onImageClick ? handleImageClick : undefined}
 									isSelected={isSelected}
 									className={layout === 'list' ? 'flex flex-row items-center h-20' : undefined}
 									priority={index < 8}

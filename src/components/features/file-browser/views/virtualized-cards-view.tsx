@@ -2,14 +2,13 @@
  * @file Vista de tarjetas virtualizada usando TanStack Virtual
  * @module components/features/file-browser/views/virtualized-cards-view
  */
-'use client';
 
-import { EntityCard } from '@/components/cards/entity-card';
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
 import React, { memo, useMemo, useRef } from 'react';
+import { EntityCard } from '@/components/cards/entity-card';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
 
 interface VirtualizedCardsViewProps {
 	items: EntityWithStats[];

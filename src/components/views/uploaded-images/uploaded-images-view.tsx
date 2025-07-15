@@ -1,14 +1,6 @@
-'use client';
-
 import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
-import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-	deleteUploadedImage,
-	getUploadedImages,
-	uploadImages,
-} from '@/app/actions/uploaded-images/uploaded-images.actions';
 import { MemoizedImageCard } from '@/components/cards/image-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -32,15 +24,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import type { BaseContentProps } from '@/components/views/base';
+import {
+	deleteUploadedImageFromApi,
+	getUploadedImagesFromApi,
+	uploadImagesToApi,
+} from '@/lib/api/client/uploaded-images.client';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
+import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 import { toastService } from '@/services/toast';
-import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
 import { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';
-import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
+import type { UploadedImageResult } from '@/types/uploaded-image';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 
@@ -53,7 +50,7 @@ export type UploadedImageFilters = {
 
 export function UploadedImagesView() {
 	const [isLoading, setIsLoading] = useState(true);
-	const [items, setItems] = useState<UploadedImageResult[]>([]);
+	const [items, setItems] = useState<FileItem[]>([]);
 	const [filters, setFilters] = useState<UploadedImageFilters>({});
 	const [isUploading, setIsUploading] = useState(false);
 	const [showFilters, setShowFilters] = useState(false);
@@ -67,20 +64,29 @@ export function UploadedImagesView() {
 	const loadImages = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			// Usando la server action
-			const response = await getUploadedImages({
+			// Usando el cliente API
+			const response = await getUploadedImagesFromApi({
 				...filters,
 				page: currentPage,
 				pageSize: 20,
 			});
 
-			if (response.success) {
-				setItems(response.items || []);
-				setTotalItems(response.total || 0);
-				setTotalPages(Math.ceil((response.total || 0) / (response.pageSize || 20)));
-			} else {
-				toastService.error(response.error || 'No se pudieron cargar las imágenes subidas.');
-			}
+			setItems(
+				response.items.map((item) => ({
+					id: item.id,
+					name: item.name,
+					path: item.path,
+					type: FileType.IMAGE,
+					size: item.size,
+					mimeType: 'image/jpeg', // Default, will be refined by adaptedItems
+					metadata: typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {}),
+					processingStatus: FileProcessingStatus.COMPLETED,
+					createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+					updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+				})) || []
+			);
+			setTotalItems(response.total || 0);
+			setTotalPages(Math.ceil((response.total || 0) / (response.pageSize || 20)));
 			setIsLoading(false);
 		} catch (error) {
 			viewLogger.error('Error al cargar imágenes:', error);
@@ -111,17 +117,12 @@ export function UploadedImagesView() {
 					formData.append('type', filters.type);
 				}
 
-				// Llamar a la server action
-				const result = await uploadImages(formData);
-
-				if (result.success) {
-					toastService.success(
-						`Se ${result.items?.length === 1 ? 'ha subido' : 'han subido'} ${result.items?.length} ${result.items?.length === 1 ? 'imagen' : 'imágenes'} correctamente.`
-					);
-					loadImages(); // Recargamos la lista de imágenes
-				} else {
-					toastService.error(result.error || 'No se pudieron subir las imágenes.');
-				}
+				// Llamar al cliente API
+				const result = await uploadImagesToApi(formData);
+				toastService.success(
+					`Se ${result.items?.length === 1 ? 'ha subido' : 'han subido'} ${result.items?.length} ${result.items?.length === 1 ? 'imagen' : 'imágenes'} correctamente.`
+				);
+				loadImages(); // Recargamos la lista de imágenes
 				setIsUploading(false);
 			} catch (error) {
 				viewLogger.error('Error al subir imágenes:', error);
@@ -136,15 +137,10 @@ export function UploadedImagesView() {
 	const handleDeleteImage = useCallback(
 		async (id: string) => {
 			try {
-				const result = await deleteUploadedImage(id);
-
-				if (result.success) {
-					toastService.success('La imagen se ha eliminado correctamente.');
-					setSelectedImage(null);
-					loadImages();
-				} else {
-					toastService.error(result.error || 'No se pudo eliminar la imagen.');
-				}
+				await deleteUploadedImageFromApi(id);
+				toastService.success('La imagen se ha eliminado correctamente.');
+				setSelectedImage(null);
+				loadImages();
 			} catch (error) {
 				viewLogger.error('Error al eliminar imagen:', error);
 				toastService.error('No se pudo eliminar la imagen.');
@@ -232,7 +228,9 @@ export function UploadedImagesView() {
 						mimeType = `image/${meta.format.toLowerCase()}`;
 					}
 				}
-			} catch {}
+			} catch (e) {
+				void e; /* Ignorar errores de parseo de metadata */
+			}
 			// Asegurar que metadata es string JSON
 			const metadataString = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {});
 			return {

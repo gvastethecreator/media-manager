@@ -1,6 +1,11 @@
-'use server';
+/**
+ * @file Estadísticas del sistema
+ * @description Compatible con Vite + React - ✅ MIGRADO A DRIZZLE
+ */
 
-import { getPrismaClient } from '@/lib/database/db';
+import { count, gte, sum } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { collections, folders, images, tags } from '@/lib/drizzle/schema/index';
 import { formatBytes } from '@/lib/utils/format.utils';
 
 /**
@@ -8,9 +13,9 @@ import { formatBytes } from '@/lib/utils/format.utils';
  */
 export async function getIndexedFilesCount(): Promise<number> {
 	try {
-		const prisma = await getPrismaClient();
-		const count = await prisma.image.count();
-		return count;
+		const [result] = await db.select({ count: count() }).from(images);
+
+		return result.count;
 	} catch (error) {
 		console.error('Error al obtener conteo de archivos:', error);
 		return 0;
@@ -25,14 +30,9 @@ export async function getTotalSpaceUsed(): Promise<{
 	formatted: string;
 }> {
 	try {
-		const prisma = await getPrismaClient();
-		const result = await prisma.image.aggregate({
-			_sum: {
-				size: true,
-			},
-		});
+		const [result] = await db.select({ totalSize: sum(images.size) }).from(images);
 
-		const totalBytes = result._sum.size || 0;
+		const totalBytes = Number(result.totalSize) || 0;
 
 		return {
 			raw: totalBytes,
@@ -52,9 +52,9 @@ export async function getTotalSpaceUsed(): Promise<{
  */
 export async function getMonitoredFoldersCount(): Promise<number> {
 	try {
-		const prisma = await getPrismaClient();
-		const count = await prisma.folder.count();
-		return count;
+		const [result] = await db.select({ count: count() }).from(folders);
+
+		return result.count;
 	} catch (error) {
 		console.error('Error al obtener carpetas monitoreadas:', error);
 		return 0;
@@ -66,9 +66,9 @@ export async function getMonitoredFoldersCount(): Promise<number> {
  */
 export async function getCollectionsCount(): Promise<number> {
 	try {
-		const prisma = await getPrismaClient();
-		const count = await prisma.collection.count();
-		return count;
+		const [result] = await db.select({ count: count() }).from(collections);
+
+		return result.count;
 	} catch (error) {
 		console.error('Error al obtener colecciones:', error);
 		return 0;
@@ -80,9 +80,9 @@ export async function getCollectionsCount(): Promise<number> {
  */
 export async function getTagsCount(): Promise<number> {
 	try {
-		const prisma = await getPrismaClient();
-		const count = await prisma.tag.count();
-		return count;
+		const [result] = await db.select({ count: count() }).from(tags);
+
+		return result.count;
 	} catch (error) {
 		console.error('Error al obtener etiquetas:', error);
 		return 0;
@@ -99,20 +99,13 @@ export async function getFilesHistoricalData(): Promise<
 	}>
 > {
 	try {
-		const prisma = await getPrismaClient();
 		const sevenDaysAgo = new Date();
 		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-		const files = await prisma.image.findMany({
-			where: {
-				createdAt: {
-					gte: sevenDaysAgo,
-				},
-			},
-			select: {
-				createdAt: true,
-			},
-		});
+		const files = await db
+			.select({ createdAt: images.createdAt })
+			.from(images)
+			.where(gte(images.createdAt, sevenDaysAgo));
 
 		// Agrupar por día
 		const groupedByDay = files.reduce<Record<string, number>>((acc, file) => {
@@ -150,23 +143,13 @@ export async function getTagsHistoricalData(): Promise<
 	}>
 > {
 	try {
-		const prisma = await getPrismaClient();
 		const sevenDaysAgo = new Date();
 		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-		const tags = await prisma.tag.findMany({
-			where: {
-				createdAt: {
-					gte: sevenDaysAgo,
-				},
-			},
-			select: {
-				createdAt: true,
-			},
-		});
+		const tagsData = await db.select({ createdAt: tags.createdAt }).from(tags).where(gte(tags.createdAt, sevenDaysAgo));
 
 		// Agrupar por día
-		const groupedByDay = tags.reduce<Record<string, number>>((acc, tag) => {
+		const groupedByDay = tagsData.reduce<Record<string, number>>((acc, tag) => {
 			const date = tag.createdAt.toISOString().split('T')[0];
 			acc[date] = (acc[date] || 0) + 1;
 			return acc;
@@ -195,19 +178,17 @@ export async function getTagsHistoricalData(): Promise<
 }
 
 /**
- * Obtiene métricas del sistema
+ * Obtiene métricas del sistema (simuladas)
  */
 export async function getSystemMetrics(): Promise<{
 	cpuUsage: number;
 	memoryUsage: number;
 	queueSize: number;
 }> {
-	// En un entorno real, estos datos vendrían de monitoreo de sistema
-	// Aquí simulamos valores para demostración
-
+	// Simular métricas del sistema ya que no tenemos acceso real
 	return {
-		cpuUsage: Math.floor(Math.random() * 60) + 20, // 20-80%
-		memoryUsage: Math.floor(Math.random() * 50) + 30, // 30-80%
-		queueSize: Math.floor(Math.random() * 30), // 0-30
+		cpuUsage: Math.floor(Math.random() * 100),
+		memoryUsage: Math.floor(Math.random() * 100),
+		queueSize: Math.floor(Math.random() * 10),
 	};
 }

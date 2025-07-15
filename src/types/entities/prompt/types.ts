@@ -4,67 +4,68 @@
  * @description Define las estructuras de datos, inputs y tipos para la entidad Prompt.
  */
 
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
-import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
+import type { ConceptWithStats } from '../concept';
+import type { GroupWithStats } from '../group';
+import type { ImageWithStats } from '../image';
+import type { NoteWithStats } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { TagWithStats } from '../tag';
+import type { VideoWithStats } from '../video';
+import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemWithStats } from '../world-item';
 
 /**
- * Define la estructura de un parámetro dentro de un prompt.
+ * 🎯 Tipo base canónico para Prompt
  */
-export interface PromptParameter {
+export interface PromptBase {
+	id: string;
 	name: string;
-	type: 'string' | 'number' | 'boolean' | 'array' | 'object';
-	description?: string;
-	required?: boolean;
-	defaultValue?: unknown;
-	options?: string[];
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	content: string | null;
+	parameters: string | null; // JSON string
+	style: string | null;
+	mood: string | null;
+	lighting: string | null;
+	composition: string | null;
+	technique: string | null;
+	inspiration: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
  * 🎯 Tipo completo para Prompt con todas las relaciones y campos JSON deserializados.
  */
-export interface PromptComplete {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	content: string;
-	purpose: string;
-	category: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-
-	// Campos JSON deserializados
-	parameters: PromptParameter[];
-	tags: string[]; // El campo `tags` es un array de strings serializado
-
+export interface PromptComplete extends PromptBase {
 	// Relaciones
-	images?: ImageComplete[];
-	videos?: VideoComplete[];
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tagEntities?: TagComplete[];
-	characters?: CharacterComplete[];
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tagEntities?: TagWithStats[];
+	characters?: CharacterWithStats[];
 	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
+	worldItems?: WorldItemWithStats[];
+	concepts?: ConceptWithStats[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
 	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
+	groups?: GroupWithStats[];
 
 	// Conteos
 	_count?: {
@@ -89,33 +90,26 @@ export interface PromptComplete {
  */
 export interface PromptCreateInput {
 	name: string;
-	emoji?: string;
-	color?: string;
 	description?: string | null;
-	content?: string;
-	purpose?: string;
-	category?: string;
-	featuredImage?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
 	isFavorite?: boolean;
-
-	// Campos JSON
-	parameters?: PromptParameter[];
-	tags?: string[];
-
-	// IDs de relaciones
-	imageIds?: string[];
-	videoIds?: string[];
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagEntityIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	worldItemIds?: string[];
-	conceptIds?: string[];
-	noteIds?: string[];
-	wildcardIds?: string[];
-	propertyIds?: string[];
-	groupIds?: string[];
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 }
 
 /**
@@ -132,11 +126,60 @@ export interface PromptSearchOptions {
 	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: {
 		search?: string;
-		category?: string[];
-		purpose?: string[];
+		category?: string | string[];
+		purpose?: string | string[];
 		onlyFavorites?: boolean;
 		tags?: string[];
 		contentContains?: string;
 	};
 	includeRelations?: boolean;
+}
+
+/**
+ * 📊 Estadísticas de un prompt.
+ */
+export interface PromptStats {
+	imageCount: number;
+	videoCount: number;
+	totalVideos?: number; // Para compatibilidad con prompt-card.tsx
+	tagCount: number;
+	noteCount: number;
+	totalContentItems: number;
+	lastUpdated: Date;
+	totalImages: number;
+	totalAssociations: number;
+	albumCount?: number;
+	collectionCount?: number;
+	characterCount?: number;
+	placeCount?: number;
+	worldItemCount?: number;
+	conceptCount?: number;
+	wildcardCount?: number;
+	propertyCount?: number;
+	groupCount?: number;
+}
+
+/**
+ * 🎯 Prompt con estadísticas calculadas
+ */
+export interface PromptWithStats extends PromptBase {
+	entityType: 'prompt';
+	// Contadores de relaciones
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tagEntities?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+	tags?: any; // Para compatibilidad con prompt-card.tsx
+	stats?: PromptStats;
 }

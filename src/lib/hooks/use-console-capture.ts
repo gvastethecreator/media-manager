@@ -58,7 +58,14 @@ export function useConsoleCapture() {
 		};
 
 		setIsCapturing(true);
-	}, [isCapturing, captureMessage]);
+	}, [
+		isCapturing,
+		captureMessage,
+		originalConsole.error,
+		originalConsole.info,
+		originalConsole.log,
+		originalConsole.warn,
+	]);
 
 	const stopCapturing = useCallback(() => {
 		if (!isCapturing) return;
@@ -69,7 +76,7 @@ export function useConsoleCapture() {
 		console.info = originalConsole.info;
 
 		setIsCapturing(false);
-	}, [isCapturing]);
+	}, [isCapturing, originalConsole.error, originalConsole.info, originalConsole.log, originalConsole.warn]);
 
 	const clearMessages = useCallback(() => {
 		setMessages([]);

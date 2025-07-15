@@ -1,116 +1,204 @@
-'use client';
-
 import { AlertCircle, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { getPrompts } from '@/app/actions/prompts/prompt.actions';
+import { useNavigate } from 'react-router-dom';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { useCreatePrompt, usePrompts } from '@/lib/api/prompts';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
-import type { PromptWithStats } from '@/types/entities/prompt/base';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('PromptsView');
 
-export function PromptsView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
-	const { selectPrompt } = usePromptStore();
-	const router = useRouter();
-	const [prompts, setPrompts] = useState<PromptWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function PromptsView({ isVisible }: ViewProps) {
+	const navigate = useNavigate();
+	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
+	const { selectedPromptId, setSelectedPromptId } = usePromptStore();
+	const { mutate: createPrompt } = useCreatePrompt();
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticPrompts, _addEvent] = clientEvents.useEvents<PromptWithStats[]>(prompts);
+	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [showForm, setShowForm] = useState(false);
+	const [newPromptName, setNewPromptName] = useState('');
+	const [newPromptContent, setNewPromptContent] = useState('');
+	const [newPromptDescription, setNewPromptDescription] = useState('');
 
-	const fetchPrompts = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando prompts...');
-			const data = await getPrompts();
-			setPrompts(data);
-			viewLogger.info(`✅ ${data.length} prompts cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando prompts:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
+	// Usar React Query hook en lugar de server action
+	const {
+		data: prompts = [],
+		isLoading,
+		error,
+		refetch,
+	} = usePrompts({
+		search: localSearch,
+		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
+		sortOrder: sortOrder as 'asc' | 'desc',
+	});
 
+	// Sincronizar búsqueda local con store de navegación
 	useEffect(() => {
-		// Cargar prompts inicialmente
-		fetchPrompts();
-	}, [fetchPrompts]);
+		if (searchTerm !== localSearch) {
+			setLocalSearch(searchTerm || '');
+		}
+	}, [searchTerm, localSearch]);
 
-	const handlePromptClick = useCallback(
-		(prompt: PromptWithStats) => {
-			viewLogger.info('🖱️ Click en prompt:', prompt.name);
-			setCurrentView('prompt-content');
-			selectPrompt(prompt);
+	const handlePromptSelect = useCallback(
+		(promptId: string) => {
+			viewLogger.info('🤖 Seleccionando prompt', { promptId });
+			setSelectedPromptId(promptId);
+			clientEvents.emit('prompt:selected', { promptId });
 		},
-		[setCurrentView, selectPrompt]
+		[setSelectedPromptId]
 	);
 
-	const _handlePromptEdit = useCallback(
-		(id: string) => {
-			viewLogger.info('⚙️ Editando prompt:', id);
-			router.push(`/settings/prompts?id=${id}`);
+	const handlePromptEdit = useCallback(
+		(promptId: string) => {
+			viewLogger.info('✏️ Editando prompt', { promptId });
+			navigate(`/prompts/${promptId}/edit`);
 		},
-		[router]
+		[navigate]
 	);
 
-	const _handlePromptDelete = useCallback((id: string) => {
-		viewLogger.info('🗑️ Eliminando prompt:', id);
-		// Implementar lógica de eliminación
-	}, []);
+	const { toast } = useToast();
+	const handleCreatePrompt = useCallback(() => {
+		if (newPromptName.trim() === '' || newPromptContent.trim() === '') {
+			toast({
+				title: '❌ Error',
+				description: 'El nombre y el contenido del prompt no pueden estar vacíos.',
+				variant: 'destructive',
+			});
+			return;
+		}
+		createPrompt({ name: newPromptName, content: newPromptContent, description: newPromptDescription });
+		setNewPromptName('');
+		setNewPromptContent('');
+		setNewPromptDescription('');
+		setShowForm(false);
+	}, [newPromptName, newPromptContent, newPromptDescription, createPrompt]);
 
-	// Renderizar el contenido según el estado
+	const handleRetry = useCallback(() => {
+		viewLogger.info('🔄 Reintentando cargar prompts');
+		refetch();
+	}, [refetch]);
+
+	if (!isVisible) return null;
+
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<div className="flex flex-col items-center gap-3">
+					<Spinner size="lg" />
+					<p className="text-sm text-muted-foreground">Cargando prompts...</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="p-6">
+				<Alert variant="destructive">
+					<AlertCircle className="h-4 w-4" />
+					<AlertTitle>Error al cargar prompts</AlertTitle>
+					<AlertDescription>
+						{error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+						<button onClick={handleRetry} className="ml-2 underline hover:no-underline">
+							Reintentar
+						</button>
+					</AlertDescription>
+				</Alert>
+			</div>
+		);
+	}
+
 	return (
-		<motion.div
-			className="container mx-auto p-4"
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			transition={{ duration: 0.5 }}
-		>
-			<ScrollArea className="h-[calc(100vh-120px)]">
-				{isLoading ? (
-					<div className="flex justify-center items-center h-64">
-						<Spinner size="lg" />
-					</div>
-				) : error ? (
-					<Alert variant="destructive" className="mb-4">
-						<AlertCircle className="h-4 w-4" />
-						<AlertTitle>Error</AlertTitle>
-						<AlertDescription>{error}</AlertDescription>
-					</Alert>
-				) : optimisticPrompts.length === 0 ? (
-					<EmptyState
-						icon={MessageSquare}
-						title="No hay prompts disponibles"
-						description="Crea un nuevo prompt para empezar"
-					/>
-				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-						{optimisticPrompts.map((prompt) => (
-							<MemoizedPromptCard
-								key={prompt.id}
-								prompt={prompt}
-								onClick={() => handlePromptClick(prompt)}
-								className="h-full"
+		<ScrollArea className="flex-1">
+			<div className="p-6">
+				<h2 className="text-xl font-bold mb-4">Vista de Prompts</h2>
+
+				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+					{showForm ? 'Cancelar' : 'Crear Prompt'}
+				</Button>
+
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">Nuevo Prompt</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="promptName">Nombre</Label>
+							<Input
+								id="promptName"
+								value={newPromptName}
+								onChange={(e) => setNewPromptName(e.target.value)}
+								placeholder="Nombre del prompt"
 							/>
-						))}
+						</div>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="promptContent">Contenido</Label>
+							<Textarea
+								id="promptContent"
+								value={newPromptContent}
+								onChange={(e) => setNewPromptContent(e.target.value)}
+								placeholder="Contenido del prompt"
+							/>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="promptDescription">Descripción</Label>
+							<Textarea
+								id="promptDescription"
+								value={newPromptDescription}
+								onChange={(e) => setNewPromptDescription(e.target.value)}
+								placeholder="Descripción del prompt (opcional)"
+							/>
+						</div>
+						<Button onClick={handleCreatePrompt}>Guardar Prompt</Button>
 					</div>
 				)}
-			</ScrollArea>
-		</motion.div>
+
+				{!prompts.length && !isLoading && !showForm ? (
+					<EmptyState
+						icon={MessageSquare}
+						title="Sin prompts"
+						description={
+							localSearch
+								? `No se encontraron prompts que coincidan con "${localSearch}"`
+								: 'No hay prompts disponibles'
+						}
+					/>
+				) : (
+					<motion.div
+						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.3 }}
+					>
+						{prompts.map((prompt, index) => (
+							<motion.div
+								key={prompt.id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.3, delay: index * 0.05 }}
+							>
+								<MemoizedPromptCard
+									prompt={prompt}
+									isSelected={prompt.id === selectedPromptId}
+									onSelect={() => handlePromptSelect(prompt.id)}
+									onEdit={() => handlePromptEdit(prompt.id)}
+								/>
+							</motion.div>
+						))}
+					</motion.div>
+				)}
+			</div>
+		</ScrollArea>
 	);
 }

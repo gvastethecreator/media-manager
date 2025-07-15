@@ -1,10 +1,12 @@
-'use client';
-
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getRecentConceptImages } from './concept-server-actions';
+
+import { ConceptService } from '@/services/concept/concept.service';
+import type { ImageWithStats } from '@/types/entities/image';
+
+const { getRecentConceptImages } = ConceptService;
 
 interface ConceptCardImagesProps {
 	conceptId: string;

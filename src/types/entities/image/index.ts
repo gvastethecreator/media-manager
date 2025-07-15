@@ -1,33 +1,48 @@
 /**
- * @file Exportaciones principales de tipos para la entidad Image
+ * @file Exportaciones principales de tipos para la entidad Image.
  * @module types/entities/image
- * @warning ⚠️ SOLO exportar tipos canónicos desde './types'.
- * @description Este barrel ha sido limpiado para evitar dependencias legacy. Usar únicamente '@/types/entities/image/types'.
+ * @description
+ *   Centraliza la exportación del tipo canónico **`ImageWithStats`**.
+ *
+ *   - `ImageBase`: Tipo base de Drizzle.
+ *   - `ImageStatistics`: Interfaz para las estadísticas de conteo.
+ *   - `ImageWithStats`: El tipo enriquecido que se debe usar en la app.
+ *
+ * @see /src/types/entities/image/base.ts
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Enumeraciones ---
+export { ImageFormat, ImageStatus } from './enums';
+// --- Tipos Canónicos ---
 export type {
-	ImageAIMetadata,
-	ImageAnalysis,
 	ImageBase,
 	ImageComplete,
 	ImageCreateInput,
-	ImageEXIFData,
+	ImageExtended,
 	ImageFilters,
-	ImageMetadata,
-	ImageRelations,
+	ImageListItem,
 	ImageSearchOptions,
 	ImageSearchResult,
-	ImageStatistics,
-	ImageThumbnail,
-	ImageTransformerOptions,
-	ImageUI,
 	ImageUpdateInput,
-	ImageValidated,
-	ImageViewConfig,
 	ImageWithStats,
-	PrismaImageWithCounts,
-	RelatedImage,
 } from './types';
+
+// --- Tipos de compatibilidad e interfaces ---
+import type { ImageBase, ImageStatistics, ImageWithStats } from './base';
+
+// Exportar tipos desde base
+export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
+
+export type ImageComplete = ImageWithStats;
+export type ImageCreateInput = Partial<ImageBase>;
+export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt' | 'addedAt'>>;
+export type ImageSearchOptions = {
+	skip?: number;
+	take?: number;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	where?: Record<string, unknown>;
+};
 
 export {
 	IMAGE_SORT_PROPERTY_MAP,

@@ -3,7 +3,6 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
-    "Prisma.prisma",
     "mikestead.dotenv",
     "eamodio.gitlens",
     "Christian-Kohler.path-intellisense",
@@ -11,7 +10,6 @@
     "ms-vscode.vscode-typescript-next",
     "beardedbear.beardedtheme",
     "beardedbear.beardedicons",
-    "alefragnani.bookmarks",
     "rphlmr.vscode-drizzle-orm",
     "biomejs.biome",
     "fuzionix.file-tree-extractor"

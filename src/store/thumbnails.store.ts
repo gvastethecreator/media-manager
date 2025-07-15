@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { imageService } from '@/services/image/image.service';
 import type { ThumbnailStats } from '@/types/thumbnails';
 
 export interface ProcessStatus {
@@ -46,7 +46,7 @@ const initialProcessStatus: ProcessStatus = {
 	progress: 0,
 };
 
-const _BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const _BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 	isLoading: true,
@@ -107,7 +107,7 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 
 			while (retries > 0 && !stats) {
 				try {
-					stats = await thumbnailActions.getThumbnailStats();
+					stats = await imageService.getThumbnailProcessingStats();
 					break;
 				} catch (error) {
 					_lastError = error;

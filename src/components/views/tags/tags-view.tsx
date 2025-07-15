@@ -1,17 +1,19 @@
-'use client';
-
 import { Tag } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback, useEffect, useState } from 'react';
-import { getTagsAction } from '@/app/actions/tags';
-import { TagCard, type TagWithStats } from '@/components/cards/tag-card';
+import { memo, useCallback, useState } from 'react';
+import { TagCard } from '@/components/cards/tag-card/tag-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { useCreateTag, useTags } from '@/lib/api/tags';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useTagStore } from '@/store/entities/tag';
-import type { ViewProps } from '../types';
+import type { TagWithStats } from '@/types/entities/tag';
 
 const viewLogger = clientLogger.withContext('TagsView');
 
@@ -34,49 +36,18 @@ MemoizedTagCard.displayName = 'MemoizedTagCard';
  *
  * Muestra todas las etiquetas disponibles en el sistema utilizando el componente TagCard
  */
-export function TagsView({ className }: ViewProps) {
+export function TagsView() {
 	const { setCurrentView } = useNavigationStore();
-	const { selectedId, setSelectedId } = useTagStore((state) => ({
-		selectedId: state.selectedId,
-		setSelectedId: (id: string) => state.setSelectedId(id),
-	}));
-	const [tags, setTags] = useState<TagWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const selectTag = useTagStore((state) => state.selectTag);
 
-	// Cargar etiquetas al montar el componente
-	useEffect(() => {
-		async function loadTags() {
-			try {
-				setIsLoading(true);
-				viewLogger.info('🔄 Cargando etiquetas...');
-				const fetchedTags = await getTagsAction();
+	const { data: tagsResponse, isLoading, error } = useTags();
+	const { mutate: createTag } = useCreateTag();
 
-				if (!fetchedTags) {
-					throw new Error('La acción de obtener etiquetas no devolvió resultados.');
-				}
+	const [showForm, setShowForm] = useState(false);
+	const [newTagName, setNewTagName] = useState('');
+	const [newTagDescription, setNewTagDescription] = useState('');
 
-				// FIXME: Las fechas vienen serializadas como strings. La corrección
-				// debe hacerse en la capa de datos/serialización.
-				const transformedTags = fetchedTags.map((tag) => ({
-					...tag,
-					createdAt: new Date(tag.createdAt),
-					updatedAt: new Date(tag.updatedAt),
-				}));
-
-				setTags(transformedTags);
-				viewLogger.info(`✅ ${transformedTags.length} etiquetas cargadas`);
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-				viewLogger.error('❌ Error cargando etiquetas:', error);
-				setError(errorMessage);
-			} finally {
-				setIsLoading(false);
-			}
-		}
-
-		loadTags();
-	}, []);
+	const tags = tagsResponse?.data || [];
 
 	// Manejar el clic en una etiqueta
 	const handleTagClick = useCallback(
@@ -91,22 +62,33 @@ export function TagsView({ className }: ViewProps) {
 				console.warn('⚠️ Advertencia: La etiqueta no tiene un nombre definido');
 			}
 
-			viewLogger.info('🔍 Seleccionando etiqueta:', tag.id, tag.name);
+			viewLogger.info('🔍 Seleccionando etiqueta:', { tagId: tag.id, tagName: tag.name });
 
 			// Actualizar el estado de selección en el store de etiquetas
-			setSelectedId(tag.id);
+			selectTag(tag.id);
 
 			// Luego cambiar la vista para mostrar el contenido
 			setCurrentView('tag-content');
 		},
-		[setCurrentView, setSelectedId]
+		[setCurrentView, selectTag]
 	);
+
+	const handleCreateTag = useCallback(() => {
+		if (newTagName.trim() === '') {
+			console.error('❌ Error: El nombre de la etiqueta no puede estar vacío');
+			return;
+		}
+		createTag({ name: newTagName, description: newTagDescription });
+		setNewTagName('');
+		setNewTagDescription('');
+		setShowForm(false);
+	}, [newTagName, newTagDescription, createTag]);
 
 	// Renderizar estados de carga y error
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
+				<p className="text-destructive">Error: {error.message}</p>
 			</div>
 		);
 	}
@@ -115,32 +97,60 @@ export function TagsView({ className }: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!tags || tags.length === 0) {
-		return (
-			<EmptyState
-				icon={Tag}
-				title="No hay etiquetas creadas"
-				description="Crea etiquetas para organizar tus imágenes por temas o características."
-			/>
-		);
-	}
-
-	// Renderizar la lista de etiquetas en tarjetas
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{tags.map((tag, index) => (
-						<motion.div
-							key={tag.id}
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: index * 0.05 }}
-						>
-							{tag.id && <MemoizedTagCard tag={tag} onClick={() => handleTagClick(tag)} />}
-						</motion.div>
-					))}
-				</div>
+				<h2 className="text-xl font-bold mb-4">Vista de Etiquetas</h2>
+
+				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+					{showForm ? 'Cancelar' : 'Crear Etiqueta'}
+				</Button>
+
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">Nueva Etiqueta</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="tagName">Nombre</Label>
+							<Input
+								id="tagName"
+								value={newTagName}
+								onChange={(e) => setNewTagName(e.target.value)}
+								placeholder="Nombre de la etiqueta"
+							/>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="tagDescription">Descripción</Label>
+							<Textarea
+								id="tagDescription"
+								value={newTagDescription}
+								onChange={(e) => setNewTagDescription(e.target.value)}
+								placeholder="Descripción de la etiqueta (opcional)"
+							/>
+						</div>
+						<Button onClick={handleCreateTag}>Guardar Etiqueta</Button>
+					</div>
+				)}
+
+				{!tags || (tags.length === 0 && !isLoading && !showForm) ? (
+					<EmptyState
+						icon={Tag}
+						title="No hay etiquetas creadas"
+						description="Crea etiquetas para organizar tus imágenes por temas o características."
+					/>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+						{tags.map((tag, index) => (
+							<motion.div
+								key={tag.id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: index * 0.05 }}
+							>
+								{tag.id && <MemoizedTagCard tag={tag} onClick={() => handleTagClick(tag)} />}
+							</motion.div>
+						))}
+					</div>
+				)}
 			</div>
 		</ScrollArea>
 	);

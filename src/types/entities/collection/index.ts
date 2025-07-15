@@ -4,19 +4,16 @@
  * @description
  *   Centraliza la exportación del tipo canónico **`CollectionWithStats`**.
  *
- *   - `CollectionBase`: Tipo base de Prisma.
+ *   - `CollectionBase`: Tipo base de Drizzle.
  *   - `CollectionStatistics`: Interfaz para las estadísticas de conteo.
  *   - `CollectionWithStats`: El tipo enriquecido que se debe usar en la app.
  *
  * @see /src/types/entities/collection/base.ts
- * @updated 2025-01-27
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { CollectionBase, CollectionWithStats } from './base';
-
 // --- Tipos Canónicos ---
-export type { CollectionBase, CollectionStatistics, CollectionWithStats } from './base';
-
+export type { CollectionBase, CollectionEdition, CollectionStatistics, CollectionWithStats } from './base';
 // --- Enumeraciones ---
 export {
 	COLLECTION_CATEGORY_COLORS,
@@ -26,11 +23,19 @@ export {
 	CollectionRarity,
 	CollectionSortOption,
 } from './enums';
+// --- Tipos adicionales ---
+export type {
+	CollectionFilter,
+	CollectionFilters,
+	CollectionSortBy,
+	CollectionViewConfig,
+	CreateCollectionInput,
+	UpdateCollectionInput,
+} from './types';
 
-// --- Esquemas de Validación (si existen) ---
-// export { CollectionCreateSchema, CollectionUpdateSchema } from './schema';
+// --- Tipos de compatibilidad e interfaces ---
+import type { CollectionBase, CollectionWithStats } from './base';
 
-// --- Tipos de compatibilidad legacy ---
 export type CollectionComplete = CollectionWithStats;
 export type CollectionCreateInput = Partial<CollectionBase>;
 export type CollectionUpdateInput = Partial<Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'>>;
@@ -40,10 +45,3 @@ export type CollectionSearchOptions = {
 	orderBy?: Record<string, 'asc' | 'desc'>;
 	where?: Record<string, unknown>;
 };
-
-// --- Tipos Legacy (OBSOLETOS) ---
-/**
- * @deprecated Los tipos monolíticos de `types.ts` están obsoletos.
- * Usar `CollectionWithStats` y otros tipos canónicos desde `base.ts`.
- */
-// export * from './types';

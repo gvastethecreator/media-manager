@@ -1,28 +1,35 @@
 # Directorios generados
 node_modules/
-.next/
 dist/
 build/
 coverage/
+out/
+.vercel/
 
 # Cachés
+.cache/
 .image-cache/
 .thumbnail-cache/
+~/
 
 # Assets públicos (imágenes, fuentes, etc.)
 public/assets/
 
-# Archivos generados
-next-env.d.ts
-*.d.ts
-*.tsbuildinfo
-
-# Migraciones de Prisma
-prisma/migrations/
-
 # Archivos de ambiente
 .env
 .env.*
+.env.local
+.env.production.local
+.env.development.local
 
-# Archivos de cache
-.cache/
+# Archivos de log y lock
+*.log
+*.lock
+
+# Otros
+.DS_Store
+*.d.ts
+*.tsbuildinfo
+*.sqlite
+*.sqlite3
+*.sqlite-journal

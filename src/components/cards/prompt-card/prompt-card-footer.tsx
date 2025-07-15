@@ -1,5 +1,3 @@
-'use client';
-
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Image, Tag, Video } from 'lucide-react';
@@ -10,6 +8,7 @@ interface PromptCardFooterProps {
 	updatedAt: Date;
 	imagesCount: number;
 	videosCount: number;
+	tagsCount: number;
 	tagsCount: number;
 	primaryColor: string;
 	secondaryColor?: string;
@@ -26,7 +25,6 @@ export function PromptCardFooter({
 	videosCount,
 	tagsCount,
 	primaryColor,
-	secondaryColor,
 	tcgMode = true,
 }: PromptCardFooterProps) {
 	const formattedDate = format(new Date(updatedAt), 'dd/MM/yyyy', { locale: es });

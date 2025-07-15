@@ -1,27 +1,48 @@
 /**
- * @file Índice de transformadores para la entidad Concept.
+ * @file Punto de entrada para los transformadores de la entidad Concept.
  * @module transformers/concept
- * @description Centraliza la exportación de funciones de transformación y mapeo
- * para la entidad Concept, asegurando una interfaz consistente para el resto de la aplicación.
+ * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Concept.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-// --- Exportaciones de Mappers ---
-// Se renombran para seguir el patrón de nomenclatura: map[Entidad][Accion]To[Destino]
+// 🗺️ Mappers - Transformaciones básicas entre tipos
 export {
-    createFilter as mapConceptFiltersToPrisma,
-    createOrderBy as mapConceptOrderByToPrisma, toSearchOptions as mapConceptSearchOptionsToPrisma, toCreateData as mapCreateConceptDataToPrisma, toUpdateData as mapUpdateConceptDataToPrisma, processConcepts
+	createFilterDrizzle,
+	createOrderByDrizzle,
+	processConcepts,
+	toCreateDataDrizzle,
+	toSearchOptionsDrizzle,
+	toUpdateDataDrizzle,
 } from './mappers';
-// --- Exportaciones de Serializers ---
-// Funciones para serializar y deserializar datos de la entidad Concept.
+// 📋 Schemas - Esquemas Zod para validación
 export {
-    deserializeTags,
-    serializeTags
-} from './serializers';
-// --- Exportaciones de Transformer ---
-// Proporcionan la lógica central de transformación de datos de Prisma al tipo canónico.
-export {
-    conceptPayload,
-    fromPrismaConcept,
-    fromPrismaConcepts
-} from './transformer';
+	ConceptBaseSchema,
+	ConceptCountsSchema,
+	ConceptCreateSchema,
+	ConceptFiltersSchema,
+	ConceptSortOptionsSchema,
+	ConceptStatisticsSchema,
+	ConceptUpdateSchema,
+	ConceptWithStatsSchema,
+} from './schema';
 
+// 📦 Serializers - Manejo de campos complejos JSON
+export { deserializeTags, serializeTags } from './serializers';
+// 🔄 Transformers - Conversiones desde Drizzle
+export {
+	fromDrizzleConcept,
+	fromDrizzleConcepts,
+	fromDrizzleConceptWithRelations,
+} from './transformer';
+// 🛡️ Validators - Validaciones con Zod
+export {
+	sanitizeConceptData,
+	validateConceptBase,
+	validateConceptCounts,
+	validateConceptCreate,
+	validateConceptFilters,
+	validateConceptSortOptions,
+	validateConceptStatistics,
+	validateConceptUpdate,
+	validateConceptWithStats,
+} from './validators';

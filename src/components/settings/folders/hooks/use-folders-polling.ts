@@ -1,9 +1,7 @@
-'use client';
-
-import type { ProcessStatus } from '@/app/actions/folders/types';
+import { useCallback, useRef, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
-import { useCallback, useRef, useState } from 'react';
+import type { ProcessStatus } from '@/types/folders';
 
 const pollingLogger = clientLogger.withContext('FoldersPolling');
 
@@ -28,7 +26,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 	const [isPolling, setIsPolling] = useState(false);
 
 	// Referencias para el polling
-	const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const pollingTimerRef = useRef<number | null>(null);
 	const processingFolderRef = useRef<string | null>(null);
 	const originalFolderIdRef = useRef<string | null>(null);
 	const lastUpdatedRef = useRef<Record<string, number>>({});
@@ -68,8 +66,8 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 			});
 
 			// TODO: Implementar getFolderProcessingStatus cuando esté disponible
-			// Por ahora retornamos un estado simulado
-			const data = { isComplete: false };
+			// Por ahora, como la reindexación es síncrona, marcamos como completo inmediatamente
+			const data = { isComplete: true };
 
 			pollingErrorCountRef.current = 0;
 

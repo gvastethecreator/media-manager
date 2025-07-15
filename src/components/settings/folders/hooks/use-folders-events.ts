@@ -1,8 +1,8 @@
-'use client';
-
-import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/app/actions/folders/types';
+import { EventSourcePolyfill } from 'event-source-polyfill';
+import { useCallback, useEffect, useRef } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useCallback, useEffect } from 'react';
+import { toastService } from '@/lib/ui/toast';
+import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/types/folders';
 
 const eventsLogger = clientLogger.withContext('FoldersEvents');
 
@@ -11,6 +11,11 @@ interface FolderEventsCallbacks {
 	onError?: (error: ErrorResponse) => void;
 	onComplete?: (data: FolderResponse) => void;
 	onStats?: (stats: FolderStats) => void;
+	onReindexAllProgress?: (
+		status: ProcessStatus & {
+			currentFolder?: string;
+		}
+	) => void;
 }
 
 /**
@@ -21,6 +26,7 @@ export function useFoldersEvents({
 	onError = () => {},
 	onComplete = () => {},
 	onStats = () => {},
+	onReindexAllProgress = () => {},
 }: FolderEventsCallbacks) {
 	// Manejador de progreso (como respaldo al polling)
 	const handleProgress = useCallback(
@@ -33,6 +39,20 @@ export function useFoldersEvents({
 			eventsLogger.info('📊 Progreso del proceso vía eventos:', status);
 
 			try {
+				// Mostrar notificación de progreso si hay información significativa
+				if (status.progress !== undefined && status.progress > 0) {
+					const progressMessage = status.message || 'Procesando...';
+					const progressPercent = Math.round(status.progress);
+
+					// Solo mostrar notificación cada 25% para evitar spam
+					if (progressPercent % 25 === 0 || progressPercent >= 90) {
+						toastService.info(`📊 Progreso: ${progressPercent}%`, {
+							description: progressMessage,
+							duration: 2000, // Duración corta para no saturar
+						});
+					}
+				}
+
 				// Asegurarnos de que el evento llegue al manejador principal
 				onProgress(status);
 			} catch (error) {
@@ -86,18 +106,110 @@ export function useFoldersEvents({
 		[onStats]
 	);
 
+	const eventSourceRef = useRef<EventSourcePolyfill | null>(null);
+
 	// Subscribirse a los eventos del servicio
 	useEffect(() => {
-		// Suscribirse a eventos con logging detallado
 		eventsLogger.info('🎯 Suscribiéndose a eventos del servidor');
 
-		// TODO: Implementar suscripciones cuando estén disponibles en el servicio
-		// Por ahora solo logging
+		try {
+			// Crear conexión SSE
+			const eventSource = new EventSourcePolyfill('/api/events/stream', {
+				headers: {
+					'Cache-Control': 'no-cache',
+				},
+			});
+
+			eventSourceRef.current = eventSource;
+
+			// Manejar conexión establecida
+			eventSource.addEventListener('connected', () => {
+				eventsLogger.info('✅ Conectado a eventos SSE');
+			});
+
+			// Manejar eventos de folders
+			eventSource.addEventListener('event', (event: MessageEvent) => {
+				try {
+					const eventData = JSON.parse(event.data);
+					eventsLogger.info('📨 Evento SSE recibido:', eventData);
+
+					// Manejar diferentes tipos de eventos
+					switch (eventData.type) {
+						case 'folder:progress':
+							if (eventData.data) {
+								handleProgress({
+									status: eventData.data.status || 'processing',
+									progress: eventData.data.progress || 0,
+									totalFiles: eventData.data.totalFiles || 0,
+									filesProcessed: eventData.data.filesProcessed || 0,
+									message: eventData.data.message,
+									folderId: eventData.data.folderId,
+								});
+							}
+							break;
+
+						case 'folder:reindexAll:progress':
+							if (eventData.data) {
+								eventsLogger.info('📊 Progreso de reindexado global:', eventData.data);
+								onReindexAllProgress({
+									status: eventData.data.phase || 'processing',
+									progress: eventData.data.progress || 0,
+									totalFiles: eventData.data.totalFiles || 0,
+									filesProcessed: eventData.data.filesProcessed || 0,
+									message: eventData.data.message,
+									folderId: eventData.data.folderId,
+									currentFolder: eventData.data.currentFolder,
+									timestamp: eventData.data.timestamp || Date.now(),
+								});
+							}
+							break;
+
+						case 'folder:completed':
+							if (eventData.data) {
+								handleComplete(eventData.data as FolderResponse);
+							}
+							break;
+
+						case 'folder:error':
+							if (eventData.data) {
+								handleError(eventData.data as ErrorResponse);
+							}
+							break;
+
+						case 'folder:stats':
+							if (eventData.data) {
+								handleStats(eventData.data as FolderStats);
+							}
+							break;
+
+						default:
+							eventsLogger.debug('🤷 Evento no manejado:', eventData.type);
+					}
+				} catch (error) {
+					eventsLogger.error('❌ Error procesando evento SSE:', error);
+				}
+			});
+
+			// Manejar errores de conexión
+			eventSource.addEventListener('error', (event) => {
+				eventsLogger.error('❌ Error en conexión SSE:', event);
+			});
+
+			// Manejar heartbeat
+			eventSource.addEventListener('heartbeat', () => {
+				eventsLogger.debug('💓 Heartbeat SSE recibido');
+			});
+		} catch (error) {
+			eventsLogger.error('❌ Error iniciando conexión SSE:', error);
+		}
 
 		// Cleanup
 		return () => {
 			eventsLogger.info('🧹 Limpiando suscripciones de eventos');
-			// TODO: Implementar cleanup cuando estén disponibles las suscripciones
+			if (eventSourceRef.current) {
+				eventSourceRef.current.close();
+				eventSourceRef.current = null;
+			}
 		};
 	}, [handleProgress, handleError, handleComplete, handleStats]);
 

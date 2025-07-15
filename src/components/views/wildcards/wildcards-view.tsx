@@ -1,167 +1,171 @@
-'use client';
-
-import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
+import { Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { WildcardCard } from '@/components/cards/wildcard-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { useCreateWildcard, useWildcards } from '@/lib/api/wildcards';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
+// El store se expone desde el barrel de la entidad
 import { useWildcardStore } from '@/store/entities/wildcard';
-import { WandSparkles } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
-
-// Definir el tipo para comodines con estadísticas
-export interface WildcardWithStats {
-	id: string;
-	name: string;
-	pattern: string;
-	description: string | null;
-	values: string[];
-	createdAt: Date;
-	updatedAt: Date;
-	_count?: {
-		groups: number;
-		prompts: number;
-		images: number;
-	};
-	usageCount: number;
-}
 
 const viewLogger = clientLogger.withContext('WildcardsView');
 
-// Componente memoizado para cada tarjeta de comodín
-const MemoizedWildcardCard = React.memo(
-	({ wildcard, onWildcardClick }: { wildcard: WildcardWithStats; onWildcardClick: () => void }) => {
-		return <WildcardCard wildcard={wildcard} onClick={onWildcardClick} className="h-full" />;
-	},
-	(prevProps, nextProps) => {
-		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes
-		return (
-			prevProps.wildcard.id === nextProps.wildcard.id &&
-			prevProps.wildcard.name === nextProps.wildcard.name &&
-			prevProps.wildcard.updatedAt === nextProps.wildcard.updatedAt
-		);
-	}
-);
+export function WildcardsView({ isVisible }: ViewProps) {
+	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
+	const { selectedWildcardId, setSelectedWildcardId } = useWildcardStore();
+	const { mutate: createWildcard } = useCreateWildcard();
 
-// Para evitar advertencias de displayName
-MemoizedWildcardCard.displayName = 'MemoizedWildcardCard';
+	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [showForm, setShowForm] = useState(false);
+	const [newWildcardName, setNewWildcardName] = useState('');
+	const [newWildcardDescription, setNewWildcardDescription] = useState('');
 
-export function WildcardsView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
-	const { addWildcard, addWildcards } = useWildcardStore();
-	const router = useRouter();
-	const [wildcards, setWildcards] = useState<WildcardWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	// Usar React Query hook en lugar de server action
+	const {
+		data: wildcards = [],
+		isLoading,
+		error,
+		refetch,
+	} = useWildcards({
+		search: localSearch,
+		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
+		sortOrder: sortOrder as 'asc' | 'desc',
+	});
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticWildcards, _addEvent] = clientEvents.useEvents<WildcardWithStats[]>(wildcards);
-
-	const fetchWildcards = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando comodines...');
-			const data = await getWildcards();
-
-			// Calcular estadísticas adicionales
-			const wildcardsWithStats = data.map((wildcard) => {
-				const usageCount = (wildcard._count?.prompts || 0) + (wildcard._count?.images || 0);
-				return {
-					...wildcard,
-					usageCount,
-				};
-			});
-
-			setWildcards(wildcardsWithStats);
-			// Actualizar el store con los comodines obtenidos
-			addWildcards(data);
-			viewLogger.info(`✅ ${data.length} comodines cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando comodines:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [addWildcards]);
-
+	// Sincronizar búsqueda local con store de navegación
 	useEffect(() => {
-		// Cargar comodines inicialmente
-		fetchWildcards();
-	}, [fetchWildcards]);
+		if (searchTerm !== localSearch) {
+			setLocalSearch(searchTerm || '');
+		}
+	}, [searchTerm, localSearch]);
 
-	const handleWildcardClick = useCallback(
-		(wildcard: WildcardWithStats) => {
-			viewLogger.info('🖱️ Click en comodín:', wildcard.name);
-			setCurrentView('wildcard-detail');
-			// Actualizar la información del comodín en el store
-			addWildcard(wildcard);
-			// Navegar a la vista de detalle del comodín
-			router.push(`/wildcards/${wildcard.id}`);
+	const handleWildcardSelect = useCallback(
+		(wildcardId: string) => {
+			viewLogger.info('✨ Seleccionando wildcard', { wildcardId });
+			setSelectedWildcardId(wildcardId);
+			clientEvents.emit('wildcard:selected', { wildcardId });
 		},
-		[setCurrentView, addWildcard, router]
+		[setSelectedWildcardId]
 	);
+
+	const { toast } = useToast();
+	const handleCreateWildcard = useCallback(() => {
+		if (newWildcardName.trim() === '') {
+			toast({
+				title: '❌ Error',
+				description: 'El nombre del wildcard no puede estar vacío.',
+				variant: 'destructive',
+			});
+			return;
+		}
+		createWildcard({ name: newWildcardName, description: newWildcardDescription });
+		setNewWildcardName('');
+		setNewWildcardDescription('');
+		setShowForm(false);
+	}, [newWildcardName, newWildcardDescription, createWildcard]);
+
+	const handleRetry = useCallback(() => {
+		viewLogger.info('🔄 Reintentando cargar wildcards');
+		refetch();
+	}, [refetch]);
+
+	if (!isVisible) return null;
+
+	if (isLoading) {
+		return <LoadingScreen message="Cargando wildcards..." />;
+	}
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!optimisticWildcards || optimisticWildcards.length === 0) {
-		return (
 			<EmptyState
-				icon={WandSparkles}
-				title="No hay comodines creados"
-				description="Crea comodines para usar en tus prompts con valores aleatorios o específicos."
+				icon={Sparkles}
+				title="Error al cargar wildcards"
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				action={{
+					label: 'Reintentar',
+					onClick: handleRetry,
+				}}
 			/>
 		);
 	}
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticWildcards.map((wildcard, index) => {
-						// Verificar que el comodín tenga un id válido
-						if (!wildcard || !(wildcard as any).id) {
-							console.error('Comodín sin id válido:', wildcard);
-							return null;
+		<ScrollArea className="flex-1">
+			<div className="p-6">
+				<h2 className="text-xl font-bold mb-4">Vista de Wildcards</h2>
+
+				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+					{showForm ? 'Cancelar' : 'Crear Wildcard'}
+				</Button>
+
+				{showForm && (
+					<div className="mb-6 p-4 border rounded-lg shadow-sm">
+						<h3 className="text-lg font-semibold mb-3">Nuevo Wildcard</h3>
+						<div className="grid gap-2 mb-3">
+							<Label htmlFor="wildcardName">Nombre</Label>
+							<Input
+								id="wildcardName"
+								value={newWildcardName}
+								onChange={(e) => setNewWildcardName(e.target.value)}
+								placeholder="Nombre del wildcard"
+							/>
+						</div>
+						<div className="grid gap-2 mb-4">
+							<Label htmlFor="wildcardDescription">Descripción</Label>
+							<Textarea
+								id="wildcardDescription"
+								value={newWildcardDescription}
+								onChange={(e) => setNewWildcardDescription(e.target.value)}
+								placeholder="Descripción del wildcard (opcional)"
+							/>
+						</div>
+						<Button onClick={handleCreateWildcard}>Guardar Wildcard</Button>
+					</div>
+				)}
+
+				{!wildcards.length && !isLoading && !showForm ? (
+					<EmptyState
+						icon={Sparkles}
+						title="Sin wildcards"
+						description={
+							localSearch
+								? `No se encontraron wildcards que coincidan con "${localSearch}"`
+								: 'No hay wildcards disponibles'
 						}
-
-						// Crear una función de clic específica para este comodín
-						const onWildcardClick = () => handleWildcardClick(wildcard);
-
-						return (
+					/>
+				) : (
+					<motion.div
+						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.3 }}
+					>
+						{wildcards.map((wildcard, index) => (
 							<motion.div
-								key={(wildcard as any).id}
+								key={wildcard.id}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: index * 0.1 }}
-								className="perspective-1000"
+								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
-								<div
-									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-wildcard-id={(wildcard as any).id}
-								>
-									<MemoizedWildcardCard wildcard={wildcard} onWildcardClick={onWildcardClick} />
-								</div>
+								<WildcardCard
+									wildcard={wildcard}
+									isSelected={wildcard.id === selectedWildcardId}
+									onSelect={() => handleWildcardSelect(wildcard.id)}
+								/>
 							</motion.div>
-						);
-					})}
-				</div>
+						))}
+					</motion.div>
+				)}
 			</div>
 		</ScrollArea>
 	);

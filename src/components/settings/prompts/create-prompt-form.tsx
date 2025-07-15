@@ -1,14 +1,12 @@
-'use client';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { createPrompt, updatePrompt } from '@/app/actions/prompts/prompt.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import toastService from '@/services/toast';
+import { useCreatePrompt, useUpdatePrompt } from '@/lib/api/prompts';
+import { toastService } from '@/lib/ui/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
@@ -51,9 +49,13 @@ export function CreatePromptForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel,
+	onCancel: _onCancel,
 	onPreview,
 }: CreatePromptFormProps) {
+	// React Query mutations
+	const createPromptMutation = useCreatePrompt();
+	const updatePromptMutation = useUpdatePrompt();
+
 	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Configurar react-hook-form
@@ -105,9 +107,9 @@ export function CreatePromptForm({
 
 			if (isEditing && prompt) {
 				// Actualizar prompt existente
-				const updatedPrompt = await updatePrompt(prompt.id, {
+				const updatedPrompt = await updatePromptMutation.mutateAsync({
 					id: prompt.id,
-					...data,
+					data,
 				});
 				if (onUpdated) {
 					onUpdated(updatedPrompt);
@@ -115,7 +117,7 @@ export function CreatePromptForm({
 				toastService.success('Prompt actualizado correctamente');
 			} else {
 				// Crear nuevo prompt
-				const newPrompt = await createPrompt(data);
+				const newPrompt = await createPromptMutation.mutateAsync(data);
 				if (onCreated) {
 					onCreated(newPrompt);
 				}
@@ -194,12 +196,16 @@ export function CreatePromptForm({
 		<DynamicCreateForm
 			optionalFields={optionalFields}
 			onSubmit={async (data) => {
-				if (isEditing && prompt) {
-					await updatePrompt(prompt.id, data);
-					onUpdated?.({ ...prompt, ...data });
-				} else {
-					const created = await createPrompt(data);
-					onCreated?.(created);
+				try {
+					if (isEditing && prompt) {
+						const updated = await updatePromptMutation.mutateAsync({ id: prompt.id, data });
+						onUpdated?.(updated);
+					} else {
+						const created = await createPromptMutation.mutateAsync(data);
+						onCreated?.(created);
+					}
+				} catch (error) {
+					console.error('Error al procesar el prompt:', error);
 				}
 			}}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear prompt'}

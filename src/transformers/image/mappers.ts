@@ -1,5 +1,5 @@
 /**
- * @file Mappers canónicos para la entidad Image (sin Prisma ni legacy)
+ 
  * @module transformers/image/mappers
  */
 
@@ -19,38 +19,20 @@ export function mapImageToComplete(image: Partial<ImageComplete>): ImageComplete
 		width: image.width ?? 0,
 		height: image.height ?? 0,
 		metadata: image.metadata ?? null,
-		isFavorite: image.isFavorite ?? false,
-		addedAt: image.addedAt ?? new Date(),
-		createdAt: image.createdAt ?? new Date(),
-		updatedAt: image.updatedAt ?? new Date(),
-		// Relaciones mínimas (pueden ser null/undefined)
-		folder: image.folder ?? { id: '' },
-		stats: image.stats,
-		activities: image.activities,
-		uploadedImages: image.uploadedImages,
-		profiles: image.profiles,
-		albums: image.albums,
-		collections: image.collections,
-		tags: image.tags,
-		characters: image.characters,
-		places: image.places,
-		worldItems: image.worldItems,
-		concepts: image.concepts,
-		prompts: image.prompts,
-		notes: image.notes,
-		wildcards: image.wildcards,
-		properties: image.properties,
-		groups: image.groups,
-		// Thumbnail
 		thumbnail: image.thumbnail ?? null,
 		thumbnailSize: image.thumbnailSize ?? null,
 		thumbnailWidth: image.thumbnailWidth ?? null,
 		thumbnailHeight: image.thumbnailHeight ?? null,
+		thumbnailMimeType: image.thumbnailMimeType ?? null,
 		thumbnailError: image.thumbnailError ?? null,
 		thumbnailErrorAt: image.thumbnailErrorAt ?? null,
 		thumbnailOptimizedAt: image.thumbnailOptimizedAt ?? null,
-		// Conteos
-		_count: image._count,
+		isFavorite: image.isFavorite ?? false,
+		folderId: image.folderId ?? '',
+		noteId: image.noteId ?? null,
+		addedAt: image.addedAt ?? new Date(),
+		createdAt: image.createdAt ?? new Date(),
+		updatedAt: image.updatedAt ?? new Date(),
 	};
 }
 
@@ -75,7 +57,7 @@ export function mapToImageSummary(image: ImageComplete): {
 		id: image.id,
 		name: image.name,
 		path: image.path,
-		folderId: image.folder?.id ?? '',
+		folderId: image.folderId ?? '',
 		hash: image.hash,
 		size: image.size,
 		width: image.width,

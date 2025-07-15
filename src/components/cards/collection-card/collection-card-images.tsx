@@ -1,87 +1,28 @@
-'use client';
-
 import { ImageOffIcon, VideoIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getRecentCollectionMedia } from './collection-server-actions';
+import { useRecentCollectionMedia } from '@/lib/api/collections';
 
 interface CollectionCardImagesProps {
 	collectionId: string;
 	primaryColor: string;
 	secondaryColor?: string;
-	recentImages?: string[];
-	recentVideos?: string[];
 }
 
 /**
  * Componente para mostrar imágenes y videos recientes de una colección.
  * Diseñado con estilo TCG para la sección de "ilustración" de la carta.
  */
-export function CollectionCardImages({
-	collectionId,
-	primaryColor,
-	secondaryColor,
-	recentImages = [],
-	recentVideos = [],
-}: CollectionCardImagesProps) {
-	// Estado para manejar las imágenes
-	const [loading, setLoading] = useState(!recentImages.length && !recentVideos.length);
-	const [thumbnails, setThumbnails] = useState<
-		Array<{
-			id: string;
-			thumbnailUrl: string;
-			url?: string;
-			isVideo?: boolean;
-		}>
-	>([]);
+export function CollectionCardImages({ collectionId, primaryColor, secondaryColor }: CollectionCardImagesProps) {
+	const { data: thumbnails, isLoading: loading } = useRecentCollectionMedia(collectionId);
 
 	// Calcular color secundario derivado si no se proporciona
 	const derivedSecondaryColor = secondaryColor || `${primaryColor}90`;
 
-	// Efecto para cargar imágenes si no se proporcionaron
-	useEffect(() => {
-		// Si ya tenemos imágenes o videos proporcionados, usarlos
-		if (recentImages.length > 0 || recentVideos.length > 0) {
-			const combinedMedia = [
-				...recentImages.map((url) => ({
-					id: url.split('/').pop() || 'img-fallback',
-					thumbnailUrl: url,
-					isVideo: false,
-				})),
-				...recentVideos.map((url) => ({
-					id: url.split('/').pop() || 'video-fallback',
-					thumbnailUrl: url,
-					isVideo: true,
-				})),
-			];
-
-			setThumbnails(combinedMedia);
-			setLoading(false);
-			return;
-		}
-
-		// Si no tenemos imágenes proporcionadas, cargarlas desde el servidor
-		async function fetchThumbnails() {
-			try {
-				setLoading(true);
-				// Obtener imágenes recientes de la colección
-				const media = await getRecentCollectionMedia(collectionId);
-				setThumbnails(media);
-			} catch (error) {
-				console.error('Error fetching collection thumbnails:', error);
-			} finally {
-				setLoading(false);
-			}
-		}
-
-		if (collectionId) {
-			fetchThumbnails();
-		}
-	}, [collectionId, recentImages, recentVideos]);
-
 	// Ordenamos para mostrar primero las imágenes
-	const sortedThumbnails = [...thumbnails].sort((a, b) => (a.isVideo === b.isVideo ? 0 : a.isVideo ? 1 : -1));
+	const sortedThumbnails = thumbnails
+		? [...thumbnails].sort((a, b) => (a.isVideo === b.isVideo ? 0 : a.isVideo ? 1 : -1))
+		: [];
 
 	// Placeholder para mostrar cuando no hay imágenes
 	const renderPlaceholder = () => (

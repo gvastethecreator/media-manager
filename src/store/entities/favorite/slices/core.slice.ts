@@ -3,9 +3,9 @@
  * @module store/entities/favorite/slices/core
  */
 
+import { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FavoriteExtended } from '@/types/entities/favorite';
-import { StateCreator } from 'zustand';
 import { FavoriteStore } from '..';
 
 // Logger específico para este slice
@@ -86,8 +86,8 @@ export const createCoreSlice: StateCreator<FavoriteStore, [], [], CoreState & Co
 
 	// Verificación de favoritos
 	isFavorited: (id: string) => {
-		const state = get();
-		const result = state.favorites.some((favorite) => favorite.id === id);
+		const { favorites } = get();
+		const result = favorites.some((favorite) => favorite.id === id);
 		logger.debug(`Verificando favorito para ID ${id}: ${result}`);
 		return result;
 	},

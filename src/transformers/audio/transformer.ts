@@ -1,57 +1,57 @@
 /**
  * @file Transformador principal para la entidad Audio
  * @module transformers/audio/transformer
- * @description Contiene la lógica para convertir un objeto Audio de Prisma a nuestro tipo canónico.
+ * @description Contiene la lógica para convertir un objeto Audio de Drizzle a nuestro tipo canónico.
  */
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { AudioBase, AudioWithStats } from '@/types/entities/audio';
 import { TransformerError } from '@/lib/utils/transformers/errors';
+import type { AudioBase, AudioWithStats } from '@/types/entities/audio';
 
 const logger = serverLogger.withContext('AudioTransformer');
 
 /**
- * 🔄 Transforma un objeto Audio de Prisma a nuestro tipo canónico AudioWithStats.
+ * 🔄 Transforma un objeto Audio de Drizzle a nuestro tipo canónico AudioWithStats.
  *
- * @param prismaAudio - El objeto AudioBase obtenido de Prisma.
+ * @param drizzleAudio - El objeto AudioBase obtenido de Drizzle.
  * @returns Un objeto AudioWithStats compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaAudio(prismaAudio: AudioBase): AudioWithStats {
-	if (!prismaAudio) {
-		throw new TransformerError('El objeto de audio de Prisma no puede ser nulo.');
+export function fromDrizzleAudio(drizzleAudio: AudioBase): AudioWithStats {
+	if (!drizzleAudio) {
+		throw new TransformerError('El objeto de audio de Drizzle no puede ser nulo.');
 	}
 
 	try {
 		// TODO: Implementar la lógica real para calcular estas estadísticas
 		const stats = {
-			duration: prismaAudio.duration ?? 0,
-			format: prismaAudio.format,
+			duration: drizzleAudio.duration ?? 0,
+			format: drizzleAudio.format,
 			bitrate: 0,
 			volumePeaks: [],
 			sampleRate: 0,
 		};
 
 		const audioWithStats: AudioWithStats = {
-			...prismaAudio,
+			...drizzleAudio,
 			stats,
 		};
 
 		return audioWithStats;
 	} catch (error) {
-		logger.error('Error transformando audio desde Prisma', {
+		logger.error('Error transformando audio desde Drizzle', {
 			error,
-			audioId: prismaAudio?.id,
+			audioId: drizzleAudio?.id,
 		});
 		throw new TransformerError(`Error al transformar el audio: ${(error as Error).message}`);
 	}
 }
 
 /**
- * 🔄 Transforma una lista de audios de Prisma a una lista de AudioWithStats.
+ * 🔄 Transforma una lista de audios de Drizzle a una lista de AudioWithStats.
  *
- * @param prismaAudios - Un array de objetos Audio de Prisma.
+ * @param drizzleAudios - Un array de objetos Audio de Drizzle.
  * @returns Un array de objetos AudioWithStats.
  */
-export function fromPrismaAudios(prismaAudios: AudioBase[]): AudioWithStats[] {
-	return prismaAudios.map(fromPrismaAudio);
+export function fromDrizzleAudios(drizzleAudios: AudioBase[]): AudioWithStats[] {
+	return drizzleAudios.map(fromDrizzleAudio);
 }

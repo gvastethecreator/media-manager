@@ -3,7 +3,7 @@
  * @module store/entities/collection/types
  */
 
-import type { CollectionFilter, CollectionViewConfig, CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionWithStats } from '@/types/entities/collection';
 
 /**
  * Estado base para el store de Collection

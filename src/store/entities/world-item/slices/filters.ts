@@ -3,17 +3,17 @@
  * @module store/entities/world-item/slices/filters
  */
 
+import type { StateCreator } from 'zustand';
 import { WorldItemSortCriteria } from '@/types/entities/world-item/enums';
 import type { WorldItemFilters } from '@/types/entities/world-item/types';
-import type { StateCreator } from 'zustand';
 import type { WorldItemActions, WorldItemState } from '../types';
 
 export interface WorldItemFiltersSlice {
 	filters: WorldItemFilters;
 	updateFilters: (filters: Partial<WorldItemFilters>) => void;
 	clearFilters: () => void;
-	getFilteredWorldItems: () => any[];
-	getSortedWorldItems: () => any[];
+	getFilteredWorldItems: () => WorldItem[];
+	getSortedWorldItems: () => WorldItem[];
 	setSearchQuery: (query: string) => void;
 }
 

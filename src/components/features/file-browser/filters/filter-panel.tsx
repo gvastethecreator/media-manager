@@ -1,5 +1,5 @@
-'use client';
-
+import { CalendarIcon, Filter, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,8 +11,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { CalendarIcon, Filter, RotateCcw, SlidersHorizontal } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
 
 export type FilterType = 'text' | 'select' | 'checkbox' | 'radio' | 'date' | 'boolean';
 

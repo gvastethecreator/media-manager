@@ -3,8 +3,6 @@
  * @module components/entities/profile/ProfileManager
  */
 
-'use client';
-
 import { useEffect } from 'react';
 import { useProfileStore } from '@/store/entities/profile';
 import { ProfileControls } from './ProfileControls';

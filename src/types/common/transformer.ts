@@ -1,18 +1,5 @@
-import type { MetadataFields, UIFields } from '@/lib/utils/transformers/common';
 import { z } from 'zod';
-
-/**
- * 🔍 Esquema base para validación de campos comunes
- */
-export const BaseEntitySchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	description: z.string().nullable().optional(),
-	shortcut: z.string().nullable().optional(),
-	category: z.string().nullable().optional(),
-	sortBy: z.string().default('name'),
-	filters: z.string().default('{}'),
-});
+import type { MetadataFields, UIFields } from '@/lib/utils/transformers/common';
 
 /**
  * 🎨 Esquema para campos de UI
@@ -35,6 +22,8 @@ export const MetadataFieldsSchema = z.object({
 /**
  * 🔄 Tipo base para entidades
  */
+import { BaseEntitySchema } from './base';
+
 export interface BaseEntity extends z.infer<typeof BaseEntitySchema>, UIFields, MetadataFields {}
 
 /**
@@ -127,8 +116,8 @@ export interface TransformerOptions {
  * 🛠️ Interfaz base para transformers
  */
 export interface BaseTransformer<T, U, P = any> {
-	toPrisma(data: Partial<T>): P;
-	fromPrisma(data: U): T;
+	toDbFormat(data: Partial<T>): P;
+
 	validate(data: unknown): T;
 	extend(data: T, options?: TransformerOptions): Promise<T>;
 }

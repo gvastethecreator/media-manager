@@ -6,12 +6,18 @@
  *   Se comunica con las server actions para la persistencia de datos.
  */
 
-import * as actions from '@/app/actions/properties/property.actions';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
-import { PropertyWithStats } from '@/types/entities/property';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
+// Se reemplaza el servicio del servidor por llamadas a la API REST
+import {
+	createPropertyInApi,
+	deletePropertyFromApi,
+	getPropertiesFromApi,
+	updatePropertyInApi,
+} from '@/lib/api/client/property.client';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
+import { PropertyWithStats } from '@/types/entities/property';
 import type { PropertyCoreActions, PropertyCoreState, PropertyStore } from '../types';
 
 const logger = clientLogger.withContext('PropertyCoreSlice');
@@ -42,7 +48,7 @@ export const createPropertyCoreSlice: StateCreator<
 			})
 		);
 		try {
-			const properties = await actions.getProperties();
+			const properties = await getPropertiesFromApi();
 			set(
 				produce((draft) => {
 					draft.properties = properties.reduce(
@@ -84,7 +90,7 @@ export const createPropertyCoreSlice: StateCreator<
 			})
 		);
 		try {
-			const newProperty = await actions.createProperty(data);
+			const newProperty = await createPropertyInApi(data);
 			set(
 				produce((draft) => {
 					draft.properties[newProperty.id] = newProperty;
@@ -123,7 +129,7 @@ export const createPropertyCoreSlice: StateCreator<
 			})
 		);
 		try {
-			const updatedProperty = await actions.updateProperty(id, data);
+			const updatedProperty = await updatePropertyInApi(id, data);
 			set(
 				produce((draft) => {
 					draft.properties[updatedProperty.id] = updatedProperty;
@@ -149,7 +155,7 @@ export const createPropertyCoreSlice: StateCreator<
 			})
 		);
 		try {
-			await actions.deleteProperty(id);
+			await deletePropertyFromApi(id);
 			toastService.success(`Propiedad "${propertyToDelete.name}" eliminada.`);
 			logger.info(`✅ Propiedad "${propertyToDelete.name}" eliminada.`);
 		} catch (error) {

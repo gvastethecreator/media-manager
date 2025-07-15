@@ -7,5 +7,5 @@
  * @updated 2025-01-27
  */
 
+export type { TagComplete } from '@/types/entities/tag';
 export { toTagWithStats } from './mappers';
-export { fromPrismaTag, transformTag, type TagComplete } from './transformer';

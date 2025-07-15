@@ -1,18 +1,17 @@
-'use client';
-
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { usePlace, useRecentPlaceMedia } from '@/lib/api/places';
+import { cn } from '@/lib/utils';
+import { PlaceWithStats } from '@/types/entities/place';
 import { CardContainer } from '../card-container';
 import { PlaceCardContent } from './place-card-content';
 import { PlaceCardFooter } from './place-card-footer';
 import { PlaceCardHeader } from './place-card-header';
 import { PlaceCardImages } from './place-card-images';
-import type { PlaceCardData } from './place-server-actions';
 
 export interface PlaceCardProps {
-	/** Datos del lugar a mostrar */
-	place: PlaceCardData;
+	/** ID del lugar a mostrar */
+	placeId: string;
 	/** Tamaño compacto con menos información */
 	compact?: boolean;
 	/** Modo TCG con efectos especiales de carta */
@@ -22,7 +21,7 @@ export interface PlaceCardProps {
 	/** Clase CSS adicional para la carta */
 	className?: string;
 	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: () => void;
+	onClick?: (placeData: PlaceWithStats) => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 }
@@ -32,7 +31,7 @@ export interface PlaceCardProps {
  * Muestra información detallada de un lugar con elementos visuales de Trading Card Game
  */
 export function PlaceCard({
-	place,
+	placeId,
 	compact = false,
 	tcgMode = true,
 	disabled = false,
@@ -40,7 +39,36 @@ export function PlaceCard({
 	onClick,
 	isSelected = false,
 }: PlaceCardProps) {
+	const { data: place, isLoading, error } = usePlace(placeId);
+	const { data: recentMediaData } = useRecentPlaceMedia(placeId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Si no hay datos del lugar o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando lugar...</p>
+			</div>
+		);
+	}
+
+	if (error || !place) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Lugar no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Extraer datos del lugar
 	const {
@@ -52,7 +80,7 @@ export function PlaceCard({
 		region = 'desconocido',
 		type = 'desconocido',
 		climate = 'templado',
-		population = 0,
+		population: rawPopulation = 0, // Renombrar para evitar conflicto
 		government = 'desconocido',
 		createdAt,
 		updatedAt,
@@ -60,26 +88,25 @@ export function PlaceCard({
 		_count,
 		parsedDangers = [],
 		parsedResources = [],
-		recentImages = [],
 		metadata,
 	} = place;
 
+	// Asegurar que population sea un número
+	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
+
 	// Preparar los medios para el componente de galería
 	const cardMedia = useMemo(() => {
-		const media = [];
+		return (recentMediaData || []).map((media) => ({
+			id: media.id,
+			name: media.name,
+			thumbnailUrl: media.thumbnailUrl,
+			url: media.url,
+			isVideo: media.type === 'video',
+		}));
+	}, [recentMediaData]);
 
-		// Añadir imágenes si están disponibles
-		if (recentImages?.length) {
-			media.push(...recentImages);
-		}
-
-		// Añadir videos si están disponibles
-		if (place.recentVideos?.length) {
-			media.push(...place.recentVideos);
-		}
-
-		return media;
-	}, [recentImages, place.recentVideos]);
+	// Asegurar que population sea un número
+	const numericPopulation = typeof population === 'string' ? Number.parseInt(population, 10) : population;
 
 	// Calcular colores para la tarjeta TCG
 	const primaryColor = color || '#10b981';
@@ -134,10 +161,10 @@ export function PlaceCard({
 		(e: React.KeyboardEvent) => {
 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
 				e.preventDefault();
-				onClick();
+				onClick(place);
 			}
 		},
-		[onClick, disabled]
+		[onClick, disabled, place]
 	);
 
 	return (
@@ -151,7 +178,7 @@ export function PlaceCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled ? undefined : onClick}
+			onClick={disabled || !onClick ? undefined : () => onClick(place)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}
@@ -242,11 +269,11 @@ export function PlaceCard({
 					{/* Cabecera con nombre, emoji, región y tipo */}
 					<PlaceCardHeader
 						name={name}
-						emoji={emoji}
+						emoji={emoji || '📍'}
 						color={primaryColor}
-						region={region}
-						type={type}
-						climate={climate}
+						region={region || 'desconocido'}
+						type={type || 'desconocido'}
+						climate={climate || 'templado'}
 						isFavorite={isFavorite}
 						tcgMode={tcgMode}
 						compact={compact}
@@ -268,11 +295,11 @@ export function PlaceCard({
 							{/* Contenido principal con descripción, recursos y estadísticas */}
 							<PlaceCardContent
 								description={description || undefined}
-								region={region}
-								type={type}
-								climate={climate}
-								population={population}
-								government={government}
+								region={region || 'desconocido'}
+								type={type || 'desconocido'}
+								climate={climate || 'templado'}
+								population={population || 0}
+								government={government || 'desconocido'}
 								parsedResources={parsedResources}
 								parsedDangers={parsedDangers}
 								parsedStats={place.parsedStats}

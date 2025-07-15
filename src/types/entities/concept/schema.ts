@@ -3,8 +3,9 @@
  * @module types/entities/concept/schema
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema } from '@/types/common/base';
+import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 
 /**
  * 🏷️ Esquema para tags de concepto

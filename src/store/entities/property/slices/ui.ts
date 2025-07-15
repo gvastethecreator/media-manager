@@ -23,7 +23,7 @@ export const createPropertyUISlice: StateCreator<
 	[['zustand/immer', never]],
 	[],
 	PropertyUIState & PropertyUIActions
-> = (set, get) => ({
+> = (set, _get) => ({
 	...initialState,
 
 	selectProperty: (id) => {

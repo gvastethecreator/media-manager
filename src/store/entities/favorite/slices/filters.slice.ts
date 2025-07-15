@@ -3,9 +3,9 @@
  * @module store/entities/favorite/slices/filters
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import { FavoriteExtended } from '@/types/entities/favorite';
 import { StateCreator } from 'zustand';
+import { clientLogger } from '@/lib/logger/client-logger';
+
 import { FavoriteStore } from '..';
 import { DEFAULT_FILTERS } from '../constants';
 import { FavoriteFilters } from '../types';

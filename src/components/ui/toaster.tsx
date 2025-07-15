@@ -1,23 +1,12 @@
-'use client';
-
-import { Toast, ToastClose, ToastDescription, ToastTitle, ToastViewport, useToast } from '@/components/ui/toast';
+import { Toast as ToastPrimitive } from '@base-ui-components/react/toast';
+import { ToastViewport, toastManager } from '@/components/ui/toast';
 
 export function Toaster() {
-	const { toasts } = useToast();
-
 	return (
-		<>
-			{toasts.map(({ id, title, description, action, ...props }) => (
-				<Toast key={id} {...props}>
-					<div className="grid gap-1">
-						{title && <ToastTitle>{title}</ToastTitle>}
-						{description && <ToastDescription>{description}</ToastDescription>}
-					</div>
-					{action}
-					<ToastClose />
-				</Toast>
-			))}
-			<ToastViewport />
-		</>
+		<ToastPrimitive.Provider toastManager={toastManager}>
+			<ToastPrimitive.Portal>
+				<ToastViewport />
+			</ToastPrimitive.Portal>
+		</ToastPrimitive.Provider>
 	);
 }

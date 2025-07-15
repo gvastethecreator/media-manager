@@ -1,6 +1,7 @@
+import type { StateCreator } from 'zustand';
+import { createPrompt, deletePromptFromApi, getPrompts, updatePrompt } from '@/lib/api/client/prompt.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
-import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('PromptStore:Core');
@@ -101,7 +102,7 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 			coreLogger.info('🗑️ Eliminando prompt:', id);
 
 			// Llamar a server action para eliminar prompt
-			await deletePrompt(id);
+			await deletePromptFromApi(id);
 
 			// Recargar prompts para actualizar la lista
 			await get().loadPrompts();

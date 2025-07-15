@@ -2,10 +2,10 @@
 // Zustand store para preferencias de interfaz de usuario
 // 🗃️ Persistencia local y reactividad para settings de interfaz
 
-import { interfacePreferencesSchema } from '@/types/ui/interface.schema';
-import type { InterfacePreferences, InterfaceSettingsState } from '@/types/ui/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { interfacePreferencesSchema } from '@/types/ui/interface.schema';
+import type { InterfacePreferences, InterfaceSettingsState } from '@/types/ui/types';
 
 // Estado inicial por defecto
 const defaultPreferences: InterfacePreferences = {
@@ -110,7 +110,7 @@ export const useInterfaceSettingsStore = create<InterfaceSettingsState>()(
 					});
 				} else {
 					// 🚨 Log de error de validación
-					// eslint-disable-next-line no-console
+
 					console.warn('Preferencias de interfaz inválidas', parsed.error);
 				}
 			},

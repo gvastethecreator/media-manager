@@ -1,92 +1,91 @@
-'use client';
-
-import { Star } from 'lucide-react';
-import { useCallback, useEffect, useMemo } from 'react';
-import { getFavorites } from '@/app/actions/favorites/favorite.actions';
-import type { BaseContentProps } from '@/components/views/base';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
-import type { FileItem } from '@/types/files';
+import { useFavoriteStore } from '@/store/entities/favorite';
+import type { ViewProps } from '../types';
+import FavoritesContentView from './favorites-content-view';
 
 const viewLogger = clientLogger.withContext('FavoritesView');
 
-export function FavoritesView() {
-	// 🌟 Usar el store unificado con métodos específicos para favoritos
+export function FavoritesView({ isVisible }: ViewProps) {
+	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
+	const { selectedFavoriteId, setSelectedFavoriteId } = useFavoriteStore();
+	const { mutate: createFavorite } = useCreateFavorite();
+
+	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [showForm, setShowForm] = useState(false);
+	const [newFavoriteName, setNewFavoriteName] = useState('');
+	const [newFavoriteDescription, setNewFavoriteDescription] = useState('');
+
+	// Usar React Query hook en lugar de server action
 	const {
-		currentItems: items,
-		toggleItemSelection,
+		data: favorites = [],
 		isLoading,
-		setIsLoading,
-		setCurrentItems,
-	} = useUnifiedFileManager();
+		error,
+		refetch,
+	} = useFavorites({
+		search: localSearch,
+		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
+		sortOrder: sortOrder as 'asc' | 'desc',
+	});
 
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
-
-	const loadFavorites = useCallback(async () => {
-		try {
-			viewLogger.info('🔄 Cargando favoritos...');
-			setIsLoading(true);
-
-			// Obtener favoritos desde la API
-			const favorites = await getFavorites();
-
-			// Transformar a FileItem[] con isFavorite: true
-			const favoriteItems: FileItem[] = favorites.map((f) => ({
-				...f.image,
-				isFavorite: true, // Asegurar que todos los favoritos tengan esta propiedad
-			}));
-
-			// 🌟 Actualizar el store unificado con los favoritos
-			setCurrentItems(favoriteItems);
-
-			viewLogger.info('✅ Favoritos cargados:', { count: favoriteItems.length });
-		} catch (error) {
-			viewLogger.error('❌ Error cargando favoritos:', error);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [setIsLoading, setCurrentItems]);
-
+	// Sincronizar búsqueda local con store de navegación
 	useEffect(() => {
-		loadFavorites();
+		if (searchTerm !== localSearch) {
+			setLocalSearch(searchTerm || '');
+		}
+	}, [searchTerm, localSearch]);
 
-		const handleFavoriteChange = () => {
-			viewLogger.info('📢 Evento de cambio en favoritos recibido');
-			loadFavorites();
-		};
-
-		statsEventEmitter.on(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
-
-		return () => {
-			statsEventEmitter.off(STATS_EVENTS.FAVORITE_CHANGE, handleFavoriteChange);
-		};
-	}, [loadFavorites]);
-
-	const favoriteItems = useMemo(() => {
-		const filtered = optimisticItems.filter((item) => item.isFavorite);
-		viewLogger.debug('🔍 Filtrando favoritos:', { total: filtered.length });
-		return filtered;
-	}, [optimisticItems]);
-
-	const contentProps: BaseContentProps = {
-		items: favoriteItems,
-		isLoading,
-		toggleItemSelection,
-		emptyState: {
-			icon: Star,
-			title: 'No hay favoritos',
-			description:
-				'No se encontraron imágenes favoritas. Marca tus imágenes favoritas haciendo clic en el ícono de estrella.',
+	const handleFavoriteSelect = useCallback(
+		(favoriteId: string) => {
+			viewLogger.info('⭐ Seleccionando favorite', { favoriteId });
+			setSelectedFavoriteId(favoriteId);
+			clientEvents.emit('favorite:selected', { favoriteId });
 		},
-	};
+		[setSelectedFavoriteId]
+	);
+
+	const handleCreateFavorite = useCallback(() => {
+		// const { toast } = useToast();
+		if (newFavoriteName.trim() === '') {
+			// toast({
+			// 	title: '❌ Error',
+			// 	description: 'El nombre del favorito no puede estar vacío.',
+			// 	variant: 'destructive',
+			// });
+			return;
+		}
+		createFavorite({ name: newFavoriteName, description: newFavoriteDescription });
+		setNewFavoriteName('');
+		setNewFavoriteDescription('');
+		setShowForm(false);
+	}, [newFavoriteName, newFavoriteDescription, createFavorite]);
+
+	const handleRetry = useCallback(() => {
+		viewLogger.info('🔄 Reintentando cargar favorites');
+		refetch();
+	}, [refetch]);
+
+	if (!isVisible) return null;
 
 	return (
-		<ContentViewProvider {...contentProps}>
-			<BaseContentView />
-		</ContentViewProvider>
+		<FavoritesContentView
+			favorites={favorites}
+			isLoading={isLoading}
+			error={error}
+			localSearch={localSearch}
+			showForm={showForm}
+			newFavoriteName={newFavoriteName}
+			newFavoriteDescription={newFavoriteDescription}
+			selectedFavoriteId={selectedFavoriteId}
+			setShowForm={setShowForm}
+			setNewFavoriteName={setNewFavoriteName}
+			setNewFavoriteDescription={setNewFavoriteDescription}
+			handleFavoriteSelect={handleFavoriteSelect}
+			handleCreateFavorite={handleCreateFavorite}
+			handleRetry={handleRetry}
+		/>
 	);
 }

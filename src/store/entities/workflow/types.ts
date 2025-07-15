@@ -2,10 +2,10 @@
  * @file Definición de tipos para el store de Workflow
  * @module store/entities/workflow/types
  * @description Tipos refactorizados siguiendo el patrón de slices.
+ * @updated 2025-01-27 - Migrado a tipos locales sin Prisma
  */
 
-import type { WorkflowWithStats } from '@/types/entities/workflow';
-import type { Prisma } from '@prisma/client';
+import type { WorkflowCreateInput, WorkflowUpdateInput, WorkflowWithStats } from '@/types/entities/workflow';
 
 // --- ENUMS Y FILTROS ESPECÍFICOS DEL STORE ---
 
@@ -50,8 +50,8 @@ export interface WorkflowCoreState {
  */
 export interface WorkflowCoreActions {
 	loadWorkflows: () => Promise<void>;
-	createWorkflow: (data: Prisma.WorkflowCreateInput) => Promise<void>;
-	updateWorkflow: (id: string, data: Prisma.WorkflowUpdateInput) => Promise<void>;
+	createWorkflow: (data: WorkflowCreateInput) => Promise<void>;
+	updateWorkflow: (id: string, data: WorkflowUpdateInput) => Promise<void>;
 	deleteWorkflow: (id: string) => Promise<void>;
 }
 

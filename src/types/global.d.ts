@@ -1,7 +1,4 @@
-import type { PrismaClient } from '@prisma/client';
-
 declare global {
-	let prisma: PrismaClient | undefined;
 	interface Window {
 		electron?: {
 			openPath: (path: string) => void;
@@ -10,4 +7,10 @@ declare global {
 			deleteFile: (path: string) => void;
 		};
 	}
+
+	interface RequestInit {
+		duplex?: 'half';
+	}
+
+	const ENV: any;
 }
