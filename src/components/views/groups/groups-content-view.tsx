@@ -24,6 +24,7 @@ interface GroupsContentViewProps {
 	setNewGroupDescription: (description: string) => void;
 	handleGroupClick: (group: GroupWithStats) => void;
 	handleCreateGroup: () => void;
+	className?: string;
 }
 
 // Componente memoizado para cada tarjeta de grupo
@@ -64,6 +65,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 	setNewGroupDescription,
 	handleGroupClick,
 	handleCreateGroup,
+	className,
 }) => {
 	if (error) {
 		return (
@@ -78,7 +80,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 	}
 
 	return (
-		<ScrollArea className="h-full">
+		<ScrollArea className={className || "h-full"}>
 			<div className="container mx-auto p-6">
 				<h2 className="text-xl font-bold mb-4">Vista de Grupos</h2>
 

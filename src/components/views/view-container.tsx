@@ -16,7 +16,7 @@ import FavoritesContentView from './favorites/favorites-content-view';
 import File3DContentView from './file3d/file3d-content-view';
 import FilesContentView from './files/files-content-view';
 import { FolderContentView } from './folders/folder-content-view';
-import { FoldersView } from './folders/folders-view';
+import FoldersView from './folders/folders-view';
 import GroupsContentView from './groups/groups-content-view';
 import { JsonFileContentView } from './json-files/json-file-content-view';
 import { JsonFilesView } from './json-files/json-files-view';

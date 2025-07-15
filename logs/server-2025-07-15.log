@@ -1,0 +1,668 @@
+[2025-07-15T00:54:02.990Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T00:54:02.991Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T00:54:02.991Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T00:54:02.991Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T00:54:03.141Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T00:54:04.748Z] [INFO] ℹ️  🌐 [2025-07-15T00:54:04.748Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T00:54:04.761Z] [INFO] ℹ️  ✅ [2025-07-15T00:54:04.761Z] GET /api/system/stats - 200 - 13ms - IP: ::1 - END
+[2025-07-15T00:55:01.384Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:01.384Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T00:55:01.418Z] [INFO] ℹ️  ⚠️ [2025-07-15T00:55:01.418Z] GET /api/system/navigation - 304 - 34ms - IP: ::1 - END
+[2025-07-15T00:55:01.422Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:01.422Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T00:55:01.426Z] [INFO] ℹ️  ⚠️ [2025-07-15T00:55:01.426Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T00:55:01.427Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:01.427Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T00:55:01.430Z] [INFO] ℹ️  ✅ [2025-07-15T00:55:01.430Z] GET /api/folders - 200 - 3ms - IP: ::1 - END
+[2025-07-15T00:55:01.431Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:01.431Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T00:55:01.434Z] [INFO] ℹ️  ⚠️ [2025-07-15T00:55:01.434Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T00:55:13.223Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:13.223Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T00:55:13.227Z] [INFO] ℹ️  ⚠️ [2025-07-15T00:55:13.227Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T00:55:13.231Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:13.231Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T00:55:13.236Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:13.236Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:13.238Z] [INFO] ℹ️  ✅ [2025-07-15T00:55:13.238Z] GET /api/system/stats - 200 - 7ms - IP: ::1 - END
+[2025-07-15T00:55:13.267Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:13.267Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T00:55:13.272Z] [INFO] ℹ️  ⚠️ [2025-07-15T00:55:13.272Z] GET /api/folders - 304 - 5ms - IP: ::1 - END
+[2025-07-15T00:55:13.274Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:13.274Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:13.342Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:13.342Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:13.751Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:13.751Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:14.927Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:14.927Z] POST /api/folders/folder-1/reindex - IP: ::1 - START
+[2025-07-15T00:55:15.155Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:15.155Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:16.185Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:16.185Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:17.054Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:17.054Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:17.820Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:17.820Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:18.666Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:18.666Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:19.510Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:19.510Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:20.288Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:20.288Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:21.249Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:21.249Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:22.198Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:22.198Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:22.893Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:22.893Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:23.754Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:23.754Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:24.681Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:24.681Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:25.618Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:25.618Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:26.462Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:26.462Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:27.278Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:27.278Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:28.125Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:28.125Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:29.089Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:29.089Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:29.948Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:29.947Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:30.433Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:30.433Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:31.139Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:31.139Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:32.057Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:32.057Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:33.189Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:33.189Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:33.674Z] [INFO] ℹ️  ✅ [2025-07-15T00:55:33.674Z] POST /api/folders/folder-1/reindex - 200 - 18747ms - IP: ::1 - END
+[2025-07-15T00:55:33.680Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:33.680Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T00:55:33.683Z] [INFO] ℹ️  ✅ [2025-07-15T00:55:33.683Z] GET /api/folders - 200 - 3ms - IP: ::1 - END
+[2025-07-15T00:55:33.686Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:33.686Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T00:55:33.690Z] [INFO] ℹ️  ⚠️ [2025-07-15T00:55:33.690Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T00:55:33.889Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:33.889Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:33.999Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:33.999Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T00:55:34.001Z] [INFO] ℹ️  ⚠️ [2025-07-15T00:55:34.001Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T00:55:34.089Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:34.089Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:34.224Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:34.224Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T00:55:35.599Z] [INFO] ℹ️  🌐 [2025-07-15T00:55:35.599Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:04:07.277Z] [INFO] ℹ️  🌐 [2025-07-15T01:04:07.277Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T01:04:07.282Z] [INFO] ℹ️  ✅ [2025-07-15T01:04:07.282Z] GET /api/system/stats - 200 - 5ms - IP: ::1 - END
+[2025-07-15T01:06:45.159Z] [INFO] ℹ️  🌐 [2025-07-15T01:06:45.159Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T01:06:45.163Z] [INFO] ℹ️  ✅ [2025-07-15T01:06:45.163Z] GET /api/system/stats - 200 - 4ms - IP: ::1 - END
+[2025-07-15T01:07:27.238Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:27.238Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T01:07:27.258Z] [INFO] ℹ️  ✅ [2025-07-15T01:07:27.258Z] GET /api/system/stats - 200 - 20ms - IP: ::1 - END
+[2025-07-15T01:07:30.880Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:30.880Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T01:07:30.893Z] [INFO] ℹ️  ✅ [2025-07-15T01:07:30.893Z] GET /api/system/navigation - 200 - 13ms - IP: ::1 - END
+[2025-07-15T01:07:30.895Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:30.895Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T01:07:30.896Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:30.896Z] GET /api/stats/system - 304 - 1ms - IP: ::1 - END
+[2025-07-15T01:07:30.902Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:30.902Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:30.904Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:30.904Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:07:30.964Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:30.964Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:30.966Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:30.966Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:07:41.346Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:41.346Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:41.349Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:41.349Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T01:07:41.351Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:41.351Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:41.354Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:41.353Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T01:07:41.359Z] [INFO] ℹ️  ✅ [2025-07-15T01:07:41.359Z] GET /api/system/stats - 200 - 6ms - IP: ::1 - END
+[2025-07-15T01:07:41.398Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:41.398Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:41.400Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:41.400Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:07:41.402Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:41.402Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:41.481Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:41.481Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:41.771Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:41.771Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:43.319Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:43.319Z] POST /api/folders/folder-2/reindex - IP: ::1 - START
+[2025-07-15T01:07:43.436Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:43.436Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:43.840Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:43.840Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:44.139Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:44.139Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:44.522Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:44.522Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:44.841Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:44.841Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:45.105Z] [INFO] ℹ️  ✅ [2025-07-15T01:07:45.105Z] POST /api/folders/folder-2/reindex - 200 - 1786ms - IP: ::1 - END
+[2025-07-15T01:07:45.106Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:45.106Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:45.109Z] [INFO] ℹ️  ✅ [2025-07-15T01:07:45.109Z] GET /api/folders - 200 - 3ms - IP: ::1 - END
+[2025-07-15T01:07:45.110Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:45.110Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:45.114Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:45.114Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T01:07:45.223Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:45.223Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:45.314Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:45.314Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:45.316Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:45.316Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:07:45.401Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:45.401Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:45.506Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:45.506Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:46.923Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:46.923Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:47.137Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:47.137Z] POST /api/folders/folder-3/reindex - IP: ::1 - START
+[2025-07-15T01:07:47.300Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:47.300Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:47.728Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:47.728Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:48.298Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:48.298Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:48.669Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:48.669Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:49.050Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:49.050Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:49.598Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:49.598Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:50.082Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:50.082Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:50.415Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:50.415Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:50.967Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:50.967Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:51.396Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:51.396Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:51.986Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:51.986Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:52.403Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:52.403Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:52.935Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:52.935Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:53.276Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:53.276Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:53.626Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:53.626Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:54.117Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:54.117Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:55.821Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:55.821Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:56.207Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:56.207Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:56.472Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:56.472Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:56.781Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:56.781Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:57.189Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:57.189Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:57.709Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:57.709Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:58.276Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:58.276Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:58.588Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:58.588Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:59.090Z] [INFO] ℹ️  ✅ [2025-07-15T01:07:59.090Z] POST /api/folders/folder-3/reindex - 200 - 11953ms - IP: ::1 - END
+[2025-07-15T01:07:59.139Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:59.139Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:59.141Z] [INFO] ℹ️  ✅ [2025-07-15T01:07:59.141Z] GET /api/folders - 200 - 2ms - IP: ::1 - END
+[2025-07-15T01:07:59.143Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:59.143Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:59.148Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:59.148Z] GET /api/folders - 304 - 5ms - IP: ::1 - END
+[2025-07-15T01:07:59.277Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:59.277Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:59.391Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:59.391Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:07:59.393Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:07:59.393Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:07:59.514Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:59.514Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:59.627Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:59.627Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:07:59.730Z] [INFO] ℹ️  🌐 [2025-07-15T01:07:59.730Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:01.292Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:01.292Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:04.638Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:04.638Z] GET /api/folders/by-path?path=D%3A%5CPictures%5CBackgrounds - IP: ::1 - START
+[2025-07-15T01:08:04.641Z] [ERROR] ❌ ❌ [2025-07-15T01:08:04.641Z] GET /api/folders/by-path?path=D%3A%5CPictures%5CBackgrounds - 404 - 3ms - IP: ::1 - END
+[2025-07-15T01:08:04.652Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:04.652Z] POST /api/folders - IP: ::1 - START
+[2025-07-15T01:08:04.667Z] [INFO] ℹ️  ✅ [2025-07-15T01:08:04.667Z] POST /api/folders - 201 - 15ms - IP: ::1 - END
+[2025-07-15T01:08:04.751Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:04.751Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:04.778Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:04.778Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:08:04.781Z] [INFO] ℹ️  ✅ [2025-07-15T01:08:04.781Z] GET /api/folders - 200 - 3ms - IP: ::1 - END
+[2025-07-15T01:08:04.873Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:04.873Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:04.905Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:04.905Z] POST /api/folders/backgrounds/reindex - IP: ::1 - START
+[2025-07-15T01:08:05.087Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:05.087Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:05.351Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:05.351Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:05.647Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:05.647Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:06.197Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:06.197Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:06.430Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:06.430Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:06.600Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:06.600Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:07.022Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:07.022Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:07.266Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:07.266Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:07.534Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:07.534Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:07.701Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:07.701Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:07.913Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:07.913Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:08.475Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:08.475Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:08.733Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:08.733Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:08.915Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:08.915Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:09.169Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:09.169Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:09.267Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:09.267Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:09.608Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:09.608Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:09.797Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:09.797Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:10.018Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:10.018Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:10.512Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:10.512Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:10.890Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:10.890Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:11.170Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:11.170Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:11.452Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:11.452Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:11.899Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:11.899Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:08:11.976Z] [INFO] ℹ️  ✅ [2025-07-15T01:08:11.976Z] POST /api/folders/backgrounds/reindex - 200 - 7071ms - IP: ::1 - END
+[2025-07-15T01:08:12.131Z] [INFO] ℹ️  🌐 [2025-07-15T01:08:12.131Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T01:09:21.105Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:21.105Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T01:09:21.110Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:09:21.110Z] GET /api/system/stats - 304 - 5ms - IP: ::1 - END
+[2025-07-15T01:09:29.102Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:29.102Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T01:09:29.125Z] [INFO] ℹ️  ✅ [2025-07-15T01:09:29.125Z] GET /api/system/navigation - 200 - 23ms - IP: ::1 - END
+[2025-07-15T01:09:29.127Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:29.127Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T01:09:29.132Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:09:29.132Z] GET /api/stats/system - 304 - 5ms - IP: ::1 - END
+[2025-07-15T01:09:29.136Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:29.136Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:09:29.138Z] [INFO] ℹ️  ✅ [2025-07-15T01:09:29.138Z] GET /api/folders - 200 - 2ms - IP: ::1 - END
+[2025-07-15T01:09:29.151Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:29.151Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:09:29.153Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:09:29.153Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:09:33.673Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:33.673Z] GET /api/images? - IP: ::1 - START
+[2025-07-15T01:09:33.834Z] [INFO] ℹ️  ✅ [2025-07-15T01:09:33.834Z] GET /api/images? - 200 - 161ms - IP: ::1 - END
+[2025-07-15T01:09:33.950Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:33.950Z] GET /api/images? - IP: ::1 - START
+[2025-07-15T01:09:34.127Z] [INFO] ℹ️  ✅ [2025-07-15T01:09:34.127Z] GET /api/images? - 200 - 177ms - IP: ::1 - END
+[2025-07-15T01:09:36.481Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:36.481Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:09:36.484Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:09:36.484Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T01:09:36.487Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:36.487Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:09:36.490Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:09:36.490Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T01:09:37.262Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:37.262Z] GET /api/images? - IP: ::1 - START
+[2025-07-15T01:09:37.425Z] [INFO] ℹ️  ✅ [2025-07-15T01:09:37.425Z] GET /api/images? - 200 - 163ms - IP: ::1 - END
+[2025-07-15T01:09:37.559Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:37.559Z] GET /api/images? - IP: ::1 - START
+[2025-07-15T01:09:37.733Z] [INFO] ℹ️  ✅ [2025-07-15T01:09:37.733Z] GET /api/images? - 200 - 174ms - IP: ::1 - END
+[2025-07-15T01:09:39.096Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:39.096Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:09:39.107Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:09:39.107Z] GET /api/folders - 304 - 11ms - IP: ::1 - END
+[2025-07-15T01:09:39.108Z] [INFO] ℹ️  🌐 [2025-07-15T01:09:39.108Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:09:39.110Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:09:39.110Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:11:11.393Z] [INFO] ℹ️  🌐 [2025-07-15T01:11:11.393Z] GET /api/images? - IP: ::1 - START
+[2025-07-15T01:11:11.551Z] [INFO] ℹ️  ✅ [2025-07-15T01:11:11.551Z] GET /api/images? - 200 - 158ms - IP: ::1 - END
+[2025-07-15T01:11:11.663Z] [INFO] ℹ️  🌐 [2025-07-15T01:11:11.663Z] GET /api/images? - IP: ::1 - START
+[2025-07-15T01:11:11.816Z] [INFO] ℹ️  ✅ [2025-07-15T01:11:11.816Z] GET /api/images? - 200 - 153ms - IP: ::1 - END
+[2025-07-15T01:17:54.187Z] [INFO] ℹ️  🌐 [2025-07-15T01:17:54.187Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T01:17:54.208Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:17:54.208Z] GET /api/system/navigation - 304 - 21ms - IP: ::1 - END
+[2025-07-15T01:17:54.210Z] [INFO] ℹ️  🌐 [2025-07-15T01:17:54.210Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T01:17:54.212Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:17:54.212Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:17:54.217Z] [INFO] ℹ️  🌐 [2025-07-15T01:17:54.217Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:17:54.219Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:17:54.219Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T01:17:54.264Z] [INFO] ℹ️  🌐 [2025-07-15T01:17:54.263Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T01:17:54.266Z] [INFO] ℹ️  ⚠️ [2025-07-15T01:17:54.266Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T02:31:27.663Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T02:31:27.664Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T02:31:27.664Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T02:31:27.664Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T02:31:27.801Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T02:34:30.067Z] [INFO] ℹ️  🌐 [2025-07-15T02:34:30.067Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:34:30.112Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:34:30.112Z] GET /api/system/navigation - 304 - 45ms - IP: ::1 - END
+[2025-07-15T02:34:30.116Z] [INFO] ℹ️  🌐 [2025-07-15T02:34:30.116Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:34:30.120Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:34:30.120Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T02:34:30.121Z] [INFO] ℹ️  🌐 [2025-07-15T02:34:30.121Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:34:30.124Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:34:30.124Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T02:34:50.162Z] [INFO] ℹ️  🌐 [2025-07-15T02:34:50.161Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:34:50.202Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:34:50.202Z] GET /api/system/navigation - 304 - 41ms - IP: ::1 - END
+[2025-07-15T02:34:50.206Z] [INFO] ℹ️  🌐 [2025-07-15T02:34:50.206Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:34:50.210Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:34:50.210Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T02:34:50.214Z] [INFO] ℹ️  🌐 [2025-07-15T02:34:50.214Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:34:50.219Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:34:50.218Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T02:39:09.093Z] [INFO] ℹ️  🌐 [2025-07-15T02:39:09.093Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:39:09.099Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:39:09.099Z] GET /api/folders - 304 - 6ms - IP: ::1 - END
+[2025-07-15T02:43:48.076Z] [INFO] ℹ️  🌐 [2025-07-15T02:43:48.076Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:43:48.098Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:43:48.098Z] GET /api/system/navigation - 304 - 22ms - IP: ::1 - END
+[2025-07-15T02:43:48.101Z] [INFO] ℹ️  🌐 [2025-07-15T02:43:48.101Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:43:48.104Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:43:48.104Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T02:43:48.107Z] [INFO] ℹ️  🌐 [2025-07-15T02:43:48.107Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:43:48.108Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:43:48.108Z] GET /api/stats/system - 304 - 1ms - IP: ::1 - END
+[2025-07-15T02:47:55.377Z] [INFO] ℹ️  🌐 [2025-07-15T02:47:55.377Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:47:55.383Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:47:55.383Z] GET /api/folders - 304 - 6ms - IP: ::1 - END
+[2025-07-15T02:48:00.470Z] [INFO] ℹ️  🌐 [2025-07-15T02:48:00.470Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:48:00.493Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:48:00.493Z] GET /api/system/navigation - 304 - 23ms - IP: ::1 - END
+[2025-07-15T02:48:00.495Z] [INFO] ℹ️  🌐 [2025-07-15T02:48:00.495Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:48:00.498Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:48:00.498Z] GET /api/stats/system - 304 - 3ms - IP: ::1 - END
+[2025-07-15T02:48:00.502Z] [INFO] ℹ️  🌐 [2025-07-15T02:48:00.502Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:48:00.504Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:48:00.504Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T02:49:26.105Z] [INFO] ℹ️  🌐 [2025-07-15T02:49:26.105Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:49:26.121Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:49:26.121Z] GET /api/system/navigation - 304 - 16ms - IP: ::1 - END
+[2025-07-15T02:49:26.123Z] [INFO] ℹ️  🌐 [2025-07-15T02:49:26.123Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:49:26.126Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:49:26.126Z] GET /api/stats/system - 304 - 3ms - IP: ::1 - END
+[2025-07-15T02:49:26.128Z] [INFO] ℹ️  🌐 [2025-07-15T02:49:26.128Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:49:26.134Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:49:26.134Z] GET /api/folders - 304 - 6ms - IP: ::1 - END
+[2025-07-15T02:50:24.243Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T02:50:24.244Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T02:50:24.244Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T02:50:24.244Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T02:50:24.352Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T02:51:12.659Z] [INFO] ℹ️  🌐 [2025-07-15T02:51:12.659Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:51:12.710Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:51:12.710Z] GET /api/system/navigation - 304 - 51ms - IP: ::1 - END
+[2025-07-15T02:51:12.712Z] [INFO] ℹ️  🌐 [2025-07-15T02:51:12.712Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:51:12.715Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:51:12.715Z] GET /api/stats/system - 304 - 3ms - IP: ::1 - END
+[2025-07-15T02:51:12.716Z] [INFO] ℹ️  🌐 [2025-07-15T02:51:12.716Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:51:12.719Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:51:12.719Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T02:53:03.298Z] [INFO] ℹ️  🌐 [2025-07-15T02:53:03.298Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:53:03.305Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:53:03.305Z] GET /api/folders - 304 - 7ms - IP: ::1 - END
+[2025-07-15T02:54:10.627Z] [INFO] ℹ️  🌐 [2025-07-15T02:54:10.627Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:54:10.633Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:54:10.633Z] GET /api/folders - 304 - 6ms - IP: ::1 - END
+[2025-07-15T02:54:57.320Z] [INFO] ℹ️  🌐 [2025-07-15T02:54:57.320Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:54:57.322Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:54:57.322Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T02:55:09.795Z] [INFO] ℹ️  🌐 [2025-07-15T02:55:09.795Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:55:09.818Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:55:09.818Z] GET /api/system/navigation - 304 - 23ms - IP: ::1 - END
+[2025-07-15T02:55:09.819Z] [INFO] ℹ️  🌐 [2025-07-15T02:55:09.819Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:55:09.821Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:55:09.821Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T02:55:09.824Z] [INFO] ℹ️  🌐 [2025-07-15T02:55:09.824Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:55:09.828Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:55:09.828Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T02:58:10.722Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T02:58:10.722Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T02:58:10.722Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T02:58:10.723Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T02:58:10.881Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T02:59:12.025Z] [INFO] ℹ️  🌐 [2025-07-15T02:59:12.025Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:59:12.054Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:59:12.054Z] GET /api/folders - 304 - 29ms - IP: ::1 - END
+[2025-07-15T02:59:15.914Z] [INFO] ℹ️  🌐 [2025-07-15T02:59:15.914Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:59:15.999Z] [INFO] ℹ️  ✅ [2025-07-15T02:59:15.999Z] GET /api/system/navigation - 200 - 85ms - IP: ::1 - END
+[2025-07-15T02:59:16.002Z] [INFO] ℹ️  🌐 [2025-07-15T02:59:16.002Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:59:16.007Z] [INFO] ℹ️  ✅ [2025-07-15T02:59:16.006Z] GET /api/stats/system - 200 - 4ms - IP: ::1 - END
+[2025-07-15T02:59:16.010Z] [INFO] ℹ️  🌐 [2025-07-15T02:59:16.010Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:59:16.013Z] [INFO] ℹ️  ✅ [2025-07-15T02:59:16.013Z] GET /api/folders - 200 - 3ms - IP: ::1 - END
+[2025-07-15T02:59:17.339Z] [INFO] ℹ️  🌐 [2025-07-15T02:59:17.339Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T02:59:17.374Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:59:17.374Z] GET /api/system/navigation - 304 - 35ms - IP: ::1 - END
+[2025-07-15T02:59:17.387Z] [INFO] ℹ️  🌐 [2025-07-15T02:59:17.387Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T02:59:17.390Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:59:17.389Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T02:59:17.397Z] [INFO] ℹ️  🌐 [2025-07-15T02:59:17.397Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T02:59:17.400Z] [INFO] ℹ️  ⚠️ [2025-07-15T02:59:17.400Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:00:12.306Z] [INFO] ℹ️  🌐 [2025-07-15T03:00:12.306Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:00:12.373Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:00:12.373Z] GET /api/system/navigation - 304 - 67ms - IP: ::1 - END
+[2025-07-15T03:00:12.375Z] [INFO] ℹ️  🌐 [2025-07-15T03:00:12.375Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:00:12.378Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:00:12.378Z] GET /api/stats/system - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:00:12.386Z] [INFO] ℹ️  🌐 [2025-07-15T03:00:12.386Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:00:12.391Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:00:12.391Z] GET /api/folders - 304 - 5ms - IP: ::1 - END
+[2025-07-15T03:01:22.596Z] [INFO] ℹ️  🌐 [2025-07-15T03:01:22.596Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:01:22.600Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:01:22.600Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:04:41.121Z] [INFO] ℹ️  🌐 [2025-07-15T03:04:41.121Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:04:41.125Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:04:41.125Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:05:25.969Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T03:05:25.970Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T03:05:25.970Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T03:05:25.970Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T03:05:26.090Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T03:06:21.915Z] [INFO] ℹ️  🌐 [2025-07-15T03:06:21.915Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:06:21.970Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:06:21.970Z] GET /api/system/navigation - 304 - 55ms - IP: ::1 - END
+[2025-07-15T03:06:21.974Z] [INFO] ℹ️  🌐 [2025-07-15T03:06:21.974Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:06:21.978Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:06:21.978Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:06:21.980Z] [INFO] ℹ️  🌐 [2025-07-15T03:06:21.980Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:06:21.984Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:06:21.984Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:06:22.837Z] [INFO] ℹ️  🌐 [2025-07-15T03:06:22.837Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:06:22.870Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:06:22.869Z] GET /api/system/navigation - 304 - 32ms - IP: ::1 - END
+[2025-07-15T03:06:22.873Z] [INFO] ℹ️  🌐 [2025-07-15T03:06:22.873Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:06:22.877Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:06:22.877Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:06:22.887Z] [INFO] ℹ️  🌐 [2025-07-15T03:06:22.886Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:06:22.890Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:06:22.890Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:07:39.118Z] [INFO] ℹ️  🌐 [2025-07-15T03:07:39.118Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:07:39.141Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:07:39.141Z] GET /api/system/navigation - 304 - 23ms - IP: ::1 - END
+[2025-07-15T03:07:39.143Z] [INFO] ℹ️  🌐 [2025-07-15T03:07:39.143Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:07:39.149Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:07:39.149Z] GET /api/folders - 304 - 6ms - IP: ::1 - END
+[2025-07-15T03:07:39.152Z] [INFO] ℹ️  🌐 [2025-07-15T03:07:39.152Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:07:39.155Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:07:39.155Z] GET /api/stats/system - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:07:58.803Z] [INFO] ℹ️  🌐 [2025-07-15T03:07:58.803Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:07:58.820Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:07:58.820Z] GET /api/folders - 304 - 17ms - IP: ::1 - END
+[2025-07-15T03:08:16.010Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:16.010Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:08:16.036Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:16.036Z] GET /api/system/navigation - 304 - 26ms - IP: ::1 - END
+[2025-07-15T03:08:16.038Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:16.038Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:08:16.040Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:16.040Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T03:08:16.043Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:16.043Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:08:16.050Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:16.050Z] GET /api/folders - 304 - 7ms - IP: ::1 - END
+[2025-07-15T03:08:31.439Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:31.439Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:08:31.463Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:31.463Z] GET /api/system/navigation - 304 - 24ms - IP: ::1 - END
+[2025-07-15T03:08:31.468Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:31.468Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:08:31.470Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:31.470Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T03:08:31.472Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:31.472Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:08:31.475Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:31.475Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:08:45.727Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:45.727Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:08:45.765Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:45.765Z] GET /api/system/navigation - 304 - 38ms - IP: ::1 - END
+[2025-07-15T03:08:45.772Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:45.772Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:08:45.776Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:45.776Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:08:45.779Z] [INFO] ℹ️  🌐 [2025-07-15T03:08:45.779Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:08:45.783Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:08:45.783Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:09:08.013Z] [INFO] ℹ️  🌐 [2025-07-15T03:09:08.012Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:09:08.054Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:09:08.054Z] GET /api/system/navigation - 304 - 42ms - IP: ::1 - END
+[2025-07-15T03:09:08.058Z] [INFO] ℹ️  🌐 [2025-07-15T03:09:08.058Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:09:08.061Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:09:08.060Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T03:09:08.062Z] [INFO] ℹ️  🌐 [2025-07-15T03:09:08.062Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:09:08.073Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:09:08.073Z] GET /api/folders - 304 - 11ms - IP: ::1 - END
+[2025-07-15T03:12:38.510Z] [INFO] ℹ️  🌐 [2025-07-15T03:12:38.510Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:12:38.517Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:12:38.517Z] GET /api/folders - 304 - 7ms - IP: ::1 - END
+[2025-07-15T03:30:30.497Z] [INFO] ℹ️  🌐 [2025-07-15T03:30:30.497Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:30:30.500Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:30:30.500Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:34:00.398Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T03:34:00.399Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T03:34:00.399Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T03:34:00.400Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T03:34:00.512Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T03:34:53.968Z] [INFO] ℹ️  🌐 [2025-07-15T03:34:53.968Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:34:54.007Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:34:54.007Z] GET /api/system/navigation - 304 - 39ms - IP: ::1 - END
+[2025-07-15T03:34:54.011Z] [INFO] ℹ️  🌐 [2025-07-15T03:34:54.011Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:34:54.014Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:34:54.014Z] GET /api/stats/system - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:34:54.016Z] [INFO] ℹ️  🌐 [2025-07-15T03:34:54.016Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:34:54.019Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:34:54.019Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:36:28.769Z] [INFO] ℹ️  🌐 [2025-07-15T03:36:28.769Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:36:28.804Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:36:28.804Z] GET /api/folders - 304 - 35ms - IP: ::1 - END
+[2025-07-15T03:36:30.763Z] [INFO] ℹ️  🌐 [2025-07-15T03:36:30.763Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:36:30.783Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:36:30.783Z] GET /api/system/navigation - 304 - 20ms - IP: ::1 - END
+[2025-07-15T03:36:30.786Z] [INFO] ℹ️  🌐 [2025-07-15T03:36:30.786Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:36:30.787Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:36:30.787Z] GET /api/stats/system - 304 - 1ms - IP: ::1 - END
+[2025-07-15T03:36:30.790Z] [INFO] ℹ️  🌐 [2025-07-15T03:36:30.790Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:36:30.796Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:36:30.796Z] GET /api/folders - 304 - 6ms - IP: ::1 - END
+[2025-07-15T03:38:37.377Z] [INFO] ℹ️  🌐 [2025-07-15T03:38:37.377Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:38:37.403Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:38:37.403Z] GET /api/system/navigation - 304 - 26ms - IP: ::1 - END
+[2025-07-15T03:38:37.405Z] [INFO] ℹ️  🌐 [2025-07-15T03:38:37.405Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:38:37.407Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:38:37.407Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T03:38:37.409Z] [INFO] ℹ️  🌐 [2025-07-15T03:38:37.409Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:38:37.413Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:38:37.413Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:44:26.275Z] [INFO] ℹ️  🌐 [2025-07-15T03:44:26.275Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:44:26.279Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:44:26.279Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:45:27.742Z] [INFO] ℹ️  🌐 [2025-07-15T03:45:27.742Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:45:27.746Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:45:27.746Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:46:44.828Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T03:46:44.829Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T03:46:44.829Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T03:46:44.829Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T03:46:44.938Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T03:46:47.114Z] [INFO] ℹ️  🌐 [2025-07-15T03:46:47.114Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:46:47.128Z] [INFO] ℹ️  ✅ [2025-07-15T03:46:47.128Z] GET /api/folders - 200 - 14ms - IP: ::1 - END
+[2025-07-15T03:47:36.227Z] [INFO] ℹ️  🌐 [2025-07-15T03:47:36.227Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:47:36.262Z] [INFO] ℹ️  ✅ [2025-07-15T03:47:36.262Z] GET /api/system/navigation - 200 - 35ms - IP: ::1 - END
+[2025-07-15T03:47:36.264Z] [INFO] ℹ️  🌐 [2025-07-15T03:47:36.264Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:47:36.269Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:47:36.269Z] GET /api/folders - 304 - 5ms - IP: ::1 - END
+[2025-07-15T03:47:36.270Z] [INFO] ℹ️  🌐 [2025-07-15T03:47:36.270Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:47:36.272Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:47:36.272Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T03:50:58.227Z] [INFO] ℹ️  🌐 [2025-07-15T03:50:58.227Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:50:58.234Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:50:58.233Z] GET /api/folders - 304 - 6ms - IP: ::1 - END
+[2025-07-15T03:54:19.543Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:19.543Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:54:19.547Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:54:19.547Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:54:21.356Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:21.356Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:54:21.383Z] [INFO] ℹ️  ✅ [2025-07-15T03:54:21.383Z] GET /api/system/navigation - 200 - 27ms - IP: ::1 - END
+[2025-07-15T03:54:21.385Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:21.385Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:54:21.386Z] [INFO] ℹ️  ✅ [2025-07-15T03:54:21.386Z] GET /api/stats/system - 200 - 1ms - IP: ::1 - END
+[2025-07-15T03:54:21.400Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:21.400Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:54:21.405Z] [INFO] ℹ️  ✅ [2025-07-15T03:54:21.405Z] GET /api/folders - 200 - 5ms - IP: ::1 - END
+[2025-07-15T03:54:23.333Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:23.333Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:54:23.336Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:54:23.336Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:54:23.340Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:23.340Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T03:54:23.348Z] [INFO] ℹ️  ✅ [2025-07-15T03:54:23.348Z] GET /api/system/stats - 200 - 8ms - IP: ::1 - END
+[2025-07-15T03:54:23.349Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:23.349Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:23.388Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:23.388Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:54:23.391Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:54:23.391Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:54:23.397Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:23.397Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:23.439Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:23.439Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:23.721Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:23.721Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:25.630Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:25.630Z] POST /api/folders/folder-1/reindex - IP: ::1 - START
+[2025-07-15T03:54:25.839Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:25.839Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:26.852Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:26.852Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:27.712Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:27.712Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:28.503Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:28.503Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:29.442Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:29.442Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:30.170Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:30.170Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:31.023Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:31.023Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:31.889Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:31.889Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:32.818Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:32.818Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:33.499Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:33.499Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:34.336Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:34.336Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:35.214Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:35.214Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:54:43.103Z] [INFO] ℹ️  ✅ [2025-07-15T03:54:43.103Z] POST /api/folders/folder-1/reindex - 200 - 17473ms - IP: ::1 - END
+[2025-07-15T03:54:43.112Z] [INFO] ℹ️  🌐 [2025-07-15T03:54:43.112Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:54:43.114Z] [INFO] ℹ️  ✅ [2025-07-15T03:54:43.114Z] GET /api/folders - 200 - 2ms - IP: ::1 - END
+[2025-07-15T03:55:04.387Z] [INFO] ℹ️  🌐 [2025-07-15T03:55:04.387Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T03:55:04.408Z] [INFO] ℹ️  ✅ [2025-07-15T03:55:04.408Z] GET /api/system/stats - 200 - 21ms - IP: ::1 - END
+[2025-07-15T03:55:33.044Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T03:55:33.045Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T03:55:33.045Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T03:55:33.045Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T03:55:33.157Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T03:56:24.303Z] [INFO] ℹ️  🌐 [2025-07-15T03:56:24.303Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:56:24.344Z] [INFO] ℹ️  ✅ [2025-07-15T03:56:24.344Z] GET /api/system/navigation - 200 - 41ms - IP: ::1 - END
+[2025-07-15T03:56:24.348Z] [INFO] ℹ️  🌐 [2025-07-15T03:56:24.348Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:56:24.352Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:56:24.352Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:56:24.353Z] [INFO] ℹ️  🌐 [2025-07-15T03:56:24.353Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:56:24.357Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:56:24.357Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:59:28.277Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:28.277Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:28.285Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:28.285Z] GET /api/folders - 304 - 8ms - IP: ::1 - END
+[2025-07-15T03:59:30.334Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:30.334Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:30.339Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:30.339Z] GET /api/folders - 304 - 5ms - IP: ::1 - END
+[2025-07-15T03:59:30.346Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:30.346Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T03:59:30.354Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:30.354Z] GET /api/system/stats - 304 - 8ms - IP: ::1 - END
+[2025-07-15T03:59:30.356Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:30.356Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:30.390Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:30.390Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:30.393Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:30.393Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:59:30.396Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:30.396Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:30.446Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:30.446Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:30.668Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:30.668Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:32.111Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:32.111Z] POST /api/folders/folder-2/reindex - IP: ::1 - START
+[2025-07-15T03:59:32.251Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:32.251Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:32.674Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:32.674Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:33.048Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:33.048Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:33.363Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:33.363Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:33.700Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:33.700Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:33.963Z] [INFO] ℹ️  ✅ [2025-07-15T03:59:33.963Z] POST /api/folders/folder-2/reindex - 200 - 1852ms - IP: ::1 - END
+[2025-07-15T03:59:33.966Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:33.966Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:33.967Z] [INFO] ℹ️  ✅ [2025-07-15T03:59:33.967Z] GET /api/folders - 200 - 1ms - IP: ::1 - END
+[2025-07-15T03:59:33.968Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:33.968Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:33.970Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:33.970Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T03:59:34.071Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:34.071Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:34.140Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:34.140Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:34.143Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:34.143Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:59:34.222Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:34.222Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:34.326Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:34.326Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:34.963Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:34.963Z] POST /api/folders/folder-3/reindex - IP: ::1 - START
+[2025-07-15T03:59:35.098Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:35.098Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:35.710Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:35.710Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:35.918Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:35.918Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:36.245Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:36.245Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:36.593Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:36.593Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:36.965Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:36.965Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:37.482Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:37.482Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:37.917Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:37.917Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:38.187Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:38.187Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:38.712Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:38.712Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:39.094Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:39.094Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:39.655Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:39.655Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:39.959Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:39.959Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:40.517Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:40.517Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:40.844Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:40.844Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:41.266Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:41.266Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:41.754Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:41.754Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:43.367Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:43.367Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:43.753Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:43.753Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:43.968Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:43.968Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:44.354Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:44.354Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:44.739Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:44.739Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:45.194Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:45.194Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:45.766Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:45.766Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:46.067Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:46.067Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:46.657Z] [INFO] ℹ️  ✅ [2025-07-15T03:59:46.657Z] POST /api/folders/folder-3/reindex - 200 - 11694ms - IP: ::1 - END
+[2025-07-15T03:59:46.674Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:46.674Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:46.689Z] [INFO] ℹ️  ✅ [2025-07-15T03:59:46.689Z] GET /api/folders - 200 - 15ms - IP: ::1 - END
+[2025-07-15T03:59:46.692Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:46.692Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:46.696Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:46.696Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T03:59:46.698Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:46.698Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:46.701Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:46.701Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T03:59:46.777Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:46.777Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:46.958Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:46.958Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:48.454Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:48.454Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T03:59:51.823Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:51.823Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T03:59:51.842Z] [INFO] ℹ️  ✅ [2025-07-15T03:59:51.842Z] GET /api/system/navigation - 200 - 19ms - IP: ::1 - END
+[2025-07-15T03:59:51.845Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:51.845Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T03:59:51.847Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:51.847Z] GET /api/stats/system - 304 - 2ms - IP: ::1 - END
+[2025-07-15T03:59:51.850Z] [INFO] ℹ️  🌐 [2025-07-15T03:59:51.850Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T03:59:51.852Z] [INFO] ℹ️  ⚠️ [2025-07-15T03:59:51.852Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T04:03:07.999Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-15T04:03:08.000Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-15T04:03:08.000Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-15T04:03:08.001Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-15.log
+[2025-07-15T04:03:08.126Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-15T04:03:39.635Z] [INFO] ℹ️  🌐 [2025-07-15T04:03:39.635Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:03:39.668Z] [INFO] ℹ️  ✅ [2025-07-15T04:03:39.668Z] GET /api/folders - 200 - 33ms - IP: ::1 - END
+[2025-07-15T04:04:08.253Z] [INFO] ℹ️  🌐 [2025-07-15T04:04:08.253Z] GET /api/system/navigation - IP: ::1 - START
+[2025-07-15T04:04:08.276Z] [INFO] ℹ️  ✅ [2025-07-15T04:04:08.276Z] GET /api/system/navigation - 200 - 23ms - IP: ::1 - END
+[2025-07-15T04:04:08.280Z] [INFO] ℹ️  🌐 [2025-07-15T04:04:08.280Z] GET /api/stats/system - IP: ::1 - START
+[2025-07-15T04:04:08.284Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:04:08.284Z] GET /api/stats/system - 304 - 4ms - IP: ::1 - END
+[2025-07-15T04:04:08.286Z] [INFO] ℹ️  🌐 [2025-07-15T04:04:08.286Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:04:08.290Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:04:08.290Z] GET /api/folders - 304 - 4ms - IP: ::1 - END
+[2025-07-15T04:05:08.864Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:08.864Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:08.869Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:05:08.869Z] GET /api/folders - 304 - 5ms - IP: ::1 - END
+[2025-07-15T04:05:08.875Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:08.875Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T04:05:08.883Z] [INFO] ℹ️  ✅ [2025-07-15T04:05:08.883Z] GET /api/system/stats - 200 - 8ms - IP: ::1 - END
+[2025-07-15T04:05:08.886Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:08.886Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:08.897Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:08.897Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:08.900Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:05:08.900Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T04:05:08.903Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:08.903Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:08.951Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:08.951Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:09.208Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:09.207Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:12.216Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:12.216Z] POST /api/folders/aesthethic/reindex - IP: ::1 - START
+[2025-07-15T04:05:12.367Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:12.367Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:13.273Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:13.273Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:13.558Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:13.558Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:13.746Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:13.746Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:13.984Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:13.984Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:14.191Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:14.191Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:14.729Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:14.729Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:15.058Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:15.058Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:15.808Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:15.808Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:16.102Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:16.102Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:16.330Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:16.330Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:16.522Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:16.522Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:16.607Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:16.607Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:16.779Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:16.779Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:17.240Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:17.240Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:17.793Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:17.793Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:22.117Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:22.117Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:27.614Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:27.614Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:30.501Z] [INFO] ℹ️  ✅ [2025-07-15T04:05:30.501Z] POST /api/folders/aesthethic/reindex - 200 - 18285ms - IP: ::1 - END
+[2025-07-15T04:05:30.505Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:30.505Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:30.507Z] [INFO] ℹ️  ✅ [2025-07-15T04:05:30.507Z] GET /api/folders - 200 - 2ms - IP: ::1 - END
+[2025-07-15T04:05:30.508Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:30.508Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:30.511Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:05:30.511Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T04:05:30.679Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:30.679Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:30.744Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:30.744Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:30.747Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:05:30.747Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T04:05:31.328Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:31.328Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:31.609Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:31.609Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:32.679Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:32.679Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:33.008Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:33.008Z] POST /api/folders/cartoons/reindex - IP: ::1 - START
+[2025-07-15T04:05:33.544Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:33.544Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:34.540Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:34.540Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:34.938Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:34.938Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:36.000Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:36.000Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:36.770Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:36.770Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:37.587Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:37.587Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:37.949Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:37.949Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:39.250Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:39.250Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:39.777Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:39.777Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:40.727Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:40.727Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:41.624Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:41.624Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:42.055Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:42.055Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:43.269Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:43.269Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:43.675Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:43.675Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:44.860Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:44.860Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:45.242Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:45.242Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:46.464Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:46.464Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:46.897Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:46.897Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:47.713Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:47.713Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:47.970Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:47.970Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:49.246Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:49.246Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:50.240Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:50.240Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:50.334Z] [INFO] ℹ️  ✅ [2025-07-15T04:05:50.334Z] POST /api/folders/cartoons/reindex - 200 - 17326ms - IP: ::1 - END
+[2025-07-15T04:05:50.339Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:50.339Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:50.344Z] [INFO] ℹ️  ✅ [2025-07-15T04:05:50.344Z] GET /api/folders - 200 - 5ms - IP: ::1 - END
+[2025-07-15T04:05:50.347Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:50.347Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:50.351Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:05:50.350Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T04:05:50.453Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:50.453Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:50.530Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:50.530Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:05:50.538Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:05:50.538Z] GET /api/folders - 304 - 8ms - IP: ::1 - END
+[2025-07-15T04:05:50.627Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:50.627Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:50.745Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:50.745Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:05:52.502Z] [INFO] ℹ️  🌐 [2025-07-15T04:05:52.502Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:02.975Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:02.975Z] POST /api/folders/wallpapers/reindex - IP: ::1 - START
+[2025-07-15T04:06:03.502Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:03.502Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:03.694Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:03.694Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:04.587Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:04.587Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:05.304Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:05.304Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:06.401Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:06.401Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:06.888Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:06.888Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:07.810Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:07.810Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:08.652Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:08.652Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:08.854Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:08.854Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:09.297Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:09.297Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:11.269Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:11.269Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:11.710Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:11.710Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:12.453Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:12.453Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:13.484Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:13.484Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:13.801Z] [INFO] ℹ️  ✅ [2025-07-15T04:06:13.801Z] POST /api/folders/wallpapers/reindex - 200 - 10826ms - IP: ::1 - END
+[2025-07-15T04:06:13.807Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:13.807Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:06:13.812Z] [INFO] ℹ️  ✅ [2025-07-15T04:06:13.812Z] GET /api/folders - 200 - 5ms - IP: ::1 - END
+[2025-07-15T04:06:13.814Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:13.814Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:06:13.816Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:06:13.816Z] GET /api/folders - 304 - 2ms - IP: ::1 - END
+[2025-07-15T04:06:13.912Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:13.912Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:14.024Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:14.024Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:06:14.031Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:06:14.031Z] GET /api/folders - 304 - 7ms - IP: ::1 - END
+[2025-07-15T04:06:14.523Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:14.523Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:14.664Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:14.664Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:14.949Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:14.949Z] POST /api/folders/photography/reindex - IP: ::1 - START
+[2025-07-15T04:06:15.560Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:15.560Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:15.713Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:15.713Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:15.943Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:15.943Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:16.632Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:16.632Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:16.749Z] [INFO] ℹ️  ✅ [2025-07-15T04:06:16.749Z] POST /api/folders/photography/reindex - 200 - 1800ms - IP: ::1 - END
+[2025-07-15T04:06:16.751Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:16.751Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:06:16.754Z] [INFO] ℹ️  ✅ [2025-07-15T04:06:16.754Z] GET /api/folders - 200 - 3ms - IP: ::1 - END
+[2025-07-15T04:06:16.755Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:16.755Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:06:16.758Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:06:16.758Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T04:06:16.863Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:16.863Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:16.936Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:16.936Z] GET /api/folders - IP: ::1 - START
+[2025-07-15T04:06:16.939Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:06:16.939Z] GET /api/folders - 304 - 3ms - IP: ::1 - END
+[2025-07-15T04:06:17.047Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:17.047Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:17.627Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:17.627Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:18.877Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:18.877Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:26.098Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:26.098Z] POST /api/folders/memes/reindex - IP: ::1 - START
+[2025-07-15T04:06:26.692Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:26.692Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:40.874Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:40.874Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:06:54.570Z] [INFO] ℹ️  🌐 [2025-07-15T04:06:54.570Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:07:08.560Z] [INFO] ℹ️  🌐 [2025-07-15T04:07:08.560Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:07:23.127Z] [INFO] ℹ️  🌐 [2025-07-15T04:07:23.127Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:07:37.269Z] [INFO] ℹ️  🌐 [2025-07-15T04:07:37.269Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:07:51.465Z] [INFO] ℹ️  🌐 [2025-07-15T04:07:51.465Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:08:05.838Z] [INFO] ℹ️  🌐 [2025-07-15T04:08:05.838Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:08:07.442Z] [INFO] ℹ️  🌐 [2025-07-15T04:08:07.442Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T04:08:07.446Z] [INFO] ℹ️  ✅ [2025-07-15T04:08:07.446Z] GET /api/system/stats - 200 - 4ms - IP: ::1 - END
+[2025-07-15T04:08:20.716Z] [INFO] ℹ️  🌐 [2025-07-15T04:08:20.716Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:08:35.071Z] [INFO] ℹ️  🌐 [2025-07-15T04:08:35.070Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:08:49.899Z] [INFO] ℹ️  🌐 [2025-07-15T04:08:49.899Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:08:55.843Z] [INFO] ℹ️  🌐 [2025-07-15T04:08:55.843Z] GET /api/system/stats - IP: ::1 - START
+[2025-07-15T04:08:55.847Z] [INFO] ℹ️  ⚠️ [2025-07-15T04:08:55.847Z] GET /api/system/stats - 304 - 4ms - IP: ::1 - END
+[2025-07-15T04:09:05.797Z] [INFO] ℹ️  🌐 [2025-07-15T04:09:05.797Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:09:21.557Z] [INFO] ℹ️  🌐 [2025-07-15T04:09:21.557Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:09:37.352Z] [INFO] ℹ️  🌐 [2025-07-15T04:09:37.352Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:09:52.640Z] [INFO] ℹ️  🌐 [2025-07-15T04:09:52.640Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:10:07.894Z] [INFO] ℹ️  🌐 [2025-07-15T04:10:07.894Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:10:23.706Z] [INFO] ℹ️  🌐 [2025-07-15T04:10:23.706Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:10:38.586Z] [INFO] ℹ️  🌐 [2025-07-15T04:10:38.586Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:10:53.346Z] [INFO] ℹ️  🌐 [2025-07-15T04:10:53.346Z] GET /api/events/stream - IP: ::1 - START
+[2025-07-15T04:11:06.499Z] [INFO] ℹ️  🌐 [2025-07-15T04:11:06.499Z] GET /api/events/stream - IP: ::1 - START

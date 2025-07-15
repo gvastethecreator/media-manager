@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import type { Favorite } from '@/types/entities/favorite';
 
 interface FavoritesContentViewProps {
@@ -25,6 +26,7 @@ interface FavoritesContentViewProps {
 	handleFavoriteSelect: (favoriteId: string) => void;
 	handleCreateFavorite: () => void;
 	handleRetry: () => void;
+	className?: string;
 }
 
 const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
@@ -42,6 +44,7 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	handleFavoriteSelect,
 	handleCreateFavorite,
 	handleRetry,
+	className,
 }) => {
 	if (isLoading) {
 		return <LoadingScreen message="Cargando favoritos..." />;
@@ -62,7 +65,7 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	}
 
 	return (
-		<ScrollArea className="flex-1">
+		<ScrollArea className={className || "flex-1"}>
 			<div className="p-6">
 				<h2 className="text-xl font-bold mb-4">Vista de Favoritos</h2>
 

@@ -26,7 +26,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 		const loadImages = async () => {
 			try {
 				setIsLoading(true);
-				const data = await worldItemService.getRecentWorldItemImages(worldItemId);
+				const data = await worldItemService.getRecentWorldItemImages(worldItemId, 6);
 				// Filtrar solo imágenes con thumbnailUrl válida
 				const validImages = data.filter((img) => img.thumbnailUrl);
 				setImages(validImages);
