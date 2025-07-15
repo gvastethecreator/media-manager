@@ -38,7 +38,14 @@ export interface FolderResponse {
 
 export interface FolderStats {
 	totalFolders: number;
+	totalFiles: number;
 	totalImages: number;
+	totalVideos: number;
+	totalAudio: number;
+	totalDocuments: number;
+	totalOthers: number;
 	totalSize: number;
+	formattedSize: string;
 	lastScanned?: string;
+	directoryCount: number; // Para compatibilidad con componente actual
 }

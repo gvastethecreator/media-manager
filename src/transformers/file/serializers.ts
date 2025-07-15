@@ -81,6 +81,10 @@ export function serializeFileList(files: FileWithStats[]) {
  * @returns Estadísticas serializadas
  */
 export function serializeFileGroupedStats(grouped: Record<string, FileWithStats[]>) {
+	if (!grouped || typeof grouped !== 'object') {
+		return [];
+	}
+	// Validación adicional null-safe para Object.entries
 	return Object.entries(grouped).map(([fileType, files]) => ({
 		fileType,
 		count: files.length,

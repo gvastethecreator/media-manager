@@ -10,6 +10,7 @@ import {
 	images,
 	places,
 	tags,
+	videos,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -130,14 +131,24 @@ interface TopTag {
 // Funciones exportadas
 export async function getSystemStats(): Promise<GeneralStats | null> {
 	console.log('🔍 [getSystemStats] Iniciando función...');
-	// Temporalmente devolver datos mock para evitar errores de Drizzle
-	statsLogger.info('📊 Usando datos temporales para evitar errores de Object.entries');
+	statsLogger.info('📊 Obteniendo estadísticas del sistema');
 
 	try {
-		// Datos mock temporales
+		// Obtener conteos reales de la base de datos
+		const [foldersCount, imagesCount, videosCount] = await Promise.all([
+			db.select({ count: sql<number>`count(*)` }).from(folders),
+			db.select({ count: sql<number>`count(*)` }).from(images),
+			db.select({ count: sql<number>`count(*)` }).from(videos),
+		]);
+
+		// Calcular tamaño total
+		const totalSizeResult = await db
+			.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` })
+			.from(folders);
+
 		const result = {
-			totalImages: 0,
-			totalFolders: 7, // Sabemos que hay 7 carpetas
+			totalImages: imagesCount[0]?.count || 0,
+			totalFolders: foldersCount[0]?.count || 0,
 			totalTags: 0,
 			totalCollections: 0,
 			totalAlbums: 0,
@@ -147,19 +158,16 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 			totalFavorites: 0,
 			totalViews: 0,
 			totalDownloads: 0,
-			totalSize: 0,
+			totalSize: totalSizeResult[0]?.totalSize || 0,
 			totalActivities: 0,
 			topTags: [],
 			recentActivity: [],
 		} satisfies GeneralStats;
 
-		statsLogger.info('✅ Estadísticas temporales devueltas');
+		statsLogger.info('✅ Estadísticas del sistema obtenidas');
 		return result;
 	} catch (error) {
 		console.error('🚨 [getSystemStats] Error capturado:', error);
-		console.error('🚨 [getSystemStats] Error stack:', error instanceof Error ? error.stack : 'No stack available');
-		console.error('🚨 [getSystemStats] Error message:', error instanceof Error ? error.message : String(error));
-		console.error('🚨 [getSystemStats] Error name:', error instanceof Error ? error.name : typeof error);
 		statsLogger.error('Error al obtener estadísticas del sistema:', error);
 		return null;
 	}
@@ -172,6 +180,81 @@ export interface ExtendedStats {
 	totalJsonFiles: number;
 	totalWorkflows: number;
 	totalFile3D: number;
+}
+
+// Función para obtener estadísticas detalladas de carpetas
+export async function getFolderStats(): Promise<import('@/types/folders').FolderStats | null> {
+	try {
+		statsLogger.info('📊 Obteniendo estadísticas detalladas de carpetas');
+
+		// Obtener conteos y estadísticas con logging detallado
+		statsLogger.info('🔍 Ejecutando consultas a la base de datos...');
+		const [foldersCount, imagesCount, videosCount, totalSizeResult] = await Promise.all([
+			db.select({ count: sql<number>`count(*)` }).from(folders).then(result => {
+				statsLogger.info('✅ Consulta folders completada:', result);
+				return result;
+			}).catch(error => {
+				statsLogger.error('❌ Error en consulta folders:', error);
+				throw error;
+			}),
+			db.select({ count: sql<number>`count(*)` }).from(images).then(result => {
+				statsLogger.info('✅ Consulta images completada:', result);
+				return result;
+			}).catch(error => {
+				statsLogger.error('❌ Error en consulta images:', error);
+				throw error;
+			}),
+			db.select({ count: sql<number>`count(*)` }).from(videos).then(result => {
+				statsLogger.info('✅ Consulta videos completada:', result);
+				return result;
+			}).catch(error => {
+				statsLogger.error('❌ Error en consulta videos:', error);
+				throw error;
+			}),
+			db.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` }).from(folders).then(result => {
+				statsLogger.info('✅ Consulta totalSize completada:', result);
+				return result;
+			}).catch(error => {
+				statsLogger.error('❌ Error en consulta totalSize:', error);
+				throw error;
+			}),
+		]);
+
+		const totalFolders = foldersCount[0]?.count || 0;
+		const totalImages = imagesCount[0]?.count || 0;
+		const totalVideos = videosCount[0]?.count || 0;
+		const totalSize = totalSizeResult[0]?.totalSize || 0;
+		const totalFiles = totalImages + totalVideos;
+
+		// Formatear tamaño
+		const formatBytes = (bytes: number): string => {
+			if (bytes === 0) return '0 B';
+			const k = 1024;
+			const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+			const i = Math.floor(Math.log(bytes) / Math.log(k));
+			return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
+		};
+
+		const result = {
+			totalFolders,
+			totalFiles,
+			totalImages,
+			totalVideos,
+			totalAudio: 0, // TODO: Implementar cuando se agregue tabla de audio
+			totalDocuments: 0, // TODO: Implementar cuando se agregue tabla de documentos
+			totalOthers: 0, // TODO: Implementar cuando se agregue tabla de otros archivos
+			totalSize,
+			formattedSize: formatBytes(totalSize),
+			directoryCount: totalFolders, // Para compatibilidad
+			lastScanned: new Date().toISOString(),
+		};
+
+		statsLogger.info('✅ Estadísticas detalladas de carpetas obtenidas');
+		return result;
+	} catch (error) {
+		statsLogger.error('❌ Error al obtener estadísticas de carpetas:', error);
+		return null;
+	}
 }
 
 // Extender getSystemStats para incluir nuevas entidades
