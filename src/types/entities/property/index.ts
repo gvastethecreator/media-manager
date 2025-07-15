@@ -5,24 +5,23 @@
  *   Este archivo centraliza todas las exportaciones de tipos para la entidad Property.
  *   El tipo canónico para usar en la aplicación es **`PropertyWithStats`**.
  *
- *   - `PropertyBase`: Tipo base de Prisma.
+ *   - `PropertyBase`: Tipo base de Drizzle.
  *   - `PropertyWithStats`: Tipo enriquecido con estadísticas calculadas.
- *   - `PrismaPropertyWithCounts`: Tipo de Prisma que incluye los conteos de relaciones.
  *
  * @see /src/types/entities/property/base.ts
  * @updated 2025-01-27
  */
 
-// --- Tipos Canónicos (NUEVO) ---
-export { PROPERTY_COUNTS_RELATIONS, propertyCounts } from './base';
 export type {
-	PrismaPropertyWithCounts,
 	PropertyBase,
 	PropertyCreateInput,
 	PropertyStatistics,
 	PropertyUpdateInput,
+	PropertyWithCounts,
 	PropertyWithStats,
 } from './base';
+// --- Tipos Canónicos (NUEVO) ---
+export { PROPERTY_COUNTS_RELATIONS } from './base';
 
 // --- Esquemas de Validación ---
 // Asumiendo que `schema.ts` contiene esquemas relevantes como PropertySchema.

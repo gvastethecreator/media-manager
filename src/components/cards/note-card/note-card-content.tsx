@@ -13,10 +13,10 @@ import {
 	Video,
 } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { useNoteCounts } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
-import { getNoteCounts, type NoteRelationCounts } from './note-server-actions';
 
 interface NoteCardContentProps {
 	content?: string | null;
@@ -41,29 +41,14 @@ export function NoteCardContent({
 	status = 'pendiente',
 	priority = 0,
 	primaryColor,
-	secondaryColor,
 	noteId,
 	tcgMode = true,
 }: NoteCardContentProps) {
 	// Generar un ID de renderizado único
 	const renderKey = React.useMemo(() => nanoid(), []);
 
-	// Estado para guardar los contadores de relaciones
-	const [relationCounts, setRelationCounts] = useState<NoteRelationCounts>({
-		characters: 0,
-		places: 0,
-		worldItems: 0,
-		concepts: 0,
-		prompts: 0,
-		images: 0,
-		videos: 0,
-		albums: 0,
-		collections: 0,
-		tags: 0,
-		wildcards: 0,
-		properties: 0,
-		groups: 0,
-	});
+	// Usar el hook para obtener contadores de relaciones
+	const { data: relationCounts } = useNoteCounts(noteId);
 
 	// Determinar si se muestran elementos
 	const hasTags = Array.isArray(tags) && tags.length > 0;
@@ -72,22 +57,8 @@ export function NoteCardContent({
 	// Formatear la prioridad con etiquetas
 	const priorityLabel = priority === 0 ? 'Normal' : priority === 1 ? 'Alta' : priority === 2 ? 'Urgente' : 'Baja';
 
-	// Cargar recuentos de relaciones al montar el componente
-	useEffect(() => {
-		const loadCounts = async () => {
-			try {
-				const counts = await getNoteCounts(noteId);
-				setRelationCounts(counts);
-			} catch (error) {
-				console.error('Error cargando recuentos:', error);
-			}
-		};
-
-		loadCounts();
-	}, [noteId]);
-
 	// Calcular el total de relaciones
-	const totalRelations = Object.values(relationCounts).reduce((sum, count) => sum + count, 0);
+	const totalRelations = relationCounts ? Object.values(relationCounts).reduce((sum, count) => sum + count, 0) : 0;
 
 	return (
 		<div
@@ -168,28 +139,28 @@ export function NoteCardContent({
 					<StatBar
 						icon={<Image className="h-3.5 w-3.5" />}
 						label="Imágenes"
-						value={relationCounts.images}
+						value={relationCounts?.images || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
 					/>
 					<StatBar
 						icon={<Video className="h-3.5 w-3.5" />}
 						label="Videos"
-						value={relationCounts.videos}
+						value={relationCounts?.videos || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
 					/>
 					<StatBar
 						icon={<UserSquare className="h-3.5 w-3.5" />}
 						label="Personajes"
-						value={relationCounts.characters}
+						value={relationCounts?.characters || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
 					/>
 					<StatBar
 						icon={<FolderOpen className="h-3.5 w-3.5" />}
 						label="Colecciones"
-						value={relationCounts.collections}
+						value={relationCounts?.collections || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
 					/>
@@ -201,25 +172,25 @@ export function NoteCardContent({
 				<div className="mt-auto grid grid-cols-2 gap-2 text-xs">
 					<StatCounter
 						icon={<UserSquare className="h-3.5 w-3.5" />}
-						count={relationCounts.characters}
+						count={relationCounts?.characters || 0}
 						label="Personajes"
 						primaryColor={primaryColor}
 					/>
 					<StatCounter
 						icon={<MapPin className="h-3.5 w-3.5" />}
-						count={relationCounts.places}
+						count={relationCounts?.places || 0}
 						label="Lugares"
 						primaryColor={primaryColor}
 					/>
 					<StatCounter
 						icon={<FileText className="h-3.5 w-3.5" />}
-						count={relationCounts.worldItems + relationCounts.concepts}
+						count={(relationCounts?.worldItems || 0) + (relationCounts?.concepts || 0)}
 						label="Objetos"
 						primaryColor={primaryColor}
 					/>
 					<StatCounter
 						icon={<ListChecks className="h-3.5 w-3.5" />}
-						count={relationCounts.prompts}
+						count={relationCounts?.prompts || 0}
 						label="Prompts"
 						primaryColor={primaryColor}
 					/>
@@ -229,7 +200,7 @@ export function NoteCardContent({
 			{/* Relaciones adicionales en estilo TCG */}
 			{tcgMode && totalRelations > 0 && (
 				<div className="flex justify-center gap-2 mt-2">
-					{relationCounts.tags > 0 && (
+					{relationCounts?.tags && relationCounts.tags > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
@@ -238,7 +209,7 @@ export function NoteCardContent({
 							<span>{relationCounts.tags}</span>
 						</Badge>
 					)}
-					{relationCounts.prompts > 0 && (
+					{relationCounts?.prompts && relationCounts.prompts > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
@@ -247,7 +218,7 @@ export function NoteCardContent({
 							<span>{relationCounts.prompts}</span>
 						</Badge>
 					)}
-					{relationCounts.places > 0 && (
+					{relationCounts?.places && relationCounts.places > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
@@ -256,7 +227,7 @@ export function NoteCardContent({
 							<span>{relationCounts.places}</span>
 						</Badge>
 					)}
-					{relationCounts.worldItems > 0 && (
+					{relationCounts?.worldItems && relationCounts.worldItems > 0 && (
 						<Badge
 							variant="outline"
 							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
@@ -287,7 +258,9 @@ function StatCounter({
 		<div className="flex flex-col items-center justify-center">
 			<div className="flex items-center gap-1">
 				{icon}
-				<span className="font-medium">{count}</span>
+				<span className="font-medium" style={{ color: primaryColor }}>
+					{count}
+				</span>
 			</div>
 			<div className="text-[0.65rem] opacity-70">{label}</div>
 		</div>

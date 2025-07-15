@@ -1,28 +1,101 @@
 /**
  * @file Transformador principal para la entidad Character
  * @module transformers/character/transformer
- * @description Contiene la lógica para convertir un objeto Character de Prisma a nuestros tipos canónicos.
+ * @description Contiene la lógica para convertir un objeto Character de Drizzle a nuestros tipos canónicos.
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CharacterWithStats, PrismaCharacterWithCounts } from '@/types/entities/character';
-import type { Prisma } from '@prisma/client';
+import type { CharacterWithStats } from '@/types/entities/character';
+
+// Tipos locales equivalentes a Drizzle
+type DrizzleCharacterWithCounts = {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	level: number;
+	class: string;
+	race: string;
+	alignment: string;
+	backstory: string;
+	stats: string;
+	psychologicalProfile: string;
+	socialProfile: string;
+	relationships: string;
+	goals: string;
+	fears: string;
+	beliefs: string;
+	personality: string;
+	skills: string;
+	abilities: string;
+	sortBy: string;
+	filters: string;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	notes?: any[];
+	_count?: {
+		images?: number;
+		videos?: number;
+		tags?: number;
+		groups?: number;
+		properties?: number;
+		collections?: number;
+		albums?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		relatedCharacters?: number;
+		relatedTo?: number;
+	};
+};
+
+type DrizzleCharacterCreateInput = {
+	name: string;
+	emoji: string;
+	color: string;
+	level: number;
+	class: string;
+	race: string;
+	alignment: string;
+	backstory: string;
+	stats: string;
+	psychologicalProfile: string;
+	socialProfile: string;
+	relationships: string;
+	goals: string;
+	fears: string;
+	beliefs: string;
+	personality: string;
+	skills: string;
+	abilities: string;
+	sortBy: string;
+	filters: string;
+	isFavorite: boolean;
+};
+
+type DrizzleCharacterUpdateInput = Partial<Omit<DrizzleCharacterCreateInput, 'id'>>;
 
 const logger = serverLogger.withContext('CharacterTransformer');
 
 /**
- * 🔄 Transforma un Character de Prisma a CharacterWithStats (optimizado).
+ * 🔄 Transforma un Character de Drizzle a CharacterWithStats (optimizado).
+ * ✅ MIGRADO A DRIZZLE
  *
- * @param prismaCharacter - Character de Prisma con conteos
+ * @param drizzleCharacter - Character de Drizzle con conteos
  * @returns CharacterWithStats con estadísticas pre-calculadas
  */
-export function fromPrismaCharacter(prismaCharacter: PrismaCharacterWithCounts | null): CharacterWithStats | null {
-	if (!prismaCharacter) {
+export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCounts | null): CharacterWithStats | null {
+	if (!drizzleCharacter) {
 		return null;
 	}
 
 	try {
-		const { _count, ...baseData } = prismaCharacter;
+		const { _count, ...baseData } = drizzleCharacter;
 		const now = new Date();
 
 		// Calcular totales desde los conteos
@@ -79,7 +152,7 @@ export function fromPrismaCharacter(prismaCharacter: PrismaCharacterWithCounts |
 			filters: baseData.filters || '[]',
 			psychologicalProfile: baseData.psychologicalProfile || '',
 			socialProfile: baseData.socialProfile || '',
-			notes: baseData.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
+			notes: baseData.notes || [], // Simplificado para evitar dependencias
 
 			// Conteos originales para compatibilidad
 			_count,
@@ -108,28 +181,30 @@ export function fromPrismaCharacter(prismaCharacter: PrismaCharacterWithCounts |
 			},
 		};
 	} catch (error) {
-		logger.error('Error al transformar personaje de Prisma', { error, characterId: prismaCharacter?.id });
+		logger.error('Error al transformar personaje de Drizzle', { error, characterId: drizzleCharacter?.id });
 		return null;
 	}
 }
 
 /**
- * 🔄 Transforma una lista de personajes de Prisma a CharacterWithStats.
+ * 🔄 Transforma una lista de personajes de Drizzle a CharacterWithStats.
+ * ✅ MIGRADO A DRIZZLE
  *
- * @param prismaCharacters - Array de personajes de Prisma
+ * @param drizzleCharacters - Array de personajes de Drizzle
  * @returns Array de CharacterWithStats
  */
-export function fromPrismaCharacters(prismaCharacters: PrismaCharacterWithCounts[]): CharacterWithStats[] {
-	return prismaCharacters.map(fromPrismaCharacter).filter((c): c is CharacterWithStats => c !== null);
+export function fromDrizzleCharacters(drizzleCharacters: DrizzleCharacterWithCounts[]): CharacterWithStats[] {
+	return drizzleCharacters.map(fromDrizzleCharacter).filter((c): c is CharacterWithStats => c !== null);
 }
 
 /**
- * 🔄 Convierte CharacterWithStats a datos para Prisma (create).
+ * 🔄 Convierte CharacterWithStats a datos para Drizzle (create).
+ * ✅ MIGRADO A DRIZZLE
  *
  * @param character - Character con estadísticas
- * @returns Datos preparados para Prisma.character.create()
+ * @returns Datos preparados para Drizzle character create
  */
-export function toPrismaCharacterCreate(character: Partial<CharacterWithStats>): Prisma.CharacterCreateInput {
+export function toDrizzleCharacterCreate(character: Partial<CharacterWithStats>): DrizzleCharacterCreateInput {
 	const {
 		id, // Omitir ID en create
 		_count, // Omitir conteos calculados
@@ -167,12 +242,13 @@ export function toPrismaCharacterCreate(character: Partial<CharacterWithStats>):
 }
 
 /**
- * 🔄 Convierte CharacterWithStats a datos para Prisma (update).
+ * 🔄 Convierte CharacterWithStats a datos para Drizzle (update).
+ * ✅ MIGRADO A DRIZZLE
  *
  * @param character - Character con estadísticas parcial
- * @returns Datos preparados para Prisma.character.update()
+ * @returns Datos preparados para Drizzle character update
  */
-export function toPrismaCharacterUpdate(character: Partial<CharacterWithStats>): Prisma.CharacterUpdateInput {
+export function toDrizzleCharacterUpdate(character: Partial<CharacterWithStats>): DrizzleCharacterUpdateInput {
 	const {
 		id, // Omitir ID en update
 		_count, // Omitir conteos calculados
@@ -186,6 +262,7 @@ export function toPrismaCharacterUpdate(character: Partial<CharacterWithStats>):
 
 /**
  * 📊 Calcula el power level de un personaje basado en nivel y asociaciones.
+ * ✅ MIGRADO A DRIZZLE
  *
  * @param level - Nivel del personaje
  * @param totalAssociations - Total de asociaciones
@@ -202,6 +279,7 @@ function calculatePowerLevel(level: number, totalAssociations: number): number {
 
 /**
  * 🎭 Determina el nivel de rareza basado en power level y métricas.
+ * ✅ MIGRADO A DRIZZLE
  *
  * @param level - Nivel del personaje
  * @param powerLevel - Power level calculado

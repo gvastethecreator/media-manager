@@ -3,14 +3,15 @@
  * @file Servicio de Workflow con lógica de negocio
  * @module services/workflow.service
  * @description Capa de servicio para la entidad Workflow que maneja la lógica de negocio
- * @updated 2025-06-27
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { prisma } from '@/lib/database/prisma';
+import { asc, count, eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { workflows } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { WorkflowWithStats } from '@/types/entities/workflow';
-import type { Prisma, Workflow } from '@prisma/client';
+import type { WorkflowCreateInput, WorkflowUpdateInput, WorkflowWithStats } from '@/types/entities/workflow';
 
 const workflowLogger = serverLogger.withContext('WorkflowService');
 
@@ -35,18 +36,30 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
  */
 export async function getWorkflows(): Promise<WorkflowWithStats[]> {
 	try {
-		const workflows = await prisma.workflow.findMany({
-			orderBy: { name: 'asc' },
-		});
+		workflowLogger.info('🔍 Obteniendo workflows con Drizzle');
+
+		const drizzleWorkflows = await db
+			.select({
+				id: workflows.id,
+				name: workflows.name,
+				description: workflows.description,
+				content: workflows.content,
+				isActive: workflows.isActive,
+				createdAt: workflows.createdAt,
+				updatedAt: workflows.updatedAt,
+			})
+			.from(workflows)
+			.orderBy(asc(workflows.name));
 
 		// Crear estadísticas básicas para cada workflow
-		return workflows.map((workflow) => {
-			const contentLength = workflow.content.length;
+		return drizzleWorkflows.map((workflow) => {
+			const contentLength = workflow.content ? workflow.content.length : 0;
 			const isValid = contentLength > 0;
 
 			// Construir WorkflowWithStats siguiendo la estructura esperada
 			const workflowWithStats: WorkflowWithStats = {
 				...workflow,
+				isActive: Boolean(workflow.isActive),
 				statistics: {
 					totalExecutions: 0, // No hay modelo WorkflowExecution aún
 					successfulExecutions: 0,
@@ -76,11 +89,35 @@ export async function getWorkflows(): Promise<WorkflowWithStats[]> {
 /**
  * Obtiene un workflow por su ID
  */
-export async function getWorkflowById(id: string): Promise<Workflow | null> {
+export async function getWorkflowById(id: string): Promise<any | null> {
 	try {
-		return await prisma.workflow.findUnique({
-			where: { id },
-		});
+		workflowLogger.info(`🔍 Obteniendo workflow por ID: ${id}`);
+
+		const drizzleWorkflow = await db
+			.select({
+				id: workflows.id,
+				name: workflows.name,
+				description: workflows.description,
+				content: workflows.content,
+				isActive: workflows.isActive,
+				createdAt: workflows.createdAt,
+				updatedAt: workflows.updatedAt,
+			})
+			.from(workflows)
+			.where(eq(workflows.id, id))
+			.limit(1);
+
+		if (drizzleWorkflow.length === 0) {
+			workflowLogger.warn(`Workflow no encontrado: ${id}`);
+			return null;
+		}
+
+		const rawWorkflow = drizzleWorkflow[0];
+
+		return {
+			...rawWorkflow,
+			isActive: Boolean(rawWorkflow.isActive),
+		};
 	} catch (error) {
 		workflowLogger.error('Error obteniendo workflow por ID:', { id, error });
 		throw new Error('Error al obtener workflow');
@@ -90,16 +127,36 @@ export async function getWorkflowById(id: string): Promise<Workflow | null> {
 /**
  * Crea un nuevo workflow
  */
-export async function createWorkflow(data: Prisma.WorkflowCreateInput): Promise<Workflow> {
+export async function createWorkflow(data: WorkflowCreateInput): Promise<any> {
 	try {
-		const newWorkflow = await prisma.workflow.create({
-			data,
+		workflowLogger.info(`🆕 Creando workflow: ${data.name}`);
+
+		const newWorkflowData = {
+			name: data.name,
+			description: data.description || null,
+			content: data.content || '',
+			isActive: data.isActive ?? true,
+		};
+
+		const [newWorkflow] = await db.insert(workflows).values(newWorkflowData).returning({
+			id: workflows.id,
+			name: workflows.name,
+			description: workflows.description,
+			content: workflows.content,
+			isActive: workflows.isActive,
+			createdAt: workflows.createdAt,
+			updatedAt: workflows.updatedAt,
 		});
+
+		const finalWorkflow = {
+			...newWorkflow,
+			isActive: Boolean(newWorkflow.isActive),
+		};
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
 			type: EVENT_TYPE_MAPPING[EVENTS.WORKFLOW_CREATED],
-			data: { action: 'create', entity: newWorkflow, eventType: EVENTS.WORKFLOW_CREATED },
+			data: { action: 'create', entity: finalWorkflow, eventType: EVENTS.WORKFLOW_CREATED },
 		});
 
 		await emit({
@@ -107,10 +164,10 @@ export async function createWorkflow(data: Prisma.WorkflowCreateInput): Promise<
 			data: { action: 'change', eventType: EVENTS.WORKFLOWS_CHANGED },
 		});
 
-		workflowLogger.info('Workflow creado:', newWorkflow.name);
-		return newWorkflow;
+		workflowLogger.info('✅ Workflow creado:', finalWorkflow.name);
+		return finalWorkflow;
 	} catch (error) {
-		workflowLogger.error('Error creando workflow:', { data, error });
+		workflowLogger.error('❌ Error creando workflow:', { data, error });
 		throw new Error('Error al crear workflow');
 	}
 }
@@ -118,17 +175,35 @@ export async function createWorkflow(data: Prisma.WorkflowCreateInput): Promise<
 /**
  * Actualiza un workflow existente
  */
-export async function updateWorkflow(id: string, data: Prisma.WorkflowUpdateInput): Promise<Workflow> {
+export async function updateWorkflow(id: string, data: WorkflowUpdateInput): Promise<any> {
 	try {
-		const updatedWorkflow = await prisma.workflow.update({
-			where: { id },
-			data,
+		workflowLogger.info(`🔄 Actualizando workflow: ${id}`);
+
+		const updateData: any = {};
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.content !== undefined) updateData.content = data.content;
+		if (data.isActive !== undefined) updateData.isActive = data.isActive;
+
+		const [updatedWorkflow] = await db.update(workflows).set(updateData).where(eq(workflows.id, id)).returning({
+			id: workflows.id,
+			name: workflows.name,
+			description: workflows.description,
+			content: workflows.content,
+			isActive: workflows.isActive,
+			createdAt: workflows.createdAt,
+			updatedAt: workflows.updatedAt,
 		});
+
+		const finalWorkflow = {
+			...updatedWorkflow,
+			isActive: Boolean(updatedWorkflow.isActive),
+		};
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
 			type: EVENT_TYPE_MAPPING[EVENTS.WORKFLOW_UPDATED],
-			data: { action: 'update', entity: updatedWorkflow, eventType: EVENTS.WORKFLOW_UPDATED },
+			data: { action: 'update', entity: finalWorkflow, eventType: EVENTS.WORKFLOW_UPDATED },
 		});
 
 		await emit({
@@ -136,10 +211,10 @@ export async function updateWorkflow(id: string, data: Prisma.WorkflowUpdateInpu
 			data: { action: 'change', eventType: EVENTS.WORKFLOWS_CHANGED },
 		});
 
-		workflowLogger.info('Workflow actualizado:', updatedWorkflow.name);
-		return updatedWorkflow;
+		workflowLogger.info('✅ Workflow actualizado:', finalWorkflow.name);
+		return finalWorkflow;
 	} catch (error) {
-		workflowLogger.error('Error actualizando workflow:', { id, data, error });
+		workflowLogger.error('❌ Error actualizando workflow:', { id, data, error });
 		throw new Error('Error al actualizar workflow');
 	}
 }
@@ -149,9 +224,9 @@ export async function updateWorkflow(id: string, data: Prisma.WorkflowUpdateInpu
  */
 export async function deleteWorkflow(id: string): Promise<void> {
 	try {
-		await prisma.workflow.delete({
-			where: { id },
-		});
+		workflowLogger.info(`🗑️ Eliminando workflow: ${id}`);
+
+		await db.delete(workflows).where(eq(workflows.id, id));
 
 		// Emitir eventos con el nuevo sistema
 		await emit({
@@ -164,9 +239,9 @@ export async function deleteWorkflow(id: string): Promise<void> {
 			data: { action: 'change', eventType: EVENTS.WORKFLOWS_CHANGED },
 		});
 
-		workflowLogger.info('Workflow eliminado:', id);
+		workflowLogger.info('✅ Workflow eliminado:', id);
 	} catch (error) {
-		workflowLogger.error('Error eliminando workflow:', { id, error });
+		workflowLogger.error('❌ Error eliminando workflow:', { id, error });
 		throw new Error('Error al eliminar workflow');
 	}
 }
@@ -176,11 +251,9 @@ export async function deleteWorkflow(id: string): Promise<void> {
  */
 export async function workflowExists(id: string): Promise<boolean> {
 	try {
-		const workflow = await prisma.workflow.findUnique({
-			where: { id },
-			select: { id: true },
-		});
-		return workflow !== null;
+		const workflow = await db.select({ id: workflows.id }).from(workflows).where(eq(workflows.id, id)).limit(1);
+
+		return workflow.length > 0;
 	} catch (error) {
 		workflowLogger.error('Error verificando existencia de workflow:', { id, error });
 		return false;
@@ -192,7 +265,9 @@ export async function workflowExists(id: string): Promise<boolean> {
  */
 export async function getWorkflowCount(): Promise<number> {
 	try {
-		return await prisma.workflow.count();
+		const [result] = await db.select({ count: count() }).from(workflows);
+
+		return result.count;
 	} catch (error) {
 		workflowLogger.error('Error obteniendo conteo de workflows:', { error });
 		throw new Error('Error al obtener conteo de workflows');

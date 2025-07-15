@@ -1,21 +1,19 @@
-'use client';
-
 // Importaciones de server actions para entidades
 // TODO: addImageToAlbum no está implementada aún
 // import { addImageToAlbum } from '@/app/actions/albums/album.actions';
 // TODO: addImageToCollection no está implementada aún
 // import { addImageToCollection } from '@/app/actions/collections/collection-images.actions';
-import { addImageToTag } from '@/app/actions/tags/relation.actions';
+
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toast } from '@/services/toast';
+import { toastService } from '@/lib/ui/toast';
+import tagService from '@/services/tag/tag.service';
 
 // Importaciones de stores en entidades
 
-// Importaciones de actions de archivos
-import { deleteFile as deleteFileAction } from '@/app/actions/files/file.actions';
-
 // Importar el tipo local en lugar del tipo global
-import type { FileItem } from '@/types/files';
+import type { FileItem } from '@/lib/contexts/file-context';
+// Importaciones de actions de archivos
+import { deleteFile as deleteFileAction } from '@/services/file/file.service';
 import type { ContextMenuAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');
@@ -123,10 +121,10 @@ const customFileOperationsService = {
 							}),
 						]);
 						actionLogger.info('✅ Imagen copiada al portapapeles');
-						toast.success('Imagen copiada al portapapeles');
+						toastService.success('Imagen copiada al portapapeles');
 					} catch (error) {
 						actionLogger.error('❌ Error al copiar imagen al portapapeles:', error);
-						toast.error('No se pudo copiar la imagen al portapapeles');
+						toastService.error('No se pudo copiar la imagen al portapapeles');
 						throw error;
 					}
 				}
@@ -144,10 +142,10 @@ const customFileOperationsService = {
 			// Usar la server action para eliminar el archivo
 			await deleteFileAction(path);
 			actionLogger.info('✅ Archivo eliminado:', path);
-			toast.success('Archivo eliminado correctamente');
+			toastService.success('Archivo eliminado correctamente');
 			return Promise.resolve();
 		} catch (error) {
-			toast.error('Error al eliminar el archivo');
+			toastService.error('Error al eliminar el archivo');
 			return Promise.reject(error);
 		}
 	},
@@ -185,7 +183,7 @@ export const handleContextAction = async (
 
 			case 'download':
 				// Descargar archivo
-				toast.info(`Descargando: ${item.name}`);
+				toastService.info(`Descargando: ${item.name}`);
 				await customFileOperationsService.downloadFile(item.path);
 				break;
 
@@ -198,15 +196,14 @@ export const handleContextAction = async (
 				// Copiar ruta
 				await navigator.clipboard
 					.writeText(item.path)
-					.then(() => toast.success('Ruta copiada al portapapeles'))
-					.catch(() => toast.error('No se pudo copiar la ruta'));
+					.then(() => toastService.success('Ruta copiada al portapapeles'))
+					.catch(() => toastService.error('No se pudo copiar la ruta'));
 				break;
 
 			case 'delete':
 				// Eliminar archivo
-				if (confirm(`¿Estás seguro de que quieres eliminar "${item.name}"?`)) {
-					await customFileOperationsService.deleteFile(item.path);
-				}
+				toastService.info(`Eliminando: ${item.name}`);
+				await customFileOperationsService.deleteFile(item.path);
 				break;
 
 			case 'add-to-collection':
@@ -214,7 +211,7 @@ export const handleContextAction = async (
 					// TODO: Implementar cuando addImageToCollection esté disponible
 					// const collectionId = data.collectionId as string;
 					// await addImageToCollection(item.id, collectionId);
-					toast.info('Función añadir a colección pendiente de implementación');
+					toastService.info('Función añadir a colección pendiente de implementación');
 				}
 				break;
 
@@ -223,7 +220,7 @@ export const handleContextAction = async (
 					// TODO: Implementar cuando addImageToAlbum esté disponible
 					// const albumId = data.albumId as string;
 					// await addImageToAlbum(item.id, albumId);
-					toast.info('Función añadir a álbum pendiente de implementación');
+					toastService.info('Función añadir a álbum pendiente de implementación');
 				}
 				break;
 
@@ -231,8 +228,8 @@ export const handleContextAction = async (
 				if (data?.tagId) {
 					// Añadir etiqueta
 					const tagId = data.tagId as string;
-					await addImageToTag(tagId, item.id);
-					toast.success('Etiqueta añadida a la imagen');
+					await tagService.addImageToTag(tagId, item.id);
+					toastService.success('Etiqueta añadida a la imagen');
 				}
 				break;
 
@@ -241,6 +238,6 @@ export const handleContextAction = async (
 		}
 	} catch (error) {
 		actionLogger.error(`Error al ejecutar acción ${action}:`, error);
-		toast.error(`Error al ejecutar la acción: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		toastService.error(`Error al ejecutar la acción: ${error instanceof Error ? error.message : 'Error desconocido'}`);
 	}
 };

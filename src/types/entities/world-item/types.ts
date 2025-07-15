@@ -6,54 +6,19 @@
  * @updated 2025-07-01
  */
 
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
-import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
+import type { ConceptWithStats } from '../concept';
+import type { GroupWithStats } from '../group';
+import type { ImageWithStats } from '../image';
+import type { NoteWithStats } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
+import type { TagWithStats } from '../tag/types';
 import type { VideoWithStats } from '../video';
-import type { WildcardComplete } from '../wildcard';
-
-// --- ESTRUCTURAS DE DATOS SERIALIZADAS ---
-
-export interface WorldItemAttribute {
-	name: string;
-	value: number;
-	maxValue?: number;
-}
-export interface WorldItemEffect {
-	name: string;
-	description: string;
-	duration?: string;
-	cooldown?: string;
-}
-export interface WorldItemRequirement {
-	name: string;
-	value: number;
-	description?: string;
-}
-export interface WorldItemStat {
-	name: string;
-	value: number;
-	modifier?: string;
-}
-export interface WorldItemProperty {
-	name: string;
-	value: string | number | boolean;
-	description?: string;
-}
-export interface WorldItemFilter {
-	type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
-	operator: 'AND' | 'OR' | 'NOT';
-	value: string | number | boolean;
-	field?: string;
-}
+import type { WildcardWithStats } from '../wildcard';
 
 // --- TIPOS BASE Y RELACIONES ---
 
@@ -61,41 +26,43 @@ export interface WorldItemBase {
 	id: string;
 	name: string;
 	description: string | null;
-	type: string | null;
+	emoji: string | null;
+	color: string | null;
 	category: string | null;
-	rarity: string | null;
-	size: string | null;
-	origin: string | null;
-	attributes: string; // JSON
-	effects: string; // JSON
-	requirements: string; // JSON
-	stats: string; // JSON
-	properties: string; // JSON
-	filters: string; // JSON
-	tags: string; // JSON
+	isPublic: boolean;
 	isFavorite: boolean;
-	shortcut: string | null;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	rarity: string | null;
+	value: string | null;
+	weight: string | null;
+	materials: string | null;
+	origin: string | null;
+	properties: string | null;
+	uses: string | null;
+	history: string | null;
+	notes: string | null;
 	featuredImage: string | null;
-	emoji: string;
-	color: string;
+	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
 export interface WorldItemRelations {
-	images?: ImageComplete[];
+	images?: ImageWithStats[];
 	videos?: VideoWithStats[];
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
 	places?: PlaceComplete[];
-	concepts?: ConceptComplete[];
+	concepts?: ConceptWithStats[];
 	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
 	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
+	groups?: GroupWithStats[];
 }
 
 export interface WorldItemCounts {
@@ -116,47 +83,101 @@ export interface WorldItemCounts {
 	};
 }
 
-// Omitimos los campos JSON para reemplazarlos por su versión deserializada
-type OmittedFields = 'attributes' | 'effects' | 'requirements' | 'stats' | 'properties' | 'filters' | 'tags';
+export interface WorldItemStatistics {
+	totalImages: number;
+	totalVideos: number;
+	totalAlbums: number;
+	totalCollections: number;
+	totalTags: number;
+	totalCharacters: number;
+	totalPlaces: number;
+	totalConcepts: number;
+	totalPrompts: number;
+	totalNotes: number;
+	totalWildcards: number;
+	totalProperties: number;
+	totalGroups: number;
+	totalRelations: number;
+	totalSize: number;
+	averageSize: number;
+	averageRelations: number;
+	popularityScore: number;
+	completenessScore: number;
+	usageCount: number;
+	lastUsed: Date | null;
+}
 
-export type WorldItemComplete = Omit<WorldItemBase, OmittedFields> & {
-	attributes: WorldItemAttribute[];
-	effects: WorldItemEffect[];
-	requirements: WorldItemRequirement[];
-	stats: WorldItemStat[];
-	properties: WorldItemProperty[];
-	filters: WorldItemFilter[];
-	tags: string[];
-} & WorldItemRelations &
-	WorldItemCounts;
+export interface WorldItemWithStats extends Omit<WorldItemBase, 'totalImages' | 'totalVideos'> {
+	entityType: 'world-item';
+	_stats: WorldItemStatistics;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+	// Relaciones opcionales
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptComplete[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+}
+
+/**
+ * 🌍 WorldItem completo con relaciones
+ */
+export interface WorldItemComplete extends WorldItemBase {
+	images?: ImageWithStats[];
+	videos?: VideoWithStats[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	concepts?: ConceptWithStats[];
+	prompts?: PromptComplete[];
+	notes?: NoteWithStats[];
+	wildcards?: WildcardWithStats[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-type WorldItemRelationInput = {
-	imageIds?: string[];
-	videoIds?: string[];
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	conceptIds?: string[];
-	promptIds?: string[];
-	noteIds?: string[];
-	wildcardIds?: string[];
-	propertyIds?: string[];
-	groupIds?: string[];
-};
-
-export type WorldItemCreateInput = Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt' | OmittedFields> & {
-	attributes?: WorldItemAttribute[];
-	effects?: WorldItemEffect[];
-	requirements?: WorldItemRequirement[];
-	stats?: WorldItemStat[];
-	properties?: WorldItemProperty[];
-	filters?: WorldItemFilter[];
-	tags?: string[];
-} & WorldItemRelationInput;
+export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {}
 
 export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 

@@ -5,32 +5,30 @@
  * @description Este barrel ha sido limpiado para evitar dependencias legacy. Usar únicamente '@/types/entities/note/types'.
  */
 
-export type {
-	NoteCreateInput as CreateNoteData, // Alias para retrocompatibilidad
-	// Alias para retrocompatibilidad
-	NoteWithStats as Note,
-	NoteBase,
-	NoteComplete,
-	NoteCreateInput, // Alias para retrocompatibilidad
-	NoteFilters,
-	NoteRelations,
-	NoteSearchOptions,
-	NoteSearchResult,
-	NoteStatistics,
-	NoteTransformerOptions,
-	NoteUI,
-	NoteUpdateInput,
-	NoteValidated,
-	NoteWithStats,
-	PrismaNoteWithCounts,
-	RelatedNote,
-} from './types';
-
 export {
 	NoteCategory,
 	NotePriority,
-	NoteSortCriteria,
 	NoteSortOption,
 	NoteStatus,
 	NoteViewMode,
+} from './enums';
+export type {
+	NoteBase,
+	NoteComplete,
+	NoteCreateInput as CreateNoteData, // Alias para retrocompatibilidad
+	NoteCreateInput,
+	NoteFilters,
+	NoteSearchOptions,
+	NoteSearchResult,
+	NoteStatistics,
+	NoteStats,
+	NoteTransformerOptions,
+	NoteUpdateInput,
+	NoteValidated,
+	// Alias para retrocompatibilidad
+	NoteWithStats as Note,
+	NoteWithStats,
+	RelatedNote,
 } from './types';
+
+export { NoteSortCriteria } from './types';

@@ -1,13 +1,22 @@
 /**
  * @file Transformadores para perfiles de usuario
  * @module transformers/profile
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
+
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import type { Profile, Settings } from '@/lib/drizzle';
+
+/**
+ * Tipo extendido de Profile que incluye settings (para compatibilidad con transformadores legacy)
+ */
+type ProfileWithSettings = Profile & {
+	settings?: Settings | string | null;
+};
 
 import { Language, type ProfileBase, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
-import type { Profile as ProfileFromPrisma } from '@prisma/client';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 /**
  * Tipo para el perfil extendido con datos adicionales
@@ -68,11 +77,11 @@ export function formatProfileDate(date: Date): string {
 
 /**
  * Parsea y valida las preferencias del perfil
- * @param profile - Perfil de Prisma
+ * @param profile - Perfil de base de datos (puede incluir settings)
  * @returns Preferencias validadas y con valores por defecto
  * @throws Error si la validación falla
  */
-export function parseProfilePreferences(profile: ProfileFromPrisma): ProfilePreferencesSchemaType {
+export function parseProfilePreferences(profile: ProfileWithSettings): ProfilePreferencesSchemaType {
 	let rawPreferences: Record<string, any> = {}; // Initialize as empty object
 	try {
 		// Intentar parsear las preferencias desde profile.settings si existe
@@ -120,13 +129,13 @@ export function parseProfilePreferences(profile: ProfileFromPrisma): ProfilePref
 }
 
 /**
- * Transforma un Profile de Prisma a un objeto extendido para UI
- * @param profile - Perfil de Prisma
+ * Transforma un Profile de la base de datos a un objeto extendido para UI
+ * @param profile - Perfil de base de datos
  * @returns Perfil extendido con datos adicionales para UI
  */
-export function transformProfile(profile: ProfileFromPrisma): ProfileExtended {
+export function transformProfile(profile: ProfileWithSettings): ProfileExtended {
 	const createdAt = new Date(profile.createdAt);
-	const updatedAt = new Date(profile.updatedAt);
+	const updatedAt = profile.updatedAt ? new Date(profile.updatedAt) : new Date();
 
 	// Extraemos solo las propiedades de ProfileBase
 	const baseProfile: ProfileBase = {
@@ -151,11 +160,11 @@ export function transformProfile(profile: ProfileFromPrisma): ProfileExtended {
 }
 
 /**
- * Transforma una lista de Profiles de Prisma a objetos extendidos
- * @param profiles - Lista de perfiles de Prisma
+ * Transforma una lista de Profiles de la base de datos a objetos extendidos
+ * @param profiles - Lista de perfiles de base de datos
  * @returns Lista de perfiles extendidos
  */
-export function transformProfiles(profiles: ProfileFromPrisma[]): ProfileExtended[] {
+export function transformProfiles(profiles: ProfileWithSettings[]): ProfileExtended[] {
 	return profiles.map(transformProfile);
 }
 

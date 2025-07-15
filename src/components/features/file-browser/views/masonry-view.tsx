@@ -1,15 +1,15 @@
+import React from 'react';
 /**
  * @file Vista masonry V2 - Layout tipo Pinterest
  * @module components/features/file-browser/views/masonry-view-v2
  */
-'use client';
 
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { isImageWithStats, isVideoWithStats } from '@/types/migration';
 import { PlayCircleIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
+import { isImageWithStats, isVideoWithStats } from '@/types/migration';
 
 interface MasonryViewProps {
 	items: EntityWithStats[];

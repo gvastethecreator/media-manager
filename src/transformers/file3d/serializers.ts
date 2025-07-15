@@ -10,7 +10,7 @@ export function validateFile3D(input: unknown): File3DWithStats {
 
 	const data = input as Record<string, unknown>;
 
-	// Crear File3D básico basándose en el schema de Prisma
+	// Crear File3D básico basándose en el schema local (Drizzle)
 	const file3D: File3DWithStats = {
 		id: (data.id as string) || generateId(),
 		name: (data.name as string) || 'Sin nombre',

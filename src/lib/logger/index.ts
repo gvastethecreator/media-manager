@@ -15,16 +15,16 @@ export {
 
 // Exportar configuración y tipos
 export {
-	LogLevelSchema,
-	LoggerConfigSchema,
-	loggerConfig,
-	type LogLevel,
 	type LoggerConfig,
+	LoggerConfigSchema,
+	type LogLevel,
+	LogLevelSchema,
+	loggerConfig,
 } from './logger.config';
 // Exportar directamente desde el logger del servidor
 export {
+	createServerServiceLogger as createLogger, // Exportar ServerLogger también como Logger para compatibilidad
 	ServerLogger as Logger,
 	ServerLogger,
-	createServerServiceLogger as createLogger, // Exportar ServerLogger también como Logger para compatibilidad
 	serverLogger,
 } from './server-logger';

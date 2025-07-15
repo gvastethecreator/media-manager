@@ -1,13 +1,11 @@
-'use client';
-
 import { Library } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { getCollectionImages, removeImageFromCollection } from '@/app/actions/collections/collection.actions';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
+import { useCollectionImages, useRemoveImageFromCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 const logger = clientLogger.withContext('CollectionContentView');
 
@@ -17,9 +15,18 @@ export function CollectionContentView() {
 
 	const currentCollection = getSelectedCollection();
 
-	const [collectionImages, setCollectionImages] = useState<FileItem[]>([]);
+	const [collectionImages, setCollectionImages] = useState<EntityWithStats[]>([]);
 	const [loadingImages, setLoadingImages] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	const {
+		data: collectionImagesData,
+		isLoading: isLoadingImages,
+		error: collectionError,
+		refetch: refetchCollectionImages,
+	} = useCollectionImages(selectedCollectionId);
+
+	const removeImageMutation = useRemoveImageFromCollection();
 
 	useEffect(() => {
 		if (!selectedCollectionId) {
@@ -31,10 +38,11 @@ export function CollectionContentView() {
 			try {
 				setLoadingImages(true);
 				logger.info(`🔄 Cargando imágenes para colección: ${selectedCollectionId}`);
-				const images = await getCollectionImages(selectedCollectionId);
-				setCollectionImages(images);
+				if (collectionImagesData) {
+					setCollectionImages(collectionImagesData as EntityWithStats[]);
+				}
 				setError(null);
-				logger.info(`✅ ${images.length} imágenes cargadas para colección`);
+				logger.info(`✅ ${collectionImagesData?.length || 0} imágenes cargadas para colección`);
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 				logger.error('❌ Error cargando imágenes de colección:', error);
@@ -46,10 +54,10 @@ export function CollectionContentView() {
 		};
 
 		loadImages();
-	}, [selectedCollectionId]);
+	}, [selectedCollectionId, collectionImagesData]);
 
 	const handleToggleItemSelection = useCallback(
-		async (item: FileItem) => {
+		async (item: EntityWithStats) => {
 			if (!selectedCollectionId) {
 				logger.warn('⚠️ No hay colección seleccionada para modificar');
 				return;
@@ -62,21 +70,20 @@ export function CollectionContentView() {
 
 			try {
 				if (isSelected) {
-					await removeImageFromCollection(selectedCollectionId, item.id);
+					await removeImageMutation.mutateAsync({ collectionId: selectedCollectionId, imageId: item.id });
 				} else {
 					await addImageToCollection(selectedCollectionId, item.id);
 				}
 
 				// Recargar imágenes después de la operación
-				const updatedImages = await getCollectionImages(selectedCollectionId);
-				setCollectionImages(updatedImages);
+				refetchCollectionImages();
 				logger.info('✅ Colección actualizada correctamente');
 			} catch (error) {
 				logger.error('❌ Error al modificar colección:', error);
 				setError('Error al modificar la colección');
 			}
 		},
-		[selectedCollectionId, collectionImages, addImageToCollection]
+		[selectedCollectionId, collectionImages, addImageToCollection, removeImageMutation, refetchCollectionImages]
 	);
 
 	const contentProps: CollectionContentProps = {
@@ -101,6 +108,22 @@ export function CollectionContentView() {
 				: 'No hay colección seleccionada',
 		},
 	};
+
+	if (isLoading || isLoadingImages) {
+		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
+	}
+
+	if (error || collectionError) {
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">
+				Error: {error || collectionError?.message}
+			</div>
+		);
+	}
+
+	if (!collectionImages || collectionImages.length === 0) {
+		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	}
 
 	return (
 		<ContentViewProvider {...contentProps}>

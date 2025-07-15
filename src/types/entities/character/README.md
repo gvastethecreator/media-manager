@@ -32,7 +32,7 @@ graph TD
 
 - **Legacy eliminado:** Todos los tipos legacy (`base.ts`, `extended.ts`, enums locales) han sido eliminados.
 - **Solo tipos canónicos:** Usar siempre los tipos de `types.ts` y `extended.ts`.
-- **No importar tipos de Prisma en cliente.**
+
 - **Transformers, server actions y esquemas usan solo tipos canónicos.**
 
 ## 📝 Ejemplo de uso

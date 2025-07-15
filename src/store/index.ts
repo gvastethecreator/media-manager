@@ -8,7 +8,7 @@ export {
 
 // Exportar ViewMode desde ui.store y renombrar el de view-options si es necesario
 export {
-	useUIStore,
 	type UIStore,
+	useUIStore,
 	type ViewMode,
 } from './ui.store';

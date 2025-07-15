@@ -1,12 +1,9 @@
-'use client';
-
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import type { GroupWithStats } from '@/types/entities/group';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Prisma } from '@prisma/client';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación para el formulario
@@ -25,15 +22,32 @@ const groupFormSchema = z.object({
 
 type FormData = z.infer<typeof groupFormSchema>;
 
+// Tipos para la creación y actualización de grupos usando Drizzle
+interface GroupCreateInput {
+	name: string;
+	description?: string;
+}
+
+interface GroupUpdateInput {
+	name?: string;
+	description?: string;
+}
+
 interface CreateGroupFormProps {
 	group?: GroupWithStats;
 	isEditing?: boolean;
-	onSubmit: (data: Prisma.GroupCreateInput | Prisma.GroupUpdateInput) => Promise<void>;
+	onSubmit: (data: GroupCreateInput | GroupUpdateInput) => Promise<void>;
 	onCancel: () => void;
 	onPreview?: () => void;
 }
 
-export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, onPreview }: CreateGroupFormProps) {
+export function CreateGroupForm({
+	group,
+	isEditing = false,
+	onSubmit,
+	onCancel: _onCancel,
+	onPreview: _onPreview,
+}: CreateGroupFormProps) {
 	// Inicializar el formulario con el tipo correcto
 	const form = useForm<FormData>({
 		resolver: zodResolver(groupFormSchema),

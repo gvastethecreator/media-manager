@@ -1,21 +1,22 @@
-'use client';
-
 import { ScrollText } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { getNoteImages } from '@/app/actions/notes/note.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { useNoteImages } from '@/lib/api/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 const viewLogger = clientLogger.withContext('NoteContentView');
 
 export function NoteContentView() {
 	const selectedNote = useNoteStore((state) => state.selectedNote);
-	const [items, setItems] = useState([]);
+	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const [error, setError] = useState<string | null>(null);
+
+	// React Query hook must be at top level
+	const { data: noteImages, isLoading: isLoadingImages, error: noteError } = useNoteImages(selectedNote?.id || '');
 
 	const loadNoteImages = useCallback(async () => {
 		if (!selectedNote) {
@@ -24,20 +25,21 @@ export function NoteContentView() {
 		}
 
 		try {
-			viewLogger.info('🔄 Cargando imágenes de la nota:', selectedNote.id);
+			setError(null);
 			setIsLoading(true);
-			const images = await getNoteImages(selectedNote.id);
-			setItems(images);
-			viewLogger.info(`✅ ${images.length} imágenes cargadas`);
-		} catch (error) {
-			viewLogger.error('❌ Error cargando imágenes:', error);
-			toast.error('Error al cargar las imágenes de la nota');
-			setItems([]);
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			viewLogger.info('🔄 Cargando imágenes de la nota...');
+			if (noteImages) {
+				setItems(noteImages as EntityWithStats[]);
+			}
+			viewLogger.info('✅ Imágenes cargadas');
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			setError(errorMessage);
+			viewLogger.error('❌ Error cargando imágenes de la nota:', errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
-	}, [selectedNote]);
+	}, [selectedNote, noteImages]);
 
 	useEffect(() => {
 		loadNoteImages();
@@ -47,6 +49,20 @@ export function NoteContentView() {
 		// Implementar la lógica de selección de items si es necesaria
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);
+
+	if (isLoading || isLoadingImages) {
+		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
+	}
+
+	if (error || noteError) {
+		return (
+			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || noteError?.message}</div>
+		);
+	}
+
+	if (!items || items.length === 0) {
+		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	}
 
 	const contentProps: BaseContentProps = {
 		items,

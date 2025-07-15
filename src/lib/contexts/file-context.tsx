@@ -1,30 +1,63 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
-import { logActivity } from '@/app/actions/activity/activity.actions';
+import { useLogActivity } from '@/lib/api/activity';
+import {
+	useAddTags,
+	useAddToCollection,
+	useRemoveFromCollection,
+	useRemoveTags,
+	useToggleFavorite,
+} from '@/lib/api/files';
 import { clientEvents } from '@/lib/client/events.client';
 
-export interface FileItem {
-	id: string;
-	name: string;
+import type { EntityWithStats } from '@/types/entities/entity.types';
+
+export interface FileItem extends EntityWithStats {
+	// Propiedades de FileItem que pueden no estar en EntityWithStats o necesitan ser más específicas
 	path: string;
 	size: number;
-	type: string;
-	modified: Date;
-	metadata?: {
-		width?: number;
-		height?: number;
-		format?: string;
-		[key: string]: string | number | boolean | null | undefined;
-	};
+	type: string; // 'image', 'video', 'folder', etc.
+	modified: Date; // Fecha de última modificación del archivo
+	thumbnail?: string | null; // URL de la miniatura
+	src?: string; // URL de la imagen original (para ImageWithStats)
+	// Propiedades adicionales que pueden venir de diferentes entidades
+	// y que son usadas en el FileBrowser
+	width?: number;
+	height?: number;
+	format?: string;
+	// Campos de relación que pueden ser arrays de IDs o de objetos completos
 	tags?: string[];
 	collections?: string[];
 	characters?: string[];
 	places?: string[];
 	worldItems?: string[];
-	favorite?: boolean;
+	// Propiedades específicas de ImageWithStats o VideoWithStats
+	url?: string; // URL directa al archivo
+	duration?: number; // Duración del video
+	// Propiedades de fecha que pueden ser string o Date
+	createdAt: Date | string;
+	updatedAt: Date | string;
+	accessedAt?: Date | string;
+	// Propiedades de estado
 	isFavorite?: boolean;
-	thumbnail?: string;
+	isArchived?: boolean;
+	isPublic?: boolean;
+	// Propiedades de carpeta
+	parentId?: string | null;
+	// Propiedades de JSON
+	isValid?: boolean;
+	keys?: number;
+	// Propiedades de audio
+	artist?: string;
+	album?: string;
+	genre?: string;
+	// Propiedades de documento
+	pageCount?: number;
+	wordCount?: number;
+	// Propiedades de 3D
+	polygonCount?: number;
+	textureSize?: number;
 }
 
 interface FileContextType {
@@ -81,6 +114,9 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	// Usamos el hook de eventos optimistas del cliente
 	const [_optimisticState, addEvent] = clientEvents.useEvents({});
 
+	// Hook para registrar actividades - debe estar en el nivel superior
+	const logActivity = useLogActivity();
+
 	// Métodos del contexto original
 	const addFiles = useCallback((newFiles: FileItem[]) => {
 		setFiles((prev) => [...prev, ...newFiles]);
@@ -109,14 +145,19 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			// Seleccionar el item
 			selectFiles([item.id]);
 
-			// Registrar actividad de vista usando server action en lugar del servicio
-			await logActivity({
-				type: 'view',
-				description: `Vista de ${item.name}`,
-				imageId: item.id,
-			});
+			// Registrar actividad de vista usando API hook
+			try {
+				await logActivity.mutateAsync({
+					type: 'view',
+					description: `Vista de ${item.name}`,
+					imageId: item.id,
+				});
+			} catch (error) {
+				console.error('Error registrando actividad:', error);
+				// No bloquear la UI por errores de logging
+			}
 		},
-		[selectFiles]
+		[selectFiles, logActivity]
 	);
 
 	const toggleItemSelection = useCallback(
@@ -164,99 +205,55 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	);
 
 	// Resto de métodos del contexto original en lib/contexts/file-context.tsx
+	const { mutate: toggleFavoriteMutate } = useToggleFavorite();
+
 	const toggleFavorite = useCallback(
 		(fileId: string) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (file.id === fileId) {
-						const newFile = {
-							...file,
-							isFavorite: !file.isFavorite,
-						};
-						addEvent({ type: 'favorites:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			toggleFavoriteMutate(fileId);
 		},
-		[addEvent]
+		[toggleFavoriteMutate]
 	);
+
+	const { mutate: addToCollectionMutate } = useAddToCollection();
+	const { mutate: removeFromCollectionMutate } = useRemoveFromCollection();
 
 	const addToCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							collections: [...(file.collections || []), collectionId],
-						};
-						addEvent({ type: 'collections:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			for (const fileId of fileIds) {
+				addToCollectionMutate({ fileId, collectionId });
+			}
 		},
-		[addEvent]
+		[addToCollectionMutate]
 	);
 
 	const removeFromCollection = useCallback(
 		(fileIds: string[], collectionId: string) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							collections: file.collections?.filter((id) => id !== collectionId),
-						};
-						addEvent({ type: 'collections:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			for (const fileId of fileIds) {
+				removeFromCollectionMutate({ fileId, collectionId });
+			}
 		},
-		[addEvent]
+		[removeFromCollectionMutate]
 	);
+
+	const { mutate: addTagsMutate } = useAddTags();
+	const { mutate: removeTagsMutate } = useRemoveTags();
 
 	const addTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							tags: [...new Set([...(file.tags || []), ...tags])],
-						};
-						addEvent({ type: 'tags:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			for (const fileId of fileIds) {
+				addTagsMutate({ fileId, tags });
+			}
 		},
-		[addEvent]
+		[addTagsMutate]
 	);
 
 	const removeTags = useCallback(
 		(fileIds: string[], tags: string[]) => {
-			setFiles((prev) =>
-				prev.map((file) => {
-					if (fileIds.includes(file.id)) {
-						const newFile = {
-							...file,
-							tags: file.tags?.filter((tag) => !tags.includes(tag)),
-						};
-						addEvent({ type: 'tags:modified', data: { item: newFile } });
-						return newFile;
-					}
-					return file;
-				})
-			);
+			for (const fileId of fileIds) {
+				removeTagsMutate({ fileId, tags });
+			}
 		},
-		[addEvent]
+		[removeTagsMutate]
 	);
 
 	// Resto de funciones del contexto original

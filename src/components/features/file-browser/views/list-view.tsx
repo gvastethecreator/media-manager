@@ -1,12 +1,9 @@
+import React from 'react';
 /**
  * @file Vista de lista V2 usando EntityWithStats
  * @module components/features/file-browser/views/list-view-v2
  */
-'use client';
 
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
 import {
 	FileIcon,
 	FileTextIcon,
@@ -21,6 +18,9 @@ import {
 	VideoIcon,
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
+import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 interface ListViewProps {
 	items: EntityWithStats[];
@@ -47,14 +47,7 @@ const typeIcons: Record<string, React.ComponentType<any>> = {
 	// Añadir más según necesidad
 };
 
-export const ListView = memo<ListViewProps>(function ListView({
-	items,
-	itemSize,
-	selectedIds,
-	containerWidth,
-	onItemClick,
-	onItemDoubleClick,
-}) {
+export const ListView = memo<ListViewProps>(function ListView({ items, selectedIds, onItemClick, onItemDoubleClick }) {
 	// Preparar datos de la tabla con información adicional
 	const tableData = useMemo(() => {
 		return items.map((item) => {

@@ -16,12 +16,7 @@ function ResizablePanelGroup({ className, ...props }: React.ComponentProps<typeo
 	);
 }
 
-function ResizablePanel({
-	isCollapsed,
-	...props
-}: React.ComponentProps<typeof ResizablePrimitive.Panel> & {
-	isCollapsed?: boolean;
-}) {
+function ResizablePanel({ ...props }: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
 	return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
 }
 
@@ -50,4 +45,4 @@ function ResizableHandle({
 	);
 }
 
-export { ResizableHandle, ResizablePanel, ResizablePanelGroup };
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle };

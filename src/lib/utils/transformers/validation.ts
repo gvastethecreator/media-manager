@@ -1,6 +1,7 @@
-import { Logger } from '@/lib/logger';
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { Logger } from '@/lib/logger';
+import { BaseEntitySchema } from '@/types/common/base';
+import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 
 const logger = new Logger({ context: 'TransformerValidation' });
 

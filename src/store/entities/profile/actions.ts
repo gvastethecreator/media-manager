@@ -3,9 +3,10 @@
  * @module store/entities/profile/actions
  */
 
-import { getActiveProfile, getProfiles } from '@/app/actions/profiles';
-import type { ProfileExtended, ProfileFilters, ProfilePaginationOptions } from '@/types/entities/profile';
 import type { StateCreator } from 'zustand';
+// Refactor 2025-07: se usan funciones del cliente API de perfiles
+import { getActiveProfileFromApi, getProfilesFromApi } from '@/lib/api/client/profile.client';
+import type { ProfileExtended, ProfileFilters, ProfilePaginationOptions } from '@/types/entities/profile';
 import type { ProfileStoreState } from './types';
 
 /**
@@ -64,7 +65,7 @@ export const createProfileActions: StateCreator<ProfileStoreState & ProfileActio
 	fetchActiveProfile: async () => {
 		set({ isLoadingActive: true, activeProfileError: null });
 		try {
-			const profile = await getActiveProfile();
+			const profile = await getActiveProfileFromApi();
 			set({ activeProfile: profile, isLoadingActive: false });
 		} catch (error) {
 			set({
@@ -82,7 +83,7 @@ export const createProfileActions: StateCreator<ProfileStoreState & ProfileActio
 		set({ isLoadingProfiles: true, profilesError: null });
 		try {
 			const { filters, pagination } = get();
-			const profiles = await getProfiles();
+			const profiles = await getProfilesFromApi();
 			set({ profiles, totalProfiles: profiles.length, isLoadingProfiles: false });
 		} catch (error) {
 			set({

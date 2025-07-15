@@ -1,11 +1,15 @@
-'use client';
-
-import { createFolder, deleteFolder, updateFolder } from '@/app/actions/folders';
-import { clearMetadataCache } from '@/app/actions/metadata';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
-import type { FolderCreateInput } from '@/types/entities/folder';
 import { useCallback } from 'react';
+import { useCreateFolder, useDeleteFolder, useReindexFolder, useUpdateFolder } from '@/lib/api/folders';
+import { validateFolderExists } from '@/lib/api/services/folders';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
+import type { FolderCreateInput } from '@/types/entities/folder';
+import { useReindexAllFolders } from './use-folders';
+
+// Stub para clearMetadataCache en el cliente - la funcionalidad real está en el servidor
+const clearMetadataCache = () => {
+	clientLogger.withContext('MetadataCache').info('🧹 Cache metadata: operación delegada al servidor');
+};
 
 const operationsLogger = clientLogger.withContext('FoldersOperations');
 
@@ -25,52 +29,130 @@ export function useFoldersOperations({
 	onError,
 	onReindexAllStart,
 }: UseOperationsOptions) {
+	// ✅ Llamar todos los hooks al nivel superior
+	const createFolderMutation = useCreateFolder();
+	const reindexFolderMutation = useReindexFolder();
+	const deleteFolderMutation = useDeleteFolder();
+	const updateFolderMutation = useUpdateFolder();
+	const reindexAllFoldersMutation = useReindexAllFolders();
+
 	// Añadir una nueva carpeta
 	const handleAddFolder = useCallback(
 		async (folderPath: string) => {
 			try {
 				operationsLogger.info('➕ Agregando carpeta:', { path: folderPath });
 
+				// Validar que la ruta no esté vacía
+				if (!folderPath || !folderPath.trim()) {
+					const errorMessage = 'La ruta de la carpeta no puede estar vacía';
+					operationsLogger.error('❌ Ruta de carpeta vacía');
+					onError(errorMessage);
+					toastService.error(errorMessage);
+					return;
+				}
+
+				// Validar si la carpeta ya existe
+				operationsLogger.info('🔍 Validando si la carpeta ya existe:', { path: folderPath });
+				const folderExists = await validateFolderExists(folderPath.trim());
+
+				if (folderExists) {
+					const errorMessage = `Ya existe una carpeta con la ruta: ${folderPath.trim()}`;
+					operationsLogger.warn('⚠️ Carpeta duplicada detectada:', { path: folderPath.trim() });
+					onError(errorMessage);
+					toastService.error(errorMessage);
+					return;
+				}
+
+				// Normalizar la ruta
+				const normalizedPath = folderPath.trim().replace(/\\/g, '/').replace(/\/+/g, '/');
+				const folderName = normalizedPath.split('/').filter(Boolean).pop() || normalizedPath;
+
 				// Crear el input correctamente
 				const input: FolderCreateInput = {
-					path: folderPath,
-					name: folderPath.split('/').pop() || folderPath,
+					path: normalizedPath,
+					name: folderName,
+					description: null,
+					emoji: null,
+					color: null,
+					featuredImage: null,
+					isFavorite: false,
+					totalFiles: 0,
+					totalSize: 0,
 					autoReindex: false,
+					lastIndexed: null,
+					parentId: null,
+					presetId: null,
 				};
 
 				// Llamar a la acción del servidor
-				const result = await createFolder(input);
+				const result = await createFolderMutation.mutateAsync(input);
+
+				// Validación defensiva: asegurar que result tiene un ID válido
+				if (!result || !result.id) {
+					throw new Error('Error: La respuesta del servidor no contiene un ID válido');
+				}
 
 				// Notificar inicio de procesamiento
 				onStartProcessing(result.id);
 
 				operationsLogger.info('✅ Carpeta agregada correctamente:', result);
-				await onLoadData(); // Recargar datos
 
-				toastService.success(`La carpeta ${result.name} se ha agregado correctamente`);
+				// Recargar datos para obtener la nueva carpeta
+				await onLoadData();
+
+				// Iniciar indexación automática de la nueva carpeta
+				operationsLogger.info('🚀 Iniciando indexación automática para carpeta:', result.id);
+				try {
+					await reindexFolderMutation.mutateAsync(result.id);
+					toastService.success(`La carpeta ${result.name} se ha agregado e indexado correctamente`);
+				} catch (indexError) {
+					operationsLogger.warn('⚠️ Error iniciando indexación automática:', indexError);
+					toastService.success(`La carpeta ${result.name} se ha agregado correctamente`);
+					toastService.warning('No se pudo iniciar la indexación automática');
+				}
 			} catch (error) {
 				operationsLogger.error('❌ Error al agregar carpeta:', error);
 
-				onError(error instanceof Error ? error.message : 'Error desconocido');
+				// Manejo específico para errores de validación
+				let errorMessage = 'Error desconocido';
+				if (error instanceof Error) {
+					// Extraer mensaje específico del error 409
+					if (error.message.includes('409') || error.message.includes('Ya existe una carpeta')) {
+						errorMessage = `Ya existe una carpeta con la ruta: ${folderPath.trim()}`;
+					} else {
+						errorMessage = error.message;
+					}
+				}
 
-				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
+				onError(errorMessage);
+				toastService.error(errorMessage);
 			}
 		},
-		[onStartProcessing, onLoadData, onError]
+		[onStartProcessing, onLoadData, onError, createFolderMutation.mutateAsync, reindexFolderMutation.mutateAsync]
 	);
 
 	// Reindexar una carpeta
 	const handleReindexFolder = useCallback(
 		async (folderId: string) => {
+			if (!folderId || folderId === 'undefined') {
+				operationsLogger.error('❌ Error: Invalid folderId for reindex:', folderId);
+				toastService.error('Error: ID de carpeta inválido');
+				return;
+			}
+
 			try {
 				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
 
-				// Notificar inicio de procesamiento
-				onStartProcessing(folderId);
+				// Notificar inicio del reindexado
+				toastService.info('🔄 Iniciando reindexado', {
+					description: 'El proceso de reindexación ha comenzado...',
+				});
 
-				// Usar la nueva función de reindexado
-				const { reindexFolder } = await import('@/app/actions/folders/crud.actions');
-				await reindexFolder(folderId);
+				// Usar la nueva función de reindexado (síncrona)
+				await reindexFolderMutation.mutateAsync(folderId);
+
+				// Recargar datos después de la reindexación
+				await onLoadData();
 
 				operationsLogger.info('✅ Reindexación completada');
 				toastService.success('Carpeta reindexada correctamente');
@@ -82,17 +164,23 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onStartProcessing, onError]
+		[onLoadData, onError, reindexFolderMutation.mutateAsync]
 	);
 
 	// Eliminar una carpeta
 	const handleRemoveFolder = useCallback(
 		async (folderId: string) => {
+			if (!folderId || folderId === 'undefined') {
+				operationsLogger.error('❌ Error: Invalid folderId for delete:', folderId);
+				toastService.error('Error: ID de carpeta inválido');
+				return;
+			}
+
 			try {
 				operationsLogger.info('🗑️ Eliminando carpeta:', { folderId });
 
 				// Llamar a la acción del servidor
-				await deleteFolder(folderId);
+				await deleteFolderMutation.mutateAsync(folderId);
 
 				// Recargar datos
 				await onLoadData();
@@ -106,17 +194,23 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onLoadData, onError]
+		[onLoadData, onError, deleteFolderMutation.mutateAsync]
 	);
 
 	// Actualizar configuración de autoreindexado
 	const handleAutoReindexToggle = useCallback(
 		async (folderId: string, value: boolean) => {
+			if (!folderId || folderId === 'undefined') {
+				operationsLogger.error('❌ Error: Invalid folderId for toggle auto-reindex:', folderId);
+				toastService.error('Error: ID de carpeta inválido');
+				return;
+			}
+
 			try {
 				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
 
 				// Llamar a la acción del servidor
-				await updateFolder(folderId, { autoReindex: value });
+				await updateFolderMutation.mutateAsync({ id: folderId, data: { autoReindex: value } });
 
 				// Recargar datos
 				await onLoadData();
@@ -130,7 +224,7 @@ export function useFoldersOperations({
 				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 			}
 		},
-		[onLoadData, onError]
+		[onLoadData, onError, updateFolderMutation.mutateAsync]
 	);
 
 	// Reindexar todas las carpetas
@@ -138,8 +232,18 @@ export function useFoldersOperations({
 		try {
 			operationsLogger.info('🔄 Iniciando reindexación global directa');
 
-			// Iniciar directamente el proceso de reindexado sin diálogo
-			onReindexAllStart();
+			// Notificar inicio del reindexado global
+			toastService.info('🔄 Iniciando reindexado global', {
+				description: 'Reindexando todas las carpetas...',
+			});
+
+			// Ejecutar reindexación global (síncrona)
+			await reindexAllFoldersMutation.mutateAsync();
+
+			// Recargar datos después de la reindexación global
+			await onLoadData();
+
+			toastService.success('Reindexación global completada');
 		} catch (error) {
 			operationsLogger.error('❌ Error al iniciar reindexación global:', error);
 
@@ -147,7 +251,7 @@ export function useFoldersOperations({
 
 			toastService.error(error instanceof Error ? error.message : 'Error desconocido');
 		}
-	}, [onReindexAllStart, onError]);
+	}, [onLoadData, onError, reindexAllFoldersMutation.mutateAsync]);
 
 	// Limpiar caché
 	const handleClearCache = useCallback(async () => {

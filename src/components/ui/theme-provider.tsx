@@ -1,10 +1,13 @@
-'use client';
+/**
+ * @file Theme Provider migrado de Next.js a React nativo
+ * @module components/ui/theme-provider
+ * @description Proveedor de temas con soporte para temas personalizados
+ * @updated 2025-01-27 - Migrado de next-themes a React nativo
+ */
 
-import type { ThemeProviderProps } from 'next-themes';
-import { ThemeProvider as NextThemeProvider, useTheme } from 'next-themes';
-import { useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-// Definimos los temas personalizados
+// Definimos los temas personalizados (mantenidos de la versión original)
 const customThemes = [
 	'light',
 	'dark',
@@ -18,9 +21,28 @@ const customThemes = [
 	'carbon',
 	'teal',
 	'citrico',
-];
+] as const;
 
-// Componente de debug para monitorear cambios en el tema
+type Theme = (typeof customThemes)[number] | 'system';
+
+interface ThemeContextType {
+	theme: Theme;
+	setTheme: (theme: Theme) => void;
+	resolvedTheme: (typeof customThemes)[number];
+	themes: readonly string[];
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export interface ThemeProviderProps {
+	children: React.ReactNode;
+	defaultTheme?: Theme;
+	storageKey?: string;
+	attribute?: string;
+	enableSystem?: boolean;
+}
+
+// Componente de debug para monitorear cambios en el tema (mantenido)
 function ThemeDebugger() {
 	useEffect(() => {
 		const observer = new MutationObserver((mutations) => {
@@ -41,26 +63,123 @@ function ThemeDebugger() {
 	return null;
 }
 
-// Componente para forzar la aplicación del tema actual
+// Componente para forzar la aplicación del tema actual (mantenido)
 function ThemeEnforcer() {
-	const { theme } = useTheme();
+	const { theme, resolvedTheme } = useTheme();
 
 	useEffect(() => {
-		if (theme && typeof document !== 'undefined') {
-			console.log(`Forzando aplicación del tema: ${theme}`);
-			document.documentElement.setAttribute('data-theme', theme);
+		if (resolvedTheme && typeof document !== 'undefined') {
+			console.log(`Forzando aplicación del tema: ${resolvedTheme}`);
+			document.documentElement.setAttribute('data-theme', resolvedTheme);
 		}
-	}, [theme]);
+	}, [resolvedTheme]);
 
 	return null;
 }
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+export function ThemeProvider({
+	children,
+	defaultTheme = 'light',
+	storageKey = 'theme',
+	attribute = 'data-theme',
+	enableSystem = true,
+}: ThemeProviderProps) {
+	const [theme, setTheme] = useState<Theme>(defaultTheme);
+	const [resolvedTheme, setResolvedTheme] = useState<(typeof customThemes)[number]>('light');
+
+	// Detectar preferencia del sistema
+	const getSystemTheme = (): (typeof customThemes)[number] => {
+		if (typeof window === 'undefined') return 'light';
+		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+	};
+
+	// Resolver tema actual
+	const resolveTheme = React.useCallback(
+		(currentTheme: Theme): (typeof customThemes)[number] => {
+			if (currentTheme === 'system') {
+				return getSystemTheme();
+			}
+			return currentTheme as (typeof customThemes)[number];
+		},
+		[getSystemTheme]
+	);
+
+	// Aplicar tema al DOM
+	const applyTheme = React.useCallback(
+		(themeToApply: (typeof customThemes)[number]) => {
+			const root = document.documentElement;
+
+			// Remover todas las clases de tema anteriores
+			customThemes.forEach((t) => root.classList.remove(t));
+
+			// Aplicar nueva clase de tema
+			root.classList.add(themeToApply);
+
+			// Aplicar atributo data-theme
+			if (attribute) {
+				root.setAttribute(attribute, themeToApply);
+			}
+		},
+		[attribute]
+	);
+
+	// Inicializar tema desde localStorage
+	useEffect(() => {
+		const storedTheme = localStorage.getItem(storageKey) as Theme;
+		if (storedTheme && (customThemes.includes(storedTheme as any) || storedTheme === 'system')) {
+			setTheme(storedTheme);
+		}
+	}, [storageKey]);
+
+	// Actualizar tema resuelto cuando cambia el tema o la preferencia del sistema
+	useEffect(() => {
+		const resolved = resolveTheme(theme);
+		setResolvedTheme(resolved);
+		applyTheme(resolved);
+
+		// Escuchar cambios en la preferencia del sistema
+		if (theme === 'system' && enableSystem) {
+			const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+			const handleChange = () => {
+				const newResolved = resolveTheme(theme);
+				setResolvedTheme(newResolved);
+				applyTheme(newResolved);
+			};
+
+			mediaQuery.addEventListener('change', handleChange);
+			return () => mediaQuery.removeEventListener('change', handleChange);
+		}
+	}, [theme, enableSystem, applyTheme, resolveTheme]);
+
+	// Función para cambiar tema
+	const handleSetTheme = (newTheme: Theme) => {
+		setTheme(newTheme);
+		localStorage.setItem(storageKey, newTheme);
+	};
+
+	const value: ThemeContextType = {
+		theme,
+		setTheme: handleSetTheme,
+		resolvedTheme,
+		themes: customThemes,
+	};
+
 	return (
-		<NextThemeProvider attribute="data-theme" defaultTheme="light" themes={customThemes} {...props}>
+		<ThemeContext.Provider value={value}>
 			{children}
 			<ThemeDebugger />
 			<ThemeEnforcer />
-		</NextThemeProvider>
+		</ThemeContext.Provider>
 	);
 }
+
+export function useTheme() {
+	const context = useContext(ThemeContext);
+	if (context === undefined) {
+		throw new Error('useTheme debe ser usado dentro de un ThemeProvider');
+	}
+	return context;
+}
+
+// Exportar tipos para compatibilidad
+export type { Theme, ThemeContextType };

@@ -395,11 +395,11 @@ partialize: (state) => ({
 
 ```bash
 # Verificar tipos
-npx tsc --noEmit src/store/entities/activity/**/*.ts
+bunx tsc --noEmit src/store/entities/activity/**/*.ts
 
 # Ejecutar tests
-npm test -- src/store/entities/activity
+bun test -- src/store/entities/activity
 
 # Generar documentación
-npm run docs:activity
+bun run docs:activity
 ```

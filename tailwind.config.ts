@@ -4,7 +4,6 @@ import type { Config } from 'tailwindcss';
 const config: Config = {
 	darkMode: 'class',
 	content: ['./pages/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
-	prefix: '',
 	theme: {
 		container: {
 			center: true,
@@ -15,74 +14,62 @@ const config: Config = {
 		},
 		extend: {
 			colors: {
-				border: 'var(--color-border)',
-				input: 'var(--color-input)',
-				ring: 'var(--color-ring)',
-				background: 'var(--color-background)',
-				foreground: 'var(--color-foreground)',
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'var(--color-primary)',
-					foreground: 'var(--color-primary-foreground)',
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))',
 				},
 				secondary: {
-					DEFAULT: 'var(--color-secondary)',
-					foreground: 'var(--color-secondary-foreground)',
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))',
 				},
 				destructive: {
-					DEFAULT: 'var(--color-destructive)',
-					foreground: 'var(--color-destructive-foreground)',
+					DEFAULT: 'hsl(var(--destructive))',
+					foreground: 'hsl(var(--destructive-foreground))',
 				},
 				muted: {
-					DEFAULT: 'var(--color-muted)',
-					foreground: 'var(--color-muted-foreground)',
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))',
 				},
 				accent: {
-					DEFAULT: 'var(--color-accent)',
-					foreground: 'var(--color-accent-foreground)',
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))',
 				},
 				popover: {
-					DEFAULT: 'var(--color-popover)',
-					foreground: 'var(--color-popover-foreground)',
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))',
 				},
 				card: {
-					DEFAULT: 'var(--color-card)',
-					foreground: 'var(--color-card-foreground)',
-				},
-				chart: {
-					1: 'var(--color-chart-1)',
-					2: 'var(--color-chart-2)',
-					3: 'var(--color-chart-3)',
-					4: 'var(--color-chart-4)',
-					5: 'var(--color-chart-5)',
-				},
-				sidebar: {
-					DEFAULT: 'var(--color-sidebar)',
-					foreground: 'var(--color-sidebar-foreground)',
-					primary: 'var(--color-sidebar-primary)',
-					'primary-foreground': 'var(--color-sidebar-primary-foreground)',
-					accent: 'var(--color-sidebar-accent)',
-					'accent-foreground': 'var(--color-sidebar-accent-foreground)',
-					border: 'var(--color-sidebar-border)',
-					ring: 'var(--color-sidebar-ring)',
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))',
 				},
 			},
 			borderRadius: {
-				sm: 'var(--radius-sm)',
-				md: 'var(--radius-md)',
-				lg: 'var(--radius-lg)',
-				xl: 'var(--radius-xl)',
+				lg: 'var(--radius)',
+				md: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)',
+			},
+			keyframes: {
+				'accordion-down': {
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' },
+				},
+				'accordion-up': {
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' },
+				},
 			},
 			animation: {
-				'accordion-down': 'var(--animate-accordion-down)',
-				'accordion-up': 'var(--animate-accordion-up)',
-				shine: 'var(--animate-shine)',
-				'border-beam': 'var(--animate-border-beam)',
-				meteor: 'var(--animate-meteor)',
-				'shiny-text': 'var(--animate-shiny-text)',
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
 			},
 		},
 	},
-	plugins: [require('tw-animate-css')],
+	plugins: [require('tailwindcss-animate')],
 };
 
 export default config;

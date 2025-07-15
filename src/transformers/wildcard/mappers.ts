@@ -2,8 +2,9 @@
  * @file Funciones para mapear y transformar datos de la entidad Wildcard.
  * @module transformers/wildcard/mappers
  * @description Contiene funciones para:
- *              1. Transformar la entrada de la app a tipos de Prisma (create/update).
- *              2. Transformar los datos de Prisma a tipos enriquecidos de la app (WildcardWithStats).
+ *              1. Transformar la entrada de la app a tipos locales de Drizzle.
+ *              2. Transformar los datos de Drizzle a tipos enriquecidos de la app (WildcardWithStats).
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -11,26 +12,24 @@ import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import {
-	PrismaWildcardWithCounts,
 	WildcardCreateInput,
-	WildcardSearchOptions,
 	WildcardUpdateInput,
+	WildcardWithCounts,
 	WildcardWithStats,
 } from '@/types/entities/wildcard';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('WildcardMappers');
 
 /**
- * 🃏 Transforma un objeto Wildcard de Prisma a un objeto WildcardWithStats enriquecido.
+ * 🃏 Transforma un objeto Wildcard de Drizzle a un objeto WildcardWithStats enriquecido.
  *
  * @param wildcard - El objeto de la base de datos, incluyendo los `_count` de relaciones.
  * @returns Un objeto WildcardWithStats con campos JSON parseados y estadísticas calculadas.
  */
-export function toWildcardWithStats(wildcard: PrismaWildcardWithCounts): WildcardWithStats {
+export function toWildcardWithStats(wildcard: WildcardWithCounts): WildcardWithStats {
 	const { _count, ...rest } = wildcard;
 
-	const completenessFields = [rest.description, rest.category, rest.type];
+	const completenessFields = [rest.description, rest.category];
 	const relationCounts = [
 		_count?.images ?? 0,
 		_count?.notes ?? 0,
@@ -44,13 +43,11 @@ export function toWildcardWithStats(wildcard: PrismaWildcardWithCounts): Wildcar
 
 	const stats: WildcardWithStats = {
 		...rest,
-		properties: safeJsonParse(rest.properties, null),
-		children: safeJsonParse(rest.children, []),
-		_stats: {
+		statistics: {
 			popularity,
 			usageDiversity,
 			completenessScore: calculateCompleteness(completenessFields),
-			// TODO: Implementar una lógica más sofisticada para la adaptabilidad.
+			// Lógica de adaptabilidad basada en diversidad de uso
 			adaptabilityScore: (usageDiversity / 5) * 100,
 		},
 		_count,
@@ -60,19 +57,22 @@ export function toWildcardWithStats(wildcard: PrismaWildcardWithCounts): Wildcar
 }
 
 /**
- * 🔄 Mapea un `WildcardCreateInput` a un `Prisma.WildcardCreateInput`.
+ * 🔄 Mapea un `WildcardCreateInput` a datos para inserción en Drizzle.
  */
-export function mapCreateWildcardDataToPrisma(input: WildcardCreateInput): Prisma.WildcardCreateInput {
+export function mapCreateWildcardData(input: WildcardCreateInput): WildcardCreateInput {
 	try {
-		// Los campos de relaciones como `tags` no están en el tipo base de Prisma,
-		// por lo que usamos 'as any' para evitar errores de tipo aquí.
-		const { tags, ...rest } = input as any;
-
 		return {
-			...rest,
-			children: input.children ? JSON.stringify(input.children) : '[]',
-			properties: input.properties ? JSON.stringify(input.properties) : '{}',
-			tags: tags ? { connect: tags.map((id: string) => ({ id })) } : undefined,
+			...input,
+			children: input.children ? JSON.stringify(input.children) : null,
+			// Asegurar valores por defecto
+			description: input.description ?? null,
+			emoji: input.emoji ?? null,
+			color: input.color ?? null,
+			category: input.category ?? null,
+			shortcut: input.shortcut ?? null,
+			featuredImage: input.featuredImage ?? null,
+			isFavorite: input.isFavorite ?? false,
+			parentId: input.parentId ?? null,
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de wildcard.', { error, input });
@@ -81,16 +81,16 @@ export function mapCreateWildcardDataToPrisma(input: WildcardCreateInput): Prism
 }
 
 /**
- * 🔄 Mapea un `WildcardUpdateInput` a un `Prisma.WildcardUpdateInput`.
+ * 🔄 Mapea un `WildcardUpdateInput` a datos para actualización en Drizzle.
  */
-export function mapUpdateWildcardDataToPrisma(input: WildcardUpdateInput): Prisma.WildcardUpdateInput {
+export function mapUpdateWildcardData(input: WildcardUpdateInput): WildcardUpdateInput {
 	try {
-		const { tags, ...rest } = input as any;
-		const data: Prisma.WildcardUpdateInput = { ...rest };
+		const data: WildcardUpdateInput = { ...input };
 
-		if (input.children) data.children = JSON.stringify(input.children);
-		if (input.properties) data.properties = JSON.stringify(input.properties);
-		if (tags) data.tags = { set: tags.map((id: string) => ({ id })) };
+		// Convertir children a JSON si está presente
+		if (input.children !== undefined) {
+			data.children = input.children ? JSON.stringify(input.children) : null;
+		}
 
 		return data;
 	} catch (error) {
@@ -100,54 +100,37 @@ export function mapUpdateWildcardDataToPrisma(input: WildcardUpdateInput): Prism
 }
 
 /**
- * 🔄 Mapea `WildcardSearchOptions` a `Prisma.WildcardFindManyArgs`.
+ * 🔄 Mapea filtros de búsqueda a condiciones WHERE de Drizzle.
  */
-export function mapWildcardSearchOptionsToPrisma(options: WildcardSearchOptions): Prisma.WildcardFindManyArgs {
-	const { filters, ...rest } = options;
-	const where = filters ? mapWildcardFiltersToPrisma(filters) : undefined;
-
-	return {
-		...rest,
-		where,
-		include: {
-			_count: {
-				select: {
-					tags: true,
-					images: true,
-					characters: true,
-					places: true,
-					notes: true,
-				},
-			},
-		},
-	};
-}
-
-/**
- * 🔄 Mapea `WildcardFilters` a `Prisma.WildcardWhereInput`.
- */
-function mapWildcardFiltersToPrisma(filters: NonNullable<WildcardSearchOptions['filters']>): Prisma.WildcardWhereInput {
-	const where: Prisma.WildcardWhereInput = {};
+export function mapWildcardFilters(filters: {
+	searchQuery?: string;
+	categories?: string[];
+	onlyFavorites?: boolean;
+	parentId?: string | null;
+	hasChildren?: boolean;
+}) {
+	const conditions: any[] = [];
 
 	if (filters.searchQuery) {
-		where.OR = [{ name: { contains: filters.searchQuery } }, { description: { contains: filters.searchQuery } }];
+		// En Drizzle, esto se manejará con like() en el servicio
+		return { searchQuery: filters.searchQuery };
 	}
 
 	if (filters.categories && filters.categories.length > 0) {
-		where.category = { in: filters.categories };
+		return { categories: filters.categories };
 	}
 
 	if (filters.onlyFavorites !== undefined) {
-		where.isFavorite = filters.onlyFavorites;
+		return { onlyFavorites: filters.onlyFavorites };
 	}
 
 	if (filters.parentId !== undefined) {
-		where.parentId = filters.parentId;
+		return { parentId: filters.parentId };
 	}
 
 	if (filters.hasChildren !== undefined) {
-		where.childWildcards = filters.hasChildren ? { some: {} } : { none: {} };
+		return { hasChildren: filters.hasChildren };
 	}
 
-	return where;
+	return filters;
 }

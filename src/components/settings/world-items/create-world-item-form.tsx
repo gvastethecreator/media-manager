@@ -1,22 +1,20 @@
-'use client';
-
 // 🛠️ Refactor: DynamicCreateForm para WorldItem
 // Ahora solo el campo "name" es obligatorio, el resto se agrega dinámicamente.
 // Validación y tipos corregidos para compatibilidad con el patrón reusable.
 
-import { createWorldItem, updateWorldItem } from '@/app/actions/world-items/world-item.actions';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import toastService from '@/services/toast';
-import type { WorldItemCreateInput } from '@/types/entities/world-item';
-import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
-import type { WorldItemComplete } from '@/types/entities/world-item/extended';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
+import { toastService } from '@/lib/ui/toast';
+import type { WorldItemCreateInput } from '@/types/entities/world-item';
+import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
+import type { WorldItemComplete } from '@/types/entities/world-item/extended';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)
@@ -51,6 +49,10 @@ export function CreateWorldItemForm({
 	onCancel,
 	onPreview,
 }: CreateWorldItemFormProps) {
+	// React Query mutations
+	const createWorldItemMutation = useCreateWorldItem();
+	const updateWorldItemMutation = useUpdateWorldItem();
+
 	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Configurar react-hook-form
@@ -103,13 +105,13 @@ export function CreateWorldItemForm({
 
 			if (isEditing && worldItem) {
 				// Actualizar objeto existente
-				const updatedItem = await updateWorldItem(worldItem.id, data);
+				const updatedItem = await updateWorldItemMutation.mutateAsync({ id: worldItem.id, data });
 				if (onUpdated) {
 					onUpdated(updatedItem);
 				}
 			} else {
 				// Crear nuevo objeto
-				const newItem = await createWorldItem(data);
+				const newItem = await createWorldItemMutation.mutateAsync(data);
 				if (onCreated) {
 					onCreated(newItem);
 				}
@@ -239,12 +241,16 @@ export function CreateWorldItemForm({
 		<DynamicCreateForm<WorldItemCreateInput>
 			optionalFields={optionalFields as any}
 			onSubmit={async (data) => {
-				if (isEditing && worldItem) {
-					await updateWorldItem(worldItem.id, data);
-					onUpdated?.({ ...worldItem, ...data });
-				} else {
-					const created = await createWorldItem(data);
-					onCreated?.(created);
+				try {
+					if (isEditing && worldItem) {
+						const updated = await updateWorldItemMutation.mutateAsync({ id: worldItem.id, data });
+						onUpdated?.(updated);
+					} else {
+						const created = await createWorldItemMutation.mutateAsync(data);
+						onCreated?.(created);
+					}
+				} catch (error) {
+					console.error('Error al procesar el world item:', error);
 				}
 			}}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear objeto'}

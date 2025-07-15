@@ -6,14 +6,28 @@
  * @updated 2025-06-27
  */
 
+import * as crypto from 'crypto';
+import { asc, count, eq } from 'drizzle-orm';
+// Drizzle imports
+import { db } from '@/lib/drizzle';
+import { jsonFiles } from '@/lib/drizzle/schema/index';
+import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/database/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { fromPrismaJsonFile, fromPrismaJsonFiles } from '@/transformers/json-file/transformer';
-import type { JsonFileWithStats } from '@/types/entities/json-file';
-import type { Prisma } from '@prisma/client';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { fromDrizzleJsonFile, fromDrizzleJsonFiles } from '@/transformers/json-file/transformer';
+import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
 
 const jsonFileLogger = serverLogger.withContext('JsonFileService');
+
+// Función auxiliar para crear errores
+const createJsonFileError = (
+	message: string,
+	code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
+	cause?: unknown
+) => {
+	return createEntityErrorObject('JsonFileError', message, code, cause);
+};
 
 // Constantes para los tipos de eventos
 const EVENTS = {
@@ -36,10 +50,43 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
  */
 export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 	try {
-		const jsonFiles = await prisma.jsonFile.findMany({
-			orderBy: { name: 'asc' },
-		});
-		return fromPrismaJsonFiles(jsonFiles);
+		// **MIGRACIÓN A DRIZZLE**
+		jsonFileLogger.info('🗂️ Obteniendo archivos JSON');
+
+		const drizzleJsonFiles = await db
+			.select({
+				id: jsonFiles.id,
+				name: jsonFiles.name,
+				description: jsonFiles.description,
+				emoji: jsonFiles.emoji,
+				color: jsonFiles.color,
+				shortcut: jsonFiles.shortcut,
+				category: jsonFiles.category,
+				filePath: jsonFiles.filePath,
+				fileName: jsonFiles.fileName,
+				fileSize: jsonFiles.fileSize,
+				mimeType: jsonFiles.mimeType,
+				content: jsonFiles.content,
+				schema: jsonFiles.schema,
+				tags: jsonFiles.tags,
+				metadata: jsonFiles.metadata,
+				sortBy: jsonFiles.sortBy,
+				filters: jsonFiles.filters,
+				featuredImage: jsonFiles.featuredImage,
+				isFavorite: jsonFiles.isFavorite,
+				createdAt: jsonFiles.createdAt,
+				updatedAt: jsonFiles.updatedAt,
+			})
+			.from(jsonFiles)
+			.orderBy(asc(jsonFiles.name));
+
+		// Transformar a formato compatible con transformadores legacy
+		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile) => ({
+			...rawJsonFile,
+			isFavorite: Boolean(rawJsonFile.isFavorite),
+		}));
+
+		return fromDrizzleJsonFiles(transformedJsonFiles as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivos JSON:', { error });
 		throw new Error('Error al obtener archivos JSON');
@@ -51,11 +98,51 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
  */
 export async function getJsonFileById(id: string): Promise<JsonFileWithStats | null> {
 	try {
-		const jsonFile = await prisma.jsonFile.findUnique({
-			where: { id },
-		});
-		if (!jsonFile) return null;
-		return fromPrismaJsonFile(jsonFile);
+		// **MIGRACIÓN A DRIZZLE**
+		jsonFileLogger.info(`🔍 Obteniendo archivo JSON por ID: ${id}`);
+
+		const drizzleJsonFile = await db
+			.select({
+				id: jsonFiles.id,
+				name: jsonFiles.name,
+				description: jsonFiles.description,
+				emoji: jsonFiles.emoji,
+				color: jsonFiles.color,
+				shortcut: jsonFiles.shortcut,
+				category: jsonFiles.category,
+				filePath: jsonFiles.filePath,
+				fileName: jsonFiles.fileName,
+				fileSize: jsonFiles.fileSize,
+				mimeType: jsonFiles.mimeType,
+				content: jsonFiles.content,
+				schema: jsonFiles.schema,
+				tags: jsonFiles.tags,
+				metadata: jsonFiles.metadata,
+				sortBy: jsonFiles.sortBy,
+				filters: jsonFiles.filters,
+				featuredImage: jsonFiles.featuredImage,
+				isFavorite: jsonFiles.isFavorite,
+				createdAt: jsonFiles.createdAt,
+				updatedAt: jsonFiles.updatedAt,
+			})
+			.from(jsonFiles)
+			.where(eq(jsonFiles.id, id))
+			.limit(1);
+
+		if (drizzleJsonFile.length === 0) {
+			jsonFileLogger.warn(`Archivo JSON no encontrado: ${id}`);
+			return null;
+		}
+
+		const rawJsonFile = drizzleJsonFile[0];
+
+		// Transformar a formato compatible con transformadores legacy
+		const transformedJsonFile = {
+			...rawJsonFile,
+			isFavorite: Boolean(rawJsonFile.isFavorite),
+		};
+
+		return fromDrizzleJsonFile(transformedJsonFile as any);
 	} catch (error) {
 		jsonFileLogger.error('Error obteniendo archivo JSON por ID:', { id, error });
 		throw new Error('Error al obtener archivo JSON');
@@ -65,57 +152,119 @@ export async function getJsonFileById(id: string): Promise<JsonFileWithStats | n
 /**
  * Crea un nuevo archivo JSON
  */
-export async function createJsonFile(data: Prisma.JsonFileCreateInput): Promise<JsonFileWithStats> {
+export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFileWithStats> {
 	try {
-		const newJsonFile = await prisma.jsonFile.create({
-			data,
-		});
+		jsonFileLogger.info('🗂️ Creando archivo JSON:', data.name);
 
-		// Emitir eventos con el nuevo sistema
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.insert(jsonFiles)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				path: data.path,
+				size: data.size,
+				hash: data.hash,
+				mimeType: data.mimeType,
+				extension: data.extension,
+				folderId: data.folderId,
+				isFavorite: data.isFavorite || false,
+				isArchived: data.isArchived || false,
+				validJson: data.validJson || false,
+				schemaVersion: data.schemaVersion || null,
+				keys: data.keys || null,
+				values: data.values || null,
+				depth: data.depth || null,
+				hasArrays: data.hasArrays || false,
+				hasObjects: data.hasObjects || false,
+				encoding: data.encoding || null,
+				compressed: data.compressed || false,
+				minified: data.minified || false,
+				prettyPrinted: data.prettyPrinted || false,
+				content: data.content || null,
+				parsedContent: data.parsedContent || null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
+
+		const newJsonFile = result[0];
+		const jsonFileWithStats = fromDrizzleJsonFile(newJsonFile);
+
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILE_CREATED],
-			data: { action: 'create', entity: newJsonFile, eventType: EVENTS.JSON_FILE_CREATED },
+			type: 'files:modified',
+			data: { action: 'create', jsonFile: newJsonFile },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILES_CHANGED],
-			data: { action: 'change', eventType: EVENTS.JSON_FILES_CHANGED },
-		});
-
-		jsonFileLogger.info('Archivo JSON creado:', newJsonFile.name);
-		return fromPrismaJsonFile(newJsonFile);
+		jsonFileLogger.info('✅ Archivo JSON creado:', jsonFileWithStats.name);
+		return jsonFileWithStats;
 	} catch (error) {
-		jsonFileLogger.error('Error creando archivo JSON:', { data, error });
-		throw new Error('Error al crear archivo JSON');
+		jsonFileLogger.error('❌ Error al crear archivo JSON:', error);
+		throw createJsonFileError('No se pudo crear el archivo JSON', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
  * Actualiza un archivo JSON existente
  */
-export async function updateJsonFile(id: string, data: Prisma.JsonFileUpdateInput): Promise<JsonFileWithStats> {
+export async function updateJsonFile(id: string, data: JsonFileUpdateInput): Promise<JsonFileWithStats> {
 	try {
-		const updatedJsonFile = await prisma.jsonFile.update({
-			where: { id },
-			data,
-		});
+		jsonFileLogger.info('🔄 Actualizando archivo JSON:', id);
 
-		// Emitir eventos con el nuevo sistema
+		// Verificar que el archivo JSON existe
+		const exists = await jsonFileExists(id);
+		if (!exists) {
+			throw createJsonFileError('Archivo JSON no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+		}
+
+		// **MIGRACIÓN A DRIZZLE**
+		// Solo actualizar campos que están presentes en data
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
+
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.path !== undefined) updateData.path = data.path;
+		if (data.size !== undefined) updateData.size = data.size;
+		if (data.hash !== undefined) updateData.hash = data.hash;
+		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
+		if (data.extension !== undefined) updateData.extension = data.extension;
+		if (data.folderId !== undefined) updateData.folderId = data.folderId;
+		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
+		if (data.isArchived !== undefined) updateData.isArchived = Boolean(data.isArchived);
+		if (data.validJson !== undefined) updateData.validJson = Boolean(data.validJson);
+		if (data.schemaVersion !== undefined) updateData.schemaVersion = data.schemaVersion;
+		if (data.keys !== undefined) updateData.keys = data.keys;
+		if (data.values !== undefined) updateData.values = data.values;
+		if (data.depth !== undefined) updateData.depth = data.depth;
+		if (data.hasArrays !== undefined) updateData.hasArrays = Boolean(data.hasArrays);
+		if (data.hasObjects !== undefined) updateData.hasObjects = Boolean(data.hasObjects);
+		if (data.encoding !== undefined) updateData.encoding = data.encoding;
+		if (data.compressed !== undefined) updateData.compressed = Boolean(data.compressed);
+		if (data.minified !== undefined) updateData.minified = Boolean(data.minified);
+		if (data.prettyPrinted !== undefined) updateData.prettyPrinted = Boolean(data.prettyPrinted);
+		if (data.content !== undefined) updateData.content = data.content;
+		if (data.parsedContent !== undefined) updateData.parsedContent = data.parsedContent;
+
+		const result = await db.update(jsonFiles).set(updateData).where(eq(jsonFiles.id, id)).returning();
+
+		const updatedJsonFile = result[0];
+		const jsonFileWithStats = fromDrizzleJsonFile(updatedJsonFile);
+
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILE_UPDATED],
-			data: { action: 'update', entity: updatedJsonFile, eventType: EVENTS.JSON_FILE_UPDATED },
+			type: 'files:modified',
+			data: { action: 'update', jsonFile: updatedJsonFile },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILES_CHANGED],
-			data: { action: 'change', eventType: EVENTS.JSON_FILES_CHANGED },
-		});
-
-		jsonFileLogger.info('Archivo JSON actualizado:', updatedJsonFile.name);
-		return fromPrismaJsonFile(updatedJsonFile);
+		jsonFileLogger.info('✅ Archivo JSON actualizado:', jsonFileWithStats.name);
+		return jsonFileWithStats;
 	} catch (error) {
-		jsonFileLogger.error('Error actualizando archivo JSON:', { id, data, error });
-		throw new Error('Error al actualizar archivo JSON');
+		jsonFileLogger.error('❌ Error al actualizar archivo JSON:', error);
+		throw createJsonFileError('No se pudo actualizar el archivo JSON', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -124,25 +273,30 @@ export async function updateJsonFile(id: string, data: Prisma.JsonFileUpdateInpu
  */
 export async function deleteJsonFile(id: string): Promise<void> {
 	try {
-		await prisma.jsonFile.delete({
-			where: { id },
-		});
+		jsonFileLogger.info('🗑️ Eliminando archivo JSON:', id);
 
-		// Emitir eventos con el nuevo sistema
+		// Verificar que el archivo JSON existe
+		const exists = await jsonFileExists(id);
+		if (!exists) {
+			throw createJsonFileError('Archivo JSON no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+		}
+
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.delete(jsonFiles).where(eq(jsonFiles.id, id)).returning();
+
+		const deletedJsonFile = result[0];
+
+		// Emitir eventos
 		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILE_DELETED],
-			data: { action: 'delete', entity: { id }, eventType: EVENTS.JSON_FILE_DELETED },
+			type: 'files:modified',
+			data: { action: 'delete', jsonFile: deletedJsonFile },
 		});
+		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 
-		await emit({
-			type: EVENT_TYPE_MAPPING[EVENTS.JSON_FILES_CHANGED],
-			data: { action: 'change', eventType: EVENTS.JSON_FILES_CHANGED },
-		});
-
-		jsonFileLogger.info('Archivo JSON eliminado:', id);
+		jsonFileLogger.info('✅ Archivo JSON eliminado:', deletedJsonFile.name);
 	} catch (error) {
-		jsonFileLogger.error('Error eliminando archivo JSON:', { id, error });
-		throw new Error('Error al eliminar archivo JSON');
+		jsonFileLogger.error('❌ Error al eliminar archivo JSON:', error);
+		throw createJsonFileError('No se pudo eliminar el archivo JSON', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -151,13 +305,12 @@ export async function deleteJsonFile(id: string): Promise<void> {
  */
 export async function jsonFileExists(id: string): Promise<boolean> {
 	try {
-		const jsonFile = await prisma.jsonFile.findUnique({
-			where: { id },
-			select: { id: true },
-		});
-		return jsonFile !== null;
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select({ count: count() }).from(jsonFiles).where(eq(jsonFiles.id, id));
+
+		return result[0].count > 0;
 	} catch (error) {
-		jsonFileLogger.error('Error verificando existencia de archivo JSON:', { id, error });
+		jsonFileLogger.error('❌ Error verificando existencia de archivo JSON:', { id, error });
 		return false;
 	}
 }
@@ -167,9 +320,12 @@ export async function jsonFileExists(id: string): Promise<boolean> {
  */
 export async function getJsonFileCount(): Promise<number> {
 	try {
-		return await prisma.jsonFile.count();
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db.select({ count: count() }).from(jsonFiles);
+
+		return result[0].count;
 	} catch (error) {
-		jsonFileLogger.error('Error obteniendo conteo de archivos JSON:', { error });
-		throw new Error('Error al obtener conteo de archivos JSON');
+		jsonFileLogger.error('❌ Error obteniendo conteo de archivos JSON:', error);
+		throw createJsonFileError('No se pudo obtener el conteo de archivos JSON', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }

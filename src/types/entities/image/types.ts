@@ -1,13 +1,13 @@
 /**
  * @file Tipos canónicos para la entidad Image
  * @module types/entities/image/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
  * @description Estructura unificada y validada para Image. Todos los campos clave son obligatorios.
  * Última migración: 2025-01-27
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema } from '@/types/common/base';
+import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -20,7 +20,7 @@ import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
 import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { WorldItemWithStats } from '../world-item';
 
 /**
  * 🔍 Esquema de validación para Image
@@ -51,167 +51,27 @@ export const ImageSchema = z.object({
 export interface ImageBase {
 	id: string;
 	name: string;
-	description?: string | null;
+	description: string | null;
 	path: string;
 	hash: string;
 	size: number;
 	width: number;
 	height: number;
-	metadata?: string | null; // JSON string en DB
+	metadata: string | null;
+	thumbnail: string | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailMimeType: string | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
 	isFavorite: boolean;
-	folderId: string | null;
-	addedAt: Date;
+	folderId: string;
+	noteId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-}
-
-/**
- * 🖼️ Datos de thumbnail
- */
-export interface ImageThumbnail {
-	thumbnail?: Buffer | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
-	thumbnailError?: string | null;
-	thumbnailErrorAt?: Date | null;
-	thumbnailOptimizedAt?: Date | null;
-}
-
-/**
- * 🔗 Relaciones de Image optimizadas (usando tipos WithStats)
- */
-export interface ImageRelations {
-	folder?: FolderComplete | null;
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
-}
-
-/**
- * 📊 Consulta optimizada de Prisma con conteos
- */
-export interface PrismaImageWithCounts extends ImageBase {
-	_count: {
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-}
-
-/**
- * 📊 Estadísticas específicas de Image
- */
-export interface ImageStatistics {
-	// Conteos de relaciones
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalWildcards: number;
-	totalProperties: number;
-	totalGroups: number;
-	totalAssociations: number;
-
-	// Métricas técnicas
-	megapixels: number;
-	aspectRatio: number;
-	fileSize: number; // En MB
-	dimensions: string; // "1920x1080"
-
-	// Métricas de uso
-	views: number;
-	likes: number;
-	downloads: number;
-	shares: number;
-
-	// Análisis de calidad
-	qualityScore: number; // 0-100
-	technicalGrade: 'A' | 'B' | 'C' | 'D';
-	colorTemperature: 'warm' | 'neutral' | 'cool';
-
-	// Metadatos AI
-	aiConfidence: number; // 0-100
-	autoTags: string[];
-	duplicateStatus: 'unique' | 'duplicate' | 'similar';
-
-	lastUpdated: Date;
-}
-
-/**
- * 🖼️ Image con estadísticas optimizadas (tipo principal)
- */
-export interface ImageWithStats extends ImageBase {
-	statistics: ImageStatistics;
-	// Campos derivados calculados
-	thumbnailUrl: string;
-	fullUrl: string;
-	displayName: string;
-	parsedMetadata: ImageMetadata | null;
-	formattedSize: string;
-	formattedDimensions: string;
-	aspectRatioLabel: string;
-}
-
-/**
- * 🖥️ Propiedades de UI para Image
- */
-export interface ImageUI {
-	isSelected?: boolean;
-	isLoading?: boolean;
-	isExpanded?: boolean;
-	isHovered?: boolean;
-	isHighlighted?: boolean;
-	isEditing?: boolean;
-	thumbnailLoading?: boolean;
-	hasError?: boolean;
-	isInViewport?: boolean;
-	isDragging?: boolean;
-	isDropTarget?: boolean;
-}
-
-/**
- * 🖼️ Image completo con relaciones (para casos que requieren relaciones completas)
- */
-export interface ImageComplete extends ImageBase, ImageThumbnail, ImageRelations, ImageUI {
-	_count?: {
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-	parsedMetadata?: ImageMetadata | null;
+	addedAt: Date;
 }
 
 /**
@@ -227,7 +87,7 @@ export interface ImageCreateInput {
 	height: number;
 	metadata?: string | null;
 	isFavorite?: boolean;
-	folderId: string; // Requerido según el esquema Prisma
+	folderId: string;
 	// Relaciones opcionales
 	albums?: string[];
 	collections?: string[];
@@ -533,10 +393,10 @@ export const IMAGE_SORT_PROPERTY_MAP: Record<ImageSortCriteria, string> = {
 	[ImageSortCriteria.DIMENSIONS_DESC]: 'width',
 	[ImageSortCriteria.QUALITY_ASC]: 'statistics.qualityScore',
 	[ImageSortCriteria.QUALITY_DESC]: 'statistics.qualityScore',
-	[ImageSortCriteria.VIEWS_ASC]: 'statistics.views',
-	[ImageSortCriteria.VIEWS_DESC]: 'statistics.views',
-	[ImageSortCriteria.LIKES_ASC]: 'statistics.likes',
-	[ImageSortCriteria.LIKES_DESC]: 'statistics.likes',
+	[ImageSortCriteria.VIEWS_ASC]: 'views',
+	[ImageSortCriteria.VIEWS_DESC]: 'views',
+	[ImageSortCriteria.LIKES_ASC]: 'likes',
+	[ImageSortCriteria.LIKES_DESC]: 'likes',
 };
 
 // Tipos inferidos de Zod

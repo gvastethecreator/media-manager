@@ -1,11 +1,10 @@
-'use client';
-
 import { Album, Code, Image, Settings, Target, UserSquare } from 'lucide-react';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface PromptCardContentProps {
+	name: string;
 	description?: string | null;
 	content?: string;
 	purpose?: string;
@@ -39,7 +38,6 @@ export function PromptCardContent({
 	category = 'general',
 	tags = [],
 	primaryColor,
-	secondaryColor,
 	relationCounts = {},
 	tcgMode = true,
 	compact = false,
@@ -237,7 +235,9 @@ function StatCounter({
 		<div className="flex flex-col items-center">
 			<div className="flex items-center gap-1 mb-1">
 				{icon}
-				<span className="font-medium">{count}</span>
+				<span className="font-medium" style={{ color: primaryColor }}>
+					{count}
+				</span>
 			</div>
 			<div className="text-[0.65rem] opacity-70">{label}</div>
 		</div>

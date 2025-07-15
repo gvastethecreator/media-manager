@@ -4,9 +4,8 @@
  */
 
 import { StateCreator } from 'zustand';
-import { applyFileFilters } from '@/transformers/file';
-import { FileFilterOptions } from '@/types/entities/file/base';
-import { EnhancedFile } from '@/types/entities/file/extended';
+import { applyFileFilters, FileWithStats } from '@/transformers/file';
+import { FileFilterOptions } from '@/types/entities/file/types';
 import { FileStore } from '..';
 
 // Tipos para filtros
@@ -42,8 +41,8 @@ export interface FiltersActions {
 	setSearchTerm: (term: string) => void;
 
 	// Selectores
-	getFilteredFiles: () => EnhancedFile[];
-	getFilteredAndSortedFiles: () => EnhancedFile[];
+	getFilteredFiles: () => FileWithStats[];
+	getFilteredAndSortedFiles: () => FileWithStats[];
 }
 
 // Estado inicial

@@ -1,5 +1,3 @@
-'use client';
-
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { HeartIcon, ImageIcon, Star, VideoIcon } from 'lucide-react';
@@ -27,7 +25,6 @@ export function PlaceCardFooter({
 	imagesCount = 0,
 	videosCount = 0,
 	primaryColor = '#10b981',
-	secondaryColor = '#064e3b',
 	power = 1,
 	healthPoints = 100,
 	cardId = '',

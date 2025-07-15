@@ -1,32 +1,41 @@
 /**
- * @file Exporta todos los tipos relacionados con la entidad Concept
+ * @file Exportaciones principales de tipos para la entidad Concept.
  * @module types/entities/concept
+ * @description
+ *   Centraliza la exportación del tipo canónico **`ConceptWithStats`**.
  *
- * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
- * Legacy eliminado.
+ *   - `ConceptBase`: Tipo base de Drizzle.
+ *   - `ConceptStatistics`: Interfaz para las estadísticas de conteo.
+ *   - `ConceptWithStats`: El tipo enriquecido que se debe usar en la app.
+ *
+ * @see /src/types/entities/concept/base.ts
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Tipos Canónicos ---
+// Tipos base desde base.ts
+export type {
+	ConceptBase,
+	ConceptStatistics,
+	ConceptStats,
+	ConceptWithStats,
+} from './base';
+// --- Enumeraciones ---
 export {
 	ConceptCategory,
 	ConceptSortOption,
 	ConceptStatus,
 	ConceptViewMode,
 } from './enums';
-// Exportar esquema de validación
-export type { ConceptStats } from './schema';
+
+// Tipos adicionales desde types.ts
 export type {
-	ConceptBase as Concept,
-	ConceptBase,
-	ConceptComplete,
 	ConceptCreateInput,
 	ConceptExtended,
 	ConceptFilters,
-	ConceptListItem,
 	ConceptSearchOptions,
 	ConceptSearchResult,
 	ConceptUpdateInput,
 } from './types';
-// Exportar tipo principal como Concept para compatibilidad
-export { ConceptSchema } from './types';
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

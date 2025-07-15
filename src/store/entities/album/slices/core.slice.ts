@@ -4,11 +4,17 @@
  * @description Gestiona el estado y las acciones CRUD para la entidad Album.
  */
 
-import * as actions from '@/app/actions/albums/album.actions';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
 import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
+// Consumimos la API en lugar de las server actions
+import {
+	createAlbumInApi,
+	deleteAlbumFromApi,
+	getAlbumsFromApi,
+	updateAlbumInApi,
+} from '@/lib/api/client/album.client';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
 import type { AlbumCoreActions, AlbumCoreState, AlbumStore } from '../types';
 
 const logger = clientLogger.withContext('AlbumCoreSlice');
@@ -43,7 +49,7 @@ export const createAlbumCoreSlice: StateCreator<
 		});
 
 		try {
-			const albums = await actions.getAlbums();
+			const albums = await getAlbumsFromApi();
 			set((state) => {
 				state.albums = albums.reduce(
 					(acc, album) => {
@@ -71,11 +77,11 @@ export const createAlbumCoreSlice: StateCreator<
 
 	createAlbum: async (data) => {
 		try {
-			await actions.createAlbum(data);
+			await createAlbumInApi(data);
 			toastService.success(`Álbum "${data.name}" creado.`);
 			await get().loadAlbums();
 		} catch (error) {
-			const errorMsg = '❌ Error al crear el álbum "' + data.name + '".';
+			const errorMsg = `❌ Error al crear el álbum "${data.name}".`;
 			logger.error(errorMsg, error);
 			toastService.error(errorMsg);
 		}
@@ -83,8 +89,8 @@ export const createAlbumCoreSlice: StateCreator<
 
 	updateAlbum: async (id, data) => {
 		try {
-			await actions.updateAlbum(id, data);
-			toastService.success(`Álbum actualizado.`);
+			await updateAlbumInApi(id, data);
+			toastService.success('Álbum actualizado.');
 			await get().loadAlbums();
 		} catch (error) {
 			const errorMsg = '❌ Error al actualizar el álbum.';
@@ -101,7 +107,7 @@ export const createAlbumCoreSlice: StateCreator<
 			})
 		);
 		try {
-			await actions.deleteAlbum(id);
+			await deleteAlbumFromApi(id);
 			toastService.success(`Álbum "${albumName}" eliminado.`);
 		} catch (error) {
 			const errorMsg = '❌ Error al eliminar el álbum.';

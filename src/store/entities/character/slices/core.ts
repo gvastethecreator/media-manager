@@ -4,9 +4,9 @@
  * @description Slice principal con estructura Record optimizada para acceso O(1).
  */
 
+import type { StateCreator } from 'zustand';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
-import type { StateCreator } from 'zustand';
 import type { CharacterCoreSlice, CharacterState } from '../types';
 
 const logger = serverLogger.withContext('CharacterCoreSlice');
@@ -25,10 +25,12 @@ export function charactersToRecord(characters: CharacterWithStats[]): Record<str
 /**
  * Crea el slice principal optimizado para Character.
  */
-export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCoreSlice, [], [], CharacterCoreSlice> = (
-	set,
-	get
-) => ({
+export const createCharacterCoreSlice: StateCreator<
+	CharacterState & CharacterCoreSlice,
+	[],
+	[],
+	CharacterState & CharacterCoreSlice
+> = (set, get) => ({
 	// Conversión y utilidades optimizadas
 	charactersToRecord,
 
@@ -40,6 +42,11 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	getAllCharacters: () => {
 		const { characters } = get();
 		return Object.values(characters);
+	},
+
+	getCharactersByIds: (ids: string[]) => {
+		const { characters } = get();
+		return ids.map((id) => characters[id]).filter(Boolean);
 	},
 
 	// Operaciones principales CRUD optimizadas

@@ -1,12 +1,7 @@
-'use server';
+import { ENV } from '@/config/env';
+import type { ProcessStatus } from '@/types/process';
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { ProcessStatus } from '@/types/process';
-import { revalidatePath } from 'next/cache';
-
-const eventsLogger = serverLogger.withContext('ServerEvents');
-
-// Mapa de rutas a revalidar por tipo de evento
+// Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
 const EVENT_PATHS: Record<EventType, string[]> = {
 	create: ['/'],
 	update: ['/'],
@@ -111,23 +106,88 @@ export interface EventData<T = unknown> {
 	data?: T;
 }
 
+// Store para eventos en memoria (compartido con el endpoint)
+const eventStore = new Map<string, EventData[]>();
+const eventSubscribers = new Set<(event: EventData) => void>();
+
 /**
- * Emite un evento y revalida las rutas necesarias
+ * Obtener el store de eventos (para uso compartido)
+ */
+export function getEventStore() {
+	return eventStore;
+}
+
+/**
+ * Obtener los suscriptores de eventos (para uso compartido)
+ */
+export function getEventSubscribers() {
+	return eventSubscribers;
+}
+
+/**
+ * Emite un evento directamente en el servidor (sin HTTP)
+ */
+function emitDirect(event: EventData) {
+	console.log('🚀 Emitiendo evento (servidor directo):', event);
+
+	// Almacenar evento
+	const eventKey = event.type;
+	if (!eventStore.has(eventKey)) {
+		eventStore.set(eventKey, []);
+	}
+	eventStore.get(eventKey)?.push({
+		...event,
+		timestamp: Date.now(),
+	});
+
+	// Mantener solo los últimos 100 eventos por tipo
+	const events = eventStore.get(eventKey);
+	if (events && events.length > 100) {
+		events.splice(0, events.length - 100);
+	}
+
+	// Notificar a suscriptores
+	eventSubscribers.forEach((subscriber) => {
+		try {
+			subscriber(event);
+		} catch (error) {
+			console.error('Error notificando suscriptor:', error);
+		}
+	});
+}
+
+/**
+ * Emite un evento (versión híbrida - directo en servidor, HTTP en cliente)
  */
 export async function emit(event: EventData) {
-	eventsLogger.info('🚀 Emitiendo evento:', event);
+	try {
+		// Detectar si estamos en el servidor (Node.js) o cliente (navegador)
+		const isServer = typeof window === 'undefined';
 
-	// Revalidar rutas asociadas al tipo de evento
-	const paths = EVENT_PATHS[event.type];
-	if (paths) {
-		for (const path of paths) {
-			revalidatePath(path);
+		if (isServer) {
+			// En el servidor, emitir directamente
+			emitDirect(event);
+		} else {
+			// En el cliente, usar HTTP
+			console.log('🚀 Emitiendo evento (cliente HTTP):', event);
+			const response = await fetch('/api/events', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(event),
+			});
+
+			if (!response.ok) {
+				console.warn('❌ Error al emitir evento:', response.statusText);
+			}
 		}
+	} catch (error) {
+		console.warn('❌ Error al emitir evento:', error);
+		// En modo desarrollo, no fallar por errores de eventos
 	}
 }
 
 /**
- * Emite un evento de progreso
+ * Emite un evento de progreso (versión cliente)
  */
 export async function emitProgress(status: ProcessStatus) {
 	// Asegurarse de que timestamp esté presente

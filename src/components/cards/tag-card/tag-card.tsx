@@ -1,12 +1,10 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
-import type { TagWithStats } from '@/types/entities/tag';
 import { Sparkles, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
+import type { TagWithStats } from '@/types/entities/tag';
 import { TagCardContent } from './tag-card-content';
 import { TagCardFooter } from './tag-card-footer';
 import { TagCardHeader } from './tag-card-header';
@@ -58,7 +56,6 @@ export function TagCard({
 		updatedAt,
 		isFavorite = false,
 		featuredImage,
-		totalAssociations,
 	} = tag;
 
 	// Calcular valores derivados
@@ -77,27 +74,14 @@ export function TagCard({
 	const groupsCount = tag._count?.groups || 0;
 
 	// Calcular total de relaciones para mostrar la rareza
-	const totalRelations =
-		imagesCount +
-		videosCount +
-		albumsCount +
-		collectionsCount +
-		charactersCount +
-		placesCount +
-		worldItemsCount +
-		conceptsCount +
-		promptsCount +
-		notesCount +
-		wildcardsCount +
-		propertiesCount +
-		groupsCount;
+	const totalRelations = tag.stats?.totalRelations ?? 0;
 
 	// Determinar rareza basada en relaciones
 	const determineRarity = (): TagRarity => {
-		if (totalAssociations > 200) return TagRarity.LEGENDARY;
-		if (totalAssociations > 100) return TagRarity.VERY_RARE;
-		if (totalAssociations > 50) return TagRarity.RARE;
-		if (totalAssociations > 10) return TagRarity.UNCOMMON;
+		if (totalRelations > 200) return TagRarity.LEGENDARY;
+		if (totalRelations > 100) return TagRarity.VERY_RARE;
+		if (totalRelations > 50) return TagRarity.RARE;
+		if (totalRelations > 10) return TagRarity.UNCOMMON;
 		return TagRarity.COMMON;
 	};
 
@@ -257,7 +241,7 @@ export function TagCard({
 					{/* Cabecera con nombre e icono */}
 					<TagCardHeader
 						name={name}
-						emoji={emoji}
+						emoji={emoji ?? '🏷️'}
 						color={cardColor}
 						category={category as TagCategory}
 						rarity={calculatedRarity}
