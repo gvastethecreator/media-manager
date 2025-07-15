@@ -429,36 +429,79 @@ router.get('/:id/recent-images', async (req, res) => {
 router.get('/:id/stats', async (req, res) => {
 	try {
 		const { id } = req.params;
+		console.log(`🔍 [FOLDER-STATS] Iniciando obtención de estadísticas para carpeta: ${id}`);
 
 		if (!isValidFolderId(id)) {
+			console.log(`❌ [FOLDER-STATS] ID de carpeta inválido: ${id}`);
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await db
+		console.log(`✅ [FOLDER-STATS] ID válido, consultando datos básicos de carpeta...`);
+		// Obtener estadísticas básicas de la carpeta
+		const folderData = await db
 			.select({
 				totalSize: folders.totalSize,
 				lastIndexed: folders.lastIndexed,
-				totalImages: count(images.id).from(images).where(eq(images.folderId, id)),
-				totalVideos: count(videos.id).from(videos).where(eq(videos.folderId, id)),
 			})
 			.from(folders)
-			.leftJoin(images, eq(folders.id, images.folderId))
-			.leftJoin(videos, eq(folders.id, videos.folderId))
-			.where(eq(folders.id, id));
+			.where(eq(folders.id, id))
+			.limit(1);
 
-		if (folder.length === 0) {
+		console.log(`📊 [FOLDER-STATS] Datos de carpeta obtenidos:`, folderData);
+
+		if (folderData.length === 0) {
+			console.log(`❌ [FOLDER-STATS] Carpeta no encontrada: ${id}`);
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
 		}
 
+		console.log(`🖼️ [FOLDER-STATS] Consultando estadísticas de imágenes...`);
+		// Contar imágenes por tipo
+		const imageStats = await db
+			.select({
+				count: count(),
+			})
+			.from(images)
+			.where(eq(images.folderId, id));
+
+		console.log(`📹 [FOLDER-STATS] Consultando estadísticas de videos...`);
+		// Contar videos
+		const videoStats = await db
+			.select({
+				count: count(),
+			})
+			.from(videos)
+			.where(eq(videos.folderId, id));
+
+		console.log(`🔄 [FOLDER-STATS] Obteniendo imágenes recientes...`);
+		// Obtener las últimas 4 imágenes
+		const recentImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				thumbnailUrl: images.thumbnailUrl,
+				createdAt: images.createdAt,
+			})
+			.from(images)
+			.where(eq(images.folderId, id))
+			.orderBy(desc(images.createdAt))
+			.limit(4);
+
+		console.log(`📈 [FOLDER-STATS] Construyendo objeto de estadísticas...`);
 		const stats = {
-			totalImages: folder[0].totalImages,
-			totalVideos: folder[0].totalVideos,
-			totalSize: folder[0].totalSize,
-			lastActivity: folder[0].lastIndexed,
+			totalImages: imageStats[0]?.count || 0,
+			totalVideos: videoStats[0]?.count || 0,
+			totalAudio: 0, // TODO: Implementar cuando se agregue tabla de audio
+			totalDocuments: 0, // TODO: Implementar cuando se agregue tabla de documentos
+			totalOthers: 0, // TODO: Implementar cuando se agregue tabla de otros archivos
+			totalSize: folderData[0].totalSize,
+			lastActivity: folderData[0].lastIndexed,
+			recentImages: recentImages,
 		};
+		console.log(`✅ [FOLDER-STATS] Estadísticas construidas exitosamente:`, stats);
 		res.json(stats);
 	} catch (error) {
-		console.error('Error al obtener estadísticas de la carpeta:', error);
+		console.error('💥 [FOLDER-STATS] Error al obtener estadísticas de la carpeta:', error);
+		console.error('💥 [FOLDER-STATS] Stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

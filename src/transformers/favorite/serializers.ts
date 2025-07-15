@@ -62,6 +62,9 @@ export function serializeFavoriteList(favorites: FavoriteWithStats[]) {
  * @returns Estadísticas serializadas
  */
 export function serializeFavoriteGroupedStats(grouped: Record<string, FavoriteWithStats[]>) {
+	if (!grouped || typeof grouped !== 'object') {
+		return [];
+	}
 	return Object.entries(grouped).map(([entityType, favorites]) => ({
 		entityType,
 		count: favorites.length,

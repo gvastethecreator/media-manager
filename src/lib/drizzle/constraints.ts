@@ -361,6 +361,9 @@ export const OPTIMIZED_VIEWS = {
  * 🛠️ Función para aplicar todos los constraints a una tabla
  */
 export function applyConstraints(tableName: string, constraints: Record<string, any>) {
+	if (!constraints || typeof constraints !== 'object') {
+		return [];
+	}
 	const checks = Object.entries(constraints).map(([field, constraint]) =>
 		check(`${tableName}_${field}_check`, constraint)
 	);

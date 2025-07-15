@@ -69,6 +69,10 @@ export function validateRelations(relations: unknown, allowedRelations: string[]
  * 🎯 Valida tipos de datos
  */
 export function validateDataTypes(data: Record<string, unknown>, typeMap: Record<string, string>) {
+	// Validación null-safe para evitar errores de Object.entries
+	if (!typeMap || typeof typeMap !== 'object') {
+		return;
+	}
 	for (const [field, expectedType] of Object.entries(typeMap)) {
 		const value = data[field];
 		if (value !== undefined && value !== null) {

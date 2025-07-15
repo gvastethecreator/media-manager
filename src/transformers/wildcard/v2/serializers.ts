@@ -203,9 +203,12 @@ function calculateItemCount(wildcard: WildcardBase & { _count?: Record<string, n
 	// Sumar todos los conteos excepto childWildcards para evitar duplicidades
 	let total = 0;
 
-	for (const [key, value] of Object.entries(wildcard._count)) {
-		if (key !== 'childWildcards') {
-			total += value as number;
+	// 🚨 VALIDACIÓN NULL-SAFE PARA Object.entries()
+	if (wildcard._count && typeof wildcard._count === 'object') {
+		for (const [key, value] of Object.entries(wildcard._count)) {
+			if (key !== 'childWildcards') {
+				total += value as number;
+			}
 		}
 	}
 

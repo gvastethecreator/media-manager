@@ -926,6 +926,12 @@ function calculateHealth(counts: any): number {
 	// Base HP
 	let hp = 100;
 
+	// Validación null-safe para evitar errores de Object.entries
+	if (!counts || typeof counts !== 'object') {
+		console.warn('⚠️ [GROUP-SERVICE] calculateHealth recibió counts null/undefined, usando valores por defecto');
+		return hp;
+	}
+
 	// Contar tipos diferentes de entidades presentes
 	const entityTypes = Object.entries(counts).filter(([_, count]) => count > 0).length;
 
@@ -933,7 +939,7 @@ function calculateHealth(counts: any): number {
 	hp += entityTypes * 20;
 
 	// Bonificación por volumen total de entidades principales
-	const mainEntities = counts.characters + counts.places + counts.worldItems + counts.concepts;
+	const mainEntities = (counts.characters || 0) + (counts.places || 0) + (counts.worldItems || 0) + (counts.concepts || 0);
 	hp += mainEntities * 5;
 
 	return Math.min(999, hp);
