@@ -264,6 +264,7 @@ function PromptCardComponent({
 					<PromptCardFooter
 						imagesCount={imagesCount}
 						videosCount={videosCount}
+						tagsCount={tagsCount}
 						createdAt={createdAt}
 						updatedAt={updatedAt}
 						primaryColor={primaryColor}

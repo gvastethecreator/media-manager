@@ -1,229 +1,178 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { useCreateFolder } from '@/lib/api/folders'; // Importar el hook useCreateFolder
-import { findFolders } from '@/lib/api/services/folders';
-import { clientEvents } from '@/lib/client/events.client';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileStoreBase } from '@/store/entities/file';
-import { useFolderStore } from '@/store/entities/folder';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Folder, FolderPlus, RefreshCw } from 'lucide-react';
+import { FolderCard } from '@/components/cards/folder-card';
+import { EmptyState } from '@/components/core/data-display';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useFolders } from '@/lib/api/folders';
+import { useCreateFolder } from '@/lib/api/folders';
 import type { FolderWithStats } from '@/types/entities/folder';
-import type { ViewProps } from '../types';
-import FoldersContentView from './folders-content-view';
 
-const viewLogger = clientLogger.withContext('FoldersView');
+interface FoldersViewProps {
+	className?: string;
+}
 
-export function FoldersView(_props: ViewProps) {
-	const { setCurrentView, setCurrentItem } = useNavigationStore();
+export default function FoldersView({
+	className = '',
+}: FoldersViewProps) {
+	const navigate = useNavigate();
+	const { data: foldersResponse, isLoading, error, refetch } = useFolders();
+	const folders = foldersResponse?.data || [];
+	const { mutate: createFolder, isPending: isCreating } = useCreateFolder();
 
-	// 🆕 Usar los nuevos stores específicos
-	const { selectFolder, getFolder } = useFolderStore();
-	const { mutate: createFolder } = useCreateFolder(); // Obtener la función de mutación
-
-	// 🧹 Para limpiar selección - usar el hook base directamente
-	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
-
-	const [folders, setFolders] = useState<FolderWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-
+	// Estado para el formulario de nueva carpeta
 	const [showForm, setShowForm] = useState(false);
 	const [newFolderName, setNewFolderName] = useState('');
 	const [newFolderPath, setNewFolderPath] = useState('');
 
-	// Usar el nuevo hook de eventos optimistas del cliente
-	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderWithStats[]>(folders);
-	// Mantener un contador de reintentos
-	const [retryCount, setRetryCount] = useState(0);
-	const [isManualRetry, setIsManualRetry] = useState(false);
-	const maxRetries = 3;
+	// Manejar clic en carpeta - navegar a la vista de contenido
+	const handleFolderClick = (folder: FolderWithStats) => {
+		navigate(`/folders/${folder.id}`);
+	};
 
-	// Separar la lógica de carga para evitar dependencias circulares
-	const executeLoad = useCallback(
-		async (isManual = false) => {
-			try {
-				if (isManual) {
-					setIsManualRetry(true);
-				}
-				setIsLoading(true);
-				viewLogger.info('🔄 Cargando carpetas...');
-				const result = await findFolders({ limit: 100 });
+	// Manejar creación de carpeta
+	const handleCreateFolder = async () => {
+		if (!newFolderName.trim() || !newFolderPath.trim()) return;
 
-				// ✅ Transformar datos para EntityCard - ahora los datos ya vienen con estadísticas
-				if (result?.data && Array.isArray(result.data)) {
-					const transformedData = result.data.map((folderData: FolderWithStats): FolderWithStats => {
-						return {
-							...folderData,
-							lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
-							createdAt: new Date(folderData.createdAt),
-							updatedAt: new Date(folderData.updatedAt),
-							// Las estadísticas ya vienen del servicio, no necesitamos modificarlas
-							// _count ya viene del transformer
-							// totalSize y totalFiles ya vienen del transformer
-						};
-					});
-
-					setFolders(transformedData);
-					setRetryCount(0);
-					setError(null);
-					viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
-				} else {
-					throw new Error('Respuesta del servicio no es un array válido');
-				}
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-
-				// Gestionar los casos de errores de concurrencia o transitorios solo en carga automática
-				const isTransientError =
-					(errorMessage.includes('Operación') && errorMessage.includes('en progreso')) ||
-					errorMessage.includes('ECONNREFUSED') ||
-					errorMessage.includes('timeout') ||
-					errorMessage.includes('network');
-
-				if (isTransientError && retryCount < maxRetries && !isManual) {
-					// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
-					const retryDelay = 300 * 3 ** retryCount;
-					viewLogger.debug(
-						`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
-					);
-
-					// Incrementar contador de reintentos y programar un nuevo intento
-					setRetryCount((prev) => prev + 1);
-					setTimeout(() => {
-						executeLoad(false);
-					}, retryDelay);
-					return;
-				}
-
-				// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
-				if (retryCount >= maxRetries && !isManual) {
-					viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
-				}
-
-				viewLogger.error('❌ Error cargando carpetas:', error);
-				setError(errorMessage);
-			} finally {
-				setIsLoading(false);
-				if (isManual) {
-					setIsManualRetry(false);
-				}
-			}
-		},
-		[retryCount]
-	);
-
-	// Hook para carga inicial - sin dependencias que causen loops
-	useEffect(() => {
-		viewLogger.debug('🟢 FoldersView Montado');
-		// Cargar carpetas solo una vez al montar
-		if (folders.length === 0 && !isLoading) {
-			viewLogger.debug('📁 Iniciando carga de carpetas...');
-			executeLoad(false);
-		}
-
-		return () => {
-			viewLogger.debug('🔴 FoldersView Desmontado');
-		};
-	}, [executeLoad, folders.length, isLoading]); // Solo ejecutar al montar/desmontar
-
-	// Función pública para recargar
-	const loadFolders = useCallback(
-		(isManual = false) => {
-			setRetryCount(0); // Resetear contador en cargas manuales
-			executeLoad(isManual);
-		},
-		[executeLoad]
-	);
-
-	const handleFolderClick = useCallback(
-		(folder: FolderWithStats) => {
-			try {
-				viewLogger.info('🖱️ Click en carpeta:', folder.name);
-				viewLogger.debug('ℹ️ Carpeta clickeada:', folder);
-
-				// Verificaciones de seguridad
-				if (!folder || !folder.id) {
-					viewLogger.error('❌ Carpeta inválida:', folder);
-					return;
-				}
-
-				viewLogger.debug('🧹 Limpiando selecciones previas...');
-				// 🧹 Limpiar selecciones previas
-				deselectAllFiles();
-				viewLogger.debug('✅ Selecciones limpiadas.');
-
-				viewLogger.debug('🔄 Actualizando el store de carpetas (selectFolder)...');
-				// 🔄 Actualizar el store de carpetas PRIMERO
-				selectFolder(folder.id);
-				viewLogger.debug(`✅ selectFolder llamado con ID: ${folder.id}`);
-
-				viewLogger.debug('📋 Estableciendo elemento actual en navigation store...');
-				// 📋 Establecer el elemento actual en el navigation store
-				setCurrentItem({
-					id: folder.id,
-					name: folder.name,
-					path: folder.path,
-					description: folder.description || undefined,
-					color: folder.color || undefined,
-					emoji: folder.emoji || undefined,
-					count: folder._count?.images || 0,
-					totalSize: folder.totalSize,
-					lastIndexed: folder.lastIndexed || undefined,
-					createdAt: folder.createdAt,
-					itemType: 'folder',
-				});
-				viewLogger.debug('✅ setCurrentItem llamado con datos de carpeta.');
-
-				viewLogger.debug('📍 Actualizando la vista de navegación (setCurrentView)...');
-				// 📍 Actualizar la vista de navegación
-				setCurrentView('folder-content');
-				viewLogger.debug('✅ setCurrentView llamado a folder-content.');
-
-				viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`);
-			} catch (error) {
-				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
-			}
-		},
-		[setCurrentView, setCurrentItem, deselectAllFiles, selectFolder]
-	);
-
-	// Función para reintento manual
-	const handleManualRetry = useCallback(() => {
-		loadFolders(true);
-	}, [loadFolders]);
-
-	const handleCreateFolder = useCallback(async () => {
-		if (newFolderName.trim() === '') {
-			console.error('El nombre de la carpeta no puede estar vacío.');
-			return;
-		}
-		// Aquí se asume que createFolder es una función que interactúa con el backend
-		// y que, al completarse, recargará la lista de carpetas o actualizará el store.
 		try {
-			await createFolder({ name: newFolderName, path: newFolderPath });
+			await createFolder({
+				name: newFolderName.trim(),
+				path: newFolderPath.trim(),
+			});
+
+			// Limpiar formulario y cerrarlo
 			setNewFolderName('');
 			setNewFolderPath('');
 			setShowForm(false);
-			loadFolders(true); // Recargar carpetas después de crear una nueva
-		} catch (err) {
-			console.error('Error al crear carpeta:', err);
+		} catch (error) {
+			console.error('Error creating folder:', error);
 		}
-	}, [newFolderName, newFolderPath, createFolder, loadFolders]);
+	};
+
+	// Manejar reintento manual
+	const handleManualRetry = () => {
+		refetch();
+	};
+
+	// Usar las carpetas obtenidas del hook
+	const allFolders = folders;
+
+	if (isLoading && folders.length === 0) {
+		return <LoadingScreen message="Cargando carpetas..." />;
+	}
+
+	if (error) {
+		return (
+			<div className="flex h-full flex-col items-center justify-center space-y-4">
+				<div className="text-center">
+					<h3 className="text-lg font-semibold text-destructive">Error al cargar carpetas</h3>
+					<p className="text-sm text-muted-foreground">{error}</p>
+				</div>
+				<Button onClick={handleManualRetry} variant="outline">
+					<RefreshCw className="mr-2 h-4 w-4" />
+					Reintentar
+				</Button>
+			</div>
+		);
+	}
+
+	if (allFolders.length === 0) {
+		return (
+			<div className={`h-full ${className}`}>
+				<div className="flex items-center justify-between p-4 border-b">
+					<h2 className="text-xl font-semibold">Carpetas</h2>
+					<Button onClick={() => setShowForm(true)} size="sm">
+						<FolderPlus className="mr-2 h-4 w-4" />
+						Nueva Carpeta
+					</Button>
+				</div>
+
+				{showForm && (
+					<div className="p-4 border-b bg-muted/50">
+						<div className="space-y-3">
+							<Input
+								placeholder="Nombre de la carpeta"
+								value={newFolderName}
+								onChange={(e) => setNewFolderName(e.target.value)}
+							/>
+							<Input
+								placeholder="Ruta de la carpeta"
+								value={newFolderPath}
+								onChange={(e) => setNewFolderPath(e.target.value)}
+							/>
+							<div className="flex gap-2">
+								<Button onClick={handleCreateFolder} size="sm">
+									Crear
+								</Button>
+								<Button onClick={() => setShowForm(false)} variant="outline" size="sm">
+									Cancelar
+								</Button>
+							</div>
+						</div>
+					</div>
+				)}
+
+				<EmptyState
+					icon={Folder}
+					title="No hay carpetas"
+					description="Agrega tu primera carpeta para organizar tus archivos."
+				/>
+			</div>
+		);
+	}
 
 	return (
-		<FoldersContentView
-			folders={folders}
-			isLoading={isLoading}
-			error={error}
-			showForm={showForm}
-			newFolderName={newFolderName}
-			newFolderPath={newFolderPath}
-			optimisticFolders={optimisticFolders}
-			setShowForm={setShowForm}
-			setNewFolderName={setNewFolderName}
-			setNewFolderPath={setNewFolderPath}
-			handleFolderClick={handleFolderClick}
-			handleCreateFolder={handleCreateFolder}
-			handleManualRetry={handleManualRetry}
-		/>
+		<div className={`h-full flex flex-col ${className}`}>
+			<div className="flex items-center justify-between p-4 border-b">
+				<h2 className="text-xl font-semibold">Carpetas ({allFolders.length})</h2>
+				<Button onClick={() => setShowForm(true)} size="sm">
+					<FolderPlus className="mr-2 h-4 w-4" />
+					Nueva Carpeta
+				</Button>
+			</div>
+
+			{showForm && (
+				<div className="p-4 border-b bg-muted/50">
+					<div className="space-y-3">
+						<Input
+							placeholder="Nombre de la carpeta"
+							value={newFolderName}
+							onChange={(e) => setNewFolderName(e.target.value)}
+						/>
+						<Input
+							placeholder="Ruta de la carpeta"
+							value={newFolderPath}
+							onChange={(e) => setNewFolderPath(e.target.value)}
+						/>
+						<div className="flex gap-2">
+							<Button onClick={handleCreateFolder} size="sm">
+								Crear
+							</Button>
+							<Button onClick={() => setShowForm(false)} variant="outline" size="sm">
+								Cancelar
+							</Button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			<ScrollArea className="flex-1">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+					{allFolders.map((folder) => (
+						<FolderCard
+							key={folder.id}
+							folder={folder}
+							onClick={() => handleFolderClick(folder)}
+							interactive={true}
+							tcgMode={false}
+							className="h-full"
+						/>
+					))}
+				</div>
+			</ScrollArea>
+		</div>
 	);
 }

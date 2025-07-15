@@ -268,15 +268,15 @@ export function WorldItemCard({
 
 	// Procesar estadísticas si es un string o formato JSON
 	const parsedStats = useMemo(() => {
-		if (typeof rawStats === 'string' && rawStats) {
+		if (typeof _stats === 'string' && _stats) {
 			try {
-				return JSON.parse(rawStats);
+				return JSON.parse(_stats);
 			} catch (_e) {
 				return {};
 			}
 		}
-		return rawStats || {};
-	}, [rawStats]);
+		return _stats || {};
+	}, [_stats]);
 
 	// Procesar la imagen destacada
 	const _processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;

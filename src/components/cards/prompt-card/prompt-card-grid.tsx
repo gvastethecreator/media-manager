@@ -129,9 +129,9 @@ export function PromptCardGrid({
 					</div>
 				) : (
 					prompts.map((prompt) => (
-						<MemoizedPromptCard
+						<PromptCard
 							key={prompt.id}
-							prompt={prompt}
+							promptId={prompt.id}
 							tcgMode={tcgMode}
 							compact={compact}
 							onClick={onPromptClick ? () => onPromptClick(prompt) : undefined}

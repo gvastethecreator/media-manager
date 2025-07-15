@@ -11,6 +11,7 @@ interface PromptCardContentProps {
 	parameters?: Record<string, any> | string;
 	category?: string;
 	tags?: string[] | string;
+	emoji?: string;
 	primaryColor: string;
 	secondaryColor?: string;
 	relationCounts?: {
