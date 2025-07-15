@@ -6,15 +6,15 @@ Este módulo implementa el **patrón optimizado CharacterWithStats** para la ent
 
 ```mermaid
 graph TD
-    A[PrismaCharacterWithCounts] --> B[fromPrismaCharacter]
+    A[DrizzleCharacterWithCounts] --> B[fromDrizzleCharacter]
     B --> C[CharacterWithStats]
     C --> D[UI Components]
 
-    E[CharacterBase] --> F[toPrismaCharacterCreate]
-    F --> G[Prisma Create]
+    E[CharacterBase] --> F[toDrizzleCharacterCreate]
+    F --> G[Drizzle Create]
 
-    H[CharacterWithStats] --> I[toPrismaCharacterUpdate]
-    I --> J[Prisma Update]
+    H[CharacterWithStats] --> I[toDrizzleCharacterUpdate]
+    I --> J[Drizzle Update]
 ```
 
 ## 🎯 Patrón CharacterWithStats
@@ -23,7 +23,7 @@ graph TD
 - **📊 Estadísticas Pre-calculadas**: Todos los conteos calculados una vez
 - **⚡ Consultas Optimizadas**: Solo conteos, sin relaciones completas
 - **🎮 Sistema RPG**: Power level y rareza automáticos
-- **🔄 Transformación Eficiente**: Conversión directa desde Prisma
+- **🔄 Transformación Eficiente**: Conversión directa desde Drizzle
 
 ### Estructura del Tipo:
 ```typescript
@@ -46,16 +46,16 @@ interface CharacterWithStats extends CharacterBase {
 
 ## 🔧 Funciones Principales
 
-### `fromPrismaCharacter()`
-Transforma PrismaCharacterWithCounts a CharacterWithStats con estadísticas optimizadas.
+### `fromDrizzleCharacter()`
+Transforma DrizzleCharacterWithCounts a CharacterWithStats con estadísticas optimizadas.
 
 ```typescript
-const character = await prisma.character.findUnique({
-  where: { id },
-  include: CHARACTER_SELECT_WITH_STATS
+const character = await db.query.characters.findFirst({
+  where: eq(characters.id, id),
+  with: CHARACTER_SELECT_WITH_STATS
 });
 
-const transformed = fromPrismaCharacter(character);
+const transformed = fromDrizzleCharacter(character);
 // ✅ Incluye estadísticas pre-calculadas
 // ✅ Power level automático
 // ✅ Sistema de rareza
@@ -79,13 +79,9 @@ Sistema automático de rareza:
 ### Antes (CharacterComplete):
 ```typescript
 // ❌ Carga todas las relaciones
-const character = await prisma.character.findUnique({
-  include: {
-    images: true,
-    videos: true,
-    tags: true
-    // ... todas las relaciones
-  }
+const character = await db.query.characters.findFirst({
+  where: eq(characters.id, id),
+  with: { /* todas las relaciones */ }
 });
 // 🐌 Lento, consume mucha memoria
 ```
@@ -93,10 +89,11 @@ const character = await prisma.character.findUnique({
 ### Ahora (CharacterWithStats):
 ```typescript
 // ✅ Solo conteos optimizados
-const character = await prisma.character.findUnique({
-  include: CHARACTER_SELECT_WITH_STATS
+const character = await db.query.characters.findFirst({
+  where: eq(characters.id, id),
+  with: CHARACTER_SELECT_WITH_STATS
 });
-const transformed = fromPrismaCharacter(character);
+const transformed = fromDrizzleCharacter(character);
 // ⚡ 60-80% más rápido
 // 💾 Menos memoria
 ```
@@ -161,14 +158,14 @@ import { CharacterCard } from '@/components/cards/character-card';
 - ❌ `CharacterWithRelations` → ✅ `CharacterWithStats`
 
 ### Funciones Actualizadas:
-- ✅ `fromPrismaCharacter()`: Retorna CharacterWithStats
-- ✅ `CHARACTER_SELECT_WITH_STATS`: Consulta optimizada
+- ✅ `fromDrizzleCharacter()`: Retorna CharacterWithStats
+- ✅ `CHARACTER_SELECT_WITH_STATS`: Consulta optimizada para Drizzle
 - ✅ Store con estructura Record para acceso O(1)
 
 ## 🏗️ Arquitectura
 
 ### Capas del Sistema:
-1. **Database**: Prisma con consultas optimizadas
+1. **Database**: Drizzle con consultas optimizadas
 2. **Transformers**: Conversión con estadísticas
 3. **Actions**: Server actions con tipos correctos
 4. **Store**: Zustand con Record optimizado
@@ -176,7 +173,7 @@ import { CharacterCard } from '@/components/cards/character-card';
 
 ### Flujo de Datos:
 ```
-Prisma Query → fromPrismaCharacter → CharacterWithStats → Store → UI
+Drizzle Query → fromDrizzleCharacter → CharacterWithStats → Store → UI
 ```
 
 ## 📋 Checklist de Migración

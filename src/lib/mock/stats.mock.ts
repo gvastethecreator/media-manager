@@ -3,7 +3,7 @@
  * Esto reduce las consultas a la base de datos durante el desarrollo local
  */
 
-import type { GeneralStats } from '@/app/actions/stats/stats.actions';
+import type { SystemStats } from '@/lib/api/system';
 
 // Función para generar fechas relativas
 const getRandomDate = () => {
@@ -15,7 +15,7 @@ const getRandomDate = () => {
 };
 
 // Datos de estadísticas simulados
-export const MOCK_STATS: GeneralStats = {
+export const MOCK_STATS: SystemStats = {
 	totalImages: 1287,
 	totalFolders: 64,
 	totalTags: 186,
@@ -80,4 +80,4 @@ export const MOCK_STATS: GeneralStats = {
 };
 
 // Bandera para activar los datos simulados en entorno de desarrollo
-export const USE_MOCK_STATS = process.env.NODE_ENV === 'development';
+export const USE_MOCK_STATS = false;

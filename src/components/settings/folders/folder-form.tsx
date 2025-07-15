@@ -1,5 +1,3 @@
-'use client';
-
 import { Folder } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
@@ -54,9 +52,27 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 
 			await onAddFolder(folderPath);
 			setFolderPath('');
+			formLogger.info('✅ Carpeta agregada exitosamente');
 		} catch (error) {
 			formLogger.error('Error al agregar carpeta:', error);
-			setErrorMessage(error instanceof Error ? error.message : 'Error al agregar carpeta');
+
+			// Manejo específico de errores
+			let userMessage = 'Error al agregar carpeta';
+			if (error instanceof Error) {
+				if (error.message.includes('Ya existe una carpeta')) {
+					userMessage = error.message;
+				} else if (error.message.includes('409')) {
+					userMessage = `La carpeta '${folderPath}' ya existe en el sistema`;
+				} else if (error.message.includes('404')) {
+					userMessage = 'La ruta especificada no existe o no es accesible';
+				} else if (error.message.includes('403')) {
+					userMessage = 'No tienes permisos para acceder a esta carpeta';
+				} else {
+					userMessage = error.message;
+				}
+			}
+
+			setErrorMessage(userMessage);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -123,7 +139,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 						type="button"
 						variant="ghost"
 						size="sm"
-						className="absolute right-1 top-1/2 -translate-y-1/2 h-7 text-xs"
+						className="absolute right-1 top-1/2 -translate-y-1/2 h-7 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
 						onClick={handleBrowse}
 						disabled={isSubmitting || isProcessing || isLoading}
 					>
@@ -134,14 +150,29 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 				<Button
 					type="submit"
 					size="sm"
-					className="h-9"
+					className="h-9 cursor-pointer hover:bg-primary/90 transition-colors"
 					disabled={isSubmitting || isProcessing || isLoading || !folderPath.trim()}
 				>
 					{isSubmitting ? 'Agregando...' : 'Agregar'}
 				</Button>
 			</div>
 
-			{errorMessage && <div className="text-xs text-red-500 px-1">{errorMessage}</div>}
+			{errorMessage && (
+				<div className="bg-red-50 border border-red-200 rounded-md p-2 mt-1">
+					<div className="flex items-start gap-2">
+						<div className="text-red-400 mt-0.5">
+							<svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fillRule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+									clipRule="evenodd"
+								/>
+							</svg>
+						</div>
+						<div className="text-xs text-red-700">{errorMessage}</div>
+					</div>
+				</div>
+			)}
 		</form>
 	);
 }

@@ -6,7 +6,7 @@ export default function imageLoader({ src, width, quality }: { src: string; widt
 
 	// Si es una ruta de API, agregamos los parámetros de optimización
 	if (src.startsWith('/api/images/')) {
-		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+		const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 		const url = new URL(src, baseUrl);
 		url.searchParams.set('w', width.toString());
 		if (quality) {

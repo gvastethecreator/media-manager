@@ -1,5 +1,3 @@
-'use client';
-
 import { CircleDashed } from 'lucide-react';
 import { motion } from 'motion/react';
 

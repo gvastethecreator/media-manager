@@ -1,9 +1,52 @@
-import type { Collection } from '@prisma/client';
+/**
+ * @file Tipos base para la entidad Collection.
+ * @module types/entities/collection/base
+ * @description Define los tipos canónicos para la entidad Collection, siguiendo el patrón `Base + Statistics + WithStats`.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
+ */
 
 /**
- * 🗿 Modelo base de Collection, tal como viene de Prisma.
+ * 🗿 Modelo base de Collection, basado en el esquema de Drizzle.
  */
-export type CollectionBase = Collection;
+export type CollectionBase = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	featuredImage: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	totalSize: number;
+	lastImageAddedAt: Date | null;
+	lastVideoAddedAt: Date | null;
+	parentId: string | null;
+	category: string | null;
+	platform: string | null;
+	price: number | null;
+	network: string | null;
+	tokenId: string | null;
+	url: string | null;
+	alternativeUrl: string | null;
+	editions: CollectionEdition[] | null;
+	sourceImage: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
+export interface CollectionEdition {
+	id: string;
+	name: string;
+	price: number;
+	currency: string;
+	quantity: number;
+	available: number;
+	releaseDate: Date;
+	year: number;
+	metadata?: Record<string, any>;
+}
 
 /**
  * 📊 Estadísticas calculadas y derivadas para una Collection.
@@ -31,4 +74,5 @@ export interface CollectionStatistics {
  */
 export interface CollectionWithStats extends CollectionBase {
 	stats: CollectionStatistics;
+	isRecent?: boolean;
 }

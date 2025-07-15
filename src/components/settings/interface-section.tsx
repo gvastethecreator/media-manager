@@ -2,6 +2,8 @@
 // Sección de interfaz para controlar tipografía, tema, animaciones y otros aspectos visuales
 // 🛠️ Cumple con los lineamientos de arquitectura y stack del proyecto
 
+import { Columns, Eye, Grid, LayoutGrid, List, Settings, Zap } from 'lucide-react';
+import React, { useId, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,8 +13,6 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
-import { Columns, Eye, Grid, LayoutGrid, List, Settings, Zap } from 'lucide-react';
-import React, { useId, useState } from 'react';
 
 /**
  * InterfaceSection

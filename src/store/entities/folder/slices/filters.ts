@@ -3,9 +3,9 @@
  * @module store/entities/folder/slices/filters
  */
 
+import type { StateCreator } from 'zustand';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { FolderSortCriteria, FolderViewMode } from '@/types/entities/folder/enums';
-import type { StateCreator } from 'zustand';
 import type { FolderFiltersSlice, FolderStore } from '../types';
 
 export interface FolderFiltersState {

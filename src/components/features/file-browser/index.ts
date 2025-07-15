@@ -4,12 +4,11 @@
 export { GridItem } from './components/grid-item';
 // Export main components
 export { FileBrowser } from './file-browser';
-
 // Export utility hooks and helpers
 export { useFilteredData } from './hooks/use-filtered-data';
-
 // Export renderer
 export { ImageRenderer } from './image-renderer';
+export { IntegratedFileBrowser, useIntegratedFileBrowser } from './integrated-file-browser';
 
 // Export types
 export * from './types';

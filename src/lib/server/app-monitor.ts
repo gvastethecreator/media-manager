@@ -1,5 +1,5 @@
 /**
- * Monitor de aplicación para Next.js
+ * Monitor de aplicación (Bun)
  *
  * Este módulo proporciona funcionalidades para monitorear el rendimiento
  * de la aplicación y mostrar estadísticas en tiempo real.
@@ -298,7 +298,7 @@ export async function logAppStartup(): Promise<void> {
 	appLogger.info('Aplicación iniciada', {
 		timestamp: new Date().toISOString(),
 		environment: process.env.NODE_ENV || 'development',
-		nextVersion: process.env.NEXT_RUNTIME || 'unknown',
+		bunVersion: process.versions?.bun ?? 'unknown',
 	});
 	appLogger.separatorEnd();
 

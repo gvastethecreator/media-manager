@@ -1,5 +1,3 @@
-'use client';
-
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -7,15 +5,17 @@ interface CardHeaderProps {
 	title: string;
 	subtitle?: string;
 	icon?: ReactNode;
+	emoji?: string;
 	primaryColor: string;
 	className?: string;
+	compact?: boolean;
 }
 
 /**
  * Componente de encabezado para tarjetas de entidades
  * Similar al encabezado de una carta Magic con título, subtítulo e icono
  */
-export function CardHeader({ title, subtitle, icon, primaryColor, className }: CardHeaderProps) {
+export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
 	return (
 		<div
 			className={cn('px-3 py-2 border-b', 'flex items-center gap-2', className)}

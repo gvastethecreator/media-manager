@@ -1,11 +1,12 @@
 /**
  * @file Transformadores para entidades Metadata
  * @module transformers/metadata
+ 
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataBase, MetadataExtended } from '@/types/entities/metadata';
-import { fromPrismaMetadata, mapCreateInputToPrisma, mapUpdateInputToPrisma } from './mappers';
+import { fromDrizzleMetadata, mapCreateInputToDrizzle, mapUpdateInputToDrizzle } from './mappers';
 
 /**
  * Transforma un objeto Metadata a su versión extendida con propiedades calculadas
@@ -16,7 +17,7 @@ export const transformMetadata = (metadata: MetadataBase | null): MetadataExtend
 	if (!metadata) return null;
 
 	try {
-		return fromPrismaMetadata(metadata as any);
+		return fromDrizzleMetadata(metadata as any);
 	} catch (error) {
 		console.error('Error transformando metadata:', error);
 		return null;
@@ -38,8 +39,9 @@ export const transformMetadatas = (metadataArray: MetadataBase[] | null): Metada
 
 // Exportar todas las funciones útiles
 export {
-	fromPrismaMetadata as extendMetadata,
-	formatBytes, // Re-exportar desde @/lib/utils/format.utils
-	mapCreateInputToPrisma as mapCreateMetadataDataToPrisma,
-	mapUpdateInputToPrisma as mapUpdateMetadataDataToPrisma,
+	fromDrizzleMetadata,
+	mapCreateInputToDrizzle,
+	mapUpdateInputToDrizzle,
+	// Re-exportar desde @/lib/utils/format.utils
+	formatBytes,
 };

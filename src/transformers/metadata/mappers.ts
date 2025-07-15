@@ -1,39 +1,46 @@
 /**
- * @file Mapeadores para la entidad Metadata, convirtiendo datos de Prisma a tipos de la aplicación.
+ * @file Mapeadores para la entidad Metadata, convirtiendo datos de Drizzle a tipos de la aplicación.
  * @module transformers/metadata/mappers
+ 
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { MetadataCreateInput, MetadataUpdateInput } from '@/types/entities/metadata';
-import type { Metadata, Prisma } from '@prisma/client';
+import type {
+	MetadataBase,
+	MetadataCreateInput,
+	MetadataExtended,
+	MetadataUpdateInput,
+} from '@/types/entities/metadata';
 
-// formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
+// Tipos de datos para Drizzle
+type DrizzleCreateMetadataData = Omit<MetadataBase, 'id' | 'createdAt' | 'updatedAt'>;
+type DrizzleUpdateMetadataData = Partial<DrizzleCreateMetadataData>;
 
-// Mapear datos de Prisma a nuestro tipo extendido (ejemplo, se necesitará un tipo MetadataExtended)
-export function fromPrismaMetadata(metadata: Metadata): MetadataExtended {
-	const aspectRatio = metadata.width && metadata.height ? metadata.width / metadata.height : 0;
-	const formattedSize = formatBytes(metadata.size || 0);
-	const dimensions = `${metadata.width || 0}x${metadata.height || 0}`;
-
+/**
+ * Mapear datos de Drizzle a nuestro tipo extendido
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function fromDrizzleMetadata(metadata: MetadataBase): MetadataExtended {
 	return {
 		...metadata,
-		aspectRatio,
-		formattedSize,
-		dimensions,
 	};
 }
 
-// Mapear datos de creación a formato Prisma
-export function mapCreateInputToPrisma(data: MetadataCreateInput): Prisma.MetadataCreateInput {
-	// Aquí debería ir la lógica para mapear MetadataCreateInput a Prisma.MetadataCreateInput
+/**
+ * Mapear datos de creación a formato Drizzle
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function mapCreateInputToDrizzle(data: MetadataCreateInput): DrizzleCreateMetadataData {
 	return {
 		...data,
 	};
 }
 
-// Mapear datos de actualización a formato Prisma
-export function mapUpdateInputToPrisma(data: Partial<MetadataUpdateInput>): Prisma.MetadataUpdateInput {
-	// Aquí debería ir la lógica para mapear MetadataUpdateInput a Prisma.MetadataUpdateInput
+/**
+ * Mapear datos de actualización a formato Drizzle
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function mapUpdateInputToDrizzle(data: Partial<MetadataUpdateInput>): DrizzleUpdateMetadataData {
 	return {
 		...data,
 	};

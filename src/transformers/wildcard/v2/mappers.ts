@@ -20,7 +20,7 @@ import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
 const logger = serverLogger.withContext('WildcardTransformer:Mappers');
 
 /**
- * Mapea datos de creación de wildcard a formato Prisma
+ * Mapea datos de creación de wildcard a formato de base de datos
  * @param data Datos de creación
  * @returns Datos formateados para Prisma
  */
@@ -48,7 +48,7 @@ export function toCreateWildcardData(data: CreateWildcardData): Record<string, a
 }
 
 /**
- * Mapea datos de actualización de wildcard a formato Prisma
+ 
  * @param data Datos de actualización
  * @returns Datos formateados para Prisma
  */
@@ -122,7 +122,7 @@ export function toWildcardRelated(wildcard: WildcardBase): WildcardRelated {
 }
 
 /**
- * Mapea opciones de búsqueda a formato Prisma
+ * Mapea opciones de búsqueda a formato de base de datos
  * @param options Opciones de búsqueda
  * @returns Opciones formateadas para Prisma
  */
@@ -211,7 +211,7 @@ export function toSearchOptions(options: WildcardSearchOptions = {}): Record<str
 
 /**
  * Aplica filtros a la consulta de búsqueda
- * @param where Objeto where de Prisma
+ * @param where Objeto where de Drizzle
  * @param filters Filtros a aplicar
  */
 function applyFilters(where: Record<string, any>, filters: WildcardSearchFilters): void {

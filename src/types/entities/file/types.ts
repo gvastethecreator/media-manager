@@ -1,42 +1,34 @@
 /**
  * 📁 Tipos canónicos para la entidad File
  */
-import { FileType } from './enums';
+import { FileType } from './base';
 
 export type FileBase = {
 	id: string;
 	name: string;
 	path: string;
-	type: FileType | string;
 	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	fileType: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	isHidden: boolean;
+	description: string | null;
+	tags: string | null;
+	metadata: string | null;
+	lastAccessed: Date | null;
+	accessCount: number | null;
+	isProcessed: boolean | null;
+	processingError: string | null;
+	processingStatus: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-	modifiedAt: Date;
-	accessedAt: Date;
-	isDirectory: boolean;
-	parentPath: string;
-	absolutePath: string;
-	relativePath: string;
-	extension: string;
-	mimeType: string;
 };
 
-export type FileInfo = FileBase;
-
-export type ImageFileInfo = FileBase & {
-	type: FileType.IMAGE;
-	width?: number;
-	height?: number;
-};
-
-export type DirectoryInfo = FileBase & {
-	isDirectory: true;
-	childCount?: number;
-};
-
-export type FileRelations = {
-	// relaciones con otras entidades
-};
+export type FileRelations = Record<string, never>;
 
 export type FileCreateInput = Omit<FileBase, 'id' | 'createdAt' | 'updatedAt' | 'accessedAt' | 'modifiedAt'>;
 
@@ -59,10 +51,13 @@ export type FileFilterOptions = {
  */
 export type DirectoryReadResult = {
 	path: string;
+	items: FileBase[]; // mezcla de archivos y carpetas
 	files: FileInfo[];
 	directories: DirectoryInfo[];
-	totalCount: number;
-	totalSize: number;
+	totalItems: number;
+	hasMore: boolean;
+	// Campos agregados opcionalmente por el servidor
+	totalSize?: number;
 };
 
 /**

@@ -1,20 +1,18 @@
-'use client';
-
-import { createCollection, updateCollection } from '@/app/actions/collections/collection.actions';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import toastService from '@/services/toast';
+import { useCreateCollection, useUpdateCollection } from '@/lib/api/collections';
+import { toastService } from '@/lib/ui/toast';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,
 	COLLECTION_CATEGORY_EMOJIS,
 	CollectionCategory,
 } from '@/types/entities/collection/enums';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
@@ -63,8 +61,12 @@ export function CreateCollectionForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel,
+	onCancel: _onCancel,
 }: CreateCollectionFormProps) {
+	// React Query mutations
+	const createCollectionMutation = useCreateCollection();
+	const updateCollectionMutation = useUpdateCollection();
+
 	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Inicializar formulario con valores por defecto
@@ -186,13 +188,16 @@ export function CreateCollectionForm({
 
 			// Crear o actualizar colección
 			if (isEditing && collection) {
-				const updated = await updateCollection(collection.id, {
-					...collectionData,
-					isFavorite: data.isFavorite,
-				} as CollectionUpdateInput);
+				const updated = await updateCollectionMutation.mutateAsync({
+					id: collection.id,
+					data: {
+						...collectionData,
+						isFavorite: data.isFavorite,
+					} as CollectionUpdateInput,
+				});
 				onUpdated?.(updated);
 			} else {
-				const created = await createCollection(collectionData);
+				const created = await createCollectionMutation.mutateAsync(collectionData);
 				onCreated?.(created);
 				form.reset();
 			}

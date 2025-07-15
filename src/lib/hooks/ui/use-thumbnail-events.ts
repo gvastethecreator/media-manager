@@ -1,14 +1,14 @@
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useEffect } from 'react';
 import { serverLogger } from '@/lib/logger/server-logger';
-// import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail-service-export';
-// TODO: Implementar servicio de thumbnails o usar servicio de imágenes
+import type { ProcessStatus } from '@/store/thumbnails.store';
 import { useThumbnailStore } from '@/store/thumbnails.store';
+import type { ThumbnailError } from '@/types/thumbnails';
 
 const RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 30000;
 const MAX_RECONNECT_ATTEMPTS = 5;
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 type EventSourceMessage = {
 	data: string;

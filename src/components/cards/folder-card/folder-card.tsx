@@ -1,64 +1,44 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { FolderComplete, FolderWithStats } from '@/types/entities/folder';
 import { memo, useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import { FolderWithStats } from '@/types/entities/folder';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
 
-interface FolderCardProps {
-	folder: FolderWithStats | FolderComplete;
+export interface FolderCardProps {
+	folder: FolderWithStats;
 	onClick?: () => void;
 	href?: string;
 	className?: string;
-	compact?: boolean;
 	interactive?: boolean;
 	tcgMode?: boolean;
 }
 
-/**
- * Componente para mostrar una carpeta en formato de tarjeta
- * Optimizado para usar FolderWithStats pero compatible con FolderComplete
- */
 export const FolderCard = memo(function FolderCard({
 	folder,
 	onClick,
 	href,
 	className,
-	compact = false,
 	interactive = true,
 	tcgMode = false,
 }: FolderCardProps) {
-	// Validar que el objeto folder exista
-	if (!folder) {
-		console.error('FolderCard recibió un objeto folder inválido');
-		return null;
-	}
-
-	// Preparar datos con fallbacks
 	const folderData = useMemo(() => {
-		// Extraer conteos de _count si existen
 		const imageCount = folder._count?.images ?? 0;
-
-		// Verificar si es FolderWithStats para acceder a statistics
 		const isWithStats = 'statistics' in folder;
 
 		return {
 			...folder,
-			// Asegurar que tenemos conteo de imágenes
 			imageCount,
 			_count: {
 				...(folder._count || {}),
 				images: imageCount,
 			},
-			// Asegurar valores por defecto para otros campos
-			totalFiles: folder.totalFiles ?? imageCount ?? 0,
-			totalSize: folder.totalSize ?? 0,
-			recentImageUrls: [], // Temporalmente vacío
-			childrenCount: isWithStats ? (folder as FolderWithStats).statistics.folderCount : 0,
-			lastIndexed: folder.lastIndexed || null,
+			totalFiles: folder.statistics?.totalFiles ?? 0,
+			totalSize: folder.statistics?.totalSize ?? 0,
+			recentImageUrls: folder.recentImages || [],
+			childrenCount: folder.statistics?.folderCount ?? 0,
+			lastIndexed: folder.lastIndexed ?? null,
 		};
 	}, [folder]);
 
@@ -72,6 +52,12 @@ export const FolderCard = memo(function FolderCard({
 			onClick();
 		}
 	}, [onClick, interactive]);
+
+	// Validar que el objeto folder exista
+	if (!folder) {
+		console.error('FolderCard recibió un objeto folder inválido');
+		return null;
+	}
 
 	// Componente de la carta
 	const cardContent = (
@@ -156,7 +142,7 @@ export const FolderCard = memo(function FolderCard({
 				<>
 					{/* Textura de fondo sutil */}
 					<div
-						className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+						className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
 						style={{
 							background: `radial-gradient(circle at 50% 50%, ${primaryColor}10 0%, transparent 70%)`,
 							zIndex: 1,

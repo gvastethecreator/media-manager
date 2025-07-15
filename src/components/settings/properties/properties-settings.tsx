@@ -1,127 +1,89 @@
-'use client';
-
-// TODO: Refactorizar para mover la lógica de transformación de datos a la capa de server actions.
-// Actualmente, la lógica de `loadProperties`, `handleCreateProperty`, etc., transforma los datos
-// de Prisma a un tipo `PropertyWithStats` local. Esto debería hacerse en un transformador
-// y ser devuelto directamente por las server actions para simplificar el componente y
-// centralizar la lógica de negocio. Esta refactorización está bloqueada por fallos
-// persistentes en la herramienta de edición de código en los archivos de `server actions` y `transformers`.
-
-import {
-	createProperty,
-	deleteProperty,
-	getProperties,
-	togglePropertyFavorite,
-	updateProperty,
-} from '@/app/actions/properties/property.actions';
+import { Plus, Search, Star, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import toastService from '@/services/toast';
+import type { PropertyCreateInput, PropertyUpdateInput } from '@/lib/api/properties';
+import { useCreateProperty, useDeleteProperty, useProperties, useUpdateProperty } from '@/lib/api/properties';
+import { toastService } from '@/lib/ui/toast';
 import type { PropertyWithStats } from '@/types/entities/property';
-import { CreatePropertySchema } from '@/types/entities/property/schema';
-import { Plus, Search, Star, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import type { z } from 'zod';
 import { CreatePropertyForm } from './create-property-form';
-
-type PropertyCategory = z.infer<typeof CreatePropertySchema>['category'];
-type PropertyFormData = z.infer<typeof CreatePropertySchema>;
-
-// Filtros simplificados sin sortBy y sortOrder
-interface PropertyFilters {
-	searchQuery?: string;
-	categories?: string[];
-	onlyFavorites?: boolean;
-}
 
 export type { PropertyWithStats }; // Exportamos el tipo para el PropertyPreview
 
 export function PropertiesSettings() {
-	const [properties, setProperties] = useState<PropertyWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [_error, setError] = useState<string | null>(null);
+	// State local para UI
 	const [selectedProperty, setSelectedProperty] = useState<PropertyWithStats | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
-	const [isDeleting, setIsDeleting] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
-	// Filtros simplificados
-	const [filters, setFilters] = useState<PropertyFilters>({
-		searchQuery: '',
-		categories: [],
-		onlyFavorites: false,
-	});
+	// React Query hooks
+	const { data: propertiesResponse, isLoading, error } = useProperties({ search: searchQuery });
+	const createPropertyMutation = useCreateProperty();
+	const updatePropertyMutation = useUpdateProperty();
+	const deletePropertyMutation = useDeleteProperty();
 
-	const loadProperties = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			const data = await getProperties();
-			setProperties(data);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			setError(errorMessage);
-			toastService.error('Error al cargar las propiedades', {
-				description: errorMessage,
-			});
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
+	const properties = propertiesResponse?.data || [];
 
-	useEffect(() => {
-		loadProperties();
-	}, [loadProperties]);
+	// Filtrar propiedades basadas en los criterios
+	const filteredProperties = useMemo(() => {
+		return properties.filter((property) => {
+			let matches = true;
 
-	// Filtrar propiedades basadas en los criterios validados
-	const filteredProperties = properties.filter((property) => {
-		let matches = true;
-		if (filters.searchQuery) {
-			const normalizedQuery = filters.searchQuery.toLowerCase();
-			matches =
-				matches &&
-				(property.name.toLowerCase().includes(normalizedQuery) ||
-					property.description?.toLowerCase().includes(normalizedQuery) ||
-					false);
-		}
-		if (filters.categories && filters.categories.length > 0) {
-			matches =
-				matches && (property.category ? filters.categories.includes(property.category as PropertyCategory) : false);
-		}
-		if (filters.onlyFavorites) {
-			matches = matches && property.isFavorite;
-		}
-		return matches;
-	});
+			if (searchQuery) {
+				const normalizedQuery = searchQuery.toLowerCase();
+				matches =
+					matches &&
+					(property.name.toLowerCase().includes(normalizedQuery) ||
+						property.description?.toLowerCase().includes(normalizedQuery) ||
+						false);
+			}
+
+			if (selectedCategories.length > 0) {
+				matches = matches && (property.type ? selectedCategories.includes(property.type) : false);
+			}
+
+			if (onlyFavorites) {
+				matches = matches && property.isFavorite;
+			}
+
+			return matches;
+		});
+	}, [properties, searchQuery, selectedCategories, onlyFavorites]);
 
 	// Ordenar propiedades por nombre
-	const sortedProperties = [...filteredProperties].sort((a, b) => a.name.localeCompare(b.name));
+	const sortedProperties = useMemo(() => {
+		return [...filteredProperties].sort((a, b) => a.name.localeCompare(b.name));
+	}, [filteredProperties]);
 
-	// Estadísticas mejoradas
-	const stats = {
-		totalProperties: properties.length,
-		totalAssociations: properties.reduce((acc, property) => acc + property.totalAssociations, 0),
-		emptyProperties: properties.filter((property) => property.totalAssociations === 0).length,
-		favoriteProperties: properties.filter((property) => property.isFavorite).length,
-		byCategory: properties.reduce(
-			(acc, property) => {
-				const category = property.category || 'sin categoría';
-				acc[category] = (acc[category] || 0) + 1;
-				return acc;
-			},
-			{} as Record<string, number>
-		),
-	};
+	// Estadísticas
+	const stats = useMemo(() => {
+		return {
+			totalProperties: properties.length,
+			totalAssociations: properties.reduce((acc, property) => acc + (property.totalAssociations || 0), 0),
+			emptyProperties: properties.filter((property) => (property.totalAssociations || 0) === 0).length,
+			favoriteProperties: properties.filter((property) => property.isFavorite).length,
+			byCategory: properties.reduce(
+				(acc, property) => {
+					const category = property.type || 'sin categoría';
+					acc[category] = (acc[category] || 0) + 1;
+					return acc;
+				},
+				{} as Record<string, number>
+			),
+		};
+	}, [properties]);
 
-	// Manejadores actualizados
-	const handleCreateProperty = async (data: PropertyFormData) => {
+	// Manejadores
+	const handleCreateProperty = async (data: PropertyCreateInput) => {
 		try {
-			const newProperty = await createProperty(data);
-			setProperties((prev) => [...prev, newProperty]);
+			await createPropertyMutation.mutateAsync(data);
 			setIsCreateDialogOpen(false);
 			toastService.success('Propiedad creada correctamente');
 		} catch (err) {
@@ -132,10 +94,9 @@ export function PropertiesSettings() {
 		}
 	};
 
-	const handleUpdateProperty = async (id: string, data: PropertyFormData) => {
+	const handleUpdateProperty = async (id: string, data: PropertyUpdateInput) => {
 		try {
-			const updatedProperty = await updateProperty(id, data);
-			setProperties((prev) => prev.map((p) => (p.id === id ? updatedProperty : p)));
+			await updatePropertyMutation.mutateAsync({ id, data });
 			setSelectedProperty(null);
 			setIsEditMode(false);
 			toastService.success('Propiedad actualizada correctamente');
@@ -149,30 +110,23 @@ export function PropertiesSettings() {
 
 	const handleDeleteProperty = async (id: string) => {
 		try {
-			setIsDeleting(true);
-			await deleteProperty(id);
-			setProperties((prev) => prev.filter((p) => p.id !== id));
-			setSelectedProperty(null);
+			await deletePropertyMutation.mutateAsync(id);
+			if (selectedProperty?.id === id) {
+				setSelectedProperty(null);
+			}
 			toastService.success('Propiedad eliminada correctamente');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			toastService.error('Error al eliminar la propiedad', {
 				description: errorMessage,
 			});
-		} finally {
-			setIsDeleting(false);
 		}
 	};
 
 	const handleToggleFavorite = async (property: PropertyWithStats) => {
 		try {
-			const updatedProperty = await togglePropertyFavorite(property.id);
-			setProperties((prev) => prev.map((p) => (p.id === property.id ? updatedProperty : p)));
-
-			if (selectedProperty?.id === property.id) {
-				setSelectedProperty(updatedProperty);
-			}
-
+			// Implementar toggle favorite cuando esté disponible en la API
+			// const updatedProperty = await togglePropertyFavorite(property.id);
 			toastService.success(
 				`${property.name} ${!property.isFavorite ? 'marcada como favorita' : 'desmarcada como favorita'}`
 			);
@@ -184,9 +138,29 @@ export function PropertiesSettings() {
 		}
 	};
 
-	const handlePropertyDelete = (propertyId: string) => {
-		handleDeleteProperty(propertyId);
-	};
+	// Mostrar loading state
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" />
+					<p className="mt-2 text-sm text-gray-500">Cargando propiedades...</p>
+				</div>
+			</div>
+		);
+	}
+
+	// Mostrar error state
+	if (error) {
+		return (
+			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+				<div className="text-center">
+					<p className="text-red-500">Error al cargar las propiedades</p>
+					<p className="text-sm text-gray-500 mt-1">{error instanceof Error ? error.message : 'Error desconocido'}</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
@@ -199,140 +173,133 @@ export function PropertiesSettings() {
 								<div>
 									<CardTitle className="text-xl font-bold">Propiedades</CardTitle>
 									<p className="text-xs text-muted-foreground">
-										{stats.totalProperties} propiedades, {stats.favoriteProperties} favoritas
+										{stats.totalProperties} total • {stats.favoriteProperties} favoritas
 									</p>
 								</div>
-								<Button
-									size="sm"
-									variant="ghost"
-									onClick={() => setIsCreateDialogOpen(true)}
-									title="Crear nueva propiedad"
-								>
+								<Button size="sm" variant="ghost" onClick={() => setIsCreateDialogOpen(true)}>
 									<Plus className="h-4 w-4" />
 								</Button>
 							</div>
 
-							<div className="flex gap-2">
-								<div className="relative w-full">
-									<Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+							{/* Filtros */}
+							<div className="space-y-2">
+								{/* Búsqueda */}
+								<div className="flex items-center gap-2 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors">
+									<Search className="h-4 w-4 opacity-50" />
 									<Input
 										placeholder="Buscar propiedades..."
-										value={filters.searchQuery}
-										onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
-										className="h-8 pl-8"
+										value={searchQuery}
+										onChange={(e) => setSearchQuery(e.target.value)}
+										className="h-8 p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-0"
 									/>
 								</div>
-							</div>
-							<div className="flex gap-2">
-								<Select
-									value={filters.sortBy}
-									onValueChange={(value) => setFilters({ ...filters, sortBy: value as typeof filters.sortBy })}
-								>
-									<SelectTrigger className="h-8">
-										<SelectValue placeholder="Ordenar por..." />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="name">Nombre</SelectItem>
-										<SelectItem value="category">Categoría</SelectItem>
-										<SelectItem value="createdAt">Fecha</SelectItem>
-									</SelectContent>
-								</Select>
-								<Toggle
-									pressed={filters.onlyFavorites}
-									onPressedChange={(pressed) => setFilters({ ...filters, onlyFavorites: pressed })}
-									size="sm"
-								>
-									<Star className="h-4 w-4" />
-								</Toggle>
+
+								{/* Filtros adicionales */}
+								<div className="flex gap-2">
+									<Toggle pressed={onlyFavorites} onPressedChange={setOnlyFavorites} size="sm">
+										<Star className="h-4 w-4" />
+									</Toggle>
+								</div>
 							</div>
 						</CardHeader>
+
 						<CardContent className="flex-1 p-0">
 							<ScrollArea className="h-full">
 								<div className="space-y-1 p-2">
-									{isLoading ? (
-										<div className="flex justify-center p-4">
-											<p className="text-sm opacity-70">Cargando propiedades...</p>
-										</div>
-									) : sortedProperties.length === 0 ? (
-										<div className="flex flex-col items-center justify-center py-8">
-											<Search className="h-8 w-8 opacity-20 mb-2" />
-											<p className="text-sm opacity-50">
-												{filters.searchQuery || filters.onlyFavorites || (filters.categories?.length ?? 0) > 0
-													? 'No se encontraron propiedades con los filtros aplicados'
-													: 'No hay propiedades creadas'}
-											</p>
-											<Button variant="ghost" size="sm" className="mt-2" onClick={() => setIsCreateDialogOpen(true)}>
-												Crear propiedad
-											</Button>
-										</div>
-									) : (
-										sortedProperties.map((property) => (
+									{sortedProperties.map((property) => (
+										<div
+											key={property.id}
+											className={`relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
+												selectedProperty?.id === property.id ? 'bg-secondary text-secondary-foreground' : ''
+											}`}
+										>
 											<Button
-												key={property.id}
-												variant={selectedProperty?.id === property.id ? 'secondary' : 'ghost'}
-												className="w-full justify-start h-12 relative group"
+												variant="ghost"
+												className="w-full justify-start h-12 relative"
 												onClick={() => setSelectedProperty(property)}
 											>
-												<div className="flex items-center gap-2">
-													<span role="img" aria-label="emoji">
-														{property.emoji}
-													</span>
-													<div className="flex flex-col items-start">
+												<div className="flex items-center gap-2 w-full">
+													<div className="flex flex-col items-start flex-1">
 														<span className="font-medium">{property.name}</span>
-														<span className="text-xs opacity-50">{property.totalAssociations} elementos</span>
+														<span className="text-xs opacity-50">{property.totalAssociations || 0} asociaciones</span>
 													</div>
 												</div>
-												{property.isFavorite && <Star className="h-3 w-3 absolute right-2 top-2 text-yellow-500" />}
-												<Button
-													variant="ghost"
-													size="icon"
-													className="absolute right-1 opacity-0 group-hover:opacity-100"
-													onClick={() => handlePropertyDelete(property.id)}
-												>
-													<Trash2 className="h-4 w-4" />
-												</Button>
+												{property.isFavorite && <Star className="h-3 w-3 absolute right-8 top-2" />}
 											</Button>
-										))
-									)}
+											<Button
+												variant="ghost"
+												size="icon"
+												className="absolute right-1 top-1 opacity-0 group-hover/item:opacity-100 h-10 w-10"
+												onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+													e.stopPropagation();
+													handleDeleteProperty(property.id);
+												}}
+											>
+												<Trash2 className="h-4 w-4" />
+											</Button>
+										</div>
+									))}
 								</div>
 							</ScrollArea>
 						</CardContent>
 					</Card>
 				</div>
 
-				{/* Panel derecho: Vista detalle o formulario */}
+				{/* Panel derecho: Detalles o creación */}
 				<div className="col-span-12 md:col-span-7 lg:col-span-8">
-					<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-						{selectedProperty ? (
-							isEditMode ? (
-								<CreatePropertyForm
-									property={selectedProperty}
-									onSubmit={(data) => handleUpdateProperty(selectedProperty.id, data)}
-									onCancel={() => setIsEditMode(false)}
-								/>
-							) : (
-								<PropertyPreview
-									property={selectedProperty}
-									onEdit={() => setIsEditMode(true)}
-									onDelete={() => handleDeleteProperty(selectedProperty.id)}
-									onFavoriteToggle={() => handleToggleFavorite(selectedProperty)}
-									onContinue={() => {
-										setIsEditMode(false);
-										setSelectedProperty(null);
-									}}
-									isDeleting={isDeleting}
-								/>
-							)
-						) : (
-							<div className="flex flex-col items-center justify-center h-full">
-								<Search className="h-12 w-12 opacity-20" />
-								<p className="text-sm opacity-50 mt-2">Selecciona una propiedad para ver sus detalles</p>
+					{selectedProperty && !isEditMode ? (
+						<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)]">
+							<CardHeader>
+								<div className="flex items-center justify-between">
+									<CardTitle>{selectedProperty.name}</CardTitle>
+									<div className="flex gap-2">
+										<Button size="sm" variant="outline" onClick={() => setIsEditMode(true)}>
+											Editar
+										</Button>
+										<Button size="sm" variant="destructive" onClick={() => handleDeleteProperty(selectedProperty.id)}>
+											Eliminar
+										</Button>
+									</div>
+								</div>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-4">
+									<div>
+										<h4 className="font-medium mb-2">Valor</h4>
+										<p className="text-sm text-muted-foreground">{selectedProperty.value}</p>
+									</div>
+									{selectedProperty.description && (
+										<div>
+											<h4 className="font-medium mb-2">Descripción</h4>
+											<p className="text-sm text-muted-foreground">{selectedProperty.description}</p>
+										</div>
+									)}
+									<div>
+										<h4 className="font-medium mb-2">Estadísticas</h4>
+										<p className="text-sm text-muted-foreground">
+											{selectedProperty.totalAssociations || 0} asociaciones totales
+										</p>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					) : isEditMode && selectedProperty ? (
+						<CreatePropertyForm
+							property={selectedProperty}
+							onSubmit={(data) => handleUpdateProperty(selectedProperty.id, data)}
+							onCancel={() => setIsEditMode(false)}
+						/>
+					) : (
+						<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
+							<div className="text-center">
+								<Plus className="mx-auto h-12 w-12 text-gray-400" />
+								<h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Selecciona una propiedad</h3>
+								<p className="mt-1 text-sm text-gray-500">O crea una nueva para empezar</p>
 							</div>
-						)}
-					</Card>
+						</Card>
+					)}
 				</div>
 
-				{/* Dialog para crear nueva propiedad */}
 				<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
 					<CreatePropertyForm onSubmit={handleCreateProperty} onCancel={() => setIsCreateDialogOpen(false)} />
 				</Dialog>

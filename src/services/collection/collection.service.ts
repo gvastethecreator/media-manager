@@ -5,12 +5,16 @@
  * @updated 2025-01-27
  */
 
-import { getPrismaClient } from '@/lib/database/db';
+import * as crypto from 'crypto';
+import { and, asc, desc, eq, like, or } from 'drizzle-orm';
+// Drizzle imports
+import { db } from '@/lib/drizzle';
+import { collections, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { toPrismaCollectionCreate, toPrismaCollectionUpdate } from '@/transformers/collection/serializers';
-import { fromPrismaCollection, fromPrismaCollections } from '@/transformers/collection/transformer';
+import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';
 import type {
 	CollectionBase,
 	CollectionCreateInput,
@@ -18,7 +22,6 @@ import type {
 	CollectionUpdateInput,
 	CollectionWithStats,
 } from '@/types/entities/collection';
-import { revalidatePath } from 'next/cache';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');
@@ -27,49 +30,6 @@ const logger = serverLogger.withContext('CollectionService');
 const REVALIDATE_PATHS = ['/collections', '/settings/collections'];
 
 // Selección optimizada para obtener solo los conteos
-const COLLECTION_SELECT_WITH_STATS = {
-	id: true,
-	name: true,
-	emoji: true,
-	color: true,
-	description: true,
-	shortcut: true,
-	category: true,
-	sortBy: true,
-	filters: true,
-	url: true,
-	alternativeUrl: true,
-	sourceImage: true,
-	platform: true,
-	price: true,
-	network: true,
-	tokenId: true,
-	tokenAddress: true,
-	contractAddress: true,
-	contractType: true,
-	editions: true,
-	featuredImage: true,
-	isFavorite: true,
-	createdAt: true,
-	updatedAt: true,
-	_count: {
-		select: {
-			images: true,
-			videos: true,
-			albums: true,
-			tags: true,
-			characters: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			properties: true,
-			groups: true,
-		},
-	},
-} as const;
 
 // Eventos del servicio de colecciones
 export const COLLECTION_EVENTS = {
@@ -150,33 +110,85 @@ const revalidateCollectionPaths = async (): Promise<void> => {
  */
 export const searchCollections = async (options: CollectionSearchOptions): Promise<CollectionWithStats[]> => {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info('🔍 Buscando colecciones', { options });
-		const prisma = await getPrismaClient();
 
-		// Construir query básica
-		const where: any = {};
+		// Construir condiciones de filtro
+		const conditions: any[] = [];
+
 		if (options.filters?.search) {
-			where.OR = [
-				{ name: { contains: options.filters.search } },
-				{ description: { contains: options.filters.search } },
-			];
+			conditions.push(
+				or(
+					like(collections.name, `%${options.filters.search}%`),
+					like(collections.description, `%${options.filters.search}%`)
+				)
+			);
 		}
+
 		if (options.filters?.isFavorite !== undefined) {
-			where.isFavorite = options.filters.isFavorite;
+			conditions.push(eq(collections.isFavorite, options.filters.isFavorite ? 1 : 0));
 		}
+
 		if (options.filters?.category && options.filters.category.length > 0) {
-			where.category = { in: options.filters.category };
+			const categoryConditions = options.filters.category.map((cat) => eq(collections.category, cat));
+			conditions.push(or(...categoryConditions));
 		}
 
-		const collections = await prisma.collection.findMany({
-			where,
-			select: COLLECTION_SELECT_WITH_STATS,
-			skip: options.skip,
-			take: options.take,
-			orderBy: options.orderBy || { createdAt: 'desc' },
-		});
+		// Construir query
+		let query = db
+			.select({
+				id: collections.id,
+				name: collections.name,
+				description: collections.description,
+				emoji: collections.emoji,
+				color: collections.color,
+				featuredImage: collections.featuredImage,
+				isPublic: collections.isPublic,
+				isFavorite: collections.isFavorite,
+				totalImages: collections.totalImages,
+				totalVideos: collections.totalVideos,
+				totalSize: collections.totalSize,
+				lastImageAddedAt: collections.lastImageAddedAt,
+				lastVideoAddedAt: collections.lastVideoAddedAt,
+				parentId: collections.parentId,
+				createdAt: collections.createdAt,
+				updatedAt: collections.updatedAt,
+			})
+			.from(collections);
 
-		const result = fromPrismaCollections(collections);
+		// Aplicar filtros
+		if (conditions.length > 0) {
+			query = query.where(and(...conditions));
+		}
+
+		// Aplicar ordenamiento
+		const orderBy = options.orderBy || { createdAt: 'desc' };
+		if (orderBy.createdAt) {
+			query = query.orderBy(orderBy.createdAt === 'desc' ? desc(collections.createdAt) : asc(collections.createdAt));
+		} else if (orderBy.name) {
+			query = query.orderBy(orderBy.name === 'desc' ? desc(collections.name) : asc(collections.name));
+		}
+
+		// Aplicar paginación
+		if (options.skip) {
+			query = query.offset(options.skip);
+		}
+		if (options.take) {
+			query = query.limit(options.take);
+		}
+
+		const drizzleCollections = await query;
+
+		const transformedCollections = drizzleCollections.map((rawCollection) => ({
+			...rawCollection,
+			isFavorite: Boolean(rawCollection.isFavorite),
+		}));
+
+		// Transformar usando el transformer correcto
+		const result = transformedCollections
+			.map((collection) => fromDrizzleCollection(collection))
+			.filter((c): c is CollectionWithStats => c !== null);
+
 		logger.info(`✅ ${result.length} colecciones encontradas`);
 		return result;
 	} catch (error) {
@@ -194,15 +206,61 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
  */
 export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info('📚 Obteniendo todas las colecciones');
-		const prisma = await getPrismaClient();
 
-		const collections = await prisma.collection.findMany({
-			select: COLLECTION_SELECT_WITH_STATS,
-			orderBy: { createdAt: 'desc' },
-		});
+		const drizzleCollections = await db
+			.select({
+				id: collections.id,
+				name: collections.name,
+				emoji: collections.emoji,
+				color: collections.color,
+				description: collections.description,
+				shortcut: collections.shortcut,
+				category: collections.category,
+				sortBy: collections.sortBy,
+				filters: collections.filters,
+				url: collections.url,
+				alternativeUrl: collections.alternativeUrl,
+				sourceImage: collections.sourceImage,
+				platform: collections.platform,
+				price: collections.price,
+				network: collections.network,
+				tokenId: collections.tokenId,
+				tokenAddress: collections.tokenAddress,
+				contractAddress: collections.contractAddress,
+				contractType: collections.contractType,
+				editions: collections.editions,
+				featuredImage: collections.featuredImage,
+				isFavorite: collections.isFavorite,
+				createdAt: collections.createdAt,
+				updatedAt: collections.updatedAt,
+			})
+			.from(collections)
+			.orderBy(desc(collections.createdAt));
 
-		const result = fromPrismaCollections(collections);
+		const transformedCollections = drizzleCollections.map((rawCollection) => ({
+			...rawCollection,
+			isFavorite: Boolean(rawCollection.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		}));
+
+		const result = fromDrizzleCollections(transformedCollections as any);
 		logger.info(`✅ ${result.length} colecciones obtenidas`);
 		return result;
 	} catch (error) {
@@ -220,20 +278,69 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
  */
 export const getCollection = async (id: string): Promise<CollectionWithStats | null> => {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info(`🔍 Obteniendo colección por ID: ${id}`);
-		const prisma = await getPrismaClient();
 
-		const collection = await prisma.collection.findUnique({
-			where: { id },
-			select: COLLECTION_SELECT_WITH_STATS,
-		});
+		const drizzleCollection = await db
+			.select({
+				id: collections.id,
+				name: collections.name,
+				emoji: collections.emoji,
+				color: collections.color,
+				description: collections.description,
+				shortcut: collections.shortcut,
+				category: collections.category,
+				sortBy: collections.sortBy,
+				filters: collections.filters,
+				url: collections.url,
+				alternativeUrl: collections.alternativeUrl,
+				sourceImage: collections.sourceImage,
+				platform: collections.platform,
+				price: collections.price,
+				network: collections.network,
+				tokenId: collections.tokenId,
+				tokenAddress: collections.tokenAddress,
+				contractAddress: collections.contractAddress,
+				contractType: collections.contractType,
+				editions: collections.editions,
+				featuredImage: collections.featuredImage,
+				isFavorite: collections.isFavorite,
+				createdAt: collections.createdAt,
+				updatedAt: collections.updatedAt,
+			})
+			.from(collections)
+			.where(eq(collections.id, id))
+			.limit(1);
 
-		if (!collection) {
+		if (drizzleCollection.length === 0) {
 			logger.warn(`Colección no encontrada: ${id}`);
 			return null;
 		}
 
-		const result = fromPrismaCollection(collection);
+		const rawCollection = drizzleCollection[0];
+
+		const transformedCollection = {
+			...rawCollection,
+			isFavorite: Boolean(rawCollection.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
+		const result = fromDrizzleCollection(transformedCollection as any);
 		if (!result) {
 			throw new CollectionServiceError('Error al transformar la colección', 'TRANSFORM_FAILED');
 		}
@@ -256,27 +363,74 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 export const createCollection = async (data: CollectionCreateInput): Promise<CollectionWithStats> => {
 	try {
 		logger.info('✨ Creando nueva colección', { name: data.name });
-		const prisma = await getPrismaClient();
 
-		const prismaData = toPrismaCollectionCreate(data);
-		const newCollection = await prisma.collection.create({
-			data: prismaData,
-			select: COLLECTION_SELECT_WITH_STATS,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.insert(collections)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				emoji: data.emoji || '📋',
+				color: data.color || '#3b82f6',
+				description: data.description || null,
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				url: data.url || null,
+				alternativeUrl: data.alternativeUrl || null,
+				sourceImage: data.sourceImage || null,
+				platform: data.platform || null,
+				price: data.price || null,
+				network: data.network || null,
+				tokenId: data.tokenId || null,
+				tokenAddress: data.tokenAddress || null,
+				contractAddress: data.contractAddress || null,
+				contractType: data.contractType || null,
+				editions: data.editions || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
+
+		const newCollection = result[0];
+
+		// Transformar a formato compatible
+		const transformedCollection = {
+			...newCollection,
+			isFavorite: Boolean(newCollection.isFavorite),
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
 
 		// Revalidar rutas
 		await revalidateCollectionPaths();
 
-		const result = fromPrismaCollection(newCollection);
-		if (!result) {
+		const collectionWithStats = fromDrizzleCollection(transformedCollection as any);
+		if (!collectionWithStats) {
 			throw new CollectionServiceError('Error al transformar la colección recién creada', 'TRANSFORM_FAILED');
 		}
 
 		// Notificar creación
-		await notifyCollectionChange('create', result);
+		await notifyCollectionChange('create', collectionWithStats);
 
-		logger.info(`✅ Colección creada exitosamente: ${result.name}`, { id: result.id });
-		return result;
+		logger.info(`✅ Colección creada exitosamente: ${collectionWithStats.name}`, { id: collectionWithStats.id });
+		return collectionWithStats;
 	} catch (error) {
 		logger.error('❌ Error al crear colección', { error, data });
 		throw new CollectionServiceError(
@@ -293,23 +447,63 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 export const updateCollection = async (id: string, data: CollectionUpdateInput): Promise<CollectionWithStats> => {
 	try {
 		logger.info(`📝 Actualizando colección: ${id}`);
-		const prisma = await getPrismaClient();
 
-		const prismaData = toPrismaCollectionUpdate(data);
-		const updatedCollection = await prisma.collection.update({
-			where: { id },
-			data: prismaData,
-			select: COLLECTION_SELECT_WITH_STATS,
-		});
+		const [updatedCollection] = await db
+			.update(collections)
+			.set({
+				name: data.name,
+				emoji: data.emoji || '📋',
+				color: data.color || '#3b82f6',
+				description: data.description || null,
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				url: data.url || null,
+				alternativeUrl: data.alternativeUrl || null,
+				sourceImage: data.sourceImage || null,
+				platform: data.platform || null,
+				price: data.price || null,
+				network: data.network || null,
+				tokenId: data.tokenId || null,
+				tokenAddress: data.tokenAddress || null,
+				contractAddress: data.contractAddress || null,
+				contractType: data.contractType || null,
+				editions: data.editions || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				updatedAt: new Date(),
+			})
+			.where(eq(collections.id, id))
+			.returning();
+
+		if (!updatedCollection) {
+			throw new CollectionServiceError('Colección no encontrada', 'COLLECTION_NOT_FOUND');
+		}
 
 		// Revalidar rutas
 		await revalidateCollectionPaths();
 		revalidatePath(`/collections/${id}`);
 
-		const result = fromPrismaCollection(updatedCollection);
-		if (!result) {
-			throw new CollectionServiceError('Error al transformar la colección actualizada', 'TRANSFORM_FAILED');
-		}
+		const result: CollectionWithStats = {
+			...updatedCollection,
+			isFavorite: Boolean(updatedCollection.isFavorite),
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
 
 		// Notificar actualización
 		await notifyCollectionChange('update', result);
@@ -332,14 +526,11 @@ export const updateCollection = async (id: string, data: CollectionUpdateInput):
 export const deleteCollection = async (id: string): Promise<void> => {
 	try {
 		logger.info(`🗑️ Eliminando colección: ${id}`);
-		const prisma = await getPrismaClient();
 
 		// Notificar antes de eliminar
 		await notifyCollectionChange('delete', { id });
 
-		await prisma.collection.delete({
-			where: { id },
-		});
+		await db.delete(collections).where(eq(collections.id, id));
 
 		// Revalidar rutas
 		await revalidateCollectionPaths();
@@ -361,28 +552,20 @@ export const deleteCollection = async (id: string): Promise<void> => {
 export const getCollectionImages = async (id: string): Promise<{ id: string; name: string; path: string }[]> => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes de la colección: ${id}`);
-		const prisma = await getPrismaClient();
 
-		const images = await prisma.image.findMany({
-			where: {
-				collections: {
-					some: {
-						id: id,
-					},
-				},
-			},
-			select: {
-				id: true,
-				name: true,
-				path: true,
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
+		const result = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+			})
+			.from(images)
+			.innerJoin(collections, eq(images.collectionId, collections.id))
+			.where(eq(collections.id, id))
+			.orderBy(desc(images.createdAt));
 
-		logger.info(`✅ ${images.length} imágenes obtenidas de la colección: ${id}`);
-		return images;
+		logger.info(`✅ ${result.length} imágenes obtenidas de la colección: ${id}`);
+		return result;
 	} catch (error) {
 		logger.error(`❌ Error al obtener imágenes de la colección ${id}`, { error });
 		throw new CollectionServiceError(
@@ -399,32 +582,52 @@ export const getCollectionImages = async (id: string): Promise<{ id: string; nam
 export const toggleCollectionFavorite = async (id: string): Promise<CollectionWithStats> => {
 	try {
 		logger.info(`⭐ Cambiando estado de favorito de la colección: ${id}`);
-		const prisma = await getPrismaClient();
 
 		// Obtener estado actual
-		const currentCollection = await prisma.collection.findUnique({
-			where: { id },
-			select: { isFavorite: true },
+		const currentCollection = await db.query.collections.findFirst({
+			where: eq(collections.id, id),
+			columns: { isFavorite: true },
 		});
 
 		if (!currentCollection) {
 			throw new CollectionServiceError('Colección no encontrada', 'COLLECTION_NOT_FOUND');
 		}
 
-		const updatedCollection = await prisma.collection.update({
-			where: { id },
-			data: { isFavorite: !currentCollection.isFavorite },
-			select: COLLECTION_SELECT_WITH_STATS,
-		});
+		const [updatedCollection] = await db
+			.update(collections)
+			.set({
+				isFavorite: !currentCollection.isFavorite,
+			})
+			.where(eq(collections.id, id))
+			.returning();
+
+		if (!updatedCollection) {
+			throw new CollectionServiceError('Error al actualizar la colección', 'UPDATE_FAILED');
+		}
 
 		// Revalidar rutas
 		await revalidateCollectionPaths();
 		revalidatePath(`/collections/${id}`);
 
-		const result = fromPrismaCollection(updatedCollection);
-		if (!result) {
-			throw new CollectionServiceError('Error al transformar la colección', 'TRANSFORM_FAILED');
-		}
+		const result: CollectionWithStats = {
+			...updatedCollection,
+			isFavorite: Boolean(updatedCollection.isFavorite),
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
 
 		// Notificar actualización
 		await notifyCollectionChange('update', result);
@@ -441,7 +644,72 @@ export const toggleCollectionFavorite = async (id: string): Promise<CollectionWi
 	}
 };
 
-// Servicio principal
+/**
+ * Clase de servicio para gestión de colecciones
+ */
+export class CollectionService {
+	async getCollections(_filters?: any): Promise<{ collections: CollectionWithStats[]; total: number }> {
+		const collections = await getCollections();
+		return { collections, total: collections.length };
+	}
+
+	async getCollectionById(id: string): Promise<CollectionWithStats | null> {
+		return await getCollection(id);
+	}
+
+	async createCollection(data: CollectionCreateInput): Promise<CollectionWithStats> {
+		return await createCollection(data);
+	}
+
+	async updateCollection(id: string, data: CollectionUpdateInput): Promise<CollectionWithStats | null> {
+		try {
+			return await updateCollection(id, data);
+		} catch (error) {
+			if (error instanceof CollectionServiceError && error.code === 'COLLECTION_NOT_FOUND') {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteCollection(id: string): Promise<boolean> {
+		try {
+			await deleteCollection(id);
+			return true;
+		} catch (error) {
+			if (error instanceof CollectionServiceError && error.code === 'COLLECTION_NOT_FOUND') {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	async getCollectionImages(id: string): Promise<{ id: string; name: string; path: string }[]> {
+		return await getCollectionImages(id);
+	}
+
+	async toggleFavorite(id: string): Promise<CollectionWithStats> {
+		return await toggleCollectionFavorite(id);
+	}
+
+	async addImageToCollection(collectionId: string, imageId: string): Promise<void> {
+		// TODO: Implementar lógica para agregar imagen a colección
+		logger.info(`Agregando imagen ${imageId} a colección ${collectionId}`);
+	}
+
+	async removeImageFromCollection(collectionId: string, imageId: string): Promise<void> {
+		// TODO: Implementar lógica para remover imagen de colección
+		logger.info(`Removiendo imagen ${imageId} de colección ${collectionId}`);
+	}
+
+	async getRecentCollectionMedia(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener media reciente
+		logger.info(`Obteniendo media reciente de colección ${id} (limit: ${limit})`);
+		return [];
+	}
+}
+
+// Servicio principal (legacy)
 const collectionService = {
 	searchCollections,
 	getCollections,

@@ -4,8 +4,9 @@
  * @description Implementación del servicio para gestionar actividades del sistema
  */
 
-import { PrismaClient } from '@prisma/client';
-import { mapActivityFiltersToPrisma, mapCreateActivityDataToPrisma } from '@/transformers/activity';
+import { and, count, desc, eq, gte, ilike, inArray, lte } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { activities, images } from '@/lib/drizzle/schema/index';
 import type { Activity, ActivityFilters, ActivityListResponse, CreateActivityData } from '@/types/entities/activity';
 
 /**
@@ -49,19 +50,42 @@ export interface ActivityService {
 }
 
 /**
+ * Convierte los filtros de la aplicación a condiciones Drizzle
+ */
+function buildWhereConditions(filters: ActivityFilters = {}) {
+	const conditions = [];
+
+	// Filtrar por tipos de actividad
+	if (filters.types && filters.types.length > 0) {
+		conditions.push(inArray(activities.type, filters.types));
+	}
+
+	// Filtrar por imagen
+	if (filters.imageId) {
+		conditions.push(eq(activities.imageId, filters.imageId));
+	}
+
+	// Filtrar por fechas
+	if (filters.startDate) {
+		conditions.push(gte(activities.createdAt, filters.startDate));
+	}
+
+	if (filters.endDate) {
+		conditions.push(lte(activities.createdAt, filters.endDate));
+	}
+
+	// Filtrar por búsqueda en descripción (mapea a message en BD)
+	if (filters.searchQuery) {
+		conditions.push(ilike(activities.message, `%${filters.searchQuery}%`));
+	}
+
+	return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
+/**
  * Implementación del servicio de Activity
  */
 export class ActivityServiceImpl implements ActivityService {
-	private prisma: PrismaClient;
-
-	/**
-	 * Constructor del servicio
-	 * @param prismaClient Cliente Prisma
-	 */
-	constructor(prismaClient: PrismaClient) {
-		this.prisma = prismaClient;
-	}
-
 	/**
 	 * Crea una nueva actividad
 	 * @param data Datos para la creación
@@ -69,22 +93,39 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	async create(data: CreateActivityData): Promise<Activity> {
 		try {
-			const prismaData = mapCreateActivityDataToPrisma(data);
+			// Insertar nueva actividad (mapear description -> message)
+			const result = await db
+				.insert(activities)
+				.values({
+					id: crypto.randomUUID(),
+					type: data.type,
+					message: data.message, // Mapeo: message en app -> message en BD
+					data: data.data || null,
+					data: null,
+					imageId: data.imageId || null,
+					createdAt: new Date(),
+				})
+				.returning();
 
-			const activity = await this.prisma.activity.create({
-				data: prismaData,
-				include: {
-					image: {
-						select: {
-							id: true,
-							name: true,
-							path: true,
-						},
-					},
-				},
-			});
+			const newActivity = result[0];
 
-			return this.transformActivityResponse(activity);
+			// Buscar imagen relacionada si existe
+			let imageData = null;
+			if (newActivity.imageId) {
+				const imageResult = await db
+					.select({
+						id: images.id,
+						name: images.name,
+						path: images.path,
+					})
+					.from(images)
+					.where(eq(images.id, newActivity.imageId))
+					.limit(1);
+
+				imageData = imageResult[0] || null;
+			}
+
+			return this.transformActivityResponse({ ...newActivity, image: imageData });
 		} catch (error) {
 			console.error('Error al crear actividad:', error);
 			throw new Error('No se pudo crear la actividad');
@@ -98,22 +139,29 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	async findById(id: string): Promise<Activity | null> {
 		try {
-			const activity = await this.prisma.activity.findUnique({
-				where: { id },
-				include: {
+			// Buscar actividad con imagen relacionada
+			const result = await db
+				.select({
+					id: activities.id,
+					type: activities.type,
+					message: activities.message,
+					data: activities.data,
+					createdAt: activities.createdAt,
+					imageId: activities.imageId,
 					image: {
-						select: {
-							id: true,
-							name: true,
-							path: true,
-						},
+						id: images.id,
+						name: images.name,
+						path: images.path,
 					},
-				},
-			});
+				})
+				.from(activities)
+				.leftJoin(images, eq(activities.imageId, images.id))
+				.where(eq(activities.id, id))
+				.limit(1);
 
-			if (!activity) return null;
+			if (result.length === 0) return null;
 
-			return this.transformActivityResponse(activity);
+			return this.transformActivityResponse(result[0]);
 		} catch (error) {
 			console.error('Error al buscar actividad:', error);
 			throw new Error('No se pudo buscar la actividad');
@@ -127,23 +175,44 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	async list(filters: ActivityFilters = {}): Promise<ActivityListResponse> {
 		try {
-			const prismaQuery = mapActivityFiltersToPrisma(filters);
+			const whereConditions = buildWhereConditions(filters);
+			const limit = filters.limit || 20;
+			const offset = filters.offset || 0;
 
-			// Consulta principal
-			const activities = await this.prisma.activity.findMany(prismaQuery);
+			// Consulta principal con join a imagen
+			const activitiesResult = await db
+				.select({
+					id: activities.id,
+					type: activities.type,
+					message: activities.message,
+					data: activities.data,
+					createdAt: activities.createdAt,
+					imageId: activities.imageId,
+					image: {
+						id: images.id,
+						name: images.name,
+						path: images.path,
+					},
+				})
+				.from(activities)
+				.leftJoin(images, eq(activities.imageId, images.id))
+				.where(whereConditions)
+				.orderBy(desc(activities.createdAt))
+				.limit(limit)
+				.offset(offset);
 
 			// Consulta para contar total
-			const totalCount = await this.prisma.activity.count({
-				where: prismaQuery.where,
-			});
+			const totalCountResult = await db.select({ count: count() }).from(activities).where(whereConditions);
+
+			const totalCount = totalCountResult[0]?.count || 0;
 
 			// Transformar resultados
-			const transformedActivities = activities.map((activity) => this.transformActivityResponse(activity));
+			const transformedActivities = activitiesResult.map((activity) => this.transformActivityResponse(activity));
 
 			return {
 				activities: transformedActivities,
 				totalCount,
-				hasMore: (prismaQuery.skip || 0) + (prismaQuery.take || 20) < totalCount,
+				hasMore: offset + limit < totalCount,
 			};
 		} catch (error) {
 			console.error('Error al listar actividades:', error);
@@ -158,11 +227,9 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	async delete(id: string): Promise<boolean> {
 		try {
-			await this.prisma.activity.delete({
-				where: { id },
-			});
+			const result = await db.delete(activities).where(eq(activities.id, id)).returning();
 
-			return true;
+			return result.length > 0;
 		} catch (error) {
 			console.error('Error al eliminar actividad:', error);
 			return false;
@@ -176,13 +243,11 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	async clearAll(filters?: ActivityFilters): Promise<number> {
 		try {
-			const where = filters ? mapActivityFiltersToPrisma(filters).where : {};
+			const whereConditions = filters ? buildWhereConditions(filters) : undefined;
 
-			const result = await this.prisma.activity.deleteMany({
-				where,
-			});
+			const result = await db.delete(activities).where(whereConditions).returning();
 
-			return result.count;
+			return result.length;
 		} catch (error) {
 			console.error('Error al eliminar todas las actividades:', error);
 			throw new Error('No se pudieron eliminar las actividades');
@@ -190,22 +255,22 @@ export class ActivityServiceImpl implements ActivityService {
 	}
 
 	/**
-	 * Transforma la respuesta de Prisma al formato de la aplicación
-	 * @param prismaActivity Actividad desde Prisma
+	 * Transforma la respuesta de Drizzle al formato de la aplicación
+	 * @param drizzleActivity Actividad desde Drizzle
 	 * @returns Actividad en formato de aplicación
 	 */
-	private transformActivityResponse(prismaActivity: any): Activity {
+	private transformActivityResponse(drizzleActivity: any): Activity {
 		return {
-			id: prismaActivity.id,
-			type: prismaActivity.type,
-			description: prismaActivity.description,
-			imageId: prismaActivity.imageId,
-			createdAt: prismaActivity.createdAt,
-			image: prismaActivity.image,
+			id: drizzleActivity.id,
+			type: drizzleActivity.type,
+			description: drizzleActivity.message, // Mapeo: message en BD -> description en app
+			imageId: drizzleActivity.imageId,
+			createdAt: drizzleActivity.createdAt,
+			image: drizzleActivity.image,
 			// Podríamos añadir más campos UI aquí basados en el tipo de actividad
-			iconEmoji: this.getIconForActivityType(prismaActivity.type),
-			iconColor: this.getColorForActivityType(prismaActivity.type),
-			category: this.getCategoryForActivityType(prismaActivity.type),
+			iconEmoji: this.getIconForActivityType(drizzleActivity.type),
+			iconColor: this.getColorForActivityType(drizzleActivity.type),
+			category: this.getCategoryForActivityType(drizzleActivity.type),
 		};
 	}
 
@@ -271,26 +336,22 @@ export class ActivityServiceImpl implements ActivityService {
 let activityServiceInstance: ActivityService | null = null;
 
 /**
- * Obtiene la instancia del servicio de actividades
- * @param prisma Cliente Prisma opcional
- * @returns Servicio de actividades
+ * Función factory para obtener la instancia del servicio
  */
-export function getActivityService(prisma?: PrismaClient): ActivityService {
-	if (!activityServiceInstance && prisma) {
-		activityServiceInstance = new ActivityServiceImpl(prisma);
-	}
-
+export function getActivityService(): ActivityService {
 	if (!activityServiceInstance) {
-		throw new Error('ActivityService no ha sido inicializado');
+		activityServiceInstance = new ActivityServiceImpl();
 	}
 
 	return activityServiceInstance;
 }
 
+// Alias para compatibilidad con rutas del servidor
+export { ActivityServiceImpl as ActivityService };
+
 /**
- * Inicializa el servicio de actividades
- * @param prisma Cliente Prisma
+ * Función de inicialización del servicio
  */
-export function initActivityService(prisma: PrismaClient): void {
-	activityServiceInstance = new ActivityServiceImpl(prisma);
+export function initActivityService(): void {
+	console.log('ActivityService inicializado');
 }

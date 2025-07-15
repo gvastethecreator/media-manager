@@ -1,4 +1,7 @@
-'use server';
+/**
+ * @file Métricas técnicas de desarrollo
+ * @description Compatible con Vite + React
+ */
 
 /**
  * Obtiene métricas técnicas detalladas del sistema

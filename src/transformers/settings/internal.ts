@@ -1,11 +1,13 @@
 /**
  * @file Implementaciones internas de transformers para Settings
  * @module transformers/settings/internal
+ * ✅ MIGRADO A DRIZZLE - Julio 2025
+ * @deprecated Este archivo será reemplazado por la nueva estructura estándar
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { settingsSchema } from '@/types/settings';
 import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
+import { settingsSchema } from '@/types/settings';
 
 const logger = serverLogger.withContext('SettingsTransformer:internal');
 
@@ -13,10 +15,10 @@ const logger = serverLogger.withContext('SettingsTransformer:internal');
 
 export const serializers = {
 	/**
-	 * Transforma los datos de configuración de Prisma a su formato para la interfaz de usuario
+	 * Transforma los datos de configuración desde almacenamiento a formato de aplicación
 	 */
-	fromPrismaSettings<T>(settingsData: T): T {
-		logger.debug('🔄 Transformando configuración de Prisma a UI', { settingsData });
+	fromStorageSettings<T>(settingsData: T): T {
+		logger.debug('🔄 Transformando configuración desde almacenamiento a aplicación', { settingsData });
 
 		if (!settingsData) {
 			return settingsData;
@@ -30,10 +32,10 @@ export const serializers = {
 	},
 
 	/**
-	 * Transforma los datos de configuración de la interfaz de usuario a su formato para Prisma
+	 * Transforma los datos de configuración desde formato de aplicación a almacenamiento
 	 */
-	toPrismaSettings<T>(settingsData: T): T {
-		logger.debug('🔄 Transformando configuración de UI a Prisma', { settingsData });
+	toStorageSettings<T>(settingsData: T): T {
+		logger.debug('🔄 Transformando configuración desde aplicación a almacenamiento', { settingsData });
 
 		if (!settingsData) {
 			return settingsData;
@@ -119,20 +121,20 @@ export const serializers = {
 
 export const mappers = {
 	/**
-	 * Mapea los datos de configuración para actualizar en Prisma
+	 * Mapea los datos de configuración para actualizar en la base de datos
 	 */
-	mapSettingsUpdateToPrisma<T, U>(updateData: T): U {
-		logger.debug('🔄 Mapeando actualización de configuración a formato Prisma', { updateData });
+	mapSettingsUpdateToDatabase<T, U>(updateData: T): U {
+		logger.debug('🔄 Mapeando actualización de configuración a formato de base de datos', { updateData });
 
 		if (!updateData) {
 			return {} as U;
 		}
 
 		// Crear una copia para no modificar el original
-		const prismaData = { ...(updateData as object) } as Record<string, unknown>;
+		const dbData = { ...(updateData as object) } as Record<string, unknown>;
 
 		// Serializar campos JSON
-		const serializedData = serializers.serializeSettingsJson(prismaData);
+		const serializedData = serializers.serializeSettingsJson(dbData);
 
 		return serializedData as unknown as U;
 	},

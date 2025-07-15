@@ -3,4 +3,4 @@
  * @module types/entities/property/extended
  */
 
-export type { PropertyComplete } from './types';
+import type { PropertyComplete } from './types';

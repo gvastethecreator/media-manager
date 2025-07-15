@@ -1,5 +1,3 @@
-'use client';
-
 import { Building2, Cloud, Compass, Droplets, Mountain, Palmtree, Sparkles, Sprout, Star, Trees } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,7 +36,6 @@ export function PlaceCardHeader({
 	climate = 'Templado',
 	isFavorite = false,
 	tcgMode = true,
-	compact = false,
 }: PlaceCardHeaderProps) {
 	// Determinar icono según el tipo de lugar
 	const getTypeIcon = () => {

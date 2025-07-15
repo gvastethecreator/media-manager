@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { readdir, rm, stat } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,11 +44,15 @@ export function executeWithLogging(command, logFileName, options = {}) {
 			const lines = output.split('\n').filter((l) => l.trim());
 			if (lines.length > 5) {
 				console.log('\n📊 Resumen (primeras 5 líneas):');
-				lines.slice(0, 5).forEach((line) => console.log(`  ${line}`));
+				for (const line of lines.slice(0, 5)) {
+					console.log(`  ${line}`);
+				}
 				console.log(`  ... y ${lines.length - 5} líneas más`);
 			} else {
 				console.log('\n📊 Salida completa:');
-				lines.forEach((line) => console.log(`  ${line}`));
+				for (const line of lines) {
+					console.log(`  ${line}`);
+				}
 			}
 		}
 
@@ -66,7 +70,9 @@ export function executeWithLogging(command, logFileName, options = {}) {
 			const errorLines = (error.stdout || error.stderr).split('\n').filter((l) => l.trim());
 			if (errorLines.length > 0) {
 				console.error('\n📊 Primeros errores encontrados:');
-				errorLines.slice(0, 3).forEach((line) => console.error(`  ${line}`));
+				for (const line of errorLines.slice(0, 3)) {
+					console.error(`  ${line}`);
+				}
 			}
 		}
 
@@ -118,11 +124,11 @@ export function parseLogsByCategory(logFile) {
 
 	const lines = content.split('\n');
 
-	lines.forEach((line) => {
+	for (const line of lines) {
 		const lowerLine = line.toLowerCase();
 		categorizeByType(line, lowerLine, categories);
 		categorizeByTool(line, lowerLine, categories);
-	});
+	}
 
 	return categories;
 }
@@ -139,16 +145,16 @@ export function showLogSummary(logFile) {
 
 	if (categories.errors.length > 0) {
 		console.log('\n❌ Primeros errores:');
-		categories.errors.slice(0, 3).forEach((error) => {
+		for (const error of categories.errors.slice(0, 3)) {
 			console.log(`  ${error.trim()}`);
-		});
+		}
 	}
 
 	if (categories.warnings.length > 0) {
 		console.log('\n⚠️  Primeros warnings:');
-		categories.warnings.slice(0, 3).forEach((warning) => {
+		for (const warning of categories.warnings.slice(0, 3)) {
 			console.log(`  ${warning.trim()}`);
-		});
+		}
 	}
 }
 
@@ -170,11 +176,11 @@ export function listRecentLogs(limit = 10) {
 		.slice(0, limit);
 
 	console.log(`\n📄 Últimos ${limit} logs:`);
-	files.forEach((file, index) => {
+	for (const file of files) {
 		const isError = file.name.includes('_error');
 		const icon = isError ? '❌' : '✅';
 		console.log(`  ${index + 1}. ${icon} ${file.name} (${new Date(file.stats.mtime).toLocaleString()})`);
-	});
+	}
 
 	return files;
 }

@@ -307,4 +307,4 @@ Búsqueda O(n) por ID, optimizable con Record si es necesario.
 - `@/types/entities/album` - Tipos canónicos
 - `@/app/actions/albums` - Server actions
 - `@/lib/logger` - Logging
-- `@/services/toast` - Notificaciones
+- `@/lib/ui/toast` - Notificaciones

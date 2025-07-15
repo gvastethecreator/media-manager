@@ -1,5 +1,3 @@
-'use client';
-
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';

@@ -1,9 +1,6 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import { FolderIcon } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
+import { motion } from 'motion/react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface GroupCardImagesProps {
@@ -163,12 +160,11 @@ export function GroupCardImages({
 							key={`media-${index}-${media.substring(media.lastIndexOf('/') + 1)}`}
 							className="relative overflow-hidden bg-black/10"
 						>
-							<Image
+							<img
 								src={media}
 								alt={`Group content ${index + 1}`}
-								fill
 								className={cn(
-									'object-cover',
+									'absolute inset-0 w-full h-full object-cover',
 									rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 								)}
 								style={{

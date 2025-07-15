@@ -1,5 +1,3 @@
-'use client';
-
 import { Heart, ImageIcon, Scroll, Shield, Sparkles, Star, Swords, Video, Wand } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React from 'react';
@@ -28,6 +26,9 @@ interface CharacterCardFooterProps {
 	skills?: { name: string; level: number }[];
 	/** Si está en modo TCG con efectos especiales */
 	tcgMode?: boolean;
+	cardId?: string;
+	level?: number | null;
+	compact?: boolean;
 }
 
 /**
@@ -74,6 +75,26 @@ export function CharacterCardFooter({
 		if (lowerAlignment.includes('neutral')) return <Scroll className="w-3.5 h-3.5" />;
 		return <Star className="w-3.5 h-3.5" />;
 	};
+
+	if (!tcgMode) {
+		return (
+			<div className="py-2 px-3 text-xs flex justify-between items-center">
+				<div className="flex items-center space-x-2 text-white/70">
+					<div className="flex items-center">
+						<ImageIcon className="h-3.5 w-3.5 mr-1" />
+						<span>{imagesCount}</span>
+					</div>
+					{videosCount > 0 && (
+						<div className="flex items-center">
+							<Video className="h-3.5 w-3.5 mr-1" />
+							<span>{videosCount}</span>
+						</div>
+					)}
+				</div>
+				<div className="text-[9px] opacity-60 text-right">#{characterId}</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="py-3 px-4 text-xs">

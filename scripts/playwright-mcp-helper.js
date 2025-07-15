@@ -119,7 +119,7 @@ Comandos disponibles:
 
 Ejemplos:
   node scripts/playwright-mcp-helper.js generate-tests
-  node scripts/playwright-mcp-helper.js list-scenarios
+  bun scripts/playwright-mcp-helper.js list-scenarios
 `)
 	);
 }
@@ -174,12 +174,12 @@ function generateAllTests(config) {
 		process.exit(1);
 	}
 
-	config.testScenarios.forEach((scenario) => {
+	for (const scenario of config.testScenarios) {
 		generateTestFromScenario(scenario, config);
-	});
+	}
 
 	console.log(chalk.green(`\n✅ Se generaron ${config.testScenarios.length} archivos de test`));
-	console.log(chalk.gray('💡 Ejecuta los tests con: pnpm test:e2e'));
+	console.log(chalk.gray('💡 Ejecuta los tests con: bun test:e2e'));
 }
 
 // Procesar argumentos de línea de comandos

@@ -1,16 +1,5 @@
-'use client';
-
-import type { WildcardComplete as Wildcard } from '@prisma/client';
 import { ChevronRight, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash, WandIcon } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useState } from 'react';
-import {
-	createWildcard,
-	deleteWildcard,
-	getRootWildcards,
-	getWildcards,
-	updateWildcard,
-} from '@/app/actions/wildcards/wildcard.actions';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -18,8 +7,16 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
+import {
+	useCreateWildcard,
+	useDeleteWildcard,
+	useRootWildcards,
+	useUpdateWildcard,
+	useWildcards,
+} from '@/lib/api/wildcards';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
-import toastService from '@/services/toast';
+import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { WildcardPreview } from './wildcard-preview';
 
 // Importar el tipo de formulario que hemos definido
@@ -36,12 +33,12 @@ type CreateWildcardFormValues = {
 	isFavorite: boolean;
 };
 
-// Importación dinámica para evitar problemas con SSR
-const CreateWildcardForm = dynamic(() => import('./create-wildcard-form').then((mod) => mod.CreateWildcardForm), {
-	ssr: false,
-});
+// Carga perezosa del formulario
+const CreateWildcardForm = lazy(() =>
+	import('./create-wildcard-form').then((mod) => ({ default: mod.CreateWildcardForm }))
+);
 
-interface WildcardWithRelations extends Omit<Wildcard, 'children'> {
+interface WildcardWithRelations extends Omit<WildcardWithStats, 'children'> {
 	id: string;
 	name: string;
 	emoji: string;
@@ -55,7 +52,7 @@ interface WildcardWithRelations extends Omit<Wildcard, 'children'> {
 	createdAt: Date;
 	updatedAt: Date;
 	parentId: string | null;
-	parent?: Wildcard | null;
+	parent?: WildcardWithStats | null;
 	childWildcards?: WildcardWithRelations[];
 	_count?: {
 		images: number;
@@ -75,16 +72,20 @@ interface WildcardWithRelations extends Omit<Wildcard, 'children'> {
 }
 
 export function WildcardsSettings() {
-	const [wildcards, setWildcards] = useState<WildcardWithRelations[]>([]);
-	const [_rootWildcards, setRootWildcards] = useState<Wildcard[]>([]);
+	// React Query hooks
+	const { data: allWildcards = [], isLoading: isLoadingWildcards, error: wildcardsError } = useWildcards();
+	const { data: rootWildcards = [], isLoading: isLoadingRoots, error: rootsError } = useRootWildcards();
+	const createWildcardMutation = useCreateWildcard();
+	const updateWildcardMutation = useUpdateWildcard();
+	const deleteWildcardMutation = useDeleteWildcard();
+
+	// Estado local
 	const [expandedWildcards, setExpandedWildcards] = useState<Record<string, boolean>>({});
-	const [_isLoading, setIsLoading] = useState(true);
-	const [_error, setError] = useState<string | null>(null);
 	const [selectedWildcard, setSelectedWildcard] = useState<WildcardWithRelations | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [currentParentId, setCurrentParentId] = useState<string | null>(null);
-	const [breadcrumbs, setBreadcrumbs] = useState<Wildcard[]>([]);
+	const [breadcrumbs, setBreadcrumbs] = useState<WildcardWithStats[]>([]);
 
 	// Filtros y ordenamiento
 	const [searchQuery, setSearchQuery] = useState('');
@@ -93,53 +94,43 @@ export function WildcardsSettings() {
 	const [showOnlyRoots, setShowOnlyRoots] = useState(true);
 	const [sortBy, setSortBy] = useState<'name' | 'category' | 'createdAt'>('name');
 
-	// Cargar comodines
-	const loadWildcards = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			const [allWildcards, rootWildcardsList] = await Promise.all([getWildcards(), getRootWildcards()]);
+	// Manejo de errores
+	const isLoading = isLoadingWildcards || isLoadingRoots;
+	const error = wildcardsError || rootsError;
 
-			// Convertir y extender los wildcards con las propiedades necesarias
-			const extendedWildcards = allWildcards.map((wildcard) => ({
-				...wildcard,
-				_count: {
-					...wildcard._count,
-					albums: 0,
-					collections: 0,
-					tags: 0,
-					characters: 0,
-					places: 0,
-					worldItems: 0,
-					concepts: 0,
-					prompts: 0,
-					notes: 0,
-					properties: 0,
-				},
-			})) as WildcardWithRelations[];
-
-			setWildcards(extendedWildcards);
-			setRootWildcards(rootWildcardsList);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			setError(errorMessage);
+	useEffect(() => {
+		if (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error('Error al cargar los comodines', {
 				description: errorMessage,
 			});
-		} finally {
-			setIsLoading(false);
 		}
-	}, []);
+	}, [error]);
 
-	useEffect(() => {
-		loadWildcards();
-	}, [loadWildcards]);
+	// Convertir y extender los wildcards con las propiedades necesarias
+	const wildcards = allWildcards.map((wildcard) => ({
+		...wildcard,
+		_count: {
+			...wildcard._count,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+			characters: 0,
+			places: 0,
+			worldItems: 0,
+			concepts: 0,
+			prompts: 0,
+			notes: 0,
+			properties: 0,
+		},
+	})) as WildcardWithRelations[];
 
 	// Actualizar breadcrumbs cuando cambia el comodín seleccionado
 	useEffect(() => {
 		if (selectedWildcard?.parent) {
 			// Construir breadcrumbs ascendiendo en la jerarquía
-			const buildBreadcrumbs = async () => {
-				const breadcrumbPath: Wildcard[] = [];
+			const buildBreadcrumbs = () => {
+				const breadcrumbPath: WildcardWithStats[] = [];
 				let currentWildcard = selectedWildcard;
 
 				while (currentWildcard.parent) {
@@ -249,61 +240,59 @@ export function WildcardsSettings() {
 	// Manejadores
 	const handleCreateWildcard = async (data: CreateWildcardFormValues) => {
 		try {
-			// Si estamos dentro de un grupo, establecer parentId
-			if (currentParentId && !data.parentId) {
-				data.parentId = currentParentId;
-			}
-
-			// Formateamos children como string JSON para la API
-			const formattedData = {
-				...data,
+			// Convertir el formato del formulario al formato de la API
+			const formattedData: WildcardCreateInput = {
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description,
+				shortcut: data.shortcut,
+				category: data.category,
 				children: JSON.stringify(data.children),
+				parentId: data.parentId,
+				featuredImage: data.featuredImage,
+				isFavorite: data.isFavorite,
 			};
 
-			const _newWildcard = await createWildcard(formattedData);
-			await loadWildcards(); // Recargar para actualizar jerarquías
+			await createWildcardMutation.mutateAsync(formattedData);
 			setIsCreateDialogOpen(false);
 			toastService.success('Comodín creado correctamente');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al crear el comodín', {
-				description: errorMessage,
-			});
+		} catch (error) {
+			toastService.error('Error al crear el comodín');
 		}
 	};
 
 	const handleUpdateWildcard = async (id: string, data: CreateWildcardFormValues) => {
 		try {
-			// Formateamos children como string JSON para la API
-			const formattedData = {
-				...data,
+			const formattedData: WildcardUpdateInput = {
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description,
+				shortcut: data.shortcut,
+				category: data.category,
 				children: JSON.stringify(data.children),
+				parentId: data.parentId,
+				featuredImage: data.featuredImage,
+				isFavorite: data.isFavorite,
 			};
 
-			await updateWildcard(id, formattedData);
-			await loadWildcards(); // Recargar para actualizar jerarquías
+			await updateWildcardMutation.mutateAsync({ id, data: formattedData });
 			setSelectedWildcard(null);
 			setIsEditMode(false);
 			toastService.success('Comodín actualizado correctamente');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al actualizar el comodín', {
-				description: errorMessage,
-			});
+		} catch (error) {
+			toastService.error('Error al actualizar el comodín');
 		}
 	};
 
 	const handleDeleteWildcard = async (id: string) => {
 		try {
-			await deleteWildcard(id);
-			await loadWildcards(); // Recargar para actualizar jerarquías
+			await deleteWildcardMutation.mutateAsync(id);
 			setSelectedWildcard(null);
 			toastService.success('Comodín eliminado correctamente');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el comodín', {
-				description: errorMessage,
-			});
+		} catch (error) {
+			toastService.error('Error al eliminar el comodín');
 		}
 	};
 
@@ -481,12 +470,18 @@ export function WildcardsSettings() {
 				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
 					{selectedWildcard ? (
 						isEditMode ? (
-							<CreateWildcardForm
-								wildcard={selectedWildcard}
-								parentWildcards={wildcards.filter((w) => w.id !== selectedWildcard.id)}
-								onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
-								onCancel={() => setIsEditMode(false)}
-							/>
+							<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+								<DialogContent className="max-w-3xl p-0 overflow-hidden">
+									<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+										<CreateWildcardForm
+											onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
+											onClose={() => setIsCreateDialogOpen(false)}
+											parentId={currentParentId}
+											wildcard={selectedWildcard}
+										/>
+									</Suspense>
+								</DialogContent>
+							</Dialog>
 						) : (
 							<WildcardPreview
 								wildcard={selectedWildcard}
@@ -505,12 +500,15 @@ export function WildcardsSettings() {
 
 			{/* Dialog para crear nuevo comodín */}
 			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-				<DialogContent>
-					<CreateWildcardForm
-						parentWildcards={wildcards}
-						onSubmit={handleCreateWildcard}
-						onCancel={() => setIsCreateDialogOpen(false)}
-					/>
+				<DialogContent className="max-w-3xl p-0 overflow-hidden">
+					<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+						<CreateWildcardForm
+							onSubmit={handleCreateWildcard}
+							onClose={() => setIsCreateDialogOpen(false)}
+							parentId={currentParentId}
+							wildcard={undefined}
+						/>
+					</Suspense>
 				</DialogContent>
 			</Dialog>
 		</div>

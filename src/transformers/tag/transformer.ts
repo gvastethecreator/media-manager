@@ -1,96 +1,176 @@
 /**
- * @file Transformadores para la entidad Tag.
+ * @file Transformer principal para Tag
  * @module transformers/tag/transformer
- * @description Contiene funciones para convertir objetos Tag entre diferentes formatos.
+ * ✅ MIGRADO A DRIZZLE - Julio 2025
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { calculateCompleteness } from '@/lib/utils/transformers';
-import type { PrismaTagWithCounts, TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
+import { handleTransformerError } from '@/lib/utils/transformers/errors';
+import type { TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
+import { fromStorageTag, normalizeTag, sanitizeTagForClient, toStorageTag } from './serializers';
+import { safeValidateTag, validateTag } from './validators';
 
-const tagTransformerLogger = clientLogger.withContext('TagTransformer');
+const logger = serverLogger.withContext('TagTransformer');
 
 /**
- * Convierte un objeto Tag de Prisma a TagWithStats. * Esta función es compatible con el sistema legacy que esperaba TagComplete.
- *
- * @param prismaTag El objeto Tag de Prisma, puede incluir conteos de relaciones
- * @returns Un objeto TagWithStats con estadísticas calculadas o null si el input es inválido
+ * Transforma datos de la base de datos a objeto Tag de la aplicación
  */
-export function fromPrismaTag(prismaTag: PrismaTagWithCounts | TagBase | null): TagWithStats | null {
-	if (!prismaTag) {
-		tagTransformerLogger.warn('⚠️ Tag de Prisma nulo o indefinido');
+export function fromDatabase(dbData: any): TagBase {
+	try {
+		logger.debug('🔄 Transformando Tag desde DB', { dbData });
+
+		if (!dbData) {
+			throw new Error('Datos de DB requeridos para transformar Tag');
+		}
+
+		// Aplicar transformaciones de deserialización
+		const processed = fromStorageTag(dbData);
+
+		// Validar resultado
+		const validated = validateTag(processed);
+
+		logger.debug('✅ Tag transformado desde DB exitosamente', { validated });
+		return validated;
+	} catch (error) {
+		logger.error('❌ Error transformando Tag desde DB:', error);
+		throw handleTransformerError(error as Error);
+	}
+}
+
+/**
+ * Prepara objeto Tag para insertar en la base de datos
+ */
+export function toDatabase(tag: TagBase): any {
+	try {
+		logger.debug('🔄 Transformando Tag para DB insert', { tag });
+
+		if (!tag) {
+			throw new Error('Objeto Tag requerido');
+		}
+
+		// Validar entrada
+		const validated = validateTag(tag);
+
+		// Aplicar transformaciones de serialización
+		const serialized = toStorageTag(validated);
+
+		logger.debug('✅ Tag transformado para DB exitosamente', { serialized });
+		return serialized;
+	} catch (error) {
+		logger.error('❌ Error transformando Tag para DB:', error);
+		throw handleTransformerError(error as Error);
+	}
+}
+
+/**
+ * Normaliza Tag aplicando valores por defecto
+ */
+export function normalize(tag: Partial<TagBase>): TagBase {
+	try {
+		logger.debug('🔄 Normalizando Tag', { tag });
+
+		const normalized = normalizeTag(tag);
+		const validated = validateTag(normalized);
+
+		logger.debug('✅ Tag normalizado exitosamente', { validated });
+		return validated;
+	} catch (error) {
+		logger.error('❌ Error normalizando Tag:', error);
+		throw handleTransformerError(error as Error);
+	}
+}
+
+/**
+ * Prepara Tag para ser enviado al cliente (sanitizado)
+ */
+export function forClient(tag: TagBase): TagBase {
+	try {
+		logger.debug('🔄 Preparando Tag para cliente', { tag });
+
+		// Validar entrada
+		const validated = validateTag(tag);
+
+		// Sanitizar datos
+		const sanitized = sanitizeTagForClient(validated);
+
+		logger.debug('✅ Tag preparado para cliente exitosamente', { sanitized });
+		return sanitized;
+	} catch (error) {
+		logger.error('❌ Error preparando Tag para cliente:', error);
+		throw handleTransformerError(error as Error);
+	}
+}
+
+/**
+ * Validación segura que devuelve éxito/error sin lanzar excepciones
+ */
+export function safeParse(data: unknown): { success: true; data: TagBase } | { success: false; error: string } {
+	try {
+		logger.debug('🔍 Validación segura de Tag', { data });
+
+		return safeValidateTag(data);
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		logger.warn('⚠️ Error en validación segura de Tag:', { error: errorMessage });
+		return { success: false, error: errorMessage };
+	}
+}
+
+/**
+ * Convierte un objeto Tag con conteos a TagWithStats (función legacy mantenida por compatibilidad)
+ * @deprecated Usar las nuevas funciones de transformer en su lugar
+ */
+export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
+	logger.warn('⚠️ Usando función legacy fromDrizzleTag, considerar migrar a nuevas funciones');
+
+	if (!drizzleTag) {
+		logger.warn('⚠️ Tag de Drizzle nulo o indefinido');
 		return null;
 	}
 
 	try {
-		tagTransformerLogger.debug(`🔄 Transformando tag: ${prismaTag.id}`);
+		logger.debug(`🔄 Transformando tag legacy: ${drizzleTag.id}`);
 
-		// Verificar si el objeto tiene conteos (_count)
-		const hasCounts = '_count' in prismaTag && prismaTag._count;
+		const hasCounts = '_count' in drizzleTag && drizzleTag._count;
+		const { _count, ...baseTag } = drizzleTag;
 
 		if (hasCounts) {
-			// Si tiene conteos, usar el transformador completo
-			const { _count, ...baseTag } = prismaTag as PrismaTagWithCounts;
+			// Convertir conteos a números y calcular estadísticas
+			const counts = _count as Record<string, number>;
+			const totalRelations = Object.values(counts).reduce((sum: number, count: number) => sum + count, 0);
+			const usageDiversity = Object.values(counts).filter((count: number) => count > 0).length;
 
-			// Calcular estadísticas
-			const totalRelations = Object.values(_count).reduce((sum, count) => sum + count, 0);
-			const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
-			const totalPossibleRelations = Object.keys(_count).length;
-			const diversityRatio = totalPossibleRelations > 0 ? usageDiversity / totalPossibleRelations : 0;
+			const diversityRatio = usageDiversity > 0 ? usageDiversity / Object.keys(counts).length : 0;
 			const popularity = Math.log1p(totalRelations) * diversityRatio;
-			const completenessScore = calculateCompleteness(baseTag, ['name', 'description', 'category']);
 
-			const stats: TagStatistics = {
+			const statistics: TagStatistics = {
 				totalRelations,
-				usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
-				popularity: Number.parseFloat(popularity.toFixed(2)),
-				completenessScore,
+				usageDiversity: diversityRatio,
+				popularity,
+				completenessScore: calculateCompleteness(baseTag, ['name', 'description', 'category']),
 			};
 
 			return {
 				...baseTag,
-				stats,
-			};
+				statistics,
+			} as TagWithStats;
 		}
 
-		// Si no tiene conteos, crear estadísticas vacías
-		const completenessScore = calculateCompleteness(prismaTag, ['name', 'description', 'category']);
-
-		const stats: TagStatistics = {
+		// Sin conteos, crear estadísticas vacías
+		const statistics: TagStatistics = {
 			totalRelations: 0,
 			usageDiversity: 0,
 			popularity: 0,
-			completenessScore,
+			completenessScore: calculateCompleteness(baseTag, ['name', 'description', 'category']),
 		};
 
 		return {
-			...prismaTag,
-			stats,
-		};
+			...baseTag,
+			statistics,
+		} as TagWithStats;
 	} catch (error) {
-		tagTransformerLogger.error('❌ Error transformando tag:', error);
+		logger.error('❌ Error transformando tag legacy:', error);
 		return null;
 	}
 }
-
-// === NAMESPACE DE EXPORTACIÓN ===
-// Esta estructura evita que Next.js detecte el archivo como Server Action
-
-/**
- * TagTransformer - Namespace que contiene todas las funciones de transformación para tags
- */
-export const TagTransformer = {
-	fromPrismaTag,
-} as const;
-
-/**
- * Alias para compatibilidad con código legacy.
- * @deprecated Usar fromPrismaTag directamente. SERÁ ELIMINADO EN v2.0
- */
-export const transformTag = TagTransformer.fromPrismaTag;
-
-/**
- * Tipo de compatibilidad para código legacy que espera TagComplete.
- * @deprecated Usar TagWithStats directamente. SERÁ ELIMINADO EN v2.0
- */
-export type TagComplete = TagWithStats;

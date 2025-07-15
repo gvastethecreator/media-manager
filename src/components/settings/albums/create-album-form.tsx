@@ -1,14 +1,12 @@
-'use client';
-
 import { Loader2, Save, X } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { createAlbum, updateAlbum } from '@/app/actions/albums/album.actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import toastService from '@/services/toast';
+import { type AlbumCreateInput, type AlbumUpdateInput, useCreateAlbum, useUpdateAlbum } from '@/lib/api/albums';
+import { toastService } from '@/lib/ui/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 
 // Props del componente
@@ -38,6 +36,10 @@ export function CreateAlbumForm({
 	onReset,
 	onPreview,
 }: CreateAlbumFormProps) {
+	// React Query mutations
+	const createAlbumMutation = useCreateAlbum();
+	const updateAlbumMutation = useUpdateAlbum();
+
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errors, setErrors] = useState<Partial<FormData>>({});
 
@@ -117,25 +119,23 @@ export function CreateAlbumForm({
 				// Preparar datos para el backend
 				const albumData = {
 					name: formData.name,
-					emoji: formData.emoji,
-					color: formData.color,
-					sortBy: 'name' as const,
-					filters: '[]' as const,
-					isFavorite: false,
 					description: formData.description || undefined,
-					category: formData.category || undefined,
+					color: formData.color,
 				};
 
 				if (isEditing && album) {
 					// Actualizar álbum existente
-					const updatedAlbum = await updateAlbum(album.id, albumData);
+					const updatedAlbum = await updateAlbumMutation.mutateAsync({
+						id: album.id,
+						data: albumData as AlbumUpdateInput,
+					});
 					if (onUpdated) {
 						onUpdated(updatedAlbum);
 					}
 					toastService.system.success('Álbum actualizado correctamente');
 				} else {
 					// Crear nuevo álbum
-					const newAlbum = await createAlbum(albumData);
+					const newAlbum = await createAlbumMutation.mutateAsync(albumData as AlbumCreateInput);
 					if (onCreated) {
 						onCreated(newAlbum);
 					}
@@ -158,7 +158,7 @@ export function CreateAlbumForm({
 				setIsSubmitting(false);
 			}
 		},
-		[formData, validateForm, isEditing, album, onCreated, onUpdated]
+		[formData, validateForm, isEditing, album, onCreated, onUpdated, createAlbumMutation, updateAlbumMutation]
 	);
 
 	// Manejar cancelación

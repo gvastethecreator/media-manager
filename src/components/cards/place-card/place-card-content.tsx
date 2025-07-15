@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertTriangleIcon, CircleDollarSignIcon, ShieldIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -9,7 +7,7 @@ interface PlaceCardContentProps {
 	region?: string;
 	type?: string;
 	climate?: string;
-	population?: number;
+	population: number;
 	government?: string;
 	parsedResources?: Array<{ name: string; abundance: number; description?: string }>;
 	parsedDangers?: Array<{ type: string; level: number; description?: string }>;

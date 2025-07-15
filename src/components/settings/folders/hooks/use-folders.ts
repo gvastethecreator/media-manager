@@ -1,10 +1,9 @@
-'use client';
-
-import type { ErrorResponse, ProcessStatus } from '@/app/actions/folders/types';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
-import type { FolderWithStats } from '@/types/entities/folder';
 import { useCallback, useEffect, useState } from 'react';
+import { useReindexAllFolders } from '@/lib/api/folders';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
+import type { FolderWithStats } from '@/types/entities/folder';
+import type { ErrorResponse, ProcessStatus } from '@/types/folders';
 import { type ExtendedProcessStatus, initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';
@@ -194,16 +193,44 @@ export function useFolders() {
 		[handleProcessComplete]
 	);
 
-	// Iniciar un proceso
+	// Función para manejar el progreso del reindexado global
+	const handleReindexAllProgress = useCallback((status: ProcessStatus & { currentFolder?: string }) => {
+		folderLogger.info('🌍 Progreso de reindexado global:', status);
+
+		setGlobalReindexStatus((prev) => ({
+			...prev,
+			isProcessing: status.isProcessing,
+			progress: status.progress || 0,
+			currentFolder: status.currentFolder || prev.currentFolder,
+			processedFolders: status.filesProcessed || prev.processedFolders,
+			totalFolders: status.totalFiles || prev.totalFolders,
+			lastUpdate: Date.now(),
+		}));
+
+		// Si el reindexado global ha terminado
+		if (!status.isProcessing && status.progress === 100) {
+			folderLogger.info('✅ Reindexado global completado');
+			setGlobalReindexStatus((prev) => ({
+				...prev,
+				isProcessing: false,
+				endTime: Date.now(),
+			}));
+			toastService.success('Reindexado global completado correctamente');
+		}
+	}, []);
+
+	// Función de procesamiento simplificada (sin polling)
 	const startProcessing = useCallback((folderId: string) => {
 		setIsProcessing(true);
-		setProcessStatus({
+		setProcessStatus((prev) => ({
+			...prev,
 			folderId,
 			status: 'processing',
 			progress: 0,
 			phase: 'starting',
 			startTime: Date.now(),
-		});
+			isProcessing: true,
+		}));
 	}, []);
 
 	// Función para actualizar una carpeta específica
@@ -220,29 +247,43 @@ export function useFolders() {
 		onError: handleProcessError,
 		onComplete: (data) => handleProcessComplete(data.folderId),
 		onStats: () => {},
+		onReindexAllProgress: handleReindexAllProgress,
 	});
 
 	const foldersOperations = useFoldersOperations({
-		onStartProcessing: startProcessing,
+		onStartProcessing: (folderId: string) => {
+			setIsProcessing(true);
+			setProcessStatus((prev) => ({
+				...prev,
+				folderId,
+				status: 'processing',
+				progress: 0,
+				isProcessing: true,
+			}));
+		},
 		onLoadData: loadFolders,
 		onError: (error) => setError(error.toString()),
 		onReindexAllStart: () => {
-			folderLogger.info('🔄 Ejecutando reindexación global directa');
-			// Ejecutar la función de reindexado directamente
-			void (async () => {
-				await reindexAll();
-			})();
+			setGlobalReindexStatus((prev) => ({
+				...prev,
+				isProcessing: true,
+				progress: 0,
+				processedFolders: 0,
+				startTime: Date.now(),
+			}));
 		},
 	});
 
-	const foldersPolling = useFoldersPolling({
-		onStatusUpdate: handleStatusUpdate,
-		onComplete: handleProcessComplete,
-	});
+	// Polling removido - la reindexación es síncrona
+	// const foldersPolling = useFoldersPolling({
+	//	onStatusUpdate: handleStatusUpdate,
+	//	onComplete: handleProcessComplete,
+	// });
 
 	// Función para reiniciar todas las carpetas
 	const reindexAll = useCallback(async () => {
 		folderLogger.info('🔄 Iniciando reindexación global');
+		const reindexAllFoldersMutation = useReindexAllFolders();
 
 		try {
 			setGlobalReindexStatus((prev) => ({
@@ -254,9 +295,7 @@ export function useFolders() {
 				startTime: Date.now(),
 			}));
 
-			// Usar la nueva función de reindexado
-			const { reindexAllFolders } = await import('@/app/actions/folders/crud.actions');
-			const result = await reindexAllFolders();
+			const result = await reindexAllFoldersMutation.mutateAsync();
 
 			folderLogger.info('✅ Reindexación global completada:', result);
 
@@ -283,8 +322,8 @@ export function useFolders() {
 	// Función para manejar el reindex de una carpeta específica
 	const reindexFolder = useCallback(
 		async (folderId: string) => {
-			if (typeof folderId !== 'string') {
-				folderLogger.error('❌ ID de carpeta inválido:', folderId);
+			if (!folderId || folderId === 'undefined' || typeof folderId !== 'string') {
+				folderLogger.error('[useFolders] ❌ Error: Invalid folderId provided to reindexFolder:', folderId);
 				return;
 			}
 
@@ -295,8 +334,9 @@ export function useFolders() {
 			} catch (error) {
 				folderLogger.error(`❌ Error en reindex de carpeta ${folderId}:`, error);
 				handleProcessError({
-					folderId,
+					error: error instanceof Error ? error.message : 'Error desconocido',
 					message: error instanceof Error ? error.message : 'Error desconocido',
+					folderId,
 					timestamp: Date.now(),
 				});
 			}
@@ -319,6 +359,27 @@ export function useFolders() {
 		[foldersOperations, updateSpecificFolder]
 	);
 
+	// Función para manejar click en carpeta (seleccionar o eliminar)
+	const handleFolderClick = useCallback(
+		async (folderId: string) => {
+			if (selectedFolder === folderId) {
+				// Si ya está seleccionada, eliminar
+				try {
+					await foldersOperations.handleRemoveFolder(folderId);
+					setSelectedFolder(null);
+					toastService.success('Carpeta eliminada correctamente');
+				} catch (error) {
+					folderLogger.error('❌ Error eliminando carpeta:', error);
+					toastService.error('Error al eliminar la carpeta');
+				}
+			} else {
+				// Si no está seleccionada, seleccionar para eliminar
+				setSelectedFolder(folderId);
+			}
+		},
+		[selectedFolder, foldersOperations]
+	);
+
 	// Función para seleccionar carpeta
 	const selectFolder = useCallback((folderId: string | null) => {
 		setSelectedFolder(folderId);
@@ -332,10 +393,10 @@ export function useFolders() {
 	// Cleanup al desmontar
 	useEffect(() => {
 		return () => {
-			foldersEvents.cleanup?.();
-			foldersPolling.cleanup?.();
+			// foldersPolling.cleanup?.(); // Polling removido
+			// No cleanup needed for foldersEvents
 		};
-	}, [foldersEvents, foldersPolling]);
+	}, []);
 
 	return {
 		// Datos
@@ -366,7 +427,7 @@ export function useFolders() {
 		handleReindexAll: foldersOperations.handleReindexAll,
 		handleAutoReindexToggle: foldersOperations.handleAutoReindexToggle,
 		handleClearCache: foldersOperations.handleClearCache,
-		handleFolderClick: selectFolder,
+		handleFolderClick: handleFolderClick,
 
 		// Funciones de UI eliminadas - no más diálogos de confirmación
 
@@ -383,6 +444,9 @@ export function useFolders() {
 		handleStatusUpdate,
 	};
 }
+
+// Re-export hook específico para operaciones
+export { useReindexAllFolders };
 
 /**
  * 🛠️ FIX: Se fuerza la recarga de carpetas y estadísticas tras la finalización de un proceso

@@ -66,14 +66,16 @@ export interface ThumbnailMetadata {
  */
 export interface ThumbnailBase {
 	id: string;
-	sourceId: string;
-	sourceType: string;
+	entityType: string;
+	entityId: string;
+	size: string;
 	path: string;
-	size: number;
 	width: number;
 	height: number;
 	format: string;
-	quality: ThumbnailQuality;
+	quality: number;
+	fileSize: number;
+	isGenerated: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }

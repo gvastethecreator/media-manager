@@ -1,5 +1,6 @@
-'use client';
-
+import { AlertCircle, ChevronRight, Folder, RefreshCw, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,6 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { AlertCircle, Folder, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
 import { FolderProgressDetails } from './folder-progress-details';
 import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
@@ -22,6 +20,7 @@ interface FolderCardProps {
 	isProcessing: boolean;
 	processStatus: ExtendedProcessStatus;
 	isGloballyProcessing: boolean;
+	allFolders?: ExtendedFolder[]; // Para buscar información del padre
 	onReindex: (folderId: string) => void;
 	onToggleAutoReindex: (folderId: string, value: boolean) => void;
 	onFolderClick: (folderId: string) => void;
@@ -34,11 +33,18 @@ export function FolderCard({
 	isProcessing,
 	processStatus,
 	isGloballyProcessing,
+	allFolders = [],
 	onReindex,
 	onToggleAutoReindex,
 	onFolderClick,
 	getFolderIndexStatus,
 }: FolderCardProps) {
+	// Función helper para encontrar el nombre de la carpeta padre
+	const getParentFolderName = useCallback(() => {
+		if (!folder.parentId || !allFolders.length) return null;
+		const parentFolder = allFolders.find((f) => f.id === folder.parentId);
+		return parentFolder?.name || null;
+	}, [folder.parentId, allFolders]);
 	// Determinar si esta carpeta está siendo procesada actualmente
 	const isReindexing = isProcessing && processStatus?.folderId === folder.id;
 
@@ -152,21 +158,39 @@ export function FolderCard({
 					<div className="space-y-2">
 						{/* Cabecera de la carpeta */}
 						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-1">
-								<Folder className="h-4 w-4 text-blue-500" />
-								<span className="font-medium text-sm">{folder.name}</span>
-								{getStatusMessage()}
+							<div className="flex flex-col gap-0.5">
+								<div className="flex items-center gap-1">
+									<Folder className="h-4 w-4 text-blue-500" />
+									<span className="font-medium text-sm">{folder.name}</span>
+									{getStatusMessage()}
+								</div>
+								{/* Información del padre */}
+								{getParentFolderName() && (
+									<div className="flex items-center gap-1 text-xs text-muted-foreground ml-5">
+										<span>en</span>
+										<ChevronRight className="h-3 w-3" />
+										<span className="font-medium">{getParentFolderName()}</span>
+									</div>
+								)}
 							</div>
 
 							<div className="flex items-center gap-1">
 								<TooltipProvider>
 									<Tooltip>
 										<TooltipTrigger asChild>
-											<div className="flex items-center gap-1">
+											<div className="flex items-center gap-1 cursor-pointer">
 												<Switch
 													checked={folder.autoReindex}
-													onCheckedChange={(checked) => onToggleAutoReindex(folder.id, checked)}
-													disabled={isGloballyProcessing}
+													onCheckedChange={(checked) => {
+														if (!folder.id) {
+															console.error('[FolderCard] ❌ Error: folder.id is undefined for auto-reindex', {
+																folder,
+															});
+															return;
+														}
+														onToggleAutoReindex(folder.id, checked);
+													}}
+													disabled={isGloballyProcessing || !folder.id}
 													className="scale-75"
 												/>
 												<span className="text-[10px] text-muted-foreground">Auto</span>
@@ -184,19 +208,27 @@ export function FolderCard({
 											<Button
 												size="icon"
 												variant="ghost"
-												className="h-6 w-6"
-												onClick={() => onReindex(folder.id)}
-												disabled={isGloballyProcessing}
+												className="h-6 w-6 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+												onClick={() => {
+													if (!folder.id) {
+														console.error('[FolderCard] ❌ Error: folder.id is undefined', { folder });
+														return;
+													}
+													onReindex(folder.id);
+												}}
+												disabled={isGloballyProcessing || isReindexing || !folder.id}
 											>
 												<RefreshCw
 													className={cn(
-														'h-3.5 w-3.5',
+														'h-3.5 w-3.5 transition-transform',
 														isProcessing && processStatus.folderId === folder.id && 'animate-spin'
 													)}
 												/>
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent className="text-xs">Reindexar carpeta</TooltipContent>
+										<TooltipContent className="text-xs">
+											{isReindexing ? 'Reindexando...' : 'Reindexar carpeta'}
+										</TooltipContent>
 									</Tooltip>
 								</TooltipProvider>
 
@@ -207,15 +239,23 @@ export function FolderCard({
 												size="icon"
 												variant="ghost"
 												className={cn(
-													'h-6 w-6',
-													selectedFolder === folder.id && 'bg-destructive hover:bg-destructive/90'
+													'h-6 w-6 cursor-pointer transition-colors',
+													selectedFolder === folder.id
+														? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+														: 'hover:bg-destructive/10 hover:text-destructive'
 												)}
-												onClick={() => onFolderClick(folder.id)}
-												disabled={isGloballyProcessing}
+												onClick={() => {
+													if (!folder.id) {
+														console.error('[FolderCard] ❌ Error: folder.id is undefined for delete', { folder });
+														return;
+													}
+													onFolderClick(folder.id);
+												}}
+												disabled={isGloballyProcessing || !folder.id}
 											>
 												<Trash2
 													className={cn(
-														'h-3.5 w-3.5',
+														'h-3.5 w-3.5 transition-colors',
 														selectedFolder === folder.id ? 'text-background' : 'text-muted-foreground'
 													)}
 												/>

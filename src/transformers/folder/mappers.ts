@@ -1,9 +1,11 @@
 /**
  * @file Funciones de mapeo para la entidad Folder
  * @module transformers/folder/mappers
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
 	FolderComplete,
 	FolderCreateInput,
@@ -11,22 +13,97 @@ import type {
 	FolderSearchOptions,
 	FolderUpdateInput,
 } from '@/types/entities/folder';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { Prisma, Folder as PrismaFolder } from '@prisma/client';
 import { normalizeFolderPath } from './serializers';
 
 const logger = serverLogger.withContext('FolderMappers');
 
+// Tipos locales equivalentes a Drizzle (migración a Drizzle)
+type DrizzleFolderCreateInput = {
+	id?: string;
+	name: string;
+	path: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	totalFiles?: number;
+	totalSize?: number;
+	autoReindex?: boolean;
+	lastIndexed?: Date | null;
+	parentId?: string | null;
+	presetId?: string | null;
+	createdAt?: Date;
+	updatedAt?: Date;
+};
+
+type DrizzleFolderUpdateInput = {
+	name?: string;
+	path?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	totalFiles?: number;
+	totalSize?: number;
+	autoReindex?: boolean;
+	lastIndexed?: Date | null;
+	parentId?: string | null;
+	presetId?: string | null;
+	updatedAt?: Date;
+};
+
+type DrizzleFolderWhereInput = {
+	id?: string;
+	name?: { contains?: string };
+	description?: { contains?: string };
+	path?: string;
+	isFavorite?: boolean;
+	parentId?: string | null;
+	OR?: DrizzleFolderWhereInput[];
+	images?: { some?: any };
+};
+
+type DrizzleFolderFindManyArgs = {
+	skip?: number;
+	take?: number;
+	orderBy?: any;
+	where?: DrizzleFolderWhereInput;
+	include?: any;
+};
+
+type DrizzleFolder = {
+	id: string;
+	name: string;
+	path: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	totalFiles: number;
+	totalSize: number;
+	autoReindex: boolean;
+	lastIndexed: Date | null;
+	parentId: string | null;
+	presetId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
 /**
- * 🔄 Mapea un `FolderCreateInput` a un `Prisma.FolderCreateInput`.
+ * 🔄 Mapea un `FolderCreateInput` a un `DrizzleFolderCreateInput`.
  * Normaliza la ruta y establece valores por defecto.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapCreateFolderDataToPrisma(data: FolderCreateInput): Prisma.FolderCreateInput {
+export function mapCreateFolderDataToDrizzle(data: FolderCreateInput): DrizzleFolderCreateInput {
 	try {
 		return {
+			id: crypto.randomUUID(),
 			name: data.name,
 			path: data.path,
-			autoReindex: data.autoReindex,
+			autoReindex: data.autoReindex ?? false,
 			description: data.description ?? null,
 			emoji: data.emoji ?? null,
 			color: data.color ?? null,
@@ -37,6 +114,8 @@ export function mapCreateFolderDataToPrisma(data: FolderCreateInput): Prisma.Fol
 			totalFiles: 0,
 			totalSize: 0,
 			lastIndexed: null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de carpeta', { error, data });
@@ -45,17 +124,18 @@ export function mapCreateFolderDataToPrisma(data: FolderCreateInput): Prisma.Fol
 }
 
 /**
- * 🔄 Mapea un `FolderUpdateInput` a un `Prisma.FolderUpdateInput`.
+ * 🔄 Mapea un `FolderUpdateInput` a un `DrizzleFolderUpdateInput`.
  * Normaliza la ruta si se proporciona.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapUpdateFolderDataToPrisma(data: FolderUpdateInput): Prisma.FolderUpdateInput {
+export function mapUpdateFolderDataToDrizzle(data: FolderUpdateInput): DrizzleFolderUpdateInput {
 	try {
-		const prismaData: Prisma.FolderUpdateInput = { ...data };
+		const drizzleData: DrizzleFolderUpdateInput = { ...data };
 		if (data.path) {
-			prismaData.path = data.path;
+			drizzleData.path = data.path;
 		}
-		prismaData.updatedAt = new Date();
-		return prismaData;
+		drizzleData.updatedAt = new Date();
+		return drizzleData;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de carpeta', { error, data });
 		throw new TransformerError('Error al mapear datos de actualización de carpeta.');
@@ -63,11 +143,12 @@ export function mapUpdateFolderDataToPrisma(data: FolderUpdateInput): Prisma.Fol
 }
 
 /**
- * 🔄 Mapea `FolderSearchOptions` a `Prisma.FolderFindManyArgs`.
+ * 🔄 Mapea `FolderSearchOptions` a `DrizzleFolderFindManyArgs`.
+ * ✅ MIGRADO A DRIZZLE
  */
-export function mapFolderSearchOptionsToPrisma(options: FolderSearchOptions): Prisma.FolderFindManyArgs {
+export function mapFolderSearchOptionsToDrizzle(options: FolderSearchOptions): DrizzleFolderFindManyArgs {
 	const { skip, take, orderBy, filters, include } = options;
-	const args: Prisma.FolderFindManyArgs = {
+	const args: DrizzleFolderFindManyArgs = {
 		skip,
 		take,
 		orderBy,
@@ -75,17 +156,18 @@ export function mapFolderSearchOptionsToPrisma(options: FolderSearchOptions): Pr
 	};
 
 	if (filters) {
-		args.where = mapFolderFiltersToPrisma(filters);
+		args.where = mapFolderFiltersToDrizzle(filters);
 	}
 
 	return args;
 }
 
 /**
- * 🔄 Mapea `FolderFilters` a `Prisma.FolderWhereInput`.
+ * 🔄 Mapea `FolderFilters` a `DrizzleFolderWhereInput`.
+ * ✅ MIGRADO A DRIZZLE
  */
-function mapFolderFiltersToPrisma(filters: FolderFilters): Prisma.FolderWhereInput {
-	const where: Prisma.FolderWhereInput = {};
+function mapFolderFiltersToDrizzle(filters: FolderFilters): DrizzleFolderWhereInput {
+	const where: DrizzleFolderWhereInput = {};
 
 	if (filters.search) {
 		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
@@ -107,49 +189,57 @@ function mapFolderFiltersToPrisma(filters: FolderFilters): Prisma.FolderWhereInp
 }
 
 /**
- * 🔄 Transforma un objeto FolderComplete a formato Prisma
+ * 🔄 Transforma un objeto FolderComplete a formato Drizzle
+ * ✅ MIGRADO A DRIZZLE
  *
  * @param folder Objeto FolderComplete
- * @returns Datos para Prisma
+ * @returns Datos para Drizzle
  */
-export function transformCompleteFolderToPrisma(folder: FolderComplete): PrismaFolder {
+export function transformCompleteFolderToDrizzle(folder: FolderComplete): DrizzleFolder {
 	try {
 		// Extraer propiedades no persistibles
 		const { children, parent, stats, _count, metadata, ...persistableData } = folder;
 
-		// Convertir el objeto a formato Prisma
+		// Convertir el objeto a formato Drizzle
 		return {
 			...persistableData,
 			// Normalizar path si existe
 			path: folder.path ? normalizeFolderPath(folder.path) : folder.path,
-			// Convertir metadatos a formato adecuado si existen
-			metadata: metadata || {},
-		};
+			// Asegurar que todos los campos requeridos estén presentes
+			id: persistableData.id || crypto.randomUUID(),
+			createdAt: persistableData.createdAt || new Date(),
+			updatedAt: persistableData.updatedAt || new Date(),
+		} as DrizzleFolder;
 	} catch (error) {
-		logger.error('Error transformando folder completo a Prisma:', error);
-		return folder;
+		logger.error('Error transformando folder completo a Drizzle:', error);
+		return folder as DrizzleFolder;
 	}
 }
 
 /**
- * 🔄 Transforma un objeto Folder a formato Prisma
+ * 🔄 Transforma un objeto Folder a formato Drizzle
+ * ✅ MIGRADO A DRIZZLE
  *
  * @param folder Objeto Folder
- * @returns Datos para Prisma
+ * @returns Datos para Drizzle
  */
-export function transformFolderToPrisma(folder: Folder): PrismaFolder {
+export function transformFolderToDrizzle(folder: any): DrizzleFolder {
 	try {
 		// Extraer la propiedad _count que no es persistible
 		const { _count, ...persistableData } = folder;
 
-		// Convertir el objeto a formato Prisma
+		// Convertir el objeto a formato Drizzle
 		return {
 			...persistableData,
 			// Normalizar path si existe
 			path: folder.path ? normalizeFolderPath(folder.path) : folder.path,
-		};
+			// Asegurar que todos los campos requeridos estén presentes
+			id: persistableData.id || crypto.randomUUID(),
+			createdAt: persistableData.createdAt || new Date(),
+			updatedAt: persistableData.updatedAt || new Date(),
+		} as DrizzleFolder;
 	} catch (error) {
-		logger.error('Error transformando folder a Prisma:', error);
-		return folder;
+		logger.error('Error transformando folder a Drizzle:', error);
+		return folder as DrizzleFolder;
 	}
 }

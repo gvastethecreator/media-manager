@@ -1,5 +1,6 @@
-import type { Profile } from '@prisma/client';
-import { prisma } from '@/lib/database/prisma';
+import { asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { profiles } from '@/lib/drizzle/schema/index';
 import { transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
 	Language,
@@ -10,37 +11,54 @@ import {
 	ThemeMode,
 } from '@/types/entities/profile/types';
 
+// Tipo local para Profile de Drizzle
+type DrizzleProfile = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	theme: string;
+	language: string;
+	isActive: boolean;
+	preferences: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
+
 /**
- * Construye una consulta Prisma para Profile con filtros
+ * Construye condiciones de filtro para consultas Drizzle
+ * ✅ MIGRADO A DRIZZLE
  */
-export function buildProfileQuery(filters: ProfileFilters = {}) {
-	const query: Record<string, unknown> = {};
+export function buildProfileFilters(filters: ProfileFilters = {}) {
+	const conditions = [];
 
 	// Filtro por búsqueda de texto
 	if (filters.search) {
-		query.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
+		conditions.push(or(like(profiles.name, `%${filters.search}%`), like(profiles.description, `%${filters.search}%`)));
 	}
 
 	// Filtro por estado activo
 	if (filters.isActive !== undefined) {
-		query.isActive = filters.isActive;
+		conditions.push(eq(profiles.isActive, filters.isActive));
 	}
 
 	// Filtro por tema
 	if (filters.theme) {
-		query.theme = filters.theme;
+		conditions.push(eq(profiles.theme, filters.theme));
 	}
 
 	// Filtro por idioma
 	if (filters.language) {
-		query.language = filters.language;
+		conditions.push(eq(profiles.language, filters.language));
 	}
 
-	return query;
+	return conditions;
 }
 
 /**
  * Recupera perfiles paginados con filtros
+ * ✅ MIGRADO A DRIZZLE
  */
 export async function getPaginatedProfiles(
 	filters: ProfileFilters = {},
@@ -48,14 +66,15 @@ export async function getPaginatedProfiles(
 ): Promise<PaginatedProfiles> {
 	const { page = 1, limit = 10, sortBy = 'name', sortDirection = 'asc' } = pagination;
 
-	const where = buildProfileQuery(filters);
-
-	// Construir ordenación
-	const orderBy: Record<string, string> = {};
-	orderBy[sortBy] = sortDirection;
+	const filterConditions = buildProfileFilters(filters);
 
 	// Consultar total de registros
-	const total = await prisma.profile.count({ where });
+	const [totalResult] = await db
+		.select({ count: count() })
+		.from(profiles)
+		.where(filterConditions.length > 0 ? filterConditions[0] : undefined);
+
+	const total = totalResult.count;
 
 	// Calcular total de páginas
 	const totalPages = Math.ceil(total / limit);
@@ -63,16 +82,23 @@ export async function getPaginatedProfiles(
 	// Calcular offset
 	const skip = (page - 1) * limit;
 
+	// Construir ordenación
+	const orderBy =
+		sortDirection === 'asc'
+			? asc(profiles[sortBy as keyof typeof profiles])
+			: desc(profiles[sortBy as keyof typeof profiles]);
+
 	// Consultar registros
-	const profiles = await prisma.profile.findMany({
-		where,
-		orderBy,
-		skip,
-		take: limit,
-	});
+	const profilesData = await db
+		.select()
+		.from(profiles)
+		.where(filterConditions.length > 0 ? filterConditions[0] : undefined)
+		.orderBy(orderBy)
+		.offset(skip)
+		.limit(limit);
 
 	// Transformar resultados
-	const transformedProfiles = transformProfiles(profiles);
+	const transformedProfiles = transformProfiles(profilesData);
 
 	return {
 		items: transformedProfiles,
@@ -85,38 +111,33 @@ export async function getPaginatedProfiles(
 
 /**
  * Obtiene el perfil activo
+ * ✅ MIGRADO A DRIZZLE
  */
-export async function getActiveProfile(): Promise<Profile | null> {
-	return prisma.profile.findFirst({
-		where: { isActive: true },
-	});
+export async function getActiveProfile(): Promise<DrizzleProfile | null> {
+	const [profile] = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+	return profile || null;
 }
 
 /**
  * Establece un perfil como activo y los demás como inactivos
+ * ✅ MIGRADO A DRIZZLE
  */
 export async function setActiveProfile(id: string): Promise<boolean> {
 	try {
 		// Verificar que el perfil existe
-		const profile = await prisma.profile.findUnique({
-			where: { id },
-		});
+		const [profile] = await db.select().from(profiles).where(eq(profiles.id, id)).limit(1);
 
 		if (!profile) {
 			return false;
 		}
 
 		// Transacción: desactivar todos los perfiles y activar solo el solicitado
-		await prisma.$transaction([
-			prisma.profile.updateMany({
-				where: { isActive: true },
-				data: { isActive: false },
-			}),
-			prisma.profile.update({
-				where: { id },
-				data: { isActive: true },
-			}),
-		]);
+		await db.transaction(async (tx) => {
+			await tx.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
+
+			await tx.update(profiles).set({ isActive: true }).where(eq(profiles.id, id));
+		});
 
 		return true;
 	} catch (error) {
@@ -127,29 +148,29 @@ export async function setActiveProfile(id: string): Promise<boolean> {
 
 /**
  * Crea un perfil por defecto si no existe ninguno
+ * ✅ MIGRADO A DRIZZLE
  */
-export async function ensureDefaultProfile(): Promise<Profile> {
+export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 	// Buscar si ya existe algún perfil
-	const existingProfiles = await prisma.profile.count();
+	const [existingProfilesResult] = await db.select({ count: count() }).from(profiles);
+
+	const existingProfiles = existingProfilesResult.count;
 
 	if (existingProfiles > 0) {
 		// Si no hay perfil activo pero hay perfiles, activamos el primero
-		const activeProfile = await prisma.profile.findFirst({
-			where: { isActive: true },
-		});
+		const [activeProfile] = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
 
 		if (!activeProfile) {
-			const firstProfile = await prisma.profile.findFirst({
-				orderBy: { createdAt: 'asc' },
-			});
+			const [firstProfile] = await db.select().from(profiles).orderBy(asc(profiles.createdAt)).limit(1);
 
 			if (firstProfile) {
-				await prisma.profile.update({
-					where: { id: firstProfile.id },
-					data: { isActive: true },
-				});
+				const [updatedProfile] = await db
+					.update(profiles)
+					.set({ isActive: true })
+					.where(eq(profiles.id, firstProfile.id))
+					.returning();
 
-				return firstProfile;
+				return updatedProfile;
 			}
 		} else {
 			return activeProfile;
@@ -157,20 +178,28 @@ export async function ensureDefaultProfile(): Promise<Profile> {
 	}
 
 	// Si no hay perfiles, crear uno por defecto
-	return prisma.profile.create({
-		data: {
+	const [newProfile] = await db
+		.insert(profiles)
+		.values({
 			name: 'Perfil por defecto',
 			emoji: '👤',
 			color: '#3b82f6',
 			theme: ThemeMode.SYSTEM,
 			language: Language.SPANISH,
 			isActive: true,
-		},
-	});
+			description: null,
+			preferences: null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		})
+		.returning();
+
+	return newProfile;
 }
 
 /**
  * Valida y limpia las preferencias del usuario
+ * ✅ MIGRADO A DRIZZLE
  */
 export function validateProfilePreferences(preferences: Record<string, unknown>): Partial<ProfilePreferences> {
 	const validatedPreferences: Partial<ProfilePreferences> = {};
@@ -196,46 +225,12 @@ export function validateProfilePreferences(preferences: Record<string, unknown>)
 	}
 
 	// Valores booleanos
-	const booleanFields = [
-		'enableAnimations',
-		'enableSounds',
-		'enableHaptics',
-		'enableNotifications',
-		'showHiddenFiles',
-		'highContrast',
-		'reducedMotion',
-		'outlineElements',
-	];
+	const booleanFields = ['enableAnimations', 'showThumbnails', 'autoSave', 'enableNotifications'];
 
 	for (const field of booleanFields) {
 		if (typeof preferences[field] === 'boolean') {
-			validatedPreferences[field as keyof ProfilePreferences] = preferences[field] as boolean;
+			(validatedPreferences as any)[field] = preferences[field];
 		}
-	}
-
-	// Vista por defecto
-	if (preferences.defaultView && ['grid', 'list', 'gallery', 'compact'].includes(preferences.defaultView as string)) {
-		validatedPreferences.defaultView = preferences.defaultView as 'grid' | 'list' | 'gallery' | 'compact';
-	}
-
-	// Ordenación por defecto
-	if (preferences.defaultSort && ['name', 'date', 'size', 'type'].includes(preferences.defaultSort as string)) {
-		validatedPreferences.defaultSort = preferences.defaultSort as 'name' | 'date' | 'size' | 'type';
-	}
-
-	// Número entero para elementos por página
-	if (
-		typeof preferences.itemsPerPage === 'number' &&
-		Number.isInteger(preferences.itemsPerPage) &&
-		preferences.itemsPerPage > 0 &&
-		preferences.itemsPerPage <= 100
-	) {
-		validatedPreferences.itemsPerPage = preferences.itemsPerPage;
-	}
-
-	// Tamaño de fuente
-	if (preferences.fontSize && ['small', 'medium', 'large'].includes(preferences.fontSize as string)) {
-		validatedPreferences.fontSize = preferences.fontSize as 'small' | 'medium' | 'large';
 	}
 
 	return validatedPreferences;

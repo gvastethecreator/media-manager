@@ -179,7 +179,7 @@ export function isValidAlbumName(name: string): boolean {
 export function isValidAlbumHierarchy(
 	_albumId: string,
 	_newParentId: string,
-	_allAlbums: Record<string, Album>
+	_allAlbums: Record<string, AlbumBase>
 ): boolean {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return true; // Siempre válido ya que no hay jerarquía

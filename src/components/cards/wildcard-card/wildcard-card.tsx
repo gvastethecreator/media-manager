@@ -1,11 +1,9 @@
-'use client';
-
 import { Shuffle } from 'lucide-react';
-import Link from 'next/link';
 import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { WildcardComplete as Wildcard } from '@/types/prisma';
+import type { WildcardWithStats as Wildcard } from '@/types/entities/wildcard';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
@@ -142,7 +140,7 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 
 	// Si no hay onClick, lo envolvemos en un Link para navegar a la página del comodín
 	return (
-		<Link href={`/dashboard/wildcards/${wildcard.id}`} className="block">
+		<Link to={`/dashboard/wildcards/${wildcard.id}`} className="block">
 			{cardContent}
 		</Link>
 	);

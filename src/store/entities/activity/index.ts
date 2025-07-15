@@ -4,18 +4,21 @@
  * @description Implementación del store de Zustand para la gestión de actividades del sistema
  */
 
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+// 🔄 Migración: consumo de API en lugar de servicios directos
 import {
-	createActivity as createActivityAction,
-	deleteActivity as deleteActivityAction,
-	getActivityById,
-	getFilteredActivities,
-} from '@/app/actions/activity';
+	createActivityInApi,
+	deleteActivityFromApi,
+	getActivitiesFromApi,
+	getActivityFromApi,
+} from '@/lib/api/client/activity.client';
+// Migración: se eliminaron servicios directos para evitar dependencias del lado cliente
 import { clientLogger } from '@/lib/logger/client-logger';
+
 import { extendActivities, extendActivity } from '@/transformers/activity';
 import type { ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
 import { ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
 
 // Logger para el store
 const storeLogger = clientLogger.withContext('ActivityStore');
@@ -228,7 +231,7 @@ export const useActivityStore = create<ActivityStore>()(
 								error: null,
 							}));
 
-							const activity = await getActivityById(id);
+							const activity = await getActivityFromApi(id);
 							if (activity) {
 								const extendedActivity = extendActivity(activity);
 								set((state) => ({
@@ -259,7 +262,7 @@ export const useActivityStore = create<ActivityStore>()(
 								error: null,
 							}));
 
-							const result = await getFilteredActivities(filters ?? {});
+							const result = await getActivitiesFromApi(filters ?? {});
 							if (result) {
 								const extendedActivities = extendActivities(result.activities);
 								const activitiesMap = extendedActivities.reduce(
@@ -304,7 +307,11 @@ export const useActivityStore = create<ActivityStore>()(
 								error: null,
 							}));
 
-							const createdActivity = await createActivityAction(data.type, data.metadata ?? {}, data.imageId);
+							const createdActivity = await createActivityInApi({
+								type: data.type,
+								description: data.description ?? '',
+								imageId: data.imageId,
+							});
 							const extendedActivity = extendActivity(createdActivity);
 
 							set((state) => ({
@@ -335,19 +342,18 @@ export const useActivityStore = create<ActivityStore>()(
 								error: null,
 							}));
 
-							const result = await deleteActivityAction(id);
-							if (result) {
-								set((state) => {
-									const newActivities = { ...state.activities };
-									delete newActivities[id];
+							await deleteActivityFromApi(id);
+							set((state) => {
+								const newActivities = { ...state.activities };
+								delete newActivities[id];
 
-									return {
-										activities: newActivities,
-										lastUpdated: Date.now(),
-									};
-								});
-							}
-							return result;
+								return {
+									activities: newActivities,
+									lastUpdated: Date.now(),
+								};
+							});
+
+							return true;
 						} catch (error) {
 							set(() => ({
 								error: error instanceof Error ? error.message : 'Error desconocido',

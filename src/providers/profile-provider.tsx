@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { getActiveProfile } from '@/app/actions/profiles';
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
+import { useActiveProfile } from '@/lib/api/profiles';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
 import { type ProfileBase, ThemeMode } from '@/types/entities/profile';
 
@@ -26,11 +26,6 @@ export interface ProfileContextValue {
 	 * Error asociado al perfil
 	 */
 	error: string | null;
-
-	/**
-	 * Función para aplicar un tema
-	 */
-	applyTheme: (theme: ThemeMode) => void;
 }
 
 const ProfileContext = createContext<ProfileContextValue>({
@@ -38,7 +33,6 @@ const ProfileContext = createContext<ProfileContextValue>({
 	isLoading: true,
 	profile: null,
 	error: null,
-	applyTheme: () => {},
 });
 
 export const useProfile = () => useContext(ProfileContext);
@@ -46,78 +40,64 @@ export const useProfile = () => useContext(ProfileContext);
 // Componente Provider
 export function ProfileProvider({ children }: { children: ReactNode }) {
 	const [_isInitialized, setIsInitialized] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 
-	// Acceder al store de Zustand
-	const { activeProfile, isLoadingActive, activeProfileError, fetchActiveProfile, updateTheme } = useProfileStore();
+	// Hook para obtener el perfil activo desde la API (TanStack Query)
+	const { data: activeProfile, isLoading: isLoadingAPI, error: errorAPI } = useActiveProfile();
 
-	// Calcular si está en modo oscuro usando el selector
+	// Acceder al store de Zustand (para estado local y acciones)
+	const { activeProfile: storeProfile, isLoadingActive, activeProfileError, fetchActiveProfile } = useProfileStore();
+
+	// Calcular si está en modo oscuro usando el selector de Zustand
 	const isDarkMode = useProfileStore(selectIsDarkMode);
 
-	// Función para aplicar un tema (memoizada para useEffect)
-	const applyTheme = useCallback(
-		(theme: ThemeMode) => {
-			if (theme === ThemeMode.DARK) {
-				document.documentElement.classList.add('dark');
-				document.documentElement.classList.remove('light');
-			} else if (theme === ThemeMode.LIGHT) {
-				document.documentElement.classList.add('light');
-				document.documentElement.classList.remove('dark');
-			} else {
-				// SYSTEM: Aplicar según preferencia del sistema
-				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-				if (prefersDark) {
-					document.documentElement.classList.add('dark');
-					document.documentElement.classList.remove('light');
-				} else {
-					document.documentElement.classList.add('light');
-					document.documentElement.classList.remove('dark');
-				}
-			}
-
-			// Actualizar también en el store
-			updateTheme(theme);
-		},
-		[updateTheme]
-	);
-
-	// Inicializar y asegurar que existe un perfil por defecto
+	// Inicializar el store con datos de la API cuando estén disponibles
 	useEffect(() => {
 		const init = async () => {
 			try {
-				// Asegurar que existe un perfil por defecto
-				// Simplemente intentamos obtener el perfil activo, que creará uno por defecto si no existe
-				await getActiveProfile();
-
-				// Cargar el perfil activo en el store
-				await fetchActiveProfile();
-
+				if (activeProfile) {
+					// Sincronizar el store de Zustand con los datos de la API
+					await fetchActiveProfile();
+				}
 				setIsInitialized(true);
 			} catch (error) {
 				console.error('Error inicializando perfil:', error);
-				setError('Error inicializando perfil');
-			} finally {
-				setIsLoading(false);
 			}
 		};
 
-		init();
-	}, [fetchActiveProfile]);
-
-	// Aplicar tema cuando cambie el perfil activo
-	useEffect(() => {
-		if (activeProfile?.theme) {
-			applyTheme(activeProfile.theme);
+		if (!isLoadingAPI) {
+			init();
 		}
-	}, [activeProfile?.theme, applyTheme]);
+	}, [activeProfile, isLoadingAPI, fetchActiveProfile]);
 
-	// Escuchar cambios en la preferencia del sistema cuando el tema es SYSTEM
+	// EFECTO: Aplicar el tema al DOM cuando cambie el perfil
 	useEffect(() => {
-		if (!activeProfile || activeProfile.theme !== ThemeMode.SYSTEM) return;
+		const currentProfile = activeProfile || storeProfile;
+		const theme = currentProfile?.theme || ThemeMode.SYSTEM;
 
-		// Función para aplicar tema según cambios en preferencia del sistema
+		if (theme === ThemeMode.DARK) {
+			document.documentElement.classList.add('dark');
+			document.documentElement.classList.remove('light');
+		} else if (theme === ThemeMode.LIGHT) {
+			document.documentElement.classList.add('light');
+			document.documentElement.classList.remove('dark');
+		} else {
+			// SYSTEM: Aplicar según preferencia del sistema
+			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			if (prefersDark) {
+				document.documentElement.classList.add('dark');
+				document.documentElement.classList.remove('light');
+			} else {
+				document.documentElement.classList.add('light');
+				document.documentElement.classList.remove('dark');
+			}
+		}
+	}, [activeProfile, storeProfile]); // Depende de los objetos de perfil
+
+	// EFECTO: Escuchar cambios en la preferencia del sistema cuando el tema es SYSTEM
+	useEffect(() => {
+		const currentProfile = activeProfile || storeProfile;
+		if (!currentProfile || currentProfile.theme !== ThemeMode.SYSTEM) return;
+
 		const handleSystemThemeChange = (e: MediaQueryListEvent) => {
 			if (e.matches) {
 				document.documentElement.classList.add('dark');
@@ -128,23 +108,27 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 			}
 		};
 
-		// Detector de cambios en preferencia del sistema
 		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 		mediaQuery.addEventListener('change', handleSystemThemeChange);
 
 		return () => {
 			mediaQuery.removeEventListener('change', handleSystemThemeChange);
 		};
-	}, [activeProfile]);
+	}, [activeProfile, storeProfile]);
 
-	// Valor del contexto
+	// Valor del contexto: priorizar datos de API (TanStack Query) sobre el store de Zustand
 	const contextValue: ProfileContextValue = {
 		isDarkMode,
-		isLoading: isLoading || isLoadingActive,
-		profile: activeProfile,
-		error: error || activeProfileError,
-		applyTheme,
+		isLoading: isLoadingAPI || isLoadingActive,
+		profile: activeProfile || storeProfile,
+		error: errorAPI?.message || activeProfileError,
 	};
 
 	return <ProfileContext.Provider value={contextValue}>{children}</ProfileContext.Provider>;
 }
+
+// Hook para obtener el perfil activo de forma síncrona
+export const useActiveProfileSync = () => {
+	const { profile, isLoading, error } = useProfile();
+	return { profile, isLoading, error };
+};

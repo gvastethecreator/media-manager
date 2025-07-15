@@ -5,11 +5,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-const ScrollArea = React.memo(function ScrollArea({
-	className,
-	children,
-	...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
+function ScrollArea({ className, children, ...props }: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
 	return (
 		<ScrollAreaPrimitive.Root data-slot="scroll-area" className={cn('relative', className)} {...props}>
 			<ScrollAreaPrimitive.Viewport
@@ -22,9 +18,9 @@ const ScrollArea = React.memo(function ScrollArea({
 			<ScrollAreaPrimitive.Corner />
 		</ScrollAreaPrimitive.Root>
 	);
-});
+}
 
-const ScrollBar = React.memo(function ScrollBar({
+function ScrollBar({
 	className,
 	orientation = 'vertical',
 	...props
@@ -47,6 +43,6 @@ const ScrollBar = React.memo(function ScrollBar({
 			/>
 		</ScrollAreaPrimitive.ScrollAreaScrollbar>
 	);
-});
+}
 
 export { ScrollArea, ScrollBar };

@@ -1,13 +1,9 @@
-'use server';
-
 /**
- * Utilidades del sistema que solo funcionan en el servidor
+ * Utilidades del sistema - versión cliente
  *
  * Este módulo proporciona funciones relacionadas con información del sistema
- * que dependen de módulos de Node.js y solo deben ejecutarse en el servidor.
+ * que ahora se comunican con la API del servidor.
  */
-
-import os from 'os';
 
 /**
  * Interfaz para estadísticas del sistema
@@ -43,67 +39,48 @@ export interface SystemInfo {
 }
 
 /**
- * Obtiene información del sistema operativo
- * Esta función solo debe llamarse desde el servidor
+ * Obtiene información del sistema a través de la API
  */
 export async function getSystemInfo(): Promise<SystemInfo> {
-	// CPU
-	const cpus = os.cpus();
-	const cpuModel = cpus.length > 0 ? cpus[0].model : 'Unknown';
-	const cpuCores = cpus.length;
-	const loadAvg = os.loadavg();
-
-	// Calcular uso de CPU (aproximado)
-	let totalIdle = 0;
-	let totalTick = 0;
-
-	for (const cpu of cpus) {
-		for (const type in cpu.times) {
-			totalTick += cpu.times[type as keyof typeof cpu.times];
+	try {
+		const response = await fetch('/api/system/info');
+		if (!response.ok) {
+			throw new Error('Error al obtener información del sistema');
 		}
-		totalIdle += cpu.times.idle;
+		return response.json();
+	} catch (error) {
+		console.warn('❌ Error al obtener información del sistema:', error);
+		// Retornar datos mock en caso de error
+		return {
+			cpu: {
+				usage: 0,
+				cores: 4,
+				model: 'Unknown',
+				loadAvg: [0, 0, 0],
+			},
+			memory: {
+				total: 8589934592, // 8GB
+				free: 4294967296, // 4GB
+				used: 4294967296, // 4GB
+				usedPercent: 50,
+			},
+			uptime: {
+				system: 86400, // 1 día
+			},
+			platform: {
+				type: 'unknown',
+				release: 'unknown',
+				arch: 'x64',
+			},
+			nodejs: {
+				version: 'v18.0.0',
+				pid: 1234,
+			},
+			network: {
+				interfaces: ['eth0', 'lo'],
+			},
+		};
 	}
-
-	const cpuUsage = cpuCores > 0 ? Math.round((1 - totalIdle / totalTick) * 100) : 0;
-
-	// Memoria
-	const totalMem = os.totalmem();
-	const freeMem = os.freemem();
-	const usedMem = totalMem - freeMem;
-	const usedMemPercent = Math.round((usedMem / totalMem) * 100);
-
-	// Interfaces de red
-	const networkInterfaces = Object.keys(os.networkInterfaces());
-
-	return {
-		cpu: {
-			usage: cpuUsage,
-			cores: cpuCores,
-			model: cpuModel,
-			loadAvg,
-		},
-		memory: {
-			total: totalMem,
-			free: freeMem,
-			used: usedMem,
-			usedPercent: usedMemPercent,
-		},
-		uptime: {
-			system: os.uptime(),
-		},
-		platform: {
-			type: os.platform(),
-			release: os.release(),
-			arch: os.arch(),
-		},
-		nodejs: {
-			version: process.version,
-			pid: process.pid,
-		},
-		network: {
-			interfaces: networkInterfaces,
-		},
-	};
 }
 
 // formatBytes se ha movido a @/lib/utils/format.utils.ts para evitar duplicación

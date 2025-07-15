@@ -1,18 +1,17 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import { WorldItem, WorldItemRarity, WorldItemType } from '@/types/entities/world-item';
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useRecentWorldItemImages, useWorldItem } from '@/lib/api/world-items';
+import { cn } from '@/lib/utils';
+import { WorldItemRarity, WorldItemType, WorldItemWithStats } from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
 import { WorldItemCardImages } from './world-item-card-images';
 
 export interface WorldItemCardProps {
-	worldItem: WorldItem;
-	onClick?: () => void;
+	worldItemId: string;
+	onClick?: (worldItemData: WorldItemWithStats) => void;
 	className?: string;
 	style?: React.CSSProperties;
 	tcgMode?: boolean;
@@ -28,7 +27,7 @@ export interface WorldItemCardProps {
  * visualmente atractivo.
  */
 export function WorldItemCard({
-	worldItem,
+	worldItemId,
 	onClick,
 	className,
 	style,
@@ -39,7 +38,36 @@ export function WorldItemCard({
 	interactive = true,
 	...rest
 }: WorldItemCardProps) {
+	const { data: worldItem, isLoading, error } = useWorldItem(worldItemId);
+	const { data: recentImagesData } = useRecentWorldItemImages(worldItemId);
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Si no hay datos del objeto del mundo o está cargando, mostrar un esqueleto o un mensaje de error
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando objeto del mundo...</p>
+			</div>
+		);
+	}
+
+	if (error || !worldItem) {
+		return (
+			<div
+				className={cn(
+					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Objeto del mundo no encontrado'}</p>
+			</div>
+		);
+	}
 
 	// Extraer propiedades básicas del objeto
 	const {
@@ -59,25 +87,25 @@ export function WorldItemCard({
 		attributes,
 		effects,
 		requirements,
-		stats,
+		_stats,
 		properties,
 		featuredImage,
 	} = worldItem;
 
 	// Calcular valores derivados
-	const imagesCount = worldItem._count?.images || 0;
-	const videosCount = worldItem._count?.videos || 0;
-	const albumsCount = worldItem._count?.albums || 0;
-	const collectionsCount = worldItem._count?.collections || 0;
-	const tagsCount = worldItem._count?.tags || 0;
-	const charactersCount = worldItem._count?.characters || 0;
-	const placesCount = worldItem._count?.places || 0;
-	const conceptsCount = worldItem._count?.concepts || 0;
-	const promptsCount = worldItem._count?.prompts || 0;
-	const notesCount = worldItem._count?.notes || 0;
-	const wildcardsCount = worldItem._count?.wildcards || 0;
-	const propertiesCount = worldItem._count?.properties || 0;
-	const groupsCount = worldItem._count?.groups || 0;
+	const imagesCount = _stats?.totalImages || worldItem._count?.images || 0;
+	const videosCount = _stats?.totalVideos || worldItem._count?.videos || 0;
+	const albumsCount = _stats?.totalAlbums || worldItem._count?.albums || 0;
+	const collectionsCount = _stats?.totalCollections || worldItem._count?.collections || 0;
+	const tagsCount = _stats?.totalTags || worldItem._count?.tags || 0;
+	const charactersCount = _stats?.totalCharacters || worldItem._count?.characters || 0;
+	const placesCount = _stats?.totalPlaces || worldItem._count?.places || 0;
+	const conceptsCount = _stats?.totalConcepts || worldItem._count?.concepts || 0;
+	const promptsCount = _stats?.totalPrompts || worldItem._count?.prompts || 0;
+	const notesCount = _stats?.totalNotes || worldItem._count?.notes || 0;
+	const wildcardsCount = _stats?.totalWildcards || worldItem._count?.wildcards || 0;
+	const propertiesCount = _stats?.totalProperties || worldItem._count?.properties || 0;
+	const groupsCount = _stats?.totalGroups || worldItem._count?.groups || 0;
 
 	// Calcular total de relaciones para efectos visuales
 	const _totalRelations =
@@ -166,7 +194,7 @@ export function WorldItemCard({
 	};
 
 	// Color de efecto basado en rareza
-	const rarityColor = rarityColorMap[rarity?.toLowerCase()] || rarityColorMap.common;
+	const rarityColor = rarityColorMap[rarity?.toLowerCase() || 'common'];
 
 	// Nivel de brillo basado en rareza para efectos
 	const rarityGlowMap: Record<string, number> = {
@@ -177,17 +205,17 @@ export function WorldItemCard({
 		legendary: 20,
 	};
 
-	const rarityGlow = rarityGlowMap[rarity?.toLowerCase()] || 0;
+	const rarityGlow = rarityGlowMap[rarity?.toLowerCase() || 'common'] || 0;
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
 			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
 				e.preventDefault();
-				onClick();
+				onClick(worldItem);
 			}
 		},
-		[onClick, disabled]
+		[onClick, disabled, worldItem]
 	);
 
 	// Procesar propiedades si es un string o formato JSON
@@ -240,15 +268,15 @@ export function WorldItemCard({
 
 	// Procesar estadísticas si es un string o formato JSON
 	const parsedStats = useMemo(() => {
-		if (typeof stats === 'string' && stats) {
+		if (typeof rawStats === 'string' && rawStats) {
 			try {
-				return JSON.parse(stats);
+				return JSON.parse(rawStats);
 			} catch (_e) {
 				return {};
 			}
 		}
-		return stats || {};
-	}, [stats]);
+		return rawStats || {};
+	}, [rawStats]);
 
 	// Procesar la imagen destacada
 	const _processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
@@ -272,7 +300,7 @@ export function WorldItemCard({
 			}}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled || !interactive ? undefined : onClick}
+			onClick={disabled || !interactive || !onClick ? undefined : () => onClick(worldItem)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
 			role={onClick && interactive ? 'button' : 'article'}
@@ -348,11 +376,11 @@ export function WorldItemCard({
 				{/* Contenido principal */}
 				<WorldItemCardContent
 					description={description}
-					properties={parsedProperties}
-					requirements={parsedRequirements}
-					attributes={parsedAttributes}
-					effects={parsedEffects}
-					stats={parsedStats}
+					properties={properties}
+					requirements={requirements}
+					attributes={attributes}
+					effects={effects}
+					stats={_stats}
 					origin={origin}
 					rarity={rarity}
 					primaryColor={primaryColor}
@@ -363,6 +391,8 @@ export function WorldItemCard({
 					createdAt={createdAt}
 					updatedAt={updatedAt}
 					imagesCount={imagesCount}
+					videosCount={videosCount}
+					totalRelations={_totalRelations}
 					isFavorite={isFavorite}
 					category={category}
 					type={type}

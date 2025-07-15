@@ -1,6 +1,5 @@
-'use client';
-
-import { deleteCollection, searchCollections } from '@/app/actions/collections/collection.actions';
+import { AlertCircle, Filter, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,15 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import toastService from '@/services/toast';
+import { useCollections, useDeleteCollection } from '@/lib/api/collections';
+import { toastService } from '@/lib/ui/toast';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,
 	COLLECTION_CATEGORY_EMOJIS,
 	CollectionCategory,
 } from '@/types/entities/collection/enums';
-import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
 
 // Tipos seguros para preview data
@@ -31,9 +29,6 @@ interface PreviewData {
 }
 
 export function CollectionsSettings() {
-	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 	const [selectedCollection, setSelectedCollection] = useState<CollectionWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<PreviewData | null>(null);
@@ -43,78 +38,71 @@ export function CollectionsSettings() {
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
-	// Cargar colecciones al montar el componente
-	useEffect(() => {
-		const loadCollections = async () => {
-			try {
-				setIsLoading(true);
-				const data = await searchCollections({});
-				setCollections(data);
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				setError(errorMessage);
-				toastService.error('Error al cargar las colecciones', {
-					description: errorMessage,
-				});
-			} finally {
-				setIsLoading(false);
+	// React Query hooks
+	const { data: collectionsResponse, isLoading, error } = useCollections({});
+	const deleteCollectionMutation = useDeleteCollection();
+
+	// Extraer las colecciones de la respuesta
+	const collections = collectionsResponse?.collections || [];
+
+	// Calcular estadísticas generales usando useMemo para optimización
+	const stats = useMemo(
+		() => ({
+			totalCollections: collections.length,
+			totalImages: collections.reduce((acc, collection) => acc + (collection.stats?.imageCount || 0), 0),
+			emptyCollections: collections.filter((collection) => (collection.stats?.imageCount || 0) === 0).length,
+			favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
+		}),
+		[collections]
+	);
+
+	// Filtrar colecciones basadas en los criterios seleccionados usando useMemo
+	const filteredCollections = useMemo(() => {
+		return collections.filter((collection) => {
+			let matches = true;
+
+			// Filtrar por búsqueda
+			if (searchQuery.trim() !== '') {
+				const normalizedQuery = searchQuery.toLowerCase();
+				matches =
+					matches &&
+					Boolean(
+						collection.name.toLowerCase().includes(normalizedQuery) ||
+							collection.description?.toLowerCase().includes(normalizedQuery)
+					);
 			}
-		};
 
-		loadCollections();
-	}, []);
+			// Filtrar por categorías
+			if (selectedCategories.length > 0) {
+				matches = matches && (collection.category ? selectedCategories.includes(collection.category) : false);
+			}
 
-	// Calcular estadísticas generales
-	const stats = {
-		totalCollections: collections.length,
-		totalImages: collections.reduce((acc, collection) => acc + (collection.stats?.imageCount || 0), 0),
-		emptyCollections: collections.filter((collection) => (collection.stats?.imageCount || 0) === 0).length,
-		favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
-	};
+			// Filtrar por favoritos
+			if (onlyFavorites) {
+				matches = matches && !!collection.isFavorite;
+			}
 
-	// Filtrar colecciones basadas en los criterios seleccionados
-	const filteredCollections = collections.filter((collection) => {
-		let matches = true;
-
-		// Filtrar por búsqueda
-		if (searchQuery.trim() !== '') {
-			const normalizedQuery = searchQuery.toLowerCase();
-			matches =
-				matches &&
-				Boolean(
-					collection.name.toLowerCase().includes(normalizedQuery) ||
-						collection.description?.toLowerCase().includes(normalizedQuery)
-				);
-		}
-
-		// Filtrar por categorías
-		if (selectedCategories.length > 0) {
-			matches = matches && (collection.category ? selectedCategories.includes(collection.category) : false);
-		}
-
-		// Filtrar por favoritos
-		if (onlyFavorites) {
-			matches = matches && !!collection.isFavorite;
-		}
-
-		return matches;
-	});
+			return matches;
+		});
+	}, [collections, searchQuery, selectedCategories, onlyFavorites]);
 
 	// Manejar eliminación de colección
-	const handleDeleteCollection = useCallback(async (id: string) => {
-		try {
-			await deleteCollection(id);
-			setCollections((prev) => prev.filter((collection) => collection.id !== id));
-			setSelectedCollection(null);
-			setIsEditing(false);
-			toastService.success('Colección eliminada');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar la colección', {
-				description: errorMessage,
-			});
-		}
-	}, []);
+	const handleDeleteCollection = useCallback(
+		async (id: string) => {
+			try {
+				await deleteCollectionMutation.mutateAsync(id);
+				setSelectedCollection(null);
+				setIsEditing(false);
+				toastService.success('Colección eliminada');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar la colección', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deleteCollectionMutation]
+	);
 
 	// Manejar edición de colección
 	const handleEditCollection = useCallback((collection: CollectionWithStats) => {
@@ -123,20 +111,12 @@ export function CollectionsSettings() {
 	}, []);
 
 	// Manejar creación exitosa
-	const handleCollectionCreated = useCallback((newCollection: CollectionWithStats) => {
-		setCollections((prev) => [...prev, newCollection]);
+	const handleCollectionCreated = useCallback((_newCollection: CollectionWithStats) => {
 		toastService.success('Colección creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleCollectionUpdated = useCallback((updatedCollection: CollectionWithStats) => {
-		setCollections((prev) =>
-			prev.map((collection) =>
-				collection.id === updatedCollection.id
-					? ({ ...collection, ...updatedCollection } as CollectionWithStats)
-					: collection
-			)
-		);
+	const handleCollectionUpdated = useCallback((_updatedCollection: CollectionWithStats) => {
 		toastService.success('Colección actualizada');
 	}, []);
 
@@ -158,10 +138,10 @@ export function CollectionsSettings() {
 		setOnlyFavorites(false);
 	}, []);
 
-	// Extraer categorías únicas de las colecciones
-	const uniqueCategories = Array.from(
-		new Set(collections.map((collection) => collection.category).filter(Boolean))
-	) as string[];
+	// Extraer categorías únicas de las colecciones usando useMemo
+	const uniqueCategories = useMemo(() => {
+		return Array.from(new Set(collections.map((collection) => collection.category).filter(Boolean))) as string[];
+	}, [collections]);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
 	const handleDeleteButtonClick = useCallback(
@@ -189,12 +169,18 @@ export function CollectionsSettings() {
 		return (
 			<Card className="rounded-sm bg-muted/30 border-none">
 				<CardContent>
-					<EmptyState
-						icon={Info}
-						title="Error al cargar colecciones"
-						description={error}
-						actions={<Button onClick={() => globalThis.location?.reload()}>Intentar de nuevo</Button>}
-					/>
+					<div className="flex flex-col items-center gap-4 text-center p-6">
+						<AlertCircle className="h-12 w-12 text-destructive" />
+						<div>
+							<h3 className="text-lg font-semibold">Error al cargar colecciones</h3>
+							<p className="text-sm text-muted-foreground mt-1">
+								{error instanceof Error ? error.message : 'Error desconocido'}
+							</p>
+						</div>
+						<Button onClick={() => window.location.reload()} variant="outline">
+							Intentar de nuevo
+						</Button>
+					</div>
 				</CardContent>
 			</Card>
 		);

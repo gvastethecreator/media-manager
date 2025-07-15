@@ -1,29 +1,33 @@
-import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 import type { LucideIcon } from 'lucide-react';
+import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 
 /**
  * Tipo para las categorías de navegación disponibles
  */
 export type NavigationCategory =
-	| 'collections'
+	| 'files'
+	| 'library'
+	| 'worldbuilding'
+	| 'management'
 	| 'folders'
+	| 'collections'
 	| 'tags'
 	| 'albums'
 	| 'characters'
 	| 'places'
-	| 'world-items'
+	| 'worldItems'
 	| 'concepts'
 	| 'prompts'
 	| 'notes'
 	| 'groups'
 	| 'properties'
 	| 'wildcards'
-	// Nuevas entidades
 	| 'audios'
 	| 'documents'
-	| 'json-files'
-	| 'file-3ds'
-	| 'workflows';
+	| 'jsonFiles'
+	| 'file3ds'
+	| 'workflows'
+	| 'videos';
 
 /**
  * @description Representa una entidad que puede tener un conteo de imágenes asociadas.
@@ -49,16 +53,18 @@ export interface CategoryItem {
 export interface CategoryChild {
 	id: string;
 	name: string;
+	label?: string;
 	title?: string; // Para notas que usan title en lugar de name
 	emoji?: string;
 	color?: string;
 	path?: string;
 	description?: string;
+	icon?: LucideIcon;
+	itemCount?: number; // Conteo total de elementos
 	totalFiles?: number;
 	totalSize?: number;
 	_count?: {
-		images: number;
-		// Otros conteos posibles
+		images?: number;
 		folders?: number;
 		collections?: number;
 		tags?: number;

@@ -4,7 +4,7 @@
  * @description Convierte entre NoteComplete y NoteWithStats para mantener compatibilidad
  */
 
-import type { NoteComplete, NoteWithStats, NoteStatistics } from '@/types/entities/note';
+import type { NoteComplete, NoteStatistics, NoteWithStats } from '@/types/entities/note';
 import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
 
 /**
@@ -125,7 +125,7 @@ function generateExcerpt(content: string, maxLength = 150): string {
 	const truncated = cleaned.substring(0, maxLength);
 	const lastSpace = truncated.lastIndexOf(' ');
 
-	return lastSpace > maxLength * 0.8 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+	return lastSpace > maxLength * 0.8 ? `${truncated.substring(0, lastSpace)}...` : `${truncated}...`;
 }
 
 /**

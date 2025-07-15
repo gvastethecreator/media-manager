@@ -1,8 +1,7 @@
 /**
  * @file Tipos canónicos para la entidad Activity
  * @module types/entities/activity/types
- * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
- * @description Estructura unificada y validada para Activity.
+ * @description Estructura unificada y validada para Activity. Utilizar estos tipos en toda la aplicación.
  * Última migración: 2025-06-18
  */
 
@@ -14,7 +13,8 @@ import { z } from 'zod';
 export interface ActivityBase {
 	id: string;
 	type: string;
-	description: string;
+	message: string;
+	data?: string | null;
 	imageId?: string | null;
 	createdAt: Date;
 }
@@ -54,7 +54,8 @@ export type ActivityComplete = Activity;
  */
 export interface CreateActivityData {
 	type: string;
-	description: string;
+	message: string;
+	data?: string;
 	imageId?: string;
 }
 
@@ -91,13 +92,13 @@ export interface ActivityListResponse {
 export const ActivitySchema = z.object({
 	id: z.string(),
 	type: z.string(),
-	description: z.string(),
+	message: z.string(),
+	data: z.string().nullable().optional(),
 	imageId: z.string().nullable().optional(),
 	createdAt: z.date(),
 });
 
-// 🟢 Documentación y advertencia:
+// 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con ActivitySchema antes de persistir.
 // - ActivityComplete es un alias de Activity para consistencia con otros stores.

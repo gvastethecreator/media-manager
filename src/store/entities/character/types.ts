@@ -131,11 +131,19 @@ export interface CharacterFiltersSlice {
 	removeFilter: (filterId: string) => void;
 	clearFilters: () => void;
 	toggleFilter: (filter: CharacterFilterItem) => void;
+	filterByClass: (characterClass: CharacterClass | null) => void;
+	filterByRace: (race: CharacterRace | null) => void;
+	filterByLevel: (minLevel: number | null, maxLevel: number | null) => void;
+	filterByCategory: (category: CharacterCategory | null) => void;
+	filterByAlignment: (alignment: CharacterAlignment | null) => void;
+	filterByFavorites: (onlyFavorites: boolean) => void;
+	applyFilters: (filters: CharacterFilterItem[]) => void;
 
 	// 📊 Ordenamiento
 	setSortOption: (option: CharacterSortOption) => void;
 	toggleSortDirection: () => void;
 	resetSorting: () => void;
+	setDefaultSortOption: (option: CharacterSortOption) => void;
 
 	// 📊 Agrupamiento
 	setGroupBy: (groupBy: string) => void;

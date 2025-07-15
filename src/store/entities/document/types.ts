@@ -2,10 +2,10 @@
  * @file Tipos para el store de la entidad Document.
  * @module store/entities/document/types
  * @description Define la forma del estado y las acciones para el store de Document.
+ * ✅ MIGRADO A DRIZZLE - Usa tipos locales en lugar de Prisma
  */
 
-import type { DocumentWithStats } from '@/types/entities/document';
-import type { Prisma } from '@prisma/client';
+import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
 
 // --- Estado del Slice ---
 
@@ -16,36 +16,23 @@ export interface DocumentCoreState {
 	lastUpdated: number | null;
 }
 
-export interface DocumentUIState {
-	// ...p.ej., documento seleccionado, etc.
-}
+export type DocumentUIState = Record<string, never>;
 
-export interface DocumentFilterState {
-	// ...p.ej., filtros de búsqueda, ordenación, etc.
-}
+export type DocumentFilterState = Record<string, never>;
 
 // --- Acciones del Slice ---
 
 export interface DocumentCoreActions {
 	loadDocuments: () => Promise<void>;
-	createDocument: (data: Prisma.DocumentCreateInput) => Promise<void>;
-	updateDocument: (id: string, data: Prisma.DocumentUpdateInput) => Promise<void>;
+	createDocument: (data: DocumentCreateInput) => Promise<void>;
+	updateDocument: (id: string, data: DocumentUpdateInput) => Promise<void>;
 	deleteDocument: (id: string) => Promise<void>;
 }
 
-export interface DocumentUIActions {
-	// ...
-}
+export type DocumentUIActions = Record<string, never>;
 
-export interface DocumentFilterActions {
-	// ...
-}
+export type DocumentFilterActions = Record<string, never>;
 
 // --- Store Completo ---
 
-export type DocumentStore = DocumentCoreState &
-	DocumentCoreActions &
-	DocumentUIState &
-	DocumentUIActions &
-	DocumentFilterState &
-	DocumentFilterActions;
+export type DocumentStore = DocumentCoreState & DocumentCoreActions;

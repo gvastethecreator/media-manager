@@ -1,5 +1,3 @@
-'use client';
-
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +7,7 @@ import { ErrorBoundary } from './error-boundary';
  * Componente de fallback para errores globales
  * 🚨 Muestra un mensaje de error amigable con opción de reintentar
  */
-function GlobalErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
+export function GlobalErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
 	// Registrar el error en la consola para depuración
 	React.useEffect(() => {
 		console.error('Error global capturado:', error);
@@ -49,9 +47,5 @@ export function GlobalErrorHandler({ children }: { children: React.ReactNode }) 
 		setKey((prev) => prev + 1);
 	}, []);
 
-	return (
-		<ErrorBoundary key={key} fallback={(error) => <GlobalErrorFallback error={error} resetError={handleReset} />}>
-			{children}
-		</ErrorBoundary>
-	);
+	return <ErrorBoundary key={key}>{children}</ErrorBoundary>;
 }

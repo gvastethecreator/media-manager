@@ -1,19 +1,40 @@
 /**
  * @file Transformadores para trabajos en cola
  * @module transformers/queue-job
+ 
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
-import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
-import type { QueueJob } from '@prisma/client';
 import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
+import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
+
+// Tipo local equivalente a Drizzle (migración a Drizzle)
+type DrizzleQueueJob = {
+	id: string;
+	type: string;
+	status: QueueJobStatus;
+	priority: number;
+	attempts: number;
+	maxAttempts: number;
+	progress: number;
+	data: string; // JSON
+	metadata?: string | null; // JSON
+	result?: string | null; // JSON
+	error?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	startedAt?: Date | null;
+	finishedAt?: Date | null;
+	retryAt?: Date | null;
+};
 
 const logger = serverLogger.withContext('QueueJobTransformer');
 
 /**
  * Formatea una fecha para mostrar en la UI
+ * ✅ MIGRADO A DRIZZLE
  * @param date - Fecha a formatear
  * @returns Fecha formateada
  */
@@ -24,6 +45,7 @@ export function formatQueueJobDate(date: Date | null): string | undefined {
 
 /**
  * Calcula el tiempo transcurrido entre dos fechas
+ * ✅ MIGRADO A DRIZZLE
  * @param start - Fecha de inicio
  * @param end - Fecha de fin
  * @returns Duración formateada
@@ -37,6 +59,7 @@ export function calculateDuration(start: Date | null, end: Date | null): string 
 
 /**
  * Serializa la metadata de un trabajo para almacenar en la base de datos
+ * ✅ MIGRADO A DRIZZLE
  * @param metadata - Metadata a serializar
  * @returns Metadata serializada como string JSON
  */
@@ -47,10 +70,11 @@ export function serializeQueueJobMetadata(metadata: QueueJobMetadata | undefined
 
 /**
  * Parsea y valida la metadata del trabajo
- * @param job - Trabajo de Prisma
+ * ✅ MIGRADO A DRIZZLE
+ * @param job - Trabajo de Drizzle
  * @returns Metadata validada
  */
-export function parseQueueJobMetadata(job: QueueJob): QueueJobMetadata | undefined {
+export function parseQueueJobMetadata(job: DrizzleQueueJob): QueueJobMetadata | undefined {
 	if (!job.metadata) return undefined;
 
 	try {
@@ -63,19 +87,21 @@ export function parseQueueJobMetadata(job: QueueJob): QueueJobMetadata | undefin
 
 /**
  * Determina si un trabajo está activo
- * @param job - Trabajo de Prisma
+ * ✅ MIGRADO A DRIZZLE
+ * @param job - Trabajo de Drizzle
  * @returns true si el trabajo está activo
  */
-export function isQueueJobActive(job: QueueJob): boolean {
+export function isQueueJobActive(job: DrizzleQueueJob): boolean {
 	return job.status === QueueJobStatus.PENDING || job.status === QueueJobStatus.PROCESSING;
 }
 
 /**
  * Determina si un trabajo puede ser reintentado
- * @param job - Trabajo de Prisma
+ * ✅ MIGRADO A DRIZZLE
+ * @param job - Trabajo de Drizzle
  * @returns true si el trabajo puede ser reintentado
  */
-export function canRetryQueueJob(job: QueueJob): boolean {
+export function canRetryQueueJob(job: DrizzleQueueJob): boolean {
 	return (
 		job.status === QueueJobStatus.FAILED &&
 		job.attempts < job.maxAttempts &&
@@ -85,19 +111,21 @@ export function canRetryQueueJob(job: QueueJob): boolean {
 
 /**
  * Determina si un trabajo puede ser cancelado
- * @param job - Trabajo de Prisma
+ * ✅ MIGRADO A DRIZZLE
+ * @param job - Trabajo de Drizzle
  * @returns true si el trabajo puede ser cancelado
  */
-export function canCancelQueueJob(job: QueueJob): boolean {
+export function canCancelQueueJob(job: DrizzleQueueJob): boolean {
 	return job.status === QueueJobStatus.PENDING || job.status === QueueJobStatus.RETRYING;
 }
 
 /**
- * Transforma un QueueJob de Prisma a un objeto extendido para UI
- * @param job - Trabajo de Prisma
+ * Transforma un QueueJob de Drizzle a un objeto extendido para UI
+ * ✅ MIGRADO A DRIZZLE
+ * @param job - Trabajo de Drizzle
  * @returns Trabajo extendido con datos adicionales para UI
  */
-export function transformQueueJob(job: QueueJob): QueueJobExtended {
+export function transformQueueJob(job: DrizzleQueueJob): QueueJobExtended {
 	const createdAt = new Date(job.createdAt);
 	const updatedAt = new Date(job.updatedAt);
 	const startedAt = job.startedAt ? new Date(job.startedAt) : null;
@@ -121,20 +149,22 @@ export function transformQueueJob(job: QueueJob): QueueJobExtended {
 }
 
 /**
- * Transforma una lista de QueueJobs de Prisma a objetos extendidos
- * @param jobs - Lista de trabajos de Prisma
+ * Transforma una lista de QueueJobs de Drizzle a objetos extendidos
+ * ✅ MIGRADO A DRIZZLE
+ * @param jobs - Lista de trabajos de Drizzle
  * @returns Lista de trabajos extendidos
  */
-export function transformQueueJobs(jobs: QueueJob[]): QueueJobExtended[] {
+export function transformQueueJobs(jobs: DrizzleQueueJob[]): QueueJobExtended[] {
 	return jobs.map(transformQueueJob);
 }
 
 /**
  * Calcula el tiempo restante estimado basado en el progreso actual
- * @param job - Trabajo de Prisma
+ * ✅ MIGRADO A DRIZZLE
+ * @param job - Trabajo de Drizzle
  * @returns Tiempo restante estimado formateado
  */
-function calculateEstimatedTimeRemaining(job: QueueJob): string | undefined {
+function calculateEstimatedTimeRemaining(job: DrizzleQueueJob): string | undefined {
 	if (!job.startedAt || job.progress <= 0) return undefined;
 
 	const elapsedMs = Date.now() - job.startedAt.getTime();

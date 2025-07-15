@@ -1,9 +1,7 @@
-'use client';
-
 import { useCallback, useEffect, useState } from 'react';
 // import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
 import { useTagStore } from '@/store/entities/tag';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/common/entity-with-stats';
 
 /**
  * 🏷️ Vista de contenido de etiquetas
@@ -14,16 +12,16 @@ export function TagContentView() {
 	const selectedId = useTagStore((state) => state.selectedId);
 	const selectedTag = useTagStore((state) => state.items.find((tag) => tag.id === selectedId));
 
-	const [_images, setImages] = useState<FileItem[]>([]);
+	const [_images, setImages] = useState<EntityWithStats[]>([]);
 	const [_isLoading, setIsLoading] = useState(false);
 
 	// Función para cargar imágenes de la etiqueta
 	const _fetchTagImages = useCallback(async (_tagId: string) => {
 		// const images = await getTagImages(tagId);
-		// return images as unknown as FileItem[];
+		// return images as EntityWithStats[];
 		// Simulación mientras se encuentra la función correcta
 		await new Promise((res) => setTimeout(res, 500));
-		return [] as unknown as FileItem[];
+		return [] as EntityWithStats[];
 	}, []);
 
 	useEffect(() => {

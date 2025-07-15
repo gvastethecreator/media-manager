@@ -1,20 +1,47 @@
-import type { Prisma } from '@prisma/client';
+/**
+ * 🃏 WILDCARD BASE TYPES
+ *
+ * Tipos base para wildcards usando tipos locales de Drizzle.
+ *
+ * @updated 2025-01-27
+ */
 
 // ----------------------------------------------------------------
 
 /**
  * 🃏 WILDCARD BASE TYPE
  *
- * El tipo base para un wildcard, derivado directamente del schema de Prisma.
+ * El tipo base para un wildcard, derivado del schema de Drizzle.
  * Los wildcards son elementos flexibles que pueden representar casi cualquier cosa.
- *
- * @see Prisma.WildcardCreateInput
  */
-export type WildcardBase = Prisma.WildcardGetPayload<{
-	include: {
-		tags: true;
-	};
-}>;
+export interface WildcardBase {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	shortcut: string | null;
+	children: string | null;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	// Relaciones
+	tags?: TagBase[];
+}
+
+/**
+ * 🃏 TAG BASE TYPE (para relaciones)
+ */
+export interface TagBase {
+	id: string;
+	name: string;
+	color: string | null;
+	emoji: string | null;
+	description: string | null;
+}
 
 /**
  * 🃏 WILDCARD STATISTICS
@@ -33,11 +60,11 @@ export interface WildcardStatistics {
 }
 
 /**
- * 🃏 PRISMA WILDCARD WITH COUNTS
+ * 🃏 WILDCARD WITH COUNTS
  *
- * Extiende el tipo de Prisma para incluir los conteos de relaciones de forma eficiente.
+ * Wildcard con conteos de relaciones para optimización.
  */
-export interface PrismaWildcardWithCounts extends WildcardBase {
+export interface WildcardWithCounts extends WildcardBase {
 	_count: {
 		tags: number;
 		images: number;
@@ -55,7 +82,8 @@ export interface PrismaWildcardWithCounts extends WildcardBase {
  * debe usar en toda la UI y la lógica de negocio.
  */
 export interface WildcardWithStats extends WildcardBase {
-	statistics: WildcardStatistics;
+	entityType: 'wildcard';
+	statistics?: WildcardStatistics;
 	_count: {
 		tags: number;
 		images: number;
@@ -70,20 +98,51 @@ export interface WildcardWithStats extends WildcardBase {
  *
  * Tipo para la creación de un nuevo wildcard.
  */
-export type WildcardCreateInput = Prisma.WildcardUncheckedCreateInput;
+export interface WildcardCreateInput {
+	name: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	shortcut?: string | null;
+	children?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	parentId?: string | null;
+}
 
 /**
  * 🃏 WILDCARD UPDATE INPUT
  *
  * Tipo para la actualización de un wildcard existente.
  */
-export type WildcardUpdateInput = Prisma.WildcardUncheckedUpdateInput;
+export interface WildcardUpdateInput {
+	name?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	shortcut?: string | null;
+	children?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	parentId?: string | null;
+}
 
 /**
  * 🃏 WILDCARD PREVIEW
  *
  * Tipo para previsualizaciones de wildcards, con un subconjunto de campos.
  */
-export type WildcardPreview = Pick<WildcardBase, 'id' | 'name' | 'description' | 'createdAt' | 'updatedAt'> & {
+export interface WildcardPreview {
+	id: string;
+	name: string;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 	imageUrl?: string;
-};
+}
+
+// ----------------------------------------------------------------
+// TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
+// ----------------------------------------------------------------

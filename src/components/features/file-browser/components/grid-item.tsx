@@ -1,22 +1,12 @@
-'use client';
-
 import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback } from 'react';
-import { FileItem } from '@/types/files';
+import React, { memo, useCallback } from 'react';
+import { FileItem } from '@/lib/contexts/file-context';
+import { EntityWithStats } from '@/types/entities/entity.types';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';
-
-// 📝 Tipo local para FileBrowser que soporta miniaturas serializables
-type FileBrowserFileItem = FileItem & {
-	thumbnail?: string | null; // Siempre string o null, nunca Buffer/Uint8Array
-	createdAt: string; // ISO string, no Date
-	updatedAt: string; // ISO string, no Date
-	modifiedAt: string; // ISO string, no Date
-	accessedAt: string; // ISO string, no Date
-};
 
 // 🛠️ Utilidad para formatear tamaño de archivo
 const formatFileSize = (bytes: number): string => {
@@ -28,7 +18,7 @@ const formatFileSize = (bytes: number): string => {
 };
 
 interface GridItemProps {
-	item: FileBrowserFileItem;
+	item: FileItem;
 	isSelected: boolean;
 	isFavorite: boolean;
 	onClick: (e?: React.MouseEvent) => void;

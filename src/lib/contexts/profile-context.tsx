@@ -1,7 +1,10 @@
-'use client';
+('use client');
 
-import type { User } from '@/lib/types';
 import { createContext, type ReactNode, useContext, useState } from 'react';
+import type { User } from '@/lib/types';
+import type { CollectionBase } from '@/types/entities/collection';
+import type { FolderBase } from '@/types/entities/folder';
+import type { TagBase } from '@/types/entities/tag';
 
 type ViewType = 'files' | 'collections' | 'folders' | 'tags';
 

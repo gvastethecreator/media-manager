@@ -1,5 +1,5 @@
-import type { ProcessStatus } from '@/app/actions/folders/types';
 import type { FolderExtended, FolderStats } from '@/types/entities/folder';
+import type { ProcessStatus } from '@/types/folders';
 
 /**
  * 📁 Extensión del tipo canónico para incluir estado de error temporal
@@ -7,14 +7,12 @@ import type { FolderExtended, FolderStats } from '@/types/entities/folder';
  */
 export interface ExtendedFolder extends FolderExtended {
 	error?: string; // Error temporal durante el procesamiento
+	lastIndexed?: Date; // Última fecha de indexación
 }
 
 // 🔄 Estado extendido del proceso con propiedades adicionales
 export interface ExtendedProcessStatus extends ProcessStatus {
-	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
-	timestamp?: number;
 	startTime?: number;
-	filesProcessed?: number; // Añadido ya que se usa en use-folders.ts
 	globalProgress?: {
 		current: number;
 		total: number;

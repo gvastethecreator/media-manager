@@ -6,7 +6,7 @@ Este módulo proporciona funciones para transformar y validar objetos de colecci
 
 El transformador de colecciones maneja la conversión entre diferentes formatos de colección:
 
-- Transformación de objetos Prisma a objetos de aplicación
+- Transformación de objetos Drizzle a objetos de aplicación
 - Validación y normalización de datos
 - Generación de formatos extendidos para interfaces de usuario
 - Cálculo de estadísticas relacionadas con la colección
@@ -202,23 +202,23 @@ Para operaciones que involucran estas relaciones, consulte la documentación esp
 
 Transformar datos de Collection entre diferentes capas de la aplicación:
 
-- **Prisma → CollectionWithStats**: Para uso en UI y lógica de negocio
-- **CollectionWithStats → Prisma**: Para persistencia en base de datos
+- **Drizzle → CollectionWithStats**: Para uso en UI y lógica de negocio
+- **CollectionWithStats → Drizzle**: Para persistencia en base de datos
 
 ### Arquitectura
 
 ```mermaid
 graph TD
-    A[Prisma Collection] --> B[fromPrismaCollection]
+    A[Drizzle Collection] --> B[fromDrizzleCollection]
     B --> C[CollectionWithStats]
-    C --> D[toPrismaCollection]
-    D --> E[Prisma Collection]
+    C --> D[toDrizzleCollection]
+    D --> E[Drizzle Collection]
 
-    F[CollectionCreateInput] --> G[toPrismaCollectionCreate]
-    G --> H[Prisma Create Data]
+    F[CollectionCreateInput] --> G[toDrizzleCollectionCreate]
+    G --> H[Drizzle Create Data]
 
-    I[CollectionUpdateInput] --> J[toPrismaCollectionUpdate]
-    J --> K[Prisma Update Data]
+    I[CollectionUpdateInput] --> J[toDrizzleCollectionUpdate]
+    J --> K[Drizzle Update Data]
 ```
 
 ### Tipos Principales
@@ -245,9 +245,9 @@ interface CollectionWithStats extends CollectionBase {
 
 ### Funciones Principales
 
-#### `fromPrismaCollection(prismaCollection: PrismaCollectionWithCounts): CollectionWithStats`
+#### `fromDrizzleCollection(DrizzleCollection: DrizzleCollectionWithCounts): CollectionWithStats`
 
-Convierte datos de Prisma a formato de aplicación con estadísticas calculadas.
+Convierte datos de Drizzle a formato de aplicación con estadísticas calculadas.
 
 **Características:**
 
@@ -256,17 +256,17 @@ Convierte datos de Prisma a formato de aplicación con estadísticas calculadas.
 - ✅ Maneja valores null/undefined
 - ✅ Optimizado para performance
 
-#### `toPrismaCollection(collection: CollectionWithStats): PrismaCollection`
+#### `toDrizzleCollection(collection: CollectionWithStats): DrizzleCollection`
 
-Convierte datos de aplicación a formato Prisma para persistencia.
+Convierte datos de aplicación a formato Drizzle para persistencia.
 
-#### `toPrismaCollectionCreate(input: CollectionCreateInput): PrismaCollectionCreateInput`
+#### `toDrizzleCollectionCreate(input: CollectionCreateInput): DrizzleCollectionCreateInput`
 
-Prepara datos para creación en Prisma.
+Prepara datos para creación en Drizzle.
 
-#### `toPrismaCollectionUpdate(input: CollectionUpdateInput): PrismaCollectionUpdateInput`
+#### `toDrizzleCollectionUpdate(input: CollectionUpdateInput): DrizzleCollectionUpdateInput`
 
-Prepara datos para actualización en Prisma.
+Prepara datos para actualización en Drizzle.
 
 ### Funciones Server Actions
 

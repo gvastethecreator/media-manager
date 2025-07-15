@@ -4,12 +4,39 @@
  * @description Define los tipos canónicos para la entidad File3D, siguiendo el nuevo patrón de `...WithStats`.
  */
 
-import type { File3D } from '@prisma/client';
-
 /**
- * 🧊 Tipo base de File3D directamente desde el schema de Prisma.
+ * 🧊 Tipo base de File3D directamente desde el schema de Drizzle.
  */
-export type File3DBase = File3D;
+export type File3DBase = {
+	id: string;
+	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	format: string | null;
+	version: string | null;
+	vertices: number | null;
+	faces: number | null;
+	triangles: number | null;
+	materials: number | null;
+	textures: number | null;
+	animations: number | null;
+	bones: number | null;
+	scenes: number | null;
+	cameras: number | null;
+	lights: number | null;
+	hasUV: boolean | null;
+	hasNormals: boolean | null;
+	hasColors: boolean | null;
+	boundingBox: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 /**
  * 📊 Métricas y estadísticas calculadas para un archivo 3D.
@@ -35,3 +62,17 @@ export interface File3DStatistics {
 export interface File3DWithStats extends File3DBase {
 	stats: File3DStatistics;
 }
+
+// --- TIPOS PARA MUTACIONES ---
+
+/**
+ * 🆕 Tipo para crear un nuevo File3D
+ * Omite campos autogenerados (id, timestamps)
+ */
+export type File3DCreateInput = Omit<File3DBase, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * ✏️ Tipo para actualizar un File3D existente
+ * Todos los campos son opcionales excepto id
+ */
+export type File3DUpdateInput = Partial<File3DCreateInput>;

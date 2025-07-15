@@ -1,5 +1,5 @@
-import { serverLogger } from '@/lib/logger/server-logger';
 import { QueryClient } from '@tanstack/react-query';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const _queryLogger = serverLogger.withContext('ReactQuery');
 

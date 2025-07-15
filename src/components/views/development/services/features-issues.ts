@@ -1,4 +1,7 @@
-'use server';
+/**
+ * @file Servicios de desarrollo para features e issues
+ * @description Funciones para obtener datos de desarrollo (compatible con Vite)
+ */
 
 import type { Feature } from '../cards/feature-card';
 import type { Issue } from '../cards/issue-card';
@@ -6,7 +9,7 @@ import { ServiceStatus } from '../cards/service-card';
 
 /**
  * Obtiene la lista de features
- * Adaptado para Next.js 15 con 'use server'
+ * Compatible con Vite + React
  */
 export async function getFeatures(): Promise<Feature[]> {
 	// Simulación de obtención de datos desde BD
@@ -47,7 +50,7 @@ export async function getFeatures(): Promise<Feature[]> {
 
 /**
  * Obtiene la lista de issues
- * Adaptado para Next.js 15 con 'use server'
+ * Compatible con Vite + React
  */
 export async function getIssues(): Promise<Issue[]> {
 	// Simulación de obtención de datos desde BD
@@ -85,7 +88,7 @@ export async function getIssues(): Promise<Issue[]> {
 
 /**
  * Obtiene el estado de los servicios
- * Adaptado para Next.js 15 con 'use server'
+ * Compatible con Vite + React
  */
 export async function getServices(): Promise<Omit<ServiceStatus, 'icon'>[]> {
 	// Simulación de obtención de datos desde BD

@@ -4,12 +4,43 @@
  * @description Define los tipos canónicos para la entidad Audio, siguiendo el nuevo patrón de `...WithStats`.
  */
 
-import type { Audio } from '@prisma/client';
-
 /**
- * 🎵 Tipo base de Audio directamente desde el schema de Prisma.
+ * 🎵 Tipo base de Audio directamente desde el schema de Drizzle.
  */
-export type AudioBase = Audio;
+export type AudioBase = {
+	id: string;
+	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	mimeType: string;
+	extension: string;
+	folderId: string;
+	isFavorite: boolean;
+	isArchived: boolean;
+	duration: number | null;
+	bitrate: number | null;
+	sampleRate: number | null;
+	channels: number | null;
+	format: string | null;
+	codec: string | null;
+	title: string | null;
+	artist: string | null;
+	album: string | null;
+	year: number | null;
+	genre: string | null;
+	track: number | null;
+	disc: number | null;
+	albumArtist: string | null;
+	composer: string | null;
+	comment: string | null;
+	lyrics: string | null;
+	bpm: number | null;
+	key: string | null;
+	mood: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 /**
  * 📊 Métricas y estadísticas calculadas para un archivo de Audio.
@@ -35,3 +66,17 @@ export interface AudioStatistics {
 export interface AudioWithStats extends AudioBase {
 	stats: AudioStatistics;
 }
+
+// --- TIPOS PARA MUTACIONES ---
+
+/**
+ * 🆕 Tipo para crear un nuevo Audio
+ * Omite campos autogenerados (id, timestamps)
+ */
+export type AudioCreateInput = Omit<AudioBase, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * ✏️ Tipo para actualizar un Audio existente
+ * Todos los campos son opcionales excepto id
+ */
+export type AudioUpdateInput = Partial<AudioCreateInput>;

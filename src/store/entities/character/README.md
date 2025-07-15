@@ -349,4 +349,4 @@ partialize: (state) => ({
 - `@/types/entities/character/enums` - Enumeraciones RPG
 - `@/utils/character` - Utilidades y helpers
 - `@/lib/logger` - Logging
-- `@/services/toast` - Notificaciones
+- `@/lib/ui/toast` - Notificaciones

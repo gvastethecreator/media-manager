@@ -1,5 +1,7 @@
 # 🛡️ Solución para el manejo de datos binarios en Next.js
 
+> **Nota 2025-07:** Esta guía se conserva solo como referencia histórica. Tras la migración a **Bun + Vite + React**, la serialización de datos binarios se maneja directamente en la API Express y ya no depende de las restricciones de Next.js.
+
 ## 📌 Problema: Serialización de Uint8Array y Buffer
 
 Next.js lanza un error cuando se intentan pasar objetos binarios (`Uint8Array` o `Buffer`) desde Server Components/Actions a Client Components:
@@ -76,7 +78,7 @@ Se ha implementado en `folder-crud.actions.ts` una función robusta que:
 
 - `src/app/actions/*/`: Todas las funciones que devuelven datos al cliente
 - `src/app/api/*/`: Endpoints que interactúan con datos binarios
-- `src/transformers/*/`: Funciones que transforman datos de Prisma a tipos del dominio
+- `src/transformers/*/`: Funciones que transforman datos de la base de datos a tipos del dominio
 - `src/services/*/`: Servicios que manejan imágenes, archivos o datos binarios
 
 ## 📝 Para pruebas y debugging

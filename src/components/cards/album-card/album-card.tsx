@@ -1,9 +1,7 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import type { AlbumWithStats } from '@/types/entities/album';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { AlbumWithStats } from '@/types/entities/album';
 import { AlbumCardContent } from './album-card-content';
 import { AlbumCardFooter } from './album-card-footer';
 import { AlbumCardHeader } from './album-card-header';

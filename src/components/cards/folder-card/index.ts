@@ -3,7 +3,8 @@ export * from './folder-card-content';
 export * from './folder-card-footer';
 export * from './folder-card-header';
 export * from './folder-card-images';
-export * from './folder-server-actions';
+
+// export * from './folder-server-actions'; // TODO: Archivo no encontrado
 
 // Componente memorizado para mejorar rendimiento
 import { memo } from 'react';

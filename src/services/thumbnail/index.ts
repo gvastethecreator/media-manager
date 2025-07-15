@@ -77,36 +77,36 @@ class ThumbnailService {
 	}
 
 	// Event handlers (stubs)
-	onProgress(handler: (status: ProcessStatus) => void) {
+	onProgress(_handler: (status: ProcessStatus) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 
-	onError(handler: (error: ThumbnailError) => void) {
+	onError(_handler: (error: ThumbnailError) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 
-	onComplete(handler: (data: Record<string, unknown>) => void) {
+	onComplete(_handler: (data: Record<string, unknown>) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 
-	onStats(handler: (stats: Record<string, unknown>) => void) {
+	onStats(_handler: (stats: Record<string, unknown>) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 
 	// Event unsubscribers (stubs)
-	offProgress(handler: (status: ProcessStatus) => void) {
+	offProgress(_handler: (status: ProcessStatus) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 
-	offError(handler: (error: ThumbnailError) => void) {
+	offError(_handler: (error: ThumbnailError) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 
-	offComplete(handler: (data: Record<string, unknown>) => void) {
+	offComplete(_handler: (data: Record<string, unknown>) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 
-	offStats(handler: (stats: Record<string, unknown>) => void) {
+	offStats(_handler: (stats: Record<string, unknown>) => void) {
 		// TODO: Implementar funcionalidad completa
 	}
 }

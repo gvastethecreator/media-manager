@@ -3,6 +3,8 @@
  * @module store/entities/character/slices/filters
  */
 
+import type { StateCreator } from 'zustand';
+import { matchesCharacterSearch, sortCharacters } from '@/lib/utils/character';
 import type { CharacterFilterItem, CharacterWithStats } from '@/types/entities/character';
 import {
 	CharacterAlignment,
@@ -11,8 +13,6 @@ import {
 	CharacterRace,
 	CharacterSortOption,
 } from '@/types/entities/character';
-import { matchesCharacterSearch, sortCharacters } from '@/lib/utils/character';
-import type { StateCreator } from 'zustand';
 import type { CharacterFiltersSlice, CharacterState } from '../types';
 
 /**
@@ -203,8 +203,15 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * Filtra los personajes por texto de búsqueda
 	 * @param searchTerm Término de búsqueda
 	 */
-	filterByText: (searchTerm: string) => {
+	setSearchTerm: (searchTerm: string) => {
 		set({ searchTerm });
+	},
+
+	/**
+	 * Limpia el término de búsqueda
+	 */
+	clearSearch: () => {
+		set({ searchTerm: '' });
 	},
 
 	/**
@@ -351,16 +358,6 @@ export const createCharacterFiltersSlice: StateCreator<
 	},
 
 	/**
-	 * Obtiene personajes por IDs especificados
-	 * @param ids Array de IDs de personajes
-	 * @returns Array de personajes correspondientes a los IDs proporcionados
-	 */
-	getCharactersByIds: (ids: string[]) => {
-		const { characters } = get();
-		return ids.map((id) => characters[id]).filter(Boolean);
-	},
-
-	/**
 	 * Agrega un filtro personalizado
 	 * @param filter Filtro a agregar
 	 */
@@ -388,6 +385,53 @@ export const createCharacterFiltersSlice: StateCreator<
 			activeFilters: [],
 			searchTerm: '',
 		});
+	},
+
+	/**
+	 * Alterna un filtro (añade si no existe, elimina si existe)
+	 * @param filter Filtro a alternar
+	 */
+	toggleFilter: (filter: CharacterFilterItem) => {
+		set((state) => {
+			const existingFilter = state.activeFilters.find((f) => f.query === filter.query && f.value === filter.value);
+			if (existingFilter) {
+				return {
+					activeFilters: state.activeFilters.filter((f) => !(f.query === filter.query && f.value === filter.value)),
+				};
+			}
+			return {
+				activeFilters: [...state.activeFilters, filter],
+			};
+		});
+	},
+
+	/**
+	 * Alterna la dirección de ordenamiento (ASC/DESC)
+	 */
+	toggleSortDirection: () => {
+		set((state) => {
+			const currentOption = state.currentSortOption;
+			let newOption: CharacterSortOption;
+
+			if (currentOption.endsWith('_ASC')) {
+				newOption = currentOption.replace('_ASC', '_DESC') as CharacterSortOption;
+			} else if (currentOption.endsWith('_DESC')) {
+				newOption = currentOption.replace('_DESC', '_ASC') as CharacterSortOption;
+			} else {
+				// Default to ascending if no clear direction
+				newOption = `${currentOption}_ASC` as CharacterSortOption;
+			}
+			return { currentSortOption: newOption };
+		});
+	},
+
+	/**
+	 * Restablece el ordenamiento a la opción predeterminada
+	 */
+	resetSorting: () => {
+		set((state) => ({
+			currentSortOption: state.defaultSortOption,
+		}));
 	},
 
 	/**

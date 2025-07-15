@@ -20,7 +20,6 @@ export function FolderCardHeader({
 	name,
 	emoji = '📁',
 	primaryColor,
-	secondaryColor,
 	path,
 	tcgMode = true,
 	isFavorite = false,
@@ -40,7 +39,7 @@ export function FolderCardHeader({
 		folderType = 'Archive';
 	} else if (path?.includes('backups')) {
 		folderType = 'Backup';
-	} else if (path?.split('/').length > 3) {
+	} else if (path && path.split('/').length > 3) {
 		folderType = 'Deep';
 	}
 

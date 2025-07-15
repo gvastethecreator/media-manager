@@ -1,112 +1,94 @@
 /**
- * @file Serializadores para la entidad Favorite
+ * @file Serializadores para la entidad Favorite.
  * @module transformers/favorite/serializers
+ * @description Contiene funciones para serializar datos de Favorite para respuestas API y cliente.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { FavoriteWithImage } from '@/types/entities/favorite';
-import type { FileItem } from '@/types/files';
-import type { Favorite as PrismaFavorite, Image as PrismaImage } from '@prisma/client';
-
-const serializersLogger = serverLogger.withContext('Favorite:Serializers');
-
-type PrismaFavoriteWithImage = PrismaFavorite & { image: PrismaImage };
-
-interface MetadataContent {
-	dimensions: {
-		width: number;
-		height: number;
-	};
-	exif?: {
-		make?: string;
-		model?: string;
-		dateTime?: string;
-		exposureTime?: number;
-		fNumber?: number;
-		iso?: number;
-		focalLength?: number;
-		gps?: {
-			latitude: number;
-			longitude: number;
-			altitude?: number;
-		};
-	};
-}
+import type { FavoriteBase, FavoriteWithStats } from '@/types/entities/favorite';
 
 /**
- * 🔄 Transforma una imagen en un FileItem para uso en componentes de UI
+ * ⭐ Serializa un favorito base para respuestas API.
+ * Omite campos sensibles y aplica formato estándar.
+ *
+ * @param favorite - Favorito base desde Drizzle
+ * @returns Favorito serializado para API
  */
-export function transformImageToFileItem(image: PrismaImage): FileItem {
+export function serializeFavoriteBase(favorite: FavoriteBase) {
 	return {
-		id: image.id,
-		name: image.name || 'Untitled',
-		type: 'image' as const,
-		path: image.path,
-		size: image.size || 0,
-		width: image.width || 0,
-		height: image.height || 0,
-		metadata: image.metadata || '',
-		thumbnail: image.thumbnail || null,
-		thumbnailSize: image.thumbnailSize || undefined,
-		thumbnailWidth: image.thumbnailWidth || undefined,
-		thumbnailHeight: image.thumbnailHeight || undefined,
-		thumbnailError: image.thumbnailError || null,
-		thumbnailErrorAt: image.thumbnailErrorAt || null,
-		thumbnailOptimizedAt: image.thumbnailOptimizedAt || null,
-		isPublic: false, // TODO: Implementar si es necesario
-		isFavorite: image.isFavorite || false,
-		folderId: image.folderId,
-		createdAt: image.addedAt || new Date(), // ImageBase usa addedAt
-		updatedAt: image.addedAt || new Date(), // TODO: Implementar updatedAt
-		modifiedAt: image.addedAt || new Date(),
-		accessedAt: image.addedAt || new Date(),
-		hash: image.hash || '',
-		src: image.path,
-		// Las relaciones se mapean como arrays vacíos por ahora
-		collections: [],
-		tags: [],
-		places: [],
-		worldItems: [],
-		concepts: [],
-		prompts: [],
-		notes: [],
-		groups: [],
-		properties: [],
-		wildcards: [],
-		stats: undefined,
+		id: favorite.id,
+		entityId: favorite.entityId,
+		entityType: favorite.entityType,
+		userId: favorite.userId,
+		profileId: favorite.profileId,
+		createdAt: favorite.createdAt.toISOString(),
+		updatedAt: favorite.updatedAt.toISOString(),
 	};
 }
 
 /**
- * Convierte un favorito con imagen en un formato FavoriteWithImage
- * @param favorite Favorito base con imagen incluida
- * @returns Favorito con imagen transformada
+ * 📊 Serializa un favorito con estadísticas para respuestas API.
+ *
+ * @param favorite - Favorito con estadísticas
+ * @returns Favorito serializado con estadísticas
  */
-export function toFavoriteWithImage(favorite: PrismaFavoriteWithImage): FavoriteWithImage {
-	try {
-		return {
-			id: favorite.id,
-			entityId: favorite.entityId,
-			entityType: favorite.entityType,
-			userId: favorite.userId,
-			createdAt: favorite.createdAt,
-			updatedAt: favorite.updatedAt,
-			image: transformImageToFileItem(favorite.image),
-		};
-	} catch (error) {
-		serializersLogger.error('Error convirtiendo a favorito con imagen:', error);
-		return {
-			...favorite,
-			image: transformImageToFileItem(favorite.image || ({} as PrismaImage)),
-		} as FavoriteWithImage;
-	}
+export function serializeFavoriteWithStats(favorite: FavoriteWithStats) {
+	return {
+		...serializeFavoriteBase(favorite),
+		stats: {
+			entityTypeName: favorite.stats.entityTypeName,
+			formattedCreatedAt: favorite.stats.formattedCreatedAt,
+			daysSinceFavorited: favorite.stats.daysSinceFavorited,
+			isRecent: favorite.stats.isRecent,
+			isOld: favorite.stats.isOld,
+		},
+	};
 }
 
 /**
- * Convierte una lista de favoritos con imágenes
- * @param favorites Lista de favoritos con imágenes
- * @returns Lista de favoritos transformados
+ * ⭐ Serializa una lista de favoritos para respuestas API.
+ *
+ * @param favorites - Lista de favoritos con estadísticas
+ * @returns Lista serializada
  */
-export function toFavoritesWithImages(favorites: PrismaFavoriteWithImage[]): FavoriteWithImage[] {
-	return favorites.map(toFavoriteWithImage);
+export function serializeFavoriteList(favorites: FavoriteWithStats[]) {
+	return favorites.map(serializeFavoriteWithStats);
+}
+
+/**
+ * 📊 Serializa estadísticas agrupadas de favoritos.
+ *
+ * @param grouped - Favoritos agrupados por tipo
+ * @returns Estadísticas serializadas
+ */
+export function serializeFavoriteGroupedStats(grouped: Record<string, FavoriteWithStats[]>) {
+	return Object.entries(grouped).map(([entityType, favorites]) => ({
+		entityType,
+		count: favorites.length,
+		favorites: favorites.map(serializeFavoriteWithStats),
+	}));
+}
+
+/**
+ * 📊 Serializa resumen de favoritos.
+ *
+ * @param summary - Resumen de estadísticas de favoritos
+ * @returns Resumen serializado
+ */
+export function serializeFavoritesSummary(summary: {
+	total: number;
+	byType: Record<string, number>;
+	recentCount: number;
+	oldCount: number;
+	mostRecentDate: Date;
+	oldestDate: Date;
+}) {
+	return {
+		total: summary.total,
+		byType: summary.byType,
+		recentCount: summary.recentCount,
+		oldCount: summary.oldCount,
+		mostRecentDate: summary.mostRecentDate.toISOString(),
+		oldestDate: summary.oldestDate.toISOString(),
+	};
 }

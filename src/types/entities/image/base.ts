@@ -1,94 +1,94 @@
-// ELIMINADO: interface ImageBase duplicada aquí. Usar solo la de types.ts
+/**
+ * @file Tipos base para la entidad Image.
+ * @module types/entities/image/base
+ * @description Define los tipos canónicos para la entidad Image, siguiendo el patrón `Base + Statistics + WithStats`.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
+ */
+
+import type { TagWithStats } from '../tag';
 
 /**
- * 🎨 Configuración visual asociada a una imagen
+ * 🖼️ Modelo base de Image, basado en el esquema de Drizzle.
  */
-export interface ImageVisualConfigBase {
+export type ImageBase = {
 	id: string;
-	imageId: string;
-	config: string;
-}
-
-/**
- * 📊 Estadísticas base de una imagen
- * NOTA: Campo downloads eliminado - no existe en el esquema Prisma ImageStats
- */
-export interface ImageStatsBase {
-	id: string;
-	imageId: string;
-	views: number;
-	likes: number;
-	// downloads: number; // ❌ ELIMINADO - No existe en esquema Prisma
-}
-
-/**
- * 🟢 Datos mínimos requeridos para crear una imagen
- */
-export interface CreateImageData {
 	name: string;
+	description: string | null;
 	path: string;
-	folderId: string;
 	hash: string;
 	size: number;
 	width: number;
 	height: number;
-	description?: string;
-	metadata?: string;
-	presetId?: string | null;
-}
-
-/**
- * 🟡 Datos para actualizar una imagen
- */
-export interface UpdateImageData {
-	name?: string;
-	description?: string;
-	presetId?: string | null;
-	isFavorite?: boolean;
-}
-
-/**
- * 📋 Resumen básico de una imagen para listados
- */
-export interface ImageSummary {
-	id: string;
-	name: string;
-	path: string;
+	metadata: string | null;
+	thumbnail: string | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailMimeType: string | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
+	isFavorite: boolean;
 	folderId: string;
-	hash: string;
-	size: number;
-	width: number;
-	height: number;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
+	noteId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+	addedAt: Date;
+	tags?: TagWithStats[];
+};
+
+/**
+ * 📊 Estadísticas calculadas y derivadas para una Image.
+ * Principalmente, los conteos de las relaciones.
+ */
+export interface ImageStatistics {
+	viewCount: number;
+	downloadCount: number;
+	likeCount: number;
+	commentCount: number;
+	tagCount: number;
+	albumCount: number;
+	collectionCount: number;
+	characterCount: number;
+	placeCount: number;
+	worldItemCount: number;
+	conceptCount: number;
+	promptCount: number;
+	noteCount: number;
+	wildcardCount: number;
+	propertyCount: number;
+	groupCount: number;
 }
 
 /**
- * 🧩 Estructura de metadatos de una imagen
+ * 📊 Alias para compatibilidad - ImageStats apunta a ImageStatistics
  */
-export interface ImageMetadata {
-	format?: string;
-	exif?: Record<string, unknown>;
-	iptc?: Record<string, unknown>;
-	xmp?: Record<string, unknown>;
-	icc?: Record<string, unknown>;
-	ai?: ImageAIMetadata;
-}
+export type ImageStats = ImageStatistics;
 
 /**
- * 🤖 Estructura de metadatos de IA para imágenes generadas
+ * ✨ Modelo extendido de Image con estadísticas.
+ * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
-export interface ImageAIMetadata {
-	model?: string;
-	prompt?: string;
-	negativePrompt?: string;
-	seed?: number;
-	samplingSteps?: number;
-	cfgScale?: number;
-	samplingMethod?: string;
-	extraParameters?: Record<string, unknown>;
+export interface ImageWithStats extends ImageBase {
+	entityType: 'image';
+	stats: ImageStatistics;
+	thumbnailUrl: string;
+	fullUrl: string;
 }
 
-// ✅ Tipos revisados y documentados. Listos para uso seguro en frontend y backend.
+export interface DrizzleImageWithCounts extends ImageBase {
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}

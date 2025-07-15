@@ -5,7 +5,7 @@
  * @updated 2025-06-21
  */
 
-import { TaskExtended } from '@/types/entities/task';
+import { TaskExtended } from '@/types/entities/task/types';
 
 /**
  * Modo de visualización para tareas

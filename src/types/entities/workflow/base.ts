@@ -1,16 +1,31 @@
-import type { Workflow } from '@prisma/client';
-
 /**
- * 🗿 Modelo base de Workflow, directamente desde Prisma.
+ * 🗿 Modelo base de Workflow, directamente desde Drizzle.
  */
-export type WorkflowBase = Workflow;
-
-/**
- * 🤖 Tipo de un Workflow de Prisma que incluye sus relaciones directas.
- * A diferencia de EntityWithStats, no usamos `_count` aquí, sino que calcularemos
- * las estadísticas a partir de las ejecuciones relacionadas.
- */
-export type PrismaWorkflow = WorkflowBase;
+export type WorkflowBase = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	isActive: boolean;
+	version: string;
+	config: string | null;
+	steps: string | null;
+	triggers: string | null;
+	conditions: string | null;
+	actions: string | null;
+	schedule: string | null;
+	lastRun: Date | null;
+	nextRun: Date | null;
+	runCount: number;
+	successCount: number;
+	errorCount: number;
+	createdAt: Date;
+	updatedAt: Date;
+};
 
 /**
  * 📊 Estadísticas calculadas para un Workflow.
@@ -32,3 +47,6 @@ export interface WorkflowStatistics {
 export interface WorkflowWithStats extends WorkflowBase {
 	stats: WorkflowStatistics;
 }
+
+export interface WorkflowCreateInput extends Omit<WorkflowBase, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface WorkflowUpdateInput extends Partial<WorkflowCreateInput> {}

@@ -1,369 +1,155 @@
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { ViewType } from '@/components/views/types';
-import { useAlbumStore } from '@/store/entities/album';
-import { useCharacterStore } from '@/store/entities/character';
-import { useCollectionStore } from '@/store/entities/collection';
-import { useConceptStore } from '@/store/entities/concept';
-import { useGroupStore } from '@/store/entities/group';
-import { useNoteStore } from '@/store/entities/note';
-import { usePlaceStore } from '@/store/entities/place';
-import { usePromptStore } from '@/store/entities/prompt';
-import { usePropertyStore } from '@/store/entities/property';
-import { useTagStore } from '@/store/entities/tag';
-import { useWildcardStore } from '@/store/entities/wildcard';
-import { useWorldItemStore } from '@/store/entities/world-item';
-import { useCallback } from 'react';
-
 /**
- * Hook que proporciona manejadores para las interacciones con categorías
- * Centraliza la lógica de selección y navegación entre categorías
+ * @file Hook para manejar las interacciones con categorías de navegación - VERSIÓN TEMPORAL
+ * @module components/navigation/hooks/use-category-handlers
+ * @description Hook que maneja clicks y navegación entre categorías - Sin stores problemáticos
+ * @updated 2025-01-27
  */
+
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import type { ViewType } from '@/components/views/types';
+import { clientLogger } from '@/lib/logger/client-logger';
+
+const logger = clientLogger.withContext('CategoryHandlers');
+
 export function useCategoryHandlers() {
+	const navigate = useNavigate();
 	const { currentView, setCurrentView } = useNavigationStore();
 
-	// Stores específicos para cada entidad - usando las propiedades correctas
-	const collectionStore = useCollectionStore();
-	const tagStore = useTagStore();
-	const albumStore = useAlbumStore();
-	const characterStore = useCharacterStore();
-	const placeStore = usePlaceStore();
-	const worldItemStore = useWorldItemStore();
-	const conceptStore = useConceptStore();
-	const promptStore = usePromptStore();
-	const noteStore = useNoteStore();
-	const _groupStore = useGroupStore();
-	const _propertyStore = usePropertyStore();
-	const _wildcardStore = useWildcardStore();
-
-	// Funciones de selección extraídas de los stores (usando las funciones reales)
-	const selectCollection = collectionStore.selectCollection || (() => console.log('selectCollection not available'));
-	const selectTag = tagStore.selectTag || (() => console.log('selectTag not available'));
-	const selectAlbum = albumStore.selectAlbum || (() => console.log('selectAlbum not available'));
-	const selectCharacter = characterStore.selectCharacter || (() => console.log('selectCharacter not available'));
-	const selectPlace = placeStore.selectPlace || (() => console.log('selectPlace not available'));
-	const selectWorldItem = worldItemStore.selectWorldItem || (() => console.log('selectWorldItem not available'));
-	const selectConcept = conceptStore.selectConcept || (() => console.log('selectConcept not available'));
-	const selectPrompt = promptStore.selectPrompt || (() => console.log('selectPrompt not available'));
-	const selectNote = noteStore.selectNote || (() => console.log('selectNote not available'));
-
-	// Funciones locales para entidades sin selectores implementados
-	const { setCurrentItem } = useNavigationStore();
-
-	const selectFolder = useCallback(
-		(folderId: string | null) => {
-			if (folderId) {
-				// Establecer el currentItem en la navigation store
-				setCurrentItem({
-					id: folderId,
-					itemType: 'folder',
-				});
-				console.log('Folder selected:', folderId);
-			} else {
-				setCurrentItem(null);
-			}
-		},
-		[setCurrentItem]
-	);
-
-	const selectGroup = useCallback((groupId: string | null) => {
-		// TODO: Implementar selector en GroupStore
-		console.log('Group selected:', groupId);
-	}, []);
-
-	const selectProperty = useCallback((propertyId: string | null) => {
-		// TODO: Implementar selector en PropertyStore
-		console.log('Property selected:', propertyId);
-	}, []);
-
-	const selectWildcard = useCallback((wildcardId: string | null) => {
-		// TODO: Implementar selector en WildcardStore
-		console.log('Wildcard selected:', wildcardId);
-	}, []);
-
-	// IDs seleccionados - extraídos de los stores usando las propiedades reales
-	const selectedCollectionId = collectionStore.selectedCollectionId || null;
-	const selectedFolderId = null; // TODO: Implementar store de folder
-	const selectedTagId = tagStore.selectedId || null;
-	const selectedAlbumId = albumStore.ui?.selectedIds?.[0] || null;
-	const selectedCharacterId = characterStore.ui?.selectedIds?.[0] || null;
-	const selectedPlaceId = placeStore.selectedPlaceId || null;
-	const selectedWorldItemId = worldItemStore.selectedWorldItemId || null;
-	const selectedConceptId = conceptStore.selectedConceptId || null;
-	const selectedPromptId = promptStore.selectedPrompt?.id || null;
-	const selectedNoteId = noteStore.selectedNoteId || null;
-	const selectedGroupId = null; // TODO: Obtener del store cuando esté implementado
-	const selectedPropertyId = null; // TODO: Obtener del store cuando esté implementado
-	const selectedWildcardId = null; // TODO: Obtener del store cuando esté implementado
-
-	// Función para limpiar todas las selecciones actuales
-	const clearAllSelections = useCallback(() => {
-		// 🧹 Limpiar todas las selecciones para evitar estados huérfanos
-		selectCollection(null);
-		selectFolder(null);
-		selectTag(null);
-		selectAlbum(null);
-		selectCharacter(null);
-		selectPlace(null);
-		selectWorldItem(null);
-		selectConcept(null);
-		selectPrompt(null);
-		selectNote(null);
-		selectGroup(null);
-		selectProperty(null);
-		selectWildcard(null);
-	}, [
-		selectCollection,
-		selectFolder,
-		selectTag,
-		selectAlbum,
-		selectCharacter,
-		selectPlace,
-		selectWorldItem,
-		selectConcept,
-		selectPrompt,
-		selectNote,
-		selectGroup,
-		selectProperty,
-		selectWildcard,
-	]);
-
-	// Función para manejar el clic en una categoría
+	// Handler genérico para categorías
 	const handleCategoryClick = useCallback(
-		(id: ViewType) => {
-			// Limpiar selecciones anteriores para evitar estados huérfanos
-			clearAllSelections();
-
-			// Actualizar la vista actual
-			setCurrentView(id);
+		(categoryId: ViewType) => {
+			logger.info(`📂 Click en categoría: ${categoryId}`);
+			setCurrentView(categoryId);
+			navigate(`/${categoryId}`);
 		},
-		[clearAllSelections, setCurrentView]
+		[navigate, setCurrentView]
 	);
 
-	// Función para manejar el clic en una colección
-	const handleCollectionClick = useCallback(
-		(collectionId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			// Establecer vista y colección actual
-			setCurrentView('collection-content');
-			selectCollection(collectionId);
-		},
-		[clearAllSelections, setCurrentView, selectCollection]
-	);
-
-	// Función para manejar el clic en una carpeta
+	// Handlers específicos para cada tipo de entidad - VERSIÓN TEMPORAL SIN STORES
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
-			console.log('🔄 Navegando a carpeta:', folderId);
-
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			// Establecer carpeta actual primero
-			selectFolder(folderId);
-
-			// Luego cambiar la vista
-			setCurrentView('folder-content');
-
-			console.log('✅ Vista cambiada a folder-content para carpeta:', folderId);
+			logger.info(`📁 Click en folder: ${folderId}`);
+			setCurrentView('folders');
+			navigate(`/folders/${folderId}`);
 		},
-		[clearAllSelections, setCurrentView, selectFolder]
+		[navigate, setCurrentView]
+	);
+
+	const handleCollectionClick = useCallback(
+		(collectionId: string) => {
+			logger.info(`📚 Click en collection: ${collectionId}`);
+			setCurrentView('collections');
+			navigate(`/collections/${collectionId}`);
+		},
+		[navigate, setCurrentView]
 	);
 
 	const handleTagClick = useCallback(
 		(tagId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('tag-content');
-			selectTag(tagId);
+			logger.info(`🏷️ Click en tag: ${tagId}`);
+			setCurrentView('tags');
+			navigate(`/tags/${tagId}`);
 		},
-		[clearAllSelections, setCurrentView, selectTag]
+		[navigate, setCurrentView]
 	);
 
 	const handleAlbumClick = useCallback(
 		(albumId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('album-content');
-			selectAlbum(albumId);
+			logger.info(`🎞️ Click en album: ${albumId}`);
+			setCurrentView('albums');
+			navigate(`/albums/${albumId}`);
 		},
-		[clearAllSelections, setCurrentView, selectAlbum]
+		[navigate, setCurrentView]
 	);
 
 	const handleCharacterClick = useCallback(
 		(characterId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('character-content');
-			selectCharacter(characterId);
+			logger.info(`👤 Click en character: ${characterId}`);
+			setCurrentView('characters');
+			navigate(`/characters/${characterId}`);
 		},
-		[clearAllSelections, setCurrentView, selectCharacter]
+		[navigate, setCurrentView]
 	);
 
 	const handlePlaceClick = useCallback(
 		(placeId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('place-content');
-			selectPlace(placeId);
+			logger.info(`📍 Click en place: ${placeId}`);
+			setCurrentView('places');
+			navigate(`/places/${placeId}`);
 		},
-		[clearAllSelections, setCurrentView, selectPlace]
+		[navigate, setCurrentView]
 	);
 
 	const handleWorldItemClick = useCallback(
 		(worldItemId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('world-item-content');
-			selectWorldItem(worldItemId);
+			logger.info(`🌍 Click en worldItem: ${worldItemId}`);
+			setCurrentView('world-items');
+			navigate(`/world-items/${worldItemId}`);
 		},
-		[clearAllSelections, setCurrentView, selectWorldItem]
+		[navigate, setCurrentView]
 	);
 
 	const handleConceptClick = useCallback(
 		(conceptId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('concept-content');
-			selectConcept(conceptId);
+			logger.info(`💡 Click en concept: ${conceptId}`);
+			setCurrentView('concepts');
+			navigate(`/concepts/${conceptId}`);
 		},
-		[clearAllSelections, setCurrentView, selectConcept]
+		[navigate, setCurrentView]
 	);
 
 	const handlePromptClick = useCallback(
 		(promptId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('prompt-content');
-			selectPrompt(promptId);
+			logger.info(`🎨 Click en prompt: ${promptId}`);
+			setCurrentView('prompts');
+			navigate(`/prompts/${promptId}`);
 		},
-		[clearAllSelections, setCurrentView, selectPrompt]
+		[navigate, setCurrentView]
 	);
 
 	const handleNoteClick = useCallback(
 		(noteId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('note-content');
-			selectNote(noteId);
+			logger.info(`📝 Click en note: ${noteId}`);
+			setCurrentView('notes');
+			navigate(`/notes/${noteId}`);
 		},
-		[clearAllSelections, setCurrentView, selectNote]
+		[navigate, setCurrentView]
 	);
 
 	const handleGroupClick = useCallback(
 		(groupId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('group-content');
-			selectGroup(groupId);
+			logger.info(`👥 Click en group: ${groupId}`);
+			setCurrentView('groups');
+			navigate(`/groups/${groupId}`);
 		},
-		[clearAllSelections, setCurrentView, selectGroup]
+		[navigate, setCurrentView]
 	);
 
 	const handlePropertyClick = useCallback(
 		(propertyId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('property-content');
-			selectProperty(propertyId);
+			logger.info(`🏷️ Click en property: ${propertyId}`);
+			setCurrentView('properties');
+			navigate(`/properties/${propertyId}`);
 		},
-		[clearAllSelections, setCurrentView, selectProperty]
+		[navigate, setCurrentView]
 	);
 
 	const handleWildcardClick = useCallback(
 		(wildcardId: string) => {
-			// Limpiar otras selecciones
-			clearAllSelections();
-
-			setCurrentView('wildcard-content');
-			selectWildcard(wildcardId);
+			logger.info(`🎲 Click en wildcard: ${wildcardId}`);
+			setCurrentView('wildcards');
+			navigate(`/wildcards/${wildcardId}`);
 		},
-		[clearAllSelections, setCurrentView, selectWildcard]
+		[navigate, setCurrentView]
 	);
 
-	// Función para obtener el ID actualmente seleccionado según la vista
-	const getCurrentSelectedId = useCallback(() => {
-		switch (currentView) {
-			case 'collection-content':
-				return selectedCollectionId;
-			case 'folder-content':
-				return selectedFolderId;
-			case 'tag-content':
-				return selectedTagId;
-			case 'album-content':
-				return selectedAlbumId;
-			case 'character-content':
-				return selectedCharacterId;
-			case 'place-content':
-				return selectedPlaceId;
-			case 'world-item-content':
-				return selectedWorldItemId;
-			case 'concept-content':
-				return selectedConceptId;
-			case 'prompt-content':
-				return selectedPromptId;
-			case 'note-content':
-				return selectedNoteId;
-			case 'group-content':
-				return selectedGroupId;
-			case 'property-content':
-				return selectedPropertyId;
-			case 'wildcard-content':
-				return selectedWildcardId;
-			default:
-				return null;
-		}
-	}, [
-		currentView,
-		selectedCollectionId,
-		selectedTagId,
-		selectedAlbumId,
-		selectedCharacterId,
-		selectedPlaceId,
-		selectedWorldItemId,
-		selectedConceptId,
-		selectedPromptId,
-		selectedNoteId,
-	]);
-
 	return {
-		// Estado actual
 		currentView,
-		currentSelectedId: getCurrentSelectedId(),
-
-		// IDs seleccionados
-		selectedCollectionId,
-		selectedFolderId,
-		selectedTagId,
-		selectedAlbumId,
-		selectedCharacterId,
-		selectedPlaceId,
-		selectedWorldItemId,
-		selectedConceptId,
-		selectedPromptId,
-		selectedNoteId,
-		selectedGroupId,
-		selectedPropertyId,
-		selectedWildcardId,
-
-		// Manejadores de categorías
 		handleCategoryClick,
-		clearAllSelections,
-
-		// Manejadores específicos por entidad
-		handleCollectionClick,
 		handleFolderClick,
+		handleCollectionClick,
 		handleTagClick,
 		handleAlbumClick,
 		handleCharacterClick,
@@ -375,8 +161,5 @@ export function useCategoryHandlers() {
 		handleGroupClick,
 		handlePropertyClick,
 		handleWildcardClick,
-
-		// Utilidades
-		getCurrentSelectedId,
 	};
 }

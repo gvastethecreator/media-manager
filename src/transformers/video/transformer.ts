@@ -1,73 +1,88 @@
 /**
  * @file Transformer optimizado para la entidad Video
  * @module transformers/video/transformer
- * @description Transforma videos de Prisma a VideoWithStats con análisis técnico avanzado
+ * @description Transforma videos de Drizzle a VideoWithStats con análisis técnico avanzado
  * Última refactorización: 2025-01-27
+ 
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type {
-	PrismaVideoWithCounts,
-	VideoComplete,
-	VideoStatistics,
-	VideoWithStats,
-} from '@/types/entities/video/types';
+import type { VideoComplete, VideoStats, VideoWithStats } from '@/types/entities/video/types';
 import { VideoQuality } from '@/types/entities/video/types';
-import type { Prisma } from '@prisma/client';
+
+// Tipos locales equivalentes a Drizzle (migración a Drizzle)
+type DrizzleVideoWithCounts = {
+	id: string;
+	name: string | null;
+	path: string;
+	size: number;
+	width: number | null;
+	height: number | null;
+	duration: number;
+	metadata: string | null;
+	thumbnail: Buffer | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	thumbnailError: string | null;
+	thumbnailErrorAt: Date | null;
+	thumbnailOptimizedAt: Date | null;
+	isFavorite: boolean;
+	folderId: string | null;
+	addedAt: Date;
+	createdAt: Date;
+	updatedAt: Date;
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+};
+
+type DrizzleVideoFromDrizzle = DrizzleVideoWithCounts & {
+	folder?: any;
+	tags?: any[];
+	albums?: any[];
+	collections?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
+};
 
 const logger = serverLogger.withContext('VideoTransformer');
 
-// Tipo para compatibilidad legacy
-type VideoFromPrisma = Prisma.VideoGetPayload<{
-	include: {
-		folder: true;
-		tags: true;
-		albums: true;
-		collections: true;
-		characters: true;
-		places: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		notes: true;
-		wildcards: true;
-		properties: true;
-		groups: true;
-		_count: {
-			select: {
-				albums: true;
-				collections: true;
-				tags: true;
-				characters: true;
-				places: true;
-				worldItems: true;
-				concepts: true;
-				prompts: true;
-				notes: true;
-				wildcards: true;
-				properties: true;
-				groups: true;
-			};
-		};
-	};
-}>;
-
 /**
- * 🎬 Transforma un objeto de video de Prisma a VideoWithStats,
+ * 🎬 Transforma un objeto de video de Drizzle a VideoWithStats,
  * calculando todas las estadísticas y análisis técnico.
+ * ✅ MIGRADO A DRIZZLE
  *
- * @param prismaVideo - El objeto de video obtenido de Prisma, con los conteos.
+ * @param drizzleVideo - El objeto de video obtenido de Drizzle, con los conteos.
  * @returns Un objeto VideoWithStats completo y optimizado.
  */
-export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): VideoWithStats {
-	if (!prismaVideo) {
-		throw new TransformerError('Video de Prisma es null o undefined');
+export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts): VideoWithStats {
+	if (!drizzleVideo) {
+		throw new TransformerError('Video de Drizzle es null o undefined');
 	}
 
 	try {
-		const { _count, ...baseData } = prismaVideo;
+		const { _count, ...baseData } = drizzleVideo;
 		const counts = _count || {};
 
 		// 📊 Calcular estadísticas de relaciones
@@ -126,7 +141,7 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);
 		const hasAudio = metadata?.hasAudio ?? true; // Asumir que tiene audio por defecto
-		const hasSubtitles = metadata?.subtitleLanguages?.length > 0 ?? false;
+		const hasSubtitles = (metadata?.subtitleLanguages?.length ?? 0) > 0;
 		const bitrate = metadata?.bitrate || null;
 		const frameRate = metadata?.frameRate || null;
 
@@ -199,121 +214,70 @@ export function fromPrismaVideoWithCounts(prismaVideo: PrismaVideoWithCounts): V
 
 		return {
 			...baseData,
-			_count: {
-				albums: albumsCount,
-				collections: collectionsCount,
-				tags: tagsCount,
-				characters: charactersCount,
-				places: placesCount,
-				worldItems: worldItemsCount,
-				concepts: conceptsCount,
-				prompts: promptsCount,
-				notes: notesCount,
-				wildcards: wildcardsCount,
-				properties: propertiesCount,
-				groups: groupsCount,
-			},
 			statistics,
 		};
 	} catch (error) {
-		logger.error('❌ Error transformando video desde Prisma', {
-			error,
-			videoId: prismaVideo?.id,
-		});
-		throw new TransformerError(`No se pudo transformar el video: ${error.message}`);
+		logger.error('Error al transformar video de Drizzle:', { error, videoId: drizzleVideo?.id });
+		throw new TransformerError(`Error al transformar video: ${error}`);
 	}
 }
 
 /**
- * 🎬 Función legacy para compatibilidad con otros transformers
- * @deprecated Usar fromPrismaVideoWithCounts para mejor rendimiento
+ * 🎬 Transforma un video de Drizzle a VideoComplete (sin estadísticas avanzadas)
+ * ✅ MIGRADO A DRIZZLE
+ *
+ * @param videoFromDrizzle Video con relaciones de Drizzle
+ * @returns VideoComplete o null si hay error
  */
-export function fromPrismaVideo(videoFromPrisma: VideoFromPrisma | null): VideoComplete | null {
-	if (!videoFromPrisma) return null;
+export function fromDrizzleVideo(videoFromDrizzle: DrizzleVideoFromDrizzle | null): VideoComplete | null {
+	if (!videoFromDrizzle) {
+		return null;
+	}
 
 	try {
-		const { _count, ...baseData } = videoFromPrisma;
-
+		// Transformación básica sin estadísticas complejas
 		return {
-			...baseData,
-			metadata: baseData.metadata || null,
-			thumbnail: baseData.thumbnail ? Buffer.from(baseData.thumbnail) : null,
-			tags: baseData.tags ?? [],
-			albums: baseData.albums ?? [],
-			collections: baseData.collections ?? [],
-			characters: baseData.characters ?? [],
-			places: baseData.places ?? [],
-			worldItems: baseData.worldItems ?? [],
-			concepts: baseData.concepts ?? [],
-			prompts: baseData.prompts ?? [],
-			notes: baseData.notes ?? [],
-			wildcards: baseData.wildcards ?? [],
-			properties: baseData.properties ?? [],
-			groups: baseData.groups ?? [],
-			_count: {
-				albums: _count?.albums ?? 0,
-				collections: _count?.collections ?? 0,
-				tags: _count?.tags ?? 0,
-				characters: _count?.characters ?? 0,
-				places: _count?.places ?? 0,
-				worldItems: _count?.worldItems ?? 0,
-				concepts: _count?.concepts ?? 0,
-				prompts: _count?.prompts ?? 0,
-				notes: _count?.notes ?? 0,
-				wildcards: _count?.wildcards ?? 0,
-				properties: _count?.properties ?? 0,
-				groups: _count?.groups ?? 0,
-			},
+			...videoFromDrizzle,
+			// Simplificar relaciones para evitar dependencias circulares
+			folder: videoFromDrizzle.folder || null,
+			tags: videoFromDrizzle.tags || [],
+			albums: videoFromDrizzle.albums || [],
+			collections: videoFromDrizzle.collections || [],
+			characters: videoFromDrizzle.characters || [],
+			places: videoFromDrizzle.places || [],
+			worldItems: videoFromDrizzle.worldItems || [],
+			concepts: videoFromDrizzle.concepts || [],
+			prompts: videoFromDrizzle.prompts || [],
+			notes: videoFromDrizzle.notes || [],
+			wildcards: videoFromDrizzle.wildcards || [],
+			properties: videoFromDrizzle.properties || [],
+			groups: videoFromDrizzle.groups || [],
 		};
 	} catch (error) {
-		logger.error(`Error transformando video desde Prisma: ${videoFromPrisma.id}`, {
-			error,
-			videoId: videoFromPrisma.id,
-		});
+		logger.error('Error al transformar video simple de Drizzle:', { error, videoId: videoFromDrizzle?.id });
 		return null;
 	}
 }
 
 /**
- * 🎬 Función legacy para múltiples videos
- * @deprecated Usar fromPrismaVideosWithCounts para mejor rendimiento
+ * 🎬 Transforma una lista de videos de Drizzle a VideoComplete
+ * ✅ MIGRADO A DRIZZLE
  */
-export function fromPrismaVideos(videos: VideoFromPrisma[]): VideoComplete[] {
-	if (!Array.isArray(videos)) {
-		logger.error('⚠️ Intentando transformar un array de videos inválido:', videos);
-		return [];
-	}
-
-	try {
-		return videos.map(fromPrismaVideo).filter((video): video is VideoComplete => video !== null);
-	} catch (error) {
-		logger.error('❌ Error transformando lista de videos:', error);
-		return [];
-	}
+export function fromDrizzleVideos(videos: DrizzleVideoFromDrizzle[]): VideoComplete[] {
+	return videos.map(fromDrizzleVideo).filter((v): v is VideoComplete => v !== null);
 }
 
 /**
- * 🎬 Transforma múltiples videos de Prisma.
- *
- * @param videos Array de videos de Prisma.
- * @returns Array de videos transformados a VideoWithStats.
+ * 🎬 Transforma una lista de videos con conteos de Drizzle a VideoWithStats
+ * ✅ MIGRADO A DRIZZLE
  */
-export function fromPrismaVideosWithCounts(videos: PrismaVideoWithCounts[]): VideoWithStats[] {
-	if (!Array.isArray(videos)) {
-		logger.error('⚠️ Intentando transformar un array de videos inválido:', videos);
-		throw new TransformerError('Error transformando videos: no es un array');
-	}
-
-	try {
-		return videos.map(fromPrismaVideoWithCounts);
-	} catch (error) {
-		logger.error('❌ Error transformando lista de videos:', error);
-		throw new TransformerError('Error transformando lista de videos');
-	}
+export function fromDrizzleVideosWithCounts(videos: DrizzleVideoWithCounts[]): VideoWithStats[] {
+	return videos.map(fromDrizzleVideoWithCounts);
 }
 
 /**
- * 🔄 Convierte array de VideoWithStats a Record para store optimizado
+ * 🗂️ Convierte un array de videos a un Record indexado por ID
+ * ✅ MIGRADO A DRIZZLE
  */
 export function videosToRecord(videos: VideoWithStats[]): Record<string, VideoWithStats> {
 	return videos.reduce(
@@ -326,43 +290,45 @@ export function videosToRecord(videos: VideoWithStats[]): Record<string, VideoWi
 }
 
 /**
- * 🔍 Obtiene video por ID desde Record (acceso O(1))
+ * 🔍 Obtiene un video por ID del Record
+ * ✅ MIGRADO A DRIZZLE
  */
 export function getVideoById(videos: Record<string, VideoWithStats>, id: string): VideoWithStats | undefined {
 	return videos[id];
 }
 
 /**
- * 📋 Convierte Record a array para iteración
+ * 📋 Obtiene todos los videos del Record como array
+ * ✅ MIGRADO A DRIZZLE
  */
 export function getAllVideos(videos: Record<string, VideoWithStats>): VideoWithStats[] {
 	return Object.values(videos);
 }
 
-// === FUNCIONES AUXILIARES ===
+// === FUNCIONES DE UTILIDAD ===
 
 /**
- * 📐 Calcula la relación de aspecto del video
+ * 📐 Calcula la relación de aspecto de un video
  */
 function calculateAspectRatio(width: number | null, height: number | null): string {
 	if (!width || !height) return 'unknown';
-
 	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 	const divisor = gcd(width, height);
-	const ratioWidth = width / divisor;
-	const ratioHeight = height / divisor;
+	const aspectWidth = width / divisor;
+	const aspectHeight = height / divisor;
 
-	// Ratios comunes
-	if (ratioWidth === 16 && ratioHeight === 9) return '16:9';
-	if (ratioWidth === 4 && ratioHeight === 3) return '4:3';
-	if (ratioWidth === 21 && ratioHeight === 9) return '21:9';
-	if (ratioWidth === 1 && ratioHeight === 1) return '1:1';
+	// Casos comunes
+	if (aspectWidth === 16 && aspectHeight === 9) return '16:9';
+	if (aspectWidth === 4 && aspectHeight === 3) return '4:3';
+	if (aspectWidth === 1 && aspectHeight === 1) return '1:1';
+	if (aspectWidth === 21 && aspectHeight === 9) return '21:9';
+	if (aspectWidth === 3 && aspectHeight === 2) return '3:2';
 
-	return `${ratioWidth}:${ratioHeight}`;
+	return `${aspectWidth}:${aspectHeight}`;
 }
 
 /**
- * 📺 Formatea la resolución del video
+ * 📏 Formatea la resolución del video
  */
 function formatResolution(width: number | null, height: number | null): string {
 	if (!width || !height) return 'unknown';
@@ -370,21 +336,23 @@ function formatResolution(width: number | null, height: number | null): string {
 }
 
 /**
- * 🎯 Determina el nivel de calidad basado en resolución
+ * 🏆 Determina el nivel de calidad basado en resolución
  */
 function determineQualityLevel(width: number | null, height: number | null): VideoQuality {
 	if (!width || !height) return VideoQuality.UNKNOWN;
 
 	const pixels = width * height;
 
-	if (pixels >= 2073600) return VideoQuality.ULTRA; // 1920x1080 o superior
-	if (pixels >= 921600) return VideoQuality.HIGH; // 1280x720
-	if (pixels >= 307200) return VideoQuality.MEDIUM; // 640x480
+	if (pixels >= 8294400) return VideoQuality.UHD_4K; // 3840x2160
+	if (pixels >= 2073600) return VideoQuality.QHD_2K; // 1920x1080
+	if (pixels >= 921600) return VideoQuality.HD; // 1280x720
+	if (pixels >= 307200) return VideoQuality.SD; // 640x480
+
 	return VideoQuality.LOW;
 }
 
 /**
- * 🏆 Calcula el quality score del video (0-100)
+ * 📊 Calcula un score de calidad general (0-100)
  */
 function calculateQualityScore(params: {
 	width: number | null;
@@ -397,71 +365,83 @@ function calculateQualityScore(params: {
 }): number {
 	let score = 0;
 
-	// Resolución (30 puntos)
+	// Resolución (40 puntos máximo)
 	const pixels = (params.width || 0) * (params.height || 0);
-	if (pixels >= 2073600)
-		score += 30; // 1080p+
+	if (pixels >= 8294400)
+		score += 40; // 4K
+	else if (pixels >= 2073600)
+		score += 35; // 2K
 	else if (pixels >= 921600)
-		score += 25; // 720p
+		score += 30; // HD
 	else if (pixels >= 307200)
-		score += 15; // 480p
-	else if (pixels > 0) score += 5; // Cualquier resolución
+		score += 20; // SD
+	else score += 10; // Low
 
-	// Duración (20 puntos)
+	// Duración (20 puntos máximo)
 	const minutes = params.duration / 60;
-	if (minutes >= 1 && minutes <= 120)
-		score += 20; // Duración razonable
-	else if (minutes > 0) score += 10; // Cualquier duración
+	if (minutes >= 60)
+		score += 20; // Película
+	else if (minutes >= 30)
+		score += 18; // Episodio largo
+	else if (minutes >= 10)
+		score += 15; // Episodio corto
+	else if (minutes >= 3)
+		score += 12; // Clip largo
+	else if (minutes >= 1)
+		score += 8; // Clip corto
+	else score += 3; // Muy corto
 
-	// Tamaño vs duración (15 puntos)
-	const mbPerMinute = params.size / (1024 * 1024) / minutes;
-	if (mbPerMinute >= 5 && mbPerMinute <= 50)
-		score += 15; // Bitrate razonable
-	else if (mbPerMinute > 0) score += 5;
+	// Tamaño vs calidad (15 puntos máximo)
+	const mbPerMinute = params.size / (1024 * 1024) / Math.max(minutes, 0.1);
+	if (mbPerMinute >= 50)
+		score += 15; // Alta calidad
+	else if (mbPerMinute >= 20)
+		score += 12; // Buena calidad
+	else if (mbPerMinute >= 10)
+		score += 8; // Calidad media
+	else if (mbPerMinute >= 5)
+		score += 5; // Baja calidad
+	else score += 2; // Muy baja calidad
 
-	// Metadatos (15 puntos)
-	if (params.hasMetadata) score += 10;
+	// Metadatos (10 puntos máximo)
+	if (params.hasMetadata) score += 5;
 	if (params.hasThumbnail) score += 5;
 
-	// Asociaciones (20 puntos)
-	if (params.totalRelations >= 10) score += 20;
-	else if (params.totalRelations >= 5) score += 15;
-	else if (params.totalRelations >= 1) score += 10;
-	else score += 5; // Bonus base
+	// Relaciones (15 puntos máximo)
+	score += Math.min(params.totalRelations, 15);
 
-	return Math.min(100, Math.max(0, score));
+	return Math.min(score, 100);
 }
 
 /**
- * 📈 Determina el technical grade
+ * 📈 Determina el grado técnico basado en métricas
  */
 function determineTechnicalGrade(
 	qualityScore: number,
 	qualityLevel: VideoQuality,
-	megabytes: number
+	_megabytes: number
 ): 'A' | 'B' | 'C' | 'D' {
-	if (qualityScore >= 85 && qualityLevel === VideoQuality.ULTRA && megabytes >= 100) return 'A';
-	if (qualityScore >= 70 && qualityLevel >= VideoQuality.HIGH && megabytes >= 50) return 'B';
-	if (qualityScore >= 50 && qualityLevel >= VideoQuality.MEDIUM) return 'C';
+	if (qualityScore >= 80 && qualityLevel >= VideoQuality.QHD_2K) return 'A';
+	if (qualityScore >= 60 && qualityLevel >= VideoQuality.HD) return 'B';
+	if (qualityScore >= 40 && qualityLevel >= VideoQuality.SD) return 'C';
 	return 'D';
 }
 
 /**
- * 🔍 Parsea metadatos del video
+ * 🤖 Parsea metadatos del video
  */
 function parseVideoMetadata(metadataStr: string | null): any {
 	if (!metadataStr) return null;
 
 	try {
 		return JSON.parse(metadataStr);
-	} catch (error) {
-		logger.warn('⚠️ JSON inválido para metadatos de video:', metadataStr);
+	} catch {
 		return null;
 	}
 }
 
 /**
- * 🏷️ Genera tags automáticos basados en características del video
+ * 🏷️ Genera tags automáticos basados en características
  */
 function generateAutoTags(params: {
 	qualityLevel: VideoQuality;
@@ -474,66 +454,63 @@ function generateAutoTags(params: {
 	const tags: string[] = [];
 
 	// Tags de calidad
-	if (params.qualityLevel === VideoQuality.ULTRA) tags.push('ultra-hd', '4k');
-	else if (params.qualityLevel === VideoQuality.HIGH) tags.push('hd', '1080p');
-	else if (params.qualityLevel === VideoQuality.MEDIUM) tags.push('sd', '720p');
+	if (params.qualityLevel >= VideoQuality.UHD_4K) tags.push('4K', 'Ultra HD');
+	else if (params.qualityLevel >= VideoQuality.QHD_2K) tags.push('2K', 'Full HD');
+	else if (params.qualityLevel >= VideoQuality.HD) tags.push('HD');
+	else if (params.qualityLevel >= VideoQuality.SD) tags.push('SD');
 
 	// Tags de duración
-	if (params.durationMinutes < 1) tags.push('corto', 'clip');
-	else if (params.durationMinutes < 10) tags.push('breve');
-	else if (params.durationMinutes < 60) tags.push('medio');
-	else tags.push('largo', 'película');
+	if (params.durationMinutes >= 90) tags.push('Película', 'Largo');
+	else if (params.durationMinutes >= 45) tags.push('Episodio');
+	else if (params.durationMinutes >= 10) tags.push('Corto');
+	else if (params.durationMinutes >= 1) tags.push('Clip');
+	else tags.push('Micro');
 
-	// Tags técnicos
-	if (params.hasAudio) tags.push('con-audio');
-	else tags.push('sin-audio', 'mudo');
+	// Tags de características
+	if (!params.hasAudio) tags.push('Sin Audio');
+	if (params.hasSubtitles) tags.push('Subtítulos');
 
-	if (params.hasSubtitles) tags.push('subtitulado');
-
-	// Tags de formato
-	if (params.aspectRatio === '16:9') tags.push('widescreen');
-	else if (params.aspectRatio === '4:3') tags.push('formato-clásico');
-	else if (params.aspectRatio === '21:9') tags.push('ultra-wide');
+	// Tags de aspecto
+	if (params.aspectRatio === '16:9') tags.push('Widescreen');
+	else if (params.aspectRatio === '4:3') tags.push('Clásico');
+	else if (params.aspectRatio === '1:1') tags.push('Cuadrado');
+	else if (params.aspectRatio === '21:9') tags.push('Ultrawide');
 
 	// Tags de tamaño
-	if (params.megabytes >= 1000) tags.push('archivo-grande');
-	else if (params.megabytes < 50) tags.push('archivo-pequeño');
+	if (params.megabytes >= 1000) tags.push('Gran Tamaño');
+	else if (params.megabytes >= 100) tags.push('Tamaño Medio');
+	else tags.push('Compacto');
 
 	return tags;
 }
 
-// formatFileSize se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
-
 /**
- * ⏱️ Formatea la duración del video
+ * ⏱️ Formatea duración en segundos a formato legible
  */
 function formatDuration(seconds: number): string {
-	if (seconds < 60) return `${Math.round(seconds)}s`;
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const remainingSeconds = Math.floor(seconds % 60);
 
-	const minutes = Math.floor(seconds / 60);
-	const remainingSeconds = Math.round(seconds % 60);
-
-	if (minutes < 60) {
-		return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+	if (hours > 0) {
+		return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 	}
 
-	const hours = Math.floor(minutes / 60);
-	const remainingMinutes = minutes % 60;
-
-	return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+	return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
 /**
- * 🏷️ Obtiene etiqueta de calidad combinada
+ * 🏷️ Obtiene etiqueta de calidad legible
  */
 function getQualityLabel(qualityLevel: VideoQuality, technicalGrade: string): string {
-	const qualityMap = {
-		[VideoQuality.ULTRA]: 'Ultra HD',
-		[VideoQuality.HIGH]: 'HD',
-		[VideoQuality.MEDIUM]: 'SD',
+	const qualityNames = {
+		[VideoQuality.UHD_4K]: '4K Ultra HD',
+		[VideoQuality.QHD_2K]: '2K Full HD',
+		[VideoQuality.HD]: 'HD',
+		[VideoQuality.SD]: 'SD',
 		[VideoQuality.LOW]: 'Baja',
 		[VideoQuality.UNKNOWN]: 'Desconocida',
 	};
 
-	return `${qualityMap[qualityLevel]} (${technicalGrade})`;
+	return `${qualityNames[qualityLevel]} (${technicalGrade})`;
 }

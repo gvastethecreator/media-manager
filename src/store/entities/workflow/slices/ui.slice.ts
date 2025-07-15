@@ -18,7 +18,7 @@ export const createWorkflowUISlice: StateCreator<
 	[['zustand/immer', never]],
 	[],
 	WorkflowUIState & WorkflowUIActions
-> = (set, get) => ({
+> = (set, _get) => ({
 	...initialState,
 
 	selectWorkflow: (id) => {

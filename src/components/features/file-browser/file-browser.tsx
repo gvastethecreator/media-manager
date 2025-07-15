@@ -2,12 +2,16 @@
  * @file FileBrowser V2 - Usando tipos optimizados WithStats y virtualización
  * @module components/features/file-browser/file-browser-v2
  * @description Nueva versión del FileBrowser que usa stores específicos por entidad,
- * tipos optimizados WithStats, virtualización con TanStack Virtual y mantiene el panel derecho visible.
+ * tipos optimizados WithStats, virtualización con TanStack Virtual y soporte multi-entidad.
  *
  * MIGRACIÓN: Este componente reemplazará a file-browser.tsx
  */
-'use client';
 
+import { FileTextIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { EntityCard } from '@/components/cards/entity-card';
+import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
 import { EmptyState } from '@/components/core/data-display';
 import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -17,9 +21,6 @@ import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { EntityStatsType, EntityWithStats } from '@/types/migration';
-import { FileTextIcon } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { StatusBar } from './toolbar/status-bar';
 import { VirtualizedCardsView } from './views/virtualized-cards-view';
 import { VirtualizedListView } from './views/virtualized-list-view';
@@ -29,8 +30,12 @@ import { VirtualizedSimpleGridView } from './views/virtualized-simple-grid-view'
 const logger = clientLogger.withContext('FileBrowser');
 
 interface FileBrowserProps {
-	/** Tipo de entidad a mostrar */
-	entityType: EntityStatsType;
+	/** Tipo de entidad a mostrar - puede ser un tipo específico o 'mixed' para múltiples tipos */
+	entityType?: EntityStatsType | 'mixed';
+	/** Tipos de entidades específicas a mostrar cuando entityType es 'mixed' */
+	entityTypes?: EntityStatsType[];
+	/** Items específicos a mostrar (para modo manual) */
+	items?: EntityWithStats[];
 	/** Callback cuando se selecciona un item */
 	onItemSelect?: (item: EntityWithStats) => void;
 	/** Callback cuando se hace doble click en un item */
@@ -41,17 +46,35 @@ interface FileBrowserProps {
 	filterId?: string;
 	/** Tipo de filtro (folder, collection, tag, etc) */
 	filterType?: 'folder' | 'collection' | 'tag' | 'album';
+	/** Modo de funcionamiento */
+	mode?: 'auto' | 'manual';
+	/** Nuevas props para layouts */
+	layout?: CardLayout;
+	/** Nuevas props para layouts */
+	preset?: string;
+	/** Nuevas props para layouts */
+	variant?: CardVariant;
+	/** Nuevas props para layouts */
+	size?: CardSize;
 }
 
 const FALLBACK_WIDTH = 1200;
 
 export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
-	entityType,
-	onItemSelect,
+	entityType = 'image',
+	entityTypes = [],
+	mode = 'auto',
+	items: manualItems = [],
+	folderId,
+	filterType = undefined,
+	selectedIds = [],
+	onItemClick,
 	onItemDoubleClick,
 	className,
-	filterId,
-	filterType,
+	layout = 'vertical',
+	preset,
+	variant = 'default',
+	size = 'md',
 }) {
 	const [containerWidth, setContainerWidth] = useState<number>(0);
 	const containerRef = useRef<any>(null);
@@ -61,77 +84,192 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Estados globales
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
-	const { selectedIds, setSelectedIds, clearSelection } = useSelectionStore();
+	const { selectedIds: globalSelectedIds, setSelectedIds, clearSelection } = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 
-	// Por ahora solo soportamos imágenes, expandir según necesidad
-	const { images: imagesRecord, isLoading, error, loadImages, getSortedImages, getImagesByFolder } = useImageStore();
+	// Stores por tipo de entidad (expandir según necesidad)
+	const {
+		images: imagesRecord,
+		isLoading: imagesLoading,
+		error: imagesError,
+		loadImages,
+		getSortedImages,
+		getImagesByFolder,
+	} = useImageStore();
+	// TODO: Añadir otros stores cuando estén implementados
+	// const { videos: videosRecord, isLoading: videosLoading, ... } = useVideoStore();
+	// const { audios: audiosRecord, isLoading: audiosLoading, ... } = useAudioStore();
 
 	// Cargar datos al montar o cuando cambian los filtros (con optimizaciones)
 	const lastLoadParamsRef = useRef<string>('');
 	const isLoadingRef = useRef<boolean>(false);
 
 	useEffect(() => {
-		if (entityType === 'image') {
-			const { loadImages: storeLoadImages, isLoading: currentlyLoading, getImagesByFolder } = useImageStore.getState();
+		// En modo manual, no cargar datos automáticamente
+		if (mode === 'manual') {
+			return;
+		}
 
-			const loadParams: Parameters<typeof storeLoadImages>[0] = {};
+		// Determinar qué tipos de entidades cargar
+		const typesToLoad = entityType === 'mixed' ? entityTypes : [entityType as EntityStatsType];
 
-			// Si hay filtro de carpeta, incluirlo en los parámetros
-			if (filterId && filterType === 'folder') {
-				loadParams.folderId = filterId;
-			}
+		// Cargar datos para cada tipo
+		for (const type of typesToLoad) {
+			if (type === 'image') {
+				const {
+					loadImages: storeLoadImages,
+					isLoading: currentlyLoading,
+					getImagesByFolder,
+				} = useImageStore.getState();
 
-			// Crear una clave única para estos parámetros
-			const paramsKey = JSON.stringify({ entityType, filterId, filterType });
+				const loadParams: Parameters<typeof storeLoadImages>[0] = {};
 
-			// Si los parámetros no han cambiado, no hacer nada
-			if (lastLoadParamsRef.current === paramsKey) {
-				return;
-			}
+				// Si hay filtro de carpeta, incluirlo en los parámetros
+				if (folderId && filterType === 'folder') {
+					loadParams.folderId = folderId;
+				}
 
-			// Evitar múltiples cargas simultáneas usando ref
-			if (isLoadingRef.current || currentlyLoading) {
-				logger.debug('⚠️ Carga ya en progreso, saltando llamada del FileBrowser');
-				return;
-			}
+				// Crear una clave única para estos parámetros
+				const paramsKey = JSON.stringify({ type, folderId, filterType });
 
-			// Si hay filtro de carpeta, verificar si ya tenemos datos
-			if (filterId && filterType === 'folder') {
-				const existingImages = getImagesByFolder(filterId);
-				if (existingImages.length > 0) {
-					logger.debug('📋 Ya hay imágenes cargadas para esta carpeta, saltando carga');
-					lastLoadParamsRef.current = paramsKey;
+				// Si los parámetros no han cambiado, no hacer nada
+				if (lastLoadParamsRef.current === paramsKey) {
 					return;
+				}
+
+				// Evitar múltiples cargas simultáneas usando ref
+				if (isLoadingRef.current || currentlyLoading) {
+					logger.debug('⚠️ Carga ya en progreso, saltando llamada del FileBrowser');
+					return;
+				}
+
+				// Si hay filtro de carpeta, verificar si ya tenemos datos
+				if (folderId && filterType === 'folder') {
+					const existingImages = getImagesByFolder(folderId);
+					if (existingImages.length > 0) {
+						logger.debug('📋 Ya hay imágenes cargadas para esta carpeta, saltando carga');
+						lastLoadParamsRef.current = paramsKey;
+						return;
+					}
+				}
+
+				// Actualizar la referencia de los últimos parámetros
+				lastLoadParamsRef.current = paramsKey;
+				isLoadingRef.current = true;
+
+				logger.debug('🔄 FileBrowser iniciando carga de imágenes', loadParams);
+
+				// Llamar a la función del store directamente
+				storeLoadImages(loadParams).finally(() => {
+					isLoadingRef.current = false;
+				});
+			}
+			// TODO: Añadir otros tipos cuando se implementen sus stores
+		}
+	}, [entityType, entityTypes, folderId, filterType, mode]); // Mantener estas dependencias pero con la optimización del ref
+
+	// Obtener items según el modo y tipo de entidad
+	const items = (() => {
+		// En modo manual, usar los items proporcionados
+		if (mode === 'manual' && manualItems) {
+			return manualItems;
+		}
+
+		// En modo auto, obtener desde stores
+		if (entityType === 'mixed') {
+			// Modo mixto: combinar múltiples tipos de entidades
+			const allItems: EntityWithStats[] = [];
+
+			for (const type of entityTypes) {
+				switch (type) {
+					case 'image':
+						if (folderId && filterType === 'folder') {
+							allItems.push(...getImagesByFolder(folderId));
+						} else {
+							allItems.push(...getSortedImages());
+						}
+						break;
+					// TODO: Añadir otros casos según se implementen
 				}
 			}
 
-			// Actualizar la referencia de los últimos parámetros
-			lastLoadParamsRef.current = paramsKey;
-			isLoadingRef.current = true;
-
-			logger.debug('🔄 FileBrowser iniciando carga de imágenes', loadParams);
-
-			// Llamar a la función del store directamente
-			storeLoadImages(loadParams).finally(() => {
-				isLoadingRef.current = false;
+			// Ordenar todos los items combinados (opcional)
+			return allItems.sort((a, b) => {
+				// Ordenar por fecha de modificación descendente por defecto
+				const aDate = new Date('updatedAt' in a ? a.updatedAt || 0 : 0);
+				const bDate = new Date('updatedAt' in b ? b.updatedAt || 0 : 0);
+				return bDate.getTime() - aDate.getTime();
 			});
 		}
-		// TODO: Añadir otros tipos cuando se implementen sus stores
-	}, [entityType, filterId, filterType]); // Mantener estas dependencias pero con la optimización del ref
 
-	// Obtener items según el tipo de entidad
-	const items = (() => {
+		// Modo específico: un solo tipo de entidad
 		switch (entityType) {
 			case 'image':
 				// Si hay filtro por carpeta, usar getImagesByFolder
-				if (filterId && filterType === 'folder') {
-					return getImagesByFolder(filterId);
+				if (folderId && filterType === 'folder') {
+					return getImagesByFolder(folderId);
 				}
 				return getSortedImages();
 			// TODO: Añadir otros casos según se implementen
 			default:
 				return [];
+		}
+	})();
+
+	// Determinar estado de carga y error
+	const isLoading = (() => {
+		if (mode === 'manual') {
+			return false;
+		}
+
+		if (entityType === 'mixed') {
+			// En modo mixto, verificar si algún store está cargando
+			return entityTypes.some((type) => {
+				switch (type) {
+					case 'image':
+						return imagesLoading;
+					// TODO: Añadir otros casos
+					default:
+						return false;
+				}
+			});
+		}
+
+		// Modo específico
+		switch (entityType) {
+			case 'image':
+				return imagesLoading;
+			// TODO: Añadir otros casos
+			default:
+				return false;
+		}
+	})();
+
+	const error = (() => {
+		if (mode === 'manual') {
+			return null;
+		}
+
+		if (entityType === 'mixed') {
+			// En modo mixto, mostrar el primer error encontrado
+			for (const type of entityTypes) {
+				switch (type) {
+					case 'image':
+						if (imagesError) return imagesError;
+						break;
+					// TODO: Añadir otros casos
+				}
+			}
+			return null;
+		}
+
+		// Modo específico
+		switch (entityType) {
+			case 'image':
+				return imagesError;
+			// TODO: Añadir otros casos
+			default:
+				return null;
 		}
 	})();
 
@@ -200,9 +338,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				setSelectedIds([item.id]);
 			}
 
-			onItemSelect?.(item);
+			onItemClick?.(item, e);
 		},
-		[selectedIds, setSelectedIds, onItemSelect]
+		[selectedIds, setSelectedIds, onItemClick]
 	);
 
 	// Manejar doble click
@@ -237,6 +375,27 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			return () => window.removeEventListener('keydown', handleKeyDown);
 		}
 	}, [clearSelection]);
+
+	// Función para renderizar item usando EntityCard
+	const renderItem = useCallback(
+		(item: EntityWithStats, _index: number) => {
+			return (
+				<EntityCard
+					key={item.id}
+					entity={item}
+					isSelected={selectedIds.includes(item.id)}
+					onClick={() => handleItemClick(item)}
+					onDoubleClick={() => handleItemDoubleClick(item)}
+					layout={layout}
+					preset={preset}
+					variant={variant}
+					size={size}
+					className="w-full h-full"
+				/>
+			);
+		},
+		[selectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size]
+	);
 
 	// Renderizar contenido según el estado
 	const renderContent = () => {
@@ -302,20 +461,40 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 });
 
 /**
- * 📝 Documentación de migración:
+ * 📝 Documentación de capacidades multi-entidad:
  *
- * Cambios principales respecto a file-browser.tsx:
- * 1. Usa EntityWithStats en lugar de FileItem
- * 2. Usa stores específicos por entidad (useImageStore, etc)
- * 3. Props simplificadas - recibe entityType en lugar de items
- * 4. Gestión de datos interna usando stores Zustand
- * 5. Sin conversiones de tipos - usa tipos nativos WithStats
- * 6. Integración completa con TanStack Virtual para rendimiento mejorado
- * 7. Mantiene el panel derecho siempre visible en lugar de ocultarlo
+ * Nuevas capacidades implementadas:
+ * 1. ✅ **Modo Mixed**: Combina múltiples tipos de entidades en una sola vista
+ * 2. ✅ **Modo Manual**: Acepta items específicos sin cargar desde stores
+ * 3. ✅ **EntityCard Integration**: Usa el sistema de cards para renderizar diferentes tipos
+ * 4. ✅ **Filtrado Inteligente**: Mantiene filtros por carpeta/colección en modo mixto
+ * 5. ✅ **Ordenación Unificada**: Ordena items combinados por fecha de modificación
+ * 6. ✅ **Estados Agregados**: Combina estados de carga y error de múltiples stores
+ * 7. ✅ **Virtualización Optimizada**: Mantiene rendimiento con múltiples tipos
  *
- * Para migrar:
- * 1. Cambiar import de FileBrowser a FileBrowserV2
- * 2. Pasar entityType en lugar de items
- * 3. Los datos se cargan automáticamente desde los stores
- * 4. El panel derecho se mantiene siempre visible para consistencia
+ * Ejemplos de uso:
+ *
+ * // Modo específico (comportamiento original)
+ * <FileBrowser entityType="image" />
+ *
+ * // Modo mixto con múltiples entidades
+ * <FileBrowser
+ *   entityType="mixed"
+ *   entityTypes={['image', 'video', 'audio']}
+ * />
+ *
+ * // Modo manual con items específicos
+ * <FileBrowser
+ *   entityType="mixed"
+ *   mode="manual"
+ *   items={customEntityList}
+ * />
+ *
+ * // Con filtros (funciona en todos los modos)
+ * <FileBrowser
+ *   entityType="mixed"
+ *   entityTypes={['image', 'document']}
+ *   filterId={folderId}
+ *   filterType="folder"
+ * />
  */

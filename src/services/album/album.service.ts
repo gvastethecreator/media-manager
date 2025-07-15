@@ -2,40 +2,21 @@
  * @file Servicio de gestión de álbumes
  * @module services/album/album.service
  * @description Servicio centralizado para operaciones CRUD y lógica de negocio de álbumes
- * @updated 2025-01-27
+ * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { prisma } from '@/lib/database/prisma';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
-import { Prisma } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('AlbumService');
 
 // Constantes del servicio
 const REVALIDATE_PATHS = ['/albums'];
-
-const ALBUM_WITH_STATS_INCLUDE = {
-	_count: {
-		select: {
-			images: true,
-			videos: true,
-			collections: true,
-			tags: true,
-			characters: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			properties: true,
-			groups: true,
-		},
-	},
-} as const;
 
 export interface GetAlbumsOptions {
 	includeArchived?: boolean;
@@ -57,17 +38,40 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 	try {
 		logger.info(`🔍 Obteniendo álbum por ID: ${id}`);
 
-		const album = await prisma.album.findUnique({
-			where: { id },
-			include: ALBUM_WITH_STATS_INCLUDE,
-		});
+		// **MIGRACIÓN A DRIZZLE**
+		const drizzleAlbum = await db
+			.select({
+				id: albums.id,
+				name: albums.name,
+				emoji: albums.emoji,
+				color: albums.color,
+				description: albums.description,
+				shortcut: albums.shortcut,
+				category: albums.category,
+				sortBy: albums.sortBy,
+				filters: albums.filters,
+				featuredImage: albums.featuredImage,
+				isFavorite: albums.isFavorite,
+				createdAt: albums.createdAt,
+				updatedAt: albums.updatedAt,
+			})
+			.from(albums)
+			.where(eq(albums.id, id))
+			.limit(1);
 
-		if (!album) {
+		if (drizzleAlbum.length === 0) {
 			logger.warn(`Álbum no encontrado: ${id}`);
 			return null;
 		}
 
-		return toAlbumWithStats(album, album._count);
+		const rawAlbum = drizzleAlbum[0];
+
+		const transformedAlbum = {
+			...rawAlbum,
+			isFavorite: Boolean(rawAlbum.isFavorite),
+		};
+
+		return toAlbumWithStats(transformedAlbum as any);
 	} catch (error) {
 		logger.error(`❌ Error al obtener el álbum ${id}`, { error });
 		throw new Error(`No se pudo obtener el álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
@@ -89,27 +93,75 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 
 		logger.info('🎞️ Obteniendo álbumes', { options });
 
-		// Construir filtros
-		const where: Prisma.AlbumWhereInput = {};
+		// **MIGRACIÓN A DRIZZLE**
+		// Construir filtros dinámicamente
+		const conditions: any[] = [];
 
 		if (search) {
-			where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
+			conditions.push(or(like(albums.name, `%${search}%`), like(albums.description, `%${search}%`)));
 		}
 
-		// Obtener álbumes
-		const [albums, total] = await Promise.all([
-			prisma.album.findMany({
-				where,
-				include: ALBUM_WITH_STATS_INCLUDE,
-				orderBy: { [orderBy]: orderDirection },
-			}),
-			prisma.album.count({ where }),
-		]);
+		// Determinar el ordenamiento
+		const orderDirection_fn = orderDirection === 'desc' ? desc : asc;
+		let orderByField: any;
 
-		const transformedAlbums = albums.map((album) => toAlbumWithStats(album, album._count));
+		switch (orderBy) {
+			case 'createdAt':
+				orderByField = orderDirection_fn(albums.createdAt);
+				break;
+			case 'updatedAt':
+				orderByField = orderDirection_fn(albums.updatedAt);
+				break;
+			default: // 'name'
+				orderByField = orderDirection_fn(albums.name);
+		}
+
+		// Consulta principal
+		let drizzleQuery = db
+			.select({
+				id: albums.id,
+				name: albums.name,
+				emoji: albums.emoji,
+				color: albums.color,
+				description: albums.description,
+				shortcut: albums.shortcut,
+				category: albums.category,
+				sortBy: albums.sortBy,
+				filters: albums.filters,
+				featuredImage: albums.featuredImage,
+				isFavorite: albums.isFavorite,
+				createdAt: albums.createdAt,
+				updatedAt: albums.updatedAt,
+			})
+			.from(albums);
+
+		// Aplicar filtros si existen
+		if (conditions.length > 0) {
+			drizzleQuery = drizzleQuery.where(and(...conditions));
+		}
+
+		// Aplicar ordenamiento
+		const drizzleAlbums = await drizzleQuery.orderBy(orderByField);
+
+		// Consulta de conteo total (con los mismos filtros)
+		let countQuery = db.select({ count: count() }).from(albums);
+
+		if (conditions.length > 0) {
+			countQuery = countQuery.where(and(...conditions));
+		}
+
+		const [{ count: total }] = await countQuery;
+
+		// Transformar resultados de Drizzle a formato compatible con transformadores legacy
+		const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
+			...rawAlbum,
+			isFavorite: Boolean(rawAlbum.isFavorite),
+		}));
+
+		const finalAlbums = transformedAlbums.map((album) => toAlbumWithStats(album as any));
 
 		return {
-			albums: transformedAlbums,
+			albums: finalAlbums,
 			total,
 		};
 	} catch (error) {
@@ -127,30 +179,35 @@ export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStat
 	try {
 		logger.info('📝 Creando nuevo álbum', { name: data.name });
 
-		const albumData: Prisma.AlbumCreateInput = {
-			name: data.name,
-			emoji: data.emoji || '📸',
-			color: data.color || '#3b82f6',
-			description: data.description || null,
-			shortcut: data.shortcut || null,
-			category: data.category || 'general',
-			sortBy: data.sortBy || 'name',
-			filters: data.filters || '[]',
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
-		};
-
-		const newAlbum = await prisma.album.create({
-			data: albumData,
-			include: ALBUM_WITH_STATS_INCLUDE,
-		});
+		const [newAlbum] = await db
+			.insert(albums)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				emoji: data.emoji || '📸',
+				color: data.color || '#3b82f6',
+				description: data.description || null,
+				featuredImage: data.featuredImage || null,
+				isPublic: data.isPublic || false,
+				isFavorite: data.isFavorite || false,
+				totalImages: data.totalImages || 0,
+				totalVideos: data.totalVideos || 0,
+				totalSize: data.totalSize || 0,
+				filters: data.filters || null,
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				metadata: data.metadata || null,
+				lastImageAddedAt: data.lastImageAddedAt || null,
+				lastVideoAddedAt: data.lastVideoAddedAt || null,
+			})
+			.returning();
 
 		// Revalidar rutas
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
 
-		const result = toAlbumWithStats(newAlbum, newAlbum._count);
+		const result = toAlbumWithStats(newAlbum);
 		logger.info(`✅ Álbum creado exitosamente: ${result.id}`);
 
 		return result;
@@ -167,24 +224,29 @@ export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<A
 	try {
 		logger.info(`🔄 Actualizando álbum: ${id}`, { data });
 
-		const albumData: Prisma.AlbumUpdateInput = {};
-
-		if (data.name !== undefined) albumData.name = data.name;
-		if (data.emoji !== undefined) albumData.emoji = data.emoji;
-		if (data.color !== undefined) albumData.color = data.color;
-		if (data.description !== undefined) albumData.description = data.description;
-		if (data.shortcut !== undefined) albumData.shortcut = data.shortcut;
-		if (data.category !== undefined) albumData.category = data.category;
-		if (data.sortBy !== undefined) albumData.sortBy = data.sortBy;
-		if (data.filters !== undefined) albumData.filters = data.filters;
-		if (data.featuredImage !== undefined) albumData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) albumData.isFavorite = data.isFavorite;
-
-		const updatedAlbum = await prisma.album.update({
-			where: { id },
-			data: albumData,
-			include: ALBUM_WITH_STATS_INCLUDE,
-		});
+		const [updatedAlbum] = await db
+			.update(albums)
+			.set({
+				name: data.name,
+				emoji: data.emoji,
+				color: data.color,
+				description: data.description,
+				featuredImage: data.featuredImage,
+				isPublic: data.isPublic,
+				isFavorite: data.isFavorite,
+				totalImages: data.totalImages,
+				totalVideos: data.totalVideos,
+				totalSize: data.totalSize,
+				filters: data.filters,
+				shortcut: data.shortcut,
+				category: data.category,
+				metadata: data.metadata,
+				lastImageAddedAt: data.lastImageAddedAt,
+				lastVideoAddedAt: data.lastVideoAddedAt,
+				updatedAt: sql`(strftime('%s', 'now'))`,
+			})
+			.where(eq(albums.id, id))
+			.returning();
 
 		// Revalidar rutas
 		for (const path of REVALIDATE_PATHS) {
@@ -192,7 +254,7 @@ export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<A
 		}
 		revalidatePath(`/albums/${id}`);
 
-		const result = toAlbumWithStats(updatedAlbum, updatedAlbum._count);
+		const result = toAlbumWithStats(updatedAlbum);
 		logger.info(`✅ Álbum actualizado exitosamente: ${id}`);
 
 		return result;
@@ -209,9 +271,7 @@ export async function deleteAlbum(id: string): Promise<void> {
 	try {
 		logger.warn(`🗑️ Eliminando álbum: ${id}`);
 
-		await prisma.album.delete({
-			where: { id },
-		});
+		await db.delete(albums).where(eq(albums.id, id));
 
 		// Revalidar rutas
 		for (const path of REVALIDATE_PATHS) {
@@ -232,26 +292,19 @@ export async function getAlbumImages(albumId: string): Promise<{ id: string; nam
 	try {
 		logger.info(`🖼️ Obteniendo imágenes del álbum: ${albumId}`);
 
-		const images = await prisma.image.findMany({
-			where: {
-				albums: {
-					some: {
-						id: albumId,
-					},
-				},
-			},
-			select: {
-				id: true,
-				name: true,
-				path: true,
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
+		const imagesData = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+			})
+			.from(images)
+			.innerJoin(imageAlbums, eq(images.id, imageAlbums.A))
+			.where(eq(imageAlbums.B, albumId))
+			.orderBy(desc(images.createdAt));
 
-		logger.info(`✅ Obtenidas ${images.length} imágenes del álbum ${albumId}`);
-		return images;
+		logger.info(`✅ Obtenidas ${imagesData.length} imágenes del álbum ${albumId}`);
+		return imagesData;
 	} catch (error) {
 		logger.error(`❌ Error al obtener imágenes del álbum ${albumId}`, { error });
 		throw new Error(
@@ -267,22 +320,18 @@ export async function addImageToAlbum(albumId: string, imageId: string): Promise
 	try {
 		logger.info(`🔗 Agregando imagen ${imageId} al álbum ${albumId}`);
 
-		await prisma.album.update({
-			where: { id: albumId },
-			data: {
-				images: {
-					connect: { id: imageId },
-				},
-			},
+		await db.insert(imageAlbums).values({
+			A: imageId,
+			B: albumId,
 		});
 
 		// Revalidar rutas
 		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${albumId}`);
 
-		logger.info(`✅ Imagen agregada exitosamente al álbum`);
+		logger.info('✅ Imagen agregada exitosamente al álbum');
 	} catch (error) {
-		logger.error(`❌ Error al agregar imagen al álbum`, { error, albumId, imageId });
+		logger.error('❌ Error al agregar imagen al álbum', { error, albumId, imageId });
 		throw new Error(
 			`No se pudo agregar la imagen al álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
 		);
@@ -296,22 +345,15 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 	try {
 		logger.info(`🔗 Removiendo imagen ${imageId} del álbum ${albumId}`);
 
-		await prisma.album.update({
-			where: { id: albumId },
-			data: {
-				images: {
-					disconnect: { id: imageId },
-				},
-			},
-		});
+		await db.delete(imageAlbums).where(and(eq(imageAlbums.A, imageId), eq(imageAlbums.B, albumId)));
 
 		// Revalidar rutas
 		REVALIDATE_PATHS.forEach((path) => revalidatePath(path));
 		revalidatePath(`/albums/${albumId}`);
 
-		logger.info(`✅ Imagen removida exitosamente del álbum`);
+		logger.info('✅ Imagen removida exitosamente del álbum');
 	} catch (error) {
-		logger.error(`❌ Error al remover imagen del álbum`, { error, albumId, imageId });
+		logger.error('❌ Error al remover imagen del álbum', { error, albumId, imageId });
 		throw new Error(
 			`No se pudo remover la imagen del álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`
 		);

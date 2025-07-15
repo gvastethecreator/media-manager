@@ -1,7 +1,5 @@
-'use client';
-
 import { Plus } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import {
 	ContextMenuItem,
@@ -80,15 +78,7 @@ const ErrorState = memo(function ErrorState({ entityName }: { entityName: string
 });
 
 // Componente para el botón de crear memoizado
-const CreateButton = memo(function CreateButton({
-	entityName,
-	onClick,
-	entityType,
-}: {
-	entityName: string;
-	onClick: () => void;
-	entityType: string;
-}) {
+const CreateButton = memo(function CreateButton({ entityName, onClick }: { entityName: string; onClick: () => void }) {
 	const { setCurrentView } = useNavigationStore();
 
 	// Mapeo de entidades a sus correspondientes tabs en SettingsView
@@ -229,7 +219,7 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 		if (hasError && (!entities || entities.length === 0)) {
 			return (
 				<>
-					<CreateButton entityName={entityName} onClick={handleCreate} entityType={entityName} />
+					<CreateButton entityName={entityName} onClick={handleCreate} />
 					<MemoizedContextMenuSeparator />
 					<ErrorState entityName={entityName} />
 				</>
@@ -239,7 +229,7 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 		// Incluso con error, si tenemos datos los mostramos
 		return (
 			<>
-				<CreateButton entityName={entityName} onClick={handleCreate} entityType={entityName} />
+				<CreateButton entityName={entityName} onClick={handleCreate} />
 				<MemoizedContextMenuSeparator />
 
 				{entities && entities.length > 0 ? (

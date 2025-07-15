@@ -2,14 +2,12 @@
  * @file Vista de lista virtualizada usando TanStack Virtual
  * @module components/features/file-browser/views/virtualized-list-view
  */
-'use client';
 
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import Image from 'next/image';
 import React, { memo, useRef } from 'react';
+import { cn } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
 
 interface VirtualizedListViewProps {
 	items: EntityWithStats[];
@@ -89,7 +87,7 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 							{/* Thumbnail o icono */}
 							<div className="w-12 h-12 bg-muted rounded flex-shrink-0 flex items-center justify-center">
 								{item.entityType === 'image' && item.path ? (
-									<Image
+									<img
 										src={item.path}
 										alt={item.name}
 										width={48}

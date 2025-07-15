@@ -1,8 +1,6 @@
-'use client';
-
+import { Clock, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
-import { Clock, Star } from 'lucide-react';
 
 interface VideoCardHeaderProps {
 	video: VideoWithStats;
@@ -15,8 +13,9 @@ interface VideoCardHeaderProps {
  * 🎬 Header del VideoCard con nombre, duración y indicadores
  */
 export function VideoCardHeader({ video, primaryColor, tcgMode = true, compact = false }: VideoCardHeaderProps) {
-	const { name, statistics, isFavorite } = video;
-	const { formattedDuration, qualityLabel, technicalGrade } = statistics;
+	const { name, isFavorite } = video;
+	const { formattedDuration, technicalGrade } = video.stats;
+	const qualityLabel = video.stats.qualityLevel;
 
 	return (
 		<div className={cn('border-b relative z-10', compact ? 'p-2' : 'p-3')} style={{ borderColor: `${primaryColor}30` }}>

@@ -1,305 +1,450 @@
 /**
  * @file Servicio para operaciones con archivos
  * @module services/file/file.service
+ * ✅ MIGRADO DESDE SERVER ACTIONS - 2025-07-03
  */
 
+import fs, { stat } from 'fs/promises';
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { transformFile } from '@/transformers/file';
+import { emit } from '@/lib/server/events.server';
 import {
-	DirectoryReadResult,
-	FileBase,
-	FileCopyMoveResult,
-	FileFilterOptions,
-	FileOperationOptions,
-	FileOperationResult,
-} from '@/types/entities/file/base';
-import { EnhancedFile } from '@/types/entities/file/extended';
+	determineFileType,
+	determineMimeType,
+	generateFileId,
+	mapStatsToFileInfo,
+	serializeDirectoryContents,
+	serializeFileOperationResult,
+} from '@/transformers/file';
+import {
+	type DirectoryReadResult,
+	type FileBase,
+	type FileCopyMoveResult,
+	FileErrorCode,
+	FileEventType,
+	type FileInfo,
+	type FileOperationOptions,
+	type FileOperationResult,
+	FileType,
+} from '@/types/entities/file';
 
 const logger = serverLogger.withContext('FileService');
 
 /**
- * Lee el contenido de un directorio
- * @param directoryPath - Ruta del directorio a leer
- * @param options - Opciones de filtrado
- * @returns Resultado de la lectura
+ * Interfaz para respuesta de Data URL
  */
-export async function readDirectory(directoryPath: string, _options?: FileFilterOptions): Promise<DirectoryReadResult> {
+interface DataUrlResponse {
+	dataUrl: string;
+	mimeType: string;
+}
+
+// Función creadora de errores (enfoque funcional)
+const createFileError = (
+	message: string,
+	code: FileErrorCode = FileErrorCode.OPERATION_FAILED,
+	cause?: unknown
+): Error & { code: FileErrorCode; cause?: unknown } => {
+	const error = new Error(message);
+	error.name = 'FileError';
+	return Object.assign(error, { code, cause });
+};
+
+/**
+ * Valida y sanitiza una ruta de archivo para prevenir ataques de ruta
+ * @param filePath Ruta del archivo a validar
+ * @returns Ruta normalizada y sanitizada
+ */
+function validateAndSanitizePath(filePath: string): string {
+	// Normalizar la ruta y eliminar intentos de navegar fuera del directorio permitido
+	const normalizedPath = path.normalize(filePath).replace(/^(\.\.(\/|\\|$))+/, '');
+
+	// Verificar que la ruta existe y es un archivo válido
+	return normalizedPath;
+}
+
+/**
+ * Obtiene metadatos de un archivo
+ * @param filePath Ruta del archivo
+ * @returns Información del archivo
+ */
+export async function getFileInfo(filePath: string): Promise<FileInfo> {
 	try {
-		logger.info(`Leyendo directorio: ${directoryPath}`);
+		logger.info('📊 Obteniendo información del archivo:', filePath);
 
-		// Aquí iría la lógica real para leer directorios del sistema de archivos
-		// Esta es una implementación de ejemplo sin acceso real al FS
+		// Validar y sanitizar la ruta
+		const normalizedPath = validateAndSanitizePath(filePath);
 
-		// En un entorno real, se usaría fs/promises para leer el directorio
-		const mockItems: FileBase[] = [
-			{
-				id: '1',
-				name: 'Documentos',
-				path: `${directoryPath}/Documentos`,
-				type: 'DIRECTORY',
-				extension: '',
-				mimeType: 'directory',
-				size: 0,
-				createdAt: new Date(),
-				modifiedAt: new Date(),
-				isDirectory: true,
-			},
-			{
-				id: '2',
-				name: 'imagen.jpg',
-				path: `${directoryPath}/imagen.jpg`,
-				type: 'IMAGE',
-				extension: '.jpg',
-				mimeType: 'image/jpeg',
-				size: 1024000,
-				createdAt: new Date(),
-				modifiedAt: new Date(),
-				isDirectory: false,
-			},
-			{
-				id: '3',
-				name: 'documento.pdf',
-				path: `${directoryPath}/documento.pdf`,
-				type: 'DOCUMENT',
-				extension: '.pdf',
-				mimeType: 'application/pdf',
-				size: 512000,
-				createdAt: new Date(),
-				modifiedAt: new Date(),
-				isDirectory: false,
-			},
-		];
+		// Verificar que el archivo existe
+		const fileStats = await stat(normalizedPath);
+		if (!fileStats.isFile()) {
+			throw createFileError('La ruta especificada no es un archivo válido', FileErrorCode.NOT_A_FILE);
+		}
 
-		const result: DirectoryReadResult = {
-			path: directoryPath,
-			items: mockItems,
-			totalItems: mockItems.length,
-			hasMore: false,
-			directories: mockItems.filter((item) => item.isDirectory).length,
-			files: mockItems.filter((item) => !item.isDirectory).length,
-		};
+		// Usar transformer para mapear stats a FileInfo
+		const fileInfo = mapStatsToFileInfo(normalizedPath, fileStats);
 
-		return result;
+		logger.info('✅ Información del archivo obtenida');
+		return fileInfo;
 	} catch (error) {
-		logger.error(`Error al leer directorio ${directoryPath}:`, error);
-		throw error;
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al obtener información del archivo:', error);
+		throw createFileError('No se pudo obtener información del archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
- * Obtiene información de un archivo
- * @param filePath - Ruta del archivo
- * @returns Información del archivo o null si ocurre un error
+ * Lee un archivo como buffer
+ * Esta función es interna para ser utilizada por otras acciones de archivos
  */
-export async function getFileInfo(filePath: string): Promise<EnhancedFile | null> {
+async function readFileAsBuffer(filePath: string): Promise<{
+	buffer: Buffer;
+	fileInfo: FileInfo;
+}> {
 	try {
-		logger.info(`Obteniendo información del archivo: ${filePath}`);
+		// Validar y obtener información del archivo
+		const fileInfo = await getFileInfo(filePath);
 
-		// Esta es una implementación de ejemplo sin acceso real al FS
-		// En un entorno real, se usaría fs/promises.stat para obtener información
+		// Leer el archivo
+		const buffer = await fs.readFile(fileInfo.path);
 
-		const mockFileInfo: FileBase = {
-			id: filePath,
-			name: filePath.split('/').pop() || '',
-			path: filePath,
-			type: filePath.endsWith('.jpg') ? 'IMAGE' : 'FILE',
-			extension: filePath.includes('.') ? `.${filePath.split('.').pop()}` : '',
-			mimeType: filePath.endsWith('.jpg') ? 'image/jpeg' : 'application/octet-stream',
-			size: 1024000,
-			createdAt: new Date(),
-			modifiedAt: new Date(),
-			isDirectory: false,
-		};
-
-		return transformFile(mockFileInfo);
+		return { buffer, fileInfo };
 	} catch (error) {
-		logger.error(`Error al obtener información del archivo ${filePath}:`, error);
-		return null;
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al leer archivo:', error);
+		throw createFileError('No se pudo leer el archivo', FileErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Obtiene el contenido de un directorio
+ * @param dirPath Ruta del directorio
+ * @returns Resultado de la lectura del directorio
+ */
+export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadResult> {
+	try {
+		logger.info('📁 Obteniendo contenido del directorio:', dirPath);
+
+		// Validar y sanitizar la ruta
+		const normalizedPath = validateAndSanitizePath(dirPath);
+
+		// Verificar que el directorio existe
+		const dirStats = await stat(normalizedPath);
+		if (!dirStats.isDirectory()) {
+			throw createFileError('La ruta especificada no es un directorio válido', FileErrorCode.NOT_A_DIRECTORY);
+		}
+
+		// Leer contenido del directorio
+		const items = await fs.readdir(normalizedPath, { withFileTypes: true });
+
+		// Procesar cada elemento
+		const processedItems: FileBase[] = [];
+		for (const item of items) {
+			const itemPath = path.join(normalizedPath, item.name);
+			const itemStats = await stat(itemPath);
+
+			// Usar transformers para crear el objeto FileBase
+			const fileBase: FileBase = {
+				id: generateFileId(itemPath),
+				name: item.name,
+				path: itemPath,
+				type: item.isDirectory() ? FileType.DIRECTORY : determineFileType(item.name),
+				extension: item.isDirectory() ? '' : path.extname(item.name),
+				mimeType: item.isDirectory() ? 'directory' : determineMimeType(item.name),
+				size: itemStats.size,
+				createdAt: itemStats.birthtime,
+				modifiedAt: itemStats.mtime,
+				isDirectory: item.isDirectory(),
+			};
+
+			processedItems.push(fileBase);
+		}
+
+		// Usar transformer para serializar el resultado
+		const result = serializeDirectoryContents(normalizedPath, processedItems);
+
+		logger.info('✅ Contenido del directorio obtenido:', {
+			path: normalizedPath,
+			itemCount: processedItems.length,
+		});
+
+		return result;
+	} catch (error) {
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al obtener contenido del directorio:', error);
+		throw createFileError('No se pudo obtener el contenido del directorio', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
  * Crea un nuevo directorio
- * @param directoryPath - Ruta del directorio a crear
+ * @param dirPath Ruta del directorio a crear
+ * @param options Opciones de operación
  * @returns Resultado de la operación
  */
-export async function createDirectory(directoryPath: string): Promise<FileOperationResult> {
+export async function createDirectory(dirPath: string, options?: FileOperationOptions): Promise<FileOperationResult> {
 	try {
-		logger.info(`Creando directorio: ${directoryPath}`);
+		logger.info('📁 Creando directorio:', dirPath);
 
-		// Aquí iría la lógica real para crear directorios
-		// En un entorno real, se usaría fs/promises.mkdir
+		// Validar y sanitizar la ruta
+		const normalizedPath = validateAndSanitizePath(dirPath);
 
-		const result: FileOperationResult = {
-			success: true,
-			path: directoryPath,
-			timestamp: new Date(),
-		};
+		// Crear directorio (recursive por defecto)
+		await fs.mkdir(normalizedPath, { recursive: options?.recursive ?? true });
 
-		return result;
+		// Emitir evento
+		await emit({
+			type: FileEventType.CREATED,
+			data: { path: normalizedPath, type: 'directory' },
+		});
+
+		logger.info('✅ Directorio creado');
+		return serializeFileOperationResult(true, normalizedPath);
 	} catch (error) {
-		logger.error(`Error al crear directorio ${directoryPath}:`, error);
-
-		return {
-			success: false,
-			path: directoryPath,
-			error: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date(),
-		};
+		logger.error('❌ Error al crear directorio:', error);
+		throw createFileError('No se pudo crear el directorio', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
- * Elimina un archivo o directorio
- * @param path - Ruta del archivo o directorio a eliminar
- * @param options - Opciones de operación (recursive, etc.)
+ * Elimina un archivo del sistema
+ * @param filePath Ruta del archivo a eliminar
  * @returns Resultado de la operación
  */
-export async function deleteFileOrDirectory(
-	path: string,
-	_options?: FileOperationOptions
-): Promise<FileOperationResult> {
+export async function deleteFile(filePath: string): Promise<FileOperationResult> {
 	try {
-		const isDirectory = (await getFileInfo(path))?.isDirectory || false;
-		logger.info(`Eliminando ${isDirectory ? 'directorio' : 'archivo'}: ${path}`);
+		logger.info('🗑️ Eliminando archivo:', filePath);
 
-		// Aquí iría la lógica real para eliminar archivos/directorios
-		// En un entorno real, se usaría fs/promises.rm
+		// Validar y sanitizar la ruta
+		const normalizedPath = validateAndSanitizePath(filePath);
 
-		const result: FileOperationResult = {
-			success: true,
-			path: path,
-			timestamp: new Date(),
-		};
+		// Verificar que el archivo existe
+		const fileStats = await stat(normalizedPath);
+		if (!fileStats.isFile()) {
+			throw createFileError('La ruta especificada no es un archivo válido', FileErrorCode.NOT_A_FILE);
+		}
 
-		return result;
+		// Eliminar el archivo
+		await fs.unlink(normalizedPath);
+
+		// Emitir evento
+		await emit({
+			type: FileEventType.DELETED,
+			data: { path: normalizedPath },
+		});
+
+		logger.info('✅ Archivo eliminado');
+		return serializeFileOperationResult(true, normalizedPath);
 	} catch (error) {
-		logger.error(`Error al eliminar ${path}:`, error);
-
-		return {
-			success: false,
-			path: path,
-			error: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date(),
-		};
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al eliminar archivo:', error);
+		throw createFileError('No se pudo eliminar el archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
- * Copia un archivo o directorio
- * @param sourcePath - Ruta del archivo o directorio origen
- * @param destinationPath - Ruta del archivo o directorio destino
- * @param options - Opciones de operación (overwrite, etc.)
- * @returns Resultado de la operación
+ * Obtiene el contenido de un archivo como una URL de datos (data URL)
+ * Útil para imágenes que necesitan ser copiadas al portapapeles
+ * @param filePath Ruta del archivo
+ * @returns Data URL del archivo
  */
-export async function copyFileOrDirectory(
-	sourcePath: string,
-	destinationPath: string,
-	_options?: FileOperationOptions
-): Promise<FileCopyMoveResult> {
+export async function getFileAsDataUrl(filePath: string): Promise<DataUrlResponse> {
 	try {
-		const isDirectory = (await getFileInfo(sourcePath))?.isDirectory || false;
-		logger.info(`Copiando ${isDirectory ? 'directorio' : 'archivo'} de ${sourcePath} a ${destinationPath}`);
+		logger.info('📄 Obteniendo archivo como URL de datos:', filePath);
 
-		// Aquí iría la lógica real para copiar archivos/directorios
-		// En un entorno real, se usaría fs/promises.cp
+		// Leer el archivo como buffer
+		const { buffer, fileInfo } = await readFileAsBuffer(filePath);
 
-		const result: FileCopyMoveResult = {
-			success: true,
-			sourcePath,
-			destinationPath,
-			timestamp: new Date(),
-		};
+		// Verificar que el archivo es una imagen
+		if (fileInfo.type !== FileType.IMAGE) {
+			throw createFileError('El archivo no es una imagen soportada', FileErrorCode.INVALID_PATH);
+		}
 
-		return result;
-	} catch (error) {
-		logger.error(`Error al copiar ${sourcePath} a ${destinationPath}:`, error);
+		// Convertir a Data URL
+		const dataUrl = `data:${fileInfo.mimeType};base64,${buffer.toString('base64')}`;
 
+		logger.info('✅ Archivo convertido a URL de datos');
 		return {
-			success: false,
-			sourcePath,
-			destinationPath,
-			error: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date(),
+			dataUrl,
+			mimeType: fileInfo.mimeType,
 		};
-	}
-}
-
-/**
- * Mueve un archivo o directorio
- * @param sourcePath - Ruta del archivo o directorio origen
- * @param destinationPath - Ruta del archivo o directorio destino
- * @param options - Opciones de operación (overwrite, etc.)
- * @returns Resultado de la operación
- */
-export async function moveFileOrDirectory(
-	sourcePath: string,
-	destinationPath: string,
-	_options?: FileOperationOptions
-): Promise<FileCopyMoveResult> {
-	try {
-		const isDirectory = (await getFileInfo(sourcePath))?.isDirectory || false;
-		logger.info(`Moviendo ${isDirectory ? 'directorio' : 'archivo'} de ${sourcePath} a ${destinationPath}`);
-
-		// Aquí iría la lógica real para mover archivos/directorios
-		// En un entorno real, se usaría fs/promises.rename
-
-		const result: FileCopyMoveResult = {
-			success: true,
-			sourcePath,
-			destinationPath,
-			timestamp: new Date(),
-		};
-
-		return result;
 	} catch (error) {
-		logger.error(`Error al mover ${sourcePath} a ${destinationPath}:`, error);
-
-		return {
-			success: false,
-			sourcePath,
-			destinationPath,
-			error: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date(),
-		};
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al obtener archivo como URL de datos:', error);
+		throw createFileError('No se pudo obtener el archivo como URL de datos', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
  * Renombra un archivo o directorio
- * @param path - Ruta actual del archivo o directorio
- * @param newName - Nuevo nombre (sin la ruta)
+ * @param oldPath Ruta actual
+ * @param newPath Nueva ruta
+ * @param options Opciones de operación
  * @returns Resultado de la operación
  */
-export async function renameFileOrDirectory(path: string, newName: string): Promise<FileCopyMoveResult> {
+export async function renameFile(
+	oldPath: string,
+	newPath: string,
+	options?: FileOperationOptions
+): Promise<FileOperationResult> {
 	try {
-		const isDirectory = (await getFileInfo(path))?.isDirectory || false;
+		logger.info('📝 Renombrando archivo:', { from: oldPath, to: newPath });
 
-		// Construir la nueva ruta (mismo directorio, nombre diferente)
-		const parentPath = path.split('/').slice(0, -1).join('/');
-		const destinationPath = `${parentPath}/${newName}`;
+		// Validar rutas
+		const normalizedOldPath = validateAndSanitizePath(oldPath);
+		const normalizedNewPath = validateAndSanitizePath(newPath);
 
-		logger.info(`Renombrando ${isDirectory ? 'directorio' : 'archivo'} de ${path} a ${destinationPath}`);
+		// Verificar que el archivo/directorio origen existe
+		await stat(normalizedOldPath);
 
-		// En un entorno real, se usaría fs/promises.rename
+		// Verificar si el destino ya existe (a menos que se permita sobrescribir)
+		if (!options?.overwrite) {
+			try {
+				await stat(normalizedNewPath);
+				throw createFileError('El archivo destino ya existe', FileErrorCode.FILE_EXISTS);
+			} catch (error: any) {
+				// Si el archivo no existe, está bien (es lo que queremos)
+				if (error.code !== 'ENOENT' && error.name !== 'FileError') {
+					throw error;
+				}
+			}
+		}
 
-		const result: FileCopyMoveResult = {
-			success: true,
-			sourcePath: path,
-			destinationPath,
-			timestamp: new Date(),
-		};
+		// Renombrar/mover el archivo
+		await fs.rename(normalizedOldPath, normalizedNewPath);
 
-		return result;
+		// Emitir evento
+		await emit({
+			type: FileEventType.MOVED,
+			data: { oldPath: normalizedOldPath, newPath: normalizedNewPath },
+		});
+
+		logger.info('✅ Archivo renombrado');
+		return serializeFileOperationResult(true, normalizedNewPath);
 	} catch (error) {
-		logger.error(`Error al renombrar ${path}:`, error);
-
-		return {
-			success: false,
-			sourcePath: path,
-			destinationPath: `${path.split('/').slice(0, -1).join('/')}/${newName}`,
-			error: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date(),
-		};
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al renombrar archivo:', error);
+		throw createFileError('No se pudo renombrar el archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
+
+/**
+ * Copia un archivo
+ * @param sourcePath Ruta origen
+ * @param destPath Ruta destino
+ * @param options Opciones de operación
+ * @returns Resultado de la operación
+ */
+export async function copyFile(
+	sourcePath: string,
+	destPath: string,
+	options?: FileOperationOptions
+): Promise<FileCopyMoveResult> {
+	try {
+		logger.info('📋 Copiando archivo:', { from: sourcePath, to: destPath });
+
+		// Validar rutas
+		const normalizedSourcePath = validateAndSanitizePath(sourcePath);
+		const normalizedDestPath = validateAndSanitizePath(destPath);
+
+		// Verificar que el archivo origen existe y es un archivo
+		const sourceStats = await stat(normalizedSourcePath);
+		if (!sourceStats.isFile()) {
+			throw createFileError('El origen no es un archivo válido', FileErrorCode.NOT_A_FILE);
+		}
+
+		// Verificar si el destino ya existe
+		if (!options?.overwrite) {
+			try {
+				await stat(normalizedDestPath);
+				throw createFileError('El archivo destino ya existe', FileErrorCode.FILE_EXISTS);
+			} catch (error: any) {
+				if (error.code !== 'ENOENT' && error.name !== 'FileError') {
+					throw error;
+				}
+			}
+		}
+
+		// Copiar el archivo
+		await fs.copyFile(normalizedSourcePath, normalizedDestPath);
+
+		// Emitir evento
+		await emit({
+			type: FileEventType.COPIED,
+			data: { sourcePath: normalizedSourcePath, destPath: normalizedDestPath },
+		});
+
+		logger.info('✅ Archivo copiado');
+		return {
+			success: true,
+			sourcePath: normalizedSourcePath,
+			destinationPath: normalizedDestPath,
+			timestamp: new Date(),
+		};
+	} catch (error) {
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al copiar archivo:', error);
+		throw createFileError('No se pudo copiar el archivo', FileErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Mueve un archivo
+ * @param sourcePath Ruta origen
+ * @param destPath Ruta destino
+ * @param options Opciones de operación
+ * @returns Resultado de la operación
+ */
+export async function moveFile(
+	sourcePath: string,
+	destPath: string,
+	options?: FileOperationOptions
+): Promise<FileCopyMoveResult> {
+	try {
+		logger.info('🚚 Moviendo archivo:', { from: sourcePath, to: destPath });
+
+		// Primero copiar el archivo
+		const copyResult = await copyFile(sourcePath, destPath, options);
+
+		if (copyResult.success) {
+			// Luego eliminar el archivo origen
+			await deleteFile(sourcePath);
+
+			// Emitir evento de movimiento
+			await emit({
+				type: FileEventType.MOVED,
+				data: { oldPath: sourcePath, newPath: destPath },
+			});
+
+			logger.info('✅ Archivo movido');
+			return copyResult;
+		}
+		throw createFileError('Error en la copia durante el movimiento', FileErrorCode.OPERATION_FAILED);
+	} catch (error) {
+		if (error instanceof Error && error.name === 'FileError') {
+			throw error;
+		}
+		logger.error('❌ Error al mover archivo:', error);
+		throw createFileError('No se pudo mover el archivo', FileErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+// Mantener compatibilidad con nombres anteriores
+export const readDirectory = getDirectoryInfo;
+export const deleteFileOrDirectory = deleteFile;
+export const copyFileOrDirectory = copyFile;
+export const moveFileOrDirectory = moveFile;
+export const renameFileOrDirectory = renameFile;

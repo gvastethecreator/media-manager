@@ -1,44 +1,31 @@
-import type {
-	ConceptBase,
-	ConceptFilters,
-	ConceptSortOption,
-	ConceptViewMode,
-	ConceptWithStats,
-} from '@/types/entities/concept/types';
+import type { ConceptBase, ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptFilters, ConceptSortOption, ConceptViewMode } from '@/types/entities/concept/types';
 import { EntityType } from '@/types/entities/entities';
 
 /**
- * Store completo de Conceptos combinando todas las slices
+ * Slice de estado y acciones para el core de Conceptos
  */
-export interface ConceptStore {
-	// Estado - CoreSlice
+export interface ConceptCoreSlice {
 	concepts: ConceptWithStats[];
 	selectedConcept: ConceptWithStats | null;
 	isLoading: boolean;
 	error: string | null;
-
-	// Acciones - CoreSlice
 	loadConcepts: () => Promise<void>;
 	createConcept: (data: Omit<ConceptBase, 'id'>) => Promise<void>;
 	updateConcept: (id: string, data: Partial<ConceptBase>) => Promise<void>;
 	deleteConcept: (id: string) => Promise<void>;
 	selectConcept: (concept: ConceptWithStats | null) => void;
 	reset: () => void;
+}
 
-	// Estado - FiltersSlice
+/**
+ * Slice de estado y acciones para los filtros de Conceptos
+ */
+export interface ConceptFiltersSlice {
 	filters: ConceptFilters;
 	sortBy: ConceptSortOption;
 	page: number;
 	pageSize: number;
-
-	// Estado - UISlice
-	viewMode: ConceptViewMode;
-	isCreateModalOpen: boolean;
-	isEditModalOpen: boolean;
-	isDeleteDialogOpen: boolean;
-	isDetailsDrawerOpen: boolean;
-
-	// Acciones - FiltersSlice
 	setFilters: (filters: Partial<ConceptFilters>) => void;
 	setSortBy: (sortOption: ConceptSortOption) => void;
 	setPage: (page: number) => void;
@@ -48,8 +35,17 @@ export interface ConceptStore {
 	setTagsFilter: (tags: string[]) => void;
 	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
 	clearFilters: () => void;
+}
 
-	// Acciones - UISlice
+/**
+ * Slice de estado y acciones para la UI de Conceptos
+ */
+export interface ConceptUISlice {
+	viewMode: ConceptViewMode;
+	isCreateModalOpen: boolean;
+	isEditModalOpen: boolean;
+	isDeleteDialogOpen: boolean;
+	isDetailsDrawerOpen: boolean;
 	openCreateModal: () => void;
 	closeCreateModal: () => void;
 	openEditModal: () => void;
@@ -60,8 +56,17 @@ export interface ConceptStore {
 	closeDetailsDrawer: () => void;
 	setViewMode: (mode: ConceptViewMode) => void;
 	resetUI: () => void;
+}
 
-	// Acciones - RelationsSlice
+/**
+ * Slice de estado y acciones para las relaciones de Conceptos
+ */
+export interface ConceptRelationsSlice {
 	addConceptToEntity: (conceptId: string, entityId: string, entityType: EntityType) => Promise<void>;
 	removeConceptFromEntity: (conceptId: string, entityId: string, entityType: EntityType) => Promise<void>;
 }
+
+/**
+ * Store completo de Conceptos combinando todas las slices
+ */
+export interface ConceptStore extends ConceptCoreSlice, ConceptFiltersSlice, ConceptUISlice, ConceptRelationsSlice {}

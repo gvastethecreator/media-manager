@@ -1,5 +1,3 @@
-'use client';
-
 import { Activity, BarChart, Boxes, Cpu, FileJson, Folder, HardDrive, Library, Tag } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import type { SystemMetric } from '../cards/metric-card';

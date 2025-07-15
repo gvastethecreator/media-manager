@@ -4,8 +4,8 @@
  * @description Funciones selectoras para acceder al estado de manera optimizada
  */
 
-import { ActivityCategory, ActivityComplete } from '@/types/entities/activity';
 import { groupBy } from '@/lib/utils/array.utils';
+import { ActivityCategory, ActivityComplete } from '@/types/entities/activity';
 import type { ActivityStore } from './index';
 
 /**

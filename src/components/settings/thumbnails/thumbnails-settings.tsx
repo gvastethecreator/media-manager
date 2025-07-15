@@ -1,6 +1,7 @@
-'use client';
-
-import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
+import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import * as React from 'react';
+import { useId } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,19 +12,21 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import {
+	type LastProcessedThumbnail,
+	type ProcessOptions,
+	useCleanThumbnails,
+	useLastProcessedThumbnails,
+	useOptimizeThumbnails,
+	useReprocessThumbnails,
+	useThumbnail,
+} from '@/lib/api/thumbnails';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { ProcessOptions } from '@/services/thumbnail-service-export';
-import toastService from '@/services/toast';
 import { useThumbnailStore } from '@/store/thumbnails.store';
-import type { LastProcessedThumbnail, ThumbnailCallbacks } from '@/types/thumbnails';
-import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import Image from 'next/image';
-import * as React from 'react';
-import { useId } from 'react';
 import { ThumbnailError } from './thumbnail-error';
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
@@ -37,31 +40,7 @@ const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 
 // ThumbnailItem component
 function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index: number }) {
-	const [thumbnail, setThumbnail] = React.useState<string | null>(null);
-	const [isLoading, setIsLoading] = React.useState(true);
-	const [error, setError] = React.useState<string | null>(null);
-
-	React.useEffect(() => {
-		const loadThumbnail = async () => {
-			try {
-				setIsLoading(true);
-				const data = await thumbnailActions.getThumbnail(image.id, ThumbnailQuality.MEDIUM);
-
-				if (data.thumbnailUrl) {
-					setThumbnail(data.thumbnailUrl);
-				} else {
-					setError(data.error || 'No se recibió una URL de thumbnail válida');
-				}
-			} catch (err) {
-				console.error('Error cargando thumbnail:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadThumbnail();
-	}, [image.id]);
+	const { data: thumbnailData, isLoading, error } = useThumbnail(image.id, ThumbnailQuality.MEDIUM);
 
 	return (
 		<motion.div
@@ -79,12 +58,11 @@ function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index:
 			) : error ? (
 				<div className="absolute inset-0 flex items-center justify-center text-red-500 text-xs">Error</div>
 			) : (
-				thumbnail && (
+				thumbnailData?.thumbnailUrl && (
 					<>
-						<Image
-							src={thumbnail}
+						<img
+							src={thumbnailData.thumbnailUrl}
 							alt={image.path}
-							fill
 							className="object-cover transition-transform group-hover:scale-105"
 						/>
 						<motion.div
@@ -116,25 +94,15 @@ export function ThumbnailsSettings() {
 		error: thumbnailError,
 	} = useThumbnailStore();
 
+	// React Query hooks
+	const { data: lastProcessedThumbnails = [], refetch: refetchLastProcessed } = useLastProcessedThumbnails(9);
+	const optimizeThumbnailsMutation = useOptimizeThumbnails();
+	const reprocessThumbnailsMutation = useReprocessThumbnails();
+	const cleanThumbnailsMutation = useCleanThumbnails();
+
 	const [showErrors, setShowErrors] = React.useState(false);
-	const [lastProcessedThumbnails, setLastProcessedThumbnails] = React.useState<LastProcessedThumbnail[]>([]);
 
 	const idVideoAnimation = useId();
-
-	// Cargar últimas miniaturas procesadas
-	React.useEffect(() => {
-		const loadLastProcessed = async () => {
-			try {
-				const thumbnails = await thumbnailActions.getLastProcessedThumbnails();
-				setLastProcessedThumbnails(thumbnails);
-			} catch (error) {
-				console.error('Error cargando últimas miniaturas:', error);
-			}
-		};
-
-		loadLastProcessed();
-		// No es necesario recargar cuando cambie isThumbnailProcessing
-	}, []);
 
 	// Inicializar eventos SSE y cargar estadísticas iniciales
 	React.useEffect(() => {
@@ -146,11 +114,8 @@ export function ThumbnailsSettings() {
 		initializeThumbnails();
 	};
 
-	// Manejador común para procesos de miniaturas
-	const handleThumbnailProcess = async (
-		processFunction: (options: ThumbnailCallbacks) => Promise<void>,
-		processName: string
-	) => {
+	// Manejador común para procesos de miniaturas usando React Query
+	const handleThumbnailProcess = async (mutation: any, processName: string) => {
 		if (isThumbnailProcessing) {
 			toastService.info('Ya hay un proceso de miniaturas en ejecución');
 			return;
@@ -158,10 +123,11 @@ export function ThumbnailsSettings() {
 
 		try {
 			setThumbnailProcessing(true);
-			await processFunction({
+
+			const options: ProcessOptions = {
 				onProgress: (status) => {
 					if (status?.lastProcessed) {
-						setLastProcessedThumbnails((prev) => [status.lastProcessed as LastProcessedThumbnail, ...prev.slice(0, 4)]);
+						refetchLastProcessed();
 					}
 				},
 				onError: (error: unknown) => {
@@ -189,8 +155,11 @@ export function ThumbnailsSettings() {
 					}
 
 					initializeThumbnails();
+					refetchLastProcessed();
 				},
-			});
+			};
+
+			await mutation.mutateAsync(options);
 		} catch (error: unknown) {
 			console.error(`Error en ${processName}:`, error);
 			toastService.error(
@@ -225,23 +194,11 @@ export function ThumbnailsSettings() {
 		}
 	};
 
-	const handleOptimizeThumbnails = () =>
-		handleThumbnailProcess(
-			(callbacks) => thumbnailActions.optimizeThumbnails(callbacks as unknown as ProcessOptions),
-			'Optimización'
-		);
+	const handleOptimizeThumbnails = () => handleThumbnailProcess(optimizeThumbnailsMutation, 'Optimización');
 
-	const handleReprocessThumbnails = () =>
-		handleThumbnailProcess(
-			(callbacks) => thumbnailActions.reprocessThumbnails(callbacks as unknown as ProcessOptions),
-			'Reprocesamiento'
-		);
+	const handleReprocessThumbnails = () => handleThumbnailProcess(reprocessThumbnailsMutation, 'Reprocesamiento');
 
-	const handleCleanThumbnails = () =>
-		handleThumbnailProcess(
-			(callbacks) => thumbnailActions.cleanThumbnails(callbacks as unknown as ProcessOptions),
-			'Limpieza'
-		);
+	const handleCleanThumbnails = () => handleThumbnailProcess(cleanThumbnailsMutation, 'Limpieza');
 
 	return (
 		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">

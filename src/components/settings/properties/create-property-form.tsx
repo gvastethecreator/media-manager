@@ -1,14 +1,12 @@
-'use client';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
-import { createProperty, updateProperty } from '@/app/actions/properties/property.actions';
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { useCreateProperty, useUpdateProperty } from '@/lib/api/properties';
 import type { PropertyWithStats as Property } from '@/types/entities/property';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
@@ -31,6 +29,10 @@ export function CreatePropertyForm({
 	onUpdated,
 	onCancel,
 }: CreatePropertyFormProps) {
+	// React Query mutations
+	const createPropertyMutation = useCreateProperty();
+	const updatePropertyMutation = useUpdateProperty();
+
 	const form = useForm<FormData>({
 		resolver: zodResolver(CreatePropertySchema),
 		defaultValues: {
@@ -82,16 +84,20 @@ export function CreatePropertyForm({
 			return;
 		}
 
-		if (isEditing && property) {
-			const updated = await updateProperty(property.id, data);
-			if (updated) {
-				onUpdated?.(updated);
+		try {
+			if (isEditing && property) {
+				const updated = await updatePropertyMutation.mutateAsync({ id: property.id, data });
+				if (updated) {
+					onUpdated?.(updated);
+				}
+			} else {
+				const created = await createPropertyMutation.mutateAsync(data);
+				if (created) {
+					onCreated?.(created);
+				}
 			}
-		} else {
-			const created = await createProperty(data);
-			if (created) {
-				onCreated?.(created);
-			}
+		} catch (error) {
+			console.error('Error al procesar la propiedad:', error);
 		}
 	};
 

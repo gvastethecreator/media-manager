@@ -1,16 +1,16 @@
-// Barrel de transformers para JsonFile
+/**
+ * @file Punto de entrada para transformadores de JsonFile
+ * @module transformers/json-file
+ 
+ */
 
-// Exportar desde mappers (renombrando la función conflictiva)
-export {
-	fromPrismaJsonFile as mapJsonFileFromPrisma,
-	toPrismaJsonFile,
-} from './mappers';
-
-// Exportar desde serializers
+// Exportar mappers, serializers, validators y schemas
+export * from './mappers';
+export * from './schema';
 export * from './serializers';
-
 // Exportar desde transformer
 export {
-	fromPrismaJsonFile,
-	fromPrismaJsonFiles,
+	fromDrizzleJsonFile,
+	fromDrizzleJsonFiles,
 } from './transformer';
+export * from './validators';

@@ -14,7 +14,7 @@ Esta vista permite visualizar archivos JSON en tres modos:
 
 ## Dependencias
 
-- `react-json-view-lite` (agregar con `pnpm add react-json-view-lite`)
+- `react-json-view-lite` (agregar con `bun add react-json-view-lite`)
 
 ## Extensiones futuras
 

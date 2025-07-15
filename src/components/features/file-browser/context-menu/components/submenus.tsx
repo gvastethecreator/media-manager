@@ -1,5 +1,5 @@
-'use client';
-
+import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
+import { memo, useCallback } from 'react';
 import {
 	ContextMenuItem,
 	ContextMenuSub,
@@ -10,9 +10,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
-import type { FileItem } from '@/types/files';
-import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
-import { memo, useCallback } from 'react';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
 // Logger para el componente
@@ -26,8 +24,8 @@ const _submenuLogger = clientLogger.withContext('ContextSubmenu');
  * @param handleOpenChange Callback para apertura/cierre del submenú
  */
 interface SubmenuProps {
-	file: FileItem;
-	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
+	file: EntityWithStats;
+	onAction: (action: ContextMenuAction, file: EntityWithStats, data?: Record<string, unknown>) => void;
 	loadingStates: LoadingStates;
 	handleOpenChange: (entity: keyof LoadingStates, isOpen: boolean) => void;
 }
@@ -326,12 +324,7 @@ export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
 });
 
 // Componente para el submenú de prompts
-export const PromptsSubmenu = memo(function PromptsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	handleOpenChange,
-}: SubmenuProps) {
+export const PromptsSubmenu = memo(function PromptsSubmenu() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>
@@ -346,12 +339,7 @@ export const PromptsSubmenu = memo(function PromptsSubmenu({
 });
 
 // Componente para el submenú de notas
-export const NotesSubmenu = memo(function NotesSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	handleOpenChange,
-}: SubmenuProps) {
+export const NotesSubmenu = memo(function NotesSubmenu() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>
@@ -366,12 +354,7 @@ export const NotesSubmenu = memo(function NotesSubmenu({
 });
 
 // Componente para el submenú de conceptos
-export const ConceptsSubmenu = memo(function ConceptsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	handleOpenChange,
-}: SubmenuProps) {
+export const ConceptsSubmenu = memo(function ConceptsSubmenu() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>

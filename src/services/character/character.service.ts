@@ -5,24 +5,22 @@
  * @updated 2025-01-27
  */
 
-import { getPrismaClient } from '@/lib/database/db';
+import * as crypto from 'crypto';
+import { desc, eq } from 'drizzle-orm';
+// Drizzle imports
+import { db } from '@/lib/drizzle';
+import { characters } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { mapCharacterSearchOptionsToPrisma } from '@/transformers/character/mappers';
-import {
-	fromPrismaCharacter,
-	fromPrismaCharacters,
-	toPrismaCharacterCreate,
-	toPrismaCharacterUpdate,
-} from '@/transformers/character/transformer';
+import { fromDrizzleCharacter, fromDrizzleCharacters } from '@/transformers/character/transformer';
 import type {
 	CharacterCreateInput,
 	CharacterSearchOptions,
 	CharacterUpdateInput,
 	CharacterWithStats,
 } from '@/types/entities/character';
-import { revalidatePath } from 'next/cache';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CharacterService');
@@ -36,61 +34,6 @@ export const CHARACTER_EVENTS = {
 	UPDATED: 'character:updated',
 	DELETED: 'character:deleted',
 	STATS_UPDATED: 'character:stats:updated',
-} as const;
-
-/**
- * 📊 Consulta optimizada para Character con conteos (sin relaciones completas).
- * Mejora significativa de rendimiento vs include completo.
- */
-const CHARACTER_SELECT_WITH_STATS = {
-	id: true,
-	name: true,
-	description: true,
-	emoji: true,
-	color: true,
-	shortcut: true,
-	category: true,
-	level: true,
-	class: true,
-	race: true,
-	type: true,
-	alignment: true,
-	backstory: true,
-	stats: true,
-	psychologicalProfile: true,
-	socialProfile: true,
-	relationships: true,
-	goals: true,
-	fears: true,
-	beliefs: true,
-	personality: true,
-	skills: true,
-	abilities: true,
-	sortBy: true,
-	filters: true,
-	featuredImage: true,
-	isFavorite: true,
-	createdAt: true,
-	updatedAt: true,
-	_count: {
-		select: {
-			images: true,
-			videos: true,
-			tags: true,
-			groups: true,
-			properties: true,
-			collections: true,
-			albums: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			relatedCharacters: true,
-			relatedTo: true,
-		},
-	},
 } as const;
 
 // Tipos de entrada
@@ -166,20 +109,53 @@ const revalidateCharacterPaths = async (): Promise<void> => {
  */
 export async function getCharacter(id: string): Promise<CharacterWithStats | null> {
 	try {
+		// **MIGRACIÓN A DRIZZLE**
 		logger.info(`🔍 Obteniendo personaje por ID: ${id}`);
-		const prisma = await getPrismaClient();
 
-		const character = await prisma.character.findUnique({
-			where: { id },
-			select: CHARACTER_SELECT_WITH_STATS,
-		});
+		const drizzleCharacter = await db
+			.select({
+				id: characters.id,
+				name: characters.name,
+				description: characters.description,
+				emoji: characters.emoji,
+				color: characters.color,
+				category: characters.category,
+				isPublic: characters.isPublic,
+				isFavorite: characters.isFavorite,
+				totalImages: characters.totalImages,
+				totalVideos: characters.totalVideos,
+				age: characters.age,
+				gender: characters.gender,
+				species: characters.species,
+				occupation: characters.occupation,
+				personality: characters.personality,
+				background: characters.background,
+				relationships: characters.relationships,
+				skills: characters.skills,
+				equipment: characters.equipment,
+				notes: characters.notes,
+				featuredImage: characters.featuredImage,
+				parentId: characters.parentId,
+				createdAt: characters.createdAt,
+				updatedAt: characters.updatedAt,
+			})
+			.from(characters)
+			.where(eq(characters.id, id))
+			.limit(1);
 
-		if (!character) {
+		if (drizzleCharacter.length === 0) {
 			logger.warn(`Personaje no encontrado: ${id}`);
 			return null;
 		}
 
-		const result = fromPrismaCharacter(character);
+		const rawCharacter = drizzleCharacter[0];
+
+		const transformedCharacter = {
+			...rawCharacter,
+			isFavorite: Boolean(rawCharacter.isFavorite),
+		};
+
+		const result = fromDrizzleCharacter(transformedCharacter as any);
 		if (!result) {
 			throw new CharacterServiceError('Error al transformar personaje obtenido', 'TRANSFORM_ERROR');
 		}
@@ -201,27 +177,74 @@ export async function getCharacter(id: string): Promise<CharacterWithStats | nul
  */
 export async function getCharacters(options: CharacterSearchOptions = {}): Promise<GetCharactersResult> {
 	try {
-		logger.info('🔍 Obteniendo personajes', { options });
-		const prisma = await getPrismaClient();
+		// **MIGRACIÓN A DRIZZLE**
+		logger.info('🔍 Obteniendo personajes con opciones:', options);
 
-		const prismaOptions = mapCharacterSearchOptionsToPrisma(options);
+		// Por ahora, implementación básica sin filtros complejos
+		const drizzleCharacters = await db
+			.select({
+				id: characters.id,
+				name: characters.name,
+				description: characters.description,
+				emoji: characters.emoji,
+				color: characters.color,
+				shortcut: characters.shortcut,
+				category: characters.category,
+				level: characters.level,
+				class: characters.class,
+				race: characters.race,
+				type: characters.type,
+				alignment: characters.alignment,
+				backstory: characters.backstory,
+				stats: characters.stats,
+				psychologicalProfile: characters.psychologicalProfile,
+				socialProfile: characters.socialProfile,
+				relationships: characters.relationships,
+				goals: characters.goals,
+				fears: characters.fears,
+				beliefs: characters.beliefs,
+				personality: characters.personality,
+				skills: characters.skills,
+				abilities: characters.abilities,
+				sortBy: characters.sortBy,
+				filters: characters.filters,
+				featuredImage: characters.featuredImage,
+				isFavorite: characters.isFavorite,
+				createdAt: characters.createdAt,
+				updatedAt: characters.updatedAt,
+			})
+			.from(characters)
+			.orderBy(desc(characters.createdAt));
 
-		// Obtener personajes con conteo total
-		const [characters, total] = await Promise.all([
-			prisma.character.findMany({
-				...prismaOptions,
-				select: CHARACTER_SELECT_WITH_STATS,
-			}),
-			prisma.character.count({
-				where: prismaOptions.where,
-			}),
-		]);
+		const transformedCharacters = drizzleCharacters.map((rawCharacter) => ({
+			...rawCharacter,
+			isFavorite: Boolean(rawCharacter.isFavorite),
+			// Counts vacíos por ahora (TODO: implementar subqueries)
+			_count: {
+				images: 0,
+				videos: 0,
+				tags: 0,
+				groups: 0,
+				properties: 0,
+				collections: 0,
+				albums: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				relatedCharacters: 0,
+				relatedTo: 0,
+			},
+		}));
 
-		const transformedCharacters = fromPrismaCharacters(characters);
+		const charactersResult = fromDrizzleCharacters(transformedCharacters as any);
+		const total = transformedCharacters.length; // TODO: implementar conteo separado
 
-		logger.info(`✅ ${transformedCharacters.length} personajes obtenidos`);
+		logger.info(`✅ ${charactersResult.length} personajes encontrados`);
 		return {
-			characters: transformedCharacters,
+			characters: charactersResult,
 			total,
 		};
 	} catch (error) {
@@ -240,28 +263,59 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 export async function createCharacter(data: CharacterCreateInput): Promise<CharacterWithStats> {
 	try {
 		logger.info('📝 Creando nuevo personaje', { name: data.name });
-		const prisma = await getPrismaClient();
 
-		const prismaData = toPrismaCharacterCreate(data);
+		// **MIGRACIÓN A DRIZZLE**
+		const result = await db
+			.insert(characters)
+			.values({
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description || null,
+				emoji: data.emoji || '👤',
+				color: data.color || '#3b82f6',
+				shortcut: data.shortcut || null,
+				category: data.category || null,
+				level: data.level || null,
+				class: data.class || null,
+				race: data.race || null,
+				type: data.type || null,
+				alignment: data.alignment || null,
+				backstory: data.backstory || null,
+				stats: data.stats || null,
+				psychologicalProfile: data.psychologicalProfile || null,
+				socialProfile: data.socialProfile || null,
+				relationships: data.relationships || null,
+				goals: data.goals || null,
+				fears: data.fears || null,
+				beliefs: data.beliefs || null,
+				personality: data.personality || null,
+				skills: data.skills || null,
+				abilities: data.abilities || null,
+				sortBy: data.sortBy || null,
+				filters: data.filters || null,
+				featuredImage: data.featuredImage || null,
+				isFavorite: data.isFavorite || false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
 
-		const newCharacter = await prisma.character.create({
-			data: prismaData,
-			select: CHARACTER_SELECT_WITH_STATS,
-		});
+		const newCharacter = result[0];
 
-		const result = fromPrismaCharacter(newCharacter);
-		if (!result) {
-			throw new CharacterServiceError('Error al transformar personaje creado', 'TRANSFORM_ERROR');
+		// Obtener el personaje creado con estadísticas
+		const createdCharacter = await getCharacter(newCharacter.id);
+		if (!createdCharacter) {
+			throw new CharacterServiceError('Error al obtener personaje creado', 'TRANSFORM_ERROR');
 		}
 
 		// Revalidar rutas
 		await revalidateCharacterPaths();
 
 		// Notificar creación
-		await notifyCharacterChange('create', result);
+		await notifyCharacterChange('create', createdCharacter);
 
-		logger.info(`✅ Personaje creado exitosamente: ${result.name}`, { id: result.id });
-		return result;
+		logger.info(`✅ Personaje creado exitosamente: ${createdCharacter.name}`, { id: createdCharacter.id });
+		return createdCharacter;
 	} catch (error) {
 		logger.error('❌ Error al crear personaje', { error, data });
 		throw new CharacterServiceError(
@@ -278,29 +332,57 @@ export async function createCharacter(data: CharacterCreateInput): Promise<Chara
 export async function updateCharacter(id: string, data: CharacterUpdateInput): Promise<CharacterWithStats> {
 	try {
 		logger.info(`📝 Actualizando personaje: ${id}`);
-		const prisma = await getPrismaClient();
 
+		// **MIGRACIÓN A DRIZZLE**
 		// Verificar si el personaje existe
-		const existingCharacter = await prisma.character.findUnique({
-			where: { id },
-			select: { id: true },
-		});
+		const existingCharacter = await db
+			.select({ id: characters.id })
+			.from(characters)
+			.where(eq(characters.id, id))
+			.limit(1);
 
-		if (!existingCharacter) {
+		if (existingCharacter.length === 0) {
 			throw new CharacterServiceError('Personaje no encontrado', 'CHARACTER_NOT_FOUND');
 		}
 
-		const prismaData = toPrismaCharacterUpdate(data);
+		const updateData: any = {
+			updatedAt: new Date(),
+		};
 
-		const updatedCharacter = await prisma.character.update({
-			where: { id },
-			data: prismaData,
-			select: CHARACTER_SELECT_WITH_STATS,
-		});
+		// Solo actualizar campos que se envían
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.emoji !== undefined) updateData.emoji = data.emoji;
+		if (data.color !== undefined) updateData.color = data.color;
+		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+		if (data.category !== undefined) updateData.category = data.category;
+		if (data.level !== undefined) updateData.level = data.level;
+		if (data.class !== undefined) updateData.class = data.class;
+		if (data.race !== undefined) updateData.race = data.race;
+		if (data.type !== undefined) updateData.type = data.type;
+		if (data.alignment !== undefined) updateData.alignment = data.alignment;
+		if (data.backstory !== undefined) updateData.backstory = data.backstory;
+		if (data.stats !== undefined) updateData.stats = data.stats;
+		if (data.psychologicalProfile !== undefined) updateData.psychologicalProfile = data.psychologicalProfile;
+		if (data.socialProfile !== undefined) updateData.socialProfile = data.socialProfile;
+		if (data.relationships !== undefined) updateData.relationships = data.relationships;
+		if (data.goals !== undefined) updateData.goals = data.goals;
+		if (data.fears !== undefined) updateData.fears = data.fears;
+		if (data.beliefs !== undefined) updateData.beliefs = data.beliefs;
+		if (data.personality !== undefined) updateData.personality = data.personality;
+		if (data.skills !== undefined) updateData.skills = data.skills;
+		if (data.abilities !== undefined) updateData.abilities = data.abilities;
+		if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
+		if (data.filters !== undefined) updateData.filters = data.filters;
+		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
-		const result = fromPrismaCharacter(updatedCharacter);
-		if (!result) {
-			throw new CharacterServiceError('Error al transformar personaje actualizado', 'TRANSFORM_ERROR');
+		await db.update(characters).set(updateData).where(eq(characters.id, id));
+
+		// Obtener el personaje actualizado con estadísticas
+		const updatedCharacter = await getCharacter(id);
+		if (!updatedCharacter) {
+			throw new CharacterServiceError('Error al obtener personaje actualizado', 'TRANSFORM_ERROR');
 		}
 
 		// Revalidar rutas
@@ -308,10 +390,10 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
 		revalidatePath(`/characters/${id}`);
 
 		// Notificar actualización
-		await notifyCharacterChange('update', result);
+		await notifyCharacterChange('update', updatedCharacter);
 
-		logger.info(`✅ Personaje actualizado exitosamente: ${result.name}`, { id });
-		return result;
+		logger.info(`✅ Personaje actualizado exitosamente: ${updatedCharacter.name}`, { id });
+		return updatedCharacter;
 	} catch (error) {
 		logger.error(`❌ Error al actualizar personaje ${id}`, { error, data });
 		throw new CharacterServiceError(
@@ -328,21 +410,20 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
 export async function deleteCharacter(id: string): Promise<void> {
 	try {
 		logger.warn(`🗑️ Eliminando personaje: ${id}`);
-		const prisma = await getPrismaClient();
 
+		// **MIGRACIÓN A DRIZZLE**
 		// Verificar si el personaje existe
-		const existingCharacter = await prisma.character.findUnique({
-			where: { id },
-			select: { id: true, name: true },
-		});
+		const existingCharacter = await db
+			.select({ id: characters.id, name: characters.name })
+			.from(characters)
+			.where(eq(characters.id, id))
+			.limit(1);
 
-		if (!existingCharacter) {
+		if (existingCharacter.length === 0) {
 			throw new CharacterServiceError('Personaje no encontrado', 'CHARACTER_NOT_FOUND');
 		}
 
-		await prisma.character.delete({
-			where: { id },
-		});
+		await db.delete(characters).where(eq(characters.id, id));
 
 		// Revalidar rutas
 		await revalidateCharacterPaths();
@@ -367,37 +448,43 @@ export async function deleteCharacter(id: string): Promise<void> {
 export async function toggleCharacterFavorite(id: string): Promise<CharacterWithStats> {
 	try {
 		logger.info(`⭐ Cambiando estado de favorito del personaje: ${id}`);
-		const prisma = await getPrismaClient();
 
+		// **MIGRACIÓN A DRIZZLE**
 		// Obtener estado actual
-		const currentCharacter = await prisma.character.findUnique({
-			where: { id },
-			select: { isFavorite: true },
-		});
+		const currentCharacter = await db
+			.select({ isFavorite: characters.isFavorite })
+			.from(characters)
+			.where(eq(characters.id, id))
+			.limit(1);
 
-		if (!currentCharacter) {
+		if (currentCharacter.length === 0) {
 			throw new CharacterServiceError('Personaje no encontrado', 'CHARACTER_NOT_FOUND');
 		}
 
-		const updatedCharacter = await prisma.character.update({
-			where: { id },
-			data: { isFavorite: !currentCharacter.isFavorite },
-			select: CHARACTER_SELECT_WITH_STATS,
-		});
+		const newFavoriteState = !currentCharacter[0].isFavorite;
 
-		const result = fromPrismaCharacter(updatedCharacter);
-		if (!result) {
-			throw new CharacterServiceError('Error al transformar personaje actualizado', 'TRANSFORM_ERROR');
+		await db
+			.update(characters)
+			.set({
+				isFavorite: newFavoriteState,
+				updatedAt: new Date(),
+			})
+			.where(eq(characters.id, id));
+
+		// Obtener el personaje actualizado con estadísticas
+		const updatedCharacter = await getCharacter(id);
+		if (!updatedCharacter) {
+			throw new CharacterServiceError('Error al obtener personaje actualizado', 'TRANSFORM_ERROR');
 		}
 
 		// Revalidar rutas
 		await revalidateCharacterPaths();
 
 		// Notificar actualización
-		await notifyCharacterChange('update', result);
+		await notifyCharacterChange('update', updatedCharacter);
 
-		logger.info(`✅ Estado de favorito cambiado: ${id} -> ${result.isFavorite}`);
-		return result;
+		logger.info(`✅ Estado de favorito cambiado: ${id} -> ${updatedCharacter.isFavorite}`);
+		return updatedCharacter;
 	} catch (error) {
 		logger.error(`❌ Error al cambiar estado de favorito del personaje ${id}`, { error });
 		throw new CharacterServiceError(
@@ -486,6 +573,59 @@ export async function getFavoriteCharacters(): Promise<CharacterWithStats[]> {
 			'GET_FAVORITE_CHARACTERS_FAILED',
 			error
 		);
+	}
+}
+
+/**
+ * Clase de servicio para gestión de personajes
+ */
+export class CharacterService {
+	async getCharacters(filters?: any): Promise<{ characters: CharacterWithStats[]; total: number }> {
+		const result = await getCharacters(filters || {});
+		return result;
+	}
+
+	async getCharacterById(id: string): Promise<CharacterWithStats | null> {
+		return await getCharacter(id);
+	}
+
+	async createCharacter(data: CharacterCreateInput): Promise<CharacterWithStats> {
+		return await createCharacter(data);
+	}
+
+	async updateCharacter(id: string, data: CharacterUpdateInput): Promise<CharacterWithStats | null> {
+		try {
+			return await updateCharacter(id, data);
+		} catch (error) {
+			if (error instanceof CharacterServiceError && error.code === 'CHARACTER_NOT_FOUND') {
+				return null;
+			}
+			throw error;
+		}
+	}
+
+	async deleteCharacter(id: string): Promise<boolean> {
+		try {
+			await deleteCharacter(id);
+			return true;
+		} catch (error) {
+			if (error instanceof CharacterServiceError && error.code === 'CHARACTER_NOT_FOUND') {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	async getCharacterImages(id: string): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes del personaje
+		logger.info(`Obteniendo imágenes del personaje ${id}`);
+		return [];
+	}
+
+	async getRecentCharacterImages(id: string, limit: number): Promise<any[]> {
+		// TODO: Implementar lógica para obtener imágenes recientes del personaje
+		logger.info(`Obteniendo imágenes recientes del personaje ${id} (limit: ${limit})`);
+		return [];
 	}
 }
 

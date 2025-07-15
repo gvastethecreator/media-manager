@@ -8,7 +8,6 @@
 // --- 🏗️ Tipos Base y Estadísticas (Nuevo Patrón) ---
 // Tipos canónicos que deben usarse en toda la aplicación nueva.
 export type {
-	PrismaWildcardWithCounts,
 	WildcardBase,
 	WildcardCreateInput,
 	WildcardPreview,
@@ -32,17 +31,17 @@ export {
 // --- 💀 Tipos Legacy (Obsoletos) ---
 // @deprecated Estos tipos se mantienen por retrocompatibilidad y serán eliminados.
 //             No usar en código nuevo. Refactorizar para usar WildcardWithStats.
-export type {
-	CreateWildcardData,
-	UpdateWildcardData,
-	WildcardBulkUpdateData,
-	WildcardChild,
-	WildcardComplete,
-	WildcardDeserialized,
-	WildcardRelated,
-	WildcardSearchFilters,
-	WildcardSearchOptions,
-} from './types';
+// export type {
+// 	CreateWildcardData,
+// 	UpdateWildcardData,
+// 	WildcardBulkUpdateData,
+// 	WildcardChild,
+// 	WildcardComplete,
+// 	WildcardDeserialized,
+// 	WildcardRelated,
+// 	WildcardSearchFilters,
+// 	WildcardSearchOptions,
+// } from './types';
 
 // --- 🎨 Enums y Constantes (a Mover) ---
 // TODO: Mover a un archivo `enums.ts` dedicado.

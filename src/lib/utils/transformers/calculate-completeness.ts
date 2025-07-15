@@ -22,20 +22,6 @@
  * const fullScore = calculateCompleteness(['a', 1, true]); // 100
  * const emptyScore = calculateCompleteness([null, undefined, '']); // 0
  */
-export function calculateCompleteness(fields: unknown[]): number;
-
-/**
- * Calcula un score de completitud basado en los campos especificados de un objeto.
- *
- * @param obj - El objeto del cual extraer los valores
- * @param fieldNames - Array de nombres de campos a evaluar
- * @returns {number} Un número entero entre 0 y 100.
- *
- * @example
- * const entity = { name: 'Test', description: '', category: 'A' };
- * const score = calculateCompleteness(entity, ['name', 'description', 'category']); // 67
- */
-export function calculateCompleteness(obj: Record<string, unknown>, fieldNames: string[]): number;
 
 export function calculateCompleteness(fieldsOrObj: unknown[] | Record<string, unknown>, fieldNames?: string[]): number {
 	// Si es un array directo (primera sobrecarga)

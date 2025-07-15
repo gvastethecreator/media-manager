@@ -1,10 +1,9 @@
 /**
- * @file Funciones auxiliares para la entidad Tag
+ * @file Utilidades y helpers para la entidad Tag
  * @module utils/tag/helpers
  */
 
-import { TagCategory, TagSortCriteria } from '@/store/entities/tag/types';
-import { type TagBase } from '@/types/entities/tag';
+import { type TagBase, TagCategory, TagSortCriteria } from '@/types/entities/tag';
 import { generateTagColor, generateTagEmoji } from '../string.utils';
 
 /**

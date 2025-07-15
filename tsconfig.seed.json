@@ -10,6 +10,6 @@
     "isolatedModules": true,
     "outDir": "dist"
   },
-  "include": ["prisma/**/*.ts"],
+  "include": [],
   "exclude": ["node_modules"]
 }

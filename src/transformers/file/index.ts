@@ -1,99 +1,58 @@
 /**
- * @file Punto de entrada para transformadores de File
+ * @file Punto de entrada para los transformadores de la entidad File.
  * @module transformers/file
+ * @description Exporta funciones de transformación, validación y serialización para File.
+ * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import { formatFileSize } from '@/lib/utils/format.utils';
-// Importaciones explícitas desde mappers
-import {
-	applyFileFilters,
-	determineFileType,
-	determineMimeType,
-	generateFileId,
-	getColorForFileType,
-	getIconForFileType,
-	mapStatsToFileInfo,
-	toEnhancedDirectory,
-	toEnhancedImageFile,
-	toFileListItem, // Mantenemos esta que sí existe
-} from './mappers';
-// Importaciones explícitas desde serializers
-import {
-	deserializeImageMetadata,
-	// formatFileSize se ha movido a @/lib/utils/format.utils.ts
-	pathsToTreeStructure,
-	serializeDirectoryContents,
-	serializeFileListForUI,
-	serializeFileOperationResult,
-	serializeImageMetadata,
-} from './serializers';
-
-/**
- * Transforma un array de archivos base a archivos mejorados
- * @param files Array de archivos base
- * @returns Array de archivos transformados y mejorados
- */
-export function transformFiles(files: any[]): any[] {
-	try {
-		return files.map((file) => {
-			if (file.isDirectory) {
-				return toEnhancedDirectory(file);
-			}
-			return toEnhancedImageFile(file);
-		});
-	} catch (error) {
-		console.error('Error transformando archivos:', error);
-		return [];
-	}
-}
-
-// Reexportaciones explícitas
+// --- Filtros ---
 export {
 	applyFileFilters,
-	// Desde serializers
-	deserializeImageMetadata,
+	applyFileFiltersAndSort,
+	applySortToFiles,
+} from './filters';
+// --- Transformadores principales ---
+export {
+	groupFilesByType,
+	toFileWithStats,
+	toFileWithStatsList,
+} from './mappers';
+// --- Schema de Drizzle ---
+export {
+	type FileInsert,
+	type FileSchema,
+	filesTable,
+	fileTypeEnum,
+} from './schema.ts';
+// --- Serializadores ---
+export {
+	serializeDirectoryStructure,
+	serializeFileBase,
+	serializeFileGroupedStats,
+	serializeFileList,
+	serializeFileWithStats,
+} from './serializers';
+// --- Las siguientes funciones están implementadas en el módulo utils ---
+export {
 	determineFileType,
 	determineMimeType,
-	formatFileSize,
-	// Desde mappers
 	generateFileId,
-	getColorForFileType,
-	getIconForFileType,
 	mapStatsToFileInfo,
-	pathsToTreeStructure,
 	serializeDirectoryContents,
-	serializeFileListForUI,
 	serializeFileOperationResult,
-	serializeImageMetadata,
-	toEnhancedDirectory,
-	toEnhancedImageFile,
-	toFileListItem,
-};
-
-// Objeto consolidado (opcional, pero mantenido por compatibilidad)
-// Asegúrate de que todas las funciones añadidas aquí también estén en la exportación explícita de arriba.
-export const fileTransformer = {
-	// Desde mappers
-	generateFileId,
-	determineFileType,
-	determineMimeType,
-	mapStatsToFileInfo,
-	toFileListItem,
-	getIconForFileType,
-	getColorForFileType,
-	applyFileFilters,
-	toEnhancedDirectory,
-	toEnhancedImageFile,
-	transformFiles,
-
-	// Desde serializers
-	deserializeImageMetadata,
-	serializeImageMetadata,
-	formatFileSize, // Re-exportado desde @/lib/utils/format.utils
-	pathsToTreeStructure,
-	serializeDirectoryContents,
-	serializeFileListForUI,
-	serializeFileOperationResult,
-};
-
-export default fileTransformer;
+} from './utils';
+// --- Validadores y esquemas ---
+export {
+	type FileBase,
+	type FileCreateInput,
+	type FileSearchInput,
+	type FileStatistics,
+	type FileUpdateInput,
+	type FileWithStats,
+	fileBaseSchema,
+	fileCreateSchema,
+	fileSearchSchema,
+	fileStatisticsSchema,
+	fileUpdateSchema,
+	fileWithStatsSchema,
+} from './validators';

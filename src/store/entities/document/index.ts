@@ -14,18 +14,15 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-
-import type { DocumentStore } from './types';
 import { createDocumentCoreSlice } from './slices/core.slice';
-import { createDocumentUISlice } from './slices/ui.slice';
 import { createDocumentFilterSlice } from './slices/filters.slice';
+import { createDocumentUISlice } from './slices/ui.slice';
+import type { DocumentStore } from './types';
 
 export const useDocumentStore = create<DocumentStore>()(
 	devtools(
 		immer((...a) => ({
 			...createDocumentCoreSlice(...a),
-			...createDocumentUISlice(...a),
-			...createDocumentFilterSlice(...a),
 		})),
 		{ name: 'DocumentStore' }
 	)

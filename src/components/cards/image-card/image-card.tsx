@@ -1,17 +1,17 @@
-'use client';
-
+import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useImage } from '@/lib/api/images';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
-import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { getImageCardData, type ImageCardData } from './image-server-actions';
+import type { ImageWithStats } from '@/types/entities/image';
+import type { TagWithStats } from '@/types/entities/tag';
 
 interface ImageCardProps {
 	imageId: string;
-	onClick?: (imageData: ImageCardData) => void;
+	onClick?: (imageData: ImageWithStats) => void;
 	className?: string;
 	showTags?: boolean;
 	showDetails?: boolean;
@@ -37,9 +37,7 @@ export function ImageCard({
 	tcgMode = false,
 	showRelations = false,
 }: ImageCardProps) {
-	const [imageData, setImageData] = useState<ImageCardData | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const { data: imageData, isLoading, error } = useImage(imageId);
 	const [isHovered, setIsHovered] = useState(false);
 
 	// Si variant es tcg, forzar tcgMode a true
@@ -47,26 +45,13 @@ export function ImageCard({
 		tcgMode = true;
 	}
 
-	useEffect(() => {
-		const loadImageData = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getImageCardData(imageId);
-				setImageData(data);
-			} catch (err) {
-				console.error('Error cargando datos de imagen:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		if (imageId) {
-			loadImageData();
+	const handleClick = () => {
+		if (onClick && imageData) {
+			onClick(imageData);
 		}
-	}, [imageId]);
+	};
 
-	// Funciones para el aspecto ratio
+	// Funciones de utilidad para clases CSS
 	const getAspectRatioClass = () => {
 		switch (aspectRatio) {
 			case 'square':
@@ -77,46 +62,30 @@ export function ImageCard({
 				return '';
 			default:
 				if (typeof aspectRatio === 'string' && aspectRatio.includes('/')) {
-					const [width, height] = aspectRatio.split('/');
-					return `aspect-[${width}/${height}]`;
+					return `aspect-[${aspectRatio}]`;
 				}
-				return '';
+				return 'aspect-[3/2]';
 		}
 	};
 
-	// Función para calcular dimensiones legibles
-	const getHumanReadableDimensions = () => {
-		if (!imageData?.width || !imageData?.height) return '';
-		return `${imageData.width} × ${imageData.height}`;
-	};
-
-	// Obtener variante de diseño
 	const getVariantClasses = () => {
 		switch (variant) {
 			case 'minimal':
-				return 'border-0 shadow-none';
+				return 'border-0 shadow-none bg-transparent';
 			case 'polaroid':
-				return 'border-8 border-white bg-white shadow-md p-1 rotate-1';
+				return 'border-8 border-white dark:border-gray-800 bg-white dark:bg-gray-800 shadow-md p-1 rotate-1';
 			case 'tcg':
-				return 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black';
+				return 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black text-white';
 			default:
-				return tcgMode
-					? 'border border-gray-800/20 shadow-lg bg-gradient-to-b from-gray-900 to-black'
-					: 'border border-gray-200 dark:border-gray-800';
-		}
-	};
-
-	const handleClick = () => {
-		if (onClick && imageData) {
-			onClick(imageData);
+				return 'border border-gray-200 dark:border-gray-800 bg-card';
 		}
 	};
 
 	// Determinar color primario para efectos TCG
 	const getPrimaryColor = () => {
 		// Usar el color de la primera etiqueta si hay etiquetas
-		if (imageData?.tags && imageData.tags.length > 0) {
-			return imageData.tags[0].color || '#3b82f6';
+		if (imageData?.parsedMetadata?.tags?.length > 0) {
+			return imageData.parsedMetadata.tags[0].color || '#3b82f6';
 		}
 		// Color predeterminado
 		return '#3b82f6';
@@ -151,7 +120,7 @@ export function ImageCard({
 			>
 				<div className="text-center p-4">
 					<ImageIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-					<p className="text-sm text-gray-500">{error || 'No se pudo cargar la imagen'}</p>
+					<p className="text-sm text-gray-500">{error?.message || 'No se pudo cargar la imagen'}</p>
 				</div>
 			</div>
 		);
@@ -159,13 +128,13 @@ export function ImageCard({
 
 	// Obtener formato de imagen de los metadatos
 	const _getImageFormat = () => {
-		return imageData.metadata?.format || 'unknown';
+		return imageData.parsedMetadata?.format || 'unknown';
 	};
 
 	// Obtener información de cámara si está disponible
 	const getCameraInfo = () => {
-		if (imageData.metadata?.camera?.make || imageData.metadata?.camera?.model) {
-			return `${imageData.metadata.camera.make || ''} ${imageData.metadata.camera.model || ''}`.trim();
+		if (imageData.parsedMetadata?.camera?.make || imageData.parsedMetadata?.camera?.model) {
+			return `${imageData.parsedMetadata.camera.make || ''} ${imageData.parsedMetadata.camera.model || ''}`.trim();
 		}
 		return null;
 	};
@@ -174,16 +143,21 @@ export function ImageCard({
 
 	// Calcular contador total de relaciones
 	const getTotalRelationsCount = () => {
-		if (!imageData._count) return 0;
+		if (!imageData.stats) return 0;
 		return (
-			(imageData._count.tags || 0) +
-			(imageData._count.albums || 0) +
-			(imageData._count.collections || 0) +
-			(imageData._count.characters || 0) +
-			(imageData._count.places || 0) +
-			(imageData._count.worldItems || 0) +
-			(imageData._count.notes || 0)
+			(imageData.stats.tagCount || 0) +
+			(imageData.stats.albumCount || 0) +
+			(imageData.stats.collectionCount || 0) +
+			(imageData.stats.characterCount || 0) +
+			(imageData.stats.placeCount || 0) +
+			(imageData.stats.worldItemCount || 0) +
+			(imageData.stats.noteCount || 0)
 		);
+	};
+
+	const getHumanReadableDimensions = () => {
+		if (!imageData?.parsedMetadata?.width || !imageData?.parsedMetadata?.height) return '';
+		return `${imageData.parsedMetadata.width} × ${imageData.parsedMetadata.height}`;
 	};
 
 	const cardContent = (
@@ -193,15 +167,16 @@ export function ImageCard({
 				getAspectRatioClass(),
 				getVariantClasses(),
 				isHovered ? 'shadow-lg scale-[1.02]' : 'hover:shadow-lg hover:scale-[1.02]',
-				onClick && 'cursor-pointer',
-				className
+				onClick && 'cursor-pointer'
 			)}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
-			onClick={handleClick}
-			onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-			tabIndex={onClick ? 0 : -1}
-			role={onClick ? 'button' : undefined}
+			{...(onClick && {
+				onClick: handleClick,
+				onKeyDown: (e: React.KeyboardEvent) => e.key === 'Enter' && handleClick(),
+				tabIndex: 0,
+				role: 'button',
+			})}
 		>
 			{/* Elementos decorativos TCG */}
 			{tcgMode && (
@@ -257,9 +232,9 @@ export function ImageCard({
 
 			{/* Imagen principal */}
 			<div className="relative w-full h-full">
-				{imageData.thumbnailUrl ? (
+				{imageData.thumbnail ? (
 					<img
-						src={imageData.thumbnailUrl}
+						src={imageData.thumbnail}
 						alt={imageData.name || 'Imagen'}
 						className={cn(
 							'w-full h-full object-cover',
@@ -324,14 +299,14 @@ export function ImageCard({
 								{/* Formato de la imagen y tamaño */}
 								{tcgMode && (
 									<div className="mt-1 flex flex-wrap gap-1.5">
-										{imageData.metadata?.format && (
+										{imageData.parsedMetadata?.format && (
 											<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4">
-												{imageData.metadata.format.toUpperCase()}
+												{imageData.parsedMetadata.format.toUpperCase()}
 											</Badge>
 										)}
-										{imageData.metadata?.size && (
+										{imageData.parsedMetadata?.size && (
 											<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4">
-												{Math.round(imageData.metadata.size / 1024)} KB
+												{Math.round(imageData.parsedMetadata.size / 1024)} KB
 											</Badge>
 										)}
 										{imageData.hash && (
@@ -350,16 +325,16 @@ export function ImageCard({
 							{/* Relaciones */}
 							{showRelations && (tcgMode || isHovered) && (
 								<div className="mt-2 flex items-center gap-2">
-									{imageData._count?.tags && imageData._count.tags > 0 && (
+									{imageData.stats?.tagCount && imageData.stats.tagCount > 0 && (
 										<Badge variant="secondary" className="bg-black/40 border-none gap-1">
 											<TagIcon className="h-3 w-3" />
-											{imageData._count.tags}
+											{imageData.stats.tagCount}
 										</Badge>
 									)}
-									{imageData._count?.albums && imageData._count.albums > 0 && (
+									{imageData.stats?.albumCount && imageData.stats.albumCount > 0 && (
 										<Badge variant="secondary" className="bg-black/40 border-none gap-1">
 											<FolderIcon className="h-3 w-3" />
-											{imageData._count.albums}
+											{imageData.stats.albumCount}
 										</Badge>
 									)}
 									{getTotalRelationsCount() > 0 && (
@@ -385,10 +360,10 @@ export function ImageCard({
 						{/* Información TCG en parte inferior (siempre visible) */}
 						<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black to-transparent pt-2">
 							{/* Etiquetas en modo TCG (visible siempre) */}
-							{showTags && imageData.tags && imageData.tags.length > 0 && (
+							{showTags && imageData.parsedMetadata?.tags?.length > 0 && (
 								<div className="px-3">
 									<div className="flex flex-wrap gap-1 mb-1">
-										{imageData.tags.slice(0, 3).map((tag) => (
+										{imageData.parsedMetadata?.tags?.slice(0, 3).map((tag: TagWithStats) => (
 											<Badge
 												key={tag.id}
 												variant="outline"
@@ -402,9 +377,9 @@ export function ImageCard({
 												{tag.name}
 											</Badge>
 										))}
-										{imageData.tags.length > 3 && (
+										{imageData.parsedMetadata?.tags?.length > 3 && (
 											<Badge variant="outline" className="py-0 h-4 text-[10px] bg-gray-800/60 border-gray-700/60">
-												+{imageData.tags.length - 3}
+												+{imageData.parsedMetadata.tags.length - 3}
 											</Badge>
 										)}
 									</div>
@@ -423,7 +398,7 @@ export function ImageCard({
 			</div>
 
 			{/* Etiquetas estándar (visible al hacer hover) */}
-			{showTags && imageData.tags && imageData.tags.length > 0 && !tcgMode && (
+			{showTags && imageData.parsedMetadata?.tags?.length > 0 && !tcgMode && (
 				<div
 					className={cn(
 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
@@ -432,7 +407,7 @@ export function ImageCard({
 					)}
 				>
 					<div className="flex flex-wrap gap-1">
-						{imageData.tags.slice(0, 5).map((tag) => (
+						{imageData.parsedMetadata?.tags?.slice(0, 5).map((tag: TagWithStats) => (
 							<Badge
 								key={tag.id}
 								variant="outline"
@@ -446,9 +421,9 @@ export function ImageCard({
 								{tag.name}
 							</Badge>
 						))}
-						{imageData.tags.length > 5 && (
+						{imageData.parsedMetadata?.tags?.length > 5 && (
 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
-								+{imageData.tags.length - 5}
+								+{imageData.parsedMetadata.tags?.length - 5}
 							</Badge>
 						)}
 					</div>
@@ -464,8 +439,8 @@ export function ImageCard({
 
 	// Si no hay onClick, envolver en un Link (si route es proporcionado)
 	return (
-		<Link href={`/images/${imageId}`} passHref>
-			{cardContent}
-		</Link>
+		<div className={className}>
+			<Link to={`/images/${imageId}`}>{cardContent}</Link>
+		</div>
 	);
 }

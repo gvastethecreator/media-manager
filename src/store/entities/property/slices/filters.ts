@@ -20,7 +20,7 @@ export const createPropertyFilterSlice: StateCreator<
 	[['zustand/immer', never]],
 	[],
 	{ filters: PropertyFilters } & PropertyFilterActions
-> = (set, get) => ({
+> = (set, _get) => ({
 	filters: initialState,
 
 	updateFilters: (newFilters: Partial<PropertyFilters>) => {

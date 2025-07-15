@@ -1,14 +1,12 @@
-'use client';
-
 import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getImageUrl } from '@/app/actions/images';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
-import { toastService } from '@/services/toast';
+import { pathToUrl } from '@/lib/web/url-utils';
 import { useImageResources } from '@/store/image-resources.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 
@@ -324,7 +322,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 	// Función memoizada para cargar URL de imagen
 	const loadImageUrl = useCallback(async (imageId: string): Promise<string> => {
 		try {
-			const url = await getImageUrl(imageId);
+			const url = await pathToUrl(imageId);
 			return url;
 		} catch (error) {
 			console.error(`Error cargando URL para ${imageId}:`, error);
@@ -524,11 +522,6 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 		[isOpen]
 	);
 
-	// No renderizar nada si no hay imágenes o el visor está cerrado
-	if (!isOpen || !images?.length || !currentImage) {
-		return null;
-	}
-
 	// Función para seleccionar una imagen específica
 	const handleSelectImage = useCallback(
 		(index: number) => {
@@ -543,7 +536,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 		// TODO: Implementar drag si es necesario
 	};
 
-	return (
+	const viewerContent = (
 		<dialog
 			className={dialogClassName}
 			open={isOpen}
@@ -679,4 +672,11 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 			</div>
 		</dialog>
 	);
+
+	// No renderizar nada si no hay imágenes o el visor está cerrado
+	if (!isOpen || !images?.length || !currentImage) {
+		return null;
+	}
+
+	return viewerContent;
 });

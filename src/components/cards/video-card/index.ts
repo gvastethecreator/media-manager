@@ -3,8 +3,8 @@
  * @module components/cards/video-card
  */
 
-export { VideoCard } from './video-card';
 export type { VideoCardProps } from './video-card';
+export { VideoCard } from './video-card';
 export { VideoCardContent } from './video-card-content';
 export { VideoCardFooter } from './video-card-footer';
 export { VideoCardHeader } from './video-card-header';

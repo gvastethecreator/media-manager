@@ -3,11 +3,11 @@
  * @module store/entities/character
  */
 
-import type { CharacterViewConfig, CharacterWithStats } from '@/types/entities/character';
-import { CharacterSortOption } from '@/types/entities/character/enums';
-import { CHARACTER_KEY_PREFIX } from '@/lib/utils/character';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { CHARACTER_KEY_PREFIX } from '@/lib/utils/character';
+import type { CharacterViewConfig, CharacterWithStats } from '@/types/entities/character';
+import { CharacterSortOption } from '@/types/entities/character/enums';
 import { createCharacterCoreSlice } from './slices/core';
 import { createCharacterFiltersSlice } from './slices/filters';
 import { createCharacterUISlice } from './slices/ui';
