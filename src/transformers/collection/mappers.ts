@@ -17,21 +17,21 @@ import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '
 export function toCollectionWithStats(collection: CollectionBase, counts?: any): CollectionWithStats {
 	// Calcular estadísticas básicas
 	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0) : 0;
-	
+
 	// Calcular completitud basada en campos importantes
 	const completenessFields = [collection.name, collection.description, collection.category];
 	const completenessScore = calculateCompleteness(collection, ['name', 'description', 'category']);
-	
+
 	// Calcular popularidad basada en el total de items
 	const popularity = Math.log1p(totalItems);
-	
+
 	const stats: CollectionStatistics = {
 		totalItems,
 		completeness: completenessScore,
 		popularity: Number.parseFloat(popularity.toFixed(2)),
 		lastUpdated: new Date().toISOString(),
 	};
-	
+
 	return {
 		...collection,
 		stats,
@@ -44,5 +44,5 @@ export function toCollectionWithStats(collection: CollectionBase, counts?: any):
  * @returns Lista de CollectionWithStats
  */
 export function toCollectionWithStatsList(collections: CollectionBase[]): CollectionWithStats[] {
-	return collections.map(collection => toCollectionWithStats(collection));
+	return collections.map((collection) => toCollectionWithStats(collection));
 }

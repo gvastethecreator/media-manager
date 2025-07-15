@@ -24,18 +24,18 @@ const eventSubscribers = getEventSubscribers();
 router.post('/', async (req, res) => {
 	try {
 		const event: EventData = req.body;
-		
+
 		logger.info('📢 Evento recibido:', {
 			type: event.type,
 			id: event.id,
-			data: event.data
+			data: event.data,
 		});
 
 		// Validar estructura del evento
 		if (!event.type) {
 			return res.status(400).json({
 				error: 'Tipo de evento requerido',
-				code: 'INVALID_EVENT_TYPE'
+				code: 'INVALID_EVENT_TYPE',
 			});
 		}
 
@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
 		}
 		eventStore.get(eventKey)?.push({
 			...event,
-			timestamp: Date.now()
+			timestamp: Date.now(),
 		});
 
 		// Mantener solo los últimos 100 eventos por tipo
@@ -56,7 +56,7 @@ router.post('/', async (req, res) => {
 		}
 
 		// Notificar a suscriptores (para futuras implementaciones de WebSocket/SSE)
-		eventSubscribers.forEach(subscriber => {
+		eventSubscribers.forEach((subscriber) => {
 			try {
 				subscriber(event);
 			} catch (error) {
@@ -69,15 +69,14 @@ router.post('/', async (req, res) => {
 			success: true,
 			message: 'Evento procesado correctamente',
 			eventType: event.type,
-			timestamp: Date.now()
+			timestamp: Date.now(),
 		});
-
 	} catch (error) {
 		logger.error('Error procesando evento:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			code: 'INTERNAL_SERVER_ERROR',
-			details: error instanceof Error ? error.message : 'Error desconocido'
+			details: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
 });
@@ -88,36 +87,36 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
 	try {
 		const { type, limit = 50 } = req.query;
-		
+
 		if (type && typeof type === 'string') {
 			// Obtener eventos de un tipo específico
 			const events = eventStore.get(type) || [];
 			const limitedEvents = events.slice(-Number(limit));
-			
+
 			res.json({
 				type,
 				count: limitedEvents.length,
 				total: events.length,
-				events: limitedEvents
+				events: limitedEvents,
 			});
 		} else {
 			// Obtener resumen de todos los tipos de eventos
 			const summary = Array.from(eventStore.entries()).map(([eventType, events]) => ({
 				type: eventType,
 				count: events.length,
-				lastEvent: events[events.length - 1]?.timestamp || null
+				lastEvent: events[events.length - 1]?.timestamp || null,
 			}));
-			
+
 			res.json({
 				totalTypes: summary.length,
-				summary
+				summary,
 			});
 		}
 	} catch (error) {
 		logger.error('Error obteniendo eventos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
-			code: 'INTERNAL_SERVER_ERROR'
+			code: 'INTERNAL_SERVER_ERROR',
 		});
 	}
 });
@@ -128,31 +127,31 @@ router.get('/', async (req, res) => {
 router.delete('/', async (req, res) => {
 	try {
 		const { type } = req.query;
-		
+
 		if (type && typeof type === 'string') {
 			// Limpiar eventos de un tipo específico
 			eventStore.delete(type);
 			logger.info(`🧹 Eventos del tipo '${type}' eliminados`);
-			
+
 			res.json({
 				success: true,
-				message: `Eventos del tipo '${type}' eliminados`
+				message: `Eventos del tipo '${type}' eliminados`,
 			});
 		} else {
 			// Limpiar todos los eventos
 			eventStore.clear();
 			logger.info('🧹 Todos los eventos eliminados');
-			
+
 			res.json({
 				success: true,
-				message: 'Todos los eventos eliminados'
+				message: 'Todos los eventos eliminados',
 			});
 		}
 	} catch (error) {
 		logger.error('Error eliminando eventos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
-			code: 'INTERNAL_SERVER_ERROR'
+			code: 'INTERNAL_SERVER_ERROR',
 		});
 	}
 });
@@ -188,7 +187,7 @@ router.get('/stream', async (req, res) => {
 					send('event', {
 						type: event.type,
 						data: event.data,
-						timestamp: Date.now()
+						timestamp: Date.now(),
 					});
 				}
 			} catch (error) {
@@ -209,7 +208,6 @@ router.get('/stream', async (req, res) => {
 		// Enviar confirmación de conexión
 		send('connected', { timestamp: Date.now() });
 		logger.info('🔌 Cliente SSE conectado');
-
 	} catch (error) {
 		logger.error('Error en conexión SSE:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });

@@ -25,8 +25,6 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	const { data: recentImagesData } = useRecentNoteImages(noteId);
 	const { data: noteCounts } = useNoteCounts(noteId);
 
-	
-
 	// Calcular valores derivados
 	const imagesCount = noteCounts?.images || 0;
 	const videosCount = noteCounts?.videos || 0;
