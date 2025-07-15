@@ -29,6 +29,7 @@ export interface UploadedImageBase {
 	hash: string;
 	metadata: string | null;
 	imageId: string;
+	category?: string;
 	createdAt: Date;
 }
 

@@ -6,6 +6,8 @@ interface WorldItemCardFooterProps {
 	createdAt: Date | string;
 	updatedAt: Date | string;
 	imagesCount?: number;
+	videosCount?: number;
+	totalRelations?: number;
 	isFavorite?: boolean;
 	category?: string | null;
 	type?: string | null;

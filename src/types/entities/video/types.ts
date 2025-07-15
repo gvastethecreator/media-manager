@@ -271,7 +271,9 @@ export interface VideoPaginationOptions {
  * 🎥 Tipo completo para Video con relaciones y estadísticas
  */
 export interface VideoWithStats extends VideoBase {
+	entityType: 'video';
 	stats: VideoStatistics;
+	thumbnailUrl: string | null;
 	_count?: {
 		albums?: number;
 		collections?: number;

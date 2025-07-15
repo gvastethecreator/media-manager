@@ -101,6 +101,7 @@ export function PlaceCard({
 			name: media.name,
 			thumbnailUrl: media.thumbnailUrl,
 			url: media.url,
+			type: media.type,
 			isVideo: media.type === 'video',
 		}));
 	}, [recentMediaData]);

@@ -641,6 +641,11 @@ export class TagService {
 		logger.info(`Obteniendo imágenes recientes de la etiqueta ${id} (limit: ${limit})`);
 		return [];
 	}
+
+	async addImageToTag(tagId: string, imageId: string): Promise<void> {
+		// TODO: Implementar lógica para agregar imagen a etiqueta
+		logger.info(`Agregando imagen ${imageId} a etiqueta ${tagId}`);
+	}
 }
 
 // Servicio principal

@@ -25,6 +25,22 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	const { data: recentImagesData } = useRecentNoteImages(noteId);
 	const { data: noteCounts } = useNoteCounts(noteId);
 
+	// Extraer datos relevantes primero
+	const {
+		id,
+		title,
+		emoji = '📝',
+		color,
+		category,
+		content,
+		status,
+		priority,
+		isFavorite = false,
+		createdAt,
+		updatedAt,
+		tags,
+	} = note || {};
+
 	// Calcular valores derivados
 	const imagesCount = noteCounts?.images || 0;
 	const videosCount = noteCounts?.videos || 0;
@@ -118,21 +134,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		);
 	}
 
-	// Extraer datos relevantes
-	const {
-		id,
-		title,
-		emoji = '📝',
-		color,
-		category,
-		content,
-		status,
-		priority,
-		isFavorite = false,
-		createdAt,
-		updatedAt,
-		tags,
-	} = note;
+
 
 	// Render del componente
 	return (

@@ -2,9 +2,10 @@ import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
-import { IntegratedFileBrowser } from '@/components/features/file-browser';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
+import BaseContentView from '@/components/views/base/base-content-view';
 import { useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
@@ -115,7 +116,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	useEffect(() => {
 		setHasAttemptedLoad(false);
 		setIsRetrying(false);
-	}, []);
+	}, [currentFolderId]);
 
 	// ️ Validación: verificar que hay una carpeta seleccionada
 	if (!currentFolderId) {
@@ -161,58 +162,43 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		);
 	}
 
-	// Renderizar galería de imágenes usando IntegratedFileBrowser
+	// Renderizar galería de imágenes usando BaseContentView y FileBrowser
 	return (
-		<div className="relative h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
-			{/* Controles en la esquina superior derecha */}
-			<div className="absolute top-2 right-2 z-10 flex gap-2">
-				<Button variant="outline" size="sm" onClick={handleScanFolder} disabled={isRetrying}>
-					<FolderSearch className="h-4 w-4 mr-2" />
-					{isRetrying ? 'Escaneando...' : 'Escanear'}
-				</Button>
-				<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
-					<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
-					{isRetrying ? 'Recargando...' : 'Recargar'}
-				</Button>
-			</div>
-
-			{/* Header con información de la carpeta */}
-			<div className="p-6 pb-4 border-b border-border bg-background/50 backdrop-blur-sm">
-				<h2 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
-					{currentItem?.emoji && <span className="text-3xl">{currentItem.emoji}</span>}
-					{currentItem?.name || 'Carpeta'}
-				</h2>
-				{currentItem?.description && <p className="text-muted-foreground">{currentItem.description}</p>}
-			</div>
-
-			{/* IntegratedFileBrowser con toolbar integrado */}
-			<div className="flex-1 overflow-hidden">
-				<IntegratedFileBrowser
-					entityType="image"
-					filterId={currentFolderId}
-					filterType="folder"
-					onItemSelect={handleImageSelect}
-					onItemDoubleClick={handleImageDoubleClick}
-					showToolbar={true}
-					toolbarProps={{
-						isRightPanelVisible: true,
-						// TODO: Conectar con el estado del panel derecho
-					}}
-					className="h-full"
-				/>
-			</div>
-		</div>
+		<BaseContentView
+			title={currentItem?.name || 'Carpeta'}
+			description={currentItem?.description}
+			icon={currentItem?.emoji}
+			headerControls={
+				<>
+					<Button variant="outline" size="sm" onClick={handleScanFolder} disabled={isRetrying}>
+						<FolderSearch className="h-4 w-4 mr-2" />
+						{isRetrying ? 'Escaneando...' : 'Escanear'}
+					</Button>
+					<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
+						<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+						{isRetrying ? 'Recargando...' : 'Recargar'}
+					</Button>
+				</>
+			}
+		>
+			<FileBrowser
+				entityType="image"
+				filterId={currentFolderId}
+				filterType="folder"
+				onItemClick={handleImageSelect}
+				onItemDoubleClick={handleImageDoubleClick}
+				className="h-full"
+			/>
+		</BaseContentView>
 	);
 }
 
 /**
  * 📝 Documentación:
- * - Vista optimizada que usa IntegratedFileBrowser para una experiencia completa
- * - Toolbar integrado con controles de vista, búsqueda y selección
+ * - Vista optimizada que usa BaseContentView y FileBrowser para una experiencia completa
+ * - Controles de recarga y escaneo integrados en el header
  * - Filtrado automático por carpeta usando filterId
- * - Controles de recarga y escaneo integrados en overlay
- * - Información contextual de la carpeta
- * - UI consistente con el resto del sistema
+ * - UI consistente con el resto del sistema usando componentes base
  * - Previene loops infinitos con estado local de control
  * - Experiencia unificada de navegación de archivos
  */

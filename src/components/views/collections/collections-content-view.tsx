@@ -23,6 +23,7 @@ interface CollectionsContentViewProps {
 	setNewCollectionDescription: (description: string) => void;
 	handleCollectionClick: (collection: CollectionWithStats) => void;
 	handleCreateCollection: () => void;
+	className?: string;
 }
 
 const MemoizedCollectionCard = memo(CollectionCard);
@@ -39,6 +40,7 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 	setNewCollectionDescription,
 	handleCollectionClick,
 	handleCreateCollection,
+	className,
 }) => {
 	if (error) {
 		return (
@@ -53,7 +55,7 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 	}
 
 	return (
-		<ScrollArea className="h-full">
+		<ScrollArea className={className || "h-full"}>
 			<div className="container mx-auto p-6">
 				<h2 className="text-xl font-bold mb-4">Vista de Colecciones</h2>
 

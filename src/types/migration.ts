@@ -19,18 +19,15 @@ import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 
-// Tipos temporales para entidades que aún no tienen definiciones completas
-export interface AudioWithStats extends AudioBase {
-	entityType: 'audio';
-}
+// Imports para los tipos re-exportados
+import type { AudioBase } from '@/types/entities/audio';
+import type { DocumentBase } from '@/types/entities/document';
+import type { CollectionBase } from '@/types/entities/collection';
 
-export interface DocumentWithStats extends DocumentBase {
-	entityType: 'document';
-}
-
-export interface CollectionWithStats extends CollectionBase {
-	entityType: 'collection';
-}
+// Re-exportar tipos reales en lugar de definiciones temporales
+export type { AudioWithStats } from '@/types/entities/audio';
+export type { DocumentWithStats } from '@/types/entities/document';
+export type { CollectionWithStats } from '@/types/entities/collection';
 
 export interface AlbumWithStats extends EntityWithStats {
 	entityType: 'album';
