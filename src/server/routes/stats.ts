@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
+import { getStats, getSystemStats, getSystemStatsExtended, getFolderStats } from '../services/stats.service';
 
 const router = express.Router();
 
@@ -61,6 +61,20 @@ router.get('/top-tags', async (req, res) => {
 		res.json(topTags);
 	} catch (error) {
 		console.error('Error getting top tags:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// GET /stats/folders - Obtener estadísticas detalladas de carpetas
+router.get('/folders', async (_req, res) => {
+	try {
+		const stats = await getFolderStats();
+		if (!stats) {
+			return res.status(500).json({ error: 'No se pudieron obtener las estadísticas de carpetas' });
+		}
+		res.json(stats);
+	} catch (error) {
+		console.error('Error getting folder stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

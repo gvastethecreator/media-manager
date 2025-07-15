@@ -402,6 +402,11 @@ async function getAIGenerationInfo(metadata: Record<string, unknown>): Promise<a
 	const aiKeys = ['parameters', 'prompt', 'model', 'seed', 'steps'];
 	const aiData: Record<string, unknown> = {};
 
+	// Validación null-safe para evitar errores de Object.entries
+	if (!metadata || typeof metadata !== 'object') {
+		return null;
+	}
+
 	for (const [key, value] of Object.entries(metadata)) {
 		const lowerKey = key.toLowerCase();
 		if (aiKeys.some((aiKey) => lowerKey.includes(aiKey))) {

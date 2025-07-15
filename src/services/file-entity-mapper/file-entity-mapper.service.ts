@@ -38,10 +38,22 @@ export class FileEntityMapperService {
 	 * Determina el tipo de entidad basado en la extensión del archivo
 	 */
 	public getEntityTypeFromExtension(extension: string): EntityType {
+		if (!extension) {
+			return EntityType.UNKNOWN;
+		}
+
 		const normalizedExt = extension.toLowerCase();
+		if (!normalizedExt) {
+			return EntityType.UNKNOWN;
+		}
+
+		// Validación null-safe para evitar errores de Object.entries
+		if (!ENTITY_TYPE_MAPPING || typeof ENTITY_TYPE_MAPPING !== 'object') {
+			return EntityType.UNKNOWN;
+		}
 
 		for (const [entityType, extensions] of Object.entries(ENTITY_TYPE_MAPPING)) {
-			if (extensions.includes(normalizedExt)) {
+			if (extensions && extensions.includes(normalizedExt)) {
 				return entityType as EntityType;
 			}
 		}

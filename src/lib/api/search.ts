@@ -30,9 +30,11 @@ export function useSearch(filters: SearchFilters) {
 		queryKey: searchKeys.search(filters),
 		queryFn: () => {
 			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					params.append(key, String(value));
+			if (filters && typeof filters === 'object') {
+				for (const [key, value] of Object.entries(filters)) {
+					if (value !== undefined && value !== null) {
+						params.append(key, String(value));
+					}
 				}
 			}
 			return apiClient.get<SearchResult>(`/search?${params.toString()}`);

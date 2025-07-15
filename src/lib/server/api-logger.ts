@@ -50,6 +50,10 @@ export const apiLogger = {
 		// Función para filtrar headers sensibles
 		const filterHeaders = (headers: Record<string, string | string[] | undefined>): Record<string, string> => {
 			const headersObj: Record<string, string> = {};
+			// Null-safe validation to avoid Object.entries errors
+			if (!headers || typeof headers !== 'object') {
+				return headersObj;
+			}
 			for (const [key, value] of Object.entries(headers)) {
 				const headerValue = Array.isArray(value) ? value.join(', ') : (value ?? '');
 				if (options.sensitiveHeaders?.includes(key.toLowerCase())) {
