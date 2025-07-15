@@ -14,9 +14,14 @@ import { FolderGroup } from './folder-group';
 import { getFolderIndexStatus } from './folder-utils';
 import { FoldersStats } from './folders-stats';
 import { useFolders } from './hooks/use-folders';
+import { useFolderStats } from './hooks/use-folder-stats';
 
 export function FoldersSettings() {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+
+	// Hook para estadísticas generales de carpetas
+	const { data: generalStats, isLoading: isStatsLoading, error: statsError } = useFolderStats();
 
 	const {
 		folders,
@@ -38,8 +43,26 @@ export function FoldersSettings() {
 		setError,
 	} = useFolders();
 
+	// Funciones para manejar las nuevas características
+	const handleUpdateFolder = (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => {
+		// TODO: Implementar la actualización de carpetas
+		console.log('Updating folder:', folderId, updates);
+	};
+
+	const handleToggleExpanded = (folderId: string) => {
+		setExpandedFolders(prev => {
+			const newSet = new Set(prev);
+			if (newSet.has(folderId)) {
+				newSet.delete(folderId);
+			} else {
+				newSet.add(folderId);
+			}
+			return newSet;
+		});
+	};
+
 	// Combinar errores
-	const displayError = errorMessage || error;
+	const displayError = errorMessage || error || statsError?.message;
 
 	if (displayError) {
 		return (
@@ -67,12 +90,19 @@ export function FoldersSettings() {
 	}
 
 	return (
-		<Card className="bg-muted/30 rounded-sm border-none">
-			<CardHeader className="p-3 pb-2">
-				<CardTitle className="text-base text-muted-foreground font-medium flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<FolderIcon className="h-4 w-4 text-primary" />
-						<span>Carpetas de Imágenes</span>
+		<div className="space-y-6">
+			{/* Estadísticas generales al principio */}
+			{generalStats && !isStatsLoading && (
+				<FoldersStats stats={generalStats} />
+			)}
+
+			{/* Sección de gestión de carpetas */}
+			<Card className="bg-muted/30 rounded-sm border-none">
+				<CardHeader className="p-3 pb-2">
+					<CardTitle className="text-base text-muted-foreground font-medium flex items-center justify-between">
+						<div className="flex items-center gap-2">
+							<FolderIcon className="h-4 w-4 text-primary" />
+							<span>Gestión de Carpetas</span>
 						{(isGloballyProcessing || isProcessing) && (
 							<div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
 								<RefreshCw className="h-4 w-4 animate-spin text-primary" />
@@ -171,6 +201,9 @@ export function FoldersSettings() {
 										onToggleAutoReindex={handleAutoReindexToggle}
 										onFolderClick={handleFolderClick}
 										getFolderIndexStatus={getFolderIndexStatus}
+										onUpdateFolder={handleUpdateFolder}
+										onToggleExpanded={handleToggleExpanded}
+										expandedFolders={expandedFolders}
 									/>
 								));
 							})()}
@@ -193,9 +226,6 @@ export function FoldersSettings() {
 						</div>
 					</ScrollArea>
 
-					{/* Estadísticas */}
-					<FoldersStats stats={stats} />
-
 					{/* Progress bar para reindexado global */}
 					{globalReindexStatus.isProcessing && (
 						<div className="mt-2">
@@ -206,7 +236,8 @@ export function FoldersSettings() {
 						</div>
 					)}
 				</div>
-			</CardContent>
-		</Card>
+				</CardContent>
+			</Card>
+		</div>
 	);
 }

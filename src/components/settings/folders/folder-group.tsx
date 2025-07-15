@@ -16,6 +16,9 @@ interface FolderGroupProps {
 	onToggleAutoReindex: (folderId: string, value: boolean) => void;
 	onFolderClick: (folderId: string) => void;
 	getFolderIndexStatus: (folder: ExtendedFolder) => IndexStatus;
+	onUpdateFolder?: (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => void;
+	onToggleExpanded?: (folderId: string) => void;
+	expandedFolders?: Set<string>;
 }
 
 export function FolderGroup({
@@ -30,6 +33,9 @@ export function FolderGroup({
 	onToggleAutoReindex,
 	onFolderClick,
 	getFolderIndexStatus,
+	onUpdateFolder,
+	onToggleExpanded,
+	expandedFolders,
 }: FolderGroupProps) {
 	// Ordenar subcarpetas por nombre
 	const sortedSubfolders = [...subfolders].sort((a, b) => a.name.localeCompare(b.name));
@@ -53,6 +59,9 @@ export function FolderGroup({
 				onToggleAutoReindex={onToggleAutoReindex}
 				onFolderClick={onFolderClick}
 				getFolderIndexStatus={getFolderIndexStatus}
+				onUpdateFolder={onUpdateFolder}
+				onToggleExpanded={onToggleExpanded}
+				isExpanded={expandedFolders?.has(parentFolder.id || '') || false}
 			/>
 
 			{/* Subcarpetas anidadas */}

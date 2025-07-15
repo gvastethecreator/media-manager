@@ -95,9 +95,12 @@ export function useRecentActivity(filters: StatsFilters = {}) {
 		queryKey: statsKeys.activity(filters),
 		queryFn: () => {
 			const params = new URLSearchParams();
-			for (const [key, value] of Object.entries(filters)) {
-				if (value !== undefined && value !== null) {
-					params.append(key, String(value));
+			// Validación null-safe para evitar errores de Object.entries
+			if (filters && typeof filters === 'object') {
+				for (const [key, value] of Object.entries(filters)) {
+					if (value !== undefined && value !== null) {
+						params.append(key, String(value));
+					}
 				}
 			}
 			return apiClient.get<RecentActivity[]>(`/stats/activity?${params.toString()}`);
