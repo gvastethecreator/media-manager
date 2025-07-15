@@ -158,7 +158,7 @@ export function PlaceCardImages({
 				>
 					{/* Imagen del lugar */}
 					<img
-						src={displayImage as string}
+						src={displayImage?.thumbnailUrl || ''}
 						alt="Place image"
 						className={cn(
 							'object-cover w-full h-full',

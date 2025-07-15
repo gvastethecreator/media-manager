@@ -38,6 +38,8 @@ interface FileBrowserProps {
 	items?: EntityWithStats[];
 	/** Callback cuando se selecciona un item */
 	onItemSelect?: (item: EntityWithStats) => void;
+	/** Callback cuando se hace click en un item */
+	onItemClick?: (item: EntityWithStats, e: React.MouseEvent) => void;
 	/** Callback cuando se hace doble click en un item */
 	onItemDoubleClick?: (item: EntityWithStats) => void;
 	/** Clase CSS adicional */
@@ -46,6 +48,8 @@ interface FileBrowserProps {
 	filterId?: string;
 	/** Tipo de filtro (folder, collection, tag, etc) */
 	filterType?: 'folder' | 'collection' | 'tag' | 'album';
+	/** IDs de elementos seleccionados */
+	selectedIds?: string[];
 	/** Modo de funcionamiento */
 	mode?: 'auto' | 'manual';
 	/** Nuevas props para layouts */
@@ -65,9 +69,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	entityTypes = [],
 	mode = 'auto',
 	items: manualItems = [],
-	folderId,
+	filterId,
 	filterType = undefined,
 	selectedIds = [],
+	onItemSelect,
 	onItemClick,
 	onItemDoubleClick,
 	className,
@@ -125,12 +130,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				const loadParams: Parameters<typeof storeLoadImages>[0] = {};
 
 				// Si hay filtro de carpeta, incluirlo en los parámetros
-				if (folderId && filterType === 'folder') {
-					loadParams.folderId = folderId;
+				if (filterId && filterType === 'folder') {
+					loadParams.folderId = filterId;
 				}
 
 				// Crear una clave única para estos parámetros
-				const paramsKey = JSON.stringify({ type, folderId, filterType });
+				const paramsKey = JSON.stringify({ type, filterId, filterType });
 
 				// Si los parámetros no han cambiado, no hacer nada
 				if (lastLoadParamsRef.current === paramsKey) {
@@ -144,8 +149,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				}
 
 				// Si hay filtro de carpeta, verificar si ya tenemos datos
-				if (folderId && filterType === 'folder') {
-					const existingImages = getImagesByFolder(folderId);
+				if (filterId && filterType === 'folder') {
+					const existingImages = getImagesByFolder(filterId);
 					if (existingImages.length > 0) {
 						logger.debug('📋 Ya hay imágenes cargadas para esta carpeta, saltando carga');
 						lastLoadParamsRef.current = paramsKey;
@@ -166,7 +171,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 			// TODO: Añadir otros tipos cuando se implementen sus stores
 		}
-	}, [entityType, entityTypes, folderId, filterType, mode]); // Mantener estas dependencias pero con la optimización del ref
+	}, [entityType, entityTypes, filterId, filterType, mode]); // Mantener estas dependencias pero con la optimización del ref
 
 	// Obtener items según el modo y tipo de entidad
 	const items = (() => {
@@ -183,8 +188,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			for (const type of entityTypes) {
 				switch (type) {
 					case 'image':
-						if (folderId && filterType === 'folder') {
-							allItems.push(...getImagesByFolder(folderId));
+						if (filterId && filterType === 'folder') {
+							allItems.push(...getImagesByFolder(filterId));
 						} else {
 							allItems.push(...getSortedImages());
 						}
@@ -206,8 +211,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		switch (entityType) {
 			case 'image':
 				// Si hay filtro por carpeta, usar getImagesByFolder
-				if (folderId && filterType === 'folder') {
-					return getImagesByFolder(folderId);
+				if (filterId && filterType === 'folder') {
+					return getImagesByFolder(filterId);
 				}
 				return getSortedImages();
 			// TODO: Añadir otros casos según se implementen
@@ -338,6 +343,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				setSelectedIds([item.id]);
 			}
 
+			onItemSelect?.(item);
 			onItemClick?.(item, e);
 		},
 		[selectedIds, setSelectedIds, onItemClick]

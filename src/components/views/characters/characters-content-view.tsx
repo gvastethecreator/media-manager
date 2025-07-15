@@ -27,6 +27,7 @@ interface CharactersContentViewProps {
 	handleCharacterSelect: (characterId: string) => void;
 	handleCreateCharacter: () => void;
 	handleRetry: () => void;
+	className?: string;
 }
 
 const CharactersContentView: React.FC<CharactersContentViewProps> = ({
@@ -44,6 +45,7 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	handleCharacterSelect,
 	handleCreateCharacter,
 	handleRetry,
+	className,
 }) => {
 	if (isLoading) {
 		return <LoadingScreen message="Cargando personajes..." />;
@@ -64,7 +66,7 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	}
 
 	return (
-		<ScrollArea className="flex-1">
+		<ScrollArea className={className || "flex-1"}>
 			<div className="p-6">
 				<h2 className="text-xl font-bold mb-4">Vista de Personajes</h2>
 

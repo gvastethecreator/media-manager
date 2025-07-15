@@ -38,6 +38,7 @@ interface AlbumsContentViewProps {
 	handleEditAlbum: (album: AlbumWithStats) => void;
 	handleDeleteAlbum: (albumId: string) => void;
 	handleSubmitForm: () => void;
+	className?: string;
 }
 
 const MemoizedAlbumCard = React.memo(
@@ -120,6 +121,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 	handleEditAlbum,
 	handleDeleteAlbum,
 	handleSubmitForm,
+	className,
 }) => {
 	if (error) {
 		return (
@@ -134,7 +136,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 	}
 
 	return (
-		<ScrollArea className="h-full">
+		<ScrollArea className={className || "h-full"}>
 			<div className="container mx-auto p-6">
 				<h2 className="text-xl font-bold mb-4">Vista de Álbumes</h2>
 

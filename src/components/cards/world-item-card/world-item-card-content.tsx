@@ -154,7 +154,7 @@ export function WorldItemCardContent({
 							className="flex justify-between mb-0.5 text-xs"
 						>
 							<span className="font-medium">{prop.name || 'Propiedad'}</span>
-							<span className="text-muted-foreground">{prop.value}</span>
+						<span className="text-muted-foreground">{String(prop.value || '')}</span>
 						</div>
 					))}
 				</div>
@@ -171,7 +171,7 @@ export function WorldItemCardContent({
 							<span className="font-semibold" style={{ color: primaryColor }}>
 								{key}:
 							</span>
-							<span>{typeof value === 'number' ? value : String(value)}</span>
+							<span>{typeof value === 'number' ? value : String(value || '')}</span>
 						</div>
 					))}
 				</div>
@@ -185,8 +185,8 @@ export function WorldItemCardContent({
 					</div>
 					{parsedEffects.map((effect: WorldItemEffect, index: number) => (
 						<div key={`effect-${renderKey}-${effect.name || `effect-${index + 1}`}`} className="text-[10px] mb-0.5">
-							<span className="font-medium">{effect.name}: </span>
-							<span className="text-muted-foreground">{effect.description}</span>
+							<span className="font-medium">{String(effect.name || '')}: </span>
+					<span className="text-muted-foreground">{String(effect.description || '')}</span>
 						</div>
 					))}
 				</div>
@@ -202,8 +202,8 @@ export function WorldItemCardContent({
 						<div key={`req-${renderKey}-${key}`} className="text-[10px] mb-0.5">
 							<span className="font-medium">{key}: </span>
 							<span className="text-muted-foreground">
-								{typeof req === 'object' && req !== null && 'value' in req ? req.value : String(req)}
-							</span>
+						{typeof req === 'object' && req !== null && 'value' in req ? String((req as any).value || '') : String(req || '')}
+					</span>
 						</div>
 					))}
 				</div>
