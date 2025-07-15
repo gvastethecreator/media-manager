@@ -9,10 +9,10 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import type { ImageCardData } from '@/lib/api/services/images';
 import { cn } from '@/lib/utils';
 import type { ImageWithStats } from '@/types/entities/image/base';
 import type { TagWithStats } from '@/types/entities/tag/base';
-import type { ImageCardData } from '@/lib/api/services/images';
 import { ImageCardImproved } from './image-card-improved';
 
 interface ImageGalleryProps {

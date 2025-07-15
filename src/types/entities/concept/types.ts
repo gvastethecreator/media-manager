@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+
 // Re-export tipos base desde base.ts para evitar duplicación
 export type { ConceptBase, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
 

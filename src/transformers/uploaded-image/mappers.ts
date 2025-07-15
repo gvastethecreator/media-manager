@@ -69,18 +69,18 @@ export function toUploadedImageExtended(
 		height: 600,
 		aspectRatio: 800 / 600,
 	};
-	
+
 	// Calcular estadísticas básicas si no se proporcionan
 	const imageStats = stats || {
 		totalViews: 0,
 		lastAccessed: new Date().toISOString(),
 		processingTime: 0,
 	};
-	
+
 	// Construir URL de la imagen
 	const imageUrl = `/uploads/${uploadedImage.name || uploadedImage.id}`;
 	const thumbnailUrl = `/uploads/thumbnails/${uploadedImage.name || uploadedImage.id}`;
-	
+
 	return {
 		...uploadedImage,
 		dimensions: {
@@ -99,5 +99,5 @@ export function toUploadedImageExtended(
  * @returns Lista de UploadedImageExtended
  */
 export function toUploadedImageExtendedList(uploadedImages: any[]): any[] {
-	return uploadedImages.map(image => toUploadedImageExtended(image));
+	return uploadedImages.map((image) => toUploadedImageExtended(image));
 }

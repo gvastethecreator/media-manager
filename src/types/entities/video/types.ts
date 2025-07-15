@@ -6,9 +6,6 @@
  */
 
 import { z } from 'zod';
-
-// Imports optimizados usando tipos WithStats
-import type { VideoStatistics } from './base';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -21,6 +18,8 @@ import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
 import type { WildcardWithStats } from '../wildcard';
 import type { WorldItemWithStats } from '../world-item';
+// Imports optimizados usando tipos WithStats
+import type { VideoStatistics } from './base';
 
 /**
  * 🎥 Enums para Video

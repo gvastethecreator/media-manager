@@ -1,7 +1,7 @@
+import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useCallback, useEffect, useRef } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import { EventSourcePolyfill } from 'event-source-polyfill';
 import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/types/folders';
 
 const eventsLogger = clientLogger.withContext('FoldersEvents');
@@ -11,9 +11,11 @@ interface FolderEventsCallbacks {
 	onError?: (error: ErrorResponse) => void;
 	onComplete?: (data: FolderResponse) => void;
 	onStats?: (stats: FolderStats) => void;
-	onReindexAllProgress?: (status: ProcessStatus & {
-		currentFolder?: string;
-	}) => void;
+	onReindexAllProgress?: (
+		status: ProcessStatus & {
+			currentFolder?: string;
+		}
+	) => void;
 }
 
 /**
@@ -41,7 +43,7 @@ export function useFoldersEvents({
 				if (status.progress !== undefined && status.progress > 0) {
 					const progressMessage = status.message || 'Procesando...';
 					const progressPercent = Math.round(status.progress);
-					
+
 					// Solo mostrar notificación cada 25% para evitar spam
 					if (progressPercent % 25 === 0 || progressPercent >= 90) {
 						toastService.info(`📊 Progreso: ${progressPercent}%`, {
@@ -141,7 +143,7 @@ export function useFoldersEvents({
 									totalFiles: eventData.data.totalFiles || 0,
 									filesProcessed: eventData.data.filesProcessed || 0,
 									message: eventData.data.message,
-									folderId: eventData.data.folderId
+									folderId: eventData.data.folderId,
 								});
 							}
 							break;
@@ -157,7 +159,7 @@ export function useFoldersEvents({
 									message: eventData.data.message,
 									folderId: eventData.data.folderId,
 									currentFolder: eventData.data.currentFolder,
-									timestamp: eventData.data.timestamp || Date.now()
+									timestamp: eventData.data.timestamp || Date.now(),
 								});
 							}
 							break;
@@ -197,7 +199,6 @@ export function useFoldersEvents({
 			eventSource.addEventListener('heartbeat', () => {
 				eventsLogger.debug('💓 Heartbeat SSE recibido');
 			});
-
 		} catch (error) {
 			eventsLogger.error('❌ Error iniciando conexión SSE:', error);
 		}

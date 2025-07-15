@@ -2,12 +2,11 @@ import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { memo, useCallback } from 'react';
+import { FileItem } from '@/lib/contexts/file-context';
 import { EntityWithStats } from '@/types/entities/entity.types';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';
-
-import { FileItem } from '@/lib/contexts/file-context';
 
 // 🛠️ Utilidad para formatear tamaño de archivo
 const formatFileSize = (bytes: number): string => {

@@ -4,9 +4,9 @@
  * @description Utilidades para generar IDs únicos basados en nombres de carpeta
  */
 
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema/index';
-import { eq } from 'drizzle-orm';
 
 /**
  * Normaliza un nombre de carpeta para usarlo como ID
@@ -16,7 +16,7 @@ import { eq } from 'drizzle-orm';
 export function normalizeFolderName(name: string): string {
 	// Convertir a minúsculas
 	let normalized = name.toLowerCase();
-	
+
 	// Reemplazar caracteres especiales y acentos
 	normalized = normalized
 		.normalize('NFD')
@@ -25,12 +25,12 @@ export function normalizeFolderName(name: string): string {
 		.replace(/\s+/g, '-') // Espacios a guiones
 		.replace(/-+/g, '-') // Múltiples guiones a uno solo
 		.replace(/^-+|-+$/g, ''); // Remover guiones al inicio y final
-	
+
 	// Asegurar que no esté vacío
 	if (!normalized) {
 		normalized = 'carpeta';
 	}
-	
+
 	return normalized;
 }
 
@@ -41,12 +41,8 @@ export function normalizeFolderName(name: string): string {
  */
 export async function folderIdExists(id: string): Promise<boolean> {
 	try {
-		const result = await db
-			.select({ id: folders.id })
-			.from(folders)
-			.where(eq(folders.id, id))
-			.limit(1);
-		
+		const result = await db.select({ id: folders.id }).from(folders).where(eq(folders.id, id)).limit(1);
+
 		return result.length > 0;
 	} catch (error) {
 		console.error('Error verificando existencia de ID de carpeta:', error);
@@ -60,27 +56,27 @@ export async function folderIdExists(id: string): Promise<boolean> {
  * @param maxAttempts - Número máximo de intentos (default: 100)
  * @returns ID único generado
  */
-export async function generateFolderIdFromName(name: string, maxAttempts: number = 100): Promise<string> {
+export async function generateFolderIdFromName(name: string, maxAttempts = 100): Promise<string> {
 	const baseName = normalizeFolderName(name);
-	
+
 	// Intentar primero sin sufijo
 	let candidateId = baseName;
 	let exists = await folderIdExists(candidateId);
-	
+
 	if (!exists) {
 		return candidateId;
 	}
-	
+
 	// Si existe, probar con sufijos numéricos
 	for (let i = 2; i <= maxAttempts; i++) {
 		candidateId = `${baseName}-${i}`;
 		exists = await folderIdExists(candidateId);
-		
+
 		if (!exists) {
 			return candidateId;
 		}
 	}
-	
+
 	// Si llegamos aquí, fallback a UUID
 	console.warn(`No se pudo generar ID único para '${name}' después de ${maxAttempts} intentos. Usando UUID.`);
 	return crypto.randomUUID();
@@ -97,7 +93,7 @@ export function isValidFolderId(id: string): boolean {
 	if (uuidRegex.test(id)) {
 		return true;
 	}
-	
+
 	// Verificar si es nombre normalizado válido
 	const nameRegex = /^[a-z0-9]+(-[a-z0-9]+)*(-\d+)?$/;
 	return nameRegex.test(id) && id.length <= 100;
@@ -109,13 +105,13 @@ export function isValidFolderId(id: string): boolean {
  * @param count - Número de sugerencias (default: 5)
  * @returns Array de nombres sugeridos
  */
-export function getFolderNameSuggestions(name: string, count: number = 5): string[] {
+export function getFolderNameSuggestions(name: string, count = 5): string[] {
 	const baseName = normalizeFolderName(name);
 	const suggestions: string[] = [];
-	
+
 	for (let i = 2; i <= count + 1; i++) {
 		suggestions.push(`${baseName}-${i}`);
 	}
-	
+
 	return suggestions;
 }

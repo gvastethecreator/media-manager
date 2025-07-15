@@ -36,7 +36,10 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		recentImages: [],
 		recentVideos: [],
 		totalSize: character.statistics?.totalAssociations ?? 0,
-		stats: typeof character.stats === 'string' ? safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats) : (character.stats ?? {} as CharacterStats),
+		stats:
+			typeof character.stats === 'string'
+				? safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats)
+				: (character.stats ?? ({} as CharacterStats)),
 		parsedRelationships: safeJsonParse<Record<string, any>>(character.relationships, {}),
 		parsedGoals: safeJsonParse<Record<string, any>>(character.goals, {}),
 		parsedFears: safeJsonParse<Record<string, any>>(character.fears, {}),

@@ -54,7 +54,7 @@ export function useFoldersOperations({
 				// Validar si la carpeta ya existe
 				operationsLogger.info('🔍 Validando si la carpeta ya existe:', { path: folderPath });
 				const folderExists = await validateFolderExists(folderPath.trim());
-				
+
 				if (folderExists) {
 					const errorMessage = `Ya existe una carpeta con la ruta: ${folderPath.trim()}`;
 					operationsLogger.warn('⚠️ Carpeta duplicada detectada:', { path: folderPath.trim() });
@@ -96,10 +96,10 @@ export function useFoldersOperations({
 				onStartProcessing(result.id);
 
 				operationsLogger.info('✅ Carpeta agregada correctamente:', result);
-				
+
 				// Recargar datos para obtener la nueva carpeta
 				await onLoadData();
-				
+
 				// Iniciar indexación automática de la nueva carpeta
 				operationsLogger.info('🚀 Iniciando indexación automática para carpeta:', result.id);
 				try {
@@ -139,7 +139,7 @@ export function useFoldersOperations({
 				toastService.error('Error: ID de carpeta inválido');
 				return;
 			}
-			
+
 			try {
 				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
 
@@ -175,7 +175,7 @@ export function useFoldersOperations({
 				toastService.error('Error: ID de carpeta inválido');
 				return;
 			}
-			
+
 			try {
 				operationsLogger.info('🗑️ Eliminando carpeta:', { folderId });
 
@@ -205,7 +205,7 @@ export function useFoldersOperations({
 				toastService.error('Error: ID de carpeta inválido');
 				return;
 			}
-			
+
 			try {
 				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
 

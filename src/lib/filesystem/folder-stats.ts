@@ -3,12 +3,12 @@ import { eq } from 'drizzle-orm';
 import path from 'path';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema/index';
+import { emitProgress } from '@/lib/server/events.server';
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
 import type { EntityCreationStats } from '@/types/file-entity-mapper';
 import type { DirectoryInfo } from './folder-scanner';
 import { scanFolder } from './folder-scanner';
 import { type FolderSyncResult, syncFoldersWithFileSystem } from './folder-sync';
-import { emitProgress } from '@/lib/server/events.server';
 
 /**
  * 🔧 ENHANCED: Actualiza estadísticas, crea entidades automáticamente y procesa subcarpetas
@@ -71,7 +71,7 @@ export async function updateFolderStats(
 	// 🎯 NUEVA FUNCIONALIDAD: Crear entidades automáticamente con progreso
 	const fileEntityMapper = FileEntityMapperService.getInstance();
 	const filePaths = scanResult.files.map((file) => file.path);
-	
+
 	// Emitir progreso inicial
 	if (emitProgressEvents && currentDepth === 0) {
 		await emitProgress({
@@ -82,11 +82,11 @@ export async function updateFolderStats(
 				progress: 0,
 				totalFiles: filePaths.length,
 				processedFiles: 0,
-				message: 'Iniciando indexación de archivos...'
-			}
+				message: 'Iniciando indexación de archivos...',
+			},
 		});
 	}
-	
+
 	// Procesar archivos con progreso
 	const entityStats = await processFilesWithProgress(
 		filePaths,
@@ -158,14 +158,14 @@ async function processFilesWithProgress(
 	const totalFiles = filePaths.length;
 	let processedFiles = 0;
 	const stats: EntityCreationStats = { created: 0, updated: 0, errors: 0 };
-	
+
 	// Procesar archivos en lotes para evitar sobrecarga
 	const batchSize = 10;
 	const progressUpdateInterval = Math.max(1, Math.floor(totalFiles / 20)); // Actualizar progreso cada 5%
-	
+
 	for (let i = 0; i < filePaths.length; i += batchSize) {
 		const batch = filePaths.slice(i, i + batchSize);
-		
+
 		// Procesar lote
 		for (const filePath of batch) {
 			try {
@@ -179,9 +179,9 @@ async function processFilesWithProgress(
 				console.error(`Error procesando archivo ${filePath}:`, error);
 				stats.errors++;
 			}
-			
+
 			processedFiles++;
-			
+
 			// Emitir progreso cada cierto intervalo
 			if (emitEvents && (processedFiles % progressUpdateInterval === 0 || processedFiles === totalFiles)) {
 				const progress = Math.round((processedFiles / totalFiles) * 100);
@@ -192,20 +192,21 @@ async function processFilesWithProgress(
 					totalFiles,
 					filesProcessed: processedFiles,
 					phase: processedFiles === totalFiles ? 'complete' : 'processing',
-					message: processedFiles === totalFiles 
-						? 'Indexación completada'
-						: `Procesando archivos... ${processedFiles}/${totalFiles}`,
-					timestamp: Date.now()
+					message:
+						processedFiles === totalFiles
+							? 'Indexación completada'
+							: `Procesando archivos... ${processedFiles}/${totalFiles}`,
+					timestamp: Date.now(),
 				});
 			}
 		}
-		
+
 		// Pequeña pausa entre lotes para evitar bloqueo
 		if (i + batchSize < filePaths.length) {
-			await new Promise(resolve => setTimeout(resolve, 10));
+			await new Promise((resolve) => setTimeout(resolve, 10));
 		}
 	}
-	
+
 	return stats;
 }
 
@@ -257,12 +258,12 @@ async function processSubfolders(
 
 			// Indexar recursivamente la subcarpeta (sin emitir eventos de progreso)
 			const subfolderStats = await updateFolderStats(
-				subfolderId, 
-				processedPaths, 
-				maxDepth, 
+				subfolderId,
+				processedPaths,
+				maxDepth,
 				currentDepth,
 				false, // No sincronizar subcarpetas
-				false  // No emitir eventos de progreso en subcarpetas
+				false // No emitir eventos de progreso en subcarpetas
 			);
 			totalStats.created += subfolderStats.created;
 			totalStats.updated += subfolderStats.updated;

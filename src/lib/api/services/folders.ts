@@ -110,17 +110,17 @@ export const validateFolderExists = async (folderPath: string): Promise<boolean>
 				},
 			}
 		);
-		
+
 		// Si la respuesta es 200, la carpeta existe
 		if (response.ok) {
 			return true;
 		}
-		
+
 		// Si es 404, la carpeta no existe (esto es esperado)
 		if (response.status === 404) {
 			return false;
 		}
-		
+
 		// Para otros errores, lanzar excepción
 		const errorText = await response.text();
 		throw new Error(`Error validando carpeta: ${response.status} - ${errorText}`);

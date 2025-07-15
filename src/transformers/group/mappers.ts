@@ -17,20 +17,20 @@ import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entitie
 export function toGroupWithStats(group: GroupBase, counts?: any): GroupWithStats {
 	// Calcular estadísticas básicas
 	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0) : 0;
-	
+
 	// Calcular completitud basada en campos importantes
 	const completenessScore = calculateCompleteness(group, ['name', 'description', 'category']);
-	
+
 	// Calcular popularidad basada en el total de items
 	const popularity = Math.log1p(totalItems);
-	
+
 	const stats: GroupStatistics = {
 		totalItems,
 		completeness: completenessScore,
 		popularity: Number.parseFloat(popularity.toFixed(2)),
 		lastUpdated: new Date().toISOString(),
 	};
-	
+
 	return {
 		...group,
 		stats,
@@ -43,5 +43,5 @@ export function toGroupWithStats(group: GroupBase, counts?: any): GroupWithStats
  * @returns Lista de GroupWithStats
  */
 export function toGroupWithStatsList(groups: GroupBase[]): GroupWithStats[] {
-	return groups.map(group => toGroupWithStats(group));
+	return groups.map((group) => toGroupWithStats(group));
 }
