@@ -51,7 +51,7 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 	}
 
 	// Filtrar conceptos por término de búsqueda
-	const filteredConcepts = concepts.filter(
+	const filteredConcepts = (concepts || []).filter(
 		(concept) =>
 			concept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			concept.description?.toLowerCase().includes(searchTerm.toLowerCase())

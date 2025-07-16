@@ -14,6 +14,7 @@ import DocumentsContentView from './documents/documents-content-view';
 import EntityCardsContentView from './entity-cards/entity-cards-content-view';
 import FavoritesContentView from './favorites/favorites-content-view';
 import File3DContentView from './file3d/file3d-content-view';
+import { File3DContentView as File3DDetailView } from './file3d/file-3d-content-view';
 import FilesContentView from './files/files-content-view';
 import { FolderContentView } from './folders/folder-content-view';
 import FoldersView from './folders/folders-view';
@@ -115,7 +116,7 @@ export const ViewContainer = memo(function ViewContainer() {
 			case 'workflow-content':
 				return <WorkflowContentView />;
 			case 'file-3d-content':
-				return <File3DContentView />;
+				return <File3DDetailView />;
 
 			// Para el resto, usar placeholder temporal
 			default:
@@ -187,8 +188,8 @@ export const ViewContainer = memo(function ViewContainer() {
 	const renderViewContent = (view: string) => {
 		// Contenido específico de cada vista con cards informativos
 		const commonFeatures = (
-			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-				<div className="bg-card rounded-lg border border-border p-6">
+			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
+				<div className="bg-card rounded-lg border border-border p-2">
 					<div className="flex items-center mb-3">
 						<div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
 							<span className="text-xl">🔍</span>
@@ -200,7 +201,7 @@ export const ViewContainer = memo(function ViewContainer() {
 					</p>
 				</div>
 
-				<div className="bg-card rounded-lg border border-border p-6">
+				<div className="bg-card rounded-lg border border-border p-2">
 					<div className="flex items-center mb-3">
 						<div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center mr-3">
 							<span className="text-xl">⚡</span>
@@ -210,7 +211,7 @@ export const ViewContainer = memo(function ViewContainer() {
 					<p className="text-sm text-muted-foreground">Previsualiza contenido sin salir de la vista actual.</p>
 				</div>
 
-				<div className="bg-card rounded-lg border border-border p-6">
+				<div className="bg-card rounded-lg border border-border p-2">
 					<div className="flex items-center mb-3">
 						<div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center mr-3">
 							<span className="text-xl">🎨</span>

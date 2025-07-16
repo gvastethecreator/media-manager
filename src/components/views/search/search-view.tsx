@@ -77,7 +77,7 @@ export function SearchView(_props: ViewProps) {
 		(item: EntityWithStats) => {
 			// ✅ MIGRADO: Usar EntityWithStats en lugar de FileItem
 			if (item.type === 'image') {
-				const imageItems = items.filter((i: EntityWithStats) => i.type === 'image');
+				const imageItems = (items || []).filter((i: EntityWithStats) => i.type === 'image');
 				const currentIndex = imageItems.findIndex((i: EntityWithStats) => i.id === item.id);
 
 				// Convertir EntityWithStats a formato compatible con viewer
