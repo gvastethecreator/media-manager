@@ -1,0 +1,131 @@
+Comando: bunx biome format --write .
+Fecha: 2025-07-16T01:47:45.473Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\forms\emoji-picker.tsx:200:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected corresponding JSX closing tag for 'ScrollArea'.
+  
+    199 │ 					{/* 📱 Contenido de cada categoría */}
+  > 200 │ 					<ScrollArea className="h-72">
+        │ 					^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    201 │ 						{Object.entries(emojisByCategory).map(([category, emojis]) => (
+    202 │ 							<TabsContent key={category} value={category} className="m-0">
+  
+  i Opening tag
+  
+    199 │ 					{/* 📱 Contenido de cada categoría */}
+  > 200 │ 					<ScrollArea className="h-72">
+        │ 					^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    201 │ 						{Object.entries(emojisByCategory).map(([category, emojis]) => (
+    202 │ 							<TabsContent key={category} value={category} className="m-0">
+  
+  i closing tag
+  
+  > 222 │ 				</Tabs>
+        │ 				^^^^^^^
+    223 │ 			</PopoverContent>
+    224 │ 		</Popover>
+  
+
+src\components\forms\emoji-picker.tsx:174:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected corresponding JSX closing tag for 'Tabs'.
+  
+    172 │ 			</PopoverTrigger>
+    173 │ 			<PopoverContent className="w-80 p-0" align="start">
+  > 174 │ 				<Tabs value={activeTab} onValueChange={setActiveTab}>
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    175 │ 					{/* 🎨 Navegación por categorías */}
+    176 │ 					<div className="border-b px-3">
+  
+  i Opening tag
+  
+    172 │ 			</PopoverTrigger>
+    173 │ 			<PopoverContent className="w-80 p-0" align="start">
+  > 174 │ 				<Tabs value={activeTab} onValueChange={setActiveTab}>
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    175 │ 					{/* 🎨 Navegación por categorías */}
+    176 │ 					<div className="border-b px-3">
+  
+  i closing tag
+  
+    222 │ 				</Tabs>
+  > 223 │ 			</PopoverContent>
+        │ 			^^^^^^^^^^^^^^^^^
+    224 │ 		</Popover>
+    225 │ 	);
+  
+
+src\components\forms\emoji-picker.tsx:173:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected corresponding JSX closing tag for 'PopoverContent'.
+  
+    171 │ 				</Button>
+    172 │ 			</PopoverTrigger>
+  > 173 │ 			<PopoverContent className="w-80 p-0" align="start">
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    174 │ 				<Tabs value={activeTab} onValueChange={setActiveTab}>
+    175 │ 					{/* 🎨 Navegación por categorías */}
+  
+  i Opening tag
+  
+    171 │ 				</Button>
+    172 │ 			</PopoverTrigger>
+  > 173 │ 			<PopoverContent className="w-80 p-0" align="start">
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    174 │ 				<Tabs value={activeTab} onValueChange={setActiveTab}>
+    175 │ 					{/* 🎨 Navegación por categorías */}
+  
+  i closing tag
+  
+    222 │ 				</Tabs>
+    223 │ 			</PopoverContent>
+  > 224 │ 		</Popover>
+        │ 		^^^^^^^^^^
+    225 │ 	);
+    226 │ });
+  
+
+src\components\forms\emoji-picker.tsx:226:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    224 │ 		</Popover>
+    225 │ 	);
+  > 226 │ });
+        │ ^
+    227 │ 
+  
+
+src\components\forms\emoji-picker.tsx:227:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `<` but instFormatted 1466 files in 1642ms. No fixes applied.
+Found 5 errors.
+ead the file ends
+  
+    225 │ 	);
+    226 │ });
+  > 227 │ 
+        │ 
+  
+  i the file ends here
+  
+    225 │ 	);
+    226 │ });
+  > 227 │ 
+        │ 
+  
+
+src\components\forms\emoji-picker.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

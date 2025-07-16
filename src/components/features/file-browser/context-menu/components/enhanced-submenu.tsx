@@ -17,7 +17,7 @@ import { SubmenuSearch } from './submenu-search';
 interface EnhancedSubmenuItem {
 	id: string;
 	name: string;
-	emoji?: string;
+	emoji?: string | null;
 	color?: string;
 	isFavorite?: boolean;
 	isRecent?: boolean;

@@ -13,6 +13,37 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 		// Definir carpetas padre y subcarpetas de ejemplo para demostrar la jerarquía visual
 		const sampleFolders = [
 			// Carpetas padre
+			// Más subcarpetas para demostrar jerarquía
+			{
+				id: 'nature-photos',
+				name: 'Nature',
+				description: 'Fotografías de naturaleza',
+				path: 'D:\\Pictures\\Photography\\Nature',
+				emoji: '🌿',
+				totalFiles: 0,
+				totalSize: 0,
+				lastIndexed: null,
+				autoReindex: true,
+				color: '#22c55e',
+				isFavorite: false,
+				parentId: 'photography',
+				presetId: null,
+			},
+			{
+				id: 'funny-memes',
+				name: 'Funny',
+				description: 'Memes divertidos',
+				path: 'D:\\Pictures\\memes\\Funny',
+				emoji: '😂',
+				totalFiles: 0,
+				totalSize: 0,
+				lastIndexed: null,
+				autoReindex: false,
+				color: '#fbbf24',
+				isFavorite: true,
+				parentId: 'memes',
+				presetId: null,
+			},
 			{
 				id: 'cartoons',
 				name: 'Cartoons',
@@ -78,7 +109,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				id: 'silenthill',
 				name: 'SilentHill',
 				description: 'Anime y manga',
-				path: 'D:\\Pictures\\SilentHill',
+				path: 'D:\\Pictures\\Cartoons\\SilentHill',
 				emoji: '🎌',
 				totalFiles: 0,
 				totalSize: 0,
@@ -86,14 +117,14 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				autoReindex: true,
 				color: '#8b5cf6',
 				isFavorite: false,
-				parentId: '',
+				parentId: 'cartoons',
 				presetId: null,
 			},
 			{
 				id: 'aesthethic',
 				name: 'Aesthethic',
-				description: 'Películas de Disney',
-				path: 'D:\\Pictures\\Aesthethic',
+				description: 'Fotografías estéticas',
+				path: 'D:\\Pictures\\Photography\\Aesthethic',
 				emoji: '🏰',
 				totalFiles: 0,
 				totalSize: 0,
@@ -101,7 +132,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				autoReindex: false,
 				color: '#f59e0b',
 				isFavorite: true,
-				parentId: '',
+				parentId: 'photography',
 				presetId: null,
 			},
 		];
@@ -109,7 +140,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 		// Insertar carpetas
 		await db.insert(folders).values(sampleFolders);
 
-		seedLogger.success(`✅ ${sampleFolders.length} carpetas creadas`);
+		seedLogger.success(`✅ ${sampleFolders.length} carpetas creadas (incluyendo jerarquía padre-hijo)`);
 	} catch (error) {
 		seedLogger.error('❌ Error creando carpetas:', error);
 		throw error;

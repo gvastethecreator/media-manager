@@ -12,6 +12,7 @@
 export interface PropertyBase {
 	id: string;
 	name: string;
+	value: string | number;
 	description: string | null;
 	emoji: string | null;
 	color: string | null;

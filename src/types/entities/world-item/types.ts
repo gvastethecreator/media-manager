@@ -109,6 +109,7 @@ export interface WorldItemStatistics {
 	completenessScore: number;
 	usageCount: number;
 	lastUsed: Date | null;
+	[key: string]: number | undefined;
 }
 
 export interface WorldItemWithStats extends Omit<WorldItemBase, 'totalImages' | 'totalVideos'> {

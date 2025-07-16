@@ -124,14 +124,14 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 
 		return (
 			<img
-					src={src}
-					alt={alt}
-					width={width || 300}
-					height={height || 300}
-					className={className}
-					loading={priority ? 'eager' : 'lazy'}
-					{...imgProps}
-				/>
+				src={src}
+				alt={alt}
+				width={width || 300}
+				height={height || 300}
+				className={className}
+				loading={priority ? 'eager' : 'lazy'}
+				{...imgProps}
+			/>
 		);
 	}
 

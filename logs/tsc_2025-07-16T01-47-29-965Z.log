@@ -1,0 +1,14 @@
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-07-16T01:47:29.966Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/forms/emoji-picker.tsx[0m:[93m200[0m:[93m7[0m - [91merror[0m[90m TS17008: [0mJSX element 'ScrollArea' has no corresponding closing tag.
+
+[7m200[0m      <ScrollArea className="h-72">
+[7m   [0m [91m      ~~~~~~~~~~[0m
+
+
+Found 1 error in src/components/forms/emoji-picker.tsx[90m:200[0m
+

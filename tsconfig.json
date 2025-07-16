@@ -17,7 +17,8 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["vite/client", "vitest/globals", "@types/react", "@types/react-dom"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "vitest.config.ts", "src/**/*.d.ts"],

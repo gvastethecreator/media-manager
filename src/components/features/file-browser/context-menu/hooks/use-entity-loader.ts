@@ -125,7 +125,8 @@ const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityNam
 	let timeoutId: any; // Usar any para compatibilidad entre Node y navegador
 
 	const timeoutPromise = new Promise<T>((_resolve) => {
-		timeoutId = setTimeout(() => { // Cast a number para compatibilidad con el navegador
+		timeoutId = setTimeout(() => {
+			// Cast a number para compatibilidad con el navegador
 			entityLoaderLogger.warn(
 				`⚠️ Timeout al cargar ${entityName} después de ${timeoutMs}ms - continuando con datos parciales`
 			);

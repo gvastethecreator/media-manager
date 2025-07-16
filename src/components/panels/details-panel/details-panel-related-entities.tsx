@@ -8,8 +8,9 @@ import type { ItemComponentProps } from './details-panel-types';
  */
 export function RelatedEntities({ item }: ItemComponentProps) {
 	// Helper para verificar si la propiedad existe y tiene elementos.
-	const hasRelation = (prop: string): boolean => {
-		return prop in item && Array.isArray(item[prop]) && item[prop].length > 0;
+	const hasRelation = (prop: keyof ItemComponentProps['item']): boolean => {
+		const value = item[prop];
+		return Array.isArray(value) && value.length > 0;
 	};
 
 	const relations = [
@@ -68,7 +69,8 @@ export function RelatedEntities({ item }: ItemComponentProps) {
 			<h3 className="text-xs font-medium text-muted-foreground">Entidades relacionadas</h3>
 			<div className="flex flex-col gap-1.5">
 				{availableRelations.map((rel) => {
-					const count = item[rel.key as keyof typeof item].length;
+					const value = item[rel.key as keyof typeof item];
+					const count = Array.isArray(value) ? value.length : 0;
 					return (
 						<InfoItem
 							key={rel.key}

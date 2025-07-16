@@ -222,209 +222,210 @@ export function ThumbnailsSettings() {
 						</div>
 					)}
 					<div className="space-y-3">
-					<div className="grid grid-cols-2 gap-1	">
-						<div className="space-y-1.5">
-							<Label className="text-sm">Calidad de Miniaturas</Label>
-							<Select value={settings.thumbnailQuality} onValueChange={handleQualityChange}>
-								<SelectTrigger className="h-8 text-xs">
-									<SelectValue placeholder="Selecciona la calidad" />
-								</SelectTrigger>
-								<SelectContent>
-									{thumbnailQualityOptions.map((option) => (
-										<SelectItem key={option.value} value={option.value} className="text-xs">
-											{option.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<p className="text-xs text-muted-foreground">
-								Una calidad más alta resultará en miniaturas más nítidas pero ocupará más espacio
-							</p>
-						</div>
-
-						<div className="flex items-center justify-between space-x-4 py-1">
-							<div className="space-y-0.5">
-								<Label htmlFor="video-animation" className="text-sm">
-									Animación en videos
-								</Label>
+						<div className="grid grid-cols-2 gap-1	">
+							<div className="space-y-1.5">
+								<Label className="text-sm">Calidad de Miniaturas</Label>
+								<Select value={settings.thumbnailQuality} onValueChange={handleQualityChange}>
+									<SelectTrigger className="h-8 text-xs">
+										<SelectValue placeholder="Selecciona la calidad" />
+									</SelectTrigger>
+									<SelectContent>
+										{thumbnailQualityOptions.map((option) => (
+											<SelectItem key={option.value} value={option.value} className="text-xs">
+												{option.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 								<p className="text-xs text-muted-foreground">
-									Mostrar un preview animado al pasar el cursor sobre videos
+									Una calidad más alta resultará en miniaturas más nítidas pero ocupará más espacio
 								</p>
 							</div>
-							<Switch
-								id={idVideoAnimation}
-								checked={settings.videoThumbnailAnimation}
-								onCheckedChange={handleVideoAnimationToggle}
-								className="scale-90"
-							/>
+
+							<div className="flex items-center justify-between space-x-4 py-1">
+								<div className="space-y-0.5">
+									<Label htmlFor="video-animation" className="text-sm">
+										Animación en videos
+									</Label>
+									<p className="text-xs text-muted-foreground">
+										Mostrar un preview animado al pasar el cursor sobre videos
+									</p>
+								</div>
+								<Switch
+									id={idVideoAnimation}
+									checked={settings.videoThumbnailAnimation}
+									onCheckedChange={handleVideoAnimationToggle}
+									className="scale-90"
+								/>
+							</div>
 						</div>
-					</div>
 
-					<div className="flex flex-wrap gap-1.5 pt-2">
-						<Button
-							variant="outline"
-							size="sm"
-							className="h-7 text-xs"
-							onClick={handleOptimizeThumbnails}
-							disabled={isThumbnailLoading || isThumbnailProcessing}
-						>
-							{isThumbnailProcessing ? (
-								<>
-									<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-									Optimizando...
-								</>
-							) : (
-								<>
-									<Zap className="h-3.5 w-3.5 mr-1.5" />
-									Optimizar
-								</>
-							)}
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							className="h-7 text-xs"
-							onClick={handleReprocessThumbnails}
-							disabled={isThumbnailLoading || isThumbnailProcessing}
-						>
-							{isThumbnailProcessing ? (
-								<>
-									<Settings2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-									Procesando...
-								</>
-							) : (
-								<>
-									<Settings2 className="h-3.5 w-3.5 mr-1.5" />
-									Reprocesar
-								</>
-							)}
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							className="h-7 text-xs"
-							onClick={handleCleanThumbnails}
-							disabled={isThumbnailLoading || isThumbnailProcessing}
-						>
-							{isThumbnailProcessing ? (
-								<>
-									<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-									Limpiando...
-								</>
-							) : (
-								<>
-									<Trash2 className="h-3.5 w-3.5 mr-1.5" />
-									Limpiar
-								</>
-							)}
-						</Button>
-
-						{isThumbnailProcessing && (
+						<div className="flex flex-wrap gap-1.5 pt-2">
 							<Button
-								variant="ghost"
+								variant="outline"
 								size="sm"
-								onClick={() => setThumbnailProcessing(false)}
-								className="h-7 text-xs text-red-500 hover:text-red-600"
+								className="h-7 text-xs"
+								onClick={handleOptimizeThumbnails}
+								disabled={isThumbnailLoading || isThumbnailProcessing}
 							>
-								Cancelar
+								{isThumbnailProcessing ? (
+									<>
+										<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										Optimizando...
+									</>
+								) : (
+									<>
+										<Zap className="h-3.5 w-3.5 mr-1.5" />
+										Optimizar
+									</>
+								)}
 							</Button>
-						)}
-					</div>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-7 text-xs"
+								onClick={handleReprocessThumbnails}
+								disabled={isThumbnailLoading || isThumbnailProcessing}
+							>
+								{isThumbnailProcessing ? (
+									<>
+										<Settings2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										Procesando...
+									</>
+								) : (
+									<>
+										<Settings2 className="h-3.5 w-3.5 mr-1.5" />
+										Reprocesar
+									</>
+								)}
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								className="h-7 text-xs"
+								onClick={handleCleanThumbnails}
+								disabled={isThumbnailLoading || isThumbnailProcessing}
+							>
+								{isThumbnailProcessing ? (
+									<>
+										<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										Limpiando...
+									</>
+								) : (
+									<>
+										<Trash2 className="h-3.5 w-3.5 mr-1.5" />
+										Limpiar
+									</>
+								)}
+							</Button>
 
-					<Separator className="my-2" />
-					<div className="grid grid-cols-2 gap-3">
-						{thumbnailStats && (
-							<>
-								<motion.div
-									initial={{ opacity: 0, x: -20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.1 }}
-									className="space-y-1.5"
+							{isThumbnailProcessing && (
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={() => setThumbnailProcessing(false)}
+									className="h-7 text-xs text-red-500 hover:text-red-600"
 								>
-									<div className="flex items-center justify-between">
-										<Label className="text-sm">Miniaturas</Label>
-										<Badge variant="secondary" className="text-xs">
-											{formatBytes(thumbnailStats.totalSize || 0)}
-										</Badge>
-									</div>
-									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">{thumbnailStats.totalFiles || 0} totales</span>
-										<span className="text-sm text-muted-foreground">{thumbnailStats.pending} pendientes</span>
-									</div>
-								</motion.div>
-
-								<motion.div
-									initial={{ opacity: 0, x: 20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.2 }}
-									className="space-y-1.5"
-								>
-									<div className="flex items-center justify-between">
-										<Label className="text-sm">Estado</Label>
-										{thumbnailStats.errors.length > 0 && (
-											<Button
-												variant="ghost"
-												size="sm"
-												className="h-6 text-xs text-red-500 hover:text-red-600"
-												onClick={() => setShowErrors(true)}
-											>
-												<AlertCircle className="h-3.5 w-3.5 mr-1" />
-												Ver errores
-											</Button>
-										)}
-									</div>
-									<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-										<span className="text-sm font-medium">{thumbnailStats.errors.length} errores</span>
-										<Badge
-											variant="secondary"
-											className={cn('text-xs', thumbnailStats.pending === 0 && 'bg-green-500/20 text-green-500')}
-										>
-											{thumbnailStats.pending === 0 ? 'Al día' : 'Pendiente'}
-										</Badge>
-									</div>
-								</motion.div>
-							</>
-						)}
-					</div>
-					{isThumbnailProcessing && (
-						<motion.div
-							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: 'auto' }}
-							exit={{ opacity: 0, height: 0 }}
-							className="space-y-1.5 bg-muted/30 p-3 rounded-lg mt-3"
-						>
-							<div className="flex justify-between text-xs">
-								<span>
-									{thumbnailProcessStatus.current || 0} de {thumbnailProcessStatus.total || 0} (
-									{Math.round(thumbnailProcessStatus.progress || 0)}%)
-								</span>
-								<span className="text-muted-foreground">{thumbnailProcessStatus.status || 'Procesando...'}</span>
-							</div>
-							<Progress value={thumbnailProcessStatus.progress} className="h-1.5" />
-							{thumbnailProcessStatus.currentFile && (
-								<p className="text-xs text-muted-foreground truncate">{thumbnailProcessStatus.currentFile}</p>
+									Cancelar
+								</Button>
 							)}
-						</motion.div>
-					)}
+						</div>
 
-					{lastProcessedThumbnails.length > 0 && (
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.3 }}
-							className="space-y-1.5 mt-3"
-						>
-							<Label className="text-sm">Últimas Procesadas</Label>
-							<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
-								<AnimatePresence>
-									{lastProcessedThumbnails.map((image, index) => (
-										<ThumbnailItem key={image.id} image={image} index={index} />
-									))}
-								</AnimatePresence>
-							</div>
-						</motion.div>
-					)}
-				</div>
+						<Separator className="my-2" />
+						<div className="grid grid-cols-2 gap-3">
+							{thumbnailStats && (
+								<>
+									<motion.div
+										initial={{ opacity: 0, x: -20 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ delay: 0.1 }}
+										className="space-y-1.5"
+									>
+										<div className="flex items-center justify-between">
+											<Label className="text-sm">Miniaturas</Label>
+											<Badge variant="secondary" className="text-xs">
+												{formatBytes(thumbnailStats.totalSize || 0)}
+											</Badge>
+										</div>
+										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+											<span className="text-sm font-medium">{thumbnailStats.totalFiles || 0} totales</span>
+											<span className="text-sm text-muted-foreground">{thumbnailStats.pending} pendientes</span>
+										</div>
+									</motion.div>
+
+									<motion.div
+										initial={{ opacity: 0, x: 20 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ delay: 0.2 }}
+										className="space-y-1.5"
+									>
+										<div className="flex items-center justify-between">
+											<Label className="text-sm">Estado</Label>
+											{thumbnailStats.errors.length > 0 && (
+												<Button
+													variant="ghost"
+													size="sm"
+													className="h-6 text-xs text-red-500 hover:text-red-600"
+													onClick={() => setShowErrors(true)}
+												>
+													<AlertCircle className="h-3.5 w-3.5 mr-1" />
+													Ver errores
+												</Button>
+											)}
+										</div>
+										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
+											<span className="text-sm font-medium">{thumbnailStats.errors.length} errores</span>
+											<Badge
+												variant="secondary"
+												className={cn('text-xs', thumbnailStats.pending === 0 && 'bg-green-500/20 text-green-500')}
+											>
+												{thumbnailStats.pending === 0 ? 'Al día' : 'Pendiente'}
+											</Badge>
+										</div>
+									</motion.div>
+								</>
+							)}
+						</div>
+						{isThumbnailProcessing && (
+							<motion.div
+								initial={{ opacity: 0, height: 0 }}
+								animate={{ opacity: 1, height: 'auto' }}
+								exit={{ opacity: 0, height: 0 }}
+								className="space-y-1.5 bg-muted/30 p-3 rounded-lg mt-3"
+							>
+								<div className="flex justify-between text-xs">
+									<span>
+										{thumbnailProcessStatus.current || 0} de {thumbnailProcessStatus.total || 0} (
+										{Math.round(thumbnailProcessStatus.progress || 0)}%)
+									</span>
+									<span className="text-muted-foreground">{thumbnailProcessStatus.status || 'Procesando...'}</span>
+								</div>
+								<Progress value={thumbnailProcessStatus.progress} className="h-1.5" />
+								{thumbnailProcessStatus.currentFile && (
+									<p className="text-xs text-muted-foreground truncate">{thumbnailProcessStatus.currentFile}</p>
+								)}
+							</motion.div>
+						)}
+
+						{lastProcessedThumbnails.length > 0 && (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								transition={{ delay: 0.3 }}
+								className="space-y-1.5 mt-3"
+							>
+								<Label className="text-sm">Últimas Procesadas</Label>
+								<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
+									<AnimatePresence>
+										{lastProcessedThumbnails.map((image, index) => (
+											<ThumbnailItem key={image.id} image={image} index={index} />
+										))}
+									</AnimatePresence>
+								</div>
+							</motion.div>
+						)}
+					</div>
+				</ScrollArea>
 			</CardContent>
 
 			<Dialog open={showErrors} onOpenChange={setShowErrors}>
