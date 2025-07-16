@@ -4,7 +4,7 @@
  */
 
 import { StateCreator } from 'zustand';
-import { TagWithStats } from '@/types/entities/tag';
+import type { TagWithStats } from '@/types/entities/tag';
 import type { TagStore } from '../types';
 
 /**

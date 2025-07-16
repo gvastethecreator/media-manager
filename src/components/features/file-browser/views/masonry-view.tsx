@@ -8,8 +8,7 @@ import { PlayCircleIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { isImageWithStats, isVideoWithStats } from '@/types/migration';
+import { EntityWithStats, isImageWithStats, isVideoWithStats } from '@/types/migration';
 
 interface MasonryViewProps {
 	items: EntityWithStats[];
@@ -53,7 +52,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 			if (isImageWithStats(item) && item.statistics) {
 				aspectRatio = item.statistics.aspectRatio || 1;
 			} else if (isVideoWithStats(item) && 'width' in item && 'height' in item) {
-				aspectRatio = item.width / item.height;
+				aspectRatio = (item.width ?? 1) / (item.height ?? 1);
 			}
 
 			// Limitar aspect ratio para evitar items muy altos o muy anchos

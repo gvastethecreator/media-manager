@@ -249,10 +249,9 @@ function PromptCardComponent({
 							tcgMode={tcgMode}
 						/>
 					)}
-					<PromptCardContent
+					<					<PromptCardContent
 						name={name}
 						emoji={emoji}
-						color={primaryColor}
 						description={description || ''}
 						content={content || ''}
 						category={category || 'general'}
@@ -260,6 +259,7 @@ function PromptCardComponent({
 						relationCounts={relationCounts}
 						tcgMode={tcgMode}
 						compact={compact}
+						primaryColor={primaryColor}
 					/>
 					<PromptCardFooter
 						imagesCount={imagesCount}

@@ -31,8 +31,13 @@ import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cach
 import { clientLogger } from '@/lib/logger/client-logger';
 // 🎯 Cache y throttling optimizados
 import { throttleEvent } from '@/lib/system/event-throttler';
-import type { EntityStatsType, EntityWithStats } from '@/types/migration';
-import { isFolderWithStats, isImageWithStats, isVideoWithStats } from '@/types/migration';
+import type {
+	EntityStatsType,
+	EntityWithStats,
+	isFolderWithStats,
+	isImageWithStats,
+	isVideoWithStats,
+} from '@/types/migration';
 
 const fileManagerLogger = clientLogger.withContext('UnifiedFileManager');
 

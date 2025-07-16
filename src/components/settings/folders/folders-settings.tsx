@@ -8,13 +8,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { FolderCard } from './folder-card';
 import { FolderForm } from './folder-form';
 import { FolderGroup } from './folder-group';
 import { getFolderIndexStatus } from './folder-utils';
 import { FoldersStats } from './folders-stats';
-import { useFolders } from './hooks/use-folders';
 import { useFolderStats } from './hooks/use-folder-stats';
+import { useFolders } from './hooks/use-folders';
 
 export function FoldersSettings() {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -44,13 +43,16 @@ export function FoldersSettings() {
 	} = useFolders();
 
 	// Funciones para manejar las nuevas características
-	const handleUpdateFolder = (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => {
+	const handleUpdateFolder = (
+		folderId: string,
+		updates: { emoji?: string; description?: string; isFavorite?: boolean }
+	) => {
 		// TODO: Implementar la actualización de carpetas
 		console.log('Updating folder:', folderId, updates);
 	};
 
 	const handleToggleExpanded = (folderId: string) => {
-		setExpandedFolders(prev => {
+		setExpandedFolders((prev) => {
 			const newSet = new Set(prev);
 			if (newSet.has(folderId)) {
 				newSet.delete(folderId);
@@ -91,11 +93,6 @@ export function FoldersSettings() {
 
 	return (
 		<div className="space-y-6">
-			{/* Estadísticas generales al principio */}
-			{generalStats && !isStatsLoading && (
-				<FoldersStats stats={generalStats} />
-			)}
-
 			{/* Sección de gestión de carpetas */}
 			<Card className="bg-muted/30 rounded-sm border-none">
 				<CardHeader className="p-3 pb-2">
@@ -103,141 +100,143 @@ export function FoldersSettings() {
 						<div className="flex items-center gap-2">
 							<FolderIcon className="h-4 w-4 text-primary" />
 							<span>Gestión de Carpetas</span>
-						{(isGloballyProcessing || isProcessing) && (
-							<div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
-								<RefreshCw className="h-4 w-4 animate-spin text-primary" />
-								<span className="font-medium">
-									{processStatus?.message ||
-										(isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...')}
-									{processStatus?.progress !== undefined && (
-										<span className="ml-1">({Math.round(processStatus.progress)}%)</span>
+							{(isGloballyProcessing || isProcessing) && (
+								<div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+									<RefreshCw className="h-4 w-4 animate-spin text-primary" />
+									<span className="font-medium">
+										{processStatus?.message ||
+											(isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...')}
+										{processStatus?.progress !== undefined && (
+											<span className="ml-1">({Math.round(processStatus.progress)}%)</span>
+										)}
+									</span>
+								</div>
+							)}
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Info className="h-3.5 w-3.5 text-muted-foreground cursor-pointer" />
+									</TooltipTrigger>
+									<TooltipContent side="top" className="text-xs max-w-xs">
+										Administra las carpetas donde se almacenan tus imágenes. Agrega nuevas carpetas y mantén actualizado
+										tu índice.
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						</div>
+
+						<div className="flex items-center gap-1.5">
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={handleClearCache}
+								className="h-7 text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors"
+								disabled={isLoading || isProcessing}
+							>
+								<EraserIcon className="h-3.5 w-3.5 mr-1" />
+								Limpiar caché
+							</Button>
+
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={() => reindexAll()}
+								className="h-7 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+								disabled={isLoading || isGloballyProcessing}
+							>
+								<RefreshCw
+									className={cn(
+										'h-3.5 w-3.5 mr-1 transition-transform',
+										(isLoading || globalReindexStatus.isProcessing) && 'animate-spin'
 									)}
-								</span>
+								/>
+								{globalReindexStatus.isProcessing
+									? `Reindexando... ${Math.round(globalReindexStatus.progress)}%`
+									: 'Reindexar todo'}
+							</Button>
+						</div>
+					</CardTitle>
+				</CardHeader>
+
+				<Separator className="my-0" />
+
+				<CardContent className="p-3">
+					<div className="space-y-3">
+						{/* Formulario para agregar carpetas */}
+						<FolderForm isProcessing={isProcessing} isLoading={isLoading} onAddFolder={handleAddFolder} />
+
+						{/* Lista de carpetas con jerarquía mejorada en 2 columnas */}
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pr-3">
+						{(() => {
+						// Separar carpetas padre de subcarpetas
+						const parentFolders = folders.filter((folder) => !folder.parentId);
+						const subfolders = folders.filter((folder) => folder.parentId);
+
+						// Agrupar subcarpetas por padre
+						const folderGroups = parentFolders.map((parent) => {
+						const children = subfolders.filter((sub) => sub.parentId === parent.id);
+						return { parent, children };
+						});
+
+						// Ordenar grupos por nombre del padre
+						folderGroups.sort((a, b) => a.parent.name.localeCompare(b.parent.name));
+
+						return folderGroups.map(({ parent, children }) => (
+						<div key={parent.id} className="col-span-1">
+						<FolderGroup
+						parentFolder={parent}
+						subfolders={children}
+						allFolders={folders}
+						selectedFolder={selectedFolder}
+						isProcessing={isProcessing}
+						processStatus={processStatus}
+						isGloballyProcessing={isGloballyProcessing}
+						onReindex={handleReindexFolder}
+						onToggleAutoReindex={handleAutoReindexToggle}
+						onFolderClick={handleFolderClick}
+						getFolderIndexStatus={getFolderIndexStatus}
+						onUpdateFolder={handleUpdateFolder}
+						onToggleExpanded={handleToggleExpanded}
+						expandedFolders={expandedFolders}
+						/>
+						</div>
+						));
+						})()}
+
+						{folders.length === 0 && (
+						<motion.div
+						animate={{
+						opacity: [0, 1],
+						y: [20, 0],
+						}}
+						className="col-span-full py-8 text-center"
+						>
+						<Folder className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+						<p className="text-sm text-muted-foreground">No hay carpetas indexadas</p>
+						<p className="text-xs mt-1 text-muted-foreground/75">
+						Agrega una carpeta para comenzar a indexar imágenes
+						</p>
+						</motion.div>
+						)}
+						</div>
+
+						{/* Progress bar para reindexado global */}
+						{globalReindexStatus.isProcessing && (
+							<div className="mt-2">
+								<Progress value={globalReindexStatus.progress} className="h-2" />
+								<p className="text-xs text-muted-foreground mt-1 text-center">
+									Reindexando... {Math.round(globalReindexStatus.progress)}%
+								</p>
 							</div>
 						)}
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Info className="h-3.5 w-3.5 text-muted-foreground cursor-pointer" />
-								</TooltipTrigger>
-								<TooltipContent side="top" className="text-xs max-w-xs">
-									Administra las carpetas donde se almacenan tus imágenes. Agrega nuevas carpetas y mantén actualizado
-									tu índice.
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
 					</div>
-
-					<div className="flex items-center gap-1.5">
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={handleClearCache}
-							className="h-7 text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors"
-							disabled={isLoading || isProcessing}
-						>
-							<EraserIcon className="h-3.5 w-3.5 mr-1" />
-							Limpiar caché
-						</Button>
-
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={() => reindexAll()}
-							className="h-7 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
-							disabled={isLoading || isGloballyProcessing}
-						>
-							<RefreshCw
-								className={cn(
-									'h-3.5 w-3.5 mr-1 transition-transform',
-									(isLoading || globalReindexStatus.isProcessing) && 'animate-spin'
-								)}
-							/>
-							{globalReindexStatus.isProcessing
-								? `Reindexando... ${Math.round(globalReindexStatus.progress)}%`
-								: 'Reindexar todo'}
-						</Button>
-					</div>
-				</CardTitle>
-			</CardHeader>
-
-			<Separator className="my-0" />
-
-			<CardContent className="p-3">
-				<div className="space-y-3">
-					{/* Formulario para agregar carpetas */}
-					<FolderForm isProcessing={isProcessing} isLoading={isLoading} onAddFolder={handleAddFolder} />
-
-					{/* Lista de carpetas con jerarquía mejorada */}
-					<ScrollArea className="h-[300px] w-full">
-						<div className="space-y-3 pr-3">
-							{(() => {
-								// Separar carpetas padre de subcarpetas
-								const parentFolders = folders.filter((folder) => !folder.parentId);
-								const subfolders = folders.filter((folder) => folder.parentId);
-
-								// Agrupar subcarpetas por padre
-								const folderGroups = parentFolders.map((parent) => {
-									const children = subfolders.filter((sub) => sub.parentId === parent.id);
-									return { parent, children };
-								});
-
-								// Ordenar grupos por nombre del padre
-								folderGroups.sort((a, b) => a.parent.name.localeCompare(b.parent.name));
-
-								return folderGroups.map(({ parent, children }) => (
-									<FolderGroup
-										key={parent.id}
-										parentFolder={parent}
-										subfolders={children}
-										allFolders={folders}
-										selectedFolder={selectedFolder}
-										isProcessing={isProcessing}
-										processStatus={processStatus}
-										isGloballyProcessing={isGloballyProcessing}
-										onReindex={handleReindexFolder}
-										onToggleAutoReindex={handleAutoReindexToggle}
-										onFolderClick={handleFolderClick}
-										getFolderIndexStatus={getFolderIndexStatus}
-										onUpdateFolder={handleUpdateFolder}
-										onToggleExpanded={handleToggleExpanded}
-										expandedFolders={expandedFolders}
-									/>
-								));
-							})()}
-
-							{folders.length === 0 && (
-								<motion.div
-									animate={{
-										opacity: [0, 1],
-										y: [20, 0],
-									}}
-									className="py-8 text-center"
-								>
-									<Folder className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-									<p className="text-sm text-muted-foreground">No hay carpetas indexadas</p>
-									<p className="text-xs mt-1 text-muted-foreground/75">
-										Agrega una carpeta para comenzar a indexar imágenes
-									</p>
-								</motion.div>
-							)}
-						</div>
-					</ScrollArea>
-
-					{/* Progress bar para reindexado global */}
-					{globalReindexStatus.isProcessing && (
-						<div className="mt-2">
-							<Progress value={globalReindexStatus.progress} className="h-2" />
-							<p className="text-xs text-muted-foreground mt-1 text-center">
-								Reindexando... {Math.round(globalReindexStatus.progress)}%
-							</p>
-						</div>
-					)}
-				</div>
 				</CardContent>
 			</Card>
+
+			{/* Estadísticas generales al final */}
+			{generalStats && !isStatsLoading && <FoldersStats stats={generalStats} />}
 		</div>
 	);
 }

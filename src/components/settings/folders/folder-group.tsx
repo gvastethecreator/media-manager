@@ -64,19 +64,21 @@ export function FolderGroup({
 				isExpanded={expandedFolders?.has(parentFolder.id || '') || false}
 			/>
 
-			{/* Subcarpetas anidadas */}
-			{sortedSubfolders.length > 0 && (
+			{/* Subcarpetas anidadas - Solo mostrar si está expandida */}
+			{sortedSubfolders.length > 0 && expandedFolders?.has(parentFolder.id || '') && (
 				<motion.div
 					initial={{ opacity: 0, height: 0 }}
 					animate={{ opacity: 1, height: 'auto' }}
+					exit={{ opacity: 0, height: 0 }}
 					transition={{ duration: 0.2, delay: 0.1 }}
-					className="space-y-1 overflow-hidden"
+					className="space-y-1 overflow-hidden ml-4 border-l-2 border-muted pl-3"
 				>
 					{sortedSubfolders.map((subfolder, index) => (
 						<motion.div
 							key={subfolder.id}
 							initial={{ opacity: 0, x: -20 }}
 							animate={{ opacity: 1, x: 0 }}
+							exit={{ opacity: 0, x: -20 }}
 							transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
 						>
 							<SubfolderCard

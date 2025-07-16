@@ -89,7 +89,7 @@ export function SystemSettings() {
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
+			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none h-full">
 				<CardHeader className="p-2 pb-0 bg-transparent">
 					<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
 						<span className="flex items-center gap-2 h-7">
@@ -108,8 +108,8 @@ export function SystemSettings() {
 					</CardTitle>
 				</CardHeader>
 				<Separator className="my-0" />
-				<CardContent className="p-2">
-					<div className="space-y-3">
+				<CardContent className="p-2 overflow-y-auto flex-1">
+					<div className="space-y-3 h-full flex flex-col">
 						<motion.div
 							animate={{
 								opacity: [0, 1],
@@ -157,7 +157,7 @@ export function SystemSettings() {
 							</div>
 
 							{/* Información adicional */}
-							<div className="mt-2 text-xs text-muted-foreground space-y-1 p-2 bg-background/50 rounded-md">
+							<div className="mt-2 text-xs text-muted-foreground space-y-1 p-2 bg-background/50 rounded-md flex-1">
 								<div className="flex justify-between">
 									<span>Entidades:</span>
 									<span className="font-medium">{systemData.totalEntities}</span>

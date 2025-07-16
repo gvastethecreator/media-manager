@@ -112,6 +112,7 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				icon={<BookImage className="h-4 w-4" />}
 				items={collections.map((c) => ({
 					...c,
+					emoji: c.emoji ?? undefined,
 					isFavorite: Boolean(c.isFavorite),
 					isRecent: Boolean(c.isRecent),
 				}))}
@@ -126,9 +127,10 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 			<EnhancedSubmenu
 				title="Etiquetas"
 				icon={<Tag className="h-4 w-4" />}
-				items={tags.map((t: TagType) => ({
+				items={tags.map((t: TagWithStats) => ({
 					id: t.id,
 					name: t.name,
+					emoji: t.emoji || undefined,
 					isFavorite: false,
 					isRecent: false,
 				}))}
@@ -147,6 +149,7 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				icon={<Album className="h-4 w-4" />}
 				items={albums.map((a) => ({
 					...a,
+					emoji: a.emoji ?? undefined,
 					isFavorite: Boolean(a.isFavorite),
 					isRecent: Boolean(a.isRecent),
 				}))}

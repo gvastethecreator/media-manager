@@ -9,7 +9,7 @@ export * from './helpers';
 // Re-exportar todas las funciones de validators
 export * from './validators';
 
-import { CharacterSortOption } from '@/types/entities/character/enums';
+import type { CharacterSortOption } from '@/types/entities/character/enums';
 import type { CharacterWithStats } from '@/types/entities/character/types';
 
 /**

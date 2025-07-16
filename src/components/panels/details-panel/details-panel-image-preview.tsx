@@ -21,7 +21,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 	const MAX_ATTEMPTS = 3;
 
 	// Verificar si hay una URL válida en el item
-	const hasThumbnail = React.useMemo(() => !!item.url && typeof item.url === 'string', [item.url]);
+	const hasThumbnail = React.useMemo(() => 'thumbnailUrl' in item && !!item.thumbnailUrl && typeof item.thumbnailUrl === 'string', [item.thumbnailUrl]);
 
 	// Usar useCallback para la función de carga para evitar recreaciones innecesarias
 	const loadImage = React.useCallback(

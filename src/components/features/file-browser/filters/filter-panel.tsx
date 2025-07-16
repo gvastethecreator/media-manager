@@ -82,8 +82,8 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 							<Label htmlFor={filter.id}>{filter.label}</Label>
 							<Input
 								id={filter.id}
-								value={currentValue || ''}
-								onChange={(e) => applyFilter(filter.id, e.target.value, 'contains')}
+								value={typeof currentValue === 'boolean' ? '' : currentValue || ''}
+								onChange={(e) => applyFilter(filter.id, e.target.value, 'contains' as FilterOption['operator'])}
 								placeholder={filter.placeholder}
 							/>
 						</div>
@@ -178,16 +178,16 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 									>
 										<CalendarIcon className="mr-2 h-4 w-4" />
 										{currentValue
-											? currentValue instanceof Date
+											? typeof currentValue === 'object' && currentValue instanceof Date
 												? currentValue.toLocaleDateString()
-												: new Date(currentValue).toLocaleDateString()
+												: new Date(currentValue as string | number).toLocaleDateString()
 											: filter.placeholder || 'Seleccionar fecha'}
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-auto p-0">
 									<Calendar
 										mode="single"
-										selected={currentValue ? new Date(currentValue) : undefined}
+										selected={currentValue ? new Date(currentValue as string | number) : undefined}
 										onSelect={(date) => applyFilter(filter.id, date)}
 										initialFocus
 									/>

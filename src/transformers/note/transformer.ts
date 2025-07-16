@@ -1,18 +1,20 @@
 /**
  * @file Transformer optimizado para la entidad Note
  * @module transformers/note/transformer
- 
+
  * 🎯 Patrón: Solo conteos, sin relaciones completas para máximo rendimiento
  */
 
 import type {
+	NoteCategory,
 	NoteComplete,
 	NoteCreateInput,
+	NotePriority,
 	NoteStatistics,
+	NoteStatus,
 	NoteUpdateInput,
 	NoteWithStats,
 } from '@/types/entities/note';
-import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
 
 /**
  * 📝 Convierte datos de Drizzle con conteos a NoteWithStats optimizado

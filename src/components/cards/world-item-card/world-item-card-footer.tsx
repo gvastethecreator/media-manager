@@ -2,17 +2,15 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Clock, Image as ImageIcon, ShieldCheck, Sparkles, Star } from 'lucide-react';
 
+import type { WorldItemWithStats } from '@/types/entities/world-item';
+
 interface WorldItemCardFooterProps {
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount?: number;
-	videosCount?: number;
-	totalRelations?: number;
-	isFavorite?: boolean;
-	category?: string | null;
-	type?: string | null;
+	worldItem: WorldItemWithStats;
+	_totalRelations: number;
 	primaryColor: string;
 	secondaryColor: string;
+	intensityFactor: number;
+	compact?: boolean;
 }
 
 /**
@@ -20,15 +18,15 @@ interface WorldItemCardFooterProps {
  * Similar a la parte inferior de una carta Magic con el tipo, artista y copyright.
  */
 export function WorldItemCardFooter({
-	createdAt,
-	updatedAt,
-	imagesCount = 0,
-	isFavorite = false,
-	category = 'Objeto',
-	type = 'ITEM',
+	worldItem,
+	_totalRelations,
 	primaryColor,
 	secondaryColor,
+	intensityFactor,
+	compact = false,
 }: WorldItemCardFooterProps) {
+	const { createdAt, updatedAt, isFavorite, category, type, _stats } = worldItem;
+	const imagesCount = _stats?.totalImages || worldItem._count?.images || 0;
 	// Convertir fechas a objetos Date si son strings
 	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
 	const updatedAtDate = typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt;
@@ -81,18 +79,19 @@ export function WorldItemCardFooter({
 						<span>{imagesCount}</span>
 					</div>
 				</div>
-			</div>
 
-			{/* Fechas de creación y modificación */}
-			<div className="flex justify-between text-[0.65rem] text-white/60">
-				<div className="flex items-center">
-					<Calendar size={12} className="mr-1" />
-					<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
-				</div>
-				<div className="flex items-center">
-					<Clock size={12} className="mr-1" />
-					<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
-				</div>
+				{!compact && (
+					<div className="flex justify-between text-[0.65rem] text-white/60">
+						<div className="flex items-center">
+							<Calendar size={12} className="mr-1" />
+							<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
+						</div>
+						<div className="flex items-center">
+							<Clock size={12} className="mr-1" />
+							<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);

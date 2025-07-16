@@ -219,6 +219,169 @@ export function CollectionsSettings() {
 													placeholder="Buscar colecciones..."
 													value={searchQuery}
 													onChange={(e) => setSearchQuery(e.target.value)}
+												/>
+											</div>
+
+											<div className="space-y-2">
+												<Label>Categorías</Label>
+												<div className="grid grid-cols-2 gap-2">
+													{Object.values(CollectionCategory).map((category) => (
+														<div key={category} className="flex items-center space-x-2">
+															<Checkbox
+																id={`category-${category}`}
+																checked={selectedCategories.includes(category)}
+																onCheckedChange={(checked) => {
+																	setSelectedCategories((prev) =>
+																		checked ? [...prev, category] : prev.filter((c) => c !== category)
+																	);
+																}}
+															/>
+															<Label htmlFor={`category-${category}`} className="text-sm">
+																{category}
+															</Label>
+														</div>
+													))}
+												</div>
+											</div>
+
+											<div className="flex items-center space-x-2">
+												<Checkbox
+													id="only-favorites"
+													checked={onlyFavorites}
+													onCheckedChange={(checked) => setOnlyFavorites(Boolean(checked))}
+												/>
+												<Label htmlFor="only-favorites" className="text-sm">
+													Solo favoritos
+												</Label>
+											</div>
+
+											<Button onClick={clearFilters} variant="outline" className="w-full">
+												Limpiar Filtros
+											</Button>
+										</div>
+									</PopoverContent>
+								</Popover>
+								<Button size="sm" onClick={() => setIsEditing(false)}>
+									<PlusCircle className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
+					</CardHeader>
+					<CardContent className="flex-1 overflow-y-auto p-3 pt-0">
+						<ScrollArea className="h-full pr-3">
+							<div className="space-y-2">
+								{filteredCollections.length === 0 && (
+									<EmptyState
+										icon={Library}
+										title="No hay colecciones"
+										description="Crea tu primera colección para organizar tus imágenes."
+									/>
+								)}
+							{filteredCollections.map((collection) => (
+									<div
+										key={collection.id}
+										className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors
+											${selectedCollection?.id === collection.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+										onClick={() => handleEditCollection(collection)}
+									>
+										<div className="flex items-center gap-2">
+											<span className="text-lg">
+												{COLLECTION_CATEGORY_EMOJIS[collection.category as CollectionCategory] || '📚'}
+											</span>
+											<div className="flex flex-col">
+												<span className="font-medium text-sm">{collection.name}</span>
+												<span className="text-xs text-muted-foreground">
+													{collection.stats?.imageCount || 0} imágenes
+												</span>
+											</div>
+										</div>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={(e) => {
+												e.stopPropagation();
+												handleDeleteButtonClick(collection.id);
+											}}
+										>
+											<Trash2 className="h-4 w-4 text-destructive" />
+										</Button>
+									</div>
+								))}
+							</div>
+						</ScrollArea>
+											onClick={(e) => {
+												e.stopPropagation();
+												handleDeleteButtonClick(collection.id);
+											}}
+										>
+											<Trash2 className="h-4 w-4 text-destructive" />
+										</Button>
+									</div>
+								))}
+							</div>
+						</ScrollArea>
+															onClick={(e) => {
+																e.stopPropagation();
+																handleDeleteButtonClick(collection.id);
+															}}
+														>
+															<Trash2 className="h-4 w-4 text-destructive" />
+														</Button>
+													</div>
+												</div>
+											))}
+										</div>
+									</ScrollArea>
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleDeleteButtonClick(collection.id);
+																}}
+															>
+																<Trash2 className="h-4 w-4 text-destructive" />
+															</Button>
+														</div>
+												</div>
+											))}
+										</div>
+									</ScrollArea>
+														/>
+													</div>
+												</div>
+											))}
+										</div>
+									</ScrollArea>
+											onClick={(e) => {
+												e.stopPropagation();
+												handleDeleteButtonClick(collection.id);
+											}}
+											className="text-destructive hover:bg-destructive/10"
+										>
+											<Trash className="h-4 w-4" />
+										</Button>
+									</div>
+								))}
+							</div>
+						</ScrollArea>
+					</CardContent>
+				</Card>
+							<div className="flex items-center gap-1">
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+											<Filter className="h-3.5 w-3.5" />
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-72" align="end">
+										<div className="space-y-4">
+											<h4 className="font-medium text-sm">Filtrar Colecciones</h4>
+
+											<div className="space-y-2">
+												<Label htmlFor="search">Buscar</Label>
+												<Input
+													id="search"
+													placeholder="Buscar colecciones..."
+													value={searchQuery}
+													onChange={(e) => setSearchQuery(e.target.value)}
 													className="h-8 text-xs"
 												/>
 											</div>
@@ -376,8 +539,6 @@ export function CollectionsSettings() {
 					</CardContent>
 				</Card>
 			</div>
-
-			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
 				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
 					<CardHeader className="py-2 px-3">

@@ -1,4 +1,4 @@
-import { EntityType } from '@/types/entities/entities';
+import type { EntityType } from '@/types/entities/entities';
 import type { PromptBase, PromptWithStats } from '@/types/entities/prompt/base';
 import type { PromptSortOption, PromptViewMode } from '@/types/entities/prompt/enums';
 import type { PromptExecutionParams, PromptExecutionResult, PromptFilters } from '@/types/entities/prompt/extended';

@@ -1,6 +1,6 @@
 import { AlertTriangle, FolderSync, ImageIcon, Upload } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
@@ -14,7 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import type { ImageWithStats } from '@/types/entities/image';
-import { EntityStatsType, type EntityWithStats, isImageWithStats } from '@/types/migration';
+import type { EntityStatsType, EntityWithStats } from '@/types/migration';
 
 interface AllImagesContentViewProps {
 	images: ImageWithStats[];

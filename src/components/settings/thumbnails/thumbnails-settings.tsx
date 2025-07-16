@@ -201,7 +201,7 @@ export function ThumbnailsSettings() {
 	const handleCleanThumbnails = () => handleThumbnailProcess(cleanThumbnailsMutation, 'Limpieza');
 
 	return (
-		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
+		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none h-full">
 			<CardHeader className="p-2 pb-0 bg-transparent">
 				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
 					<span className="flex items-center gap-2 h-7">
@@ -210,17 +210,18 @@ export function ThumbnailsSettings() {
 				</CardTitle>
 			</CardHeader>
 			<Separator className="my-0" />
-			<CardContent className="p-2">
-				{thumbnailError && (
-					<div className="mb-4">
-						<ThumbnailError
-							error={thumbnailError}
-							onRetry={handleRetryInitialize}
-							description="No se pudieron cargar las estadísticas de miniaturas. Esto puede deberse a un problema de conexión con la base de datos."
-						/>
-					</div>
-				)}
-				<div className="space-y-3">
+			<CardContent className="overflow-y-auto flex-1 p-2">
+				<ScrollArea className="h-full flex flex-col">
+					{thumbnailError && (
+						<div className="mb-4">
+							<ThumbnailError
+								error={thumbnailError}
+								onRetry={handleRetryInitialize}
+								description="No se pudieron cargar las estadísticas de miniaturas. Esto puede deberse a un problema de conexión con la base de datos."
+							/>
+						</div>
+					)}
+					<div className="space-y-3">
 					<div className="grid grid-cols-2 gap-1	">
 						<div className="space-y-1.5">
 							<Label className="text-sm">Calidad de Miniaturas</Label>
@@ -385,7 +386,6 @@ export function ThumbnailsSettings() {
 							</>
 						)}
 					</div>
-
 					{isThumbnailProcessing && (
 						<motion.div
 							initial={{ opacity: 0, height: 0 }}

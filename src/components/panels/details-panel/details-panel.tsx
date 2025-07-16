@@ -11,8 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
+import type { EntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 // Importar el sistema de registry
 import { entityDetailsRegistry } from './entity-details-registry';

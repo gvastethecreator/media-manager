@@ -1,9 +1,8 @@
-import { createBrowserRouter } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+import { createBrowserRouter, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
 import { DashboardView } from '@/components/views/dashboard/dashboard-view';
-import FoldersView from '@/components/views/folders/folders-view';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
+import FoldersView from '@/components/views/folders/folders-view';
 
 // Wrapper component para pasar el parámetro de la URL
 const FolderContentWrapper = () => {

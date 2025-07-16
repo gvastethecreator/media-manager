@@ -280,10 +280,12 @@ export function useFolders() {
 	//	onComplete: handleProcessComplete,
 	// });
 
+	// Hook para reindexación global - debe estar en el nivel superior
+	const reindexAllFoldersMutation = useReindexAllFolders();
+
 	// Función para reiniciar todas las carpetas
 	const reindexAll = useCallback(async () => {
 		folderLogger.info('🔄 Iniciando reindexación global');
-		const reindexAllFoldersMutation = useReindexAllFolders();
 
 		try {
 			setGlobalReindexStatus((prev) => ({
@@ -317,7 +319,7 @@ export function useFolders() {
 				endTime: Date.now(),
 			}));
 		}
-	}, [loadFolders, loadStats]);
+	}, [reindexAllFoldersMutation, loadFolders, loadStats]);
 
 	// Función para manejar el reindex de una carpeta específica
 	const reindexFolder = useCallback(

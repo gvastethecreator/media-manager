@@ -3,7 +3,7 @@
  * @module types/entities/world-item/extended
  */
 
-import type { WorldItemSortCriteria, WorldItemViewMode } from './enums';
+import { WorldItemSortCriteria, WorldItemViewMode } from './enums';
 import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement, WorldItemStats } from './stats-types';
 import type { WorldItemBase, WorldItemFilters, WorldItemRelations } from './types';
 

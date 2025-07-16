@@ -54,7 +54,6 @@ export function useCategoryStats() {
 			jsonFiles: navigationData.jsonFiles || [],
 			file3ds: navigationData.file3ds || [],
 			workflows: navigationData.workflows || [],
-			videos: navigationData.videos || [],
 		};
 	}, [navigationData]);
 

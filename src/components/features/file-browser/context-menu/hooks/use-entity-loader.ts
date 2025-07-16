@@ -122,10 +122,10 @@ declare global {
 
 // Modificar la función withTimeout para ser más tolerante y no fallar inmediatamente
 const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityName: string): Promise<T> => {
-	let timeoutId: number | undefined;
+	let timeoutId: any; // Usar any para compatibilidad entre Node y navegador
 
 	const timeoutPromise = new Promise<T>((_resolve) => {
-		timeoutId = setTimeout(() => {
+		timeoutId = setTimeout(() => { // Cast a number para compatibilidad con el navegador
 			entityLoaderLogger.warn(
 				`⚠️ Timeout al cargar ${entityName} después de ${timeoutMs}ms - continuando con datos parciales`
 			);
@@ -241,30 +241,30 @@ export function useEntityLoader() {
 				entityLoaderLogger.info(`🔄 Cargando datos para ${entity}...`);
 				switch (entity) {
 					case 'collections':
-						if (typeof collectionStore.fetchCollections === 'function') {
+						if ('fetchCollections' in collectionStore) {
 							await collectionStore.fetchCollections();
 						}
 						break;
 					case 'tags':
-						if ('fetchTags' in tagStore && typeof tagStore.fetchTags === 'function') {
+						if ('fetchTags' in tagStore) {
 							await tagStore.fetchTags();
 						}
 						break;
 					case 'albums':
-						if (typeof albumStore.fetchAlbums === 'function') {
-							await albumStore.fetchAlbums();
+						if ('loadAlbums' in albumStore) {
+							await albumStore.loadAlbums();
 						}
 						break;
 					case 'characters':
 						// No hay método de fetch, solo marcar como cargado
 						break;
 					case 'places':
-						if ('loadPlaces' in placeStore && typeof placeStore.loadPlaces === 'function') {
+						if ('loadPlaces' in placeStore) {
 							await placeStore.loadPlaces();
 						}
 						break;
 					case 'worldItems':
-						if (typeof worldItemStore.loadWorldItems === 'function') {
+						if ('loadWorldItems' in worldItemStore) {
 							await worldItemStore.loadWorldItems();
 						}
 						break;

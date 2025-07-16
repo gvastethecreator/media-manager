@@ -1,5 +1,5 @@
 import { merge } from 'lodash';
-import { type AppSettings, DEFAULT_SETTINGS } from '@/types/settings';
+import type { AppSettings, DEFAULT_SETTINGS } from '@/types/settings';
 
 const SETTINGS_KEY = 'image-manager-settings';
 

@@ -939,7 +939,8 @@ function calculateHealth(counts: any): number {
 	hp += entityTypes * 20;
 
 	// Bonificación por volumen total de entidades principales
-	const mainEntities = (counts.characters || 0) + (counts.places || 0) + (counts.worldItems || 0) + (counts.concepts || 0);
+	const mainEntities =
+		(counts.characters || 0) + (counts.places || 0) + (counts.worldItems || 0) + (counts.concepts || 0);
 	hp += mainEntities * 5;
 
 	return Math.min(999, hp);

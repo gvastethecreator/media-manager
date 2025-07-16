@@ -66,7 +66,7 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	}
 
 	return (
-		<ScrollArea className={className || "flex-1"}>
+		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
 				<h2 className="text-xl font-bold mb-4">Vista de Personajes</h2>
 

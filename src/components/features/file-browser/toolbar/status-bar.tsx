@@ -20,7 +20,6 @@ export const StatusBar = memo<StatusBarProps>(function StatusBar({ totalItems, s
 		const names: Record<EntityStatsType, { singular: string; plural: string }> = {
 			image: { singular: 'imagen', plural: 'imágenes' },
 			video: { singular: 'video', plural: 'videos' },
-			album: { singular: 'álbum', plural: 'álbumes' },
 			collection: { singular: 'colección', plural: 'colecciones' },
 			tag: { singular: 'etiqueta', plural: 'etiquetas' },
 			character: { singular: 'personaje', plural: 'personajes' },

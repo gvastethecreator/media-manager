@@ -197,7 +197,7 @@ export function useDeletePlace() {
 
 export function useRecentPlaceMedia(placeId: string, limit = 6) {
 	return useQuery<
-		Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>,
+		Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; type?: string; isVideo?: boolean }>,
 		Error
 	>({
 		queryKey: [...placeKeys.detail(placeId), 'media', limit],

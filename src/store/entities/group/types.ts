@@ -5,8 +5,14 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
-import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/group';
+import type {
+	GroupCreateInput,
+	GroupSortCriteria,
+	GroupType,
+	GroupUpdateInput,
+	GroupViewMode,
+	GroupWithStats,
+} from '@/types/entities/group';
 
 /**
  * Estado del core para el store de grupos
