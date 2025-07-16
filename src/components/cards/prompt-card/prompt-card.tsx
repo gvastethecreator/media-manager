@@ -249,7 +249,7 @@ function PromptCardComponent({
 							tcgMode={tcgMode}
 						/>
 					)}
-					<					<PromptCardContent
+					<PromptCardContent
 						name={name}
 						emoji={emoji}
 						description={description || ''}

@@ -83,7 +83,7 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 
 				// Normalizar datos de generación AI
 				if ('ai' in metadata && !('generation' in metadata)) {
-					result.generation = metadata.ai as FileMetadata['generation'];
+					result.generation = (metadata.ai as any)?.generation as FileMetadata['generation'];
 				}
 
 				// Normalizar datos de generación

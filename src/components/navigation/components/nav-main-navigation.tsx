@@ -51,16 +51,8 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 				label: 'Carpetas',
 				color: '#F59E0B', // Amber
 				icon: Folder,
-				children: [
-					{
-						id: 'folders',
-						label: 'Explorar carpetas',
-						icon: Folder,
-						count: stats.totalFolders || 0,
-						hasChildren: true,
-						color: '#F59E0B',
-					},
-				],
+				children: [],
+				showTreeView: true, // Nueva propiedad para mostrar TreeView directamente
 			},
 			{
 				id: 'files',
@@ -270,68 +262,90 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 								<span className="font-semibold text-xs flex-1" style={{ color: category.color }}>
 									{category.label}
 								</span>
-								{expandedCategories.has(category.id) ? (
-									<ChevronDown className="h-4 w-4 text-muted-foreground" />
-								) : (
-									<ChevronRight className="h-4 w-4 text-muted-foreground" />
+								{(category.children.length > 0 || category.showTreeView) && (
+									<>
+										{expandedCategories.has(category.id) ? (
+											<ChevronDown className="h-4 w-4 text-muted-foreground" />
+										) : (
+											<ChevronRight className="h-4 w-4 text-muted-foreground" />
+										)}
+									</>
 								)}
 							</div>
 							{expandedCategories.has(category.id) && (
-								<div className="flex flex-col gap-0.5">
-									{category.children.map((child, _idx) => (
-										<div key={child.id} className="flex flex-col">
-											<div
-												className={cn(
-													'justify-between w-full text-xs px-2 py-1 rounded flex items-center',
-													'hover:bg-secondary/50 transition-colors',
-													currentView === child.id && 'bg-secondary font-bold'
-												)}
-											>
-												<div
-													className="flex items-center flex-1 cursor-pointer"
-													onClick={() => onNavigate(child.id as ViewType)}
-												>
-													<child.icon className="h-3 w-3 mr-2" style={{ color: child.color }} />
-													{child.label}
-												</div>
-												<div className="flex items-center gap-1">
-													{child.count !== undefined && (
-														<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
-															{child.count}
-														</span>
-													)}
-													{child.hasChildren && (
-														<button
-															className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
-															onClick={(e) => {
-																e.stopPropagation();
-																toggleCategory(child.id);
-															}}
-														>
-															{expandedCategories.has(child.id) ? (
-																<ChevronDown className="h-3 w-3" />
-															) : (
-																<ChevronRight className="h-3 w-3" />
-															)}
-														</button>
-													)}
-												</div>
-											</div>
-											{child.hasChildren && expandedCategories.has(child.id) && (
-												<div className="ml-4 mt-1 border-l border-border/50 pl-2">
-													<NavCategoryChildren
-														categoryId={child.id}
-														isCollapsed={isCollapsed}
-														selectedChildId={null}
-														currentView={currentView}
-														items={getCategoryItems(child.id as any)}
-														onItemClick={handleChildClick}
-													/>
-												</div>
-											)}
+								<>
+									{/* TreeView directo para carpetas */}
+									{category.showTreeView && (
+										<div className="ml-2 mt-1">
+											<NavCategoryChildren
+												categoryId={category.id}
+												isCollapsed={isCollapsed}
+												selectedChildId={null}
+												currentView={currentView}
+												items={[]}
+												onItemClick={handleChildClick}
+											/>
 										</div>
-									))}
-								</div>
+									)}
+									{/* Categorías normales */}
+									{!category.showTreeView && (
+										<div className="flex flex-col gap-0.5">
+											{category.children.map((child, _idx) => (
+												<div key={child.id} className="flex flex-col">
+													<div
+														className={cn(
+															'justify-between w-full text-xs px-2 py-1 rounded flex items-center',
+															'hover:bg-secondary/50 transition-colors',
+															currentView === child.id && 'bg-secondary font-bold'
+														)}
+													>
+														<div
+															className="flex items-center flex-1 cursor-pointer"
+															onClick={() => onNavigate(child.id as ViewType)}
+														>
+															<child.icon className="h-3 w-3 mr-2" style={{ color: child.color }} />
+															{child.label}
+														</div>
+														<div className="flex items-center gap-1">
+															{child.count !== undefined && (
+																<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
+																	{child.count}
+																</span>
+															)}
+															{child.hasChildren && (
+																<button
+																	className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
+																	onClick={(e) => {
+																		e.stopPropagation();
+																		toggleCategory(child.id);
+																	}}
+																>
+																	{expandedCategories.has(child.id) ? (
+																		<ChevronDown className="h-3 w-3" />
+																	) : (
+																		<ChevronRight className="h-3 w-3" />
+																	)}
+																</button>
+															)}
+														</div>
+													</div>
+													{child.hasChildren && expandedCategories.has(child.id) && (
+														<div className="ml-4 mt-1 border-l border-border/50 pl-2">
+															<NavCategoryChildren
+																categoryId={child.id}
+																isCollapsed={isCollapsed}
+																selectedChildId={null}
+																currentView={currentView}
+																items={getCategoryItems(child.id as any)}
+																onItemClick={handleChildClick}
+															/>
+														</div>
+													)}
+												</div>
+											))}
+										</div>
+									)}
+								</>
 							)}
 						</div>
 					))}

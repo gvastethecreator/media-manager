@@ -17,14 +17,14 @@ interface WorldItemCardFooterProps {
  * Componente para el pie de una tarjeta de objeto del mundo.
  * Similar a la parte inferior de una carta Magic con el tipo, artista y copyright.
  */
-export function WorldItemCardFooter({
+export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 	worldItem,
 	_totalRelations,
 	primaryColor,
 	secondaryColor,
 	intensityFactor,
 	compact = false,
-}: WorldItemCardFooterProps) {
+}: WorldItemCardFooterProps) => {
 	const { createdAt, updatedAt, isFavorite, category, type, _stats } = worldItem;
 	const imagesCount = _stats?.totalImages || worldItem._count?.images || 0;
 	// Convertir fechas a objetos Date si son strings
