@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStats, getSystemStats, getSystemStatsExtended, getFolderStats } from '../services/stats.service';
+import { getFolderStats, getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
 
 const router = express.Router();
 

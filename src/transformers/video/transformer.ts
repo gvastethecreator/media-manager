@@ -3,14 +3,13 @@
  * @module transformers/video/transformer
  * @description Transforma videos de Drizzle a VideoWithStats con análisis técnico avanzado
  * Última refactorización: 2025-01-27
- 
+
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { VideoComplete, VideoStats, VideoWithStats } from '@/types/entities/video/types';
-import { VideoQuality } from '@/types/entities/video/types';
+import type { VideoComplete, VideoQuality, VideoWithStats } from '@/types/entities/video/types';
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
 type DrizzleVideoWithCounts = {

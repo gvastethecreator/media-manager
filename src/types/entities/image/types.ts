@@ -8,19 +8,7 @@
 import { z } from 'zod';
 import { BaseEntitySchema } from '@/types/common/base';
 import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
-import type { AlbumWithStats } from '../album';
-import type { CharacterWithStats } from '../character';
-import type { CollectionWithStats } from '../collection';
-import type { ConceptComplete } from '../concept';
-import type { FolderComplete } from '../folder';
-import type { GroupWithStats } from '../group';
-import type { NoteComplete } from '../note';
-import type { PlaceComplete } from '../place';
-import type { PromptComplete } from '../prompt';
-import type { PropertyComplete } from '../property';
-import type { TagWithStats } from '../tag';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemWithStats } from '../world-item';
+import { ImageComplete } from '.';
 
 /**
  * 🔍 Esquema de validación para Image

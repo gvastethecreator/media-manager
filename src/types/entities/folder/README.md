@@ -28,7 +28,7 @@ graph TD
 
 ```ts
 import type { FolderBase, FolderCreateInput } from '@/types/entities/folder';
-import { FolderSchema } from '@/types/entities/folder/types';
+import type { FolderSchema } from '@/types/entities/folder/types';
 
 const nueva: FolderCreateInput = { name: 'Proyectos', path: '/proyectos' };
 const validada = FolderSchema.parse(nueva);

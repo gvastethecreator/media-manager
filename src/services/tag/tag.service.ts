@@ -590,6 +590,31 @@ export async function toggleTagArchive(id: string): Promise<TagWithStats> {
 	}
 }
 
+export async function addImageToTag(tagId: string, imageId: string): Promise<void> {
+	try {
+		logger.info(`🏷️ Agregando imagen ${imageId} a etiqueta ${tagId}`);
+
+		// **MIGRACIÓN A DRIZZLE**
+		await db.insert(imageTags).values({
+			tagId,
+			imageId,
+		});
+
+		// Revalidar rutas y notificar
+		await revalidateTagPaths();
+		await notifyTagChange('update', { id: tagId });
+
+		logger.info(`✅ Imagen ${imageId} agregada a etiqueta ${tagId}`);
+	} catch (error) {
+		logger.error(`❌ Error al agregar imagen a etiqueta`, { error, tagId, imageId });
+		throw new TagServiceError(
+			`Error al agregar imagen a etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'ADD_IMAGE_TO_TAG_FAILED',
+			error
+		);
+	}
+}
+
 /**
  * Clase de servicio para gestión de etiquetas
  */
@@ -657,6 +682,7 @@ const tagService = {
 	deleteTag,
 	toggleTagFavorite,
 	toggleTagArchive,
+	addImageToTag, // <-- Añadir aquí
 	notifyTagChange,
 	TAG_EVENTS,
 	TagServiceError,

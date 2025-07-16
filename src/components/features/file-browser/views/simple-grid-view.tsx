@@ -8,8 +8,7 @@ import { FileIcon, FileTextIcon, FolderIcon, ImageIcon, MusicIcon, PlayCircleIco
 import { motion } from 'motion/react';
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatsType, isImageWithStats, isVideoWithStats } from '@/types/migration';
+import { EntityWithStats, getEntityStatsType, isImageWithStats, isVideoWithStats } from '@/types/migration';
 
 interface SimpleGridViewProps {
 	items: EntityWithStats[];
@@ -92,9 +91,9 @@ export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView(
 									{type === 'image' && <ImageIcon className="h-8 w-8 text-muted-foreground" />}
 									{type === 'video' && <VideoIcon className="h-8 w-8 text-muted-foreground" />}
 									{type === 'folder' && <FolderIcon className="h-8 w-8 text-muted-foreground" />}
-									{type === 'audio' && <MusicIcon className="h-8 w-8 text-muted-foreground" />}
-									{type === 'document' && <FileTextIcon className="h-8 w-8 text-muted-foreground" />}
-									{!['image', 'video', 'folder', 'audio', 'document'].includes(type) && (
+									{type && type === 'audio' && <MusicIcon className="h-8 w-8 text-muted-foreground" />}
+									{type && type === 'document' && <FileTextIcon className="h-8 w-8 text-muted-foreground" />}
+									{!['image', 'video', 'folder', 'audio', 'document'].includes(type || '') && (
 										<FileIcon className="h-8 w-8 text-muted-foreground" />
 									)}
 								</div>

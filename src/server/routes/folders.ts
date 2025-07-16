@@ -436,7 +436,7 @@ router.get('/:id/stats', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		console.log(`✅ [FOLDER-STATS] ID válido, consultando datos básicos de carpeta...`);
+		console.log('✅ [FOLDER-STATS] ID válido, consultando datos básicos de carpeta...');
 		// Obtener estadísticas básicas de la carpeta
 		const folderData = await db
 			.select({
@@ -447,14 +447,14 @@ router.get('/:id/stats', async (req, res) => {
 			.where(eq(folders.id, id))
 			.limit(1);
 
-		console.log(`📊 [FOLDER-STATS] Datos de carpeta obtenidos:`, folderData);
+		console.log('📊 [FOLDER-STATS] Datos de carpeta obtenidos:', folderData);
 
 		if (folderData.length === 0) {
 			console.log(`❌ [FOLDER-STATS] Carpeta no encontrada: ${id}`);
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
 		}
 
-		console.log(`🖼️ [FOLDER-STATS] Consultando estadísticas de imágenes...`);
+		console.log('🖼️ [FOLDER-STATS] Consultando estadísticas de imágenes...');
 		// Contar imágenes por tipo
 		const imageStats = await db
 			.select({
@@ -463,7 +463,7 @@ router.get('/:id/stats', async (req, res) => {
 			.from(images)
 			.where(eq(images.folderId, id));
 
-		console.log(`📹 [FOLDER-STATS] Consultando estadísticas de videos...`);
+		console.log('📹 [FOLDER-STATS] Consultando estadísticas de videos...');
 		// Contar videos
 		const videoStats = await db
 			.select({
@@ -472,13 +472,13 @@ router.get('/:id/stats', async (req, res) => {
 			.from(videos)
 			.where(eq(videos.folderId, id));
 
-		console.log(`🔄 [FOLDER-STATS] Obteniendo imágenes recientes...`);
+		console.log('🔄 [FOLDER-STATS] Obteniendo imágenes recientes...');
 		// Obtener las últimas 4 imágenes
 		const recentImages = await db
 			.select({
 				id: images.id,
 				name: images.name,
-				thumbnailUrl: images.thumbnailUrl,
+				thumbnail: images.thumbnail,
 				createdAt: images.createdAt,
 			})
 			.from(images)
@@ -486,7 +486,7 @@ router.get('/:id/stats', async (req, res) => {
 			.orderBy(desc(images.createdAt))
 			.limit(4);
 
-		console.log(`📈 [FOLDER-STATS] Construyendo objeto de estadísticas...`);
+		console.log('📈 [FOLDER-STATS] Construyendo objeto de estadísticas...');
 		const stats = {
 			totalImages: imageStats[0]?.count || 0,
 			totalVideos: videoStats[0]?.count || 0,
@@ -497,7 +497,7 @@ router.get('/:id/stats', async (req, res) => {
 			lastActivity: folderData[0].lastIndexed,
 			recentImages: recentImages,
 		};
-		console.log(`✅ [FOLDER-STATS] Estadísticas construidas exitosamente:`, stats);
+		console.log('✅ [FOLDER-STATS] Estadísticas construidas exitosamente:', stats);
 		res.json(stats);
 	} catch (error) {
 		console.error('💥 [FOLDER-STATS] Error al obtener estadísticas de la carpeta:', error);

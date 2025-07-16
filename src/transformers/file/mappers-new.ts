@@ -5,7 +5,7 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import { type FileBase, type FileStatistics, FileType, type FileWithStats } from '@/types/entities/file';
+import type { FileBase, FileStatistics, FileType, FileWithStats } from '@/types/entities/file';
 
 /**
  * 📊 Calcula las estadísticas de un archivo.

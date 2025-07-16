@@ -38,7 +38,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { CollectionWithStats } from '@/types/entities/collection.types';
-import { isCollectionWithStats } from '@/types/migration';
+import type { isCollectionWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,

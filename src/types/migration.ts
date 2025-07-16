@@ -4,8 +4,12 @@
  * @description Funciones utilitarias para type checking y migración de tipos legacy a EntityWithStats
  */
 
+// Imports para los tipos re-exportados
+import type { AudioBase } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
+import type { CollectionBase } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
+import type { DocumentBase } from '@/types/entities/document';
 import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { GroupWithStats } from '@/types/entities/group';
@@ -19,15 +23,10 @@ import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 
-// Imports para los tipos re-exportados
-import type { AudioBase } from '@/types/entities/audio';
-import type { DocumentBase } from '@/types/entities/document';
-import type { CollectionBase } from '@/types/entities/collection';
-
 // Re-exportar tipos reales en lugar de definiciones temporales
 export type { AudioWithStats } from '@/types/entities/audio';
-export type { DocumentWithStats } from '@/types/entities/document';
 export type { CollectionWithStats } from '@/types/entities/collection';
+export type { DocumentWithStats } from '@/types/entities/document';
 
 export interface AlbumWithStats extends EntityWithStats {
 	entityType: 'album';

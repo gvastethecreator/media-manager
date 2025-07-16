@@ -57,7 +57,7 @@ import {
 	toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
-import { ThumbnailQuality } from '@/types/thumbnails';
+import type { ThumbnailQuality, ThumbnailStats } from '@/types/thumbnails';
 // Tipos movidos a types locales
 export interface GetImagesOptions {
 	folderId?: string;

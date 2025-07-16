@@ -30,7 +30,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/lib/ui/use-toast';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
 
@@ -123,10 +123,10 @@ export function useActionsSystem() {
 			} catch (error) {
 				toast({
 					title: 'Error inesperado',
-					description: `Error al ejecutar ${action.label}: ${error.message}`,
+					description: `Error al ejecutar ${action.label}: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 					variant: 'destructive',
 				});
-				return { success: false, message: error.message };
+				return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 			} finally {
 				setIsExecuting(false);
 				setProgress(0);
@@ -176,7 +176,7 @@ export function useActionsSystem() {
 		if (!currentAction) return;
 
 		const context: ActionContext = {
-			entity: currentAction.entity,
+			...currentAction.context,
 			metadata: inputValues,
 		};
 

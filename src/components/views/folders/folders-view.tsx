@@ -1,23 +1,20 @@
+import { Folder, FolderPlus, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Folder, FolderPlus, RefreshCw } from 'lucide-react';
 import { FolderCard } from '@/components/cards/folder-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useFolders } from '@/lib/api/folders';
-import { useCreateFolder } from '@/lib/api/folders';
+import { useCreateFolder, useFolders } from '@/lib/api/folders';
 import type { FolderWithStats } from '@/types/entities/folder';
 
 interface FoldersViewProps {
 	className?: string;
 }
 
-export default function FoldersView({
-	className = '',
-}: FoldersViewProps) {
+export default function FoldersView({ className = '' }: FoldersViewProps) {
 	const navigate = useNavigate();
 	const { data: foldersResponse, isLoading, error, refetch } = useFolders();
 	const folders = foldersResponse?.data || [];

@@ -6,7 +6,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import tagService from '@/services/tag/tag.service';
+import tagService, { addImageToTag } from '@/services/tag/tag.service';
 
 // Importaciones de stores en entidades
 
@@ -228,7 +228,7 @@ export const handleContextAction = async (
 				if (data?.tagId) {
 					// Añadir etiqueta
 					const tagId = data.tagId as string;
-					await tagService.addImageToTag(tagId, item.id);
+					await addImageToTag(tagId, item.id);
 					toastService.success('Etiqueta añadida a la imagen');
 				}
 				break;

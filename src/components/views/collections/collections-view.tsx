@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCreateCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';

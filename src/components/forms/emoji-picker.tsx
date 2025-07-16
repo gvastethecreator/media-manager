@@ -1,9 +1,9 @@
-import { EmojiPicker as FrimousseEmojiPicker } from 'frimousse';
+
 import { memo, useCallback, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
-import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface EmojiPickerProps {
@@ -152,14 +152,7 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 	const [open, setOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState('activities');
 
-	// 🎯 Manejar selección con Frimousse
-	const handleFrimousseSelect = useCallback(
-		(emoji: { native: string }) => {
-			onChange(emoji.native);
-			setOpen(false);
-		},
-		[onChange]
-	);
+	
 
 	// Callback para manejar selección de emojis del grid
 	const handleEmojiSelect = useCallback(
@@ -225,34 +218,7 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 							</TabsContent>
 						))}
 
-						{/* 🔍 Picker completo con búsqueda */}
-						<TabsContent value="search" className="m-0">
-							<div className="p-3">
-								<FrimousseEmojiPicker.Root onEmojiSelect={handleFrimousseSelect} className="w-full">
-									<FrimousseEmojiPicker.Search
-										placeholder="Buscar emoji..."
-										className="w-full mb-3 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-									/>
-									<FrimousseEmojiPicker.Viewport className="h-48 overflow-hidden">
-										<FrimousseEmojiPicker.Loading className="flex items-center justify-center h-full text-sm text-muted-foreground">
-											Cargando emojis...
-										</FrimousseEmojiPicker.Loading>
-										<FrimousseEmojiPicker.Empty className="flex items-center justify-center h-full text-sm text-muted-foreground">
-											No se encontraron emojis
-										</FrimousseEmojiPicker.Empty>
-										<FrimousseEmojiPicker.List className="grid grid-cols-8 gap-1" />
-									</FrimousseEmojiPicker.Viewport>
-								</FrimousseEmojiPicker.Root>
-							</div>
-						</TabsContent>
-					</ScrollArea>
-
-					{/* 🔍 Botón para acceder al buscador completo */}
-					<div className="border-t p-2">
-						<Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => setActiveTab('search')}>
-							🔍 Buscar más emojis
-						</Button>
-					</div>
+						
 				</Tabs>
 			</PopoverContent>
 		</Popover>

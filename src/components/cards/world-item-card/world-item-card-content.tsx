@@ -14,13 +14,13 @@ const { getRecentWorldItemImages } = worldItemService;
 
 interface WorldItemCardContentProps {
 	description?: string | null;
-	properties?: WorldItemProperty[] | string;
-	requirements?: Record<string, WorldItemRequirement> | string;
-	attributes?: string[] | string;
-	effects?: WorldItemEffect[] | string;
-	stats?: WorldItemStats | string;
+	properties?: WorldItemProperty[] | string | null;
+	requirements?: Record<string, WorldItemRequirement> | string | null;
+	attributes?: string[] | string | null;
+	effects?: WorldItemEffect[] | string | null;
+	stats?: WorldItemStats | string | null;
 	origin?: string | null;
-	rarity?: string;
+	rarity?: string | null;
 	primaryColor?: string;
 }
 
@@ -154,7 +154,7 @@ export function WorldItemCardContent({
 							className="flex justify-between mb-0.5 text-xs"
 						>
 							<span className="font-medium">{prop.name || 'Propiedad'}</span>
-						<span className="text-muted-foreground">{String(prop.value || '')}</span>
+							<span className="text-muted-foreground">{String(prop.value || '')}</span>
 						</div>
 					))}
 				</div>
@@ -186,7 +186,7 @@ export function WorldItemCardContent({
 					{parsedEffects.map((effect: WorldItemEffect, index: number) => (
 						<div key={`effect-${renderKey}-${effect.name || `effect-${index + 1}`}`} className="text-[10px] mb-0.5">
 							<span className="font-medium">{String(effect.name || '')}: </span>
-					<span className="text-muted-foreground">{String(effect.description || '')}</span>
+							<span className="text-muted-foreground">{String(effect.description || '')}</span>
 						</div>
 					))}
 				</div>
@@ -202,8 +202,10 @@ export function WorldItemCardContent({
 						<div key={`req-${renderKey}-${key}`} className="text-[10px] mb-0.5">
 							<span className="font-medium">{key}: </span>
 							<span className="text-muted-foreground">
-						{typeof req === 'object' && req !== null && 'value' in req ? String((req as any).value || '') : String(req || '')}
-					</span>
+								{typeof req === 'object' && req !== null && 'value' in req
+									? String((req as any).value || '')
+									: String(req || '')}
+							</span>
 						</div>
 					))}
 				</div>

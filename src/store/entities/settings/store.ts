@@ -4,7 +4,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { interfacePreferencesSchema } from '@/types/ui/interface.schema';
+import type { interfacePreferencesSchema } from '@/types/ui/interface.schema';
 import type { InterfacePreferences, InterfaceSettingsState } from '@/types/ui/types';
 
 // Estado inicial por defecto

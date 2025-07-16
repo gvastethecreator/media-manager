@@ -123,11 +123,11 @@ export function EntityPreloader({
 		let entitiesToPreload: string[] = [];
 
 		switch (mode) {
-			case 'all':
-				entitiesToPreload = ALL_ENTITIES;
+						case 'all':
+				entitiesToPreload = [...ALL_ENTITIES];
 				break;
 			case 'priority':
-				entitiesToPreload = PRIORITY_ENTITIES;
+				entitiesToPreload = [...PRIORITY_ENTITIES];
 				break;
 			case 'custom':
 				entitiesToPreload = customEntities;

@@ -261,7 +261,7 @@ export function VirtualizerWrapper<T>({
 
 		if (type === 'grid') {
 			// Para cuadrícula, calcular índices por filas/columnas
-			const itemHeight = gridVirtualizer.options.estimateSize();
+			const itemHeight = gridVirtualizer.options.estimateSize(0);
 			const itemWidth = (scrollElement.clientWidth - gridGap * (columnCount + 1)) / columnCount;
 
 			if (itemHeight && itemWidth) {
@@ -401,7 +401,7 @@ export function VirtualizerWrapper<T>({
 			}
 
 			// Delay para actualizar índices visibles
-			visibilityUpdateTimeoutRef.current = setTimeout(() => {
+			visibilityUpdateTimeoutRef.current = setTimeout(() => { // Cast a number para compatibilidad con el navegador
 				updateVisibleIndices();
 				visibilityUpdateTimeoutRef.current = null;
 			}, 100);

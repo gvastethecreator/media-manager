@@ -19,8 +19,7 @@ import {
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatistics, getEntityStatsType } from '@/types/migration';
+import { EntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 interface ListViewProps {
 	items: EntityWithStats[];
@@ -53,13 +52,13 @@ export const ListView = memo<ListViewProps>(function ListView({ items, selectedI
 		return items.map((item) => {
 			const type = getEntityStatsType(item);
 			const stats = getEntityStatistics(item);
-			const Icon = typeIcons[type] || FileIcon;
+			const Icon = type ? typeIcons[type] : FileIcon;
 
 			// Obtener tamaño si está disponible
 			let size = '-';
 			if ('size' in item) {
 				size = formatFileSize(item.size);
-			} else if (stats?.fileSize) {
+			} else if (stats && 'fileSize' in stats && stats.fileSize) {
 				size = `${stats.fileSize.toFixed(1)} MB`;
 			}
 
@@ -124,7 +123,7 @@ export const ListView = memo<ListViewProps>(function ListView({ items, selectedI
 								<td className="p-2 text-sm text-muted-foreground">{size}</td>
 								<td className="p-2 text-sm text-muted-foreground">{formatDate(modifiedDate)}</td>
 								<td className="p-2 text-sm text-muted-foreground text-center">
-									{stats?.totalAssociations || stats?.totalItems || '-'}
+									{stats && 'totalAssociations' in stats && stats.totalAssociations !== undefined ? stats.totalAssociations : stats && 'totalItems' in stats && stats.totalItems !== undefined ? stats.totalItems : '-'}
 								</td>
 							</tr>
 						);

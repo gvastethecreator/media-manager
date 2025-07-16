@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { FolderWithStats } from '@/types/entities/folder';
+import type { FolderWithStats } from '@/types/entities/folder';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';

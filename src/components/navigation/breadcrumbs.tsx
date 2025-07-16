@@ -39,7 +39,6 @@ interface BreadcrumbConfig {
 
 const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> = {
 	files: { label: 'Archivos', path: '/files' },
-	loading: { label: 'Cargando', path: '/loading' },
 	'all-images': { label: 'Galería', path: '/gallery' },
 	favorites: { label: 'Favoritos', path: '/favorites' },
 	search: { label: 'Búsqueda', path: '/search' },

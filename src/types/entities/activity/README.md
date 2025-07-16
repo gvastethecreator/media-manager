@@ -30,7 +30,7 @@ graph TD
 
 ```ts
 import type { Activity, ActivityCreateInput } from '@/types/entities/activity';
-import { ActivitySchema } from '@/types/entities/activity/types';
+import type { ActivitySchema } from '@/types/entities/activity/types';
 
 const nueva: ActivityCreateInput = { type: 'image_upload', description: 'Subida de imagen' };
 const validada = ActivitySchema.parse(nueva);
