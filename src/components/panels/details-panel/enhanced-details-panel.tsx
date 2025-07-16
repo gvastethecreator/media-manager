@@ -18,8 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatsType } from '@/types/migration';
+import type { EntityWithStats, getEntityStatsType } from '@/types/migration';
 import { entityDetailsRegistry } from './entity-details-registry';
 
 // Fallback para cuando no hay configuración específica

@@ -78,7 +78,7 @@ export function PlaceCard({
 		color = '#10b981',
 		description,
 		region = 'desconocido',
-		type = 'desconocido',
+		type,
 		climate = 'templado',
 		population: rawPopulation = 0, // Renombrar para evitar conflicto
 		government = 'desconocido',

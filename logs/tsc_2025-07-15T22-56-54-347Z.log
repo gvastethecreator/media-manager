@@ -1,0 +1,14 @@
+Comando: bunx tsc --noEmit --pretty --noEmit
+Fecha: 2025-07-15T22:56:54.348Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/views/collections/collections-view.tsx[0m:[93m1[0m:[93m45[0m - [91merror[0m[90m TS1005: [0m'from' expected.
+
+[7m1[0m import { useCallback, useEffect, useState } 'react';
+[7m [0m [91m                                            ~~~~~~~[0m
+
+
+Found 1 error in src/components/views/collections/collections-view.tsx[90m:1[0m
+

@@ -83,7 +83,7 @@ export interface BaseCardProps {
 	/** Si la card está en estado de carga */
 	isLoading?: boolean;
 	/** Callback de click */
-	onClick?: () => void;
+	onClick?: (e: React.MouseEvent) => void;
 	/** Callback de doble click */
 	onDoubleClick?: () => void;
 	/** Props legacy para compatibilidad */

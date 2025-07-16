@@ -88,9 +88,9 @@ export function UploadedImageCard({
 
 	// Dimensiones formateadas
 	const dimensions = useMemo(() => {
-		if (!uploadedImage.width || !uploadedImage.height) return 'N/A';
-		return `${uploadedImage.width}×${uploadedImage.height}`;
-	}, [uploadedImage.width, uploadedImage.height]);
+		if (!uploadedImage.dimensions?.width || !uploadedImage.dimensions?.height) return 'N/A';
+		return `${uploadedImage.dimensions.width}×${uploadedImage.dimensions.height}`;
+	}, [uploadedImage.dimensions?.width, uploadedImage.dimensions?.height]);
 
 	// URL de la imagen con fallback
 	const imageUrl = useMemo(() => {

@@ -5,8 +5,7 @@
  */
 
 import type { ComponentType } from 'react';
-import type { EntityWithStats } from '@/types/migration';
-import { getEntityStatsType } from '@/types/migration';
+import type { EntityWithStats, getEntityStatsType } from '@/types/migration';
 
 // Tipos base para los componentes de detalles
 export interface EntityDetailsProps<T extends EntityWithStats = EntityWithStats> {

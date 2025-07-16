@@ -34,7 +34,7 @@ import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { VideoWithStats } from '@/types/entities/video.types';
-import { isVideoWithStats } from '@/types/migration';
+import type { isVideoWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,

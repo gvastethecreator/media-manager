@@ -59,6 +59,8 @@ const tabColors = {
 	system: '#64748b', // Slate
 	albums: '#8b5cf6', // Violet
 	collections: '#ef4444', // Red
+	folders: '#f59e0b', // Amber
+	interface: '#0ea5e9', // Sky
 	tags: '#f59e0b', // Amber
 	characters: '#ec4899', // Pink
 	'world-items': '#f59e0b', // Amber
@@ -88,6 +90,18 @@ const tabsData: TabItem[] = [
 		label: 'Sistema',
 		icon: <SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.system,
+	},
+	{
+		id: 'folders',
+		label: 'Carpetas',
+		icon: <FolderIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.folders,
+	},
+	{
+		id: 'interface',
+		label: 'Interfaz',
+		icon: <SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.interface,
 	},
 	{
 		id: 'entities-cards',
@@ -250,12 +264,17 @@ export function SettingsView() {
 				{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
 				<div className="flex-1 h-full overflow-auto">
 					<TabsContent value="system" className="h-full w-full p-2 m-0 border-none">
-						<div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
-							<FoldersSettings />
+						<div className="grid grid-cols-1 w-full">
 							<SystemSettings />
-							{/* 🎨 Nueva sección de interfaz */}
-							<InterfaceSection />
 						</div>
+					</TabsContent>
+
+					<TabsContent value="folders" className="h-full w-full p-2 m-0 border-none">
+						<FoldersSettings />
+					</TabsContent>
+
+					<TabsContent value="interface" className="h-full w-full p-2 m-0 border-none">
+						<InterfaceSection />
 					</TabsContent>
 
 					<TabsContent value="entities-cards" className="h-full w-full p-2 m-0 border-none">

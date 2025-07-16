@@ -45,6 +45,10 @@ export interface WorldItemBase {
 	notes: string | null;
 	featuredImage: string | null;
 	parentId: string | null;
+	shortcut: string | null;
+	attributes: string | null;
+	effects: string | null;
+	requirements: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }

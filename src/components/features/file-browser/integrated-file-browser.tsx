@@ -78,9 +78,9 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 				switch (type) {
 					case 'image':
 						if (filterId && filterType === 'folder') {
-							allIds.push(...imageStore.getImagesByFolder(filterId).map((img) => img.id));
+															allIds.push(...imageStore.getImagesByFolder(filterId).map((img: ImageWithStats) => img.id));
 						} else {
-							allIds.push(...imageStore.getSortedImages().map((img) => img.id));
+							allIds.push(...imageStore.getSortedImages().map((img: ImageWithStats) => img.id));
 						}
 						break;
 					// TODO: Añadir otros casos según se implementen otros stores
@@ -95,10 +95,10 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 			case 'image':
 				// Si hay filtro por carpeta, usar getImagesByFolder
 				if (filterId && filterType === 'folder') {
-					return imageStore.getImagesByFolder(filterId).map((img) => img.id);
+					return imageStore.getImagesByFolder(filterId).map((img: ImageWithStats) => img.id);
 				}
 				// De lo contrario, usar todas las imágenes ordenadas
-				return imageStore.getSortedImages().map((img) => img.id);
+				return imageStore.getSortedImages().map((img: ImageWithStats) => img.id);
 			// TODO: Añadir otros casos según se implementen otros stores
 			default:
 				return [];

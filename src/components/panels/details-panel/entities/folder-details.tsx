@@ -38,7 +38,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { FolderWithStats } from '@/types/entities/folder.types';
-import { isFolderWithStats } from '@/types/migration';
+import type { isFolderWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,

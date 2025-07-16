@@ -117,7 +117,7 @@ Para cada entidad, seguimos este patrón:
 ## 🔍 Modo de uso
 
 ```typescript
-import { Entity, EntityCreateInput, EntityUpdateInput } from '@/types/entities/entity';
+import type { Entity, EntityCreateInput, EntityUpdateInput } from '@/types/entities/entity';
 
 // Crear nueva entidad
 const createInput: EntityCreateInput = {

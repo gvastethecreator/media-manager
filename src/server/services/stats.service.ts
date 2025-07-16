@@ -190,34 +190,50 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 		// Obtener conteos y estadísticas con logging detallado
 		statsLogger.info('🔍 Ejecutando consultas a la base de datos...');
 		const [foldersCount, imagesCount, videosCount, totalSizeResult] = await Promise.all([
-			db.select({ count: sql<number>`count(*)` }).from(folders).then(result => {
-				statsLogger.info('✅ Consulta folders completada:', result);
-				return result;
-			}).catch(error => {
-				statsLogger.error('❌ Error en consulta folders:', error);
-				throw error;
-			}),
-			db.select({ count: sql<number>`count(*)` }).from(images).then(result => {
-				statsLogger.info('✅ Consulta images completada:', result);
-				return result;
-			}).catch(error => {
-				statsLogger.error('❌ Error en consulta images:', error);
-				throw error;
-			}),
-			db.select({ count: sql<number>`count(*)` }).from(videos).then(result => {
-				statsLogger.info('✅ Consulta videos completada:', result);
-				return result;
-			}).catch(error => {
-				statsLogger.error('❌ Error en consulta videos:', error);
-				throw error;
-			}),
-			db.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` }).from(folders).then(result => {
-				statsLogger.info('✅ Consulta totalSize completada:', result);
-				return result;
-			}).catch(error => {
-				statsLogger.error('❌ Error en consulta totalSize:', error);
-				throw error;
-			}),
+			db
+				.select({ count: sql<number>`count(*)` })
+				.from(folders)
+				.then((result) => {
+					statsLogger.info('✅ Consulta folders completada:', result);
+					return result;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta folders:', error);
+					throw error;
+				}),
+			db
+				.select({ count: sql<number>`count(*)` })
+				.from(images)
+				.then((result) => {
+					statsLogger.info('✅ Consulta images completada:', result);
+					return result;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta images:', error);
+					throw error;
+				}),
+			db
+				.select({ count: sql<number>`count(*)` })
+				.from(videos)
+				.then((result) => {
+					statsLogger.info('✅ Consulta videos completada:', result);
+					return result;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta videos:', error);
+					throw error;
+				}),
+			db
+				.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` })
+				.from(folders)
+				.then((result) => {
+					statsLogger.info('✅ Consulta totalSize completada:', result);
+					return result;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta totalSize:', error);
+					throw error;
+				}),
 		]);
 
 		const totalFolders = foldersCount[0]?.count || 0;
@@ -232,7 +248,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 			const k = 1024;
 			const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 			const i = Math.floor(Math.log(bytes) / Math.log(k));
-			return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
+			return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 		};
 
 		const result = {
