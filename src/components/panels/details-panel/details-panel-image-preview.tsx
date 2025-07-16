@@ -21,7 +21,10 @@ export function ImagePreview({ item }: ItemComponentProps) {
 	const MAX_ATTEMPTS = 3;
 
 	// Verificar si hay una URL válida en el item
-	const hasThumbnail = React.useMemo(() => 'thumbnailUrl' in item && !!item.thumbnailUrl && typeof item.thumbnailUrl === 'string', [item.thumbnailUrl]);
+	const hasThumbnail = React.useMemo(
+		() => 'thumbnailUrl' in item && !!item.thumbnailUrl && typeof item.thumbnailUrl === 'string',
+		[item.thumbnailUrl]
+	);
 
 	// Usar useCallback para la función de carga para evitar recreaciones innecesarias
 	const loadImage = React.useCallback(
@@ -134,7 +137,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 		// Si hay un thumbnail en el item, establecerlo como URL inicial
 		if (hasThumbnail) {
 			// Establecer el thumbnail como URL inicial mientras cargamos la imagen completa
-			setImageUrl(item.url || null);
+			setImageUrl(item.thumbnailUrl || null);
 		}
 
 		// Iniciar carga directamente desde aquí
@@ -144,11 +147,11 @@ export function ImagePreview({ item }: ItemComponentProps) {
 				setIsLoading(false);
 			}
 		});
-	}, [item.id, loadImage, hasThumbnail, item.url, imageUrl]); // Incluir todas las dependencias necesarias
+	}, [item.id, loadImage, hasThumbnail, item.thumbnailUrl, imageUrl]); // Incluir todas las dependencias necesarias
 
 	const handleClick = React.useCallback(() => {
 		if (imageUrl) {
-			openViewer([item], 0);
+			openViewer([{ ...item, entityType: 'image' }], 0);
 		}
 	}, [item, openViewer, imageUrl]);
 
@@ -159,8 +162,8 @@ export function ImagePreview({ item }: ItemComponentProps) {
 			{isLoading && hasThumbnail && (
 				<div className="absolute inset-0">
 					<img
-						src={item.url}
-						alt={item.name || 'Miniatura de la imagen'}
+						src={item.thumbnailUrl}
+						alt={'name' in item ? item.name || 'Miniatura de la imagen' : 'Miniatura de la imagen'}
 						className="w-full h-full object-contain bg-background/50 filter blur-[1px] brightness-75"
 					/>
 					<div className="absolute top-2 right-2 bg-background/70 rounded-full p-1">
@@ -207,11 +210,11 @@ export function ImagePreview({ item }: ItemComponentProps) {
 							}
 						}}
 						type="button"
-						aria-label={`Ver ${item.name || 'imagen'} en tamaño completo`}
+						aria-label={`Ver ${'name' in item ? item.name || 'imagen' : 'imagen'} en tamaño completo`}
 					>
 						<img
 							src={imageUrl}
-							alt={item.name || 'Vista previa de imagen'}
+							alt={'name' in item ? item.name || 'Vista previa de imagen' : 'Vista previa de imagen'}
 							className="w-full h-full object-contain bg-background/50"
 							onLoad={() => {
 								setIsLoading(false);

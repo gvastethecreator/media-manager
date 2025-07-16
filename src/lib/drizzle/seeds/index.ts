@@ -75,3 +75,8 @@ export async function runSeeds() {
 		client.close();
 	}
 }
+
+// Ejecutar seeds si este archivo se ejecuta directamente
+if (import.meta.main) {
+	runSeeds().catch(console.error);
+}

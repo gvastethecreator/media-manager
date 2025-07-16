@@ -401,7 +401,8 @@ export function VirtualizerWrapper<T>({
 			}
 
 			// Delay para actualizar índices visibles
-			visibilityUpdateTimeoutRef.current = setTimeout(() => { // Cast a number para compatibilidad con el navegador
+			visibilityUpdateTimeoutRef.current = setTimeout(() => {
+				// Cast a number para compatibilidad con el navegador
 				updateVisibleIndices();
 				visibilityUpdateTimeoutRef.current = null;
 			}, 100);

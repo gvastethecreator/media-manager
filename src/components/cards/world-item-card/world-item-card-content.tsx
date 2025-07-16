@@ -9,12 +9,13 @@ import type {
 	WorldItemRequirement,
 	WorldItemStats,
 } from '@/types/entities/world-item/stats-types';
+import type { PropertyWithStats } from '@/types/entities/property/base';
 
 const { getRecentWorldItemImages } = worldItemService;
 
 interface WorldItemCardContentProps {
 	description?: string | null;
-	properties?: WorldItemProperty[] | string | null;
+	properties?: PropertyWithStats[] | string | null;
 	requirements?: Record<string, WorldItemRequirement> | string | null;
 	attributes?: string[] | string | null;
 	effects?: WorldItemEffect[] | string | null;

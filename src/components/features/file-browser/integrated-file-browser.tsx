@@ -78,7 +78,7 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 				switch (type) {
 					case 'image':
 						if (filterId && filterType === 'folder') {
-															allIds.push(...imageStore.getImagesByFolder(filterId).map((img: ImageWithStats) => img.id));
+							allIds.push(...imageStore.getImagesByFolder(filterId).map((img: ImageWithStats) => img.id));
 						} else {
 							allIds.push(...imageStore.getSortedImages().map((img: ImageWithStats) => img.id));
 						}

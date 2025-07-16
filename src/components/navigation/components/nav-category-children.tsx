@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { CategoryChild, ViewMode } from '../types';
+import { FolderTreeView } from './folder-tree-view';
 
 interface NavCategoryChildrenProps {
 	categoryId: string;
@@ -21,6 +22,16 @@ export const NavCategoryChildren = memo(function NavCategoryChildren({
 	items,
 	onItemClick,
 }: NavCategoryChildrenProps) {
+	// Para la categoría de carpetas, usar TreeView
+	if (categoryId === 'folders') {
+		return (
+			<div className="px-1">
+				<FolderTreeView className="text-[11px]" />
+			</div>
+		);
+	}
+
+	// Para otras categorías, usar la lista normal
 	if (!items || items.length === 0) {
 		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
 	}
