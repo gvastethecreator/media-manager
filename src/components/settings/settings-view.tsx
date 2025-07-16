@@ -17,8 +17,8 @@ import {
 	WandIcon,
 } from 'lucide-react';
 import * as React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { cn } from '@/lib/utils';
 import { AlbumsSettings } from './albums/albums-settings';
@@ -87,16 +87,16 @@ const tabColors = {
 // Definición de todos los tabs para evitar la duplicación de código
 const tabsData: TabItem[] = [
 	{
-		id: 'system',
-		label: 'Sistema',
-		icon: <SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
-		color: tabColors.system,
-	},
-	{
 		id: 'folders',
 		label: 'Carpetas',
 		icon: <FolderIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.folders,
+	},
+	{
+		id: 'system',
+		label: 'Sistema',
+		icon: <SettingsIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.system,
 	},
 	{
 		id: 'interface',
@@ -239,7 +239,7 @@ const tabsData: TabItem[] = [
 ];
 
 export function SettingsView() {
-	const [activeTab, setActiveTab] = React.useState('system');
+	const [activeTab, setActiveTab] = React.useState('folders');
 
 	// 📡 Escuchar el evento para cambiar la pestaña activa desde otros componentes
 	React.useEffect(() => {
@@ -260,31 +260,29 @@ export function SettingsView() {
 	}, []);
 
 	return (
-		<div className="h-full w-full">
+		<div className="h-full w-full p-0 m-0">
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-row">
 				{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
-				<div className="flex-1 h-full overflow-hidden">
+				<div className="flex-1 h-full overflow-hidden p-0 m-0">
+					<TabsContent value="folders" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-0">
+								<FoldersSettings />
+							</div>
+						</ScrollArea>
+					</TabsContent>
 					<TabsContent value="system" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<div className="grid grid-cols-1 w-full">
 									<SystemSettings />
 								</div>
 							</div>
 						</ScrollArea>
 					</TabsContent>
-
-					<TabsContent value="folders" className="h-full w-full p-0 m-0 border-none">
-						<ScrollArea className="h-full w-full">
-							<div className="p-2">
-								<FoldersSettings />
-							</div>
-						</ScrollArea>
-					</TabsContent>
-
 					<TabsContent value="interface" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<InterfaceSection />
 							</div>
 						</ScrollArea>
@@ -292,7 +290,7 @@ export function SettingsView() {
 
 					<TabsContent value="entities-cards" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<EntitiesCardsSettings />
 							</div>
 						</ScrollArea>
@@ -300,7 +298,7 @@ export function SettingsView() {
 
 					<TabsContent value="albums" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<AlbumsSettings />
 							</div>
 						</ScrollArea>
@@ -308,7 +306,7 @@ export function SettingsView() {
 
 					<TabsContent value="collections" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<CollectionsSettings />
 							</div>
 						</ScrollArea>
@@ -316,7 +314,7 @@ export function SettingsView() {
 
 					<TabsContent value="tags" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<TagsSettings />
 							</div>
 						</ScrollArea>
@@ -324,7 +322,7 @@ export function SettingsView() {
 
 					<TabsContent value="characters" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<CharactersSettings />
 							</div>
 						</ScrollArea>
@@ -332,7 +330,7 @@ export function SettingsView() {
 
 					<TabsContent value="world-items" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<WorldItemsSettings />
 							</div>
 						</ScrollArea>
@@ -340,7 +338,7 @@ export function SettingsView() {
 
 					<TabsContent value="places" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<PlacesSettings />
 							</div>
 						</ScrollArea>
@@ -348,7 +346,7 @@ export function SettingsView() {
 
 					<TabsContent value="concepts" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<ConceptsSettings />
 							</div>
 						</ScrollArea>
@@ -356,7 +354,7 @@ export function SettingsView() {
 
 					<TabsContent value="prompts" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<PromptSettings />
 							</div>
 						</ScrollArea>
@@ -364,7 +362,7 @@ export function SettingsView() {
 
 					<TabsContent value="notes" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<NotesSettings />
 							</div>
 						</ScrollArea>
@@ -372,7 +370,7 @@ export function SettingsView() {
 
 					<TabsContent value="uploaded-images" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<UploadedImagesSettings />
 							</div>
 						</ScrollArea>
@@ -380,7 +378,7 @@ export function SettingsView() {
 
 					<TabsContent value="shortcuts" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<ShortcutsSettings />
 							</div>
 						</ScrollArea>
@@ -388,7 +386,7 @@ export function SettingsView() {
 
 					<TabsContent value="profiles" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<ProfilesSettings />
 							</div>
 						</ScrollArea>
@@ -396,7 +394,7 @@ export function SettingsView() {
 
 					<TabsContent value="properties" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<PropertiesSettings />
 							</div>
 						</ScrollArea>
@@ -404,7 +402,7 @@ export function SettingsView() {
 
 					<TabsContent value="groups" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<GroupsSettings />
 							</div>
 						</ScrollArea>
@@ -412,7 +410,7 @@ export function SettingsView() {
 
 					<TabsContent value="wildcards" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<WildcardsSettings />
 							</div>
 						</ScrollArea>
@@ -420,7 +418,7 @@ export function SettingsView() {
 
 					<TabsContent value="thumbnails" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<ThumbnailsSettings />
 							</div>
 						</ScrollArea>
@@ -428,7 +426,7 @@ export function SettingsView() {
 
 					<TabsContent value="document" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<DocumentSettings />
 							</div>
 						</ScrollArea>
@@ -436,7 +434,7 @@ export function SettingsView() {
 
 					<TabsContent value="audio" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<AudioSettings />
 							</div>
 						</ScrollArea>
@@ -444,7 +442,7 @@ export function SettingsView() {
 
 					<TabsContent value="json-file" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<JsonFileSettings />
 							</div>
 						</ScrollArea>
@@ -452,7 +450,7 @@ export function SettingsView() {
 
 					<TabsContent value="workflow" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<WorkflowSettings />
 							</div>
 						</ScrollArea>
@@ -460,7 +458,7 @@ export function SettingsView() {
 
 					<TabsContent value="file3d" className="h-full w-full p-0 m-0 border-none">
 						<ScrollArea className="h-full w-full">
-							<div className="p-2">
+							<div className="p-0">
 								<File3DSettings />
 							</div>
 						</ScrollArea>
