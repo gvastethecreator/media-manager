@@ -10,7 +10,6 @@
 import type { FC } from 'react';
 import type { AnyEntityWithStats } from '@/types/migration';
 import {
-	type EntityWithStats,
 	getEntityStatsType,
 	isAlbumWithStats,
 	isAudioWithStats,

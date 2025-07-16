@@ -43,20 +43,14 @@ const BaseContentView: React.FC<BaseContentViewProps> = ({
 								)}
 								{description && <p className="text-muted-foreground">{description}</p>}
 							</div>
-							{headerControls && (
-								<div className="flex gap-2">
-									{headerControls}
-								</div>
-							)}
+							{headerControls && <div className="flex gap-2">{headerControls}</div>}
 						</div>
 					</div>
 				</>
 			)}
 
 			{/* Contenido principal */}
-			<div className="flex-1 overflow-hidden">
-				{children}
-			</div>
+			<div className="flex-1 overflow-hidden">{children}</div>
 		</div>
 	);
 };

@@ -10,35 +10,35 @@
  * 🗿 Modelo base de WorldItem, derivado del schema de Drizzle.
  */
 export interface WorldItemBase {
-		id: string;
-		name: string;
-		description: string | null;
-		emoji: string | null;
-		color: string | null;
-		category: string | null;
-		isPublic: boolean;
-		isFavorite: boolean;
-		totalImages: number;
-		totalVideos: number;
-		type: string | null;
-		rarity: string | null;
-		value: string | null;
-		weight: string | null;
-		materials: string | null;
-		origin: string | null;
-		properties: string | null;
-		uses: string | null;
-		history: string | null;
-		notes: string | null;
-		featuredImage: string | null;
-		parentId: string | null;
-		shortcut?: string | null;
-		attributes?: string | null;
-		effects?: string | null;
-		requirements?: string | null;
-		createdAt: Date;
-		updatedAt: Date;
-	}
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	rarity: string | null;
+	value: string | null;
+	weight: string | null;
+	materials: string | null;
+	origin: string | null;
+	properties: string | null;
+	uses: string | null;
+	history: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
+	shortcut?: string | null;
+	attributes?: string | null;
+	effects?: string | null;
+	requirements?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /**
  * 📊 Estadísticas específicas de WorldItem con análisis RPG

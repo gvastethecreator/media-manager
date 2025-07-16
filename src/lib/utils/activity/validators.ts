@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { ActivityType } from '@/types/entities/activity';
+import type { ActivityType } from '@/types/entities/activity';
 
 /**
  * Determina si un tipo de actividad es válido

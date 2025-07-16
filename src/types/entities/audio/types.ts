@@ -1,4 +1,4 @@
-import { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
+import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
 
 export interface AudioBase extends EntityBase {
 	name: string;

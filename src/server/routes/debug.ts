@@ -103,13 +103,13 @@ function formatUptime(seconds: number): string {
 function formatNetworkInterfaces() {
 	const interfaces = os.networkInterfaces();
 	const result: Array<{ interface: string; address: string; netmask: string; mac: string }> = [];
-	
+
 	// Validación null-safe para evitar errores de Object.entries
 	if (!interfaces || typeof interfaces !== 'object') {
 		console.warn('⚠️ [DEBUG] os.networkInterfaces() retornó null/undefined, retornando array vacío');
 		return result;
 	}
-	
+
 	for (const [name, netInterface] of Object.entries(interfaces)) {
 		if (netInterface) {
 			for (const iface of netInterface) {

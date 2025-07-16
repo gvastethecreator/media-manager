@@ -4,8 +4,14 @@
  * @description Convierte entre NoteComplete y NoteWithStats para mantener compatibilidad
  */
 
-import type { NoteComplete, NoteStatistics, NoteWithStats } from '@/types/entities/note';
-import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
+import type {
+	NoteCategory,
+	NoteComplete,
+	NotePriority,
+	NoteStatistics,
+	NoteStatus,
+	NoteWithStats,
+} from '@/types/entities/note';
 
 /**
  * 🔄 Convierte NoteComplete a NoteWithStats

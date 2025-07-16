@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
 import { Button } from './button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './card';
 import { Input } from './input';
 import { Label } from './label';
-import { ScrollArea } from './scroll-area';
 import { Switch } from './switch';
 import { Tabs, TabsList, TabsTrigger } from './tabs';
 

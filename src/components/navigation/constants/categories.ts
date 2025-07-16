@@ -51,7 +51,7 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		color: '#14b8a6',
 	},
 	{
-		id: 'world-items',
+		id: 'worldItems',
 		icon: Box,
 		label: 'Objetos',
 		color: '#f59e0b',
@@ -111,7 +111,7 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		color: '#38bdf8',
 	},
 	{
-		id: 'json-files',
+		id: 'jsonFiles',
 		icon: Database,
 		label: 'JSON',
 		color: '#f472b6',
@@ -123,7 +123,7 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		color: '#a3e635',
 	},
 	{
-		id: 'file-3ds',
+		id: 'file3ds',
 		icon: Box,
 		label: '3D',
 		color: '#818cf8',

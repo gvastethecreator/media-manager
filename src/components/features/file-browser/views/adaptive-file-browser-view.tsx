@@ -78,7 +78,7 @@ export const AdaptiveFileBrowserView = memo<AdaptiveFileBrowserViewProps>(functi
 			case 'list':
 				return {
 					type: 'list' as const,
-					estimateSize: () => 60,
+					estimateSize: (): number => 60,
 					columns: 1,
 					gap: 4,
 				};

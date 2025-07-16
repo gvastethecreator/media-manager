@@ -14,10 +14,10 @@ interface NavCategoryChildrenProps {
 }
 
 export const NavCategoryChildren = memo(function NavCategoryChildren({
-	_categoryId,
-	_isCollapsed,
+	categoryId,
+	isCollapsed,
 	selectedChildId,
-	_currentView,
+	currentView,
 	items,
 	onItemClick,
 }: NavCategoryChildrenProps) {

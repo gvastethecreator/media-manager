@@ -376,28 +376,22 @@ export function WorldItemCard({
 				{/* Contenido principal */}
 				<WorldItemCardContent
 					description={description}
-					properties={properties}
-					requirements={requirements}
-					attributes={attributes}
-					effects={effects}
-					stats={_stats}
+					properties={parsedProperties}
+					requirements={parsedRequirements}
+					attributes={parsedAttributes}
+					effects={parsedEffects}
+					stats={parsedStats}
 					origin={origin}
 					rarity={rarity}
-					primaryColor={primaryColor}
+					primaryColor={rarityColor}
 				/>
-
-				{/* Pie de la tarjeta */}
 				<WorldItemCardFooter
-					createdAt={createdAt}
-					updatedAt={updatedAt}
-					imagesCount={imagesCount}
-					videosCount={videosCount}
-					totalRelations={_totalRelations}
-					isFavorite={isFavorite}
-					category={category}
-					type={type}
-					primaryColor={primaryColor}
-					secondaryColor={secondaryColor}
+					worldItem={worldItem!}
+					_totalRelations={_totalRelations}
+					primaryColor={rarityColor}
+					secondaryColor={secondaryColor as any}
+					intensityFactor={intensityFactor}
+					compact={compact}
 				/>
 			</div>
 		</motion.article>

@@ -134,8 +134,6 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		);
 	}
 
-
-
 	// Render del componente
 	return (
 		<motion.div

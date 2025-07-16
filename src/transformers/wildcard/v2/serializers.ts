@@ -198,18 +198,23 @@ export function fromDrizzleWildcard<T extends WildcardBase>(
  * @returns Número total de elementos
  */
 function calculateItemCount(wildcard: WildcardBase & { _count?: Record<string, number> }): number {
-	if (!wildcard._count) return 0;
+	// 🚨 VALIDACIÓN NULL-SAFE MEJORADA PARA Object.entries()
+	if (!wildcard || !wildcard._count || typeof wildcard._count !== 'object' || wildcard._count === null) {
+		return 0;
+	}
 
 	// Sumar todos los conteos excepto childWildcards para evitar duplicidades
 	let total = 0;
 
-	// 🚨 VALIDACIÓN NULL-SAFE PARA Object.entries()
-	if (wildcard._count && typeof wildcard._count === 'object') {
+	try {
 		for (const [key, value] of Object.entries(wildcard._count)) {
-			if (key !== 'childWildcards') {
-				total += value as number;
+			if (key !== 'childWildcards' && typeof value === 'number' && !isNaN(value)) {
+				total += value;
 			}
 		}
+	} catch (error) {
+		console.error('Error al procesar _count en calculateItemCount:', error);
+		return 0;
 	}
 
 	return total;

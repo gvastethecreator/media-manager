@@ -3,8 +3,7 @@
  * @module utils/collection/helpers
  */
 
-import type { CollectionWithStats } from '@/types/entities/collection';
-import { CollectionSortOption } from '@/types/entities/collection';
+import type { CollectionSortOption, CollectionWithStats } from '@/types/entities/collection';
 
 /**
  * Ordena un array de colecciones según la opción de ordenación
