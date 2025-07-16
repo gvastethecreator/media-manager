@@ -137,7 +137,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 		);
 	}
 
-	if (files.length === 0) {
+	if (!files || files.length === 0) {
 		return (
 			<EmptyState
 				icon={FileIcon}
@@ -169,7 +169,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 						transition={{ delay: 0.1 }}
 						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4"
 					>
-						{files.map((file: FileWithStats, index: number) => (
+						{files?.map((file: FileWithStats, index: number) => (
 							<motion.div
 								key={file.id}
 								initial={{ opacity: 0, y: 20 }}
@@ -178,7 +178,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 							>
 								<MemoizedEntityCard file={file} onFileClick={() => handleFileClick(file)} />
 							</motion.div>
-						))}
+						)) || []}
 					</motion.div>
 
 					{/* Dialog para upload de archivos */}
@@ -241,7 +241,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 									<Button
 										onClick={() => handleFileUploadInternal(uploadFiles)}
 										className="h-9"
-										disabled={isUploading || uploadFiles.length === 0}
+										disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
 									>
 										{isUploading ? 'Subiendo...' : 'Subir Archivos'}
 									</Button>
