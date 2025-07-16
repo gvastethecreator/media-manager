@@ -21,7 +21,7 @@ export interface SystemStats {
 }
 
 export interface NavigationData {
-	folders: Array<{ id: string; name: string; path: string; itemCount: number }>;
+	folders: Array<{ id: string; name: string; path: string; itemCount: number; parentId?: string | null }>;
 	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
 	tags: Array<{ id: string; name: string; count?: number }>;
 	albums: Array<{ id: string; name: string; description?: string; itemCount?: number }>;

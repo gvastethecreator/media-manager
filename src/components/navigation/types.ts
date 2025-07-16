@@ -63,6 +63,7 @@ export interface CategoryChild {
 	itemCount?: number; // Conteo total de elementos
 	totalFiles?: number;
 	totalSize?: number;
+	parentId?: string | null; // Para jerarquía de carpetas
 	_count?: {
 		images?: number;
 		folders?: number;

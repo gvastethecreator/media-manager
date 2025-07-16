@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { InfoItem } from './details-panel-info-item';
-import type { InfoItemData, MetadataComponentProps } from './details-panel-types';
+import type { InfoItemData, MetadataSectionsProps } from './details-panel-types';
 
 // Helper to render a list of info items
 function renderInfoItems(items: (InfoItemData | null | undefined)[]) {

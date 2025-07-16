@@ -1,5 +1,5 @@
-import { truncateText } from '@/lib/utils/format';
 import type { InfoItemProps } from './details-panel-types';
+import { truncateText } from './details-panel-utils';
 
 /**
  * Componente reutilizable para mostrar un ítem de información con etiqueta y valor.

@@ -217,9 +217,8 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 								</div>
 							</TabsContent>
 						))}
-
-						
-				</Tabs>
+				</ScrollArea>
+			</Tabs>
 			</PopoverContent>
 		</Popover>
 	);

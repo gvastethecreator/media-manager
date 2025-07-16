@@ -169,57 +169,57 @@ export function FoldersSettings() {
 
 						{/* Lista de carpetas con jerarquía mejorada en 2 columnas */}
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pr-3">
-						{(() => {
-						// Separar carpetas padre de subcarpetas
-						const parentFolders = folders.filter((folder) => !folder.parentId);
-						const subfolders = folders.filter((folder) => folder.parentId);
+							{(() => {
+								// Separar carpetas padre de subcarpetas
+								const parentFolders = folders.filter((folder) => !folder.parentId);
+								const subfolders = folders.filter((folder) => folder.parentId);
 
-						// Agrupar subcarpetas por padre
-						const folderGroups = parentFolders.map((parent) => {
-						const children = subfolders.filter((sub) => sub.parentId === parent.id);
-						return { parent, children };
-						});
+								// Agrupar subcarpetas por padre
+								const folderGroups = parentFolders.map((parent) => {
+									const children = subfolders.filter((sub) => sub.parentId === parent.id);
+									return { parent, children };
+								});
 
-						// Ordenar grupos por nombre del padre
-						folderGroups.sort((a, b) => a.parent.name.localeCompare(b.parent.name));
+								// Ordenar grupos por nombre del padre
+								folderGroups.sort((a, b) => a.parent.name.localeCompare(b.parent.name));
 
-						return folderGroups.map(({ parent, children }) => (
-						<div key={parent.id} className="col-span-1">
-						<FolderGroup
-						parentFolder={parent}
-						subfolders={children}
-						allFolders={folders}
-						selectedFolder={selectedFolder}
-						isProcessing={isProcessing}
-						processStatus={processStatus}
-						isGloballyProcessing={isGloballyProcessing}
-						onReindex={handleReindexFolder}
-						onToggleAutoReindex={handleAutoReindexToggle}
-						onFolderClick={handleFolderClick}
-						getFolderIndexStatus={getFolderIndexStatus}
-						onUpdateFolder={handleUpdateFolder}
-						onToggleExpanded={handleToggleExpanded}
-						expandedFolders={expandedFolders}
-						/>
-						</div>
-						));
-						})()}
+								return folderGroups.map(({ parent, children }) => (
+									<div key={parent.id} className="col-span-1">
+										<FolderGroup
+											parentFolder={parent}
+											subfolders={children}
+											allFolders={folders}
+											selectedFolder={selectedFolder}
+											isProcessing={isProcessing}
+											processStatus={processStatus}
+											isGloballyProcessing={isGloballyProcessing}
+											onReindex={handleReindexFolder}
+											onToggleAutoReindex={handleAutoReindexToggle}
+											onFolderClick={handleFolderClick}
+											getFolderIndexStatus={getFolderIndexStatus}
+											onUpdateFolder={handleUpdateFolder}
+											onToggleExpanded={handleToggleExpanded}
+											expandedFolders={expandedFolders}
+										/>
+									</div>
+								));
+							})()}
 
-						{folders.length === 0 && (
-						<motion.div
-						animate={{
-						opacity: [0, 1],
-						y: [20, 0],
-						}}
-						className="col-span-full py-8 text-center"
-						>
-						<Folder className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-						<p className="text-sm text-muted-foreground">No hay carpetas indexadas</p>
-						<p className="text-xs mt-1 text-muted-foreground/75">
-						Agrega una carpeta para comenzar a indexar imágenes
-						</p>
-						</motion.div>
-						)}
+							{folders.length === 0 && (
+								<motion.div
+									animate={{
+										opacity: [0, 1],
+										y: [20, 0],
+									}}
+									className="col-span-full py-8 text-center"
+								>
+									<Folder className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+									<p className="text-sm text-muted-foreground">No hay carpetas indexadas</p>
+									<p className="text-xs mt-1 text-muted-foreground/75">
+										Agrega una carpeta para comenzar a indexar imágenes
+									</p>
+								</motion.div>
+							)}
 						</div>
 
 						{/* Progress bar para reindexado global */}

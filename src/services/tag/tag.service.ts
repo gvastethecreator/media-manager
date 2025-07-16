@@ -606,7 +606,7 @@ export async function addImageToTag(tagId: string, imageId: string): Promise<voi
 
 		logger.info(`✅ Imagen ${imageId} agregada a etiqueta ${tagId}`);
 	} catch (error) {
-		logger.error(`❌ Error al agregar imagen a etiqueta`, { error, tagId, imageId });
+		logger.error('❌ Error al agregar imagen a etiqueta', { error, tagId, imageId });
 		throw new TagServiceError(
 			`Error al agregar imagen a etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			'ADD_IMAGE_TO_TAG_FAILED',

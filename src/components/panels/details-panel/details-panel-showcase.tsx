@@ -18,6 +18,8 @@ const mockEntities: EntityWithStats[] = [
 	{
 		id: '1',
 		name: 'imagen-ejemplo.jpg',
+		entityType: 'image',
+		description: 'Una imagen de ejemplo',
 		type: 'image',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
@@ -36,6 +38,8 @@ const mockEntities: EntityWithStats[] = [
 	{
 		id: '2',
 		name: 'video-demo.mp4',
+		entityType: 'video',
+		description: 'Un video de demostración',
 		type: 'video',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
@@ -53,6 +57,8 @@ const mockEntities: EntityWithStats[] = [
 	{
 		id: '3',
 		name: 'Documentos',
+		entityType: 'folder',
+		description: 'Carpeta de documentos',
 		type: 'folder',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
@@ -65,6 +71,7 @@ const mockEntities: EntityWithStats[] = [
 	{
 		id: '4',
 		name: 'Mi Colección',
+		entityType: 'collection',
 		type: 'collection',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),

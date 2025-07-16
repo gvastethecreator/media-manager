@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { cn } from '@/lib/utils';
 import { AlbumsSettings } from './albums/albums-settings';
@@ -262,107 +263,207 @@ export function SettingsView() {
 		<div className="h-full w-full">
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-row">
 				{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
-				<div className="flex-1 h-full overflow-auto">
-					<TabsContent value="system" className="h-full w-full p-2 m-0 border-none">
-						<div className="grid grid-cols-1 w-full">
-							<SystemSettings />
-						</div>
+				<div className="flex-1 h-full overflow-hidden">
+					<TabsContent value="system" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<div className="grid grid-cols-1 w-full">
+									<SystemSettings />
+								</div>
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="folders" className="h-full w-full p-2 m-0 border-none">
-						<FoldersSettings />
+					<TabsContent value="folders" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<FoldersSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="interface" className="h-full w-full p-2 m-0 border-none">
-						<InterfaceSection />
+					<TabsContent value="interface" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<InterfaceSection />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="entities-cards" className="h-full w-full p-2 m-0 border-none">
-						<EntitiesCardsSettings />
+					<TabsContent value="entities-cards" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<EntitiesCardsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="albums" className="h-full w-full p-2 m-0 border-none">
-						<AlbumsSettings />
+					<TabsContent value="albums" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<AlbumsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="collections" className="h-full w-full p-2 m-0 border-none">
-						<CollectionsSettings />
+					<TabsContent value="collections" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<CollectionsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="tags" className="h-full w-full p-2 m-0 border-none">
-						<TagsSettings />
+					<TabsContent value="tags" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<TagsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="characters" className="h-full w-full p-2 m-0 border-none">
-						<CharactersSettings />
+					<TabsContent value="characters" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<CharactersSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="world-items" className="h-full w-full p-2 m-0 border-none">
-						<WorldItemsSettings />
+					<TabsContent value="world-items" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<WorldItemsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="places" className="h-full w-full p-2 m-0 border-none">
-						<PlacesSettings />
+					<TabsContent value="places" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<PlacesSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="concepts" className="h-full w-full p-2 m-0 border-none">
-						<ConceptsSettings />
+					<TabsContent value="concepts" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<ConceptsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="prompts" className="h-full w-full p-2 m-0 border-none">
-						<PromptSettings />
+					<TabsContent value="prompts" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<PromptSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="notes" className="h-full w-full p-2 m-0 border-none">
-						<NotesSettings />
+					<TabsContent value="notes" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<NotesSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="uploaded-images" className="h-full w-full p-2 m-0 border-none">
-						<UploadedImagesSettings />
+					<TabsContent value="uploaded-images" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<UploadedImagesSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="shortcuts" className="h-full w-full p-2 m-0 border-none">
-						<ShortcutsSettings />
+					<TabsContent value="shortcuts" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<ShortcutsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="profiles" className="h-full w-full p-2 m-0 border-none">
-						<ProfilesSettings />
+					<TabsContent value="profiles" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<ProfilesSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="properties" className="h-full w-full p-2 m-0 border-none">
-						<PropertiesSettings />
+					<TabsContent value="properties" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<PropertiesSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="groups" className="h-full w-full p-2 m-0 border-none">
-						<GroupsSettings />
+					<TabsContent value="groups" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<GroupsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="wildcards" className="h-full w-full p-2 m-0 border-none">
-						<WildcardsSettings />
+					<TabsContent value="wildcards" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<WildcardsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="thumbnails" className="h-full w-full p-2 m-0 border-none">
-						<ThumbnailsSettings />
+					<TabsContent value="thumbnails" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<ThumbnailsSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="document" className="h-full w-full p-2 m-0 border-none">
-						<DocumentSettings />
+					<TabsContent value="document" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<DocumentSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="audio" className="h-full w-full p-2 m-0 border-none">
-						<AudioSettings />
+					<TabsContent value="audio" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<AudioSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="json-file" className="h-full w-full p-2 m-0 border-none">
-						<JsonFileSettings />
+					<TabsContent value="json-file" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<JsonFileSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="workflow" className="h-full w-full p-2 m-0 border-none">
-						<WorkflowSettings />
+					<TabsContent value="workflow" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<WorkflowSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="file3d" className="h-full w-full p-2 m-0 border-none">
-						<File3DSettings />
+					<TabsContent value="file3d" className="h-full w-full p-0 m-0 border-none">
+						<ScrollArea className="h-full w-full">
+							<div className="p-2">
+								<File3DSettings />
+							</div>
+						</ScrollArea>
 					</TabsContent>
 				</div>
 

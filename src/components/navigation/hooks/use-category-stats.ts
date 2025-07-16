@@ -15,6 +15,7 @@ type NavItem = {
 	totalSize?: number;
 	imageCount?: number;
 	itemCount?: number; // Conteo total de elementos
+	parentId?: string | null; // Para jerarquía de carpetas
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -95,6 +96,7 @@ export function useCategoryStats() {
 					itemCount: item.itemCount || item.imageCount || (item._count?.images ?? 0) + (item._count?.videos ?? 0),
 					totalFiles: item.totalFiles || 0,
 					totalSize: item.totalSize || 0,
+					parentId: item.parentId || null,
 					_count: item._count
 						? {
 								images: item._count.images || 0,

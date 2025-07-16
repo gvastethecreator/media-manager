@@ -72,6 +72,7 @@ export interface NavigationData {
 		name: string;
 		path: string;
 		itemCount: number;
+		parentId?: string | null;
 		_count?: { images: number; videos: number };
 	}>;
 	collections: Array<{ id: string; name: string; description: string; itemCount: number }>;
@@ -179,6 +180,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 				name: f.name,
 				path: f.path,
 				itemCount: f.totalFiles || 0,
+				parentId: f.parentId || null,
 			})),
 			collections: collectionsData.map((c) => ({
 				id: c.id.toString(),

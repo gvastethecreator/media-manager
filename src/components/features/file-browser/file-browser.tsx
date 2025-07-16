@@ -390,7 +390,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					key={item.id}
 					entity={item}
 					isSelected={selectedIds.includes(item.id)}
-										onClick={(e) => handleItemClick(item, e)}
+					onClick={(e) => handleItemClick(item, e)}
 					onDoubleClick={() => handleItemDoubleClick(item)}
 					layout={layout}
 					preset={preset}
@@ -461,7 +461,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					</motion.div>
 				</AnimatePresence>
 			</div>
-			<StatusBar totalItems={items.length} selectedCount={selectedIds.length} entityType={entityType === 'mixed' ? 'image' : entityType} />
+			<StatusBar
+				totalItems={items.length}
+				selectedCount={selectedIds.length}
+				entityType={entityType === 'mixed' ? 'image' : entityType}
+			/>
 		</div>
 	);
 });

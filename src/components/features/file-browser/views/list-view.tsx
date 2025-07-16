@@ -123,7 +123,11 @@ export const ListView = memo<ListViewProps>(function ListView({ items, selectedI
 								<td className="p-2 text-sm text-muted-foreground">{size}</td>
 								<td className="p-2 text-sm text-muted-foreground">{formatDate(modifiedDate)}</td>
 								<td className="p-2 text-sm text-muted-foreground text-center">
-									{stats && 'totalAssociations' in stats && stats.totalAssociations !== undefined ? stats.totalAssociations : stats && 'totalItems' in stats && stats.totalItems !== undefined ? stats.totalItems : '-'}
+									{stats && 'totalAssociations' in stats && stats.totalAssociations !== undefined
+										? stats.totalAssociations
+										: stats && 'totalItems' in stats && stats.totalItems !== undefined
+											? stats.totalItems
+											: '-'}
 								</td>
 							</tr>
 						);

@@ -74,7 +74,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 
 			{/* Información técnica */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-				{ 'path' in item && item.path && (
+				{'path' in item && item.path && (
 					<InfoItem icon={<Folder className="h-3 w-3 text-blue-400" />} label="Ubicación" value={item.path} />
 				)}
 
@@ -86,7 +86,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 					/>
 				)}
 
-				{ 'fileSize' in item && item.fileSize && (
+				{'fileSize' in item && item.fileSize && (
 					<InfoItem
 						icon={<HardDrive className="h-3 w-3 text-amber-400" />}
 						label="Tamaño"
@@ -115,13 +115,16 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 				)}
 			</div>
 
-			{!hasResolution && !('fileSize' in item && item.fileSize) && !('path' in item && item.path) && !metadata?.mimeType && (
-				<div className="p-2 border border-dashed border-muted-foreground/30 rounded-md">
-					<p className="text-[10px] text-muted-foreground text-center">
-						No se encontró información básica para esta imagen.
-					</p>
-				</div>
-			)}
+			{!hasResolution &&
+				!('fileSize' in item && item.fileSize) &&
+				!('path' in item && item.path) &&
+				!metadata?.mimeType && (
+					<div className="p-2 border border-dashed border-muted-foreground/30 rounded-md">
+						<p className="text-[10px] text-muted-foreground text-center">
+							No se encontró información básica para esta imagen.
+						</p>
+					</div>
+				)}
 		</div>
 	);
 }
