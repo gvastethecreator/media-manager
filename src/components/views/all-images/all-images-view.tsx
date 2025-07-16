@@ -15,7 +15,7 @@ const viewLogger = clientLogger.withContext('AllImagesView');
  * Vista principal de todas las imágenes
  * Muestra una galería con todas las imágenes disponibles
  */
-export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
+export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 	// Usar selectores individuales para evitar recrear objetos
 	const imagesRecord = useImageStore((s) => s.images);
 	const isLoading = useImageStore((s) => s.isLoading);
@@ -25,7 +25,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 
 	// Hook para indexación automática de carpetas
 	const {
-		status: indexingStatus,
+		status,
 		isIndexing,
 		progress,
 		startIndexing,
@@ -46,7 +46,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 	});
 
 	useEffect(() => {
-		if (Object.keys(imagesRecord).length === 0) {
+		if (!imagesRecord || Object.keys(imagesRecord).length === 0) {
 			viewLogger.info('Store de imágenes vacío, cargando desde el servidor...');
 			loadImages();
 		}
@@ -94,7 +94,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 				viewLogger.info('🖱️ Doble click en imagen:', image.name);
 
 				// Abrir visor de imágenes
-				const imageItems = sortedImages
+				const imageItems = (sortedImages || [])
 					.filter((img: EntityWithStats) => isImageWithStats(img))
 					.map((img: EntityWithStats) => ({
 						id: img.id,
@@ -140,7 +140,7 @@ export const AllImagesView = function AllImagesView({ _className }: ViewProps) {
 			images={sortedImages}
 			isLoading={isLoading}
 			error={error}
-			indexingStatus={indexingStatus}
+			indexingStatus={status}
 			isIndexing={isIndexing}
 			progress={progress}
 			startIndexing={startIndexing}

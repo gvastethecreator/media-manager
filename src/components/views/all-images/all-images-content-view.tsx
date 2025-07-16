@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { useToast } from '@/components/ui/use-toast';
+import BaseContentView from '@/components/views/base/base-content-view';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { EntityStatsType, EntityWithStats } from '@/types/migration';
 
@@ -24,7 +25,7 @@ interface AllImagesContentViewProps {
 		indexedFolders: number;
 		totalFolders: number;
 		currentFolder: string | null;
-		errors: string[];
+		errors: Array<{ folderId: string; message: string }>;
 	};
 	isIndexing: boolean;
 	progress: number;
@@ -124,7 +125,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 	// Renderizar barra de estado de indexación
 	const renderIndexingStatus = () => {
-		if (!isIndexing && indexingStatus.indexedFolders === 0) {
+		if (!indexingStatus || (!isIndexing && indexingStatus.indexedFolders === 0)) {
 			return null;
 		}
 
@@ -152,24 +153,24 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 					<>
 						<Progress value={progress * 100} className="h-2 mb-2" />
 						<div className="flex items-center justify-between text-xs text-blue-700 dark:text-blue-300">
-							<span>
-								{indexingStatus.indexedFolders} de {indexingStatus.totalFolders} carpetas
-							</span>
-							{indexingStatus.currentFolder && (
-								<span className="truncate max-w-40">Procesando: {indexingStatus.currentFolder}</span>
-							)}
-						</div>
+						<span>
+							{indexingStatus?.indexedFolders || 0} de {indexingStatus?.totalFolders || 0} carpetas
+						</span>
+						{indexingStatus?.currentFolder && (
+							<span className="truncate max-w-40">Procesando: {indexingStatus.currentFolder}</span>
+						)}
+					</div>
 					</>
 				)}
 
-				{indexingStatus.errors.length > 0 && (
-					<div className="mt-2 flex items-center gap-2">
-						<AlertTriangle className="h-4 w-4 text-amber-600" />
-						<Badge variant="outline" className="text-amber-700 border-amber-600">
-							{indexingStatus.errors.length} errores
-						</Badge>
-					</div>
-				)}
+				{indexingStatus?.errors && indexingStatus.errors.length > 0 && (
+				<div className="mt-2 flex items-center gap-2">
+					<AlertTriangle className="h-4 w-4 text-amber-600" />
+					<Badge variant="outline" className="text-amber-700 border-amber-600">
+						{indexingStatus.errors.length} errores
+					</Badge>
+				</div>
+			)}
 			</motion.div>
 		);
 	};
@@ -182,82 +183,85 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 		);
 	}
 
-	if (isLoading && images.length === 0) {
+	if (isLoading && (!images || images.length === 0)) {
 		return <LoadingScreen />;
 	}
 
-	if (images.length === 0 && !isIndexing) {
+	if ((!images || images.length === 0) && !isIndexing) {
 		return (
-			<ScrollArea className="h-full">
-				<div className="container mx-auto p-6">
-					{renderIndexingStatus()}
-					<EmptyState
-						icon={ImageIcon}
-						title="No hay imágenes"
-						description="No se encontraron imágenes en la base de datos. Prueba agregando carpetas o iniciando la indexación."
-					/>
-					<div className="flex justify-center mt-4">
-						<Button onClick={startIndexing}>
-							<FolderSync className="h-4 w-4 mr-2" />
-							Buscar e indexar carpetas
-						</Button>
-					</div>
-				</div>
-			</ScrollArea>
+			<BaseContentView
+				title="Todas las Imágenes"
+				description="Gestiona y visualiza todas tus imágenes"
+				icon={<ImageIcon className="h-5 w-5" />}
+				headerControls={
+					<Button onClick={startIndexing}>
+						<FolderSync className="h-4 w-4 mr-2" />
+						Buscar e indexar carpetas
+					</Button>
+				}
+			>
+				{renderIndexingStatus()}
+				<EmptyState
+					icon={ImageIcon}
+					title="No hay imágenes"
+					description="No se encontraron imágenes en la base de datos. Prueba agregando carpetas o iniciando la indexación."
+				/>
+			</BaseContentView>
 		);
 	}
 
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				{/* Barra de estado de indexación */}
-				{renderIndexingStatus()}
+		<BaseContentView
+			title="Todas las Imágenes"
+			description={`${(images?.length || 0)} ${(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total`}
+			icon={<ImageIcon className="h-5 w-5" />}
+			headerControls={
+				<>
+					{isIndexing && (
+						<Badge variant="secondary" className="animate-pulse">
+							<FolderSync className="h-3 w-3 mr-1 animate-spin" />
+							Indexando
+						</Badge>
+					)}
+					<Button onClick={startIndexing} variant="outline">
+						<FolderSync className="h-4 w-4 mr-2" />
+						Reindexar
+					</Button>
+				</>
+			}
+		>
+			{/* Barra de estado de indexación */}
+			{renderIndexingStatus()}
 
-				{/* Header con estadísticas */}
-				<div className="mb-6">
-					<h2 className="text-2xl font-bold text-foreground mb-2">Todas las Imágenes</h2>
-					<div className="flex items-center gap-4 text-muted-foreground">
+			{/* FileBrowser para mostrar todas las imágenes */}
+			<FileBrowser
+				entityType={EntityStatsType.IMAGE}
+				mode="auto"
+				onItemSelect={handleImageClick}
+				onItemDoubleClick={handleImageDoubleClick}
+				className="min-h-[600px]"
+				layout="vertical"
+				variant="default"
+				size="md"
+			/>
+
+			{/* Footer con información adicional */}
+			{images && images.length > 0 && (
+				<div className="mt-8 pt-6 border-t border-border">
+					<div className="flex items-center justify-between text-sm text-muted-foreground">
 						<span>
-							{images.length} {images.length === 1 ? 'imagen' : 'imágenes'} en total
+							Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
 						</span>
-						{isIndexing && (
-							<Badge variant="secondary" className="animate-pulse">
-								<FolderSync className="h-3 w-3 mr-1 animate-spin" />
-								Indexando
-							</Badge>
+						{indexingStatus?.indexedFolders && indexingStatus.indexedFolders > 0 && (
+							<span className="text-green-600 dark:text-green-400">
+								✅ {indexingStatus.indexedFolders} carpetas indexadas automáticamente
+							</span>
 						)}
 					</div>
 				</div>
+			)}
 
-				{/* FileBrowser para mostrar todas las imágenes */}
-				<FileBrowser
-					entityType={EntityStatsType.IMAGE}
-					mode="auto"
-					onItemSelect={handleImageClick}
-					onItemDoubleClick={handleImageDoubleClick}
-					className="min-h-[600px]"
-					layout="vertical"
-					variant="default"
-					size="md"
-				/>
-
-				{/* Footer con información adicional */}
-				{images.length > 0 && (
-					<div className="mt-8 pt-6 border-t border-border">
-						<div className="flex items-center justify-between text-sm text-muted-foreground">
-							<span>
-								Mostrando {images.length} {images.length === 1 ? 'imagen' : 'imágenes'}
-							</span>
-							{indexingStatus.indexedFolders > 0 && (
-								<span className="text-green-600 dark:text-green-400">
-									✅ {indexingStatus.indexedFolders} carpetas indexadas automáticamente
-								</span>
-							)}
-						</div>
-					</div>
-				)}
-
-				{/* Dialog para upload de imágenes */}
+			{/* Dialog para upload de imágenes */}
 				<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
 					<DialogTrigger asChild>
 						<Button
@@ -324,7 +328,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 								<Button
 									onClick={() => handleFileUploadInternal(uploadFiles)}
 									className="h-9"
-									disabled={isUploading || uploadFiles.length === 0}
+									disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
 								>
 									{isUploading ? 'Subiendo...' : 'Subir Imágenes'}
 								</Button>
@@ -332,8 +336,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 						</div>
 					</DialogContent>
 				</Dialog>
-			</div>
-		</ScrollArea>
+		</BaseContentView>
 	);
 };
 

@@ -90,22 +90,6 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				presetId: null,
 			},
 			{
-				id: 'memes',
-				name: 'Memes',
-				description: 'Memes y chistes',
-				path: 'D:\\Pictures\\memes',
-				emoji: '🎵',
-				totalFiles: 0,
-				totalSize: 0,
-				lastIndexed: null,
-				autoReindex: false,
-				color: '#eab308',
-				isFavorite: true,
-				parentId: null,
-				presetId: null,
-			},
-			// Subcarpetas para demostrar jerarquía
-			{
 				id: 'silenthill',
 				name: 'SilentHill',
 				description: 'Anime y manga',

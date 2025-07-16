@@ -10,6 +10,7 @@
 import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { EntityCard } from '@/components/cards/entity-card';
 import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
 import { EmptyState } from '@/components/core/data-display';
@@ -85,6 +86,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const containerRef = useRef<any>(null);
 	const measurementAttemptsRef = useRef(0);
 	const lastMeasuredElementRef = useRef<unknown>(null);
+	// Referencias para evitar cargas duplicadas
+	const lastLoadParamsRef = useRef<string>('');
+	const isLoadingRef = useRef<boolean>(false);
 
 	// Estados globales
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
@@ -105,13 +109,31 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// const { videos: videosRecord, isLoading: videosLoading, ... } = useVideoStore();
 	// const { audios: audiosRecord, isLoading: audiosLoading, ... } = useAudioStore();
 
-	// Cargar datos al montar o cuando cambian los filtros (con optimizaciones)
-	const lastLoadParamsRef = useRef<string>('');
-	const isLoadingRef = useRef<boolean>(false);
-
-	useEffect(() => {
+	// Función de carga con debounce para evitar llamadas excesivas
+	const debouncedLoadData = useDebouncedCallback(() => {
 		// En modo manual, no cargar datos automáticamente
 		if (mode === 'manual') {
+			return;
+		}
+
+		// Solo cargar si hay un filterId válido
+		if (!filterId) {
+			logger.debug('⚠️ No hay filterId, saltando carga automática');
+			return;
+		}
+
+		// Crear una clave única para los parámetros de carga
+		const loadParamsKey = JSON.stringify({ entityType, entityTypes, filterId, filterType, mode });
+
+		// Evitar cargas duplicadas comparando parámetros
+		if (lastLoadParamsRef.current === loadParamsKey) {
+			logger.debug('⚠️ Parámetros de carga idénticos, saltando carga duplicada');
+			return;
+		}
+
+		// Evitar múltiples cargas simultáneas
+		if (isLoadingRef.current) {
+			logger.debug('⚠️ Carga ya en progreso, saltando llamada del FileBrowser');
 			return;
 		}
 
@@ -121,11 +143,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		// Cargar datos para cada tipo
 		for (const type of typesToLoad) {
 			if (type === 'image') {
-				const {
-					loadImages: storeLoadImages,
-					isLoading: currentlyLoading,
-					getImagesByFolder,
-				} = useImageStore.getState();
+				const { loadImages: storeLoadImages, getImagesByFolder } = useImageStore.getState();
+
+				// Verificar si ya existen imágenes para esta carpeta
+				if (filterId && filterType === 'folder') {
+					const existingImages = getImagesByFolder(filterId);
+					if (existingImages.length > 0) {
+						logger.debug('✅ Ya existen imágenes para esta carpeta, saltando carga');
+						lastLoadParamsRef.current = loadParamsKey;
+						return;
+					}
+				}
 
 				const loadParams: Parameters<typeof storeLoadImages>[0] = {};
 
@@ -134,44 +162,32 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					loadParams.folderId = filterId;
 				}
 
-				// Crear una clave única para estos parámetros
-				const paramsKey = JSON.stringify({ type, filterId, filterType });
+				logger.debug('🔄 FileBrowser iniciando carga de imágenes', { filterId, filterType, loadParams });
 
-				// Si los parámetros no han cambiado, no hacer nada
-				if (lastLoadParamsRef.current === paramsKey) {
-					return;
-				}
-
-				// Evitar múltiples cargas simultáneas usando ref
-				if (isLoadingRef.current || currentlyLoading) {
-					logger.debug('⚠️ Carga ya en progreso, saltando llamada del FileBrowser');
-					return;
-				}
-
-				// Si hay filtro de carpeta, verificar si ya tenemos datos
-				if (filterId && filterType === 'folder') {
-					const existingImages = getImagesByFolder(filterId);
-					if (existingImages.length > 0) {
-						logger.debug('📋 Ya hay imágenes cargadas para esta carpeta, saltando carga');
-						lastLoadParamsRef.current = paramsKey;
-						return;
-					}
-				}
-
-				// Actualizar la referencia de los últimos parámetros
-				lastLoadParamsRef.current = paramsKey;
+				// Marcar como cargando
 				isLoadingRef.current = true;
-
-				logger.debug('🔄 FileBrowser iniciando carga de imágenes', loadParams);
+				lastLoadParamsRef.current = loadParamsKey;
 
 				// Llamar a la función del store directamente
-				storeLoadImages(loadParams).finally(() => {
-					isLoadingRef.current = false;
-				});
+				storeLoadImages(loadParams)
+					.then(() => {
+						logger.debug('✅ Carga de imágenes completada');
+					})
+					.catch((error) => {
+						logger.error('❌ Error al cargar imágenes en FileBrowser:', error);
+					})
+					.finally(() => {
+						isLoadingRef.current = false;
+					});
 			}
 			// TODO: Añadir otros tipos cuando se implementen sus stores
 		}
-	}, [entityType, entityTypes, filterId, filterType, mode]); // Mantener estas dependencias pero con la optimización del ref
+	}, 300); // Debounce de 300ms
+
+	// Cargar datos al montar o cuando cambian los filtros
+	useEffect(() => {
+		debouncedLoadData();
+	}, [entityType, entityTypes, filterId, filterType, mode, debouncedLoadData]);
 
 	// Obtener items según el modo y tipo de entidad
 	const items = (() => {
