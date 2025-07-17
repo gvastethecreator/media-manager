@@ -1,7 +1,7 @@
 import { ArrowLeft, Download, Edit, FileText, Share2, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,16 +14,16 @@ interface DocumentContentViewProps extends ViewProps {
 }
 
 export const DocumentContentView: React.FC<DocumentContentViewProps> = ({ className, documentId }) => {
-	const { navigateToMainFromContent, currentItem } = useNavigationStore();
+	const navigate = useNavigate();
 
 	const handleGoBack = () => {
-		navigateToMainFromContent();
+		navigate(-1);
 	};
 
 	// Mock data - en una implementación real vendría del store
 	const documentData = {
 		id: documentId || '1',
-		name: currentItem?.name || 'Documento de Ejemplo',
+		name: 'Documento de Ejemplo',
 		type: 'PDF',
 		size: '2.4 MB',
 		created: '2024-01-15',

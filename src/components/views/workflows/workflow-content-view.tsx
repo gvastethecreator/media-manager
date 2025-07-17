@@ -1,7 +1,7 @@
 import { ArrowLeft, Download, Edit, Play, Settings, Share2, Square, Trash2, Workflow } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,11 +15,11 @@ interface WorkflowContentViewProps extends ViewProps {
 }
 
 export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ className, workflowId }) => {
-	const { navigateToMainFromContent, currentItem } = useNavigationStore();
+	const navigate = useNavigate();
 	const [isRunning, setIsRunning] = React.useState(false);
 
 	const handleGoBack = () => {
-		navigateToMainFromContent();
+		navigate(-1);
 	};
 
 	const toggleWorkflow = () => {
@@ -29,7 +29,7 @@ export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ classN
 	// Mock data - en una implementación real vendría del store
 	const workflowData = {
 		id: workflowId || '1',
-		name: currentItem?.name || 'Procesamiento de Imágenes',
+		name: 'Procesamiento de Imágenes',
 		description: 'Workflow para procesar y organizar imágenes automáticamente',
 		status: 'idle' as const,
 		lastRun: '2024-01-20 14:30',

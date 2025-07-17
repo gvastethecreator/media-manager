@@ -26,9 +26,9 @@ export function AlbumsSettings() {
 	// Calcular estadísticas generales
 	const stats = {
 		totalAlbums: albums.length,
-		totalImages: albums.reduce((acc, album) => acc + (album.stats.imageCount || 0), 0),
+		totalImages: albums.reduce((acc: number, album: AlbumWithStats) => acc + (album.stats.imageCount || 0), 0),
 		totalSize: 0, // No hay información de tamaño en el schema
-		emptyAlbums: albums.filter((album) => album.stats.imageCount === 0).length,
+		emptyAlbums: albums.filter((album: AlbumWithStats) => album.stats.imageCount === 0).length,
 	};
 
 	// Manejar eliminación de álbum

@@ -8,8 +8,9 @@ import type { ItemComponentProps } from './details-panel-types';
  */
 export function RelatedEntities({ item }: ItemComponentProps) {
 	// Helper para verificar si la propiedad existe y tiene elementos.
-	const hasRelation = (prop: keyof ItemComponentProps['item']): boolean => {
-		const value = item[prop];
+	const hasRelation = (prop: string): boolean => {
+		if (!(prop in item)) return false;
+		const value = (item as any)[prop];
 		return Array.isArray(value) && value.length > 0;
 	};
 

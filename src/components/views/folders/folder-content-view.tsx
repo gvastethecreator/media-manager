@@ -2,10 +2,9 @@ import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import BaseContentView from '@/components/views/base/base-content-view';
-import { useReindexFolder } from '@/lib/api/folders';
+import { useFolder, useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import type { EntityWithStats } from '@/types/migration';
@@ -18,9 +17,11 @@ interface FolderContentViewProps {
 }
 
 export function FolderContentView({ folderId: propFolderId }: FolderContentViewProps = {}) {
-	// 📂 Obtener información de la carpeta actual desde navigation store o props
-	const { currentItem } = useNavigationStore();
-	const currentFolderId = propFolderId || currentItem?.id || null;
+	// 📂 Obtener información de la carpeta actual desde props
+	const currentFolderId = propFolderId || null;
+
+	// 🔄 Cargar información de la carpeta desde la API
+	const { data: folderData, isLoading: isFolderLoading, error: folderError } = useFolder(currentFolderId || '');
 
 	// Estado local para controlar operaciones
 	const [isRetrying, setIsRetrying] = useState(false);
@@ -86,6 +87,8 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		setIsRetrying(false);
 	}, [currentFolderId]);
 
+
+
 	// ️ Validación: verificar que hay una carpeta seleccionada
 	if (!currentFolderId) {
 		logger.warn('⚠️ No hay carpeta seleccionada');
@@ -100,12 +103,39 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		);
 	}
 
+	// 🔄 Mostrar estado de carga mientras se obtiene información de la carpeta
+	if (isFolderLoading) {
+		return (
+			<div className="flex flex-col items-center justify-center h-full gap-4">
+				<EmptyState
+					icon={RefreshCw}
+					title="Cargando carpeta..."
+					description="Obteniendo información de la carpeta."
+				/>
+			</div>
+		);
+	}
+
+	// ❌ Mostrar error si no se pudo cargar la carpeta
+	if (folderError) {
+		logger.error('❌ Error al cargar carpeta:', folderError);
+		return (
+			<div className="flex flex-col items-center justify-center h-full gap-4">
+				<EmptyState
+					icon={Folder}
+					title="Error al cargar carpeta"
+					description="No se pudo obtener la información de la carpeta. Verifica que existe y tienes permisos para acceder."
+				/>
+			</div>
+		);
+	}
+
 	// Renderizar galería de imágenes usando BaseContentView y FileBrowser
 	return (
 		<BaseContentView
-			title={currentItem?.name || 'Carpeta'}
-			description={currentItem?.description}
-			icon={currentItem?.emoji}
+			title={folderData?.name || 'Carpeta'}
+			description={folderData?.description}
+			icon={folderData?.emoji}
 			headerControls={
 				<>
 					<Button variant="outline" size="sm" onClick={handleScanFolder} disabled={isRetrying}>

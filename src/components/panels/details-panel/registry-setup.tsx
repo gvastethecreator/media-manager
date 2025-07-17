@@ -12,6 +12,7 @@ import {
 import { FolderDetails, FolderMetadata, FolderPreview, FolderToolbar } from './entities/folder-details';
 
 // Importar componentes específicos
+import { VideoDetails } from './entities/video-details';
 import { ImageDetails, ImageMetadata, ImagePreview, ImageToolbar } from './entities/image-details';
 import type {
 	EntityDetailsProps,
@@ -31,11 +32,11 @@ import {
 } from './entity-details-registry';
 
 // Componentes genéricos para otros tipos
-const GenericEntityDetails = ({ _entity }: EntityDetailsProps) => {
+const GenericEntityDetails = ({ entity }: EntityDetailsProps) => {
 	return <div className="p-4 text-center text-muted-foreground">{'Componente específico en desarrollo'}</div>;
 };
 
-const GenericPreview = ({ _entity }: EntityPreviewProps) => {
+const GenericPreview = ({ entity }: EntityPreviewProps) => {
 	return (
 		<div className="h-32 bg-muted/30 flex items-center justify-center text-muted-foreground">
 			{'Vista previa no disponible'}
@@ -43,11 +44,11 @@ const GenericPreview = ({ _entity }: EntityPreviewProps) => {
 	);
 };
 
-const GenericToolbar = ({ _entity, _onAction }: EntityToolbarProps) => {
+const GenericToolbar = ({ entity, onAction }: EntityToolbarProps) => {
 	return <div className="p-2 text-xs text-muted-foreground">{'Herramientas en desarrollo'}</div>;
 };
 
-const GenericMetadata = ({ _entity }: EntityMetadataProps) => {
+const GenericMetadata = ({ entity }: EntityMetadataProps) => {
 	return <div className="p-2 text-xs text-muted-foreground">{'Metadatos en desarrollo'}</div>;
 };
 

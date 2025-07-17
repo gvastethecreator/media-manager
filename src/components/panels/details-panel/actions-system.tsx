@@ -30,7 +30,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/lib/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
 
@@ -176,7 +176,7 @@ export function useActionsSystem() {
 		if (!currentAction) return;
 
 		const context: ActionContext = {
-			...currentAction.context,
+			entity: currentAction.entity,
 			metadata: inputValues,
 		};
 

@@ -186,6 +186,7 @@ app.listen(PORT, () => {
 	console.log(`   🎯 World Items: http://localhost:${PORT}/api/world-items`);
 	console.log(`   💡 Concepts: http://localhost:${PORT}/api/concepts`);
 	console.log(`   🤖 Prompts: http://localhost:${PORT}/api/prompts`);
+	console.log(`   📤 Uploaded Images: http://localhost:${PORT}/api/uploaded-images`);
 	console.log(`   ✨ Wildcards: http://localhost:${PORT}/api/wildcards`);
 	console.log(`   🎵 Audio: http://localhost:${PORT}/api/audio`);
 	console.log(`   🎬 Videos: http://localhost:${PORT}/api/videos`);

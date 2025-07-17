@@ -173,7 +173,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					.then(() => {
 						logger.debug('✅ Carga de imágenes completada');
 					})
-					.catch((error) => {
+					.catch((error: Error) => {
 						logger.error('❌ Error al cargar imágenes en FileBrowser:', error);
 					})
 					.finally(() => {
@@ -386,7 +386,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Añadir efecto para escuchar Escape globalmente
 	useEffect(() => {
-		const handleKeyDown = (e: any) => {
+		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e?.key === 'Escape') {
 				clearSelection();
 			}

@@ -33,8 +33,8 @@ import {
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { VideoWithStats } from '@/types/entities/video.types';
-import type { isVideoWithStats } from '@/types/migration';
+import type { VideoWithStats } from '@/types/entities/video/types';
+import { isVideoWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,
@@ -235,7 +235,7 @@ export const VideoPreview = memo<EntityPreviewProps<VideoWithStats>>(function Vi
 						<video
 							ref={videoRef}
 							src={videoUrl}
-							poster={entity.thumbnailUrl}
+							poster={entity.thumbnailUrl || undefined}
 							className="w-full h-full object-contain"
 							onTimeUpdate={handleTimeUpdate}
 							onLoadedMetadata={handleLoadedMetadata}

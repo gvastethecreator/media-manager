@@ -51,7 +51,7 @@ export const ListView = memo<ListViewProps>(function ListView({ items, selectedI
 	const tableData = useMemo(() => {
 		return items.map((item) => {
 			const type = getEntityStatsType(item);
-			const stats = getEntityStatistics(item);
+			const stats: any = getEntityStatistics(item);
 			const Icon = type ? typeIcons[type] : FileIcon;
 
 			// Obtener tamaño si está disponible

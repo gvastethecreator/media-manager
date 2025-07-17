@@ -29,8 +29,12 @@ export interface UploadedImageBase {
 	hash: string;
 	metadata: string | null;
 	imageId: string;
-	category?: string;
+	type: string | null;
+	category: string | null;
+	width: number | null;
+	height: number | null;
 	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**

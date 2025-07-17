@@ -2,7 +2,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, FileIcon, FileText, FolderIcon, Hash, ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
@@ -26,15 +25,12 @@ interface EntityWithDynamicProperties {
 /**
  * Componente que muestra información detallada sobre la entidad actual (carpeta, colección, etc.)
  * Se mostrará a la derecha de los breadcrumbs con un estilo más sutil
+ * 
+ * NOTA: Este componente está deshabilitado temporalmente durante la migración a React Router
  */
 export function EntityDetails() {
-	const { currentView, getCurrentItem } = useNavigationStore();
-	const currentItem = getCurrentItem() as EntityWithDynamicProperties | undefined;
-
-	// Si no hay elemento actual o no es una vista de contenido, no mostrar nada
-	if (!currentItem || !currentView.endsWith('-content')) {
-		return null;
-	}
+	// Componente deshabilitado durante la migración
+	return null;
 
 	// Verificamos que el currentItem tenga las propiedades necesarias
 	const hasProperty = <T extends keyof EntityWithDynamicProperties>(key: T): boolean =>

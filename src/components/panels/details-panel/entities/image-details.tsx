@@ -11,8 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { ImageWithStats } from '@/types/entities/image.types';
-import type { isImageWithStats } from '@/types/migration';
+import type { ImageWithStats } from '@/types/entities/image/types';
+import { isImageWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,

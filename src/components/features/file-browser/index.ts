@@ -8,7 +8,7 @@ export { FileBrowser } from './file-browser';
 export { useFilteredData } from './hooks/use-filtered-data';
 // Export renderer
 export { ImageRenderer } from './image-renderer';
-export { IntegratedFileBrowser, useIntegratedFileBrowser } from './integrated-file-browser';
+
 
 // Export types
 export * from './types';
