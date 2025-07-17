@@ -22,8 +22,8 @@ export function ImagePreview({ item }: ItemComponentProps) {
 
 	// Verificar si hay una URL válida en el item
 	const hasThumbnail = React.useMemo(
-		() => 'thumbnailUrl' in item && !!item.thumbnailUrl && typeof item.thumbnailUrl === 'string',
-		[item.thumbnailUrl]
+		() => 'thumbnailUrl' in item && !!(item as any).thumbnailUrl && typeof (item as any).thumbnailUrl === 'string',
+		[(item as any).thumbnailUrl]
 	);
 
 	// Usar useCallback para la función de carga para evitar recreaciones innecesarias
@@ -137,7 +137,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 		// Si hay un thumbnail en el item, establecerlo como URL inicial
 		if (hasThumbnail) {
 			// Establecer el thumbnail como URL inicial mientras cargamos la imagen completa
-			setImageUrl(item.thumbnailUrl || null);
+					setImageUrl((item as any).thumbnailUrl || null);
 		}
 
 		// Iniciar carga directamente desde aquí
@@ -147,7 +147,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 				setIsLoading(false);
 			}
 		});
-	}, [item.id, loadImage, hasThumbnail, item.thumbnailUrl, imageUrl]); // Incluir todas las dependencias necesarias
+	}, [item.id, loadImage, hasThumbnail, (item as any).thumbnailUrl, imageUrl]); // Incluir todas las dependencias necesarias
 
 	const handleClick = React.useCallback(() => {
 		if (imageUrl) {

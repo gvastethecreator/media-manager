@@ -336,7 +336,7 @@ export function CharactersSettings() {
 											>
 												<div
 													className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-white"
-													style={{ backgroundColor: character.color }}
+													style={{ backgroundColor: character.color || '' }}
 												>
 													<span className="text-xs">{character.emoji || character.name.charAt(0).toUpperCase()}</span>
 												</div>

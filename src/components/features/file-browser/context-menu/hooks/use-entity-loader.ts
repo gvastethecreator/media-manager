@@ -247,10 +247,10 @@ export function useEntityLoader() {
 						}
 						break;
 					case 'tags':
-						if ('fetchTags' in tagStore) {
-							await tagStore.fetchTags();
-						}
-						break;
+					if ('loadTags' in tagStore && typeof tagStore.loadTags === 'function') {
+						await tagStore.loadTags();
+					}
+					break;
 					case 'albums':
 						if ('loadAlbums' in albumStore) {
 							await albumStore.loadAlbums();

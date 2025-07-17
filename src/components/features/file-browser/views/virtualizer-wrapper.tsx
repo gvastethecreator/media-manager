@@ -90,7 +90,7 @@ export function VirtualizerWrapper<T>({
 	const renderedItemsCache = useRef<Map<number, React.ReactNode>>(new Map());
 	const [loadedItems, setLoadedItems] = useState<number>(VIRTUALIZER_CONFIG.sequential.batchSize);
 	// Contador de tiempo para evitar demasiadas actualizaciones en desplazamientos rápidos
-	const visibilityUpdateTimeoutRef = useRef<number | null>(null);
+	const visibilityUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	// Contador para limitar solicitudes secuenciales por sesión de scroll
 	const sequentialRequestsRef = useRef<number>(0);
 	// Flag para saber si estamos cargando actualmente

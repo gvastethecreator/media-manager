@@ -1,7 +1,7 @@
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -38,72 +38,54 @@ interface BreadcrumbConfig {
 }
 
 const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> = {
-	files: { label: 'Archivos', path: '/files' },
+	dashboard: { label: 'Dashboard', path: '/' },
+	settings: { label: 'Ajustes', path: '/settings' },
 	'all-images': { label: 'Galería', path: '/gallery' },
+	'uploaded-images': { label: 'Imágenes Subidas', path: '/uploaded-images' },
+	files: { label: 'Archivos', path: '/files' },
 	favorites: { label: 'Favoritos', path: '/favorites' },
 	search: { label: 'Búsqueda', path: '/search' },
 	collections: { label: 'Colecciones', path: '/collections' },
-	'collection-content': {
-		label: 'Colecciones',
-		path: '/collections',
-		contentPath: '/collections',
-	},
+	'collection-content': { label: 'Colecciones', path: '/collections', contentPath: '/collections' },
 	folders: { label: 'Carpetas', path: '/folders' },
-	'folder-content': {
-		label: 'Carpetas',
-		path: '/folders',
-		contentPath: '/folders',
-	},
+	'folder-content': { label: 'Carpetas', path: '/folders', contentPath: '/folders' },
+	canvas: { label: 'Canvas', path: '/canvas' },
+	chat: { label: 'Chat', path: '/chat' },
 	tags: { label: 'Etiquetas', path: '/tags' },
-	'tag-content': {
-		label: 'Etiquetas',
-		path: '/tags',
-		contentPath: '/tags',
-	},
+	'tag-content': { label: 'Etiquetas', path: '/tags', contentPath: '/tags' },
 	albums: { label: 'Álbumes', path: '/albums' },
-	'album-content': {
-		label: 'Álbumes',
-		path: '/albums',
-		contentPath: '/albums',
-	},
+	'album-content': { label: 'Álbumes', path: '/albums', contentPath: '/albums' },
 	characters: { label: 'Personajes', path: '/characters' },
-	'character-content': {
-		label: 'Personajes',
-		path: '/characters',
-		contentPath: '/characters',
-	},
+	'character-content': { label: 'Personajes', path: '/characters', contentPath: '/characters' },
 	places: { label: 'Lugares', path: '/places' },
-	'place-content': {
-		label: 'Lugares',
-		path: '/places',
-		contentPath: '/places',
-	},
+	'place-content': { label: 'Lugares', path: '/places', contentPath: '/places' },
 	'world-items': { label: 'Objetos', path: '/world-items' },
-	'world-item-content': {
-		label: 'Objetos',
-		path: '/world-items',
-		contentPath: '/world-items',
-	},
-	settings: { label: 'Ajustes', path: '/settings' },
-	development: { label: 'Desarrollo', path: '/development' },
+	'world-item-content': { label: 'Objetos', path: '/world-items', contentPath: '/world-items' },
 	concepts: { label: 'Conceptos', path: '/concepts' },
-	'concept-content': {
-		label: 'Conceptos',
-		path: '/concepts',
-		contentPath: '/concepts',
-	},
+	'concept-content': { label: 'Conceptos', path: '/concepts', contentPath: '/concepts' },
 	prompts: { label: 'Prompts', path: '/prompts' },
-	'prompt-content': {
-		label: 'Prompts',
-		path: '/prompts',
-		contentPath: '/prompts',
-	},
+	'prompt-content': { label: 'Prompts', path: '/prompts', contentPath: '/prompts' },
 	notes: { label: 'Notas', path: '/notes' },
-	'note-content': {
-		label: 'Notas',
-		path: '/notes',
-		contentPath: '/notes',
-	},
+	'note-content': { label: 'Notas', path: '/notes', contentPath: '/notes' },
+	groups: { label: 'Grupos', path: '/groups' },
+	'group-content': { label: 'Grupos', path: '/groups', contentPath: '/groups' },
+	properties: { label: 'Propiedades', path: '/properties' },
+	'property-content': { label: 'Propiedades', path: '/properties', contentPath: '/properties' },
+	wildcards: { label: 'Wildcards', path: '/wildcards' },
+	'wildcard-content': { label: 'Wildcards', path: '/wildcards', contentPath: '/wildcards' },
+	'entity-cards': { label: 'Entity Cards', path: '/entity-cards' },
+	development: { label: 'Desarrollo', path: '/development' },
+	documents: { label: 'Documentos', path: '/documents' },
+	'document-content': { label: 'Documentos', path: '/documents', contentPath: '/documents' },
+	audios: { label: 'Audios', path: '/audios' },
+	'audio-content': { label: 'Audios', path: '/audios', contentPath: '/audios' },
+	'json-files': { label: 'Archivos JSON', path: '/json-files' },
+	'json-file-content': { label: 'Archivos JSON', path: '/json-files', contentPath: '/json-files' },
+	workflows: { label: 'Workflows', path: '/workflows' },
+	'workflow-content': { label: 'Workflows', path: '/workflows', contentPath: '/workflows' },
+	'file-3ds': { label: 'Archivos 3D', path: '/file-3ds' },
+	'file-3d-content': { label: 'Archivos 3D', path: '/file-3ds', contentPath: '/file-3ds' },
+	mixed: { label: 'Mixto', path: '/' },
 };
 
 const formatBytes = (bytes: number): string => {
@@ -127,7 +109,7 @@ const formatDate = (date: Date): string => {
 };
 
 export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) {
-	const { navigateToHome, navigateToMainFromContent } = useNavigationStore();
+	const navigate = useNavigate();
 	const config = currentView ? BREADCRUMB_CONFIG[currentView] : undefined;
 	const isContentView = currentView ? currentView.endsWith('-content') : false;
 
@@ -140,7 +122,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 							variant="ghost"
 							size="sm"
 							className="p-0 h-6 text-primary hover:text-primary/80 font-medium cursor-pointer flex items-center gap-1"
-							onClick={navigateToHome}
+							onClick={() => navigate('/')}
 						>
 							<Home className="w-3 h-3" />
 							<span className="text-xs">Inicio</span>
@@ -165,7 +147,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 							variant="ghost"
 							size="sm"
 							className="p-0 h-6 text-primary hover:text-primary/80 font-medium cursor-pointer flex items-center gap-0.5"
-							onClick={navigateToHome}
+							onClick={() => navigate('/')}
 						>
 							<Home className="w-3 h-3" />
 							<span className="text-xs">Inicio</span>
@@ -182,7 +164,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 									variant="ghost"
 									size="sm"
 									className="p-0 h-6 text-primary hover:text-primary/80 font-medium cursor-pointer text-xs"
-									onClick={navigateToMainFromContent}
+									onClick={() => navigate(-1)}
 								>
 									{config.label}
 								</Button>

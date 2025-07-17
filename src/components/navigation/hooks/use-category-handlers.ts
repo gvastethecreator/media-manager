@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import type { ViewType } from '@/components/views/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 
@@ -15,138 +14,122 @@ const logger = clientLogger.withContext('CategoryHandlers');
 
 export function useCategoryHandlers() {
 	const navigate = useNavigate();
-	const { currentView, setCurrentView } = useNavigationStore();
 
 	// Handler genérico para categorías
 	const handleCategoryClick = useCallback(
 		(categoryId: ViewType) => {
 			logger.info(`📂 Click en categoría: ${categoryId}`);
-			setCurrentView(categoryId);
 			navigate(`/${categoryId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	// Handlers específicos para cada tipo de entidad - VERSIÓN TEMPORAL SIN STORES
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
 			logger.info(`📁 Click en folder: ${folderId}`);
-			setCurrentView('folders');
 			navigate(`/folders/${folderId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleCollectionClick = useCallback(
 		(collectionId: string) => {
 			logger.info(`📚 Click en collection: ${collectionId}`);
-			setCurrentView('collections');
 			navigate(`/collections/${collectionId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleTagClick = useCallback(
 		(tagId: string) => {
 			logger.info(`🏷️ Click en tag: ${tagId}`);
-			setCurrentView('tags');
 			navigate(`/tags/${tagId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleAlbumClick = useCallback(
 		(albumId: string) => {
 			logger.info(`🎞️ Click en album: ${albumId}`);
-			setCurrentView('albums');
 			navigate(`/albums/${albumId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleCharacterClick = useCallback(
 		(characterId: string) => {
 			logger.info(`👤 Click en character: ${characterId}`);
-			setCurrentView('characters');
 			navigate(`/characters/${characterId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handlePlaceClick = useCallback(
 		(placeId: string) => {
 			logger.info(`📍 Click en place: ${placeId}`);
-			setCurrentView('places');
 			navigate(`/places/${placeId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleWorldItemClick = useCallback(
 		(worldItemId: string) => {
 			logger.info(`🌍 Click en worldItem: ${worldItemId}`);
-			setCurrentView('world-items');
 			navigate(`/world-items/${worldItemId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleConceptClick = useCallback(
 		(conceptId: string) => {
 			logger.info(`💡 Click en concept: ${conceptId}`);
-			setCurrentView('concepts');
 			navigate(`/concepts/${conceptId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handlePromptClick = useCallback(
 		(promptId: string) => {
 			logger.info(`🎨 Click en prompt: ${promptId}`);
-			setCurrentView('prompts');
 			navigate(`/prompts/${promptId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleNoteClick = useCallback(
 		(noteId: string) => {
 			logger.info(`📝 Click en note: ${noteId}`);
-			setCurrentView('notes');
 			navigate(`/notes/${noteId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleGroupClick = useCallback(
 		(groupId: string) => {
 			logger.info(`👥 Click en group: ${groupId}`);
-			setCurrentView('groups');
 			navigate(`/groups/${groupId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handlePropertyClick = useCallback(
 		(propertyId: string) => {
 			logger.info(`🏷️ Click en property: ${propertyId}`);
-			setCurrentView('properties');
 			navigate(`/properties/${propertyId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	const handleWildcardClick = useCallback(
 		(wildcardId: string) => {
 			logger.info(`🎲 Click en wildcard: ${wildcardId}`);
-			setCurrentView('wildcards');
 			navigate(`/wildcards/${wildcardId}`);
 		},
-		[navigate, setCurrentView]
+		[navigate]
 	);
 
 	return {
-		currentView,
 		handleCategoryClick,
 		handleFolderClick,
 		handleCollectionClick,

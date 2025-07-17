@@ -49,9 +49,9 @@ export function CollectionsSettings() {
 	const stats = useMemo(
 		() => ({
 			totalCollections: collections.length,
-			totalImages: collections.reduce((acc, collection) => acc + (collection.stats?.imageCount || 0), 0),
-			emptyCollections: collections.filter((collection) => (collection.stats?.imageCount || 0) === 0).length,
-			favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
+			totalImages: collections.reduce((acc: number, collection: CollectionWithStats) => acc + (collection.stats?.imageCount || 0), 0),
+			emptyCollections: collections.filter((collection: CollectionWithStats) => (collection.stats?.imageCount || 0) === 0).length,
+			favoriteCollections: collections.filter((collection: CollectionWithStats) => collection.isFavorite).length,
 		}),
 		[collections]
 	);
@@ -140,7 +140,7 @@ export function CollectionsSettings() {
 
 	// Extraer categorías únicas de las colecciones usando useMemo
 	const uniqueCategories = useMemo(() => {
-		return Array.from(new Set(collections.map((collection) => collection.category).filter(Boolean))) as string[];
+		return Array.from(new Set(collections.map((collection: CollectionWithStats) => collection.category).filter(Boolean))) as string[];
 	}, [collections]);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
@@ -277,7 +277,7 @@ export function CollectionsSettings() {
 										description="Crea tu primera colección para organizar tus imágenes."
 									/>
 								)}
-								{filteredCollections.map((collection) => (
+								{filteredCollections.map((collection: CollectionWithStats) => (
 									<div
 										key={collection.id}
 										className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors
@@ -303,7 +303,7 @@ export function CollectionsSettings() {
 												handleDeleteButtonClick(collection.id);
 											}}
 										>
-											<Trash2 className="h-4 w-4 text-destructive" />
+											<Trash className="h-4 w-4 text-destructive" />
 										</Button>
 									</div>
 								))}

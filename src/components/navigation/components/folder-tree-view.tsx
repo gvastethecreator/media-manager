@@ -1,8 +1,8 @@
 import { memo, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Folder, FolderOpen } from 'lucide-react';
 import { TreeView, type TreeNode } from '@/components/tree-view';
 import { cn } from '@/lib/utils';
-import { useNavigationStore } from '../navigation.store';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import type { CategoryChild } from '../types';
 
@@ -56,7 +56,7 @@ export const FolderTreeView = memo(function FolderTreeView({
 	selectedFolderId
 }: FolderTreeViewProps) {
 	const { getCategoryItems, isLoading } = useCategoryStats();
-	const { setCurrentView, setCurrentItem } = useNavigationStore();
+	const navigate = useNavigate();
 
 	// Obtener carpetas desde la API de navegación
 	const folders = useMemo(() => {
@@ -76,21 +76,9 @@ export const FolderTreeView = memo(function FolderTreeView({
 	const handleNodeClick = useCallback((node: TreeNode) => {
 		const folder = node.data as CategoryChild;
 		
-		// Actualizar navegación
-		setCurrentView('folder-content');
-		setCurrentItem({
-			id: folder.id,
-			name: folder.name,
-			path: folder.path,
-			description: folder.description,
-			color: folder.color,
-			emoji: folder.emoji,
-			count: folder.itemCount || 0,
-			totalSize: folder.totalSize,
-			itemType: 'folder',
-			_count: folder._count
-		});
-	}, [setCurrentView, setCurrentItem]);
+		// Navegar a la carpeta usando React Router
+		navigate(`/folders/${folder.id}`);
+	}, [navigate]);
 
 	// Manejar expansión de nodos
 	const handleNodeExpand = useCallback((nodeId: string, expanded: boolean) => {

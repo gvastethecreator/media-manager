@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { EntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
+import { EntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 // Importar el sistema de registry
 import { entityDetailsRegistry } from './entity-details-registry';
@@ -25,6 +25,14 @@ interface DetailsPanelV2Props {
 // Componente memoizado para una entidad usando el registry
 const EntityDetailsView = memo<{ item: EntityWithStats }>(function EntityDetailsView({ item }) {
 	const type = getEntityStatsType(item);
+	if (type === null) {
+		return (
+			<div className="p-4 text-center text-muted-foreground">
+				<p>Tipo de entidad no reconocido</p>
+				<BasicInfoSection item={item} />
+			</div>
+		);
+	}
 	const config = entityDetailsRegistry.getConfig(type);
 	const { handleAction } = useEntityActions();
 
@@ -81,7 +89,7 @@ const EntityDetailsView = memo<{ item: EntityWithStats }>(function EntityDetails
 // Componente para información básica (fallback)
 const BasicInfoSection = memo<{ item: EntityWithStats }>(function BasicInfoSection({ item }) {
 	const type = getEntityStatsType(item);
-	const stats = getEntityStatistics(item);
+	const stats: any = getEntityStatistics(item);
 
 	const infoItems = useMemo(() => {
 		const items = [];
@@ -170,6 +178,7 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 		const groups: Record<string, EntityWithStats[]> = {};
 		for (const item of items) {
 			const type = getEntityStatsType(item);
+			if (type === null) continue;
 			if (!groups[type]) {
 				groups[type] = [];
 			}
@@ -202,7 +211,7 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 				<CardContent>
 					<div className="grid grid-cols-3 gap-2">
 						{items.slice(0, 9).map((item) => {
-							const config = entityDetailsRegistry.getConfig(getEntityStatsType(item));
+							const config = entityDetailsRegistry.getConfig(getEntityStatsType(item) as string);
 							if (!config) return null;
 
 							const { previewComponent: PreviewComponent } = config;

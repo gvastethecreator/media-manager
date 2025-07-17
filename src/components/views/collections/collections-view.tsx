@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCreateCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -11,7 +11,7 @@ import CollectionsContentView from './collections-content-view';
 const viewLogger = clientLogger.withContext('CollectionsView');
 
 export function CollectionsView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
+	const navigate = useNavigate();
 	const { getCollections, isLoading, error, fetchCollections, selectCollection } = useCollectionStore();
 	const { mutate: createCollection } = useCreateCollection();
 
@@ -33,9 +33,9 @@ export function CollectionsView(_props: ViewProps) {
 		(collection: CollectionWithStats) => {
 			viewLogger.info('🖱️ Click en colección:', collection.name);
 			selectCollection(collection.id);
-			setCurrentView('collection-content');
+			navigate('/collection-content');
 		},
-		[setCurrentView, selectCollection]
+		[navigate, selectCollection]
 	);
 
 	const handleCreateCollection = useCallback(() => {

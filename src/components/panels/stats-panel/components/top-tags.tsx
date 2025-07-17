@@ -1,6 +1,6 @@
 import { AlertCircle, Tag } from 'lucide-react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/lib/api/stats';
+import { useStats } from '@/lib/hooks/system/use-stats';
 import { TagUsage } from './tag-usage';
 
 export function TopTags() {
@@ -33,7 +33,7 @@ export function TopTags() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 space-y-1 w-full gap-2">
-				{stats.topTags.map((tag) => (
+				{stats.topTags.map((tag: TopTag) => (
 					<TagUsage key={tag.id} tag={tag} />
 				))}
 			</CardContent>

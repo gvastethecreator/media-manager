@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
@@ -10,7 +10,7 @@ import GroupsContentView from './groups-content-view';
 const viewLogger = clientLogger.withContext('GroupsView');
 
 export function GroupsView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
+	const navigate = useNavigate();
 
 	// Leer el estado y las acciones directamente del store de Zustand
 	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
@@ -37,12 +37,12 @@ export function GroupsView(_props: ViewProps) {
 	const handleGroupClick = useCallback(
 		(group: GroupWithStats) => {
 			viewLogger.info('🖱️ Click en grupo:', group.name);
-			// Navegar a la vista de detalle del grupo usando el navigation store
-			setCurrentView('group-content');
+			// Navegar a la vista de detalle del grupo usando React Router
+			navigate('/group-content');
 			// Emitir evento para otros componentes que puedan necesitar este dato
 			clientEvents.emit('group:selected', { groupId: group.id });
 		},
-		[setCurrentView]
+		[navigate]
 	);
 
 	const handleCreateGroup = useCallback(() => {

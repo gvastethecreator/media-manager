@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { ViewType } from '@/components/views/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useUIStore } from '@/store/ui.store';
@@ -12,30 +12,32 @@ const logger = clientLogger.withContext('MainNavigation');
  */
 export function useMainNavigation() {
 	const { toggleSettings } = useUIStore();
-	const { setCurrentView } = useNavigationStore();
+	const navigate = useNavigate();
 
 	const handleOpenSettings = useCallback(() => {
 		logger.info('⚙️ Abriendo configuración');
-		setCurrentView('settings');
+		navigate('/settings');
 		toggleSettings();
-	}, [toggleSettings, setCurrentView]);
+	}, [toggleSettings, navigate]);
 
 	const handleOpenDevelopment = useCallback(() => {
 		logger.info('🛠️ Abriendo desarrollo');
-		setCurrentView('development');
-	}, [setCurrentView]);
+		navigate('/development');
+	}, [navigate]);
 
 	const handleOpenEntityCards = useCallback(() => {
 		logger.info('🃏 Abriendo entity cards');
-		setCurrentView('entity-cards');
-	}, [setCurrentView]);
+		navigate('/entity-cards');
+	}, [navigate]);
 
 	const handleMainNavigate = useCallback(
 		(id: ViewType) => {
 			logger.info(`🧭 Navegando a: ${id}`);
-			setCurrentView(id);
+			// Convertir ViewType a ruta
+			const route = id === 'all-images' ? '/gallery' : `/${id}`;
+			navigate(route);
 		},
-		[setCurrentView]
+		[navigate]
 	);
 
 	return {

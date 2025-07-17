@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCharacters, useCreateCharacter } from '@/lib/api/characters';
 import { clientEvents } from '@/lib/client/events.client';
@@ -12,11 +11,10 @@ import CharactersContentView from './characters-content-view';
 const viewLogger = clientLogger.withContext('CharactersView');
 
 export function CharactersView({ isVisible }: ViewProps) {
-	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
 	const { selectedCharacterId, setSelectedCharacterId } = useCharacterStore();
 	const { mutate: createCharacter } = useCreateCharacter();
 
-	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
 	const [newCharacterName, setNewCharacterName] = useState('');
 	const [newCharacterDescription, setNewCharacterDescription] = useState('');
@@ -29,16 +27,9 @@ export function CharactersView({ isVisible }: ViewProps) {
 		refetch,
 	} = useCharacters({
 		search: localSearch,
-		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc',
+		sortBy: 'name',
+		sortOrder: 'asc',
 	});
-
-	// Sincronizar búsqueda local con store de navegación
-	useEffect(() => {
-		if (searchTerm !== localSearch) {
-			setLocalSearch(searchTerm || '');
-		}
-	}, [searchTerm, localSearch]);
 
 	const handleCharacterSelect = useCallback(
 		(characterId: string) => {

@@ -1,10 +1,10 @@
 import { Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TagCard } from '@/components/cards/tag-card/tag-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,7 +37,7 @@ MemoizedTagCard.displayName = 'MemoizedTagCard';
  * Muestra todas las etiquetas disponibles en el sistema utilizando el componente TagCard
  */
 export function TagsView() {
-	const { setCurrentView } = useNavigationStore();
+	const navigate = useNavigate();
 	const selectTag = useTagStore((state) => state.selectTag);
 
 	const { data: tagsResponse, isLoading, error } = useTags();
@@ -68,9 +68,9 @@ export function TagsView() {
 			selectTag(tag.id);
 
 			// Luego cambiar la vista para mostrar el contenido
-			setCurrentView('tag-content');
+			navigate('/tag-content');
 		},
-		[setCurrentView, selectTag]
+		[navigate, selectTag]
 	);
 
 	const handleCreateTag = useCallback(() => {
