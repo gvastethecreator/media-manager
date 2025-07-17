@@ -40,6 +40,7 @@ export interface ConceptStatistics {
 	wildcardCount: number;
 	propertyCount: number;
 	groupCount: number;
+	totalAssociations: number;
 }
 
 /**

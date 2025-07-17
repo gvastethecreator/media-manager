@@ -21,6 +21,7 @@ export type ViewType =
 	| 'dashboard'
 	| 'settings'
 	| 'all-images'
+	| 'uploaded-images'
 	| 'files'
 	| 'favorites'
 	| 'search'
@@ -67,4 +68,5 @@ export type ViewType =
 	| 'workflows'
 	| 'workflow-content'
 	| 'file-3ds'
-	| 'file-3d-content';
+	| 'file-3d-content'
+	| 'mixed';

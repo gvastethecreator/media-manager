@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
@@ -52,7 +52,7 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 		}
 	}, [loadImages, imagesRecord]);
 
-	const { setCurrentView, setCurrentItem } = useNavigationStore();
+	const navigate = useNavigate();
 	const { openViewer } = useImageViewer();
 
 	// Cachear el resultado de getSortedImages
@@ -69,21 +69,13 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 				viewLogger.info('🖱️ Click en imagen:', image.name);
 
 				// Navegar a la vista de detalle de imagen
-				setCurrentItem({
-					id: image.id,
-					name: image.name || '',
-					path: image.path || '',
-					description: image.description || undefined,
-					count: 1,
-					createdAt: image.createdAt,
-					itemType: 'image',
-				});
-				setCurrentView('all-images'); // Usamos vista existente por ahora
+				// Por ahora mantenemos en la misma vista
+				viewLogger.info('Imagen seleccionada:', image.name);
 			} else {
 				viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
 			}
 		},
-		[setCurrentView, setCurrentItem]
+		[navigate]
 	);
 
 	const handleImageDoubleClick = useCallback(

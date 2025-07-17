@@ -4,7 +4,7 @@
  */
 
 import {
-	Collection,
+	FolderDot,
 	Download,
 	Edit,
 	Eye,
@@ -37,8 +37,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { CollectionWithStats } from '@/types/entities/collection.types';
-import type { isCollectionWithStats } from '@/types/migration';
+import type { CollectionWithStats } from '@/types/entities/collection/types';
+import { isCollectionWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,
@@ -75,7 +75,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 	return (
 		<div className="space-y-4">
 			{/* Preview principal */}
-			<CollectionPreview entity={entity} size="lg" showItems={true} onAction={handleAction} />
+			<CollectionPreview entity={entity} size="lg" onAction={handleAction} />
 
 			{/* Información de la colección */}
 			<Card>
@@ -87,7 +87,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 						<Avatar className="h-12 w-12">
 							<AvatarImage src={entity.coverImageUrl} alt={entity.name} />
 							<AvatarFallback>
-								<Collection className="h-6 w-6" />
+								<FolderDot className="h-6 w-6" />
 							</AvatarFallback>
 						</Avatar>
 						<div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 					</CardHeader>
 					<CardContent>
 						<div className="flex flex-wrap gap-1">
-							{entity.tags.map((tag) => (
+							{entity.tags.map((tag: TagWithStats) => (
 								<Badge key={tag.id} variant="outline" className="text-xs">
 									<Tag className="h-2 w-2 mr-1" />
 									{tag.name}
@@ -157,7 +157,6 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(function CollectionPreview({
 	entity,
 	size = 'md',
-	showItems = false,
 	onAction,
 }) {
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -235,7 +234,7 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 						<Collection className="h-4 w-4 text-primary" />
 						<CardTitle className="text-sm truncate">{entity.name}</CardTitle>
 					</div>
-					{showItems && (
+					{
 						<div className="flex items-center gap-1">
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>

@@ -1,7 +1,7 @@
 import { ArrowLeft, Box, Download, Edit, Eye, RotateCcw, Share2, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,16 +15,16 @@ interface File3DContentViewProps extends ViewProps {
 }
 
 export const File3DContentView: React.FC<File3DContentViewProps> = ({ className, file3DId }) => {
-	const { navigateToMainFromContent, currentItem } = useNavigationStore();
+	const navigate = useNavigate();
 
 	const handleGoBack = () => {
-		navigateToMainFromContent();
+		navigate(-1);
 	};
 
 	// Mock data - en una implementación real vendría del store
 	const file3DData = {
 		id: file3DId || '1',
-		name: currentItem?.name || 'model.obj',
+		name: 'model.obj',
 		format: 'OBJ',
 		size: '15.3 MB',
 		created: '2024-01-15',

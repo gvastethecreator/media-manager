@@ -11,8 +11,8 @@ import type { EntityWithStats } from '@/types/common/entity-with-stats';
 const viewLogger = clientLogger.withContext('AlbumContentView');
 
 export function AlbumContentView() {
-	const currentAlbumId = useAlbumStore((state) => state.ui.currentAlbumId);
-	const album = useAlbumStore((state) => (currentAlbumId ? state.core.albums[currentAlbumId] : null));
+	const currentAlbumId = useAlbumStore((state) => state.currentAlbumId);
+	const album = useAlbumStore((state) => (currentAlbumId ? state.albums[currentAlbumId] : null));
 
 	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);

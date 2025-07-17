@@ -1,6 +1,6 @@
 import { AlertCircle, Clock } from 'lucide-react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/lib/api/stats';
+import { useStats } from '@/lib/hooks/system/use-stats';
 import { Activity } from './activity';
 
 export function RecentActivity() {
@@ -34,7 +34,7 @@ export function RecentActivity() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2 space-y-1">
-				{stats.recentActivity.map((activity) => (
+				{stats.recentActivity.map((activity: RecentActivity) => (
 					<Activity key={activity.id} activity={activity} />
 				))}
 			</CardContent>

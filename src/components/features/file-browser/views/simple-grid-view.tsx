@@ -91,8 +91,8 @@ export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView(
 									{type === 'image' && <ImageIcon className="h-8 w-8 text-muted-foreground" />}
 									{type === 'video' && <VideoIcon className="h-8 w-8 text-muted-foreground" />}
 									{type === 'folder' && <FolderIcon className="h-8 w-8 text-muted-foreground" />}
-									{type && type === 'audio' && <MusicIcon className="h-8 w-8 text-muted-foreground" />}
-									{type && type === 'document' && <FileTextIcon className="h-8 w-8 text-muted-foreground" />}
+									{type === 'audio' && <MusicIcon className="h-8 w-8 text-muted-foreground" />}
+									{type === 'document' && <FileTextIcon className="h-8 w-8 text-muted-foreground" />}
 									{!['image', 'video', 'folder', 'audio', 'document'].includes(type || '') && (
 										<FileIcon className="h-8 w-8 text-muted-foreground" />
 									)}

@@ -108,8 +108,8 @@ export function CreateCharacterForm({
 				alignment: (character.alignment as CharacterAlignment) || CharacterAlignment.NEUTRAL,
 				level: character.level || 1,
 				backstory: character.backstory || '',
-				psychologicalProfile: character.psychologicalProfile || '',
-				socialProfile: character.socialProfile || '',
+				psychologicalProfile: character.psychologicalProfile || null,
+				socialProfile: character.socialProfile || null,
 				category: character.category as CharacterCategory | undefined,
 				isFavorite: character.isFavorite || false,
 			});
@@ -199,24 +199,18 @@ export function CreateCharacterForm({
 
 			const characterData: CharacterCreateInput = {
 				name: data.name,
-				description: data.description,
-				color: data.color,
-				emoji: data.emoji,
-				class: data.class,
-				race: data.race,
-				alignment: data.alignment,
-				level: data.level,
-				category: data.category,
+								description: data.description || null,
+				category: data.category || null,
 			};
 
 			// Crear o actualizar personaje
 			if (isEditing && character) {
 				const updateData: CharacterUpdateInput = {
 					...characterData,
-					backstory: data.backstory,
-					psychologicalProfile: data.psychologicalProfile,
-					socialProfile: data.socialProfile,
-					isFavorite: data.isFavorite,
+					backstory: data.backstory || null,
+					psychologicalProfile: data.psychologicalProfile || null,
+					socialProfile: data.socialProfile || null,
+					isFavorite: data.isFavorite || false,
 				};
 				const updated = await updateCharacterMutation.mutateAsync({ id: character.id, data: updateData });
 				onUpdated?.(updated);

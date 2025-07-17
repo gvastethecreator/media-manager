@@ -37,8 +37,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { FolderWithStats } from '@/types/entities/folder.types';
-import type { isFolderWithStats } from '@/types/migration';
+import type { FolderWithStats } from '@/types/entities/folder/types';
+import { isFolderWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,
@@ -72,7 +72,7 @@ export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function 
 	return (
 		<div className="space-y-4">
 			{/* Preview principal */}
-			<FolderPreview entity={entity} size="lg" showContent={true} onAction={handleAction} />
+			<FolderPreview entity={entity} size="lg" onAction={handleAction} />
 
 			{/* Estadísticas rápidas */}
 			<Card>
@@ -127,7 +127,6 @@ export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function 
 export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function FolderPreview({
 	entity,
 	size = 'md',
-	showContent = false,
 	onAction,
 }) {
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -303,7 +302,7 @@ const FolderBreadcrumb = memo<{ entity: FolderWithStats; onNavigate: (action: st
 						>
 							<Home className="h-3 w-3" />
 						</Button>
-						{pathSegments.map((segment, index) => (
+						{pathSegments.map((segment: string, index: number) => (
 							<div key={index} className="flex items-center gap-1">
 								<ChevronRight className="h-3 w-3 text-muted-foreground" />
 								<Button

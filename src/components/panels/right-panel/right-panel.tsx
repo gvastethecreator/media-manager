@@ -1,6 +1,6 @@
 import { PanelRightClose, X } from 'lucide-react';
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useLocation } from 'react-router-dom';
 import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -52,14 +52,14 @@ interface RightPanelProps {
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
-export const RightPanel = memo(function RightPanel({ _className, isCollapsed, onToggleCollapse }: RightPanelProps) {
+export const RightPanel = memo(function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPanelProps) {
 	const { isVisible, setVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
-	const { currentView } = useNavigationStore();
+	const location = useLocation();
 	const [mounted, setMounted] = useState(false);
 	const hasSelectedItems = selectedItems && selectedItems.length > 0;
 
 	// Ocultar el panel cuando estamos en la vista de settings
-	const isInSettingsView = currentView === 'settings';
+	const isInSettingsView = location.pathname === '/settings';
 
 	// Determina si debemos mostrar el panel
 	const shouldShowPanel = !isInSettingsView && (isVisible || hasSelectedItems);

@@ -32,6 +32,25 @@ export interface EXIFData {
 /**
  * 🤖 Metadatos de IA para imágenes generadas
  */
+export interface AIGenerationInfo {
+	type?: string;
+	model?: string;
+	sampler?: string;
+	seed?: number;
+	steps?: number;
+	cfg_scale?: number;
+	clip_skip?: number;
+	cfg?: number;
+	prompt?: string;
+	negative_prompt?: string;
+	workflow?: string;
+	extra_params?: Record<string, unknown>;
+	created_at?: string;
+}
+
+/**
+ * 🤖 Metadatos de IA para imágenes generadas
+ */
 export interface AIMetadata {
 	model?: string;
 	prompt?: string;
@@ -86,6 +105,7 @@ export interface FileMetadata {
 
 	// Metadatos de AI
 	ai?: AIMetadata;
+	generation?: AIGenerationInfo;
 
 	// Análisis automatizado
 	analysis?: {

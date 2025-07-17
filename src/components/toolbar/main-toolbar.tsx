@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -57,7 +57,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	isRightPanelVisible,
 	allItemIds = [],
 }) {
-	const { currentView, getCurrentItem } = useNavigationStore();
+	const location = useLocation();
+	const currentView = location.pathname.split('/')[1] || 'gallery';
 
 	// 🔄 Usar los nuevos stores de Zustand
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
@@ -97,7 +98,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const showDetailsButton = useMemo(() => viewsWithDetails.includes(currentView), [viewsWithDetails, currentView]);
 
 	// Determinar si estamos en la vista de settings para ocultar controles innecesarios
-	const isInSettingsView = useMemo(() => currentView === 'settings', [currentView]);
+	const isInSettingsView = useMemo(() => location.pathname === '/settings', [location.pathname]);
 
 	// 🔄 Acciones para archivos seleccionados
 	const handleDeleteSelected = useCallback(async () => {
@@ -497,7 +498,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		}
 	};
 
-	const _item = getCurrentItem();
+
 
 	return (
 		<div className="flex items-center justify-between h-10 px-2 border-b">

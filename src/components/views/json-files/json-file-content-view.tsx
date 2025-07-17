@@ -1,7 +1,7 @@
 import { ArrowLeft, Brackets, Code, Download, Edit, Share2, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,16 +14,16 @@ interface JsonFileContentViewProps extends ViewProps {
 }
 
 export const JsonFileContentView: React.FC<JsonFileContentViewProps> = ({ className, jsonFileId }) => {
-	const { navigateToMainFromContent, currentItem } = useNavigationStore();
+	const navigate = useNavigate();
 
 	const handleGoBack = () => {
-		navigateToMainFromContent();
+		navigate(-1);
 	};
 
 	// Mock data - en una implementación real vendría del store
 	const jsonData = {
 		id: jsonFileId || '1',
-		name: currentItem?.name || 'config.json',
+		name: 'config.json',
 		size: '1.2 KB',
 		created: '2024-01-15',
 		modified: '2024-01-20',

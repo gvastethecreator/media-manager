@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileStoreBase } from '@/store/entities/file';
 import type { FileWithStats } from '@/types/entities/file';
@@ -18,7 +18,7 @@ export function FilesView({ className }: ViewProps) {
 	const error = useFileStoreBase((state) => state.error);
 	const navigateToDirectory = useFileStoreBase((state) => state.navigateToDirectory);
 	const fileCount = useFileStoreBase((state) => state.fileCount);
-	const { setCurrentView, setCurrentItem } = useNavigationStore();
+	const navigate = useNavigate();
 
 	// Estados para el upload de archivos
 	const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -38,26 +38,15 @@ export function FilesView({ className }: ViewProps) {
 		(file: FileWithStats) => {
 			viewLogger.info('🖱️ Click en archivo:', file.name);
 
-			// Navegar a la vista de detalle del archivo
-			setCurrentItem({
-				id: file.id,
-				name: file.name || '',
-				path: file.path || '',
-				description: undefined,
-				count: 1,
-				createdAt: file.createdAt,
-				itemType: 'file',
-			});
-
 			// Abrir el archivo según su tipo
 			if (file.type === 'image') {
-				setCurrentView('all-images');
+				navigate('/all-images');
 			} else {
 				// Para otros tipos de archivo, podemos implementar un visor genérico
 				viewLogger.info('Abriendo archivo:', file.name);
 			}
 		},
-		[setCurrentView, setCurrentItem]
+		[navigate]
 	);
 
 	// Función para manejar el upload de archivos

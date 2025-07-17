@@ -5,8 +5,10 @@ import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
-import { serializeAlbum } from '@/transformers/album';
+import { serializeAlbum, toAlbumWithStats } from '@/transformers/album/index';
 import type { AlbumWithStats } from '@/types/entities/album';
+
+console.log('🔍 [DEBUG] Albums router cargado, toAlbumWithStats:', typeof toAlbumWithStats);
 
 /**
  * @file albums.ts
@@ -113,6 +115,10 @@ albumsRouter.get('/', async (req, res) => {
 	const { search, limit, offset, sortBy, sortOrder } = parse.data;
 
 	try {
+		console.log('🔍 [DEBUG] Iniciando consulta de albums...');
+		console.log('🔍 [DEBUG] Verificando toAlbumWithStats:', typeof toAlbumWithStats);
+		console.log('🔍 [DEBUG] Verificando serializeAlbum:', typeof serializeAlbum);
+		
 		const whereConditions = [];
 		if (search) {
 			whereConditions.push(or(like(albums.name, `%${search}%`), like(albums.description, `%${search}%`)));
@@ -138,7 +144,13 @@ albumsRouter.get('/', async (req, res) => {
 		]);
 
 		const total = totalResult[0].count;
-		const serializedAlbums = albumsData.map(serializeAlbum);
+		console.log('🔍 [DEBUG] Albums obtenidos:', albumsData.length);
+		console.log('🔍 [DEBUG] Primer album:', albumsData[0]);
+		const albumsWithStats = albumsData.map(toAlbumWithStats);
+		console.log('🔍 [DEBUG] Albums con stats:', albumsWithStats.length);
+		console.log('🔍 [DEBUG] Primer album con stats:', albumsWithStats[0]);
+		const serializedAlbums = albumsWithStats.map(serializeAlbum);
+		console.log('🔍 [DEBUG] Albums serializados:', serializedAlbums.length);
 
 		res.json({
 			data: serializedAlbums,
@@ -151,7 +163,9 @@ albumsRouter.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error obteniendo albums:', error);
+		console.error('🚨 [ERROR CRÍTICO] Error en /api/albums:', error);
+		console.error('🚨 [ERROR CRÍTICO] Stack trace:', error.stack);
+		console.error('🚨 [ERROR CRÍTICO] Message:', error.message);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -172,7 +186,8 @@ albumsRouter.get('/:id', async (req, res) => {
 			return res.status(404).json({ error: 'Album no encontrado' });
 		}
 
-		res.json(serializeAlbum(album));
+		const albumWithStats = toAlbumWithStats(album);
+		res.json(serializeAlbum(albumWithStats));
 	} catch (error) {
 		console.error('Error obteniendo album:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
@@ -853,3 +868,13 @@ async function getAlbumStats(albumId: string): Promise<{
 		};
 	}
 }
+
+// Middleware de captura de errores específico para albums (debe ir al final)
+albumsRouter.use((error: any, req: any, res: any, next: any) => {
+	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Error capturado:', error);
+	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Stack:', error.stack);
+	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Message:', error.message);
+	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] URL:', req.url);
+	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Method:', req.method);
+	res.status(500).json({ error: 'Error interno del servidor en albums' });
+});

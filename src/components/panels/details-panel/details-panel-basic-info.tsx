@@ -86,13 +86,13 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 					/>
 				)}
 
-				{'fileSize' in item && item.fileSize && (
+				{'fileSize' in item && item.fileSize ? (
 					<InfoItem
 						icon={<HardDrive className="h-3 w-3 text-amber-400" />}
 						label="Tamaño"
-						value={formatBytes(item.fileSize)}
+						value={formatBytes((item as any).fileSize)}
 					/>
-				)}
+				) : null}
 
 				{item.createdAt && (
 					<InfoItem

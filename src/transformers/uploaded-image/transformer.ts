@@ -14,18 +14,16 @@ import {
 // Tipos locales para uploaded image (migración a Drizzle)
 type DrizzleUploadedImageWithRelations = {
 	id: string;
-	hash: string;
-	imageId: string;
-	fileName: string | null;
-	fileSize: number | null;
-	mimeType: string | null;
-	uploadedAt: Date;
-	isProcessed: boolean;
-	processingError: string | null;
-	width: number;
-	height: number;
-	metadata: string | null;
 	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	metadata: string | null;
+	imageId: string;
+	type: string;
+	category: string;
+	width: number | null;
+	height: number | null;
 	createdAt: Date;
 	updatedAt: Date;
 	image?: {
@@ -35,18 +33,16 @@ type DrizzleUploadedImageWithRelations = {
 
 type DrizzleUploadedImageBase = {
 	id: string;
-	hash: string;
-	imageId: string;
-	fileName: string | null;
-	fileSize: number | null;
-	mimeType: string | null;
-	uploadedAt: Date;
-	isProcessed: boolean;
-	processingError: string | null;
-	width: number;
-	height: number;
-	metadata: string | null;
 	name: string;
+	path: string;
+	size: number;
+	hash: string;
+	metadata: string | null;
+	imageId: string;
+	type: string;
+	category: string;
+	width: number | null;
+	height: number | null;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -66,26 +62,39 @@ export function transformToUploadedImageFromDrizzle(uploadedImage: DrizzleUpload
 }
 
 /**
- * Transforms a Drizzle UploadedImage object (with relations) into a canonical UploadedImageExtended.
+ * Transforms a Drizzle UploadedImage object (with or without relations) into a canonical UploadedImageExtended.
  * ✅ MIGRADO A DRIZZLE
- * @param uploadedImage - The Drizzle object, including relations.
+ * @param uploadedImage - The Drizzle object, optionally including relations.
  * @returns The canonical UploadedImageExtended.
  */
 export function transformToUploadedImageWithRelationsFromDrizzle(
-	uploadedImage: DrizzleUploadedImageWithRelations
+	uploadedImage: DrizzleUploadedImageWithRelations | DrizzleUploadedImageBase
 ): UploadedImageExtended {
+	const width = uploadedImage.width || 800;
+	const height = uploadedImage.height || 600;
+	
 	const dimensions: UploadedImageDimensions = {
-		width: uploadedImage.width,
-		height: uploadedImage.height,
-		aspectRatio: uploadedImage.width / uploadedImage.height,
+		width,
+		height,
+		aspectRatio: width / height,
 	};
+
+	// Verificar si el objeto tiene relaciones
+	const hasRelations = 'image' in uploadedImage;
+	const thumbnailUrl = hasRelations ? uploadedImage.image?.thumbnailPath : undefined;
 
 	return {
 		...uploadedImage,
+		type: uploadedImage.type || null,
+		category: uploadedImage.category || null,
+		width,
+		height,
+		uploadedAt: uploadedImage.createdAt, // Usar createdAt como uploadedAt
+		updatedAt: uploadedImage.updatedAt,
 		metadata: uploadedImage.metadata ?? null,
 		dimensions,
-		url: `/uploads/${uploadedImage.name}`, // Example URL construction
-		thumbnailUrl: uploadedImage.image?.thumbnailPath, // Assuming 'image' relation has a thumbnail path
+		url: `/uploads/${uploadedImage.name}`,
+		thumbnailUrl,
 	};
 }
 

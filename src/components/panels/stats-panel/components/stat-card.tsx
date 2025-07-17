@@ -12,6 +12,8 @@ import {
 	Star,
 	Tag,
 	Users,
+	Book,
+	Grid2X2,
 } from 'lucide-react';
 import { memo } from 'react';
 
@@ -29,6 +31,8 @@ const ICONS = {
 	Star,
 	Tag,
 	Users,
+	Book,
+	Grid2X2,
 } as const;
 
 interface StatCardProps {

@@ -390,8 +390,7 @@ export function ConceptsSettings() {
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
 								<div className="space-y-3">
 									<CreateConceptForm
-										key={selectedConcept?.id || 'new-concept'}
-										concept={selectedConcept}
+										concept={selectedConcept as ConceptExtended}
 										isEditing={isEditing}
 										onCreated={handleConceptCreated}
 										onUpdated={handleConceptUpdated}

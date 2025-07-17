@@ -1,6 +1,6 @@
 import { AlertCircle, BarChart } from 'lucide-react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/lib/api/stats';
+import { useStats } from '@/lib/hooks/system/use-stats';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { StatCard } from './stat-card';
 

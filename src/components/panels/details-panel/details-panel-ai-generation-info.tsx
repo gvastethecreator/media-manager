@@ -119,13 +119,13 @@ export function AIGenerationInfo({ generation }: AIGenerationInfoProps) {
 						<InfoItem icon={<Settings2 className="h-3 w-3 text-purple-400" />} label="Strength" value={strengthValue} />
 					)}
 
-					{generation.created_at && typeof generation.created_at === 'string' && (
+					{generation.created_at && typeof generation.created_at === 'string' ? (
 						<InfoItem
 							icon={<Calendar className="h-3 w-3 text-teal-400" />}
 							label="Fecha"
 							value={new Date(generation.created_at).toLocaleString()}
 						/>
-					)}
+					) : null}
 				</div>
 
 				{/* Prompt */}

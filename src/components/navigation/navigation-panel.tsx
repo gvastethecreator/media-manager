@@ -1,4 +1,5 @@
 import { memo, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ViewType } from '@/components/views/types';
@@ -6,33 +7,36 @@ import { cn } from '@/lib/utils';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
 import { useCategoryStats } from './hooks';
-import { useNavigationStore } from './navigation.store';
 
 export const NavPanel = memo(function NavPanel({
 	isCollapsed = false,
 	onToggleCollapse,
 }: Omit<NavPanelProps, 'initialData'>) {
-	const { currentView, setCurrentView } = useNavigationStore();
+	const navigate = useNavigate();
+	const location = useLocation();
 	const { stats } = useCategoryStats();
+
+	// Obtener la vista actual desde la URL
+	const currentView = location.pathname.slice(1) || 'dashboard';
 
 	const handleNavigate = useCallback(
 		(id: ViewType) => {
-			setCurrentView(id);
+			navigate(`/${id}`);
 		},
-		[setCurrentView]
+		[navigate]
 	);
 
 	const handleOpenSettings = useCallback(() => {
-		setCurrentView('settings');
-	}, [setCurrentView]);
+		navigate('/settings');
+	}, [navigate]);
 
 	const handleOpenDevelopment = useCallback(() => {
-		setCurrentView('development');
-	}, [setCurrentView]);
+		navigate('/development');
+	}, [navigate]);
 
 	const handleOpenEntityCards = useCallback(() => {
-		setCurrentView('entity-cards');
-	}, [setCurrentView]);
+		navigate('/entity-cards');
+	}, [navigate]);
 
 	return (
 		<aside

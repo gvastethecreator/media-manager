@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSystemInit } from '@/lib/api/system';
+import { useSystemInit } from '@/lib/hooks/system/use-system-service';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger específico para este componente

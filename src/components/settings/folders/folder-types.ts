@@ -7,7 +7,14 @@ import type { ProcessStatus } from '@/types/folders';
  */
 export interface ExtendedFolder extends FolderExtended {
 	error?: string; // Error temporal durante el procesamiento
-	lastIndexed?: Date; // Última fecha de indexación
+	lastIndexed?: Date | null; // Última fecha de indexación
+	emoji?: string;
+	description?: string;
+	isFavorite?: boolean;
+	parentId?: string | null;
+	children?: ExtendedFolder[];
+	autoReindex?: boolean;
+	path?: string;
 }
 
 // 🔄 Estado extendido del proceso con propiedades adicionales

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -10,11 +9,10 @@ import FavoritesContentView from './favorites-content-view';
 const viewLogger = clientLogger.withContext('FavoritesView');
 
 export function FavoritesView({ isVisible }: ViewProps) {
-	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
 	const { selectedFavoriteId, setSelectedFavoriteId } = useFavoriteStore();
 	const { mutate: createFavorite } = useCreateFavorite();
 
-	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
 	const [newFavoriteName, setNewFavoriteName] = useState('');
 	const [newFavoriteDescription, setNewFavoriteDescription] = useState('');
@@ -27,16 +25,11 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		refetch,
 	} = useFavorites({
 		search: localSearch,
-		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc',
+		sortBy: 'name' as 'name' | 'createdAt' | 'updatedAt',
+		sortOrder: 'asc' as 'asc' | 'desc',
 	});
 
-	// Sincronizar búsqueda local con store de navegación
-	useEffect(() => {
-		if (searchTerm !== localSearch) {
-			setLocalSearch(searchTerm || '');
-		}
-	}, [searchTerm, localSearch]);
+
 
 	const handleFavoriteSelect = useCallback(
 		(favoriteId: string) => {

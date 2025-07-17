@@ -7,10 +7,10 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateConcept, useUpdateConcept } from '@/lib/api/concepts';
 import { toastService } from '@/lib/ui/toast';
 import type {
-	ConceptComplete,
 	ConceptCreateInput,
 	ConceptExtended,
 	ConceptUpdateInput,
+	ConceptWithStats,
 } from '@/types/entities/concept';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
@@ -22,7 +22,7 @@ const conceptSchema = z.object({
 	color: z.string().min(1, 'El color es requerido'),
 	emoji: z.string().min(1, 'El emoji es requerido'),
 	category: z.string().optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean().optional(),
 });
 
 type ConceptForm = z.infer<typeof conceptSchema>;
@@ -30,8 +30,8 @@ type ConceptForm = z.infer<typeof conceptSchema>;
 interface CreateConceptFormProps {
 	concept?: ConceptExtended | null;
 	isEditing?: boolean;
-	onCreated?: (concept: ConceptComplete) => void;
-	onUpdated?: (concept: ConceptComplete) => void;
+	onCreated?: (concept: ConceptWithStats) => void;
+	onUpdated?: (concept: ConceptWithStats) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -78,13 +78,13 @@ export function CreateConceptForm({
 	useEffect(() => {
 		if (concept && isEditing) {
 			form.reset({
-				name: concept.name,
-				description: concept.description || '',
-				content: concept.content || '',
-				color: concept.color || '#3b82f6',
-				emoji: concept.emoji || '💡',
-				category: concept.category || 'general',
-				isFavorite: concept.isFavorite || false,
+				name: (concept as ConceptBase).name,
+				description: (concept as ConceptBase).description || '',
+				content: (concept as ConceptBase).content || '',
+				color: (concept as ConceptBase).color || '#3b82f6',
+				emoji: (concept as ConceptBase).emoji || '💡',
+				category: (concept as ConceptBase).category || 'general',
+				isFavorite: (concept as ConceptBase).isFavorite || false,
 			});
 		}
 	}, [concept, isEditing, form]);
@@ -100,7 +100,7 @@ export function CreateConceptForm({
 					...data,
 					content: data.content || '',
 				};
-				const updatedConcept = await updateConceptMutation.mutateAsync({ id: concept.id, data: updateData });
+				const updatedConcept = await updateConceptMutation.mutateAsync({ id: (concept as ConceptBase).id, data: updateData });
 				if (onUpdated) {
 					onUpdated(updatedConcept);
 				}

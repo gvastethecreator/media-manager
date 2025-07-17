@@ -18,12 +18,24 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import type { EntityWithStats, getEntityStatsType } from '@/types/migration';
+import { EntityWithStats, getEntityStatsType } from '@/types/migration';
 import { entityDetailsRegistry } from './entity-details-registry';
 
 // Fallback para cuando no hay configuración específica
-const DefaultEntityDetails = memo<{ entity: EntityWithStats }>(function DefaultEntityDetails({ entity }) {
+const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action: string, data?: any) => void }>(function DefaultEntityDetails({ entity, onAction }) {
 	const entityType = getEntityStatsType(entity);
+	if (entityType === null) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-sm">Tipo de entidad no reconocido</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<p className="text-sm text-muted-foreground">No se pudo determinar el tipo de entidad para mostrar los detalles.</p>
+				</CardContent>
+			</Card>
+		);
+	}
 
 	return (
 		<Card>
@@ -61,6 +73,7 @@ const MultipleSelectionDetails = memo<{ entities: EntityWithStats[]; onAction?: 
 			const counts: Record<string, number> = {};
 			for (const entity of entities) {
 				const type = getEntityStatsType(entity);
+				if (type === null) continue;
 				counts[type] = (counts[type] || 0) + 1;
 			}
 			return counts;
