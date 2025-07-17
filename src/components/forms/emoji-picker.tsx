@@ -1,4 +1,3 @@
-
 import { memo, useCallback, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -152,8 +151,6 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 	const [open, setOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState('activities');
 
-	
-
 	// Callback para manejar selección de emojis del grid
 	const handleEmojiSelect = useCallback(
 		(emoji: string) => {
@@ -217,8 +214,8 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 								</div>
 							</TabsContent>
 						))}
-				</ScrollArea>
-			</Tabs>
+					</ScrollArea>
+				</Tabs>
 			</PopoverContent>
 		</Popover>
 	);

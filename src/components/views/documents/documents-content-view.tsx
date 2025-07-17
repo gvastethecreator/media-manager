@@ -61,7 +61,7 @@ const DocumentsContentView: React.FC<DocumentsContentViewProps> = ({
 		);
 	}
 
-	if (isLoading && documents.length === 0) {
+	if (isLoading && (!documents || documents.length === 0)) {
 		return <LoadingScreen />;
 	}
 
@@ -99,7 +99,7 @@ const DocumentsContentView: React.FC<DocumentsContentViewProps> = ({
 					</div>
 				)}
 
-				{documents.length === 0 && !isLoading && !showForm ? (
+				{(!documents || documents.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={FileText}
 						title="No hay documentos"
@@ -107,7 +107,7 @@ const DocumentsContentView: React.FC<DocumentsContentViewProps> = ({
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{documents.map((document: DocumentWithStats, index: number) => {
+						{documents?.map((document: DocumentWithStats, index: number) => {
 							const onDocumentClick = () => handleDocumentClick(document);
 							return (
 								<motion.div

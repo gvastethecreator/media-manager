@@ -156,6 +156,12 @@ async function resetDatabase() {
 		return false;
 	}
 
+	// Paso 3.1: Eliminar directorio de migraciones existentes para reinicio completo
+	const migrationsPath = path.join(rootDir, 'src/lib/drizzle/migrations');
+	if (!deleteDirIfExists(migrationsPath)) {
+		return false;
+	}
+
 	// Paso 4: Generar migraciones con Drizzle
 	log('Generando migraciones con Drizzle...', 'info');
 	if (!runCommand('bunx', ['drizzle-kit', 'generate'])) {
@@ -172,13 +178,13 @@ async function resetDatabase() {
 	}
 	log('Esquema aplicado correctamente con Drizzle', 'success');
 
-	// Paso 6: Ejecutar seed con el nuevo sistema
-	log('Ejecutando seed para poblar la base de datos...', 'info');
-	if (!runCommand('tsx', ['scripts/db/seed-drizzle.ts'])) {
-		log('Falló la ejecución del seed con Drizzle', 'error');
+	// Paso 6: Ejecutar limpieza y seed con el nuevo sistema
+	log('Ejecutando limpieza y seed para poblar la base de datos...', 'info');
+	if (!runCommand('tsx', ['scripts/db/clean-and-seed.ts'])) {
+		log('Falló la ejecución de limpieza y seed con Drizzle', 'error');
 		return false;
 	}
-	log('Seed ejecutado correctamente con Drizzle', 'success');
+	log('Limpieza y seed ejecutados correctamente con Drizzle', 'success');
 
 	log('Reset de la base de datos completado con éxito usando Drizzle', 'success');
 	return true;

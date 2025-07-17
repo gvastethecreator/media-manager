@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
-import BaseContentView from '@/components/views/base/base-content-view';
+import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useFolder, useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
@@ -87,8 +87,6 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		setIsRetrying(false);
 	}, [currentFolderId]);
 
-
-
 	// ️ Validación: verificar que hay una carpeta seleccionada
 	if (!currentFolderId) {
 		logger.warn('⚠️ No hay carpeta seleccionada');
@@ -107,11 +105,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	if (isFolderLoading) {
 		return (
 			<div className="flex flex-col items-center justify-center h-full gap-4">
-				<EmptyState
-					icon={RefreshCw}
-					title="Cargando carpeta..."
-					description="Obteniendo información de la carpeta."
-				/>
+				<EmptyState icon={RefreshCw} title="Cargando carpeta..." description="Obteniendo información de la carpeta." />
 			</div>
 		);
 	}

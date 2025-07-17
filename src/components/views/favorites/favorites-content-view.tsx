@@ -98,7 +98,7 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 					</div>
 				)}
 
-				{!favorites.length && !isLoading && !showForm ? (
+				{(!favorites || !favorites.length) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={Heart}
 						title="Sin favoritos"
@@ -115,7 +115,7 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.3 }}
 					>
-						{favorites.map((favorite, index) => (
+						{favorites?.map((favorite, index) => (
 							<motion.div
 								key={favorite.id}
 								initial={{ opacity: 0, y: 20 }}

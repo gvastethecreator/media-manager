@@ -36,10 +36,9 @@ MemoizedJsonFileCard.displayName = 'MemoizedJsonFileCard';
 export function JsonFilesView(_props: ViewProps) {
 	// Usar selectores individuales para evitar recrear objetos
 	const jsonFilesRecord = useJsonFileStore((s) => s.jsonFiles);
-	const isLoading = useJsonFileStore((s) => s.isLoading);
+	const isLoading = useJsonFileStore((s) => s.loading);
 	const error = useJsonFileStore((s) => s.error);
-	const loadJsonFiles = useJsonFileStore((s) => s.loadJsonFiles);
-	const getSortedJsonFiles = useJsonFileStore((s) => s.getSortedJsonFiles);
+	const fetchJsonFiles = useJsonFileStore((s) => s.fetchJsonFiles);
 	const { mutate: createJsonFile } = useCreateJsonFile();
 
 	const [showForm, setShowForm] = useState(false);
@@ -47,11 +46,11 @@ export function JsonFilesView(_props: ViewProps) {
 	const [newJsonFileContent, setNewJsonFileContent] = useState('');
 
 	useEffect(() => {
-		if (Object.keys(jsonFilesRecord).length === 0) {
+		if (!jsonFilesRecord || jsonFilesRecord.length === 0) {
 			viewLogger.info('Store de archivos JSON vacío, cargando desde el servidor...');
-			loadJsonFiles();
+			fetchJsonFiles();
 		}
-	}, [loadJsonFiles, jsonFilesRecord]);
+	}, [fetchJsonFiles, jsonFilesRecord]);
 
 	const handleJsonFileClick = useCallback((jsonFile: JsonFileWithStats) => {
 		viewLogger.info('🖱️ Click en archivo JSON:', jsonFile.name);
@@ -85,10 +84,10 @@ export function JsonFilesView(_props: ViewProps) {
 		setShowForm(false);
 	}, [newJsonFileName, newJsonFileContent, createJsonFile]);
 
-	// Cachear el resultado de getSortedJsonFiles
+	// Cachear el resultado de ordenamiento de archivos JSON
 	const sortedJsonFiles = useMemo(() => {
-		return getSortedJsonFiles();
-	}, [getSortedJsonFiles]);
+		return jsonFilesRecord.sort((a, b) => a.name.localeCompare(b.name));
+	}, [jsonFilesRecord]);
 
 	if (error) {
 		return (
@@ -98,7 +97,7 @@ export function JsonFilesView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading && Object.keys(jsonFilesRecord).length === 0) {
+	if (isLoading && (!jsonFilesRecord || jsonFilesRecord.length === 0)) {
 		return <LoadingScreen />;
 	}
 
@@ -136,7 +135,7 @@ export function JsonFilesView(_props: ViewProps) {
 					</div>
 				)}
 
-				{sortedJsonFiles.length === 0 && !isLoading && !showForm ? (
+				{(!sortedJsonFiles || sortedJsonFiles.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={Braces}
 						title="No hay archivos JSON"
@@ -144,7 +143,7 @@ export function JsonFilesView(_props: ViewProps) {
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{sortedJsonFiles.map((jsonFile, index) => {
+						{sortedJsonFiles?.map((jsonFile, index) => {
 							const onJsonFileClick = () => handleJsonFileClick(jsonFile);
 							return (
 								<motion.div

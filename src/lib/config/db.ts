@@ -19,7 +19,7 @@ export type DbConfig = z.infer<typeof dbConfigSchema>;
 
 // Configuración por defecto
 export const defaultDbConfig: DbConfig = {
-	url: process.env.DATABASE_URL || 'postgresql://localhost:5432/image_manager',
+	url: process.env.DATABASE_URL || 'file:./db.sqlite',
 	maxConnections: 10,
 	connectionTimeout: 10000,
 	queryTimeout: 5000,
@@ -33,7 +33,7 @@ export const defaultDbConfig: DbConfig = {
 export function getDbConfig(): DbConfig {
 	try {
 		return dbConfigSchema.parse({
-			url: process.env.DATABASE_URL,
+			url: process.env.DATABASE_URL || 'file:./db.sqlite',
 			maxConnections: process.env.DB_MAX_CONNECTIONS ? Number.parseInt(process.env.DB_MAX_CONNECTIONS) : undefined,
 			connectionTimeout: process.env.DB_CONNECTION_TIMEOUT
 				? Number.parseInt(process.env.DB_CONNECTION_TIMEOUT)

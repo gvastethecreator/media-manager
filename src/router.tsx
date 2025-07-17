@@ -1,9 +1,5 @@
 import { createBrowserRouter, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
-import { DashboardView } from '@/components/views/dashboard/dashboard-view';
-import { FolderContentView } from '@/components/views/folders/folder-content-view';
-import FoldersView from '@/components/views/folders/folders-view';
-
 // Importar todas las vistas
 import AlbumsContentView from '@/components/views/albums/albums-content-view';
 import AllImagesContentView from '@/components/views/all-images/all-images-content-view';
@@ -12,17 +8,21 @@ import CharactersContentView from '@/components/views/characters/characters-cont
 import CollectionsContentView from '@/components/views/collections/collections-content-view';
 import ConceptsContentView from '@/components/views/concepts/concepts-content-view';
 import DashboardContentView from '@/components/views/dashboard/dashboard-content-view';
+import { DashboardView } from '@/components/views/dashboard/dashboard-view';
 import DevelopmentContentView from '@/components/views/development/development-content-view';
 import { DocumentContentView } from '@/components/views/documents/document-content-view';
 import DocumentsContentView from '@/components/views/documents/documents-content-view';
 import EntityCardsContentView from '@/components/views/entity-cards/entity-cards-content-view';
 import FavoritesContentView from '@/components/views/favorites/favorites-content-view';
-import File3DContentView from '@/components/views/file3d/file3d-content-view';
 import { File3DContentView as File3DDetailView } from '@/components/views/file3d/file-3d-content-view';
+import File3DContentView from '@/components/views/file3d/file3d-content-view';
 import FilesContentView from '@/components/views/files/files-content-view';
+import { FolderContentView } from '@/components/views/folders/folder-content-view';
+import FoldersView from '@/components/views/folders/folders-view';
 import GroupsContentView from '@/components/views/groups/groups-content-view';
 import { JsonFileContentView } from '@/components/views/json-files/json-file-content-view';
 import { JsonFilesView } from '@/components/views/json-files/json-files-view';
+import MixedContentView from '@/components/views/mixed/mixed-content-view';
 import { NotesView } from '@/components/views/notes/notes-view';
 import { PlacesView } from '@/components/views/places/places-view';
 import { PromptsView } from '@/components/views/prompts/prompts-view';
@@ -35,7 +35,6 @@ import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
 import { WorkflowContentView } from '@/components/views/workflows/workflow-content-view';
 import { WorkflowsView } from '@/components/views/workflows/workflows-view';
 import { WorldItemsView } from '@/components/views/world-items/world-items-view';
-import MixedContentView from '@/components/views/mixed/mixed-content-view';
 
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {
@@ -43,6 +42,7 @@ const FolderContentWrapper = () => {
 	return <FolderContentView folderId={id} />;
 };
 
+import { useEffect } from 'react';
 // Importar las vistas de contenido específico
 import { AlbumContentView } from '@/components/views/albums/album-content-view';
 import { CharacterContentView } from '@/components/views/characters/character-content-view';
@@ -56,7 +56,6 @@ import { PropertyContentView } from '@/components/views/properties/property-cont
 import { TagContentView } from '@/components/views/tags/tag-content-view';
 import { WildcardContentView } from '@/components/views/wildcards/wildcard-content-view';
 import { WorldItemContentView } from '@/components/views/world-items/world-item-content-view';
-
 // Importar stores para los wrappers
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
@@ -70,19 +69,18 @@ import { usePropertyStore } from '@/store/entities/property';
 import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { useEffect } from 'react';
 
 // Wrapper para álbumes
 const AlbumContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const { setCurrentAlbumId } = useAlbumStore();
-	
+
 	useEffect(() => {
 		if (id) {
 			setCurrentAlbumId(id);
 		}
 	}, [id, setCurrentAlbumId]);
-	
+
 	return <AlbumContentView />;
 };
 
@@ -90,13 +88,13 @@ const AlbumContentWrapper = () => {
 const CharacterContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedCharacterId = useCharacterStore((state) => state.setSelectedCharacterId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedCharacterId(id);
 		}
 	}, [id, setSelectedCharacterId]);
-	
+
 	return <CharacterContentView />;
 };
 
@@ -104,13 +102,13 @@ const CharacterContentWrapper = () => {
 const CollectionContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setCurrentCollectionId = useCollectionStore((state) => state.ui.setCurrentCollectionId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setCurrentCollectionId(id);
 		}
 	}, [id, setCurrentCollectionId]);
-	
+
 	return <CollectionContentView />;
 };
 
@@ -118,13 +116,13 @@ const CollectionContentWrapper = () => {
 const ConceptContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedConceptId = useConceptStore((state) => state.setSelectedConceptId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedConceptId(id);
 		}
 	}, [id, setSelectedConceptId]);
-	
+
 	return <ConceptContentView />;
 };
 
@@ -132,13 +130,13 @@ const ConceptContentWrapper = () => {
 const GroupContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedGroupId = useGroupStore((state) => state.setSelectedGroupId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedGroupId(id);
 		}
 	}, [id, setSelectedGroupId]);
-	
+
 	return <GroupContentView />;
 };
 
@@ -146,13 +144,13 @@ const GroupContentWrapper = () => {
 const NoteContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedNoteId = useNoteStore((state) => state.setSelectedNoteId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedNoteId(id);
 		}
 	}, [id, setSelectedNoteId]);
-	
+
 	return <NoteContentView />;
 };
 
@@ -160,13 +158,13 @@ const NoteContentWrapper = () => {
 const PlaceContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedPlaceId = usePlaceStore((state) => state.setSelectedPlaceId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedPlaceId(id);
 		}
 	}, [id, setSelectedPlaceId]);
-	
+
 	return <PlaceContentView />;
 };
 
@@ -174,13 +172,13 @@ const PlaceContentWrapper = () => {
 const PromptContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedPromptId = usePromptStore((state) => state.setSelectedPromptId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedPromptId(id);
 		}
 	}, [id, setSelectedPromptId]);
-	
+
 	return <PromptContentView />;
 };
 
@@ -188,13 +186,13 @@ const PromptContentWrapper = () => {
 const PropertyContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedPropertyId = usePropertyStore((state) => state.setSelectedPropertyId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedPropertyId(id);
 		}
 	}, [id, setSelectedPropertyId]);
-	
+
 	return <PropertyContentView />;
 };
 
@@ -202,13 +200,13 @@ const PropertyContentWrapper = () => {
 const TagContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedTagId = useTagStore((state) => state.setSelectedTagId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedTagId(id);
 		}
 	}, [id, setSelectedTagId]);
-	
+
 	return <TagContentView />;
 };
 
@@ -216,13 +214,13 @@ const TagContentWrapper = () => {
 const WildcardContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedWildcardId = useWildcardStore((state) => state.setSelectedWildcardId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedWildcardId(id);
 		}
 	}, [id, setSelectedWildcardId]);
-	
+
 	return <WildcardContentView />;
 };
 
@@ -230,13 +228,13 @@ const WildcardContentWrapper = () => {
 const WorldItemContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
 	const setSelectedWorldItemId = useWorldItemStore((state) => state.setSelectedWorldItemId);
-	
+
 	useEffect(() => {
 		if (id) {
 			setSelectedWorldItemId(id);
 		}
 	}, [id, setSelectedWorldItemId]);
-	
+
 	return <WorldItemContentView />;
 };
 

@@ -74,9 +74,9 @@ function buildWhereConditions(filters: ActivityFilters = {}) {
 		conditions.push(lte(activities.createdAt, filters.endDate));
 	}
 
-	// Filtrar por búsqueda en descripción (mapea a message en BD)
+	// Filtrar por búsqueda en descripción
 	if (filters.searchQuery) {
-		conditions.push(ilike(activities.message, `%${filters.searchQuery}%`));
+		conditions.push(ilike(activities.description, `%${filters.searchQuery}%`));
 	}
 
 	return conditions.length > 0 ? and(...conditions) : undefined;
@@ -93,16 +93,18 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	async create(data: CreateActivityData): Promise<Activity> {
 		try {
-			// Insertar nueva actividad (mapear description -> message)
+			// Insertar nueva actividad
 			const result = await db
 				.insert(activities)
 				.values({
 					id: crypto.randomUUID(),
 					type: data.type,
-					message: data.message, // Mapeo: message en app -> message en BD
-					data: data.data || null,
-					data: null,
-					imageId: data.imageId || null,
+					entityType: data.entityType,
+					entityId: data.entityId,
+					action: data.action,
+					userId: data.userId,
+					description: data.description,
+					metadata: data.metadata || null,
 					createdAt: new Date(),
 				})
 				.returning();
@@ -144,8 +146,8 @@ export class ActivityServiceImpl implements ActivityService {
 				.select({
 					id: activities.id,
 					type: activities.type,
-					message: activities.message,
-					data: activities.data,
+					description: activities.description,
+					metadata: activities.metadata,
 					createdAt: activities.createdAt,
 					imageId: activities.imageId,
 					image: {
@@ -184,8 +186,8 @@ export class ActivityServiceImpl implements ActivityService {
 				.select({
 					id: activities.id,
 					type: activities.type,
-					message: activities.message,
-					data: activities.data,
+					description: activities.description,
+					metadata: activities.metadata,
 					createdAt: activities.createdAt,
 					imageId: activities.imageId,
 					image: {
@@ -263,7 +265,7 @@ export class ActivityServiceImpl implements ActivityService {
 		return {
 			id: drizzleActivity.id,
 			type: drizzleActivity.type,
-			description: drizzleActivity.message, // Mapeo: message en BD -> description en app
+			description: drizzleActivity.description,
 			imageId: drizzleActivity.imageId,
 			createdAt: drizzleActivity.createdAt,
 			image: drizzleActivity.image,

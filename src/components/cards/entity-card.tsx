@@ -8,17 +8,17 @@
  */
 
 import type { FC } from 'react';
-import type { AnyEntityWithStats, ImageWithStats } from '@/types/migration';
-import type { VideoWithStats } from '@/types/entities/video/types';
-import type { CharacterWithStats } from '@/types/entities/character';
 import type { AudioWithStats } from '@/types/entities/audio';
+import type { CharacterWithStats } from '@/types/entities/character';
+import type { ConceptWithStats } from '@/types/entities/concept';
 import type { NoteWithStats } from '@/types/entities/note';
 import type { PlaceWithStats } from '@/types/entities/place';
-import type { WorldItemWithStats } from '@/types/entities/world-item';
-import type { ConceptWithStats } from '@/types/entities/concept';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import type { PropertyWithStats } from '@/types/entities/property';
+import type { VideoWithStats } from '@/types/entities/video/types';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
+import type { WorldItemWithStats } from '@/types/entities/world-item';
+import type { AnyEntityWithStats, ImageWithStats } from '@/types/migration';
 import {
 	getEntityStatsType,
 	isAlbumWithStats,
@@ -251,7 +251,14 @@ export const EntityCard: FC<EntityCardProps> = ({
 	}
 
 	if (isFolderWithStats(entity)) {
-		return <FolderCard folder={entity} onClick={createSimpleClickHandler(onClick)} className={className} interactive={!!onClick} />;
+		return (
+			<FolderCard
+				folder={entity}
+				onClick={createSimpleClickHandler(onClick)}
+				className={className}
+				interactive={!!onClick}
+			/>
+		);
 	}
 
 	if (isAudioWithStats(entity)) {
@@ -327,7 +334,9 @@ export const EntityCard: FC<EntityCardProps> = ({
 			};
 		};
 
-		return <WorldItemCard worldItemId={entity.id} onClick={createWorldItemClickHandler(onClick)} className={className} />;
+		return (
+			<WorldItemCard worldItemId={entity.id} onClick={createWorldItemClickHandler(onClick)} className={className} />
+		);
 	}
 
 	if (isConceptWithStats(entity)) {
