@@ -199,7 +199,7 @@ export function CreateCharacterForm({
 
 			const characterData: CharacterCreateInput = {
 				name: data.name,
-								description: data.description || null,
+				description: data.description || null,
 				category: data.category || null,
 			};
 

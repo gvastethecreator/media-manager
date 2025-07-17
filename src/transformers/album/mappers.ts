@@ -178,21 +178,22 @@ export function mapAlbumFiltersToDrizzle(filters: {
  * @returns Álbum con estadísticas calculadas
  */
 export function toAlbumWithStats(drizzleAlbum: DrizzleAlbumWithRelations): AlbumWithStats {
-	// Calcular estadísticas basadas en las relaciones
+	// Calcular estadísticas basadas en las relaciones disponibles
+	// Si las relaciones no están cargadas, usar los valores de los campos directos
 	const stats: AlbumStatistics = {
-		imageCount: drizzleAlbum.images?.length || 0,
-		videoCount: drizzleAlbum.videos?.length || 0,
-		collectionCount: drizzleAlbum.collections?.length || 0,
-		tagCount: drizzleAlbum.tags?.length || 0,
-		characterCount: drizzleAlbum.characters?.length || 0,
-		placeCount: drizzleAlbum.places?.length || 0,
-		worldItemCount: drizzleAlbum.worldItems?.length || 0,
-		conceptCount: drizzleAlbum.concepts?.length || 0,
-		promptCount: drizzleAlbum.prompts?.length || 0,
-		noteCount: drizzleAlbum.notes?.length || 0,
-		wildcardCount: drizzleAlbum.wildcards?.length || 0,
-		propertyCount: drizzleAlbum.properties?.length || 0,
-		groupCount: drizzleAlbum.groups?.length || 0,
+		imageCount: drizzleAlbum.images?.length ?? drizzleAlbum.totalImages ?? 0,
+		videoCount: drizzleAlbum.videos?.length ?? drizzleAlbum.totalVideos ?? 0,
+		collectionCount: drizzleAlbum.collections?.length ?? 0,
+		tagCount: drizzleAlbum.tags?.length ?? 0,
+		characterCount: drizzleAlbum.characters?.length ?? 0,
+		placeCount: drizzleAlbum.places?.length ?? 0,
+		worldItemCount: drizzleAlbum.worldItems?.length ?? 0,
+		conceptCount: drizzleAlbum.concepts?.length ?? 0,
+		promptCount: drizzleAlbum.prompts?.length ?? 0,
+		noteCount: drizzleAlbum.notes?.length ?? 0,
+		wildcardCount: drizzleAlbum.wildcards?.length ?? 0,
+		propertyCount: drizzleAlbum.properties?.length ?? 0,
+		groupCount: drizzleAlbum.groups?.length ?? 0,
 	};
 
 	// Crear el objeto AlbumWithStats

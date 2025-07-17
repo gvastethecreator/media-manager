@@ -117,11 +117,11 @@ export function useTauriContext() {
  * Utilidad para obtener la URL base de la API según el contexto
  */
 export function getApiBaseUrl(): string {
-	// En Tauri, siempre usar localhost
-	if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-		return 'http://localhost:3001/api';
+	// En desarrollo, usar localhost directo
+	if (process.env.NODE_ENV === 'development') {
+		return 'http://localhost:4000/api';
 	}
 
-	// En desarrollo web
-	return process.env.VITE_API_URL || 'http://localhost:3001/api';
+	// En producción, usar la variable de entorno o fallback
+	return process.env.VITE_API_URL || 'http://localhost:4000/api';
 }

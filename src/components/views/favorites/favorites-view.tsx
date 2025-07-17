@@ -29,8 +29,6 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		sortOrder: 'asc' as 'asc' | 'desc',
 	});
 
-
-
 	const handleFavoriteSelect = useCallback(
 		(favoriteId: string) => {
 			viewLogger.info('⭐ Seleccionando favorite', { favoriteId });

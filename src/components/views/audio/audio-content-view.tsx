@@ -170,7 +170,7 @@ const AudioContentView: React.FC<AudioContentViewProps> = ({
 					</div>
 				)}
 
-				{audios.length === 0 && !isLoading && !showForm ? (
+				{(!audios || audios.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={Music}
 						title="No hay archivos de audio"
@@ -178,7 +178,7 @@ const AudioContentView: React.FC<AudioContentViewProps> = ({
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{audios.map((audio: AudioWithStats, index: number) => {
+						{audios?.map((audio: AudioWithStats, index: number) => {
 							const onAudioClick = () => handleAudioClick(audio);
 							return (
 								<motion.div

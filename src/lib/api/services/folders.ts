@@ -102,7 +102,7 @@ export const validateFolderExists = async (folderPath: string): Promise<boolean>
 	try {
 		// Hacer la petición directamente para evitar logs de error innecesarios
 		const response = await fetch(
-			`${process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : window.location.origin}/api/folders/by-path?path=${encodeURIComponent(folderPath)}`,
+			`${process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : window.location.origin}/api/folders/by-path?path=${encodeURIComponent(folderPath)}`,
 			{
 				method: 'GET',
 				headers: {

@@ -100,7 +100,10 @@ export function CreateConceptForm({
 					...data,
 					content: data.content || '',
 				};
-				const updatedConcept = await updateConceptMutation.mutateAsync({ id: (concept as ConceptBase).id, data: updateData });
+				const updatedConcept = await updateConceptMutation.mutateAsync({
+					id: (concept as ConceptBase).id,
+					data: updateData,
+				});
 				if (onUpdated) {
 					onUpdated(updatedConcept);
 				}

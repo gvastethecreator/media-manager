@@ -131,7 +131,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 		);
 	}
 
-	if (isLoading && albums.length === 0) {
+	if (isLoading && (!albums || albums.length === 0)) {
 		return <LoadingScreen />;
 	}
 
@@ -177,7 +177,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 					</div>
 				)}
 
-				{albums.length === 0 && !isLoading && !showForm ? (
+				{(!albums || albums.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={AlbumIcon}
 						title="No hay álbumes creados"
@@ -185,7 +185,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{albums.map((album, index) => {
+						{albums?.map((album, index) => {
 							const onAlbumClick = () => handleAlbumClick(album);
 							return (
 								<motion.div

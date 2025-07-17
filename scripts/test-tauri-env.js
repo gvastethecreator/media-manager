@@ -7,10 +7,10 @@
 // Configurar variables de entorno como lo haría Tauri
 process.env.NODE_ENV = 'development';
 process.env.DATABASE_URL = 'file:./db.sqlite';
-process.env.API_PORT = '3001';
-process.env.PORT = '3001';
+process.env.API_PORT = '4000';
+process.env.PORT = '4000';
 process.env.CORS_ORIGIN = 'http://localhost:5173';
-process.env.VITE_API_URL = 'http://localhost:3001/api';
+process.env.VITE_API_URL = 'http://localhost:4000/api';
 process.env.TAURI_ENV = 'dev';
 
 console.log('🧪 Probando configuración de backend para Tauri...\n');

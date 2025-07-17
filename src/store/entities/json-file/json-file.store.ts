@@ -53,6 +53,7 @@ export interface JsonFileState {
 
 	// Utilidades
 	getJsonFileById: (id: string) => JsonFileWithStats | undefined;
+	getSortedJsonFiles: () => JsonFileWithStats[];
 	toggleFavorite: (id: string) => Promise<void>;
 }
 
@@ -156,6 +157,13 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			// Utilidades
 			getJsonFileById: (id: string) => {
 				return get().jsonFiles.find((j) => j.id === id);
+			},
+
+			getSortedJsonFiles: () => {
+				return get().jsonFiles.sort((a, b) => {
+					// Ordenar por nombre alfabéticamente
+					return a.name.localeCompare(b.name);
+				});
 			},
 
 			toggleFavorite: async (id: string) => {

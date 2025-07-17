@@ -137,7 +137,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 		// Si hay un thumbnail en el item, establecerlo como URL inicial
 		if (hasThumbnail) {
 			// Establecer el thumbnail como URL inicial mientras cargamos la imagen completa
-					setImageUrl((item as any).thumbnailUrl || null);
+			setImageUrl((item as any).thumbnailUrl || null);
 		}
 
 		// Iniciar carga directamente desde aquí

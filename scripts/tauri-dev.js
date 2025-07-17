@@ -20,10 +20,10 @@ const tauriEnv = {
 	...process.env,
 	NODE_ENV: 'development',
 	DATABASE_URL: 'file:./db.sqlite',
-	API_PORT: '3001',
-	PORT: '3001',
+	API_PORT: '4000',
+	PORT: '4000',
 	CORS_ORIGIN: 'http://localhost:5173',
-	VITE_API_URL: 'http://localhost:3001/api',
+	VITE_API_URL: 'http://localhost:4000/api',
 	TAURI_ENV: 'dev',
 };
 

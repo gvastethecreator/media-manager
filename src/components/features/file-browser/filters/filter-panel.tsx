@@ -177,16 +177,17 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 										)}
 									>
 										<CalendarIcon className="mr-2 h-4 w-4" />
-						{currentValue
-							? (() => {
-									try {
-										const date = currentValue instanceof Date ? currentValue : new Date(currentValue as string | number);
-										return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Fecha inválida';
-									} catch {
-										return 'Fecha inválida';
-									}
-							  })()
-							: filter.placeholder || 'Seleccionar fecha'}
+										{currentValue
+											? (() => {
+													try {
+														const date =
+															currentValue instanceof Date ? currentValue : new Date(currentValue as string | number);
+														return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Fecha inválida';
+													} catch {
+														return 'Fecha inválida';
+													}
+												})()
+											: filter.placeholder || 'Seleccionar fecha'}
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-auto p-0">

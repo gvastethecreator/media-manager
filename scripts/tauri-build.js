@@ -85,15 +85,15 @@ if (isPackaged) {
   // Modo producción: usar recursos empaquetados
   process.env.NODE_ENV = 'production';
   process.env.DATABASE_URL = 'file:' + join(process.resourcesPath, 'server', 'db.sqlite');
-  process.env.API_PORT = process.env.PORT || '3001';
+  process.env.API_PORT = process.env.PORT || '4000';
   process.env.CORS_ORIGIN = 'tauri://localhost';
 } else {
   // Modo desarrollo: usar variables de entorno del proyecto
   process.env.NODE_ENV = 'development';
   process.env.DATABASE_URL = 'file:' + join(__dirname, 'db.sqlite');
-  process.env.API_PORT = process.env.PORT || '3001';
+  process.env.API_PORT = process.env.PORT || '4000';
   process.env.CORS_ORIGIN = 'http://localhost:5173';
-  process.env.VITE_API_URL = 'http://localhost:3001/api';
+  process.env.VITE_API_URL = 'http://localhost:4000/api';
 }
 
 // Log para debug

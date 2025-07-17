@@ -10,10 +10,9 @@ import {
 	CollectionToolbar,
 } from './entities/collection-details';
 import { FolderDetails, FolderMetadata, FolderPreview, FolderToolbar } from './entities/folder-details';
-
+import { ImageDetails, ImageMetadata, ImagePreview, ImageToolbar } from './entities/image-details';
 // Importar componentes específicos
 import { VideoDetails } from './entities/video-details';
-import { ImageDetails, ImageMetadata, ImagePreview, ImageToolbar } from './entities/image-details';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,

@@ -4,11 +4,11 @@
  */
 
 import {
-	FolderDot,
 	Download,
 	Edit,
 	Eye,
 	Filter,
+	FolderDot,
 	Grid,
 	Heart,
 	Layout,

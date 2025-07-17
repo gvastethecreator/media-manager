@@ -43,7 +43,8 @@ export async function getWorkflows(): Promise<WorkflowWithStats[]> {
 				id: workflows.id,
 				name: workflows.name,
 				description: workflows.description,
-				content: workflows.content,
+				config: workflows.config,
+				steps: workflows.steps,
 				isActive: workflows.isActive,
 				createdAt: workflows.createdAt,
 				updatedAt: workflows.updatedAt,
@@ -53,7 +54,9 @@ export async function getWorkflows(): Promise<WorkflowWithStats[]> {
 
 		// Crear estadísticas básicas para cada workflow
 		return drizzleWorkflows.map((workflow) => {
-			const contentLength = workflow.content ? workflow.content.length : 0;
+			const configLength = workflow.config ? workflow.config.length : 0;
+			const stepsLength = workflow.steps ? workflow.steps.length : 0;
+			const contentLength = configLength + stepsLength;
 			const isValid = contentLength > 0;
 
 			// Construir WorkflowWithStats siguiendo la estructura esperada
@@ -98,7 +101,8 @@ export async function getWorkflowById(id: string): Promise<any | null> {
 				id: workflows.id,
 				name: workflows.name,
 				description: workflows.description,
-				content: workflows.content,
+				config: workflows.config,
+				steps: workflows.steps,
 				isActive: workflows.isActive,
 				createdAt: workflows.createdAt,
 				updatedAt: workflows.updatedAt,
@@ -134,7 +138,8 @@ export async function createWorkflow(data: WorkflowCreateInput): Promise<any> {
 		const newWorkflowData = {
 			name: data.name,
 			description: data.description || null,
-			content: data.content || '',
+			config: data.config || null,
+			steps: data.steps || null,
 			isActive: data.isActive ?? true,
 		};
 
@@ -142,7 +147,8 @@ export async function createWorkflow(data: WorkflowCreateInput): Promise<any> {
 			id: workflows.id,
 			name: workflows.name,
 			description: workflows.description,
-			content: workflows.content,
+			config: workflows.config,
+			steps: workflows.steps,
 			isActive: workflows.isActive,
 			createdAt: workflows.createdAt,
 			updatedAt: workflows.updatedAt,
@@ -182,14 +188,16 @@ export async function updateWorkflow(id: string, data: WorkflowUpdateInput): Pro
 		const updateData: any = {};
 		if (data.name !== undefined) updateData.name = data.name;
 		if (data.description !== undefined) updateData.description = data.description;
-		if (data.content !== undefined) updateData.content = data.content;
+		if (data.config !== undefined) updateData.config = data.config;
+		if (data.steps !== undefined) updateData.steps = data.steps;
 		if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
 		const [updatedWorkflow] = await db.update(workflows).set(updateData).where(eq(workflows.id, id)).returning({
 			id: workflows.id,
 			name: workflows.name,
 			description: workflows.description,
-			content: workflows.content,
+			config: workflows.config,
+			steps: workflows.steps,
 			isActive: workflows.isActive,
 			createdAt: workflows.createdAt,
 			updatedAt: workflows.updatedAt,

@@ -145,16 +145,16 @@ export function validateFolderPath(path: string): string {
 export function validateFolderId(id: string): string {
 	// Importar la función de validación que acepta tanto UUIDs como nombres normalizados
 	const { isValidFolderId } = require('@/lib/utils/folder-id-generator');
-	
+
 	if (!id || typeof id !== 'string') {
 		logger.error('Error validando ID de carpeta: ID vacío o no es string', { id });
 		throw new TransformerError('ID de carpeta inválido');
 	}
-	
+
 	if (!isValidFolderId(id)) {
 		logger.error('Error validando ID de carpeta: formato inválido', { id });
 		throw new TransformerError('ID de carpeta inválido');
 	}
-	
+
 	return id;
 }

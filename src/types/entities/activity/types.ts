@@ -13,9 +13,15 @@ import { z } from 'zod';
 export interface ActivityBase {
 	id: string;
 	type: string;
-	message: string;
-	data?: string | null;
-	imageId?: string | null;
+	entityType: string;
+	entityId: string;
+	action: string;
+	userId: string;
+	description: string;
+	metadata?: Record<string, any> | null;
+	ipAddress?: string | null;
+	userAgent?: string | null;
+	sessionId?: string | null;
 	createdAt: Date;
 }
 
@@ -54,9 +60,15 @@ export type ActivityComplete = Activity;
  */
 export interface CreateActivityData {
 	type: string;
-	message: string;
-	data?: string;
-	imageId?: string;
+	entityType: string;
+	entityId: string;
+	action: string;
+	userId: string;
+	description: string;
+	metadata?: Record<string, any>;
+	ipAddress?: string;
+	userAgent?: string;
+	sessionId?: string;
 }
 
 /**
@@ -92,9 +104,15 @@ export interface ActivityListResponse {
 export const ActivitySchema = z.object({
 	id: z.string(),
 	type: z.string(),
-	message: z.string(),
-	data: z.string().nullable().optional(),
-	imageId: z.string().nullable().optional(),
+	entityType: z.string(),
+	entityId: z.string(),
+	action: z.string(),
+	userId: z.string(),
+	description: z.string(),
+	metadata: z.record(z.any()).nullable().optional(),
+	ipAddress: z.string().nullable().optional(),
+	userAgent: z.string().nullable().optional(),
+	sessionId: z.string().nullable().optional(),
 	createdAt: z.date(),
 });
 

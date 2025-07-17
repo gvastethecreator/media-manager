@@ -73,7 +73,7 @@ export function TauriBackendStatus() {
 				</div>
 
 				<div className="text-xs text-muted-foreground space-y-1">
-					<div>Puerto: 3001</div>
+					<div>Puerto: 4000</div>
 					<div>Modo: Aplicación de escritorio</div>
 				</div>
 			</CardContent>

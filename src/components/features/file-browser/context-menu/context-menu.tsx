@@ -111,13 +111,13 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				title="Colecciones"
 				icon={<BookImage className="h-4 w-4" />}
 				items={collections.map((c) => ({
-				...c,
-				emoji: c.emoji ?? undefined,
-				color: c.color || undefined,
-				isFavorite: Boolean(c.isFavorite),
-				isRecent: Boolean(c.isRecent),
-			}))}
-			isLoading={loadingStates.collections.loading}
+					...c,
+					emoji: c.emoji ?? undefined,
+					color: c.color || undefined,
+					isFavorite: Boolean(c.isFavorite),
+					isRecent: Boolean(c.isRecent),
+				}))}
+				isLoading={loadingStates.collections.loading}
 				file={file}
 				onAction={onAction}
 				actionType="add-to-collection"
@@ -149,13 +149,13 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				title="Álbumes"
 				icon={<Album className="h-4 w-4" />}
 				items={albums.map((a) => ({
-				...a,
-				emoji: a.emoji ?? undefined,
-				color: a.color || undefined,
-				isFavorite: Boolean(a.isFavorite),
-				isRecent: Boolean(a.isRecent),
-			}))}
-			isLoading={loadingStates.albums.loading}
+					...a,
+					emoji: a.emoji ?? undefined,
+					color: a.color || undefined,
+					isFavorite: Boolean(a.isFavorite),
+					isRecent: Boolean(a.isRecent),
+				}))}
+				isLoading={loadingStates.albums.loading}
 				file={file}
 				onAction={onAction}
 				actionType="add-to-album"

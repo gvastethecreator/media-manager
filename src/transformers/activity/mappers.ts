@@ -8,9 +8,15 @@ import { type ActivityFilters, ActivityType, type CreateActivityData } from '../
 
 type DrizzleCreateActivityData = {
 	type: string;
-	message: string;
-	data?: string | null;
-	imageId?: string | null;
+	entityType: string;
+	entityId: string;
+	action: string;
+	userId: string;
+	description: string;
+	metadata?: Record<string, any> | null;
+	ipAddress?: string | null;
+	userAgent?: string | null;
+	sessionId?: string | null;
 };
 
 type DrizzleWhereFilter = {
@@ -19,7 +25,7 @@ type DrizzleWhereFilter = {
 	type?: { in?: string[] };
 	imageId?: string;
 	createdAt?: { gte?: Date; lte?: Date };
-	message?: { contains?: string };
+	description?: { contains?: string };
 };
 
 type DrizzleFindManyArgs = {
@@ -39,9 +45,15 @@ type DrizzleFindManyArgs = {
 export function mapCreateActivityDataToDrizzle(data: CreateActivityData): DrizzleCreateActivityData {
 	return {
 		type: data.type,
-		message: data.message,
-		data: data.data || null,
-		imageId: data.imageId || null,
+		entityType: data.entityType,
+		entityId: data.entityId,
+		action: data.action,
+		userId: data.userId,
+		description: data.description,
+		metadata: data.metadata || null,
+		ipAddress: data.ipAddress || null,
+		userAgent: data.userAgent || null,
+		sessionId: data.sessionId || null,
 	};
 }
 
@@ -79,7 +91,7 @@ export function mapActivityFiltersToDrizzle(filters: ActivityFilters): DrizzleFi
 
 	// Filtrar por búsqueda en descripción
 	if (filters.searchQuery) {
-		where.message = {
+		where.description = {
 			contains: filters.searchQuery,
 		};
 	}
@@ -139,9 +151,9 @@ export function generateActivityDescription(type: ActivityType | string, data: R
 		[ActivityType.COLLECTION_ADD_IMAGE]: `Imagen "${data.imageName}" añadida a la colección "${data.name}"`,
 		[ActivityType.COLLECTION_REMOVE_IMAGE]: `Imagen "${data.imageName}" eliminada de la colección "${data.name}"`,
 
-		[ActivityType.SYSTEM_ERROR]: `Error: ${data.message}`,
-		[ActivityType.SYSTEM_WARNING]: `Advertencia: ${data.message}`,
-		[ActivityType.SYSTEM_INFO]: `Información: ${data.message}`,
+		[ActivityType.SYSTEM_ERROR]: `Error: ${data.description || data.error || 'Error del sistema'}`,
+		[ActivityType.SYSTEM_WARNING]: `Advertencia: ${data.description || data.warning || 'Advertencia del sistema'}`,
+		[ActivityType.SYSTEM_INFO]: `Información: ${data.description || data.info || 'Información del sistema'}`,
 		[ActivityType.SYSTEM_SYNC]: `Sincronización ${data.status}`,
 		[ActivityType.SYSTEM_BACKUP]: `Copia de seguridad ${data.status}`,
 		[ActivityType.SYSTEM_RESTORE]: `Restauración ${data.status}`,
@@ -157,7 +169,7 @@ export function generateActivityDescription(type: ActivityType | string, data: R
 	};
 
 	// Obtener la plantilla o usar una genérica
-	const template = templates[type] || `${data.message}`;
+	const template = templates[type] || `${data.description || data.message || 'Actividad del sistema'}`;
 
 	// Reemplazar variables en la plantilla
 	return template.replace(/\${(\w+)}/g, (_, key) => data[key] || '[?]');

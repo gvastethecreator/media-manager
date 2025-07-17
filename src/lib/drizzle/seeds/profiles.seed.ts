@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { profiles } from '../schema';
 import { seedLogger } from './index';
@@ -32,7 +33,22 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 			},
 		];
 
-		await db.insert(profiles).values(sampleProfiles);
+		await db
+			.insert(profiles)
+			.values(sampleProfiles)
+			.onConflictDoUpdate({
+				target: profiles.id,
+				set: {
+					name: sql`excluded.name`,
+					emoji: sql`excluded.emoji`,
+					color: sql`excluded.color`,
+					description: sql`excluded.description`,
+					isActive: sql`excluded.isActive`,
+					updatedAt: sql`(CURRENT_TIMESTAMP)`,
+					settingsId: sql`excluded.settingsId`,
+					imageId: sql`excluded.imageId`,
+				},
+			});
 
 		seedLogger.success(`✅ ${sampleProfiles.length} perfiles creados`);
 	} catch (error) {

@@ -25,7 +25,7 @@ interface EntityWithDynamicProperties {
 /**
  * Componente que muestra información detallada sobre la entidad actual (carpeta, colección, etc.)
  * Se mostrará a la derecha de los breadcrumbs con un estilo más sutil
- * 
+ *
  * NOTA: Este componente está deshabilitado temporalmente durante la migración a React Router
  */
 export function EntityDetails() {

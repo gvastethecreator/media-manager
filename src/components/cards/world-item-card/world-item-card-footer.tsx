@@ -95,4 +95,4 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 			</div>
 		</div>
 	);
-}
+};

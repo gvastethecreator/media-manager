@@ -20,9 +20,9 @@ export class ApiClient {
 	private baseURL: string;
 
 	constructor() {
-		// En desarrollo, el servidor Express corre en puerto 3001
+		// En desarrollo, el servidor Express corre en puerto 4000
 		// En producción, usar la misma URL base
-		this.baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : window.location.origin;
+		this.baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : window.location.origin;
 	}
 
 	/**

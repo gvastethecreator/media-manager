@@ -6,6 +6,7 @@ import os from 'os';
 import path from 'path';
 import { db } from '@/lib/drizzle';
 import {
+	activities,
 	albums,
 	audios,
 	characters,
@@ -26,7 +27,7 @@ import {
 	wildcards,
 	workflows,
 	worldItems,
-} from '@/lib/drizzle/schema';
+} from '@/lib/drizzle/schema/index';
 import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
 import { createSystemError } from '@/lib/errors/system';
 import type { Settings } from '@/types/settings';

@@ -61,7 +61,7 @@ const File3DContentView: React.FC<File3DContentViewProps> = ({
 		);
 	}
 
-	if (isLoading && file3ds.length === 0) {
+	if (isLoading && (!file3ds || file3ds.length === 0)) {
 		return <LoadingScreen />;
 	}
 
@@ -99,7 +99,7 @@ const File3DContentView: React.FC<File3DContentViewProps> = ({
 					</div>
 				)}
 
-				{file3ds.length === 0 && !isLoading && !showForm ? (
+				{(!file3ds || file3ds.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={Box}
 						title="No hay archivos 3D"
@@ -107,7 +107,7 @@ const File3DContentView: React.FC<File3DContentViewProps> = ({
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{file3ds.map((file3d, index) => {
+						{file3ds?.map((file3d, index) => {
 							const onFile3DClick = () => handleFile3DClick(file3d);
 							return (
 								<motion.div

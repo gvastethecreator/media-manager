@@ -22,7 +22,13 @@ import {
 	ConceptViewMode,
 	ConceptWithStats,
 } from '@/types/entities/concept';
-import type { ConceptStore } from './types';
+import type {
+	ConceptCoreSlice,
+	ConceptFiltersSlice,
+	ConceptRelationsSlice,
+	ConceptStore,
+	ConceptUISlice,
+} from './types';
 
 const storeLogger = clientLogger.withContext('ConceptStore');
 
@@ -155,6 +161,9 @@ const createRelationsSlice: StateCreator<ConceptStore, [], [], ConceptRelationsS
 });
 
 // --- STORE CREATION ---
+// Selectores
+export const selectSelectedConcept = (state: ConceptStore) => state.selectedConcept;
+
 export const useConceptStore = create<ConceptStore>()(
 	devtools(
 		persist(

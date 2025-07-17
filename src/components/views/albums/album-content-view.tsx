@@ -86,7 +86,7 @@ export function AlbumContentView() {
 		);
 	}
 
-	if (!items || items.length === 0) {
+	if (!optimisticItems || optimisticItems.length === 0) {
 		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
 	}
 
