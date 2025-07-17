@@ -118,7 +118,7 @@ albumsRouter.get('/', async (req, res) => {
 		console.log('🔍 [DEBUG] Iniciando consulta de albums...');
 		console.log('🔍 [DEBUG] Verificando toAlbumWithStats:', typeof toAlbumWithStats);
 		console.log('🔍 [DEBUG] Verificando serializeAlbum:', typeof serializeAlbum);
-		
+
 		const whereConditions = [];
 		if (search) {
 			whereConditions.push(or(like(albums.name, `%${search}%`), like(albums.description, `%${search}%`)));

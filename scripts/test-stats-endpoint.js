@@ -5,7 +5,7 @@ async function testStatsEndpoint() {
 	console.log('🔍 Probando endpoint /api/stats/system...');
 
 	try {
-		const response = await fetch('http://localhost:3001/api/stats/system');
+		const response = await fetch('http://localhost:4000/api/stats/system');
 		const data = await response.json();
 
 		console.log('📊 Status:', response.status);

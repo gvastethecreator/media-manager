@@ -70,9 +70,12 @@ export const createWorkflowCoreSlice: StateCreator<
 
 	createWorkflow: async (data) => {
 		try {
-			await createWorkflowInApi(data);
+			const newWorkflow = await createWorkflowInApi(data);
+			set((state) => {
+				state.workflows[newWorkflow.id] = newWorkflow;
+				state.lastUpdated = Date.now();
+			});
 			toastService.success(`Workflow "${data.name}" creado.`);
-			await get().loadWorkflows(); // Recargar para obtener el nuevo item con stats
 		} catch (error) {
 			const errorMsg = `❌ Error al crear el workflow "${data.name}".`;
 			logger.error(errorMsg, error);
@@ -82,9 +85,12 @@ export const createWorkflowCoreSlice: StateCreator<
 
 	updateWorkflow: async (id, data) => {
 		try {
-			await updateWorkflowInApi(id, data);
+			const updatedWorkflow = await updateWorkflowInApi(id, data);
+			set((state) => {
+				state.workflows[id] = updatedWorkflow;
+				state.lastUpdated = Date.now();
+			});
 			toastService.success('Workflow actualizado.');
-			await get().loadWorkflows(); // Recargar para obtener los datos actualizados
 		} catch (error) {
 			const errorMsg = '❌ Error al actualizar el workflow.';
 			logger.error(errorMsg, error);

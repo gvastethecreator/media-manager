@@ -55,5 +55,5 @@ const BaseContentView: React.FC<BaseContentViewProps> = ({
 	);
 };
 
-export default BaseContentView;
+export { BaseContentView };
 export type { BaseContentViewProps };

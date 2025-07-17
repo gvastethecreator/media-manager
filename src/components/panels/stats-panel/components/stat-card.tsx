@@ -1,19 +1,19 @@
 import {
 	Activity,
 	Album,
+	Book,
 	Bookmark,
 	Box,
 	Download,
 	Eye,
 	Folder,
+	Grid2X2,
 	HardDrive,
 	Image,
 	MapPin,
 	Star,
 	Tag,
 	Users,
-	Book,
-	Grid2X2,
 } from 'lucide-react';
 import { memo } from 'react';
 

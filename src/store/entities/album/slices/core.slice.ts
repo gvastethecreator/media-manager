@@ -36,7 +36,11 @@ export const createAlbumCoreSlice: StateCreator<
 
 	// Getters
 	getSortedAlbums: () => {
-		const albums = Object.values(get().albums);
+		const albumsRecord = get().albums;
+		if (!albumsRecord) {
+			return [];
+		}
+		const albums = Object.values(albumsRecord);
 		// Ordenar por fecha de actualización descendente por defecto
 		return albums.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 	},

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 
 import { useToast } from '@/components/ui/use-toast';
-import BaseContentView from '@/components/views/base/base-content-view';
+import { BaseContentView } from '@/components/views/base/base-content-view';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { EntityStatsType, EntityWithStats } from '@/types/migration';
 
@@ -153,24 +153,24 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 					<>
 						<Progress value={progress * 100} className="h-2 mb-2" />
 						<div className="flex items-center justify-between text-xs text-blue-700 dark:text-blue-300">
-						<span>
-							{indexingStatus?.indexedFolders || 0} de {indexingStatus?.totalFolders || 0} carpetas
-						</span>
-						{indexingStatus?.currentFolder && (
-							<span className="truncate max-w-40">Procesando: {indexingStatus.currentFolder}</span>
-						)}
-					</div>
+							<span>
+								{indexingStatus?.indexedFolders || 0} de {indexingStatus?.totalFolders || 0} carpetas
+							</span>
+							{indexingStatus?.currentFolder && (
+								<span className="truncate max-w-40">Procesando: {indexingStatus.currentFolder}</span>
+							)}
+						</div>
 					</>
 				)}
 
 				{indexingStatus?.errors && indexingStatus.errors.length > 0 && (
-				<div className="mt-2 flex items-center gap-2">
-					<AlertTriangle className="h-4 w-4 text-amber-600" />
-					<Badge variant="outline" className="text-amber-700 border-amber-600">
-						{indexingStatus.errors.length} errores
-					</Badge>
-				</div>
-			)}
+					<div className="mt-2 flex items-center gap-2">
+						<AlertTriangle className="h-4 w-4 text-amber-600" />
+						<Badge variant="outline" className="text-amber-700 border-amber-600">
+							{indexingStatus.errors.length} errores
+						</Badge>
+					</div>
+				)}
 			</motion.div>
 		);
 	};
@@ -213,7 +213,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 	return (
 		<BaseContentView
 			title="Todas las Imágenes"
-			description={`${(images?.length || 0)} ${(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total`}
+			description={`${images?.length || 0} ${(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total`}
 			icon={<ImageIcon className="h-5 w-5" />}
 			headerControls={
 				<>
@@ -262,80 +262,76 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 			)}
 
 			{/* Dialog para upload de imágenes */}
-				<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-					<DialogTrigger asChild>
-						<Button
-							variant="default"
-							className="fixed bottom-4 right-4 z-50"
-							onClick={() => setIsUploadDialogOpen(true)}
-						>
-							<Upload className="w-4 h-4 mr-2" />
-							Subir Imágenes
-						</Button>
-					</DialogTrigger>
-					<DialogContent className="sm:max-w-[425px]">
-						<DialogHeader>
-							<DialogTitle>Subir Imágenes</DialogTitle>
-						</DialogHeader>
+			<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+				<DialogTrigger asChild>
+					<Button variant="default" className="fixed bottom-4 right-4 z-50" onClick={() => setIsUploadDialogOpen(true)}>
+						<Upload className="w-4 h-4 mr-2" />
+						Subir Imágenes
+					</Button>
+				</DialogTrigger>
+				<DialogContent className="sm:max-w-[425px]">
+					<DialogHeader>
+						<DialogTitle>Subir Imágenes</DialogTitle>
+					</DialogHeader>
 
-						<div className="grid gap-4 py-2">
-							{/* Instrucciones */}
-							<Card>
-								<CardHeader>
-									<CardTitle className="text-base font-semibold">Instrucciones</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="text-sm text-muted-foreground">
-										1. Selecciona las imágenes que deseas subir desde tu dispositivo.
-									</p>
-									<p className="text-sm text-muted-foreground">
-										2. Asegúrate de que las imágenes cumplan con los requisitos de tamaño y formato.
-									</p>
-									<p className="text-sm text-muted-foreground">
-										3. Haz clic en "Subir Imágenes" para iniciar el proceso de carga.
-									</p>
-								</CardContent>
-							</Card>
+					<div className="grid gap-4 py-2">
+						{/* Instrucciones */}
+						<Card>
+							<CardHeader>
+								<CardTitle className="text-base font-semibold">Instrucciones</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<p className="text-sm text-muted-foreground">
+									1. Selecciona las imágenes que deseas subir desde tu dispositivo.
+								</p>
+								<p className="text-sm text-muted-foreground">
+									2. Asegúrate de que las imágenes cumplan con los requisitos de tamaño y formato.
+								</p>
+								<p className="text-sm text-muted-foreground">
+									3. Haz clic en "Subir Imágenes" para iniciar el proceso de carga.
+								</p>
+							</CardContent>
+						</Card>
 
-							{/* Selector de archivos */}
-							<div>
-								<Label htmlFor="image-upload" className="block text-sm font-medium">
-									Seleccionar Imágenes
-								</Label>
-								<Input
-									id="image-upload"
-									type="file"
-									accept="image/*"
-									multiple
-									onChange={handleFileSelectInternal}
-									className="mt-1"
-								/>
-							</div>
-
-							{/* Progreso de carga */}
-							{isUploading && (
-								<div className="flex flex-col gap-2">
-									<Progress value={uploadProgress} className="h-2" />
-									<span className="text-xs text-muted-foreground">Cargando... {uploadProgress}%</span>
-								</div>
-							)}
-
-							{/* Botones de acción */}
-							<div className="flex justify-end gap-2">
-								<Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} className="h-9">
-									Cancelar
-								</Button>
-								<Button
-									onClick={() => handleFileUploadInternal(uploadFiles)}
-									className="h-9"
-									disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
-								>
-									{isUploading ? 'Subiendo...' : 'Subir Imágenes'}
-								</Button>
-							</div>
+						{/* Selector de archivos */}
+						<div>
+							<Label htmlFor="image-upload" className="block text-sm font-medium">
+								Seleccionar Imágenes
+							</Label>
+							<Input
+								id="image-upload"
+								type="file"
+								accept="image/*"
+								multiple
+								onChange={handleFileSelectInternal}
+								className="mt-1"
+							/>
 						</div>
-					</DialogContent>
-				</Dialog>
+
+						{/* Progreso de carga */}
+						{isUploading && (
+							<div className="flex flex-col gap-2">
+								<Progress value={uploadProgress} className="h-2" />
+								<span className="text-xs text-muted-foreground">Cargando... {uploadProgress}%</span>
+							</div>
+						)}
+
+						{/* Botones de acción */}
+						<div className="flex justify-end gap-2">
+							<Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} className="h-9">
+								Cancelar
+							</Button>
+							<Button
+								onClick={() => handleFileUploadInternal(uploadFiles)}
+								className="h-9"
+								disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
+							>
+								{isUploading ? 'Subiendo...' : 'Subir Imágenes'}
+							</Button>
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</BaseContentView>
 	);
 };

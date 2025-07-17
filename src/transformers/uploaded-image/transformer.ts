@@ -72,7 +72,7 @@ export function transformToUploadedImageWithRelationsFromDrizzle(
 ): UploadedImageExtended {
 	const width = uploadedImage.width || 800;
 	const height = uploadedImage.height || 600;
-	
+
 	const dimensions: UploadedImageDimensions = {
 		width,
 		height,

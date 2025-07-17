@@ -9,7 +9,6 @@ export { useFilteredData } from './hooks/use-filtered-data';
 // Export renderer
 export { ImageRenderer } from './image-renderer';
 
-
 // Export types
 export * from './types';
 

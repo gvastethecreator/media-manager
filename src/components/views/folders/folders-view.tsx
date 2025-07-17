@@ -76,7 +76,6 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 		);
 	}
 
-
 	return (
 		<div className={`h-full flex flex-col p-0 m-0 ${className}`}>
 			<ScrollArea className="flex-1">

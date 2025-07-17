@@ -498,8 +498,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		}
 	};
 
-
-
 	return (
 		<div className="flex items-center justify-between h-10 px-2 border-b">
 			<div className="flex items-center">

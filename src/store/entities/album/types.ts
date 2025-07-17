@@ -41,4 +41,9 @@ export type AlbumFilterActions = Record<string, never>;
 
 // --- Store Completo ---
 
-export type AlbumStore = AlbumCoreState & AlbumCoreActions & AlbumUIState & AlbumUIActions & AlbumFilterState & AlbumFilterActions;
+export type AlbumStore = AlbumCoreState &
+	AlbumCoreActions &
+	AlbumUIState &
+	AlbumUIActions &
+	AlbumFilterState &
+	AlbumFilterActions;

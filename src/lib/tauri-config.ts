@@ -16,7 +16,7 @@ export const getAppConfig = () => {
 		isDesktop,
 		isBrowser: !isDesktop,
 		// URL base para APIs - en desktop usamos el servidor embebido
-		apiBaseUrl: isDesktop ? 'http://localhost:3001/api' : '/api',
+		apiBaseUrl: isDesktop ? 'http://localhost:4000/api' : '/api',
 		// Configuración de CORS
 		corsEnabled: !isDesktop,
 		// Configuración de rutas

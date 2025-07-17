@@ -17,6 +17,12 @@ import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqli
  * =================================================================================
  */
 
+// =================================================================================
+// IMPORTACIONES DEL SISTEMA MODULAR
+// =================================================================================
+// Importar y re-exportar todas las tablas del sistema modular
+export * from './schema/index';
+
 // Modelo para el sistema de colas
 export const queueJobs = sqliteTable(
 	'QueueJob',
@@ -222,11 +228,25 @@ export const imageStats = sqliteTable(
 export const activities = sqliteTable('Activity', {
 	id: text('id').primaryKey(),
 	type: text('type').notNull(),
-	message: text('message').notNull(),
-	data: text('data'),
+	entityType: text('entityType').notNull(),
+	entityId: text('entityId').notNull(),
+	userId: text('userId'),
+	action: text('action').notNull(),
+	description: text('description'),
+	metadata: text('metadata'),
+	ipAddress: text('ipAddress'),
+	userAgent: text('userAgent'),
+	sessionId: text('sessionId'),
 	createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
-	imageId: text('imageId'),
 });
+
+// Índices para la tabla Activity
+export const activityIndexes = {
+	typeIdx: index('Activity_type_idx').on(activities.type),
+	entityTypeIdx: index('Activity_entityType_idx').on(activities.entityType),
+	entityIdIdx: index('Activity_entityId_idx').on(activities.entityId),
+	createdAtIdx: index('Activity_createdAt_idx').on(activities.createdAt),
+};
 
 // Modelo para los grupos
 export const groups = sqliteTable(
@@ -308,7 +328,10 @@ export const tags = sqliteTable(
 		emoji: text('emoji').default('🏷️'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
+		shortcut: text('shortcut'),
+		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		parentId: text('parentId'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
@@ -762,38 +785,7 @@ export const thumbnails = sqliteTable(
 	})
 );
 
-// Modelo para flujos de trabajo
-export const workflows = sqliteTable(
-	'Workflow',
-	{
-		id: text('id').primaryKey(),
-		name: text('name').notNull(),
-		description: text('description'),
-		emoji: text('emoji').default('⚙️'),
-		color: text('color').default('#3b82f6'),
-		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
-		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		isActive: integer('isActive', { mode: 'boolean' }).notNull().default(true),
-		version: text('version').default('1.0.0'),
-		config: text('config'),
-		steps: text('steps'),
-		triggers: text('triggers'),
-		conditions: text('conditions'),
-		actions: text('actions'),
-		schedule: text('schedule'),
-		lastRun: integer('lastRun', { mode: 'timestamp_ms' }),
-		nextRun: integer('nextRun', { mode: 'timestamp_ms' }),
-		runCount: integer('runCount').notNull().default(0),
-		successCount: integer('successCount').notNull().default(0),
-		errorCount: integer('errorCount').notNull().default(0),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
-		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
-	},
-	(table) => ({
-		nameIdx: uniqueIndex('Workflow_name_key').on(table.name),
-	})
-);
+// Nota: workflows se exporta desde schema/content/index.ts
 
 // Modelo para favoritos
 export const favorites = sqliteTable(

@@ -22,49 +22,53 @@ import { EntityWithStats, getEntityStatsType } from '@/types/migration';
 import { entityDetailsRegistry } from './entity-details-registry';
 
 // Fallback para cuando no hay configuración específica
-const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action: string, data?: any) => void }>(function DefaultEntityDetails({ entity, onAction }) {
-	const entityType = getEntityStatsType(entity);
-	if (entityType === null) {
+const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action: string, data?: any) => void }>(
+	function DefaultEntityDetails({ entity, onAction }) {
+		const entityType = getEntityStatsType(entity);
+		if (entityType === null) {
+			return (
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-sm">Tipo de entidad no reconocido</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p className="text-sm text-muted-foreground">
+							No se pudo determinar el tipo de entidad para mostrar los detalles.
+						</p>
+					</CardContent>
+				</Card>
+			);
+		}
+
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-sm">Tipo de entidad no reconocido</CardTitle>
+					<CardTitle className="text-sm">Detalles de {entityType}</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<p className="text-sm text-muted-foreground">No se pudo determinar el tipo de entidad para mostrar los detalles.</p>
+					<div className="space-y-2 text-sm">
+						<div className="flex justify-between">
+							<span className="text-muted-foreground">Nombre:</span>
+							<span className="font-medium truncate max-w-[60%]">{entity.name || 'Sin nombre'}</span>
+						</div>
+						<div className="flex justify-between">
+							<span className="text-muted-foreground">Tipo:</span>
+							<Badge variant="secondary" className="text-xs">
+								{entityType.charAt(0).toUpperCase() + entityType.slice(1)}
+							</Badge>
+						</div>
+						{entity.createdAt && (
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Creado:</span>
+								<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
+							</div>
+						)}
+					</div>
 				</CardContent>
 			</Card>
 		);
 	}
-
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-sm">Detalles de {entityType}</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<div className="space-y-2 text-sm">
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Nombre:</span>
-						<span className="font-medium truncate max-w-[60%]">{entity.name || 'Sin nombre'}</span>
-					</div>
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Tipo:</span>
-						<Badge variant="secondary" className="text-xs">
-							{entityType.charAt(0).toUpperCase() + entityType.slice(1)}
-						</Badge>
-					</div>
-					{entity.createdAt && (
-						<div className="flex justify-between">
-							<span className="text-muted-foreground">Creado:</span>
-							<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
-						</div>
-					)}
-				</div>
-			</CardContent>
-		</Card>
-	);
-});
+);
 
 // Componente para mostrar múltiples elementos seleccionados
 const MultipleSelectionDetails = memo<{ entities: EntityWithStats[]; onAction?: (action: string, data?: any) => void }>(

@@ -24,12 +24,7 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 	const getSortedImages = useImageStore((s) => s.getSortedImages);
 
 	// Hook para indexación automática de carpetas
-	const {
-		status,
-		isIndexing,
-		progress,
-		startIndexing,
-	} = useAutoFolderIndexing({
+	const { status, isIndexing, progress, startIndexing } = useAutoFolderIndexing({
 		autoStart: true,
 		maxFoldersPerBatch: 3,
 		onIndexingStart: () => {

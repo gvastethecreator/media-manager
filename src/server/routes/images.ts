@@ -6,9 +6,9 @@ import { z } from 'zod';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
 import { folders, images } from '@/lib/drizzle/schema/index';
+import { isValidFolderId } from '@/lib/utils/folder-id-generator';
 import { imageService } from '@/services/image/image.service';
 import { processImage } from '../services/image-processing.service';
-import { isValidFolderId } from '@/lib/utils/folder-id-generator';
 
 const router = Router();
 
@@ -49,9 +49,12 @@ const UpdateImageSchema = CreateImageSchema.partial().omit({
 
 // Schema para filtros de búsqueda
 const ImageFiltersSchema = z.object({
-	folderId: z.string().refine((id) => isValidFolderId(id), {
-		message: 'ID de carpeta inválido'
-	}).optional(),
+	folderId: z
+		.string()
+		.refine((id) => isValidFolderId(id), {
+			message: 'ID de carpeta inválido',
+		})
+		.optional(),
 	isFavorite: z.boolean().optional(),
 	minWidth: z.number().int().positive().optional(),
 	maxWidth: z.number().int().positive().optional(),

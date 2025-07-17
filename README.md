@@ -241,7 +241,7 @@ bun run db:verify
 # .env.local
 DATABASE_URL="file:./dev.db"
 NODE_ENV="development"
-PORT=3001
+PORT=4000
 CORS_ORIGIN="http://localhost:5173"
 
 # Opcional: Turso (producción)

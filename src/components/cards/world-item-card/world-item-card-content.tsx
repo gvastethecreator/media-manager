@@ -3,13 +3,13 @@ import React, { useMemo } from 'react';
 import { useTheme } from '@/lib/contexts/theme-context';
 import { cn } from '@/lib/utils';
 import worldItemService from '@/services/world-item/world-item.service';
+import type { PropertyWithStats } from '@/types/entities/property/base';
 import type {
 	WorldItemEffect,
 	WorldItemProperty,
 	WorldItemRequirement,
 	WorldItemStats,
 } from '@/types/entities/world-item/stats-types';
-import type { PropertyWithStats } from '@/types/entities/property/base';
 
 const { getRecentWorldItemImages } = worldItemService;
 
