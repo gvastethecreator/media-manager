@@ -3,13 +3,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // Tipos para la API
 interface CreateActivityData {
 	type: string;
+	entityType: string;
+	entityId: string;
+	action: string;
+	userId: string;
 	description: string;
-	imageId?: string;
-	albumId?: string;
-	folderId?: string;
-	characterId?: string;
-	collectionId?: string;
 	metadata?: Record<string, any>;
+	ipAddress?: string;
+	userAgent?: string;
+	sessionId?: string;
 }
 
 interface GetActivitiesParams {
@@ -31,13 +33,15 @@ interface ActivityStatsParams {
 interface Activity {
 	id: string;
 	type: string;
+	entityType: string;
+	entityId: string;
+	action: string;
+	userId: string;
 	description: string;
-	imageId?: string;
-	albumId?: string;
-	folderId?: string;
-	characterId?: string;
-	collectionId?: string;
 	metadata?: Record<string, any>;
+	ipAddress?: string;
+	userAgent?: string;
+	sessionId?: string;
 	createdAt: string;
 	updatedAt: string;
 }

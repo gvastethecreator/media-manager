@@ -3,7 +3,7 @@ use tauri::Manager;
 
 #[tauri::command]
 pub async fn check_backend_health() -> Result<String, String> {
-    match reqwest::get("http://localhost:3001/health").await {
+    match reqwest::get("http://localhost:4000/health").await {
         Ok(response) => {
             if response.status().is_success() {
                 Ok("Backend is running".to_string())

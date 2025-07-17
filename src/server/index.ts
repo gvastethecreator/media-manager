@@ -39,7 +39,7 @@ import { workflowsRouter } from './routes/workflows.js';
 import worldItemsRouter from './routes/world-items';
 
 const app = express();
-const PORT = process.env.API_PORT || process.env.PORT || '3001';
+const PORT = process.env.API_PORT || process.env.PORT || '4000';
 
 // Middleware
 app.use(
@@ -171,7 +171,7 @@ app.use((req, res) => {
 // Middleware de manejo de errores (DEBE ir al final)
 app.use(errorLogger);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
 	console.log(`🚀 Servidor Express iniciado en puerto ${PORT}`);
 	console.log('\n📁 APIs de Entidades:');
 	console.log(`   📁 Folders: http://localhost:${PORT}/api/folders`);

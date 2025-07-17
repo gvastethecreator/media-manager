@@ -50,7 +50,7 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 		);
 	}
 
-	if (isLoading && collections.length === 0) {
+	if (isLoading && (!collections || collections.length === 0)) {
 		return <LoadingScreen />;
 	}
 
@@ -88,7 +88,7 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 					</div>
 				)}
 
-				{collections.length === 0 && !isLoading && !showForm ? (
+				{(!collections || collections.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={BookMarked}
 						title="No hay colecciones creadas"
@@ -96,7 +96,7 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{collections.map((collection, index) => (
+						{collections?.map((collection, index) => (
 							<motion.div
 								key={collection.id}
 								initial={{ opacity: 0, y: 20 }}

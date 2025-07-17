@@ -10,30 +10,41 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { createWorkflowInApi, getWorkflowsFromApi } from '@/lib/api/client/workflow.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useWorkflowStore } from '@/store/entities/workflow';
+import type { WorkflowWithStats } from '@/types/entities/workflow';
 
 const viewLogger = clientLogger.withContext('WorkflowsView');
 
 export function WorkflowsView() {
-	const { workflows, isLoading, error, loadWorkflows, createWorkflow } = useWorkflowStore((state) => ({
-		workflows: Object.values(state.workflows),
-		isLoading: state.isLoading,
-		error: state.error,
-		loadWorkflows: state.loadWorkflows,
-		createWorkflow: state.createWorkflow,
-	}));
+	const [workflows, setWorkflows] = useState<WorkflowWithStats[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
 	const [showForm, setShowForm] = useState(false);
 	const [newWorkflowName, setNewWorkflowName] = useState('');
 	const [newWorkflowDescription, setNewWorkflowDescription] = useState('');
 
-	useEffect(() => {
-		if (workflows.length === 0 && !isLoading) {
-			viewLogger.info('Store de workflows vacío, cargando desde el servidor...');
-			loadWorkflows();
+	const loadWorkflows = useCallback(async () => {
+		if (isLoading) return;
+		setIsLoading(true);
+		setError(null);
+		try {
+			const data = await getWorkflowsFromApi();
+			setWorkflows(data);
+			viewLogger.info(`✅ ${data.length} workflows cargados.`);
+		} catch (err) {
+			const errorMsg = '❌ Error al cargar los workflows.';
+			viewLogger.error(errorMsg, err);
+			setError(errorMsg);
+		} finally {
+			setIsLoading(false);
 		}
-	}, [loadWorkflows, workflows.length, isLoading]);
+	}, [isLoading]);
+
+	useEffect(() => {
+		loadWorkflows();
+	}, []);
 
 	const { toast } = useToast();
 	const handleCreateWorkflow = useCallback(async () => {
@@ -45,11 +56,24 @@ export function WorkflowsView() {
 			});
 			return;
 		}
-		await createWorkflow({ name: newWorkflowName, description: newWorkflowDescription });
-		setNewWorkflowName('');
-		setNewWorkflowDescription('');
-		setShowForm(false);
-	}, [newWorkflowName, newWorkflowDescription, createWorkflow]);
+		try {
+			const newWorkflow = await createWorkflowInApi({ name: newWorkflowName, description: newWorkflowDescription });
+			setWorkflows((prev) => [...prev, newWorkflow]);
+			toast({
+				title: '✅ Éxito',
+				description: `Workflow "${newWorkflowName}" creado.`,
+			});
+			setNewWorkflowName('');
+			setNewWorkflowDescription('');
+			setShowForm(false);
+		} catch (err) {
+			toast({
+				title: '❌ Error',
+				description: `Error al crear el workflow "${newWorkflowName}".`,
+				variant: 'destructive',
+			});
+		}
+	}, [newWorkflowName, newWorkflowDescription, toast]);
 
 	if (error) {
 		return (
@@ -97,7 +121,7 @@ export function WorkflowsView() {
 					</div>
 				)}
 
-				{workflows.length === 0 && !isLoading && !showForm ? (
+				{(!workflows || workflows.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
 						icon={Workflow}
 						title="No hay workflows creados"
@@ -105,7 +129,7 @@ export function WorkflowsView() {
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-						{workflows.map((wf, index) => (
+						{workflows?.map((wf, index) => (
 							<motion.div
 								key={wf.id}
 								initial={{ opacity: 0, y: 20 }}

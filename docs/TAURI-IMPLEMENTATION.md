@@ -73,12 +73,12 @@ bun run build
 
 ### **En Desarrollo**
 - Base de datos en: `./db.sqlite`
-- Backend ejecutándose en: `http://localhost:3001`
+- Backend ejecutándose en: `http://localhost:4000`
 
 ### **En Producción (Desktop)**
 - Base de datos en: `{AppData}/image-manager/db.sqlite`
 - Backend incluido internamente en la aplicación
-- APIs accesibles en: `http://localhost:3001`
+- APIs accesibles en: `http://localhost:4000`
 
 ## 🔧 Componentes Añadidos
 
@@ -145,8 +145,8 @@ import { getDatabasePath, setupTauriEnvironment } from '@/lib/tauri/database-con
 
 ### **Backend no inicia**
 ```bash
-# Verificar que el puerto 3001 esté libre
-netstat -an | findstr :3001
+# Verificar que el puerto 4000 esté libre
+netstat -an | findstr :4000
 
 # Verificar logs del backend
 # Los logs aparecerán en la consola de Tauri

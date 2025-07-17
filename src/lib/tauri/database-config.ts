@@ -70,7 +70,7 @@ export async function checkBackendDependencies(): Promise<{
 
 	try {
 		// Verificar que el backend responda
-		const response = await fetch('http://localhost:3001/health');
+		const response = await fetch('http://localhost:4000/health');
 		hasNodeRuntime = response.ok;
 	} catch (error) {
 		errors.push(`Backend no disponible: ${error}`);

@@ -7,6 +7,11 @@ import type { AlbumFilterActions, AlbumFilterState, AlbumStore } from '../types'
 
 const initialState: AlbumFilterState = {};
 
-export const createAlbumFilterSlice: StateCreator<AlbumStore, [['zustand/immer', never]], [], AlbumFilterState & AlbumFilterActions> = () => ({
+export const createAlbumFilterSlice: StateCreator<
+	AlbumStore,
+	[['zustand/immer', never]],
+	[],
+	AlbumFilterState & AlbumFilterActions
+> = () => ({
 	...initialState,
 });

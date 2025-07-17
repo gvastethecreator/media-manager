@@ -1,0 +1,44 @@
+Comando: bunx biome format --write .
+Fecha: 2025-07-17T21:52:41.580Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\panels\details-pFormatted 1485 files in 1674ms. Fixed 2 files.
+Found 2 errors.
+anel\entities\collection-details.tsx:260:6 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `)`
+  
+    258 │ 							</Button>
+    259 │ 						</div>
+  > 260 │ 					)}
+        │ 					^
+    261 │ 				</div>
+    262 │ 			</CardHeader>
+  
+  i Remove )
+  
+
+src\components\panels\details-panel\entities\collection-details.tsx:260:7 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    258 │ 							</Button>
+    259 │ 						</div>
+  > 260 │ 					)}
+        │ 					 ^
+    261 │ 				</div>
+    262 │ 			</CardHeader>
+  
+
+src\components\panels\details-panel\entities\collection-details.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

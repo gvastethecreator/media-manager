@@ -262,7 +262,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 								<span className="font-semibold text-xs flex-1" style={{ color: category.color }}>
 									{category.label}
 								</span>
-								{(category.children.length > 0 || category.showTreeView) && (
+								{((category.children && category.children.length > 0) || category.showTreeView) && (
 									<>
 										{expandedCategories.has(category.id) ? (
 											<ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -290,7 +290,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 									{/* Categorías normales */}
 									{!category.showTreeView && (
 										<div className="flex flex-col gap-0.5">
-											{category.children.map((child, _idx) => (
+											{(category.children || []).map((child, _idx) => (
 												<div key={child.id} className="flex flex-col">
 													<div
 														className={cn(

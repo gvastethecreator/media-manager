@@ -9,7 +9,12 @@ const initialState: AlbumUIState = {
 	currentAlbumId: null,
 };
 
-export const createAlbumUISlice: StateCreator<AlbumStore, [['zustand/immer', never]], [], AlbumUIState & AlbumUIActions> = (set) => ({
+export const createAlbumUISlice: StateCreator<
+	AlbumStore,
+	[['zustand/immer', never]],
+	[],
+	AlbumUIState & AlbumUIActions
+> = (set) => ({
 	...initialState,
 
 	setCurrentAlbumId: (id) => {
