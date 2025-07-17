@@ -4,7 +4,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
+import type { NavigationData } from '@/lib/api/navigation';
 import { ViewType } from '@/components/views/types';
 
 /**

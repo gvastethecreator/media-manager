@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { WildcardCard } from '@/components/cards/wildcard-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,11 +20,10 @@ import type { ViewProps } from '../types';
 const viewLogger = clientLogger.withContext('WildcardsView');
 
 export function WildcardsView({ isVisible }: ViewProps) {
-	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
 	const { selectedWildcardId, setSelectedWildcardId } = useWildcardStore();
 	const { mutate: createWildcard } = useCreateWildcard();
 
-	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
 	const [newWildcardName, setNewWildcardName] = useState('');
 	const [newWildcardDescription, setNewWildcardDescription] = useState('');
@@ -38,16 +36,9 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		refetch,
 	} = useWildcards({
 		search: localSearch,
-		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc',
+		sortBy: 'name',
+		sortOrder: 'asc',
 	});
-
-	// Sincronizar búsqueda local con store de navegación
-	useEffect(() => {
-		if (searchTerm !== localSearch) {
-			setLocalSearch(searchTerm || '');
-		}
-	}, [searchTerm, localSearch]);
 
 	const handleWildcardSelect = useCallback(
 		(wildcardId: string) => {

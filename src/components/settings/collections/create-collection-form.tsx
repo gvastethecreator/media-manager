@@ -42,7 +42,7 @@ const createCollectionSchema = z.object({
 	url: z.string().url({ message: 'La URL debe ser válida' }).optional().or(z.literal('')),
 	alternativeUrl: z.string().url({ message: 'La URL alternativa debe ser válida' }).optional().or(z.literal('')),
 	price: z.number().nonnegative().optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof createCollectionSchema>;
@@ -92,8 +92,8 @@ export function CreateCollectionForm({
 			form.reset({
 				name: collection.name,
 				description: collection.description || '',
-				color: collection.color,
-				emoji: collection.emoji,
+				color: collection.color || undefined,
+				emoji: collection.emoji || undefined,
 				category: collection.category || undefined,
 				platform: collection.platform || undefined,
 				url: collection.url || '',
@@ -176,14 +176,15 @@ export function CreateCollectionForm({
 
 			const collectionData: CollectionCreateInput = {
 				name: data.name,
-				description: data.description,
-				color: data.color,
-				emoji: data.emoji,
-				category: data.category,
-				platform: data.platform,
-				url: data.url || undefined,
-				alternativeUrl: data.alternativeUrl || undefined,
-				price: data.price,
+				color: data.color || null,
+				emoji: data.emoji || null,
+				description: data.description || null,
+				category: data.category || null,
+				platform: data.platform || null,
+				url: data.url || null,
+				alternativeUrl: data.alternativeUrl || null,
+				price: data.price || null,
+				isFavorite: data.isFavorite || false,
 			};
 
 			// Crear o actualizar colección

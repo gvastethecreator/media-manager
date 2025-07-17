@@ -131,7 +131,7 @@ src/components/features/file-browser/
 ├── views/               # Vistas (Grid, List, Cards, Masonry)
 ├── file-browser.tsx     # Componente principal
 ├── image-renderer.tsx   # Renderizador optimizado de imágenes
-├── integrated-file-browser.tsx # Integración con toolbar
+
 ├── types.tsx            # Tipos compartidos
 └── README.md            # Documentación
 ```
@@ -160,22 +160,7 @@ Componente principal para mostrar y manipular archivos. Gestiona:
 />
 ```
 
-### `IntegratedFileBrowser`
 
-Componente de nivel superior que integra `FileBrowser` con `FileBrowserToolbar`. Proporciona una experiencia completa:
-
-```tsx
-<IntegratedFileBrowser
-  items={files}
-  isLoading={isLoading}
-  isReindexing={isReindexing}
-  reindexProgress={progress}
-  loadMoreItems={handleLoadMore}
-  showSearch={true}
-  showFilters={true}
-  showDetailsToggle={true}
-/>
-```
 
 ## Flujo de datos
 
@@ -220,22 +205,7 @@ export default function MyPage() {
 }
 ```
 
-### Integrado con Toolbar
 
-```tsx
-import { IntegratedFileBrowser } from '@/components/features/file-browser';
-
-export default function MyPage() {
-  return (
-    <IntegratedFileBrowser
-      items={myFiles}
-      isLoading={isLoading}
-      showSearch={true}
-      showFilters={true}
-    />
-  );
-}
-```
 
 ## Estado del desarrollo
 

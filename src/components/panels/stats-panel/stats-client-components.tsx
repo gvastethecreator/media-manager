@@ -24,6 +24,8 @@ export interface GeneralStats {
 	totalDownloads: number;
 	totalSize: number;
 	totalActivities: number;
+	topTags: TopTag[];
+	recentActivity: RecentActivity[];
 }
 
 // Componente cliente para estadísticas generales
@@ -243,7 +245,7 @@ export function ClientTopTags() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 space-y-0.5 w-full">
-				{stats.topTags.map((tag) => (
+				{stats.topTags.map((tag: TopTag) => (
 					<TagUsage key={tag.id} tag={tag} />
 				))}
 			</CardContent>
@@ -311,7 +313,7 @@ export function ClientRecentActivity() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 w-full space-y-0">
-				{stats.recentActivity.map((activity) => (
+				{stats.recentActivity.map((activity: RecentActivity) => (
 					<Activity key={activity.id} activity={activity} />
 				))}
 			</CardContent>

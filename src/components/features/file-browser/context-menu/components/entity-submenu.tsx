@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import {
 	ContextMenuItem,
 	ContextMenuPortal,
@@ -79,7 +79,7 @@ const ErrorState = memo(function ErrorState({ entityName }: { entityName: string
 
 // Componente para el botón de crear memoizado
 const CreateButton = memo(function CreateButton({ entityName, onClick }: { entityName: string; onClick: () => void }) {
-	const { setCurrentView } = useNavigationStore();
+	const navigate = useNavigate();
 
 	// Mapeo de entidades a sus correspondientes tabs en SettingsView
 	const entityToSettingsTabMap: Record<string, string> = {
@@ -101,7 +101,7 @@ const CreateButton = memo(function CreateButton({ entityName, onClick }: { entit
 		onClick();
 
 		// Redirigir a la vista de configuración
-		setCurrentView('settings');
+		navigate('/settings');
 
 		// Obtener la pestaña correspondiente
 		const settingsTab = entityToSettingsTabMap[entityName];
@@ -115,7 +115,7 @@ const CreateButton = memo(function CreateButton({ entityName, onClick }: { entit
 				})
 			);
 		}
-	}, [onClick, entityName, setCurrentView]);
+	}, [onClick, entityName, navigate]);
 
 	return (
 		<MemoizedContextMenuItem onClick={handleCreateClick} className="text-primary">

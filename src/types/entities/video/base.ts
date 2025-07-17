@@ -64,6 +64,8 @@ export interface VideoStatistics {
 	propertyCount: number;
 	groupCount: number;
 	totalRelations: number;
+	totalAssociations: number;
+	totalItems: number;
 
 	// Métricas técnicas de video
 	durationMinutes: number;

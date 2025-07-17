@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,11 +22,10 @@ const viewLogger = clientLogger.withContext('PromptsView');
 
 export function PromptsView({ isVisible }: ViewProps) {
 	const navigate = useNavigate();
-	const { searchTerm, sortBy, sortOrder } = useNavigationStore();
 	const { selectedPromptId, setSelectedPromptId } = usePromptStore();
 	const { mutate: createPrompt } = useCreatePrompt();
 
-	const [localSearch, setLocalSearch] = useState(searchTerm || '');
+	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
 	const [newPromptName, setNewPromptName] = useState('');
 	const [newPromptContent, setNewPromptContent] = useState('');
@@ -41,16 +39,9 @@ export function PromptsView({ isVisible }: ViewProps) {
 		refetch,
 	} = usePrompts({
 		search: localSearch,
-		sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: sortOrder as 'asc' | 'desc',
+		sortBy: 'name',
+		sortOrder: 'asc',
 	});
-
-	// Sincronizar búsqueda local con store de navegación
-	useEffect(() => {
-		if (searchTerm !== localSearch) {
-			setLocalSearch(searchTerm || '');
-		}
-	}, [searchTerm, localSearch]);
 
 	const handlePromptSelect = useCallback(
 		(promptId: string) => {

@@ -21,17 +21,15 @@ const UploadedImageCreateSchema = z.object({
 
 const UploadedImageUpdateSchema = UploadedImageCreateSchema.partial();
 
-// GET /uploaded-images/:id - Obtener datos de una imagen subida por ID
-router.get('/:id', async (req, res) => {
-	const { id } = req.params;
-
-	const result = await getUploadedImage(id);
+// GET /uploaded-images/stats - Obtener estadísticas de imágenes subidas (DEBE IR ANTES QUE /:id)
+router.get('/stats', async (_req, res) => {
+	const result = await getUploadedImageStats();
 
 	if (!result.success) {
-		return res.status(404).json({ error: result.error });
+		return res.status(500).json({ error: result.error });
 	}
 
-	res.json(result.item);
+	res.json(result.stats);
 });
 
 // GET /uploaded-images - Obtener lista de imágenes subidas con filtros
@@ -66,15 +64,17 @@ router.get('/', async (req, res) => {
 	});
 });
 
-// GET /uploaded-images/stats - Obtener estadísticas de imágenes subidas
-router.get('/stats', async (_req, res) => {
-	const result = await getUploadedImageStats();
+// GET /uploaded-images/:id - Obtener datos de una imagen subida por ID
+router.get('/:id', async (req, res) => {
+	const { id } = req.params;
+
+	const result = await getUploadedImage(id);
 
 	if (!result.success) {
-		return res.status(500).json({ error: result.error });
+		return res.status(404).json({ error: result.error });
 	}
 
-	res.json(result.stats);
+	res.json(result.item);
 });
 
 // DELETE /uploaded-images/:id - Eliminar imagen subida

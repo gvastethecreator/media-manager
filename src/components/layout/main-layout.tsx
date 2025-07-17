@@ -1,9 +1,9 @@
 import { memo, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { RightPanel } from '@/components/panels/right-panel/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { ViewContainer } from '@/components/views/view-container';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 export const MainLayout = memo(function MainLayout() {
@@ -47,7 +47,7 @@ export const MainLayout = memo(function MainLayout() {
 
 						{/* Contenido principal */}
 						<div className="flex-1 min-h-0 bg-background p-4">
-							<ViewContainer />
+							<Outlet />
 						</div>
 					</div>
 				</ResizablePanel>

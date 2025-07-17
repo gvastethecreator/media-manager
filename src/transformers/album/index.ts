@@ -16,5 +16,5 @@ export * from './mappers';
 export * from './schema';
 export * from './serializers';
 // Alias para compatibilidad con rutas del servidor
-export { serializeAlbum as toAlbumWithStats } from './serializers';
+export { toAlbumWithStats } from './mappers';
 export * from './validators';

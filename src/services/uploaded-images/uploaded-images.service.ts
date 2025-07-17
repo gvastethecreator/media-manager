@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, like, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, like, lte, or, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { uploadedImages } from '@/lib/drizzle/schema/index';
 import { processImage } from '@/lib/image/image-processing';
@@ -357,9 +357,11 @@ class UploadedImagesService {
 					type: uploadedImages.type,
 					category: uploadedImages.category,
 					size: uploadedImages.size,
+					hash: uploadedImages.hash,
+					metadata: uploadedImages.metadata,
+					imageId: uploadedImages.imageId,
 					width: uploadedImages.width,
 					height: uploadedImages.height,
-					metadata: uploadedImages.metadata,
 					createdAt: uploadedImages.createdAt,
 					updatedAt: uploadedImages.updatedAt,
 				})
@@ -398,6 +400,55 @@ class UploadedImagesService {
 		}
 	}
 
+	public async getImage(id: string): Promise<UploadedImageResult | null> {
+		try {
+			uploadedImagesLogger.info(`🔍 Obteniendo imagen subida por ID: ${id}`);
+
+			// Buscar la imagen por ID
+			const imageQuery = await db
+				.select({
+					id: uploadedImages.id,
+					name: uploadedImages.name,
+					path: uploadedImages.path,
+					size: uploadedImages.size,
+					hash: uploadedImages.hash,
+					metadata: uploadedImages.metadata,
+					imageId: uploadedImages.imageId,
+					type: uploadedImages.type,
+					category: uploadedImages.category,
+					width: uploadedImages.width,
+					height: uploadedImages.height,
+					createdAt: uploadedImages.createdAt,
+					updatedAt: uploadedImages.updatedAt,
+				})
+				.from(uploadedImages)
+				.where(eq(uploadedImages.id, id))
+				.limit(1);
+
+			if (imageQuery.length === 0) {
+				return null;
+			}
+
+			const image = imageQuery[0];
+
+			// Transformar usando el transformer
+			const transformedImage = fromDB(image);
+
+			return {
+				success: true,
+				item: transformedImage,
+			};
+		} catch (error) {
+			uploadedImagesLogger.error('Error obteniendo imagen subida por ID:', error);
+			throw toServiceError(error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: 'Error al obtener la imagen subida',
+				context: { id },
+				serviceName: SERVICE_NAME,
+			});
+		}
+	}
+
 	public async getImageStats(): Promise<UploadedImageStats> {
 		try {
 			uploadedImagesLogger.info('📊 Calculando estadísticas de imágenes subidas');
@@ -405,31 +456,29 @@ class UploadedImagesService {
 			// Contar el número total de imágenes
 			const totalResult = await db.select({ count: count(uploadedImages.id) }).from(uploadedImages);
 
-			// Agrupar por tipo usando una consulta SQL raw para obtener suma
-			const byTypeQuery = await db.execute(sql`
-				SELECT
-					type,
-					COUNT(*) as count,
-					COALESCE(SUM(size), 0) as total_size
-				FROM ${uploadedImages}
-				GROUP BY type
-			`);
+			// Obtener todas las imágenes para calcular estadísticas
+			const allImages = await db
+				.select({
+					type: uploadedImages.type,
+					size: uploadedImages.size,
+				})
+				.from(uploadedImages);
 
-			// Calcular el tamaño total
-			const totalSize = byTypeQuery.rows.reduce((sum, item: any) => sum + (Number(item.total_size) || 0), 0);
+			// Calcular estadísticas por tipo
+			const stats: Record<string, number> = {};
+			let totalSize = 0;
 
-			// Convertir a formato de respuesta
-			const stats: Record<UploadedImageType, number> = {} as Record<UploadedImageType, number>;
-
-			for (const item of byTypeQuery.rows as any[]) {
-				stats[item.type as UploadedImageType] = Number(item.count);
+			for (const image of allImages) {
+				const type = image.type || 'unknown';
+				stats[type] = (stats[type] || 0) + 1;
+				totalSize += image.size || 0;
 			}
 
 			uploadedImagesLogger.info('✅ Estadísticas calculadas');
 
 			return {
 				total: totalResult[0].count,
-				byType: stats,
+				byType: stats as Record<UploadedImageType, number>,
 				totalSize,
 			};
 		} catch (error) {
@@ -437,6 +486,7 @@ class UploadedImagesService {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al obtener estadísticas de imágenes subidas',
+				context: {},
 				serviceName: SERVICE_NAME,
 			});
 		}

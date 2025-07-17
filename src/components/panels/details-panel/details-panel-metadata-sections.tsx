@@ -16,7 +16,7 @@ function renderInfoItems(items: (InfoItemData | null | undefined)[]) {
 /**
  * Componente para metadata XMP
  */
-export function XMPInfo({ metadata }: MetadataComponentProps) {
+export function XMPInfo({ metadata }: MetadataSectionsProps) {
 	const [copied, setCopied] = useState(false);
 	const xmp = metadata?.xmp as Record<string, any> | undefined;
 
@@ -151,7 +151,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 /**
  * Componente para metadata IPTC
  */
-export function IPTCInfo({ metadata }: MetadataComponentProps) {
+export function IPTCInfo({ metadata }: MetadataSectionsProps) {
 	const iptc = metadata?.iptc as Record<string, any> | undefined;
 
 	if (!iptc) {
@@ -227,7 +227,7 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 /**
  * Componente para metadata EXIF
  */
-export function ExifInfo({ metadata }: MetadataComponentProps) {
+export function ExifInfo({ metadata }: MetadataSectionsProps) {
 	const exif = metadata?.exif as Record<string, any> | undefined;
 
 	if (!exif) {
@@ -335,7 +335,7 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 /**
  * Componente para metadata GPS
  */
-export function GPSInfo({ metadata }: MetadataComponentProps) {
+export function GPSInfo({ metadata }: MetadataSectionsProps) {
 	if (!metadata?.gps) {
 		return <div className="text-xs text-muted-foreground">No hay datos GPS disponibles</div>;
 	}
@@ -395,7 +395,7 @@ export function GPSInfo({ metadata }: MetadataComponentProps) {
 /**
  * Componente para metadata técnica
  */
-export function TechnicalInfo({ metadata }: MetadataComponentProps) {
+export function TechnicalInfo({ metadata }: MetadataSectionsProps) {
 	if (!metadata) {
 		return <div className="text-xs text-muted-foreground">No hay datos técnicos disponibles</div>;
 	}

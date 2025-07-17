@@ -51,7 +51,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 
 	// Función para aplicar un filtro
 	const applyFilter = useCallback(
-		(id: string, value: any, operator = 'eq') => {
+		(id: string, value: any, operator: 'eq' | 'contains' | 'gt' | 'lt' | 'gte' | 'lte' = 'eq') => {
 			if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
 				removeFilterOption(id);
 			} else {
@@ -83,7 +83,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 							<Input
 								id={filter.id}
 								value={typeof currentValue === 'boolean' ? '' : currentValue || ''}
-								onChange={(e) => applyFilter(filter.id, e.target.value, 'contains' as FilterOption['operator'])}
+								onChange={(e) => applyFilter(filter.id, e.target.value, 'contains')}
 								placeholder={filter.placeholder}
 							/>
 						</div>
@@ -177,11 +177,16 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 										)}
 									>
 										<CalendarIcon className="mr-2 h-4 w-4" />
-										{currentValue
-											? typeof currentValue === 'object' && currentValue instanceof Date
-												? currentValue.toLocaleDateString()
-												: new Date(currentValue as string | number).toLocaleDateString()
-											: filter.placeholder || 'Seleccionar fecha'}
+						{currentValue
+							? (() => {
+									try {
+										const date = currentValue instanceof Date ? currentValue : new Date(currentValue as string | number);
+										return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Fecha inválida';
+									} catch {
+										return 'Fecha inválida';
+									}
+							  })()
+							: filter.placeholder || 'Seleccionar fecha'}
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-auto p-0">

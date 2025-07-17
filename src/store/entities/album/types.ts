@@ -16,7 +16,9 @@ export interface AlbumCoreState {
 	lastUpdated: number | null;
 }
 
-export type AlbumUIState = Record<string, never>;
+export interface AlbumUIState {
+	currentAlbumId: string | null;
+}
 
 export type AlbumFilterState = Record<string, never>;
 
@@ -31,10 +33,12 @@ export interface AlbumCoreActions {
 	getSortedAlbums: () => AlbumWithStats[];
 }
 
-export type AlbumUIActions = Record<string, never>;
+export interface AlbumUIActions {
+	setCurrentAlbumId: (id: string | null) => void;
+}
 
 export type AlbumFilterActions = Record<string, never>;
 
 // --- Store Completo ---
 
-export type AlbumStore = AlbumCoreState & AlbumCoreActions;
+export type AlbumStore = AlbumCoreState & AlbumCoreActions & AlbumUIState & AlbumUIActions & AlbumFilterState & AlbumFilterActions;

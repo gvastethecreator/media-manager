@@ -50,8 +50,8 @@ export function useDetailsPanelIntegration() {
 	 */
 	const addToSelection = useCallback(
 		(item: EntityWithStats) => {
-			setSelectedItems((prev) => {
-				const exists = prev.find((p) => p.id === item.id);
+			setSelectedItems((prev: EntityWithStats[]) => {
+				const exists = prev.find((p: EntityWithStats) => p.id === item.id);
 				if (exists) return prev;
 				return [...prev, item];
 			});
@@ -65,7 +65,7 @@ export function useDetailsPanelIntegration() {
 	 */
 	const removeFromSelection = useCallback(
 		(itemId: string) => {
-			setSelectedItems((prev) => prev.filter((p) => p.id !== itemId));
+			setSelectedItems((prev: EntityWithStats[]) => prev.filter((p: EntityWithStats) => p.id !== itemId));
 		},
 		[setSelectedItems]
 	);
@@ -75,8 +75,8 @@ export function useDetailsPanelIntegration() {
 	 */
 	const toggleSelection = useCallback(
 		(item: EntityWithStats) => {
-			setSelectedItems((prev) => {
-				const exists = prev.find((p) => p.id === item.id);
+			setSelectedItems((prev: EntityWithStats[]) => {
+				const exists = prev.find((p: EntityWithStats) => p.id === item.id);
 				if (exists) {
 					return prev.filter((p) => p.id !== item.id);
 				}

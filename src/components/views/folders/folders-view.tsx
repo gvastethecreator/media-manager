@@ -76,88 +76,11 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 		);
 	}
 
-	if (allFolders.length === 0) {
-		return (
-			<div className={`h-full ${className}`}>
-				<div className="flex items-center justify-between p-4 border-b">
-					<h2 className="text-xl font-semibold">Carpetas</h2>
-					<Button onClick={() => setShowForm(true)} size="sm">
-						<FolderPlus className="mr-2 h-4 w-4" />
-						Nueva Carpeta
-					</Button>
-				</div>
-
-				{showForm && (
-					<div className="p-4 border-b bg-muted/50">
-						<div className="space-y-3">
-							<Input
-								placeholder="Nombre de la carpeta"
-								value={newFolderName}
-								onChange={(e) => setNewFolderName(e.target.value)}
-							/>
-							<Input
-								placeholder="Ruta de la carpeta"
-								value={newFolderPath}
-								onChange={(e) => setNewFolderPath(e.target.value)}
-							/>
-							<div className="flex gap-2">
-								<Button onClick={handleCreateFolder} size="sm">
-									Crear
-								</Button>
-								<Button onClick={() => setShowForm(false)} variant="outline" size="sm">
-									Cancelar
-								</Button>
-							</div>
-						</div>
-					</div>
-				)}
-
-				<EmptyState
-					icon={Folder}
-					title="No hay carpetas"
-					description="Agrega tu primera carpeta para organizar tus archivos."
-				/>
-			</div>
-		);
-	}
 
 	return (
-		<div className={`h-full flex flex-col ${className}`}>
-			<div className="flex items-center justify-between p-4 border-b">
-				<h2 className="text-xl font-semibold">Carpetas ({allFolders.length})</h2>
-				<Button onClick={() => setShowForm(true)} size="sm">
-					<FolderPlus className="mr-2 h-4 w-4" />
-					Nueva Carpeta
-				</Button>
-			</div>
-
-			{showForm && (
-				<div className="p-4 border-b bg-muted/50">
-					<div className="space-y-3">
-						<Input
-							placeholder="Nombre de la carpeta"
-							value={newFolderName}
-							onChange={(e) => setNewFolderName(e.target.value)}
-						/>
-						<Input
-							placeholder="Ruta de la carpeta"
-							value={newFolderPath}
-							onChange={(e) => setNewFolderPath(e.target.value)}
-						/>
-						<div className="flex gap-2">
-							<Button onClick={handleCreateFolder} size="sm">
-								Crear
-							</Button>
-							<Button onClick={() => setShowForm(false)} variant="outline" size="sm">
-								Cancelar
-							</Button>
-						</div>
-					</div>
-				</div>
-			)}
-
+		<div className={`h-full flex flex-col p-0 m-0 ${className}`}>
 			<ScrollArea className="flex-1">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+				<div className="grid grid-cols-4 gap-2 p-2">
 					{allFolders.map((folder) => (
 						<FolderCard
 							key={folder.id}

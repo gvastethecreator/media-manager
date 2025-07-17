@@ -129,11 +129,19 @@ export const uploadedImages = sqliteTable(
 		hash: text('hash').notNull(),
 		metadata: text('metadata'),
 		imageId: text('imageId').notNull(),
+		// Campos adicionales requeridos por el servicio
+		type: text('type').notNull().default('thumbnail'),
+		category: text('category').notNull().default('user'),
+		width: integer('width'),
+		height: integer('height'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
 		pathIdx: uniqueIndex('UploadedImage_path_key').on(table.path),
 		imageId_idx: index('UploadedImage_imageId_idx').on(table.imageId),
 		hash_idx: index('UploadedImage_hash_idx').on(table.hash),
+		type_idx: index('UploadedImage_type_idx').on(table.type),
+		category_idx: index('UploadedImage_category_idx').on(table.category),
 	})
 );

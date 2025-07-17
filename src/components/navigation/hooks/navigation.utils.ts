@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useNavigate } from 'react-router-dom';
 import type { ViewType } from '@/components/views/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
@@ -36,7 +36,7 @@ type ContentVewType = keyof typeof navigationMap;
  * centralizando la lógica de limpieza de selecciones
  */
 export function useNavigation() {
-	const { setCurrentView } = useNavigationStore();
+	const navigate = useNavigate();
 
 	const collectionStore = useCollectionStore();
 	const folderStore = useFolderStore();
@@ -101,12 +101,12 @@ export function useNavigation() {
 				}
 
 				// Cambiar la vista
-				setCurrentView(viewType);
+				navigate(`/${viewType}`);
 			} catch (error) {
 				navLogger.error('❌ Error al navegar a la vista:', error);
 			}
 		},
-		[setCurrentView, clearAllSelections]
+		[navigate, clearAllSelections]
 	);
 
 	/**
@@ -120,9 +120,22 @@ export function useNavigation() {
 			if ('select' in store && typeof store.select === 'function') {
 				(store as any).select(id);
 			}
-			setCurrentView(viewType);
+			// Convertir viewType a ruta apropiada
+			const routeMap: Record<ContentVewType, string> = {
+				'collection-content': 'collections',
+				'folder-content': 'folders',
+				'tag-content': 'tags',
+				'album-content': 'albums',
+				'character-content': 'characters',
+				'place-content': 'places',
+				'world-item-content': 'world-items',
+				'concept-content': 'concepts',
+				'prompt-content': 'prompts',
+				'note-content': 'notes',
+			};
+			navigate(`/${routeMap[viewType]}/${id}`);
 		},
-		[clearAllSelections, setCurrentView]
+		[clearAllSelections, navigate]
 	);
 
 	// Se mantienen los wrappers para compatibilidad hacia atrás

@@ -6,7 +6,45 @@
  
  */
 
-import type { Album, AlbumStatistics, AlbumWithStats, CreateAlbumInput } from '@/types/entities/album';
+import type { Album, AlbumStatistics, AlbumWithStats, CreateAlbumInput } from '@/types/entities/album/index';
+
+/**
+ * Tipo para datos de álbum que vienen de Drizzle con relaciones
+ */
+type DrizzleAlbumWithRelations = {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	featuredImage: string | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	totalSize: number;
+	filters: string | null;
+	shortcut: string | null;
+	category: string | null;
+	metadata: Record<string, any> | null;
+	lastImageAddedAt: Date | null;
+	lastVideoAddedAt: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
+	images?: { id: string }[];
+	videos?: { id: string }[];
+	collections?: { id: string }[];
+	tags?: { id: string }[];
+	characters?: { id: string }[];
+	places?: { id: string }[];
+	worldItems?: { id: string }[];
+	concepts?: { id: string }[];
+	prompts?: { id: string }[];
+	notes?: { id: string }[];
+	wildcards?: { id: string }[];
+	properties?: { id: string }[];
+	groups?: { id: string }[];
+};
 
 /**
  * Estructura para datos de creación de álbum compatible con Drizzle
@@ -131,4 +169,55 @@ export function mapAlbumFiltersToDrizzle(filters: {
 			createdAt: 'desc',
 		},
 	};
+}
+
+/**
+ * Transforma datos de álbum de Drizzle a AlbumWithStats
+ * ✅ MIGRADO A DRIZZLE
+ * @param drizzleAlbum Datos de álbum de Drizzle con relaciones
+ * @returns Álbum con estadísticas calculadas
+ */
+export function toAlbumWithStats(drizzleAlbum: DrizzleAlbumWithRelations): AlbumWithStats {
+	// Calcular estadísticas basadas en las relaciones
+	const stats: AlbumStatistics = {
+		imageCount: drizzleAlbum.images?.length || 0,
+		videoCount: drizzleAlbum.videos?.length || 0,
+		collectionCount: drizzleAlbum.collections?.length || 0,
+		tagCount: drizzleAlbum.tags?.length || 0,
+		characterCount: drizzleAlbum.characters?.length || 0,
+		placeCount: drizzleAlbum.places?.length || 0,
+		worldItemCount: drizzleAlbum.worldItems?.length || 0,
+		conceptCount: drizzleAlbum.concepts?.length || 0,
+		promptCount: drizzleAlbum.prompts?.length || 0,
+		noteCount: drizzleAlbum.notes?.length || 0,
+		wildcardCount: drizzleAlbum.wildcards?.length || 0,
+		propertyCount: drizzleAlbum.properties?.length || 0,
+		groupCount: drizzleAlbum.groups?.length || 0,
+	};
+
+	// Crear el objeto AlbumWithStats
+	const albumWithStats: AlbumWithStats = {
+		id: drizzleAlbum.id,
+		name: drizzleAlbum.name,
+		description: drizzleAlbum.description,
+		emoji: drizzleAlbum.emoji,
+		color: drizzleAlbum.color,
+		featuredImage: drizzleAlbum.featuredImage,
+		isPublic: drizzleAlbum.isPublic,
+		isFavorite: drizzleAlbum.isFavorite,
+		totalImages: drizzleAlbum.totalImages,
+		totalVideos: drizzleAlbum.totalVideos,
+		totalSize: drizzleAlbum.totalSize,
+		filters: drizzleAlbum.filters,
+		shortcut: drizzleAlbum.shortcut,
+		category: drizzleAlbum.category,
+		metadata: drizzleAlbum.metadata,
+		lastImageAddedAt: drizzleAlbum.lastImageAddedAt,
+		lastVideoAddedAt: drizzleAlbum.lastVideoAddedAt,
+		createdAt: drizzleAlbum.createdAt,
+		updatedAt: drizzleAlbum.updatedAt,
+		stats,
+	};
+
+	return albumWithStats;
 }

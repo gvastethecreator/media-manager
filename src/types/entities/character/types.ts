@@ -53,6 +53,8 @@ export interface CharacterBase extends EntityBase {
 	race?: string;
 	alignment?: string;
 	backstory?: string;
+	psychologicalProfile?: string | null;
+	socialProfile?: string | null;
 	goals?: string; // JSON string
 	fears?: string; // JSON string
 	beliefs?: string; // JSON string
@@ -201,7 +203,7 @@ export const CharacterSchema = z.object({
 	sortBy: z.string().nullable(),
 	filters: z.string().nullable(),
 	featuredImage: z.string().nullable(),
-	isFavorite: z.boolean(),
+	isFavorite: z.boolean().optional(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });

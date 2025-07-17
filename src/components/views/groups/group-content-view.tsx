@@ -1,7 +1,6 @@
 import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGroup } from '@/lib/api/groups';
@@ -13,7 +12,6 @@ const logger = clientLogger.withContext('GroupContentView');
 export function GroupContentView(_props: ViewProps) {
 	const params = useParams();
 	const groupId = typeof params.id === 'string' ? params.id : null;
-	const { setCurrentView } = useNavigationStore();
 
 	// Usar React Query hook en lugar de server action
 	const {

@@ -274,6 +274,10 @@ export interface VideoWithStats extends VideoBase {
 	entityType: 'video';
 	stats: VideoStatistics;
 	thumbnailUrl: string | null;
+	frameRate?: number;
+	videoCodec?: string;
+	audioCodec?: string;
+	bitrate?: number;
 	_count?: {
 		albums?: number;
 		collections?: number;
