@@ -9,6 +9,7 @@ import {
 	Eye,
 	Filter,
 	FolderDot,
+	FolderOpen,
 	Grid,
 	Heart,
 	Layout,
@@ -38,6 +39,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { CollectionWithStats } from '@/types/entities/collection/types';
+import type { TagWithStats } from '@/types/entities/tag';
 import { isCollectionWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
@@ -161,6 +163,7 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 }) {
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
+	const [showItems, setShowItems] = useState(true);
 
 	if (!isCollectionWithStats(entity)) {
 		return null;
@@ -231,7 +234,7 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<Collection className="h-4 w-4 text-primary" />
+						<FolderOpen className="h-4 w-4 text-primary" />
 						<CardTitle className="text-sm truncate">{entity.name}</CardTitle>
 					</div>
 					{
@@ -257,7 +260,8 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 								{viewMode === 'grid' ? <List className="h-3 w-3" /> : <Grid className="h-3 w-3" />}
 							</Button>
 						</div>
-					)}
+					}
+
 				</div>
 			</CardHeader>
 			<CardContent className="p-0">
@@ -307,7 +311,7 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 
 						{sortedItems.length === 0 && (
 							<div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-								<Collection className="h-8 w-8 mb-2" />
+								<FolderOpen className="h-8 w-8 mb-2" />
 								<p className="text-sm">Colección vacía</p>
 								<Button variant="outline" size="sm" className="mt-2" onClick={() => onAction?.('add-items')}>
 									<Plus className="h-3 w-3 mr-1" />
@@ -326,7 +330,7 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 									className="w-16 h-16 object-cover rounded-lg mx-auto mb-2"
 								/>
 							) : (
-								<Collection className="h-12 w-12 text-primary mx-auto mb-2" />
+								<FolderOpen className="h-12 w-12 text-primary mx-auto mb-2" />
 							)}
 							<p className="text-sm text-muted-foreground">{entity.statistics?.totalItems || 0} elementos</p>
 						</div>

@@ -1,49 +1,13 @@
 import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
+import type { AudioBase, AudioStatistics, AudioWithStats as BaseAudioWithStats } from './base';
 
-export interface AudioBase extends EntityBase {
-	name: string;
-	path: string;
-	size: number;
-	hash: string;
-	mimeType: string;
-	extension: string;
-	folderId: string;
-	isFavorite: boolean;
-	isArchived: boolean;
-	duration: number | null;
-	bitrate: number | null;
-	sampleRate: number | null;
-	channels: number | null;
-	format: string | null;
-	codec: string | null;
-	title: string | null;
-	artist: string | null;
-	album: string | null;
-	year: number | null;
-	genre: string | null;
-	track: number | null;
-	disc: number | null;
-	albumArtist: string | null;
-	composer: string | null;
-	comment: string | null;
-	lyrics: string | null;
-	bpm: number | null;
-	key: string | null;
-	mood: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+// Re-export tipos base
+export type { AudioBase, AudioStatistics } from './base';
+
+// Extender AudioWithStats con entityType
+export interface AudioWithStats extends BaseAudioWithStats {
+	entityType: 'audio';
 }
-
-export interface AudioStatistics {
-	duration: number | null;
-	bitrate: number | null;
-	sampleRate: number | null;
-	channels: number | null;
-	format: string | null;
-	codec: string | null;
-}
-
-export interface AudioWithStats extends AudioBase, EntityWithStats {}
 
 export type AudioCreateInput = Partial<AudioBase>;
 export type AudioUpdateInput = Partial<AudioBase>;

@@ -82,6 +82,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	variant = 'default',
 	size = 'md',
 }) {
+	console.log('🔍 FileBrowser - Montando componente con:', { entityType, filterId, filterType, mode });
 	const [containerWidth, setContainerWidth] = useState<number>(0);
 	const containerRef = useRef<any>(null);
 	const measurementAttemptsRef = useRef(0);
@@ -111,6 +112,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Función de carga con debounce para evitar llamadas excesivas
 	const debouncedLoadData = useDebouncedCallback(() => {
+		console.log('🔍 FileBrowser - debouncedLoadData ejecutándose con:', { entityType, filterId, filterType, mode });
 		// En modo manual, no cargar datos automáticamente
 		if (mode === 'manual') {
 			return;
@@ -143,17 +145,28 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		// Cargar datos para cada tipo
 		for (const type of typesToLoad) {
 			if (type === 'image') {
-				const { loadImages: storeLoadImages, getImagesByFolder } = useImageStore.getState();
+					const { loadImages: storeLoadImages, getImagesByFolder } = useImageStore.getState();
 
-				// Verificar si ya existen imágenes para esta carpeta
-				if (filterId && filterType === 'folder') {
-					const existingImages = getImagesByFolder(filterId);
-					if (existingImages.length > 0) {
-						logger.debug('✅ Ya existen imágenes para esta carpeta, saltando carga');
-						lastLoadParamsRef.current = loadParamsKey;
-						return;
+					// Verificar si ya existen imágenes para esta carpeta
+					if (filterId && filterType === 'folder') {
+						const existingImages = getImagesByFolder(filterId);
+						console.log('🔍 FileBrowser - Verificando imágenes existentes para carpeta:', {
+							filterId,
+							existingImagesCount: existingImages.length,
+							existingImages: existingImages.slice(0, 3),
+							storeState: {
+								totalImages: Object.keys(useImageStore.getState().core.images).length,
+								isLoading: useImageStore.getState().core.isLoading,
+								error: useImageStore.getState().core.error
+							}
+						});
+						if (existingImages.length > 0) {
+							console.log('🔍 FileBrowser - Ya existen imágenes para esta carpeta, saltando carga');
+							logger.debug('✅ Ya existen imágenes para esta carpeta, saltando carga');
+							lastLoadParamsRef.current = loadParamsKey;
+							return;
+						}
 					}
-				}
 
 				const loadParams: Parameters<typeof storeLoadImages>[0] = {};
 
@@ -162,20 +175,32 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					loadParams.folderId = filterId;
 				}
 
-				logger.debug('🔄 FileBrowser iniciando carga de imágenes', { filterId, filterType, loadParams });
+				console.log('🔄 FileBrowser - Iniciando carga de imágenes', { filterId, filterType, loadParams, storeLoadImages: typeof storeLoadImages });
+					logger.debug('🔄 FileBrowser iniciando carga de imágenes', { filterId, filterType, loadParams });
 
 				// Marcar como cargando
 				isLoadingRef.current = true;
 				lastLoadParamsRef.current = loadParamsKey;
 
 				// Llamar a la función del store directamente
-				storeLoadImages(loadParams)
-					.then(() => {
-						logger.debug('✅ Carga de imágenes completada');
-					})
-					.catch((error: Error) => {
-						logger.error('❌ Error al cargar imágenes en FileBrowser:', error);
-					})
+					console.log('🚀 FileBrowser - Llamando a storeLoadImages con parámetros:', loadParams);
+					storeLoadImages(loadParams)
+						.then(() => {
+							console.log('✅ FileBrowser - Carga de imágenes completada');
+							logger.debug('✅ Carga de imágenes completada');
+							// Verificar el estado del store después de la carga
+							const newState = useImageStore.getState();
+							console.log('📊 FileBrowser - Estado del store después de la carga:', {
+								totalImages: Object.keys(newState.core.images).length,
+								imagesByFolder: getImagesByFolder(filterId).length,
+								isLoading: newState.core.isLoading,
+								error: newState.core.error
+							});
+						})
+						.catch((error: Error) => {
+							console.error('❌ FileBrowser - Error al cargar imágenes:', error);
+							logger.error('❌ Error al cargar imágenes en FileBrowser:', error);
+						})
 					.finally(() => {
 						isLoadingRef.current = false;
 					});
@@ -191,6 +216,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Obtener items según el modo y tipo de entidad
 	const items = (() => {
+		console.log('🔍 FileBrowser - Calculando items con:', { entityType, filterId, filterType, mode });
 		// En modo manual, usar los items proporcionados
 		if (mode === 'manual' && manualItems) {
 			return manualItems;
@@ -228,11 +254,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			case 'image':
 				// Si hay filtro por carpeta, usar getImagesByFolder
 				if (filterId && filterType === 'folder') {
-					return getImagesByFolder(filterId);
+					const filteredImages = getImagesByFolder(filterId);
+					console.log('🔍 FileBrowser - Imágenes filtradas por carpeta:', filteredImages.length, { filterId });
+					return filteredImages;
 				}
-				return getSortedImages();
+				const allImages = getSortedImages();
+				console.log('🔍 FileBrowser - Todas las imágenes ordenadas:', allImages.length);
+				return allImages;
 			// TODO: Añadir otros casos según se implementen
 			default:
+				console.log('🔍 FileBrowser - Retornando array vacío (entityType no coincide)');
 				return [];
 		}
 	})();
@@ -401,6 +432,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Función para renderizar item usando EntityCard
 	const renderItem = useCallback(
 		(item: EntityWithStats, _index: number) => {
+			console.log('🔍 FileBrowser - Renderizando item:', { id: item.id, entityType: item.entityType || 'unknown' });
 			return (
 				<EntityCard
 					key={item.id}
@@ -421,7 +453,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Renderizar contenido según el estado
 	const renderContent = () => {
+		console.log('🔍 FileBrowser - Estado de renderizado:', { 
+			isLoading, 
+			error, 
+			itemsLength: items.length, 
+			containerWidth,
+			entityType,
+			filterId,
+			filterType 
+		});
+
 		if (isLoading && items.length === 0) {
+			console.log('🔍 FileBrowser - Renderizando loading...');
 			return (
 				<div className="flex h-full w-full items-center justify-center">
 					<Spinner />
@@ -430,6 +473,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		if (error) {
+			console.log('🔍 FileBrowser - Renderizando error:', error);
 			return (
 				<div className="flex h-full w-full items-center justify-center">
 					<p className="text-destructive">Error: {error}</p>
@@ -438,8 +482,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		if (items.length === 0) {
+			console.log('🔍 FileBrowser - Renderizando estado vacío');
 			return <EmptyState icon={FileTextIcon} title="Sin elementos" description="No hay elementos para mostrar." />;
 		}
+
+		console.log('🔍 FileBrowser - Renderizando contenido con', items.length, 'items');
 
 		const commonViewProps = {
 			items,

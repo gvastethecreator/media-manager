@@ -66,6 +66,14 @@ export enum EntityStatsType {
 	NOTE = 'note',
 	PROPERTY = 'property',
 	WILDCARD = 'wildcard',
+	AUDIO = 'audio',
+	DOCUMENT = 'document',
+	COLLECTION = 'collection',
+	ALBUM = 'album',
+	CHARACTER = 'character',
+	CONCEPT = 'concept',
+	PROMPT = 'prompt',
+	GROUP = 'group',
 }
 
 // Función helper para verificar si es una entidad con el campo entityType
@@ -256,6 +264,14 @@ export function getEntityStatsType(entity: EntityWithStats): EntityStatsType | n
 	if (isNoteWithStats(entity)) return EntityStatsType.NOTE;
 	if (isPropertyWithStats(entity)) return EntityStatsType.PROPERTY;
 	if (isWildcardWithStats(entity)) return EntityStatsType.WILDCARD;
+	if (isAudioWithStats(entity)) return EntityStatsType.AUDIO;
+	if (isDocumentWithStats(entity)) return EntityStatsType.DOCUMENT;
+	if (isCollectionWithStats(entity)) return EntityStatsType.COLLECTION;
+	if (isAlbumWithStats(entity)) return EntityStatsType.ALBUM;
+	if (isCharacterWithStats(entity)) return EntityStatsType.CHARACTER;
+	if (isConceptWithStats(entity)) return EntityStatsType.CONCEPT;
+	if (isPromptWithStats(entity)) return EntityStatsType.PROMPT;
+	if (isGroupWithStats(entity)) return EntityStatsType.GROUP;
 	return null;
 }
 

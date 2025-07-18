@@ -175,6 +175,7 @@ router.get('/', async (req, res) => {
 		// Formatear respuesta para compatibilidad
 		const formattedImages = imageResults.map((img) => ({
 			...img,
+			entityType: 'image' as const,
 			folder: img.folderName
 				? {
 						id: img.folderId,
@@ -264,6 +265,7 @@ router.get('/:id', async (req, res) => {
 		// Formatear respuesta para compatibilidad
 		const formattedImage = {
 			...image,
+			entityType: 'image' as const,
 			folder: image.folderName
 				? {
 						id: image.folderId,

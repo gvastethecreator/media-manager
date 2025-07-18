@@ -6,7 +6,7 @@ import { useCharacterImages } from '@/lib/api/characters';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCharacterStore } from '@/store/entities/character';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const viewLogger = clientLogger.withContext('CharacterContentView');
 

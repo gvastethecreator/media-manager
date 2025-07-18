@@ -11,19 +11,11 @@ import type {
 	WorldItemCreateInput,
 	WorldItemFilters,
 	WorldItemSearchOptions,
-	WorldItemStats,
 	WorldItemUpdateInput,
 	WorldItemWithStats,
 } from '@/types/entities/world-item';
-import {
-	serializeAttributes,
-	serializeEffects,
-	serializeFilters,
-	serializeProperties,
-	serializeRequirements,
-	serializeStats,
-	serializeTags,
-} from './serializers';
+import type { WorldItemStatistics } from '@/types/entities/world-item/base';
+// Las funciones de serialización ya no se usan en este archivo
 
 // Tipos de datos para Drizzle
 type DrizzleWorldItemCreateInput = {
@@ -71,37 +63,7 @@ type DrizzleWorldItemOrderByInput = {
 // Logger específico para este módulo
 const logger = serverLogger.withContext('WorldItemMappers');
 
-const relationMap: Record<string, string> = {
-	imageIds: 'images',
-	videoIds: 'videos',
-	albumIds: 'albums',
-	collectionIds: 'collections',
-	tagIds: 'tags',
-	characterIds: 'characters',
-	placeIds: 'places',
-	conceptIds: 'concepts',
-	promptIds: 'prompts',
-	noteIds: 'notes',
-	wildcardIds: 'wildcards',
-	propertyIds: 'properties',
-	groupIds: 'groups',
-};
-
-function connectRelations(input: Partial<WorldItemCreateInput>, _operation: 'connect' | 'set'): Record<string, any> {
-	const relations: any = {};
-	for (const key in relationMap) {
-		if (key in input && Array.isArray((input as any)[key])) {
-			const dbKey = relationMap[key];
-			const ids = (input as any)[key];
-			if (ids.length > 0) {
-				// En Drizzle, las relaciones se manejan de forma diferente
-				// Esto se maneja en el servicio, no en el mapper
-				relations[`${dbKey}Ids`] = ids;
-			}
-		}
-	}
-	return relations;
-}
+// Las relaciones se manejan directamente en el servicio de Drizzle
 
 /**
  * 🗺️ Mapea un WorldItemCreateInput a un Drizzle WorldItemCreateInput.
@@ -109,34 +71,19 @@ function connectRelations(input: Partial<WorldItemCreateInput>, _operation: 'con
  */
 export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): DrizzleWorldItemCreateInput {
 	try {
-		const { attributes, effects, requirements, stats, properties, filters, tags, ...rest } = input;
-
-		const baseData = rest as Omit<
-			WorldItemCreateInput,
-			| 'attributes'
-			| 'effects'
-			| 'requirements'
-			| 'stats'
-			| 'properties'
-			| 'filters'
-			| 'tags'
-			| keyof ReturnType<typeof connectRelations>
-		>;
-
 		const drizzleData: DrizzleWorldItemCreateInput = {
-			...baseData,
-			name: baseData.name || 'Nuevo Item',
-			type: baseData.type || 'item',
-			category: baseData.category || 'misc',
-			rarity: baseData.rarity || 'common',
-			attributes: serializeAttributes(attributes || []),
-			effects: serializeEffects(effects || []),
-			requirements: serializeRequirements(requirements || []),
-			stats: serializeStats(stats || []),
-			properties: serializeProperties(properties || []),
-			filters: serializeFilters(filters || []),
-			tags: serializeTags(tags || []),
-			// Las relaciones se manejan por separado en Drizzle
+			...input,
+			name: input.name || 'Nuevo Item',
+			type: input.type || 'item',
+			category: input.category || 'misc',
+			rarity: input.rarity || 'common',
+			attributes: input.attributes || '{}',
+			effects: input.effects || '{}',
+			requirements: input.requirements || '{}',
+			stats: '{}', // Campo adicional para Drizzle
+			properties: input.properties || '{}',
+			filters: '{}', // Campo adicional para Drizzle
+			tags: '[]', // Campo adicional para Drizzle
 		};
 
 		return drizzleData;
@@ -152,32 +99,7 @@ export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): Dr
  */
 export function mapUpdateWorldItemDataToDrizzle(input: WorldItemUpdateInput): DrizzleWorldItemUpdateInput {
 	try {
-		const { attributes, effects, requirements, stats, properties, filters, tags, ...rest } = input;
-
-		const baseData = rest as Omit<
-			WorldItemUpdateInput,
-			| 'attributes'
-			| 'effects'
-			| 'requirements'
-			| 'stats'
-			| 'properties'
-			| 'filters'
-			| 'tags'
-			| keyof ReturnType<typeof connectRelations>
-		>;
-
-		const drizzleData: DrizzleWorldItemUpdateInput = { ...baseData };
-
-		if (attributes) drizzleData.attributes = serializeAttributes(attributes);
-		if (effects) drizzleData.effects = serializeEffects(effects);
-		if (requirements) drizzleData.requirements = serializeRequirements(requirements);
-		if (stats) drizzleData.stats = serializeStats(stats);
-		if (properties) drizzleData.properties = serializeProperties(properties);
-		if (filters) drizzleData.filters = serializeFilters(filters);
-		if (tags) drizzleData.tags = serializeTags(tags);
-
-		// Las relaciones se manejan por separado en Drizzle
-		// Object.assign(drizzleData, connectRelations(input, 'set'));
+		const drizzleData: DrizzleWorldItemUpdateInput = { ...input };
 
 		return drizzleData;
 	} catch (error) {
@@ -219,8 +141,8 @@ function mapSortByToDrizzle(sortBy?: string): DrizzleWorldItemOrderByInput {
 	if (!sortBy) return { updatedAt: 'desc' };
 
 	const [field, order = 'desc'] = sortBy.split(':');
-	const validOrders = ['asc', 'desc'];
-	const sortOrder = validOrders.includes(order) ? order : 'desc';
+	const validOrders = ['asc', 'desc'] as const;
+	const sortOrder = (validOrders.includes(order as any) ? order : 'desc') as 'asc' | 'desc';
 
 	// Mapear campos de UI a campos de Drizzle si es necesario
 	const fieldMap: Record<string, string> = {
@@ -271,18 +193,18 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	const attributes =
 		typeof worldItem.attributes === 'string'
 			? (JSON.parse(worldItem.attributes || '[]') as any[])
-			: worldItem.attributes || [];
+			: [];
 
 	const effects =
-		typeof worldItem.effects === 'string' ? (JSON.parse(worldItem.effects || '[]') as any[]) : worldItem.effects || [];
+		typeof worldItem.effects === 'string' ? (JSON.parse(worldItem.effects || '[]') as any[]) : [];
 
 	const requirements =
 		typeof worldItem.requirements === 'string'
 			? (JSON.parse(worldItem.requirements || '[]') as any[])
-			: worldItem.requirements || [];
+			: [];
 
-	const statsData =
-		typeof worldItem.stats === 'string' ? (JSON.parse(worldItem.stats || '[]') as any[]) : worldItem.stats || [];
+	// No hay campo stats en WorldItemComplete, usar array vacío
+	const statsData: any[] = [];
 
 	// Calcular métricas temporales
 	const now = new Date();
@@ -369,6 +291,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 
 	return {
 		...rest,
+		entityType: 'world-item' as const,
 		_stats: stats,
 	};
 }

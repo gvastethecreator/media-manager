@@ -6,7 +6,7 @@ import { useAlbumImages } from '@/lib/api/albums';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const viewLogger = clientLogger.withContext('AlbumContentView');
 

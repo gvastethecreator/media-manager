@@ -107,7 +107,7 @@ const BasicInfoSection = memo<{ item: EntityWithStats }>(function BasicInfoSecti
 			id: 'type',
 			icon: <Cpu className="h-3 w-3" />,
 			label: 'Tipo',
-			value: type.charAt(0).toUpperCase() + type.slice(1),
+			value: type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Desconocido',
 		});
 
 		// Tamaño (para archivos)
@@ -178,7 +178,7 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 		const groups: Record<string, EntityWithStats[]> = {};
 		for (const item of items) {
 			const type = getEntityStatsType(item);
-			if (type === null) continue;
+			if (!type) continue;
 			if (!groups[type]) {
 				groups[type] = [];
 			}
@@ -211,17 +211,19 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 				<CardContent>
 					<div className="grid grid-cols-3 gap-2">
 						{items.slice(0, 9).map((item) => {
-							const config = entityDetailsRegistry.getConfig(getEntityStatsType(item) as string);
-							if (!config) return null;
+						const type = getEntityStatsType(item);
+						if (!type) return null;
+						const config = entityDetailsRegistry.getConfig(type);
+						if (!config) return null;
 
-							const { previewComponent: PreviewComponent } = config;
+						const { previewComponent: PreviewComponent } = config;
 
-							return (
-								<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
-									<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
-								</div>
-							);
-						})}
+						return (
+							<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
+								<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
+							</div>
+						);
+					})}
 					</div>
 					{items.length > 9 && (
 						<p className="text-xs text-muted-foreground mt-2 text-center">+{items.length - 9} elementos más</p>

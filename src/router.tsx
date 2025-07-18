@@ -2,7 +2,7 @@ import { createBrowserRouter, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
 // Importar todas las vistas
 import AlbumsContentView from '@/components/views/albums/albums-content-view';
-import AllImagesContentView from '@/components/views/all-images/all-images-content-view';
+import { AllImagesView } from '@/components/views/all-images/all-images-view';
 import AudioContentView from '@/components/views/audio/audio-content-view';
 import CharactersContentView from '@/components/views/characters/characters-content-view';
 import CollectionsContentView from '@/components/views/collections/collections-content-view';
@@ -294,7 +294,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'all-images',
-				element: <AllImagesContentView className="h-full" />,
+				element: <AllImagesView className="h-full" />,
 			},
 			{
 				path: 'uploaded-images',
