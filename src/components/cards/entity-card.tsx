@@ -10,15 +10,17 @@
 import type { FC } from 'react';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
+import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import type { NoteWithStats } from '@/types/entities/note';
 import type { PlaceWithStats } from '@/types/entities/place';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import type { PropertyWithStats } from '@/types/entities/property';
+import type { TagWithStats } from '@/types/entities/tag';
 import type { VideoWithStats } from '@/types/entities/video/types';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
-import type { AnyEntityWithStats, ImageWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 import {
 	getEntityStatsType,
 	isAlbumWithStats,

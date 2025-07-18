@@ -4,7 +4,7 @@ import { EmptyState } from '@/components/core/data-display/empty-state/empty-sta
 import { usePlaceImages } from '@/lib/api/places';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePlaceStore } from '@/store/entities/place';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import { BaseContentView } from '../base/base-content-view';
 import { ContentViewProvider } from '../base/content-view-provider';
 

@@ -15,7 +15,8 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { EntityStatsType, EntityWithStats } from '@/types/migration';
+import type { EntityWithStats } from '@/types/migration';
+import { EntityStatsType } from '@/types/migration';
 
 interface AllImagesContentViewProps {
 	images: ImageWithStats[];
@@ -187,28 +188,30 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 		return <LoadingScreen />;
 	}
 
-	if ((!images || images.length === 0) && !isIndexing) {
-		return (
-			<BaseContentView
-				title="Todas las Imágenes"
-				description="Gestiona y visualiza todas tus imágenes"
-				icon={<ImageIcon className="h-5 w-5" />}
-				headerControls={
-					<Button onClick={startIndexing}>
-						<FolderSync className="h-4 w-4 mr-2" />
-						Buscar e indexar carpetas
-					</Button>
-				}
-			>
-				{renderIndexingStatus()}
-				<EmptyState
-					icon={ImageIcon}
-					title="No hay imágenes"
-					description="No se encontraron imágenes en la base de datos. Prueba agregando carpetas o iniciando la indexación."
-				/>
-			</BaseContentView>
-		);
-	}
+	// Comentamos esta lógica para que siempre se muestre el FileBrowser
+	// El FileBrowser se encargará de mostrar el estado vacío si no hay imágenes
+	// if ((!images || images.length === 0) && !isIndexing) {
+	// 	return (
+	// 		<BaseContentView
+	// 			title="Todas las Imágenes"
+	// 			description="Gestiona y visualiza todas tus imágenes"
+	// 			icon={<ImageIcon className="h-5 w-5" />}
+	// 			headerControls={
+	// 				<Button onClick={startIndexing}>
+	// 					<FolderSync className="h-4 w-4 mr-2" />
+	// 					Buscar e indexar carpetas
+	// 				</Button>
+	// 			}
+	// 		>
+	// 			{renderIndexingStatus()}
+	// 			<EmptyState
+	// 				icon={ImageIcon}
+	// 				title="No hay imágenes"
+	// 				description="No se encontraron imágenes en la base de datos. Prueba agregando carpetas o iniciando la indexación."
+	// 			/>
+	// 		</BaseContentView>
+	// 	);
+	// }
 
 	return (
 		<BaseContentView

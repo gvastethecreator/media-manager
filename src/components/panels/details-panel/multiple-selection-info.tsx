@@ -19,7 +19,7 @@ import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import { BulkMetadataEditor } from './bulk-metadata-editor';
 
 export interface MultipleSelectionInfoProps {
