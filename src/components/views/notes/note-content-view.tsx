@@ -5,7 +5,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { useNoteImages } from '@/lib/api/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const viewLogger = clientLogger.withContext('NoteContentView');
 

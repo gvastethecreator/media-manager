@@ -73,5 +73,6 @@ export interface DocumentStatistics {
  * Este es el tipo canónico que debe usarse en la aplicación.
  */
 export interface DocumentWithStats extends DocumentBase {
+	entityType: 'document';
 	stats: DocumentStatistics;
 }

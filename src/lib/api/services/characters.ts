@@ -1,7 +1,6 @@
 import type { CharacterWithStats } from '@/types/entities/character/types';
+import type { CharacterCardData } from '@/components/cards/character-card/character-card.types';
 import { apiClient } from '../client';
-
-export interface CharacterCardData extends CharacterWithStats {}
 
 export interface GetCharactersOptions {
 	limit?: number;

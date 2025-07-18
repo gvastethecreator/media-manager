@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { EntityStatsType } from '@/types/migration';
+import { EntityStatsType } from '@/types/migration';
 
 interface StatusBarProps {
 	totalItems: number;
@@ -18,24 +18,23 @@ export const StatusBar = memo<StatusBarProps>(function StatusBar({ totalItems, s
 	// Obtener el nombre plural del tipo de entidad
 	const entityName = useMemo(() => {
 		const names: Record<EntityStatsType, { singular: string; plural: string }> = {
-			image: { singular: 'imagen', plural: 'imágenes' },
-			video: { singular: 'video', plural: 'videos' },
-			tag: { singular: 'etiqueta', plural: 'etiquetas' },
-			character: { singular: 'personaje', plural: 'personajes' },
-			place: { singular: 'lugar', plural: 'lugares' },
-			worldItem: { singular: 'elemento de mundo', plural: 'elementos de mundo' },
-			concept: { singular: 'concepto', plural: 'conceptos' },
-			prompt: { singular: 'prompt', plural: 'prompts' },
-			note: { singular: 'nota', plural: 'notas' },
-			wildcard: { singular: 'wildcard', plural: 'wildcards' },
-			property: { singular: 'propiedad', plural: 'propiedades' },
-			group: { singular: 'grupo', plural: 'grupos' },
-			folder: { singular: 'carpeta', plural: 'carpetas' },
-			audio: { singular: 'audio', plural: 'audios' },
-			document: { singular: 'documento', plural: 'documentos' },
-			jsonFile: { singular: 'archivo JSON', plural: 'archivos JSON' },
-			file3d: { singular: 'archivo 3D', plural: 'archivos 3D' },
-			uploadedImage: { singular: 'imagen subida', plural: 'imágenes subidas' },
+			[EntityStatsType.IMAGE]: { singular: 'imagen', plural: 'imágenes' },
+			[EntityStatsType.VIDEO]: { singular: 'video', plural: 'videos' },
+			[EntityStatsType.TAG]: { singular: 'etiqueta', plural: 'etiquetas' },
+			[EntityStatsType.CHARACTER]: { singular: 'personaje', plural: 'personajes' },
+			[EntityStatsType.PLACE]: { singular: 'lugar', plural: 'lugares' },
+			[EntityStatsType.WORLD_ITEM]: { singular: 'elemento de mundo', plural: 'elementos de mundo' },
+			[EntityStatsType.CONCEPT]: { singular: 'concepto', plural: 'conceptos' },
+			[EntityStatsType.PROMPT]: { singular: 'prompt', plural: 'prompts' },
+			[EntityStatsType.NOTE]: { singular: 'nota', plural: 'notas' },
+			[EntityStatsType.WILDCARD]: { singular: 'wildcard', plural: 'wildcards' },
+			[EntityStatsType.PROPERTY]: { singular: 'propiedad', plural: 'propiedades' },
+			[EntityStatsType.GROUP]: { singular: 'grupo', plural: 'grupos' },
+			[EntityStatsType.FOLDER]: { singular: 'carpeta', plural: 'carpetas' },
+			[EntityStatsType.AUDIO]: { singular: 'audio', plural: 'audios' },
+			[EntityStatsType.DOCUMENT]: { singular: 'documento', plural: 'documentos' },
+			[EntityStatsType.COLLECTION]: { singular: 'colección', plural: 'colecciones' },
+			[EntityStatsType.ALBUM]: { singular: 'álbum', plural: 'álbumes' },
 		};
 
 		return names[entityType] || { singular: 'elemento', plural: 'elementos' };

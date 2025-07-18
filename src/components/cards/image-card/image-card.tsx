@@ -232,9 +232,9 @@ export function ImageCard({
 
 			{/* Imagen principal */}
 			<div className="relative w-full h-full">
-				{imageData.thumbnail ? (
+				{imageData.thumbnailUrl ? (
 					<img
-						src={imageData.thumbnail}
+						src={imageData.thumbnailUrl}
 						alt={imageData.name || 'Imagen'}
 						className={cn(
 							'w-full h-full object-cover',

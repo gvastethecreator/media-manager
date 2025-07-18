@@ -5,7 +5,7 @@ import type { CollectionContentProps } from '@/components/views/base/types';
 import { useCollectionImages, useRemoveImageFromCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const logger = clientLogger.withContext('CollectionContentView');
 

@@ -49,7 +49,7 @@ export default defineConfig({
 				},
 			},
 			// Evitar que Rollup intente resolver dependencias de Node.js
-			external: ['fs', 'fs/promises', 'path', 'crypto', 'sharp'],
+			external: ['fs', 'fs/promises', 'path', 'crypto', 'sharp', 'http'],
 		},
 	},
 	define: {
@@ -58,7 +58,7 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		// Evitar que Vite intente bundlear módulos de Node.js
-		exclude: ['fs', 'fs/promises', 'path', 'crypto', 'sharp'],
+		exclude: ['fs', 'fs/promises', 'path', 'crypto', 'sharp', 'http'],
 		include: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'motion'],
 	},
 	resolve: {
@@ -69,6 +69,7 @@ export default defineConfig({
 			{ find: 'path', replacement: emptyModule },
 			{ find: 'crypto', replacement: emptyModule },
 			{ find: 'sharp', replacement: emptyModule },
+			{ find: 'http', replacement: emptyModule },
 		],
 	},
 });

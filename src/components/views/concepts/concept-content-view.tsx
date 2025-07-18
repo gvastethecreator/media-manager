@@ -5,7 +5,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { useConceptImages } from '@/lib/api/concepts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { selectSelectedConcept, useConceptStore } from '@/store/entities/concept';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const viewLogger = clientLogger.withContext('ConceptContentView');
 

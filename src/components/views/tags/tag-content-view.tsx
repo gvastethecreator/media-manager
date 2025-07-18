@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 // import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
 import { useTagStore } from '@/store/entities/tag';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 /**
  * 🏷️ Vista de contenido de etiquetas

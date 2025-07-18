@@ -131,6 +131,7 @@ export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function 
 }) {
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [showHidden, setShowHidden] = useState(false);
+	const [showContent, setShowContent] = useState(true);
 
 	if (!isFolderWithStats(entity)) {
 		return null;

@@ -46,6 +46,7 @@ export interface AIGenerationInfo {
 	workflow?: string;
 	extra_params?: Record<string, unknown>;
 	created_at?: string;
+	[key: string]: unknown; // Index signature para propiedades adicionales
 }
 
 /**

@@ -6,7 +6,7 @@ import { useWorldItemImages } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useSelectionStore } from '@/store/selection.store';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const viewLogger = clientLogger.withContext('WorldItemContentView');
 

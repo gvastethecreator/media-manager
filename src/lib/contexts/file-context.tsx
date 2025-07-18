@@ -20,6 +20,7 @@ export interface FileItem extends EntityWithStats {
 	type: string; // 'image', 'video', 'folder', etc.
 	modified: Date; // Fecha de última modificación del archivo
 	thumbnail?: string | null; // URL de la miniatura
+	thumbnailUrl?: string | null; // Alias para thumbnail
 	src?: string; // URL de la imagen original (para ImageWithStats)
 	// Propiedades adicionales que pueden venir de diferentes entidades
 	// y que son usadas en el FileBrowser
