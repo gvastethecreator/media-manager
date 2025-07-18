@@ -10,7 +10,6 @@ import {
 	deserializeEffects,
 	deserializeFilters,
 	deserializeRequirements,
-	deserializeStats,
 } from './serializers';
 
 // Tipos locales equivalentes a Drizzle
@@ -28,9 +27,9 @@ type DrizzleWorldItemFromDrizzle = {
 	effects: string;
 	requirements: string;
 	stats: string;
-	properties: string;
+	propertiesJson: string;
 	filters: string;
-	tags: string;
+	tagsJson: string;
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
@@ -81,8 +80,11 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		attributes: deserializeAttributes(worldItem.attributes),
 		effects: deserializeEffects(worldItem.effects),
 		requirements: deserializeRequirements(worldItem.requirements),
-		stats: deserializeStats(worldItem.stats),
 		filters: deserializeFilters(worldItem.filters),
+
+		// Deserialización de campos JSON renombrados
+		properties: JSON.parse(worldItem.propertiesJson || '{}'),
+		tags: JSON.parse(worldItem.tagsJson || '[]'),
 
 		// Mapeo de relaciones - simplificado para evitar dependencias circulares
 		images: worldItem.images || [],
@@ -97,9 +99,7 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		wildcards: worldItem.wildcards || [],
 		groups: worldItem.groups || [],
 
-		// Asignación correcta de relaciones
-		tags: relationTags || [],
-		properties: relationProperties || [],
+		// Las relaciones tags y properties ya están deserializadas arriba
 
 		// Conteo de relaciones
 		_count: {

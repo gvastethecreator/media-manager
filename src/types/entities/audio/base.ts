@@ -64,6 +64,7 @@ export interface AudioStatistics {
  * Este es el tipo canónico para usar en la aplicación.
  */
 export interface AudioWithStats extends AudioBase {
+	entityType: 'audio';
 	stats: AudioStatistics;
 }
 

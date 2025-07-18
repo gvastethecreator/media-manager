@@ -73,6 +73,7 @@ export interface CollectionStatistics {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface CollectionWithStats extends CollectionBase {
+	entityType: 'collection';
 	stats: CollectionStatistics;
 	isRecent?: boolean;
 }

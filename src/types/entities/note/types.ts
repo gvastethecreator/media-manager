@@ -271,6 +271,7 @@ export interface NoteStatistics {
  * 📝 Note completo con relaciones
  */
 export interface NoteComplete extends NoteBase {
+	entityType: 'note';
 	// Relaciones
 	images?: ImageComplete[];
 	videos?: VideoWithStats[];
@@ -309,7 +310,7 @@ export interface NoteComplete extends NoteBase {
  */
 export interface NoteWithStats extends NoteBase {
 	entityType: 'note';
-	statistics?: NoteStatistics;
+	stats: NoteStatistics;
 	_count?: {
 		images: number;
 		videos: number;

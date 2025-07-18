@@ -91,3 +91,32 @@ export interface ActivityStats {
 	entityType?: string;
 	entityId?: string;
 }
+
+export interface TopTag {
+	id: string;
+	name: string;
+	color?: string;
+	count: number;
+	percentage?: number;
+}
+
+export interface RecentActivity {
+	id: string;
+	type: string;
+	description: string;
+	entityType: string;
+	entityId: string;
+	createdAt: Date;
+	metadata?: Record<string, any>;
+}
+
+export interface StorageBreakdown {
+	images: number;
+	videos: number;
+	audio: number;
+	documents: number;
+	thumbnails: number;
+	cache: number;
+	other: number;
+	total: number;
+}

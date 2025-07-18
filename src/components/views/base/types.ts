@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import type { EntityWithStats } from '@/types/common/entity-with-stats';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 /**
  * Props base para todas las vistas de contenido

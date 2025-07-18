@@ -127,24 +127,47 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		}
 	},
 	fetchImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
+		console.log('🔍 DEBUG Store: fetchImages llamado con opciones:', options);
+		console.log('🔍 DEBUG Store: Estado actual:', { isLoading: get().isLoading, totalImages: Object.keys(get().images).length });
+		
 		if (get().isLoading && !options.refresh) {
+			console.log('⚠️ DEBUG Store: Saltando carga - isLoading=true y refresh=false');
 			return Object.values(get().images);
 		}
+		
 		set({ isLoading: true, error: null });
+		console.log('🚀 DEBUG Store: Iniciando carga de imágenes...');
+		
 		try {
-			if (options.refresh) get().clearImages();
+			if (options.refresh) {
+				console.log('🧹 DEBUG Store: Limpiando imágenes existentes (refresh=true)');
+				get().clearImages();
+			}
+			
+			console.log('📡 DEBUG Store: Llamando a ImageApi.getImagesFromApi con:', options);
 			const result = await ImageApi.getImagesFromApi(options);
-			const images = result?.images || [];
+			console.log('📡 DEBUG Store: Respuesta de API:', result);
+			
+			const images = result?.data || result?.images || [];
+			console.log('🔍 DEBUG Store: Estructura de imágenes recibidas:', images.length > 0 ? images.slice(0, 2) : 'Array vacío');
+			console.log('🔍 DEBUG Store: Primera imagen completa:', images[0]);
 			const validImages = Array.isArray(images) ? images.filter((img) => img?.id) : [];
+			console.log('✅ DEBUG Store: Imágenes válidas encontradas:', validImages.length);
+			console.log('🔍 DEBUG Store: Imágenes descartadas:', images.length - validImages.length);
+			
 			get().addImages(validImages);
+			console.log('💾 DEBUG Store: Imágenes añadidas al store. Total en store:', Object.keys(get().images).length);
+			
 			return validImages;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch images';
+			console.error('❌ DEBUG Store: Error en fetchImages:', e);
 			imageLogger.error(errorMessage, { error: e, options });
 			set({ error: errorMessage });
 			return [];
 		} finally {
 			set({ isLoading: false });
+			console.log('🏁 DEBUG Store: fetchImages completado. Estado final:', { isLoading: false, totalImages: Object.keys(get().images).length });
 		}
 	},
 	loadImages: (options: { folderId?: string; refresh?: boolean } = {}) => get().fetchImages(options),
