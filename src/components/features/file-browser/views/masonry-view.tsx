@@ -6,9 +6,10 @@ import React from 'react';
 
 import { PlayCircleIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { EntityWithStats, isImageWithStats, isVideoWithStats } from '@/types/migration';
+import { useImageResources } from '@/store/image-resources.store';
 
 interface MasonryViewProps {
 	items: EntityWithStats[];
@@ -24,6 +25,62 @@ interface MasonryItem extends EntityWithStats {
 	columnIndex: number;
 	top: number;
 }
+
+// Componente interno para manejar thumbnails de imágenes
+const ImageThumbnail = memo(function ImageThumbnail({ 
+	imageId, 
+	imageName, 
+	className 
+}: {
+	imageId: string;
+	imageName: string;
+	className: string;
+}) {
+	const { getThumbnail, isLoading: isResourceLoading } = useImageResources();
+	const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+	const [thumbnailLoading, setThumbnailLoading] = useState(false);
+
+	useEffect(() => {
+		const loadThumbnail = async () => {
+			if (!imageId || thumbnailUrl) return;
+
+			setThumbnailLoading(true);
+			try {
+				const url = await getThumbnail(imageId);
+				if (url) {
+					setThumbnailUrl(url);
+				}
+			} catch (error) {
+				console.error('Error cargando thumbnail:', error);
+			} finally {
+				setThumbnailLoading(false);
+			}
+		};
+
+		loadThumbnail();
+	}, [imageId, getThumbnail, thumbnailUrl]);
+
+	const displayThumbnailUrl = thumbnailUrl || `/api/images/${imageId}/thumbnail`;
+	const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
+
+	if (shouldShowLoading) {
+		return (
+			<div className={cn(className, "animate-pulse bg-muted")} />
+		);
+	}
+
+	return (
+		<img
+			src={displayThumbnailUrl}
+			alt={imageName}
+			className={className}
+			loading="lazy"
+			onError={(e) => {
+				console.warn(`Error cargando thumbnail para ${imageId}:`, e);
+			}}
+		/>
+	);
+});
 
 export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	items,
@@ -129,13 +186,12 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 						}}
 					>
 						{/* Contenido principal */}
-						{isImage && item.thumbnailUrl ? (
+						{isImage && item.id ? (
 							<>
-								<img
-									src={item.thumbnailUrl}
-									alt={item.name || 'Imagen'}
+								<ImageThumbnail
+									imageId={item.id}
+									imageName={item.name || 'Imagen'}
 									className="w-full h-full object-cover"
-									loading="lazy"
 								/>
 								<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 							</>
