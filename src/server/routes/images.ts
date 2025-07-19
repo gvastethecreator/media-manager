@@ -9,6 +9,7 @@ import { folders, images } from '@/lib/drizzle/schema/index';
 import { isValidFolderId } from '@/lib/utils/folder-id-generator';
 import { imageService } from '@/services/image/image.service';
 import { processImage } from '../services/image-processing.service';
+import { verifySignedToken } from '../services/thumbnail.service';
 
 const router = Router();
 
@@ -176,6 +177,8 @@ router.get('/', async (req, res) => {
 		const formattedImages = imageResults.map((img) => ({
 			...img,
 			entityType: 'image' as const,
+			// Agregar thumbnailUrl si hay thumbnail
+			thumbnailUrl: img.thumbnail ? `/api/images/${img.id}/thumbnail` : null,
 			folder: img.folderName
 				? {
 						id: img.folderId,
@@ -214,6 +217,43 @@ router.get('/', async (req, res) => {
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
+	}
+});
+
+// GET /api/images/:id/content - Servir la imagen original
+router.get('/:id/content', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const buffer = await imageService.getOriginalImage(id);
+		res.set({
+			'Content-Type': 'image/jpeg', // Asumimos JPEG por defecto, se puede mejorar
+			'Content-Length': buffer.length.toString(),
+			'Cache-Control': 'public, max-age=31536000',
+		});
+		res.send(buffer);
+	} catch (error) {
+		console.error('Error serving image:', error);
+		res.status(500).send('Error serving image');
+	}
+});
+
+// GET /api/images/:id/thumbnail - Servir thumbnail
+router.get('/:id/thumbnail', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const buffer = await imageService.getThumbnail(id);
+		if (!buffer) {
+			return res.status(404).send('Thumbnail not found');
+		}
+		res.set({
+			'Content-Type': 'image/webp', // Asumimos WEBP por defecto, se puede mejorar
+			'Content-Length': buffer.length.toString(),
+			'Cache-Control': 'public, max-age=31536000',
+		});
+		res.send(buffer);
+	} catch (error) {
+		console.error('Error serving thumbnail:', error);
+		res.status(500).send('Error serving thumbnail');
 	}
 });
 
@@ -266,6 +306,8 @@ router.get('/:id', async (req, res) => {
 		const formattedImage = {
 			...image,
 			entityType: 'image' as const,
+			// Agregar thumbnailUrl si hay thumbnail
+			thumbnailUrl: image.thumbnail ? `/api/images/${image.id}/thumbnail` : null,
 			folder: image.folderName
 				? {
 						id: image.folderId,
@@ -295,43 +337,6 @@ router.get('/:id', async (req, res) => {
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
-	}
-});
-
-// GET /api/images/:id/content - Servir la imagen original
-router.get('/:id/content', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const buffer = await imageService.getOriginalImage(id);
-		res.set({
-			'Content-Type': 'image/jpeg', // Asumimos JPEG por defecto, se puede mejorar
-			'Content-Length': buffer.length.toString(),
-			'Cache-Control': 'public, max-age=31536000',
-		});
-		res.send(buffer);
-	} catch (error) {
-		console.error('Error serving image:', error);
-		res.status(500).send('Error serving image');
-	}
-});
-
-// GET /api/images/:id/thumbnail - Servir thumbnail
-router.get('/:id/thumbnail', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const buffer = await imageService.getThumbnail(id);
-		if (!buffer) {
-			return res.status(404).send('Thumbnail not found');
-		}
-		res.set({
-			'Content-Type': 'image/webp', // Asumimos WEBP por defecto, se puede mejorar
-			'Content-Length': buffer.length.toString(),
-			'Cache-Control': 'public, max-age=31536000',
-		});
-		res.send(buffer);
-	} catch (error) {
-		console.error('Error serving thumbnail:', error);
-		res.status(500).send('Error serving thumbnail');
 	}
 });
 

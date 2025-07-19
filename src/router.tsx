@@ -20,6 +20,7 @@ import FilesContentView from '@/components/views/files/files-content-view';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
 import FoldersView from '@/components/views/folders/folders-view';
 import GroupsContentView from '@/components/views/groups/groups-content-view';
+import ImageDetailView from '@/components/views/images/image-detail-view';
 import { JsonFileContentView } from '@/components/views/json-files/json-file-content-view';
 import { JsonFilesView } from '@/components/views/json-files/json-files-view';
 import MixedContentView from '@/components/views/mixed/mixed-content-view';
@@ -437,6 +438,11 @@ export const router = createBrowserRouter([
 			{
 				path: 'world-items/:id',
 				element: <WorldItemContentWrapper />,
+			},
+			// Rutas para imágenes individuales
+			{
+				path: 'images/:id',
+				element: <ImageDetailView />,
 			},
 			// Content Views - Vistas de detalle sin parámetros
 			{

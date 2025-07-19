@@ -2,15 +2,37 @@ import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useFolder, useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
-import type { EntityWithStats } from '@/types/migration';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { EntityStatsType, type EntityWithStats } from '@/types/migration';
+import type { ImageWithStats } from '@/types/entities/image';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
+
+// Función auxiliar para convertir ImageWithStats a ImageItem
+const imageWithStatsToImageItem = (image: ImageWithStats): ImageItem => ({
+	id: image.id,
+	name: image.name,
+	type: image.type || 'image',
+	path: image.path,
+	size: image.size || 0,
+	width: image.width,
+	height: image.height,
+	url: image.url,
+	thumbnail: image.thumbnail,
+	src: image.src,
+	alt: image.alt,
+	mimeType: image.mimeType,
+	metadata: image.metadata,
+	parsedMetadata: image.parsedMetadata,
+});
 
 interface FolderContentViewProps {
 	folderId?: string;
@@ -23,18 +45,37 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	// 🔄 Cargar información de la carpeta desde la API
 	const { data: folderData, isLoading: isFolderLoading, error: folderError } = useFolder(currentFolderId || '');
 
+	// Estados globales para panel de detalles y visor
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const { openViewer } = useFileViewerStore();
+	const { getImagesByFolder } = useImageStore();
+
 	// Estado local para controlar operaciones
 	const [isRetrying, setIsRetrying] = useState(false);
 
 	const handleImageSelect = useCallback((image: EntityWithStats) => {
 		logger.info('🖱️ Imagen seleccionada:', image.name);
-		// Lógica de selección aquí
-	}, []);
+
+		// Mostrar panel de detalles con la imagen seleccionada
+		setSelectedItems([image]);
+		setDetailsPanelVisible(true);
+	}, [setSelectedItems, setDetailsPanelVisible]);
 
 	const handleImageDoubleClick = useCallback((image: EntityWithStats) => {
 		logger.info('🖱️ Doble click en imagen:', image.name);
-		// Lógica de apertura de visor aquí
-	}, []);
+
+		// Obtener todas las imágenes de la carpeta para el visor
+		if (currentFolderId) {
+			const folderImages = getImagesByFolder(currentFolderId);
+
+			// Convertir a ImageItem y encontrar el índice de la imagen actual
+			const imageItems = folderImages.map(imageWithStatsToImageItem);
+			const currentIndex = imageItems.findIndex((item: ImageItem) => item.id === image.id);
+
+			// Abrir el visor con todas las imágenes de la carpeta
+			openViewer(imageItems, Math.max(0, currentIndex));
+		}
+	}, [currentFolderId, getImagesByFolder, openViewer]);
 
 	const handleForceRefresh = useCallback(async () => {
 		if (!currentFolderId || isRetrying) return;
@@ -128,8 +169,8 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	return (
 		<BaseContentView
 			title={folderData?.name || 'Carpeta'}
-			description={folderData?.description}
-			icon={folderData?.emoji}
+			description={folderData?.description || undefined}
+			icon={folderData?.emoji || undefined}
 			headerControls={
 				<>
 					<Button variant="outline" size="sm" onClick={handleScanFolder} disabled={isRetrying}>
@@ -144,7 +185,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 			}
 		>
 			<FileBrowser
-				entityType="image"
+				entityType={EntityStatsType.IMAGE}
 				filterId={currentFolderId}
 				filterType="folder"
 				onItemClick={handleImageSelect}
