@@ -12,6 +12,7 @@ import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
+import type { ImageWithStats } from '@/types/entities/image';
 import type { NoteWithStats } from '@/types/entities/note';
 import type { PlaceWithStats } from '@/types/entities/place';
 import type { PromptWithStats } from '@/types/entities/prompt';
@@ -177,12 +178,31 @@ export const EntityCard: FC<EntityCardProps> = ({
 		};
 	};
 
+	// Crear wrapper para onClick que convierta el formato de ImageCard al formato de FileBrowser
+	const createImageClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+		console.log('🔧 EntityCard - createImageClickHandler llamado con onClick:', !!originalOnClick);
+		if (!originalOnClick) return undefined;
+		return (imageData: ImageWithStats) => {
+			console.log('🖱️ EntityCard - ImageCard onClick ejecutado para imagen:', imageData.id);
+			// Crear un evento sintético para mantener compatibilidad
+			const syntheticEvent = {
+				preventDefault: () => {},
+				stopPropagation: () => {},
+				currentTarget: null,
+				target: null,
+			} as unknown as React.MouseEvent;
+			originalOnClick(syntheticEvent);
+		};
+	};
+
 	// Renderizar componente específico basado en type guards
 	if (isImageWithStats(entity)) {
+		const imageClickHandler = createImageClickHandler(onClick);
+		console.log('🔧 EntityCard - Renderizando ImageCard con handler:', !!imageClickHandler);
 		return (
 			<ImageCard
 				imageId={entity.id}
-				onClick={onClick}
+				onClick={imageClickHandler}
 				className={className}
 				showTags={config.showTags}
 				showDetails={config.showDetails}

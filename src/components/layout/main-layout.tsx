@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { RightPanel } from '@/components/panels/right-panel/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
@@ -74,6 +75,9 @@ export const MainLayout = memo(function MainLayout() {
 					</>
 				)}
 			</ResizablePanelGroup>
+
+			{/* FileViewer global - modal overlay */}
+			<FileViewer />
 		</div>
 	);
 });

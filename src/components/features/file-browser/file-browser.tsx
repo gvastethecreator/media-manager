@@ -372,6 +372,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Manejar click en item
 	const handleItemClick = useCallback(
 		(item: EntityWithStats, e: React.MouseEvent) => {
+			console.log('🔍 FileBrowser - handleItemClick ejecutado:', {
+				itemId: item.id,
+				hasOnItemClick: !!onItemClick,
+				hasOnItemSelect: !!onItemSelect
+			});
+
 			const isShiftClick = e.shiftKey;
 			const isCtrlClick = e.ctrlKey || e.metaKey;
 
@@ -393,12 +399,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			onItemSelect?.(item);
 			onItemClick?.(item, e);
 		},
-		[selectedIds, setSelectedIds, onItemClick]
+		[selectedIds, setSelectedIds, onItemClick, onItemSelect]
 	);
 
 	// Manejar doble click
 	const handleItemDoubleClick = useCallback(
 		(item: EntityWithStats) => {
+			console.log('🔍 FileBrowser - handleItemDoubleClick ejecutado:', {
+				itemId: item.id,
+				hasOnItemDoubleClick: !!onItemDoubleClick
+			});
+
 			onItemDoubleClick?.(item);
 		},
 		[onItemDoubleClick]
@@ -432,14 +443,43 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Función para renderizar item usando EntityCard
 	const renderItem = useCallback(
 		(item: EntityWithStats, _index: number) => {
-			console.log('🔍 FileBrowser - Renderizando item:', { id: item.id, entityType: item.entityType || 'unknown' });
+			console.log('� FileBrowser - NUEVO LOG - Renderizando item:', {
+				id: item.id,
+				entityType: item.entityType || 'unknown',
+				timestamp: new Date().toISOString()
+			});
+
+			console.log('🚨 FileBrowser - NUEVO LOG - Props disponibles:', {
+				hasOnItemClick: !!onItemClick,
+				hasOnItemDoubleClick: !!onItemDoubleClick,
+				hasHandleItemClick: !!handleItemClick,
+				hasHandleItemDoubleClick: !!handleItemDoubleClick,
+				onItemClickType: typeof onItemClick,
+				onItemDoubleClickType: typeof onItemDoubleClick
+			});
+
+			const onClickHandler = (e: React.MouseEvent) => {
+				console.log('🚨 FileBrowser - onClick handler ejecutado:', { itemId: item.id });
+				handleItemClick(item, e);
+			};
+
+			const onDoubleClickHandler = () => {
+				console.log('🚨 FileBrowser - onDoubleClick handler ejecutado:', { itemId: item.id });
+				handleItemDoubleClick(item);
+			};
+
+			console.log('� FileBrowser - Handlers creados para EntityCard:', {
+				onClickHandler: !!onClickHandler,
+				onDoubleClickHandler: !!onDoubleClickHandler
+			});
+
 			return (
 				<EntityCard
 					key={item.id}
 					entity={item}
 					isSelected={selectedIds.includes(item.id)}
-					onClick={(e) => handleItemClick(item, e)}
-					onDoubleClick={() => handleItemDoubleClick(item)}
+					onClick={onClickHandler}
+					onDoubleClick={onDoubleClickHandler}
 					layout={layout}
 					preset={preset}
 					variant={variant}
@@ -448,19 +488,19 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				/>
 			);
 		},
-		[selectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size]
+		[selectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size, onItemClick, onItemDoubleClick]
 	);
 
 	// Renderizar contenido según el estado
 	const renderContent = () => {
-		console.log('🔍 FileBrowser - Estado de renderizado:', { 
-			isLoading, 
-			error, 
-			itemsLength: items.length, 
+		console.log('🔍 FileBrowser - Estado de renderizado:', {
+			isLoading,
+			error,
+			itemsLength: items.length,
 			containerWidth,
 			entityType,
 			filterId,
-			filterType 
+			filterType
 		});
 
 		if (isLoading && items.length === 0) {

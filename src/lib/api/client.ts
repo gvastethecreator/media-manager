@@ -20,9 +20,8 @@ export class ApiClient {
 	private baseURL: string;
 
 	constructor() {
-		// En desarrollo, el servidor Express corre en puerto 4000
-		// En producción, usar la misma URL base
-		this.baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : window.location.origin;
+		// Usar el proxy de Vite en desarrollo y la misma URL base en producción
+		this.baseURL = process.env.NODE_ENV === 'development' ? '' : window.location.origin;
 	}
 
 	/**

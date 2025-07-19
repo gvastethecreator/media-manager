@@ -132,7 +132,14 @@ export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function Vir
 												width: `${cardWidth}px`,
 											}}
 										>
-											<EntityCard entity={item} isSelected={isSelected} compact={itemSize < 150} className="h-full" />
+											<EntityCard
+												entity={item}
+												isSelected={isSelected}
+												compact={itemSize < 150}
+												className="h-full"
+												onClick={(e) => onItemClick(item, e)}
+												onDoubleClick={() => onItemDoubleClick(item)}
+											/>
 										</motion.div>
 									);
 								})}
