@@ -6,9 +6,10 @@ import React from 'react';
 
 import { FileIcon, FileTextIcon, FolderIcon, ImageIcon, MusicIcon, PlayCircleIcon, VideoIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { EntityWithStats, getEntityStatsType, isImageWithStats, isVideoWithStats } from '@/types/migration';
+import { useImageResources } from '@/store/image-resources.store';
 
 interface SimpleGridViewProps {
 	items: EntityWithStats[];
@@ -18,6 +19,62 @@ interface SimpleGridViewProps {
 	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: EntityWithStats) => void;
 }
+
+// Componente interno para manejar thumbnails de imágenes
+const ImageThumbnail = memo(function ImageThumbnail({
+	imageId,
+	imageName,
+	className
+}: {
+	imageId: string;
+	imageName: string;
+	className: string;
+}) {
+	const { getThumbnail, isLoading: isResourceLoading } = useImageResources();
+	const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+	const [thumbnailLoading, setThumbnailLoading] = useState(false);
+
+	useEffect(() => {
+		const loadThumbnail = async () => {
+			if (!imageId || thumbnailUrl) return;
+
+			setThumbnailLoading(true);
+			try {
+				const url = await getThumbnail(imageId);
+				if (url) {
+					setThumbnailUrl(url);
+				}
+			} catch (error) {
+				console.error('Error cargando thumbnail:', error);
+			} finally {
+				setThumbnailLoading(false);
+			}
+		};
+
+		loadThumbnail();
+	}, [imageId, getThumbnail, thumbnailUrl]);
+
+	const displayThumbnailUrl = thumbnailUrl || `/api/images/${imageId}/thumbnail`;
+	const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
+
+	if (shouldShowLoading) {
+		return (
+			<div className={cn(className, "animate-pulse bg-muted")} />
+		);
+	}
+
+	return (
+		<img
+			src={displayThumbnailUrl}
+			alt={imageName}
+			className={className}
+			loading="lazy"
+			onError={(e) => {
+				console.warn(`Error cargando thumbnail para ${imageId}:`, e);
+			}}
+		/>
+	);
+});
 
 export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView({
 	items,
@@ -79,12 +136,11 @@ export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView(
 							}}
 						>
 							{/* Miniatura o ícono */}
-							{isImage && item.thumbnailUrl ? (
-								<img
-									src={item.thumbnailUrl}
-									alt={item.name || 'Imagen'}
+							{isImage && item.id ? (
+								<ImageThumbnail
+									imageId={item.id}
+									imageName={item.name || 'Imagen'}
 									className="absolute inset-0 w-full h-full object-cover"
-									loading="lazy"
 								/>
 							) : (
 								<div className="absolute inset-0 flex items-center justify-center">

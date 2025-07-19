@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useMemo, useRef } from 'react';
+import React, { memo, useMemo, useRef, useCallback } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
@@ -18,6 +18,73 @@ interface VirtualizedCardsViewProps {
 	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: EntityWithStats) => void;
 }
+
+// Componente interno memoizado para cada carta
+const CardItem = memo<{
+	item: EntityWithStats;
+	isSelected: boolean;
+	compact: boolean;
+	itemIndex: number;
+	cardWidth: number;
+	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: EntityWithStats) => void;
+	animationProps: {
+		initial: { opacity: number; y: number };
+		animate: { opacity: number; y: number };
+		baseTransition: { duration: number };
+	};
+}>(function CardItem({
+	item,
+	isSelected,
+	compact,
+	itemIndex,
+	cardWidth,
+	onItemClick,
+	onItemDoubleClick,
+	animationProps,
+}) {
+	const handleClick = useCallback((e: React.MouseEvent) => {
+		console.log('🖱️ VirtualizedCardsView - onClick disparado:', { itemId: item.id });
+		e.stopPropagation();
+		onItemClick(item, e);
+	}, [item, onItemClick]);
+
+	const handleDoubleClick = useCallback(() => {
+		console.log('🖱️ VirtualizedCardsView - onDoubleClick disparado:', { itemId: item.id });
+		onItemDoubleClick(item);
+	}, [item, onItemDoubleClick]);
+
+	const transition = useMemo(() => ({
+		...animationProps.baseTransition,
+		delay: Math.min(itemIndex * 0.02, 0.3),
+	}), [animationProps.baseTransition, itemIndex]);
+
+	return (
+		<motion.div
+			key={item.id}
+			initial={animationProps.initial}
+			animate={animationProps.animate}
+			transition={transition}
+			className={cn(
+				'relative cursor-pointer transition-all duration-200',
+				'hover:z-10',
+				isSelected && 'ring-2 ring-primary ring-offset-2'
+			)}
+			style={{
+				width: `${cardWidth}px`,
+			}}
+		>
+			<EntityCard
+				entity={item}
+				isSelected={isSelected}
+				compact={compact}
+				className="h-full"
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+			/>
+		</motion.div>
+	);
+});
 
 export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function VirtualizedCardsView({
 	items,
@@ -64,6 +131,30 @@ export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function Vir
 		return items.slice(startIndex, endIndex);
 	};
 
+	// Memoizar handlers para evitar re-renders masivos
+	const handleItemClick = useCallback((item: EntityWithStats, e: React.MouseEvent) => {
+		onItemClick(item, e);
+	}, [onItemClick]);
+
+	const handleItemDoubleClick = useCallback((item: EntityWithStats) => {
+		onItemDoubleClick(item);
+	}, [onItemDoubleClick]);
+
+	// Memoizar objetos de animación para evitar re-renders
+	const animationProps = useMemo(() => ({
+		initial: { opacity: 0, y: 20 },
+		animate: { opacity: 1, y: 0 },
+		baseTransition: { duration: 0.3 },
+	}), []);
+
+	// Función para crear transition con delay estable
+	// const createTransition = useCallback((itemIndex: number) => {
+	// 	return {
+	// 		...animationProps.baseTransition,
+	// 		delay: Math.min(itemIndex * 0.02, 0.3),
+	// 	};
+	// }, [animationProps.baseTransition]);
+
 	return (
 		<div
 			ref={parentRef}
@@ -107,40 +198,17 @@ export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function Vir
 									const itemIndex = virtualRow.index * columns + columnIndex;
 
 									return (
-										<motion.div
+										<CardItem
 											key={item.id}
-											initial={{ opacity: 0, y: 20 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{
-												delay: Math.min(itemIndex * 0.02, 0.3),
-												duration: 0.3,
-											}}
-											className={cn(
-												'relative cursor-pointer transition-all duration-200',
-												'hover:z-10',
-												isSelected && 'ring-2 ring-primary ring-offset-2'
-											)}
-											onClick={(e) => {
-												e.stopPropagation();
-												onItemClick(item, e);
-											}}
-											onDoubleClick={(e) => {
-												e.stopPropagation();
-												onItemDoubleClick(item);
-											}}
-											style={{
-												width: `${cardWidth}px`,
-											}}
-										>
-											<EntityCard
-												entity={item}
-												isSelected={isSelected}
-												compact={itemSize < 150}
-												className="h-full"
-												onClick={(e) => onItemClick(item, e)}
-												onDoubleClick={() => onItemDoubleClick(item)}
-											/>
-										</motion.div>
+											item={item}
+											isSelected={isSelected}
+											compact={itemSize < 150}
+											itemIndex={itemIndex}
+											cardWidth={cardWidth}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											animationProps={animationProps}
+										/>
 									);
 								})}
 							</div>

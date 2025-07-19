@@ -144,16 +144,47 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				get().clearImages();
 			}
 			
-			console.log('📡 DEBUG Store: Llamando a ImageApi.getImagesFromApi con:', options);
-			const result = await ImageApi.getImagesFromApi(options);
-			console.log('📡 DEBUG Store: Respuesta de API:', result);
+			// Implementar paginación automática para obtener todas las imágenes
+			let allImages: any[] = [];
+			let offset = 0;
+			const limit = 100; // Máximo permitido por el servidor
+			let hasMore = true;
 			
-			const images = result?.data || result?.images || [];
-			console.log('🔍 DEBUG Store: Estructura de imágenes recibidas:', images.length > 0 ? images.slice(0, 2) : 'Array vacío');
-			console.log('🔍 DEBUG Store: Primera imagen completa:', images[0]);
-			const validImages = Array.isArray(images) ? images.filter((img) => img?.id) : [];
+			while (hasMore) {
+				console.log(`📡 DEBUG Store: Llamando a ImageApi.getImagesFromApi con: offset=${offset}, limit=${limit}`);
+				
+				// Solo pasar parámetros que están permitidos por ImageFiltersSchema en el servidor
+				const apiOptions: any = { 
+					limit, 
+					offset 
+				};
+				
+				// Agregar solo parámetros válidos del esquema del servidor si están presentes
+				if (options.folderId) apiOptions.folderId = options.folderId;
+				
+				const result = await ImageApi.getImagesFromApi(apiOptions);
+				console.log(`📡 DEBUG Store: Respuesta de API (página ${Math.floor(offset/limit) + 1}):`, result);
+				
+				// Verificar el formato de la respuesta y adaptarse
+				const images = result?.images || (result as any)?.data || [];
+				console.log(`✅ DEBUG Store: Imágenes recibidas en esta página: ${images.length}`);
+				
+				if (images.length > 0) {
+					allImages = allImages.concat(images);
+					offset += limit;
+					// Si recibimos menos imágenes que el límite, ya no hay más páginas
+					hasMore = images.length === limit;
+				} else {
+					hasMore = false;
+				}
+				
+				console.log(`🔍 DEBUG Store: Total acumulado: ${allImages.length}, hasMore: ${hasMore}`);
+			}
+			
+			console.log('🔍 DEBUG Store: Total de imágenes obtenidas:', allImages.length);
+			const validImages = Array.isArray(allImages) ? allImages.filter((img) => img?.id) : [];
 			console.log('✅ DEBUG Store: Imágenes válidas encontradas:', validImages.length);
-			console.log('🔍 DEBUG Store: Imágenes descartadas:', images.length - validImages.length);
+			console.log('🔍 DEBUG Store: Imágenes descartadas:', allImages.length - validImages.length);
 			
 			get().addImages(validImages);
 			console.log('💾 DEBUG Store: Imágenes añadidas al store. Total en store:', Object.keys(get().images).length);

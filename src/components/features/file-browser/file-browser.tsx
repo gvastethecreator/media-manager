@@ -21,7 +21,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { EntityStatsType, EntityWithStats } from '@/types/migration';
+import { EntityStatsType, type EntityWithStats } from '@/types/migration';
 import { StatusBar } from './toolbar/status-bar';
 import { VirtualizedCardsView } from './views/virtualized-cards-view';
 import { VirtualizedListView } from './views/virtualized-list-view';
@@ -251,7 +251,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Modo específico: un solo tipo de entidad
 		switch (entityType) {
-			case 'image':
+			case 'image': {
 				// Si hay filtro por carpeta, usar getImagesByFolder
 				if (filterId && filterType === 'folder') {
 					const filteredImages = getImagesByFolder(filterId);
@@ -261,6 +261,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				const allImages = getSortedImages();
 				console.log('🔍 FileBrowser - Todas las imágenes ordenadas:', allImages.length);
 				return allImages;
+			}
 			// TODO: Añadir otros casos según se implementen
 			default:
 				console.log('🔍 FileBrowser - Retornando array vacío (entityType no coincide)');
@@ -567,7 +568,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			<StatusBar
 				totalItems={items.length}
 				selectedCount={selectedIds.length}
-				entityType={entityType === 'mixed' ? 'image' : entityType}
+				entityType={entityType === 'mixed' ? EntityStatsType.IMAGE : (entityType as EntityStatsType)}
 			/>
 		</div>
 	);

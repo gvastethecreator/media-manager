@@ -10,8 +10,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import { EntityStatsType, type EntityWithStats } from '@/types/migration';
 import type { ImageWithStats } from '@/types/entities/image';
+import { EntityStatsType, type EntityWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
@@ -26,7 +26,8 @@ const imageWithStatsToImageItem = (image: ImageWithStats): ImageItem => ({
 	width: image.width,
 	height: image.height,
 	url: image.url,
-	thumbnail: image.thumbnail,
+	thumbnail: image.thumbnail || `/api/images/${image.id}/thumbnail`,
+	thumbnailUrl: image.thumbnailUrl || `/api/images/${image.id}/thumbnail`,
 	src: image.src,
 	alt: image.alt,
 	mimeType: image.mimeType,
@@ -53,29 +54,35 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	// Estado local para controlar operaciones
 	const [isRetrying, setIsRetrying] = useState(false);
 
-	const handleImageSelect = useCallback((image: EntityWithStats) => {
-		logger.info('🖱️ Imagen seleccionada:', image.name);
+	const handleImageSelect = useCallback(
+		(image: EntityWithStats) => {
+			logger.info('🖱️ Imagen seleccionada:', image.name);
 
-		// Mostrar panel de detalles con la imagen seleccionada
-		setSelectedItems([image]);
-		setDetailsPanelVisible(true);
-	}, [setSelectedItems, setDetailsPanelVisible]);
+			// Mostrar panel de detalles con la imagen seleccionada
+			setSelectedItems([image]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
+	);
 
-	const handleImageDoubleClick = useCallback((image: EntityWithStats) => {
-		logger.info('🖱️ Doble click en imagen:', image.name);
+	const handleImageDoubleClick = useCallback(
+		(image: EntityWithStats) => {
+			logger.info('🖱️ Doble click en imagen:', image.name);
 
-		// Obtener todas las imágenes de la carpeta para el visor
-		if (currentFolderId) {
-			const folderImages = getImagesByFolder(currentFolderId);
+			// Obtener todas las imágenes de la carpeta para el visor
+			if (currentFolderId) {
+				const folderImages = getImagesByFolder(currentFolderId);
 
-			// Convertir a ImageItem y encontrar el índice de la imagen actual
-			const imageItems = folderImages.map(imageWithStatsToImageItem);
-			const currentIndex = imageItems.findIndex((item: ImageItem) => item.id === image.id);
+				// Convertir a ImageItem y encontrar el índice de la imagen actual
+				const imageItems = folderImages.map(imageWithStatsToImageItem);
+				const currentIndex = imageItems.findIndex((item: ImageItem) => item.id === image.id);
 
-			// Abrir el visor con todas las imágenes de la carpeta
-			openViewer(imageItems, Math.max(0, currentIndex));
-		}
-	}, [currentFolderId, getImagesByFolder, openViewer]);
+				// Abrir el visor con todas las imágenes de la carpeta
+				openViewer(imageItems, Math.max(0, currentIndex));
+			}
+		},
+		[currentFolderId, getImagesByFolder, openViewer]
+	);
 
 	const handleForceRefresh = useCallback(async () => {
 		if (!currentFolderId || isRetrying) return;

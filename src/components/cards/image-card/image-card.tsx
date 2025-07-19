@@ -1,17 +1,19 @@
 import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
-import React, { useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useImage } from '@/lib/api/images';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
+import { useImageResources } from '@/store/image-resources.store';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { TagWithStats } from '@/types/entities/tag';
 
 interface ImageCardProps {
 	imageId: string;
-	onClick?: (imageData: ImageWithStats) => void;
+	onClick?: (imageData?: ImageWithStats) => void;
+	onDoubleClick?: () => void;
 	className?: string;
 	showTags?: boolean;
 	showDetails?: boolean;
@@ -26,9 +28,10 @@ interface ImageCardProps {
  * Incluye opción de estilo TCG (Trading Card Game) para una visualización
  * más atractiva e inmersiva.
  */
-export function ImageCard({
+export const ImageCard = memo(function ImageCard({
 	imageId,
 	onClick,
+	onDoubleClick,
 	className,
 	showTags = true,
 	showDetails = true,
@@ -39,15 +42,47 @@ export function ImageCard({
 }: ImageCardProps) {
 	const { data: imageData, isLoading, error } = useImage(imageId);
 	const [isHovered, setIsHovered] = useState(false);
+	const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+	const [thumbnailLoading, setThumbnailLoading] = useState(false);
+
+	// Hook para manejar recursos de imagen (thumbnails)
+	const { getThumbnail, isLoading: isResourceLoading } = useImageResources();
 
 	// Si variant es tcg, forzar tcgMode a true
 	if (variant === 'tcg') {
 		tcgMode = true;
 	}
 
+	// Cargar thumbnail usando useImageResources
+	useEffect(() => {
+		const loadThumbnail = async () => {
+			if (!imageId || thumbnailUrl) return;
+
+			setThumbnailLoading(true);
+			try {
+				const url = await getThumbnail(imageId);
+				if (url) {
+					setThumbnailUrl(url);
+				}
+			} catch (error) {
+				console.error('Error cargando thumbnail:', error);
+			} finally {
+				setThumbnailLoading(false);
+			}
+		};
+
+		loadThumbnail();
+	}, [imageId, getThumbnail, thumbnailUrl]);
+
 	const handleClick = () => {
 		if (onClick && imageData) {
 			onClick(imageData);
+		}
+	};
+
+	const handleDoubleClick = () => {
+		if (onDoubleClick) {
+			onDoubleClick();
 		}
 	};
 
@@ -126,6 +161,10 @@ export function ImageCard({
 		);
 	}
 
+	// Determinar la URL del thumbnail a usar
+	const displayThumbnailUrl = thumbnailUrl || imageData.thumbnailUrl || `/api/images/${imageData.id}/thumbnail`;
+	const shouldShowThumbnailLoading = thumbnailLoading || isResourceLoading(imageId);
+
 	// Obtener formato de imagen de los metadatos
 	const _getImageFormat = () => {
 		return imageData.parsedMetadata?.format || 'unknown';
@@ -161,22 +200,20 @@ export function ImageCard({
 	};
 
 	const cardContent = (
-		<div
+		<button
+			type="button"
 			className={cn(
-				'group relative overflow-hidden rounded-lg transition-all duration-300',
+				'group relative overflow-hidden rounded-lg transition-all duration-300 w-full h-full border-0 bg-transparent p-0',
 				getAspectRatioClass(),
 				getVariantClasses(),
 				isHovered ? 'shadow-lg scale-[1.02]' : 'hover:shadow-lg hover:scale-[1.02]',
-				onClick && 'cursor-pointer'
+				(onClick || onDoubleClick) && 'cursor-pointer'
 			)}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
-			{...(onClick && {
-				onClick: handleClick,
-				onKeyDown: (e: React.KeyboardEvent) => e.key === 'Enter' && handleClick(),
-				tabIndex: 0,
-				role: 'button',
-			})}
+			onClick={handleClick}
+			onDoubleClick={handleDoubleClick}
+			disabled={!onClick && !onDoubleClick}
 		>
 			{/* Elementos decorativos TCG */}
 			{tcgMode && (
@@ -232,15 +269,44 @@ export function ImageCard({
 
 			{/* Imagen principal */}
 			<div className="relative w-full h-full">
-				{imageData.thumbnailUrl ? (
+				{/* Mostrar skeleton mientras carga el thumbnail */}
+				{shouldShowThumbnailLoading && (
+					<div className={cn('absolute inset-0 z-10', tcgMode && 'pt-8')}>
+						<Skeleton className="w-full h-full" />
+					</div>
+				)}
+
+				{displayThumbnailUrl ? (
 					<img
-						src={imageData.thumbnailUrl}
+						src={displayThumbnailUrl}
 						alt={imageData.name || 'Imagen'}
 						className={cn(
 							'w-full h-full object-cover',
-							tcgMode && 'pt-8' // Espacio para la barra superior en modo TCG
+							tcgMode && 'pt-8', // Espacio para la barra superior en modo TCG
+							shouldShowThumbnailLoading && 'opacity-0' // Ocultar mientras carga
 						)}
 						loading="lazy"
+						onLoad={() => {
+							// Ocultar skeleton cuando la imagen se carga
+							setThumbnailLoading(false);
+						}}
+						onError={(e) => {
+							// Fallback si el thumbnail falla
+							console.warn(`Error cargando thumbnail para ${imageId}:`, e);
+							const imgElement = e.currentTarget as HTMLImageElement;
+							imgElement.style.display = 'none';
+							const parent = imgElement.parentElement;
+							if (parent) {
+								parent.innerHTML = `
+									<div class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900 ${tcgMode ? 'pt-8' : ''}">
+										<svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+										</svg>
+									</div>
+								`;
+							}
+							setThumbnailLoading(false);
+						}}
 					/>
 				) : (
 					<div
@@ -429,11 +495,11 @@ export function ImageCard({
 					</div>
 				</div>
 			)}
-		</div>
+		</button>
 	);
 
-	// Si hay un onClick, devolver directamente el contenido
-	if (onClick) {
+	// Si hay un onClick o onDoubleClick, devolver directamente el contenido
+	if (onClick || onDoubleClick) {
 		return cardContent;
 	}
 
@@ -443,4 +509,4 @@ export function ImageCard({
 			<Link to={`/images/${imageId}`}>{cardContent}</Link>
 		</div>
 	);
-}
+});

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
-import { pathToUrl } from '@/lib/web/url-utils';
 import { useImageResources } from '@/store/image-resources.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 
@@ -20,6 +19,7 @@ export interface ImageItem {
 	height: number | null;
 	url?: string;
 	thumbnail: string | null;
+	thumbnailUrl?: string;
 	src?: string;
 	alt?: string;
 	mimeType?: string;
@@ -322,7 +322,8 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 	// Función memoizada para cargar URL de imagen
 	const loadImageUrl = useCallback(async (imageId: string): Promise<string> => {
 		try {
-			const url = await pathToUrl(imageId);
+			// Usar el endpoint correcto para imágenes
+			const url = `/api/images/${imageId}`;
 			return url;
 		} catch (error) {
 			console.error(`Error cargando URL para ${imageId}:`, error);
