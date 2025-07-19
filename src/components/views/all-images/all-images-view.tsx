@@ -5,7 +5,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { EntityWithStats, isImageWithStats } from '@/types/migration';
+import type { EntityWithStats } from '@/types/migration';
+import { isImageWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 import AllImagesContentView from './all-images-content-view';
 

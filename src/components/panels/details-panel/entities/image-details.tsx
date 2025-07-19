@@ -4,15 +4,16 @@
  */
 
 import { Crop, Download, Edit, Eye, Heart, Maximize2, RotateCcw, RotateCw, Share, ZoomIn, ZoomOut } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { ImageWithStats } from '@/types/entities/image/types';
+import type { ImageWithStats } from '@/types/entities/image';
 import { isImageWithStats } from '@/types/migration';
+import { useImageResources } from '@/store/image-resources.store';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,
@@ -96,6 +97,67 @@ export const ImagePreview = memo<EntityPreviewProps<ImageWithStats>>(function Im
 		xl: 'h-80',
 	};
 
+	// Componente interno para manejar la previsualización de imágenes
+	const ImagePreview = memo(function ImagePreview({ 
+		imageId, 
+		imageName, 
+		zoom,
+		className 
+	}: {
+		imageId: string;
+		imageName: string;
+		zoom: number;
+		className: string;
+	}) {
+		const { getThumbnail, isLoading: isResourceLoading } = useImageResources();
+		const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+		const [thumbnailLoading, setThumbnailLoading] = useState(false);
+
+		useEffect(() => {
+			const loadThumbnail = async () => {
+				if (!imageId || thumbnailUrl) return;
+
+				setThumbnailLoading(true);
+				try {
+					const url = await getThumbnail(imageId);
+					if (url) {
+						setThumbnailUrl(url);
+					}
+				} catch (error) {
+					console.error('Error cargando thumbnail:', error);
+				} finally {
+					setThumbnailLoading(false);
+				}
+			};
+
+			loadThumbnail();
+		}, [imageId, getThumbnail, thumbnailUrl]);
+
+		const displayThumbnailUrl = thumbnailUrl || `/api/images/${imageId}/thumbnail`;
+		const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
+
+		if (shouldShowLoading) {
+			return (
+				<div className={cn(className, "animate-pulse bg-muted flex items-center justify-center")}>
+					<span className="text-muted-foreground">Cargando...</span>
+				</div>
+			);
+		}
+
+		return (
+			<img
+				src={displayThumbnailUrl}
+				alt={imageName || 'Imagen'}
+				className="max-w-full max-h-full object-contain transition-transform duration-200"
+				style={{ transform: `scale(${zoom})` }}
+				loading="lazy"
+				onError={(e) => {
+					console.warn(`Error cargando thumbnail para ${imageId}:`, e);
+				}}
+			/>
+		);
+	});
+
 	const handleZoomIn = useCallback(() => {
 		setZoom((prev) => Math.min(prev * 1.2, 5));
 	}, []);
@@ -113,19 +175,16 @@ export const ImagePreview = memo<EntityPreviewProps<ImageWithStats>>(function Im
 		return null;
 	}
 
-	const imageUrl = entity.thumbnailUrl || entity.path;
-
 	return (
 		<Card className="overflow-hidden">
 			<CardContent className="p-0">
 				<div className={cn('relative bg-muted/30 flex items-center justify-center', sizeClasses[size])}>
-					{imageUrl ? (
-						<img
-							src={imageUrl}
-							alt={entity.name || 'Imagen'}
-							className="max-w-full max-h-full object-contain transition-transform duration-200"
-							style={{ transform: `scale(${zoom})` }}
-							loading="lazy"
+					{entity.id ? (
+						<ImagePreview
+							imageId={entity.id}
+							imageName={entity.name || 'Imagen'}
+							zoom={zoom}
+							className="max-w-full max-h-full"
 						/>
 					) : (
 						<div className="text-muted-foreground">Sin vista previa disponible</div>

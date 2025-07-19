@@ -5,9 +5,10 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import type { EntityWithStats } from '@/types/migration';
+import { useImageResources } from '@/store/image-resources.store';
 
 interface VirtualizedListViewProps {
 	items: EntityWithStats[];
@@ -17,6 +18,64 @@ interface VirtualizedListViewProps {
 	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: EntityWithStats) => void;
 }
+
+// Componente interno para manejar thumbnails de imágenes
+const ImageThumbnail = memo(function ImageThumbnail({
+	imageId,
+	imageName,
+	className
+}: {
+	imageId: string;
+	imageName: string;
+	className: string;
+}) {
+	const { getThumbnail, isLoading: isResourceLoading } = useImageResources();
+	const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+	const [thumbnailLoading, setThumbnailLoading] = useState(false);
+
+	useEffect(() => {
+		const loadThumbnail = async () => {
+			if (!imageId || thumbnailUrl) return;
+
+			setThumbnailLoading(true);
+			try {
+				const url = await getThumbnail(imageId);
+				if (url) {
+					setThumbnailUrl(url);
+				}
+			} catch (error) {
+				console.error('Error cargando thumbnail:', error);
+			} finally {
+				setThumbnailLoading(false);
+			}
+		};
+
+		loadThumbnail();
+	}, [imageId, getThumbnail, thumbnailUrl]);
+
+	const displayThumbnailUrl = thumbnailUrl || `/api/images/${imageId}/thumbnail`;
+	const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
+
+	if (shouldShowLoading) {
+		return (
+			<div className={cn(className, "animate-pulse bg-muted")} />
+		);
+	}
+
+	return (
+		<img
+			src={displayThumbnailUrl}
+			alt={imageName}
+			className={className}
+			onError={(e) => {
+				console.warn(`Error cargando thumbnail para ${imageId}:`, e);
+				// Fallback visual
+				const target = e.target as HTMLImageElement;
+				target.style.display = 'none';
+			}}
+		/>
+	);
+});
 
 export const VirtualizedListView = memo<VirtualizedListViewProps>(function VirtualizedListView({
 	items,
@@ -86,12 +145,10 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 						>
 							{/* Thumbnail o icono */}
 							<div className="w-12 h-12 bg-muted rounded flex-shrink-0 flex items-center justify-center">
-								{item.entityType === 'image' && item.path ? (
-									<img
-										src={item.path}
-										alt={item.name}
-										width={48}
-										height={48}
+								{item.entityType === 'image' && item.id ? (
+									<ImageThumbnail
+										imageId={item.id}
+										imageName={item.name}
 										className="w-12 h-12 object-cover rounded"
 									/>
 								) : (
