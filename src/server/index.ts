@@ -2,6 +2,7 @@
 
 import cors from 'cors';
 import express from 'express';
+import path from 'path';
 import { errorLogger, logInfo, requestLogger } from './middleware/logging';
 import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
@@ -39,7 +40,7 @@ import { workflowsRouter } from './routes/workflows.js';
 import worldItemsRouter from './routes/world-items';
 
 const app = express();
-const PORT = process.env.API_PORT || process.env.PORT || '4000';
+const PORT = Number.parseInt(process.env.API_PORT || process.env.PORT || '4000', 10);
 
 // Middleware
 app.use(
@@ -50,6 +51,11 @@ app.use(
 );
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Configurar archivos estáticos para las imágenes
+const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
+app.use('/uploads', express.static(path.resolve(UPLOADS_DIR)));
+console.log(`📁 Archivos estáticos configurados: /uploads -> ${path.resolve(UPLOADS_DIR)}`);
 
 // 🚨 LOGGING DIRECTO ANTES DEL MIDDLEWARE
 console.log('🔥 [PRE-MIDDLEWARE] Aplicando requestLogger...');
