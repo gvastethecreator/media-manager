@@ -590,7 +590,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 				{/* Main Image Container */}
 				<motion.div
-					key={currentImage.id}
+					key={currentImage?.id || 'no-image'}
 					className="absolute inset-0 flex items-center justify-center"
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
@@ -607,7 +607,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 									transition={{ duration: 0.3 }}
 									className="absolute inset-0 flex items-center justify-center"
 								>
-									{urls[currentImage.id] ? (
+									{currentImage && urls[currentImage.id] ? (
 										<motion.div
 											className="absolute inset-0 flex items-center justify-center"
 											initial={{ opacity: 0, filter: 'blur(10px)' }}
@@ -636,7 +636,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 							)}
 						</AnimatePresence>
 
-						{!isLoading && urls[currentImage.id] && (
+						{!isLoading && currentImage && urls[currentImage.id] && (
 							<motion.div
 								className="absolute inset-0 flex items-center justify-center"
 								style={{
@@ -646,14 +646,14 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 								}}
 							>
 								<img
-									src={urls[currentImage.id]}
-									alt={currentImage.name || 'Image'}
+									src={currentImage ? urls[currentImage.id] : ''}
+									alt={currentImage?.name || 'Image'}
 									className="max-w-full max-h-full object-contain"
 								/>
 							</motion.div>
 						)}
 
-						{!urls[currentImage.id] && !isLoading && (
+						{!currentImage || (!urls[currentImage.id] && !isLoading) && (
 							<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
 								<p>Error al cargar la imagen</p>
 							</div>

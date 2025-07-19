@@ -46,7 +46,7 @@ const initialProcessStatus: ProcessStatus = {
 	progress: 0,
 };
 
-const _BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const _BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 	isLoading: true,
