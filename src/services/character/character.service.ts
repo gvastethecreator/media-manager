@@ -180,6 +180,8 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 		// **MIGRACIÓN A DRIZZLE**
 		logger.info('🔍 Obteniendo personajes con opciones:', options);
 
+		console.log('🔍 Paso 1: Iniciando consulta Drizzle...');
+
 		// Por ahora, implementación básica sin filtros complejos
 		const drizzleCharacters = await db
 			.select({
@@ -188,41 +190,56 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 				description: characters.description,
 				emoji: characters.emoji,
 				color: characters.color,
-				shortcut: characters.shortcut,
 				category: characters.category,
-				level: characters.level,
-				class: characters.class,
-				race: characters.race,
-				type: characters.type,
-				alignment: characters.alignment,
-				backstory: characters.backstory,
-				stats: characters.stats,
-				psychologicalProfile: characters.psychologicalProfile,
-				socialProfile: characters.socialProfile,
-				relationships: characters.relationships,
-				goals: characters.goals,
-				fears: characters.fears,
-				beliefs: characters.beliefs,
+				age: characters.age,
+				gender: characters.gender,
+				species: characters.species,
+				occupation: characters.occupation,
 				personality: characters.personality,
+				background: characters.background,
+				relationships: characters.relationships,
 				skills: characters.skills,
-				abilities: characters.abilities,
-				sortBy: characters.sortBy,
-				filters: characters.filters,
+				equipment: characters.equipment,
+				notes: characters.notes,
 				featuredImage: characters.featuredImage,
+				isPublic: characters.isPublic,
 				isFavorite: characters.isFavorite,
+				totalImages: characters.totalImages,
+				totalVideos: characters.totalVideos,
+				parentId: characters.parentId,
 				createdAt: characters.createdAt,
 				updatedAt: characters.updatedAt,
 			})
 			.from(characters)
 			.orderBy(desc(characters.createdAt));
 
-		const transformedCharacters = drizzleCharacters.map((rawCharacter) => ({
+		console.log('🔍 Paso 2: Consulta completada, datos obtenidos:', drizzleCharacters.length);
+		console.log('🔍 Primer personaje raw:', JSON.stringify(drizzleCharacters[0], null, 2));
+
+		const transformedCharacters = drizzleCharacters.map((rawCharacter: any) => ({
 			...rawCharacter,
 			isFavorite: Boolean(rawCharacter.isFavorite),
+			// Mapear campos del esquema actual al formato esperado por el transformer
+			level: 1, // default temporal
+			class: rawCharacter.occupation || null,
+			race: rawCharacter.species || null,
+			type: 'character',
+			alignment: null,
+			backstory: rawCharacter.background || null,
+			stats: null,
+			psychologicalProfile: null,
+			socialProfile: null,
+			goals: null,
+			fears: null,
+			beliefs: null,
+			abilities: rawCharacter.equipment || null,
+			sortBy: null,
+			filters: null,
+			shortcut: null,
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
-				images: 0,
-				videos: 0,
+				images: rawCharacter.totalImages || 0,
+				videos: rawCharacter.totalVideos || 0,
 				tags: 0,
 				groups: 0,
 				properties: 0,
@@ -239,7 +256,13 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			},
 		}));
 
+		console.log('🔍 Paso 3: Personajes transformados:', transformedCharacters.length);
+		console.log('🔍 Primer personaje transformado:', JSON.stringify(transformedCharacters[0], null, 2));
+
+		console.log('🔍 Paso 4: Iniciando fromDrizzleCharacters...');
 		const charactersResult = fromDrizzleCharacters(transformedCharacters as any);
+		console.log('🔍 Paso 5: fromDrizzleCharacters completado:', charactersResult.length);
+
 		const total = transformedCharacters.length; // TODO: implementar conteo separado
 
 		logger.info(`✅ ${charactersResult.length} personajes encontrados`);
@@ -248,6 +271,7 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			total,
 		};
 	} catch (error) {
+		console.error('❌ Error detallado en getCharacters:', error);
 		logger.error('❌ Error al obtener personajes', { error, options });
 		throw new CharacterServiceError(
 			`Error al obtener personajes: ${error instanceof Error ? error.message : 'Error desconocido'}`,
