@@ -2,7 +2,7 @@
  * @file Transformador principal para la entidad Character
  * @module transformers/character/transformer
  * @description Contiene la lógica para convertir un objeto Character de Drizzle a nuestros tipos canónicos.
- 
+
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -89,15 +89,29 @@ const logger = serverLogger.withContext('CharacterTransformer');
  * @param drizzleCharacter - Character de Drizzle con conteos
  * @returns CharacterWithStats con estadísticas pre-calculadas
  */
-export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCounts | null): CharacterWithStats | null {
-	if (!drizzleCharacter) {
-		return null;
-	}
-
+export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCounts): CharacterWithStats | null {
 	try {
-		const { _count, ...baseData } = drizzleCharacter;
-		const now = new Date();
+		console.log('🔄 Iniciando transformación de personaje:', drizzleCharacter?.id);
+		console.log('🔄 Datos de entrada:', JSON.stringify(drizzleCharacter, null, 2));
 
+		if (!drizzleCharacter) {
+			console.log('❌ drizzleCharacter es null/undefined');
+			return null;
+		}
+
+		const now = new Date().toISOString();
+		const { _count, ...baseData } = drizzleCharacter;
+
+		console.log('🔄 baseData después de destructuring:', JSON.stringify(baseData, null, 2));
+		console.log('🔄 _count después de destructuring:', JSON.stringify(_count, null, 2));
+
+		// Validar que _count existe y tiene las propiedades necesarias
+		if (!_count || typeof _count !== 'object') {
+			console.log('❌ _count no es un objeto válido:', _count);
+			return null;
+		}
+
+		console.log('🔄 Calculando totales desde _count...');
 		// Calcular totales desde los conteos
 		const totalImages = _count?.images ?? 0;
 		const totalVideos = _count?.videos ?? 0;
@@ -114,6 +128,8 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 		const totalWildcards = _count?.wildcards ?? 0;
 		const totalRelatedCharacters = _count?.relatedCharacters ?? 0;
 		const totalRelatedTo = _count?.relatedTo ?? 0;
+
+		console.log('🔄 Totales calculados');
 
 		const totalAssociations =
 			totalImages +
@@ -132,27 +148,30 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			totalRelatedCharacters +
 			totalRelatedTo;
 
+		console.log('🔄 Calculando power level...');
 		// Calcular power level basado en nivel y asociaciones
-		const powerLevel = calculatePowerLevel(baseData.level, totalAssociations);
+		const powerLevel = calculatePowerLevel(baseData.level || 1, totalAssociations);
 
+		console.log('🔄 Determinando rareza...');
 		// Determinar rareza basada en power level y nivel
-		const rarityLevel = determineRarityLevel(baseData.level, powerLevel, totalAssociations);
+		const rarityLevel = determineRarityLevel(baseData.level || 1, powerLevel, totalAssociations);
 
-		return {
+		console.log('🔄 Construyendo resultado final...');
+		const result = {
 			...baseData,
-			// Asegurar campos JSON como strings
-			stats: baseData.stats || '{}',
-			skills: baseData.skills || '[]',
-			relationships: baseData.relationships || '[]',
-			goals: baseData.goals || '[]',
-			fears: baseData.fears || '[]',
-			beliefs: baseData.beliefs || '[]',
-			personality: baseData.personality || '[]',
-			abilities: baseData.abilities || '[]',
-			filters: baseData.filters || '[]',
-			psychologicalProfile: baseData.psychologicalProfile || '',
-			socialProfile: baseData.socialProfile || '',
-			notes: baseData.notes || [], // Simplificado para evitar dependencias
+			// Validación null-safe para evitar errores de Object.entries
+			stats: baseData.stats != null ? baseData.stats : '{}',
+			skills: baseData.skills != null ? baseData.skills : '[]',
+			relationships: baseData.relationships != null ? baseData.relationships : '[]',
+			goals: baseData.goals != null ? baseData.goals : '[]',
+			fears: baseData.fears != null ? baseData.fears : '[]',
+			beliefs: baseData.beliefs != null ? baseData.beliefs : '[]',
+			personality: baseData.personality != null ? baseData.personality : '[]',
+			abilities: baseData.abilities != null ? baseData.abilities : '[]',
+			filters: baseData.filters != null ? baseData.filters : '[]',
+			psychologicalProfile: baseData.psychologicalProfile != null ? baseData.psychologicalProfile : '',
+			socialProfile: baseData.socialProfile != null ? baseData.socialProfile : '',
+			notes: baseData.notes != null ? baseData.notes : [], // Simplificado para evitar dependencias
 
 			// Conteos originales para compatibilidad
 			_count,
@@ -180,7 +199,11 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 				rarityLevel,
 			},
 		};
+
+		console.log('✅ Transformación completada exitosamente');
+		return result;
 	} catch (error) {
+		console.error('❌ Error detallado en transformación:', error);
 		logger.error('Error al transformar personaje de Drizzle', { error, characterId: drizzleCharacter?.id });
 		return null;
 	}
