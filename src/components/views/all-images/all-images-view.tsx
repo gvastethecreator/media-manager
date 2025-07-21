@@ -45,7 +45,7 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 		console.log('🔍 DEBUG AllImagesView: useEffect ejecutado');
 		console.log('🔍 DEBUG AllImagesView: imagesRecord:', imagesRecord);
 		console.log('🔍 DEBUG AllImagesView: Object.keys(imagesRecord).length:', Object.keys(imagesRecord || {}).length);
-		
+
 		if (!imagesRecord || Object.keys(imagesRecord).length === 0) {
 			console.log('🚀 DEBUG AllImagesView: Store de imágenes vacío, llamando loadImages()');
 			viewLogger.info('Store de imágenes vacío, cargando desde el servidor...');
