@@ -2,7 +2,7 @@
 // Proporciona tanto export default como exports nombrados para evitar errores
 
 const emptyObject = {};
-const emptyFunction = () => {};
+const emptyFunction = () => { };
 const emptyPromise = Promise.resolve();
 
 // Para compatibilidad con http - STATUS_CODES como propiedad del objeto principal
