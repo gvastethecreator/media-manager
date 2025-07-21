@@ -1,24 +1,19 @@
 // Cargar variables de entorno primero
 
-import cors from 'cors';
 import express from 'express';
 import path from 'path';
-import { errorLogger, logInfo, requestLogger } from './middleware/logging';
-import activityRouter from './routes/activity';
+import { errorLogger, logInfo } from './middleware/logging';
+import activityRouter from './routes/activity-new';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
 import charactersRouter from './routes/characters';
-import charactersDebugRouter from './routes/characters-debug';
-import albumsDebugRouter from './routes/albums-debug';
 import testCharactersRouter from './routes/test-characters';
 import collectionsRouter from './routes/collections';
 import conceptsRouter from './routes/concepts';
 import debugRouter from './routes/debug.js';
-import { documentsRouter } from './routes/documents.js';
-import downloadRouter from './routes/download.js';
-import eventsRouter from './routes/events';
 import favoritesRouter from './routes/favorites';
 import filesRouter from './routes/files-temp.js';
+import { documentsRouter } from './routes/documents.js';
 import { foldersRouter } from './routes/folders.js';
 import groupsRouter from './routes/groups';
 import { imagesRouter } from './routes/images.js';
@@ -27,11 +22,12 @@ import localFilesRouter from './routes/local-files-simple.js';
 import metadataRouter from './routes/metadata';
 import notesRouter from './routes/notes';
 import placesRouter from './routes/places';
-import profilesRouter from './routes/profiles';
+import profilesRouter from './routes/profiles-fixed';
 import promptsRouter from './routes/prompts';
 import propertiesRouter from './routes/properties';
 import { queueRouter } from './routes/queue';
 import searchRouter from './routes/search';
+import settingsRouter from './routes/settings';
 import statsRouter from './routes/stats';
 import systemRouter from './routes/system';
 import tagsRouter from './routes/tags';
@@ -41,17 +37,11 @@ import { videosRouter } from './routes/videos.js';
 import wildcardsRouter from './routes/wildcards';
 import { workflowsRouter } from './routes/workflows.js';
 import worldItemsRouter from './routes/world-items';
-
+import downloadRouter from './routes/download.js';
+import eventsRouter from './routes/events';
 const app = express();
 const PORT = Number.parseInt(process.env.API_PORT || process.env.PORT || '4000', 10);
-
-// Middleware
-app.use(
-	cors({
-		origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-		credentials: true,
-	})
-);
+// ...existing code...
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -93,14 +83,56 @@ app.use((req, res, next) => {
 	next();
 });
 
-// Middleware de logging original (como backup)
-app.use(requestLogger);
+// Middleware de logging original (como backup) - COMENTADO PARA EVITAR CONFLICTOS
+// app.use(requestLogger);
 
 console.log('🔥 [POST-MIDDLEWARE] requestLogger aplicado');
 process.stdout.write('🔥 [POST-MIDDLEWARE-STDOUT] requestLogger aplicado\n');
 logInfo('🔧 Middleware de logging robusto configurado');
 console.log('🚨 [CRITICAL DEBUG] Este log debe aparecer SIEMPRE');
 console.log('🚨 [CRITICAL DEBUG] Timestamp:', new Date().toISOString());
+
+// Verificar que todos los routers sean funciones
+console.log('🔍 [DEBUG] Verificando routers...');
+console.log('🔍 [DEBUG] activityRouter:', typeof activityRouter);
+console.log('🔍 [DEBUG] settingsRouter:', typeof settingsRouter);
+console.log('🔍 [DEBUG] profilesRouter:', typeof profilesRouter);
+console.log('🔍 [DEBUG] metadataRouter:', typeof metadataRouter);
+console.log('🔍 [DEBUG] systemRouter:', typeof systemRouter);
+console.log('🔍 [DEBUG] albumsRouter:', typeof albumsRouter);
+console.log('🔍 [DEBUG] audioRouter:', typeof audioRouter);
+
+// Verificar más routers que pueden estar causando problemas
+console.log('🔍 [DEBUG] foldersRouter:', typeof foldersRouter);
+console.log('🔍 [DEBUG] imagesRouter:', typeof imagesRouter);
+console.log('🔍 [DEBUG] filesRouter:', typeof filesRouter);
+console.log('🔍 [DEBUG] downloadRouter:', typeof downloadRouter);
+console.log('🔍 [DEBUG] tagsRouter:', typeof tagsRouter);
+console.log('🔍 [DEBUG] charactersRouter:', typeof charactersRouter);
+console.log('🔍 [DEBUG] testCharactersRouter:', typeof testCharactersRouter);
+console.log('🔍 [DEBUG] collectionsRouter:', typeof collectionsRouter);
+console.log('🔍 [DEBUG] placesRouter:', typeof placesRouter);
+console.log('🔍 [DEBUG] worldItemsRouter:', typeof worldItemsRouter);
+console.log('🔍 [DEBUG] conceptsRouter:', typeof conceptsRouter);
+console.log('🔍 [DEBUG] promptsRouter:', typeof promptsRouter);
+console.log('🔍 [DEBUG] uploadedImagesRouter:', typeof uploadedImagesRouter);
+console.log('🔍 [DEBUG] wildcardsRouter:', typeof wildcardsRouter);
+console.log('🔍 [DEBUG] videosRouter:', typeof videosRouter);
+console.log('🔍 [DEBUG] documentsRouter:', typeof documentsRouter);
+console.log('🔍 [DEBUG] workflowsRouter:', typeof workflowsRouter);
+console.log('🔍 [DEBUG] notesRouter:', typeof notesRouter);
+console.log('🔍 [DEBUG] propertiesRouter:', typeof propertiesRouter);
+console.log('🔍 [DEBUG] groupsRouter:', typeof groupsRouter);
+console.log('🔍 [DEBUG] favoritesRouter:', typeof favoritesRouter);
+console.log('🔍 [DEBUG] jsonFilesRouter:', typeof jsonFilesRouter);
+console.log('🔍 [DEBUG] localFilesRouter:', typeof localFilesRouter);
+console.log('🔍 [DEBUG] debugRouter:', typeof debugRouter);
+console.log('🔍 [DEBUG] queueRouter:', typeof queueRouter);
+console.log('🔍 [DEBUG] searchRouter:', typeof searchRouter);
+console.log('🔍 [DEBUG] thumbnailsRouter:', typeof thumbnailsRouter);
+console.log('🔍 [DEBUG] statsRouter:', typeof statsRouter);
+console.log('🔍 [DEBUG] eventsRouter:', typeof eventsRouter);
+console.log('🔍 [DEBUG] errorLogger:', typeof errorLogger);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -137,8 +169,8 @@ app.use('/api/albums', albumsRouter);
 app.use('/api/download', downloadRouter);
 app.use('/api/tags', tagsRouter);
 app.use('/api/characters', charactersRouter);
-app.use('/api/characters-debug', charactersDebugRouter);
-app.use('/api/albums-debug', albumsDebugRouter);
+// app.use('/api/characters-debug', charactersDebugRouter); // DESHABILITADO - archivo no existe
+// app.use('/api/albums-debug', albumsDebugRouter); // DESHABILITADO - archivo no existe
 app.use('/api/test-characters', testCharactersRouter);
 app.use('/api/collections', collectionsRouter);
 app.use('/api/places', placesRouter);
@@ -164,6 +196,7 @@ app.use('/api/queue', queueRouter);
 app.use('/api/system', systemRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/metadata', metadataRouter);
+app.use('/api/settings', settingsRouter);
 app.use('/api/thumbnails', thumbnailsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/profiles', profilesRouter);
