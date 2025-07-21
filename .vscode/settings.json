@@ -21,12 +21,14 @@
   "prettier.useTabs": true,
   "workbench.editor.highlightModifiedTabs": true,
   "gitlens.views.repositories.files.layout": "tree",
-
   "[css]": {
     "editor.defaultFormatter": "vscode.css-language-features"
   },
   "smoothtype.duration": 160,
-  "gitlens.gitCommands.skipConfirmations": ["fetch:command", "switch:command"],
+  "gitlens.gitCommands.skipConfirmations": [
+    "fetch:command",
+    "switch:command"
+  ],
   "files.autoGuessEncoding": true,
   "editor.inlineSuggest.enabled": true,
   "editor.suggest.preview": true,
@@ -54,7 +56,7 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.preferredDarkColorTheme": "Dark",
+  "workbench.preferredDarkColorTheme": "Bearded Theme Stained Blue",
   "git.enableSmartCommit": true,
   "workbench.activityBar.location": "top",
   "powermode.enabled": true,
@@ -71,19 +73,21 @@
   "typescript.tsserver.web.projectWideIntellisense.enabled": false,
   "typescript.tsserver.web.typeAcquisition.enabled": false,
   "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-
   // Configuración específica para ESLint
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
   "eslint.format.enable": true,
   "eslint.run": "onSave",
-
   // Configuración específica para Prettier
   "prettier.requireConfig": true,
   "prettier.printWidth": 120,
   "prettier.singleQuote": true,
   "prettier.semi": true,
   "prettier.arrowParens": "always",
-
   // Configuración Next.js
   "tailwindCSS.includeLanguages": {
     "typescript": "javascript",
@@ -92,12 +96,13 @@
   "tailwindCSS.emmetCompletions": true,
   "editor.formatOnPaste": false,
   "editor.formatOnType": false,
-
   "terminal.integrated.defaultProfile.windows": null,
   "terminal.integrated.profiles.windows": {
     "PowerShell": {
       "source": "PowerShell",
-      "args": ["-NoProfile"],
+      "args": [
+        "-NoProfile"
+      ],
       "icon": "terminal-powershell"
     }
   },

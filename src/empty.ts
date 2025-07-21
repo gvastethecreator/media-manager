@@ -5,7 +5,39 @@ const emptyObject = {};
 const emptyFunction = () => {};
 const emptyPromise = Promise.resolve();
 
-export default emptyObject;
+// Para compatibilidad con http - STATUS_CODES como propiedad del objeto principal
+const STATUS_CODES = {
+	200: 'OK',
+	201: 'Created',
+	204: 'No Content',
+	400: 'Bad Request',
+	401: 'Unauthorized',
+	403: 'Forbidden',
+	404: 'Not Found',
+	405: 'Method Not Allowed',
+	426: 'Upgrade Required',
+	500: 'Internal Server Error',
+	502: 'Bad Gateway',
+	503: 'Service Unavailable',
+	504: 'Gateway Timeout'
+};
+
+// Crear un objeto http que incluya STATUS_CODES
+const httpModule = {
+	STATUS_CODES,
+	createServer: emptyFunction,
+	get: emptyFunction,
+	request: emptyFunction,
+	Agent: emptyFunction,
+	globalAgent: emptyObject,
+	Server: emptyFunction,
+	IncomingMessage: emptyFunction,
+	ServerResponse: emptyFunction,
+	ClientRequest: emptyFunction,
+	OutgoingMessage: emptyFunction,
+};
+
+export default httpModule;
 export { emptyObject, emptyFunction, emptyPromise };
 
 // Exportaciones adicionales comunes que podrían ser requeridas
@@ -61,23 +93,7 @@ export const promises = {
 	realpath: emptyFunction,
 };
 
-// Para compatibilidad con http
-export const STATUS_CODES = {
-	200: 'OK',
-	201: 'Created',
-	204: 'No Content',
-	400: 'Bad Request',
-	401: 'Unauthorized',
-	403: 'Forbidden',
-	404: 'Not Found',
-	405: 'Method Not Allowed',
-	426: 'Upgrade Required',
-	500: 'Internal Server Error',
-	502: 'Bad Gateway',
-	503: 'Service Unavailable',
-	504: 'Gateway Timeout'
-};
-
+// Para compatibilidad con http - exportaciones individuales
 export const createServer = emptyFunction;
 export const get = emptyFunction;
 export const request = emptyFunction;
@@ -88,6 +104,7 @@ export const IncomingMessage = emptyFunction;
 export const ServerResponse = emptyFunction;
 export const ClientRequest = emptyFunction;
 export const OutgoingMessage = emptyFunction;
+export { STATUS_CODES };
 
 // Para compatibilidad con tipos de fs
 export interface Stats {
