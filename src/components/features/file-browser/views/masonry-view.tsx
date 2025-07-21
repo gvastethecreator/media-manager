@@ -27,10 +27,10 @@ interface MasonryItem extends EntityWithStats {
 }
 
 // Componente interno para manejar thumbnails de imágenes
-const ImageThumbnail = memo(function ImageThumbnail({ 
-	imageId, 
-	imageName, 
-	className 
+const ImageThumbnail = memo(function ImageThumbnail({
+	imageId,
+	imageName,
+	className
 }: {
 	imageId: string;
 	imageName: string;
