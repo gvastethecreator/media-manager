@@ -1,8 +1,13 @@
 import express from 'express';
+import { and, desc, isNotNull } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { images } from '@/lib/drizzle/schema/index';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
 import { thumbnailService } from '@/services/thumbnail';
 import {
+	bulkGenerateThumbnails,
 	cleanThumbnails,
+	deleteThumbnail,
 	getThumbnail,
 	getThumbnailStats,
 	optimizeThumbnails,
@@ -121,6 +126,42 @@ router.get('/reprocess', async (req, res) => {
 		res.json(result);
 	} catch (error) {
 		console.error('Error reprocessing thumbnails:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// GET /thumbnails/last-processed - Obtener thumbnails procesados recientemente
+router.get('/last-processed', async (req, res) => {
+	try {
+		const { limit = '9' } = req.query;
+		const limitNum = Number.parseInt(limit as string, 10);
+
+		// Consulta a la base de datos para obtener thumbnails recientes
+		// Usando la tabla images como referencia para thumbnails procesados
+		const recentThumbnails = await db.query.images.findMany({
+			columns: {
+				id: true,
+				path: true,
+				updatedAt: true,
+			},
+			where: and(
+				// Solo imágenes que tengan thumbnails generados
+				isNotNull(images.thumbnailWidth),
+				isNotNull(images.thumbnailHeight)
+			),
+			orderBy: desc(images.updatedAt),
+			limit: limitNum,
+		});
+
+		const formattedThumbnails = recentThumbnails.map((img: { id: string; path: string; updatedAt: Date }) => ({
+			id: img.id,
+			path: img.path,
+			processedAt: img.updatedAt.toISOString(),
+		}));
+
+		res.json(formattedThumbnails);
+	} catch (error) {
+		console.error('Error obteniendo thumbnails procesados recientes:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
