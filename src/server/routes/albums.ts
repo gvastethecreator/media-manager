@@ -107,66 +107,43 @@ interface ThumbnailImage {
 
 // GET /api/albums - Listar albums
 albumsRouter.get('/', async (req, res) => {
-	const parse = AlbumFiltersSchema.safeParse(req.query);
-	if (!parse.success) {
-		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
-	}
-
-	const { search, limit, offset, sortBy, sortOrder } = parse.data;
-
 	try {
-		console.log('🔍 [DEBUG] Iniciando consulta de albums...');
-		console.log('🔍 [DEBUG] Verificando toAlbumWithStats:', typeof toAlbumWithStats);
-		console.log('🔍 [DEBUG] Verificando serializeAlbum:', typeof serializeAlbum);
+		console.log('🔍 [DEBUG] Endpoint /api/albums llamado');
 
-		const whereConditions = [];
-		if (search) {
-			whereConditions.push(or(like(albums.name, `%${search}%`), like(albums.description, `%${search}%`)));
+		// Primero verificar si existen albums
+		const albumCount = await db.select({ count: count() }).from(albums);
+		console.log('🔍 [DEBUG] Total de albums en BD:', albumCount[0].count);
+
+		if (albumCount[0].count === 0) {
+			console.log('🔍 [DEBUG] No hay albums en la base de datos');
+			return res.json({
+				data: [],
+				pagination: { total: 0, limit: 0, offset: 0 },
+				message: 'No hay albums disponibles'
+			});
 		}
 
-		const orderByColumn = albums[sortBy];
-		const orderByClause = sortOrder === 'desc' ? desc(orderByColumn) : asc(orderByColumn);
+		// Test básico con solo 1 album
+		const simpleAlbums = await db.select().from(albums).limit(1);
+		console.log('🔍 [DEBUG] Albums simples obtenidos:', simpleAlbums.length);
 
-		const [albumsData, totalResult] = await Promise.all([
-			db.query.albums.findMany({
-				where: and(...whereConditions),
-				with: {
-					images: { columns: { id: true } },
-				},
-				orderBy: orderByClause,
-				limit: limit,
-				offset: offset,
-			}),
-			db
-				.select({ count: count() })
-				.from(albums)
-				.where(and(...whereConditions)),
-		]);
-
-		const total = totalResult[0].count;
-		console.log('🔍 [DEBUG] Albums obtenidos:', albumsData.length);
-		console.log('🔍 [DEBUG] Primer album:', albumsData[0]);
-		const albumsWithStats = albumsData.map(toAlbumWithStats);
-		console.log('🔍 [DEBUG] Albums con stats:', albumsWithStats.length);
-		console.log('🔍 [DEBUG] Primer album con stats:', albumsWithStats[0]);
-		const serializedAlbums = albumsWithStats.map(serializeAlbum);
-		console.log('🔍 [DEBUG] Albums serializados:', serializedAlbums.length);
+		if (simpleAlbums.length > 0) {
+			console.log('🔍 [DEBUG] Primer album simple:', JSON.stringify(simpleAlbums[0], null, 2));
+		}
 
 		res.json({
-			data: serializedAlbums,
+			data: simpleAlbums,
 			pagination: {
-				total,
-				limit,
-				offset,
-				hasNext: offset + limit < total,
-				hasPrev: offset > 0,
+				total: albumCount[0].count,
+				limit: 1,
+				offset: 0,
 			},
 		});
 	} catch (error) {
 		console.error('🚨 [ERROR CRÍTICO] Error en /api/albums:', error);
-		console.error('🚨 [ERROR CRÍTICO] Stack trace:', error.stack);
-		console.error('🚨 [ERROR CRÍTICO] Message:', error.message);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		console.error('🚨 [ERROR CRÍTICO] Stack trace:', error?.stack);
+		console.error('🚨 [ERROR CRÍTICO] Message:', error?.message);
+		res.status(500).json({ error: 'Error interno del servidor', details: error?.message });
 	}
 });
 
@@ -565,20 +542,20 @@ albumsRouter.get('/cards', async (req, res) => {
 			where: conditions.length > 0 ? and(...conditions) : undefined,
 			with: includeStatsFlag
 				? {
-						images: { columns: { id: true } },
-						videos: { columns: { id: true } },
-						collections: { columns: { id: true } },
-						tags: { columns: { id: true } },
-						characters: { columns: { id: true } },
-						places: { columns: { id: true } },
-						worldItems: { columns: { id: true } },
-						concepts: { columns: { id: true } },
-						prompts: { columns: { id: true } },
-						notes: { columns: { id: true } },
-						wildcards: { columns: { id: true } },
-						properties: { columns: { id: true } },
-						groups: { columns: { id: true } },
-					}
+					images: { columns: { id: true } },
+					videos: { columns: { id: true } },
+					collections: { columns: { id: true } },
+					tags: { columns: { id: true } },
+					characters: { columns: { id: true } },
+					places: { columns: { id: true } },
+					worldItems: { columns: { id: true } },
+					concepts: { columns: { id: true } },
+					prompts: { columns: { id: true } },
+					notes: { columns: { id: true } },
+					wildcards: { columns: { id: true } },
+					properties: { columns: { id: true } },
+					groups: { columns: { id: true } },
+				}
 				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
@@ -589,35 +566,35 @@ albumsRouter.get('/cards', async (req, res) => {
 			...album,
 			stats: includeStatsFlag
 				? {
-						imageCount: album.images?.length || 0,
-						videoCount: album.videos?.length || 0,
-						collectionCount: album.collections?.length || 0,
-						tagCount: album.tags?.length || 0,
-						characterCount: album.characters?.length || 0,
-						placeCount: album.places?.length || 0,
-						worldItemCount: album.worldItems?.length || 0,
-						conceptCount: album.concepts?.length || 0,
-						promptCount: album.prompts?.length || 0,
-						noteCount: album.notes?.length || 0,
-						wildcardCount: album.wildcards?.length || 0,
-						propertyCount: album.properties?.length || 0,
-						groupCount: album.groups?.length || 0,
-					}
+					imageCount: album.images?.length || 0,
+					videoCount: album.videos?.length || 0,
+					collectionCount: album.collections?.length || 0,
+					tagCount: album.tags?.length || 0,
+					characterCount: album.characters?.length || 0,
+					placeCount: album.places?.length || 0,
+					worldItemCount: album.worldItems?.length || 0,
+					conceptCount: album.concepts?.length || 0,
+					promptCount: album.prompts?.length || 0,
+					noteCount: album.notes?.length || 0,
+					wildcardCount: album.wildcards?.length || 0,
+					propertyCount: album.properties?.length || 0,
+					groupCount: album.groups?.length || 0,
+				}
 				: {
-						imageCount: 0,
-						videoCount: 0,
-						collectionCount: 0,
-						tagCount: 0,
-						characterCount: 0,
-						placeCount: 0,
-						worldItemCount: 0,
-						conceptCount: 0,
-						promptCount: 0,
-						noteCount: 0,
-						wildcardCount: 0,
-						propertyCount: 0,
-						groupCount: 0,
-					},
+					imageCount: 0,
+					videoCount: 0,
+					collectionCount: 0,
+					tagCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
+				},
 		}));
 
 		res.json(results);
@@ -778,20 +755,20 @@ albumsRouter.get('/search', async (req, res) => {
 			where: and(...conditions),
 			with: includeStatsFlag
 				? {
-						images: { columns: { id: true } },
-						videos: { columns: { id: true } },
-						collections: { columns: { id: true } },
-						tags: { columns: { id: true } },
-						characters: { columns: { id: true } },
-						places: { columns: { id: true } },
-						worldItems: { columns: { id: true } },
-						concepts: { columns: { id: true } },
-						prompts: { columns: { id: true } },
-						notes: { columns: { id: true } },
-						wildcards: { columns: { id: true } },
-						properties: { columns: { id: true } },
-						groups: { columns: { id: true } },
-					}
+					images: { columns: { id: true } },
+					videos: { columns: { id: true } },
+					collections: { columns: { id: true } },
+					tags: { columns: { id: true } },
+					characters: { columns: { id: true } },
+					places: { columns: { id: true } },
+					worldItems: { columns: { id: true } },
+					concepts: { columns: { id: true } },
+					prompts: { columns: { id: true } },
+					notes: { columns: { id: true } },
+					wildcards: { columns: { id: true } },
+					properties: { columns: { id: true } },
+					groups: { columns: { id: true } },
+				}
 				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
@@ -803,35 +780,35 @@ albumsRouter.get('/search', async (req, res) => {
 			...album,
 			stats: includeStatsFlag
 				? {
-						imageCount: album.images?.length || 0,
-						videoCount: album.videos?.length || 0,
-						collectionCount: album.collections?.length || 0,
-						tagCount: album.tags?.length || 0,
-						characterCount: album.characters?.length || 0,
-						placeCount: album.places?.length || 0,
-						worldItemCount: album.worldItems?.length || 0,
-						conceptCount: album.concepts?.length || 0,
-						promptCount: album.prompts?.length || 0,
-						noteCount: album.notes?.length || 0,
-						wildcardCount: album.wildcards?.length || 0,
-						propertyCount: album.properties?.length || 0,
-						groupCount: album.groups?.length || 0,
-					}
+					imageCount: album.images?.length || 0,
+					videoCount: album.videos?.length || 0,
+					collectionCount: album.collections?.length || 0,
+					tagCount: album.tags?.length || 0,
+					characterCount: album.characters?.length || 0,
+					placeCount: album.places?.length || 0,
+					worldItemCount: album.worldItems?.length || 0,
+					conceptCount: album.concepts?.length || 0,
+					promptCount: album.prompts?.length || 0,
+					noteCount: album.notes?.length || 0,
+					wildcardCount: album.wildcards?.length || 0,
+					propertyCount: album.properties?.length || 0,
+					groupCount: album.groups?.length || 0,
+				}
 				: {
-						imageCount: 0,
-						videoCount: 0,
-						collectionCount: 0,
-						tagCount: 0,
-						characterCount: 0,
-						placeCount: 0,
-						worldItemCount: 0,
-						conceptCount: 0,
-						promptCount: 0,
-						noteCount: 0,
-						wildcardCount: 0,
-						propertyCount: 0,
-						groupCount: 0,
-					},
+					imageCount: 0,
+					videoCount: 0,
+					collectionCount: 0,
+					tagCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
+				},
 		}));
 
 		res.json(results);

@@ -1,146 +1,104 @@
-import { Router } from 'express';
+import express from 'express';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { z } from 'zod';
-import {
-	createCharacter,
-	deleteCharacter,
-	getCharacter,
-	getCharacters,
-	toggleCharacterFavorite,
-	updateCharacter,
-} from '@/services/character/character.service';
+import { db } from '@/lib/drizzle';
+import { characters } from '@/lib/drizzle/schema/index';
 
-const router = Router();
+const router = express.Router();
 
-const CharacterCreateSchema = z.object({
-	name: z.string().min(1),
-	description: z.string().nullable().optional(),
-	emoji: z.string().nullable().optional(),
-	color: z.string().nullable().optional(),
-	category: z.string().nullable().optional(),
-	isPublic: z.boolean().optional(),
-	isFavorite: z.boolean().optional(),
-	totalImages: z.number().int().min(0).optional(),
-	totalVideos: z.number().int().min(0).optional(),
-	age: z.string().nullable().optional(),
-	gender: z.string().nullable().optional(),
-	species: z.string().nullable().optional(),
-	occupation: z.string().nullable().optional(),
-	personality: z.string().nullable().optional(),
-	background: z.string().nullable().optional(),
-	relationships: z.string().nullable().optional(),
-	skills: z.string().nullable().optional(),
-	equipment: z.string().nullable().optional(),
-	notes: z.string().nullable().optional(),
-	featuredImage: z.string().nullable().optional(),
-	parentId: z.string().nullable().optional(),
+// Schemas de validación
+const CharacterFiltersSchema = z.object({
+	search: z.string().optional(),
+	limit: z.coerce.number().min(1).max(100).default(20),
+	offset: z.coerce.number().min(0).default(0),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt']).default('updatedAt'),
+	sortOrder: z.enum(['asc', 'desc']).default('desc'),
+	category: z.string().optional(),
+	isFavorite: z.coerce.boolean().optional(),
 });
 
-const CharacterUpdateSchema = CharacterCreateSchema.partial();
+// GET /api/characters - Listar personajes
+router.get('/', async (req, res) => {
+	const parse = CharacterFiltersSchema.safeParse(req.query);
+	if (!parse.success) {
+		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+	}
 
-// GET /api/characters - Obtener todos los personajes
-router.get('/', async (_req, res) => {
+	const { search, limit, offset, sortBy, sortOrder, category, isFavorite } = parse.data;
+
 	try {
-		console.log('🔍 Obteniendo personajes con Drizzle ORM');
-		const characters = await getCharacters();
-		console.log(`✅ ${characters.characters.length} personajes obtenidos`);
-		res.json(characters);
-	} catch (error) {
-		console.error('❌ Error al obtener personajes:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
+		console.log('🔍 [DEBUG] Iniciando consulta de characters...');
+
+		const whereConditions = [];
+		if (search) {
+			whereConditions.push(
+				or(
+					like(characters.name, `%${search}%`),
+					like(characters.description, `%${search}%`),
+					like(characters.category, `%${search}%`)
+				)
+			);
+		}
+		if (category) {
+			whereConditions.push(like(characters.category, `%${category}%`));
+		}
+		if (isFavorite !== undefined) {
+			whereConditions.push(eq(characters.isFavorite, isFavorite));
+		}
+
+		const orderByColumn = characters[sortBy];
+		const orderByClause = sortOrder === 'desc' ? desc(orderByColumn) : asc(orderByColumn);
+
+		const [charactersData, totalResult] = await Promise.all([
+			db.query.characters.findMany({
+				where: and(...whereConditions),
+				orderBy: orderByClause,
+				limit: limit,
+				offset: offset,
+			}),
+			db
+				.select({ count: count() })
+				.from(characters)
+				.where(and(...whereConditions)),
+		]);
+
+		const total = totalResult[0].count;
+		console.log('🔍 [DEBUG] Characters obtenidos:', charactersData.length);
+
+		res.json({
+			data: charactersData,
+			pagination: {
+				total,
+				limit,
+				offset,
+				hasNext: offset + limit < total,
+				hasPrev: offset > 0,
+			},
 		});
+	} catch (error) {
+		console.error('🚨 [ERROR] Error en /api/characters:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
-// GET /api/characters/:id - Obtener un personaje por ID
+// GET /api/characters/:id - Obtener personaje específico
 router.get('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		console.log(`🔍 Obteniendo personaje ${id} con Drizzle ORM`);
 
-		const character = await getCharacter(id);
+		const character = await db.query.characters.findFirst({
+			where: eq(characters.id, id),
+		});
 
 		if (!character) {
 			return res.status(404).json({ error: 'Personaje no encontrado' });
 		}
 
-		console.log(`✅ Personaje ${id} obtenido exitosamente`);
 		res.json(character);
 	} catch (error) {
-		console.error('❌ Error al obtener personaje:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
+		console.error('Error getting character:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
-// POST /api/characters - Crear un nuevo personaje
-router.post('/', async (req, res) => {
-	try {
-		const validatedData = CharacterCreateSchema.parse(req.body);
-		const newCharacter = await createCharacter(validatedData);
-		res.status(201).json(newCharacter);
-	} catch (error) {
-		console.error('❌ Error al crear personaje:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// PUT /api/characters/:id - Actualizar un personaje existente
-router.put('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const validatedData = CharacterUpdateSchema.parse(req.body);
-		const updatedCharacter = await updateCharacter(id, validatedData);
-		if (!updatedCharacter) {
-			return res.status(404).json({ error: 'Personaje no encontrado' });
-		}
-		res.json(updatedCharacter);
-	} catch (error) {
-		console.error('❌ Error al actualizar personaje:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// DELETE /api/characters/:id - Eliminar un personaje
-router.delete('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-		await deleteCharacter(id);
-		res.status(204).send();
-	} catch (error) {
-		console.error('❌ Error al eliminar personaje:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// PUT /api/characters/:id/favorite - Cambiar estado de favorito
-router.put('/:id/favorite', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const updatedCharacter = await toggleCharacterFavorite(id);
-		res.json(updatedCharacter);
-	} catch (error) {
-		console.error('❌ Error al cambiar estado de favorito del personaje:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-export { router as charactersRouter };
-
-// Exportación default para compatibilidad con server/index.ts
 export default router;

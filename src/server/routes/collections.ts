@@ -1,202 +1,88 @@
 import express from 'express';
-import { CollectionService } from '@/services/collection/collection.service';
-import { ImageService } from '@/services/image/image.service';
-import { toCollectionWithStats } from '@/transformers/collection';
-import { toImageWithStats } from '@/transformers/image';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { z } from 'zod';
+import { db } from '@/lib/drizzle';
+import { collections } from '@/lib/drizzle/schema/index';
 
 const router = express.Router();
-const collectionService = new CollectionService();
-const imageService = new ImageService();
 
-// GET /collections - Listar colecciones con filtros
+// Schemas de validación
+const CollectionFiltersSchema = z.object({
+	search: z.string().optional(),
+	limit: z.coerce.number().min(1).max(100).default(20),
+	offset: z.coerce.number().min(0).default(0),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt']).default('updatedAt'),
+	sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
+// GET /api/collections - Listar colecciones
 router.get('/', async (req, res) => {
+	const parse = CollectionFiltersSchema.safeParse(req.query);
+	if (!parse.success) {
+		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+	}
+
+	const { search, limit, offset, sortBy, sortOrder } = parse.data;
+
 	try {
-		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc' } = req.query;
+		console.log('🔍 [DEBUG] Iniciando consulta de collections...');
 
-		const filters = {
-			search: search as string,
-			limit: Number.parseInt(limit as string),
-			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-			sortOrder: sortOrder as 'asc' | 'desc',
-		};
+		const whereConditions = [];
+		if (search) {
+			whereConditions.push(or(like(collections.name, `%${search}%`), like(collections.description, `%${search}%`)));
+		}
 
-		const { collections, total } = await collectionService.getCollections(filters);
-		const transformedCollections = collections.map(toCollectionWithStats);
+		const orderByColumn = collections[sortBy];
+		const orderByClause = sortOrder === 'desc' ? desc(orderByColumn) : asc(orderByColumn);
+
+		const [collectionsData, totalResult] = await Promise.all([
+			db.query.collections.findMany({
+				where: and(...whereConditions),
+				orderBy: orderByClause,
+				limit: limit,
+				offset: offset,
+			}),
+			db
+				.select({ count: count() })
+				.from(collections)
+				.where(and(...whereConditions)),
+		]);
+
+		const total = totalResult[0].count;
+		console.log('🔍 [DEBUG] Collections obtenidos:', collectionsData.length);
 
 		res.json({
-			data: transformedCollections,
+			data: collectionsData,
 			pagination: {
 				total,
-				limit: filters.limit,
-				offset: filters.offset,
-				hasNext: filters.offset + filters.limit < total,
-				hasPrev: filters.offset > 0,
+				limit,
+				offset,
+				hasNext: offset + limit < total,
+				hasPrev: offset > 0,
 			},
 		});
 	} catch (error) {
-		console.error('Error getting collections:', error);
+		console.error('🚨 [ERROR] Error en /api/collections:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
-// GET /collections/:id - Obtener colección por ID
+// GET /api/collections/:id - Obtener colección específica
 router.get('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const collection = await collectionService.getCollectionById(id);
+
+		const collection = await db.query.collections.findFirst({
+			where: eq(collections.id, id),
+		});
 
 		if (!collection) {
 			return res.status(404).json({ error: 'Colección no encontrada' });
 		}
 
-		res.json(toCollectionWithStats(collection));
+		res.json(collection);
 	} catch (error) {
 		console.error('Error getting collection:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// GET /collections/:id/images - Obtener imágenes de una colección
-router.get('/:id/images', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const images = await collectionService.getCollectionImages(id);
-		const transformedImages = images.map(toImageWithStats);
-
-		res.json(transformedImages);
-	} catch (error) {
-		console.error('Error getting collection images:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// GET /collections/:id/images/all
-router.get('/:id/images/all', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const images = await collectionService.getCollectionImages(id);
-		const transformedImages = images.map(toImageWithStats);
-		res.json({ items: transformedImages });
-	} catch (error) {
-		console.error('Error getting collection images:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// GET /collections/:id/media - Obtener imágenes y videos recientes de una colección
-router.get('/:id/media', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const limit = Number(req.query.limit) || 6;
-
-		const media = await collectionService.getRecentCollectionMedia(id, limit);
-		res.json(media);
-	} catch (error) {
-		console.error('Error getting collection media:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// POST /collections - Crear nueva colección
-router.post('/', async (req, res) => {
-	try {
-		const { name, description, color, isPublic } = req.body;
-
-		if (!name) {
-			return res.status(400).json({ error: 'El nombre es requerido' });
-		}
-
-		const collection = await collectionService.createCollection({
-			name,
-			description,
-			color,
-			isPublic: isPublic || false,
-		});
-
-		res.status(201).json(toCollectionWithStats(collection));
-	} catch (error) {
-		console.error('Error creating collection:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// PUT /collections/:id - Actualizar colección
-router.put('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { name, description, color, isPublic } = req.body;
-
-		const collection = await collectionService.updateCollection(id, {
-			name,
-			description,
-			color,
-			isPublic,
-		});
-
-		if (!collection) {
-			return res.status(404).json({ error: 'Colección no encontrada' });
-		}
-
-		res.json(toCollectionWithStats(collection));
-	} catch (error) {
-		console.error('Error updating collection:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// DELETE /collections/:id - Eliminar colección
-router.delete('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		const deleted = await collectionService.deleteCollection(id);
-
-		if (!deleted) {
-			return res.status(404).json({ error: 'Colección no encontrada' });
-		}
-
-		res.status(204).send();
-	} catch (error) {
-		console.error('Error deleting collection:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// POST /collections/:id/images/:imageId - Agregar imagen a colección
-router.post('/:id/images/:imageId', async (req, res) => {
-	try {
-		const { id, imageId } = req.params;
-
-		await collectionService.addImageToCollection(id, imageId);
-		res.status(204).send();
-	} catch (error) {
-		console.error('Error adding image to collection:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// DELETE /collections/:id/images/:imageId - Remover imagen de colección
-router.delete('/:id/images/:imageId', async (req, res) => {
-	try {
-		const { id, imageId } = req.params;
-
-		await collectionService.removeImageFromCollection(id, imageId);
-		res.status(204).send();
-	} catch (error) {
-		console.error('Error removing image from collection:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-
-// POST /collections/:id/favorite - Alternar estado de favorito de una colección
-router.post('/:id/favorite', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const collection = await collectionService.toggleFavorite(id);
-		res.json(toCollectionWithStats(collection));
-	} catch (error) {
-		console.error('Error toggling collection favorite status:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
