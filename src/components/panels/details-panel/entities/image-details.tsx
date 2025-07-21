@@ -98,11 +98,11 @@ export const ImagePreview = memo<EntityPreviewProps<ImageWithStats>>(function Im
 	};
 
 	// Componente interno para manejar la previsualización de imágenes
-	const ImagePreview = memo(function ImagePreview({ 
-		imageId, 
-		imageName, 
+	const ImagePreview = memo(function ImagePreview({
+		imageId,
+		imageName,
 		zoom,
-		className 
+		className
 	}: {
 		imageId: string;
 		imageName: string;
