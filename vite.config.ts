@@ -27,6 +27,11 @@ export default defineConfig({
 		hmr: {
 			port: 5175,
 		},
+		// Configuración adicional para mejorar compatibilidad con Bun
+		middlewareMode: false,
+		fs: {
+			strict: false,
+		},
 		proxy: {
 			'/api': {
 				target: 'http://localhost:4000',
