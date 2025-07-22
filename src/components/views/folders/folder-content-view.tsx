@@ -139,7 +139,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	if (!currentFolderId) {
 		logger.warn('⚠️ No hay carpeta seleccionada');
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
+			<div className="flex flex-col items-center justify-center h-full gap-0">
 				<EmptyState
 					icon={Folder}
 					title="No hay carpeta seleccionada"
@@ -185,7 +185,7 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 						{isRetrying ? 'Escaneando...' : 'Escanear'}
 					</Button>
 					<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
-						<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+						<RefreshCw className={`h-4 w-4 mr-0 ${isRetrying ? 'animate-spin' : ''}`} />
 						{isRetrying ? 'Recargando...' : 'Recargar'}
 					</Button>
 				</>

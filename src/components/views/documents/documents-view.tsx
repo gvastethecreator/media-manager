@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDocumentStore } from '@/store/entities/document';
 import type { DocumentWithStats } from '@/types/entities/document';
@@ -12,6 +13,8 @@ const viewLogger = clientLogger.withContext('DocumentsView');
  * Muestra una lista de documentos con cards TCG y soporte para previsualización.
  */
 export function DocumentsView(_props: ViewProps) {
+	const navigate = useNavigate();
+	
 	// Usar selectores individuales para evitar recrear objetos
 	const documentsRecord = useDocumentStore((s) => s.documents);
 	const isLoading = useDocumentStore((s) => s.isLoading);
@@ -42,8 +45,9 @@ export function DocumentsView(_props: ViewProps) {
 
 	const handleDocumentClick = useCallback((document: DocumentWithStats) => {
 		viewLogger.info('🖱️ Click en documento:', document.name);
-		// Lógica de navegación o apertura de visor aquí
-	}, []);
+		// Navegar a la vista de contenido específica del documento
+		navigate(`/documents/${document.id}`);
+	}, [navigate]);
 
 	const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files?.[0]) {

@@ -79,7 +79,7 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	return (
 		<div className={`h-full flex flex-col p-0 m-0 ${className}`}>
 			<ScrollArea className="flex-1">
-				<div className="grid grid-cols-4 gap-2 p-2">
+				<div className="grid grid-cols-4 gap-2 p-0">
 					{allFolders.map((folder) => (
 						<FolderCard
 							key={folder.id}

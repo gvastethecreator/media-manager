@@ -11,6 +11,7 @@ import { useCategoryStats } from './hooks';
 export const NavPanel = memo(function NavPanel({
 	isCollapsed = false,
 	onToggleCollapse,
+	isAnimating = false,
 }: Omit<NavPanelProps, 'initialData'>) {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -41,17 +42,17 @@ export const NavPanel = memo(function NavPanel({
 	return (
 		<aside
 			className={cn(
-				'h-full flex flex-col bg-background border-r border-border transition-all duration-300',
-				isCollapsed && 'w-16'
+				'h-full flex flex-col bg-background border-r border-border overflow-hidden',
+				isAnimating && 'transition-all duration-300 ease-in-out'
 			)}
 			aria-label="Panel de navegación principal"
 		>
 			<NavPanelHeader
 				isCollapsed={isCollapsed}
-				onToggleCollapse={onToggleCollapse}
 				onOpenSettings={handleOpenSettings}
 				onOpenDevelopment={handleOpenDevelopment}
 				onOpenEntityCards={handleOpenEntityCards}
+				isAnimating={isAnimating}
 			/>
 			<ScrollArea className="flex-1">
 				<NavMainNavigation currentView={currentView} onNavigate={handleNavigate} isCollapsed={isCollapsed} />

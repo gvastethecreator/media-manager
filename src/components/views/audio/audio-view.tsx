@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio/audio.store';
 import type { AudioWithStats } from '@/types/entities/audio';
@@ -12,6 +13,8 @@ const viewLogger = clientLogger.withContext('AudioView');
  * Muestra una lista de audios con cards TCG y soporte para reproducción.
  */
 export function AudioView(_props: ViewProps) {
+	const navigate = useNavigate();
+	
 	// Usar selectores normales de Zustand en lugar de la utilidad problemática
 	const { audios, isLoading, error, fetchAudios, createAudio, updateAudio, deleteAudio } = useAudioStore((state) => ({
 		audios: state.audios,
@@ -38,8 +41,9 @@ export function AudioView(_props: ViewProps) {
 
 	const handleAudioClick = useCallback((audio: AudioWithStats) => {
 		viewLogger.info('🖱️ Click en audio:', audio.name);
-		setCurrentAudio(audio);
-	}, []);
+		// Navegar a la vista de contenido específica del audio
+		navigate(`/audio/${audio.id}`);
+	}, [navigate]);
 
 	const handleEditAudio = useCallback((audio: AudioWithStats) => {
 		setEditingAudio(audio);
