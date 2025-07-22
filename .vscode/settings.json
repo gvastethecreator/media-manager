@@ -56,7 +56,7 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.preferredDarkColorTheme": "Bearded Theme Stained Blue",
+  "workbench.preferredDarkColorTheme": "Default Dark Modern",
   "git.enableSmartCommit": true,
   "workbench.activityBar.location": "top",
   "powermode.enabled": true,

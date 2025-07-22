@@ -1,12 +1,112 @@
-import React from 'react';
+import { Grid, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { EmptyState } from '@/components/core/data-display';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { Button } from '@/components/ui/button';
+import { BaseContentView } from '@/components/views/base/base-content-view';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { EntityStatsType, type EntityWithStats } from '@/types/migration';
 
-const MixedContentView: React.FC = () => {
-	return (
-		<div>
-			<h1>Mixed View</h1>
-			<p>Content for Mixed will go here.</p>
-		</div>
+// Logger para depuración
+const logger = clientLogger.withContext('MixedContentView');
+
+interface MixedContentViewProps {
+	filterType?: string;
+	filterId?: string;
+}
+
+export function MixedContentView({ filterType, filterId }: MixedContentViewProps = {}) {
+	// Estados globales para panel de detalles y visor
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const { openViewer } = useFileViewerStore();
+
+	// Estado local para controlar operaciones
+	const [isRetrying, setIsRetrying] = useState(false);
+
+	const handleItemSelect = useCallback(
+		(item: EntityWithStats) => {
+			logger.info('🖱️ Elemento seleccionado:', item.name);
+
+			// Mostrar panel de detalles con el elemento seleccionado
+			setSelectedItems([item]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
 	);
-};
+
+	const handleItemDoubleClick = useCallback(
+		(item: EntityWithStats) => {
+			logger.info('🖱️ Doble click en elemento:', item.name);
+
+			// Abrir el visor con el elemento
+			// El FileBrowser se encargará de obtener todos los elementos relacionados
+			const viewerItem = {
+				id: item.id,
+				name: item.name,
+				type: item.type || 'file',
+				path: item.path || '',
+				size: item.size || 0,
+				url: item.url,
+				thumbnail: item.thumbnail,
+				thumbnailUrl: item.thumbnailUrl,
+				src: item.src,
+				alt: item.alt,
+				mimeType: item.mimeType,
+				metadata: item.metadata,
+			};
+
+			// Abrir el visor con el elemento actual
+			openViewer([viewerItem], 0);
+		},
+		[openViewer]
+	);
+
+	const handleForceRefresh = useCallback(async () => {
+		if (isRetrying) return;
+
+		setIsRetrying(true);
+		logger.info('🔄 Forzando recarga del contenido mixto');
+		
+		// El FileBrowser se encargará de la recarga
+		setTimeout(() => {
+			setIsRetrying(false);
+		}, 1000);
+	}, [isRetrying]);
+
+	// Renderizar vista de contenido mixto usando BaseContentView y FileBrowser
+	return (
+		<BaseContentView
+			title="Contenido Mixto"
+			description="Vista unificada de todos los tipos de archivos"
+			headerControls={
+				<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
+					<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+					{isRetrying ? 'Recargando...' : 'Recargar'}
+				</Button>
+			}
+		>
+			<FileBrowser
+				entityType={EntityStatsType.MIXED}
+				filterId={filterId}
+				filterType={filterType || 'mixed'}
+				onItemClick={handleItemSelect}
+				onItemDoubleClick={handleItemDoubleClick}
+				className="h-full"
+			/>
+		</BaseContentView>
+	);
+}
 
 export default MixedContentView;
+
+/**
+ * 📝 Documentación:
+ * - Vista de contenido optimizada para mostrar elementos mixtos
+ * - Delega la visualización al FileBrowser con soporte para múltiples tipos
+ * - Controles de recarga integrados en el header
+ * - UI consistente con el resto del sistema usando componentes base
+ * - Experiencia unificada de navegación de archivos mixtos
+ * - Manejo de selección y doble clic para abrir visor
+ */

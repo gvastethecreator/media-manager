@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFile3DStore } from '@/store/entities/file-3d';
 import type { File3DWithStats } from '@/types/entities/file3d';
@@ -12,6 +13,8 @@ const viewLogger = clientLogger.withContext('File3DView');
  * Muestra una lista de archivos 3D con cards TCG y soporte para visualización.
  */
 export function File3DView(_props: ViewProps) {
+	const navigate = useNavigate();
+	
 	// Usar selectores individuales para evitar recrear objetos
 	const file3dsRecord = useFile3DStore((s) => s.file3Ds);
 	const isLoading = useFile3DStore((s) => s.isLoading);
@@ -33,8 +36,8 @@ export function File3DView(_props: ViewProps) {
 
 	const handleFile3DClick = useCallback((file3d: File3DWithStats) => {
 		viewLogger.info('🖱️ Click en archivo 3D:', file3d.name);
-		// Lógica de navegación o apertura de visor 3D aquí
-	}, []);
+		navigate(`/file3d/${file3d.id}`);
+	}, [navigate]);
 
 	const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files?.[0]) {

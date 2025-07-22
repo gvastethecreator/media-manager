@@ -4,7 +4,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { VideoViewMode } from '../../../../types/entities/video';
+import { VideoViewMode } from '@/types/entities/video/types';
 import type { VideoStore } from '..';
 
 export interface VideoUIState {

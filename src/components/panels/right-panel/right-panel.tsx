@@ -1,8 +1,6 @@
-import { PanelRightClose, X } from 'lucide-react';
-import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react';
+import { lazy, memo, Suspense, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -43,6 +41,7 @@ interface RightPanelProps {
 	className?: string;
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
+	isAnimating?: boolean;
 }
 
 /**
@@ -52,8 +51,13 @@ interface RightPanelProps {
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
-export const RightPanel = memo(function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPanelProps) {
-	const { isVisible, setVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
+export const RightPanel = memo(function RightPanel({
+	className,
+	isCollapsed,
+	onToggleCollapse,
+	isAnimating = false
+}: RightPanelProps) {
+	const { isVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const location = useLocation();
 	const [mounted, setMounted] = useState(false);
 	const hasSelectedItems = selectedItems && selectedItems.length > 0;
@@ -78,11 +82,6 @@ export const RightPanel = memo(function RightPanel({ className, isCollapsed, onT
 		if (!mounted) return;
 	}, [mounted]);
 
-	// Manejar el cierre del panel
-	const handleClose = useCallback(() => {
-		setVisible(false);
-	}, [setVisible]);
-
 	// Determinamos el título según el contenido actual
 	const panelTitle = hasSelectedItems ? 'Detalles' : 'Estadísticas';
 
@@ -94,22 +93,13 @@ export const RightPanel = memo(function RightPanel({ className, isCollapsed, onT
 	return (
 		<div
 			className={cn(
-				'flex flex-col h-full bg-background transition-all duration-300',
+				'flex flex-col h-full bg-background',
+				isAnimating && 'transition-all duration-300',
 				isCollapsed && 'right-panel-collapsed'
 			)}
 		>
 			<div className="flex items-center justify-between p-2 border-b">
 				<h3 className="text-sm font-medium">{panelTitle}</h3>
-				<div className="flex items-center gap-1">
-					{onToggleCollapse && (
-						<Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={onToggleCollapse}>
-							<PanelRightClose className="h-4 w-4" />
-						</Button>
-					)}
-					<Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={handleClose}>
-						<X className="h-4 w-4" />
-					</Button>
-				</div>
 			</div>
 
 			{!isCollapsed &&
