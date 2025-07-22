@@ -41,6 +41,7 @@ export interface NavPanelProps {
 	initialData: NavigationData;
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
+	isAnimating?: boolean;
 }
 
 export interface CategoryItem {

@@ -27,6 +27,7 @@ import {
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
 
@@ -255,24 +256,46 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 					{NAVIGATION_CATEGORIES.map((category, _catIdx) => (
 						<div key={category.id} className="mb-1">
 							<div
-								className="flex items-center gap-1 mb-0.5 cursor-pointer"
+								className={cn(
+									"flex items-center gap-1 mb-0.5 cursor-pointer transition-all duration-300",
+									isCollapsed ? "justify-center px-1 py-1" : ""
+								)}
 								onClick={() => toggleCategory(category.id)}
 							>
-								<category.icon className="h-4 w-4" style={{ color: category.color }} />
-								<span className="font-semibold text-xs flex-1" style={{ color: category.color }}>
-									{category.label}
-								</span>
-								{((category.children && category.children.length > 0) || category.showTreeView) && (
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<category.icon
+											className={cn(
+												"h-4 w-4",
+												isCollapsed ? "h-3 w-3" : ""
+											)}
+											style={{ color: category.color }}
+										/>
+									</TooltipTrigger>
+									{isCollapsed && (
+										<TooltipContent side="right" className="text-xs">
+											<p className="font-medium text-amber-400">{category.label}</p>
+										</TooltipContent>
+									)}
+								</Tooltip>
+								{!isCollapsed && (
 									<>
-										{expandedCategories.has(category.id) ? (
-											<ChevronDown className="h-4 w-4 text-muted-foreground" />
-										) : (
-											<ChevronRight className="h-4 w-4 text-muted-foreground" />
+										<span className="font-semibold text-xs flex-1" style={{ color: category.color }}>
+											{category.label}
+										</span>
+										{((category.children && category.children.length > 0) || category.showTreeView) && (
+											<>
+												{expandedCategories.has(category.id) ? (
+													<ChevronDown className="h-4 w-4 text-muted-foreground" />
+												) : (
+													<ChevronRight className="h-4 w-4 text-muted-foreground" />
+												)}
+											</>
 										)}
 									</>
 								)}
 							</div>
-							{expandedCategories.has(category.id) && (
+							{!isCollapsed && expandedCategories.has(category.id) && (
 								<>
 									{/* TreeView directo para carpetas */}
 									{category.showTreeView && (
@@ -294,40 +317,50 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 												<div key={child.id} className="flex flex-col">
 													<div
 														className={cn(
-															'justify-between w-full text-xs px-2 py-1 rounded flex items-center',
+															'justify-between w-full text-xs px-2 py-1 rounded flex items-center transition-all duration-300',
 															'hover:bg-secondary/50 transition-colors',
-															currentView === child.id && 'bg-secondary font-bold'
+															currentView === child.id && 'bg-secondary font-bold',
+															isCollapsed ? 'justify-center px-1' : ''
 														)}
 													>
 														<div
-															className="flex items-center flex-1 cursor-pointer"
+															className={cn(
+																"flex items-center flex-1 cursor-pointer",
+																isCollapsed ? "justify-center" : ""
+															)}
 															onClick={() => onNavigate(child.id as ViewType)}
 														>
-															<child.icon className="h-3 w-3 mr-2" style={{ color: child.color }} />
-															{child.label}
-														</div>
-														<div className="flex items-center gap-1">
-															{child.count !== undefined && (
-																<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
-																	{child.count}
-																</span>
-															)}
-															{child.hasChildren && (
-																<button
-																	className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
-																	onClick={(e) => {
-																		e.stopPropagation();
-																		toggleCategory(child.id);
-																	}}
-																>
-																	{expandedCategories.has(child.id) ? (
-																		<ChevronDown className="h-3 w-3" />
-																	) : (
-																		<ChevronRight className="h-3 w-3" />
-																	)}
-																</button>
+															<child.icon className="h-3 w-3" style={{ color: child.color }} />
+															{!isCollapsed && (
+																<>
+																	<span className="ml-2">{child.label}</span>
+																</>
 															)}
 														</div>
+														{!isCollapsed && (
+															<div className="flex items-center gap-1">
+																{child.count !== undefined && (
+																	<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
+																		{child.count}
+																	</span>
+																)}
+																{child.hasChildren && (
+																	<button
+																		className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
+																		onClick={(e) => {
+																			e.stopPropagation();
+																			toggleCategory(child.id);
+																		}}
+																	>
+																		{expandedCategories.has(child.id) ? (
+																			<ChevronDown className="h-3 w-3" />
+																		) : (
+																			<ChevronRight className="h-3 w-3" />
+																		)}
+																	</button>
+																)}
+															</div>
+														)}
 													</div>
 													{child.hasChildren && expandedCategories.has(child.id) && (
 														<div className="ml-4 mt-1 border-l border-border/50 pl-2">

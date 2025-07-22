@@ -1,8 +1,6 @@
 import {
 	Archive,
-	ArrowDown,
-	ArrowLeft,
-	ArrowRight,
+	ArrowDown, ArrowRight,
 	ArrowUp,
 	BookImage,
 	Box,
@@ -21,6 +19,10 @@ import {
 	LayoutGrid,
 	List,
 	MapPin,
+	PanelLeftClose,
+	PanelLeftOpen,
+	PanelRightClose,
+	PanelRightOpen,
 	Plus,
 	Search,
 	Share2,
@@ -28,7 +30,7 @@ import {
 	TagIcon,
 	Trash2,
 	User2,
-	X,
+	X
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
@@ -36,6 +38,7 @@ import { useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { ViewType } from '@/components/views/types';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
@@ -48,6 +51,8 @@ export interface ViewToolbarProps {
 	isRightPanelCollapsed?: boolean;
 	toggleRightPanelCollapse?: () => void;
 	isRightPanelVisible?: boolean;
+	isLeftPanelCollapsed?: boolean;
+	toggleLeftPanelCollapse?: () => void;
 	allItemIds?: string[]; // IDs de todos los elementos disponibles para selección
 }
 
@@ -55,6 +60,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	isRightPanelCollapsed,
 	toggleRightPanelCollapse,
 	isRightPanelVisible,
+	isLeftPanelCollapsed,
+	toggleLeftPanelCollapse,
 	allItemIds = [],
 }) {
 	const location = useLocation();
@@ -500,11 +507,30 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 
 	return (
 		<div className="flex items-center justify-between h-10 px-2 border-b">
-			<div className="flex items-center">
-				<ViewBreadcrumbs />
+			{/* Lado izquierdo: Botón colapsar panel izquierdo + breadcrumbs + selecciones */}
+			<div className="flex items-center gap-2">
+				{/* Botón de colapsar panel izquierdo */}
+				{toggleLeftPanelCollapse && (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-7 w-7 hover:bg-accent"
+						onClick={toggleLeftPanelCollapse}
+						title={isLeftPanelCollapsed ? 'Abrir panel izquierdo' : 'Cerrar panel izquierdo'}
+					>
+						{isLeftPanelCollapsed ? (
+							<PanelLeftOpen className="h-3.5 w-3.5" />
+						) : (
+							<PanelLeftClose className="h-3.5 w-3.5" />
+						)}
+					</Button>
+				)}
+
+				<ViewBreadcrumbs currentView={currentView as ViewType} />
 				{renderSelectionActions()}
 			</div>
 
+			{/* Lado derecho: Controles de vista + botón colapsar panel derecho */}
 			<div className="flex items-center gap-2">
 				{!isInSettingsView && renderSearchInput()}
 				{!isInSettingsView && renderSortButtons()}
@@ -524,15 +550,20 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 					</Button>
 				)}
 
-				{!isInSettingsView && isRightPanelVisible && (
+				{/* Botón de colapsar panel derecho */}
+				{!isInSettingsView && toggleRightPanelCollapse && (
 					<Button
 						variant="ghost"
 						size="icon"
 						className="h-7 w-7 hover:bg-accent"
 						onClick={toggleRightPanelCollapse}
-						title={isRightPanelCollapsed ? 'Expandir panel' : 'Colapsar panel'}
+						title={isRightPanelCollapsed ? 'Abrir panel derecho' : 'Cerrar panel derecho'}
 					>
-						{isRightPanelCollapsed ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
+						{isRightPanelCollapsed ? (
+							<PanelRightOpen className="h-3.5 w-3.5" />
+						) : (
+							<PanelRightClose className="h-3.5 w-3.5" />
+						)}
 					</Button>
 				)}
 			</div>
