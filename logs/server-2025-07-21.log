@@ -829,3 +829,8 @@
 [2025-07-21T23:33:34.386Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
 [2025-07-21T23:33:34.386Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-21.log
 [2025-07-21T23:33:34.477Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
+[2025-07-21T23:48:47.688Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-07-21T23:48:47.688Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-07-21T23:48:47.688Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-07-21T23:48:47.689Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-07-21.log
+[2025-07-21T23:48:47.779Z] [INFO] ℹ️  🔧 Middleware de logging robusto configurado
