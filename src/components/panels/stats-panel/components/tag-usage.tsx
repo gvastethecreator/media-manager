@@ -5,13 +5,14 @@ interface TagUsageProps {
 	tag: {
 		id: string;
 		name: string;
-		color: string;
+		color: string | undefined;
 		count: number;
 	};
 }
 
 export const TagUsage = memo(function TagUsage({ tag }: TagUsageProps) {
 	const percentage = Math.min(100, (tag.count / 100) * 100);
+	const tagColor = tag.color || '#6b7280'; // Color por defecto si no está definido
 
 	return (
 		<div className="flex items-center justify-between py-1 px-1.5 rounded-sm hover:bg-muted/30 transition-colors">
@@ -19,7 +20,7 @@ export const TagUsage = memo(function TagUsage({ tag }: TagUsageProps) {
 				<Badge
 					variant="outline"
 					className="px-1.5 py-0 h-auto text-[10px]"
-					style={{ borderColor: tag.color, color: tag.color }}
+					style={{ borderColor: tagColor, color: tagColor }}
 				>
 					{tag.name}
 				</Badge>

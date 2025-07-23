@@ -12,6 +12,7 @@ import type {
 	ConceptUpdateInput,
 	ConceptWithStats,
 } from '@/types/entities/concept';
+import type { ConceptBase } from '@/types/entities/concept/base';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod

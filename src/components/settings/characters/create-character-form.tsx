@@ -48,7 +48,7 @@ const createCharacterSchema = z.object({
 	psychologicalProfile: z.string().max(500).optional(),
 	socialProfile: z.string().max(500).optional(),
 	category: z.nativeEnum(CharacterCategory).optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean(),
 });
 
 type FormValues = z.infer<typeof createCharacterSchema>;
@@ -220,9 +220,9 @@ export function CreateCharacterForm({
 				featuredImage: null,
 				parentId: null,
 				level: data.level || 1,
-				class: data.class || null,
-				race: data.race || null,
-				alignment: data.alignment || null,
+				class: data.class ? String(data.class) : null,
+				race: data.race ? String(data.race) : null,
+				alignment: data.alignment ? String(data.alignment) : null,
 				backstory: data.backstory || null,
 				psychologicalProfile: data.psychologicalProfile || null,
 				socialProfile: data.socialProfile || null,
@@ -232,6 +232,9 @@ export function CreateCharacterForm({
 			if (isEditing && character) {
 				const updateData: CharacterUpdateInput = {
 					...characterData,
+					class: data.class ? String(data.class) : null,
+					race: data.race ? String(data.race) : null,
+					alignment: data.alignment ? String(data.alignment) : null,
 					backstory: data.backstory || null,
 					psychologicalProfile: data.psychologicalProfile || null,
 					socialProfile: data.socialProfile || null,

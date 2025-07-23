@@ -66,28 +66,50 @@ export interface EntityAction {
 
 // Registro global de configuraciones por tipo de entidad
 class EntityDetailsRegistry {
-	private configs = new Map<string, EntityDetailsConfig>();
+	private configs = new Map<string, EntityDetailsConfig<EntityWithStats>>();
 
 	/**
 	 * Registra una configuración para un tipo de entidad
 	 */
 	register<T extends EntityWithStats>(entityType: string, config: EntityDetailsConfig<T>): void {
-		this.configs.set(entityType, config as EntityDetailsConfig);
+		// Validación de tipo segura antes de la conversión
+		if (!entityType || typeof entityType !== 'string') {
+			throw new Error('EntityType debe ser una cadena válida');
+		}
+		if (!config || typeof config !== 'object') {
+			throw new Error('Config debe ser un objeto válido');
+		}
+		// Conversión segura después de validación
+		this.configs.set(entityType, config as EntityDetailsConfig<EntityWithStats>);
 	}
 
 	/**
 	 * Obtiene la configuración para un tipo de entidad
 	 */
-	getConfig(entityType: string): EntityDetailsConfig | undefined {
-		return this.configs.get(entityType);
+	getConfig<T extends EntityWithStats = EntityWithStats>(entityType: string): EntityDetailsConfig<T> | undefined {
+		if (!entityType || typeof entityType !== 'string') {
+			return undefined;
+		}
+		const config = this.configs.get(entityType);
+		// Validación antes de la conversión de tipo
+		if (!config) {
+			return undefined;
+		}
+		// Type guard implícito: si existe en el Map, es del tipo correcto
+		return config as EntityDetailsConfig<T>;
 	}
 
 	/**
 	 * Obtiene la configuración para una entidad específica
 	 */
 	getConfigForEntity(entity: EntityWithStats): EntityDetailsConfig | undefined {
+		// Validación de entrada
+		if (!entity || typeof entity !== 'object') {
+			return undefined;
+		}
+		
 		const entityType = getEntityStatsType(entity);
-		if (entityType === null) {
+		if (entityType === null || typeof entityType !== 'string') {
 			return undefined;
 		}
 		return this.getConfig(entityType);
@@ -390,10 +412,14 @@ export function createEntityConfig<T extends EntityWithStats>(
 		detailsComponent: ComponentType<EntityDetailsProps<T>>;
 	}
 ): EntityDetailsConfig<T> {
+	const defaultPreviewComponent: ComponentType<EntityPreviewProps<T>> = () => null;
+	const defaultToolbarComponent: ComponentType<EntityToolbarProps<T>> = () => null;
+	const defaultMetadataComponent: ComponentType<EntityMetadataProps<T>> = () => null;
+
 	return {
-		previewComponent: config.previewComponent || (() => null),
-		toolbarComponent: config.toolbarComponent || (() => null),
-		metadataComponent: config.metadataComponent || (() => null),
+		previewComponent: config.previewComponent || defaultPreviewComponent,
+		toolbarComponent: config.toolbarComponent || defaultToolbarComponent,
+		metadataComponent: config.metadataComponent || defaultMetadataComponent,
 		actions: config.actions || [],
 		infoCategories: config.infoCategories || [DefaultInfoCategories.BASIC, DefaultInfoCategories.METADATA],
 		supportsExpandedPreview: config.supportsExpandedPreview ?? false,
