@@ -82,6 +82,7 @@ export function useActionsSystem() {
 	const { toast } = useToast();
 	const [isExecuting, setIsExecuting] = useState(false);
 	const [currentAction, setCurrentAction] = useState<ActionConfig | null>(null);
+	const [currentContext, setCurrentContext] = useState<ActionContext | null>(null);
 	const [showConfirmation, setShowConfirmation] = useState(false);
 	const [showInputDialog, setShowInputDialog] = useState(false);
 	const [inputValues, setInputValues] = useState<Record<string, any>>({});
@@ -131,6 +132,7 @@ export function useActionsSystem() {
 				setIsExecuting(false);
 				setProgress(0);
 				setCurrentAction(null);
+				setCurrentContext(null);
 				setShowConfirmation(false);
 				setShowInputDialog(false);
 				setInputValues({});
@@ -145,6 +147,7 @@ export function useActionsSystem() {
 	const startAction = useCallback(
 		(action: ActionConfig, context: ActionContext) => {
 			setCurrentAction(action);
+			setCurrentContext(context);
 
 			// Si requiere entrada de datos
 			if (action.requiresInput && action.inputFields) {
@@ -173,21 +176,22 @@ export function useActionsSystem() {
 	 * Confirma y ejecuta la acción
 	 */
 	const confirmAction = useCallback(() => {
-		if (!currentAction) return;
+		if (!currentAction || !currentContext) return;
 
 		const context: ActionContext = {
-			entity: currentAction.entity,
-			metadata: inputValues,
+			...currentContext,
+			metadata: { ...currentContext.metadata, ...inputValues },
 		};
 
 		executeAction(currentAction, context);
-	}, [currentAction, executeAction, inputValues]);
+	}, [currentAction, currentContext, executeAction, inputValues]);
 
 	/**
 	 * Cancela la acción actual
 	 */
 	const cancelAction = useCallback(() => {
 		setCurrentAction(null);
+		setCurrentContext(null);
 		setShowConfirmation(false);
 		setShowInputDialog(false);
 		setInputValues({});

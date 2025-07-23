@@ -6,7 +6,7 @@ import { StatCard } from './stat-card';
 
 export function GeneralStats() {
 	// Usar React Query hook en lugar de server action
-	const { data: stats, isLoading, error } = useStats();
+	const { stats, isLoading, error } = useStats();
 
 	if (isLoading) {
 		return (

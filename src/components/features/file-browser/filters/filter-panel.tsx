@@ -163,44 +163,44 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 					);
 
 				case 'date':
-					return (
-						<div className="space-y-2" key={filter.id}>
-							<Label htmlFor={filter.id}>{filter.label}</Label>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button
-										id={filter.id}
-										variant="outline"
-										className={cn(
-											'w-full justify-start text-left font-normal',
-											!currentValue && 'text-muted-foreground'
-										)}
-									>
-										<CalendarIcon className="mr-2 h-4 w-4" />
-										{currentValue
-											? (() => {
-													try {
-														const date =
-															currentValue instanceof Date ? currentValue : new Date(currentValue as string | number);
-														return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Fecha inválida';
-													} catch {
-														return 'Fecha inválida';
-													}
-												})()
-											: filter.placeholder || 'Seleccionar fecha'}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0">
-									<Calendar
-										mode="single"
-										selected={currentValue ? new Date(currentValue as string | number) : undefined}
-										onSelect={(date) => applyFilter(filter.id, date)}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
-						</div>
-					);
+						return (
+							<div className="space-y-2" key={filter.id}>
+								<Label htmlFor={filter.id}>{filter.label}</Label>
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											id={filter.id}
+											variant="outline"
+											className={cn(
+												'w-full justify-start text-left font-normal',
+												!currentValue && 'text-muted-foreground'
+											)}
+										>
+											<CalendarIcon className="mr-2 h-4 w-4" />
+											{currentValue && typeof currentValue !== 'boolean'
+												? (() => {
+														try {
+															const date =
+													(currentValue as any) instanceof Date ? (currentValue as Date) : new Date(currentValue as string | number);
+															return !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Fecha inválida';
+														} catch {
+															return 'Fecha inválida';
+														}
+													})()
+												: filter.placeholder || 'Seleccionar fecha'}
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-0">
+										<Calendar
+											mode="single"
+											selected={currentValue && typeof currentValue !== 'boolean' ? new Date(currentValue as string | number) : undefined}
+											onSelect={(date) => applyFilter(filter.id, date)}
+											initialFocus
+										/>
+									</PopoverContent>
+								</Popover>
+							</div>
+						);
 
 				case 'boolean':
 					return (

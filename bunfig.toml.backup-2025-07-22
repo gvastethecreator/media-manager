@@ -1,0 +1,37 @@
+# Configuración optimizada para migración Node.js + Vite → Bun
+# Fase 1: Runtime migration con compatibilidad máxima
+
+[install]
+# Configuración de dependencias compatible con el proyecto actual
+dev = true
+optional = true
+peer = true
+production = false
+concurrentScripts = 16
+
+# Configuración para migración desde pnpm
+auto = "auto"
+frozenLockfile = false
+dryRun = false
+
+# Directorios globales
+globalDir = "~/.bun/install/global"
+globalBinDir = "~/.bun/bin"
+
+[install.cache]
+# Cache optimizada para desarrollo
+dir = "~/.bun/install/cache"
+disable = false
+disableManifest = false
+
+[install.lockfile]
+# Mantener compatibilidad durante migración
+save = true
+# Opcional: generar yarn.lock para compatibilidad
+# print = "yarn"
+
+# Configuración para desarrollo con Vite (FASE 1)
+# Estas configuraciones serán actualizadas en FASE 3
+[serve.static]
+# Plugins que se agregarán en FASE 3
+# plugins = ["bun-plugin-tailwind"]

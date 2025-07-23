@@ -38,7 +38,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { CollectionWithStats } from '@/types/entities/collection/types';
+import type { CollectionWithStats } from '@/types/entities/collection';
 import type { TagWithStats } from '@/types/entities/tag';
 import { isCollectionWithStats } from '@/types/migration';
 import type {
@@ -87,7 +87,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 				<CardContent className="space-y-3">
 					<div className="flex items-start gap-3">
 						<Avatar className="h-12 w-12">
-							<AvatarImage src={entity.coverImageUrl} alt={entity.name} />
+							<AvatarImage src={entity.featuredImage || undefined} alt={entity.name} />
 							<AvatarFallback>
 								<FolderDot className="h-6 w-6" />
 							</AvatarFallback>
@@ -97,7 +97,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 							<p className="text-sm text-muted-foreground mt-1">{entity.description || 'Sin descripción'}</p>
 							<div className="flex items-center gap-2 mt-2">
 								<Badge variant="secondary" className="text-xs">
-									{entity.statistics?.totalItems || 0} elementos
+									{entity.stats?.imageCount + entity.stats?.videoCount || 0} elementos
 								</Badge>
 								{entity.isPublic && (
 									<Badge variant="outline" className="text-xs">
@@ -112,7 +112,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 					{/* Estadísticas rápidas */}
 					<div className="grid grid-cols-3 gap-2 pt-2 border-t">
 						<div className="text-center">
-							<p className="text-lg font-bold text-primary">{entity.statistics?.totalItems || 0}</p>
+							<p className="text-lg font-bold text-primary">{entity.stats?.imageCount + entity.stats?.videoCount || 0}</p>
 							<p className="text-xs text-muted-foreground">Elementos</p>
 						</div>
 						<div className="text-center">
@@ -120,15 +120,15 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 							<p className="text-xs text-muted-foreground">Tamaño</p>
 						</div>
 						<div className="text-center">
-							<p className="text-lg font-bold text-primary">{entity.statistics?.totalViews || 0}</p>
+							<p className="text-lg font-bold text-primary">0</p>
 							<p className="text-xs text-muted-foreground">Vistas</p>
 						</div>
 					</div>
 				</CardContent>
 			</Card>
 
-			{/* Tags y categorías */}
-			{entity.tags && entity.tags.length > 0 && (
+			{/* Tags y categorías - Comentado temporalmente hasta implementar relaciones */}
+			{/* {entity.tags && entity.tags.length > 0 && (
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm">Tags</CardTitle>
@@ -144,7 +144,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 						</div>
 					</CardContent>
 				</Card>
-			)}
+			)} */}
 
 			{/* Metadatos */}
 			<CollectionMetadata entity={entity} editable={true} />
@@ -323,16 +323,16 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 				) : (
 					<div className={cn('flex items-center justify-center bg-muted/20', sizeClasses[size])}>
 						<div className="text-center">
-							{entity.coverImageUrl ? (
+							{entity.featuredImage ? (
 								<img
-									src={entity.coverImageUrl}
+									src={entity.featuredImage}
 									alt={entity.name}
 									className="w-16 h-16 object-cover rounded-lg mx-auto mb-2"
 								/>
 							) : (
 								<FolderOpen className="h-12 w-12 text-primary mx-auto mb-2" />
 							)}
-							<p className="text-sm text-muted-foreground">{entity.statistics?.totalItems || 0} elementos</p>
+							<p className="text-sm text-muted-foreground">{entity.stats?.imageCount + entity.stats?.videoCount || 0} elementos</p>
 						</div>
 					</div>
 				)}
@@ -447,7 +447,7 @@ export const CollectionMetadata = memo<EntityMetadataProps<CollectionWithStats>>
 	const metadata = [
 		{
 			label: 'Creador',
-			value: entity.createdBy || 'Desconocido',
+			value: 'Desconocido', // entity.createdBy no existe en CollectionWithStats
 			category: 'basic',
 		},
 		{
@@ -467,12 +467,12 @@ export const CollectionMetadata = memo<EntityMetadataProps<CollectionWithStats>>
 		},
 	];
 
-	const stats = entity.statistics;
+	const stats = entity.stats;
 	const statisticsMetadata = stats
 		? [
 				{
 					label: 'Total elementos',
-					value: stats.totalItems?.toString() || '0',
+					value: (stats.imageCount + stats.videoCount).toString() || '0',
 					category: 'stats',
 				},
 				{
@@ -487,12 +487,12 @@ export const CollectionMetadata = memo<EntityMetadataProps<CollectionWithStats>>
 				},
 				{
 					label: 'Documentos',
-					value: stats.documentCount?.toString() || '0',
+					value: '0', // TODO: Implementar documentCount cuando esté disponible
 					category: 'stats',
 				},
 				{
 					label: 'Total vistas',
-					value: stats.totalViews?.toString() || '0',
+					value: '0', // TODO: Implementar totalViews cuando esté disponible
 					category: 'stats',
 				},
 				{

@@ -3,6 +3,28 @@
  * @module types/entities/entity.types
  */
 
+import type { EntityType } from './entities';
+
+// Tipo específico para entityType en entidades con estadísticas
+export type EntityStatsTypeValue = 
+	| 'image'
+	| 'video'
+	| 'folder'
+	| 'tag'
+	| 'place'
+	| 'world-item'
+	| 'note'
+	| 'property'
+	| 'wildcard'
+	| 'audio'
+	| 'document'
+	| 'collection'
+	| 'album'
+	| 'character'
+	| 'concept'
+	| 'prompt'
+	| 'group';
+
 export interface EntityBase {
 	id: string;
 	name: string;
@@ -32,7 +54,7 @@ export interface EntityStats {
 }
 
 export interface EntityWithStats extends EntityBase {
-	entityType: EntityType;
+	entityType: EntityStatsTypeValue;
 	stats?: EntityStats;
 	[key: string]: any;
 }
