@@ -116,6 +116,11 @@ export interface RecentActivity {
 	entityId: string;
 	createdAt: Date;
 	metadata?: Record<string, any>;
+	image?: {
+		id: string;
+		name: string;
+		thumbnail: Uint8Array | null;
+	} | null;
 }
 
 export interface StorageBreakdown {
@@ -127,4 +132,62 @@ export interface StorageBreakdown {
 	cache: number;
 	other: number;
 	total: number;
+}
+
+/**
+ * 🔄 Función de transformación para convertir SystemStats a GeneralStats
+ * Resuelve la incompatibilidad entre las dos interfaces
+ */
+export function transformSystemStatsToGeneralStats(systemStats: SystemStats): GeneralStats {
+	return {
+		totalImages: systemStats.images.count,
+		totalFolders: 0, // No disponible en SystemStats, se debe obtener por separado
+		totalCollections: systemStats.collections.count,
+		totalTags: systemStats.tags.count,
+		totalAlbums: systemStats.albums.count,
+		totalCharacters: systemStats.characters.count,
+		totalPlaces: systemStats.places.count,
+		totalWorldItems: systemStats.worldItems.count,
+		totalFavorites: 0, // Se debe calcular por separado
+		totalViews: 0, // Se debe calcular por separado
+		totalDownloads: 0, // Se debe calcular por separado
+		totalSize: systemStats.thumbnails.totalSize,
+		totalActivities: 0, // Se debe calcular por separado
+		// Campos opcionales
+		totalDocuments: 0,
+		totalAudio: 0,
+		totalJsonFiles: 0,
+		totalWorkflows: 0,
+		totalFile3D: 0,
+		topTags: [],
+		recentActivity: [],
+	};
+}
+
+/**
+ * 🔄 Función para crear GeneralStats vacío con valores por defecto
+ */
+export function createEmptyGeneralStats(): GeneralStats {
+	return {
+		totalImages: 0,
+		totalFolders: 0,
+		totalCollections: 0,
+		totalTags: 0,
+		totalAlbums: 0,
+		totalCharacters: 0,
+		totalPlaces: 0,
+		totalWorldItems: 0,
+		totalFavorites: 0,
+		totalViews: 0,
+		totalDownloads: 0,
+		totalSize: 0,
+		totalActivities: 0,
+		totalDocuments: 0,
+		totalAudio: 0,
+		totalJsonFiles: 0,
+		totalWorkflows: 0,
+		totalFile3D: 0,
+		topTags: [],
+		recentActivity: [],
+	};
 }

@@ -5,28 +5,9 @@ import { formatBytes } from '@/lib/utils/format';
 import { Activity } from './components/activity';
 import { StatCard } from './components/stat-card';
 import { TagUsage } from './components/tag-usage';
-import type { TopTag, RecentActivity } from '@/types/stats';
+import type { TopTag, RecentActivity, GeneralStats } from '@/types/stats';
 // Función para obtener estadísticas cliente-side
 import { getStatsData } from './stats-actions-client';
-
-// Tipo local para estadísticas generales
-export interface GeneralStats {
-	totalImages: number;
-	totalFolders: number;
-	totalCollections: number;
-	totalTags: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalFavorites: number;
-	totalViews: number;
-	totalDownloads: number;
-	totalSize: number;
-	totalActivities: number;
-	topTags: TopTag[];
-	recentActivity: RecentActivity[];
-}
 
 // Componente cliente para estadísticas generales
 export function ClientGeneralStats() {
@@ -245,9 +226,9 @@ export function ClientTopTags() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 space-y-0.5 w-full">
-				{stats.topTags.map((tag: TopTag) => (
+				{stats.topTags?.map((tag: TopTag) => (
 					<TagUsage key={tag.id} tag={tag} />
-				))}
+				)) || <div className="text-muted-foreground text-sm p-2">No hay etiquetas disponibles</div>}
 			</CardContent>
 		</>
 	);
@@ -313,9 +294,9 @@ export function ClientRecentActivity() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 w-full space-y-0">
-				{stats.recentActivity.map((activity: RecentActivity) => (
+				{stats.recentActivity?.map((activity: RecentActivity) => (
 					<Activity key={activity.id} activity={activity} />
-				))}
+				)) || <div className="text-muted-foreground text-sm p-2">No hay actividad reciente</div>}
 			</CardContent>
 		</>
 	);

@@ -83,8 +83,45 @@ export interface CharacterWithStats extends CharacterBase {
 /**
  * 🧑‍🎤 Input para crear un nuevo personaje.
  * Las relaciones se especifican mediante arrays de IDs.
+ * Campos opcionales para facilitar la creación desde formularios.
  */
-export interface CharacterCreateInput extends Omit<CharacterBase, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface CharacterCreateInput {
+	name: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	age?: string | null;
+	gender?: string | null;
+	species?: string | null;
+	occupation?: string | null;
+	personality?: string | null;
+	background?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	equipment?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
+	// Additional properties
+	level?: number;
+	class?: string | null;
+	race?: string | null;
+	alignment?: string | null;
+	backstory?: string | null;
+	psychologicalProfile?: string | null;
+	socialProfile?: string | null;
+	goals?: string | null;
+	fears?: string | null;
+	beliefs?: string | null;
+	abilities?: string | null;
+	stats?: string | null;
+	statistics?: CharacterStats;
+}
 
 /**
  * 🧑‍🎤 Input para actualizar un personaje existente.

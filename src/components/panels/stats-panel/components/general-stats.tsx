@@ -1,14 +1,14 @@
 import { AlertCircle, BarChart } from 'lucide-react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/lib/hooks/system/use-stats';
+import { useStats } from '@/store/stats.store';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { StatCard } from './stat-card';
 
 export function GeneralStats() {
 	// Usar React Query hook en lugar de server action
-	const { stats, isLoading, error } = useStats();
+	const { stats, loading, error } = useStats();
 
-	if (isLoading) {
+	if (loading) {
 		return (
 			<div className="flex items-center justify-center p-4 gap-2">
 				<BarChart className="h-4 w-4 animate-pulse" />
@@ -78,34 +78,34 @@ export function GeneralStats() {
 		},
 		{
 			title: 'Documentos',
-			value: stats.totalDocuments,
+			value: stats.totalDocuments || 0,
 			icon: 'Book',
 			color: 'text-amber-500',
 		},
 		{
 			title: 'Audio',
-			value: stats.totalAudio,
+			value: stats.totalAudio || 0,
 			icon: 'Activity',
 			color: 'text-sky-500',
 		},
 		{
 			title: 'JSON',
-			value: stats.totalJsonFiles,
+			value: stats.totalJsonFiles || 0,
 			icon: 'Box',
 			color: 'text-pink-500',
 		},
 		{
 			title: 'Workflows',
-			value: stats.totalWorkflows,
+			value: stats.totalWorkflows || 0,
 			icon: 'Grid2X2',
 			color: 'text-lime-500',
 		},
 		{
 			title: '3D',
-			value: stats.totalFile3D,
+			value: stats.totalFile3D || 0,
 			icon: 'Box',
 			color: 'text-indigo-500',
-		},
+		}
 	] as const;
 
 	// Estadísticas adicionales

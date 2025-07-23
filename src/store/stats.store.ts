@@ -24,7 +24,7 @@ interface CollectionStat {
 interface TagStat {
 	id: string;
 	name: string;
-	color: string;
+	color: string | undefined;
 	count: number;
 }
 
@@ -57,10 +57,15 @@ interface WorldItemStat {
 }
 
 interface Activity {
+	id: string;
+	type: string;
 	description: string;
-	timestamp: string;
-	imageId: string;
-	imageName: string;
+	createdAt: Date;
+	image: {
+		id: string;
+		name: string;
+		thumbnail: Uint8Array | null;
+	} | null;
 }
 
 // Interfaz base para estadísticas

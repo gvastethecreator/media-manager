@@ -16,8 +16,9 @@ interface CreateAlbumFormProps {
 	onCreated?: (album: AlbumWithStats) => void;
 	onUpdated?: (album: AlbumWithStats) => void;
 	onReset?: () => void;
+	onCancel?: () => void;
 	onPreview?: (formData: FormData) => void;
-	onSubmit: (newAlbum: AlbumWithStats) => void;
+	onSubmit?: (newAlbum: AlbumWithStats) => void;
 }
 
 // Interfaz para los datos del formulario
