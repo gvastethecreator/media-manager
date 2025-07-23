@@ -34,8 +34,6 @@ const UpdateFolderSchema = CreateFolderSchema.partial().omit({ path: true });
 // GET /api/folders - Obtener todas las carpetas
 router.get('/', async (_req, res) => {
 	try {
-		console.log('🔍 Obteniendo carpetas con Drizzle ORM');
-
 		const drizzleFolders = await db
 			.select({
 				id: folders.id,
@@ -78,8 +76,6 @@ router.get('/', async (_req, res) => {
 			},
 		}));
 
-		console.log(`✅ ${transformedFolders.length} carpetas obtenidas con Drizzle`);
-
 		// Devolver estructura compatible con FoldersResponse
 		res.json({
 			data: transformedFolders,
@@ -104,10 +100,8 @@ router.get('/', async (_req, res) => {
 router.get('/by-path', async (req, res) => {
 	try {
 		const folderPath = req.query.path as string;
-		console.log('🔍 [BY-PATH] Parámetros recibidos:', { query: req.query, path: folderPath });
 
 		if (!folderPath) {
-			console.log('❌ [BY-PATH] Error: La ruta es requerida');
 			return res.status(400).json({ error: 'La ruta es requerida' });
 		}
 
@@ -234,7 +228,6 @@ router.post('/', async (req, res) => {
 
 		// Generar ID basado en el nombre de la carpeta
 		const folderId = await generateFolderIdFromName(data.name);
-		console.log(`🆔 ID generado para carpeta '${data.name}': ${folderId}`);
 
 		const newFolder = await db
 			.insert(folders)
@@ -429,14 +422,10 @@ router.get('/:id/recent-images', async (req, res) => {
 router.get('/:id/stats', async (req, res) => {
 	try {
 		const { id } = req.params;
-		console.log(`🔍 [FOLDER-STATS] Iniciando obtención de estadísticas para carpeta: ${id}`);
 
 		if (!isValidFolderId(id)) {
-			console.log(`❌ [FOLDER-STATS] ID de carpeta inválido: ${id}`);
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
-
-		console.log('✅ [FOLDER-STATS] ID válido, consultando datos básicos de carpeta...');
 		// Obtener estadísticas básicas de la carpeta
 		const folderData = await db
 			.select({
@@ -447,14 +436,9 @@ router.get('/:id/stats', async (req, res) => {
 			.where(eq(folders.id, id))
 			.limit(1);
 
-		console.log('📊 [FOLDER-STATS] Datos de carpeta obtenidos:', folderData);
-
 		if (folderData.length === 0) {
-			console.log(`❌ [FOLDER-STATS] Carpeta no encontrada: ${id}`);
 			return res.status(404).json({ error: 'Carpeta no encontrada' });
 		}
-
-		console.log('🖼️ [FOLDER-STATS] Consultando estadísticas de imágenes...');
 		// Contar imágenes por tipo
 		const imageStats = await db
 			.select({
@@ -463,7 +447,6 @@ router.get('/:id/stats', async (req, res) => {
 			.from(images)
 			.where(eq(images.folderId, id));
 
-		console.log('📹 [FOLDER-STATS] Consultando estadísticas de videos...');
 		// Contar videos
 		const videoStats = await db
 			.select({
@@ -472,7 +455,6 @@ router.get('/:id/stats', async (req, res) => {
 			.from(videos)
 			.where(eq(videos.folderId, id));
 
-		console.log('🔄 [FOLDER-STATS] Obteniendo imágenes recientes...');
 		// Obtener las últimas 4 imágenes
 		const recentImages = await db
 			.select({
@@ -486,7 +468,6 @@ router.get('/:id/stats', async (req, res) => {
 			.orderBy(desc(images.createdAt))
 			.limit(4);
 
-		console.log('📈 [FOLDER-STATS] Construyendo objeto de estadísticas...');
 		const stats = {
 			totalImages: imageStats[0]?.count || 0,
 			totalVideos: videoStats[0]?.count || 0,
@@ -497,11 +478,9 @@ router.get('/:id/stats', async (req, res) => {
 			lastActivity: folderData[0].lastIndexed,
 			recentImages: recentImages,
 		};
-		console.log('✅ [FOLDER-STATS] Estadísticas construidas exitosamente:', stats);
 		res.json(stats);
 	} catch (error) {
-		console.error('💥 [FOLDER-STATS] Error al obtener estadísticas de la carpeta:', error);
-		console.error('💥 [FOLDER-STATS] Stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
+		console.error('Error al obtener estadísticas de la carpeta:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

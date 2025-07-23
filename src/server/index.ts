@@ -2,7 +2,7 @@
 
 import express from 'express';
 import path from 'path';
-import { errorLogger, logInfo } from './middleware/logging';
+import { errorLogger, logInfo, requestLogger, logError } from './middleware/logging';
 import activityRouter from './routes/activity-new';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
@@ -48,117 +48,29 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Configurar archivos estáticos para las imágenes
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 app.use('/uploads', express.static(path.resolve(UPLOADS_DIR)));
-console.log(`📁 Archivos estáticos configurados: /uploads -> ${path.resolve(UPLOADS_DIR)}`);
+logInfo(`📁 Archivos estáticos configurados: /uploads -> ${path.resolve(UPLOADS_DIR)}`);
 
-// 🚨 LOGGING DIRECTO ANTES DEL MIDDLEWARE
-console.log('🔥 [PRE-MIDDLEWARE] Aplicando requestLogger...');
-process.stdout.write('🔥 [PRE-MIDDLEWARE-STDOUT] Aplicando requestLogger...\n');
+// Middleware de logging
+app.use(requestLogger);
 
-// Middleware de logging directo sin función externa
-app.use((req, res, next) => {
-	const timestamp = new Date().toISOString();
-	const method = req.method;
-	const url = req.originalUrl || req.url;
-	const ip = req.ip || req.connection.remoteAddress || 'unknown';
+logInfo('🔧 Middleware de logging configurado');
 
-	console.log(`🌐 [DIRECT-LOG] [${timestamp}] ${method} ${url} - IP: ${ip} - START`);
-	process.stdout.write(`🌐 [DIRECT-STDOUT] [${timestamp}] ${method} ${url} - IP: ${ip} - START\n`);
-
-	const startTime = Date.now();
-
-	res.on('finish', () => {
-		const duration = Date.now() - startTime;
-		const statusCode = res.statusCode;
-		const endTimestamp = new Date().toISOString();
-		const statusEmoji = statusCode >= 400 ? '❌' : statusCode >= 300 ? '⚠️' : '✅';
-
-		console.log(
-			`${statusEmoji} [DIRECT-LOG] [${endTimestamp}] ${method} ${url} - ${statusCode} - ${duration}ms - IP: ${ip} - END`
-		);
-		process.stdout.write(
-			`${statusEmoji} [DIRECT-STDOUT] [${endTimestamp}] ${method} ${url} - ${statusCode} - ${duration}ms - IP: ${ip} - END\n`
-		);
-	});
-
-	next();
-});
-
-// Middleware de logging original (como backup) - COMENTADO PARA EVITAR CONFLICTOS
-// app.use(requestLogger);
-
-console.log('🔥 [POST-MIDDLEWARE] requestLogger aplicado');
-process.stdout.write('🔥 [POST-MIDDLEWARE-STDOUT] requestLogger aplicado\n');
-logInfo('🔧 Middleware de logging robusto configurado');
-console.log('🚨 [CRITICAL DEBUG] Este log debe aparecer SIEMPRE');
-console.log('🚨 [CRITICAL DEBUG] Timestamp:', new Date().toISOString());
-
-// Verificar que todos los routers sean funciones
-console.log('🔍 [DEBUG] Verificando routers...');
-console.log('🔍 [DEBUG] activityRouter:', typeof activityRouter);
-console.log('🔍 [DEBUG] settingsRouter:', typeof settingsRouter);
-console.log('🔍 [DEBUG] profilesRouter:', typeof profilesRouter);
-console.log('🔍 [DEBUG] metadataRouter:', typeof metadataRouter);
-console.log('🔍 [DEBUG] systemRouter:', typeof systemRouter);
-console.log('🔍 [DEBUG] albumsRouter:', typeof albumsRouter);
-console.log('🔍 [DEBUG] audioRouter:', typeof audioRouter);
-
-// Verificar más routers que pueden estar causando problemas
-console.log('🔍 [DEBUG] foldersRouter:', typeof foldersRouter);
-console.log('🔍 [DEBUG] imagesRouter:', typeof imagesRouter);
-console.log('🔍 [DEBUG] filesRouter:', typeof filesRouter);
-console.log('🔍 [DEBUG] downloadRouter:', typeof downloadRouter);
-console.log('🔍 [DEBUG] tagsRouter:', typeof tagsRouter);
-console.log('🔍 [DEBUG] charactersRouter:', typeof charactersRouter);
-console.log('🔍 [DEBUG] testCharactersRouter:', typeof testCharactersRouter);
-console.log('🔍 [DEBUG] collectionsRouter:', typeof collectionsRouter);
-console.log('🔍 [DEBUG] placesRouter:', typeof placesRouter);
-console.log('🔍 [DEBUG] worldItemsRouter:', typeof worldItemsRouter);
-console.log('🔍 [DEBUG] conceptsRouter:', typeof conceptsRouter);
-console.log('🔍 [DEBUG] promptsRouter:', typeof promptsRouter);
-console.log('🔍 [DEBUG] uploadedImagesRouter:', typeof uploadedImagesRouter);
-console.log('🔍 [DEBUG] wildcardsRouter:', typeof wildcardsRouter);
-console.log('🔍 [DEBUG] videosRouter:', typeof videosRouter);
-console.log('🔍 [DEBUG] documentsRouter:', typeof documentsRouter);
-console.log('🔍 [DEBUG] workflowsRouter:', typeof workflowsRouter);
-console.log('🔍 [DEBUG] notesRouter:', typeof notesRouter);
-console.log('🔍 [DEBUG] propertiesRouter:', typeof propertiesRouter);
-console.log('🔍 [DEBUG] groupsRouter:', typeof groupsRouter);
-console.log('🔍 [DEBUG] favoritesRouter:', typeof favoritesRouter);
-console.log('🔍 [DEBUG] jsonFilesRouter:', typeof jsonFilesRouter);
-console.log('🔍 [DEBUG] localFilesRouter:', typeof localFilesRouter);
-console.log('🔍 [DEBUG] debugRouter:', typeof debugRouter);
-console.log('🔍 [DEBUG] queueRouter:', typeof queueRouter);
-console.log('🔍 [DEBUG] searchRouter:', typeof searchRouter);
-console.log('🔍 [DEBUG] thumbnailsRouter:', typeof thumbnailsRouter);
-console.log('🔍 [DEBUG] statsRouter:', typeof statsRouter);
-console.log('🔍 [DEBUG] eventsRouter:', typeof eventsRouter);
-console.log('🔍 [DEBUG] errorLogger:', typeof errorLogger);
+// Validar routers críticos
+if (typeof foldersRouter !== 'function' || typeof imagesRouter !== 'function') {
+	logError('❌ Routers críticos no están disponibles');
+	process.exit(1);
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-	// 🚨 LOGS EXTREMOS PARA DEBUGGING
-	console.log('🔥🔥🔥 [EXTREME-DEBUG] Health endpoint INICIANDO');
-	console.log('🔥🔥🔥 [EXTREME-DEBUG] Timestamp:', new Date().toISOString());
-	console.log('🔥🔥🔥 [EXTREME-DEBUG] Method:', req.method);
-	console.log('🔥🔥🔥 [EXTREME-DEBUG] URL:', req.url);
-
-	process.stdout.write('🔥🔥🔥 [EXTREME-STDOUT] Health endpoint INICIANDO\n');
-	process.stderr.write('🔥🔥🔥 [EXTREME-STDERR] Health endpoint INICIANDO\n');
-
 	const uptime = process.uptime();
 	const timestamp = new Date().toISOString();
-
-	console.log('🔥🔥🔥 [EXTREME-DEBUG] Enviando respuesta JSON');
-	process.stdout.write('🔥🔥🔥 [EXTREME-STDOUT] Enviando respuesta JSON\n');
 
 	res.json({
 		status: 'ok',
 		timestamp,
 		uptime,
 	});
-
-	console.log('🔥🔥🔥 [EXTREME-DEBUG] Respuesta JSON enviada');
-	process.stdout.write('🔥🔥🔥 [EXTREME-STDOUT] Respuesta JSON enviada\n');
 });
 
 // API Routes - Entidades principales

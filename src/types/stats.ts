@@ -74,6 +74,14 @@ export interface GeneralStats {
 	totalDownloads: number;
 	totalSize: number;
 	totalActivities: number;
+	// Campos adicionales para el panel de estadísticas
+	totalDocuments?: number;
+	totalAudio?: number;
+	totalJsonFiles?: number;
+	totalWorkflows?: number;
+	totalFile3D?: number;
+	topTags?: TopTag[];
+	recentActivity?: RecentActivity[];
 }
 
 export interface TagSummaryStats {

@@ -50,9 +50,9 @@ export function ConceptsSettings() {
 	const stats = useMemo(() => {
 		return {
 			totalConcepts: concepts.length,
-			totalImages: concepts.reduce((acc, concept) => acc + (concept.statistics?.imageCount || 0), 0),
-			totalAssociations: concepts.reduce((acc, concept) => acc + (concept.statistics?.totalAssociations || 0), 0),
-			unusedConcepts: concepts.filter((concept) => (concept.statistics?.imageCount || 0) === 0).length,
+			totalImages: concepts.reduce((acc, concept) => acc + (concept.stats?.imageCount || 0), 0),
+			totalAssociations: concepts.reduce((acc, concept) => acc + (concept.stats?.totalAssociations || 0), 0),
+			unusedConcepts: concepts.filter((concept) => (concept.stats?.imageCount || 0) === 0).length,
 			favoriteConcepts: concepts.filter((concept) => concept.isFavorite).length,
 		};
 	}, [concepts]);
@@ -317,7 +317,7 @@ export function ConceptsSettings() {
 												<div className="flex-1 min-w-0">
 													<h4 className="text-xs font-medium truncate">{concept.name}</h4>
 													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-														<span>{concept.statistics?.imageCount || 0} imágenes</span>
+														<span>{concept.stats?.imageCount || 0} imágenes</span>
 														{concept.category && (
 															<>
 																<span>•</span>

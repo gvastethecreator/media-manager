@@ -8,7 +8,7 @@ import { OptimizedStatsService } from '@/services/stats/optimized-stats.service'
 import { serializeAlbum, toAlbumWithStats } from '@/transformers/album/index';
 import type { AlbumWithStats } from '@/types/entities/album';
 
-console.log('🔍 [DEBUG] Albums router cargado, toAlbumWithStats:', typeof toAlbumWithStats);
+// Albums router loaded
 
 /**
  * @file albums.ts
@@ -108,14 +108,10 @@ interface ThumbnailImage {
 // GET /api/albums - Listar albums
 albumsRouter.get('/', async (req, res) => {
 	try {
-		console.log('🔍 [DEBUG] Endpoint /api/albums llamado');
-
-		// Primero verificar si existen albums
+		// Verificar si existen albums
 		const albumCount = await db.select({ count: count() }).from(albums);
-		console.log('🔍 [DEBUG] Total de albums en BD:', albumCount[0].count);
 
 		if (albumCount[0].count === 0) {
-			console.log('🔍 [DEBUG] No hay albums en la base de datos');
 			return res.json({
 				data: [],
 				pagination: { total: 0, limit: 0, offset: 0 },
@@ -125,11 +121,6 @@ albumsRouter.get('/', async (req, res) => {
 
 		// Test básico con solo 1 album
 		const simpleAlbums = await db.select().from(albums).limit(1);
-		console.log('🔍 [DEBUG] Albums simples obtenidos:', simpleAlbums.length);
-
-		if (simpleAlbums.length > 0) {
-			console.log('🔍 [DEBUG] Primer album simple:', JSON.stringify(simpleAlbums[0], null, 2));
-		}
 
 		res.json({
 			data: simpleAlbums,
@@ -140,9 +131,7 @@ albumsRouter.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('🚨 [ERROR CRÍTICO] Error en /api/albums:', error);
-		console.error('🚨 [ERROR CRÍTICO] Stack trace:', error?.stack);
-		console.error('🚨 [ERROR CRÍTICO] Message:', error?.message);
+		console.error('Error en /api/albums:', error);
 		res.status(500).json({ error: 'Error interno del servidor', details: error?.message });
 	}
 });

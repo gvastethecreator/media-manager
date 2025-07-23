@@ -19,7 +19,8 @@ export function AlbumsSettings() {
 	const [previewData, setPreviewData] = useState<any>(null);
 
 	// Usar React Query hooks en lugar de server actions
-	const { data: albums = [], isLoading, error, refetch: loadAlbums } = useAlbums();
+	const { data: albumsResponse, isLoading, error, refetch: loadAlbums } = useAlbums();
+	const albums = albumsResponse?.data || [];
 
 	const deleteAlbumMutation = useDeleteAlbum();
 

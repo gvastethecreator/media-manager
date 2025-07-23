@@ -1,11 +1,11 @@
 import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBytes } from '@/lib/utils/format.utils';
+import { formatBytes } from '@/lib/utils/format';
 import { Activity } from './components/activity';
 import { StatCard } from './components/stat-card';
 import { TagUsage } from './components/tag-usage';
-
+import type { TopTag, RecentActivity } from '@/types/stats';
 // Función para obtener estadísticas cliente-side
 import { getStatsData } from './stats-actions-client';
 

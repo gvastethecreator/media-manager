@@ -180,7 +180,7 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 		// **MIGRACIÓN A DRIZZLE**
 		logger.info('🔍 Obteniendo personajes con opciones:', options);
 
-		console.log('🔍 Paso 1: Iniciando consulta Drizzle...');
+
 
 		// Por ahora, implementación básica sin filtros complejos
 		const drizzleCharacters = await db
@@ -213,8 +213,7 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			.from(characters)
 			.orderBy(desc(characters.createdAt));
 
-		console.log('🔍 Paso 2: Consulta completada, datos obtenidos:', drizzleCharacters.length);
-		console.log('🔍 Primer personaje raw:', JSON.stringify(drizzleCharacters[0], null, 2));
+
 
 		const transformedCharacters = drizzleCharacters.map((rawCharacter: any) => ({
 			...rawCharacter,
@@ -256,12 +255,7 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			},
 		}));
 
-		console.log('🔍 Paso 3: Personajes transformados:', transformedCharacters.length);
-		console.log('🔍 Primer personaje transformado:', JSON.stringify(transformedCharacters[0], null, 2));
-
-		console.log('🔍 Paso 4: Iniciando fromDrizzleCharacters...');
 		const charactersResult = fromDrizzleCharacters(transformedCharacters as any);
-		console.log('🔍 Paso 5: fromDrizzleCharacters completado:', charactersResult.length);
 
 		const total = transformedCharacters.length; // TODO: implementar conteo separado
 
@@ -271,7 +265,6 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			total,
 		};
 	} catch (error) {
-		console.error('❌ Error detallado en getCharacters:', error);
 		logger.error('❌ Error al obtener personajes', { error, options });
 		throw new CharacterServiceError(
 			`Error al obtener personajes: ${error instanceof Error ? error.message : 'Error desconocido'}`,

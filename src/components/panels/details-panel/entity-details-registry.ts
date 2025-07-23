@@ -6,6 +6,8 @@
 
 import type { ComponentType } from 'react';
 import { EntityWithStats, getEntityStatsType } from '@/types/migration';
+import type { ConceptBase, ConceptExtended } from '@/types/entities/concept/base';
+import type { ConceptWithStats } from '@/types/entities/concept/base';
 
 // Tipos base para los componentes de detalles
 export interface EntityDetailsProps<T extends EntityWithStats = EntityWithStats> {
@@ -70,7 +72,7 @@ class EntityDetailsRegistry {
 	 * Registra una configuración para un tipo de entidad
 	 */
 	register<T extends EntityWithStats>(entityType: string, config: EntityDetailsConfig<T>): void {
-		this.configs.set(entityType, config as EntityDetailsConfig<EntityWithStats>);
+		this.configs.set(entityType, config as EntityDetailsConfig);
 	}
 
 	/**
