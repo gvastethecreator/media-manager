@@ -29,9 +29,6 @@ export type {
 } from './types';
 
 // --- Tipos de compatibilidad e interfaces ---
-import type { ImageBase, ImageStatistics, ImageWithStats } from './base';
-
-// Exportar tipos desde base
 export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
 
 export type ImageComplete = ImageWithStats;

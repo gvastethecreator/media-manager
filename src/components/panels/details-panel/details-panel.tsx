@@ -121,16 +121,21 @@ const BasicInfoSection = memo<{ item: EntityWithStats }>(function BasicInfoSecti
 		}
 
 		// Fecha de actualización
-		if ('updatedAt' in item) {
-			items.push({
-				id: 'updated',
-				icon: <Calendar className="h-3 w-3" />,
-				label: 'Actualizado',
-				value: formatDistanceToNow(new Date(item.updatedAt), {
-					addSuffix: true,
-					locale: es,
-				}),
-			});
+		if ('updatedAt' in item && item.updatedAt) {
+			try {
+				items.push({
+					id: 'updated',
+					icon: <Calendar className="h-3 w-3" />,
+					label: 'Actualizado',
+					value: formatDistanceToNow(new Date(item.updatedAt), {
+						addSuffix: true,
+						locale: es,
+					}),
+				});
+			} catch (error) {
+				// Si la fecha no es válida, no mostrar el campo
+				console.warn('Invalid date for updatedAt:', item.updatedAt);
+			}
 		}
 
 		// Estadísticas
@@ -211,19 +216,20 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 				<CardContent>
 					<div className="grid grid-cols-3 gap-2">
 						{items.slice(0, 9).map((item) => {
-						const type = getEntityStatsType(item);
-						if (!type) return null;
-						const config = entityDetailsRegistry.getConfig(type);
-						if (!config) return null;
+					const type = getEntityStatsType(item);
+					if (!type) return null;
+					const config = entityDetailsRegistry.getConfig(type);
+					if (!config) return null;
 
-						const { previewComponent: PreviewComponent } = config;
+					const { previewComponent: PreviewComponent } = config;
+					if (!PreviewComponent) return null;
 
-						return (
-							<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
-								<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
-							</div>
-						);
-					})}
+					return (
+						<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
+							<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
+						</div>
+					);
+				}).filter(Boolean)}
 					</div>
 					{items.length > 9 && (
 						<p className="text-xs text-muted-foreground mt-2 text-center">+{items.length - 9} elementos más</p>

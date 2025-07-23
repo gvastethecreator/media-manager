@@ -1,13 +1,14 @@
-# Configuración optimizada para migración Node.js + Vite → Bun
-# Fase 1: Runtime migration con compatibilidad máxima
+# Configuración optimizada Bun para FASE 2: Optimización Híbrida
+# Configuración específica para desarrollo con Vite + Bun runtime
 
 [install]
-# Configuración de dependencias compatible con el proyecto actual
+# Configuración de dependencias optimizada
 dev = true
 optional = true
 peer = true
 production = false
-concurrentScripts = 16
+# Optimización: más workers concurrentes para mejor rendimiento
+concurrentScripts = 32
 
 # Configuración para migración desde pnpm
 auto = "auto"
@@ -23,6 +24,8 @@ globalBinDir = "~/.bun/bin"
 dir = "~/.bun/install/cache"
 disable = false
 disableManifest = false
+# Optimización: cache más agresivo
+ttl = 86400
 
 [install.lockfile]
 # Mantener compatibilidad durante migración
@@ -30,8 +33,65 @@ save = true
 # Opcional: generar yarn.lock para compatibilidad
 # print = "yarn"
 
-# Configuración para desarrollo con Vite (FASE 1)
-# Estas configuraciones serán actualizadas en FASE 3
+# Configuración optimizada para desarrollo con Vite (FASE 2)
 [serve.static]
-# Plugins que se agregarán en FASE 3
+# Optimizaciones para archivos estáticos
 # plugins = ["bun-plugin-tailwind"]
+
+# Configuración de runtime optimizada
+[runtime]
+# Optimización: usar JSC (JavaScriptCore) para mejor rendimiento
+engine = "jsc"
+
+# Configuración de transpilación optimizada
+[transpiler]
+# Optimización: usar SWC para transformaciones más rápidas
+engine = "swc"
+# Optimizar para desarrollo
+minify = false
+sourcemap = true
+# Target moderno para mejor rendimiento
+target = "esnext"
+
+# Configuración de test optimizada
+[test]
+# Optimización: usar Bun test runner nativo
+runner = "bun"
+# Configuración de coverage
+coverage = true
+coverageDir = "coverage"
+
+# Configuración de logging optimizada
+[logging]
+level = "info"
+# Optimización: logs estructurados para mejor debugging
+format = "json"
+
+# Configuración de watch optimizada para desarrollo
+[watch]
+# Optimización: ignorar directorios innecesarios
+ignore = [
+  "node_modules/**",
+  "dist/**",
+  "logs/**",
+  "coverage/**",
+  ".git/**",
+  "*.log"
+]
+# Optimización: usar polling solo cuando sea necesario
+usePolling = false
+# Optimización: debounce para evitar rebuilds excesivos
+debounce = 100
+
+# Configuración de red optimizada
+[network]
+# Optimización: timeouts más largos para operaciones de red
+timeout = 30000
+retries = 3
+
+# Configuración de memoria optimizada
+[memory]
+# Optimización: límites de memoria más altos para proyectos grandes
+heapSize = "2GB"
+# Optimización: garbage collection más eficiente
+gcStrategy = "incremental"

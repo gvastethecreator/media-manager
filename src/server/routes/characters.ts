@@ -27,7 +27,6 @@ router.get('/', async (req, res) => {
 	const { search, limit, offset, sortBy, sortOrder, category, isFavorite } = parse.data;
 
 	try {
-		console.log('🔍 [DEBUG] Iniciando consulta de characters...');
 
 		const whereConditions = [];
 		if (search) {
@@ -63,7 +62,6 @@ router.get('/', async (req, res) => {
 		]);
 
 		const total = totalResult[0].count;
-		console.log('🔍 [DEBUG] Characters obtenidos:', charactersData.length);
 
 		res.json({
 			data: charactersData,

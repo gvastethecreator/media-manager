@@ -350,25 +350,25 @@ export function GPSInfo({ metadata }: MetadataSectionsProps) {
 	const infoItems: (InfoItemData | null)[] = [
 		{
 			label: 'Latitud',
-			value: gps.latitude ? formatCoordinate(gps.latitude, true) : null,
+			value: (typeof gps.latitude === 'number') ? formatCoordinate(gps.latitude, true) : null,
 			icon: <MapPin className="h-3.5 w-3.5 text-green-500" />,
-			condition: gps.latitude !== undefined,
+			condition: typeof gps.latitude === 'number',
 		},
 		{
 			label: 'Longitud',
-			value: gps.longitude ? formatCoordinate(gps.longitude, false) : null,
+			value: (typeof gps.longitude === 'number') ? formatCoordinate(gps.longitude, false) : null,
 			icon: <MapPin className="h-3.5 w-3.5 text-green-500" />,
-			condition: gps.longitude !== undefined,
+			condition: typeof gps.longitude === 'number',
 		},
 		{
 			label: 'Altitud',
-			value: gps.altitude ? `${gps.altitude.toFixed(2)}m` : null,
+			value: (typeof gps.altitude === 'number') ? `${gps.altitude.toFixed(2)}m` : null,
 			icon: <MapPin className="h-3.5 w-3.5 text-blue-500" />,
-			condition: gps.altitude !== undefined,
+			condition: typeof gps.altitude === 'number',
 		},
 	];
 
-	const hasGpsData = gps.latitude !== undefined && gps.longitude !== undefined;
+	const hasGpsData = typeof gps.latitude === 'number' && typeof gps.longitude === 'number';
 	const hasAnyInfo = infoItems.some((item) => item?.condition);
 
 	return (

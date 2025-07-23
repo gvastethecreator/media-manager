@@ -43,7 +43,7 @@ export function CollectionsSettings() {
 	const deleteCollectionMutation = useDeleteCollection();
 
 	// Extraer las colecciones de la respuesta
-	const collections = collectionsResponse?.collections || [];
+	const collections = collectionsResponse?.data || [];
 
 	// Calcular estadísticas generales usando useMemo para optimización
 	const stats = useMemo(

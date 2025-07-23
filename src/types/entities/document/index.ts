@@ -17,7 +17,7 @@
 export type {
 	DocumentCreateInput,
 	DocumentUpdateInput,
-} from '../../transformers/document/validators';
+} from '../../../transformers/document/validators';
 // --- Tipos Canónicos ---
 export type {
 	DocumentBase,

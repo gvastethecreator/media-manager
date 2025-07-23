@@ -11,7 +11,7 @@ export type SortOption = {
 export type FilterOption = {
 	field: string;
 	value: string | number | boolean | null;
-	operator: 'eq' | 'neq' | 'gt' | 'lt' | 'contains' | 'startsWith' | 'endsWith';
+	operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith';
 };
 
 export interface ViewOptionsState {

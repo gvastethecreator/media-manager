@@ -51,6 +51,10 @@ const GenericMetadata = ({ entity }: EntityMetadataProps) => {
 	return <div className="p-2 text-xs text-muted-foreground">{'Metadatos en desarrollo'}</div>;
 };
 
+const VideoMetadata = ({ entity }: EntityMetadataProps<any>) => {
+	return <div className="p-2 text-xs text-muted-foreground">{'Metadatos de video en desarrollo'}</div>;
+};
+
 /**
  * Inicializa el registro de entidades con todas las configuraciones
  */
@@ -82,7 +86,7 @@ export function initializeEntityRegistry() {
 			detailsComponent: VideoDetails,
 			previewComponent: GenericPreview,
 			toolbarComponent: GenericToolbar,
-			metadataComponent: GenericMetadata,
+			metadataComponent: VideoMetadata,
 			actions: VideoActions,
 			infoCategories: [DefaultInfoCategories.BASIC, DefaultInfoCategories.TECHNICAL, DefaultInfoCategories.METADATA],
 			supportsExpandedPreview: true,
