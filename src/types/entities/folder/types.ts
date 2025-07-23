@@ -70,6 +70,118 @@ export interface FolderSearchOptions {
 	include?: Record<string, boolean>;
 }
 
+/**
+ * 📁 Propiedades de UI para carpetas
+ */
+export interface FolderUIProps {
+	_count?: {
+		children?: number;
+		images?: number;
+		videos?: number;
+	};
+}
+
+/**
+ * 📁 Estadísticas avanzadas para carpetas
+ */
+export interface FolderStatistics {
+	// Métricas de jerarquía
+	hierarchyDepth: number;
+	totalDescendants: number;
+	directChildren: number;
+
+	// Métricas de contenido
+	contentDiversity: number;
+	organizationScore: number;
+	totalItems: number;
+
+	// Métricas de uso
+	accessFrequency: number;
+	lastActivity: Date | null;
+
+	// Distribución de contenido
+	imageCount: number;
+	videoCount: number;
+	noteCount: number;
+	documentCount: number;
+	folderCount: number;
+
+	// Métricas de tamaño
+	formattedSize: string;
+	averageFileSize: number;
+	largestFile: number;
+
+	// Análisis de nombres y organización
+	hasConsistentNaming: boolean;
+	hasDeepHierarchy: boolean;
+	isWellOrganized: boolean;
+
+	// Breadcrumbs y navegación
+	breadcrumbs: Array<{ id: string; name: string; path: string }>;
+	fullPath: string;
+	relativePath: string;
+
+	// Auto-tags generados
+	autoTags: string[];
+
+	// Calidad general
+	qualityGrade: 'A' | 'B' | 'C' | 'D';
+
+	// Relaciones
+	totalRelations: number;
+}
+
+/**
+ * 📁 Conteos relacionados para carpetas
+ */
+export interface FolderCounts {
+	children?: number;
+	images?: number;
+	videos?: number;
+}
+
+/**
+ * 📁 Relaciones de carpetas
+ */
+export interface FolderRelations {
+	parent?: FolderBase | null;
+	children?: FolderBase[];
+	images?: any[];
+	videos?: any[];
+}
+
+/**
+ * 📁 Carpeta completa con relaciones
+ */
+export interface FolderComplete extends FolderBase {
+	parent?: FolderBase | null;
+	children?: FolderComplete[];
+	images?: any[];
+	videos?: any[];
+	_count?: FolderCounts;
+}
+
+/**
+ * 📁 Carpeta extendida con propiedades de UI
+ */
+export interface FolderExtended extends FolderComplete, FolderUIProps {
+	// Propiedades adicionales de UI se heredan de FolderUIProps
+}
+
+/**
+ * 📁 Carpeta extendida completa
+ */
+export interface FolderExtendedComplete extends FolderExtended {
+	statistics?: FolderStatistics;
+}
+
+/**
+ * 📁 Carpeta con relaciones completas
+ */
+export interface FolderWithRelations extends FolderBase {
+	relations: FolderRelations;
+}
+
 // Alias para retrocompatibilidad (mantener solo si es estrictamente necesario)
 export type CreateFolderData = FolderCreateInput;
 export type UpdateFolderData = FolderUpdateInput;

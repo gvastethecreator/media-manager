@@ -1,12 +1,12 @@
 import { AlertCircle, Tag } from 'lucide-react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/lib/hooks/system/use-stats';
+import { useStats } from '@/store/stats.store';
 import { TagUsage } from './tag-usage';
 
 export function TopTags() {
-	const { stats, isLoading, error } = useStats();
+	const { stats, loading, error } = useStats();
 
-	if (isLoading) {
+	if (loading) {
 		return (
 			<div className="flex items-center justify-center p-4 gap-2">
 				<Tag className="h-4 w-4 animate-pulse" />
@@ -33,7 +33,7 @@ export function TopTags() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 space-y-0.5 w-full">
-				{stats.topTags?.map((tag) => (
+				{stats.topTags?.map((tag: any) => (
 					<TagUsage key={tag.id} tag={tag} />
 				)) || <div className="text-muted-foreground text-sm p-2">No hay datos de etiquetas</div>}
 			</CardContent>

@@ -11,7 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useConcepts, useDeleteConcept } from '@/lib/api/concepts';
 import { toastService } from '@/lib/ui/toast';
-import type { ConceptWithStats } from '@/types/entities/concept';
+import type { ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptExtended } from '@/types/entities/concept/types';
 import { CreateConceptForm } from './create-concept-form';
 
 // Tipos seguros para preview data
