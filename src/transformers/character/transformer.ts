@@ -91,27 +91,18 @@ const logger = serverLogger.withContext('CharacterTransformer');
  */
 export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCounts): CharacterWithStats | null {
 	try {
-		console.log('🔄 Iniciando transformación de personaje:', drizzleCharacter?.id);
-		console.log('🔄 Datos de entrada:', JSON.stringify(drizzleCharacter, null, 2));
 
 		if (!drizzleCharacter) {
-			console.log('❌ drizzleCharacter es null/undefined');
 			return null;
 		}
 
 		const now = new Date().toISOString();
 		const { _count, ...baseData } = drizzleCharacter;
 
-		console.log('🔄 baseData después de destructuring:', JSON.stringify(baseData, null, 2));
-		console.log('🔄 _count después de destructuring:', JSON.stringify(_count, null, 2));
-
 		// Validar que _count existe y tiene las propiedades necesarias
 		if (!_count || typeof _count !== 'object') {
-			console.log('❌ _count no es un objeto válido:', _count);
 			return null;
 		}
-
-		console.log('🔄 Calculando totales desde _count...');
 		// Calcular totales desde los conteos
 		const totalImages = _count?.images ?? 0;
 		const totalVideos = _count?.videos ?? 0;
@@ -128,8 +119,6 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 		const totalWildcards = _count?.wildcards ?? 0;
 		const totalRelatedCharacters = _count?.relatedCharacters ?? 0;
 		const totalRelatedTo = _count?.relatedTo ?? 0;
-
-		console.log('🔄 Totales calculados');
 
 		const totalAssociations =
 			totalImages +
@@ -148,15 +137,11 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			totalRelatedCharacters +
 			totalRelatedTo;
 
-		console.log('🔄 Calculando power level...');
 		// Calcular power level basado en nivel y asociaciones
 		const powerLevel = calculatePowerLevel(baseData.level || 1, totalAssociations);
 
-		console.log('🔄 Determinando rareza...');
 		// Determinar rareza basada en power level y nivel
 		const rarityLevel = determineRarityLevel(baseData.level || 1, powerLevel, totalAssociations);
-
-		console.log('🔄 Construyendo resultado final...');
 		const result = {
 			...baseData,
 			// Validación null-safe para evitar errores de Object.entries
@@ -200,7 +185,6 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			},
 		};
 
-		console.log('✅ Transformación completada exitosamente');
 		return result;
 	} catch (error) {
 		console.error('❌ Error detallado en transformación:', error);
