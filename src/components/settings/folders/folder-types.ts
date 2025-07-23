@@ -7,14 +7,14 @@ import type { ProcessStatus } from '@/types/folders';
  */
 export interface ExtendedFolder extends FolderExtended {
 	error?: string; // Error temporal durante el procesamiento
-	lastIndexed?: Date | null; // Última fecha de indexación
-	emoji?: string;
-	description?: string;
-	isFavorite?: boolean;
-	parentId?: string | null;
-	children?: ExtendedFolder[];
-	autoReindex?: boolean;
-	path?: string;
+	// lastIndexed ya está en FolderBase
+	// emoji ya está en FolderBase
+	// description ya está en FolderBase
+	// isFavorite ya está en FolderBase
+	// parentId ya está en FolderBase
+	children?: ExtendedFolder[]; // Override para usar ExtendedFolder en lugar de FolderComplete
+	// autoReindex ya está en FolderBase
+	// path ya está en FolderBase
 }
 
 // 🔄 Estado extendido del proceso con propiedades adicionales

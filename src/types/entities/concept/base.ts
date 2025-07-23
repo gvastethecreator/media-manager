@@ -71,3 +71,9 @@ export interface ConceptWithStats extends ConceptBase {
 		tags: number;
 	};
 }
+
+/**
+ * 🔄 Alias para compatibilidad con imports existentes.
+ * ConceptExtended apunta a ConceptWithStats para mantener retrocompatibilidad.
+ */
+export type ConceptExtended = ConceptWithStats;

@@ -174,7 +174,7 @@ export function CreateCollectionForm({
 		try {
 			setIsSubmitting(true);
 
-			const collectionData: CollectionCreateInput = {
+			const collectionData: Partial<CollectionCreateInput> = {
 				name: data.name,
 				color: data.color || null,
 				emoji: data.emoji || null,
@@ -187,6 +187,11 @@ export function CreateCollectionForm({
 				isFavorite: data.isFavorite || false,
 			};
 
+			// Validar que name esté presente
+			if (!data.name) {
+				throw new Error('El nombre es requerido');
+			}
+
 			// Crear o actualizar colección
 			if (isEditing && collection) {
 				const updated = await updateCollectionMutation.mutateAsync({
@@ -198,7 +203,12 @@ export function CreateCollectionForm({
 				});
 				onUpdated?.(updated);
 			} else {
-				const created = await createCollectionMutation.mutateAsync(collectionData);
+				// Asegurar que name esté presente para el tipo CollectionCreateInput
+				const createData: CollectionCreateInput = {
+					...collectionData,
+					name: data.name, // Garantizar que name esté presente
+				};
+				const created = await createCollectionMutation.mutateAsync(createData);
 				onCreated?.(created);
 				form.reset();
 			}
