@@ -50,9 +50,9 @@ export function NotesSettings() {
 	const stats = useMemo(() => {
 		return {
 			totalNotes: notes.length,
-			totalImages: notes.reduce((acc, note) => acc + (note.statistics?.imageCount || 0), 0),
-			totalAssociations: notes.reduce((acc, note) => acc + (note.statistics?.totalAssociations || 0), 0),
-			unusedNotes: notes.filter((note) => (note.statistics?.imageCount || 0) === 0).length,
+			totalImages: notes.reduce((acc, note) => acc + (note.stats?.imageCount || 0), 0),
+			totalAssociations: notes.reduce((acc, note) => acc + (note.stats?.totalAssociations || 0), 0),
+			unusedNotes: notes.filter((note) => (note.stats?.imageCount || 0) === 0).length,
 			favoriteNotes: notes.filter((note) => note.isFavorite).length,
 		};
 	}, [notes]);

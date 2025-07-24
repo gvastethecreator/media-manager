@@ -50,9 +50,9 @@ export const ImageDetails = memo<EntityDetailsProps<ImageWithStats>>(function Im
 							<p className="font-medium truncate">{entity.name}</p>
 						</div>
 						<div>
-							<span className="text-muted-foreground">Tamaño:</span>
-							<p className="font-medium">{formatBytes(entity.totalSize || 0)}</p>
-						</div>
+				<span className="text-muted-foreground">Tamaño:</span>
+				<p className="font-medium">{formatBytes(entity.size || 0)}</p>
+			</div>
 						<div>
 							<span className="text-muted-foreground">Dimensiones:</span>
 							<p className="font-medium">
@@ -290,7 +290,7 @@ export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function 
 	const metadata = [
 		{
 			label: 'Aspect Ratio',
-			value: entity.stats?.aspectRatio?.toFixed(2) || 'N/A',
+			value: entity.width && entity.height ? (entity.width / entity.height).toFixed(2) : 'N/A',
 			category: 'technical',
 		},
 		{
@@ -299,8 +299,8 @@ export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function 
 			category: 'technical',
 		},
 		{
-			label: 'Calidad',
-			value: entity.stats?.quality || 'N/A',
+			label: 'Resolución',
+			value: entity.width && entity.height ? `${entity.width} × ${entity.height}` : 'N/A',
 			category: 'technical',
 		},
 		{
@@ -358,10 +358,12 @@ export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function 
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm text-muted-foreground">
-							<p>Asociaciones: {entity.stats.totalAssociations || 0}</p>
-							{entity.stats.totalItems !== undefined && (
-								<p>Elementos relacionados: {entity.stats.totalItems}</p>
-							)}
+							<p>Visualizaciones: {entity.stats.viewCount || 0}</p>
+							<p>Descargas: {entity.stats.downloadCount || 0}</p>
+							<p>Me gusta: {entity.stats.likeCount || 0}</p>
+							<p>Etiquetas: {entity.stats.tagCount || 0}</p>
+							<p>Álbumes: {entity.stats.albumCount || 0}</p>
+							<p>Colecciones: {entity.stats.collectionCount || 0}</p>
 						</div>
 					</CardContent>
 				</Card>

@@ -84,9 +84,9 @@ export const VideoDetails = memo<EntityDetailsProps<VideoWithStats>>(function Vi
 							<p className="font-medium truncate">{entity.name}</p>
 						</div>
 						<div>
-							<span className="text-muted-foreground">Tamaño:</span>
-							<p className="font-medium">{formatBytes(entity.totalSize || 0)}</p>
-						</div>
+				<span className="text-muted-foreground">Tamaño:</span>
+				<p className="font-medium">{formatBytes(entity.size || 0)}</p>
+			</div>
 						<div>
 							<span className="text-muted-foreground">Resolución:</span>
 							<p className="font-medium">

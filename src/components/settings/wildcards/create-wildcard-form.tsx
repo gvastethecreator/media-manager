@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm, type SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,8 +15,19 @@ import type { WildcardBase } from '@/types/entities/wildcard/base';
 import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
 
 // Esquema Zod adaptado para el formulario
-const formSchema = CreateWildcardSchema.extend({
-	children: z.array(z.object({ value: z.string().min(1, 'El valor no puede estar vacío') })),
+const formSchema = z.object({
+	name: z.string().min(1, 'El nombre es obligatorio'),
+	emoji: z.string().default('🎭'),
+	color: z.string().default('#6366F1'),
+	description: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	children: z.array(z.object({ value: z.string().min(1, 'El valor no puede estar vacío') })).default([]),
+	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean().default(false),
+	parentId: z.string().nullable().optional(),
+	sortBy: z.string().optional(),
+	viewMode: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -28,19 +39,27 @@ interface CreateWildcardFormProps {
 	onCancel: () => void;
 }
 
+// Función para convertir FormValues a CreateWildcardSchema
+const convertFormToSchema = (data: FormValues): z.infer<typeof CreateWildcardSchema> => {
+	return {
+		...data,
+		children: data.children.map((c) => c.value).filter(Boolean),
+	};
+};
+
 export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, onCancel }: CreateWildcardFormProps) {
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: wildcard?.name || '',
-			emoji: wildcard?.emoji || '✨',
-			color: wildcard?.color || '#ec4899',
-			description: wildcard?.description || '',
-			shortcut: wildcard?.shortcut || '',
-			category: wildcard?.category || 'general',
-			children: wildcard?.children?.map((c) => ({ value: c })) || [],
+			emoji: wildcard?.emoji || '🎭',
+			color: wildcard?.color || '#6366F1',
+			description: wildcard?.description || null,
+			shortcut: wildcard?.shortcut || null,
+			category: wildcard?.category || null,
+			children: wildcard?.children ? JSON.parse(wildcard.children).map((c: string) => ({ value: c })) : [],
 			parentId: wildcard?.parentId || null,
-			featuredImage: wildcard?.featuredImage || '',
+			featuredImage: wildcard?.featuredImage || null,
 			isFavorite: wildcard?.isFavorite || false,
 		},
 	});
@@ -50,18 +69,19 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 		name: 'children',
 	});
 
-	const handleSubmit = (data: FormValues) => {
-		// Validar con el esquema original antes de enviar
-		const result = CreateWildcardSchema.safeParse({
+	const handleSubmit: SubmitHandler<FormValues> = (data) => {
+		// Convertir los datos del formulario al formato esperado
+		const wildcardData = {
 			...data,
-			children: data.children.map((c) => c.value).filter(Boolean), // Enviar solo strings no vacíos
-		});
+			children: JSON.stringify(data.children.map((c) => c.value).filter(Boolean)),
+		};
+
+		// Validar con el esquema original antes de enviar
+		const result = CreateWildcardSchema.safeParse(wildcardData);
 
 		if (result.success) {
 			onSubmit(result.data);
 		} else {
-			// Opcional: manejar errores de validación final aquí, si es necesario.
-			// react-hook-form ya debería haber capturado la mayoría.
 			console.error('Error de validación final:', result.error.flatten());
 		}
 	};
@@ -131,7 +151,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Descripción</FormLabel>
 									<FormControl>
-										<Input {...field} placeholder="Descripción del comodín" />
+										<Input {...field} value={field.value || ''} placeholder="Descripción del comodín" />
 									</FormControl>
 								</FormItem>
 							)}
@@ -144,7 +164,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Atajo</FormLabel>
 									<FormControl>
-										<Input {...field} placeholder="Atajo de teclado (opcional)" />
+										<Input {...field} value={field.value || ''} placeholder="Atajo de teclado (opcional)" />
 									</FormControl>
 								</FormItem>
 							)}

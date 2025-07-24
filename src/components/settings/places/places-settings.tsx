@@ -29,7 +29,8 @@ export function PlacesSettings() {
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
 	// React Query hooks
-	const { data: places = [], isLoading, error } = usePlaces({});
+	const { data: placesResponse, isLoading, error } = usePlaces({});
+	const places = placesResponse?.data || [];
 	const deletePlace = useDeletePlace();
 
 	// Calcular estadísticas generales usando useMemo para optimización

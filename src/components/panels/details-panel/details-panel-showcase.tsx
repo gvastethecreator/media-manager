@@ -322,7 +322,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 
 	const handleSelectEntity = useCallback(
 		(entity: AnyEntityWithStats) => {
-			selectSingle(entity.id);
+			selectSingle(entity);
 			setSelectedIds(new Set([entity.id]));
 		},
 		[selectSingle]
@@ -330,7 +330,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 
 	const handleToggleEntity = useCallback(
 		(entity: AnyEntityWithStats) => {
-			toggleSelection(entity.id);
+			toggleSelection(entity);
 			setSelectedIds((prev) => {
 				const newSet = new Set(prev);
 				if (newSet.has(entity.id)) {
@@ -350,7 +350,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 	}, [clearSelection]);
 
 	const handleSelectAll = useCallback(() => {
-		updateSelection(mockEntities.map((e) => e.id));
+		updateSelection(mockEntities);
 		setSelectedIds(new Set(mockEntities.map((e) => e.id)));
 	}, [updateSelection]);
 

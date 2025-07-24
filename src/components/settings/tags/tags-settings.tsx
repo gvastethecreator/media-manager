@@ -286,7 +286,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 													</Badge>
 												)}
 											</div>
-											<div className="w-4 h-4 rounded-full border" style={{ backgroundColor: tag.color }} />
+											<div className="w-4 h-4 rounded-full border" style={{ backgroundColor: tag.color || '#6b7280' }} />
 										</div>
 									</CardContent>
 								</Card>
