@@ -60,9 +60,14 @@ function buildWhereConditions(filters: ActivityFilters = {}) {
 		conditions.push(inArray(activities.type, filters.types));
 	}
 
-	// Filtrar por imagen
+	// Filtrar por imagen (usando entityId y entityType)
 	if (filters.imageId) {
-		conditions.push(eq(activities.imageId, filters.imageId));
+		conditions.push(
+			and(
+				eq(activities.entityId, filters.imageId),
+				eq(activities.entityType, 'image')
+			)
+		);
 	}
 
 	// Filtrar por fechas
@@ -113,7 +118,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			// Buscar imagen relacionada si existe
 			let imageData = null;
-			if (newActivity.imageId) {
+			if (newActivity.entityType === 'image' && newActivity.entityId) {
 				const imageResult = await db
 					.select({
 						id: images.id,
@@ -121,7 +126,7 @@ export class ActivityServiceImpl implements ActivityService {
 						path: images.path,
 					})
 					.from(images)
-					.where(eq(images.id, newActivity.imageId))
+					.where(eq(images.id, newActivity.entityId))
 					.limit(1);
 
 				imageData = imageResult[0] || null;
@@ -146,10 +151,11 @@ export class ActivityServiceImpl implements ActivityService {
 				.select({
 					id: activities.id,
 					type: activities.type,
+					entityType: activities.entityType,
+					entityId: activities.entityId,
 					description: activities.description,
 					metadata: activities.metadata,
 					createdAt: activities.createdAt,
-					imageId: activities.imageId,
 					image: {
 						id: images.id,
 						name: images.name,
@@ -157,7 +163,10 @@ export class ActivityServiceImpl implements ActivityService {
 					},
 				})
 				.from(activities)
-				.leftJoin(images, eq(activities.imageId, images.id))
+				.leftJoin(images, and(
+					eq(activities.entityId, images.id),
+					eq(activities.entityType, 'image')
+				))
 				.where(eq(activities.id, id))
 				.limit(1);
 

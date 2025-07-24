@@ -34,10 +34,10 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 import { toastService } from '@/services/toast';
-import { UploadedImageType } from '@/types/entities/uploaded-image/types';
+import { UploadedFileType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';
-import type { UploadedImageResult } from '@/types/uploaded-image';
+import type { UploadedImageResult } from '@/types/entities/uploaded-image/types';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 
@@ -45,7 +45,7 @@ const viewLogger = clientLogger.withContext('UploadedImagesView');
 // ⚠️ Si se amplían los filtros, actualizar aquí y en el panel de filtros
 export type UploadedImageFilters = {
 	search?: string;
-	type?: UploadedImageType;
+	type?: UploadedFileType;
 };
 
 export function UploadedImagesView() {

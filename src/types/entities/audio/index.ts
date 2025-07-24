@@ -13,3 +13,8 @@ export type {
 	AudioUpdateInput,
 	AudioWithStats,
 } from './base';
+
+// Alias para compatibilidad
+export type Audio = AudioWithStats;
+export type AudioFormData = AudioCreateInput;
+export type AudioUIInput = AudioCreateInput;

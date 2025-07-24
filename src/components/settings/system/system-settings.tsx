@@ -33,22 +33,39 @@ interface SystemData {
 	hostname: string;
 }
 
+// Función para mapear SystemStats a SystemData
+function mapSystemStatsToSystemData(stats: any): SystemData {
+	return {
+		cpuUsage: 0, // No disponible en SystemStats
+		memoryUsage: 0, // No disponible en SystemStats
+		cacheSize: 0, // No disponible en SystemStats
+		dbSize: stats?.dbSize || 0,
+		totalEntities: (stats?.totalImages || 0) + (stats?.totalVideos || 0) + (stats?.totalAudio || 0) + (stats?.totalFolders || 0),
+		uptime: 0, // No disponible en SystemStats
+		nodeVersion: '', // No disponible en SystemStats
+		hostname: '', // No disponible en SystemStats
+	};
+}
+
 export function SystemSettings() {
 	// Usar React Query hooks en lugar de server actions
 	const {
-		data: systemData = {
-			cpuUsage: 0,
-			memoryUsage: 0,
-			cacheSize: 0,
-			dbSize: 0,
-			totalEntities: 0,
-			uptime: 0,
-			nodeVersion: '',
-			hostname: '',
-		} as SystemData,
+		data: rawSystemData,
 		isLoading,
 		refetch: loadSystemStats,
 	} = useSystemStats();
+
+	// Mapear los datos del sistema
+	const systemData = rawSystemData ? mapSystemStatsToSystemData(rawSystemData) : {
+		cpuUsage: 0,
+		memoryUsage: 0,
+		cacheSize: 0,
+		dbSize: 0,
+		totalEntities: 0,
+		uptime: 0,
+		nodeVersion: '',
+		hostname: '',
+	} as SystemData;
 
 	const repairSystemMutation = useRepairSystem();
 	const resetDatabaseMutation = useResetDatabase();

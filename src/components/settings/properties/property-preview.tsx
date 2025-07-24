@@ -65,8 +65,8 @@ export function PropertyPreview({
 									<dt className="text-muted-foreground">Color</dt>
 									<dd className="font-medium">
 										<div className="flex items-center gap-2">
-											<div className="w-4 h-4 rounded-full" style={{ backgroundColor: property.color }} />
-											{property.color}
+											<div className="w-4 h-4 rounded-full" style={{ backgroundColor: property.color || '#64748b' }} />
+											{property.color || '#64748b'}
 										</div>
 									</dd>
 								</div>

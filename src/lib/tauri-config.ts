@@ -32,8 +32,8 @@ export const getOSInfo = async () => {
 
 	try {
 		// Para Tauri v2, las APIs se importan dinámicamente
-		const { type } = await import('@tauri-apps/api/os');
-		const osType = await type();
+		const os = await import('@tauri-apps/api/os');
+		const osType = await os.type();
 		return {
 			type: osType,
 			isWindows: osType === 'Windows_NT',

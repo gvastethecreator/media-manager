@@ -6,7 +6,7 @@
  */
 
 import { calculateCompleteness } from '@/lib/utils/transformers';
-import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionBase, CollectionWithStats } from '@/types/entities/collection';
 
 /**
  * Convierte un CollectionBase a CollectionWithStats calculando estadísticas.
@@ -17,23 +17,20 @@ import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '
 export function toCollectionWithStats(collection: CollectionBase, counts?: any): CollectionWithStats {
 	// Calcular estadísticas básicas
 	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0) : 0;
+	const imageCount = counts?.images || 0;
+	const videoCount = counts?.videos || 0;
 
-	// Calcular completitud basada en campos importantes
-	const completenessFields = [collection.name, collection.description, collection.category];
-	const completenessScore = calculateCompleteness(collection, ['name', 'description', 'category']);
-
-	// Calcular popularidad basada en el total de items
-	const popularity = Math.log1p(totalItems);
-
-	const stats: CollectionStatistics = {
+	const stats = {
 		totalItems,
-		completeness: completenessScore,
-		popularity: Number.parseFloat(popularity.toFixed(2)),
-		lastUpdated: new Date().toISOString(),
+		imageCount,
+		videoCount,
+		totalValue: 0,
+		lastActivity: new Date(),
 	};
 
 	return {
 		...collection,
+		entityType: 'collection' as const,
 		stats,
 	};
 }

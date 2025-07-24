@@ -15,7 +15,7 @@ const getRandomDate = () => {
 };
 
 // Datos de estadísticas simulados
-export const MOCK_STATS: SystemStats = {
+export const MOCK_STATS: GeneralStats = {
 	totalImages: 1287,
 	totalFolders: 64,
 	totalTags: 186,
@@ -32,11 +32,11 @@ export const MOCK_STATS: SystemStats = {
 
 	// Etiquetas más populares simuladas
 	topTags: [
-		{ id: '1', name: 'paisaje', color: '#3b82f6', count: 231 },
-		{ id: '2', name: 'retrato', color: '#10b981', count: 187 },
-		{ id: '3', name: 'animales', color: '#f59e0b', count: 143 },
-		{ id: '4', name: 'arquitectura', color: '#8b5cf6', count: 98 },
-		{ id: '5', name: 'comida', color: '#f43f5e', count: 76 },
+		{ id: '1', name: 'paisaje', color: '#3b82f6', count: 231, percentage: 0 },
+		{ id: '2', name: 'retrato', color: '#10b981', count: 187, percentage: 0 },
+		{ id: '3', name: 'animales', color: '#f59e0b', count: 143, percentage: 0 },
+		{ id: '4', name: 'arquitectura', color: '#8b5cf6', count: 98, percentage: 0 },
+		{ id: '5', name: 'comida', color: '#f43f5e', count: 76, percentage: 0 },
 	],
 
 	// Actividades recientes simuladas
@@ -46,6 +46,8 @@ export const MOCK_STATS: SystemStats = {
 			type: 'UPLOAD',
 			description: 'Imagen subida: "Amanecer en la montaña"',
 			createdAt: getRandomDate(),
+			entityType: 'image',
+			entityId: '1',
 			image: { id: '1', name: 'Amanecer en la montaña', thumbnail: null },
 		},
 		{
@@ -53,6 +55,8 @@ export const MOCK_STATS: SystemStats = {
 			type: 'TAG',
 			description: 'Etiquetas añadidas a "Retrato familiar"',
 			createdAt: getRandomDate(),
+			entityType: 'image',
+			entityId: '2',
 			image: { id: '2', name: 'Retrato familiar', thumbnail: null },
 		},
 		{
@@ -60,6 +64,8 @@ export const MOCK_STATS: SystemStats = {
 			type: 'COLLECTION',
 			description: 'Imagen añadida a colección "Vacaciones 2023"',
 			createdAt: getRandomDate(),
+			entityType: 'image',
+			entityId: '3',
 			image: { id: '3', name: 'Playa al atardecer', thumbnail: null },
 		},
 		{
@@ -67,6 +73,8 @@ export const MOCK_STATS: SystemStats = {
 			type: 'EDIT',
 			description: 'Imagen editada: "Vista desde la ventana"',
 			createdAt: getRandomDate(),
+			entityType: 'image',
+			entityId: '4',
 			image: { id: '4', name: 'Vista desde la ventana', thumbnail: null },
 		},
 		{
@@ -74,6 +82,8 @@ export const MOCK_STATS: SystemStats = {
 			type: 'FAVORITE',
 			description: 'Imagen marcada como favorita',
 			createdAt: getRandomDate(),
+			entityType: 'image',
+			entityId: '5',
 			image: { id: '5', name: 'Mascota jugando', thumbnail: null },
 		},
 	],

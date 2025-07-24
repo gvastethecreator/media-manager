@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptExtended } from '@/types/entities/prompt';
+import type { PromptBase, PromptExtended } from '@/types/entities/prompt/types';
 import { preparePromptForDisplay, preparePromptForSaving } from './helpers';
 
 const exportLogger = serverLogger.withContext('PromptExport');
@@ -76,8 +76,8 @@ function exportPromptToJSON(prompt: PromptBase | PromptExtended, includeMetadata
 	try {
 		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
 		if (!includeMetadata) {
-			const { id, name, content, category, purpose, parameters } = displayPrompt;
-			return JSON.stringify({ id, name, content, category, purpose, parameters }, null, 2);
+			const { id, name, content, category, model, parameters } = displayPrompt;
+			return JSON.stringify({ id, name, content, category, model, parameters }, null, 2);
 		}
 		return JSON.stringify(displayPrompt, null, 2);
 	} catch (error) {
@@ -98,13 +98,13 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 		let md = `# ${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
 			md += `**Categoría:** ${displayPrompt.category}\n`;
-			md += `**Propósito:** ${displayPrompt.purpose}\n`;
+            md += `**Modelo:** ${displayPrompt.model}\n`;
 
-			// Añadir tags si existen
-			const tags: string[] = displayPrompt.parsedTags || [];
-			if (tags.length > 0) {
-				md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
-			}
+            // Añadir tags si existen
+            const tags: string[] = displayPrompt.tags || [];
+            if (tags.length > 0) {
+                md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
+            }
 
 			// Añadir información de fecha
 			const createdAt =
@@ -148,13 +148,16 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
 		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
 		let text = `${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
-			text += `Categoría: ${displayPrompt.category}\n`;
-			text += `Propósito: ${displayPrompt.purpose}\n`;
+			text += `Categoría: ${displayPrompt.category}
+`;
+			text += `Modelo: ${displayPrompt.model}
+`;
 
 			// Añadir tags si existen
-			const tags = displayPrompt.parsedTags || [];
+			const tags = displayPrompt.tags || [];
 			if (tags.length > 0) {
-				text += `Tags: ${tags.join(', ')}\n`;
+				text += `Tags: ${tags.join(', ')}
+`;
 			}
 
 			text += '\n-----------------\n\n';
@@ -206,10 +209,10 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 			html += `
   <div class="metadata">
     <p><strong>Categoría:</strong> ${escapeHtml(displayPrompt.category)}</p>
-    <p><strong>Propósito:</strong> ${escapeHtml(displayPrompt.purpose)}</p>`;
+    <p><strong>Modelo:</strong> ${escapeHtml(displayPrompt.model)}</p>`;
 
 			// Añadir tags si existen
-			const tags: string[] = displayPrompt.parsedTags || [];
+			const tags: string[] = displayPrompt.tags || [];
 			if (tags.length > 0) {
 				html += `
     <p><strong>Tags:</strong> ${tags.map((tag: string) => `<span class="tag">${escapeHtml(tag)}</span>`).join(' ')}</p>`;
@@ -365,10 +368,10 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 			color: parsed.color || '#3b82f6',
 			description: parsed.description || null,
 			content: parsed.content,
-			purpose: parsed.purpose || '',
+			model: parsed.model || '',
 			category: parsed.category || 'GENERAL',
-			parameters: parsed.parameters || '{}',
-			tags: parsed.tags || '[]',
+			parameters: parsed.parameters || {},
+			tags: parsed.tags || [],
 			featuredImage: parsed.featuredImage || null,
 			isFavorite: false,
 			createdAt: new Date(),

@@ -8,6 +8,22 @@
       "group": "build",
       "isBackground": true,
       "problemMatcher": []
+    },
+    {
+      "label": "dev-full",
+      "type": "shell",
+      "command": "bun run dev:full",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "backend-server",
+      "type": "shell",
+      "command": "bun run dev:server:hot",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
     }
   ]
 }

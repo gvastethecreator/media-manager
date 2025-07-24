@@ -1,56 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
-import { toastService } from '@/lib/ui/toast';
+import { TagComplete, TagCategory } from '@/types/entities/tag';
 import { generateTagColor } from '@/lib/utils/string.utils';
-import { TagCategory } from '@/store/entities/tag/types';
-import type { TagWithStats as TagComplete } from '@/types/entities/tag/base';
+import { toastService } from '@/services/toast/toast.service';
+import { createTagSchema, ValidatedCreateTagData } from '@/lib/utils/tag/validators';
 
-
-// Esquema de validación
-const createTagSchema = z.object({
-	name: z
-		.string()
-		.min(2, {
-			message: 'El nombre debe tener al menos 2 caracteres',
-		})
-		.max(50, {
-			message: 'El nombre no debe exceder los 50 caracteres',
-		}),
-	description: z
-		.string()
-		.max(200, {
-			message: 'La descripción no debe exceder los 200 caracteres',
-		})
-		.optional(),
-	color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
-		message: 'El color debe ser un código hexadecimal válido',
-	}).optional(),
-	emoji: z.string().min(1, {
-		message: 'Debes seleccionar un emoji',
-	}),
-	category: z.nativeEnum(TagCategory).optional(),
-	isFavorite: z.boolean().optional().default(false),
-});
-
-type FormValues = {
-	name: string;
-	emoji: string;
-	color?: string;
-	description?: string;
-	category?: TagCategory;
-	isFavorite: boolean;
-};
 
 interface CreateTagFormProps {
 	tag?: TagComplete | null;
@@ -74,7 +38,7 @@ export function CreateTagForm({
 	const updateTagMutation = useUpdateTag();
 
 	// Inicializar formulario con valores por defecto
-	const form = useForm<FormValues>({
+	const form = useForm<ValidatedCreateTagData>({
 		resolver: zodResolver(createTagSchema),
 		defaultValues: {
 			name: '',
@@ -101,7 +65,7 @@ export function CreateTagForm({
 	}, [form, isEditing, tag]);
 
 	// Manejar envío del formulario
-	const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
+	const onSubmit: SubmitHandler<ValidatedCreateTagData> = async (data: ValidatedCreateTagData) => {
 		try {
 			// Crear datos comunes
 			const tagData = {
@@ -168,7 +132,7 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Emoji</FormLabel>
 							<FormControl>
-								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+								<EmojiPicker value={field.value || undefined} onEmojiSelect={field.onChange} compact showLabel={false} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -182,7 +146,7 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker value={field.value || '#3b82f6'} onChange={field.onChange} compact showLabel={false} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

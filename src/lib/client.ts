@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * @file Cliente para operaciones del lado del cliente
  * @module lib/client
@@ -32,4 +34,5 @@ export function useIsClient(): boolean {
 	return mounted;
 }
 
-import React from 'react';
+
+

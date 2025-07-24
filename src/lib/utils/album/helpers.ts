@@ -4,8 +4,8 @@
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
-import { AlbumWithRelations as Album, AlbumMetadata } from '../../types/entities/album';
-import { AlbumType } from '../../types/entities/album/enums';
+import { AlbumType } from '@/types/entities/album/enums';
+import type { AlbumWithStats } from '@/types/entities/album/types';
 
 /**
  * Genera una URL para la miniatura de un álbum
@@ -32,9 +32,9 @@ export function generateAlbumThumbnailUrl(album: Album | string, width?: number,
  * @param metadata Metadatos del álbum
  * @returns Tamaño formateado
  */
-export function formatAlbumSize(metadata?: AlbumMetadata): string {
-	if (!metadata || metadata.totalSize === undefined) return 'Desconocido';
-	return formatBytes(metadata.totalSize);
+export function formatAlbumSize(album?: AlbumWithStats): string {
+	if (!album || album.stats?.totalSize === undefined) return 'Desconocido';
+	return formatBytes(album.stats.totalSize);
 }
 
 /**
@@ -66,8 +66,8 @@ export function getAlbumTypeDescription(type: AlbumType): string {
  * @param album Álbum a verificar
  * @returns true si el álbum está vacío
  */
-export function isAlbumEmpty(album: Album): boolean {
-	return !album.metadata || album.metadata.itemCount === 0;
+export function isAlbumEmpty(album: AlbumWithStats): boolean {
+	return !album.stats || album.stats.totalMedia === 0;
 }
 
 /**
@@ -119,7 +119,7 @@ export function getAllDescendants(_albumId: string, _allAlbums: Record<string, A
  * @param albums Álbumes disponibles
  * @returns Objeto con estadísticas
  */
-export function calculateAlbumStats(albums: Album[]): {
+export function calculateAlbumStats(albums: AlbumWithStats[]): {
 	totalAlbums: number;
 	totalItems: number;
 	totalSize: number;
@@ -140,9 +140,9 @@ export function calculateAlbumStats(albums: Album[]): {
 			emptyAlbums++;
 		}
 
-		if (album.metadata) {
-			totalItems += album.metadata.itemCount || 0;
-			totalSize += album.metadata.totalSize || 0;
+		if (album.stats) {
+			totalItems += album.stats.totalMedia || 0;
+			totalSize += album.stats.totalSize || 0;
 		}
 	}
 

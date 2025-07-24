@@ -69,7 +69,7 @@ export function ShortcutsSettings() {
 	const [editingShortcut, setEditingShortcut] = React.useState<string | null>(null);
 	const [listeningForKeys, setListeningForKeys] = React.useState(false);
 	const [customShortcuts, setCustomShortcuts] = React.useState<Record<string, string>>(
-		(settings as ExtendedSettings).shortcuts || {}
+		(settings as any)?.shortcuts || {}
 	);
 
 	const handleStartEditing = (action: string) => {

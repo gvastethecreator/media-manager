@@ -25,7 +25,7 @@ export function fromDrizzleAudio(drizzleAudio: AudioBase): AudioWithStats {
 		// TODO: Implementar la lógica real para calcular estas estadísticas
 		const stats = {
 			duration: drizzleAudio.duration ?? 0,
-			format: drizzleAudio.format,
+			format: drizzleAudio.format ?? 'unknown',
 			bitrate: 0,
 			volumePeaks: [],
 			sampleRate: 0,

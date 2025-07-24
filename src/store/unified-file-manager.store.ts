@@ -879,16 +879,16 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 
 	// 🔄 Nuevas utilidades para EntityWithStats
 	getEntityType: (entity: EntityWithStats): EntityStatsType => {
-		if (isImageWithStats(entity)) return 'image';
-		if (isVideoWithStats(entity)) return 'video';
-		if (isFolderWithStats(entity)) return 'folder';
+		if (isImageWithStats(entity)) return EntityStatsType.IMAGE;
+		if (isVideoWithStats(entity)) return EntityStatsType.VIDEO;
+		if (isFolderWithStats(entity)) return EntityStatsType.FOLDER;
 		// Detectar otros tipos basándose en propiedades
-		if ('color' in entity && !('emoji' in entity)) return 'tag';
-		if ('gender' in entity) return 'character';
-		if ('conceptType' in entity) return 'concept';
-		if ('isPublic' in entity && !('path' in entity)) return 'collection';
+		if ('color' in entity && !('emoji' in entity)) return EntityStatsType.TAG;
+		if ('gender' in entity) return EntityStatsType.CHARACTER;
+		if ('conceptType' in entity) return EntityStatsType.CONCEPT;
+		if ('isPublic' in entity && !('path' in entity)) return EntityStatsType.COLLECTION;
 		// Fallback genérico
-		return 'image'; // Por defecto asumimos imagen
+		return EntityStatsType.IMAGE; // Por defecto asumimos imagen
 	},
 
 	filterByType: (type: EntityStatsType) => {

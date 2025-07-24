@@ -2,7 +2,7 @@ import { Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { WildcardCard } from '@/components/cards/wildcard-card';
-import { EmptyState } from '@/components/core/data-display';
+import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,16 +78,17 @@ export function WildcardsView({ isVisible }: ViewProps) {
 
 	if (error) {
 		return (
-			<EmptyState
-				icon={Sparkles}
-				title="Error al cargar wildcards"
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-				action={{
-					label: 'Reintentar',
-					onClick: handleRetry,
-				}}
-			/>
-		);
+				<EmptyState
+					icon={Sparkles}
+					title="Error al cargar wildcards"
+					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+					actions={
+						<Button onClick={handleRetry} variant="outline">
+							Reintentar
+						</Button>
+					}
+				/>
+			);
 	}
 
 	return (
