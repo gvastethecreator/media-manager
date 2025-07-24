@@ -48,7 +48,7 @@ export function toCreateWildcardData(data: CreateWildcardData): Record<string, u
 }
 
 /**
- 
+
  * @param data Datos de actualización
  * @returns Datos formateados para Prisma
  */

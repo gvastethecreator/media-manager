@@ -99,7 +99,7 @@ const BasicInfoSection = memo<{ item: AnyEntityWithStats }>(function BasicInfoSe
 			id: 'name',
 			icon: <Info className="h-3 w-3" />,
 			label: 'Nombre',
-			value: ('name' in item ? item.name : 'Sin nombre') || 'Sin nombre',
+			value: ('name' in item ? item.name : undefined) || 'Sin nombre',
 		});
 
 		// Tipo

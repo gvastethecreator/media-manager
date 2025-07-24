@@ -5,7 +5,6 @@
  */
 
 import type { WorldItemComplete } from '@/types/entities/world-item';
-import { deserializeAttributes, deserializeEffects, deserializeFilters, deserializeRequirements } from './serializers';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleWorldItemFromDrizzle = {
@@ -28,19 +27,19 @@ type DrizzleWorldItemFromDrizzle = {
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	images?: Array<{id: string; name: string}>;
-	videos?: Array<{id: string; name: string}>;
-	albums?: Array<{id: string; name: string}>;
-	collections?: Array<{id: string; name: string}>;
-	tags?: Array<{id: string; name: string}>;
-	characters?: Array<{id: string; name: string}>;
-	places?: Array<{id: string; name: string}>;
-	concepts?: Array<{id: string; name: string}>;
-	prompts?: Array<{id: string; name: string}>;
-	notes?: Array<{id: string; content: string}>;
-	wildcards?: Array<{id: string; name: string}>;
-	properties?: Array<{key: string; value: unknown}>;
-	groups?: Array<{id: string; name: string}>;
+	images?: Array<{ id: string; name: string }>;
+	videos?: Array<{ id: string; name: string }>;
+	albums?: Array<{ id: string; name: string }>;
+	collections?: Array<{ id: string; name: string }>;
+	tags?: Array<{ id: string; name: string }>;
+	characters?: Array<{ id: string; name: string }>;
+	places?: Array<{ id: string; name: string }>;
+	concepts?: Array<{ id: string; name: string }>;
+	prompts?: Array<{ id: string; name: string }>;
+	notes?: Array<{ id: string; content: string }>;
+	wildcards?: Array<{ id: string; name: string }>;
+	properties?: Array<{ key: string; value: unknown }>;
+	groups?: Array<{ id: string; name: string }>;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -83,7 +82,7 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		history: null,
 		parentId: null,
 		shortcut: null,
-		
+
 		// Convertir value y weight de number a string
 		value: baseData.value?.toString() || null,
 		weight: baseData.weight?.toString() || null,

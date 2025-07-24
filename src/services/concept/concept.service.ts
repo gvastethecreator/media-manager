@@ -342,7 +342,7 @@ export const ConceptService = {
 		return [];
 	},
 
-	async getConceptCounts(conceptId: string): Promise<{images: number; videos: number; albums: number; tags: number}> {
+	async getConceptCounts(conceptId: string): Promise<{ images: number; videos: number; albums: number; tags: number }> {
 		console.warn(`[ConceptService] getConceptCounts no implementado. ID: ${conceptId}. Retornando ceros.`);
 		return {
 			images: 0,

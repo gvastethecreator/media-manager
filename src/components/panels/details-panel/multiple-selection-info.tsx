@@ -19,11 +19,11 @@ import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities/entity.types';
 import { BulkMetadataEditor } from './bulk-metadata-editor';
 
 export interface MultipleSelectionInfoProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 }
 
 /**
@@ -46,56 +46,57 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 		// Procesar cada elemento
 		for (const item of items) {
 			// Tamaño total
-			totalSize += item.size || 0;
+			totalSize += ('totalSize' in item ? item.totalSize : 'size' in item ? item.size : 0) || 0;
 
 			// Contar tipos de archivo
-			if (item.type?.startsWith('image/')) {
+			const itemType = 'mimeType' in item ? item.mimeType : 'type' in item ? item.type : undefined;
+			if (itemType?.startsWith('image/')) {
 				types.set('image', (types.get('image') || 0) + 1);
-			} else if (item.type?.startsWith('video/')) {
+			} else if (itemType?.startsWith('video/')) {
 				types.set('video', (types.get('video') || 0) + 1);
-			} else if (item.type?.startsWith('audio/')) {
+			} else if (itemType?.startsWith('audio/')) {
 				types.set('audio', (types.get('audio') || 0) + 1);
 			} else {
 				types.set('unknown', (types.get('unknown') || 0) + 1);
 			}
 
 			// Contar etiquetas
-			if (item.tags) {
+			if ('tags' in item && item.tags) {
 				for (const tag of item.tags) {
 					tags.set(tag.name, (tags.get(tag.name) || 0) + 1);
 				}
 			}
 
 			// Contar colecciones
-			if (item.collections) {
+			if ('collections' in item && item.collections) {
 				for (const collection of item.collections) {
 					collections.set(collection.name, (collections.get(collection.name) || 0) + 1);
 				}
 			}
 
 			// Contar álbumes
-			if (item.albums) {
+			if ('albums' in item && item.albums) {
 				for (const album of item.albums) {
 					albums.set(album.name, (albums.get(album.name) || 0) + 1);
 				}
 			}
 
 			// Contar personajes
-			if (item.characters) {
+			if ('characters' in item && item.characters) {
 				for (const character of item.characters) {
 					characters.set(character.name, (characters.get(character.name) || 0) + 1);
 				}
 			}
 
 			// Contar lugares
-			if (item.places) {
+			if ('places' in item && item.places) {
 				for (const place of item.places) {
 					places.set(place.name, (places.get(place.name) || 0) + 1);
 				}
 			}
 
 			// Contar objetos del mundo
-			if (item.worldItems) {
+			if ('worldItems' in item && item.worldItems) {
 				for (const worldItem of item.worldItems) {
 					worldItems.set(worldItem.name, (worldItems.get(worldItem.name) || 0) + 1);
 				}
@@ -205,15 +206,18 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 							<span>Vista previa</span>
 						</h4>
 						<div className="grid grid-cols-3 gap-1.5">
-							{items.slice(0, 9).map((item, index) => (
-								<div key={item.id} className="relative aspect-square bg-muted/30 rounded-md overflow-hidden">
-									<img
-										src={item.thumbnail || item.url || ''}
-										alt={item.name || `Item ${index + 1}`}
-										className="w-full h-full object-cover"
-									/>
-								</div>
-							))}
+							{items.slice(0, 9).map((item, index) => {
+								const thumbnail = 'thumbnail' in item ? item.thumbnail : 'url' in item ? item.url : '';
+								return (
+									<div key={item.id} className="relative aspect-square bg-muted/30 rounded-md overflow-hidden">
+										<img
+											src={thumbnail || ''}
+											alt={item.name || `Item ${index + 1}`}
+											className="w-full h-full object-cover"
+										/>
+									</div>
+								);
+							})}
 							{items.length > 9 && (
 								<div className="aspect-square bg-muted/30 rounded-md flex items-center justify-center">
 									<span className="text-xs text-muted-foreground">+{items.length - 9} más</span>

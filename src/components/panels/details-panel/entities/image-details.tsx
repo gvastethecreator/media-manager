@@ -51,7 +51,7 @@ export const ImageDetails = memo<EntityDetailsProps<ImageWithStats>>(function Im
 						</div>
 						<div>
 							<span className="text-muted-foreground">Tamaño:</span>
-							<p className="font-medium">{formatBytes(entity.size || 0)}</p>
+							<p className="font-medium">{formatBytes(entity.totalSize || 0)}</p>
 						</div>
 						<div>
 							<span className="text-muted-foreground">Dimensiones:</span>
@@ -290,7 +290,7 @@ export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function 
 	const metadata = [
 		{
 			label: 'Aspect Ratio',
-			value: entity.statistics?.aspectRatio?.toFixed(2) || 'N/A',
+			value: entity.stats?.aspectRatio?.toFixed(2) || 'N/A',
 			category: 'technical',
 		},
 		{
@@ -300,7 +300,7 @@ export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function 
 		},
 		{
 			label: 'Calidad',
-			value: entity.statistics?.quality || 'N/A',
+			value: entity.stats?.quality || 'N/A',
 			category: 'technical',
 		},
 		{
@@ -351,16 +351,16 @@ export const ImageMetadata = memo<EntityMetadataProps<ImageWithStats>>(function 
 			</Card>
 
 			{/* Tags y relaciones */}
-			{entity.statistics && (
+			{entity.stats && (
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm">Estadísticas</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-sm text-muted-foreground">
-							<p>Asociaciones: {entity.statistics.totalAssociations || 0}</p>
-							{entity.statistics.totalItems !== undefined && (
-								<p>Elementos relacionados: {entity.statistics.totalItems}</p>
+							<p>Asociaciones: {entity.stats.totalAssociations || 0}</p>
+							{entity.stats.totalItems !== undefined && (
+								<p>Elementos relacionados: {entity.stats.totalItems}</p>
 							)}
 						</div>
 					</CardContent>

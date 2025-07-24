@@ -60,7 +60,7 @@ export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase 
 }
 
 /**
- 
+
  * @param wildcard Wildcard con campos JSON deserializados
  * @param options Opciones de transformación
  * @returns Wildcard con campos serializados para Drizzle

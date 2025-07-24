@@ -143,16 +143,16 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 						>
 							{/* Thumbnail o icono */}
 							<div className="w-12 h-12 bg-muted rounded flex-shrink-0 flex items-center justify-center">
-								{'entityType' in item && item.entityType === 'image' && 'id' in item && item.id ? (
+								{('entityType' in item && item.entityType === 'image') && item.id ? (
 									<ImageThumbnail 
 										imageId={item.id} 
-										imageName={'name' in item ? item.name : ('id' in item ? item.id : 'unknown')} 
+										imageName={('name' in item ? item.name : undefined) || item.id || 'unknown'} 
 										className="w-12 h-12 object-cover rounded" 
 									/>
 								) : (
 									<div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center">
 										<span className="text-xs font-semibold text-primary">
-											{'name' in item ? item.name.charAt(0).toUpperCase() : 'U'}
+											{('name' in item && item.name) ? item.name.charAt(0).toUpperCase() : 'U'}
 										</span>
 									</div>
 								)}
@@ -161,11 +161,11 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 							{/* Información del item */}
 							<div className="flex-1 min-w-0">
 								<div className="font-medium text-sm truncate">
-									{'name' in item ? item.name : 'id' in item ? item.id : 'Unknown'}
+									{('name' in item ? item.name : undefined) || item.id || 'Unknown'}
 								</div>
 								<div className="text-xs text-muted-foreground">
-									{'entityType' in item ? item.entityType : 'unknown'} • 
-									{'stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats ? item.stats.imageCount : 0} imágenes
+									{('entityType' in item ? item.entityType : 'unknown')} • 
+									{('stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats) ? item.stats.imageCount : 0} imágenes
 								</div>
 							</div>
 						</motion.div>

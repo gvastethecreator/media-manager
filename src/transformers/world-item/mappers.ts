@@ -284,6 +284,6 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	return {
 		...rest,
 		entityType: 'world-item' as const,
-		_stats: stats as unknown as WorldItemStatistics,
+		_stats: stats,
 	};
 }

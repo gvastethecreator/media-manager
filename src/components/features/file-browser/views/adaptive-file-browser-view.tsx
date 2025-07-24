@@ -272,7 +272,7 @@ const GridVirtualizedView = memo<GridVirtualizedViewProps>(function GridVirtuali
 	});
 
 	// Función para obtener items de una fila específica
-	const getRowItems = (rowIndex: number): EntityWithStats[] => {
+	const getRowItems = (rowIndex: number): AnyEntityWithStats[] => {
 		const startIndex = rowIndex * columns;
 		const endIndex = Math.min(startIndex + columns, items.length);
 		return items.slice(startIndex, endIndex);
