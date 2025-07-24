@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
@@ -102,30 +102,60 @@ export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function Vir
 }) {
 	const parentRef = useRef<any>(null);
 
-	// Calcular configuración de la grid
-	const { columns, cardWidth, rowHeight } = useMemo(() => {
-		const minCardWidth = itemSize || 200;
-		const gap = 16;
-		const padding = 24;
-		const availableWidth = containerWidth - padding * 2;
-		const cols = Math.max(1, Math.floor((availableWidth + gap) / (minCardWidth + gap)));
-		const width = (availableWidth - gap * (cols - 1)) / cols;
-		const height = width * 1.2; // Ratio de aspecto para las tarjetas
+	// Calcular configuración de la grid con mejor espaciado
+	const { columns, cardWidth, rowHeight, gap, padding } = useMemo(() => {
+		const minCardWidth = Math.max(itemSize || 200, 150); // Mínimo absoluto de 150px
+		const gapSize = 16;
+		const paddingSize = 24;
+		const availableWidth = Math.max(containerWidth - paddingSize * 2, minCardWidth);
+
+		// Calcular columnas de forma más precisa
+		const cols = Math.max(1, Math.floor((availableWidth + gapSize) / (minCardWidth + gapSize)));
+		const actualCardWidth = Math.floor((availableWidth - gapSize * (cols - 1)) / cols);
+
+		// Altura basada en ratio de aspecto más apropiado
+		const cardHeight = Math.floor(actualCardWidth * 1.25); // Ratio 4:5 para mejor proporción
+		const totalRowHeight = cardHeight + gapSize;
 
 		return {
 			columns: cols,
-			cardWidth: width,
-			rowHeight: height + gap, // Altura + gap
+			cardWidth: actualCardWidth,
+			rowHeight: totalRowHeight,
+			gap: gapSize,
+			padding: paddingSize,
 		};
 	}, [containerWidth, itemSize]);
 
 	// Calcular filas necesarias
 	const rowCount = Math.ceil(items.length / columns);
 
+	// Estado para altura del contenedor
+	const [containerHeight, setContainerHeight] = useState<number>(0);
+
+	// Efecto para medir y establecer altura del contenedor basada en ScrollArea viewport
+	useEffect(() => {
+		if (parentRef.current) {
+			const scrollAreaViewport = parentRef.current.closest('[data-radix-scroll-area-viewport]');
+			if (scrollAreaViewport) {
+				const height = scrollAreaViewport.clientHeight - (padding * 2); // Restar padding
+				setContainerHeight(height);
+			}
+		}
+	}, [padding]);
+
 	// Configurar virtualizador para filas
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
-		getScrollElement: () => parentRef.current,
+		getScrollElement: () => {
+			// Buscar el elemento de scroll más apropiado (ScrollArea viewport)
+			const scrollAreaViewport = parentRef.current?.closest('[data-radix-scroll-area-viewport]');
+			if (scrollAreaViewport) {
+				console.log('🔧 VirtualizedCardsView - Using ScrollArea viewport as scroll element');
+				return scrollAreaViewport as HTMLElement;
+			}
+			// Fallback al elemento padre o actual
+			return parentRef.current?.parentElement || parentRef.current;
+		},
 		estimateSize: () => rowHeight,
 		overscan: 5,
 	});
@@ -173,9 +203,13 @@ export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function Vir
 	return (
 		<div
 			ref={parentRef}
-			className="h-full w-full overflow-auto"
+			data-testid="virtualized-cards-view"
+			className="w-full"
 			style={{
-				contain: 'strict',
+				contain: 'layout style',
+				padding: `${padding}px`,
+				height: containerHeight > 0 ? `${containerHeight}px` : '100%',
+				overflow: 'auto',
 			}}
 		>
 			<div
@@ -198,14 +232,14 @@ export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function Vir
 								width: '100%',
 								height: `${rowHeight}px`,
 								transform: `translateY(${virtualRow.start}px)`,
-								padding: '12px 24px',
 							}}
 						>
 							<div
-								className="grid gap-4"
+								className="grid"
 								style={{
 									gridTemplateColumns: `repeat(${columns}, 1fr)`,
-									height: '100%',
+									gap: `${gap}px`,
+									height: `${rowHeight - gap}px`,
 								}}
 							>
 								{rowItems.map((item, columnIndex) => {

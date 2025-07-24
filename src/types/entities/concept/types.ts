@@ -11,6 +11,16 @@ import type { ConceptBase } from './base';
 export type { ConceptBase, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
 
 /**
+ * Tipo extendido de Concept con campos adicionales
+ */
+export interface ConceptExtended extends ConceptBase {
+	// Campos adicionales para compatibilidad
+	totalAssociations?: number;
+	lastUsed?: Date;
+	usageCount?: number;
+}
+
+/**
  * Input para creación
  */
 export interface ConceptCreateInput {

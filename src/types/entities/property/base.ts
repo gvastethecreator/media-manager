@@ -71,6 +71,7 @@ export interface PropertyWithCounts extends PropertyBase {
  */
 export interface PropertyStatistics {
 	totalRelations: number; // Suma de todas las relaciones (también conocido como totalAssociations)
+	totalAssociations: number; // Alias para totalRelations para compatibilidad
 	usageDiversity: number; // Cuán distribuido está el uso de la propiedad entre diferentes tipos de entidades
 	popularity: number; // Un score de popularidad general
 	completenessScore: number; // Qué tan completo está el perfil de la propiedad (descripción, etc.)
@@ -82,6 +83,7 @@ export interface PropertyStatistics {
  */
 export interface PropertyWithStats extends PropertyBase {
 	entityType: 'property';
+	type?: string; // Alias para category para compatibilidad
 	stats: PropertyStatistics;
 	_count: {
 		images: number;

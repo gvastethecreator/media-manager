@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { WildcardCreateInput as BaseWildcardCreateInput, WildcardWithStats } from '@/types/entities/wildcard';
+import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 import { apiClient } from './client';
 
 export interface WildcardFilters {
@@ -10,21 +10,7 @@ export interface WildcardFilters {
 	sortOrder?: 'asc' | 'desc';
 }
 
-// Extender los tipos base para incluir campos adicionales que usa el componente
-export interface WildcardCreateInput extends Omit<BaseWildcardCreateInput, 'id' | 'createdAt' | 'updatedAt'> {
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string;
-	shortcut?: string;
-	category?: string;
-	children?: string;
-	parentId?: string | null;
-	featuredImage?: string;
-	isFavorite?: boolean;
-}
 
-export interface WildcardUpdateInput extends Partial<WildcardCreateInput> {}
 
 export interface WildcardsResponse {
 	data: WildcardWithStats[];

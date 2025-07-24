@@ -267,6 +267,7 @@ export interface NoteStatistics {
 	readingTime: number;
 	completionScore: number;
 	totalItems: number;
+	totalAssociations: number; // Suma de todas las asociaciones
 }
 
 /**
@@ -312,6 +313,9 @@ export interface NoteComplete extends NoteBase {
  */
 export interface NoteWithStats extends NoteBase {
 	entityType: 'note';
+	// Propiedades requeridas para compatibilidad con AnyEntityWithStats
+	name: string; // Alias para title
+	description: string | null; // Alias para summary o content
 	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
 	_count?: {
 		images: number;

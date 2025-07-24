@@ -111,7 +111,7 @@ export function CreateGroupForm({
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker value={field.value || '#3b82f6'} onChange={field.onChange} compact showLabel={false} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

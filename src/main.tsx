@@ -5,6 +5,7 @@ import { AppProvider } from './providers/app-provider';
 
 import './app/globals.css';
 import './styles/globals.css';
+import './styles/scrollbar.css';
 
 const container = document.getElementById('root');
 if (!container) {

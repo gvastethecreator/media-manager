@@ -55,20 +55,20 @@ export enum FileProcessingStatus {
  * Es una unión de todos los tipos `...Complete` de las entidades principales.
  */
 export type FileItem =
-	| ImageComplete
-	| VideoWithStats
-	| AlbumComplete
-	| CollectionWithStats
-	| TagWithStats
-	| CharacterWithStats
-	| PlaceComplete
-	| WorldItemWithStats
-	| ConceptWithStats
-	| PromptComplete
-	| NoteComplete
-	| WildcardWithStats
-	| PropertyComplete
-	| GroupWithStats;
+	| (ImageComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (VideoWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (AlbumComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (CollectionWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (TagWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (CharacterWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (PlaceComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (WorldItemWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (ConceptWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (PromptComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (NoteComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (WildcardWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (PropertyComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date; })
+	| (GroupWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date; });
 
 /**
  * Etiqueta relacionada para archivos

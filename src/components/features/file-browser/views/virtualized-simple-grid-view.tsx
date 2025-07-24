@@ -28,24 +28,28 @@ export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(fu
 }) {
 	const parentRef = useRef<any>(null);
 
-	// Calcular configuración de la grid
-	const { columns, cellSize } = useMemo(() => {
-		const minCellSize = itemSize || 120;
-		const gap = 8;
-		const padding = 16;
-		const availableWidth = containerWidth - padding * 2;
-		const cols = Math.max(1, Math.floor((availableWidth + gap) / (minCellSize + gap)));
-		const size = Math.floor((availableWidth - gap * (cols - 1)) / cols);
+	// Calcular configuración de la grid con mejor espaciado
+	const { columns, cellSize, gap, padding } = useMemo(() => {
+		const minCellSize = Math.max(itemSize || 120, 100); // Mínimo absoluto de 100px
+		const gapSize = 12;
+		const paddingSize = 20;
+		const availableWidth = Math.max(containerWidth - paddingSize * 2, minCellSize);
+		
+		// Calcular columnas de forma más precisa
+		const cols = Math.max(1, Math.floor((availableWidth + gapSize) / (minCellSize + gapSize)));
+		const actualCellSize = Math.floor((availableWidth - gapSize * (cols - 1)) / cols);
 
 		return {
 			columns: cols,
-			cellSize: size,
+			cellSize: actualCellSize,
+			gap: gapSize,
+			padding: paddingSize,
 		};
 	}, [containerWidth, itemSize]);
 
 	// Calcular filas necesarias
 	const rowCount = Math.ceil(items.length / columns);
-	const rowHeight = cellSize + 8; // Tamaño de celda + gap
+	const rowHeight = cellSize + gap; // Tamaño de celda + gap
 
 	// Configurar virtualizador para filas
 	const rowVirtualizer = useVirtualizer({
@@ -65,9 +69,10 @@ export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(fu
 	return (
 		<div
 			ref={parentRef}
-			className="h-full w-full overflow-auto"
+			className="h-full w-full"
 			style={{
 				contain: 'strict',
+				padding: `${padding}px`,
 			}}
 		>
 			<div
@@ -90,14 +95,14 @@ export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(fu
 								width: '100%',
 								height: `${rowHeight}px`,
 								transform: `translateY(${virtualRow.start}px)`,
-								padding: '4px 16px',
 							}}
 						>
 							<div
-								className="grid gap-2"
+								className="grid"
 								style={{
 									gridTemplateColumns: `repeat(${columns}, 1fr)`,
-									height: '100%',
+									gap: `${gap}px`,
+									height: `${cellSize}px`,
 								}}
 							>
 								{rowItems.map((item, columnIndex) => {
@@ -134,11 +139,11 @@ export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(fu
 											<div className="h-full flex flex-col items-center justify-center text-center">
 												<div className="w-8 h-8 bg-primary/10 rounded mb-1 flex items-center justify-center">
 													<span className="text-xs font-semibold text-primary">
-														{'name' in item ? item.name.charAt(0).toUpperCase() : 'U'}
+														{(item.name || item.id || 'U').charAt(0).toUpperCase()}
 													</span>
 												</div>
 												<div className="text-xs font-medium truncate w-full px-1">
-													{'name' in item ? item.name : 'id' in item ? item.id : 'Unknown'}
+													{item.name || item.id || 'Unknown'}
 												</div>
 												<div className="text-xs text-muted-foreground">
 													{'stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats ? item.stats.imageCount : 0}

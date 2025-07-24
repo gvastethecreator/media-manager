@@ -74,7 +74,7 @@ export async function updateFolderStats(
 
 	// Emitir progreso inicial
 	if (emitProgressEvents && currentDepth === 0) {
-		await emitProgress({
+		await emitProgress('folder:progress', {
 			type: 'folder:progress',
 			data: {
 				folderId,
@@ -185,18 +185,16 @@ async function processFilesWithProgress(
 			// Emitir progreso cada cierto intervalo
 			if (emitEvents && (processedFiles % progressUpdateInterval === 0 || processedFiles === totalFiles)) {
 				const progress = Math.round((processedFiles / totalFiles) * 100);
-				await emitProgress({
+				await emitProgress('folder:progress', {
 					folderId,
-					isProcessing: processedFiles < totalFiles,
+					status: processedFiles < totalFiles ? 'processing' : 'complete',
 					progress,
 					totalFiles,
-					filesProcessed: processedFiles,
-					phase: processedFiles === totalFiles ? 'complete' : 'processing',
+					processedFiles,
 					message:
 						processedFiles === totalFiles
 							? 'Indexación completada'
 							: `Procesando archivos... ${processedFiles}/${totalFiles}`,
-					timestamp: Date.now(),
 				});
 			}
 		}

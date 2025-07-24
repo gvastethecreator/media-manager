@@ -12,29 +12,28 @@ import type { CharacterWithStats } from '@/types/entities/character';
 type DrizzleCharacterWithCounts = {
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
-	level: number;
-	class: string;
-	race: string;
-	alignment: string;
-	backstory: string;
-	stats: string;
-	psychologicalProfile: string;
-	socialProfile: string;
-	relationships: string;
-	goals: string;
-	fears: string;
-	beliefs: string;
-	personality: string;
-	skills: string;
-	abilities: string;
-	sortBy: string;
-	filters: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
 	isFavorite: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	age?: string | null;
+	gender?: string | null;
+	species?: string | null;
+	occupation?: string | null;
+	personality?: string | null;
+	background?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	equipment?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-	notes?: any[];
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -56,29 +55,27 @@ type DrizzleCharacterWithCounts = {
 
 type DrizzleCharacterCreateInput = {
 	name: string;
-	emoji: string;
-	color: string;
-	level: number;
-	class: string;
-	race: string;
-	alignment: string;
-	backstory: string;
-	stats: string;
-	psychologicalProfile: string;
-	socialProfile: string;
-	relationships: string;
-	goals: string;
-	fears: string;
-	beliefs: string;
-	personality: string;
-	skills: string;
-	abilities: string;
-	sortBy: string;
-	filters: string;
-	isFavorite: boolean;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	age?: string | null;
+	gender?: string | null;
+	species?: string | null;
+	occupation?: string | null;
+	personality?: string | null;
+	background?: string | null;
+	relationships?: string | null;
+	skills?: string | null;
+	equipment?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
 };
 
-type DrizzleCharacterUpdateInput = Partial<Omit<DrizzleCharacterCreateInput, 'id'>>;
+type DrizzleCharacterUpdateInput = Partial<DrizzleCharacterCreateInput>;
 
 const logger = serverLogger.withContext('CharacterTransformer');
 
@@ -136,26 +133,19 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			totalRelatedCharacters +
 			totalRelatedTo;
 
-		// Calcular power level basado en nivel y asociaciones
-		const powerLevel = calculatePowerLevel(baseData.level || 1, totalAssociations);
+		// Calcular power level basado en asociaciones (sin nivel)
+		const powerLevel = calculatePowerLevel(1, totalAssociations);
 
-		// Determinar rareza basada en power level y nivel
-		const rarityLevel = determineRarityLevel(baseData.level || 1, powerLevel, totalAssociations);
+		// Determinar rareza basada en power level
+		const rarityLevel = determineRarityLevel(1, powerLevel, totalAssociations);
 		const result = {
 			...baseData,
-			// Validación null-safe para evitar errores de Object.entries
-			stats: baseData.stats != null ? baseData.stats : '{}',
-			skills: baseData.skills != null ? baseData.skills : '[]',
-			relationships: baseData.relationships != null ? baseData.relationships : '[]',
-			goals: baseData.goals != null ? baseData.goals : '[]',
-			fears: baseData.fears != null ? baseData.fears : '[]',
-			beliefs: baseData.beliefs != null ? baseData.beliefs : '[]',
-			personality: baseData.personality != null ? baseData.personality : '[]',
-			abilities: baseData.abilities != null ? baseData.abilities : '[]',
-			filters: baseData.filters != null ? baseData.filters : '[]',
-			psychologicalProfile: baseData.psychologicalProfile != null ? baseData.psychologicalProfile : '',
-			socialProfile: baseData.socialProfile != null ? baseData.socialProfile : '',
-			notes: baseData.notes != null ? baseData.notes : [], // Simplificado para evitar dependencias
+			// Validación null-safe para evitar errores
+			skills: baseData.skills != null ? baseData.skills : null,
+			relationships: baseData.relationships != null ? baseData.relationships : null,
+			personality: baseData.personality != null ? baseData.personality : null,
+			equipment: baseData.equipment != null ? baseData.equipment : null,
+			notes: baseData.notes != null ? baseData.notes : null,
 
 			// Conteos originales para compatibilidad
 			_count,
@@ -224,29 +214,26 @@ export function toDrizzleCharacterCreate(character: Partial<CharacterWithStats>)
 	} = character;
 
 	return {
-		...baseData,
 		// Asegurar campos requeridos con defaults
 		name: baseData.name || 'Nuevo Personaje',
+		description: baseData.description || null,
 		emoji: baseData.emoji || '👤',
 		color: baseData.color || '#CCCCCC',
-		level: baseData.level || 1,
-		class: baseData.class || 'warrior',
-		race: baseData.race || 'human',
-		alignment: baseData.alignment || 'true neutral',
-		backstory: baseData.backstory || '',
-		stats: baseData.stats || '{}',
-		psychologicalProfile: baseData.psychologicalProfile || '',
-		socialProfile: baseData.socialProfile || '',
-		relationships: baseData.relationships || '[]',
-		goals: baseData.goals || '[]',
-		fears: baseData.fears || '[]',
-		beliefs: baseData.beliefs || '[]',
-		personality: baseData.personality || '[]',
-		skills: baseData.skills || '[]',
-		abilities: baseData.abilities || '[]',
-		sortBy: baseData.sortBy || '',
-		filters: baseData.filters || '[]',
+		category: baseData.category || null,
+		isPublic: baseData.isPublic || false,
 		isFavorite: baseData.isFavorite || false,
+		age: baseData.age || null,
+		gender: baseData.gender || null,
+		species: baseData.species || null,
+		occupation: baseData.occupation || null,
+		personality: baseData.personality || null,
+		background: baseData.background || null,
+		relationships: baseData.relationships || null,
+		skills: baseData.skills || null,
+		equipment: baseData.equipment || null,
+		notes: baseData.notes || null,
+		featuredImage: baseData.featuredImage || null,
+		parentId: baseData.parentId || null,
 	};
 }
 

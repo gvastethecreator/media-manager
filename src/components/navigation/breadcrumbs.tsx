@@ -141,7 +141,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 			className="flex items-center"
 		>
 			<Breadcrumb>
-				<BreadcrumbList className="flex items-center gap-0.5">
+				<BreadcrumbList className="flex items-center gap-0">
 					<BreadcrumbItem>
 						<Button
 							variant="ghost"
@@ -157,7 +157,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{isContentView && (
 						<>
 							<BreadcrumbSeparator>
-								<ChevronRight className="h-3 w-3 text-muted-foreground" />
+								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
 							<BreadcrumbItem>
 								<Button
@@ -175,7 +175,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{isContentView && currentItem?.name && (
 						<>
 							<BreadcrumbSeparator>
-								<ChevronRight className="h-3 w-3 text-muted-foreground" />
+								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
 							<BreadcrumbItem>
 								<div className="flex flex-col gap-0.5">
@@ -187,7 +187,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 									{currentItem.description && (
 										<p className="text-[10px] text-muted-foreground line-clamp-1 pl-2.5">{currentItem.description}</p>
 									)}
-									<div className="flex items-center gap-1.5 text-[10px] text-muted-foreground pl-2.5">
+									<div className="flex items-center gap-1 text-[10px] text-muted-foreground pl-2.5">
 										{currentItem._count?.images !== undefined && (
 											<span className="inline-flex items-center space-x-0.5 px-1 rounded-sm bg-secondary/30">
 												{currentItem._count.images} imágenes
@@ -207,7 +207,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{!isContentView && (
 						<>
 							<BreadcrumbSeparator>
-								<ChevronRight className="h-3 w-3 text-muted-foreground" />
+								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
 							<BreadcrumbItem>
 								<BreadcrumbPage className="text-xs font-medium text-muted-foreground">{config.label}</BreadcrumbPage>

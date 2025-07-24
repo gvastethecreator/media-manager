@@ -8,7 +8,7 @@ import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats, isAlbumWithStats, isAudioWithStats, isCharacterWithStats, isCollectionWithStats, isConceptWithStats, isDocumentWithStats, isFolderWithStats, isGroupWithStats, isImageWithStats, isNoteWithStats, isPlaceWithStats, isPromptWithStats, isPropertyWithStats, isTagWithStats, isVideoWithStats, isWildcardWithStats, isWorldItemWithStats } from '@/types/migration';
 
 const logger = clientLogger.withContext('useEntityConversion');
 
@@ -26,56 +26,81 @@ export function useEntityConversion() {
 	 * Convierte un FileItem a EntityWithStats
 	 * NOTA: Esta es una conversión temporal hasta que se actualicen los server actions
 	 */
-	const convertSingleItem = useCallback((fileItem: EntityWithStats): EntityWithStats | null => {
+	const convertSingleItem = useCallback((fileItem: any): AnyEntityWithStats | null => {
 		try {
-			// Detectar tipo basándose en propiedades específicas
-			if ('width' in fileItem && 'height' in fileItem && 'hash' in fileItem) {
-				// Es una imagen
+			// Usar type guards para determinar el tipo específico y acceder a sus propiedades
+			if (isImageWithStats(fileItem)) {
 				return {
 					...fileItem,
-					entityType: 'image' as const,
-					stats: {
+					entityType: 'image',
+					stats: fileItem.stats || {
 						viewCount: 0,
 						downloadCount: 0,
 						likeCount: 0,
 						commentCount: 0,
-						tagCount: fileItem.tags?.length || 0,
-						albumCount: fileItem.albums?.length || 0,
-						collectionCount: fileItem.collections?.length || 0,
-						characterCount: fileItem.characters?.length || 0,
-						placeCount: fileItem.places?.length || 0,
-						worldItemCount: fileItem.worldItems?.length || 0,
-						conceptCount: fileItem.concepts?.length || 0,
-						promptCount: fileItem.prompts?.length || 0,
-						noteCount: fileItem.notes?.length || 0,
-						wildcardCount: fileItem.wildcards?.length || 0,
-						propertyCount: fileItem.properties?.length || 0,
-						groupCount: fileItem.groups?.length || 0,
+						tagCount: fileItem._count?.tags || 0,
+						albumCount: fileItem._count?.albums || 0,
+						collectionCount: fileItem._count?.collections || 0,
+						characterCount: fileItem._count?.characters || 0,
+						placeCount: fileItem._count?.places || 0,
+						worldItemCount: fileItem._count?.worldItems || 0,
+						conceptCount: fileItem._count?.concepts || 0,
+						promptCount: fileItem._count?.prompts || 0,
+						noteCount: fileItem._count?.notes || 0,
+						wildcardCount: fileItem._count?.wildcards || 0,
+						propertyCount: fileItem._count?.properties || 0,
+						groupCount: fileItem._count?.groups || 0,
+						totalAssociations: fileItem._count ? Object.values(fileItem._count).reduce((sum, count) => sum + count, 0) : 0,
 					},
-					thumbnailUrl: fileItem.thumbnail || `/api/images/${fileItem.id}/thumbnail`,
+					thumbnailUrl: fileItem.thumbnailUrl || `/api/images/${fileItem.id}/thumbnail`,
 					fullUrl: `/api/images/${fileItem.id}/full`,
-				} as any; // Temporal hasta completar migración
-			}
-
-			if ('duration' in fileItem && 'fps' in fileItem) {
-				// Es un video
+				} as ImageWithStats;
+			} else if (isVideoWithStats(fileItem)) {
 				return {
 					...fileItem,
-					entityType: 'video' as const,
-					stats: {
-						// Similar a imagen pero con campos específicos de video
+					entityType: 'video',
+					stats: fileItem.stats || {
 						duration: fileItem.duration,
 						fps: fileItem.fps,
 						codec: fileItem.codec || 'unknown',
 						resolution: `${fileItem.width}x${fileItem.height}`,
-						// ... otros campos
+						// ... otros campos de video
 					},
-				} as any;
+				} as VideoWithStats;
+			} else if (isFolderWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'folder' } as FolderWithStats;
+			} else if (isTagWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'tag' } as TagWithStats;
+			} else if (isPlaceWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'place' } as PlaceWithStats;
+			} else if (isWorldItemWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'world-item' } as WorldItemWithStats;
+			} else if (isNoteWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'note' } as NoteWithStats;
+			} else if (isPropertyWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'property' } as PropertyWithStats;
+			} else if (isWildcardWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'wildcard' } as WildcardWithStats;
+			} else if (isAudioWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'audio' } as AudioWithStats;
+			} else if (isDocumentWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'document' } as DocumentWithStats;
+			} else if (isCollectionWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'collection' } as CollectionWithStats;
+			} else if (isAlbumWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'album' } as AlbumWithStats;
+			} else if (isCharacterWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'character' } as CharacterWithStats;
+			} else if (isConceptWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'concept' } as ConceptWithStats;
+			} else if (isPromptWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'prompt' } as PromptWithStats;
+			} else if (isGroupWithStats(fileItem)) {
+				return { ...fileItem, entityType: 'group' } as GroupWithStats;
 			}
 
-			// Para otros tipos, intentar mapear lo mejor posible
 			logger.warn('Tipo de FileItem no reconocido, usando conversión genérica', fileItem);
-			return fileItem as any;
+			return fileItem as AnyEntityWithStats;
 		} catch (error) {
 			logger.error('Error convirtiendo FileItem:', error);
 			return null;
@@ -96,17 +121,13 @@ export function useEntityConversion() {
 	 * Convierte y agrupa por tipo
 	 */
 	const convertAndGroupByType = useCallback(
-		(fileItems: EntityWithStats[]) => {
+		(fileItems: AnyEntityWithStats[]) => {
 			const entities = convertFileItems(fileItems);
-			const grouped: Record<string, EntityWithStats[]> = {};
+			const grouped: Record<string, AnyEntityWithStats[]> = {};
 
 			for (const entity of entities) {
 				// Detectar tipo usando type guards (temporalmente usando propiedades)
-				let type = 'unknown';
-				if ('width' in entity && 'height' in entity) type = 'image';
-				else if ('duration' in entity && 'fps' in entity) type = 'video';
-				else if ('autoReindex' in entity) type = 'folder';
-				// ... más detecciones
+				let type = entity.entityType || 'unknown';
 
 				if (!grouped[type]) grouped[type] = [];
 				grouped[type].push(entity);

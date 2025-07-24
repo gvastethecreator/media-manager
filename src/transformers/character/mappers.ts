@@ -103,16 +103,14 @@ type DrizzleCharacterFindManyArgs = {
  */
 export function mapCreateCharacterDataToDrizzle(data: CharacterCreateInput): DrizzleCharacterCreateInput {
 	try {
-		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
 		const drizzleData: DrizzleCharacterCreateInput = {
-			...rest,
+			...data,
 			id: crypto.randomUUID(),
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
 
 		// Nota: Las relaciones se manejan por separado en Drizzle
-		// imageIds, tagIds, groupIds, propertyIds se procesarán en tablas de unión después de la inserción
 
 		return drizzleData;
 	} catch (error) {
@@ -129,14 +127,12 @@ export function mapCreateCharacterDataToDrizzle(data: CharacterCreateInput): Dri
  */
 export function mapUpdateCharacterDataToDrizzle(data: CharacterUpdateInput): DrizzleCharacterUpdateInput {
 	try {
-		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
 		const drizzleData: DrizzleCharacterUpdateInput = {
-			...rest,
+			...data,
 			updatedAt: new Date(),
 		};
 
 		// Nota: Las relaciones se manejan por separado en Drizzle
-		// imageIds, tagIds, groupIds, propertyIds se procesarán en tablas de unión en operaciones separadas
 
 		return drizzleData;
 	} catch (error) {

@@ -3,7 +3,7 @@
 import express from 'express';
 import path from 'path';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
-import activityRouter from './routes/activity-new';
+import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
 import charactersRouter from './routes/characters';

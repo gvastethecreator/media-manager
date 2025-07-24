@@ -165,6 +165,11 @@ const mockEntities: AnyEntityWithStats[] = [
 			organizationScore: 0.8,
 			totalItems: 20,
 			folderCount: 2,
+			totalFolders: 2,
+			totalImages: 15,
+			totalVideos: 3,
+			totalDocuments: 2,
+			totalFiles: 20,
 			accessFrequency: 10,
 			lastActivity: new Date(),
 			imageCount: 15,
@@ -273,7 +278,7 @@ const EntityCard = memo<{
 		>
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-sm truncate">{'name' in entity ? entity.name : entity.id}</CardTitle>
+					<CardTitle className="text-sm truncate">{entity.name || entity.id}</CardTitle>
 					<Badge className={cn('text-xs', getTypeColor('entityType' in entity ? entity.entityType : 'unknown'))}>{'entityType' in entity ? entity.entityType : 'unknown'}</Badge>
 				</div>
 			</CardHeader>

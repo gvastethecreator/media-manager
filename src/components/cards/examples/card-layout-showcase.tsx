@@ -144,6 +144,11 @@ const mockEntities: AnyEntityWithStats[] = [
 			organizationScore: 0.9,
 			totalItems: 78,
 			folderCount: 2,
+			totalFolders: 2,
+			totalImages: 75,
+			totalVideos: 3,
+			totalDocuments: 0,
+			totalFiles: 78,
 			accessFrequency: 15,
 			lastActivity: new Date(),
 			imageCount: 75,
@@ -286,8 +291,8 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 							variant={selectedVariant}
 							size={selectedSize}
 							preset={selectedPreset || undefined}
-							onClick={() => console.log('Clicked:', 'name' in entity ? entity.name : entity.id)}
-							onDoubleClick={() => console.log('Double clicked:', 'name' in entity ? entity.name : entity.id)}
+							onClick={() => console.log('Clicked:', entity.name || entity.id)}
+						onDoubleClick={() => console.log('Double clicked:', entity.name || entity.id)}
 						/>
 					))}
 				</div>

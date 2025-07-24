@@ -176,7 +176,7 @@ export function getImageStats(images: ImageExtended[]) {
 		}
 
 		// Por carpeta
-		const folder = image.folderId || 'Sin carpeta';
+		const folder = image.folder?.name || 'Sin carpeta';
 		stats.byFolder[folder] = (stats.byFolder[folder] || 0) + 1;
 
 		// Resoluciones

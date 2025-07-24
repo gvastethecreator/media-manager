@@ -23,7 +23,7 @@ export function useFolderStats() {
 					totalOthers: 0,
 					totalSize: 0,
 					formattedSize: '0 B',
-					directoryCount: 0,
+					// directoryCount se mapea a directChildren en FolderStatistics
 					lastScanned: new Date().toISOString(),
 					// Propiedades adicionales requeridas por FolderStatistics
 					hierarchyDepth: 0,

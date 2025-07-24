@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ImageWithStats } from '@/types/entities/image';
+import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import { apiClient } from './client';
 
 // Tipos para filtros de imágenes
@@ -22,43 +22,7 @@ export interface ImageFilters {
 	sortOrder?: 'asc' | 'desc';
 }
 
-export interface ImageCreateInput {
-	name: string;
-	path: string;
-	hash: string;
-	size: number;
-	width: number;
-	height: number;
-	metadata?: string | null;
-	thumbnail?: string | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
-	thumbnailMimeType?: string | null;
-	thumbnailError?: string | null;
-	thumbnailErrorAt?: Date | null;
-	thumbnailOptimizedAt?: Date | null;
-	isFavorite?: boolean;
-	folderId: string;
-	noteId?: string | null;
-}
 
-export interface ImageUpdateInput {
-	name?: string;
-	description?: string | null;
-	metadata?: string | null;
-	thumbnail?: string | null;
-	thumbnailSize?: number | null;
-	thumbnailWidth?: number | null;
-	thumbnailHeight?: number | null;
-	thumbnailMimeType?: string | null;
-	thumbnailError?: string | null;
-	thumbnailErrorAt?: Date | null;
-	thumbnailOptimizedAt?: Date | null;
-	isFavorite?: boolean;
-	folderId?: string;
-	noteId?: string | null;
-}
 
 export interface ImagesResponse {
 	data: ImageWithStats[];

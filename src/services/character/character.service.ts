@@ -286,27 +286,20 @@ export async function createCharacter(data: CharacterCreateInput): Promise<Chara
 				description: data.description || null,
 				emoji: data.emoji || '👤',
 				color: data.color || '#3b82f6',
-				shortcut: data.shortcut || null,
 				category: data.category || null,
-				level: data.level || null,
-				class: data.class || null,
-				race: data.race || null,
-				type: data.type || null,
-				alignment: data.alignment || null,
-				backstory: data.backstory || null,
-				stats: data.stats || null,
-				psychologicalProfile: data.psychologicalProfile || null,
-				socialProfile: data.socialProfile || null,
-				relationships: data.relationships || null,
-				goals: data.goals || null,
-				fears: data.fears || null,
-				beliefs: data.beliefs || null,
+				age: data.age || null,
+				gender: data.gender || null,
+				species: data.species || null,
+				occupation: data.occupation || null,
 				personality: data.personality || null,
+				background: data.background || null,
+				relationships: data.relationships || null,
 				skills: data.skills || null,
-				abilities: data.abilities || null,
-				sortBy: data.sortBy || null,
-				filters: data.filters || null,
+				equipment: data.equipment || null,
+				notes: data.notes || null,
 				featuredImage: data.featuredImage || null,
+				parentId: data.parentId || null,
+				isPublic: data.isPublic || false,
 				isFavorite: data.isFavorite || false,
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -367,27 +360,20 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
 		if (data.description !== undefined) updateData.description = data.description;
 		if (data.emoji !== undefined) updateData.emoji = data.emoji;
 		if (data.color !== undefined) updateData.color = data.color;
-		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
 		if (data.category !== undefined) updateData.category = data.category;
-		if (data.level !== undefined) updateData.level = data.level;
-		if (data.class !== undefined) updateData.class = data.class;
-		if (data.race !== undefined) updateData.race = data.race;
-		if (data.type !== undefined) updateData.type = data.type;
-		if (data.alignment !== undefined) updateData.alignment = data.alignment;
-		if (data.backstory !== undefined) updateData.backstory = data.backstory;
-		if (data.stats !== undefined) updateData.stats = data.stats;
-		if (data.psychologicalProfile !== undefined) updateData.psychologicalProfile = data.psychologicalProfile;
-		if (data.socialProfile !== undefined) updateData.socialProfile = data.socialProfile;
-		if (data.relationships !== undefined) updateData.relationships = data.relationships;
-		if (data.goals !== undefined) updateData.goals = data.goals;
-		if (data.fears !== undefined) updateData.fears = data.fears;
-		if (data.beliefs !== undefined) updateData.beliefs = data.beliefs;
+		if (data.age !== undefined) updateData.age = data.age;
+		if (data.gender !== undefined) updateData.gender = data.gender;
+		if (data.species !== undefined) updateData.species = data.species;
+		if (data.occupation !== undefined) updateData.occupation = data.occupation;
 		if (data.personality !== undefined) updateData.personality = data.personality;
+		if (data.background !== undefined) updateData.background = data.background;
+		if (data.relationships !== undefined) updateData.relationships = data.relationships;
 		if (data.skills !== undefined) updateData.skills = data.skills;
-		if (data.abilities !== undefined) updateData.abilities = data.abilities;
-		if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
-		if (data.filters !== undefined) updateData.filters = data.filters;
+		if (data.equipment !== undefined) updateData.equipment = data.equipment;
+		if (data.notes !== undefined) updateData.notes = data.notes;
 		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+		if (data.parentId !== undefined) updateData.parentId = data.parentId;
+		if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
 		await db.update(characters).set(updateData).where(eq(characters.id, id));
