@@ -11,7 +11,7 @@ import CharactersContentView from './characters-content-view';
 const viewLogger = clientLogger.withContext('CharactersView');
 
 export function CharactersView({ isVisible }: ViewProps) {
-	const { selectedCharacterId, setSelectedCharacterId } = useCharacterStore();
+	const { selectedCharacterId, selectCharacter } = useCharacterStore();
 	const { mutate: createCharacter } = useCreateCharacter();
 
 	const [localSearch, setLocalSearch] = useState('');
@@ -21,7 +21,7 @@ export function CharactersView({ isVisible }: ViewProps) {
 
 	// Usar React Query hook en lugar de server action
 	const {
-		data: characters = [],
+		data: charactersResponse,
 		isLoading,
 		error,
 		refetch,
@@ -31,13 +31,15 @@ export function CharactersView({ isVisible }: ViewProps) {
 		sortOrder: 'asc',
 	});
 
+	const characters = charactersResponse?.data || [];
+
 	const handleCharacterSelect = useCallback(
 		(characterId: string) => {
 			viewLogger.info('🎭 Seleccionando character', { characterId });
-			setSelectedCharacterId(characterId);
+			selectCharacter(characterId);
 			clientEvents.emit('character:selected', { characterId });
 		},
-		[setSelectedCharacterId]
+		[selectCharacter]
 	);
 
 	const handleCreateCharacter = useCallback(() => {

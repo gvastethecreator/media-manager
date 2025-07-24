@@ -19,7 +19,7 @@ import type { ViewProps } from '../types';
 const viewLogger = clientLogger.withContext('PlacesView');
 
 export function PlacesView({ isVisible }: ViewProps) {
-	const { selectedPlaceId, setSelectedPlaceId } = usePlaceStore();
+	const { selectedPlaceId, selectPlace } = usePlaceStore();
 	const { mutate: createPlace } = useCreatePlace();
 
 	const [localSearch, setLocalSearch] = useState('');
@@ -42,10 +42,10 @@ export function PlacesView({ isVisible }: ViewProps) {
 	const handlePlaceSelect = useCallback(
 		(placeId: string) => {
 			viewLogger.info('📍 Seleccionando place', { placeId });
-			setSelectedPlaceId(placeId);
+			selectPlace(placeId);
 			clientEvents.emit('place:selected', { placeId });
 		},
-		[setSelectedPlaceId]
+		[selectPlace]
 	);
 
 	const { toast } = useToast();

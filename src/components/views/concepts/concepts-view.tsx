@@ -57,18 +57,15 @@ export function ConceptsView() {
 		}
 
 		try {
-			const now = new Date();
 			await createConcept({
 				name: newConceptName,
 				description: newConceptDescription || null,
-				content: newConceptDescription || '',
 				emoji: '💡',
 				color: '#3b82f6',
 				category: 'general',
-				featuredImage: null,
 				isFavorite: false,
-				createdAt: now,
-				updatedAt: now,
+				totalImages: 0,
+				totalVideos: 0,
 			});
 			setNewConceptName('');
 			setNewConceptDescription('');

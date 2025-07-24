@@ -1,13 +1,12 @@
-import { Grid, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { EmptyState } from '@/components/core/data-display';
+import { RefreshCw } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import { EntityStatsType, type EntityWithStats } from '@/types/migration';
+import { type AnyEntityWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('MixedContentView');
@@ -26,7 +25,7 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 	const [isRetrying, setIsRetrying] = useState(false);
 
 	const handleItemSelect = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			logger.info('🖱️ Elemento seleccionado:', item.name);
 
 			// Mostrar panel de detalles con el elemento seleccionado
@@ -37,7 +36,7 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 	);
 
 	const handleItemDoubleClick = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			logger.info('🖱️ Doble click en elemento:', item.name);
 
 			// Abrir el visor con el elemento
@@ -45,16 +44,18 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 			const viewerItem = {
 				id: item.id,
 				name: item.name,
-				type: item.type || 'file',
-				path: item.path || '',
-				size: item.size || 0,
-				url: item.url,
-				thumbnail: item.thumbnail,
-				thumbnailUrl: item.thumbnailUrl,
-				src: item.src,
-				alt: item.alt,
-				mimeType: item.mimeType,
-				metadata: item.metadata,
+				type: (item as any).type || 'file',
+				path: (item as any).path || '',
+				size: (item as any).size || 0,
+				url: (item as any).url,
+				thumbnail: (item as any).thumbnail,
+				thumbnailUrl: (item as any).thumbnailUrl,
+				src: (item as any).src,
+				alt: (item as any).alt,
+				mimeType: (item as any).mimeType,
+				metadata: (item as any).metadata,
+				width: (item as any).width || 0,
+				height: (item as any).height || 0,
 			};
 
 			// Abrir el visor con el elemento actual
@@ -88,9 +89,9 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 			}
 		>
 			<FileBrowser
-				entityType={EntityStatsType.MIXED}
+				entityType={'mixed'}
 				filterId={filterId}
-				filterType={filterType || 'mixed'}
+				filterType={(filterType as 'folder' | 'collection' | 'tag' | 'album' | 'video') || 'folder'}
 				onItemClick={handleItemSelect}
 				onItemDoubleClick={handleItemDoubleClick}
 				className="h-full"

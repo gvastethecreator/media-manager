@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import Silk from '@/components/ui/silk-background';
-import type { SystemStats } from '@/hooks/useSystemStats';
+import type { SystemStats } from '@/types/stats';
 
 interface DashboardContentViewProps {
 	stats: SystemStats | undefined;
@@ -61,19 +61,19 @@ const DashboardContentView: React.FC<DashboardContentViewProps> = memo(function 
 				<div className="grid grid-cols-2 gap-4 mt-8">
 					<div className="bg-card/90 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-white/20">
 						<p className="text-sm text-muted-foreground">Imágenes</p>
-						<p className="text-2xl font-bold">{stats?.totalImages}</p>
+						<p className="text-2xl font-bold">{stats?.images.count || 0}</p>
 					</div>
 					<div className="bg-card/90 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-white/20">
-						<p className="text-sm text-muted-foreground">Carpetas</p>
-						<p className="text-2xl font-bold">{stats?.totalFolders}</p>
+						<p className="text-sm text-muted-foreground">Álbumes</p>
+						<p className="text-2xl font-bold">{stats?.albums.count || 0}</p>
 					</div>
 					<div className="bg-card/90 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-white/20">
 						<p className="text-sm text-muted-foreground">Colecciones</p>
-						<p className="text-2xl font-bold">{stats?.totalCollections}</p>
+						<p className="text-2xl font-bold">{stats?.collections.count || 0}</p>
 					</div>
 					<div className="bg-card/90 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-white/20">
 						<p className="text-sm text-muted-foreground">Etiquetas</p>
-						<p className="text-2xl font-bold">{stats?.totalTags}</p>
+						<p className="text-2xl font-bold">{stats?.tags.count || 0}</p>
 					</div>
 				</div>
 			</div>

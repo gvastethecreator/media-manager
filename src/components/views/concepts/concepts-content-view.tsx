@@ -1,6 +1,6 @@
 import { Lightbulb } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { ConceptCard } from '@/components/cards/concept-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -9,10 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import type { Concept } from '@/types/entities/concept';
+import type { ConceptWithStats } from '@/types/entities/concept';
 
 interface ConceptsContentViewProps {
-	concepts: Concept[];
+	concepts: ConceptWithStats[];
 	isLoading: boolean;
 	error: string | null;
 	showForm: boolean;
