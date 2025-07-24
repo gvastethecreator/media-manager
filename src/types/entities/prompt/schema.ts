@@ -20,7 +20,7 @@ export const PromptSchema = z.object({
 	parameters: z.string().default('{}').or(z.record(z.string(), z.unknown())),
 	tags: z.string().default('[]').or(z.array(z.string())),
 	featuredImage: z.string().nullable().default(null),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean(),
 	createdAt: z
 		.date()
 		.optional()

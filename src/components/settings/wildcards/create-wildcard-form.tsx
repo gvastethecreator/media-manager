@@ -15,22 +15,23 @@ import type { WildcardBase } from '@/types/entities/wildcard/base';
 import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
 
 // Esquema Zod adaptado para el formulario
-const formSchema = z.object({
-	name: z.string().min(1, 'El nombre es obligatorio'),
-	emoji: z.string().default('🎭'),
-	color: z.string().default('#6366F1'),
-	description: z.string().nullable().optional(),
-	shortcut: z.string().nullable().optional(),
-	category: z.string().nullable().optional(),
-	children: z.array(z.object({ value: z.string().min(1, 'El valor no puede estar vacío') })).default([]),
-	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().default(false),
-	parentId: z.string().nullable().optional(),
-	sortBy: z.string().optional(),
-	viewMode: z.string().optional(),
+const formSchema = CreateWildcardSchema.pick({
+	name: true,
+	emoji: true,
+	color: true,
+	description: true,
+	shortcut: true,
+	category: true,
+	parentId: true,
+	featuredImage: true,
+	viewMode: true,
+}).extend({
+	isFavorite: z.boolean().optional(),
+	children: z.array(z.object({ value: z.string() })),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>;
+type FormValues = FormData;
 
 interface CreateWildcardFormProps {
 	wildcard?: WildcardBase;
@@ -48,19 +49,20 @@ const convertFormToSchema = (data: FormValues): z.infer<typeof CreateWildcardSch
 };
 
 export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, onCancel }: CreateWildcardFormProps) {
-	const form = useForm<FormValues>({
+	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: wildcard?.name || '',
-			emoji: wildcard?.emoji || '🎭',
-			color: wildcard?.color || '#6366F1',
+			emoji: wildcard?.emoji || '',
+			color: wildcard?.color || '#3b82f6',
 			description: wildcard?.description || null,
 			shortcut: wildcard?.shortcut || null,
 			category: wildcard?.category || null,
 			children: wildcard?.children ? JSON.parse(wildcard.children).map((c: string) => ({ value: c })) : [],
-			parentId: wildcard?.parentId || null,
 			featuredImage: wildcard?.featuredImage || null,
 			isFavorite: wildcard?.isFavorite || false,
+			parentId: wildcard?.parentId || null,
+			viewMode: wildcard?.viewMode || 'grid',
 		},
 	});
 
@@ -177,7 +179,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Categoría</FormLabel>
 									<FormControl>
-										<Select value={field.value || ''} onValueChange={field.onChange}>
+										<Select value={field.value || undefined} onValueChange={field.onChange}>
 											<SelectTrigger>
 												<SelectValue placeholder="Selecciona una categoría" />
 											</SelectTrigger>

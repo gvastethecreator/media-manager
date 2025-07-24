@@ -40,42 +40,14 @@ const CreateWildcardForm = lazy(() =>
 	import('./create-wildcard-form').then((mod) => ({ default: mod.CreateWildcardForm }))
 );
 
-interface WildcardWithRelations extends Omit<WildcardWithStats, 'children'> {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	shortcut: string | null;
-	category: string | null;
-	children: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	parentId: string | null;
+interface WildcardWithRelations extends WildcardWithStats {
 	parent?: WildcardWithStats | null;
 	childWildcards?: WildcardWithRelations[];
-	_count?: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		properties: number;
-		childWildcards: number;
-	};
 }
 
 export function WildcardsSettings() {
 	// React Query hooks
-	const { data: allWildcards = [], isLoading: isLoadingWildcards, error: wildcardsError } = useWildcards();
+	const { data: allWildcards, isLoading: isLoadingWildcards, error: wildcardsError } = useWildcards();
 	const { data: rootWildcards = [], isLoading: isLoadingRoots, error: rootsError } = useRootWildcards();
 	const createWildcardMutation = useCreateWildcard();
 	const updateWildcardMutation = useUpdateWildcard();
@@ -109,23 +81,8 @@ export function WildcardsSettings() {
 		}
 	}, [error]);
 
-	// Convertir y extender los wildcards con las propiedades necesarias
-	const wildcards = allWildcards.map((wildcard) => ({
-		...wildcard,
-		_count: {
-			...wildcard._count,
-			albums: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			properties: 0,
-		},
-	})) as WildcardWithRelations[];
+	// Convertir los wildcards con las propiedades necesarias
+	const wildcards = (allWildcards?.data || []) as WildcardWithRelations[];
 
 	// Actualizar breadcrumbs cuando cambia el comodín seleccionado
 	useEffect(() => {
@@ -472,18 +429,18 @@ export function WildcardsSettings() {
 				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
 					{selectedWildcard ? (
 						isEditMode ? (
-						<Dialog open={isEditMode} onOpenChange={setIsEditMode}>
-							<DialogContent className="max-w-3xl p-0 overflow-hidden">
-								<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
-									<CreateWildcardForm
-										onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
-										onClose={() => setIsEditMode(false)}
-										parentId={currentParentId}
-										wildcard={selectedWildcard}
-									/>
-								</Suspense>
-							</DialogContent>
-						</Dialog>
+							<Dialog open={isEditMode} onOpenChange={setIsEditMode}>
+								<DialogContent className="max-w-3xl p-0 overflow-hidden">
+									<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+										<CreateWildcardForm
+											onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
+											onCancel={() => setIsEditMode(false)}
+											parentWildcards={wildcards}
+											wildcard={selectedWildcard}
+										/>
+									</Suspense>
+								</DialogContent>
+							</Dialog>
 						) : (
 							<WildcardPreview
 								wildcard={selectedWildcard}
@@ -506,8 +463,8 @@ export function WildcardsSettings() {
 					<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
 						<CreateWildcardForm
 							onSubmit={handleCreateWildcard}
-							onClose={() => setIsCreateDialogOpen(false)}
-							parentId={currentParentId}
+							onCancel={() => setIsCreateDialogOpen(false)}
+							parentWildcards={wildcards}
 							wildcard={undefined}
 						/>
 					</Suspense>

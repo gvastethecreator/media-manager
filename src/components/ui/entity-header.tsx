@@ -1,7 +1,6 @@
 import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -184,7 +183,7 @@ export function EntityHeader({
 		if (action.href) {
 			return (
 				<Button key={`action-${index}`} variant={action.variant || 'default'} size="sm" asChild>
-					<Link to={action.href}>{buttonContent}</Link>
+					<a href={action.href}>{buttonContent}</a>
 				</Button>
 			);
 		}
@@ -220,7 +219,7 @@ export function EntityHeader({
 					<BreadcrumbList>
 						{backUrl && (
 							<BreadcrumbItem>
-								<BreadcrumbLink to={backUrl} className="flex items-center">
+								<BreadcrumbLink href={backUrl} className="flex items-center">
 									<ChevronLeft className="h-4 w-4 mr-1" />
 									{backLabel}
 								</BreadcrumbLink>
@@ -231,7 +230,7 @@ export function EntityHeader({
 							<React.Fragment key={`${item.label}-${item.href || index}`}>
 								{(backUrl || index > 0) && <BreadcrumbSeparator />}
 								<BreadcrumbItem>
-									{item.href ? <BreadcrumbLink to={item.href}>{item.label}</BreadcrumbLink> : <span>{item.label}</span>}
+									{item.href ? <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink> : <span>{item.label}</span>}
 								</BreadcrumbItem>
 							</React.Fragment>
 						))}
@@ -311,7 +310,7 @@ export function EntityHeader({
 												className={cn(
 													'cursor-pointer',
 													action.variant === 'destructive' &&
-														'text-destructive focus:text-destructive hover:text-destructive'
+													'text-destructive focus:text-destructive hover:text-destructive'
 												)}
 											>
 												{action.icon && <span className="mr-2">{action.icon}</span>}

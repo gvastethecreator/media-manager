@@ -1,8 +1,9 @@
 import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { CharacterCard } from '@/components/cards/character-card';
+import { adaptCharacterWithStats } from '@/components/cards/character-card/character-card-adapter';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
@@ -10,10 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import type { Character } from '@/types/entities/character';
+import type { CharacterWithStats } from '@/types/entities/character';
 
 interface CharactersContentViewProps {
-	characters: Character[];
+	characters: CharacterWithStats[];
 	isLoading: boolean;
 	error: Error | null;
 	localSearch: string;
@@ -53,15 +54,16 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 
 	if (error) {
 		return (
-			<EmptyState
-				icon={Users}
-				title="Error al cargar personajes"
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-				action={{
-					label: 'Reintentar',
-					onClick: handleRetry,
-				}}
-			/>
+			<div className="flex flex-col items-center justify-center py-12">
+				<EmptyState
+					icon={Users}
+					title="Error al cargar personajes"
+					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				/>
+				<Button onClick={handleRetry} className="mt-4">
+					Reintentar
+				</Button>
+			</div>
 		);
 	}
 
@@ -124,7 +126,8 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
 								<CharacterCard
-									character={character}
+									character={adaptCharacterWithStats(character)}
+									characterId={character.id}
 									isSelected={character.id === selectedCharacterId}
 									onSelect={() => handleCharacterSelect(character.id)}
 								/>
