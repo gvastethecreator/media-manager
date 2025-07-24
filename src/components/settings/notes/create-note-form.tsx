@@ -14,18 +14,18 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
 import { toastService } from '@/lib/ui/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
-import type { CreateNoteInput, NoteBase, UpdateNoteInput } from '@/types/entities/note/types';
+import type { NoteCreateInput, NoteBase, NoteUpdateInput } from '@/types/entities/note/types';
 
 // Esquema de validación con Zod, alineado con los tipos canónicos
 const noteSchema = z.object({
 	title: z.string().min(1, 'El título es requerido').max(100, 'El título es demasiado largo'),
 	summary: z.string().optional(),
 	content: z.string().optional(),
-	color: z.string().min(1, 'El color es requerido'),
-	emoji: z.string().min(1, 'El emoji es requerido'),
+	color: z.string().optional(),
+	emoji: z.string().optional(),
 	category: z.nativeEnum(NoteCategory).optional(),
 	tags: z.array(z.string()).optional().default([]), // Manejar como array de strings
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean().optional(),
 });
 
 // El tipo del formulario se infiere del esquema
@@ -73,11 +73,11 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 		try {
 			let result: NoteBase;
 			if (isEditing && note?.id) {
-				const updateData: UpdateNoteInput = { ...data };
+				const updateData: NoteUpdateInput = { ...data };
 				result = await updateNoteMutation.mutateAsync({ id: note.id, data: updateData });
 				toastService.success('Nota actualizada correctamente');
 			} else {
-				const createData: CreateNoteInput = { ...data };
+				const createData: NoteCreateInput = { ...data };
 				result = await createNoteMutation.mutateAsync(createData);
 				toastService.success('Nota creada correctamente');
 				form.reset(); // Limpiar el formulario después de crear

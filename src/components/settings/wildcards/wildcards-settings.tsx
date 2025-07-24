@@ -24,13 +24,15 @@ type CreateWildcardFormValues = {
 	name: string;
 	emoji: string;
 	color: string;
-	description?: string;
-	shortcut?: string;
-	category: string;
-	children: string[];
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	children: string;
 	parentId?: string | null;
-	featuredImage?: string;
+	featuredImage?: string | null;
 	isFavorite: boolean;
+	sortBy?: string;
+	viewMode?: string;
 };
 
 // Carga perezosa del formulario
@@ -248,7 +250,7 @@ export function WildcardsSettings() {
 				description: data.description,
 				shortcut: data.shortcut,
 				category: data.category,
-				children: JSON.stringify(data.children),
+				children: data.children, // Ya es string desde el formulario
 				parentId: data.parentId,
 				featuredImage: data.featuredImage,
 				isFavorite: data.isFavorite,
@@ -271,7 +273,7 @@ export function WildcardsSettings() {
 				description: data.description,
 				shortcut: data.shortcut,
 				category: data.category,
-				children: JSON.stringify(data.children),
+				children: data.children, // Ya es string desde el formulario
 				parentId: data.parentId,
 				featuredImage: data.featuredImage,
 				isFavorite: data.isFavorite,
@@ -470,18 +472,18 @@ export function WildcardsSettings() {
 				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
 					{selectedWildcard ? (
 						isEditMode ? (
-							<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-								<DialogContent className="max-w-3xl p-0 overflow-hidden">
-									<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
-										<CreateWildcardForm
-											onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
-											onClose={() => setIsCreateDialogOpen(false)}
-											parentId={currentParentId}
-											wildcard={selectedWildcard}
-										/>
-									</Suspense>
-								</DialogContent>
-							</Dialog>
+						<Dialog open={isEditMode} onOpenChange={setIsEditMode}>
+							<DialogContent className="max-w-3xl p-0 overflow-hidden">
+								<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+									<CreateWildcardForm
+										onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
+										onClose={() => setIsEditMode(false)}
+										parentId={currentParentId}
+										wildcard={selectedWildcard}
+									/>
+								</Suspense>
+							</DialogContent>
+						</Dialog>
 						) : (
 							<WildcardPreview
 								wildcard={selectedWildcard}

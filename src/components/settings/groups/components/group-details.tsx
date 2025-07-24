@@ -3,7 +3,7 @@ interface GroupDetailsProps {
 	category?: string | null;
 	shortcut?: string | null;
 	sortBy?: string | null;
-	color?: string;
+	color?: string | null;
 }
 
 export function GroupDetails({ description, category, shortcut, sortBy, color }: GroupDetailsProps) {
