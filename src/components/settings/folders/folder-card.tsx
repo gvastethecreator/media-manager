@@ -31,6 +31,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useFolderStats } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
+import type { FolderStatsResponse } from '@/types/folders';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
 import { FolderProgressDetails } from './folder-progress-details';
 import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
@@ -76,7 +77,8 @@ export function FolderCard({
 	});
 
 	// Hook para obtener estadísticas detalladas
-	const { data: folderStats } = useFolderStats(folder.id || '');
+	const folderStatsQuery = useFolderStats(folder.id || '');
+	const folderStats = folderStatsQuery.data as FolderStatsResponse | undefined;
 
 	// Funciones para manejar la edición
 	const handleSaveEdit = useCallback(() => {
@@ -484,43 +486,43 @@ export function FolderCard({
 									<div className="flex items-center gap-1 flex-wrap">
 										{/* Imágenes */}
 										{(folderStats?.totalImages || 0) > 0 && (
-											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-												<Image className="h-2.5 w-2.5" />
-												{folderStats.totalImages}
-											</Badge>
-										)}
+										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+											<Image className="h-2.5 w-2.5" />
+											{folderStats?.totalImages || 0}
+										</Badge>
+									)}
 
 										{/* Videos */}
-										{(folderStats?.totalVideos || 0) > 0 && (
-											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-												<Video className="h-2.5 w-2.5" />
-												{folderStats.totalVideos}
-											</Badge>
-										)}
+									{(folderStats?.totalVideos || 0) > 0 && (
+										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+											<Video className="h-2.5 w-2.5" />
+											{folderStats?.totalVideos || 0}
+										</Badge>
+									)}
 
 										{/* Audio */}
-										{(folderStats?.totalAudio || 0) > 0 && (
-											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-												<Music className="h-2.5 w-2.5" />
-												{folderStats.totalAudio}
-											</Badge>
-										)}
+									{(folderStats?.totalAudio || 0) > 0 && (
+										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+											<Music className="h-2.5 w-2.5" />
+											{folderStats?.totalAudio || 0}
+										</Badge>
+									)}
 
 										{/* Documentos */}
-										{(folderStats?.totalDocuments || 0) > 0 && (
-											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-												<FileText className="h-2.5 w-2.5" />
-												{folderStats.totalDocuments}
-											</Badge>
-										)}
+									{(folderStats?.totalDocuments || 0) > 0 && (
+										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+											<FileText className="h-2.5 w-2.5" />
+											{folderStats?.totalDocuments || 0}
+										</Badge>
+									)}
 
 										{/* Otros archivos */}
-										{(folderStats?.totalOthers || 0) > 0 && (
-											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-												<File className="h-2.5 w-2.5" />
-												{folderStats.totalOthers}
-											</Badge>
-										)}
+									{(folderStats?.totalOthers || 0) > 0 && (
+										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+											<File className="h-2.5 w-2.5" />
+											{folderStats?.totalOthers || 0}
+										</Badge>
+									)}
 
 										{/* Subcarpetas */}
 										{folder.children && folder.children.length > 0 && (
@@ -533,39 +535,39 @@ export function FolderCard({
 
 									<div className="flex items-center gap-1">
 										<Badge variant="secondary" className="text-[10px] px-1 h-4">
-											{formatBytes(Number(folderStats?.totalSize || folder.totalSize || 0))}
-										</Badge>
+									{formatBytes(Number(folderStats?.totalSize || 0))}
+								</Badge>
 										<FolderIndexStatusBadge status={indexStatus} lastIndexed={folder.lastIndexed} />
 									</div>
 								</div>
 
 								{/* Últimas 4 imágenes */}
-								{folderStats?.recentImages && folderStats.recentImages.length > 0 && (
-									<div className="flex items-center gap-1 mt-1">
-										<span className="text-[10px] text-muted-foreground mr-1">Recientes:</span>
-										<div className="flex gap-0.5">
-											{folderStats.recentImages.slice(0, 4).map((image, index) => (
-												<div
-													key={index}
-													className="w-6 h-6 rounded border overflow-hidden bg-muted flex items-center justify-center"
-												>
-													{image.thumbnailUrl ? (
-														<img src={image.thumbnailUrl} alt={image.name} className="w-full h-full object-cover" />
-													) : (
-														<Image className="h-3 w-3 text-muted-foreground" />
-													)}
-												</div>
-											))}
-											{folderStats.recentImages.length > 4 && (
-												<div className="w-6 h-6 rounded border bg-muted/50 flex items-center justify-center">
-													<span className="text-[8px] text-muted-foreground font-medium">
-														+{folderStats.recentImages.length - 4}
-													</span>
-												</div>
-											)}
-										</div>
+							{folderStats?.recentImages && folderStats.recentImages.length > 0 && (
+								<div className="flex items-center gap-1 mt-1">
+									<span className="text-[10px] text-muted-foreground mr-1">Recientes:</span>
+									<div className="flex gap-0.5">
+										{folderStats.recentImages.slice(0, 4).map((image, index) => (
+											<div
+												key={image.id || index}
+												className="w-6 h-6 rounded border overflow-hidden bg-muted flex items-center justify-center"
+											>
+												{image.thumbnailUrl ? (
+													<img src={image.thumbnailUrl} alt={image.name} className="w-full h-full object-cover" />
+												) : (
+													<Image className="h-3 w-3 text-muted-foreground" />
+												)}
+											</div>
+										))}
+										{folderStats.recentImages.length > 4 && (
+											<div className="w-6 h-6 rounded border bg-muted/50 flex items-center justify-center">
+												<span className="text-[8px] text-muted-foreground font-medium">
+													+{folderStats.recentImages.length - 4}
+												</span>
+											</div>
+										)}
 									</div>
-								)}
+								</div>
+							)}
 							</div>
 						</div>
 
@@ -606,7 +608,9 @@ export function FolderCard({
 					className="mt-3 pl-4 border-l-2 border-border space-y-2"
 				>
 					{folder.children.map((child) => {
-						const { data: childStats } = useFolderStats(child.id || '');
+// Hook calls need to be moved to the top level of the component
+// This line should be removed from here and the stats should be passed down as props
+						const childStats = childStatsQuery.data as FolderStatsResponse | undefined;
 						return (
 							<div key={child.id} className="flex items-center justify-between p-2 rounded-md bg-muted/30">
 								<div className="flex items-center gap-2">
@@ -618,17 +622,17 @@ export function FolderCard({
 									{(childStats?.totalImages || 0) > 0 && (
 										<Badge variant="outline" className="text-[10px] px-1 h-4 flex items-center gap-0.5">
 											<Image className="h-2 w-2" />
-											{childStats.totalImages}
+											{childStats?.totalImages}
 										</Badge>
 									)}
 									{(childStats?.totalVideos || 0) > 0 && (
 										<Badge variant="outline" className="text-[10px] px-1 h-4 flex items-center gap-0.5">
 											<Video className="h-2 w-2" />
-											{childStats.totalVideos}
+											{childStats?.totalVideos}
 										</Badge>
 									)}
 									<Badge variant="outline" className="text-[10px] px-1 h-4">
-										{formatBytes(Number(childStats?.totalSize || child.totalSize || 0))}
+										{formatBytes(Number(childStats?.totalSize || 0))}
 									</Badge>
 								</div>
 							</div>

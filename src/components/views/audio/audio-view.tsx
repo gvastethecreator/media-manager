@@ -14,7 +14,7 @@ const viewLogger = clientLogger.withContext('AudioView');
  */
 export function AudioView(_props: ViewProps) {
 	const navigate = useNavigate();
-	
+
 	// Usar selectores normales de Zustand en lugar de la utilidad problemática
 	const { audios, isLoading, error, fetchAudios, createAudio, updateAudio, deleteAudio } = useAudioStore((state) => ({
 		audios: state.audios,
@@ -39,11 +39,14 @@ export function AudioView(_props: ViewProps) {
 		}
 	}, [fetchAudios, audios.length]);
 
-	const handleAudioClick = useCallback((audio: AudioWithStats) => {
-		viewLogger.info('🖱️ Click en audio:', audio.name);
-		// Navegar a la vista de contenido específica del audio
-		navigate(`/audio/${audio.id}`);
-	}, [navigate]);
+	const handleAudioClick = useCallback(
+		(audio: AudioWithStats) => {
+			viewLogger.info('🖱️ Click en audio:', audio.name);
+			// Navegar a la vista de contenido específica del audio
+			navigate(`/audio/${audio.id}`);
+		},
+		[navigate]
+	);
 
 	const handleEditAudio = useCallback((audio: AudioWithStats) => {
 		setEditingAudio(audio);

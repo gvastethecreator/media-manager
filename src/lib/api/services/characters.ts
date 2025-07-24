@@ -1,5 +1,5 @@
-import type { CharacterWithStats } from '@/types/entities/character/types';
 import type { CharacterCardData } from '@/components/cards/character-card/character-card.types';
+import type { CharacterWithStats } from '@/types/entities/character/types';
 import { apiClient } from '../client';
 
 export interface GetCharactersOptions {

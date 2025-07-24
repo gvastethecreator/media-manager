@@ -1,6 +1,6 @@
-import { memo, useState, useEffect, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
+import { memo, useEffect, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
+import { Outlet } from 'react-router-dom';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { RightPanel } from '@/components/panels/right-panel/right-panel';
@@ -78,11 +78,7 @@ export const MainLayout = memo(function MainLayout() {
 					onExpand={() => handleLeftPanelCollapse(false)}
 					className="border-r border-border"
 				>
-					<NavPanel
-						isCollapsed={isLeftCollapsed}
-						onToggleCollapse={toggleLeftPanel}
-						isAnimating={isLeftAnimating}
-					/>
+					<NavPanel isCollapsed={isLeftCollapsed} onToggleCollapse={toggleLeftPanel} isAnimating={isLeftAnimating} />
 				</ResizablePanel>
 
 				<ResizableHandle withHandle />
@@ -100,7 +96,8 @@ export const MainLayout = memo(function MainLayout() {
 								isRightPanelVisible={true}
 								allItemIds={[]}
 							/>
-						</div>						{/* Contenido principal */}
+						</div>{' '}
+						{/* Contenido principal */}
 						<div className="flex-1 min-h-0 bg-background p-4">
 							<Outlet />
 						</div>

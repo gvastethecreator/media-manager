@@ -1,6 +1,4 @@
-import React from 'react';
-
-const WorldItemsContentView: React.FC = () => {
+const WorldItemsContentView = () => {
 	return (
 		<div>
 			<h1>World Items View</h1>

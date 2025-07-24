@@ -1,4 +1,4 @@
-import type { FolderExtended, FolderStats } from '@/types/entities/folder';
+import type { FolderExtended, FolderStatistics } from '@/types/entities/folder';
 import type { ProcessStatus } from '@/types/folders';
 
 /**
@@ -15,11 +15,35 @@ export interface ExtendedFolder extends FolderExtended {
 	children?: ExtendedFolder[]; // Override para usar ExtendedFolder en lugar de FolderComplete
 	// autoReindex ya está en FolderBase
 	// path ya está en FolderBase
+
+	// Propiedades adicionales para compatibilidad con componentes
+	totalAudio?: number;
+	totalDocuments?: number;
+	totalOthers?: number;
+	recentImages?: Array<{ id: string; name: string; thumbnailUrl?: string }>;
 }
 
 // 🔄 Estado extendido del proceso con propiedades adicionales
-export interface ExtendedProcessStatus extends ProcessStatus {
+export interface ExtendedProcessStatus {
+	isProcessing: boolean;
+	progress?: number;
+	message?: string;
+	error?: string;
+	folderId?: string;
+	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete' | 'indexing' | 'thumbnails';
+	timestamp?: number;
+	filesProcessed?: number;
+	totalFiles?: number;
+	status?: 'processing' | 'completed' | 'error';
 	startTime?: number;
+	endTime?: number;
+	currentFile?: string;
+	estimatedTimeRemaining?: number;
+	errors?: string[];
+	extendedStats?: {
+		processingSpeed?: number;
+		averageSize?: number;
+	};
 	globalProgress?: {
 		current: number;
 		total: number;
@@ -53,19 +77,63 @@ export interface GlobalProcessingState {
 	};
 }
 
-// Usar FolderStatistics en lugar de FolderStats legacy
-export const initialStats: FolderStats = {
-	folderCount: 0,
-	totalSize: 0,
-	averageSize: 0,
-	organizationScore: 0,
+// Usar FolderStatistics del tipo correcto
+export const initialStats: FolderStatistics = {
+	// Métricas de jerarquía
 	hierarchyDepth: 0,
-	indexingProgress: 0,
-	lastIndexed: null,
-	isIndexing: false,
-	hasErrors: false,
-	qualityScore: 0,
-	tags: [],
+	totalDescendants: 0,
+	directChildren: 0,
+
+	// Métricas de contenido
+	contentDiversity: 0,
+	organizationScore: 0,
+	totalItems: 0,
+	totalFolders: 0,
+
+	// Métricas de uso
+	accessFrequency: 0,
+	lastActivity: null,
+
+	// Distribución de contenido
+	imageCount: 0,
+	videoCount: 0,
+	noteCount: 0,
+	documentCount: 0,
+	folderCount: 0,
+
+	// Métricas de tamaño
+	formattedSize: '0 B',
+	averageFileSize: 0,
+	largestFile: 0,
+
+	// Análisis de nombres y organización
+	hasConsistentNaming: false,
+	hasDeepHierarchy: false,
+	isWellOrganized: false,
+
+	// Breadcrumbs y navegación
+	breadcrumbs: [],
+	fullPath: '',
+	relativePath: '',
+
+	// Auto-tags generados
+	autoTags: [],
+
+	// Calidad general
+	qualityGrade: 'D' as const,
+
+	// Relaciones
+	totalRelations: 0,
+
+	// Propiedades adicionales para compatibilidad
+	totalFiles: 0,
+	totalSize: 0,
+	totalImages: 0,
+	totalVideos: 0,
+	totalAudio: 0,
+	totalDocuments: 0,
+	totalOthers: 0,
+	directoryCount: 0,
 };
 
 export const initialGlobalReindexStatus: GlobalReindexStatus = {

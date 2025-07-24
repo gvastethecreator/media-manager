@@ -1,6 +1,7 @@
 import {
 	Archive,
-	ArrowDown, ArrowRight,
+	ArrowDown,
+	ArrowRight,
 	ArrowUp,
 	BookImage,
 	Box,
@@ -30,7 +31,7 @@ import {
 	TagIcon,
 	Trash2,
 	User2,
-	X
+	X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';

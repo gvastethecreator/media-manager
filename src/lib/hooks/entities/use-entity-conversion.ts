@@ -33,43 +33,27 @@ export function useEntityConversion() {
 				// Es una imagen
 				return {
 					...fileItem,
-					statistics: {
-						totalAlbums: fileItem.albums?.length || 0,
-						totalCollections: fileItem.collections?.length || 0,
-						totalTags: fileItem.tags?.length || 0,
-						totalCharacters: fileItem.characters?.length || 0,
-						totalPlaces: fileItem.places?.length || 0,
-						totalWorldItems: fileItem.worldItems?.length || 0,
-						totalConcepts: fileItem.concepts?.length || 0,
-						totalPrompts: fileItem.prompts?.length || 0,
-						totalNotes: fileItem.notes?.length || 0,
-						totalWildcards: fileItem.wildcards?.length || 0,
-						totalProperties: fileItem.properties?.length || 0,
-						totalGroups: fileItem.groups?.length || 0,
-						totalAssociations: 0, // Se calculará
-						megapixels: (fileItem.width * fileItem.height) / 1_000_000,
-						aspectRatio: fileItem.width / fileItem.height,
-						fileSize: fileItem.size / (1024 * 1024),
-						dimensions: `${fileItem.width}x${fileItem.height}`,
-						views: 0,
-						likes: 0,
-						downloads: 0,
-						shares: 0,
-						qualityScore: 75,
-						technicalGrade: 'B' as const,
-						colorTemperature: 'neutral' as const,
-						aiConfidence: 0,
-						autoTags: [],
-						duplicateStatus: 'unique' as const,
-						lastUpdated: new Date(),
+					entityType: 'image' as const,
+					stats: {
+						viewCount: 0,
+						downloadCount: 0,
+						likeCount: 0,
+						commentCount: 0,
+						tagCount: fileItem.tags?.length || 0,
+						albumCount: fileItem.albums?.length || 0,
+						collectionCount: fileItem.collections?.length || 0,
+						characterCount: fileItem.characters?.length || 0,
+						placeCount: fileItem.places?.length || 0,
+						worldItemCount: fileItem.worldItems?.length || 0,
+						conceptCount: fileItem.concepts?.length || 0,
+						promptCount: fileItem.prompts?.length || 0,
+						noteCount: fileItem.notes?.length || 0,
+						wildcardCount: fileItem.wildcards?.length || 0,
+						propertyCount: fileItem.properties?.length || 0,
+						groupCount: fileItem.groups?.length || 0,
 					},
 					thumbnailUrl: fileItem.thumbnail || `/api/images/${fileItem.id}/thumbnail`,
 					fullUrl: `/api/images/${fileItem.id}/full`,
-					displayName: fileItem.name || `Image ${fileItem.id.slice(-8)}`,
-					formattedSize: formatFileSize(fileItem.size),
-					formattedDimensions: `${fileItem.width} × ${fileItem.height}`,
-					aspectRatioLabel: getAspectRatioLabel(fileItem.width / fileItem.height),
-					parsedMetadata: null,
 				} as any; // Temporal hasta completar migración
 			}
 
@@ -77,7 +61,8 @@ export function useEntityConversion() {
 				// Es un video
 				return {
 					...fileItem,
-					statistics: {
+					entityType: 'video' as const,
+					stats: {
 						// Similar a imagen pero con campos específicos de video
 						duration: fileItem.duration,
 						fps: fileItem.fps,

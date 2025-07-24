@@ -2,18 +2,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateCollection, useUpdateCollection } from '@/lib/api/collections';
 import { toastService } from '@/lib/ui/toast';
-import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
+import type { CreateCollectionInput, UpdateCollectionInput, CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,
 	COLLECTION_CATEGORY_EMOJIS,
 	CollectionCategory,
 } from '@/types/entities/collection/enums';
-import { DynamicCreateForm } from '../common/dynamic-create-form';
+
 
 // Esquema de validación
 const createCollectionSchema = z.object({
@@ -61,7 +66,7 @@ export function CreateCollectionForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel: _onCancel,
+	onCancel,
 }: CreateCollectionFormProps) {
 	// React Query mutations
 	const createCollectionMutation = useCreateCollection();
@@ -174,19 +179,6 @@ export function CreateCollectionForm({
 		try {
 			setIsSubmitting(true);
 
-			const collectionData: Partial<CollectionCreateInput> = {
-				name: data.name,
-				color: data.color || null,
-				emoji: data.emoji || null,
-				description: data.description || null,
-				category: data.category || null,
-				platform: data.platform || null,
-				url: data.url || null,
-				alternativeUrl: data.alternativeUrl || null,
-				price: data.price || null,
-				isFavorite: data.isFavorite || false,
-			};
-
 			// Validar que name esté presente
 			if (!data.name) {
 				throw new Error('El nombre es requerido');
@@ -194,21 +186,33 @@ export function CreateCollectionForm({
 
 			// Crear o actualizar colección
 			if (isEditing && collection) {
+				const updateData: UpdateCollectionInput = {
+					name: data.name,
+					color: data.color || undefined,
+					emoji: data.emoji || undefined,
+					description: data.description || undefined,
+					isFavorite: data.isFavorite || false,
+					isPublic: data.isFavorite || false,
+				};
 				const updated = await updateCollectionMutation.mutateAsync({
 					id: collection.id,
-					data: {
-						...collectionData,
-						isFavorite: data.isFavorite,
-					} as CollectionUpdateInput,
+					data: updateData,
 				});
 				onUpdated?.(updated);
 			} else {
 				// Asegurar que name esté presente para el tipo CollectionCreateInput
-				const createData: CollectionCreateInput = {
-					...collectionData,
-					name: data.name, // Garantizar que name esté presente
-				};
-				const created = await createCollectionMutation.mutateAsync(createData);
+				if (!data.name) {
+					throw new Error('El nombre es requerido');
+				}
+
+				const created = await createCollectionMutation.mutateAsync({
+					name: data.name, // Ya validado que no es undefined
+					color: data.color || undefined,
+					emoji: data.emoji || undefined,
+					description: data.description || undefined,
+					isPublic: data.isFavorite || false,
+					isFavorite: data.isFavorite || false,
+				} as CreateCollectionInput);
 				onCreated?.(created);
 				form.reset();
 			}
@@ -227,74 +231,166 @@ export function CreateCollectionForm({
 		return value !== '' ? Number.parseFloat(value) : undefined;
 	};
 
-	const optionalFields = [
-		{
-			name: 'emoji',
-			label: 'Emoji',
-			render: ({ value, onChange }: any) => (
-				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
-			),
-		},
-		{
-			name: 'color',
-			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
-		},
-		{
-			name: 'description',
-			label: 'Descripción',
-			render: ({ value, onChange }: any) => (
-				<textarea
-					placeholder="Descripción de la colección..."
-					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
-				/>
-			),
-		},
-		{
-			name: 'category',
-			label: 'Categoría',
-			render: ({ value, onChange }: any) => (
-				<Select onValueChange={onChange} value={value || undefined}>
-					<SelectTrigger className="h-8 text-xs w-full">
-						<SelectValue placeholder="Seleccionar" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="arte">Arte</SelectItem>
-						<SelectItem value="foto">Foto</SelectItem>
-						<SelectItem value="libros">Libros</SelectItem>
-						<SelectItem value="otro">Otro</SelectItem>
-					</SelectContent>
-				</Select>
-			),
-		},
-		{
-			name: 'platform',
-			label: 'Plataforma',
-			render: ({ value, onChange }: any) => (
-				<Select onValueChange={onChange} value={value || undefined}>
-					<SelectTrigger className="h-8 text-xs w-full">
-						<SelectValue placeholder="Seleccionar" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="web">Web</SelectItem>
-						<SelectItem value="nft">NFT</SelectItem>
-						<SelectItem value="physical">Físico</SelectItem>
-						<SelectItem value="digital">Digital</SelectItem>
-					</SelectContent>
-				</Select>
-			),
-		},
-		// ...agregar más campos opcionales si es necesario...
-	];
-
 	return (
-		<DynamicCreateForm
-			optionalFields={optionalFields}
-			onSubmit={_onSubmit}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear colección'}
-		/>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(_onSubmit)} className="space-y-4">
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nombre</FormLabel>
+							<FormControl>
+								<Input placeholder="Nombre de la colección" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="emoji"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Emoji</FormLabel>
+							<FormControl>
+								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="color"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Color</FormLabel>
+							<FormControl>
+								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Descripción</FormLabel>
+							<FormControl>
+								<Textarea placeholder="Descripción de la colección..." rows={3} {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="category"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Categoría</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Seleccionar categoría" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{Object.values(CollectionCategory).map((category) => (
+										<SelectItem key={category} value={category}>
+											{category}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="platform"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Plataforma</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Seleccionar plataforma" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									<SelectItem value="web">Web</SelectItem>
+									<SelectItem value="nft">NFT</SelectItem>
+									<SelectItem value="physical">Físico</SelectItem>
+									<SelectItem value="digital">Digital</SelectItem>
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="url"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>URL</FormLabel>
+							<FormControl>
+								<Input placeholder="https://..." {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="price"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Precio</FormLabel>
+							<FormControl>
+								<Input type="number" min={0} step={0.01} {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="isFavorite"
+					render={({ field }) => (
+						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+							<FormControl>
+								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+							</FormControl>
+							<div className="space-y-1 leading-none">
+								<FormLabel>Marcar como favorito</FormLabel>
+							</div>
+						</FormItem>
+					)}
+				/>
+
+				<div className="flex justify-end space-x-2">
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancelar
+					</Button>
+					<Button type="submit">
+						{isEditing ? 'Guardar cambios' : 'Crear colección'}
+					</Button>
+				</div>
+			</form>
+		</Form>
 	);
 }

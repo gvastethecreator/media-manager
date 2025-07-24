@@ -5,9 +5,9 @@
  * Script para preparar la migración completa a Bun Bundler Nativo
  */
 
+import chalk from 'chalk';
 import { promises as fs } from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 
 class Fase3Checkpoint1 {
 	constructor() {
@@ -90,24 +90,24 @@ class Fase3Checkpoint1 {
 			const viteConfig = await fs.readFile('vite.config.ts', 'utf8');
 			const viteDocPath = path.join(this.backupDir, 'vite-config-analysis.md');
 			
-			const viteAnalysis = `# Análisis de Configuración Vite Actual\n\n` +
+			const viteAnalysis = '# Análisis de Configuración Vite Actual\n\n' +
 				`**Fecha:** ${new Date().toISOString()}\n\n` +
-				`## Configuración Actual\n\n` +
+				'## Configuración Actual\n\n' +
 				`\`\`\`typescript\n${viteConfig}\n\`\`\`\n\n` +
-				`## Plugins Identificados\n\n` +
-				`- @vitejs/plugin-react: Transformación JSX\n` +
-				`- vite-tsconfig-paths: Path mapping TypeScript\n` +
-				`- vite-plugin-svgr: SVG como componentes React\n\n` +
-				`## Configuraciones Críticas\n\n` +
-				`- Server: Puerto 5173, HMR, Proxy API\n` +
-				`- Build: Target ES2020, Sourcemaps, Chunks\n` +
-				`- Resolve: Alias para Node.js polyfills\n` +
-				`- OptimizeDeps: Exclusiones e inclusiones\n\n` +
-				`## Migración Requerida\n\n` +
-				`1. Reemplazar plugins con equivalentes Bun\n` +
-				`2. Configurar Bun.build() con mismas opciones\n` +
-				`3. Implementar HMR personalizado\n` +
-				`4. Mantener proxy y configuraciones de desarrollo\n`;
+				'## Plugins Identificados\n\n' +
+				'- @vitejs/plugin-react: Transformación JSX\n' +
+				'- vite-tsconfig-paths: Path mapping TypeScript\n' +
+				'- vite-plugin-svgr: SVG como componentes React\n\n' +
+				'## Configuraciones Críticas\n\n' +
+				'- Server: Puerto 5173, HMR, Proxy API\n' +
+				'- Build: Target ES2020, Sourcemaps, Chunks\n' +
+				'- Resolve: Alias para Node.js polyfills\n' +
+				'- OptimizeDeps: Exclusiones e inclusiones\n\n' +
+				'## Migración Requerida\n\n' +
+				'1. Reemplazar plugins con equivalentes Bun\n' +
+				'2. Configurar Bun.build() con mismas opciones\n' +
+				'3. Implementar HMR personalizado\n' +
+				'4. Mantener proxy y configuraciones de desarrollo\n';
 			
 			await fs.writeFile(viteDocPath, viteAnalysis);
 			
@@ -137,20 +137,20 @@ class Fase3Checkpoint1 {
 				dep.includes('plugin')
 			);
 			
-			const depsAnalysis = `# Análisis de Dependencias de Bundling\n\n` +
+			const depsAnalysis = '# Análisis de Dependencias de Bundling\n\n' +
 				`**Fecha:** ${new Date().toISOString()}\n\n` +
-				`## Dependencias de Bundling Actuales\n\n` +
+				'## Dependencias de Bundling Actuales\n\n' +
 				bundlerDeps.map(dep => `- ${dep}: ${packageJson.dependencies[dep] || packageJson.devDependencies[dep]}`).join('\n') +
-				`\n\n## Plan de Migración\n\n` +
-				`### A Eliminar\n` +
-				`- vite: Reemplazado por Bun.build()\n` +
-				`- @vitejs/plugin-react: JSX nativo en Bun\n` +
-				`- vite-plugin-svgr: Plugin personalizado\n` +
-				`- rollup: Bundler nativo Bun\n\n` +
-				`### A Mantener\n` +
-				`- typescript: Compatible con Bun\n` +
-				`- tailwindcss: Compatible con Bun\n` +
-				`- postcss: Procesamiento CSS externo\n`;
+				'\n\n## Plan de Migración\n\n' +
+				'### A Eliminar\n' +
+				'- vite: Reemplazado por Bun.build()\n' +
+				'- @vitejs/plugin-react: JSX nativo en Bun\n' +
+				'- vite-plugin-svgr: Plugin personalizado\n' +
+				'- rollup: Bundler nativo Bun\n\n' +
+				'### A Mantener\n' +
+				'- typescript: Compatible con Bun\n' +
+				'- tailwindcss: Compatible con Bun\n' +
+				'- postcss: Procesamiento CSS externo\n';
 			
 			await fs.writeFile(depsDocPath, depsAnalysis);
 			

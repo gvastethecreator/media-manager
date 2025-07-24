@@ -68,7 +68,7 @@ export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase 
 export function toDrizzleWildcard(
 	wildcard: Partial<WildcardComplete>,
 	options: WildcardTransformOptions = {}
-): Record<string, any> {
+): Record<string, unknown> {
 	try {
 		const { validateFields = true } = options;
 
@@ -78,7 +78,7 @@ export function toDrizzleWildcard(
 		}
 
 		// Crear objeto con solo propiedades válidas para Drizzle
-		const result: Record<string, any> = {
+		const result: Record<string, unknown> = {
 			id: wildcard.id,
 			name: wildcard.name,
 			emoji: wildcard.emoji || DEFAULT_WILDCARD_EMOJI,
@@ -134,7 +134,7 @@ export function fromDrizzleWildcard<T extends WildcardBase>(
 
 		// Crear resultado base con propiedades seleccionadas sin usar delete
 		const filteredWildcard = { ...wildcard };
-		const result = Object.keys(filteredWildcard).reduce((acc: any, key) => {
+		const result = Object.keys(filteredWildcard).reduce((acc: Record<string, unknown>, key) => {
 			// Copiar todas las propiedades excepto 'favorite'
 			if (key !== 'favorite') {
 				acc[key] = (filteredWildcard as any)[key];

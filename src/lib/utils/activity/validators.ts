@@ -22,7 +22,7 @@ export const createActivitySchema = z.object({
 	type: z.string().refine((type) => isValidActivityType(type), { message: 'Tipo de actividad no válido' }),
 	description: z.string().min(1, 'La descripción es obligatoria'),
 	imageId: z.string().optional(),
-	metadata: z.union([z.string(), z.record(z.any())]).optional(),
+	metadata: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
 });
 
 /**

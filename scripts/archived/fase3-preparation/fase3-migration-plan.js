@@ -5,9 +5,9 @@
  * Preparación detallada para migración completa del bundler
  */
 
+import chalk from 'chalk';
 import { promises as fs } from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 
 class Fase3MigrationPlanner {
 	constructor() {
@@ -20,7 +20,7 @@ class Fase3MigrationPlanner {
 			risk_assessment: [],
 			fallback_strategy: [],
 			validation_checklist: [],
-			estimated_timeline: '2-3 semanas'
+			estimated_timeline: '2-3 semanas',
 		};
 	}
 
@@ -35,17 +35,10 @@ class Fase3MigrationPlanner {
 					'Configurar entry points y outputs',
 					'Implementar asset handling básico',
 					'Configurar TypeScript compilation',
-					'Setup básico de development server'
+					'Setup básico de development server',
 				],
-				deliverables: [
-					'bun.build.config.ts funcional',
-					'Build básico exitoso',
-					'Assets estáticos funcionando'
-				],
-				risks: [
-					'Configuración inicial compleja',
-					'Incompatibilidades con assets existentes'
-				]
+				deliverables: ['bun.build.config.ts funcional', 'Build básico exitoso', 'Assets estáticos funcionando'],
+				risks: ['Configuración inicial compleja', 'Incompatibilidades con assets existentes'],
 			},
 			{
 				phase: 'FASE 3.2 - Migración de Plugins',
@@ -56,18 +49,15 @@ class Fase3MigrationPlanner {
 					'Migrar vite-tsconfig-paths a Bun paths',
 					'Crear plugin personalizado para SVGR',
 					'Configurar PostCSS y Tailwind',
-					'Implementar asset imports'
+					'Implementar asset imports',
 				],
 				deliverables: [
 					'JSX transformation funcionando',
 					'Path mapping operativo',
 					'SVG como componentes React',
-					'CSS processing completo'
+					'CSS processing completo',
 				],
-				risks: [
-					'Plugin SVGR personalizado complejo',
-					'CSS processing puede fallar'
-				]
+				risks: ['Plugin SVGR personalizado complejo', 'CSS processing puede fallar'],
 			},
 			{
 				phase: 'FASE 3.3 - Development Experience',
@@ -78,18 +68,15 @@ class Fase3MigrationPlanner {
 					'Configurar file watching',
 					'Setup proxy para API backend',
 					'Configurar source maps',
-					'Optimizar rebuild times'
+					'Optimizar rebuild times',
 				],
 				deliverables: [
 					'HMR funcionando correctamente',
 					'Dev server con proxy',
 					'Source maps para debugging',
-					'Fast refresh operativo'
+					'Fast refresh operativo',
 				],
-				risks: [
-					'HMR personalizado puede ser inestable',
-					'Performance de rebuild'
-				]
+				risks: ['HMR personalizado puede ser inestable', 'Performance de rebuild'],
 			},
 			{
 				phase: 'FASE 3.4 - Production Build',
@@ -100,18 +87,15 @@ class Fase3MigrationPlanner {
 					'Implementar code splitting',
 					'Configurar minification',
 					'Setup tree shaking',
-					'Optimizar bundle size'
+					'Optimizar bundle size',
 				],
 				deliverables: [
 					'Build de producción optimizado',
 					'Chunks apropiados',
 					'Bundle size comparable o mejor',
-					'Performance metrics validados'
+					'Performance metrics validados',
 				],
-				risks: [
-					'Bundle size mayor que Vite',
-					'Code splitting subóptimo'
-				]
+				risks: ['Bundle size mayor que Vite', 'Code splitting subóptimo'],
 			},
 			{
 				phase: 'FASE 3.5 - Testing & Validation',
@@ -122,19 +106,16 @@ class Fase3MigrationPlanner {
 					'Validar todas las funcionalidades',
 					'Benchmarks de performance',
 					'Testing de regresiones',
-					'Documentar cambios'
+					'Documentar cambios',
 				],
 				deliverables: [
 					'Todos los tests pasando',
 					'Funcionalidad 100% preservada',
 					'Performance igual o mejor',
-					'Documentación actualizada'
+					'Documentación actualizada',
 				],
-				risks: [
-					'Regresiones no detectadas',
-					'Performance degradation'
-				]
-			}
+				risks: ['Regresiones no detectadas', 'Performance degradation'],
+			},
 		];
 
 		this.migrationPlan.migration_phases = phases;
@@ -147,36 +128,36 @@ class Fase3MigrationPlanner {
 				risk: 'HMR personalizado inestable',
 				impact: 'ALTO',
 				probability: 'MEDIO',
-				mitigation: 'Implementar fallback a file watching, testing exhaustivo'
+				mitigation: 'Implementar fallback a file watching, testing exhaustivo',
 			},
 			{
 				category: 'PERFORMANCE',
 				risk: 'Bundle size mayor que Vite',
 				impact: 'MEDIO',
 				probability: 'BAJO',
-				mitigation: 'Optimización agresiva, tree shaking, code splitting'
+				mitigation: 'Optimización agresiva, tree shaking, code splitting',
 			},
 			{
 				category: 'DESARROLLO',
 				risk: 'Developer experience degradado',
 				impact: 'ALTO',
 				probability: 'MEDIO',
-				mitigation: 'Mantener Vite como fallback, training del equipo'
+				mitigation: 'Mantener Vite como fallback, training del equipo',
 			},
 			{
 				category: 'COMPATIBILIDAD',
 				risk: 'Plugins de terceros incompatibles',
 				impact: 'MEDIO',
 				probability: 'ALTO',
-				mitigation: 'Crear wrappers, implementaciones personalizadas'
+				mitigation: 'Crear wrappers, implementaciones personalizadas',
 			},
 			{
 				category: 'TIEMPO',
 				risk: 'Migración toma más tiempo del estimado',
 				impact: 'MEDIO',
 				probability: 'ALTO',
-				mitigation: 'Fases incrementales, rollback plan'
-			}
+				mitigation: 'Fases incrementales, rollback plan',
+			},
 		];
 
 		this.migrationPlan.risk_assessment = risks;
@@ -187,23 +168,23 @@ class Fase3MigrationPlanner {
 			{
 				scenario: 'HMR no funciona correctamente',
 				action: 'Revertir a Vite para desarrollo, mantener Bun para producción',
-				trigger: 'HMR falla > 50% del tiempo'
+				trigger: 'HMR falla > 50% del tiempo',
 			},
 			{
 				scenario: 'Performance de build degradado',
 				action: 'Rollback completo a configuración Vite',
-				trigger: 'Build time > 150% del tiempo actual'
+				trigger: 'Build time > 150% del tiempo actual',
 			},
 			{
 				scenario: 'Funcionalidad crítica rota',
 				action: 'Rollback inmediato, investigación post-mortem',
-				trigger: 'Cualquier funcionalidad core no funciona'
+				trigger: 'Cualquier funcionalidad core no funciona',
 			},
 			{
 				scenario: 'Equipo no puede adaptarse',
 				action: 'Mantener configuración híbrida, training adicional',
-				trigger: 'Feedback negativo > 70% del equipo'
-			}
+				trigger: 'Feedback negativo > 70% del equipo',
+			},
 		];
 
 		this.migrationPlan.fallback_strategy = fallback;
@@ -220,8 +201,8 @@ class Fase3MigrationPlanner {
 					'Estado global funciona (Zustand)',
 					'API calls funcionan',
 					'File uploads operativos',
-					'Database operations correctas'
-				]
+					'Database operations correctas',
+				],
 			},
 			{
 				category: 'DESARROLLO',
@@ -231,8 +212,8 @@ class Fase3MigrationPlanner {
 					'Error overlay funcional',
 					'Fast refresh operativo',
 					'Dev server proxy funciona',
-					'File watching responsive'
-				]
+					'File watching responsive',
+				],
 			},
 			{
 				category: 'PRODUCCIÓN',
@@ -242,8 +223,8 @@ class Fase3MigrationPlanner {
 					'Code splitting efectivo',
 					'Assets optimizados',
 					'Performance comparable',
-					'SEO metadata preservado'
-				]
+					'SEO metadata preservado',
+				],
 			},
 			{
 				category: 'TESTING',
@@ -252,9 +233,9 @@ class Fase3MigrationPlanner {
 					'Integration tests exitosos',
 					'E2E tests funcionan',
 					'Performance tests OK',
-					'Accessibility tests pasan'
-				]
-			}
+					'Accessibility tests pasan',
+				],
+			},
 		];
 
 		this.migrationPlan.validation_checklist = checklist;
@@ -307,13 +288,13 @@ class Fase3MigrationPlanner {
 
 		console.log(chalk.red('\n⚠️  RIESGOS PRINCIPALES:'));
 		this.migrationPlan.risk_assessment
-			.filter(risk => risk.impact === 'ALTO')
-			.forEach(risk => {
+			.filter((risk) => risk.impact === 'ALTO')
+			.forEach((risk) => {
 				console.log(`   🔴 ${risk.category}: ${risk.risk}`);
 			});
 
 		console.log(chalk.green('\n🔄 ESTRATEGIAS DE FALLBACK:'));
-		this.migrationPlan.fallback_strategy.forEach(strategy => {
+		this.migrationPlan.fallback_strategy.forEach((strategy) => {
 			console.log(`   🔄 ${strategy.scenario}`);
 			console.log(`      ➡️  ${strategy.action}`);
 		});

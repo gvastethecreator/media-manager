@@ -82,26 +82,26 @@ export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function 
 				<CardContent className="space-y-3">
 					<div className="grid grid-cols-2 gap-4 text-sm">
 						<div className="text-center">
-							<p className="text-2xl font-bold text-primary">{entity.statistics?.totalItems || 0}</p>
+							<p className="text-2xl font-bold text-primary">{entity.stats?.totalItems || 0}</p>
 							<p className="text-muted-foreground">Elementos</p>
 						</div>
 						<div className="text-center">
-							<p className="text-2xl font-bold text-primary">{formatBytes(entity.size || 0)}</p>
+							<p className="text-2xl font-bold text-primary">{formatBytes(entity.totalSize || 0)}</p>
 							<p className="text-muted-foreground">Tamaño total</p>
 						</div>
 					</div>
 
 					{/* Distribución por tipo */}
-					{entity.statistics && (
+					{entity.stats && (
 						<div className="space-y-2">
 							<div className="flex justify-between text-xs">
-								<span>Carpetas: {entity.statistics.folderCount || 0}</span>
-								<span>Archivos: {entity.statistics.fileCount || 0}</span>
+								<span>Carpetas: {entity.stats.folderCount || 0}</span>
+								<span>Archivos: {entity.stats.totalItems ? (entity.stats.totalItems - (entity.stats.folderCount || 0)) : 0}</span>
 							</div>
 							<Progress
 								value={
-									entity.statistics.totalItems
-										? ((entity.statistics.folderCount || 0) / entity.statistics.totalItems) * 100
+									entity.stats?.totalItems
+										? ((entity.stats.folderCount || 0) / entity.stats.totalItems) * 100
 										: 0
 								}
 								className="h-2"
@@ -276,7 +276,7 @@ export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function 
 					<div className={cn('flex items-center justify-center bg-muted/20', sizeClasses[size])}>
 						<div className="text-center">
 							<FolderOpen className="h-12 w-12 text-primary mx-auto mb-2" />
-							<p className="text-sm text-muted-foreground">{entity.statistics?.totalItems || 0} elementos</p>
+							<p className="text-sm text-muted-foreground">{entity.stats?.totalItems || 0} elementos</p>
 						</div>
 					</div>
 				)}
@@ -434,7 +434,7 @@ export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(functio
 		},
 	];
 
-	const stats = entity.statistics;
+	const stats = entity.stats;
 	const statisticsMetadata = stats
 		? [
 				{
@@ -454,7 +454,7 @@ export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(functio
 				},
 				{
 					label: 'Tamaño total',
-					value: formatBytes(entity.size || 0),
+					value: formatBytes(entity.totalSize || 0),
 					category: 'stats',
 				},
 			]

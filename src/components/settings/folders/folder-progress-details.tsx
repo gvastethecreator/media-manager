@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { ExtendedProcessStatus } from './hooks/use-folders';
+import type { ExtendedProcessStatus } from './folder-types';
 
 // Crear una instancia de logger para este componente
 const componentLogger = clientLogger.withContext('FolderProgressDetails');
@@ -18,13 +18,13 @@ interface FolderProgressDetailsProps {
 }
 
 // Define las fases del proceso si no están definidas
-type ProcessPhase = 'scanning' | 'metadata' | 'thumbnail' | 'complete' | 'error' | 'starting';
+type ProcessPhase = 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete' | 'indexing' | 'thumbnails';
 
 export function FolderProgressDetails({ status, isProcessing, className }: FolderProgressDetailsProps) {
 	const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 	const [isStale, setIsStale] = useState<boolean>(false);
 	const [isComplete, setIsComplete] = useState<boolean>(false);
-	const staleTimerRef = useRef<number | null>(null);
+	const staleTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const initialLoadRef = useRef<boolean>(true);
 
 	// Verificar si el estado está estancado (sin actualizaciones por más de 15 segundos)
@@ -102,18 +102,16 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 
 	// Función para renderizar el icono según la fase actual
 	const getPhaseIcon = useCallback(() => {
-		const phase = status.phase as ProcessPhase;
+		const phase = status.phase;
 		switch (phase) {
+			case 'starting':
+				return <Folder className="h-3.5 w-3.5 text-blue-500" />;
 			case 'scanning':
 				return <Folder className="h-3.5 w-3.5 text-blue-500" />;
-			case 'indexing':
+			case 'processing':
 				return <File className="h-3.5 w-3.5 text-green-500" />;
-			case 'thumbnails':
-				return <File className="h-3.5 w-3.5 text-purple-500" />;
 			case 'metadata':
 				return <Code className="h-3.5 w-3.5 text-yellow-500" />;
-			case 'error':
-				return <FileWarning className="h-3.5 w-3.5 text-red-500" />;
 			case 'complete':
 				return <File className="h-3.5 w-3.5 text-emerald-500" />;
 			default:
@@ -246,7 +244,7 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 
 			{/* Detalles adicionales */}
 			<AnimatePresence>
-				{status.errors && status.errors.length > 0 && (
+				{status.errors && Array.isArray(status.errors) && status.errors.length > 0 && (
 					<motion.div
 						initial={{ opacity: 0, height: 0 }}
 						animate={{ opacity: 1, height: 'auto' }}
@@ -254,9 +252,10 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 						className="text-[10px] text-destructive border border-destructive/20 rounded p-1 bg-destructive/5 mt-1"
 					>
 						<div className="font-medium">Errores encontrados:</div>
-						{status.errors.slice(0, 3).map((error, index) => (
-							<div key={`error-${index}-${error.file}`} className="truncate">
-								• {error.file.split('/').pop()}: {error.error}
+						{status.errors.slice(0, 3).map((errorItem: any, index: number) => (
+							<div key={`error-${index}-${errorItem.file || index}`} className="truncate">
+								• {errorItem.file ? errorItem.file.split('/').pop() : 'Archivo desconocido'}:{' '}
+								{errorItem.error || errorItem.message || String(errorItem)}
 							</div>
 						))}
 						{status.errors.length > 3 && <div>Y {status.errors.length - 3} más...</div>}

@@ -1,7 +1,7 @@
 import { AlertCircle, BarChart } from 'lucide-react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/store/stats.store';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { useStats } from '@/store/stats.store';
 import { StatCard } from './stat-card';
 
 export function GeneralStats() {
@@ -105,7 +105,7 @@ export function GeneralStats() {
 			value: stats.totalFile3D || 0,
 			icon: 'Box',
 			color: 'text-indigo-500',
-		}
+		},
 	] as const;
 
 	// Estadísticas adicionales

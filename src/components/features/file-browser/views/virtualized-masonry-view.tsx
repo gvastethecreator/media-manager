@@ -7,15 +7,15 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
 import React, { memo, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface VirtualizedMasonryViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
 export const VirtualizedMasonryView = memo<VirtualizedMasonryViewProps>(function VirtualizedMasonryView({
@@ -114,12 +114,17 @@ export const VirtualizedMasonryView = memo<VirtualizedMasonryViewProps>(function
 								<div className="h-full flex flex-col">
 									<div className="flex-1 flex items-center justify-center bg-muted rounded mb-3">
 										<div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-											<span className="text-lg font-semibold text-primary">{item.name.charAt(0).toUpperCase()}</span>
+											<span className="text-lg font-semibold text-primary">
+												{'name' in item ? item.name.charAt(0).toUpperCase() : 'U'}
+											</span>
 										</div>
 									</div>
-									<div className="text-sm font-medium text-center mb-1">{item.name}</div>
+									<div className="text-sm font-medium text-center mb-1">
+										{'name' in item ? item.name : 'id' in item ? item.id : 'Unknown'}
+									</div>
 									<div className="text-xs text-muted-foreground text-center">
-										{item.entityType} • {item.stats?.imageCount || 0} imágenes
+										{'entityType' in item ? item.entityType : 'unknown'} • 
+										{'stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats ? item.stats.imageCount : 0} imágenes
 									</div>
 								</div>
 							</motion.div>

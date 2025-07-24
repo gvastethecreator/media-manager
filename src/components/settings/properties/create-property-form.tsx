@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateProperty, useUpdateProperty } from '@/lib/api/properties';
-import type { PropertyWithStats as Property } from '@/types/entities/property';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
+import type { PropertyWithStats as Property } from '@/types/entities/property/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 type FormData = z.infer<typeof CreatePropertySchema>;

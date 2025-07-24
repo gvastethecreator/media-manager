@@ -2,7 +2,7 @@
 // Proporciona tanto export default como exports nombrados para evitar errores
 
 const emptyObject = {};
-const emptyFunction = () => { };
+const emptyFunction = () => {};
 const emptyPromise = Promise.resolve();
 
 // Para compatibilidad con http - STATUS_CODES como propiedad del objeto principal
@@ -19,7 +19,7 @@ const STATUS_CODES = {
 	500: 'Internal Server Error',
 	502: 'Bad Gateway',
 	503: 'Service Unavailable',
-	504: 'Gateway Timeout'
+	504: 'Gateway Timeout',
 };
 
 // Crear un objeto http que incluya STATUS_CODES
