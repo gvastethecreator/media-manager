@@ -71,8 +71,8 @@ type DrizzleCreatePlaceData = {
 	history?: string | null;
 	geography?: string | null;
 	landmarks?: string | null;
-	dangers: string; // JSON
-	resources: string; // JSON
+	dangers?: string | null; // JSON
+	resources?: string | null; // JSON
 	notes?: string | null;
 	featuredImage?: string | null;
 	parentId?: string | null;
@@ -174,8 +174,8 @@ export function toCreateDataForDrizzle(input: PlaceCreateInput): DrizzleCreatePl
 
 	return {
 		...rest,
-		dangers: JSON.stringify(input.dangers || []),
-		resources: JSON.stringify(input.resources || []),
+		dangers: null,
+		resources: null,
 		// Las relaciones se manejan por separado en Drizzle con junction tables
 	};
 }
@@ -202,9 +202,6 @@ export function toUpdateDataForDrizzle(input: PlaceUpdateInput): DrizzleUpdatePl
 	} = input as any; // Usamos 'as any' para manejar las relaciones que no están en el tipo base
 
 	const data: DrizzleUpdatePlaceData = { ...rest };
-
-	if (input.dangers !== undefined) data.dangers = JSON.stringify(input.dangers);
-	if (input.resources !== undefined) data.resources = JSON.stringify(input.resources);
 
 	// Las relaciones se manejan por separado en Drizzle con junction tables
 	return data;

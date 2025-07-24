@@ -40,7 +40,7 @@ const createTagSchema = z.object({
 		message: 'Debes seleccionar un emoji',
 	}),
 	category: z.nativeEnum(TagCategory).optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean().optional().default(false),
 });
 
 type FormValues = {

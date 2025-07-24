@@ -1,10 +1,10 @@
-import type {
-	DirectoryReadResult,
-	FileCopyMoveResult,
-	FileInfo,
-	FileOperationOptions,
-	FileOperationResult,
-} from '@/types/entities/file';
+import type { FileInfo } from '@/types/file-entity-mapper';
+import type { FileOperationResult } from '@/lib/types';
+
+// TODO: Definir estos tipos correctamente si se usan en la API
+type DirectoryReadResult = any;
+type FileCopyMoveResult = any;
+type FileOperationOptions = any;
 import apiClient from '../client';
 
 const API_BASE = '/files';

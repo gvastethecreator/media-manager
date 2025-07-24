@@ -3,7 +3,8 @@
  * @module utils/collection/helpers
  */
 
-import type { CollectionSortOption, CollectionWithStats } from '@/types/entities/collection';
+import { CollectionSortOption } from '@/types/entities/collection/enums';
+import type { CollectionWithStats } from '@/types/entities/collection/types';
 
 /**
  * Ordena un array de colecciones según la opción de ordenación
@@ -85,14 +86,14 @@ export function filterCollections(collections: CollectionWithStats[], filters: a
 
 		// Filtrar por número de imágenes
 		if (filters.minImages !== undefined) {
-			const imageCount = collection.stats?.imageCount || 0;
+			const imageCount = collection._count?.images || 0;
 			if (imageCount < filters.minImages) {
 				return false;
 			}
 		}
 
 		if (filters.maxImages !== undefined) {
-			const imageCount = collection.stats?.imageCount || 0;
+			const imageCount = collection._count?.images || 0;
 			if (imageCount > filters.maxImages) {
 				return false;
 			}

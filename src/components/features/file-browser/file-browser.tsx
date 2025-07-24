@@ -14,6 +14,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { EntityCard } from '@/components/cards/entity-card';
 import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
 import { EmptyState } from '@/components/core/data-display';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
@@ -94,8 +95,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Estados globales
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
+	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
+	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
 	const { selectedIds: globalSelectedIds, setSelectedIds, clearSelection } = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
+
+	// Usar selectedIds globales en lugar de prop local
+	const effectiveSelectedIds = globalSelectedIds.length > 0 ? globalSelectedIds : selectedIds;
 
 	// Stores por tipo de entidad (expandir según necesidad)
 	const {
@@ -227,51 +233,122 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			return manualItems;
 		}
 
+		let rawItems: AnyEntityWithStats[] = [];
+
 		// En modo auto, obtener desde stores
 		if (entityType === 'mixed') {
 			// Modo mixto: combinar múltiples tipos de entidades
-			const allItems: AnyEntityWithStats[] = [];
-
 			for (const type of entityTypes) {
 				switch (type) {
 					case 'image':
 						if (filterId && filterType === 'folder') {
-							allItems.push(...getImagesByFolder(filterId));
+							rawItems.push(...getImagesByFolder(filterId));
 						} else {
-							allItems.push(...getSortedImages());
+							rawItems.push(...getSortedImages());
 						}
 						break;
 					// TODO: Añadir otros casos según se implementen
 				}
 			}
+		} else {
+			// Modo específico: un solo tipo de entidad
+			switch (entityType) {
+				case 'image': {
+					// Si hay filtro por carpeta, usar getImagesByFolder
+					if (filterId && filterType === 'folder') {
+						rawItems = getImagesByFolder(filterId);
+						console.log('🔍 FileBrowser - Imágenes filtradas por carpeta:', rawItems.length, { filterId });
+					} else {
+						rawItems = getSortedImages();
+						console.log('🔍 FileBrowser - Todas las imágenes ordenadas:', rawItems.length);
+					}
+					break;
+				}
+				// TODO: Añadir otros casos según se implementen
+				default:
+					console.log('🔍 FileBrowser - Retornando array vacío (entityType no coincide)');
+					break;
+			}
+		}
 
-			// Ordenar todos los items combinados (opcional)
-			return allItems.sort((a, b) => {
-				// Ordenar por fecha de modificación descendente por defecto
-				const aDate = new Date('updatedAt' in a ? a.updatedAt || 0 : 0);
-				const bDate = new Date('updatedAt' in b ? b.updatedAt || 0 : 0);
-				return bDate.getTime() - aDate.getTime();
+		// Aplicar filtro de búsqueda si existe
+		let filteredItems = rawItems;
+		if (searchQuery && searchQuery.trim()) {
+			const query = searchQuery.toLowerCase().trim();
+			filteredItems = rawItems.filter(item => {
+				// Helper para obtener el nombre de la entidad
+				const getEntityName = (entity: AnyEntityWithStats): string => {
+					if ('name' in entity && typeof entity.name === 'string') return entity.name;
+					if ('title' in entity && typeof entity.title === 'string') return entity.title;
+					return '';
+				};
+
+				// Helper para obtener el path de la entidad
+				const getEntityPath = (entity: AnyEntityWithStats): string => {
+					if ('path' in entity && typeof entity.path === 'string') return entity.path;
+					if ('category' in entity && typeof entity.category === 'string') return entity.category;
+					return '';
+				};
+
+				const itemName = getEntityName(item).toLowerCase();
+				const itemPath = getEntityPath(item).toLowerCase();
+				return itemName.includes(query) || itemPath.includes(query);
 			});
 		}
 
-		// Modo específico: un solo tipo de entidad
-		switch (entityType) {
-			case 'image': {
-				// Si hay filtro por carpeta, usar getImagesByFolder
-				if (filterId && filterType === 'folder') {
-					const filteredImages = getImagesByFolder(filterId);
-					console.log('🔍 FileBrowser - Imágenes filtradas por carpeta:', filteredImages.length, { filterId });
-					return filteredImages;
+		// Aplicar ordenación si existe
+		if (sortOptions.length > 0) {
+			filteredItems.sort((a, b) => {
+				for (const sortOption of sortOptions) {
+					const { field, direction } = sortOption;
+					let aValue: any, bValue: any;
+
+					switch (field) {
+						case 'name': {
+							// Helper para obtener el nombre de la entidad
+							const getEntityName = (entity: AnyEntityWithStats): string => {
+								if ('name' in entity && typeof entity.name === 'string') return entity.name;
+								if ('title' in entity && typeof entity.title === 'string') return entity.title;
+								return '';
+							};
+							aValue = getEntityName(a).toLowerCase();
+							bValue = getEntityName(b).toLowerCase();
+							break;
+						}
+						case 'modifiedAt':
+							aValue = new Date((a as any).updatedAt || (a as any).modifiedAt || 0);
+							bValue = new Date((b as any).updatedAt || (b as any).modifiedAt || 0);
+							break;
+						case 'createdAt':
+							aValue = new Date((a as any).createdAt || 0);
+							bValue = new Date((b as any).createdAt || 0);
+							break;
+						default:
+							continue;
+					}
+
+					// Comparación más robusta
+					if (typeof aValue === 'string' && typeof bValue === 'string') {
+						const result = aValue.localeCompare(bValue);
+						if (result !== 0) return direction === 'asc' ? result : -result;
+					} else if (aValue instanceof Date && bValue instanceof Date) {
+						const result = aValue.getTime() - bValue.getTime();
+						if (result !== 0) return direction === 'asc' ? result : -result;
+					} else {
+						if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+						if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+					}
 				}
-				const allImages = getSortedImages();
-				console.log('🔍 FileBrowser - Todas las imágenes ordenadas:', allImages.length);
-				return allImages;
-			}
-			// TODO: Añadir otros casos según se implementen
-			default:
-				console.log('🔍 FileBrowser - Retornando array vacío (entityType no coincide)');
-				return [];
-		}
+				return 0;
+			});
+		} else {
+			// Ordenación por defecto: fecha de modificación descendente
+			filteredItems.sort((a, b) => {
+				const aDate = new Date((a as any).updatedAt || (a as any).modifiedAt || 0);
+				const bDate = new Date((b as any).updatedAt || (b as any).modifiedAt || 0);
+				return bDate.getTime() - aDate.getTime();
+			});
+		} return filteredItems;
 	})();
 
 	// Determinar estado de carga y error
@@ -391,7 +468,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				// TODO: Implementar selección por rango
 				setSelectedIds([item.id]);
 			} else if (isCtrlClick) {
-				const newSelection = new Set(selectedIds);
+				const newSelection = new Set(effectiveSelectedIds);
 				if (newSelection.has(item.id)) {
 					newSelection.delete(item.id);
 				} else {
@@ -405,7 +482,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			onItemSelect?.(item);
 			onItemClick?.(item, e);
 		},
-		[selectedIds, setSelectedIds, onItemClick, onItemSelect]
+		[effectiveSelectedIds, setSelectedIds, onItemClick, onItemSelect]
 	);
 
 	// Manejar doble click
@@ -423,14 +500,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Actualizar panel de detalles cuando cambia la selección
 	useEffect(() => {
-		if (selectedIds.length > 0) {
-			const selectedItems = items.filter((item: AnyEntityWithStats) => selectedIds.includes(item.id));
+		if (effectiveSelectedIds.length > 0) {
+			const selectedItems = items.filter((item: AnyEntityWithStats) => effectiveSelectedIds.includes(item.id));
 			setDetailsPanelItems(selectedItems);
 			setDetailsPanelVisible(true);
 		} else {
 			setDetailsPanelVisible(false);
 		}
-	}, [selectedIds, items, setDetailsPanelItems, setDetailsPanelVisible]);
+	}, [effectiveSelectedIds, items, setDetailsPanelItems, setDetailsPanelVisible]);
 
 	// Añadir efecto para escuchar Escape globalmente
 	useEffect(() => {
@@ -483,7 +560,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				<EntityCard
 					key={item.id}
 					entity={item as AnyEntityWithStats}
-					isSelected={selectedIds.includes(item.id)}
+					isSelected={effectiveSelectedIds.includes(item.id)}
 					onClick={onClickHandler}
 					onDoubleClick={onDoubleClickHandler}
 					layout={layout}
@@ -494,7 +571,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				/>
 			);
 		},
-		[selectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size, onItemClick, onItemDoubleClick]
+		[effectiveSelectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size, onItemClick, onItemDoubleClick]
 	);
 
 	// Renderizar contenido según el estado
@@ -537,7 +614,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		const commonViewProps = {
 			items,
 			itemSize,
-			selectedIds,
+			selectedIds: effectiveSelectedIds,
 			containerWidth,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
@@ -547,6 +624,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			case 'list':
 				return <VirtualizedListView {...commonViewProps} />;
 			case 'grid':
+				return <VirtualizedSimpleGridView {...commonViewProps} />;
 			case 'cards':
 				return <VirtualizedCardsView {...commonViewProps} />;
 			case 'simple-grid':
@@ -560,19 +638,21 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	return (
 		<div className={cn('flex h-full w-full flex-col bg-background', className)}>
-			<div
-				ref={containerCallbackRef}
-				className="relative h-full w-full flex-grow overflow-y-auto bg-transparent cursor-default"
-			>
-				<AnimatePresence>
-					<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-						{containerWidth > 0 ? renderContent() : <Spinner />}
-					</motion.div>
-				</AnimatePresence>
-			</div>
+			<ScrollArea className="flex-1">
+				<div
+					ref={containerCallbackRef}
+					className="relative h-full w-full bg-transparent cursor-default"
+				>
+					<AnimatePresence>
+						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+							{containerWidth > 0 ? renderContent() : <Spinner />}
+						</motion.div>
+					</AnimatePresence>
+				</div>
+			</ScrollArea>
 			<StatusBar
 				totalItems={items.length}
-				selectedCount={selectedIds.length}
+				selectedCount={effectiveSelectedIds.length}
 				entityType={entityType === 'mixed' ? EntityStatsType.IMAGE : (entityType as EntityStatsType)}
 			/>
 		</div>

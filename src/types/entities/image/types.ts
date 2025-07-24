@@ -386,5 +386,39 @@ export const IMAGE_SORT_PROPERTY_MAP: Record<ImageSortCriteria, string> = {
 	[ImageSortCriteria.LIKES_DESC]: 'likes',
 };
 
-// Tipos inferidos de Zod
 export type ImageValidated = z.infer<typeof ImageSchema>;
+
+/**
+ * 🖼️ Image con propiedades extendidas para UI y relaciones
+ */
+export interface ImageExtended extends ImageBase {
+	// Relaciones (simplificadas para evitar dependencias circulares)
+	albums?: any[];
+	collections?: any[];
+	tags?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
+	folder?: any;
+	// Conteos (siempre presentes en ImageWithStats)
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}

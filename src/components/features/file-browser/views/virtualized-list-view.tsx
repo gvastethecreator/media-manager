@@ -78,10 +78,37 @@ const ImageThumbnail = memo(function ImageThumbnail({
 export const VirtualizedListView = memo<VirtualizedListViewProps>(function VirtualizedListView({
 	items,
 	selectedIds,
+	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
 }) {
 	const parentRef = useRef<any>(null);
+	const [containerHeight, setContainerHeight] = useState<number>(600);
+
+	// Efecto para medir y establecer altura del contenedor
+	useEffect(() => {
+		if (parentRef.current) {
+			const scrollAreaViewport = parentRef.current.closest('[data-radix-scroll-area-viewport]');
+			if (scrollAreaViewport) {
+				const observer = new ResizeObserver((entries) => {
+					for (const entry of entries) {
+						const height = entry.contentRect.height;
+						if (height > 0) {
+							setContainerHeight(height - 48); // Restar padding
+						}
+					}
+				});
+				observer.observe(scrollAreaViewport);
+				return () => observer.disconnect();
+			} else {
+				// Fallback: usar el viewport más cercano
+				const viewport = parentRef.current.closest('.flex-1, .h-full');
+				if (viewport) {
+					setContainerHeight(viewport.clientHeight - 48);
+				}
+			}
+		}
+	}, []);
 
 	// Configurar virtualizador
 	const rowVirtualizer = useVirtualizer({
@@ -94,9 +121,11 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 	return (
 		<div
 			ref={parentRef}
-			className="h-full w-full overflow-auto"
+			className="w-full overflow-auto"
 			style={{
+				height: `${containerHeight}px`,
 				contain: 'strict',
+				padding: '8px 16px',
 			}}
 		>
 			<div
@@ -128,7 +157,7 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 								transform: `translateY(${virtualItem.start}px)`,
 							}}
 							className={cn(
-								'flex items-center gap-3 px-4 py-2 cursor-pointer transition-all duration-200',
+								'flex items-center gap-3 px-3 py-2 mx-1 rounded-md cursor-pointer transition-all duration-200',
 								'hover:bg-accent/50',
 								isSelected && 'bg-accent ring-2 ring-primary'
 							)}
@@ -144,10 +173,10 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 							{/* Thumbnail o icono */}
 							<div className="w-12 h-12 bg-muted rounded flex-shrink-0 flex items-center justify-center">
 								{('entityType' in item && item.entityType === 'image') && item.id ? (
-									<ImageThumbnail 
-										imageId={item.id} 
-										imageName={('name' in item ? item.name : undefined) || item.id || 'unknown'} 
-										className="w-12 h-12 object-cover rounded" 
+									<ImageThumbnail
+										imageId={item.id}
+										imageName={('name' in item ? item.name : undefined) || item.id || 'unknown'}
+										className="w-12 h-12 object-cover rounded"
 									/>
 								) : (
 									<div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center">
@@ -164,7 +193,7 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 									{('name' in item ? item.name : undefined) || item.id || 'Unknown'}
 								</div>
 								<div className="text-xs text-muted-foreground">
-									{('entityType' in item ? item.entityType : 'unknown')} • 
+									{('entityType' in item ? item.entityType : 'unknown')} •
 									{('stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats) ? item.stats.imageCount : 0} imágenes
 								</div>
 							</div>

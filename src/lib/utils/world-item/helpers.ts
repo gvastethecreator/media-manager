@@ -12,12 +12,12 @@ import type { WorldItemProperty, WorldItemStats } from '@/types/entities/world-i
  * @param stats Estadísticas del objeto
  * @returns Nivel de potencia estimado (0-100)
  */
-export function calculatePowerLevel(stats: WorldItemStats): number {
+export function calculatePowerLevel(stats: WorldItemStats & { effects?: any[] }): number {
 	let powerLevel = 0;
 	let statCount = 0;
 
 	// Factores de ponderación
-	const weights = {
+	const weights: Record<keyof WorldItemStats, number> = {
 		damage: 1.5,
 		defense: 1.5,
 		durability: 0.8,
@@ -26,19 +26,20 @@ export function calculatePowerLevel(stats: WorldItemStats): number {
 		range: 0.6,
 		accuracy: 0.7,
 		speed: 1.0,
+		// Añadir otras propiedades de WorldItemStats si son relevantes para el cálculo
 	};
 
 	// Procesar estadísticas comunes
-	for (const [key, weight] of Object.entries(weights)) {
-		const value = stats[key as keyof WorldItemStats] as number | undefined;
+	for (const key of Object.keys(weights) as Array<keyof WorldItemStats>) {
+		const value = stats[key] as number | undefined;
 		if (value !== undefined) {
-			powerLevel += value * weight;
+			powerLevel += value * weights[key];
 			statCount++;
 		}
 	}
 
 	// Añadir puntos por efectos
-	const effects = (stats as any).effects;
+	const effects = stats.effects;
 	if (Array.isArray(effects) && effects.length > 0) {
 		powerLevel += effects.length * 5;
 		statCount++;
@@ -94,7 +95,7 @@ export function meetsRequirements(
 
 	// Verificar rareza
 	if (requiredRarities && requiredRarities.length > 0) {
-		if (!requiredRarities.includes(worldItem.rarity as WorldItemRarity)) {
+		if (!worldItem.rarity || !requiredRarities.includes(worldItem.rarity as WorldItemRarity)) {
 			return false;
 		}
 	}
@@ -159,11 +160,15 @@ export function compareWorldItems(a: WorldItemExtended, b: WorldItemExtended, cr
 	};
 
 	if (criteria === 'rarity_asc') {
-		return (rarityOrder[a.rarity] || 0) - (rarityOrder[b.rarity] || 0);
+		const aRarity = a.rarity || 'unknown';
+		const bRarity = b.rarity || 'unknown';
+		return (rarityOrder[aRarity] || 0) - (rarityOrder[bRarity] || 0);
 	}
 
 	if (criteria === 'rarity_desc') {
-		return (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0);
+		const aRarity = a.rarity || 'unknown';
+		const bRarity = b.rarity || 'unknown';
+		return (rarityOrder[bRarity] || 0) - (rarityOrder[aRarity] || 0);
 	}
 
 	// Si no coincide ningún criterio, ordenar por nombre
@@ -211,14 +216,14 @@ export function filterWorldItems(
 
 		// Filtrar por tipo
 		if (filters.types && filters.types.length > 0) {
-			if (!filters.types.includes(item.type)) {
+			if (!item.type || !filters.types.includes(item.type)) {
 				return false;
 			}
 		}
 
 		// Filtrar por rareza
 		if (filters.rarities && filters.rarities.length > 0) {
-			if (!filters.rarities.includes(item.rarity)) {
+			if (!item.rarity || !filters.rarities.includes(item.rarity)) {
 				return false;
 			}
 		}

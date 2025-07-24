@@ -61,44 +61,50 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 			}
 
 			// Contar etiquetas
-			if ('tags' in item && item.tags) {
+			if ('tags' in item && Array.isArray(item.tags)) {
 				for (const tag of item.tags) {
-					tags.set(tag.name, (tags.get(tag.name) || 0) + 1);
+					const tagName = typeof tag === 'object' && tag && 'name' in tag ? tag.name : String(tag);
+					tags.set(tagName, (tags.get(tagName) || 0) + 1);
 				}
 			}
 
 			// Contar colecciones
-			if ('collections' in item && item.collections) {
+			if ('collections' in item && Array.isArray(item.collections)) {
 				for (const collection of item.collections) {
-					collections.set(collection.name, (collections.get(collection.name) || 0) + 1);
+					const collectionName = typeof collection === 'object' && collection && 'name' in collection ? collection.name : String(collection);
+					collections.set(collectionName, (collections.get(collectionName) || 0) + 1);
 				}
 			}
 
 			// Contar álbumes
-			if ('albums' in item && item.albums) {
+			if ('albums' in item && Array.isArray(item.albums)) {
 				for (const album of item.albums) {
-					albums.set(album.name, (albums.get(album.name) || 0) + 1);
+					const albumName = typeof album === 'object' && album && 'name' in album ? album.name : String(album);
+					albums.set(albumName, (albums.get(albumName) || 0) + 1);
 				}
 			}
 
 			// Contar personajes
-			if ('characters' in item && item.characters) {
+			if ('characters' in item && Array.isArray(item.characters)) {
 				for (const character of item.characters) {
-					characters.set(character.name, (characters.get(character.name) || 0) + 1);
+					const characterName = typeof character === 'object' && character && 'name' in character ? character.name : String(character);
+					characters.set(characterName, (characters.get(characterName) || 0) + 1);
 				}
 			}
 
 			// Contar lugares
-			if ('places' in item && item.places) {
+			if ('places' in item && Array.isArray(item.places)) {
 				for (const place of item.places) {
-					places.set(place.name, (places.get(place.name) || 0) + 1);
+					const placeName = typeof place === 'object' && place && 'name' in place ? place.name : String(place);
+					places.set(placeName, (places.get(placeName) || 0) + 1);
 				}
 			}
 
 			// Contar objetos del mundo
-			if ('worldItems' in item && item.worldItems) {
+			if ('worldItems' in item && Array.isArray(item.worldItems)) {
 				for (const worldItem of item.worldItems) {
-					worldItems.set(worldItem.name, (worldItems.get(worldItem.name) || 0) + 1);
+					const worldItemName = typeof worldItem === 'object' && worldItem && 'name' in worldItem ? worldItem.name : String(worldItem);
+					worldItems.set(worldItemName, (worldItems.get(worldItemName) || 0) + 1);
 				}
 			}
 

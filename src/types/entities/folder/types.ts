@@ -36,6 +36,11 @@ export interface FolderWithStats extends FolderBase, EntityWithStats, FolderUIPr
 	entityType: 'folder';
 	stats: FolderStatistics;
 	children?: FolderWithStats[]; // Para estructuras recursivas
+	recentImages?: Array<{
+		id: string;
+		name: string;
+		thumbnailUrl: string;
+	}>; // Imágenes recientes para compatibilidad con ExtendedFolder
 }
 
 /**
@@ -96,6 +101,11 @@ export interface FolderStatistics {
 	organizationScore: number;
 	totalItems: number; // También conocido como totalFiles
 	folderCount: number; // Número total de subcarpetas
+	totalFolders: number; // Alias para folderCount para compatibilidad
+	totalImages: number; // Alias para imageCount para compatibilidad
+	totalVideos: number; // Alias para videoCount para compatibilidad
+	totalDocuments: number; // Alias para documentCount para compatibilidad
+	totalFiles: number; // Alias para totalItems para compatibilidad
 
 	// Métricas de uso
 	accessFrequency: number;
