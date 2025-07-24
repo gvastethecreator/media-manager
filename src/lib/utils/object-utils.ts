@@ -5,7 +5,7 @@
  * @param source Objeto fuente cuyos valores se fusionarán
  * @returns Nuevo objeto con la combinación de ambos
  */
-export function deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
+export function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
 	const output = { ...target };
 
 	if (isObject(target) && isObject(source)) {
@@ -15,8 +15,8 @@ export function deepMerge<T extends Record<string, unknown>>(target: T, source: 
 					Object.assign(output, { [key]: source[key] });
 				} else {
 					output[key] = deepMerge(
-						target[key] as Record<string, unknown>,
-						source[key] as Record<string, unknown>
+						(target as Record<string, any>)[key],
+						(source as Record<string, any>)[key]
 					) as T[Extract<keyof T, string>];
 				}
 			} else {
@@ -38,26 +38,26 @@ function isObject(item: unknown): item is Record<string, unknown> {
 /**
  * Obtiene un valor de un objeto por un path como 'a.b.c'
  */
-export function getValueByPath<T = unknown>(obj: Record<string, unknown>, path: string): T | undefined {
+export function getValueByPath<T = unknown>(obj: Record<string, any>, path: string): T | undefined {
 	return path.split('.').reduce((prev, curr) => {
-		return prev && typeof prev === 'object' ? (prev as Record<string, unknown>)[curr] : undefined;
+		return prev && typeof prev === 'object' ? prev[curr] : undefined;
 	}, obj) as T | undefined;
 }
 
 /**
  * Establece un valor en un objeto por un path como 'a.b.c'
  */
-export function setValueByPath<T extends Record<string, unknown>>(obj: T, path: string, value: unknown): T {
+export function setValueByPath<T extends Record<string, any>>(obj: T, path: string, value: any): T {
 	const result = { ...obj };
 	const parts = path.split('.');
 
-	let current = result;
+	let current: Record<string, any> = result;
 	for (let i = 0; i < parts.length - 1; i++) {
 		const part = parts[i];
 		if (!current[part] || typeof current[part] !== 'object') {
 			current[part] = {};
 		}
-		current = current[part] as Record<string, unknown>;
+		current = current[part];
 	}
 
 	current[parts[parts.length - 1]] = value;

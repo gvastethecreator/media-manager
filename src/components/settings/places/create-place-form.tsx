@@ -39,11 +39,9 @@ const placeFormSchema = z
 		climate: z.string().default('temperate').catch('temperate'),
 		population: z.string().default('').catch(''),
 		government: z.string().default('unknown').catch('unknown'),
-		lore: z.string().default('').catch(''),
 		history: z.string().default('').catch(''),
 		isFavorite: z.boolean().default(false),
 		featuredImage: z.string().default('').catch(''),
-		shortcut: z.string().default('').catch(''),
 	})
 	.strict();
 
@@ -95,11 +93,9 @@ export function CreatePlaceForm({
 				climate: place.climate ?? 'temperate',
 				population: place.population ?? '',
 				government: place.government ?? 'unknown',
-				lore: place.lore ?? '',
 				history: place.history ?? '',
 				isFavorite: !!place.isFavorite,
 				featuredImage: place.featuredImage ?? '',
-				shortcut: place.shortcut ?? '',
 			});
 		}
 	}, [form, isEditing, place]);
@@ -121,27 +117,26 @@ export function CreatePlaceForm({
 					climate: normalize(values.climate),
 					population: values.population,
 					government: normalize(values.government),
-					lore: normalize(values.lore),
 					history: normalize(values.history),
 					isFavorite: !!values.isFavorite,
 					featuredImage: normalize(values.featuredImage),
-					shortcut: normalize(values.shortcut),
 				};
 				result = await updatePlaceMutation.mutateAsync({ id: place.id, data: updateData });
 				toastService.success(`Lugar actualizado: ${result.name}`);
 				onUpdated?.(result as PlaceWithStats);
 			} else {
 				const createData: PlaceCreateInput = {
-					...values,
+					name: values.name,
 					description: normalize(values.description),
+					emoji: values.emoji,
+					color: values.color,
 					category: normalize(values.category),
 					type: normalize(values.type),
 					climate: normalize(values.climate),
+					population: values.population,
 					government: normalize(values.government),
-					lore: normalize(values.lore),
 					history: normalize(values.history),
 					featuredImage: normalize(values.featuredImage),
-					shortcut: normalize(values.shortcut),
 					isFavorite: !!values.isFavorite,
 				};
 				result = await createPlaceMutation.mutateAsync(createData);

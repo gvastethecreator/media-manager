@@ -34,7 +34,7 @@ export interface PromptBase {
 	totalVideos: number;
 	type: string | null;
 	content: string | null;
-	parameters: string | null; // JSON string
+	parameters?: Record<string, any> | null;
 	style: string | null;
 	mood: string | null;
 	lighting: string | null;
@@ -44,6 +44,7 @@ export interface PromptBase {
 	notes: string | null;
 	featuredImage: string | null;
 	parentId: string | null;
+	tags?: string[];
 	createdAt: Date;
 	updatedAt: Date;
 }

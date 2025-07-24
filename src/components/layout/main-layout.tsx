@@ -1,19 +1,86 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { RightPanel } from '@/components/panels/right-panel/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { useReindexFolder } from '@/lib/api/folders';
+import { toastService } from '@/lib/ui/toast';
 import { useDetailsPanel } from '@/store/details-panel.store';
+import { useImageStore } from '@/store/entities/image';
+import { useFolderStore } from '@/store/entities/folder';
 
 export const MainLayout = memo(function MainLayout() {
+	const location = useLocation();
+	const params = useParams<{ id: string }>();
 	const { isVisible } = useDetailsPanel();
 	const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
 	const [isRightCollapsed, setIsRightCollapsed] = useState(!isVisible);
 	const [isLeftAnimating, setIsLeftAnimating] = useState(false);
 	const [isRightAnimating, setIsRightAnimating] = useState(false);
+
+	// Obtener datos de los stores para el ViewToolbar
+	const { getSortedImages, getImagesByFolder } = useImageStore();
+	const { selectedFolderId } = useFolderStore();
+
+	// Hook para reindexar carpeta
+	const reindexFolderMutation = useReindexFolder();
+
+	// Obtener el folderId actual según la ruta
+	const currentFolderId = useMemo(() => {
+		const currentView = location.pathname.split('/')[1] || 'gallery';
+		if (currentView === 'folders' && params.id) {
+			return params.id;
+		}
+		return null;
+	}, [location.pathname, params.id]);
+
+	// Calcular los IDs de elementos disponibles según la vista actual
+	const allItemIds = useMemo(() => {
+		const currentView = location.pathname.split('/')[1] || 'gallery';
+		
+		switch (currentView) {
+			case 'folders':
+				if (currentFolderId) {
+					return getImagesByFolder(currentFolderId).map((img: any) => img.id);
+				}
+				return [];
+			case 'all-images':
+			case 'gallery':
+				return getSortedImages().map((img: any) => img.id);
+			default:
+				return [];
+		}
+	}, [location.pathname, currentFolderId, getSortedImages, getImagesByFolder]);
+
+	// Funciones para acciones de carpeta
+	const handleScanFolder = useCallback(async () => {
+		if (!currentFolderId) return;
+		
+		try {
+			toastService.info('Escaneando carpeta...');
+			await reindexFolderMutation.mutateAsync(currentFolderId);
+			toastService.success('Carpeta escaneada correctamente');
+		} catch (error) {
+			console.error('Error al escanear carpeta:', error);
+			toastService.error('Error al escanear la carpeta');
+		}
+	}, [currentFolderId, reindexFolderMutation]);
+
+	const handleRefreshFolder = useCallback(async () => {
+		if (!currentFolderId) return;
+		
+		try {
+			toastService.info('Recargando carpeta...');
+			await reindexFolderMutation.mutateAsync(currentFolderId);
+			toastService.success('Carpeta recargada correctamente');
+		} catch (error) {
+			console.error('Error al recargar carpeta:', error);
+			toastService.error('Error al recargar la carpeta');
+		}
+	}, [currentFolderId, reindexFolderMutation]);
 
 	// Referencias para controlar los paneles programáticamente
 	const leftPanelRef = useRef<ImperativePanelHandle>(null);
@@ -89,16 +156,20 @@ export const MainLayout = memo(function MainLayout() {
 						{/* Toolbar superior */}
 						<div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
 							<ViewToolbar
-								isLeftPanelCollapsed={isLeftCollapsed}
-								toggleLeftPanelCollapse={toggleLeftPanel}
-								isRightPanelCollapsed={isRightCollapsed}
-								toggleRightPanelCollapse={toggleRightPanel}
-								isRightPanelVisible={true}
-								allItemIds={[]}
-							/>
+						isLeftPanelCollapsed={isLeftCollapsed}
+						toggleLeftPanelCollapse={toggleLeftPanel}
+						isRightPanelCollapsed={isRightCollapsed}
+						toggleRightPanelCollapse={toggleRightPanel}
+						isRightPanelVisible={true}
+						allItemIds={allItemIds}
+						currentFolderId={currentFolderId || undefined}
+						onScanFolder={handleScanFolder}
+						onRefreshFolder={handleRefreshFolder}
+						isRetrying={reindexFolderMutation.isPending}
+					/>
 						</div>{' '}
 						{/* Contenido principal */}
-						<div className="flex-1 min-h-0 bg-background p-4">
+						<div className="flex-1 min-h-0 bg-background">
 							<Outlet />
 						</div>
 					</div>

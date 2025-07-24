@@ -77,8 +77,8 @@ export function FolderCard({
 	});
 
 	// Hook para obtener estadísticas detalladas
-	const folderStatsQuery = useFolderStats(folder.id || '');
-	const folderStats = folderStatsQuery.data as FolderStatsResponse | undefined;
+	const childStatsQuery = useFolderStats(folder.id || '');
+	const folderStats = childStatsQuery.data as FolderStatsResponse | undefined;
 
 	// Funciones para manejar la edición
 	const handleSaveEdit = useCallback(() => {

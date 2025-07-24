@@ -3,6 +3,7 @@
  * @module types/entities/collection/types
  */
 
+import { CollectionSortOption } from './enums';
 import type { ImageBase } from '../image/base';
 
 export interface CollectionBase {
@@ -22,6 +23,32 @@ export interface CollectionBase {
 	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+}
+
+export interface CollectionWithStats extends CollectionBase {
+	entityType: 'collection';
+	stats?: {
+		totalItems: number;
+		imageCount: number;
+		videoCount: number;
+		totalValue: number;
+		lastActivity: Date | null;
+	};
+	_count?: {
+		images: number;
+		videos: number;
+		albums: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
 }
 
 export interface CreateCollectionInput {
@@ -56,29 +83,7 @@ export interface CollectionFilters {
 	search?: string;
 	isPublic?: boolean;
 	hasImages?: boolean;
-	sortBy?:
-		| 'name'
-		| 'createdAt'
-		| 'updatedAt'
-		| 'imageCount'
-		| 'emoji'
-		| 'color'
-		| 'isFavorite'
-		| 'shortcut'
-		| 'category'
-		| 'filters'
-		| 'featuredImage'
-		| 'url'
-		| 'alternativeUrl'
-		| 'sourceImage'
-		| 'platform'
-		| 'price'
-		| 'network'
-		| 'tokenId'
-		| 'tokenAddress'
-		| 'contractAddress'
-		| 'contractType'
-		| 'editions';
+	sortBy?: CollectionSortOption;
 	sortOrder?: 'asc' | 'desc';
 }
 

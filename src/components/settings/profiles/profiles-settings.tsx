@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator';
 import { useProfileContext } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
-import type { ProfileUpdate } from '@/services/profile-service-export';
+import type { UpdateProfileInput as ProfileUpdate } from '@/services/profile';
 
 export function ProfilesSettings() {
 	const { settings, updateProfile, setActiveProfile, deleteProfile } = useProfileContext();
@@ -102,23 +102,9 @@ export function ProfilesSettings() {
 							/>
 
 							<div className="flex gap-2">
-								<select
-									value={activeProfileData?.theme || 'system'}
-									onChange={(e) => handleUpdateActiveProfile({ theme: e.target.value })}
-									className="h-6 text-xs border-none rounded-sm bg-muted/30 px-2"
-								>
-									<option value="system">Sistema</option>
-									<option value="light">Claro</option>
-									<option value="dark">Oscuro</option>
-								</select>
-								<select
-									value={activeProfileData?.language || 'es'}
-									onChange={(e) => handleUpdateActiveProfile({ language: e.target.value })}
-									className="h-6 text-xs border-none rounded-sm bg-muted/30 px-2"
-								>
-									<option value="es">Español</option>
-									<option value="en">English</option>
-								</select>
+								<div className="text-xs text-muted-foreground">
+								Perfil: {activeProfileData?.name}
+							</div>
 							</div>
 						</div>
 						<Popover>

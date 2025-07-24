@@ -45,14 +45,11 @@ const createCharacterSchema = z.object({
 	emoji: z.string().min(1, {
 		message: 'Debes seleccionar un emoji',
 	}),
+	backstory: z.string().max(1000).optional(),
+	category: z.nativeEnum(CharacterCategory).optional(),
 	class: z.nativeEnum(CharacterClass).optional(),
 	race: z.nativeEnum(CharacterRace).optional(),
-	alignment: z.nativeEnum(CharacterAlignment).optional(),
-	level: z.number().int().min(1).max(100).optional(),
-	backstory: z.string().max(1000).optional(),
-	psychologicalProfile: z.string().max(500).optional(),
-	socialProfile: z.string().max(500).optional(),
-	category: z.nativeEnum(CharacterCategory).optional(),
+	level: z.number().min(1).max(100).optional(),
 	isFavorite: z.boolean(),
 });
 
@@ -88,14 +85,11 @@ export function CreateCharacterForm({
 			description: '',
 			color: '#3b82f6',
 			emoji: '👤',
-			class: CharacterClass.UNKNOWN,
-			race: CharacterRace.UNKNOWN,
-			alignment: CharacterAlignment.NEUTRAL,
-			level: 1,
 			backstory: '',
-			psychologicalProfile: '',
-			socialProfile: '',
 			category: undefined,
+			class: undefined,
+			race: undefined,
+			level: undefined,
 			isFavorite: false,
 		},
 	});
@@ -108,13 +102,7 @@ export function CreateCharacterForm({
 				description: character.description || '',
 				color: character.color || '#3b82f6',
 				emoji: character.emoji || '👤',
-				class: (character.class as CharacterClass) || CharacterClass.UNKNOWN,
-				race: (character.race as CharacterRace) || CharacterRace.UNKNOWN,
-				alignment: (character.alignment as CharacterAlignment) || CharacterAlignment.NEUTRAL,
-				level: character.level || 1,
-				backstory: character.backstory || '',
-				psychologicalProfile: character.psychologicalProfile || '',
-				socialProfile: character.socialProfile || '',
+				backstory: character.background || '',
 				category: character.category as CharacterCategory | undefined,
 				isFavorite: character.isFavorite || false,
 			});
@@ -217,32 +205,20 @@ export function CreateCharacterForm({
 				species: null,
 				occupation: null,
 				personality: null,
-				background: null,
+				background: data.backstory || null,
 				relationships: null,
 				skills: null,
 				equipment: null,
 				notes: null,
 				featuredImage: null,
 				parentId: null,
-				level: data.level || 1,
-				class: data.class ? String(data.class) : null,
-				race: data.race ? String(data.race) : null,
-				alignment: data.alignment ? String(data.alignment) : null,
-				backstory: data.backstory || null,
-				psychologicalProfile: data.psychologicalProfile || null,
-				socialProfile: data.socialProfile || null,
 			};
 
 			// Crear o actualizar personaje
 			if (isEditing && character) {
 				const updateData: CharacterUpdateInput = {
 					...characterData,
-					class: data.class ? String(data.class) : null,
-					race: data.race ? String(data.race) : null,
-					alignment: data.alignment ? String(data.alignment) : null,
-					backstory: data.backstory || null,
-					psychologicalProfile: data.psychologicalProfile || null,
-					socialProfile: data.socialProfile || null,
+					background: data.backstory || null,
 					isFavorite: data.isFavorite || false,
 				};
 				const updated = await updateCharacterMutation.mutateAsync({ id: character.id, data: updateData });
@@ -380,7 +356,13 @@ export function CreateCharacterForm({
 						<FormItem>
 							<FormLabel>Nivel</FormLabel>
 							<FormControl>
-								<Input type="number" min={1} max={100} {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+								<Input 
+									type="number" 
+									min={1} 
+									max={100} 
+									value={field.value ?? ''}
+									onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

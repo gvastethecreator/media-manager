@@ -13,8 +13,8 @@ export { ImageRenderer } from './image-renderer';
 export * from './types';
 
 // Export views
-export { CardsView } from './views/cards-view';
-export { ListView } from './views/list-view';
-export { MasonryView } from './views/masonry-view';
-export { SimpleGridView } from './views/simple-grid-view';
+export { VirtualizedCardsView } from './views/virtualized-cards-view';
+export { VirtualizedListView } from './views/virtualized-list-view';
+export { VirtualizedMasonryView } from './views/virtualized-masonry-view';
+export { VirtualizedSimpleGridView } from './views/virtualized-simple-grid-view';
 export { VirtualizerWrapper } from './views/virtualizer-wrapper';

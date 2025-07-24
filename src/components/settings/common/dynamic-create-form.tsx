@@ -16,7 +16,7 @@ export interface FormField<T = unknown> {
 	render: (props: { value: T; onChange: (v: T) => void }) => React.ReactNode;
 }
 
-export interface DynamicCreateFormProps<T extends Record<string, unknown> = Record<string, unknown>> {
+export interface DynamicCreateFormProps<T extends Record<string, any> = Record<string, any>> {
 	/**
 	 * Lista de campos opcionales disponibles para la entidad (ej: emoji, color, categoría...)
 	 * Cada campo debe tener: name, label, render (función que retorna el campo JSX)
@@ -36,7 +36,7 @@ export interface DynamicCreateFormProps<T extends Record<string, unknown> = Reco
 	validateName?: (name: string) => string | null;
 }
 
-export function DynamicCreateForm<T extends Record<string, unknown> = Record<string, unknown>>({
+export function DynamicCreateForm<T extends Record<string, any> = Record<string, any>>({
 	optionalFields,
 	onSubmit,
 	submitLabel = 'Crear',

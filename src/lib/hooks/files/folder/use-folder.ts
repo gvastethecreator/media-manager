@@ -32,18 +32,22 @@ export function useFolder(options: { autoFilter?: boolean; loadOnMount?: boolean
 
 	// Acceso a las acciones del store
 	const {
-		coreActions: {
-			fetchFolders,
-			fetchFolderById,
-			createFolder,
-			updateFolder,
-			deleteFolder,
-			setCurrentFolderId,
-			setCurrentFolder,
-			resetError,
-		},
-		filtersActions: { setSearchTerm, setSortBy, setSortDirection, toggleFavorites, resetFilters },
-		uiActions: { setViewMode, setItemSize, toggleFolderExpanded },
+		fetchFolders,
+		fetchFolderById,
+		createFolder,
+		updateFolder,
+		deleteFolder,
+		setCurrentFolderId,
+		setCurrentFolder,
+		resetError,
+		setSearchTerm,
+		setSortBy,
+		setSortDirection,
+		toggleFavorites,
+		resetFilters,
+		setViewMode,
+		setItemSize,
+		toggleFolderExpanded,
 	} = useFolderStore();
 
 	// Acceso al estado mediante selectores para optimizar renders

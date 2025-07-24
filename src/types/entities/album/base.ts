@@ -49,6 +49,7 @@ export interface AlbumStatistics {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface AlbumWithStats extends AlbumBase {
+	entityType: 'album';
 	stats: AlbumStatistics;
 	isRecent?: boolean;
 }

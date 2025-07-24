@@ -11,55 +11,9 @@ import {
 } from '@/lib/api/files';
 import { clientEvents } from '@/lib/client/events.client';
 
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { FileItem } from '@/types/files';
 
-export interface FileItem extends EntityWithStats {
-	// Propiedades de FileItem que pueden no estar en EntityWithStats o necesitan ser más específicas
-	path: string;
-	size: number;
-	type: string; // 'image', 'video', 'folder', etc.
-	modified: Date; // Fecha de última modificación del archivo
-	thumbnail?: string | null; // URL de la miniatura
-	thumbnailUrl?: string | null; // Alias para thumbnail
-	src?: string; // URL de la imagen original (para ImageWithStats)
-	// Propiedades adicionales que pueden venir de diferentes entidades
-	// y que son usadas en el FileBrowser
-	width?: number;
-	height?: number;
-	format?: string;
-	// Campos de relación que pueden ser arrays de IDs o de objetos completos
-	tags?: string[];
-	collections?: string[];
-	characters?: string[];
-	places?: string[];
-	worldItems?: string[];
-	// Propiedades específicas de ImageWithStats o VideoWithStats
-	url?: string; // URL directa al archivo
-	duration?: number; // Duración del video
-	// Propiedades de fecha que pueden ser string o Date
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	accessedAt?: Date | string;
-	// Propiedades de estado
-	isFavorite?: boolean;
-	isArchived?: boolean;
-	isPublic?: boolean;
-	// Propiedades de carpeta
-	parentId?: string | null;
-	// Propiedades de JSON
-	isValid?: boolean;
-	keys?: number;
-	// Propiedades de audio
-	artist?: string;
-	album?: string;
-	genre?: string;
-	// Propiedades de documento
-	pageCount?: number;
-	wordCount?: number;
-	// Propiedades de 3D
-	polygonCount?: number;
-	textureSize?: number;
-}
+
 
 interface FileContextType {
 	files: FileItem[];

@@ -5,6 +5,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { db } from './db';
 import * as schema from './schema';
+import { albums, collections, folders, images, imageStats, tags } from './schema';
 
 type DrizzleTransactionClient = typeof db._;
 
@@ -23,7 +24,7 @@ export async function withTransaction<T>(
 
 	while (true) {
 		try {
-			return await db.transaction(async (tx) => fn(tx as DrizzleTransactionClient));
+			return await db.transaction(async (tx) => fn(tx));
 		} catch (error) {
 			if (retries >= maxRetries) {
 				throw error;
@@ -45,7 +46,7 @@ export async function withTransaction<T>(
 export async function testDatabaseConnection(): Promise<boolean> {
 	try {
 		// Ejecutar una consulta simple para verificar la conexión
-		await db.select({ one: sql`1` }).from(schema.folders).limit(1);
+		await db.select({ one: sql`1` }).from(folders).limit(1);
 		return true;
 	} catch (error) {
 		console.error('❌ Error al conectar con la base de datos:', error);
@@ -59,11 +60,11 @@ export async function testDatabaseConnection(): Promise<boolean> {
 export async function getDatabaseStats() {
 	const [imageCountResult, folderCountResult, tagCountResult, albumCountResult, collectionCountResult] =
 		await Promise.all([
-			db.select({ count: sql<number>`count(*)` }).from(schema.images),
-			db.select({ count: sql<number>`count(*)` }).from(schema.folders),
-			db.select({ count: sql<number>`count(*)` }).from(schema.tags),
-			db.select({ count: sql<number>`count(*)` }).from(schema.albums),
-			db.select({ count: sql<number>`count(*)` }).from(schema.collections),
+			db.select({ count: sql<number>`count(*)` }).from(images),
+			db.select({ count: sql<number>`count(*)` }).from(folders),
+			db.select({ count: sql<number>`count(*)` }).from(tags),
+			db.select({ count: sql<number>`count(*)` }).from(albums),
+			db.select({ count: sql<number>`count(*)` }).from(collections),
 		]);
 
 	return {
@@ -82,10 +83,10 @@ export async function getDatabaseStats() {
 export async function cleanupOrphanedRecords() {
 	return withTransaction(async (tx) => {
 		// Eliminar imágenes sin carpeta asociada
-		const deletedImages = await tx.delete(schema.images).where(eq(schema.images.folderId, null)).execute();
+		const deletedImages = await tx.delete(images).where(eq(images.folderId, null)).execute();
 
 		// Eliminar estadísticas de imágenes sin imagen asociada
-		const deletedStats = await tx.delete(schema.imageStats).where(eq(schema.imageStats.imageId, null)).execute();
+		const deletedStats = await tx.delete(imageStats).where(eq(imageStats.imageId, null)).execute();
 
 		return {
 			deletedImages: deletedImages.rowsAffected,

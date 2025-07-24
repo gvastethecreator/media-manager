@@ -24,8 +24,8 @@ const noteSchema = z.object({
 	color: z.string().optional(),
 	emoji: z.string().optional(),
 	category: z.nativeEnum(NoteCategory).optional(),
-	tags: z.array(z.string()).optional().default([]), // Manejar como array de strings
-	isFavorite: z.boolean().optional(),
+	tags: z.array(z.string()).default([]), // Siempre array de strings
+	isFavorite: z.boolean().default(false),
 });
 
 // El tipo del formulario se infiere del esquema
@@ -129,7 +129,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker value={field.value || '#3b82f6'} onChange={field.onChange} compact showLabel={false} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

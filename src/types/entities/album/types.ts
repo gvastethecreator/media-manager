@@ -33,7 +33,10 @@ export interface AlbumStatistics {
 }
 
 export interface AlbumWithStats extends AlbumBase, EntityWithStats {
-	statistics: AlbumStatistics;
+	entityType: 'album';
+	stats: AlbumStatistics;
+	// Alias para compatibilidad legacy
+	statistics?: AlbumStatistics;
 }
 
 export type AlbumCreateInput = Omit<AlbumBase, 'id' | 'createdAt' | 'updatedAt'>;

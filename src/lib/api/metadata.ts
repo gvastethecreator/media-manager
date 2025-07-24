@@ -36,6 +36,8 @@ export interface MetadataUpdateInput {
 	isPublic?: boolean;
 	category?: string | null;
 	description?: string | null;
+	imageId?: string; // Añadir esta propiedad
+	metadata?: Record<string, unknown>; // Añadir esta propiedad
 }
 
 export interface BulkMetadataUpdateInput {
@@ -81,7 +83,7 @@ export function useAvailableParsers() {
 export function useUpdateImageMetadata() {
 	const queryClient = useQueryClient();
 
-	return useMutation<MetadataExtractionResult, Error, MetadataUpdateInput>({
+	return useMutation<MetadataExtractionResult, Error, { imageId: string; metadata: Record<string, unknown> }>({
 		mutationFn: ({ imageId, metadata }) =>
 			apiClient.put<MetadataExtractionResult>(`/metadata/image/${imageId}`, { metadata }),
 		onSuccess: (data, { imageId }) => {

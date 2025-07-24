@@ -1,9 +1,8 @@
-import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
+import { Folder, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
-import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useFolder, useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -11,62 +10,86 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { ImageWithStats } from '@/types/entities/image';
-import { EntityStatsType, type EntityWithStats } from '@/types/migration';
+import { EntityStatsType, type AnyEntityWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
 
 // Función auxiliar para convertir ImageWithStats a ImageItem
+// Función auxiliar para convertir ImageWithStats a ImageItem
 const imageWithStatsToImageItem = (image: ImageWithStats): ImageItem => ({
 	id: image.id,
 	name: image.name,
-	type: image.type || 'image',
+	type: 'image',
 	path: image.path,
-	size: image.size || 0,
-	width: image.width,
-	height: image.height,
-	url: image.url,
-	thumbnail: image.thumbnail || `/api/images/${image.id}/thumbnail`,
-	thumbnailUrl: image.thumbnailUrl || `/api/images/${image.id}/thumbnail`,
-	src: image.src,
-	alt: image.alt,
-	mimeType: image.mimeType,
-	metadata: image.metadata,
-	parsedMetadata: image.parsedMetadata,
+	size: image.size,
+	width: null,
+	height: null,
+	url: `/api/images/${image.id}/file`,
+	thumbnail: `/api/images/${image.id}/thumbnail`,
+	thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+	src: `/api/images/${image.id}/file`,
+	alt: image.name,
+	mimeType: 'image/jpeg', // Default
+	metadata: null,
+	parsedMetadata: undefined,
 });
 
 interface FolderContentViewProps {
 	folderId?: string;
+	// Props para integración con toolbar
+	onScanFolder?: () => void;
+	onRefreshFolder?: () => void;
+	isRetrying?: boolean;
 }
 
-export function FolderContentView({ folderId: propFolderId }: FolderContentViewProps = {}) {
+export function FolderContentView({
+	folderId: propFolderId,
+	onScanFolder: externalOnScanFolder,
+	onRefreshFolder: externalOnRefreshFolder,
+	isRetrying: externalIsRetrying = false
+}: FolderContentViewProps = {}) {
 	// 📂 Obtener información de la carpeta actual desde props
 	const currentFolderId = propFolderId || null;
 
 	// 🔄 Cargar información de la carpeta desde la API
-	const { data: folderData, isLoading: isFolderLoading, error: folderError } = useFolder(currentFolderId || '');
+	const {
+		data: folderData,
+		isLoading: isFolderLoading,
+		error: folderError
+	} = useFolder(currentFolderId || '');
+
+	console.log('🔍 FolderContentView - Debug data:', {
+		currentFolderId,
+		folderData,
+		isFolderLoading,
+		folderError: folderError?.message || folderError
+	});
 
 	// Estados globales para panel de detalles y visor
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 	const { openViewer } = useFileViewerStore();
 	const { getImagesByFolder } = useImageStore();
 
-	// Estado local para controlar operaciones
-	const [isRetrying, setIsRetrying] = useState(false);
+	// Estado local para controlar operaciones (usar externo si está disponible)
+	const [internalIsRetrying, setInternalIsRetrying] = useState(false);
+	const isRetrying = externalIsRetrying || internalIsRetrying;
 
 	const handleImageSelect = useCallback(
-		(image: EntityWithStats) => {
+		(item: AnyEntityWithStats, e: React.MouseEvent) => {
+			const image = item as ImageWithStats;
 			logger.info('🖱️ Imagen seleccionada:', image.name);
 
 			// Mostrar panel de detalles con la imagen seleccionada
-			setSelectedItems([image]);
+			setSelectedItems([item]);
 			setDetailsPanelVisible(true);
 		},
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 
 	const handleImageDoubleClick = useCallback(
-		(image: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
+			const image = item as ImageWithStats;
 			logger.info('🖱️ Doble click en imagen:', image.name);
 
 			// Obtener todas las imágenes de la carpeta para el visor
@@ -87,7 +110,13 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 	const handleForceRefresh = useCallback(async () => {
 		if (!currentFolderId || isRetrying) return;
 
-		setIsRetrying(true);
+		// Usar función externa si está disponible
+		if (externalOnRefreshFolder) {
+			externalOnRefreshFolder();
+			return;
+		}
+
+		setInternalIsRetrying(true);
 		logger.info('🔄 Forzando recarga de imágenes');
 		try {
 			// Usar getState para obtener la función de forma estable
@@ -96,9 +125,9 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		} catch (refreshError) {
 			logger.error('❌ Error al forzar recarga:', refreshError);
 		} finally {
-			setIsRetrying(false);
+			setInternalIsRetrying(false);
 		}
-	}, [currentFolderId, isRetrying]);
+	}, [currentFolderId, isRetrying, externalOnRefreshFolder]);
 
 	// Hook para reindexar carpeta
 	const reindexFolderMutation = useReindexFolder();
@@ -109,7 +138,13 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 			return;
 		}
 
-		setIsRetrying(true);
+		// Usar función externa si está disponible
+		if (externalOnScanFolder) {
+			externalOnScanFolder();
+			return;
+		}
+
+		setInternalIsRetrying(true);
 		try {
 			logger.info(`🔄 Iniciando escaneo de carpeta: ${currentFolderId}`);
 
@@ -126,13 +161,13 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		} catch (error) {
 			logger.error('❌ Error durante el escaneo:', error);
 		} finally {
-			setIsRetrying(false);
+			setInternalIsRetrying(false);
 		}
-	}, [currentFolderId, isRetrying, reindexFolderMutation.mutateAsync]);
+	}, [currentFolderId, isRetrying, externalOnScanFolder, reindexFolderMutation.mutateAsync]);
 
 	// Resetear estado cuando cambia la carpeta
 	useEffect(() => {
-		setIsRetrying(false);
+		setInternalIsRetrying(false);
 	}, [currentFolderId]);
 
 	// ️ Validación: verificar que hay una carpeta seleccionada
@@ -172,24 +207,12 @@ export function FolderContentView({ folderId: propFolderId }: FolderContentViewP
 		);
 	}
 
-	// Renderizar galería de imágenes usando BaseContentView y FileBrowser
+	// Renderizar vista de carpeta usando BaseContentView y FileBrowser
 	return (
 		<BaseContentView
 			title={folderData?.name || 'Carpeta'}
-			description={folderData?.description || undefined}
-			icon={folderData?.emoji || undefined}
-			headerControls={
-				<>
-					<Button variant="outline" size="sm" onClick={handleScanFolder} disabled={isRetrying}>
-						<FolderSearch className="h-4 w-4 mr-2" />
-						{isRetrying ? 'Escaneando...' : 'Escanear'}
-					</Button>
-					<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
-						<RefreshCw className={`h-4 w-4 mr-0 ${isRetrying ? 'animate-spin' : ''}`} />
-						{isRetrying ? 'Recargando...' : 'Recargar'}
-					</Button>
-				</>
-			}
+			description={folderData?.description || `Contenido de la carpeta ${folderData?.name || ''}`}
+			icon="📁"
 		>
 			<FileBrowser
 				entityType={EntityStatsType.IMAGE}
