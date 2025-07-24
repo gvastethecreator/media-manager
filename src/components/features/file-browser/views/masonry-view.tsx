@@ -150,7 +150,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 			{layoutItems.map((layoutItem, index) => {
 				const item = itemsMap.get(layoutItem.id);
 				if (!item) return null;
-				
+
 				const isSelected = selectedIds.includes(item.id);
 				const isImage = isImageWithStats(item);
 				const isVideo = isVideoWithStats(item);
@@ -177,11 +177,11 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 							isSelected && 'ring-2 ring-primary ring-offset-2'
 						)}
 						style={{
-					width: `${columnWidth}px`,
-					height: `${itemHeight}px`,
-					left: `${left}px`,
-					top: `${layoutItem.top}px`,
-				}}
+							width: `${columnWidth}px`,
+							height: `${itemHeight}px`,
+							left: `${left}px`,
+							top: `${layoutItem.top}px`,
+						}}
 						onClick={(e) => {
 							e.stopPropagation();
 							onItemClick(item, e);
@@ -211,10 +211,10 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 						<div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
 							<h3 className="text-white text-sm font-medium truncate drop-shadow-md">{'name' in item ? item.name : item.id}</h3>
 							{isImage && 'width' in item && 'height' in item && (
-							<p className="text-white/80 text-xs drop-shadow-md">
-								{item.width}x{item.height} • {'size' in item && item.size ? `${(item.size / 1024 / 1024).toFixed(1)} MB` : 'N/A'}
-							</p>
-						)}
+								<p className="text-white/80 text-xs drop-shadow-md">
+									{item.width}x{item.height} • {'size' in item && item.size ? `${(item.size / 1024 / 1024).toFixed(1)} MB` : 'N/A'}
+								</p>
+							)}
 						</div>
 
 						{/* Indicadores */}
@@ -231,11 +231,11 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 						)}
 
 						{/* Badge de estadísticas */}
-				{'stats' in item && typeof item.stats === 'object' && item.stats && 'totalAssociations' in item.stats && typeof (item.stats as any).totalAssociations === 'number' && (item.stats as any).totalAssociations > 0 && (
-					<div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-md">
-						<span className="text-white text-xs">{(item.stats as any).totalAssociations} elementos</span>
-					</div>
-				)}
+						{'stats' in item && typeof item.stats === 'object' && item.stats && 'totalAssociations' in item.stats && typeof (item.stats as any).totalAssociations === 'number' && (item.stats as any).totalAssociations > 0 && (
+							<div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-md">
+								<span className="text-white text-xs">{(item.stats as any).totalAssociations} elementos</span>
+							</div>
+						)}
 					</motion.div>
 				);
 			})}

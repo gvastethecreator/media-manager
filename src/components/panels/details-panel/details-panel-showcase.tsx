@@ -100,34 +100,9 @@ const mockEntities: AnyEntityWithStats[] = [
 		audioCodec: 'aac',
 		bitrate: 5000,
 		stats: {
-			totalRelations: 5,
-			totalAssociations: 3,
-			totalItems: 1,
-			durationMinutes: 2,
-			resolutionCategory: 'HD' as const,
-			qualityScore: 0.85,
-			compressionRatio: 0.7,
-			hasAudio: true,
-			hasSubtitles: false,
-			frameRate: 30,
-			aspectRatio: 1.78,
-			bitrate: 5000,
-			codecInfo: 'h264/aac',
-			fileSize: 15728640,
-			formattedSize: '15.0 MB',
-			formattedDuration: '2:00',
-			formattedResolution: '1920x1080',
-			thumbnailCount: 10,
-			hasThumbnail: true,
-			thumbnailQuality: 'high' as const,
-			processingStatus: 'completed' as const,
-			viewCount: 8,
-			downloadCount: 1,
-			likeCount: 3,
-			commentCount: 0,
-			tagCount: 2,
 			albumCount: 1,
 			collectionCount: 1,
+			tagCount: 2,
 			characterCount: 1,
 			placeCount: 0,
 			worldItemCount: 0,
@@ -137,10 +112,31 @@ const mockEntities: AnyEntityWithStats[] = [
 			wildcardCount: 0,
 			propertyCount: 0,
 			groupCount: 0,
-			lastViewedAt: new Date(),
-			lastDownloadedAt: new Date(),
-			lastLikedAt: new Date(),
-			lastCommentedAt: null,
+			totalRelations: 5,
+			totalAssociations: 3,
+			totalItems: 1,
+			durationMinutes: 2,
+			durationHours: 0.033,
+			megabytes: 15,
+			gigabytes: 0.015,
+			aspectRatio: '16:9',
+			resolution: '1920x1080',
+			formattedSize: '15.0 MB',
+			formattedDuration: '2:00',
+			qualityLevel: 'high' as const,
+			qualityScore: 85,
+			technicalGrade: 'A' as const,
+			hasAudio: true,
+			hasSubtitles: false,
+			bitrate: 5000,
+			frameRate: 30,
+			views: 8,
+			likes: 3,
+			downloads: 1,
+			shares: 0,
+			lastViewed: new Date(),
+			duplicateStatus: 'unique' as const,
+			thumbnailUrl: '/videos/demo-thumb.jpg',
 		},
 	} as AnyEntityWithStats,
 	{
@@ -326,7 +322,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 
 	const handleSelectEntity = useCallback(
 		(entity: AnyEntityWithStats) => {
-			selectSingle(entity);
+			selectSingle(entity.id);
 			setSelectedIds(new Set([entity.id]));
 		},
 		[selectSingle]
@@ -334,7 +330,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 
 	const handleToggleEntity = useCallback(
 		(entity: AnyEntityWithStats) => {
-			toggleSelection(entity);
+			toggleSelection(entity.id);
 			setSelectedIds((prev) => {
 				const newSet = new Set(prev);
 				if (newSet.has(entity.id)) {
@@ -354,7 +350,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 	}, [clearSelection]);
 
 	const handleSelectAll = useCallback(() => {
-		updateSelection(mockEntities);
+		updateSelection(mockEntities.map((e) => e.id));
 		setSelectedIds(new Set(mockEntities.map((e) => e.id)));
 	}, [updateSelection]);
 
