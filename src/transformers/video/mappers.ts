@@ -2,7 +2,7 @@
  * @file Funciones de mapeo para la entidad Video.
  * @module transformers/video/mappers
  * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Drizzle para la entidad Video.
- 
+
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -78,13 +78,12 @@ export function mapCreateVideoDataToDrizzle(input: VideoCreateInput): DrizzleCre
 		const drizzleData: DrizzleCreateVideoData = {
 			...rest,
 			metadata: rest.metadata || null,
-			thumbnail: rest.thumbnail || null,
+			thumbnail: rest.thumbnail ? rest.thumbnail.toString('base64') : null,
 			thumbnailSize: rest.thumbnailSize || null,
 			thumbnailWidth: rest.thumbnailWidth || null,
 			thumbnailHeight: rest.thumbnailHeight || null,
 			isPublic: rest.isPublic ?? false,
 			isFavorite: rest.isFavorite ?? false,
-			isHidden: rest.isHidden ?? false,
 			folderId: input.folderId,
 		};
 
@@ -119,7 +118,15 @@ export function mapUpdateVideoDataToDrizzle(input: VideoUpdateInput): DrizzleUpd
 		} = input;
 
 		// Las relaciones se manejan por separado en Drizzle con junction tables
-		return rest;
+		// Convertir thumbnail de Buffer a string si es necesario
+		const processedRest = {
+			...rest,
+			thumbnail: rest.thumbnail && Buffer.isBuffer(rest.thumbnail)
+				? rest.thumbnail.toString('base64')
+				: rest.thumbnail as string | null | undefined
+		};
+
+		return processedRest;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de video', { error, input });
 		throw new TransformerError('Error al mapear datos de actualización de video.');

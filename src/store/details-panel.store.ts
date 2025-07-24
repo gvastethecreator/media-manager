@@ -1,19 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities/entity.types';
 
 interface DetailsPanelState {
 	isVisible: boolean;
 	isFixed: boolean;
 	showStatsWhenEmpty: boolean;
-	selectedItems: EntityWithStats[];
+	selectedItems: AnyEntityWithStats[];
 	toggleVisibility: () => void;
 	toggleFixed: () => void;
 	toggleShowStatsWhenEmpty: () => void;
 	setVisible: (visible: boolean) => void;
 	setFixed: (fixed: boolean) => void;
 	setShowStatsWhenEmpty: (show: boolean) => void;
-	setSelectedItems: (items: EntityWithStats[]) => void;
+	setSelectedItems: (items: AnyEntityWithStats[]) => void;
 }
 
 export const useDetailsPanel = create<DetailsPanelState>()(
@@ -41,7 +41,7 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 					set({ showStatsWhenEmpty: show });
 				}
 			},
-			setSelectedItems: (items: EntityWithStats[]) => {
+			setSelectedItems: (items: AnyEntityWithStats[]) => {
 				const currentItems = get().selectedItems;
 
 				if (currentItems.length !== items.length) {

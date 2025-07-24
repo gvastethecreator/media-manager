@@ -52,19 +52,19 @@ type DrizzleVideoWithCounts = {
 };
 
 type DrizzleVideoFromDrizzle = DrizzleVideoWithCounts & {
-	folder?: {id: string; name: string};
-	tags?: Array<{id: string; name: string}>;
-	albums?: Array<{id: string; name: string}>;
-	collections?: Array<{id: string; name: string}>;
-	characters?: Array<{id: string; name: string}>;
-	places?: Array<{id: string; name: string}>;
-	worldItems?: Array<{id: string; name: string}>;
-	concepts?: Array<{id: string; name: string}>;
-	prompts?: Array<{id: string; name: string}>;
-	notes?: Array<{id: string; content: string}>;
-	wildcards?: Array<{id: string; name: string}>;
-	properties?: Array<{key: string; value: unknown}>;
-	groups?: Array<{id: string; name: string}>;
+	folder?: { id: string; name: string };
+	tags?: Array<{ id: string; name: string }>;
+	albums?: Array<{ id: string; name: string }>;
+	collections?: Array<{ id: string; name: string }>;
+	characters?: Array<{ id: string; name: string }>;
+	places?: Array<{ id: string; name: string }>;
+	worldItems?: Array<{ id: string; name: string }>;
+	concepts?: Array<{ id: string; name: string }>;
+	prompts?: Array<{ id: string; name: string }>;
+	notes?: Array<{ id: string; content: string }>;
+	wildcards?: Array<{ id: string; name: string }>;
+	properties?: Array<{ key: string; value: unknown }>;
+	groups?: Array<{ id: string; name: string }>;
 };
 
 const logger = serverLogger.withContext('VideoTransformer');

@@ -134,12 +134,12 @@ export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView(
 							}}
 						>
 							{/* Miniatura o ícono */}
-							{isImage && 'id' in item && item.id ? (
+							{isImage && item.id ? (
 							<ImageThumbnail
-								imageId={item.id}
-								imageName={'name' in item ? item.name : ('id' in item ? item.id : 'unknown')}
-								className="absolute inset-0 w-full h-full object-cover"
-							/>
+									imageId={item.id}
+									imageName={('name' in item ? item.name : undefined) || item.id || 'unknown'}
+									className="absolute inset-0 w-full h-full object-cover"
+								/>
 							) : (
 								<div className="absolute inset-0 flex items-center justify-center">
 									{type === 'image' && <ImageIcon className="h-8 w-8 text-muted-foreground" />}
@@ -161,10 +161,10 @@ export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView(
 									'flex flex-col justify-end p-2'
 								)}
 							>
-								<p className="text-white text-xs font-medium truncate">{'name' in item ? item.name : item.id}</p>
-						{isImage && 'width' in item && 'height' in item && (
-							<p className="text-white/70 text-[10px]">{item.width}x{item.height}</p>
-						)}
+								<p className="text-white text-xs font-medium truncate">{('name' in item ? item.name : undefined) || item.id}</p>
+					{isImage && 'width' in item && 'height' in item && item.width && item.height && (
+						<p className="text-white/70 text-[10px]">{item.width}x{item.height}</p>
+					)}
 							</div>
 
 							{/* Indicador de video */}
