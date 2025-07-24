@@ -11,10 +11,11 @@ import type {
 	WorldItemCreateInput,
 	WorldItemFilters,
 	WorldItemSearchOptions,
+	WorldItemStatistics,
 	WorldItemUpdateInput,
 	WorldItemWithStats,
 } from '@/types/entities/world-item';
-import type { WorldItemStatistics } from '@/types/entities/world-item/base';
+
 // Las funciones de serialización ya no se usan en este archivo
 
 // Tipos de datos para Drizzle
@@ -72,18 +73,23 @@ const logger = serverLogger.withContext('WorldItemMappers');
 export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): DrizzleWorldItemCreateInput {
 	try {
 		const drizzleData: DrizzleWorldItemCreateInput = {
-			...input,
 			name: input.name || 'Nuevo Item',
+			description: input.description || null,
 			type: input.type || 'item',
 			category: input.category || 'misc',
 			rarity: input.rarity || 'common',
-			attributes: input.attributes || '{}',
-			effects: input.effects || '{}',
-			requirements: input.requirements || '{}',
+			value: typeof input.value === 'number' ? input.value : null,
+			weight: typeof input.weight === 'number' ? input.weight : null,
+			featuredImage: input.featuredImage || null,
+			attributes: typeof input.attributes === 'string' ? input.attributes : JSON.stringify(input.attributes || {}),
+			effects: typeof input.effects === 'string' ? input.effects : JSON.stringify(input.effects || {}),
+			requirements:
+				typeof input.requirements === 'string' ? input.requirements : JSON.stringify(input.requirements || {}),
 			stats: '{}', // Campo adicional para Drizzle
-			properties: input.properties || '{}',
+			properties: typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties || {}),
 			filters: '{}', // Campo adicional para Drizzle
 			tags: '[]', // Campo adicional para Drizzle
+			isFavorite: input.isFavorite || false,
 		};
 
 		return drizzleData;
@@ -99,7 +105,28 @@ export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): Dr
  */
 export function mapUpdateWorldItemDataToDrizzle(input: WorldItemUpdateInput): DrizzleWorldItemUpdateInput {
 	try {
-		const drizzleData: DrizzleWorldItemUpdateInput = { ...input };
+		const drizzleData: DrizzleWorldItemUpdateInput = {};
+
+		if (input.name !== undefined) drizzleData.name = input.name;
+		if (input.description !== undefined) drizzleData.description = input.description;
+		if (input.type !== undefined) drizzleData.type = input.type || undefined;
+		if (input.category !== undefined) drizzleData.category = input.category || undefined;
+		if (input.rarity !== undefined) drizzleData.rarity = input.rarity || undefined;
+		if (input.value !== undefined) drizzleData.value = typeof input.value === 'number' ? input.value : null;
+		if (input.weight !== undefined) drizzleData.weight = typeof input.weight === 'number' ? input.weight : null;
+		if (input.featuredImage !== undefined) drizzleData.featuredImage = input.featuredImage;
+		if (input.attributes !== undefined)
+			drizzleData.attributes =
+				typeof input.attributes === 'string' ? input.attributes : JSON.stringify(input.attributes);
+		if (input.effects !== undefined)
+			drizzleData.effects = typeof input.effects === 'string' ? input.effects : JSON.stringify(input.effects);
+		if (input.requirements !== undefined)
+			drizzleData.requirements =
+				typeof input.requirements === 'string' ? input.requirements : JSON.stringify(input.requirements);
+		if (input.properties !== undefined)
+			drizzleData.properties =
+				typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties);
+		if (input.isFavorite !== undefined) drizzleData.isFavorite = input.isFavorite;
 
 		return drizzleData;
 	} catch (error) {
@@ -142,7 +169,7 @@ function mapSortByToDrizzle(sortBy?: string): DrizzleWorldItemOrderByInput {
 
 	const [field, order = 'desc'] = sortBy.split(':');
 	const validOrders = ['asc', 'desc'] as const;
-	const sortOrder = (validOrders.includes(order as any) ? order : 'desc') as 'asc' | 'desc';
+	const sortOrder = (validOrders.includes(order as 'asc' | 'desc') ? order : 'desc') as 'asc' | 'desc';
 
 	// Mapear campos de UI a campos de Drizzle si es necesario
 	const fieldMap: Record<string, string> = {
@@ -178,33 +205,17 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		artifact: 100,
 	};
 
-	// Calcular tier del item basado en rareza
-	const getTier = (rarity: string): WorldItemStatistics['itemTier'] => {
-		const rarityLower = rarity.toLowerCase();
-		if (['mythic', 'artifact'].includes(rarityLower)) return 'artifact';
-		if (rarityLower === 'legendary') return 'legendary';
-		if (rarityLower === 'epic') return 'epic';
-		if (rarityLower === 'rare') return 'rare';
-		if (rarityLower === 'uncommon') return 'uncommon';
-		return 'common';
-	};
-
 	// Deserializar campos JSON si es necesario
 	const attributes =
-		typeof worldItem.attributes === 'string'
-			? (JSON.parse(worldItem.attributes || '[]') as any[])
-			: [];
+		typeof worldItem.attributes === 'string' ? (JSON.parse(worldItem.attributes || '[]') as unknown[]) : [];
 
-	const effects =
-		typeof worldItem.effects === 'string' ? (JSON.parse(worldItem.effects || '[]') as any[]) : [];
+	const effects = typeof worldItem.effects === 'string' ? (JSON.parse(worldItem.effects || '[]') as unknown[]) : [];
 
 	const requirements =
-		typeof worldItem.requirements === 'string'
-			? (JSON.parse(worldItem.requirements || '[]') as any[])
-			: [];
+		typeof worldItem.requirements === 'string' ? (JSON.parse(worldItem.requirements || '[]') as unknown[]) : [];
 
 	// No hay campo stats en WorldItemComplete, usar array vacío
-	const statsData: any[] = [];
+	const statsData: unknown[] = [];
 
 	// Calcular métricas temporales
 	const now = new Date();
@@ -216,19 +227,19 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	// Calcular poder basado en stats, efectos y rareza
 	const powerLevel = Math.round(
 		statsData.length * 10 +
-			effects.length * 15 +
-			(rarityScores[worldItem.rarity?.toLowerCase() || 'common'] || 10) +
-			(worldItem.isFavorite ? 5 : 0)
+		effects.length * 15 +
+		(rarityScores[worldItem.rarity?.toLowerCase() || 'common'] || 10) +
+		(worldItem.isFavorite ? 5 : 0)
 	);
 
 	// Calcular completitud
 	const completenessScore = Math.round(
 		(worldItem.description ? 20 : 0) +
-			(attributes.length > 0 ? 20 : 0) +
-			(effects.length > 0 ? 20 : 0) +
-			(requirements.length > 0 ? 10 : 0) +
-			(statsData.length > 0 ? 15 : 0) +
-			(worldItem.featuredImage ? 15 : 0)
+		(attributes.length > 0 ? 20 : 0) +
+		(effects.length > 0 ? 20 : 0) +
+		(requirements.length > 0 ? 10 : 0) +
+		(statsData.length > 0 ? 15 : 0) +
+		(worldItem.featuredImage ? 15 : 0)
 	);
 
 	// Calcular popularidad basada en relaciones
@@ -247,51 +258,32 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 
 	const stats: WorldItemStatistics = {
 		// Conteos de relaciones
-		imageCount: _count?.images || 0,
-		videoCount: _count?.videos || 0,
-		albumCount: _count?.albums || 0,
-		collectionCount: _count?.collections || 0,
-		tagCount: _count?.tags || 0,
-		characterCount: _count?.characters || 0,
-		placeCount: _count?.places || 0,
-		conceptCount: _count?.concepts || 0,
-		promptCount: _count?.prompts || 0,
-		noteCount: _count?.notes || 0,
-		wildcardCount: _count?.wildcards || 0,
-		propertyCount: _count?.properties || 0,
-		groupCount: _count?.groups || 0,
-
-		// Métricas RPG
-		powerLevel,
-		rarityScore: rarityScores[worldItem.rarity?.toLowerCase() || 'common'] || 10,
-		completenessScore,
+		totalImages: _count?.images || 0,
+		totalVideos: _count?.videos || 0,
+		totalAlbums: _count?.albums || 0,
+		totalCollections: _count?.collections || 0,
+		totalTags: _count?.tags || 0,
+		totalCharacters: _count?.characters || 0,
+		totalPlaces: _count?.places || 0,
+		totalConcepts: _count?.concepts || 0,
+		totalPrompts: _count?.prompts || 0,
+		totalNotes: _count?.notes || 0,
+		totalWildcards: _count?.wildcards || 0,
+		totalProperties: _count?.properties || 0,
+		totalGroups: _count?.groups || 0,
+		totalRelations: Object.values(_count || {}).reduce((sum, count) => sum + (count || 0), 0),
+		totalSize: 0, // TODO: calcular el tamaño total
+		averageSize: 0, // TODO: calcular el tamaño promedio
+		averageRelations: 0, // TODO: calcular el promedio de relaciones
 		popularityScore,
-
-		// Análisis de contenido
-		hasDescription: !!worldItem.description,
-		hasAttributes: attributes.length > 0,
-		hasEffects: effects.length > 0,
-		hasRequirements: requirements.length > 0,
-		hasStats: statsData.length > 0,
-		mediaRichness: (_count?.images || 0) + (_count?.videos || 0),
-
-		// Análisis temporal
-		createdThisMonth: daysSinceCreation <= 30,
-		updatedThisWeek: daysSinceLastUpdate <= 7,
-		daysSinceCreation,
-		daysSinceLastUpdate,
-
-		// Metadatos RPG
-		totalAttributes: attributes.length,
-		totalEffects: effects.length,
-		totalRequirements: requirements.length,
-		totalStats: statsData.length,
-		itemTier: getTier(worldItem.rarity || 'common'),
+		completenessScore,
+		usageCount: 0, // TODO: obtener el conteo de uso
+		lastUsed: null, // TODO: obtener la fecha de último uso
 	};
 
 	return {
 		...rest,
 		entityType: 'world-item' as const,
-		_stats: stats,
+		_stats: stats as unknown as WorldItemStatistics,
 	};
 }

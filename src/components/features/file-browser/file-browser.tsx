@@ -21,7 +21,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { EntityStatsType, type EntityWithStats } from '@/types/migration';
+import { EntityStatsType, type AnyEntityWithStats } from '@/types/migration';
 import { StatusBar } from './toolbar/status-bar';
 import { VirtualizedCardsView } from './views/virtualized-cards-view';
 import { VirtualizedListView } from './views/virtualized-list-view';
@@ -36,13 +36,13 @@ interface FileBrowserProps {
 	/** Tipos de entidades específicas a mostrar cuando entityType es 'mixed' */
 	entityTypes?: EntityStatsType[];
 	/** Items específicos a mostrar (para modo manual) */
-	items?: EntityWithStats[];
+	items?: AnyEntityWithStats[];
 	/** Callback cuando se selecciona un item */
-	onItemSelect?: (item: EntityWithStats) => void;
+	onItemSelect?: (item: AnyEntityWithStats) => void;
 	/** Callback cuando se hace click en un item */
-	onItemClick?: (item: EntityWithStats, e: React.MouseEvent) => void;
+	onItemClick?: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	/** Callback cuando se hace doble click en un item */
-	onItemDoubleClick?: (item: EntityWithStats) => void;
+	onItemDoubleClick?: (item: AnyEntityWithStats) => void;
 	/** Clase CSS adicional */
 	className?: string;
 	/** ID de carpeta/colección/etc para filtrar */
@@ -145,28 +145,28 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		// Cargar datos para cada tipo
 		for (const type of typesToLoad) {
 			if (type === 'image') {
-					const { loadImages: storeLoadImages, getImagesByFolder } = useImageStore.getState();
+				const { loadImages: storeLoadImages, getImagesByFolder } = useImageStore.getState();
 
-					// Verificar si ya existen imágenes para esta carpeta
-					if (filterId && filterType === 'folder') {
-						const existingImages = getImagesByFolder(filterId);
-						console.log('🔍 FileBrowser - Verificando imágenes existentes para carpeta:', {
-							filterId,
-							existingImagesCount: existingImages.length,
-							existingImages: existingImages.slice(0, 3),
-							storeState: {
-								totalImages: Object.keys(useImageStore.getState().core.images).length,
-								isLoading: useImageStore.getState().core.isLoading,
-								error: useImageStore.getState().core.error
-							}
-						});
-						if (existingImages.length > 0) {
-							console.log('🔍 FileBrowser - Ya existen imágenes para esta carpeta, saltando carga');
-							logger.debug('✅ Ya existen imágenes para esta carpeta, saltando carga');
-							lastLoadParamsRef.current = loadParamsKey;
-							return;
-						}
+				// Verificar si ya existen imágenes para esta carpeta
+				if (filterId && filterType === 'folder') {
+					const existingImages = getImagesByFolder(filterId);
+					console.log('🔍 FileBrowser - Verificando imágenes existentes para carpeta:', {
+						filterId,
+						existingImagesCount: existingImages.length,
+						existingImages: existingImages.slice(0, 3),
+						storeState: {
+							totalImages: Object.keys(useImageStore.getState().core.images).length,
+							isLoading: useImageStore.getState().core.isLoading,
+							error: useImageStore.getState().core.error,
+						},
+					});
+					if (existingImages.length > 0) {
+						console.log('🔍 FileBrowser - Ya existen imágenes para esta carpeta, saltando carga');
+						logger.debug('✅ Ya existen imágenes para esta carpeta, saltando carga');
+						lastLoadParamsRef.current = loadParamsKey;
+						return;
 					}
+				}
 
 				const loadParams: Parameters<typeof storeLoadImages>[0] = {};
 
@@ -175,32 +175,37 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					loadParams.folderId = filterId;
 				}
 
-				console.log('🔄 FileBrowser - Iniciando carga de imágenes', { filterId, filterType, loadParams, storeLoadImages: typeof storeLoadImages });
-					logger.debug('🔄 FileBrowser iniciando carga de imágenes', { filterId, filterType, loadParams });
+				console.log('🔄 FileBrowser - Iniciando carga de imágenes', {
+					filterId,
+					filterType,
+					loadParams,
+					storeLoadImages: typeof storeLoadImages,
+				});
+				logger.debug('🔄 FileBrowser iniciando carga de imágenes', { filterId, filterType, loadParams });
 
 				// Marcar como cargando
 				isLoadingRef.current = true;
 				lastLoadParamsRef.current = loadParamsKey;
 
 				// Llamar a la función del store directamente
-					console.log('🚀 FileBrowser - Llamando a storeLoadImages con parámetros:', loadParams);
-					storeLoadImages(loadParams)
-						.then(() => {
-							console.log('✅ FileBrowser - Carga de imágenes completada');
-							logger.debug('✅ Carga de imágenes completada');
-							// Verificar el estado del store después de la carga
-							const newState = useImageStore.getState();
-							console.log('📊 FileBrowser - Estado del store después de la carga:', {
-								totalImages: Object.keys(newState.core.images).length,
-								imagesByFolder: getImagesByFolder(filterId).length,
-								isLoading: newState.core.isLoading,
-								error: newState.core.error
-							});
-						})
-						.catch((error: Error) => {
-							console.error('❌ FileBrowser - Error al cargar imágenes:', error);
-							logger.error('❌ Error al cargar imágenes en FileBrowser:', error);
-						})
+				console.log('🚀 FileBrowser - Llamando a storeLoadImages con parámetros:', loadParams);
+				storeLoadImages(loadParams)
+					.then(() => {
+						console.log('✅ FileBrowser - Carga de imágenes completada');
+						logger.debug('✅ Carga de imágenes completada');
+						// Verificar el estado del store después de la carga
+						const newState = useImageStore.getState();
+						console.log('📊 FileBrowser - Estado del store después de la carga:', {
+							totalImages: Object.keys(newState.core.images).length,
+							imagesByFolder: getImagesByFolder(filterId).length,
+							isLoading: newState.core.isLoading,
+							error: newState.core.error,
+						});
+					})
+					.catch((error: Error) => {
+						console.error('❌ FileBrowser - Error al cargar imágenes:', error);
+						logger.error('❌ Error al cargar imágenes en FileBrowser:', error);
+					})
 					.finally(() => {
 						isLoadingRef.current = false;
 					});
@@ -225,7 +230,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		// En modo auto, obtener desde stores
 		if (entityType === 'mixed') {
 			// Modo mixto: combinar múltiples tipos de entidades
-			const allItems: EntityWithStats[] = [];
+			const allItems: AnyEntityWithStats[] = [];
 
 			for (const type of entityTypes) {
 				switch (type) {
@@ -372,11 +377,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Manejar click en item
 	const handleItemClick = useCallback(
-		(item: EntityWithStats, e: React.MouseEvent) => {
+		(item: AnyEntityWithStats, e: React.MouseEvent) => {
 			console.log('🔍 FileBrowser - handleItemClick ejecutado:', {
 				itemId: item.id,
 				hasOnItemClick: !!onItemClick,
-				hasOnItemSelect: !!onItemSelect
+				hasOnItemSelect: !!onItemSelect,
 			});
 
 			const isShiftClick = e.shiftKey;
@@ -405,10 +410,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Manejar doble click
 	const handleItemDoubleClick = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			console.log('🔍 FileBrowser - handleItemDoubleClick ejecutado:', {
 				itemId: item.id,
-				hasOnItemDoubleClick: !!onItemDoubleClick
+				hasOnItemDoubleClick: !!onItemDoubleClick,
 			});
 
 			onItemDoubleClick?.(item);
@@ -419,7 +424,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Actualizar panel de detalles cuando cambia la selección
 	useEffect(() => {
 		if (selectedIds.length > 0) {
-			const selectedItems = items.filter((item: EntityWithStats) => selectedIds.includes(item.id));
+			const selectedItems = items.filter((item: AnyEntityWithStats) => selectedIds.includes(item.id));
 			setDetailsPanelItems(selectedItems);
 			setDetailsPanelVisible(true);
 		} else {
@@ -443,11 +448,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Función para renderizar item usando EntityCard
 	const renderItem = useCallback(
-		(item: EntityWithStats, _index: number) => {
-			console.log('� FileBrowser - NUEVO LOG - Renderizando item:', {
+		(item: AnyEntityWithStats, _index: number) => {
+			console.log('🔍 FileBrowser - NUEVO LOG - Renderizando item:', {
 				id: item.id,
-				entityType: item.entityType || 'unknown',
-				timestamp: new Date().toISOString()
+				entityType: 'entityType' in item ? item.entityType : 'unknown',
+				timestamp: new Date().toISOString(),
 			});
 
 			console.log('🚨 FileBrowser - NUEVO LOG - Props disponibles:', {
@@ -456,7 +461,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				hasHandleItemClick: !!handleItemClick,
 				hasHandleItemDoubleClick: !!handleItemDoubleClick,
 				onItemClickType: typeof onItemClick,
-				onItemDoubleClickType: typeof onItemDoubleClick
+				onItemDoubleClickType: typeof onItemDoubleClick,
 			});
 
 			const onClickHandler = (e: React.MouseEvent) => {
@@ -471,13 +476,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 			console.log('� FileBrowser - Handlers creados para EntityCard:', {
 				onClickHandler: !!onClickHandler,
-				onDoubleClickHandler: !!onDoubleClickHandler
+				onDoubleClickHandler: !!onDoubleClickHandler,
 			});
 
 			return (
 				<EntityCard
 					key={item.id}
-					entity={item}
+					entity={item as AnyEntityWithStats}
 					isSelected={selectedIds.includes(item.id)}
 					onClick={onClickHandler}
 					onDoubleClick={onDoubleClickHandler}
@@ -501,7 +506,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			containerWidth,
 			entityType,
 			filterId,
-			filterType
+			filterType,
 		});
 
 		if (isLoading && items.length === 0) {

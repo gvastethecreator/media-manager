@@ -1,5 +1,5 @@
 import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
-import { useEffect, useState, memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -117,14 +117,14 @@ export const ImageCard = memo(function ImageCard({
 	};
 
 	// Determinar color primario para efectos TCG
-	const getPrimaryColor = () => {
-		// Usar el color de la primera etiqueta si hay etiquetas
-		if (imageData?.parsedMetadata?.tags?.length > 0) {
-			return imageData.parsedMetadata.tags[0].color || '#3b82f6';
-		}
-		// Color predeterminado
-		return '#3b82f6';
-	};
+    const getPrimaryColor = () => {
+        // Usar el color de la primera etiqueta si hay etiquetas
+        if (imageData?.tags && imageData.tags.length > 0) {
+            return imageData.tags[0].color || '#3b82f6';
+        }
+        // Color predeterminado
+        return '#3b82f6';
+    };
 
 	// Renderizar cargando
 	if (isLoading) {
@@ -167,13 +167,23 @@ export const ImageCard = memo(function ImageCard({
 
 	// Obtener formato de imagen de los metadatos
 	const _getImageFormat = () => {
-		return imageData.parsedMetadata?.format || 'unknown';
+		try {
+			const metadata = imageData.metadata ? JSON.parse(imageData.metadata) : null;
+			return metadata?.format || 'unknown';
+		} catch {
+			return 'unknown';
+		}
 	};
 
 	// Obtener información de cámara si está disponible
 	const getCameraInfo = () => {
-		if (imageData.parsedMetadata?.camera?.make || imageData.parsedMetadata?.camera?.model) {
-			return `${imageData.parsedMetadata.camera.make || ''} ${imageData.parsedMetadata.camera.model || ''}`.trim();
+		try {
+			const metadata = imageData.metadata ? JSON.parse(imageData.metadata) : null;
+			if (metadata?.camera?.make || metadata?.camera?.model) {
+				return `${metadata.camera.make || ''} ${metadata.camera.model || ''}`.trim();
+			}
+		} catch {
+			// Ignore parsing errors
 		}
 		return null;
 	};
@@ -195,8 +205,8 @@ export const ImageCard = memo(function ImageCard({
 	};
 
 	const getHumanReadableDimensions = () => {
-		if (!imageData?.parsedMetadata?.width || !imageData?.parsedMetadata?.height) return '';
-		return `${imageData.parsedMetadata.width} × ${imageData.parsedMetadata.height}`;
+		if (!imageData?.width || !imageData?.height) return '';
+		return `${imageData.width} × ${imageData.height}`;
 	};
 
 	const cardContent = (
@@ -256,11 +266,18 @@ export const ImageCard = memo(function ImageCard({
 								{imageData.name || 'Sin título'}
 							</span>
 							<div className="flex items-center gap-1">
-								{imageData.metadata?.format && (
-									<span className="px-1.5 py-0.5 text-[10px] bg-black/30 rounded uppercase text-white/90">
-										{imageData.metadata.format}
-									</span>
-								)}
+								{(() => {
+									try {
+										const metadata = imageData.metadata ? JSON.parse(imageData.metadata) : null;
+										return metadata?.format ? (
+											<span className="px-1.5 py-0.5 text-[10px] bg-black/30 rounded uppercase text-white/90">
+												{metadata.format}
+											</span>
+										) : null;
+									} catch {
+										return null;
+									}
+								})()}
 							</div>
 						</div>
 					</div>
@@ -365,14 +382,21 @@ export const ImageCard = memo(function ImageCard({
 								{/* Formato de la imagen y tamaño */}
 								{tcgMode && (
 									<div className="mt-1 flex flex-wrap gap-1.5">
-										{imageData.parsedMetadata?.format && (
+										{(() => {
+											try {
+												const metadata = imageData.metadata ? JSON.parse(imageData.metadata) : null;
+												return metadata?.format ? (
+													<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4">
+														{metadata.format.toUpperCase()}
+													</Badge>
+												) : null;
+											} catch {
+												return null;
+											}
+										})()}
+										{imageData.size && (
 											<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4">
-												{imageData.parsedMetadata.format.toUpperCase()}
-											</Badge>
-										)}
-										{imageData.parsedMetadata?.size && (
-											<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4">
-												{Math.round(imageData.parsedMetadata.size / 1024)} KB
+												{Math.round(imageData.size / 1024)} KB
 											</Badge>
 										)}
 										{imageData.hash && (
@@ -426,10 +450,10 @@ export const ImageCard = memo(function ImageCard({
 						{/* Información TCG en parte inferior (siempre visible) */}
 						<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black to-transparent pt-2">
 							{/* Etiquetas en modo TCG (visible siempre) */}
-							{showTags && imageData.parsedMetadata?.tags?.length > 0 && (
+							{showTags && imageData.tags && imageData.tags.length > 0 && (
 								<div className="px-3">
 									<div className="flex flex-wrap gap-1 mb-1">
-										{imageData.parsedMetadata?.tags?.slice(0, 3).map((tag: TagWithStats) => (
+										{imageData.tags?.slice(0, 3).map((tag: TagWithStats) => (
 											<Badge
 												key={tag.id}
 												variant="outline"
@@ -443,9 +467,9 @@ export const ImageCard = memo(function ImageCard({
 												{tag.name}
 											</Badge>
 										))}
-										{imageData.parsedMetadata?.tags?.length > 3 && (
+										{imageData.tags && imageData.tags.length > 3 && (
 											<Badge variant="outline" className="py-0 h-4 text-[10px] bg-gray-800/60 border-gray-700/60">
-												+{imageData.parsedMetadata.tags.length - 3}
+												+{imageData.tags ? imageData.tags.length - 3 : 0}
 											</Badge>
 										)}
 									</div>
@@ -464,7 +488,7 @@ export const ImageCard = memo(function ImageCard({
 			</div>
 
 			{/* Etiquetas estándar (visible al hacer hover) */}
-			{showTags && imageData.parsedMetadata?.tags?.length > 0 && !tcgMode && (
+			{showTags && imageData.tags && imageData.tags.length > 0 && !tcgMode && (
 				<div
 					className={cn(
 						'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
@@ -473,7 +497,7 @@ export const ImageCard = memo(function ImageCard({
 					)}
 				>
 					<div className="flex flex-wrap gap-1">
-						{imageData.parsedMetadata?.tags?.slice(0, 5).map((tag: TagWithStats) => (
+						{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
 							<Badge
 								key={tag.id}
 								variant="outline"
@@ -487,9 +511,9 @@ export const ImageCard = memo(function ImageCard({
 								{tag.name}
 							</Badge>
 						))}
-						{imageData.parsedMetadata?.tags?.length > 5 && (
+						{imageData.tags && imageData.tags.length > 5 && (
 							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
-								+{imageData.parsedMetadata.tags?.length - 5}
+								+{imageData.tags ? imageData.tags.length - 5 : 0}
 							</Badge>
 						)}
 					</div>

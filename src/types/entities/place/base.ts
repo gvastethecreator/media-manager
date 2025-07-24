@@ -42,6 +42,8 @@ export type PlaceBase = {
 	notes: string | null;
 	featuredImage: string | null;
 	parentId: string | null;
+	lore?: string;
+	shortcut?: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -74,6 +76,7 @@ export type PlaceWithStats = PlaceBase & {
 	entityType: 'place';
 	/** Estadísticas calculadas de la entidad */
 	_stats: PlaceStatistics;
+	stats: PlaceStatistics; // Alias para _stats
 	/** Conteos de relaciones desde Drizzle */
 	_count?: {
 		images?: number;
@@ -98,12 +101,24 @@ export type PlaceWithStats = PlaceBase & {
 	collections?: number;
 	concepts?: number;
 	/** Campos JSON parseados */
-	parsedDangers: any[];
-	parsedResources: any[];
-	parsedStats: any;
-	metadata: any;
+	parsedDangers: unknown[];
+	parsedResources: unknown[];
+	parsedStats: Record<string, unknown>;
+	metadata: Record<string, unknown>;
 	region: string | null;
 };
+
+/**
+ * Tipo para respuesta de Places con métodos de array
+ */
+export interface PlacesResponse {
+	items: PlaceWithStats[];
+	total: number;
+	length: number; // Alias para total
+	reduce: <T>(callback: (acc: T, place: PlaceWithStats, index: number) => T, initial: T) => T;
+	filter: (callback: (place: PlaceWithStats, index: number) => boolean) => PlaceWithStats[];
+	map: <T>(callback: (place: PlaceWithStats, index: number) => T) => T[];
+}
 
 /**
  * PLACE CREATE INPUT

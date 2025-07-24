@@ -1,6 +1,4 @@
-import React from 'react';
-
-const NotesContentView: React.FC = () => {
+const NotesContentView = () => {
 	return (
 		<div>
 			<h1>Notes View</h1>

@@ -17,7 +17,7 @@ export const PromptSchema = z.object({
 	content: z.string().default(''),
 	purpose: z.string().default(''),
 	category: z.string().default('general'),
-	parameters: z.string().default('{}').or(z.record(z.any())),
+	parameters: z.string().default('{}').or(z.record(z.string(), z.unknown())),
 	tags: z.string().default('[]').or(z.array(z.string())),
 	featuredImage: z.string().nullable().default(null),
 	isFavorite: z.boolean().default(false),
@@ -52,7 +52,7 @@ export const UpdatePromptSchema = PromptSchema.partial().extend({
  */
 export const PromptExecutionParamsSchema = z.object({
 	promptId: z.string().uuid(),
-	variables: z.record(z.any()).optional(),
+	variables: z.record(z.string(), z.unknown()).optional(),
 	context: z.string().optional(),
 	options: z
 		.object({

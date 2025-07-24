@@ -152,7 +152,9 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 				<EmptyState
 					icon={Video}
 					title="Error al cargar video"
-					description={error || "No se pudo obtener la información del video. Verifica que existe y tienes permisos para acceder."}
+					description={
+						error || 'No se pudo obtener la información del video. Verifica que existe y tienes permisos para acceder.'
+					}
 					action={{
 						label: 'Reintentar',
 						onClick: handleForceRefresh,

@@ -25,7 +25,7 @@ export const FolderCard = memo(function FolderCard({
 }: FolderCardProps) {
 	const folderData = useMemo(() => {
 		const imageCount = folder._count?.images ?? 0;
-		const isWithStats = 'statistics' in folder;
+		const isWithStats = 'stats' in folder;
 
 		return {
 			...folder,
@@ -34,10 +34,10 @@ export const FolderCard = memo(function FolderCard({
 				...(folder._count || {}),
 				images: imageCount,
 			},
-			totalFiles: folder.statistics?.totalFiles ?? 0,
-			totalSize: folder.statistics?.totalSize ?? 0,
-			recentImageUrls: folder.recentImages || [],
-			childrenCount: folder.statistics?.folderCount ?? 0,
+			totalFiles: folder.stats?.totalItems ?? folder.totalFiles ?? 0,
+			totalSize: folder.stats?.totalSize ?? folder.totalSize ?? 0,
+			recentImageUrls: folder.stats?.recentImages?.map((img) => img.path) || [],
+			childrenCount: folder.stats?.folderCount ?? 0,
 			lastIndexed: folder.lastIndexed ?? null,
 		};
 	}, [folder]);

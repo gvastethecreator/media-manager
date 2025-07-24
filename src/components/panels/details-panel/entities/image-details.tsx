@@ -4,15 +4,15 @@
  */
 
 import { Crop, Download, Edit, Eye, Heart, Maximize2, RotateCcw, RotateCw, Share, ZoomIn, ZoomOut } from 'lucide-react';
-import { memo, useCallback, useState, useEffect } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { useImageResources } from '@/store/image-resources.store';
 import type { ImageWithStats } from '@/types/entities/image';
 import { isImageWithStats } from '@/types/migration';
-import { useImageResources } from '@/store/image-resources.store';
 import type {
 	EntityDetailsProps,
 	EntityMetadataProps,
@@ -101,7 +101,7 @@ export const ImagePreview = memo<EntityPreviewProps<ImageWithStats>>(function Im
 		imageId,
 		imageName,
 		zoom,
-		className
+		className,
 	}: {
 		imageId: string;
 		imageName: string;
@@ -137,7 +137,7 @@ export const ImagePreview = memo<EntityPreviewProps<ImageWithStats>>(function Im
 
 		if (shouldShowLoading) {
 			return (
-				<div className={cn(className, "animate-pulse bg-muted flex items-center justify-center")}>
+				<div className={cn(className, 'animate-pulse bg-muted flex items-center justify-center')}>
 					<span className="text-muted-foreground">Cargando...</span>
 				</div>
 			);

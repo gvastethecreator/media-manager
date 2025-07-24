@@ -14,7 +14,7 @@ const viewLogger = clientLogger.withContext('DocumentsView');
  */
 export function DocumentsView(_props: ViewProps) {
 	const navigate = useNavigate();
-	
+
 	// Usar selectores individuales para evitar recrear objetos
 	const documentsRecord = useDocumentStore((s) => s.documents);
 	const isLoading = useDocumentStore((s) => s.isLoading);
@@ -43,11 +43,14 @@ export function DocumentsView(_props: ViewProps) {
 		}
 	}, [loadDocuments, documentsRecord]);
 
-	const handleDocumentClick = useCallback((document: DocumentWithStats) => {
-		viewLogger.info('🖱️ Click en documento:', document.name);
-		// Navegar a la vista de contenido específica del documento
-		navigate(`/documents/${document.id}`);
-	}, [navigate]);
+	const handleDocumentClick = useCallback(
+		(document: DocumentWithStats) => {
+			viewLogger.info('🖱️ Click en documento:', document.name);
+			// Navegar a la vista de contenido específica del documento
+			navigate(`/documents/${document.id}`);
+		},
+		[navigate]
+	);
 
 	const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files?.[0]) {

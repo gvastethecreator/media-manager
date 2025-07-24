@@ -359,7 +359,7 @@ export const VideoSchema = z.object({
 	width: z.number().nullable(),
 	height: z.number().nullable(),
 	metadata: z.string().nullable(),
-	thumbnail: z.any().nullable(),
+	thumbnail: z.unknown().nullable(),
 	thumbnailSize: z.number().nullable(),
 	thumbnailWidth: z.number().nullable(),
 	thumbnailHeight: z.number().nullable(),

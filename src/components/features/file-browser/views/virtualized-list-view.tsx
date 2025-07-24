@@ -5,25 +5,25 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useRef, useState, useEffect } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
 import { useImageResources } from '@/store/image-resources.store';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface VirtualizedListViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
 // Componente interno para manejar thumbnails de imágenes
 const ImageThumbnail = memo(function ImageThumbnail({
 	imageId,
 	imageName,
-	className
+	className,
 }: {
 	imageId: string;
 	imageName: string;
@@ -57,9 +57,7 @@ const ImageThumbnail = memo(function ImageThumbnail({
 	const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
 
 	if (shouldShowLoading) {
-		return (
-			<div className={cn(className, "animate-pulse bg-muted")} />
-		);
+		return <div className={cn(className, 'animate-pulse bg-muted')} />;
 	}
 
 	return (
@@ -145,24 +143,29 @@ export const VirtualizedListView = memo<VirtualizedListViewProps>(function Virtu
 						>
 							{/* Thumbnail o icono */}
 							<div className="w-12 h-12 bg-muted rounded flex-shrink-0 flex items-center justify-center">
-								{item.entityType === 'image' && item.id ? (
-									<ImageThumbnail
-										imageId={item.id}
-										imageName={item.name}
-										className="w-12 h-12 object-cover rounded"
+								{'entityType' in item && item.entityType === 'image' && 'id' in item && item.id ? (
+									<ImageThumbnail 
+										imageId={item.id} 
+										imageName={'name' in item ? item.name : ('id' in item ? item.id : 'unknown')} 
+										className="w-12 h-12 object-cover rounded" 
 									/>
 								) : (
 									<div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center">
-										<span className="text-xs font-semibold text-primary">{item.name.charAt(0).toUpperCase()}</span>
+										<span className="text-xs font-semibold text-primary">
+											{'name' in item ? item.name.charAt(0).toUpperCase() : 'U'}
+										</span>
 									</div>
 								)}
 							</div>
 
 							{/* Información del item */}
 							<div className="flex-1 min-w-0">
-								<div className="font-medium text-sm truncate">{item.name}</div>
+								<div className="font-medium text-sm truncate">
+									{'name' in item ? item.name : 'id' in item ? item.id : 'Unknown'}
+								</div>
 								<div className="text-xs text-muted-foreground">
-									{item.entityType} • {item.stats?.imageCount || 0} imágenes
+									{'entityType' in item ? item.entityType : 'unknown'} • 
+									{'stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats ? item.stats.imageCount : 0} imágenes
 								</div>
 							</div>
 						</motion.div>

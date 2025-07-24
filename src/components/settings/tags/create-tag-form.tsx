@@ -2,6 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,8 +14,8 @@ import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
 import { toastService } from '@/lib/ui/toast';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import { TagCategory } from '@/store/entities/tag/types';
-import type { TagComplete } from '@/types/entities/tag';
-import { DynamicCreateForm } from '../common/dynamic-create-form';
+import type { TagComplete } from '@/types/entities/tag/types';
+
 
 // Esquema de validación
 const createTagSchema = z.object({
@@ -54,7 +59,7 @@ export function CreateTagForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel: _onCancel,
+	onCancel,
 	onPreview,
 }: CreateTagFormProps) {
 	// React Query hooks
@@ -132,54 +137,119 @@ export function CreateTagForm({
 		return () => subscription.unsubscribe();
 	}, [form, onPreview]);
 
-	const optionalFields = [
-		{
-			name: 'emoji',
-			label: 'Emoji',
-			render: ({ value, onChange }: any) => <EmojiPicker value={value} onChange={onChange} />,
-		},
-		{
-			name: 'color',
-			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} />,
-		},
-		{
-			name: 'description',
-			label: 'Descripción',
-			render: ({ value, onChange }: any) => (
-				<textarea
-					placeholder="Descripción de la etiqueta..."
-					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
-				/>
-			),
-		},
-		{
-			name: 'category',
-			label: 'Categoría',
-			render: ({ value, onChange }: any) => (
-				<Select onValueChange={onChange} value={value || undefined}>
-					<SelectTrigger>
-						<SelectValue placeholder="Selecciona una categoría" />
-					</SelectTrigger>
-					<SelectContent>
-						{/* Aquí deberías mapear las categorías reales de TagCategory */}
-						<SelectItem value="general">General</SelectItem>
-						<SelectItem value="temporal">Temporal</SelectItem>
-						<SelectItem value="importante">Importante</SelectItem>
-					</SelectContent>
-				</Select>
-			),
-		},
-	];
-
 	return (
-		<DynamicCreateForm
-			optionalFields={optionalFields}
-			onSubmit={onSubmit}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear etiqueta'}
-		/>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nombre</FormLabel>
+							<FormControl>
+								<Input placeholder="Nombre de la etiqueta" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="emoji"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Emoji</FormLabel>
+							<FormControl>
+								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="color"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Color</FormLabel>
+							<FormControl>
+								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="category"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Categoría</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Selecciona una categoría" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{Object.values(TagCategory).map((category) => (
+										<SelectItem key={category} value={category}>
+											{category}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Descripción</FormLabel>
+							<FormControl>
+								<Textarea placeholder="Descripción de la etiqueta..." rows={3} {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="isFavorite"
+					render={({ field }) => (
+						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+							<FormControl>
+								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+							</FormControl>
+							<div className="space-y-1 leading-none">
+								<FormLabel>Marcar como favorito</FormLabel>
+							</div>
+						</FormItem>
+					)}
+				/>
+
+				<div className="flex justify-end space-x-2">
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancelar
+					</Button>
+					{onPreview && (
+						<Button type="button" variant="secondary" onClick={() => onPreview(form.getValues())}>
+							Vista previa
+						</Button>
+					)}
+					<Button type="submit">
+						{isEditing ? 'Guardar cambios' : 'Crear etiqueta'}
+					</Button>
+				</div>
+			</form>
+		</Form>
 	);
 }

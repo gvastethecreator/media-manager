@@ -1,7 +1,7 @@
 import type { SystemStats as ApiSystemStats } from '@/lib/api/system';
 import { useSystemStats } from '@/lib/api/system';
 import { MOCK_STATS } from '@/lib/mock/stats.mock';
-import { transformSystemStatsToGeneralStats, createEmptyGeneralStats, type GeneralStats } from '@/types/stats';
+import { createEmptyGeneralStats, type GeneralStats, transformSystemStatsToGeneralStats } from '@/types/stats';
 
 // Caché local en memoria para reducir llamadas
 const cachedStats: GeneralStats | null = null;
@@ -33,27 +33,31 @@ function transformApiSystemStatsToGeneralStats(apiStats: ApiSystemStats): Genera
 		topTags: [
 			{ id: '1', name: 'landscape', color: '#10b981', count: 45 },
 			{ id: '2', name: 'portrait', color: '#3b82f6', count: 32 },
-			{ id: '3', name: 'nature', color: '#22c55e', count: 28 }
+			{ id: '3', name: 'nature', color: '#22c55e', count: 28 },
 		],
 		recentActivity: [
 			{
 				id: '1',
 				type: 'upload',
 				description: 'Nueva imagen subida',
+				entityType: 'image',
+				entityId: 'img1',
 				createdAt: new Date(Date.now() - 1000 * 60 * 5),
 				image: {
 					id: 'img1',
 					name: 'landscape.jpg',
-					thumbnail: null
-				}
+					thumbnail: null,
+				},
 			},
 			{
 				id: '2',
 				type: 'tag',
 				description: 'Etiqueta añadida',
+				entityType: 'tag',
+				entityId: 'tag1',
 				createdAt: new Date(Date.now() - 1000 * 60 * 15),
-				image: null
-			}
+				image: null,
+			},
 		],
 	};
 }

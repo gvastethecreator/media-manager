@@ -36,7 +36,7 @@ export function GroupPreview({ group, onEdit, onDelete, onFavoriteToggle, isDele
 	return (
 		<>
 			<GroupHeader
-				emoji={group.emoji}
+				emoji={group.emoji || '📂'}
 				name={group.name}
 				isFavorite={group.isFavorite}
 				onEdit={onEdit}

@@ -128,7 +128,10 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	},
 	fetchImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
 		console.log('🔍 DEBUG Store: fetchImages llamado con opciones:', options);
-		console.log('🔍 DEBUG Store: Estado actual:', { isLoading: get().isLoading, totalImages: Object.keys(get().images).length });
+		console.log('🔍 DEBUG Store: Estado actual:', {
+			isLoading: get().isLoading,
+			totalImages: Object.keys(get().images).length,
+		});
 
 		if (get().isLoading && !options.refresh) {
 			console.log('⚠️ DEBUG Store: Saltando carga - isLoading=true y refresh=false');
@@ -156,14 +159,14 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				// Solo pasar parámetros que están permitidos por ImageFiltersSchema en el servidor
 				const apiOptions: any = {
 					limit,
-					offset
+					offset,
 				};
 
 				// Agregar solo parámetros válidos del esquema del servidor si están presentes
 				if (options.folderId) apiOptions.folderId = options.folderId;
 
 				const result = await ImageApi.getImagesFromApi(apiOptions);
-				console.log(`📡 DEBUG Store: Respuesta de API (página ${Math.floor(offset/limit) + 1}):`, result);
+				console.log(`📡 DEBUG Store: Respuesta de API (página ${Math.floor(offset / limit) + 1}):`, result);
 
 				// Verificar el formato de la respuesta y adaptarse
 				const images = result?.images || (result as any)?.data || [];
@@ -198,7 +201,10 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			return [];
 		} finally {
 			set({ isLoading: false });
-			console.log('🏁 DEBUG Store: fetchImages completado. Estado final:', { isLoading: false, totalImages: Object.keys(get().images).length });
+			console.log('🏁 DEBUG Store: fetchImages completado. Estado final:', {
+				isLoading: false,
+				totalImages: Object.keys(get().images).length,
+			});
 		}
 	},
 	loadImages: (options: { folderId?: string; refresh?: boolean } = {}) => get().fetchImages(options),

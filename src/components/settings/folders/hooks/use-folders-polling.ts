@@ -83,7 +83,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 			if (pollingIntervalRef.current !== interval) {
 				if (pollingTimerRef.current) {
 					clearInterval(pollingTimerRef.current);
-					pollingTimerRef.current = setInterval(pollForStatus, interval);
+					pollingTimerRef.current = setInterval(pollForStatus, interval) as unknown as number;
 				}
 				pollingIntervalRef.current = interval;
 			}
@@ -92,14 +92,15 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 				pollingLogger.info('✅ API indica que el proceso está completo:', {
 					folderId,
 					originalId,
-					finishedAt: data.finishedAt,
-					mappings: data.knownMappings,
+					finishedAt: (data as any).finishedAt,
+					mappings: (data as any).knownMappings,
 				});
 				const completeStatus: ProcessStatus = {
 					folderId,
+					isProcessing: false,
 					phase: 'complete',
 					progress: 100,
-					status: 'Proceso completado',
+					status: 'completed',
 					timestamp: Date.now(),
 				};
 				onStatusUpdate(completeStatus);
@@ -137,7 +138,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 					folderId,
 					originalId,
 					consecutiveNoStatus: consecutiveNoStatusCountRef.current,
-					mappings: data.knownMappings,
+					mappings: (data as any).knownMappings,
 				});
 				if (consecutiveNoStatusCountRef.current >= MAX_NO_STATUS_ATTEMPTS) {
 					pollingLogger.error('❌ Estado de proceso no disponible tras varios intentos. Forzando error.', {
@@ -146,9 +147,10 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 					});
 					const errorStatus: ProcessStatus = {
 						folderId,
-						phase: 'error',
+						isProcessing: false,
+						phase: 'complete',
 						progress: 0,
-						status: 'Error: no se pudo obtener el estado del proceso',
+						status: 'error',
 						timestamp: Date.now(),
 					};
 					onStatusUpdate(errorStatus);
@@ -199,7 +201,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 
 			// Configurar intervalo de polling más espacioso
 			pollingIntervalRef.current = 30000; // 30 segundos
-			pollingTimerRef.current = setInterval(pollForStatus, pollingIntervalRef.current);
+			pollingTimerRef.current = setInterval(pollForStatus, pollingIntervalRef.current) as unknown as number;
 			setIsPolling(true);
 		},
 		[pollForStatus, stopPolling]

@@ -12,9 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
 import { toastService } from '@/lib/ui/toast';
-import type { WorldItemCreateInput } from '@/types/entities/world-item';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
-import type { WorldItemComplete } from '@/types/entities/world-item/extended';
+import type { WorldItemComplete, WorldItemCreateInput } from '@/types/entities/world-item/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)

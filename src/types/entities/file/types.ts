@@ -1,6 +1,8 @@
 /**
  * 📁 Tipos canónicos para la entidad File
  */
+
+import type { DirectoryInfo, FileInfo } from '@/lib/filesystem/folder-scanner';
 import { FileType } from './base';
 
 export type FileBase = {

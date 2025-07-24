@@ -162,7 +162,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 						</div>
 					);
 
-				case 'date':
+				case 'date': {
 					// Helper function para validar y convertir fechas de forma segura
 					const parseDate = (value: unknown): Date | null => {
 						if (!value) return null;
@@ -196,9 +196,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 										)}
 									>
 										<CalendarIcon className="mr-2 h-4 w-4" />
-										{selectedDate
-											? selectedDate.toLocaleDateString()
-											: filter.placeholder || 'Seleccionar fecha'}
+										{selectedDate ? selectedDate.toLocaleDateString() : filter.placeholder || 'Seleccionar fecha'}
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-auto p-0">
@@ -212,6 +210,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 							</Popover>
 						</div>
 					);
+				}
 
 				case 'boolean':
 					return (

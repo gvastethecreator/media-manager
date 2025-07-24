@@ -61,8 +61,16 @@ export const getFolderStats = async (
 ): Promise<{
 	totalImages: number;
 	totalVideos: number;
+	totalAudio: number;
+	totalDocuments: number;
+	totalOthers: number;
 	totalSize: number;
 	lastActivity: Date | null;
+	recentImages?: Array<{
+		id: string;
+		name: string;
+		thumbnailUrl?: string;
+	}>;
 }> => {
 	const response = await apiClient.get(`/folders/${folderId}/stats`);
 	return response;

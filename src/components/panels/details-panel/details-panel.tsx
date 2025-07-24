@@ -11,19 +11,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { EntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
+import { AnyEntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 // Importar el sistema de registry
 import { entityDetailsRegistry } from './entity-details-registry';
 import { useEntityActions } from './integration-hook';
 
 interface DetailsPanelV2Props {
-	selectedItems: EntityWithStats[];
+	selectedItems: AnyEntityWithStats[];
 	className?: string;
 }
 
 // Componente memoizado para una entidad usando el registry
-const EntityDetailsView = memo<{ item: EntityWithStats }>(function EntityDetailsView({ item }) {
+const EntityDetailsView = memo<{ item: AnyEntityWithStats }>(function EntityDetailsView({ item }) {
 	const type = getEntityStatsType(item);
 	if (type === null) {
 		return (
@@ -87,7 +87,7 @@ const EntityDetailsView = memo<{ item: EntityWithStats }>(function EntityDetails
 });
 
 // Componente para información básica (fallback)
-const BasicInfoSection = memo<{ item: EntityWithStats }>(function BasicInfoSection({ item }) {
+const BasicInfoSection = memo<{ item: AnyEntityWithStats }>(function BasicInfoSection({ item }) {
 	const type = getEntityStatsType(item);
 	const stats: any = getEntityStatistics(item);
 
@@ -99,7 +99,7 @@ const BasicInfoSection = memo<{ item: EntityWithStats }>(function BasicInfoSecti
 			id: 'name',
 			icon: <Info className="h-3 w-3" />,
 			label: 'Nombre',
-			value: item.name || 'Sin nombre',
+			value: ('name' in item ? item.name : 'Sin nombre') || 'Sin nombre',
 		});
 
 		// Tipo
@@ -178,9 +178,9 @@ const BasicInfoSection = memo<{ item: EntityWithStats }>(function BasicInfoSecti
 });
 
 // Vista de selección múltiple simplificada
-const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function MultipleSelectionView({ items }) {
+const MultipleSelectionView = memo<{ items: AnyEntityWithStats[] }>(function MultipleSelectionView({ items }) {
 	const itemsByType = useMemo(() => {
-		const groups: Record<string, EntityWithStats[]> = {};
+		const groups: Record<string, AnyEntityWithStats[]> = {};
 		for (const item of items) {
 			const type = getEntityStatsType(item);
 			if (!type) continue;
@@ -215,21 +215,24 @@ const MultipleSelectionView = memo<{ items: EntityWithStats[] }>(function Multip
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-3 gap-2">
-						{items.slice(0, 9).map((item) => {
-					const type = getEntityStatsType(item);
-					if (!type) return null;
-					const config = entityDetailsRegistry.getConfig(type);
-					if (!config) return null;
+						{items
+							.slice(0, 9)
+							.map((item) => {
+								const type = getEntityStatsType(item);
+								if (!type) return null;
+								const config = entityDetailsRegistry.getConfig(type);
+								if (!config) return null;
 
-					const { previewComponent: PreviewComponent } = config;
-					if (!PreviewComponent) return null;
+								const { previewComponent: PreviewComponent } = config;
+								if (!PreviewComponent) return null;
 
-					return (
-						<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
-							<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
-						</div>
-					);
-				}).filter(Boolean)}
+								return (
+									<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
+										<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
+									</div>
+								);
+							})
+							.filter(Boolean)}
 					</div>
 					{items.length > 9 && (
 						<p className="text-xs text-muted-foreground mt-2 text-center">+{items.length - 9} elementos más</p>

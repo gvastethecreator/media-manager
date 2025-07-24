@@ -11,6 +11,8 @@ import ImageDetailView from '@/components/views/images/image-detail-view';
 import { JsonFileContentView } from '@/components/views/json-files/json-file-content-view';
 import { JsonFilesView } from '@/components/views/json-files/json-files-view';
 import MixedContentView from '@/components/views/mixed/mixed-content-view';
+import NotesViewSimple from '@/components/views/notes/notes-view-simple';
+import { PlacesView } from '@/components/views/places/places-view';
 import { PromptsView } from '@/components/views/prompts/prompts-view';
 import { PropertiesView } from '@/components/views/properties/properties-view';
 import { SearchView } from '@/components/views/search/search-view';
@@ -22,8 +24,6 @@ import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
 import { WorkflowContentView } from '@/components/views/workflows/workflow-content-view';
 import { WorkflowsView } from '@/components/views/workflows/workflows-view';
 import { WorldItemsView } from '@/components/views/world-items/world-items-view';
-import NotesViewSimple from '@/components/views/notes/notes-view-simple';
-import { PlacesView } from '@/components/views/places/places-view';
 
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {
@@ -36,7 +36,12 @@ const FolderContentWrapper = () => {
 
 // Wrapper para CharactersView
 const CharactersViewWrapper = () => {
-	return <div className="p-6"><h2 className="text-2xl font-bold">Vista de Personajes</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>;
+	return (
+		<div className="p-6">
+			<h2 className="text-2xl font-bold">Vista de Personajes</h2>
+			<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+		</div>
+	);
 };
 
 // Wrappers eliminados - TODO: Re-implementar cuando se necesiten
@@ -93,7 +98,12 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'files',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Archivos</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Archivos</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'all-images',
@@ -111,11 +121,21 @@ export const router = createBrowserRouter([
 			// Multimedia - Temporalmente simplificados
 			{
 				path: 'audios',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Audio</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Audio</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'documents',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Documentos</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Documentos</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'json-files',
@@ -127,24 +147,49 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'file-3ds',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Archivos 3D</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Archivos 3D</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			// Organizadores - Temporalmente simplificados
 			{
 				path: 'favorites',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Favoritos</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Favoritos</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'collections',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Colecciones</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Colecciones</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'albums',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Álbumes</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Álbumes</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'groups',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Grupos</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Grupos</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'tags',
@@ -165,7 +210,12 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'concepts',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Conceptos</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Conceptos</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'wildcards',
@@ -191,7 +241,12 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'entity-cards',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Vista de Tarjetas de Entidad</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Vista de Tarjetas de Entidad</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'mixed',
@@ -211,11 +266,21 @@ export const router = createBrowserRouter([
 			// Content Views - Vistas de detalle sin parámetros - Temporalmente simplificadas
 			{
 				path: 'document-content',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Contenido de Documento</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Contenido de Documento</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'audio-content',
-				element: <div className="p-6"><h2 className="text-2xl font-bold">Contenido de Audio</h2><p className="text-muted-foreground">Esta vista está siendo reparada...</p></div>,
+				element: (
+					<div className="p-6">
+						<h2 className="text-2xl font-bold">Contenido de Audio</h2>
+						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+					</div>
+				),
 			},
 			{
 				path: 'json-file-content',

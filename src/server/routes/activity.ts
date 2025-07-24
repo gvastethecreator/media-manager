@@ -1,8 +1,10 @@
-import { Router } from 'express';
+import express from 'express';
 import { z } from 'zod';
 import { ActivityService } from '../../services/activity/activity.service';
+import type { ActivityFilters } from '@/types/entities/activity/types';
+import type { ExpressHandler } from '@/lib/express-types';
 
-const router = Router();
+const router = express.Router();
 const activityService = new ActivityService();
 
 // Schema para validación
@@ -14,83 +16,64 @@ const createActivitySchema = z.object({
 	folderId: z.string().optional(),
 	characterId: z.string().optional(),
 	collectionId: z.string().optional(),
-	metadata: z.record(z.any()).optional(),
-});
-
-const getActivitiesSchema = z.object({
-	page: z.number().min(1).default(1),
-	limit: z.number().min(1).max(100).default(20),
-	type: z.string().optional(),
-	imageId: z.string().optional(),
-	albumId: z.string().optional(),
-	folderId: z.string().optional(),
-	characterId: z.string().optional(),
-	collectionId: z.string().optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // POST /api/activity - Registrar nueva actividad
-router.post('/', async (req, res) => {
-	try {
-		const validatedData = createActivitySchema.parse(req.body);
+const createActivity: ExpressHandler = async (req, res) => {
+	const validatedResult = createActivitySchema.safeParse(req.body);
+	if (!validatedResult.success) {
+		return res.status(400).json({
+			error: 'Datos de entrada inválidos',
+			details: validatedResult.error.errors,
+		});
+	}
 
+	const validatedData = validatedResult.data;
+
+	try {
 		const activity = await activityService.create({
 			type: validatedData.type,
-			message: validatedData.message,
-			imageId: validatedData.imageId,
-			data: validatedData.metadata ? JSON.stringify(validatedData.metadata) : undefined,
+			entityType: 'general',
+			entityId: validatedData.imageId || validatedData.albumId || validatedData.folderId || validatedData.characterId || validatedData.collectionId || '',
+			action: 'create',
+			userId: 'system',
+			description: validatedData.message,
+			metadata: validatedData.metadata,
 		});
 
 		res.status(201).json({
 			data: activity,
 			message: 'Actividad registrada exitosamente',
-			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		if (error instanceof z.ZodError) {
-			return res.status(400).json({
-				error: 'Datos de entrada inválidos',
-				details: error.errors,
-				timestamp: new Date().toISOString(),
-			});
-		}
-
 		console.error('Error registrando actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
 		});
 	}
-});
+};
 
 // GET /api/activity - Obtener actividades
-router.get('/', async (req, res) => {
+const getActivities: ExpressHandler = async (req, res) => {
 	try {
 		const page = Number(req.query.page) || 1;
 		const limit = Number(req.query.limit) || 20;
 
-		const filters = {
-			page,
+		const filters: ActivityFilters = {
 			limit,
-			type: req.query.type as string,
-			imageId: req.query.imageId as string,
-			albumId: req.query.albumId as string,
-			folderId: req.query.folderId as string,
-			characterId: req.query.characterId as string,
-			collectionId: req.query.collectionId as string,
+			offset: (page - 1) * limit,
 		};
 
-		// Remover filtros undefined
-		for (const key of Object.keys(filters)) {
-			if (filters[key as keyof typeof filters] === undefined) {
-				delete filters[key as keyof typeof filters];
-			}
+		if (req.query.type) {
+			filters.types = [req.query.type as string];
+		}
+		if (req.query.imageId) {
+			filters.imageId = req.query.imageId as string;
 		}
 
 		const result = await activityService.list(filters);
-
-		// Calcular páginas
-		const totalPages = Math.ceil(result.totalCount / limit);
 
 		res.json({
 			data: result.activities,
@@ -98,144 +81,92 @@ router.get('/', async (req, res) => {
 				page,
 				limit,
 				total: result.totalCount,
-				pages: totalPages,
 				hasMore: result.hasMore,
 			},
-			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
 		console.error('Error obteniendo actividades:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
 		});
 	}
-});
+};
 
 // GET /api/activity/stats - Obtener estadísticas de actividad
-router.get('/stats', async (req, res) => {
+const getActivityStats: ExpressHandler = async (req, res) => {
 	try {
-		const days = Number(req.query.days) || 30;
 		const type = req.query.type as string;
+		const filters: ActivityFilters = {};
+		if (type) filters.types = [type];
 
-		// Para estadísticas, usamos el método list con filtros específicos
-		const filters: any = {};
-		if (type) filters.type = type;
-
-		// Obtener actividades recientes
 		const recentActivities = await activityService.list(filters);
 
-		// Calcular estadísticas básicas
-		const stats = {
-			totalActivities: recentActivities.totalCount,
-			activitiesByType: {},
-			activitiesByDay: [],
-			mostActiveEntities: [],
-		};
-
-		// Agrupar por tipo
 		const typeCount: Record<string, number> = {};
 		for (const activity of recentActivities.activities) {
 			typeCount[activity.type] = (typeCount[activity.type] || 0) + 1;
 		}
-		stats.activitiesByType = typeCount;
 
-		res.json({
-			data: stats,
-			timestamp: new Date().toISOString(),
-		});
+		const stats = {
+			totalActivities: recentActivities.totalCount,
+			activitiesByType: typeCount,
+		};
+
+		res.json({ data: stats });
 	} catch (error) {
 		console.error('Error obteniendo estadísticas de actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
 		});
 	}
-});
+};
 
 // GET /api/activity/:id - Obtener actividad específica
-router.get('/:id', async (req, res) => {
+const getActivityById: ExpressHandler = async (req, res) => {
 	try {
 		const { id } = req.params;
-
 		const activity = await activityService.findById(id);
 
 		if (!activity) {
-			return res.status(404).json({
-				error: 'Actividad no encontrada',
-				timestamp: new Date().toISOString(),
-			});
+			return res.status(404).json({ error: 'Actividad no encontrada' });
 		}
 
-		res.json({
-			data: activity,
-			timestamp: new Date().toISOString(),
-		});
+		res.json({ data: activity });
 	} catch (error) {
 		console.error('Error obteniendo actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
 		});
 	}
-});
+};
 
 // DELETE /api/activity/:id - Eliminar actividad
-router.delete('/:id', async (req, res) => {
+const deleteActivity: ExpressHandler = async (req, res) => {
 	try {
 		const { id } = req.params;
-
 		const success = await activityService.delete(id);
 
 		if (!success) {
-			return res.status(404).json({
-				error: 'Actividad no encontrada',
-				timestamp: new Date().toISOString(),
-			});
+			return res.status(404).json({ error: 'Actividad no encontrada' });
 		}
 
-		res.json({
-			message: 'Actividad eliminada exitosamente',
-			timestamp: new Date().toISOString(),
-		});
+		res.json({ message: 'Actividad eliminada exitosamente' });
 	} catch (error) {
 		console.error('Error eliminando actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
 		});
 	}
-});
+};
 
-// DELETE /api/activity - Eliminar todas las actividades (con filtros opcionales)
-router.delete('/', async (req, res) => {
-	try {
-		const filters: any = {};
-
-		// Aplicar filtros opcionales
-		if (req.query.type) filters.type = req.query.type;
-		if (req.query.imageId) filters.imageId = req.query.imageId;
-		if (req.query.albumId) filters.albumId = req.query.albumId;
-
-		const deletedCount = await activityService.clearAll(filters);
-
-		res.json({
-			message: `${deletedCount} actividades eliminadas exitosamente`,
-			deletedCount,
-			timestamp: new Date().toISOString(),
-		});
-	} catch (error) {
-		console.error('Error eliminando actividades:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
-		});
-	}
-});
+// Registrar las rutas
+router.post('/', createActivity);
+router.get('/', getActivities);
+router.get('/stats', getActivityStats);
+router.get('/:id', getActivityById);
+router.delete('/:id', deleteActivity);
 
 export default router;

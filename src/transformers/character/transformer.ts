@@ -91,7 +91,6 @@ const logger = serverLogger.withContext('CharacterTransformer');
  */
 export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCounts): CharacterWithStats | null {
 	try {
-
 		if (!drizzleCharacter) {
 			return null;
 		}
@@ -161,8 +160,11 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			// Conteos originales para compatibilidad
 			_count,
 
+			// Tipo de entidad
+			entityType: 'character' as const,
+
 			// Estadísticas pre-calculadas optimizadas
-			statistics: {
+			stats: {
 				totalImages,
 				totalVideos,
 				totalTags,

@@ -1,6 +1,4 @@
-import React from 'react';
-
-const TagsContentView: React.FC = () => {
+const TagsContentView = () => {
 	return (
 		<div>
 			<h1>Tags View</h1>

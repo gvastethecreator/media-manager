@@ -70,7 +70,7 @@ export interface PropertyWithCounts extends PropertyBase {
  * 📊 Estadísticas calculadas para una Property.
  */
 export interface PropertyStatistics {
-	totalRelations: number; // Suma de todas las relaciones
+	totalRelations: number; // Suma de todas las relaciones (también conocido como totalAssociations)
 	usageDiversity: number; // Cuán distribuido está el uso de la propiedad entre diferentes tipos de entidades
 	popularity: number; // Un score de popularidad general
 	completenessScore: number; // Qué tan completo está el perfil de la propiedad (descripción, etc.)

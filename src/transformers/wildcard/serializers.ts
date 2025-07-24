@@ -11,7 +11,7 @@ import type { WildcardBase, WildcardWithStats } from '@/types/entities/wildcard'
 /**
  * Serializa WildcardBase para respuestas de API
  */
-export function serializeWildcard(wildcard: WildcardBase): Record<string, any> {
+export function serializeWildcard(wildcard: WildcardBase): Record<string, unknown> {
 	return {
 		id: wildcard.id,
 		content: wildcard.content,
@@ -31,7 +31,7 @@ export function serializeWildcard(wildcard: WildcardBase): Record<string, any> {
 /**
  * Serializa WildcardWithStats para respuestas de API
  */
-export function serializeWildcardWithStats(wildcard: WildcardWithStats): Record<string, any> {
+export function serializeWildcardWithStats(wildcard: WildcardWithStats): Record<string, unknown> {
 	return {
 		...serializeWildcard(wildcard),
 		stats: {
@@ -47,13 +47,13 @@ export function serializeWildcardWithStats(wildcard: WildcardWithStats): Record<
 /**
  * Serializa un array de wildcards
  */
-export function serializeWildcards(wildcards: WildcardBase[]): Record<string, any>[] {
+export function serializeWildcards(wildcards: WildcardBase[]): Record<string, unknown>[] {
 	return wildcards.map(serializeWildcard);
 }
 
 /**
  * Serializa un array de wildcards con estadísticas
  */
-export function serializeWildcardsWithStats(wildcards: WildcardWithStats[]): Record<string, any>[] {
+export function serializeWildcardsWithStats(wildcards: WildcardWithStats[]): Record<string, unknown>[] {
 	return wildcards.map(serializeWildcardWithStats);
 }

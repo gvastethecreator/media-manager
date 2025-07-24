@@ -9,7 +9,7 @@ export function useFolderStats() {
 	return useQuery({
 		queryKey: ['folder-stats'],
 		queryFn: async (): Promise<FolderStats> => {
-			const response = await apiClient.get('/api/stats/folders');
+			const response = (await apiClient.get('/api/stats/folders')) as { data: FolderStats };
 
 			// Si la API retorna null, usar valores por defecto
 			if (!response.data) {
@@ -25,6 +25,31 @@ export function useFolderStats() {
 					formattedSize: '0 B',
 					directoryCount: 0,
 					lastScanned: new Date().toISOString(),
+					// Propiedades adicionales requeridas por FolderStatistics
+					hierarchyDepth: 0,
+					totalDescendants: 0,
+					directChildren: 0,
+					contentDiversity: 0,
+					organizationScore: 0,
+					totalItems: 0,
+					accessFrequency: 0,
+					lastActivity: null,
+					imageCount: 0,
+					videoCount: 0,
+					noteCount: 0,
+					documentCount: 0,
+					folderCount: 0,
+					averageFileSize: 0,
+					largestFile: 0,
+					hasConsistentNaming: false,
+					hasDeepHierarchy: false,
+					isWellOrganized: false,
+					breadcrumbs: [],
+					fullPath: '',
+					relativePath: '',
+					autoTags: [],
+					qualityGrade: 'D' as const,
+					totalRelations: 0,
 				};
 			}
 

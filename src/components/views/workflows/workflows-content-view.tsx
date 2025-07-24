@@ -1,6 +1,4 @@
-import React from 'react';
-
-const WorkflowsContentView: React.FC = () => {
+const WorkflowsContentView = () => {
 	return (
 		<div>
 			<h1>Workflows View</h1>

@@ -13,9 +13,9 @@ export default defineConfig({
 			jsxRuntime: 'automatic',
 			babel: {
 				parserOpts: {
-					plugins: ['decorators-legacy']
-				}
-			}
+					plugins: ['decorators-legacy'],
+				},
+			},
 		}),
 		tsconfigPaths({
 			ignoreConfigErrors: true,
@@ -44,7 +44,7 @@ export default defineConfig({
 			port: 5175,
 			// Mejorar compatibilidad con Bun
 			clientPort: 5175,
-			host: 'localhost'
+			host: 'localhost',
 		},
 		// Configuración adicional para mejorar compatibilidad con Bun
 		middlewareMode: false,
@@ -116,28 +116,36 @@ export default defineConfig({
 		// Definir variables de entorno para el cliente
 		'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
 		// Optimización: definir variables en tiempo de build
-		'__DEV__': process.env.NODE_ENV !== 'production',
-		'__PROD__': process.env.NODE_ENV === 'production',
+		__DEV__: process.env.NODE_ENV !== 'production',
+		__PROD__: process.env.NODE_ENV === 'production',
 	},
 	optimizeDeps: {
 		// Optimización de dependencias para Bun
 		exclude: [
 			// Excluir módulos de Node.js
-			'fs', 'fs/promises', 'path', 'crypto', 'sharp', 'http',
+			'fs',
+			'fs/promises',
+			'path',
+			'crypto',
+			'sharp',
+			'http',
 			// Excluir dependencias que causan problemas
-			'@tauri-apps/api'
+			'@tauri-apps/api',
 		],
 		include: [
 			// Pre-bundlear dependencias críticas
-			'react', 'react-dom', 'react-router-dom',
-			'framer-motion', 'motion',
+			'react',
+			'react-dom',
+			'react-router-dom',
+			'framer-motion',
+			'motion',
 			'@tanstack/react-query',
 			'zustand',
 			'lucide-react',
 			'lodash',
 			'date-fns',
 			'clsx',
-			'tailwind-merge'
+			'tailwind-merge',
 		],
 		// Optimización de ESBuild para dependencias
 		esbuildOptions: {

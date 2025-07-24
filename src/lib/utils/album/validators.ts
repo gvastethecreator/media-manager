@@ -5,6 +5,7 @@
 
 import { z } from 'zod';
 import { AlbumPrivacyLevel, AlbumType } from '../../types/entities/album';
+import { AlbumBase } from '@/types/entities/album';
 
 /**
  * Determina si un tipo de álbum es válido
@@ -48,7 +49,7 @@ export const albumMetadataSchema = z.object({
 			})
 		)
 		.optional(),
-	customFields: z.record(z.any()).optional(),
+	customFields: z.record(z.string(), z.unknown()).optional(),
 	coverImageUrl: z.string().url().optional(),
 	thumbnailUrls: z.array(z.string().url()).optional(),
 	lastModified: z.string().or(z.date()).optional(),

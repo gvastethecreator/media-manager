@@ -350,19 +350,19 @@ export function GPSInfo({ metadata }: MetadataSectionsProps) {
 	const infoItems: (InfoItemData | null)[] = [
 		{
 			label: 'Latitud',
-			value: (typeof gps.latitude === 'number') ? formatCoordinate(gps.latitude, true) : null,
+			value: typeof gps.latitude === 'number' ? formatCoordinate(gps.latitude, true) : null,
 			icon: <MapPin className="h-3.5 w-3.5 text-green-500" />,
 			condition: typeof gps.latitude === 'number',
 		},
 		{
 			label: 'Longitud',
-			value: (typeof gps.longitude === 'number') ? formatCoordinate(gps.longitude, false) : null,
+			value: typeof gps.longitude === 'number' ? formatCoordinate(gps.longitude, false) : null,
 			icon: <MapPin className="h-3.5 w-3.5 text-green-500" />,
 			condition: typeof gps.longitude === 'number',
 		},
 		{
 			label: 'Altitud',
-			value: (typeof gps.altitude === 'number') ? `${gps.altitude.toFixed(2)}m` : null,
+			value: typeof gps.altitude === 'number' ? `${gps.altitude.toFixed(2)}m` : null,
 			icon: <MapPin className="h-3.5 w-3.5 text-blue-500" />,
 			condition: typeof gps.altitude === 'number',
 		},

@@ -9,7 +9,10 @@ interface ActivityProps {
 		type: string;
 		description: string;
 		createdAt: Date;
-		image: {
+		entityType: string;
+		entityId: string;
+		metadata?: Record<string, any>;
+		image?: {
 			id: string;
 			name: string;
 			thumbnail: Uint8Array | null;

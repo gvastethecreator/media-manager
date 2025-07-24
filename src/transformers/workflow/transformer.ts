@@ -58,11 +58,12 @@ export function transformWorkflow(
 		return {
 			...baseWorkflow,
 			stats: {
-				averageExecutionTime: 0,
+				totalExecutions: 0,
 				successRate: 0,
-				complexityScore: 0,
-				popularityScore: 0,
-				completenessScore: 0,
+				averageDuration: 0,
+				lastExecutedAt: null,
+				nodeCount: 0,
+				connectionCount: 0,
 			},
 		};
 	} catch (error) {
@@ -78,14 +79,24 @@ function normalizeWorkflowData(data: WorkflowInputData): WorkflowBase {
 		id: data.id || '',
 		name: data.name || '',
 		description: data.description || null,
-		steps: data.steps || '[]',
-		isActive: data.isActive ?? true,
+		emoji: data.emoji || null,
+		color: data.color || null,
 		category: data.category || null,
-		version: data.version || null,
-		author: data.author || null,
-		tags: data.tags || [],
-		executionCount: data.executionCount || data.execution_count || 0,
-		lastExecutedAt: normalizeDate(data.lastExecutedAt || data.last_executed_at),
+		isPublic: data.isPublic ?? false,
+		isFavorite: data.isFavorite ?? false,
+		isActive: data.isActive ?? true,
+		version: data.version || '1.0.0',
+		config: data.config || null,
+		steps: data.steps || null,
+		triggers: data.triggers || null,
+		conditions: data.conditions || null,
+		actions: data.actions || null,
+		schedule: data.schedule || null,
+		lastRun: data.lastRun || null,
+		nextRun: data.nextRun || null,
+		runCount: data.runCount || 0,
+		successCount: data.successCount || 0,
+		errorCount: data.errorCount || 0,
 		createdAt: normalizeDate(data.createdAt || data.created_at),
 		updatedAt: normalizeDate(data.updatedAt || data.updated_at),
 	};
@@ -98,42 +109,49 @@ function calculateWorkflowStats(
 	workflow: WorkflowBase,
 	executionHistory: Array<{ duration: number; success: boolean }>
 ): WorkflowStatistics {
-	const averageExecutionTime =
+	const averageDuration =
 		executionHistory.length > 0
 			? executionHistory.reduce((sum, exec) => sum + exec.duration, 0) / executionHistory.length
 			: 0;
 
-	const successRate =
-		executionHistory.length > 0
-			? (executionHistory.filter((exec) => exec.success).length / executionHistory.length) * 100
-			: 0;
+	const successRate = workflow.runCount > 0 ? (workflow.successCount / workflow.runCount) * 100 : 0;
 
-	const complexityScore = calculateComplexityScore(workflow);
-	const popularityScore = Math.log1p(workflow.executionCount) * 10;
-	const completenessScore = calculateCompleteness(workflow, ['name', 'description', 'category', 'author']);
+	const nodeCount = calculateNodeCount(workflow);
+	const connectionCount = calculateConnectionCount(workflow);
 
 	return {
-		averageExecutionTime,
+		totalExecutions: workflow.runCount,
 		successRate,
-		complexityScore,
-		popularityScore,
-		completenessScore,
+		averageDuration,
+		lastExecutedAt: workflow.lastRun,
+		nodeCount,
+		connectionCount,
 	};
 }
 
 /**
- * Calcula un score de complejidad basado en los pasos del workflow
+ * Calcula el número de nodos en el workflow
  */
-function calculateComplexityScore(workflow: WorkflowBase): number {
+function calculateNodeCount(workflow: WorkflowBase): number {
 	try {
+		if (!workflow.steps) return 0;
 		const steps = JSON.parse(workflow.steps);
-		const stepCount = Array.isArray(steps) ? steps.length : 0;
+		return Array.isArray(steps) ? steps.length : 0;
+	} catch {
+		return 0;
+	}
+}
 
-		// Score basado en número de pasos, complejidad de estructura, etc.
-		const baseScore = Math.min(100, stepCount * 5);
-		const tagComplexity = workflow.tags.length * 2;
-
-		return Math.min(100, baseScore + tagComplexity);
+/**
+ * Calcula el número de conexiones en el workflow
+ */
+function calculateConnectionCount(workflow: WorkflowBase): number {
+	try {
+		if (!workflow.steps) return 0;
+		const steps = JSON.parse(workflow.steps);
+		if (!Array.isArray(steps)) return 0;
+		// Estimación simple: cada paso (excepto el primero) tiene al menos una conexión
+		return Math.max(0, steps.length - 1);
 	} catch {
 		return 0;
 	}
@@ -146,16 +164,4 @@ function normalizeDate(date?: Date | string | null): Date {
 	if (!date) return new Date();
 	if (date instanceof Date) return date;
 	return new Date(date);
-}
-
-/**
- * Función de ayuda para calcular completeness
- */
-function calculateCompleteness(workflow: WorkflowBase, requiredFields: (keyof WorkflowBase)[]): number {
-	const completed = requiredFields.filter((field) => {
-		const value = workflow[field];
-		return value !== null && value !== undefined && value !== '';
-	}).length;
-
-	return Math.round((completed / requiredFields.length) * 100);
 }

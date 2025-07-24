@@ -55,7 +55,7 @@ export const RightPanel = memo(function RightPanel({
 	className,
 	isCollapsed,
 	onToggleCollapse,
-	isAnimating = false
+	isAnimating = false,
 }: RightPanelProps) {
 	const { isVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const location = useLocation();

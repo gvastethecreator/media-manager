@@ -134,7 +134,7 @@ export function CreateAlbumForm({
 					if (onUpdated) {
 						onUpdated(updatedAlbum);
 					}
-					toastService.system.success('Álbum actualizado correctamente');
+					toastService.success('Álbum actualizado correctamente');
 				} else {
 					// Crear nuevo álbum
 					const newAlbum = await createAlbumMutation.mutateAsync(albumData as AlbumCreateInput);
@@ -149,11 +149,11 @@ export function CreateAlbumForm({
 						color: '#3b82f6',
 						category: '',
 					});
-					toastService.system.success('Álbum creado correctamente');
+					toastService.success('Álbum creado correctamente');
 				}
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				toastService.system.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el álbum`, {
+				toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el álbum`, {
 					description: errorMessage,
 				});
 			} finally {

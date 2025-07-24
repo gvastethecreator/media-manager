@@ -112,7 +112,9 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 					{/* Estadísticas rápidas */}
 					<div className="grid grid-cols-3 gap-2 pt-2 border-t">
 						<div className="text-center">
-							<p className="text-lg font-bold text-primary">{entity.stats?.imageCount + entity.stats?.videoCount || 0}</p>
+							<p className="text-lg font-bold text-primary">
+								{entity.stats?.imageCount + entity.stats?.videoCount || 0}
+							</p>
 							<p className="text-xs text-muted-foreground">Elementos</p>
 						</div>
 						<div className="text-center">
@@ -261,7 +263,6 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 							</Button>
 						</div>
 					}
-
 				</div>
 			</CardHeader>
 			<CardContent className="p-0">
@@ -332,7 +333,9 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 							) : (
 								<FolderOpen className="h-12 w-12 text-primary mx-auto mb-2" />
 							)}
-							<p className="text-sm text-muted-foreground">{entity.stats?.imageCount + entity.stats?.videoCount || 0} elementos</p>
+							<p className="text-sm text-muted-foreground">
+								{entity.stats?.imageCount + entity.stats?.videoCount || 0} elementos
+							</p>
 						</div>
 					</div>
 				)}

@@ -34,9 +34,9 @@ export function RecentActivity() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 w-full space-y-0">
-				{stats.recentActivity?.map((activity: any) => (
-					<Activity key={activity.id} activity={activity} />
-				)) || <div className="text-muted-foreground text-sm p-2">No hay actividad reciente</div>}
+				{stats.recentActivity?.map((activity: any) => <Activity key={activity.id} activity={activity} />) || (
+					<div className="text-muted-foreground text-sm p-2">No hay actividad reciente</div>
+				)}
 			</CardContent>
 		</>
 	);

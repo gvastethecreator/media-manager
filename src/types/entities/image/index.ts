@@ -12,28 +12,19 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Tipos Canónicos ---
+export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
 // --- Enumeraciones ---
 export { ImageFormat, ImageStatus } from './enums';
-// --- Tipos Canónicos ---
 export type {
-	ImageBase,
-	ImageComplete,
-	ImageCreateInput,
-	ImageExtended,
 	ImageFilters,
-	ImageListItem,
-	ImageSearchOptions,
 	ImageSearchResult,
-	ImageUpdateInput,
-	ImageWithStats,
 } from './types';
 
-// --- Tipos de compatibilidad e interfaces ---
-export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
-
+// --- Tipos derivados ---
 export type ImageComplete = ImageWithStats;
-export type ImageCreateInput = Partial<ImageBase>;
-export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt' | 'addedAt'>>;
+export type ImageCreateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
 export type ImageSearchOptions = {
 	skip?: number;
 	take?: number;

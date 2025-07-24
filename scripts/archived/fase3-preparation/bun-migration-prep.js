@@ -5,9 +5,9 @@
  * Crea configuraciones y scripts necesarios para la migración completa
  */
 
+import chalk from 'chalk';
 import { promises as fs } from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 
 class BunMigrationPrep {
 	constructor() {

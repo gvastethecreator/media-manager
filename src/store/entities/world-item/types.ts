@@ -109,12 +109,12 @@ export interface WorldItemApiOptions {
 	/**
 	 * Función de transformación personalizada para los datos obtenidos
 	 */
-	transform?: (data: any) => WorldItem[];
+	transform?: (data: unknown) => WorldItem[];
 
 	/**
 	 * Manejador de errores personalizado
 	 */
-	errorHandler?: (error: any) => string;
+	errorHandler?: (error: unknown) => string;
 
 	/**
 	 * Tiempo de caché en milisegundos
@@ -174,7 +174,7 @@ export interface WorldItemBatchOptions {
 	/**
 	 * Datos para la operación (solo para update, changeType, changeCategory)
 	 */
-	data?: Partial<WorldItem> | { [key: string]: any };
+	data?: Partial<WorldItem> | { [key: string]: unknown };
 }
 
 // Re-exportar tipos canónicos

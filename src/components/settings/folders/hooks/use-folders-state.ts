@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import { findFolders } from '@/lib/api/services/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { FolderStats } from '@/types/entities/folder';
+import type { FolderStatistics } from '@/types/entities/folder';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
 const stateLogger = clientLogger.withContext('FoldersState');
@@ -15,7 +15,7 @@ const stateLogger = clientLogger.withContext('FoldersState');
 export function useFoldersState() {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
-	const [stats, setStats] = useState<FolderStats>(initialStats);
+	const [stats, setStats] = useState<FolderStatistics>(initialStats);
 	const [folders, setFolders] = useState<ExtendedFolder[]>([]);
 
 	// Cargar carpetas desde la API
@@ -37,7 +37,7 @@ export function useFoldersState() {
 				totalSize: Number(folder.totalSize || 0),
 				totalFiles: Number(folder.totalFiles || folder._count?.images || 0),
 				autoReindex: folder.autoReindex || false,
-				recentImages: folder.recentImages?.filter((img): img is string => img !== null) || [],
+				recentImages: folder.recentImages?.filter((img: any): img is string => img !== null) || [],
 			}));
 
 			stateLogger.info('✅ Carpetas cargadas:', {
@@ -47,38 +47,32 @@ export function useFoldersState() {
 
 			// Calcular estadísticas básicas a partir de las carpetas usando FolderStatistics
 			const totalFiles = transformedFolders.reduce(
-				(acc: number, f: ExtendedFolder) => acc + (f.totalFiles || f._count.images || 0),
+				(acc: number, f: ExtendedFolder) => acc + (f.totalFiles || f._count?.images || 0),
 				0
 			);
 			const totalSize = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f.totalSize || 0), 0);
-			const imageCount = transformedFolders.reduce((acc: number, f: ExtendedFolder) => acc + (f._count.images || 0), 0);
+			const imageCount = transformedFolders.reduce(
+				(acc: number, f: ExtendedFolder) => acc + (f._count?.images || 0),
+				0
+			);
 
 			setStats({
-				hierarchyDepth: 0,
-				totalDescendants: 0,
-				directChildren: transformedFolders.length,
-				contentDiversity: 0,
-				organizationScore: 0,
+				...initialStats,
+				totalFolders: transformedFolders.length,
+				totalFiles: totalFiles,
 				totalItems: totalFiles,
-				accessFrequency: 0,
-				lastActivity: null,
-				imageCount,
+				totalImages: imageCount,
+				imageCount: imageCount,
+				totalVideos: 0,
 				videoCount: 0,
-				noteCount: 0,
+				totalAudio: 0,
+				totalDocuments: 0,
 				documentCount: 0,
-				folderCount: transformedFolders.length,
+				totalOthers: 0,
+				totalSize: totalSize,
 				formattedSize: formatBytes(totalSize),
-				averageFileSize: totalFiles > 0 ? totalSize / totalFiles : 0,
-				largestFile: 0,
-				hasConsistentNaming: false,
-				hasDeepHierarchy: false,
-				isWellOrganized: false,
-				breadcrumbs: [],
-				fullPath: '',
-				relativePath: '',
-				autoTags: [],
-				qualityGrade: 'C',
-				totalRelations: 0,
+				directoryCount: transformedFolders.length,
+				lastActivity: new Date(),
 			});
 		} catch (error) {
 			stateLogger.error('❌ Error cargando carpetas:', error);
@@ -117,7 +111,7 @@ export function useFoldersState() {
 	}, []);
 
 	// Actualizar estadísticas
-	const updateStats = useCallback((newStats: Partial<FolderStats>) => {
+	const updateStats = useCallback((newStats: Partial<FolderStatistics>) => {
 		setStats((prevStats: any) => ({
 			...prevStats,
 			...newStats,

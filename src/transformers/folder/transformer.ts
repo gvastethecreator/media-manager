@@ -165,6 +165,18 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 
 		// Relaciones
 		totalRelations,
+
+		// 🔧 Propiedades adicionales para compatibilidad con componentes
+		totalFiles: totalFiles || 0,
+		totalSize: totalSize || 0,
+		totalImages: imageCount,
+		totalVideos: videoCount,
+		totalAudio: 0,
+		totalDocuments: 0,
+		totalOthers: 0,
+		lastScanned: lastIndexed?.toISOString(),
+		directoryCount: folderCount,
+		recentImages: [],
 	};
 }
 
@@ -191,7 +203,8 @@ export function fromDrizzleFolderWithCounts(folderFromDrizzle: any | null, allFo
 			...baseData,
 			totalFiles,
 			totalSize,
-			statistics,
+			entityType: 'folder',
+			stats: statistics,
 			_count: {
 				children: _count.children || 0,
 				images: _count.images || 0,

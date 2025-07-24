@@ -26,18 +26,24 @@ export interface CollectionBase {
 
 export interface CreateCollectionInput {
 	name: string;
-	description?: string;
-	emoji?: string;
-	color?: string;
-	isPublic?: boolean; // Cambiado de isPrivate a isPublic
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	parentId?: string | null;
 }
 
 export interface UpdateCollectionInput {
 	name?: string;
-	description?: string;
-	emoji?: string;
-	color?: string;
-	isPublic?: boolean; // Cambiado de isPrivate a isPublic
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	parentId?: string | null;
 }
 
 export interface CollectionFilter {

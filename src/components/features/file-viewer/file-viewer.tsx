@@ -654,11 +654,12 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 							</motion.div>
 						)}
 
-						{!currentImage || (!urls[currentImage.id] && !isLoading) && (
-							<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
-								<p>Error al cargar la imagen</p>
-							</div>
-						)}
+						{!currentImage ||
+							(!urls[currentImage.id] && !isLoading && (
+								<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
+									<p>Error al cargar la imagen</p>
+								</div>
+							))}
 					</div>
 				</motion.div>
 

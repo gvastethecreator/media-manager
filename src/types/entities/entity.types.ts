@@ -6,7 +6,7 @@
 import type { EntityType } from './entities';
 
 // Tipo específico para entityType en entidades con estadísticas
-export type EntityStatsTypeValue = 
+export type EntityStatsTypeValue =
 	| 'image'
 	| 'video'
 	| 'folder'
@@ -53,8 +53,7 @@ export interface EntityStats {
 	lastUpdated?: Date;
 }
 
-export interface EntityWithStats extends EntityBase {
+export interface EntityWithStats<TStats = EntityStats> extends EntityBase {
 	entityType: EntityStatsTypeValue;
-	stats?: EntityStats;
-	[key: string]: any;
+	stats: TStats;
 }

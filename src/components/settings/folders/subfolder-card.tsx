@@ -90,7 +90,7 @@ export function SubfolderCard({
 				{/* Controles compactos */}
 				<div className="flex items-center gap-1">
 					{/* Estado del índice */}
-					<FolderIndexStatusBadge status={indexStatus} size="sm" />
+					<FolderIndexStatusBadge status={indexStatus} lastIndexed={folder.lastIndexed} />
 
 					{/* Estadísticas compactas */}
 					{folder.totalFiles > 0 && (

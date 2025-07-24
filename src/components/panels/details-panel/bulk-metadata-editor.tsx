@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 // import { updateMetadata } from '@/services/metadata/metadata.service';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 export interface BulkMetadataEditorProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 }
 
 /**
@@ -43,7 +43,7 @@ export function BulkMetadataEditor({ items }: BulkMetadataEditorProps) {
 
 		startTransition(async () => {
 			const updates = items
-				.map((item) => item.metadata?.id)
+				.map((item) => item.id)
 				.filter((id): id is string => !!id)
 				.map((id) => ({
 					id,
@@ -55,8 +55,8 @@ export function BulkMetadataEditor({ items }: BulkMetadataEditorProps) {
 
 			if (updates.length === 0) {
 				toast({
-					title: 'No hay metadatos para actualizar',
-					description: 'Ninguno de los elementos seleccionados parece tener una entrada de metadatos asociada.',
+					title: 'No hay elementos para actualizar',
+					description: 'No se encontraron elementos válidos para actualizar.',
 					variant: 'destructive',
 				});
 				return;
