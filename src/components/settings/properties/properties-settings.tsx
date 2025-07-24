@@ -66,8 +66,8 @@ export function PropertiesSettings() {
 	const stats = useMemo(() => {
 		return {
 			totalProperties: properties.length,
-			totalAssociations: properties.reduce((acc, property) => acc + (property.totalAssociations || 0), 0),
-			emptyProperties: properties.filter((property) => (property.totalAssociations || 0) === 0).length,
+			totalAssociations: properties.reduce((acc, property) => acc + (property.stats?.totalAssociations || 0), 0),
+		emptyProperties: properties.filter((property) => (property.stats?.totalAssociations || 0) === 0).length,
 			favoriteProperties: properties.filter((property) => property.isFavorite).length,
 			byCategory: properties.reduce(
 				(acc, property) => {
@@ -221,7 +221,7 @@ export function PropertiesSettings() {
 												<div className="flex items-center gap-2 w-full">
 													<div className="flex flex-col items-start flex-1">
 														<span className="font-medium">{property.name}</span>
-														<span className="text-xs opacity-50">{property.totalAssociations || 0} asociaciones</span>
+														<span className="text-xs opacity-50">{property.stats?.totalAssociations || 0} asociaciones</span>
 													</div>
 												</div>
 												{property.isFavorite && <Star className="h-3 w-3 absolute right-8 top-2" />}
@@ -277,7 +277,7 @@ export function PropertiesSettings() {
 									<div>
 										<h4 className="font-medium mb-2">Estadísticas</h4>
 										<p className="text-sm text-muted-foreground">
-											{selectedProperty.totalAssociations || 0} asociaciones totales
+											{selectedProperty.stats?.totalAssociations || 0} asociaciones totales
 										</p>
 									</div>
 								</div>
@@ -285,10 +285,15 @@ export function PropertiesSettings() {
 						</Card>
 					) : isEditMode && selectedProperty ? (
 						<CreatePropertyForm
-							property={selectedProperty}
-							onSubmit={(data) => handleUpdateProperty(selectedProperty.id, data)}
-							onCancel={() => setIsEditMode(false)}
-						/>
+					property={selectedProperty}
+					isEditing
+					onUpdated={(data) => {
+						setIsEditMode(false);
+						setSelectedProperty(data);
+					}}
+					onCreated={() => {}}
+					onCancel={() => setIsEditMode(false)}
+				/>
 					) : (
 						<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
 							<div className="text-center">
@@ -301,7 +306,10 @@ export function PropertiesSettings() {
 				</div>
 
 				<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-					<CreatePropertyForm onSubmit={handleCreateProperty} onCancel={() => setIsCreateDialogOpen(false)} />
+					<CreatePropertyForm onCreated={(data) => {
+			setIsCreateDialogOpen(false);
+			toastService.success('Propiedad creada correctamente');
+		}} onUpdated={() => {}} onCancel={() => setIsCreateDialogOpen(false)} />
 				</Dialog>
 			</div>
 		</ScrollArea>

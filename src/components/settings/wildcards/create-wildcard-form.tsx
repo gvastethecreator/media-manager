@@ -43,7 +43,7 @@ interface CreateWildcardFormProps {
 const convertFormToSchema = (data: FormValues): z.infer<typeof CreateWildcardSchema> => {
 	return {
 		...data,
-		children: data.children.map((c) => c.value).filter(Boolean),
+		children: JSON.stringify(data.children.map((c) => c.value).filter(Boolean)),
 	};
 };
 
@@ -177,7 +177,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Categoría</FormLabel>
 									<FormControl>
-										<Select value={field.value} onValueChange={field.onChange}>
+										<Select value={field.value || ''} onValueChange={field.onChange}>
 											<SelectTrigger>
 												<SelectValue placeholder="Selecciona una categoría" />
 											</SelectTrigger>
@@ -227,7 +227,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							<FormLabel>Valores</FormLabel>
 							<FormDescription>Los valores son opciones predefinidas para este comodín</FormDescription>
 
-							{fields.map((field, index) => (
+							{fields.map((field: any, index: number) => (
 								<div key={field.id} className="flex items-center gap-2">
 									<FormField
 										control={form.control}

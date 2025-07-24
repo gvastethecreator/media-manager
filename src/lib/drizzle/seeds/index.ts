@@ -109,7 +109,7 @@ export async function runSeeds() {
 		seedLogger.error('💥 Error ejecutando seeds:', error);
 		throw error;
 	} finally {
-		client.close();
+		(client as any).close();
 	}
 }
 

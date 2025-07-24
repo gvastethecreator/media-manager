@@ -77,7 +77,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 		}
 		setIsSubmitting(true);
 		try {
-			await onSubmit(formData);
+			await onSubmit(formData as T & { name: string });
 			setFormData({ name: '' });
 			setAddedFields([]);
 			setError(null);

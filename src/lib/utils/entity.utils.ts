@@ -66,17 +66,17 @@ interface EntityWithStats extends BaseEntity {
 	isFavorite?: boolean;
 }
 
-export function calculateStats<T extends BaseEntity>(
+export function calculateStats<T extends EntityWithStats>(
 	items: T[],
-	getCount = (item: T) => (item as EntityWithStats)._count?.images || 0,
-	getSize = (item: T) => (item as EntityWithStats).totalSize || 0
+	getCount = (item: T) => item._count?.images || 0,
+	getSize = (item: T) => item.totalSize || 0
 ): ExtendedStats {
 	// Estadísticas básicas
 	const basicStats = {
 		total: items.length,
-		active: items.filter((item) => !(item as EntityWithStats).isArchived).length,
-		isFavorite: items.filter((item) => (item as EntityWithStats).isFavorite).length,
-		archived: items.filter((item) => (item as EntityWithStats).isArchived).length,
+		active: items.filter((item) => !item.isArchived).length,
+		isFavorite: items.filter((item) => item.isFavorite).length,
+		archived: items.filter((item) => item.isArchived).length,
 	};
 
 	// Si no hay items, devolver solo las estadísticas básicas

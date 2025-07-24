@@ -208,12 +208,19 @@ export function serializeActivity(activity: Activity): Record<string, any> {
 		const serialized: Record<string, any> = {
 			id: validData.id,
 			type: validData.type,
+			entityType: validData.entityType,
+			entityId: validData.entityId,
+			action: validData.action,
+			userId: validData.userId,
 			description: validData.description,
 			createdAt,
 		};
 
 		// Añadir campos opcionales si existen
-		if (validData.imageId) serialized.imageId = validData.imageId;
+		if (validData.metadata) serialized.metadata = validData.metadata;
+		if (validData.ipAddress) serialized.ipAddress = validData.ipAddress;
+		if (validData.userAgent) serialized.userAgent = validData.userAgent;
+		if (validData.sessionId) serialized.sessionId = validData.sessionId;
 		if (validData.image) serialized.image = validData.image;
 		if (validData.iconEmoji) serialized.iconEmoji = validData.iconEmoji;
 		if (validData.iconColor) serialized.iconColor = validData.iconColor;
@@ -280,9 +287,16 @@ export function deserializeActivity(data: Record<string, any>): Activity | null 
 		const activity: Activity = {
 			id: parsed.id,
 			type: parsed.type,
+			entityType: parsed.entityType,
+			entityId: parsed.entityId,
+			action: parsed.action,
+			userId: parsed.userId,
 			description: parsed.description,
 			createdAt,
-			...(parsed.imageId && { imageId: parsed.imageId }),
+			...(parsed.metadata && { metadata: parsed.metadata }),
+			...(parsed.ipAddress && { ipAddress: parsed.ipAddress }),
+			...(parsed.userAgent && { userAgent: parsed.userAgent }),
+			...(parsed.sessionId && { sessionId: parsed.sessionId }),
 			...(parsed.image && { image: parsed.image }),
 			...(parsed.iconEmoji && { iconEmoji: parsed.iconEmoji }),
 			...(parsed.iconColor && { iconColor: parsed.iconColor }),

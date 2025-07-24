@@ -313,8 +313,8 @@ export function NotesSettings() {
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
 												style={{
-													backgroundColor: note.color,
-												}}
+									backgroundColor: note.color || '#3b82f6',
+								}}
 											>
 												<span className="text-xs">{note.emoji}</span>
 											</div>
@@ -397,7 +397,7 @@ export function NotesSettings() {
 										key={selectedNote?.id || 'new-note'}
 										note={selectedNote}
 										isEditing={isEditing}
-										onCreated={handleNoteCreated}
+										onSuccess={handleNoteCreated}
 										onUpdated={handleNoteUpdated}
 										onCancel={handleReset}
 										onPreview={handlePreview}

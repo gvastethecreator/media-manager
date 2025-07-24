@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useConceptStore } from '@/store/entities/concept';
 import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/types';
-import type { EntityType } from '@/types/entities/entities';
+import { EntityType } from '@/types/entities/entities/index';
 
 /**
  * Hook que proporciona acciones para gestionar conceptos

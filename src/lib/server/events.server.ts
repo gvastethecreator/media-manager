@@ -189,16 +189,16 @@ export async function emit(event: EventData) {
 /**
  * Emite un evento de progreso (versión cliente)
  */
-export async function emitProgress(status: ProcessStatus) {
+export async function emitProgress(type: EventType, data: ProcessStatus) {
 	// Asegurarse de que timestamp esté presente
-	const statusWithTimestamp = {
-		...status,
-		timestamp: status.timestamp || Date.now(),
+	const dataWithTimestamp = {
+		...data,
+		timestamp: data.timestamp || Date.now(),
 	};
 
 	// Emitir el evento
 	await emit({
-		type: 'folder:progress',
-		data: statusWithTimestamp,
+		type,
+		data: dataWithTimestamp,
 	});
 }
