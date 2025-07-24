@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 import React, { memo } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
+import type { EntityWithStats, AnyEntityWithStats } from '@/types/migration';
 
 interface CardsViewProps {
 	items: EntityWithStats[];
@@ -71,7 +71,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 								width: `${cardWidth}px`,
 							}}
 						>
-							<EntityCard entity={item} isSelected={isSelected} compact={itemSize < 150} className="h-full" />
+							<EntityCard entity={item as AnyEntityWithStats} isSelected={isSelected} compact={itemSize < 150} className="h-full" />
 						</motion.div>
 					);
 				})}

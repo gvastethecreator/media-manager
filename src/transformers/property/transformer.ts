@@ -40,13 +40,16 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 
 			const stats: PropertyStatistics = {
 				totalRelations,
+				totalAssociations: totalRelations,
 				usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
 				popularity: Number.parseFloat(popularity.toFixed(2)),
 				completenessScore,
 			};
 			return {
 				...baseProperty,
+				entityType: 'property',
 				stats,
+				_count: drizzleProperty._count,
 			};
 		}
 
@@ -54,6 +57,7 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 
 		const stats: PropertyStatistics = {
 			totalRelations: 0,
+			totalAssociations: 0,
 			usageDiversity: 0,
 			popularity: 0,
 			completenessScore,
@@ -61,7 +65,23 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 
 		return {
 			...(drizzleProperty as PropertyBase),
+			entityType: 'property',
 			stats,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				groups: 0,
+			},
 		};
 	} catch (error) {
 		propertyTransformerLogger.error('❌ Error transformando property:', error);

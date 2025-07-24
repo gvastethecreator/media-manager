@@ -33,7 +33,8 @@ export interface FolderBase extends EntityBase {
  * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)
  */
 export interface FolderWithStats extends FolderBase, EntityWithStats, FolderUIProps {
-	statistics: FolderStatistics;
+	entityType: 'folder';
+	stats: FolderStatistics;
 	children?: FolderWithStats[]; // Para estructuras recursivas
 }
 
@@ -88,26 +89,29 @@ export interface FolderStatistics {
 	// Métricas de jerarquía
 	hierarchyDepth: number;
 	totalDescendants: number;
-	directChildren: number;
+	directChildren: number; // También conocido como directoryCount
 
 	// Métricas de contenido
 	contentDiversity: number;
 	organizationScore: number;
-	totalItems: number;
+	totalItems: number; // También conocido como totalFiles
+	folderCount: number; // Número total de subcarpetas
 
 	// Métricas de uso
 	accessFrequency: number;
 	lastActivity: Date | null;
 
 	// Distribución de contenido
-	imageCount: number;
-	videoCount: number;
+	imageCount: number; // También conocido como totalImages
+	videoCount: number; // También conocido como totalVideos
 	noteCount: number;
-	documentCount: number;
-	folderCount: number;
+	documentCount: number; // También conocido como totalDocuments
+	totalAudio: number; // Archivos de audio
+	totalOthers: number; // Otros tipos de archivos
 
 	// Métricas de tamaño
 	formattedSize: string;
+	totalSize: number; // Tamaño total en bytes
 	averageFileSize: number;
 	largestFile: number;
 
@@ -129,6 +133,15 @@ export interface FolderStatistics {
 
 	// Relaciones
 	totalRelations: number;
+
+	// Compatibilidad con componentes
+	lastScanned?: string;
+	recentImages?: Array<{
+		id: string;
+		path: string;
+		name: string;
+		createdAt: string;
+	}>;
 }
 
 /**

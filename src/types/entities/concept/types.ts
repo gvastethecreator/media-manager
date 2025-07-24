@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import type { ConceptBase } from './base';
 
 // Re-export tipos base desde base.ts para evitar duplicación
 export type { ConceptBase, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
@@ -17,11 +18,21 @@ export interface ConceptCreateInput {
 	emoji?: string;
 	color?: string;
 	description?: string | null;
-	content: string;
-	category?: string;
-	featuredImage?: string | null;
+	content?: string;
+	category?: string | null;
+	isPublic?: boolean;
 	isFavorite?: boolean;
-	// Relaciones por ID
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	complexity?: string | null;
+	applications?: string | null;
+	examples?: string | null;
+	relatedConcepts?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
+	// Relaciones por ID (para compatibilidad)
 	imageIds?: string[];
 	videoIds?: string[];
 	albumIds?: string[];
@@ -43,61 +54,32 @@ export interface ConceptCreateInput {
 export type ConceptUpdateInput = Partial<ConceptCreateInput>;
 
 /**
- * Opciones de búsqueda para conceptos
- */
-export interface ConceptSearchOptions {
-	filters?: {
-		search?: string;
-		category?: string | string[];
-		tags?: string[];
-		onlyFavorites?: boolean;
-	};
-	skip?: number;
-	take?: number;
-	orderBy?: {
-		[key: string]: 'asc' | 'desc';
-	};
-	includeCount?: boolean;
-	includeRelations?: boolean;
-}
-
-/**
- * Resultado de búsqueda de conceptos
- */
-export interface ConceptSearchResult {
-	items: ConceptWithStats[];
-	total: number;
-	page: number;
-	pageSize: number;
-	totalPages: number;
-}
-
-/**
  * Filtros para búsqueda de conceptos
  */
 export interface ConceptFilters {
-	search?: string;
 	category?: string | string[];
+	search?: string;
+	sortBy?: 'name' | 'category' | 'createdAt' | 'updatedAt';
+	sortOrder?: 'asc' | 'desc';
+	page?: number;
+	pageSize?: number;
 	tags?: string[];
 	onlyFavorites?: boolean;
 }
 
 /**
- * Concepto extendido con propiedades adicionales para UI
+ * Resultado de búsqueda de conceptos
  */
-export interface ConceptExtended extends ConceptWithStats {
-	isSelected?: boolean;
-	isHighlighted?: boolean;
-	previewContent?: string;
-	lastUpdated?: Date;
-	importance?: number;
+export interface ConceptResults {
+	items: ConceptBase[];
+	total: number;
+	page: number;
+	pageSize: number;
+	stats?: {
+		totalConcepts: number;
+		categoriesStats: Record<string, number>;
+	};
 }
-
-// Los tipos ConceptStats, ConceptStatistics y ConceptWithStats se importan desde base.ts
-
-/**
- * Opciones de ordenación para conceptos
- */
 export enum ConceptSortOption {
 	NAME_ASC = 'name_asc',
 	NAME_DESC = 'name_desc',

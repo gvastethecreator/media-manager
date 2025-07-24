@@ -6,21 +6,22 @@ import React from 'react';
 
 import { PlayCircleIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { EntityWithStats, isImageWithStats, isVideoWithStats } from '@/types/migration';
 import { useImageResources } from '@/store/image-resources.store';
+import { AnyEntityWithStats, isImageWithStats, isVideoWithStats } from '@/types/migration';
 
 interface MasonryViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
-interface MasonryItem extends EntityWithStats {
+interface MasonryItem {
+	id: string;
 	aspectRatio: number;
 	columnIndex: number;
 	top: number;
@@ -30,7 +31,7 @@ interface MasonryItem extends EntityWithStats {
 const ImageThumbnail = memo(function ImageThumbnail({
 	imageId,
 	imageName,
-	className
+	className,
 }: {
 	imageId: string;
 	imageName: string;
@@ -64,9 +65,7 @@ const ImageThumbnail = memo(function ImageThumbnail({
 	const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
 
 	if (shouldShowLoading) {
-		return (
-			<div className={cn(className, "animate-pulse bg-muted")} />
-		);
+		return <div className={cn(className, 'animate-pulse bg-muted')} />;
 	}
 
 	return (
@@ -91,7 +90,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	onItemDoubleClick,
 }) {
 	// Calcular columnas y layout masonry
-	const { columns, columnWidth, layoutItems, totalHeight } = useMemo(() => {
+	const { columns, columnWidth, layoutItems, totalHeight, itemsMap } = useMemo(() => {
 		const gap = 16;
 		const padding = 24;
 		const minColumnWidth = Math.max(150, Math.min(itemSize * 1.5, 300));
@@ -106,8 +105,8 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 		const positioned = items.map((item) => {
 			// Obtener aspect ratio
 			let aspectRatio = 1;
-			if (isImageWithStats(item) && item.statistics) {
-				aspectRatio = item.statistics.aspectRatio || 1;
+			if (isImageWithStats(item) && 'width' in item && 'height' in item) {
+				aspectRatio = (item.width && item.height) ? item.width / item.height : 1;
 			} else if (isVideoWithStats(item) && 'width' in item && 'height' in item) {
 				aspectRatio = (item.width ?? 1) / (item.height ?? 1);
 			}
@@ -120,7 +119,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 			const itemHeight = colWidth / aspectRatio;
 
 			const positioned: MasonryItem = {
-				...item,
+				id: item.id,
 				aspectRatio,
 				columnIndex: shortestColumnIndex,
 				top: columnHeights[shortestColumnIndex],
@@ -132,6 +131,9 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 			return positioned;
 		});
 
+		// Crear un mapa para acceso rápido a los items originales
+		const itemsMap = new Map(items.map(item => [item.id, item]));
+
 		const maxHeight = Math.max(...columnHeights);
 
 		return {
@@ -139,18 +141,22 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 			columnWidth: colWidth,
 			layoutItems: positioned,
 			totalHeight: maxHeight,
+			itemsMap,
 		};
 	}, [items, itemSize, containerWidth]);
 
 	return (
 		<div className="relative p-6" style={{ height: `${totalHeight}px` }}>
-			{layoutItems.map((item, index) => {
+			{layoutItems.map((layoutItem, index) => {
+				const item = itemsMap.get(layoutItem.id);
+				if (!item) return null;
+				
 				const isSelected = selectedIds.includes(item.id);
 				const isImage = isImageWithStats(item);
 				const isVideo = isVideoWithStats(item);
-				const itemHeight = columnWidth / item.aspectRatio;
+				const itemHeight = columnWidth / layoutItem.aspectRatio;
 				const gap = 16;
-				const left = item.columnIndex * (columnWidth + gap);
+				const left = layoutItem.columnIndex * (columnWidth + gap);
 
 				return (
 					<motion.div
@@ -171,11 +177,11 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 							isSelected && 'ring-2 ring-primary ring-offset-2'
 						)}
 						style={{
-							width: `${columnWidth}px`,
-							height: `${itemHeight}px`,
-							left: `${left}px`,
-							top: `${item.top}px`,
-						}}
+					width: `${columnWidth}px`,
+					height: `${itemHeight}px`,
+					left: `${left}px`,
+					top: `${layoutItem.top}px`,
+				}}
 						onClick={(e) => {
 							e.stopPropagation();
 							onItemClick(item, e);
@@ -190,25 +196,25 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 							<>
 								<ImageThumbnail
 									imageId={item.id}
-									imageName={item.name || 'Imagen'}
+									imageName={item.name || item.id}
 									className="w-full h-full object-cover"
 								/>
 								<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 							</>
 						) : (
 							<div className="w-full h-full bg-muted/20 flex items-center justify-center">
-								<span className="text-4xl opacity-50">{item.emoji || '📄'}</span>
+								<span className="text-4xl opacity-50">{('emoji' in item ? item.emoji : undefined) || '📄'}</span>
 							</div>
 						)}
 
 						{/* Información en hover */}
 						<div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-							<h3 className="text-white text-sm font-medium truncate drop-shadow-md">{item.name || 'Sin nombre'}</h3>
-							{isImage && item.statistics && (
-								<p className="text-white/80 text-xs drop-shadow-md">
-									{item.statistics.dimensions} • {item.formattedSize}
-								</p>
-							)}
+							<h3 className="text-white text-sm font-medium truncate drop-shadow-md">{'name' in item ? item.name : item.id}</h3>
+							{isImage && 'width' in item && 'height' in item && (
+							<p className="text-white/80 text-xs drop-shadow-md">
+								{item.width}x{item.height} • {'size' in item && item.size ? `${(item.size / 1024 / 1024).toFixed(1)} MB` : 'N/A'}
+							</p>
+						)}
 						</div>
 
 						{/* Indicadores */}
@@ -225,11 +231,11 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 						)}
 
 						{/* Badge de estadísticas */}
-						{item.statistics && item.statistics.totalAssociations > 0 && (
-							<div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-md">
-								<span className="text-white text-xs">{item.statistics.totalAssociations} elementos</span>
-							</div>
-						)}
+				{'stats' in item && typeof item.stats === 'object' && item.stats && 'totalAssociations' in item.stats && typeof (item.stats as any).totalAssociations === 'number' && (item.stats as any).totalAssociations > 0 && (
+					<div className="absolute top-2 right-2 px-2 py-1 bg-black/50 rounded-md">
+						<span className="text-white text-xs">{(item.stats as any).totalAssociations} elementos</span>
+					</div>
+				)}
 					</motion.div>
 				);
 			})}

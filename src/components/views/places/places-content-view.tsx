@@ -1,6 +1,4 @@
-import React from 'react';
-
-const PlacesContentView: React.FC = () => {
+const PlacesContentView = () => {
 	return (
 		<div>
 			<h1>Places View</h1>

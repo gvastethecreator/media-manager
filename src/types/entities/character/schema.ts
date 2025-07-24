@@ -17,13 +17,13 @@ const _optionalString = z.string().optional();
 const _stringArray = z.array(z.string()).optional().default([]);
 
 // Esquema para estadísticas
-const _statsSchema = z.union([z.string(), z.record(z.any()), z.undefined()]).optional();
+const _statsSchema = z.union([z.string(), z.record(z.string(), z.unknown()), z.undefined()]).optional();
 
 // Esquema para filtros
-const _filtersSchema = z.union([z.string(), z.record(z.any()), z.undefined()]).optional();
+const _filtersSchema = z.union([z.string(), z.record(z.string(), z.unknown()), z.undefined()]).optional();
 
 // Esquema para relaciones
-const _relationshipsSchema = z.union([z.string(), z.array(z.any()), z.undefined()]).optional();
+const _relationshipsSchema = z.union([z.string(), z.array(z.unknown()), z.undefined()]).optional();
 
 /**
  * 🧍 Esquema para inventario de personaje
@@ -86,7 +86,7 @@ export const CharacterRelationSchema = z.object({
 });
 
 // Helper para parsear JSON de forma segura antes de validar
-const safeJsonParse = (defaultValue: any) => (val: unknown) => {
+const safeJsonParse = (defaultValue: unknown) => (val: unknown) => {
 	if (typeof val !== 'string' || !val || val === 'empty_object' || val === 'empty_array') {
 		return defaultValue;
 	}

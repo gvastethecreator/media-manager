@@ -16,7 +16,7 @@ const logger = serverLogger.withContext('TagTransformer');
 /**
  * Transforma datos de la base de datos a objeto Tag de la aplicación
  */
-export function fromDatabase(dbData: any): TagBase {
+export function fromDatabase(dbData: unknown): TagBase {
 	try {
 		logger.debug('🔄 Transformando Tag desde DB', { dbData });
 
@@ -41,7 +41,7 @@ export function fromDatabase(dbData: any): TagBase {
 /**
  * Prepara objeto Tag para insertar en la base de datos
  */
-export function toDatabase(tag: TagBase): any {
+export function toDatabase(tag: TagBase): Record<string, unknown> {
 	try {
 		logger.debug('🔄 Transformando Tag para DB insert', { tag });
 
@@ -56,7 +56,7 @@ export function toDatabase(tag: TagBase): any {
 		const serialized = toStorageTag(validated);
 
 		logger.debug('✅ Tag transformado para DB exitosamente', { serialized });
-		return serialized;
+		return serialized as unknown as Record<string, unknown>;
 	} catch (error) {
 		logger.error('❌ Error transformando Tag para DB:', error);
 		throw handleTransformerError(error as Error);
@@ -121,7 +121,7 @@ export function safeParse(data: unknown): { success: true; data: TagBase } | { s
  * Convierte un objeto Tag con conteos a TagWithStats (función legacy mantenida por compatibilidad)
  * @deprecated Usar las nuevas funciones de transformer en su lugar
  */
-export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
+export function fromDrizzleTag(drizzleTag: Record<string, unknown> | null): TagWithStats | null {
 	logger.warn('⚠️ Usando función legacy fromDrizzleTag, considerar migrar a nuevas funciones');
 
 	if (!drizzleTag) {
@@ -144,7 +144,20 @@ export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
 			const diversityRatio = usageDiversity > 0 ? usageDiversity / Object.keys(counts).length : 0;
 			const popularity = Math.log1p(totalRelations) * diversityRatio;
 
-			const statistics: TagStatistics = {
+			const stats: TagStatistics = {
+				imageCount: counts.images || 0,
+				videoCount: counts.videos || 0,
+				albumCount: counts.albums || 0,
+				collectionCount: counts.collections || 0,
+				characterCount: counts.characters || 0,
+				placeCount: counts.places || 0,
+				worldItemCount: counts.worldItems || 0,
+				conceptCount: counts.concepts || 0,
+				promptCount: counts.prompts || 0,
+				noteCount: counts.notes || 0,
+				wildcardCount: counts.wildcards || 0,
+				propertyCount: counts.properties || 0,
+				groupCount: counts.groups || 0,
 				totalRelations,
 				usageDiversity: diversityRatio,
 				popularity,
@@ -153,12 +166,26 @@ export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
 
 			return {
 				...baseTag,
-				statistics,
+				entityType: 'tag',
+				stats,
 			} as TagWithStats;
 		}
 
 		// Sin conteos, crear estadísticas vacías
-		const statistics: TagStatistics = {
+		const stats: TagStatistics = {
+			imageCount: 0,
+			videoCount: 0,
+			albumCount: 0,
+			collectionCount: 0,
+			characterCount: 0,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 0,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
 			totalRelations: 0,
 			usageDiversity: 0,
 			popularity: 0,
@@ -167,7 +194,8 @@ export function fromDrizzleTag(drizzleTag: any | null): TagWithStats | null {
 
 		return {
 			...baseTag,
-			statistics,
+			entityType: 'tag',
+			stats,
 		} as TagWithStats;
 	} catch (error) {
 		logger.error('❌ Error transformando tag legacy:', error);

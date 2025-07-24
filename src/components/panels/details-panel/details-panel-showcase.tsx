@@ -9,86 +9,242 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 import { EnhancedDetailsPanel } from './enhanced-details-panel';
 import { useDetailsPanelComplete } from './integration-hook';
 
 // Datos de ejemplo para la demostración
-const mockEntities: EntityWithStats[] = [
+const mockEntities: AnyEntityWithStats[] = [
 	{
 		id: '1',
 		name: 'imagen-ejemplo.jpg',
 		entityType: 'image',
 		description: 'Una imagen de ejemplo',
-		type: 'image',
-		createdAt: new Date(),
-		updatedAt: new Date(),
+		path: '/images/ejemplo.jpg',
+		hash: 'abc123def456',
 		size: 2048576,
 		width: 1920,
 		height: 1080,
-		path: '/images/ejemplo.jpg',
+		metadata: null,
+		thumbnail: null,
+		thumbnailSize: null,
+		thumbnailWidth: null,
+		thumbnailHeight: null,
+		thumbnailMimeType: null,
+		thumbnailError: null,
+		thumbnailErrorAt: null,
+		thumbnailOptimizedAt: null,
+		isFavorite: false,
+		folderId: 'folder1',
+		noteId: null,
+		addedAt: new Date(),
+		createdAt: new Date(),
+		updatedAt: new Date(),
 		thumbnailUrl: '/images/ejemplo-thumb.jpg',
-		statistics: {
-			totalAssociations: 5,
-			totalItems: 1,
-			aspectRatio: 1.78,
-			quality: 'high',
+		fullUrl: '/images/ejemplo.jpg',
+		stats: {
+			viewCount: 10,
+			downloadCount: 2,
+			likeCount: 5,
+			commentCount: 1,
+			tagCount: 3,
+			albumCount: 2,
+			collectionCount: 1,
+			characterCount: 0,
+			placeCount: 1,
+			worldItemCount: 0,
+			conceptCount: 2,
+			promptCount: 1,
+			noteCount: 1,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+			lastViewedAt: new Date(),
+			lastDownloadedAt: new Date(),
+			lastLikedAt: new Date(),
+			lastCommentedAt: new Date(),
 		},
-	} as EntityWithStats,
+	} as AnyEntityWithStats,
 	{
 		id: '2',
 		name: 'video-demo.mp4',
 		entityType: 'video',
 		description: 'Un video de demostración',
-		type: 'video',
-		createdAt: new Date(),
-		updatedAt: new Date(),
+		path: '/videos/demo.mp4',
+		hash: 'def456ghi789',
 		size: 15728640,
 		width: 1920,
 		height: 1080,
-		path: '/videos/demo.mp4',
-		thumbnailUrl: '/videos/demo-thumb.jpg',
 		duration: 120,
-		statistics: {
+		format: 'mp4',
+		metadata: null,
+		thumbnail: null,
+		thumbnailSize: null,
+		thumbnailWidth: null,
+		thumbnailHeight: null,
+		thumbnailMimeType: null,
+		thumbnailError: null,
+		thumbnailErrorAt: null,
+		thumbnailOptimizedAt: null,
+		isFavorite: false,
+		isPublic: true,
+		isHidden: false,
+		folderId: 'folder1',
+		noteId: null,
+		addedAt: new Date(),
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		thumbnailUrl: '/videos/demo-thumb.jpg',
+		frameRate: 30,
+		videoCodec: 'h264',
+		audioCodec: 'aac',
+		bitrate: 5000,
+		stats: {
+			totalRelations: 5,
 			totalAssociations: 3,
 			totalItems: 1,
+			durationMinutes: 2,
+			resolutionCategory: 'HD' as const,
+			qualityScore: 0.85,
+			compressionRatio: 0.7,
+			hasAudio: true,
+			hasSubtitles: false,
+			frameRate: 30,
+			aspectRatio: 1.78,
+			bitrate: 5000,
+			codecInfo: 'h264/aac',
+			fileSize: 15728640,
+			formattedSize: '15.0 MB',
+			formattedDuration: '2:00',
+			formattedResolution: '1920x1080',
+			thumbnailCount: 10,
+			hasThumbnail: true,
+			thumbnailQuality: 'high' as const,
+			processingStatus: 'completed' as const,
+			viewCount: 8,
+			downloadCount: 1,
+			likeCount: 3,
+			commentCount: 0,
+			tagCount: 2,
+			albumCount: 1,
+			collectionCount: 1,
+			characterCount: 1,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 1,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+			lastViewedAt: new Date(),
+			lastDownloadedAt: new Date(),
+			lastLikedAt: new Date(),
+			lastCommentedAt: null,
 		},
-	} as EntityWithStats,
+	} as AnyEntityWithStats,
 	{
 		id: '3',
 		name: 'Documentos',
 		entityType: 'folder',
 		description: 'Carpeta de documentos',
-		type: 'folder',
+		emoji: '📁',
+		color: '#10B981',
+		featuredImage: null,
+		isFavorite: false,
+		path: '/folders/documentos',
+		totalFiles: 20,
+		totalSize: 52428800,
+		autoReindex: true,
+		lastIndexed: new Date(),
+		parentId: null,
+		presetId: null,
 		createdAt: new Date(),
 		updatedAt: new Date(),
-		path: '/folders/documentos',
-		statistics: {
-			totalAssociations: 0,
-			totalItems: 25,
+		stats: {
+			hierarchyDepth: 1,
+			totalDescendants: 2,
+			directChildren: 2,
+			contentDiversity: 0.7,
+			organizationScore: 0.8,
+			totalItems: 20,
+			folderCount: 2,
+			accessFrequency: 10,
+			lastActivity: new Date(),
+			imageCount: 15,
+			videoCount: 3,
+			noteCount: 0,
+			documentCount: 2,
+			totalAudio: 0,
+			totalOthers: 0,
+			formattedSize: '50 MB',
+			totalSize: 52428800,
+			averageFileSize: 2621440,
+			largestFile: 10485760,
+			hasConsistentNaming: true,
+			hasDeepHierarchy: false,
+			isWellOrganized: true,
+			breadcrumbs: [{ id: '3', name: 'Documentos', path: '/folders/documentos' }],
+			fullPath: '/folders/documentos',
+			relativePath: 'documentos',
+			autoTags: ['documents'],
+			qualityGrade: 'B' as const,
+			totalRelations: 0,
+			lastScanned: new Date().toISOString(),
+			recentImages: [],
 		},
-	} as EntityWithStats,
+	} as AnyEntityWithStats,
 	{
 		id: '4',
 		name: 'Mi Colección',
 		entityType: 'collection',
-		type: 'collection',
+		description: 'Una colección de ejemplo',
+		emoji: '📸',
+		color: '#3B82F6',
+		featuredImage: null,
+		isPublic: true,
+		isFavorite: false,
+		totalImages: 12,
+		totalVideos: 3,
+		totalSize: 25165824,
+		lastImageAddedAt: new Date(),
+		lastVideoAddedAt: new Date(),
+		parentId: null,
+		category: null,
+		platform: null,
+		price: null,
+		network: null,
+		tokenId: null,
+		url: null,
+		alternativeUrl: null,
+		editions: null,
+		sourceImage: null,
 		createdAt: new Date(),
 		updatedAt: new Date(),
-		description: 'Una colección de ejemplo',
-		statistics: {
-			totalAssociations: 12,
-			totalItems: 8,
+		stats: {
+			imageCount: 12,
+			videoCount: 3,
+			albumCount: 2,
+			tagCount: 8,
+			characterCount: 4,
+			placeCount: 2,
+			worldItemCount: 1,
+			conceptCount: 5,
+			promptCount: 3,
+			noteCount: 2,
+			wildcardCount: 0,
+			propertyCount: 1,
+			groupCount: 0,
 		},
-	} as EntityWithStats,
+	} as AnyEntityWithStats,
 ];
 
 // Componente de card simple para la lista
 const EntityCard = memo<{
-	entity: EntityWithStats;
+	entity: AnyEntityWithStats;
 	isSelected: boolean;
-	onSelect: (entity: EntityWithStats) => void;
-	onToggle: (entity: EntityWithStats) => void;
+	onSelect: (entity: AnyEntityWithStats) => void;
+	onToggle: (entity: AnyEntityWithStats) => void;
 }>(function EntityCard({ entity, isSelected, onSelect, onToggle }) {
 	const getTypeColor = (type: string) => {
 		switch (type) {
@@ -121,27 +277,27 @@ const EntityCard = memo<{
 		>
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-sm truncate">{entity.name}</CardTitle>
-					<Badge className={cn('text-xs', getTypeColor(entity.type))}>{entity.type}</Badge>
+					<CardTitle className="text-sm truncate">{'name' in entity ? entity.name : entity.id}</CardTitle>
+					<Badge className={cn('text-xs', getTypeColor('entityType' in entity ? entity.entityType : 'unknown'))}>{'entityType' in entity ? entity.entityType : 'unknown'}</Badge>
 				</div>
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-2 text-xs text-muted-foreground">
-					{entity.size && (
-						<div className="flex justify-between">
-							<span>Tamaño:</span>
-							<span>{formatSize(entity.size)}</span>
-						</div>
-					)}
-					{entity.statistics?.totalItems !== undefined && (
-						<div className="flex justify-between">
-							<span>Elementos:</span>
-							<span>{entity.statistics.totalItems}</span>
-						</div>
-					)}
+					{'size' in entity && entity.size && (
+					<div className="flex justify-between">
+						<span>Tamaño:</span>
+						<span>{formatSize(entity.size)}</span>
+					</div>
+				)}
+					{'stats' in entity && entity.stats && typeof entity.stats === 'object' && 'totalItems' in entity.stats && typeof entity.stats.totalItems === 'number' && (
+				<div className="flex justify-between">
+					<span>Elementos:</span>
+					<span>{entity.stats.totalItems}</span>
+				</div>
+			)}
 					<div className="flex justify-between">
 						<span>Creado:</span>
-						<span>{new Date(entity.createdAt).toLocaleDateString()}</span>
+						<span>{'createdAt' in entity ? new Date(entity.createdAt).toLocaleDateString() : 'N/A'}</span>
 					</div>
 				</div>
 				<Separator className="my-2" />
@@ -169,7 +325,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 	const { selectSingle, toggleSelection, clearSelection, updateSelection, handleAction } = useDetailsPanelComplete();
 
 	const handleSelectEntity = useCallback(
-		(entity: EntityWithStats) => {
+		(entity: AnyEntityWithStats) => {
 			selectSingle(entity);
 			setSelectedIds(new Set([entity.id]));
 		},
@@ -177,7 +333,7 @@ export const DetailsPanelShowcase = memo(function DetailsPanelShowcase() {
 	);
 
 	const handleToggleEntity = useCallback(
-		(entity: EntityWithStats) => {
+		(entity: AnyEntityWithStats) => {
 			toggleSelection(entity);
 			setSelectedIds((prev) => {
 				const newSet = new Set(prev);

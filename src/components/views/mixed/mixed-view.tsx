@@ -36,40 +36,15 @@ export default function MixedView({ className }: MixedViewProps) {
 	const navigate = useNavigate();
 
 	// Estados de los diferentes stores
-	const {
-		images,
-		isLoading: imagesLoading,
-		error: imagesError,
-		fetchImages,
-	} = useImageStore();
+	const { images, isLoading: imagesLoading, error: imagesError, fetchImages } = useImageStore();
 
-	const {
-		videos,
-		isLoading: videosLoading,
-		error: videosError,
-		fetchVideos,
-	} = useVideoStore();
+	const { videos, isLoading: videosLoading, error: videosError, fetchVideos } = useVideoStore();
 
-	const {
-		documents,
-		isLoading: documentsLoading,
-		error: documentsError,
-		fetchDocuments,
-	} = useDocumentStore();
+	const { documents, isLoading: documentsLoading, error: documentsError, fetchDocuments } = useDocumentStore();
 
-	const {
-		audios,
-		isLoading: audiosLoading,
-		error: audiosError,
-		fetchAudios,
-	} = useAudioStore();
+	const { audios, isLoading: audiosLoading, error: audiosError, fetchAudios } = useAudioStore();
 
-	const {
-		folders,
-		isLoading: foldersLoading,
-		error: foldersError,
-		fetchFolders,
-	} = useFolderStore();
+	const { folders, isLoading: foldersLoading, error: foldersError, fetchFolders } = useFolderStore();
 
 	// Estados locales
 	const [selectedType, setSelectedType] = useState<FileType>('all');
@@ -135,9 +110,10 @@ export default function MixedView({ className }: MixedViewProps) {
 		// Filtrar por búsqueda
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase().trim();
-			filtered = filtered.filter((item) =>
-				item.name.toLowerCase().includes(query) ||
-				(item.description && item.description.toLowerCase().includes(query))
+			filtered = filtered.filter(
+				(item) =>
+					item.name.toLowerCase().includes(query) ||
+					(item.description && item.description.toLowerCase().includes(query))
 			);
 		}
 
@@ -185,13 +161,7 @@ export default function MixedView({ className }: MixedViewProps) {
 		logger.info('🔄 Reintentando carga de todos los archivos');
 
 		try {
-			await Promise.all([
-				fetchImages(),
-				fetchVideos(),
-				fetchDocuments(),
-				fetchAudios(),
-				fetchFolders(),
-			]);
+			await Promise.all([fetchImages(), fetchVideos(), fetchDocuments(), fetchAudios(), fetchFolders()]);
 		} catch (error) {
 			logger.error('❌ Error al reintentar:', error);
 		} finally {
@@ -200,55 +170,58 @@ export default function MixedView({ className }: MixedViewProps) {
 	}, [isRetrying, fetchImages, fetchVideos, fetchDocuments, fetchAudios, fetchFolders]);
 
 	// Renderizar card según tipo
-	const renderCard = useCallback((item: MixedItem & { itemType: FileType }) => {
-		const key = `${item.itemType}-${item.id}`;
+	const renderCard = useCallback(
+		(item: MixedItem & { itemType: FileType }) => {
+			const key = `${item.itemType}-${item.id}`;
 
-		switch (item.itemType) {
-			case 'images':
-				return (
-					<ImageCard
-						key={key}
-						image={item as ImageWithStats}
-						onClick={() => handleItemClick(item)}
-						className="cursor-pointer hover:shadow-lg transition-shadow"
-					/>
-				);
-			case 'videos':
-				return (
-					<VideoCard
-						key={key}
-						video={item as VideoWithStats}
-						onClick={() => handleItemClick(item)}
-						className="cursor-pointer hover:shadow-lg transition-shadow"
-					/>
-				);
-			case 'documents':
-				return (
-					<DocumentCard
-						key={key}
-						document={item as DocumentWithStats}
-						onClick={() => handleItemClick(item)}
-						className="cursor-pointer hover:shadow-lg transition-shadow"
-					/>
-				);
-			case 'folders':
-				return (
-					<FolderCard
-						key={key}
-						folder={item as FolderWithStats}
-						onClick={() => handleItemClick(item)}
-						className="cursor-pointer hover:shadow-lg transition-shadow"
-					/>
-				);
-			default:
-				return (
-					<div key={key} className="p-4 border rounded-lg">
-						<p className="text-sm text-muted-foreground">Tipo no soportado: {item.itemType}</p>
-						<p className="font-medium">{item.name}</p>
-					</div>
-				);
-		}
-	}, [handleItemClick]);
+			switch (item.itemType) {
+				case 'images':
+					return (
+						<ImageCard
+							key={key}
+							image={item as ImageWithStats}
+							onClick={() => handleItemClick(item)}
+							className="cursor-pointer hover:shadow-lg transition-shadow"
+						/>
+					);
+				case 'videos':
+					return (
+						<VideoCard
+							key={key}
+							video={item as VideoWithStats}
+							onClick={() => handleItemClick(item)}
+							className="cursor-pointer hover:shadow-lg transition-shadow"
+						/>
+					);
+				case 'documents':
+					return (
+						<DocumentCard
+							key={key}
+							document={item as DocumentWithStats}
+							onClick={() => handleItemClick(item)}
+							className="cursor-pointer hover:shadow-lg transition-shadow"
+						/>
+					);
+				case 'folders':
+					return (
+						<FolderCard
+							key={key}
+							folder={item as FolderWithStats}
+							onClick={() => handleItemClick(item)}
+							className="cursor-pointer hover:shadow-lg transition-shadow"
+						/>
+					);
+				default:
+					return (
+						<div key={key} className="p-4 border rounded-lg">
+							<p className="text-sm text-muted-foreground">Tipo no soportado: {item.itemType}</p>
+							<p className="font-medium">{item.name}</p>
+						</div>
+					);
+			}
+		},
+		[handleItemClick]
+	);
 
 	// Mostrar estado de carga
 	if (isLoading && allItems.length === 0) {

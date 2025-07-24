@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, Heart, Share2, Trash2 } from 'lucide-react';
-import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { Button } from '@/components/ui/button';
+import { BaseContentView } from '@/components/views/base/base-content-view';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
-import { clientLogger } from '@/lib/logger/client-logger';
 import type { ImageWithStats } from '@/types/entities/image';
 
 const viewLogger = clientLogger.withContext('ImageDetailView');
@@ -79,24 +79,14 @@ export function ImageDetailView() {
 	// Controles del header
 	const headerControls = (
 		<div className="flex items-center gap-2">
-			<Button
-				variant="outline"
-				size="sm"
-				onClick={() => navigate(-1)}
-				className="gap-2"
-			>
+			<Button variant="outline" size="sm" onClick={() => navigate(-1)} className="gap-2">
 				<ArrowLeft className="h-4 w-4" />
 				Volver
 			</Button>
 
 			{image && (
 				<>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleOpenViewer}
-						className="gap-2"
-					>
+					<Button variant="outline" size="sm" onClick={handleOpenViewer} className="gap-2">
 						<Share2 className="h-4 w-4" />
 						Visor
 					</Button>
@@ -141,7 +131,7 @@ export function ImageDetailView() {
 			>
 				<div className="flex items-center justify-center h-full">
 					<div className="text-center">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
 						<p className="text-muted-foreground">Cargando imagen...</p>
 					</div>
 				</div>
@@ -153,13 +143,13 @@ export function ImageDetailView() {
 		return (
 			<BaseContentView
 				title="Error"
-				description={error || "Imagen no encontrada"}
+				description={error || 'Imagen no encontrada'}
 				icon="❌"
 				headerControls={headerControls}
 			>
 				<div className="flex items-center justify-center h-full">
 					<div className="text-center">
-						<p className="text-destructive mb-4">{error || "Imagen no encontrada"}</p>
+						<p className="text-destructive mb-4">{error || 'Imagen no encontrada'}</p>
 						<Button onClick={() => navigate(-1)} variant="outline">
 							Volver
 						</Button>
@@ -185,7 +175,7 @@ export function ImageDetailView() {
 						onClick={handleOpenViewer}
 						style={{
 							maxHeight: 'calc(100vh - 200px)',
-							maxWidth: 'calc(100vw - 100px)'
+							maxWidth: 'calc(100vw - 100px)',
 						}}
 					/>
 				</div>

@@ -1,6 +1,4 @@
-import React from 'react';
-
-const UploadedImagesContentView: React.FC = () => {
+const UploadedImagesContentView = () => {
 	return (
 		<div>
 			<h1>Uploaded Images View</h1>

@@ -9,7 +9,9 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { VideoComplete, VideoQuality, VideoWithStats } from '@/types/entities/video/types';
+import type { VideoStatistics } from '@/types/entities/video/base';
+import type { VideoComplete, VideoWithStats } from '@/types/entities/video/types';
+import { VideoQuality } from '@/types/entities/video/types';
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
 type DrizzleVideoWithCounts = {
@@ -50,19 +52,19 @@ type DrizzleVideoWithCounts = {
 };
 
 type DrizzleVideoFromDrizzle = DrizzleVideoWithCounts & {
-	folder?: any;
-	tags?: any[];
-	albums?: any[];
-	collections?: any[];
-	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
-	concepts?: any[];
-	prompts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
+	folder?: {id: string; name: string};
+	tags?: Array<{id: string; name: string}>;
+	albums?: Array<{id: string; name: string}>;
+	collections?: Array<{id: string; name: string}>;
+	characters?: Array<{id: string; name: string}>;
+	places?: Array<{id: string; name: string}>;
+	worldItems?: Array<{id: string; name: string}>;
+	concepts?: Array<{id: string; name: string}>;
+	prompts?: Array<{id: string; name: string}>;
+	notes?: Array<{id: string; content: string}>;
+	wildcards?: Array<{id: string; name: string}>;
+	properties?: Array<{key: string; value: unknown}>;
+	groups?: Array<{id: string; name: string}>;
 };
 
 const logger = serverLogger.withContext('VideoTransformer');
@@ -139,10 +141,10 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);
-		const hasAudio = metadata?.hasAudio ?? true; // Asumir que tiene audio por defecto
-		const hasSubtitles = (metadata?.subtitleLanguages?.length ?? 0) > 0;
-		const bitrate = metadata?.bitrate || null;
-		const frameRate = metadata?.frameRate || null;
+		const hasAudio = (metadata?.hasAudio as boolean) ?? true; // Asumir que tiene audio por defecto
+		const hasSubtitles = Array.isArray(metadata?.subtitleLanguages) ? (metadata.subtitleLanguages.length > 0) : false;
+		const bitrate = (typeof metadata?.bitrate === 'number') ? metadata.bitrate : null;
+		const frameRate = (typeof metadata?.frameRate === 'number') ? metadata.frameRate : null;
 
 		// 🏷️ Auto-tagging inteligente
 		const autoTags = generateAutoTags({
@@ -160,19 +162,21 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		// 📊 Estadísticas completas
 		const statistics: VideoStatistics = {
 			// Conteos de relaciones
-			albumsCount,
-			collectionsCount,
-			tagsCount,
-			charactersCount,
-			placesCount,
-			worldItemsCount,
-			conceptsCount,
-			promptsCount,
-			notesCount,
-			wildcardsCount,
-			propertiesCount,
-			groupsCount,
+			albumCount: albumsCount,
+			collectionCount: collectionsCount,
+			tagCount: tagsCount,
+			characterCount: charactersCount,
+			placeCount: placesCount,
+			worldItemCount: worldItemsCount,
+			conceptCount: conceptsCount,
+			promptCount: promptsCount,
+			noteCount: notesCount,
+			wildcardCount: wildcardsCount,
+			propertyCount: propertiesCount,
+			groupCount: groupsCount,
 			totalRelations,
+			totalAssociations: totalRelations,
+			totalItems: totalRelations,
 
 			// Métricas técnicas
 			durationMinutes,
@@ -181,16 +185,11 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			gigabytes,
 			aspectRatio,
 			resolution,
+			formattedSize: formatFileSize(baseData.size),
+			formattedDuration: formatDuration(baseData.duration),
+
+			// Métricas de calidad
 			qualityLevel,
-
-			// Métricas de uso (simuladas por ahora)
-			views: 0,
-			likes: 0,
-			downloads: 0,
-			shares: 0,
-			lastViewed: null,
-
-			// Análisis de calidad
 			qualityScore,
 			technicalGrade,
 			hasAudio,
@@ -198,22 +197,30 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			bitrate,
 			frameRate,
 
-			// Metadatos AI
-			aiConfidence: 0.85, // Simulado
-			autoTags,
-			duplicateStatus,
+			// Métricas de uso
+			views: 0,
+			likes: 0,
+			downloads: 0,
+			shares: 0,
+			lastViewed: null,
 
-			// Campos derivados
+			// Estado de duplicados
+			duplicateStatus,
 			thumbnailUrl: baseData.thumbnail ? `/api/videos/${baseData.id}/thumbnail` : null,
-			displayName: baseData.name || 'Video sin título',
-			formattedSize: formatFileSize(baseData.size),
-			formattedDuration: formatDuration(baseData.duration),
-			qualityLabel: getQualityLabel(qualityLevel, technicalGrade),
 		};
 
 		return {
 			...baseData,
-			statistics,
+			name: baseData.name || 'Untitled Video',
+			thumbnail: baseData.thumbnail ? baseData.thumbnail.toString('base64') : null,
+			folderId: baseData.folderId || '',
+			entityType: 'video' as const,
+			stats: statistics,
+			thumbnailUrl: baseData.thumbnail ? `/api/videos/${baseData.id}/thumbnail` : null,
+			description: null,
+			hash: '',
+			isPublic: false,
+			isHidden: false,
 		};
 	} catch (error) {
 		logger.error('Error al transformar video de Drizzle:', { error, videoId: drizzleVideo?.id });
@@ -237,20 +244,27 @@ export function fromDrizzleVideo(videoFromDrizzle: DrizzleVideoFromDrizzle | nul
 		// Transformación básica sin estadísticas complejas
 		return {
 			...videoFromDrizzle,
+			name: videoFromDrizzle.name || 'Untitled Video',
+			folderId: videoFromDrizzle.folderId || '',
+			thumbnail: videoFromDrizzle.thumbnail ? videoFromDrizzle.thumbnail.toString('base64') : null,
+			// Propiedades requeridas faltantes
+			description: null,
+			hash: '',
+			isPublic: false,
+			isHidden: false,
 			// Simplificar relaciones para evitar dependencias circulares
-			folder: videoFromDrizzle.folder || null,
-			tags: videoFromDrizzle.tags || [],
-			albums: videoFromDrizzle.albums || [],
-			collections: videoFromDrizzle.collections || [],
-			characters: videoFromDrizzle.characters || [],
-			places: videoFromDrizzle.places || [],
-			worldItems: videoFromDrizzle.worldItems || [],
-			concepts: videoFromDrizzle.concepts || [],
-			prompts: videoFromDrizzle.prompts || [],
-			notes: videoFromDrizzle.notes || [],
-			wildcards: videoFromDrizzle.wildcards || [],
-			properties: videoFromDrizzle.properties || [],
-			groups: videoFromDrizzle.groups || [],
+			tags: (videoFromDrizzle.tags || []) as unknown as any[],
+			albums: (videoFromDrizzle.albums || []) as unknown as any[],
+			collections: (videoFromDrizzle.collections || []) as unknown as any[],
+			characters: (videoFromDrizzle.characters || []) as unknown as any[],
+			places: (videoFromDrizzle.places || []) as unknown as any[],
+			worldItems: (videoFromDrizzle.worldItems || []) as unknown as any[],
+			concepts: (videoFromDrizzle.concepts || []) as unknown as any[],
+			prompts: (videoFromDrizzle.prompts || []) as unknown as any[],
+			notes: (videoFromDrizzle.notes || []) as unknown as any[],
+			wildcards: (videoFromDrizzle.wildcards || []) as unknown as any[],
+			properties: (videoFromDrizzle.properties || []) as unknown as any[],
+			groups: (videoFromDrizzle.groups || []) as unknown as any[],
 		};
 	} catch (error) {
 		logger.error('Error al transformar video simple de Drizzle:', { error, videoId: videoFromDrizzle?.id });
@@ -342,10 +356,10 @@ function determineQualityLevel(width: number | null, height: number | null): Vid
 
 	const pixels = width * height;
 
-	if (pixels >= 8294400) return VideoQuality.UHD_4K; // 3840x2160
-	if (pixels >= 2073600) return VideoQuality.QHD_2K; // 1920x1080
-	if (pixels >= 921600) return VideoQuality.HD; // 1280x720
-	if (pixels >= 307200) return VideoQuality.SD; // 640x480
+	if (pixels >= 8294400) return VideoQuality.ULTRA; // 3840x2160 (4K)
+	if (pixels >= 2073600) return VideoQuality.HIGH; // 1920x1080 (2K/FHD)
+	if (pixels >= 921600) return VideoQuality.MEDIUM; // 1280x720 (HD)
+	if (pixels >= 307200) return VideoQuality.MEDIUM; // 640x480 (SD)
 
 	return VideoQuality.LOW;
 }
@@ -420,22 +434,22 @@ function determineTechnicalGrade(
 	qualityLevel: VideoQuality,
 	_megabytes: number
 ): 'A' | 'B' | 'C' | 'D' {
-	if (qualityScore >= 80 && qualityLevel >= VideoQuality.QHD_2K) return 'A';
-	if (qualityScore >= 60 && qualityLevel >= VideoQuality.HD) return 'B';
-	if (qualityScore >= 40 && qualityLevel >= VideoQuality.SD) return 'C';
+	if (qualityScore >= 80 && qualityLevel === VideoQuality.ULTRA) return 'A';
+	if (qualityScore >= 60 && qualityLevel === VideoQuality.HIGH) return 'B';
+	if (qualityScore >= 40 && qualityLevel === VideoQuality.MEDIUM) return 'C';
 	return 'D';
 }
 
 /**
  * 🤖 Parsea metadatos del video
  */
-function parseVideoMetadata(metadataStr: string | null): any {
-	if (!metadataStr) return null;
+function parseVideoMetadata(metadataStr: string | null): Record<string, unknown> {
+	if (!metadataStr) return {};
 
 	try {
 		return JSON.parse(metadataStr);
 	} catch {
-		return null;
+		return {};
 	}
 }
 
@@ -453,10 +467,10 @@ function generateAutoTags(params: {
 	const tags: string[] = [];
 
 	// Tags de calidad
-	if (params.qualityLevel >= VideoQuality.UHD_4K) tags.push('4K', 'Ultra HD');
-	else if (params.qualityLevel >= VideoQuality.QHD_2K) tags.push('2K', 'Full HD');
-	else if (params.qualityLevel >= VideoQuality.HD) tags.push('HD');
-	else if (params.qualityLevel >= VideoQuality.SD) tags.push('SD');
+	if (params.qualityLevel === VideoQuality.ULTRA) tags.push('4K', 'Ultra HD');
+	else if (params.qualityLevel === VideoQuality.HIGH) tags.push('2K', 'Full HD');
+	else if (params.qualityLevel === VideoQuality.MEDIUM) tags.push('HD');
+	else if (params.qualityLevel === VideoQuality.LOW) tags.push('SD');
 
 	// Tags de duración
 	if (params.durationMinutes >= 90) tags.push('Película', 'Largo');
@@ -503,10 +517,9 @@ function formatDuration(seconds: number): string {
  */
 function getQualityLabel(qualityLevel: VideoQuality, technicalGrade: string): string {
 	const qualityNames = {
-		[VideoQuality.UHD_4K]: '4K Ultra HD',
-		[VideoQuality.QHD_2K]: '2K Full HD',
-		[VideoQuality.HD]: 'HD',
-		[VideoQuality.SD]: 'SD',
+		[VideoQuality.ULTRA]: '4K Ultra HD',
+		[VideoQuality.HIGH]: '2K Full HD',
+		[VideoQuality.MEDIUM]: 'HD',
 		[VideoQuality.LOW]: 'Baja',
 		[VideoQuality.UNKNOWN]: 'Desconocida',
 	};

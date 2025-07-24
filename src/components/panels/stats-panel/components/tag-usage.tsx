@@ -5,7 +5,7 @@ interface TagUsageProps {
 	tag: {
 		id: string;
 		name: string;
-		color: string | undefined;
+		color?: string;
 		count: number;
 	};
 }

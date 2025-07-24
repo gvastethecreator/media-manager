@@ -18,7 +18,7 @@ export interface ActivityBase {
 	action: string;
 	userId: string;
 	description: string;
-	metadata?: Record<string, any> | null;
+	metadata?: Record<string, unknown> | null;
 	ipAddress?: string | null;
 	userAgent?: string | null;
 	sessionId?: string | null;
@@ -29,7 +29,7 @@ export interface ActivityBase {
  * Metadatos adicionales para actividades
  */
 export interface ActivityMetadata {
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 /**
@@ -65,7 +65,7 @@ export interface CreateActivityData {
 	action: string;
 	userId: string;
 	description: string;
-	metadata?: Record<string, any>;
+	metadata?: Record<string, unknown>;
 	ipAddress?: string;
 	userAgent?: string;
 	sessionId?: string;
@@ -109,7 +109,7 @@ export const ActivitySchema = z.object({
 	action: z.string(),
 	userId: z.string(),
 	description: z.string(),
-	metadata: z.record(z.any()).nullable().optional(),
+	metadata: z.record(z.string(), z.unknown()).nullable().optional(),
 	ipAddress: z.string().nullable().optional(),
 	userAgent: z.string().nullable().optional(),
 	sessionId: z.string().nullable().optional(),

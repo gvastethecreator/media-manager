@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { FolderWithStats } from '@/types/entities/folder';
+import type { FolderStatsResponse } from '@/types/folders';
 import {
 	createFolder,
 	deleteFolder,
@@ -213,15 +214,7 @@ export function useRecentFolderImages(folderId: string, limit = 4) {
 
 // Hook para obtener estadísticas de una carpeta
 export function useFolderStats(folderId: string) {
-	return useQuery<
-		{
-			totalImages: number;
-			totalVideos: number;
-			totalSize: number;
-			lastActivity: Date | null;
-		},
-		Error
-	>({
+	return useQuery<FolderStatsResponse, Error>({
 		queryKey: [...folderKeys.detail(folderId), 'stats'],
 		queryFn: () => getFolderStats(folderId),
 		enabled: !!folderId,

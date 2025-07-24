@@ -6,13 +6,13 @@ import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateConcept, useUpdateConcept } from '@/lib/api/concepts';
 import { toastService } from '@/lib/ui/toast';
+import type { ConceptBase } from '@/types/entities/concept/base';
 import type {
 	ConceptCreateInput,
 	ConceptExtended,
 	ConceptUpdateInput,
 	ConceptWithStats,
-} from '@/types/entities/concept';
-import type { ConceptBase } from '@/types/entities/concept/base';
+} from '@/types/entities/concept/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod

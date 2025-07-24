@@ -5,7 +5,7 @@
 // Tipos globales para el navegador
 declare global {
 	interface Window {
-		[key: string]: any;
+		[key: string]: unknown;
 	}
 
 	// Asegurar que los tipos de DOM están disponibles
@@ -42,7 +42,7 @@ declare global {
 
 	// APIs de tiempo
 	interface NodeJS {
-		Timeout: any;
+		Timeout: NodeJS.Timeout;
 	}
 
 	// Funciones globales

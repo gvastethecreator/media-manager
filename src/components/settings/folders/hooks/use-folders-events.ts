@@ -128,7 +128,7 @@ export function useFoldersEvents({
 			});
 
 			// Manejar eventos de folders
-			eventSource.addEventListener('event', (event: MessageEvent) => {
+			eventSource.addEventListener('event', (event: any) => {
 				try {
 					const eventData = JSON.parse(event.data);
 					eventsLogger.info('📨 Evento SSE recibido:', eventData);
@@ -138,12 +138,14 @@ export function useFoldersEvents({
 						case 'folder:progress':
 							if (eventData.data) {
 								handleProgress({
+									isProcessing: true,
 									status: eventData.data.status || 'processing',
 									progress: eventData.data.progress || 0,
 									totalFiles: eventData.data.totalFiles || 0,
 									filesProcessed: eventData.data.filesProcessed || 0,
 									message: eventData.data.message,
 									folderId: eventData.data.folderId,
+									timestamp: eventData.data.timestamp || Date.now(),
 								});
 							}
 							break;
@@ -152,7 +154,9 @@ export function useFoldersEvents({
 							if (eventData.data) {
 								eventsLogger.info('📊 Progreso de reindexado global:', eventData.data);
 								onReindexAllProgress({
-									status: eventData.data.phase || 'processing',
+									isProcessing: true,
+									status: eventData.data.status || 'processing',
+									phase: eventData.data.phase || 'processing',
 									progress: eventData.data.progress || 0,
 									totalFiles: eventData.data.totalFiles || 0,
 									filesProcessed: eventData.data.filesProcessed || 0,

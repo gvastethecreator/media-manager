@@ -11,6 +11,11 @@ export interface BaseStats {
 
 export interface ThumbnailStats extends BaseStats {
 	totalSize: number;
+	totalFiles: number;
+	pending: number;
+	// errors heredado de BaseStats
+	lastProcessed?: Date;
+	successRate?: number;
 }
 
 export interface TagStats {
@@ -43,6 +48,20 @@ export interface SystemStats {
 	properties: EntityStats;
 	wildcards: EntityStats;
 	thumbnails: ThumbnailStats;
+}
+
+/**
+ * Datos del sistema con métricas de rendimiento
+ */
+export interface SystemData {
+	cpuUsage: number;
+	memoryUsage: number;
+	cacheSize: number;
+	totalEntities: number;
+	uptime: number;
+	nodeVersion: string;
+	hostname: string;
+	lastUpdated?: Date;
 }
 
 export interface PerformanceStats {
@@ -115,7 +134,7 @@ export interface RecentActivity {
 	entityType: string;
 	entityId: string;
 	createdAt: Date;
-	metadata?: Record<string, any>;
+	metadata?: Record<string, unknown>;
 	image?: {
 		id: string;
 		name: string;

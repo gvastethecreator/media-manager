@@ -64,8 +64,10 @@ const ImageFiltersSchema = z.object({
 	minSize: z.number().int().positive().optional(),
 	maxSize: z.number().int().positive().optional(),
 	search: z.string().optional(),
-	limit: z.preprocess((val) => val ? Number.parseInt(String(val), 10) : 20, z.number().int().positive().max(100)).optional(),
-	offset: z.preprocess((val) => val ? Number.parseInt(String(val), 10) : 0, z.number().int().min(0)).optional(),
+	limit: z
+		.preprocess((val) => (val ? Number.parseInt(String(val), 10) : 20), z.number().int().positive().max(100))
+		.optional(),
+	offset: z.preprocess((val) => (val ? Number.parseInt(String(val), 10) : 0), z.number().int().min(0)).optional(),
 	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'size', 'width', 'height']).default('createdAt').optional(),
 	sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
 });

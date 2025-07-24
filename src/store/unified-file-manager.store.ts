@@ -274,50 +274,31 @@ const transformToEntityWithStats = (rawItem: any): EntityWithStats => {
 		// 🎯 Detectar tipo de entidad y transformar apropiadamente
 		if (rawItem.width && rawItem.height && rawItem.hash) {
 			// Es una imagen - usar patrón ImageWithStats
-			const statistics = {
-				totalAlbums: rawItem._count?.albums || 0,
-				totalCollections: rawItem._count?.collections || 0,
-				totalTags: rawItem._count?.tags || 0,
-				totalCharacters: rawItem._count?.characters || 0,
-				totalPlaces: rawItem._count?.places || 0,
-				totalWorldItems: rawItem._count?.worldItems || 0,
-				totalConcepts: rawItem._count?.concepts || 0,
-				totalPrompts: rawItem._count?.prompts || 0,
-				totalNotes: rawItem._count?.notes || 0,
-				totalWildcards: rawItem._count?.wildcards || 0,
-				totalProperties: rawItem._count?.properties || 0,
-				totalGroups: rawItem._count?.groups || 0,
-				totalAssociations: Object.values(rawItem._count || {}).reduce(
-					(sum: number, count: any) => sum + (count || 0),
-					0
-				),
-				megapixels: Number(((rawItem.width * rawItem.height) / 1_000_000).toFixed(2)),
-				aspectRatio: Number((rawItem.width / rawItem.height).toFixed(2)),
-				fileSize: Number((rawItem.size / (1024 * 1024)).toFixed(2)),
-				dimensions: `${rawItem.width}x${rawItem.height}`,
-				views: 0,
-				likes: 0,
-				downloads: 0,
-				shares: 0,
-				qualityScore: 85,
-				technicalGrade: 'A' as const,
-				colorTemperature: 'neutral' as const,
-				aiConfidence: 75,
-				autoTags: ['image'],
-				duplicateStatus: 'unique' as const,
-				lastUpdated: new Date(),
+			const stats = {
+				viewCount: 0,
+				downloadCount: 0,
+				likeCount: 0,
+				commentCount: 0,
+				tagCount: rawItem._count?.tags || 0,
+				albumCount: rawItem._count?.albums || 0,
+				collectionCount: rawItem._count?.collections || 0,
+				characterCount: rawItem._count?.characters || 0,
+				placeCount: rawItem._count?.places || 0,
+				worldItemCount: rawItem._count?.worldItems || 0,
+				conceptCount: rawItem._count?.concepts || 0,
+				promptCount: rawItem._count?.prompts || 0,
+				noteCount: rawItem._count?.notes || 0,
+				wildcardCount: rawItem._count?.wildcards || 0,
+				propertyCount: rawItem._count?.properties || 0,
+				groupCount: rawItem._count?.groups || 0,
 			};
 
 			return {
 				...rawItem,
-				statistics,
+				entityType: 'image',
+				stats,
 				thumbnailUrl: rawItem.thumbnail || `/api/images/${rawItem.id}/thumbnail`,
 				fullUrl: `/api/images/${rawItem.id}/full`,
-				displayName: rawItem.name || `Image ${rawItem.id.slice(-8)}`,
-				parsedMetadata: null,
-				formattedSize: `${statistics.fileSize} MB`,
-				formattedDimensions: `${rawItem.width} × ${rawItem.height}`,
-				aspectRatioLabel: `${statistics.aspectRatio}:1`,
 			} as EntityWithStats;
 		}
 
@@ -922,8 +903,8 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 	},
 
 	getEntityStatistics: (entity: EntityWithStats) => {
-		if ('statistics' in entity) {
-			return entity.statistics;
+		if ('stats' in entity) {
+			return entity.stats;
 		}
 		// Para entidades que aún usan el patrón Complete
 		return {

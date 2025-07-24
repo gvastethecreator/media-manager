@@ -14,7 +14,7 @@ const viewLogger = clientLogger.withContext('File3DView');
  */
 export function File3DView(_props: ViewProps) {
 	const navigate = useNavigate();
-	
+
 	// Usar selectores individuales para evitar recrear objetos
 	const file3dsRecord = useFile3DStore((s) => s.file3Ds);
 	const isLoading = useFile3DStore((s) => s.isLoading);
@@ -34,10 +34,13 @@ export function File3DView(_props: ViewProps) {
 		}
 	}, [loadFile3Ds, file3dsRecord]);
 
-	const handleFile3DClick = useCallback((file3d: File3DWithStats) => {
-		viewLogger.info('🖱️ Click en archivo 3D:', file3d.name);
-		navigate(`/file3d/${file3d.id}`);
-	}, [navigate]);
+	const handleFile3DClick = useCallback(
+		(file3d: File3DWithStats) => {
+			viewLogger.info('🖱️ Click en archivo 3D:', file3d.name);
+			navigate(`/file3d/${file3d.id}`);
+		},
+		[navigate]
+	);
 
 	const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files?.[0]) {

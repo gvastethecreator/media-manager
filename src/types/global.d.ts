@@ -12,5 +12,5 @@ declare global {
 		duplex?: 'half';
 	}
 
-	const ENV: any;
+	const ENV: Record<string, string | undefined>;
 }

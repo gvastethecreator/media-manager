@@ -20,6 +20,9 @@ export type GroupBase = {
 	filters?: any;
 	recentImages?: any[];
 	recentVideos?: any[];
+	shortcut?: string;
+	sortBy?: string;
+	featuredImage?: string;
 	createdAt: Date;
 	updatedAt: Date;
 };

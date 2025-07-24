@@ -4,23 +4,35 @@
  */
 
 import type { ImageBase } from '../image/base';
+import type { GroupBase } from './base';
 
-export interface GroupBase {
-	id: string;
-	name: string;
-	description: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-}
+// Re-export GroupBase from base file
+export type { GroupBase } from './base';
 
 export interface CreateGroupInput {
 	name: string;
 	description?: string;
+	emoji?: string;
+	color?: string;
+	category?: string;
+	isFavorite?: boolean;
+	shortcut?: string;
+	sortBy?: string;
+	featuredImage?: string;
+	filters?: any;
 }
 
 export interface UpdateGroupInput {
 	name?: string;
 	description?: string;
+	emoji?: string;
+	color?: string;
+	category?: string;
+	isFavorite?: boolean;
+	shortcut?: string;
+	sortBy?: string;
+	featuredImage?: string;
+	filters?: any;
 }
 
 export interface GroupFilters {

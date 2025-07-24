@@ -88,11 +88,23 @@ export function PlaceCard({
 		_count,
 		parsedDangers = [],
 		parsedResources = [],
+		parsedStats = {},
 		metadata,
 	} = place;
 
 	// Asegurar que population sea un número
 	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
+
+	// Corregir tipos de campos parseados
+	const safeParsedResources = Array.isArray(parsedResources) 
+		? parsedResources as { name: string; abundance: number; description?: string }[]
+		: [];
+	const safeParsedDangers = Array.isArray(parsedDangers)
+		? parsedDangers as { type: string; level: number; description?: string }[]
+		: [];
+	const safeParsedStats = parsedStats && typeof parsedStats === 'object'
+		? parsedStats as Record<string, number>
+		: {};
 
 	// Preparar los medios para el componente de galería
 	const cardMedia = useMemo(() => {
@@ -147,11 +159,12 @@ export function PlaceCard({
 	}, [color, type]);
 
 	// Datos de rareza y poder para el diseño TCG
-	const rarityLevel = metadata?.rarityLevel || 1;
-	const power = metadata?.power || 1;
-	const healthPoints = metadata?.healthPoints || 100;
-	const valueLevel = metadata?.valueLevel || 1;
-	const cardId = metadata?.cardId || `P${id.substring(0, 6)}`;
+	const parsedMetadata = metadata && typeof metadata === 'object' ? metadata as Record<string, unknown> : {};
+	const rarityLevel = (parsedMetadata.rarityLevel as number) || 1;
+	const power = (parsedMetadata.power as number) || 1;
+	const healthPoints = (parsedMetadata.healthPoints as number) || 100;
+	const valueLevel = (parsedMetadata.valueLevel as number) || 1;
+	const cardId = (parsedMetadata.cardId as string) || `P${id.substring(0, 6)}`;
 
 	// Imágenes y videos para la tarjeta
 	const imagesCount = _count?.images || 0;
@@ -296,17 +309,12 @@ export function PlaceCard({
 							{/* Contenido principal con descripción, recursos y estadísticas */}
 							<PlaceCardContent
 								description={description || undefined}
-								region={region || 'desconocido'}
-								type={type || 'desconocido'}
-								climate={climate || 'templado'}
+								climate={climate || undefined}
 								population={population || 0}
-								government={government || 'desconocido'}
-								parsedResources={parsedResources}
-								parsedDangers={parsedDangers}
-								parsedStats={place.parsedStats}
-								primaryColor={primaryColor}
-								tcgMode={tcgMode}
-								compact={compact}
+								government={government || undefined}
+								parsedResources={safeParsedResources}
+								parsedDangers={safeParsedDangers}
+								parsedStats={safeParsedStats}
 							/>
 
 							{/* Pie de carta con conteos y valores TCG */}

@@ -25,9 +25,9 @@ import {
 	Workflow,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
 
@@ -257,18 +257,15 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 						<div key={category.id} className="mb-1">
 							<div
 								className={cn(
-									"flex items-center gap-1 mb-0.5 cursor-pointer transition-all duration-300",
-									isCollapsed ? "justify-center px-1 py-1" : ""
+									'flex items-center gap-1 mb-0.5 cursor-pointer transition-all duration-300',
+									isCollapsed ? 'justify-center px-1 py-1' : ''
 								)}
 								onClick={() => toggleCategory(category.id)}
 							>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<category.icon
-											className={cn(
-												"h-4 w-4",
-												isCollapsed ? "h-3 w-3" : ""
-											)}
+											className={cn('h-4 w-4', isCollapsed ? 'h-3 w-3' : '')}
 											style={{ color: category.color }}
 										/>
 									</TooltipTrigger>
@@ -325,8 +322,8 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 													>
 														<div
 															className={cn(
-																"flex items-center flex-1 cursor-pointer",
-																isCollapsed ? "justify-center" : ""
+																'flex items-center flex-1 cursor-pointer',
+																isCollapsed ? 'justify-center' : ''
 															)}
 															onClick={() => onNavigate(child.id as ViewType)}
 														>

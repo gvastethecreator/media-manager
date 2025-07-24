@@ -5,12 +5,7 @@
  */
 
 import type { WorldItemComplete } from '@/types/entities/world-item';
-import {
-	deserializeAttributes,
-	deserializeEffects,
-	deserializeFilters,
-	deserializeRequirements,
-} from './serializers';
+import { deserializeAttributes, deserializeEffects, deserializeFilters, deserializeRequirements } from './serializers';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleWorldItemFromDrizzle = {
@@ -33,19 +28,19 @@ type DrizzleWorldItemFromDrizzle = {
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	images?: any[];
-	videos?: any[];
-	albums?: any[];
-	collections?: any[];
-	tags?: any[];
-	characters?: any[];
-	places?: any[];
-	concepts?: any[];
-	prompts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
+	images?: Array<{id: string; name: string}>;
+	videos?: Array<{id: string; name: string}>;
+	albums?: Array<{id: string; name: string}>;
+	collections?: Array<{id: string; name: string}>;
+	tags?: Array<{id: string; name: string}>;
+	characters?: Array<{id: string; name: string}>;
+	places?: Array<{id: string; name: string}>;
+	concepts?: Array<{id: string; name: string}>;
+	prompts?: Array<{id: string; name: string}>;
+	notes?: Array<{id: string; content: string}>;
+	wildcards?: Array<{id: string; name: string}>;
+	properties?: Array<{key: string; value: unknown}>;
+	groups?: Array<{id: string; name: string}>;
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -76,28 +71,44 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 	return {
 		...baseData,
 
-		// Deserialización de campos JSON
-		attributes: deserializeAttributes(worldItem.attributes),
-		effects: deserializeEffects(worldItem.effects),
-		requirements: deserializeRequirements(worldItem.requirements),
-		filters: deserializeFilters(worldItem.filters),
+		// Propiedades faltantes con valores por defecto
+		emoji: null,
+		color: null,
+		isPublic: false,
+		totalImages: 0,
+		totalVideos: 0,
+		materials: null,
+		origin: null,
+		uses: null,
+		history: null,
+		parentId: null,
+		shortcut: null,
+		
+		// Convertir value y weight de number a string
+		value: baseData.value?.toString() || null,
+		weight: baseData.weight?.toString() || null,
+
+		// Deserialización de campos JSON - mantener como string según WorldItemComplete
+		attributes: worldItem.attributes,
+		effects: worldItem.effects,
+		requirements: worldItem.requirements,
 
 		// Deserialización de campos JSON renombrados
 		properties: JSON.parse(worldItem.propertiesJson || '{}'),
 		tags: JSON.parse(worldItem.tagsJson || '[]'),
 
 		// Mapeo de relaciones - simplificado para evitar dependencias circulares
-		images: worldItem.images || [],
-		videos: worldItem.videos || [],
-		albums: worldItem.albums || [],
-		collections: worldItem.collections || [],
-		characters: worldItem.characters || [],
-		places: worldItem.places || [],
-		concepts: worldItem.concepts || [],
-		prompts: worldItem.prompts || [],
-		notes: worldItem.notes || [],
-		wildcards: worldItem.wildcards || [],
-		groups: worldItem.groups || [],
+		images: (worldItem.images || []) as unknown as any[],
+		videos: (worldItem.videos || []) as unknown as any[],
+		albums: (worldItem.albums || []) as unknown as any[],
+		collections: (worldItem.collections || []) as unknown as any[],
+		characters: (worldItem.characters || []) as unknown as any[],
+		places: (worldItem.places || []) as unknown as any[],
+		concepts: (worldItem.concepts || []) as unknown as any[],
+		prompts: (worldItem.prompts || []) as unknown as any[],
+		notes: (worldItem.notes || []) as unknown as any[],
+		wildcards: (worldItem.wildcards || []) as unknown as any[],
+		groups: (worldItem.groups || []) as unknown as any[],
 
 		// Las relaciones tags y properties ya están deserializadas arriba
 

@@ -158,7 +158,7 @@ function mapVideoFiltersToDrizzle(filters: VideoFilters): DrizzleWhereFilter {
 	// Las relaciones con tags se manejan con joins separados en Drizzle
 
 	if (filters.dateRange) {
-		const dateFilter: any = {};
+		const dateFilter: Record<string, unknown> = {};
 		if (filters.dateRange.start) {
 			dateFilter.gte = filters.dateRange.start;
 		}

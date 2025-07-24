@@ -12,7 +12,7 @@ export interface CollectionFilters {
 }
 
 export interface CollectionCreateInput {
-	name: string;
+	name: string; // Requerido
 	description?: string | null;
 	emoji?: string | null;
 	color?: string | null;

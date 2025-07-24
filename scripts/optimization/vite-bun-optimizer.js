@@ -5,9 +5,9 @@
  * Aplica optimizaciones específicas para el runtime híbrido
  */
 
+import chalk from 'chalk';
 import { promises as fs } from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 
 class ViteBunOptimizer {
 	constructor() {
@@ -309,16 +309,16 @@ gcStrategy = "incremental"
 
 	async backupCurrentConfigs() {
 		const timestamp = new Date().toISOString().split('T')[0];
-		
+
 		try {
 			// Backup Vite config
 			const viteConfig = await fs.readFile(this.configPath, 'utf8');
 			await fs.writeFile(`${this.configPath}.backup-${timestamp}`, viteConfig);
-			
+
 			// Backup Bun config
 			const bunConfig = await fs.readFile(this.bunConfigPath, 'utf8');
 			await fs.writeFile(`${this.bunConfigPath}.backup-${timestamp}`, bunConfig);
-			
+
 			console.log(chalk.green('✅ Configuraciones respaldadas'));
 			this.optimizations.push('Backup de configuraciones creado');
 		} catch (error) {
@@ -329,11 +329,11 @@ gcStrategy = "incremental"
 	async applyOptimizations() {
 		console.log(chalk.blue.bold('🔧 APLICANDO OPTIMIZACIONES VITE + BUN'));
 		console.log('='.repeat(60));
-		
+
 		// 1. Backup de configuraciones actuales
 		console.log(chalk.yellow('\n📋 Paso 1: Respaldando configuraciones actuales'));
 		await this.backupCurrentConfigs();
-		
+
 		// 2. Aplicar configuración optimizada de Vite
 		console.log(chalk.yellow('\n⚡ Paso 2: Aplicando configuración optimizada de Vite'));
 		try {
@@ -344,7 +344,7 @@ gcStrategy = "incremental"
 		} catch (error) {
 			console.error('Error aplicando configuración Vite:', error.message);
 		}
-		
+
 		// 3. Aplicar configuración optimizada de Bun
 		console.log(chalk.yellow('\n🚀 Paso 3: Aplicando configuración optimizada de Bun'));
 		try {
@@ -355,10 +355,10 @@ gcStrategy = "incremental"
 		} catch (error) {
 			console.error('Error aplicando configuración Bun:', error.message);
 		}
-		
+
 		// 4. Crear archivo de optimizaciones aplicadas
 		await this.saveOptimizationReport();
-		
+
 		console.log(chalk.blue.bold('\n🎯 OPTIMIZACIONES COMPLETADAS'));
 		console.log(chalk.green('✅ Configuraciones optimizadas para Vite + Bun'));
 		console.log(chalk.yellow('🔄 Siguiente: Reiniciar servidor de desarrollo para aplicar cambios'));
@@ -370,26 +370,23 @@ gcStrategy = "incremental"
 			phase: 'FASE 2 - Optimización Híbrida',
 			checkpoint: 'CHECKPOINT_2',
 			optimizations: this.optimizations,
-			files_modified: [
-				'vite.config.ts',
-				'bunfig.toml'
-			],
+			files_modified: ['vite.config.ts', 'bunfig.toml'],
 			backups_created: [
 				`vite.config.ts.backup-${new Date().toISOString().split('T')[0]}`,
-				`bunfig.toml.backup-${new Date().toISOString().split('T')[0]}`
+				`bunfig.toml.backup-${new Date().toISOString().split('T')[0]}`,
 			],
 			next_steps: [
 				'Reiniciar servidor de desarrollo',
 				'Validar HMR funciona correctamente',
 				'Ejecutar benchmarks post-optimización',
-				'Proceder con CHECKPOINT_3'
-			]
+				'Proceder con CHECKPOINT_3',
+			],
 		};
-		
+
 		const reportPath = path.join('logs', 'optimization-report.json');
 		await fs.mkdir(path.dirname(reportPath), { recursive: true });
 		await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
-		
+
 		console.log(chalk.green(`\n💾 Reporte de optimización guardado en: ${reportPath}`));
 	}
 }

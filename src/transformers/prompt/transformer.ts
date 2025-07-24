@@ -24,7 +24,7 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 		const wordCount = baseData.content ? baseData.content.split(/\s+/).length : 0;
 		const parameterCount = baseData.parameters ? Object.keys(baseData.parameters).length : 0;
 
-		const stats: PromptStatistics = {
+		const stats: PromptStats = {
 			useCount: _count?.uses || 0,
 			favoriteCount: _count?.favorites || 0,
 			shareCount: _count?.shares || 0,
@@ -37,6 +37,7 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 
 		return {
 			...baseData,
+			entityType: 'prompt' as const,
 			stats,
 		};
 	} catch (error) {

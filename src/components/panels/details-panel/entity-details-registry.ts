@@ -5,37 +5,38 @@
  */
 
 import type { ComponentType } from 'react';
-import { EntityWithStats, getEntityStatsType } from '@/types/migration';
-import type { ConceptBase, ConceptExtended } from '@/types/entities/concept/base';
-import type { ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptBase, ConceptExtended, ConceptWithStats } from '@/types/entities/concept/base';
+import type { EntityWithStats } from '@/types/entities/entity.types';
+import { getEntityStatsType } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 // Tipos base para los componentes de detalles
-export interface EntityDetailsProps<T extends EntityWithStats = EntityWithStats> {
+export interface EntityDetailsProps<T extends AnyEntityWithStats = AnyEntityWithStats> {
 	entity: T;
 	isSelected?: boolean;
 	onAction?: (action: string, data?: any) => void;
 }
 
-export interface EntityPreviewProps<T extends EntityWithStats = EntityWithStats> {
+export interface EntityPreviewProps<T extends AnyEntityWithStats = AnyEntityWithStats> {
 	entity: T;
 	size?: 'sm' | 'md' | 'lg' | 'xl';
 	showControls?: boolean;
 	onAction?: (action: string, data?: any) => void;
 }
 
-export interface EntityToolbarProps<T extends EntityWithStats = EntityWithStats> {
+export interface EntityToolbarProps<T extends AnyEntityWithStats = AnyEntityWithStats> {
 	entity: T;
 	onAction: (action: string, data?: any) => void;
 }
 
-export interface EntityMetadataProps<T extends EntityWithStats = EntityWithStats> {
+export interface EntityMetadataProps<T extends AnyEntityWithStats = AnyEntityWithStats> {
 	entity: T;
 	editable?: boolean;
 	onUpdate?: (updates: Partial<T>) => void;
 }
 
 // Configuración completa para cada tipo de entidad
-export interface EntityDetailsConfig<T extends EntityWithStats = EntityWithStats> {
+export interface EntityDetailsConfig<T extends AnyEntityWithStats = AnyEntityWithStats> {
 	/** Componente principal de detalles */
 	detailsComponent: ComponentType<EntityDetailsProps<T>>;
 	/** Componente de preview/vista previa */
@@ -61,17 +62,17 @@ export interface EntityAction {
 	icon?: string;
 	category: 'primary' | 'secondary' | 'destructive';
 	shortcut?: string;
-	condition?: (entity: EntityWithStats) => boolean;
+	condition?: (entity: AnyEntityWithStats) => boolean;
 }
 
 // Registro global de configuraciones por tipo de entidad
 class EntityDetailsRegistry {
-	private configs = new Map<string, EntityDetailsConfig<EntityWithStats>>();
+	private configs = new Map<string, EntityDetailsConfig<AnyEntityWithStats>>();
 
 	/**
 	 * Registra una configuración para un tipo de entidad
 	 */
-	register<T extends EntityWithStats>(entityType: string, config: EntityDetailsConfig<T>): void {
+	register<T extends AnyEntityWithStats>(entityType: string, config: EntityDetailsConfig<T>): void {
 		// Validación de tipo segura antes de la conversión
 		if (!entityType || typeof entityType !== 'string') {
 			throw new Error('EntityType debe ser una cadena válida');
@@ -79,14 +80,14 @@ class EntityDetailsRegistry {
 		if (!config || typeof config !== 'object') {
 			throw new Error('Config debe ser un objeto válido');
 		}
-		// Conversión segura después de validación
-		this.configs.set(entityType, config as EntityDetailsConfig<EntityWithStats>);
+		// Almacenar la configuración con tipo seguro
+		this.configs.set(entityType, config as unknown as EntityDetailsConfig<AnyEntityWithStats>);
 	}
 
 	/**
 	 * Obtiene la configuración para un tipo de entidad
 	 */
-	getConfig<T extends EntityWithStats = EntityWithStats>(entityType: string): EntityDetailsConfig<T> | undefined {
+	getConfig<T extends AnyEntityWithStats = AnyEntityWithStats>(entityType: string): EntityDetailsConfig<T> | undefined {
 		if (!entityType || typeof entityType !== 'string') {
 			return undefined;
 		}
@@ -95,19 +96,19 @@ class EntityDetailsRegistry {
 		if (!config) {
 			return undefined;
 		}
-		// Type guard implícito: si existe en el Map, es del tipo correcto
-		return config as EntityDetailsConfig<T>;
+		// Retornar la configuración con el tipo solicitado
+		return config as unknown as EntityDetailsConfig<T>;
 	}
 
 	/**
 	 * Obtiene la configuración para una entidad específica
 	 */
-	getConfigForEntity(entity: EntityWithStats): EntityDetailsConfig | undefined {
+	getConfigForEntity(entity: AnyEntityWithStats): EntityDetailsConfig | undefined {
 		// Validación de entrada
 		if (!entity || typeof entity !== 'object') {
 			return undefined;
 		}
-		
+
 		const entityType = getEntityStatsType(entity);
 		if (entityType === null || typeof entityType !== 'string') {
 			return undefined;
@@ -140,7 +141,7 @@ class EntityDetailsRegistry {
 	/**
 	 * Obtiene las acciones aplicables para una entidad específica
 	 */
-	getActionsForEntity(entity: EntityWithStats): EntityAction[] {
+	getActionsForEntity(entity: AnyEntityWithStats): EntityAction[] {
 		const config = this.getConfigForEntity(entity);
 		if (!config) return [];
 
@@ -407,7 +408,7 @@ export const DefaultInfoCategories = {
 } as const;
 
 // Helper para crear configuraciones rápidamente
-export function createEntityConfig<T extends EntityWithStats>(
+export function createEntityConfig<T extends AnyEntityWithStats>(
 	config: Partial<EntityDetailsConfig<T>> & {
 		detailsComponent: ComponentType<EntityDetailsProps<T>>;
 	}

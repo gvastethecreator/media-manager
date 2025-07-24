@@ -17,14 +17,7 @@ interface VideosViewProps {
 
 export default function VideosView({ className = '' }: VideosViewProps) {
 	const navigate = useNavigate();
-	const {
-		getVideos,
-		fetchVideos,
-		createVideo,
-		isLoading,
-		error,
-		setError,
-	} = useVideoStore();
+	const { getVideos, fetchVideos, createVideo, isLoading, error, setError } = useVideoStore();
 
 	const videos = getVideos();
 

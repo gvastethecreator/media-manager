@@ -1,6 +1,4 @@
-import React from 'react';
-
-const PropertiesContentView: React.FC = () => {
+const PropertiesContentView = () => {
 	return (
 		<div>
 			<h1>Properties View</h1>

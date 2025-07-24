@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ui/theme-provider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useUIStore } from '@/store/ui.store';
 import { cn } from '@/lib/utils';
+import { useUIStore } from '@/store/ui.store';
 
 interface NavPanelHeaderProps {
 	isCollapsed?: boolean;
@@ -145,19 +145,15 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 			className="relative bg-gradient-to-b from-background/90 to-transparent py-2 border-b border-border/20 shadow-sm"
 		>
 			{/* 📋 Layout responsivo */}
-			<div className={cn(
-				"flex gap-2 px-2 transition-all duration-300",
-				isCollapsed ? "flex-col items-center py-1" : "flex-col"
-			)}>
+			<div
+				className={cn(
+					'flex gap-2 px-2 transition-all duration-300',
+					isCollapsed ? 'flex-col items-center py-1' : 'flex-col'
+				)}
+			>
 				{/* Avatar */}
-				<div className={cn(
-					"flex items-center",
-					isCollapsed ? "justify-center mb-1" : "justify-between w-full"
-				)}>
-					<div className={cn(
-						"flex items-center gap-2",
-						isCollapsed && "justify-center"
-					)}>
+				<div className={cn('flex items-center', isCollapsed ? 'justify-center mb-1' : 'justify-between w-full')}>
+					<div className={cn('flex items-center gap-2', isCollapsed && 'justify-center')}>
 						<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
 						{!isCollapsed && (

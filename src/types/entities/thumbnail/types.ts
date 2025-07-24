@@ -58,7 +58,7 @@ export interface ThumbnailMetadata {
 		steps?: string[];
 		version?: string;
 	};
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 /**
@@ -84,8 +84,8 @@ export interface ThumbnailBase {
  * Relaciones de Thumbnail con otras entidades
  */
 export interface ThumbnailRelations {
-	source?: any; // Entidad a la que pertenece el thumbnail
-	usages?: any[]; // Entidades que usan este thumbnail
+	source?: unknown; // Entidad a la que pertenece el thumbnail
+	usages?: unknown[]; // Entidades que usan este thumbnail
 }
 
 /**

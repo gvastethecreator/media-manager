@@ -9,7 +9,7 @@ import {
 	ZoomInIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useState, memo } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';

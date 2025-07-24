@@ -64,7 +64,7 @@ export const CompleteImageSchema = BaseImageSchema.extend({
 	url: z.string(),
 	aspectRatio: z.number().positive(),
 	thumbnails: z.record(z.string(), ImageThumbnailSchema).default({}),
-	metadata: z.record(z.string(), z.any()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	stats: ImageStatsSchema.default({ views: 0, favorites: 0, lastAccessed: null }),
 	visualConfig: ImageVisualConfigSchema.default({ isHidden: false, isPinned: false, dominantColor: '#333333' }),
 	isPublic: z.boolean().default(false),

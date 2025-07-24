@@ -73,7 +73,7 @@ export const activityListResponseSchema = z.object({
 /**
  * Esquema para metadatos adicionales específicos por tipo de actividad
  */
-export const activityMetadataSchema = z.record(z.any());
+export const activityMetadataSchema = z.record(z.string(), z.unknown());
 
 /**
  * Esquema para tipos de actividad permitidos

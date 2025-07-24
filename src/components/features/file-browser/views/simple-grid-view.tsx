@@ -6,25 +6,25 @@ import React from 'react';
 
 import { FileIcon, FileTextIcon, FolderIcon, ImageIcon, MusicIcon, PlayCircleIcon, VideoIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useState, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { EntityWithStats, getEntityStatsType, isImageWithStats, isVideoWithStats } from '@/types/migration';
 import { useImageResources } from '@/store/image-resources.store';
+import { AnyEntityWithStats, getEntityStatsType, isImageWithStats, isVideoWithStats } from '@/types/migration';
 
 interface SimpleGridViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
 // Componente interno para manejar thumbnails de imágenes
 const ImageThumbnail = memo(function ImageThumbnail({
 	imageId,
 	imageName,
-	className
+	className,
 }: {
 	imageId: string;
 	imageName: string;
@@ -58,9 +58,7 @@ const ImageThumbnail = memo(function ImageThumbnail({
 	const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
 
 	if (shouldShowLoading) {
-		return (
-			<div className={cn(className, "animate-pulse bg-muted")} />
-		);
+		return <div className={cn(className, 'animate-pulse bg-muted')} />;
 	}
 
 	return (
@@ -136,12 +134,12 @@ export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView(
 							}}
 						>
 							{/* Miniatura o ícono */}
-							{isImage && item.id ? (
-								<ImageThumbnail
-									imageId={item.id}
-									imageName={item.name || 'Imagen'}
-									className="absolute inset-0 w-full h-full object-cover"
-								/>
+							{isImage && 'id' in item && item.id ? (
+							<ImageThumbnail
+								imageId={item.id}
+								imageName={'name' in item ? item.name : ('id' in item ? item.id : 'unknown')}
+								className="absolute inset-0 w-full h-full object-cover"
+							/>
 							) : (
 								<div className="absolute inset-0 flex items-center justify-center">
 									{type === 'image' && <ImageIcon className="h-8 w-8 text-muted-foreground" />}
@@ -163,10 +161,10 @@ export const SimpleGridView = memo<SimpleGridViewProps>(function SimpleGridView(
 									'flex flex-col justify-end p-2'
 								)}
 							>
-								<p className="text-white text-xs font-medium truncate">{item.name || 'Sin nombre'}</p>
-								{isImage && item.formattedDimensions && (
-									<p className="text-white/70 text-[10px]">{item.formattedDimensions}</p>
-								)}
+								<p className="text-white text-xs font-medium truncate">{'name' in item ? item.name : item.id}</p>
+						{isImage && 'width' in item && 'height' in item && (
+							<p className="text-white/70 text-[10px]">{item.width}x{item.height}</p>
+						)}
 							</div>
 
 							{/* Indicador de video */}

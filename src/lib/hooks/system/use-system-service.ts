@@ -14,11 +14,11 @@ export function useSystemInit() {
 		mutationFn: async () => {
 			try {
 				systemLogger.info('🚀 Inicializando sistema...');
-				
+
 				// Simular inicialización del sistema
 				// En una implementación real, aquí se haría la llamada a la API
-				await new Promise(resolve => setTimeout(resolve, 1000));
-				
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+
 				systemLogger.info('✅ Sistema inicializado correctamente');
 				return { success: true, message: 'Sistema inicializado' };
 			} catch (error) {
@@ -43,20 +43,20 @@ export function useSystemStatus() {
 		mutationFn: async () => {
 			try {
 				systemLogger.info('📊 Obteniendo estado del sistema...');
-				
+
 				// Simular obtención del estado
-				await new Promise(resolve => setTimeout(resolve, 500));
-				
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
 				return {
 					status: 'running',
 					uptime: Date.now(),
 					version: '1.0.0',
-					health: 'good'
+					health: 'good',
 				};
 			} catch (error) {
 				systemLogger.error('❌ Error al obtener estado del sistema:', error);
 				throw error;
 			}
-		}
+		},
 	});
 }

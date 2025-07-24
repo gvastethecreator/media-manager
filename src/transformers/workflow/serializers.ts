@@ -11,7 +11,7 @@ import { WorkflowBase, WorkflowWithStats } from '@/types/entities/workflow';
 /**
  * Serializa WorkflowBase para respuestas de API
  */
-export function serializeWorkflow(workflow: WorkflowBase): Record<string, any> {
+export function serializeWorkflow(workflow: WorkflowBase): Record<string, unknown> {
 	return {
 		id: workflow.id,
 		name: workflow.name,
@@ -32,7 +32,7 @@ export function serializeWorkflow(workflow: WorkflowBase): Record<string, any> {
 /**
  * Serializa WorkflowWithStats para respuestas de API
  */
-export function serializeWorkflowWithStats(workflow: WorkflowWithStats): Record<string, any> {
+export function serializeWorkflowWithStats(workflow: WorkflowWithStats): Record<string, unknown> {
 	return {
 		...serializeWorkflow(workflow),
 		stats: {
@@ -48,13 +48,13 @@ export function serializeWorkflowWithStats(workflow: WorkflowWithStats): Record<
 /**
  * Serializa un array de workflows
  */
-export function serializeWorkflows(workflows: WorkflowBase[]): Record<string, any>[] {
+export function serializeWorkflows(workflows: WorkflowBase[]): Record<string, unknown>[] {
 	return workflows.map(serializeWorkflow);
 }
 
 /**
  * Serializa un array de workflows con estadísticas
  */
-export function serializeWorkflowsWithStats(workflows: WorkflowWithStats[]): Record<string, any>[] {
+export function serializeWorkflowsWithStats(workflows: WorkflowWithStats[]): Record<string, unknown>[] {
 	return workflows.map(serializeWorkflowWithStats);
 }

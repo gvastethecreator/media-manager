@@ -2,12 +2,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateCharacter, useUpdateCharacter } from '@/lib/api/characters';
 import { toastService } from '@/lib/ui/toast';
-import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } from '@/types/entities/character';
 import {
 	CHARACTER_CLASS_COLORS,
 	CHARACTER_CLASS_EMOJIS,
@@ -16,7 +20,8 @@ import {
 	CharacterClass,
 	CharacterRace,
 } from '@/types/entities/character/enums';
-import { DynamicCreateForm } from '../common/dynamic-create-form';
+import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } from '@/types/entities/character/types';
+
 
 // Esquema de validación
 const createCharacterSchema = z.object({
@@ -67,7 +72,7 @@ export function CreateCharacterForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel: _onCancel,
+	onCancel,
 }: CreateCharacterFormProps) {
 	const [_isSubmitting, setIsSubmitting] = useState(false);
 
@@ -259,58 +264,153 @@ export function CreateCharacterForm({
 		}
 	};
 
-	const optionalFields = [
-		{
-			name: 'emoji',
-			label: 'Emoji',
-			render: ({ value, onChange }: any) => (
-				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
-			),
-		},
-		{
-			name: 'color',
-			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
-		},
-		{
-			name: 'description',
-			label: 'Descripción',
-			render: ({ value, onChange }: any) => (
-				<textarea
-					placeholder="Descripción del personaje..."
-					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
-				/>
-			),
-		},
-		{
-			name: 'class',
-			label: 'Clase',
-			render: ({ value, onChange }: any) => (
-				<Select onValueChange={onChange} value={value || undefined}>
-					<SelectTrigger className="h-8 text-xs w-full">
-						<SelectValue placeholder="Seleccionar clase" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="warrior">Guerrero</SelectItem>
-						<SelectItem value="mage">Mago</SelectItem>
-						<SelectItem value="rogue">Ladrón</SelectItem>
-						<SelectItem value="cleric">Clérigo</SelectItem>
-						<SelectItem value="ranger">Explorador</SelectItem>
-					</SelectContent>
-				</Select>
-			),
-		},
-		// ...agregar más campos opcionales si es necesario...
-	];
-
 	return (
-		<DynamicCreateForm
-			optionalFields={optionalFields}
-			onSubmit={_onSubmit}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear personaje'}
-		/>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(_onSubmit)} className="space-y-4">
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nombre</FormLabel>
+							<FormControl>
+								<Input placeholder="Nombre del personaje" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="emoji"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Emoji</FormLabel>
+							<FormControl>
+								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="color"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Color</FormLabel>
+							<FormControl>
+								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="class"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Clase</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Seleccionar clase" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{Object.values(CharacterClass).map((characterClass) => (
+										<SelectItem key={characterClass} value={characterClass}>
+											{characterClass}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="race"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Raza</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Seleccionar raza" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{Object.values(CharacterRace).map((race) => (
+										<SelectItem key={race} value={race}>
+											{race}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Descripción</FormLabel>
+							<FormControl>
+								<Textarea placeholder="Descripción del personaje..." rows={3} {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="level"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nivel</FormLabel>
+							<FormControl>
+								<Input type="number" min={1} max={100} {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="isFavorite"
+					render={({ field }) => (
+						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+							<FormControl>
+								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+							</FormControl>
+							<div className="space-y-1 leading-none">
+								<FormLabel>Marcar como favorito</FormLabel>
+							</div>
+						</FormItem>
+					)}
+				/>
+
+				<div className="flex justify-end space-x-2">
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancelar
+					</Button>
+					<Button type="submit">
+						{isEditing ? 'Guardar cambios' : 'Crear personaje'}
+					</Button>
+				</div>
+			</form>
+		</Form>
 	);
 }

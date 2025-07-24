@@ -3,8 +3,13 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import type { GroupWithStats } from '@/types/entities/group';
-import { DynamicCreateForm } from '../common/dynamic-create-form';
+import type { GroupWithStats } from '@/types/entities/group/base';
+import type { CreateGroupInput, UpdateGroupInput } from '@/types/entities/group/types';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({
@@ -12,31 +17,19 @@ const groupFormSchema = z.object({
 	emoji: z.string().default('📂'),
 	color: z.string().default('#3b82f6'),
 	description: z.string().optional(),
-	shortcut: z.string().optional(),
 	category: z.string().optional(),
-	sortBy: z.string().default('name'),
-	filters: z.string().default('empty_array'),
-	featuredImage: z.string().optional(),
+	filters: z.string().default(''),
 	isFavorite: z.boolean().default(false),
 });
 
 type FormData = z.infer<typeof groupFormSchema>;
 
-// Tipos para la creación y actualización de grupos usando Drizzle
-interface GroupCreateInput {
-	name: string;
-	description?: string;
-}
-
-interface GroupUpdateInput {
-	name?: string;
-	description?: string;
-}
+// Los tipos GroupCreateInput y GroupUpdateInput se importan desde @/types/entities/group
 
 interface CreateGroupFormProps {
 	group?: GroupWithStats;
 	isEditing?: boolean;
-	onSubmit: (data: GroupCreateInput | GroupUpdateInput) => Promise<void>;
+	onSubmit: (data: CreateGroupInput | UpdateGroupInput) => Promise<void>;
 	onCancel: () => void;
 	onPreview?: () => void;
 }
@@ -45,8 +38,8 @@ export function CreateGroupForm({
 	group,
 	isEditing = false,
 	onSubmit,
-	onCancel: _onCancel,
-	onPreview: _onPreview,
+	onCancel,
+	onPreview,
 }: CreateGroupFormProps) {
 	// Inicializar el formulario con el tipo correcto
 	const form = useForm<FormData>({
@@ -56,53 +49,132 @@ export function CreateGroupForm({
 			emoji: group?.emoji ?? '📂',
 			color: group?.color ?? '#3b82f6',
 			description: group?.description ?? '',
-			shortcut: group?.shortcut ?? '',
-			category: group?.category ?? 'general',
-			sortBy: group?.sortBy ?? 'name',
-			filters: group?.filters ?? 'empty_array',
-			featuredImage: group?.featuredImage ?? '',
+			category: group?.category ?? '',
+			filters: group?.filters ?? '',
 			isFavorite: group?.isFavorite ?? false,
 		},
 	});
 
-	const optionalFields = [
-		{
-			name: 'emoji',
-			label: 'Emoji',
-			render: ({ value, onChange }: any) => (
-				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
-			),
-		},
-		{
-			name: 'color',
-			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
-		},
-		{
-			name: 'description',
-			label: 'Descripción',
-			render: ({ value, onChange }: any) => (
-				<textarea
-					placeholder="Descripción del grupo..."
-					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
-				/>
-			),
-		},
-		// ...agregar más campos opcionales si es necesario...
-	];
-
 	const handleSubmit = async (data: FormData) => {
-		await onSubmit(data);
+		if (!data.name) {
+			throw new Error('El nombre es requerido');
+		}
+
+		const submitData: CreateGroupInput | UpdateGroupInput = {
+			name: data.name,
+			emoji: data.emoji || undefined,
+			color: data.color || undefined,
+			description: data.description || undefined,
+			category: data.category || undefined,
+			filters: data.filters || undefined,
+			isFavorite: data.isFavorite || false,
+		};
+
+		await onSubmit(submitData);
 	};
 
 	return (
-		<DynamicCreateForm
-			optionalFields={optionalFields}
-			onSubmit={handleSubmit}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear grupo'}
-		/>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Nombre</FormLabel>
+							<FormControl>
+								<Input placeholder="Nombre del grupo" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="emoji"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Emoji</FormLabel>
+							<FormControl>
+								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="color"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Color</FormLabel>
+							<FormControl>
+								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Descripción</FormLabel>
+							<FormControl>
+								<Textarea placeholder="Descripción del grupo..." {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="category"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Categoría</FormLabel>
+							<FormControl>
+								<Input placeholder="Categoría del grupo" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="isFavorite"
+					render={({ field }) => (
+						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+							<FormControl>
+								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+							</FormControl>
+							<div className="space-y-1 leading-none">
+								<FormLabel>Marcar como favorito</FormLabel>
+							</div>
+						</FormItem>
+					)}
+				/>
+
+				<div className="flex justify-end space-x-2">
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancelar
+					</Button>
+					{onPreview && (
+						<Button type="button" variant="secondary" onClick={onPreview}>
+							Vista previa
+						</Button>
+					)}
+					<Button type="submit">
+						{isEditing ? 'Guardar cambios' : 'Crear grupo'}
+					</Button>
+				</div>
+			</form>
+		</Form>
 	);
 }

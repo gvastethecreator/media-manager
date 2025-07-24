@@ -1,6 +1,4 @@
-import React from 'react';
-
-const PromptsContentView: React.FC = () => {
+const PromptsContentView = () => {
 	return (
 		<div>
 			<h1>Prompts View</h1>

@@ -12,8 +12,8 @@ export interface MediaMetadata {
 	fileSize?: number;
 	created?: Date;
 	modified?: Date;
-	exif?: Record<string, any>;
-	[key: string]: any;
+	exif?: Record<string, unknown>;
+	[key: string]: unknown;
 }
 
 export interface AIMetadata {

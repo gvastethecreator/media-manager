@@ -60,7 +60,7 @@ export interface ThumbnailExtended extends ThumbnailComplete {
 // Validaciones Zod
 export const thumbnailCompleteSchema = thumbnailBaseSchema.extend({
 	url: z.string(),
-	metadata: z.record(z.any()).nullable().optional(),
+	metadata: z.record(z.string(), z.unknown()).nullable().optional(),
 	errorMessage: z.string().nullable().optional(),
 	errorTimestamp: z.date().nullable().optional(),
 	optimizedAt: z.date().nullable().optional(),

@@ -1,6 +1,4 @@
-import React from 'react';
-
-const WildcardsContentView: React.FC = () => {
+const WildcardsContentView = () => {
 	return (
 		<div>
 			<h1>Wildcards View</h1>

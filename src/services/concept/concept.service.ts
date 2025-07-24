@@ -1,12 +1,13 @@
 // Tipo local para crear conceptos
 
 import * as crypto from 'crypto';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { concepts } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { Concept, ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept';
+import type { ConceptBase } from '@/types/entities/concept/base';
+import type { ConceptCreateInput, ConceptUpdateInput, ConceptFilters, ConceptResults } from '@/types/entities/concept/types';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 
@@ -26,14 +27,12 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 	[EVENTS.CONCEPTS_CHANGED]: 'update',
 };
 
-import type { Concept, ConceptFilters, ConceptResults, ConceptStats } from '@/types/entities/concept';
-
 /**
  * Servicio para gestionar los conceptos
  * Completamente migrado a Drizzle ORM
  */
 export const ConceptService = {
-	async createConcept(data: ConceptCreateInput): Promise<Concept> {
+	async createConcept(data: ConceptCreateInput): Promise<ConceptBase> {
 		try {
 			const result = await db
 				.insert(concepts)
@@ -61,7 +60,7 @@ export const ConceptService = {
 				})
 				.returning();
 
-			const concept = result[0] as Concept;
+			const concept = result[0] as ConceptBase;
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -81,9 +80,9 @@ export const ConceptService = {
 		}
 	},
 
-	async updateConcept(id: string, data: ConceptUpdateInput): Promise<Concept> {
+	async updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptBase> {
 		try {
-			const updateData: any = {
+			const updateData: Partial<typeof concepts.$inferInsert> = {
 				updatedAt: new Date(),
 			};
 
@@ -111,7 +110,7 @@ export const ConceptService = {
 				throw new Error('Concepto no encontrado');
 			}
 
-			const concept = result[0] as Concept;
+			const concept = result[0] as ConceptBase;
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -157,22 +156,28 @@ export const ConceptService = {
 		}
 	},
 
-	async getConcept(id: string): Promise<Concept | null> {
+	async getConcept(id: string): Promise<ConceptBase | null> {
 		try {
 			const result = await db
 				.select({
 					id: concepts.id,
 					name: concepts.name,
-					content: concepts.content,
 					description: concepts.description,
 					category: concepts.category,
 					emoji: concepts.emoji,
 					color: concepts.color,
-					shortcut: concepts.shortcut,
-					sortBy: concepts.sortBy,
-					filters: concepts.filters,
-					featuredImage: concepts.featuredImage,
+					isPublic: concepts.isPublic,
 					isFavorite: concepts.isFavorite,
+					totalImages: concepts.totalImages,
+					totalVideos: concepts.totalVideos,
+					type: concepts.type,
+					complexity: concepts.complexity,
+					applications: concepts.applications,
+					examples: concepts.examples,
+					relatedConcepts: concepts.relatedConcepts,
+					notes: concepts.notes,
+					featuredImage: concepts.featuredImage,
+					parentId: concepts.parentId,
 					createdAt: concepts.createdAt,
 					updatedAt: concepts.updatedAt,
 				})
@@ -190,7 +195,8 @@ export const ConceptService = {
 			return {
 				...rawConcept,
 				isFavorite: Boolean(rawConcept.isFavorite),
-			} as Concept;
+				isPublic: Boolean(rawConcept.isPublic),
+			} as ConceptBase;
 		} catch (error) {
 			conceptLogger.error('Error getting concept:', { id, error });
 			throw new Error('Error al obtener concepto');
@@ -202,25 +208,23 @@ export const ConceptService = {
 			const { category, search, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
 
 			// Construir filtros dinámicamente
-			const conditions: any[] = [];
+			const conditions: SQL<unknown>[] = [];
 
 			if (category) {
-				conditions.push(eq(concepts.category, category));
+				if (Array.isArray(category)) {
+					conditions.push(...category.map(cat => eq(concepts.category, cat)));
+				} else {
+					conditions.push(eq(concepts.category, category));
+				}
 			}
 
 			if (search) {
-				conditions.push(
-					or(
-						like(concepts.name, `%${search}%`),
-						like(concepts.content, `%${search}%`),
-						like(concepts.description, `%${search}%`)
-					)
-				);
+				conditions.push(like(concepts.name, `%${search}%`));
 			}
 
 			// Determinar el ordenamiento
 			const orderDirection_fn = sortOrder === 'desc' ? desc : asc;
-			let orderByField: any;
+			let orderByField: ReturnType<typeof orderDirection_fn>;
 
 			switch (sortBy) {
 				case 'name':
@@ -238,16 +242,22 @@ export const ConceptService = {
 				.select({
 					id: concepts.id,
 					name: concepts.name,
-					content: concepts.content,
 					description: concepts.description,
 					category: concepts.category,
 					emoji: concepts.emoji,
 					color: concepts.color,
-					shortcut: concepts.shortcut,
-					sortBy: concepts.sortBy,
-					filters: concepts.filters,
-					featuredImage: concepts.featuredImage,
+					isPublic: concepts.isPublic,
 					isFavorite: concepts.isFavorite,
+					totalImages: concepts.totalImages,
+					totalVideos: concepts.totalVideos,
+					type: concepts.type,
+					complexity: concepts.complexity,
+					applications: concepts.applications,
+					examples: concepts.examples,
+					relatedConcepts: concepts.relatedConcepts,
+					notes: concepts.notes,
+					featuredImage: concepts.featuredImage,
+					parentId: concepts.parentId,
 					createdAt: concepts.createdAt,
 					updatedAt: concepts.updatedAt,
 				})
@@ -274,7 +284,7 @@ export const ConceptService = {
 			const [{ count: total }] = await countQuery;
 
 			// Transformar resultados de Drizzle asegurando tipos correctos
-			const transformedConcepts = drizzleConcepts.map((rawConcept) => ({
+			const transformedConcepts = drizzleConcepts.map((rawConcept: typeof concepts.$inferSelect) => ({
 				...rawConcept,
 				isFavorite: Boolean(rawConcept.isFavorite),
 			}));
@@ -283,7 +293,7 @@ export const ConceptService = {
 			const stats = await this.getConceptStats();
 
 			return {
-				items: transformedConcepts as Concept[],
+				items: transformedConcepts as ConceptBase[],
 				total,
 				page,
 				pageSize,
@@ -295,7 +305,7 @@ export const ConceptService = {
 		}
 	},
 
-	async getConceptStats(): Promise<ConceptStats> {
+	async getConceptStats(): Promise<{ totalConcepts: number; categoriesStats: Record<string, number> }> {
 		try {
 			// Obtener conteo total
 			const [{ count: total }] = await db.select({ count: count() }).from(concepts);
@@ -310,13 +320,16 @@ export const ConceptService = {
 				.groupBy(concepts.category);
 
 			// Transformar a formato esperado
-			const byCategory = Object.fromEntries(
-				categoryStats.map((item) => [item.category || 'sin categoría', item.count])
+			const categoriesStats = Object.fromEntries(
+				categoryStats.map((item: { category: string | null; count: number }) => [
+					item.category || 'sin categoría',
+					item.count
+				])
 			);
 
 			return {
-				total,
-				byCategory,
+				totalConcepts: total,
+				categoriesStats,
 			};
 		} catch (error) {
 			conceptLogger.error('Error getting concept stats:', error);
@@ -329,22 +342,13 @@ export const ConceptService = {
 		return [];
 	},
 
-	async getConceptCounts(conceptId: string): Promise<any> {
+	async getConceptCounts(conceptId: string): Promise<{images: number; videos: number; albums: number; tags: number}> {
 		console.warn(`[ConceptService] getConceptCounts no implementado. ID: ${conceptId}. Retornando ceros.`);
 		return {
 			images: 0,
 			videos: 0,
 			albums: 0,
-			collections: 0,
 			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
 		};
 	},
 };
