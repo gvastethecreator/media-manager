@@ -228,8 +228,8 @@ export async function createPlace(input: PlaceCreateInput): Promise<PlaceWithSta
 				history: input.history || null,
 				geography: input.geography || null,
 				landmarks: input.landmarks || null,
-				resources: input.resources || null,
-				dangers: input.dangers || null,
+				resources: null, // No existe en PlaceCreateInput
+				dangers: null, // No existe en PlaceCreateInput
 				notes: input.notes || null,
 				featuredImage: input.featuredImage || null,
 				parentId: input.parentId || null,
@@ -296,8 +296,7 @@ export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<
 		if (input.history !== undefined) updateData.history = input.history;
 		if (input.geography !== undefined) updateData.geography = input.geography;
 		if (input.landmarks !== undefined) updateData.landmarks = input.landmarks;
-		if (input.resources !== undefined) updateData.resources = input.resources;
-		if (input.dangers !== undefined) updateData.dangers = input.dangers;
+		// resources y dangers no existen en PlaceUpdateInput
 		if (input.notes !== undefined) updateData.notes = input.notes;
 		if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
 		if (input.parentId !== undefined) updateData.parentId = input.parentId;

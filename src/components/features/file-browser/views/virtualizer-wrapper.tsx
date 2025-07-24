@@ -1,7 +1,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { CustomScrollArea } from './custom-scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Tipos para mejorar la tipificación
 type ViewType = 'list' | 'grid' | 'masonry';
@@ -483,21 +483,21 @@ export function VirtualizerWrapper<T>({
 	// Renderizado para modo masonry
 	if (type === 'masonry') {
 		return (
-			<CustomScrollArea
+			<ScrollArea
 				className={cn('h-full w-full', gridClassName)}
-				onWheel={(_e) => {
-					// Detectar scroll manual con rueda
-					const scrollElement = getScrollElement();
-					if (scrollElement) {
-						const scrollPosition = scrollElement.scrollTop + scrollElement.clientHeight;
-						const scrollHeight = scrollElement.scrollHeight;
+				onWheel={(_e: React.WheelEvent) => {
+				// Detectar scroll manual con rueda
+				const scrollElement = getScrollElement();
+				if (scrollElement) {
+					const scrollPosition = scrollElement.scrollTop + scrollElement.clientHeight;
+					const scrollHeight = scrollElement.scrollHeight;
 
-						// Si estamos cerca del final, cargar más
-						if (scrollHeight - scrollPosition < 400 && !isLoadingRef.current) {
-							loadItemsSequentially();
-						}
+					// Si estamos cerca del final, cargar más
+					if (scrollHeight - scrollPosition < 400 && !isLoadingRef.current) {
+						loadItemsSequentially();
 					}
-				}}
+				}
+			}}
 			>
 				<div ref={scrollRef} className="p-4 h-full" style={{ scrollBehavior: 'smooth' }}>
 					<div className="flex" style={{ gap: `${gridGap}px`, minHeight: '100%' }}>
@@ -566,7 +566,7 @@ export function VirtualizerWrapper<T>({
 						</div>
 					)}
 				</div>
-			</CustomScrollArea>
+			</ScrollArea>
 		);
 	}
 
@@ -576,21 +576,21 @@ export function VirtualizerWrapper<T>({
 		const rowVirtualItems = gridVirtualizer.getVirtualItems();
 
 		return (
-			<CustomScrollArea
+			<ScrollArea
 				className={cn('h-full w-full', gridClassName)}
-				onWheel={(_e) => {
-					// Detectar scroll manual con rueda
-					const scrollElement = getScrollElement();
-					if (scrollElement) {
-						const scrollPosition = scrollElement.scrollTop + scrollElement.clientHeight;
-						const scrollHeight = scrollElement.scrollHeight;
+				onWheel={(_e: React.WheelEvent) => {
+				// Detectar scroll manual con rueda
+				const scrollElement = getScrollElement();
+				if (scrollElement) {
+					const scrollPosition = scrollElement.scrollTop + scrollElement.clientHeight;
+					const scrollHeight = scrollElement.scrollHeight;
 
-						// Si estamos cerca del final, cargar más
-						if (scrollHeight - scrollPosition < 500 && !isLoadingRef.current) {
-							loadItemsSequentially();
-						}
+					// Si estamos cerca del final, cargar más
+					if (scrollHeight - scrollPosition < 500 && !isLoadingRef.current) {
+						loadItemsSequentially();
 					}
-				}}
+				}
+			}}
 			>
 				<div ref={scrollRef} className="h-full" style={{ scrollBehavior: 'smooth' }}>
 					<div
@@ -670,13 +670,13 @@ export function VirtualizerWrapper<T>({
 						)}
 					</div>
 				</div>
-			</CustomScrollArea>
+			</ScrollArea>
 		);
 	}
 
 	// Renderizado para modo lista
 	return (
-		<CustomScrollArea className={cn('h-full w-full', listClassName)}>
+		<ScrollArea className={cn('h-full w-full', listClassName)}>
 			<div ref={scrollRef} className="h-full" style={{ scrollBehavior: 'smooth' }}>
 				<div
 					style={{
@@ -715,7 +715,7 @@ export function VirtualizerWrapper<T>({
 						})}
 				</div>
 			</div>
-		</CustomScrollArea>
+		</ScrollArea>
 	);
 }
 

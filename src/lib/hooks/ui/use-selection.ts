@@ -34,11 +34,11 @@ export const useSelection = () => {
 		// 📊 Información de selección
 		getSelectionStats: () => ({
 			count: store.selectedItems.length,
-			totalSize: store.selectedItems.reduce((acc, item) => acc + (item.size || 0), 0),
+			totalSize: store.selectedItems.reduce((acc, item) => acc + (item.size ?? 0), 0),
 			hasSelection: store.selectedItems.length > 0,
 			isMultipleSelection: store.selectedItems.length > 1,
-			selectedTypes: [...new Set(store.selectedItems.map((item) => item.type))],
-			selectedFolders: [...new Set(store.selectedItems.map((item) => item.folderId))],
+			selectedTypes: [...new Set(store.selectedItems.map((item) => item.type ?? 'unknown'))],
+			selectedFolders: [...new Set(store.selectedItems.map((item) => item.folderId ?? 'unknown'))],
 		}),
 
 		// 🔍 Utilidades de selección
@@ -57,7 +57,7 @@ export const useSelection = () => {
 
 		selectBySize: (minSize?: number, maxSize?: number) => {
 			const filteredItems = store.displayedItems.filter((item) => {
-				const size = item.size || 0;
+				const size = item.size ?? 0;
 				return (!minSize || size >= minSize) && (!maxSize || size <= maxSize);
 			});
 			for (const item of filteredItems) {

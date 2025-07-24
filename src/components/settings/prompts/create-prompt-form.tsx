@@ -30,7 +30,7 @@ const promptSchema = z.object({
 	category: z.nativeEnum(PromptCategory).optional(),
 	model: z.nativeEnum(PromptModel).optional(),
 	parameters: z.string().optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean().optional().default(false),
 });
 
 type PromptForm = z.infer<typeof promptSchema>;

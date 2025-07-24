@@ -1,12 +1,31 @@
+import { sql } from 'drizzle-orm';
 import { db } from './db';
+import { albums, characters, collections, concepts, folders, images, notes, places, prompts, properties, tags, videos, wildcards, worldItems } from '@/lib/drizzle/schema';
+
+const entityTableMap = {
+	album: albums,
+	character: characters,
+	collection: collections,
+	concept: concepts,
+	folder: folders,
+	image: images,
+	note: notes,
+	place: places,
+	prompt: prompts,
+	property: properties,
+	tag: tags,
+	video: videos,
+	wildcard: wildcards,
+	worldItem: worldItems,
+};
 
 /**
  * Valida si un nombre está disponible para una entidad dada
- * @param entity Nombre de la entidad ('property', 'tag', etc.)
+ * @param entityType Tipo de la entidad ('property', 'tag', etc.)
  * @param name Nombre a validar
  * @throws Error si el nombre ya está en uso
  */
-export async function validateName(entity: string, name: string) {
+export async function validateName(entityType: keyof typeof entityTableMap, name: string) {
 	const normalizedName = name.trim().toLowerCase();
 
 	// Verificar longitud mínima
@@ -24,16 +43,15 @@ export async function validateName(entity: string, name: string) {
 		throw new Error('El nombre solo puede contener letras, números, espacios y guiones');
 	}
 
-	// Verificar que no exista
-	const count = await db[entity].count({
-		where: {
-			name: {
-				equals: name,
-			},
-		},
-	});
+	const table = entityTableMap[entityType];
+	if (!table) {
+		throw new Error(`Tipo de entidad desconocido: ${entityType}`);
+	}
 
-	if (count > 0) {
-		throw new Error(`Ya existe ${entity === 'property' ? 'una propiedad' : 'un elemento'} con este nombre`);
+	// Verificar que no exista
+	const [result] = await db.select({ count: sql<number>`count(*)` }).from(table).where(sql`${table.name} = ${name}`);
+
+	if (result.count > 0) {
+		throw new Error(`Ya existe ${entityType === 'property' ? 'una propiedad' : 'un elemento'} con este nombre`);
 	}
 }

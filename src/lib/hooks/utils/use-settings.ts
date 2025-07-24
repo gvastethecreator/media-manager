@@ -60,19 +60,19 @@ export function useSettings() {
 	}, [isInitialized, initialize]);
 
 	// Funciones de utilidad para trabajar con secciones específicas
-	const updateAppearance = (newAppearance: Record<string, unknown>) => {
+	const updateAppearance = (newAppearance: Partial<AppearanceSettings>) => {
 		updateSettings({ appearance: { ...appearance, ...newAppearance } });
 	};
 
-	const updateNotifications = (newNotifications: Record<string, unknown>) => {
+	const updateNotifications = (newNotifications: Partial<NotificationsSettings>) => {
 		updateSettings({ notifications: { ...notifications, ...newNotifications } });
 	};
 
-	const updatePrivacy = (newPrivacy: Record<string, unknown>) => {
+	const updatePrivacy = (newPrivacy: Partial<PrivacySettings>) => {
 		updateSettings({ privacy: { ...privacy, ...newPrivacy } });
 	};
 
-	const updateAdvanced = (newAdvanced: Record<string, unknown>) => {
+	const updateAdvanced = (newAdvanced: Partial<AdvancedSettings>) => {
 		updateSettings({ advanced: { ...advanced, ...newAdvanced } });
 	};
 

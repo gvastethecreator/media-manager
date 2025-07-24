@@ -2,28 +2,32 @@ import type { FolderCreateInput, FolderFilters, FoldersResponse, FolderUpdateInp
 import type { FolderWithStats } from '@/types/entities/folder';
 import { apiClient } from '../client';
 
-export const findFolders = async (_filters: FolderFilters): Promise<FoldersResponse> => {
+export const findFolders = async (filters: FolderFilters): Promise<FoldersResponse> => {
 	const response = await apiClient.get<FoldersResponse>('/folders');
 	return response;
 };
 
 export const getAllFolders = async (): Promise<FolderWithStats[]> => {
-	const response = await apiClient.get('/folders/tree');
+	const response = await apiClient.get<FolderWithStats[]>('/folders/tree');
 	return response;
 };
 
 export const getFolder = async (id: string): Promise<FolderWithStats> => {
-	const response = await apiClient.get(`/folders/${id}`);
-	return response;
+	const response = await apiClient.get<FolderWithStats[]>(`/folders/${id}`);
+	// La API retorna un array con un elemento, así que tomamos el primero
+	if (!response || response.length === 0) {
+		throw new Error(`Folder with id "${id}" not found`);
+	}
+	return response[0];
 };
 
 export const createFolder = async (data: FolderCreateInput): Promise<FolderWithStats> => {
-	const response = await apiClient.post('/folders', data);
+	const response = await apiClient.post<FolderWithStats>('/folders', data);
 	return response;
 };
 
 export const updateFolder = async (id: string, data: FolderUpdateInput): Promise<FolderWithStats> => {
-	const response = await apiClient.put(`/folders/${id}`, data);
+	const response = await apiClient.put<FolderWithStats>(`/folders/${id}`, data);
 	return response;
 };
 
@@ -32,27 +36,27 @@ export const deleteFolder = async (id: string): Promise<void> => {
 };
 
 export const moveFolder = async (folderId: string, newParentId: string | null): Promise<FolderWithStats> => {
-	const response = await apiClient.post(`/folders/${folderId}/move`, { newParentId });
+	const response = await apiClient.post<FolderWithStats>(`/folders/${folderId}/move`, { newParentId });
 	return response;
 };
 
 export const toggleFolderFavorite = async (id: string): Promise<FolderWithStats> => {
-	const response = await apiClient.post(`/folders/${id}/toggle-favorite`);
+	const response = await apiClient.post<FolderWithStats>(`/folders/${id}/toggle-favorite`);
 	return response;
 };
 
 export const reindexFolder = async (id: string): Promise<FolderWithStats> => {
-	const response = await apiClient.post(`/folders/${id}/reindex`);
+	const response = await apiClient.post<FolderWithStats>(`/folders/${id}/reindex`);
 	return response;
 };
 
 export const reindexAllFolders = async (): Promise<{ processed: number; errors: string[] }> => {
-	const response = await apiClient.post('/folders/reindex-all');
+	const response = await apiClient.post<{ processed: number; errors: string[] }>('/folders/reindex-all');
 	return response;
 };
 
 export const getRecentFolderImages = async (folderId: string, limit: number): Promise<string[]> => {
-	const response = await apiClient.get(`/folders/${folderId}/recent-images?limit=${limit}`);
+	const response = await apiClient.get<string[]>(`/folders/${folderId}/recent-images?limit=${limit}`);
 	return response;
 };
 
@@ -72,32 +76,45 @@ export const getFolderStats = async (
 		thumbnailUrl?: string;
 	}>;
 }> => {
-	const response = await apiClient.get(`/folders/${folderId}/stats`);
+	const response = await apiClient.get<{
+		totalImages: number;
+		totalVideos: number;
+		totalAudio: number;
+		totalDocuments: number;
+		totalOthers: number;
+		totalSize: number;
+		lastActivity: Date | null;
+		recentImages?: Array<{
+			id: string;
+			name: string;
+			thumbnailUrl?: string;
+		}>;
+	}>(`/folders/${folderId}/stats`);
 	return response;
 };
 
 export const getRootFolderId = async (): Promise<string> => {
-	const response = await apiClient.get('/folders/root-id');
+	const response = await apiClient.get<{ id: string }>('/folders/root-id');
 	return response.id;
 };
 
 export const getFolderPath = async (folderId: string): Promise<string> => {
-	const response = await apiClient.get(`/folders/${folderId}/path`);
+	const response = await apiClient.get<{ path: string }>(`/folders/${folderId}/path`);
 	return response.path;
 };
 
 export const getFolderName = async (folderId: string): Promise<string> => {
-	const response = await apiClient.get(`/folders/${folderId}/name`);
+	const response = await apiClient.get<{ name: string }>(`/folders/${folderId}/name`);
 	return response.name;
 };
 
 export const getFolderIdByPath = async (folderPath: string): Promise<string> => {
-	const response = await apiClient.get(`/folders/by-path?path=${encodeURIComponent(folderPath)}`);
+	const response = await apiClient.get<{ id: string }>(`/folders/by-path?path=${encodeURIComponent(folderPath)}`);
 	return response.id;
 };
 
 export const getParentFolderId = async (folderId: string): Promise<string | null> => {
-	const response = await apiClient.get(`/folders/${folderId}/parent-id`);
+	const response = await apiClient.get<{ parentFolderId: string | null }>(`/folders/${folderId}/parent-id`);
 	return response.parentFolderId;
 };
 
@@ -137,6 +154,7 @@ export const validateFolderExists = async (folderPath: string): Promise<boolean>
 		if (error instanceof TypeError && error.message.includes('fetch')) {
 			return false;
 		}
+
 		// Re-lanzar otros errores
 		throw error;
 	}

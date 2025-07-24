@@ -32,16 +32,16 @@ const BaseContentView: React.FC<BaseContentViewProps> = ({
 			{showHeader && (title || description || headerControls) && (
 				<>
 					{/* Header con información */}
-					<div className="p-6 pb-4 border-b border-border bg-background/50 backdrop-blur-sm">
+					<div className="p-4 pb-3 border-b border-border bg-background/50 backdrop-blur-sm">
 						<div className="flex items-center justify-between">
 							<div>
 								{title && (
-									<h2 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
-										{icon && <span className="text-3xl">{icon}</span>}
+									<h2 className="text-xl font-bold text-foreground mb-1 flex items-center gap-2">
+										{icon && <span className="text-2xl">{icon}</span>}
 										{title}
 									</h2>
 								)}
-								{description && <p className="text-muted-foreground">{description}</p>}
+								{description && <p className="text-sm text-muted-foreground">{description}</p>}
 							</div>
 							{headerControls && <div className="flex gap-2">{headerControls}</div>}
 						</div>
@@ -50,7 +50,7 @@ const BaseContentView: React.FC<BaseContentViewProps> = ({
 			)}
 
 			{/* Contenido principal */}
-			<div className="flex-1 overflow-hidden">{children}</div>
+			<div className="flex-1 min-h-0 overflow-hidden">{children}</div>
 		</div>
 	);
 };

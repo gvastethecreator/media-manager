@@ -1,7 +1,35 @@
 import { merge } from 'lodash';
-import type { AppSettings, DEFAULT_SETTINGS } from '@/types/settings';
 
-const SETTINGS_KEY = 'image-manager-settings';
+
+import type { Settings } from '@/types/settings';
+
+const DEFAULT_SETTINGS: Settings = {
+	appearance: {
+		theme: 'system',
+		fontSize: 16,
+		language: 'es',
+		reducedAnimations: false,
+		highContrast: false,
+	},
+	notifications: {
+		enabled: true,
+		email: false,
+		desktop: true,
+		frequency: 'daily',
+	},
+	privacy: {
+		shareUsageData: true,
+		storeCookies: true,
+		storeHistory: true,
+	},
+	advanced: {
+		apiKey: null,
+		devMode: false,
+		experimentalFeatures: false,
+	},
+};
+
+type AppSettings = Settings;
 
 export function loadSettings(): AppSettings {
 	try {

@@ -13,6 +13,7 @@ import {
 	Edit,
 	FileText,
 	FolderIcon,
+	FolderSearch,
 	GalleryHorizontal,
 	Grid,
 	ImageIcon,
@@ -25,6 +26,7 @@ import {
 	PanelRightClose,
 	PanelRightOpen,
 	Plus,
+	RefreshCw,
 	Search,
 	Share2,
 	Star,
@@ -32,6 +34,8 @@ import {
 	Trash2,
 	User2,
 	X,
+	ZoomIn,
+	ZoomOut,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
@@ -55,6 +59,11 @@ export interface ViewToolbarProps {
 	isLeftPanelCollapsed?: boolean;
 	toggleLeftPanelCollapse?: () => void;
 	allItemIds?: string[]; // IDs de todos los elementos disponibles para selección
+	// Props para acciones de carpeta
+	currentFolderId?: string;
+	onScanFolder?: () => void;
+	onRefreshFolder?: () => void;
+	isRetrying?: boolean;
 }
 
 export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
@@ -64,6 +73,10 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	isLeftPanelCollapsed,
 	toggleLeftPanelCollapse,
 	allItemIds = [],
+	currentFolderId,
+	onScanFolder,
+	onRefreshFolder,
+	isRetrying = false,
 }) {
 	const location = useLocation();
 	const currentView = location.pathname.split('/')[1] || 'gallery';
@@ -207,61 +220,76 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-7 w-7 hover:bg-accent"
+				className={cn(
+					'h-7 hover:bg-accent',
+					sortOptions.some((opt) => opt.field === 'name') ? 'w-10 bg-accent/50' : 'w-7'
+				)}
 				title="Ordenar por nombre"
 				onClick={() => handleSort('name')}
 				data-active={sortOptions.some((opt) => opt.field === 'name')}
 			>
-				<FileText className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'name') && 'text-primary')} />
-				{sortOptions.some((opt) => opt.field === 'name') && (
-					<span className="ml-0.5">
-						{sortOptions.find((opt) => opt.field === 'name')?.direction === 'asc' ? (
-							<ArrowUp className="h-2.5 w-2.5 text-primary" />
-						) : (
-							<ArrowDown className="h-2.5 w-2.5 text-primary" />
-						)}
-					</span>
-				)}
+				<div className="flex items-center justify-center gap-0.5">
+					<FileText className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'name') ? 'text-primary' : 'text-muted-foreground')} />
+					{sortOptions.some((opt) => opt.field === 'name') && (
+						<div className="flex items-center">
+							{sortOptions.find((opt) => opt.field === 'name')?.direction === 'asc' ? (
+								<ArrowUp className="h-2.5 w-2.5 text-primary" />
+							) : (
+								<ArrowDown className="h-2.5 w-2.5 text-primary" />
+							)}
+						</div>
+					)}
+				</div>
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-7 w-7 hover:bg-accent"
+				className={cn(
+					'h-7 hover:bg-accent',
+					sortOptions.some((opt) => opt.field === 'modifiedAt') ? 'w-10 bg-accent/50' : 'w-7'
+				)}
 				title="Ordenar por fecha de modificación"
 				onClick={() => handleSort('modifiedAt')}
 				data-active={sortOptions.some((opt) => opt.field === 'modifiedAt')}
 			>
-				<Clock className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'modifiedAt') && 'text-primary')} />
-				{sortOptions.some((opt) => opt.field === 'modifiedAt') && (
-					<span className="ml-0.5">
-						{sortOptions.find((opt) => opt.field === 'modifiedAt')?.direction === 'asc' ? (
-							<ArrowUp className="h-2.5 w-2.5 text-primary" />
-						) : (
-							<ArrowDown className="h-2.5 w-2.5 text-primary" />
-						)}
-					</span>
-				)}
+				<div className="flex items-center justify-center gap-0.5">
+					<Clock className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'modifiedAt') ? 'text-primary' : 'text-muted-foreground')} />
+					{sortOptions.some((opt) => opt.field === 'modifiedAt') && (
+						<div className="flex items-center">
+							{sortOptions.find((opt) => opt.field === 'modifiedAt')?.direction === 'asc' ? (
+								<ArrowUp className="h-2.5 w-2.5 text-primary" />
+							) : (
+								<ArrowDown className="h-2.5 w-2.5 text-primary" />
+							)}
+						</div>
+					)}
+				</div>
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-7 w-7 hover:bg-accent"
+				className={cn(
+					'h-7 hover:bg-accent',
+					sortOptions.some((opt) => opt.field === 'createdAt') ? 'w-10 bg-accent/50' : 'w-7'
+				)}
 				title="Ordenar por fecha de creación"
 				onClick={() => handleSort('createdAt')}
 				data-active={sortOptions.some((opt) => opt.field === 'createdAt')}
 			>
-				<Calendar
-					className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'createdAt') && 'text-primary')}
-				/>
-				{sortOptions.some((opt) => opt.field === 'createdAt') && (
-					<span className="ml-0.5">
-						{sortOptions.find((opt) => opt.field === 'createdAt')?.direction === 'asc' ? (
-							<ArrowUp className="h-2.5 w-2.5 text-primary" />
-						) : (
-							<ArrowDown className="h-2.5 w-2.5 text-primary" />
-						)}
-					</span>
-				)}
+				<div className="flex items-center justify-center gap-0.5">
+					<Calendar
+						className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'createdAt') ? 'text-primary' : 'text-muted-foreground')}
+					/>
+					{sortOptions.some((opt) => opt.field === 'createdAt') && (
+						<div className="flex items-center">
+							{sortOptions.find((opt) => opt.field === 'createdAt')?.direction === 'asc' ? (
+								<ArrowUp className="h-2.5 w-2.5 text-primary" />
+							) : (
+								<ArrowDown className="h-2.5 w-2.5 text-primary" />
+							)}
+						</div>
+					)}
+				</div>
 			</Button>
 		</div>
 	);
@@ -401,18 +429,18 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				onClick={() => handleSizeChange(-10)}
-				title="Reducir tamaño"
+				title="Reducir tamaño de miniaturas"
 			>
-				<ArrowDown className="h-3.5 w-3.5" />
+				<ZoomOut className="h-3.5 w-3.5" />
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				onClick={() => handleSizeChange(10)}
-				title="Aumentar tamaño"
+				title="Aumentar tamaño de miniaturas"
 			>
-				<ArrowUp className="h-3.5 w-3.5" />
+				<ZoomIn className="h-3.5 w-3.5" />
 			</Button>
 		</div>
 	);
@@ -466,6 +494,34 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 			case 'folder-content':
 				return (
 					<div className="flex items-center gap-0.5">
+						{/* Botones de escanear y recargar carpeta */}
+						{currentFolderId && onScanFolder && (
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-7 px-2 hover:bg-accent"
+								onClick={onScanFolder}
+								disabled={isRetrying}
+							>
+								<FolderSearch className="h-3.5 w-3.5 mr-1" />
+								<span className="text-xs">{isRetrying ? 'Escaneando...' : 'Escanear'}</span>
+							</Button>
+						)}
+						{currentFolderId && onRefreshFolder && (
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-7 px-2 hover:bg-accent"
+								onClick={onRefreshFolder}
+								disabled={isRetrying}
+							>
+								<RefreshCw className={`h-3.5 w-3.5 mr-1 ${isRetrying ? 'animate-spin' : ''}`} />
+								<span className="text-xs">{isRetrying ? 'Recargando...' : 'Recargar'}</span>
+							</Button>
+						)}
+						{(currentFolderId && (onScanFolder || onRefreshFolder)) && (
+							<Separator orientation="vertical" className="h-4 mx-1" />
+						)}
 						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
 							<Plus className="h-3.5 w-3.5 mr-1" />
 							<span className="text-xs">Nueva carpeta</span>

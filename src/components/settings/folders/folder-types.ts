@@ -133,7 +133,6 @@ export const initialStats: FolderStatistics = {
 	totalAudio: 0,
 	totalDocuments: 0,
 	totalOthers: 0,
-	directoryCount: 0,
 };
 
 export const initialGlobalReindexStatus: GlobalReindexStatus = {

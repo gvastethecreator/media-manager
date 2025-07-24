@@ -71,7 +71,7 @@ export function useFoldersState() {
 				totalOthers: 0,
 				totalSize: totalSize,
 				formattedSize: formatBytes(totalSize),
-				directoryCount: transformedFolders.length,
+				directChildren: transformedFolders.length,
 				lastActivity: new Date(),
 			});
 		} catch (error) {

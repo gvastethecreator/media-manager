@@ -5,7 +5,7 @@
 
 import { useCallback } from 'react';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 /**
  * Hook para manejar la integración del Details Panel con selecciones
@@ -17,7 +17,7 @@ export function useDetailsPanelIntegration() {
 	 * Actualiza los elementos seleccionados en el Details Panel
 	 */
 	const updateSelection = useCallback(
-		(items: EntityWithStats[]) => {
+		(items: AnyEntityWithStats[]) => {
 			setSelectedItems(items);
 
 			// Mostrar el panel automáticamente si hay selección
@@ -39,7 +39,7 @@ export function useDetailsPanelIntegration() {
 	 * Selecciona un solo elemento
 	 */
 	const selectSingle = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			updateSelection([item]);
 		},
 		[updateSelection]
@@ -49,9 +49,9 @@ export function useDetailsPanelIntegration() {
 	 * Añade un elemento a la selección múltiple
 	 */
 	const addToSelection = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			const { selectedItems } = useDetailsPanel.getState();
-			const exists = selectedItems.find((p: EntityWithStats) => p.id === item.id);
+			const exists = selectedItems.find((p: AnyEntityWithStats) => p.id === item.id);
 			if (!exists) {
 				setSelectedItems([...selectedItems, item]);
 			}
@@ -66,7 +66,7 @@ export function useDetailsPanelIntegration() {
 	const removeFromSelection = useCallback(
 		(itemId: string) => {
 			const { selectedItems } = useDetailsPanel.getState();
-			setSelectedItems(selectedItems.filter((p: EntityWithStats) => p.id !== itemId));
+			setSelectedItems(selectedItems.filter((p: AnyEntityWithStats) => p.id !== itemId));
 		},
 		[setSelectedItems]
 	);
@@ -75,9 +75,9 @@ export function useDetailsPanelIntegration() {
 	 * Toggle de selección para un elemento
 	 */
 	const toggleSelection = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			const { selectedItems } = useDetailsPanel.getState();
-			const exists = selectedItems.find((p: EntityWithStats) => p.id === item.id);
+			const exists = selectedItems.find((p: AnyEntityWithStats) => p.id === item.id);
 			if (exists) {
 				setSelectedItems(selectedItems.filter((p) => p.id !== item.id));
 			} else {
@@ -181,7 +181,7 @@ export function useEntityActions() {
  * Props para componentes que necesitan integración con Details Panel
  */
 export interface DetailsPanelIntegrationProps {
-	onSelectionChange?: (items: EntityWithStats[]) => void;
+	onSelectionChange?: (items: AnyEntityWithStats[]) => void;
 	onEntityAction?: (action: string, data?: any) => void;
 }
 

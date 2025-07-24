@@ -1,57 +1,8 @@
 /**
- * @file Enumeraciones y constantes para la entidad Collection
+ * @file Enumeraciones para la entidad Collection
  * @module types/entities/collection/enums
  */
 
-/**
- * Categorías predefinidas para las colecciones
- */
-export enum CollectionCategory {
-	ART = 'art',
-	PHOTOGRAPHY = 'photography',
-	DIGITAL = 'digital',
-	NFT = 'nft',
-	GAME = 'game',
-	MERCHANDISE = 'merchandise',
-	COMIC = 'comic',
-	ANIME = 'anime',
-	MOVIE = 'movie',
-	MUSIC = 'music',
-	OTHER = 'other',
-}
-
-/**
- * Rareza predefinida para las colecciones
- */
-export enum CollectionRarity {
-	COMMON = 'common',
-	UNCOMMON = 'uncommon',
-	RARE = 'rare',
-	EPIC = 'epic',
-	LEGENDARY = 'legendary',
-	MYTHIC = 'mythic',
-	UNIQUE = 'unique',
-}
-
-/**
- * Plataformas predefinidas para colecciones
- */
-export enum CollectionPlatform {
-	OPENSEA = 'opensea',
-	RARIBLE = 'rarible',
-	SUPER_RARE = 'superrare',
-	FOUNDATION = 'foundation',
-	MINTABLE = 'mintable',
-	BINANCE = 'binance',
-	EBAY = 'ebay',
-	AMAZON = 'amazon',
-	CUSTOM = 'custom',
-	OTHER = 'other',
-}
-
-/**
- * Opciones para ordenar colecciones
- */
 export enum CollectionSortOption {
 	NAME_ASC = 'name_asc',
 	NAME_DESC = 'name_desc',
@@ -63,36 +14,60 @@ export enum CollectionSortOption {
 	PRICE_DESC = 'price_desc',
 }
 
-/**
- * Mapa de colores sugeridos por categoría
- */
+export enum CollectionViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	CARDS = 'cards',
+}
+
+export enum CollectionCategory {
+	ART = 'art',
+	PHOTOGRAPHY = 'photography',
+	DIGITAL = 'digital',
+	NFT = 'nft',
+	PERSONAL = 'personal',
+	WORK = 'work',
+	PROJECT = 'project',
+	OTHER = 'other',
+}
+
+export enum CollectionPlatform {
+	OPENSEA = 'opensea',
+	RARIBLE = 'rarible',
+	FOUNDATION = 'foundation',
+	SUPERRARE = 'superrare',
+	ASYNC = 'async',
+	MAKERSPLACE = 'makersplace',
+	KNOWN_ORIGIN = 'known_origin',
+	OTHER = 'other',
+}
+
+export enum CollectionRarity {
+	COMMON = 'common',
+	UNCOMMON = 'uncommon',
+	RARE = 'rare',
+	EPIC = 'epic',
+	LEGENDARY = 'legendary',
+}
+
 export const COLLECTION_CATEGORY_COLORS: Record<CollectionCategory, string> = {
-	[CollectionCategory.ART]: '#F59E0B',
-	[CollectionCategory.PHOTOGRAPHY]: '#10B981',
-	[CollectionCategory.DIGITAL]: '#3B82F6',
-	[CollectionCategory.NFT]: '#8B5CF6',
-	[CollectionCategory.GAME]: '#EC4899',
-	[CollectionCategory.MERCHANDISE]: '#F97316',
-	[CollectionCategory.COMIC]: '#EF4444',
-	[CollectionCategory.ANIME]: '#6366F1',
-	[CollectionCategory.MOVIE]: '#0EA5E9',
-	[CollectionCategory.MUSIC]: '#14B8A6',
-	[CollectionCategory.OTHER]: '#6B7280',
+	[CollectionCategory.ART]: '#f59e0b',
+	[CollectionCategory.PHOTOGRAPHY]: '#10b981',
+	[CollectionCategory.DIGITAL]: '#3b82f6',
+	[CollectionCategory.NFT]: '#8b5cf6',
+	[CollectionCategory.PERSONAL]: '#ef4444',
+	[CollectionCategory.WORK]: '#6b7280',
+	[CollectionCategory.PROJECT]: '#06b6d4',
+	[CollectionCategory.OTHER]: '#9ca3af',
 };
 
-/**
- * Mapa de emojis sugeridos por categoría
- */
 export const COLLECTION_CATEGORY_EMOJIS: Record<CollectionCategory, string> = {
 	[CollectionCategory.ART]: '🎨',
-	[CollectionCategory.PHOTOGRAPHY]: '📷',
+	[CollectionCategory.PHOTOGRAPHY]: '📸',
 	[CollectionCategory.DIGITAL]: '💻',
-	[CollectionCategory.NFT]: '🔮',
-	[CollectionCategory.GAME]: '🎮',
-	[CollectionCategory.MERCHANDISE]: '🛍️',
-	[CollectionCategory.COMIC]: '📚',
-	[CollectionCategory.ANIME]: '🌟',
-	[CollectionCategory.MOVIE]: '🎬',
-	[CollectionCategory.MUSIC]: '🎵',
-	[CollectionCategory.OTHER]: '🌈',
+	[CollectionCategory.NFT]: '🖼️',
+	[CollectionCategory.PERSONAL]: '👤',
+	[CollectionCategory.WORK]: '💼',
+	[CollectionCategory.PROJECT]: '📋',
+	[CollectionCategory.OTHER]: '📚',
 };

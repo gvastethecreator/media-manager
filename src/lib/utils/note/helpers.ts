@@ -17,7 +17,7 @@ export function filterNotes(notes: NoteWithStats[], filters: NoteFilters): NoteW
 			const searchQuery = filters.searchQuery.toLowerCase();
 			const matchesTitle = note.title.toLowerCase().includes(searchQuery);
 			const matchesContent = note.content.toLowerCase().includes(searchQuery);
-			const matchesExcerpt = note.excerpt.toLowerCase().includes(searchQuery);
+			const matchesExcerpt = note.summary?.toLowerCase().includes(searchQuery) ?? false;
 
 			if (!matchesTitle && !matchesContent && !matchesExcerpt) {
 				return false;
@@ -50,17 +50,17 @@ export function filterNotes(notes: NoteWithStats[], filters: NoteFilters): NoteW
 		}
 
 		// Filtro por notas con tags
-		if (filters.hasTags && note.statistics.totalTags === 0) {
+		if (filters.hasTags && note.stats.tagCount === 0) {
 			return false;
 		}
 
 		// Filtro por notas con imágenes
-		if (filters.hasImages && note.statistics.totalImages === 0) {
+		if (filters.hasImages && note.stats.imageCount === 0) {
 			return false;
 		}
 
 		// Filtro por notas con videos
-		if (filters.hasVideos && note.statistics.totalVideos === 0) {
+		if (filters.hasVideos && note.stats.videoCount === 0) {
 			return false;
 		}
 
@@ -121,18 +121,15 @@ export function groupNotes(
  */
 export function getNoteStats(note: NoteWithStats) {
 	return {
-		totalRelations: note.statistics.totalItems,
-		wordCount: note.statistics.wordCount,
-		characterCount: note.statistics.characterCount,
-		readingTime: note.statistics.readingTime,
-		completionScore: note.statistics.completionScore,
-		hasMedia: note.statistics.totalImages > 0 || note.statistics.totalVideos > 0,
-		hasRelations: note.statistics.totalItems > 0,
+		totalRelations: note.stats.totalItems,
+		wordCount: note.stats.wordCount,
+		characterCount: note.stats.characterCount,
+		readingTime: note.stats.readingTime,
+		completionScore: note.stats.completionScore,
+		hasMedia: note.stats.imageCount > 0 || note.stats.videoCount > 0,
+		hasRelations: note.stats.totalItems > 0,
 		isFavorite: note.isFavorite,
-		priorityLabel: note.priorityLabel,
-		statusLabel: note.statusLabel,
-		categoryLabel: note.categoryLabel,
-		lastUpdated: note.statistics.lastUpdated,
+		lastUpdated: note.updatedAt,
 	};
 }
 
@@ -145,25 +142,11 @@ export function searchNotes(notes: NoteWithStats[], searchTerm: string): NoteWit
 	const term = searchTerm.toLowerCase();
 
 	return notes.filter((note) => {
-		// Búsqueda en campos principales
-		const matchesTitle = note.title.toLowerCase().includes(term);
-		const matchesContent = note.content.toLowerCase().includes(term);
-		const matchesExcerpt = note.excerpt.toLowerCase().includes(term);
-		const matchesCategory = note.category.toLowerCase().includes(term);
-
-		// Búsqueda en etiquetas derivadas
-		const matchesPriorityLabel = note.priorityLabel.toLowerCase().includes(term);
-		const matchesStatusLabel = note.statusLabel.toLowerCase().includes(term);
-		const matchesCategoryLabel = note.categoryLabel.toLowerCase().includes(term);
-
 		return (
 			matchesTitle ||
 			matchesContent ||
-			matchesExcerpt ||
-			matchesCategory ||
-			matchesPriorityLabel ||
-			matchesStatusLabel ||
-			matchesCategoryLabel
+			matchesSummary ||
+			matchesCategory
 		);
 	});
 }
@@ -191,11 +174,11 @@ export function getNotesAggregateStats(notes: NoteWithStats[]) {
 
 	const stats = notes.reduce(
 		(acc, note) => {
-			acc.totalWords += note.statistics.wordCount;
-			acc.totalCharacters += note.statistics.characterCount;
-			acc.totalReadingTime += note.statistics.readingTime;
-			acc.totalCompletionScore += note.statistics.completionScore;
-			acc.totalRelations += note.statistics.totalItems;
+			acc.totalWords += note.stats.wordCount;
+			acc.totalCharacters += note.stats.characterCount;
+			acc.totalReadingTime += note.stats.readingTime;
+			acc.totalCompletionScore += note.stats.completionScore;
+			acc.totalRelations += note.stats.totalItems;
 
 			if (note.isFavorite) acc.favoriteCount++;
 
@@ -248,7 +231,7 @@ export function compareNotes(noteA: NoteWithStats, noteB: NoteWithStats) {
 		priorityChanged: noteA.priority !== noteB.priority,
 		statusChanged: noteA.status !== noteB.status,
 		favoriteChanged: noteA.isFavorite !== noteB.isFavorite,
-		relationsChanged: noteA.statistics.totalItems !== noteB.statistics.totalItems,
+		relationsChanged: noteA.stats.totalItems !== noteB.stats.totalItems,
 		hasSignificantChanges: function () {
 			return (
 				this.titleChanged ||
