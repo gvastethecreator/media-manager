@@ -195,10 +195,11 @@ export class ActivityServiceImpl implements ActivityService {
 				.select({
 					id: activities.id,
 					type: activities.type,
+					entityType: activities.entityType,
+					entityId: activities.entityId,
 					description: activities.description,
 					metadata: activities.metadata,
 					createdAt: activities.createdAt,
-					imageId: activities.imageId,
 					image: {
 						id: images.id,
 						name: images.name,
@@ -206,7 +207,10 @@ export class ActivityServiceImpl implements ActivityService {
 					},
 				})
 				.from(activities)
-				.leftJoin(images, eq(activities.imageId, images.id))
+				.leftJoin(images, and(
+					eq(activities.entityId, images.id),
+					eq(activities.entityType, 'image')
+				))
 				.where(whereConditions)
 				.orderBy(desc(activities.createdAt))
 				.limit(limit)
@@ -274,8 +278,9 @@ export class ActivityServiceImpl implements ActivityService {
 		return {
 			id: drizzleActivity.id,
 			type: drizzleActivity.type,
+			entityType: drizzleActivity.entityType,
+			entityId: drizzleActivity.entityId,
 			description: drizzleActivity.description,
-			imageId: drizzleActivity.imageId,
 			createdAt: drizzleActivity.createdAt,
 			image: drizzleActivity.image,
 			// Podríamos añadir más campos UI aquí basados en el tipo de actividad

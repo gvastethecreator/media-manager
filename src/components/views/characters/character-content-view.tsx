@@ -11,8 +11,8 @@ import type { EntityWithStats } from '@/types/entities/entity.types';
 const viewLogger = clientLogger.withContext('CharacterContentView');
 
 export const CharacterContentView = memo(function CharacterContentView() {
-	const { selectedCharacterId, getSelectedCharacter } = useCharacterStore();
-	const currentCharacter = getSelectedCharacter();
+	const { selectedCharacterId, getCharacterById } = useCharacterStore();
+	const currentCharacter = selectedCharacterId ? getCharacterById(selectedCharacterId) : null;
 
 	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +24,7 @@ export const CharacterContentView = memo(function CharacterContentView() {
 		data: characterImages,
 		isLoading: isLoadingImages,
 		error: characterError,
-	} = useCharacterImages(currentCharacterId);
+	} = useCharacterImages(currentCharacterId || '');
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticItems, _addEvent] = clientEvents.useEvents<EntityWithStats[]>(items);
@@ -62,17 +62,17 @@ export const CharacterContentView = memo(function CharacterContentView() {
 		() =>
 			!selectedCharacterId
 				? {
-						icon: Users,
-						title: 'No hay personaje seleccionado',
-						description: 'Selecciona un personaje para ver su contenido.',
-					}
+					icon: Users,
+					title: 'No hay personaje seleccionado',
+					description: 'Selecciona un personaje para ver su contenido.',
+				}
 				: {
-						icon: Users,
-						title: 'Personaje sin imágenes',
-						description: currentCharacter
-							? `${currentCharacter.name} no tiene imágenes asociadas.`
-							: 'Este personaje no tiene imágenes asociadas.',
-					},
+					icon: Users,
+					title: 'Personaje sin imágenes',
+					description: currentCharacter
+						? `${currentCharacter.name} no tiene imágenes asociadas.`
+						: 'Este personaje no tiene imágenes asociadas.',
+				},
 		[selectedCharacterId, currentCharacter]
 	);
 
@@ -105,7 +105,9 @@ export const CharacterContentView = memo(function CharacterContentView() {
 
 	return (
 		<ContentViewProvider {...contentProps}>
-			<BaseContentView />
+			<BaseContentView>
+				{/* Character content will be added here */}
+			</BaseContentView>
 		</ContentViewProvider>
 	);
 });

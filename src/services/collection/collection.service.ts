@@ -129,10 +129,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 			conditions.push(eq(collections.isFavorite, options.filters.isFavorite ? 1 : 0));
 		}
 
-		if (options.filters?.category && options.filters.category.length > 0) {
-			const categoryConditions = options.filters.category.map((cat) => eq(collections.category, cat));
-			conditions.push(or(...categoryConditions));
-		}
+		// Nota: La tabla collections no tiene campo category, se omite este filtro
 
 		// Construir query
 		let query = db
@@ -216,23 +213,15 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 				emoji: collections.emoji,
 				color: collections.color,
 				description: collections.description,
-				shortcut: collections.shortcut,
-				category: collections.category,
-				sortBy: collections.sortBy,
-				filters: collections.filters,
-				url: collections.url,
-				alternativeUrl: collections.alternativeUrl,
-				sourceImage: collections.sourceImage,
-				platform: collections.platform,
-				price: collections.price,
-				network: collections.network,
-				tokenId: collections.tokenId,
-				tokenAddress: collections.tokenAddress,
-				contractAddress: collections.contractAddress,
-				contractType: collections.contractType,
-				editions: collections.editions,
 				featuredImage: collections.featuredImage,
+				isPublic: collections.isPublic,
 				isFavorite: collections.isFavorite,
+				totalImages: collections.totalImages,
+				totalVideos: collections.totalVideos,
+				totalSize: collections.totalSize,
+				lastImageAddedAt: collections.lastImageAddedAt,
+				lastVideoAddedAt: collections.lastVideoAddedAt,
+				parentId: collections.parentId,
 				createdAt: collections.createdAt,
 				updatedAt: collections.updatedAt,
 			})
@@ -288,23 +277,15 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 				emoji: collections.emoji,
 				color: collections.color,
 				description: collections.description,
-				shortcut: collections.shortcut,
-				category: collections.category,
-				sortBy: collections.sortBy,
-				filters: collections.filters,
-				url: collections.url,
-				alternativeUrl: collections.alternativeUrl,
-				sourceImage: collections.sourceImage,
-				platform: collections.platform,
-				price: collections.price,
-				network: collections.network,
-				tokenId: collections.tokenId,
-				tokenAddress: collections.tokenAddress,
-				contractAddress: collections.contractAddress,
-				contractType: collections.contractType,
-				editions: collections.editions,
 				featuredImage: collections.featuredImage,
+				isPublic: collections.isPublic,
 				isFavorite: collections.isFavorite,
+				totalImages: collections.totalImages,
+				totalVideos: collections.totalVideos,
+				totalSize: collections.totalSize,
+				lastImageAddedAt: collections.lastImageAddedAt,
+				lastVideoAddedAt: collections.lastVideoAddedAt,
+				parentId: collections.parentId,
 				createdAt: collections.createdAt,
 				updatedAt: collections.updatedAt,
 			})

@@ -2,7 +2,7 @@ import { Library } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
-import { useCollectionImages, useRemoveImageFromCollection } from '@/lib/api/collections';
+import { useCollectionImages, useRemoveImageFromCollection, useAddImageToCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { EntityWithStats } from '@/types/entities/entity.types';
@@ -10,8 +10,7 @@ import type { EntityWithStats } from '@/types/entities/entity.types';
 const logger = clientLogger.withContext('CollectionContentView');
 
 export function CollectionContentView() {
-	const { selectedCollectionId, getSelectedCollection, addImageToCollection, selectCollection, isLoading } =
-		useCollectionStore();
+	const { selectedCollectionId, getSelectedCollection, selectCollection, isLoading } = useCollectionStore();
 
 	const currentCollection = getSelectedCollection();
 
@@ -24,9 +23,10 @@ export function CollectionContentView() {
 		isLoading: isLoadingImages,
 		error: collectionError,
 		refetch: refetchCollectionImages,
-	} = useCollectionImages(selectedCollectionId);
+	} = useCollectionImages(selectedCollectionId || '');
 
 	const removeImageMutation = useRemoveImageFromCollection();
+	const addImageMutation = useAddImageToCollection();
 
 	useEffect(() => {
 		if (!selectedCollectionId) {
@@ -72,7 +72,7 @@ export function CollectionContentView() {
 				if (isSelected) {
 					await removeImageMutation.mutateAsync({ collectionId: selectedCollectionId, imageId: item.id });
 				} else {
-					await addImageToCollection(selectedCollectionId, item.id);
+					await addImageMutation.mutateAsync({ collectionId: selectedCollectionId, imageId: item.id });
 				}
 
 				// Recargar imágenes después de la operación
@@ -83,7 +83,7 @@ export function CollectionContentView() {
 				setError('Error al modificar la colección');
 			}
 		},
-		[selectedCollectionId, collectionImages, addImageToCollection, removeImageMutation, refetchCollectionImages]
+		[selectedCollectionId, collectionImages, addImageMutation, removeImageMutation, refetchCollectionImages]
 	);
 
 	const contentProps: CollectionContentProps = {
@@ -94,7 +94,7 @@ export function CollectionContentView() {
 		currentContainerId: selectedCollectionId,
 		containerName: currentCollection?.name ?? null,
 		setCurrentContainer: useCallback(
-			(id: string) => {
+			async (id: string) => {
 				logger.info(`🔄 Cambiando a colección: ${id}`);
 				selectCollection(id);
 			},
@@ -127,7 +127,12 @@ export function CollectionContentView() {
 
 	return (
 		<ContentViewProvider {...contentProps}>
-			<BaseContentView />
+			<BaseContentView>
+				{/* Collection content will be added here */}
+				<div className="p-4">
+					<p>Contenido de la colección se mostrará aquí</p>
+				</div>
+			</BaseContentView>
 		</ContentViewProvider>
 	);
 }

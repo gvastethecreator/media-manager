@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreatePrompt, useUpdatePrompt } from '@/lib/api/prompts';
 import { toastService } from '@/lib/ui/toast';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
-import type { PromptBase, PromptCreateInput, PromptUpdateInput } from '@/types/entities/prompt/base';
+import type { PromptBase } from '@/types/entities/prompt/base';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Función para formatear los nombres de modelos para mostrar
@@ -30,7 +30,7 @@ const promptSchema = z.object({
 	category: z.nativeEnum(PromptCategory).optional(),
 	model: z.nativeEnum(PromptModel).optional(),
 	parameters: z.string().optional(),
-	isFavorite: z.boolean(),
+	isFavorite: z.boolean().optional(),
 });
 
 type PromptForm = z.infer<typeof promptSchema>;
@@ -199,10 +199,10 @@ export function CreatePromptForm({
 				try {
 					if (isEditing && prompt) {
 						const updated = await updatePromptMutation.mutateAsync({ id: prompt.id, data });
-					onUpdated?.(updated as PromptBase);
+						onUpdated?.(updated as PromptBase);
 					} else {
 						const created = await createPromptMutation.mutateAsync(data);
-					onCreated?.(created as PromptBase);
+						onCreated?.(created as PromptBase);
 					}
 				} catch (error) {
 					console.error('Error al procesar el prompt:', error);

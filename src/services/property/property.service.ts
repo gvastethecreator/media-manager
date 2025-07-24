@@ -348,12 +348,11 @@ export async function updateProperty(id: string, data: PropertyUpdateInput): Pro
 
 		if (data.name !== undefined) updateData.name = data.name;
 		if (data.description !== undefined) updateData.description = data.description;
-		if (data.value !== undefined) updateData.value = data.value;
-		if (data.type !== undefined) updateData.type = data.type;
-		if (data.unit !== undefined) updateData.unit = data.unit;
+		if (data.emoji !== undefined) updateData.emoji = data.emoji;
+		if (data.color !== undefined) updateData.color = data.color;
 		if (data.category !== undefined) updateData.category = data.category;
-		if (data.isRequired !== undefined) updateData.isRequired = data.isRequired;
-		if (data.isPrivate !== undefined) updateData.isPrivate = data.isPrivate;
+		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
 		const [updatedProperty] = await db.update(properties).set(updateData).where(eq(properties.id, id)).returning();

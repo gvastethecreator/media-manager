@@ -28,7 +28,7 @@ export const createTagSchema = z.object({
 	category: z.nativeEnum(TagCategory).nullable().optional(),
 	rarity: z.nativeEnum(TagRarity).nullable().optional(),
 	texture: z.string().nullable().optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean().optional(),
 });
 
 /**

@@ -266,7 +266,6 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 				description: data.description || null,
 				color: data.color || '#3b82f6',
 				emoji: data.emoji || '🏷️',
-				category: data.category || null,
 				isFavorite: data.isFavorite || false,
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -345,7 +344,6 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 		if (data.description !== undefined) updateData.description = data.description;
 		if (data.color !== undefined) updateData.color = data.color;
 		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.category !== undefined) updateData.category = data.category;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
 		const result = await db.update(tags).set(updateData).where(eq(tags.id, id)).returning();

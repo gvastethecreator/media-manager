@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -48,7 +48,6 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 				description: albums.description,
 				shortcut: albums.shortcut,
 				category: albums.category,
-				sortBy: albums.sortBy,
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,
@@ -126,7 +125,6 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 				description: albums.description,
 				shortcut: albums.shortcut,
 				category: albums.category,
-				sortBy: albums.sortBy,
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,

@@ -1,3 +1,5 @@
+import { AudioView } from './audio-view';
+
 export { default as AudioContentView } from './audio-content-view';
 export { AudioView } from './audio-view';
 

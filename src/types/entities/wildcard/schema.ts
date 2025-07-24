@@ -57,7 +57,7 @@ export const WildcardSchema = z.object({
 	category: z.string().nullable().optional(),
 	children: z.string().default('[]'), // JSON string de hijos
 	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean(),
 	parentId: z.string().nullable().optional(),
 	createdAt: z.date().optional(),
 	updatedAt: z.date().optional(),

@@ -91,22 +91,25 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 				// Abrir visor de imágenes
 				const imageItems = (sortedImages || [])
 					.filter((img: EntityWithStats) => isImageWithStats(img))
-					.map((img: EntityWithStats) => ({
-						id: img.id,
-						name: img.name || '',
-						src: img.thumbnailUrl || `/api/images/${img.id}/content`,
-						alt: img.name || '',
-						width: 'width' in img ? img.width : 0,
-						height: 'height' in img ? img.height : 0,
-						thumbnail: img.thumbnailUrl || null,
-						type: 'image',
-						path: img.path || '',
-						size: 'size' in img ? img.size : 0,
-						mimeType: 'mimeType' in img ? img.mimeType : '',
-						metadata: null,
-						url: img.thumbnailUrl || `/api/images/${img.id}/content`,
-						parsedMetadata: undefined,
-					}));
+					.map((img: EntityWithStats) => {
+						const imageData = img as ImageWithStats;
+						return {
+							id: imageData.id,
+							name: imageData.name || '',
+							src: `/api/images/${imageData.id}/content`,
+							alt: imageData.name || '',
+							width: imageData.width || 0,
+							height: imageData.height || 0,
+							thumbnail: `/api/images/${imageData.id}/thumbnail`,
+							type: 'image',
+							path: imageData.path || '',
+							size: imageData.size || 0,
+							mimeType: imageData.mimeType || '',
+							metadata: null,
+							url: `/api/images/${imageData.id}/content`,
+							parsedMetadata: undefined,
+						};
+					});
 
 				const currentIndex = imageItems.findIndex((img: any) => img.id === image.id);
 				openViewer(imageItems, currentIndex);
