@@ -25,35 +25,58 @@ interface PromptWithNullable {
 	id: string;
 	name: string;
 	emoji: string | null;
-	color: string;
+	color: string | null;
 	description: string | null;
-	content: string;
+	content: string | null;
 	category: string | null;
-	parameters: string;
-	tags: string;
+	parameters: string | null;
+	tags: string | null;
 	featuredImage: string | null;
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 	presetId: string | null;
+	// Propiedades adicionales requeridas
+	isPublic: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	style: string | null;
+	mood: string | null;
+	lighting: string | null;
+	composition: string | null;
+	technique: string | null;
+	inspiration: string | null;
+	notes: string | null;
+	parentId: string | null;
 }
 
 // Interfaz para el tipo que espera el componente CreatePromptForm
 interface CreatePromptFormPrompt {
 	id: string;
 	name: string;
-	emoji: string;
-	color: string;
 	description: string | null;
-	content: string;
-	category: string;
-	parameters: string;
-	tags: string;
-	featuredImage: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	isPublic: boolean;
 	isFavorite: boolean;
+	totalImages: number;
+	totalVideos: number;
+	type: string | null;
+	content: string | null;
+	parameters: string | null;
+	style: string | null;
+	mood: string | null;
+	lighting: string | null;
+	composition: string | null;
+	technique: string | null;
+	inspiration: string | null;
+	notes: string | null;
+	featuredImage: string | null;
+	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-	presetId: string | null;
 }
 
 export const PromptSettings = () => {
@@ -69,12 +92,29 @@ export const PromptSettings = () => {
 
 	// Convertir los datos para que coincidan con nuestra interfaz usando useMemo
 	const prompts = useMemo(() => {
-		return promptsData.map((prompt) => ({
+		if (!Array.isArray(promptsData)) {
+			return [];
+		}
+		return promptsData.map((prompt: any) => ({
 			...prompt,
 			emoji: prompt.emoji || null,
 			description: prompt.description || null,
 			category: prompt.category || null,
 			isFavorite: prompt.isFavorite || false,
+			isPublic: prompt.isPublic || false,
+			totalImages: prompt.totalImages || 0,
+			totalVideos: prompt.totalVideos || 0,
+			type: prompt.type || null,
+			content: prompt.content || null,
+			parameters: prompt.parameters || null,
+			style: prompt.style || null,
+			mood: prompt.mood || null,
+			lighting: prompt.lighting || null,
+			composition: prompt.composition || null,
+			technique: prompt.technique || null,
+			inspiration: prompt.inspiration || null,
+			notes: prompt.notes || null,
+			parentId: prompt.parentId || null,
 		})) as PromptWithNullable[];
 	}, [promptsData]);
 
@@ -108,6 +148,20 @@ export const PromptSettings = () => {
 			...prompt,
 			emoji: prompt.emoji || '📝',
 			category: prompt.category || '',
+			isPublic: prompt.isPublic || false,
+			totalImages: prompt.totalImages || 0,
+			totalVideos: prompt.totalVideos || 0,
+			type: prompt.type || null,
+			content: prompt.content || null,
+			parameters: prompt.parameters || null,
+			style: prompt.style || null,
+			mood: prompt.mood || null,
+			lighting: prompt.lighting || null,
+			composition: prompt.composition || null,
+			technique: prompt.technique || null,
+			inspiration: prompt.inspiration || null,
+			notes: prompt.notes || null,
+			parentId: prompt.parentId || null,
 		});
 		setShowCreateDialog(true);
 	};

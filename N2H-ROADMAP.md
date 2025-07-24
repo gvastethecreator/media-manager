@@ -10,6 +10,15 @@ No debemos abordar estas tareas hasta que el sistema se encuentre en un estado e
 
 ---
 
+# Nuevas entidades
+
+- proyectos : para agrupar proyectos grandes, con información mas especifica.
+- tareas : para proyectos, tareas que se pueden asignar a personajes, o que pueden tener un estado de avance.
+- eventos : para eventos que pueden ser relacionados con personajes, lugares, etc.
+
+
+
+
 ## 🎯 Features Prioritarias
 
 ### 1. Vista de Relaciones entre Entidades

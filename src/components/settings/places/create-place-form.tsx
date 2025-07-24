@@ -40,6 +40,8 @@ const placeFormSchema = z
 		population: z.string().default('').catch(''),
 		government: z.string().default('unknown').catch('unknown'),
 		history: z.string().default('').catch(''),
+		lore: z.string().default('').catch(''),
+		shortcut: z.string().default('').catch(''),
 		isFavorite: z.boolean().default(false),
 		featuredImage: z.string().default('').catch(''),
 	})
@@ -94,6 +96,8 @@ export function CreatePlaceForm({
 				population: place.population ?? '',
 				government: place.government ?? 'unknown',
 				history: place.history ?? '',
+				lore: place.lore ?? '',
+				shortcut: place.shortcut ?? '',
 				isFavorite: !!place.isFavorite,
 				featuredImage: place.featuredImage ?? '',
 			});
@@ -107,38 +111,54 @@ export function CreatePlaceForm({
 		try {
 			let result: PlaceBase;
 			if (isEditing && place) {
-				const updateData: PlaceUpdateInput = {
-					name: values.name,
-					description: normalize(values.description),
-					emoji: values.emoji,
-					color: values.color,
-					category: normalize(values.category),
-					type: normalize(values.type),
-					climate: normalize(values.climate),
-					population: values.population,
-					government: normalize(values.government),
-					history: normalize(values.history),
-					isFavorite: !!values.isFavorite,
-					featuredImage: normalize(values.featuredImage),
-				};
-				result = await updatePlaceMutation.mutateAsync({ id: place.id, data: updateData });
-				toastService.success(`Lugar actualizado: ${result.name}`);
-				onUpdated?.(result as PlaceWithStats);
-			} else {
-				const createData: PlaceCreateInput = {
-					name: values.name,
-					description: normalize(values.description),
-					emoji: values.emoji,
-					color: values.color,
-					category: normalize(values.category),
-					type: normalize(values.type),
-					climate: normalize(values.climate),
-					population: values.population,
-					government: normalize(values.government),
-					history: normalize(values.history),
-					featuredImage: normalize(values.featuredImage),
-					isFavorite: !!values.isFavorite,
-				};
+			const updateData: PlaceUpdateInput = {
+				name: values.name,
+				description: normalize(values.description),
+				emoji: values.emoji,
+				color: values.color,
+				category: normalize(values.category),
+				type: normalize(values.type),
+				climate: normalize(values.climate),
+				population: values.population,
+				government: normalize(values.government),
+				history: normalize(values.history),
+				lore: normalize(values.lore),
+				shortcut: normalize(values.shortcut),
+				isFavorite: !!values.isFavorite,
+				featuredImage: normalize(values.featuredImage),
+			};
+			result = await updatePlaceMutation.mutateAsync({ id: place.id, data: updateData });
+			toastService.success(`Lugar actualizado: ${result.name}`);
+			onUpdated?.(result as PlaceWithStats);
+		} else {
+			const createData: PlaceCreateInput = {
+				name: values.name,
+				description: normalize(values.description),
+				emoji: values.emoji,
+				color: values.color,
+				category: normalize(values.category),
+				type: normalize(values.type),
+				climate: normalize(values.climate),
+				population: values.population,
+				government: normalize(values.government),
+				history: normalize(values.history),
+				lore: normalize(values.lore),
+				shortcut: normalize(values.shortcut),
+				featuredImage: normalize(values.featuredImage),
+				isFavorite: !!values.isFavorite,
+				isPublic: false,
+				totalImages: 0,
+				totalVideos: 0,
+				location: null,
+				economy: null,
+				culture: null,
+				geography: null,
+				landmarks: null,
+				dangers: null,
+				resources: null,
+				notes: null,
+				parentId: null,
+			};
 				result = await createPlaceMutation.mutateAsync(createData);
 				toastService.success(`Lugar creado: ${result.name}`);
 				form.reset();

@@ -6,6 +6,9 @@
 
 import type { PropertyBase, PropertyStatistics, PropertyWithStats } from './base';
 
+// Re-exportar tipos principales
+export type { PropertyBase, PropertyStatistics, PropertyWithStats };
+
 // Alias para compatibilidad
 export type PropertyComplete = PropertyWithStats;
 export type PropertyPreview = Omit<PropertyBase, 'createdAt' | 'updatedAt'>;

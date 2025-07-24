@@ -109,7 +109,6 @@ export function CreatePropertyForm({
 
 			<DynamicCreateForm
 				optionalFields={optionalFields}
-				form={form}
 				onSubmit={handleSubmit}
 				submitLabel={isEditing ? 'Guardar cambios' : 'Crear propiedad'}
 			/>

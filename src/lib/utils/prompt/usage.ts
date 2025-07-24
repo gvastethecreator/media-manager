@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptExecutionResult } from '@/types/entities/prompt';
+import type { PromptBase, PromptExecutionResult } from '@/types/entities/prompt/types';
 import { PromptModel } from '@/types/entities/prompt/enums';
 
 const usageLogger = serverLogger.withContext('PromptUsage');

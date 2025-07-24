@@ -14,29 +14,30 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
 import { toastService } from '@/lib/ui/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
-import type { NoteCreateInput, NoteBase, NoteUpdateInput } from '@/types/entities/note/types';
+import type { NoteCreateInput, NoteBase, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
 
 // Esquema de validación con Zod, alineado con los tipos canónicos
 const noteSchema = z.object({
-	title: z.string().min(1, 'El título es requerido').max(100, 'El título es demasiado largo'),
+	title: z.string().min(1, 'El título es requerido'),
 	summary: z.string().optional(),
 	content: z.string().optional(),
 	color: z.string().optional(),
 	emoji: z.string().optional(),
 	category: z.nativeEnum(NoteCategory).optional(),
-	tags: z.array(z.string()).default([]), // Siempre array de strings
-	isFavorite: z.boolean().default(false),
+	tags: z.array(z.string()),
+	isFavorite: z.boolean(),
 });
 
 // El tipo del formulario se infiere del esquema
 type NoteFormData = z.infer<typeof noteSchema>;
 
 interface CreateNoteFormProps {
-	note?: NoteBase;
+	note?: NoteBase | null;
 	isEditing?: boolean;
-	onSuccess?: (note: NoteBase) => void;
+	onSuccess?: (note: NoteWithStats) => void;
+	onUpdated?: (note: NoteWithStats) => void;
 	onCancel?: () => void;
-	onPreview?: () => void;
+	onPreview?: (data: any) => void;
 }
 
 export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, onPreview }: CreateNoteFormProps) {
@@ -61,17 +62,21 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 	useEffect(() => {
 		if (note && isEditing) {
 			form.reset({
-				...note,
+				title: note.title,
 				summary: note.summary || '',
 				content: note.content || '',
+				color: note.color || '#3b82f6',
+				emoji: note.emoji || '📝',
+				category: note.category as NoteCategory,
 				tags: Array.isArray(note.tags) ? note.tags : [],
+				isFavorite: note.isFavorite || false,
 			});
 		}
 	}, [note, isEditing, form]);
 
 	const onSubmit = async (data: NoteFormData) => {
 		try {
-			let result: NoteBase;
+			let result: NoteWithStats;
 			if (isEditing && note?.id) {
 				const updateData: NoteUpdateInput = { ...data };
 				result = await updateNoteMutation.mutateAsync({ id: note.id, data: updateData });

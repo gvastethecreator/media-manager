@@ -6,7 +6,7 @@ import {
 	incrementImageDownloadInApi,
 	incrementImageViewInApi,
 } from '@/lib/api/client/stats.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { GeneralStats } from '@/types/stats';
 
 // Tipo local para ImageStats (equivalente a Drizzle)

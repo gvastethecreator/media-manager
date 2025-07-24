@@ -141,6 +141,7 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 		const result = {
 			...baseData,
 			// Validación null-safe para evitar errores
+			description: baseData.description != null ? baseData.description : null,
 			skills: baseData.skills != null ? baseData.skills : null,
 			relationships: baseData.relationships != null ? baseData.relationships : null,
 			personality: baseData.personality != null ? baseData.personality : null,

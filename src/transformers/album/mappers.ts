@@ -217,6 +217,7 @@ export function toAlbumWithStats(drizzleAlbum: DrizzleAlbumWithRelations): Album
 		lastVideoAddedAt: drizzleAlbum.lastVideoAddedAt,
 		createdAt: drizzleAlbum.createdAt,
 		updatedAt: drizzleAlbum.updatedAt,
+		entityType: 'album' as const,
 		stats,
 	};
 

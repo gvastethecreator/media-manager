@@ -1,24 +1,6 @@
 import { serverLogger } from '../logger/server-logger';
 
-// Interfaz para las opciones del logger de acciones
-interface ActionLoggerOptions {
-	showParams?: boolean;
-	showResult?: boolean;
-	sensitiveParamFields?: string[];
-	sensitiveResultFields?: string[];
-}
-
-// Opciones predeterminadas
-const defaultOptions: ActionLoggerOptions = {
-	showParams: true,
-	showResult: true,
-	sensitiveParamFields: ['password', 'token', 'secret', 'key'],
-	sensitiveResultFields: ['password', 'token', 'secret', 'key'],
-};
-
-/**
- * Logger específico para Server Actions con funciones mejoradas
- */
+// Logger específico para Server Actions con funciones mejoradas
 export const actionLogger = {
 	/**
 	 * Crea un logger para una acción específica

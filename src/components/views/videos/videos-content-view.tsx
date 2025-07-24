@@ -1,6 +1,6 @@
 import { Play, RefreshCw, Video } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { EmptyState } from '@/components/core/data-display';
+import { EmptyState } from '@/components/ui/empty-state';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
@@ -83,12 +83,8 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 				size: v.size || 0,
 				width: v.width,
 				height: v.height,
-				url: v.url,
 				thumbnail: v.thumbnail || `/api/videos/${v.id}/thumbnail`,
 				thumbnailUrl: v.thumbnailUrl || `/api/videos/${v.id}/thumbnail`,
-				src: v.src,
-				alt: v.alt,
-				mimeType: v.mimeType,
 				metadata: v.metadata,
 			}));
 
@@ -155,10 +151,11 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 					description={
 						error || 'No se pudo obtener la información del video. Verifica que existe y tienes permisos para acceder.'
 					}
-					action={{
-						label: 'Reintentar',
-						onClick: handleForceRefresh,
-					}}
+					actions={
+						<Button onClick={handleForceRefresh} variant="outline">
+							Reintentar
+						</Button>
+					}
 				/>
 			</div>
 		);

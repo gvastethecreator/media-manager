@@ -160,9 +160,6 @@ function mapCharacterFiltersToDrizzle(filters: CharacterFilters): DrizzleCharact
 		where.OR = [
 			{ name: { contains: filters.search } },
 			{ description: { contains: filters.search } },
-			{ age: { contains: filters.search } },
-			{ gender: { contains: filters.search } },
-			{ species: { contains: filters.search } },
 			{ occupation: { contains: filters.search } },
 			{ personality: { contains: filters.search } },
 			{ background: { contains: filters.search } },

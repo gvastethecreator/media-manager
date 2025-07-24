@@ -435,7 +435,7 @@ export function ThumbnailsSettings() {
 					</DialogHeader>
 					<ScrollArea className="h-[400px] mt-4">
 						<div className="space-y-4">
-							{thumbnailStats?.errors.map((error) => (
+							{thumbnailStats?.errors.map((error: any) => (
 								<motion.div
 									key={error.imageId}
 									initial={{ opacity: 0, y: 20 }}

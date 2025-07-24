@@ -28,6 +28,10 @@ export enum CollectionCategory {
 	PERSONAL = 'personal',
 	WORK = 'work',
 	PROJECT = 'project',
+	GAME = 'game',
+	COMIC = 'comic',
+	MUSIC = 'music',
+	MOVIE = 'movie',
 	OTHER = 'other',
 }
 
@@ -58,6 +62,10 @@ export const COLLECTION_CATEGORY_COLORS: Record<CollectionCategory, string> = {
 	[CollectionCategory.PERSONAL]: '#ef4444',
 	[CollectionCategory.WORK]: '#6b7280',
 	[CollectionCategory.PROJECT]: '#06b6d4',
+	[CollectionCategory.GAME]: '#ef4444',
+	[CollectionCategory.COMIC]: '#6366f1',
+	[CollectionCategory.MUSIC]: '#ec4899',
+	[CollectionCategory.MOVIE]: '#f97316',
 	[CollectionCategory.OTHER]: '#9ca3af',
 };
 
@@ -69,5 +77,9 @@ export const COLLECTION_CATEGORY_EMOJIS: Record<CollectionCategory, string> = {
 	[CollectionCategory.PERSONAL]: '👤',
 	[CollectionCategory.WORK]: '💼',
 	[CollectionCategory.PROJECT]: '📋',
+	[CollectionCategory.GAME]: '🎮',
+	[CollectionCategory.COMIC]: '📚',
+	[CollectionCategory.MUSIC]: '🎵',
+	[CollectionCategory.MOVIE]: '🎬',
 	[CollectionCategory.OTHER]: '📚',
 };

@@ -49,7 +49,7 @@ interface FileBrowserProps {
 	/** ID de carpeta/colección/etc para filtrar */
 	filterId?: string;
 	/** Tipo de filtro (folder, collection, tag, etc) */
-	filterType?: 'folder' | 'collection' | 'tag' | 'album';
+	filterType?: 'folder' | 'collection' | 'tag' | 'album' | 'video';
 	/** IDs de elementos seleccionados */
 	selectedIds?: string[];
 	/** Modo de funcionamiento */

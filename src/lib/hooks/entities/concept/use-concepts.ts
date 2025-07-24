@@ -25,12 +25,7 @@ export function useConcepts() {
 
 	// Procesar conceptos con filtros, ordenamiento y paginación actuales
 	// Convertir ConceptWithStats[] a ConceptBase[] para el procesamiento
-	const conceptsBase: ConceptBase[] = concepts.map((concept) => {
-		// Extraer solo las propiedades de ConceptBase
-		const { _count, ...baseProperties } = concept;
-		return baseProperties as ConceptBase;
-	});
-	const processedData = processConcepts(conceptsBase, filters, sortBy, page, pageSize);
+	const processedData = processConcepts(concepts, filters, sortBy, page, pageSize);
 
 	return {
 		// Estado básico
