@@ -1,7 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeTags } from '@/transformers/concept';
-import type { ConceptBase, ConceptExtended } from '@/types/entities/concept';
-import { ConceptCategory } from '@/types/entities/concept';
+import type { ConceptBase, ConceptExtended } from '@/types/entities/concept/types';
+import { ConceptCategory } from '@/types/entities/concept/enums';
 
 const helpersLogger = serverLogger.withContext('ConceptHelpers');
 

@@ -28,7 +28,5 @@ export * from './system';
 // Tipos y constantes
 export * from './types';
 // Utilidades principales
-export * from './utils';
-// Utilidades específicas
-export * from './utils';
+
 export * from './web';

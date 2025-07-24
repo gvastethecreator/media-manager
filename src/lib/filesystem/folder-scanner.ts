@@ -56,6 +56,7 @@ export interface FolderScanResult {
 	images: FileInfo[]; // Archivos de imagen (acceso directo)
 	videos: FileInfo[]; // Archivos de video (acceso directo)
 	others: FileInfo[]; // Otros archivos (acceso directo)
+	stats?: ScanStats; // Estadísticas del escaneo
 }
 
 /**

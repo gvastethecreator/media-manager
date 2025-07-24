@@ -95,13 +95,13 @@ export function UploadedImagesSettings() {
 				// Usar React Query mutation para subir las imágenes
 				const result = await uploadImagesMutation.mutateAsync(formData);
 
-				if (result.success && result.items) {
+				if (Array.isArray(result) && result.length > 0) {
 					toastService.success(
-						`Se ${result.items.length === 1 ? 'ha subido' : 'han subido'} ${result.items.length} ${result.items.length === 1 ? 'imagen' : 'imágenes'} correctamente.`
+						`Se ${result.length === 1 ? 'ha subido' : 'han subido'} ${result.length} ${result.length === 1 ? 'imagen' : 'imágenes'} correctamente.`
 					);
 					refetch(); // Recargamos las estadísticas
 				} else {
-					toastService.error(result.error || 'No se pudieron subir las imágenes.');
+					toastService.error('No se pudieron subir las imágenes.');
 				}
 			} catch (error) {
 				sectionLogger.error('Error al subir imágenes:', error);

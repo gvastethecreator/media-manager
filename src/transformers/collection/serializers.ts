@@ -160,16 +160,15 @@ export function serializeEditions(data: CollectionEdition[] | null | undefined):
  * ✅ MIGRADO A DRIZZLE
  */
 export function toDrizzleCollectionCreate(data: CollectionCreateInput): DrizzleCollectionCreateInput {
-	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
-
 	// En Drizzle, las relaciones se manejan por separado
 	// Los IDs se almacenan como metadata o se crean relaciones en tablas de unión
 	const drizzleData: DrizzleCollectionCreateInput = {
-		...rest,
-		// Serializar campos JSON si existen
-		filters: rest.filters ? serializeFilters(rest.filters) : undefined,
-		sortBy: rest.sortBy ? serializeSortBy(rest.sortBy) : undefined,
-		editions: rest.editions ? serializeEditions(rest.editions) : undefined,
+		name: data.name,
+		description: data.description || null,
+		// Serializar campos JSON si existen (estos campos no están en CollectionCreateInput actualmente)
+		// filters: data.filters ? serializeFilters(data.filters) : undefined,
+		// sortBy: data.sortBy ? serializeSortBy(data.sortBy) : undefined,
+		// editions: data.editions ? serializeEditions(data.editions) : undefined,
 	};
 
 	return drizzleData;
@@ -180,15 +179,14 @@ export function toDrizzleCollectionCreate(data: CollectionCreateInput): DrizzleC
  * ✅ MIGRADO A DRIZZLE
  */
 export function toDrizzleCollectionUpdate(data: CollectionUpdateInput): DrizzleCollectionUpdateInput {
-	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
-
 	// En Drizzle, las relaciones se manejan por separado
 	const drizzleData: DrizzleCollectionUpdateInput = {
-		...rest,
-		// Serializar campos JSON si existen
-		filters: rest.filters ? serializeFilters(rest.filters) : undefined,
-		sortBy: rest.sortBy ? serializeSortBy(rest.sortBy) : undefined,
-		editions: rest.editions ? serializeEditions(rest.editions) : undefined,
+		name: data.name,
+		description: data.description,
+		// Serializar campos JSON si existen (estos campos no están en CollectionUpdateInput actualmente)
+		// filters: data.filters ? serializeFilters(data.filters) : undefined,
+		// sortBy: data.sortBy ? serializeSortBy(data.sortBy) : undefined,
+		// editions: data.editions ? serializeEditions(data.editions) : undefined,
 	};
 
 	return drizzleData;

@@ -2,7 +2,7 @@ import { Play, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { VideoCard } from '@/components/cards/video-card';
-import { EmptyState } from '@/components/core/data-display';
+import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +50,9 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 			await createVideo({
 				name: newVideoName.trim(),
 				path: newVideoPath.trim(),
+				hash: '', // TODO: Calcular hash del archivo
+				size: 0, // TODO: Obtener tamaño del archivo
+				duration: 0, // TODO: Obtener duración del video
 				folderId: '', // TODO: Obtener folderId del contexto
 			});
 
@@ -126,14 +129,16 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 
 				<div className="flex-1 flex items-center justify-center">
 					<EmptyState
-						icon={Play}
-						title="Sin videos"
-						description="No hay videos disponibles. Sube tu primer video para comenzar."
-						action={{
-							label: 'Subir Video',
-							onClick: () => setShowForm(true),
-						}}
-					/>
+					icon={Play}
+					title="Sin videos"
+					description="No hay videos disponibles. Sube tu primer video para comenzar."
+					actions={
+						<Button onClick={() => setShowForm(true)}>
+							<Play className="h-4 w-4 mr-2" />
+							Subir Video
+						</Button>
+					}
+				/>
 				</div>
 			</div>
 		);

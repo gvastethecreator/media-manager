@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { shallow } from 'zustand/shallow';
 
 import { useNoteStore } from '@/store/entities/note';
-import { EntityType } from '@/types/entities/entities';
+import { EntityType } from '@/types/entities/entities/index';
 
 /**
  * Hook para gestionar relaciones entre notas y otras entidades

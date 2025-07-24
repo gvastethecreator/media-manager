@@ -58,7 +58,7 @@ export function useFolderImages(folderId: string | null) {
 						id: firstImage.id,
 						name: firstImage.name,
 						thumbnail: firstImage.thumbnail ? 'Disponible' : 'No disponible',
-						imageUrl: firstImage.imageUrl || firstImage.src || 'No disponible',
+						imageUrl: firstImage.src || 'No disponible',
 						propiedades: Object.keys(firstImage).join(', '),
 					});
 				} else {
