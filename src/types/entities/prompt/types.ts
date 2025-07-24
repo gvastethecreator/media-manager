@@ -141,12 +141,10 @@ export interface PromptSearchOptions {
 export interface PromptStats {
 	imageCount: number;
 	videoCount: number;
-	totalVideos?: number; // Para compatibilidad con prompt-card.tsx
 	tagCount: number;
 	noteCount: number;
 	totalContentItems: number;
 	lastUpdated: Date;
-	totalImages: number;
 	totalAssociations: number;
 	albumCount?: number;
 	collectionCount?: number;
@@ -157,6 +155,7 @@ export interface PromptStats {
 	wildcardCount?: number;
 	propertyCount?: number;
 	groupCount?: number;
+	// Note: totalImages and totalVideos are inherited from PromptBase
 }
 
 /**

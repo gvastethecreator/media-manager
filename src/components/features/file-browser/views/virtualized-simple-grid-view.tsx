@@ -7,15 +7,15 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
 import React, { memo, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface VirtualizedSimpleGridViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
 export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(function VirtualizedSimpleGridView({
@@ -56,7 +56,7 @@ export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(fu
 	});
 
 	// Función para obtener items de una fila específica
-	const getRowItems = (rowIndex: number): EntityWithStats[] => {
+	const getRowItems = (rowIndex: number): AnyEntityWithStats[] => {
 		const startIndex = rowIndex * columns;
 		const endIndex = Math.min(startIndex + columns, items.length);
 		return items.slice(startIndex, endIndex);
@@ -134,11 +134,15 @@ export const VirtualizedSimpleGridView = memo<VirtualizedSimpleGridViewProps>(fu
 											<div className="h-full flex flex-col items-center justify-center text-center">
 												<div className="w-8 h-8 bg-primary/10 rounded mb-1 flex items-center justify-center">
 													<span className="text-xs font-semibold text-primary">
-														{item.name.charAt(0).toUpperCase()}
+														{'name' in item ? item.name.charAt(0).toUpperCase() : 'U'}
 													</span>
 												</div>
-												<div className="text-xs font-medium truncate w-full px-1">{item.name}</div>
-												<div className="text-xs text-muted-foreground">{item.stats?.imageCount || 0}</div>
+												<div className="text-xs font-medium truncate w-full px-1">
+													{'name' in item ? item.name : 'id' in item ? item.id : 'Unknown'}
+												</div>
+												<div className="text-xs text-muted-foreground">
+													{'stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats ? item.stats.imageCount : 0}
+												</div>
 											</div>
 										</motion.div>
 									);

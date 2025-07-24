@@ -115,7 +115,7 @@ export interface TransformerOptions {
 /**
  * 🛠️ Interfaz base para transformers
  */
-export interface BaseTransformer<T, U, P = any> {
+export interface BaseTransformer<T, U, P = unknown> {
 	toDbFormat(data: Partial<T>): P;
 
 	validate(data: unknown): T;

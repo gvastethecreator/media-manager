@@ -5,9 +5,9 @@
  * Identifica dependencias críticas y compatibilidad para migración completa
  */
 
+import chalk from 'chalk';
 import { promises as fs } from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 
 class DependencyAnalyzer {
 	constructor() {
@@ -21,7 +21,7 @@ class DependencyAnalyzer {
 			bun_compatible: [],
 			requires_migration: [],
 			potential_issues: [],
-			recommendations: []
+			recommendations: [],
 		};
 	}
 
@@ -38,28 +38,38 @@ class DependencyAnalyzer {
 	analyzeCriticalDependencies(packageJson) {
 		const allDeps = {
 			...packageJson.dependencies,
-			...packageJson.devDependencies
+			...packageJson.devDependencies,
 		};
 
 		this.analysis.total_dependencies = Object.keys(allDeps).length;
 
 		// Dependencias críticas para el bundling
 		const criticalPatterns = [
-			'vite', 'rollup', 'esbuild', 'webpack',
-			'@vitejs/', 'vite-plugin-',
-			'react', 'react-dom', 'react-router',
-			'typescript', '@types/',
-			'tailwindcss', 'postcss',
-			'@tanstack/', 'zustand',
-			'framer-motion', 'motion'
+			'vite',
+			'rollup',
+			'esbuild',
+			'webpack',
+			'@vitejs/',
+			'vite-plugin-',
+			'react',
+			'react-dom',
+			'react-router',
+			'typescript',
+			'@types/',
+			'tailwindcss',
+			'postcss',
+			'@tanstack/',
+			'zustand',
+			'framer-motion',
+			'motion',
 		];
 
 		for (const [name, version] of Object.entries(allDeps)) {
-			if (criticalPatterns.some(pattern => name.includes(pattern))) {
+			if (criticalPatterns.some((pattern) => name.includes(pattern))) {
 				this.analysis.critical_dependencies.push({
 					name,
 					version,
-					category: this.categorizeDependency(name)
+					category: this.categorizeDependency(name),
 				});
 			}
 		}
@@ -81,20 +91,20 @@ class DependencyAnalyzer {
 				name: '@vitejs/plugin-react',
 				purpose: 'React JSX transformation',
 				bun_alternative: 'Built-in JSX support',
-				migration_complexity: 'low'
+				migration_complexity: 'low',
 			},
 			{
 				name: 'vite-tsconfig-paths',
 				purpose: 'TypeScript path mapping',
 				bun_alternative: 'Built-in TypeScript support',
-				migration_complexity: 'low'
+				migration_complexity: 'low',
 			},
 			{
 				name: 'vite-plugin-svgr',
 				purpose: 'SVG as React components',
 				bun_alternative: 'Custom plugin needed',
-				migration_complexity: 'medium'
-			}
+				migration_complexity: 'medium',
+			},
 		];
 
 		this.analysis.vite_plugins = vitePlugins;
@@ -103,19 +113,27 @@ class DependencyAnalyzer {
 	analyzeBunCompatibility() {
 		// Dependencias que son compatibles con Bun bundler
 		const bunCompatible = [
-			'react', 'react-dom', 'react-router-dom',
-			'typescript', 'tailwindcss',
-			'@tanstack/react-query', 'zustand',
-			'framer-motion', 'motion',
-			'lucide-react', 'lodash', 'date-fns',
-			'clsx', 'tailwind-merge'
+			'react',
+			'react-dom',
+			'react-router-dom',
+			'typescript',
+			'tailwindcss',
+			'@tanstack/react-query',
+			'zustand',
+			'framer-motion',
+			'motion',
+			'lucide-react',
+			'lodash',
+			'date-fns',
+			'clsx',
+			'tailwind-merge',
 		];
 
 		this.analysis.bun_compatible = this.analysis.critical_dependencies
-			.filter(dep => bunCompatible.includes(dep.name))
-			.map(dep => ({
+			.filter((dep) => bunCompatible.includes(dep.name))
+			.map((dep) => ({
 				...dep,
-				status: 'fully_compatible'
+				status: 'fully_compatible',
 			}));
 
 		// Dependencias que requieren migración
@@ -124,26 +142,26 @@ class DependencyAnalyzer {
 				name: 'vite',
 				reason: 'Replace with Bun.build()',
 				complexity: 'high',
-				priority: 'critical'
+				priority: 'critical',
 			},
 			{
 				name: '@vitejs/plugin-react',
 				reason: 'Use Bun built-in JSX',
 				complexity: 'low',
-				priority: 'high'
+				priority: 'high',
 			},
 			{
 				name: 'vite-plugin-svgr',
 				reason: 'Create custom Bun plugin',
 				complexity: 'medium',
-				priority: 'medium'
+				priority: 'medium',
 			},
 			{
 				name: 'rollup',
 				reason: 'Replaced by Bun bundler',
 				complexity: 'high',
-				priority: 'critical'
-			}
+				priority: 'critical',
+			},
 		];
 
 		this.analysis.requires_migration = requiresMigration;
@@ -155,32 +173,32 @@ class DependencyAnalyzer {
 				category: 'HMR',
 				description: 'Hot Module Replacement needs custom implementation',
 				impact: 'high',
-				solution: 'Implement Bun-native HMR or use file watching'
+				solution: 'Implement Bun-native HMR or use file watching',
 			},
 			{
 				category: 'CSS Processing',
 				description: 'PostCSS and Tailwind integration',
 				impact: 'medium',
-				solution: 'Use Bun CSS plugins or external processing'
+				solution: 'Use Bun CSS plugins or external processing',
 			},
 			{
 				category: 'Asset Handling',
 				description: 'Static assets and imports',
 				impact: 'medium',
-				solution: 'Configure Bun asset handling'
+				solution: 'Configure Bun asset handling',
 			},
 			{
 				category: 'Development Server',
 				description: 'Dev server with proxy and middleware',
 				impact: 'high',
-				solution: 'Custom dev server or use Bun.serve()'
+				solution: 'Custom dev server or use Bun.serve()',
 			},
 			{
 				category: 'Source Maps',
 				description: 'Debug support in development',
 				impact: 'medium',
-				solution: 'Configure Bun sourcemap generation'
-			}
+				solution: 'Configure Bun sourcemap generation',
+			},
 		];
 
 		this.analysis.potential_issues = issues;
@@ -194,8 +212,8 @@ class DependencyAnalyzer {
 					'Create comprehensive test suite',
 					'Document current Vite configuration',
 					'Identify custom plugins and their alternatives',
-					'Benchmark current build performance'
-				]
+					'Benchmark current build performance',
+				],
 			},
 			{
 				phase: 'Migration Strategy',
@@ -203,8 +221,8 @@ class DependencyAnalyzer {
 					'Start with basic Bun.build() configuration',
 					'Migrate plugins one by one',
 					'Implement custom HMR solution',
-					'Create fallback to Vite if needed'
-				]
+					'Create fallback to Vite if needed',
+				],
 			},
 			{
 				phase: 'Post-migration',
@@ -212,8 +230,8 @@ class DependencyAnalyzer {
 					'Performance comparison benchmarks',
 					'Validate all features work correctly',
 					'Update documentation and scripts',
-					'Team training on new workflow'
-				]
+					'Team training on new workflow',
+				],
 			},
 			{
 				phase: 'Risk Mitigation',
@@ -221,9 +239,9 @@ class DependencyAnalyzer {
 					'Keep Vite configuration as backup',
 					'Gradual rollout to team members',
 					'Monitor for performance regressions',
-					'Have rollback plan ready'
-				]
-			}
+					'Have rollback plan ready',
+				],
+			},
 		];
 
 		this.analysis.recommendations = recommendations;
@@ -283,23 +301,23 @@ class DependencyAnalyzer {
 		console.log(chalk.red(`⚠️  PROBLEMAS POTENCIALES: ${this.analysis.potential_issues.length}`));
 
 		console.log(chalk.cyan('\n🔌 PLUGINS DE VITE:'));
-		this.analysis.vite_plugins.forEach(plugin => {
-			const complexity = plugin.migration_complexity === 'low' ? '🟢' : 
-							 plugin.migration_complexity === 'medium' ? '🟡' : '🔴';
+		this.analysis.vite_plugins.forEach((plugin) => {
+			const complexity =
+				plugin.migration_complexity === 'low' ? '🟢' : plugin.migration_complexity === 'medium' ? '🟡' : '🔴';
 			console.log(`   ${complexity} ${plugin.name} - ${plugin.purpose}`);
 		});
 
 		console.log(chalk.yellow('\n🔄 MIGRACIONES CRÍTICAS:'));
 		this.analysis.requires_migration
-			.filter(item => item.priority === 'critical')
-			.forEach(item => {
+			.filter((item) => item.priority === 'critical')
+			.forEach((item) => {
 				console.log(`   🔴 ${item.name} - ${item.reason}`);
 			});
 
 		console.log(chalk.red('\n⚠️  PRINCIPALES DESAFÍOS:'));
 		this.analysis.potential_issues
-			.filter(issue => issue.impact === 'high')
-			.forEach(issue => {
+			.filter((issue) => issue.impact === 'high')
+			.forEach((issue) => {
 				console.log(`   🔴 ${issue.category}: ${issue.description}`);
 			});
 

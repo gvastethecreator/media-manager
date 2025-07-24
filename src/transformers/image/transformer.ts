@@ -30,25 +30,20 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
 		// 📊 Calcular estadísticas
 		const statistics = calculateImageStatistics(drizzleImage);
 
-		// 🖼️ Parsear metadatos
-		const parsedMetadata = parseImageMetadata(drizzleImage.metadata);
-
-		// 🎯 Calcular campos derivados
-		const derivedFields = calculateDerivedFields(drizzleImage, statistics);
-
 		const imageWithStats: ImageWithStats = {
 			...drizzleImage,
-			statistics,
-			...derivedFields,
-			parsedMetadata,
+			entityType: 'image',
+			stats: statistics,
+			thumbnailUrl: drizzleImage.thumbnail || '',
+			fullUrl: drizzleImage.path,
 			tags: drizzleImage.tags || [],
 		};
 
 		logger.debug('🖼️ Image transformado exitosamente', {
 			imageId: drizzleImage.id,
-			totalAssociations: statistics.totalAssociations,
-			qualityScore: statistics.qualityScore,
-			technicalGrade: statistics.technicalGrade,
+			tagCount: statistics.tagCount,
+			albumCount: statistics.albumCount,
+			viewCount: statistics.viewCount,
 		});
 
 		return imageWithStats;
@@ -147,44 +142,23 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 	const duplicateStatus = determineDuplicateStatus(drizzleImage);
 
 	return {
-		// Conteos de relaciones
-		totalAlbums: albums,
-		totalCollections: collections,
-		totalTags: tags,
-		totalCharacters: characters,
-		totalPlaces: places,
-		totalWorldItems: worldItems,
-		totalConcepts: concepts,
-		totalPrompts: prompts,
-		totalNotes: notes,
-		totalWildcards: wildcards,
-		totalProperties: properties,
-		totalGroups: groups,
-		totalAssociations,
-
-		// Métricas técnicas
-		megapixels,
-		aspectRatio,
-		fileSize,
-		dimensions: `${drizzleImage.width}x${drizzleImage.height}`,
-
-		// Métricas de uso
-		views,
-		likes,
-		downloads,
-		shares,
-
-		// Análisis de calidad
-		qualityScore,
-		technicalGrade,
-		colorTemperature,
-
-		// Metadatos AI
-		aiConfidence,
-		autoTags,
-		duplicateStatus,
-
-		lastUpdated: new Date(),
+		// Conteos de relaciones según ImageStatistics
+		viewCount: views,
+		downloadCount: downloads,
+		likeCount: likes,
+		commentCount: 0, // Por ahora no hay comentarios
+		tagCount: tags,
+		albumCount: albums,
+		collectionCount: collections,
+		characterCount: characters,
+		placeCount: places,
+		worldItemCount: worldItems,
+		conceptCount: concepts,
+		promptCount: prompts,
+		noteCount: notes,
+		wildcardCount: wildcards,
+		propertyCount: properties,
+		groupCount: groups,
 	};
 }
 

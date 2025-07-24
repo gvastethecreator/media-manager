@@ -3,13 +3,18 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { DynamicCreateForm, type FormField } from '@/components/settings/common/dynamic-create-form';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
 import { toastService } from '@/lib/ui/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
-import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note/types';
+import type { CreateNoteInput, NoteBase, UpdateNoteInput } from '@/types/entities/note/types';
 
 // Esquema de validación con Zod, alineado con los tipos canónicos
 const noteSchema = z.object({
@@ -31,9 +36,10 @@ interface CreateNoteFormProps {
 	isEditing?: boolean;
 	onSuccess?: (note: NoteBase) => void;
 	onCancel?: () => void;
+	onPreview?: () => void;
 }
 
-export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel }: CreateNoteFormProps) {
+export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, onPreview }: CreateNoteFormProps) {
 	const createNoteMutation = useCreateNote();
 	const updateNoteMutation = useUpdateNote();
 
@@ -67,11 +73,11 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel }:
 		try {
 			let result: NoteBase;
 			if (isEditing && note?.id) {
-				const updateData: NoteUpdateInput = { ...data };
+				const updateData: UpdateNoteInput = { ...data };
 				result = await updateNoteMutation.mutateAsync({ id: note.id, data: updateData });
 				toastService.success('Nota actualizada correctamente');
 			} else {
-				const createData: NoteCreateInput = { ...data };
+				const createData: CreateNoteInput = { ...data };
 				result = await createNoteMutation.mutateAsync(createData);
 				toastService.success('Nota creada correctamente');
 				form.reset(); // Limpiar el formulario después de crear
@@ -85,38 +91,133 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel }:
 		}
 	};
 
-	// Definición de campos para DynamicCreateForm
-	const fields: FormField<NoteFormData>[] = [
-		{ name: 'title', label: 'Título', placeholder: 'Título de la nota...' },
-		{ name: 'summary', label: 'Resumen', placeholder: 'Un resumen corto...' },
-		{ name: 'content', label: 'Contenido', type: 'textarea', placeholder: 'Escribe tu nota aquí...' },
-	];
-
-	const optionalFields: FormField<NoteFormData>[] = [
-		{
-			name: 'emoji',
-			label: 'Emoji',
-			render: ({ field }) => <EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact />,
-		},
-		{
-			name: 'color',
-			label: 'Color',
-			render: ({ field }) => <ColorPicker value={field.value} onChange={field.onChange} compact />,
-		},
-		// Aquí puedes agregar el campo de tags si tienes un componente para ello
-	];
-
-	const isSubmitting = createNoteMutation.isPending || updateNoteMutation.isPending;
-
 	return (
-		<DynamicCreateForm<NoteFormData>
-			form={form}
-			fields={fields}
-			optionalFields={optionalFields}
-			onSubmit={onSubmit}
-			isSubmitting={isSubmitting}
-			submitLabel={isEditing ? 'Guardar Cambios' : 'Crear Nota'}
-			onCancel={onCancel}
-		/>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+				<FormField
+					control={form.control}
+					name="title"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Título</FormLabel>
+							<FormControl>
+								<Input placeholder="Título de la nota" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="emoji"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Emoji</FormLabel>
+							<FormControl>
+								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="color"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Color</FormLabel>
+							<FormControl>
+								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="category"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Categoría</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Selecciona una categoría" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{Object.values(NoteCategory).map((category) => (
+										<SelectItem key={category} value={category}>
+											{category}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="summary"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Resumen</FormLabel>
+							<FormControl>
+								<Textarea placeholder="Un resumen corto..." rows={2} {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="content"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Contenido</FormLabel>
+							<FormControl>
+								<Textarea placeholder="Escribe tu nota aquí..." rows={4} {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="isFavorite"
+					render={({ field }) => (
+						<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+							<FormControl>
+								<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+							</FormControl>
+							<div className="space-y-1 leading-none">
+								<FormLabel>Marcar como favorito</FormLabel>
+							</div>
+						</FormItem>
+					)}
+				/>
+
+				<div className="flex justify-end space-x-2">
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancelar
+					</Button>
+					{onPreview && (
+						<Button type="button" variant="secondary" onClick={onPreview}>
+							Vista previa
+						</Button>
+					)}
+					<Button type="submit">
+						{isEditing ? 'Guardar Cambios' : 'Crear Nota'}
+					</Button>
+				</div>
+			</form>
+		</Form>
 	);
 }

@@ -5,7 +5,6 @@
  * Última migración: 2025-06-18
  */
 
-import type { z } from 'zod';
 import { z } from 'zod';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
@@ -28,6 +27,7 @@ export interface NoteBase {
 	id: string;
 	title: string;
 	content: string;
+	summary?: string;
 	emoji?: string | null;
 	color?: string | null;
 	category: string;
@@ -47,6 +47,7 @@ export interface NoteBase {
 export interface NoteCreateInput {
 	title: string;
 	content?: string;
+	summary?: string;
 	category?: string;
 	priority?: number;
 	status?: string;
@@ -76,6 +77,7 @@ export interface NoteCreateInput {
 export interface NoteUpdateInput {
 	title?: string;
 	content?: string;
+	summary?: string;
 	category?: string;
 	priority?: number;
 	status?: string;
@@ -310,7 +312,7 @@ export interface NoteComplete extends NoteBase {
  */
 export interface NoteWithStats extends NoteBase {
 	entityType: 'note';
-	stats: NoteStatistics;
+	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
 	_count?: {
 		images: number;
 		videos: number;

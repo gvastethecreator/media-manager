@@ -83,16 +83,8 @@ export interface ThumbnailResult {
 	metadata: JSONString<ThumbnailMetadata>;
 }
 
-/**
- * Estadísticas de thumbnails
- */
-export interface ThumbnailStats {
-	total: number;
-	processed: number;
-	errors: number;
-	totalSize: number;
-	lastProcessed?: Date;
-}
+// ThumbnailStats se importa desde @/types/stats.ts para evitar duplicación
+// export interface ThumbnailStats - REMOVIDO: usar import { ThumbnailStats } from '@/types/stats'
 
 /**
  * Último thumbnail procesado

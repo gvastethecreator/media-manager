@@ -180,8 +180,6 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 		// **MIGRACIÓN A DRIZZLE**
 		logger.info('🔍 Obteniendo personajes con opciones:', options);
 
-
-
 		// Por ahora, implementación básica sin filtros complejos
 		const drizzleCharacters = await db
 			.select({
@@ -212,8 +210,6 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 			})
 			.from(characters)
 			.orderBy(desc(characters.createdAt));
-
-
 
 		const transformedCharacters = drizzleCharacters.map((rawCharacter: any) => ({
 			...rawCharacter,

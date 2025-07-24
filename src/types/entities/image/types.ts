@@ -8,7 +8,6 @@
 import { z } from 'zod';
 import { BaseEntitySchema } from '@/types/common/base';
 import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
-import { ImageComplete } from '.';
 
 /**
  * 🔍 Esquema de validación para Image

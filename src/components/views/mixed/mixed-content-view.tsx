@@ -68,7 +68,7 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 
 		setIsRetrying(true);
 		logger.info('🔄 Forzando recarga del contenido mixto');
-		
+
 		// El FileBrowser se encargará de la recarga
 		setTimeout(() => {
 			setIsRetrying(false);

@@ -24,6 +24,9 @@ export function useFolders() {
 		folderId: '',
 		status: 'completed',
 		progress: 0,
+		isProcessing: false,
+		phase: 'complete',
+		timestamp: Date.now(),
 	});
 	const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
 	const [globalReindexStatus, setGlobalReindexStatus] = useState(initialGlobalReindexStatus);
@@ -82,6 +85,9 @@ export function useFolders() {
 							folderId: '',
 							status: 'completed',
 							progress: 0,
+							isProcessing: false,
+							phase: 'complete',
+							timestamp: Date.now(),
 						};
 					}
 					return prev;
@@ -118,6 +124,9 @@ export function useFolders() {
 						folderId: '',
 						status: 'completed',
 						progress: 0,
+						isProcessing: false,
+						phase: 'complete',
+						timestamp: Date.now(),
 					});
 					setProcessProgress(0);
 				}
@@ -245,7 +254,13 @@ export function useFolders() {
 	const foldersEvents = useFoldersEvents({
 		onProgress: handleStatusUpdate,
 		onError: handleProcessError,
-		onComplete: (data) => handleProcessComplete(data.folderId),
+		onComplete: (data) => {
+			if (data.folderId) {
+				handleProcessComplete(data.folderId);
+			} else if (data.id) {
+				handleProcessComplete(data.id);
+			}
+		},
 		onStats: () => {},
 		onReindexAllProgress: handleReindexAllProgress,
 	});
@@ -259,6 +274,8 @@ export function useFolders() {
 				status: 'processing',
 				progress: 0,
 				isProcessing: true,
+				phase: 'starting',
+				timestamp: Date.now(),
 			}));
 		},
 		onLoadData: loadFolders,
@@ -449,6 +466,9 @@ export function useFolders() {
 
 // Re-export hook específico para operaciones
 export { useReindexAllFolders };
+
+// Re-export tipos necesarios
+export type { ExtendedProcessStatus } from '../folder-types';
 
 /**
  * 🛠️ FIX: Se fuerza la recarga de carpetas y estadísticas tras la finalización de un proceso

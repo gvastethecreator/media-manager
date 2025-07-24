@@ -19,15 +19,15 @@ import {
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { EntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
+import { AnyEntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
 
 interface ListViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
 // Mapeo de tipos a iconos
@@ -56,7 +56,7 @@ export const ListView = memo<ListViewProps>(function ListView({ items, selectedI
 
 			// Obtener tamaño si está disponible
 			let size = '-';
-			if ('size' in item) {
+			if ('size' in item && typeof item.size === 'number') {
 				size = formatFileSize(item.size);
 			} else if (stats && 'fileSize' in stats && stats.fileSize) {
 				size = `${stats.fileSize.toFixed(1)} MB`;
@@ -115,7 +115,7 @@ export const ListView = memo<ListViewProps>(function ListView({ items, selectedI
 								<td className="p-2">
 									<div className="flex items-center gap-2">
 										<Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-										<span className="truncate">{item.name || 'Sin nombre'}</span>
+										<span className="truncate">{'name' in item ? item.name : item.id}</span>
 										{'isFavorite' in item && item.isFavorite && <span className="text-yellow-500">★</span>}
 									</div>
 								</td>

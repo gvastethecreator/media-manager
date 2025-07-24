@@ -10,17 +10,17 @@ import React, { memo, useMemo } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
+import type { EntityWithStats, AnyEntityWithStats } from '@/types/migration';
 
 interface AdaptiveFileBrowserViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	selectedIds: string[];
 	containerWidth: number;
 	containerHeight: number;
 	viewMode: 'grid' | 'list' | 'cards' | 'masonry' | 'simple-grid';
 	itemSize: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 	className?: string;
 }
 
@@ -167,10 +167,10 @@ export const AdaptiveFileBrowserView = memo<AdaptiveFileBrowserViewProps>(functi
 
 // Componente para vista de lista virtualizada
 interface ListVirtualizedViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	selectedIds: string[];
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 	layoutConfig: { layout: CardLayout; variant: CardVariant; size: CardSize; preset?: string };
 	className?: string;
 }
@@ -220,7 +220,7 @@ const ListVirtualizedView = memo<ListVirtualizedViewProps>(function ListVirtuali
 							}}
 						>
 							<EntityCard
-								entity={item}
+								entity={item as AnyEntityWithStats}
 								isSelected={selectedIds.includes(item.id)}
 								onClick={(e) => onItemClick(item, e)}
 								onDoubleClick={() => onItemDoubleClick(item)}
@@ -237,11 +237,11 @@ const ListVirtualizedView = memo<ListVirtualizedViewProps>(function ListVirtuali
 
 // Componente para vista de grid virtualizada
 interface GridVirtualizedViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 	layoutConfig: { layout: CardLayout; variant: CardVariant; size: CardSize; preset?: string };
 	virtualizationConfig: { columns: number; gap: number; estimateSize: () => number };
 	className?: string;
@@ -325,13 +325,13 @@ const GridVirtualizedView = memo<GridVirtualizedViewProps>(function GridVirtuali
 											className="h-full"
 										>
 											<EntityCard
-												entity={item}
-												isSelected={selectedIds.includes(item.id)}
-												onClick={(e) => onItemClick(item, e)}
-												onDoubleClick={() => onItemDoubleClick(item)}
-												{...layoutConfig}
-												className="w-full h-full"
-											/>
+													entity={item as AnyEntityWithStats}
+													isSelected={selectedIds.includes(item.id)}
+													onClick={(e) => onItemClick(item, e)}
+													onDoubleClick={() => onItemDoubleClick(item)}
+													{...layoutConfig}
+													className="w-full h-full"
+												/>
 										</motion.div>
 									);
 								})}
@@ -346,10 +346,10 @@ const GridVirtualizedView = memo<GridVirtualizedViewProps>(function GridVirtuali
 
 // Componente para vista masonry (sin virtualización)
 interface MasonryViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	selectedIds: string[];
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 	layoutConfig: { layout: CardLayout; variant: CardVariant; size: CardSize; preset?: string };
 	columns: number;
 	gap: number;
@@ -384,7 +384,7 @@ const MasonryView = memo<MasonryViewProps>(function MasonryView({
 					style={{ marginBottom: `${gap}px` }}
 				>
 					<EntityCard
-						entity={item}
+						entity={item as AnyEntityWithStats}
 						isSelected={selectedIds.includes(item.id)}
 						onClick={(e) => onItemClick(item, e)}
 						onDoubleClick={() => onItemDoubleClick(item)}

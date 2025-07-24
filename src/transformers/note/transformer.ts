@@ -38,7 +38,8 @@ export function fromDrizzleNoteWithCounts(data: NoteComplete): NoteWithStats {
 		presetId: data.presetId,
 		createdAt: data.createdAt,
 		updatedAt: data.updatedAt,
-		statistics,
+		entityType: 'note' as const,
+		stats: statistics,
 		// Campos derivados calculados
 		excerpt: generateExcerpt(data.content),
 		formattedDate: formatDate(data.updatedAt),

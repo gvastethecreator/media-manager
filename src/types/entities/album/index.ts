@@ -12,7 +12,7 @@
  * @updated 2025-01-27
  */
 
-import type { z } from 'zod';
+import { z } from 'zod';
 import type { AlbumWithStats } from './base';
 import { CreateAlbumSchema, UpdateAlbumSchema } from './schema';
 

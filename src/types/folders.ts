@@ -36,16 +36,21 @@ export interface FolderResponse {
 	success?: boolean; // Para respuestas de operaciones
 }
 
-export interface FolderStats {
-	totalFolders: number;
-	totalFiles: number;
+// Re-exportar FolderStatistics como FolderStats para compatibilidad
+export type { FolderStatistics as FolderStats } from '@/types/entities/folder/types';
+
+// Tipo específico para el hook useFolderStats (más simple)
+export interface FolderStatsResponse {
 	totalImages: number;
 	totalVideos: number;
 	totalAudio: number;
 	totalDocuments: number;
 	totalOthers: number;
 	totalSize: number;
-	formattedSize: string;
-	lastScanned?: string;
-	directoryCount: number; // Para compatibilidad con componente actual
+	lastActivity: Date | null;
+	recentImages?: Array<{
+		id: string;
+		name: string;
+		thumbnailUrl?: string;
+	}>;
 }

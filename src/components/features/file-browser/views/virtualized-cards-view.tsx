@@ -5,29 +5,29 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useMemo, useRef, useCallback } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface VirtualizedCardsViewProps {
-	items: EntityWithStats[];
+	items: AnyEntityWithStats[];
 	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
 // Componente interno memoizado para cada carta
 const CardItem = memo<{
-	item: EntityWithStats;
+	item: AnyEntityWithStats;
 	isSelected: boolean;
 	compact: boolean;
 	itemIndex: number;
 	cardWidth: number;
-	onItemClick: (item: EntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: EntityWithStats) => void;
+	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 	animationProps: {
 		initial: { opacity: number; y: number };
 		animate: { opacity: number; y: number };
@@ -43,21 +43,27 @@ const CardItem = memo<{
 	onItemDoubleClick,
 	animationProps,
 }) {
-	const handleClick = useCallback((e: React.MouseEvent) => {
-		console.log('🖱️ VirtualizedCardsView - onClick disparado:', { itemId: item.id });
-		e.stopPropagation();
-		onItemClick(item, e);
-	}, [item, onItemClick]);
+	const handleClick = useCallback(
+		(e: React.MouseEvent) => {
+			console.log('🖱️ VirtualizedCardsView - onClick disparado:', { itemId: item.id });
+			e.stopPropagation();
+			onItemClick(item, e);
+		},
+		[item, onItemClick]
+	);
 
 	const handleDoubleClick = useCallback(() => {
 		console.log('🖱️ VirtualizedCardsView - onDoubleClick disparado:', { itemId: item.id });
 		onItemDoubleClick(item);
 	}, [item, onItemDoubleClick]);
 
-	const transition = useMemo(() => ({
-		...animationProps.baseTransition,
-		delay: Math.min(itemIndex * 0.02, 0.3),
-	}), [animationProps.baseTransition, itemIndex]);
+	const transition = useMemo(
+		() => ({
+			...animationProps.baseTransition,
+			delay: Math.min(itemIndex * 0.02, 0.3),
+		}),
+		[animationProps.baseTransition, itemIndex]
+	);
 
 	return (
 		<motion.div
@@ -125,27 +131,36 @@ export const VirtualizedCardsView = memo<VirtualizedCardsViewProps>(function Vir
 	});
 
 	// Función para obtener items de una fila específica
-	const getRowItems = (rowIndex: number): EntityWithStats[] => {
+	const getRowItems = (rowIndex: number): AnyEntityWithStats[] => {
 		const startIndex = rowIndex * columns;
 		const endIndex = Math.min(startIndex + columns, items.length);
 		return items.slice(startIndex, endIndex);
 	};
 
 	// Memoizar handlers para evitar re-renders masivos
-	const handleItemClick = useCallback((item: EntityWithStats, e: React.MouseEvent) => {
-		onItemClick(item, e);
-	}, [onItemClick]);
+	const handleItemClick = useCallback(
+		(item: AnyEntityWithStats, e: React.MouseEvent) => {
+			onItemClick(item, e);
+		},
+		[onItemClick]
+	);
 
-	const handleItemDoubleClick = useCallback((item: EntityWithStats) => {
-		onItemDoubleClick(item);
-	}, [onItemDoubleClick]);
+	const handleItemDoubleClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			onItemDoubleClick(item);
+		},
+		[onItemDoubleClick]
+	);
 
 	// Memoizar objetos de animación para evitar re-renders
-	const animationProps = useMemo(() => ({
-		initial: { opacity: 0, y: 20 },
-		animate: { opacity: 1, y: 0 },
-		baseTransition: { duration: 0.3 },
-	}), []);
+	const animationProps = useMemo(
+		() => ({
+			initial: { opacity: 0, y: 20 },
+			animate: { opacity: 1, y: 0 },
+			baseTransition: { duration: 0.3 },
+		}),
+		[]
+	);
 
 	// Función para crear transition con delay estable
 	// const createTransition = useCallback((itemIndex: number) => {

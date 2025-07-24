@@ -10,20 +10,22 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Tipos genéricos para flexibilidad
-export interface DynamicCreateFormProps {
+export interface FormField<T = unknown> {
+	name: string;
+	label: string;
+	render: (props: { value: T; onChange: (v: T) => void }) => React.ReactNode;
+}
+
+export interface DynamicCreateFormProps<T extends Record<string, unknown> = Record<string, unknown>> {
 	/**
 	 * Lista de campos opcionales disponibles para la entidad (ej: emoji, color, categoría...)
 	 * Cada campo debe tener: name, label, render (función que retorna el campo JSX)
 	 */
-	optionalFields: Array<{
-		name: string;
-		label: string;
-		render: (props: { value: any; onChange: (v: any) => void }) => React.ReactNode;
-	}>;
+	optionalFields: FormField[];
 	/**
 	 * Función de submit (recibe los datos del formulario)
 	 */
-	onSubmit: (data: any) => Promise<void>;
+	onSubmit: (data: T & { name: string }) => Promise<void>;
 	/**
 	 * Texto del botón principal
 	 */
@@ -34,12 +36,12 @@ export interface DynamicCreateFormProps {
 	validateName?: (name: string) => string | null;
 }
 
-export function DynamicCreateForm({
+export function DynamicCreateForm<T extends Record<string, unknown> = Record<string, unknown>>({
 	optionalFields,
 	onSubmit,
 	submitLabel = 'Crear',
 	validateName,
-}: DynamicCreateFormProps) {
+}: DynamicCreateFormProps<T>) {
 	const [formData, setFormData] = useState<Record<string, any>>({ name: '' });
 	const [addedFields, setAddedFields] = useState<string[]>([]);
 	const [selectedField, setSelectedField] = useState<string>('');
@@ -61,7 +63,7 @@ export function DynamicCreateForm({
 	};
 
 	// Manejar cambio de campo opcional
-	const handleFieldChange = (name: string, value: any) => {
+	const handleFieldChange = (name: string, value: unknown) => {
 		setFormData((prev) => ({ ...prev, [name]: value }));
 	};
 

@@ -1,51 +1,187 @@
 /**
  * @file Showcase de layouts de cards
- * @module components/cards/examples/card-layout-showcase
- * @description Demuestra los diferentes layouts y variantes disponibles para las cards
- */
-
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
-import { EntityCard } from '../entity-card';
-import type { CardLayout, CardSize, CardVariant } from '../types/card-layout.types';
-import { LAYOUT_PRESETS } from '../types/card-layout.types';
-
-// Mock data para demostración
-const mockEntities: EntityWithStats[] = [
-	{
-		id: '1',
-		name: 'Paisaje montañoso',
-		entityType: 'image',
-		createdAt: new Date(),
-		updatedAt: new Date(),
-		path: '/uploads/landscape.jpg',
-		thumbnailUrl: '/uploads/landscape-thumb.jpg',
-		metadata: { format: 'JPG', width: 1920, height: 1080 },
-		_count: { tags: 3, albums: 2, collections: 1 },
-		tags: [{ id: '1', name: 'naturaleza', color: '#22c55e' }],
-	},
-	{
-		id: '2',
-		name: 'Mi colección favorita',
-		entityType: 'collection',
-		createdAt: new Date(),
-		updatedAt: new Date(),
-		description: 'Una colección de mis imágenes favoritas',
-		_count: { images: 15, videos: 3 },
-		color: '#3b82f6',
-	},
-	{
-		id: '3',
+ * @module	{
+		id: 'folder-1',
 		name: 'Documentos/Trabajo',
 		entityType: 'folder',
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		path: '/home/user/documents/trabajo',
-		_count: { images: 25, files: 50 },
-		statistics: { folderCount: 5, totalSize: 1024000 },
-	},
-] as EntityWithStats[];
+		type: 'folder',
+		stats: {
+			folderCount: 5,
+			totalSize: 1024000,
+			totalItems: 75
+		},rds/examples/card-layout-showcase
+ * @description Demuestra los diferentes layouts y variantes disponibles para las cards
+ */
+
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { AnyEntityWithStats } from '@/types/migration';
+import { EntityCard } from '../entity-card';
+import type { CardLayout, CardSize, CardVariant } from '../types/card-layout.types';
+import { LAYOUT_PRESETS } from '../types/card-layout.types';
+
+// Mock data para demostración
+const mockEntities: AnyEntityWithStats[] = [
+	{
+		id: '1',
+		name: 'Paisaje montañoso',
+		entityType: 'image',
+		description: 'Una imagen de paisaje montañoso',
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		path: '/uploads/landscape.jpg',
+		hash: 'abc123def456',
+		size: 1024000,
+		width: 1920,
+		height: 1080,
+		metadata: null,
+		thumbnail: null,
+		thumbnailSize: null,
+		thumbnailWidth: null,
+		thumbnailHeight: null,
+		thumbnailMimeType: null,
+		thumbnailError: null,
+		thumbnailErrorAt: null,
+		thumbnailOptimizedAt: null,
+		isFavorite: false,
+		folderId: 'folder1',
+		noteId: null,
+		addedAt: new Date(),
+		thumbnailUrl: '/uploads/landscape-thumb.jpg',
+		fullUrl: '/uploads/landscape.jpg',
+		stats: {
+			viewCount: 10,
+			downloadCount: 2,
+			likeCount: 5,
+			commentCount: 1,
+			tagCount: 3,
+			albumCount: 2,
+			collectionCount: 1,
+			characterCount: 0,
+			placeCount: 1,
+			worldItemCount: 0,
+			conceptCount: 2,
+			promptCount: 1,
+			noteCount: 1,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+			lastViewedAt: new Date(),
+			lastDownloadedAt: new Date(),
+			lastLikedAt: new Date(),
+			lastCommentedAt: new Date(),
+		},
+	} as AnyEntityWithStats,
+	{
+		id: '2',
+		name: 'Mi colección favorita',
+		entityType: 'collection',
+		description: 'Una colección de mis imágenes favoritas',
+		emoji: '📸',
+		color: '#3b82f6',
+		featuredImage: null,
+		isPublic: true,
+		isFavorite: false,
+		isArchived: false,
+		sortOrder: 0,
+		viewCount: 0,
+		downloadCount: 0,
+		likeCount: 0,
+		shareCount: 0,
+		folderId: null,
+		parentId: null,
+		lastVideoAddedAt: new Date(),
+		category: 'personal',
+		platform: 'local',
+		privacyLevel: 'private',
+		contentRating: 'general',
+		language: 'es',
+		region: 'ES',
+		totalImages: 18,
+		totalVideos: 2,
+		totalSize: 15728640,
+		lastImageAddedAt: new Date(),
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		stats: {
+			imageCount: 18,
+			videoCount: 2,
+			totalSize: 15728640,
+			averageSize: 1572864,
+			lastImageAddedAt: new Date(),
+			lastVideoAddedAt: new Date(),
+			viewCount: 25,
+			downloadCount: 5,
+			likeCount: 18,
+			shareCount: 3,
+			tagCount: 5,
+			albumCount: 2,
+			characterCount: 3,
+			placeCount: 2,
+			worldItemCount: 1,
+			conceptCount: 4,
+			promptCount: 2,
+			noteCount: 1,
+			wildcardCount: 0,
+			propertyCount: 1,
+			groupCount: 0,
+		},
+	} as AnyEntityWithStats,
+	{
+		id: '3',
+		name: 'Documentos/Trabajo',
+		entityType: 'folder',
+		description: 'Carpeta de documentos de trabajo',
+		emoji: '📁',
+		color: '#10B981',
+		featuredImage: null,
+		isFavorite: false,
+		path: '/home/user/documents/trabajo',
+		totalFiles: 78,
+		totalSize: 52428800,
+		autoReindex: true,
+		lastIndexed: new Date(),
+		parentId: null,
+		presetId: null,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		stats: {
+			hierarchyDepth: 2,
+			totalDescendants: 5,
+			directChildren: 2,
+			contentDiversity: 0.8,
+			organizationScore: 0.9,
+			totalItems: 78,
+			folderCount: 2,
+			accessFrequency: 15,
+			lastActivity: new Date(),
+			imageCount: 75,
+			videoCount: 3,
+			noteCount: 0,
+			documentCount: 0,
+			totalAudio: 0,
+			totalOthers: 0,
+			formattedSize: '50 MB',
+			totalSize: 52428800,
+			averageFileSize: 672164,
+			largestFile: 5242880,
+			hasConsistentNaming: true,
+			hasDeepHierarchy: false,
+			isWellOrganized: true,
+			breadcrumbs: [{ id: '3', name: 'Documentos/Trabajo', path: '/home/user/documents/trabajo' }],
+			fullPath: '/home/user/documents/trabajo',
+			relativePath: 'documents/trabajo',
+			autoTags: ['work', 'documents'],
+			qualityGrade: 'A' as const,
+			totalRelations: 0,
+			lastScanned: new Date().toISOString(),
+			recentImages: [],
+		},
+	} as AnyEntityWithStats,
+];
 
 const layouts: CardLayout[] = ['minimal', 'compact', 'complete', 'horizontal', 'vertical', 'list', 'grid', 'masonry'];
 const variants: CardVariant[] = ['default', 'minimal', 'elevated', 'outlined', 'tcg', 'polaroid', 'glass'];
@@ -162,8 +298,8 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 							variant={selectedVariant}
 							size={selectedSize}
 							preset={selectedPreset || undefined}
-							onClick={() => console.log('Clicked:', entity.name)}
-							onDoubleClick={() => console.log('Double clicked:', entity.name)}
+							onClick={() => console.log('Clicked:', 'name' in entity ? entity.name : entity.id)}
+                        onDoubleClick={() => console.log('Double clicked:', 'name' in entity ? entity.name : entity.id)}
 						/>
 					))}
 				</div>

@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreatePlace, useUpdatePlace } from '@/lib/api/places';
 import { toastService } from '@/lib/ui/toast';
-import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
+import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
 
 // Opciones para los selects que antes eran enums
 const placeTypes = ['CITY', 'TOWN', 'VILLAGE', 'REGION', 'PLANET', 'OTHER'] as const;

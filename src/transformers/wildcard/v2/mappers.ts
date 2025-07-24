@@ -24,9 +24,9 @@ const logger = serverLogger.withContext('WildcardTransformer:Mappers');
  * @param data Datos de creación
  * @returns Datos formateados para Prisma
  */
-export function toCreateWildcardData(data: CreateWildcardData): Record<string, any> {
+export function toCreateWildcardData(data: CreateWildcardData): Record<string, unknown> {
 	try {
-		const result: Record<string, any> = {
+		const result: Record<string, unknown> = {
 			id: data.id,
 			name: data.name,
 			emoji: data.emoji || DEFAULT_WILDCARD_EMOJI,
@@ -52,9 +52,9 @@ export function toCreateWildcardData(data: CreateWildcardData): Record<string, a
  * @param data Datos de actualización
  * @returns Datos formateados para Prisma
  */
-export function toUpdateWildcardData(data: UpdateWildcardData): Record<string, any> {
+export function toUpdateWildcardData(data: UpdateWildcardData): Record<string, unknown> {
 	try {
-		const result: Record<string, any> = {};
+		const result: Record<string, unknown> = {};
 
 		// Solo incluir campos que están presentes en los datos de entrada
 		if (data.name !== undefined) result.name = data.name;
@@ -88,9 +88,9 @@ export function toUpdateWildcardData(data: UpdateWildcardData): Record<string, a
  * @param data Datos de actualización en lote
  * @returns Datos formateados para Prisma
  */
-export function toBulkUpdateWildcardData(data: WildcardBulkUpdateData): Record<string, any> {
+export function toBulkUpdateWildcardData(data: WildcardBulkUpdateData): Record<string, unknown> {
 	try {
-		const result: Record<string, any> = {};
+		const result: Record<string, unknown> = {};
 
 		// Solo incluir campos que están presentes en los datos de entrada
 		if (data.parentId !== undefined) result.parentId = data.parentId;
@@ -126,7 +126,7 @@ export function toWildcardRelated(wildcard: WildcardBase): WildcardRelated {
  * @param options Opciones de búsqueda
  * @returns Opciones formateadas para Prisma
  */
-export function toSearchOptions(options: WildcardSearchOptions = {}): Record<string, any> {
+export function toSearchOptions(options: WildcardSearchOptions = {}): Record<string, unknown> {
 	try {
 		const {
 			page = 1,
@@ -153,7 +153,7 @@ export function toSearchOptions(options: WildcardSearchOptions = {}): Record<str
 		};
 
 		// Configurar condiciones de búsqueda
-		const where: Record<string, any> = {};
+		const where: Record<string, unknown> = {};
 
 		// Aplicar filtros de búsqueda
 		if (filters) {
@@ -166,7 +166,7 @@ export function toSearchOptions(options: WildcardSearchOptions = {}): Record<str
 		}
 
 		// Configurar inclusiones de relaciones
-		const include: Record<string, any> = {
+		const include: Record<string, unknown> = {
 			_count: includeStats,
 		};
 
@@ -214,7 +214,7 @@ export function toSearchOptions(options: WildcardSearchOptions = {}): Record<str
  * @param where Objeto where de Drizzle
  * @param filters Filtros a aplicar
  */
-function applyFilters(where: Record<string, any>, filters: WildcardSearchFilters): void {
+function applyFilters(where: Record<string, unknown>, filters: WildcardSearchFilters): void {
 	// Filtrar por categoría
 	if (filters.category) {
 		where.category = filters.category;

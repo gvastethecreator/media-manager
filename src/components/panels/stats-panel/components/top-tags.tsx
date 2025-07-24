@@ -33,9 +33,9 @@ export function TopTags() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 space-y-0.5 w-full">
-				{stats.topTags?.map((tag: any) => (
-					<TagUsage key={tag.id} tag={tag} />
-				)) || <div className="text-muted-foreground text-sm p-2">No hay datos de etiquetas</div>}
+				{stats.topTags?.map((tag: any) => <TagUsage key={tag.id} tag={tag} />) || (
+					<div className="text-muted-foreground text-sm p-2">No hay datos de etiquetas</div>
+				)}
 			</CardContent>
 		</>
 	);

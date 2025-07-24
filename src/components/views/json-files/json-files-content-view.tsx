@@ -1,6 +1,4 @@
-import React from 'react';
-
-const JsonFilesContentView: React.FC = () => {
+const JsonFilesContentView = () => {
 	return (
 		<div>
 			<h1>Json Files View</h1>

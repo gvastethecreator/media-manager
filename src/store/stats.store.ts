@@ -84,6 +84,11 @@ interface StatsData extends BaseEntity {
 	totalPlaces: number;
 	totalWorldItems: number;
 	totalActivities: number;
+	totalDocuments: number;
+	totalAudio: number;
+	totalJsonFiles: number;
+	totalWorkflows: number;
+	totalFile3D: number;
 
 	// Listas detalladas
 	folders: FolderStat[];

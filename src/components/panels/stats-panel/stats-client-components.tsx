@@ -2,10 +2,10 @@ import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBytes } from '@/lib/utils/format';
+import type { GeneralStats, RecentActivity, TopTag } from '@/types/stats';
 import { Activity } from './components/activity';
 import { StatCard } from './components/stat-card';
 import { TagUsage } from './components/tag-usage';
-import type { TopTag, RecentActivity, GeneralStats } from '@/types/stats';
 // Función para obtener estadísticas cliente-side
 import { getStatsData } from './stats-actions-client';
 
@@ -226,9 +226,9 @@ export function ClientTopTags() {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-0 space-y-0.5 w-full">
-				{stats.topTags?.map((tag: TopTag) => (
-					<TagUsage key={tag.id} tag={tag} />
-				)) || <div className="text-muted-foreground text-sm p-2">No hay etiquetas disponibles</div>}
+				{stats.topTags?.map((tag: TopTag) => <TagUsage key={tag.id} tag={tag} />) || (
+					<div className="text-muted-foreground text-sm p-2">No hay etiquetas disponibles</div>
+				)}
 			</CardContent>
 		</>
 	);
