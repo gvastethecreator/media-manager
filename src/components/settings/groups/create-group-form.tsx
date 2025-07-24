@@ -14,12 +14,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido').max(50, 'El nombre no puede tener más de 50 caracteres'),
-	emoji: z.string().default('📂'),
-	color: z.string().default('#3b82f6'),
+	emoji: z.string().optional(),
+	color: z.string().optional(),
 	description: z.string().optional(),
 	category: z.string().optional(),
-	filters: z.string().default(''),
-	isFavorite: z.boolean().default(false),
+	filters: z.string().optional(),
+	isFavorite: z.boolean().optional(),
 });
 
 type FormData = z.infer<typeof groupFormSchema>;
@@ -29,7 +29,7 @@ type FormData = z.infer<typeof groupFormSchema>;
 interface CreateGroupFormProps {
 	group?: GroupWithStats;
 	isEditing?: boolean;
-	onSubmit: (data: CreateGroupInput | UpdateGroupInput) => Promise<void>;
+	onSubmit: (data: CreateGroupInput) => Promise<void>;
 	onCancel: () => void;
 	onPreview?: () => void;
 }
@@ -60,14 +60,14 @@ export function CreateGroupForm({
 			throw new Error('El nombre es requerido');
 		}
 
-		const submitData: CreateGroupInput | UpdateGroupInput = {
+		const submitData: CreateGroupInput = {
 			name: data.name,
-			emoji: data.emoji || undefined,
-			color: data.color || undefined,
-			description: data.description || undefined,
-			category: data.category || undefined,
-			filters: data.filters || undefined,
-			isFavorite: data.isFavorite || false,
+			emoji: data.emoji,
+			color: data.color,
+			description: data.description,
+			category: data.category,
+			filters: data.filters,
+			isFavorite: data.isFavorite,
 		};
 
 		await onSubmit(submitData);

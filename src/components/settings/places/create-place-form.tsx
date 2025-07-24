@@ -35,10 +35,9 @@ const placeFormSchema = z
 		emoji: z.string().min(1, 'El emoji es obligatorio').default('📍').catch('📍'),
 		color: z.string().min(1, 'El color es obligatorio').default('#6b7280').catch('#6b7280'),
 		category: z.string().default('general').catch('general'),
-		region: z.string().default('unknown').catch('unknown'),
 		type: z.string().default('unknown').catch('unknown'),
 		climate: z.string().default('temperate').catch('temperate'),
-		population: z.coerce.number().default(0),
+		population: z.string().default('').catch(''),
 		government: z.string().default('unknown').catch('unknown'),
 		lore: z.string().default('').catch(''),
 		history: z.string().default('').catch(''),
@@ -92,10 +91,9 @@ export function CreatePlaceForm({
 				emoji: place.emoji ?? '📍',
 				color: place.color ?? '#6b7280',
 				category: place.category ?? 'general',
-				region: place.region ?? 'unknown',
 				type: place.type ?? 'unknown',
 				climate: place.climate ?? 'temperate',
-				population: place.population ?? 0,
+				population: place.population ?? '',
 				government: place.government ?? 'unknown',
 				lore: place.lore ?? '',
 				history: place.history ?? '',
@@ -119,7 +117,6 @@ export function CreatePlaceForm({
 					emoji: values.emoji,
 					color: values.color,
 					category: normalize(values.category),
-					region: normalize(values.region),
 					type: normalize(values.type),
 					climate: normalize(values.climate),
 					population: values.population,
@@ -138,7 +135,6 @@ export function CreatePlaceForm({
 					...values,
 					description: normalize(values.description),
 					category: normalize(values.category),
-					region: normalize(values.region),
 					type: normalize(values.type),
 					climate: normalize(values.climate),
 					government: normalize(values.government),
@@ -293,23 +289,7 @@ export function CreatePlaceForm({
 						/>
 					</div>
 
-					<div className="grid grid-cols-2 gap-4">
-						{/* Región */}
-						<FormField
-							control={form.control}
-							name="region"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Región</FormLabel>
-									<FormControl>
-										<Input placeholder="Región a la que pertenece" {...field} value={field.value ?? ''} />
-									</FormControl>
-									<FormDescription>Ubicación geográfica más amplia</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
+					<div className="grid grid-cols-1 gap-4">
 						{/* Clima */}
 						<FormField
 							control={form.control}

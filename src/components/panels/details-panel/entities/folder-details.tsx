@@ -449,7 +449,7 @@ export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(functio
 				},
 				{
 					label: 'Archivos',
-					value: stats.fileCount?.toString() || '0',
+					value: stats.totalItems?.toString() || '0',
 					category: 'stats',
 				},
 				{

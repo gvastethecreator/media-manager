@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -14,7 +14,7 @@ import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
 import { toastService } from '@/lib/ui/toast';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import { TagCategory } from '@/store/entities/tag/types';
-import type { TagComplete } from '@/types/entities/tag/types';
+import type { TagWithStats as TagComplete } from '@/types/entities/tag/base';
 
 
 // Esquema de validación
@@ -35,7 +35,7 @@ const createTagSchema = z.object({
 		.optional(),
 	color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
 		message: 'El color debe ser un código hexadecimal válido',
-	}),
+	}).optional(),
 	emoji: z.string().min(1, {
 		message: 'Debes seleccionar un emoji',
 	}),
@@ -43,7 +43,14 @@ const createTagSchema = z.object({
 	isFavorite: z.boolean().default(false),
 });
 
-type FormValues = z.infer<typeof createTagSchema>;
+type FormValues = {
+	name: string;
+	emoji: string;
+	color?: string;
+	description?: string;
+	category?: TagCategory;
+	isFavorite: boolean;
+};
 
 interface CreateTagFormProps {
 	tag?: TagComplete | null;
@@ -85,7 +92,7 @@ export function CreateTagForm({
 			form.reset({
 				name: tag.name,
 				description: tag.description || '',
-				color: tag.color,
+				color: tag.color || undefined,
 				emoji: tag.emoji || '🏷️',
 				category: tag.category as TagCategory | undefined,
 				isFavorite: tag.isFavorite || false,
@@ -94,7 +101,7 @@ export function CreateTagForm({
 	}, [form, isEditing, tag]);
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: FormValues) => {
+	const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
 		try {
 			// Crear datos comunes
 			const tagData = {
@@ -109,12 +116,12 @@ export function CreateTagForm({
 			// Crear o actualizar etiqueta
 			if (isEditing && tag) {
 				const updated = await updateTagMutation.mutateAsync({ id: tag.id, data: tagData });
-				onUpdated?.(updated as TagComplete);
+				onUpdated?.(updated as unknown as TagComplete);
 				onPreview?.(updated);
 				toastService.success('Etiqueta actualizada correctamente');
 			} else {
 				const created = await createTagMutation.mutateAsync(tagData);
-				onCreated?.(created as TagComplete);
+				onCreated?.(created as unknown as TagComplete);
 				onPreview?.(created);
 				form.reset();
 				toastService.success('Etiqueta creada correctamente');

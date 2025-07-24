@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Toggle } from '@/components/ui/toggle';
 import { useCreateGroup, useDeleteGroup, useGroups, useUpdateGroup } from '@/lib/api/groups';
 import { toastService } from '@/lib/ui/toast';
-import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
+import type { CreateGroupInput, UpdateGroupInput, GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria } from '@/types/entities/group';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
@@ -125,7 +125,7 @@ export function GroupsSettings() {
 		};
 	}, [groups]);
 
-	const handleCreateGroup = async (data: GroupCreateInput) => {
+	const handleCreateGroup = async (data: CreateGroupInput) => {
 		try {
 			await createGroupMutation.mutateAsync(data);
 			setIsCreateDialogOpen(false);
@@ -136,7 +136,7 @@ export function GroupsSettings() {
 		}
 	};
 
-	const handleUpdateGroup = async (id: string, data: GroupUpdateInput) => {
+	const handleUpdateGroup = async (id: string, data: UpdateGroupInput) => {
 		try {
 			await updateGroupMutation.mutateAsync({ id, data });
 			setSelectedGroup(null);
