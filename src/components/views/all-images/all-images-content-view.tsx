@@ -214,127 +214,127 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 	// }
 
 	return (
-		<BaseContentView
-			title="Todas las Imágenes"
-			description={`${images?.length || 0} ${(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total`}
-			icon={<ImageIcon className="h-5 w-5" />}
-			headerControls={
-				<>
-					{isIndexing && (
-						<Badge variant="secondary" className="animate-pulse">
-							<FolderSync className="h-3 w-3 mr-1 animate-spin" />
-							Indexando
-						</Badge>
-					)}
-					<Button onClick={startIndexing} variant="outline">
-						<FolderSync className="h-4 w-4 mr-2" />
-						Reindexar
-					</Button>
-				</>
-			}
-		>
-			{/* Barra de estado de indexación */}
-			{renderIndexingStatus()}
+			<BaseContentView
+				title="Todas las Imágenes"
+				description={`${images?.length || 0} ${(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total`}
+				icon="image"
+				headerControls={
+					<>
+						{isIndexing && (
+							<Badge variant="secondary" className="animate-pulse">
+								<FolderSync className="h-3 w-3 mr-1 animate-spin" />
+								Indexando
+							</Badge>
+						)}
+						<Button onClick={startIndexing} variant="outline">
+							<FolderSync className="h-4 w-4 mr-2" />
+							Reindexar
+						</Button>
+					</>
+				}
+			>
+				{/* Barra de estado de indexación */}
+				{renderIndexingStatus()}
 
-			{/* FileBrowser para mostrar todas las imágenes */}
-			<FileBrowser
-				entityType={EntityStatsType.IMAGE}
-				mode="auto"
-				onItemSelect={handleImageClick}
-				onItemDoubleClick={handleImageDoubleClick}
-				className="min-h-[600px]"
-				layout="vertical"
-				variant="default"
-				size="md"
-			/>
+				{/* FileBrowser para mostrar todas las imágenes */}
+				<FileBrowser
+					entityType={EntityStatsType.IMAGE}
+					mode="auto"
+					onItemSelect={handleImageClick}
+					onItemDoubleClick={handleImageDoubleClick}
+					className="min-h-[600px]"
+					layout="vertical"
+					variant="default"
+					size="md"
+				/>
 
-			{/* Footer con información adicional */}
-			{images && images.length > 0 && (
-				<div className="mt-8 pt-6 border-t border-border">
-					<div className="flex items-center justify-between text-sm text-muted-foreground">
-						<span>
-							Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
-						</span>
-						{indexingStatus?.indexedFolders && indexingStatus.indexedFolders > 0 && (
-							<span className="text-green-600 dark:text-green-400">
-								✅ {indexingStatus.indexedFolders} carpetas indexadas automáticamente
+				{/* Footer con información adicional */}
+				{images && images.length > 0 && (
+					<div className="mt-8 pt-6 border-t border-border">
+						<div className="flex items-center justify-between text-sm text-muted-foreground">
+							<span>
+								Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
 							</span>
-						)}
-					</div>
-				</div>
-			)}
-
-			{/* Dialog para upload de imágenes */}
-			<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-				<DialogTrigger asChild>
-					<Button variant="default" className="fixed bottom-4 right-4 z-50" onClick={() => setIsUploadDialogOpen(true)}>
-						<Upload className="w-4 h-4 mr-2" />
-						Subir Imágenes
-					</Button>
-				</DialogTrigger>
-				<DialogContent className="sm:max-w-[425px]">
-					<DialogHeader>
-						<DialogTitle>Subir Imágenes</DialogTitle>
-					</DialogHeader>
-
-					<div className="grid gap-4 py-2">
-						{/* Instrucciones */}
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-base font-semibold">Instrucciones</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<p className="text-sm text-muted-foreground">
-									1. Selecciona las imágenes que deseas subir desde tu dispositivo.
-								</p>
-								<p className="text-sm text-muted-foreground">
-									2. Asegúrate de que las imágenes cumplan con los requisitos de tamaño y formato.
-								</p>
-								<p className="text-sm text-muted-foreground">
-									3. Haz clic en "Subir Imágenes" para iniciar el proceso de carga.
-								</p>
-							</CardContent>
-						</Card>
-
-						{/* Selector de archivos */}
-						<div>
-							<Label htmlFor="image-upload" className="block text-sm font-medium">
-								Seleccionar Imágenes
-							</Label>
-							<Input
-								id="image-upload"
-								type="file"
-								accept="image/*"
-								multiple
-								onChange={handleFileSelectInternal}
-								className="mt-1"
-							/>
+							{indexingStatus?.indexedFolders && indexingStatus.indexedFolders > 0 && (
+								<span className="text-green-600 dark:text-green-400">
+									✅ {indexingStatus.indexedFolders} carpetas indexadas automáticamente
+								</span>
+							)}
 						</div>
+					</div>
+				)}
 
-						{/* Progreso de carga */}
-						{isUploading && (
-							<div className="flex flex-col gap-2">
-								<Progress value={uploadProgress} className="h-2" />
-								<span className="text-xs text-muted-foreground">Cargando... {uploadProgress}%</span>
+				{/* Dialog para upload de imágenes */}
+				<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+					<DialogTrigger asChild>
+						<Button variant="default" className="fixed bottom-4 right-4 z-50" onClick={() => setIsUploadDialogOpen(true)}>
+							<Upload className="w-4 h-4 mr-2" />
+							Subir Imágenes
+						</Button>
+					</DialogTrigger>
+					<DialogContent className="sm:max-w-[425px]">
+						<DialogHeader>
+							<DialogTitle>Subir Imágenes</DialogTitle>
+						</DialogHeader>
+
+						<div className="grid gap-4 py-2">
+							{/* Instrucciones */}
+							<Card>
+								<CardHeader>
+									<CardTitle className="text-base font-semibold">Instrucciones</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<p className="text-sm text-muted-foreground">
+										1. Selecciona las imágenes que deseas subir desde tu dispositivo.
+									</p>
+									<p className="text-sm text-muted-foreground">
+										2. Asegúrate de que las imágenes cumplan con los requisitos de tamaño y formato.
+									</p>
+									<p className="text-sm text-muted-foreground">
+										3. Haz clic en "Subir Imágenes" para iniciar el proceso de carga.
+									</p>
+								</CardContent>
+							</Card>
+
+							{/* Selector de archivos */}
+							<div>
+								<Label htmlFor="image-upload" className="block text-sm font-medium">
+									Seleccionar Imágenes
+								</Label>
+								<Input
+									id="image-upload"
+									type="file"
+									accept="image/*"
+									multiple
+									onChange={handleFileSelectInternal}
+									className="mt-1"
+								/>
 							</div>
-						)}
 
-						{/* Botones de acción */}
-						<div className="flex justify-end gap-2">
-							<Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} className="h-9">
-								Cancelar
-							</Button>
-							<Button
-								onClick={() => handleFileUploadInternal(uploadFiles)}
-								className="h-9"
-								disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
-							>
-								{isUploading ? 'Subiendo...' : 'Subir Imágenes'}
-							</Button>
+							{/* Progreso de carga */}
+							{isUploading && (
+								<div className="flex flex-col gap-2">
+									<Progress value={uploadProgress} className="h-2" />
+									<span className="text-xs text-muted-foreground">Cargando... {uploadProgress}%</span>
+								</div>
+							)}
+
+							{/* Botones de acción */}
+							<div className="flex justify-end gap-2">
+								<Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} className="h-9">
+									Cancelar
+								</Button>
+								<Button
+									onClick={() => handleFileUploadInternal(uploadFiles)}
+									className="h-9"
+									disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
+								>
+									{isUploading ? 'Subiendo...' : 'Subir Imágenes'}
+								</Button>
+							</div>
 						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
+					</DialogContent>
+				</Dialog>
 		</BaseContentView>
 	);
 };

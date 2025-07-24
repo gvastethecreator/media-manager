@@ -13,7 +13,7 @@ import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
 import { TagComplete, TagCategory } from '@/types/entities/tag';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import { toastService } from '@/services/toast/toast.service';
-import { createTagSchema, ValidatedCreateTagData } from '@/lib/utils/tag/validators';
+import { createTagSchema, type ValidatedCreateTagData } from '@/lib/utils/tag/validators';
 
 
 interface CreateTagFormProps {
@@ -159,7 +159,7 @@ export function CreateTagForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Categoría</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Selecciona una categoría" />
@@ -185,7 +185,12 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Descripción</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Descripción de la etiqueta..." rows={3} {...field} />
+								<Textarea
+									placeholder="Descripción de la etiqueta..."
+									rows={3}
+									{...field}
+									value={field.value ?? ''}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
