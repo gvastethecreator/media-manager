@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AnyEntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface DetailsPanelState {
 	isVisible: boolean;

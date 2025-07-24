@@ -34,7 +34,7 @@ type WorldItemForm = z.infer<typeof worldItemSchema>;
 interface CreateWorldItemFormProps {
 	worldItem?: WorldItemComplete | null;
 	isEditing?: boolean;
-	onCreated?: (item: WorldItemComplete) => void;
+	onCreated?: (data: WorldItemCreateInput) => void;
 	onUpdated?: (item: WorldItemComplete) => void;
 	onCancel?: () => void;
 	onPreview?: (item: WorldItemComplete) => void;
@@ -110,9 +110,9 @@ export function CreateWorldItemForm({
 				}
 			} else {
 				// Crear nuevo objeto
-				const newItem = await createWorldItemMutation.mutateAsync(data);
+				await createWorldItemMutation.mutateAsync(data);
 				if (onCreated) {
-					onCreated(newItem);
+					onCreated(data);
 				}
 				form.reset(); // Limpiar formulario después de crear
 			}
@@ -245,8 +245,8 @@ export function CreateWorldItemForm({
 						const updated = await updateWorldItemMutation.mutateAsync({ id: worldItem.id, data });
 						onUpdated?.(updated);
 					} else {
-						const created = await createWorldItemMutation.mutateAsync(data);
-						onCreated?.(created);
+						await createWorldItemMutation.mutateAsync(data);
+						onCreated?.(data);
 					}
 				} catch (error) {
 					console.error('Error al procesar el world item:', error);

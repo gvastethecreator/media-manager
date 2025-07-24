@@ -60,7 +60,6 @@ export function WorldItemsSettings() {
 		() => ({
 			totalItems: worldItems.length,
 			totalImages: worldItems.reduce((acc, item) => acc + (item._count?.images || 0), 0),
-			totalSize: worldItems.reduce((acc, item) => acc + (item.totalSize || 0), 0),
 			unusedItems: worldItems.filter((item) => (item._count?.images || 0) === 0).length,
 			favoriteItems: worldItems.filter((item) => item.isFavorite).length,
 		}),
@@ -279,10 +278,10 @@ export function WorldItemsSettings() {
 												{uniqueTypes.map((type) => (
 													<div key={type} className="flex items-center space-x-2">
 														<Checkbox
-															id={`type-${type}`}
-															checked={filterTypes.includes(type)}
-															onCheckedChange={() => toggleType(type)}
-														/>
+													id={`type-${type}`}
+													checked={filterTypes.includes(type)}
+													onCheckedChange={() => toggleType(type)}
+												/>
 														<Label htmlFor={`type-${type}`} className="text-sm">
 															{type}
 														</Label>
@@ -328,7 +327,11 @@ export function WorldItemsSettings() {
 
 								{/* Favoritos */}
 								<div className="flex items-center space-x-2">
-									<Checkbox id={idShowFavorites} checked={showOnlyFavorites} onCheckedChange={setShowOnlyFavorites} />
+									<Checkbox 
+										id={idShowFavorites} 
+										checked={showOnlyFavorites} 
+										onCheckedChange={(checked) => setShowOnlyFavorites(!!checked)} 
+									/>
 									<Label htmlFor={idShowFavorites} className="text-sm">
 										Solo favoritos
 									</Label>
