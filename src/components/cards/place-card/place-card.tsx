@@ -96,7 +96,7 @@ export function PlaceCard({
 	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
 
 	// Corregir tipos de campos parseados
-	const safeParsedResources = Array.isArray(parsedResources) 
+	const safeParsedResources = Array.isArray(parsedResources)
 		? parsedResources as { name: string; abundance: number; description?: string }[]
 		: [];
 	const safeParsedDangers = Array.isArray(parsedDangers)

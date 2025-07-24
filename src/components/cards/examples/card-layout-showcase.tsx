@@ -85,38 +85,26 @@ const mockEntities: AnyEntityWithStats[] = [
 		featuredImage: null,
 		isPublic: true,
 		isFavorite: false,
-		isArchived: false,
-		sortOrder: 0,
-		viewCount: 0,
-		downloadCount: 0,
-		likeCount: 0,
-		shareCount: 0,
-		folderId: null,
 		parentId: null,
-		lastVideoAddedAt: new Date(),
 		category: 'personal',
 		platform: 'local',
-		privacyLevel: 'private',
-		contentRating: 'general',
-		language: 'es',
-		region: 'ES',
+		price: null,
+		network: null,
+		tokenId: null,
+		url: null,
+		alternativeUrl: null,
+		editions: null,
+		sourceImage: null,
 		totalImages: 18,
 		totalVideos: 2,
 		totalSize: 15728640,
 		lastImageAddedAt: new Date(),
+		lastVideoAddedAt: new Date(),
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		stats: {
 			imageCount: 18,
 			videoCount: 2,
-			totalSize: 15728640,
-			averageSize: 1572864,
-			lastImageAddedAt: new Date(),
-			lastVideoAddedAt: new Date(),
-			viewCount: 25,
-			downloadCount: 5,
-			likeCount: 18,
-			shareCount: 3,
 			tagCount: 5,
 			albumCount: 2,
 			characterCount: 3,
@@ -299,7 +287,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 							size={selectedSize}
 							preset={selectedPreset || undefined}
 							onClick={() => console.log('Clicked:', 'name' in entity ? entity.name : entity.id)}
-                        onDoubleClick={() => console.log('Double clicked:', 'name' in entity ? entity.name : entity.id)}
+							onDoubleClick={() => console.log('Double clicked:', 'name' in entity ? entity.name : entity.id)}
 						/>
 					))}
 				</div>

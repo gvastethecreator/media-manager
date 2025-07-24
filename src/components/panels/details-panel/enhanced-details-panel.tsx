@@ -18,11 +18,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { EntityWithStats, getEntityStatsType } from '@/types/migration';
+import { AnyEntityWithStats, getEntityStatsType } from '@/types/migration';
 import { entityDetailsRegistry } from './entity-details-registry';
 
 // Fallback para cuando no hay configuración específica
-const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action: string, data?: any) => void }>(
+const DefaultEntityDetails = memo<{ entity: AnyEntityWithStats; onAction?: (action: string, data?: any) => void }>(
 	function DefaultEntityDetails({ entity, onAction }) {
 		const entityType = getEntityStatsType(entity);
 		if (entityType === null) {
@@ -48,21 +48,21 @@ const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action:
 				<CardContent>
 					<div className="space-y-2 text-sm">
 						<div className="flex justify-between">
-							<span className="text-muted-foreground">Nombre:</span>
-							<span className="font-medium truncate max-w-[60%]">{entity.name || 'Sin nombre'}</span>
-						</div>
+						<span className="text-muted-foreground">Nombre:</span>
+						<span className="font-medium truncate max-w-[60%]">{('name' in entity ? entity.name : undefined) || 'Sin nombre'}</span>
+					</div>
 						<div className="flex justify-between">
 							<span className="text-muted-foreground">Tipo:</span>
 							<Badge variant="secondary" className="text-xs">
 								{entityType.charAt(0).toUpperCase() + entityType.slice(1)}
 							</Badge>
 						</div>
-						{entity.createdAt && (
-							<div className="flex justify-between">
-								<span className="text-muted-foreground">Creado:</span>
-								<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
-							</div>
-						)}
+						{'createdAt' in entity && entity.createdAt && (
+						<div className="flex justify-between">
+							<span className="text-muted-foreground">Creado:</span>
+							<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
+						</div>
+					)}
 					</div>
 				</CardContent>
 			</Card>
@@ -71,7 +71,7 @@ const DefaultEntityDetails = memo<{ entity: EntityWithStats; onAction?: (action:
 );
 
 // Componente para mostrar múltiples elementos seleccionados
-const MultipleSelectionDetails = memo<{ entities: EntityWithStats[]; onAction?: (action: string, data?: any) => void }>(
+const MultipleSelectionDetails = memo<{ entities: AnyEntityWithStats[]; onAction?: (action: string, data?: any) => void }>(
 	function MultipleSelectionDetails({ entities, onAction }) {
 		const entityCounts = useMemo(() => {
 			const counts: Record<string, number> = {};
@@ -217,7 +217,8 @@ export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {
 		}
 
 		const entity = selectedItems[0];
-		const config = entityDetailsRegistry.getConfigForEntity(entity);
+		const entityType = getEntityStatsType(entity);
+		const config = entityType ? entityDetailsRegistry.getConfig(entityType) : null;
 
 		if (config) {
 			const DetailsComponent = config.detailsComponent;

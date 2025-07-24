@@ -435,13 +435,13 @@ export class PlaceService {
 		return await deletePlace(id);
 	}
 
-	async getPlaceImages(id: string): Promise<Array<{id: string; name: string; path: string}>> {
+	async getPlaceImages(id: string): Promise<Array<{ id: string; name: string; path: string }>> {
 		// TODO: Implementar lógica para obtener imágenes del lugar
 		placeLogger.info(`Obteniendo imágenes del lugar ${id}`);
 		return [];
 	}
 
-	async getRecentPlaceMedia(id: string, limit: number): Promise<Array<{id: string; type: string; name: string}>> {
+	async getRecentPlaceMedia(id: string, limit: number): Promise<Array<{ id: string; type: string; name: string }>> {
 		// TODO: Implementar lógica para obtener media reciente del lugar
 		placeLogger.info(`Obteniendo media reciente del lugar ${id} (limit: ${limit})`);
 		return [];
