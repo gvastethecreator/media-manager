@@ -25,6 +25,15 @@ export const CollectionBaseSchema = z.object({
 	lastImageAddedAt: z.date().nullable(),
 	lastVideoAddedAt: z.date().nullable(),
 	parentId: z.string().nullable(),
+	category: z.string().nullable(),
+	platform: z.string().nullable(),
+	price: z.number().nullable(),
+	network: z.string().nullable(),
+	tokenId: z.string().nullable(),
+	url: z.string().nullable(),
+	alternativeUrl: z.string().nullable(),
+	editions: z.array(z.any()).nullable(),
+	sourceImage: z.string().nullable(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -52,6 +61,7 @@ export const CollectionStatisticsSchema = z.object({
  * ✨ Esquema Zod para CollectionWithStats (tipo canónico).
  */
 export const CollectionWithStatsSchema = CollectionBaseSchema.extend({
+	entityType: z.literal('collection'),
 	stats: CollectionStatisticsSchema,
 });
 

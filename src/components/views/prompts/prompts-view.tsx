@@ -48,7 +48,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 	const handlePromptSelect = useCallback(
 		(promptId: string) => {
 			viewLogger.info('🤖 Seleccionando prompt', { promptId });
-			const prompt = prompts.find(p => p.id === promptId);
+			const prompt = prompts.find((p) => p.id === promptId);
 			if (prompt) {
 				selectPrompt(prompt);
 			}

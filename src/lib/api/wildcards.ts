@@ -10,8 +10,6 @@ export interface WildcardFilters {
 	sortOrder?: 'asc' | 'desc';
 }
 
-
-
 export interface WildcardsResponse {
 	data: WildcardWithStats[];
 	pagination: {

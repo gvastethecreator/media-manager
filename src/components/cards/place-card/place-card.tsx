@@ -97,14 +97,12 @@ export function PlaceCard({
 
 	// Corregir tipos de campos parseados
 	const safeParsedResources = Array.isArray(parsedResources)
-		? parsedResources as { name: string; abundance: number; description?: string }[]
+		? (parsedResources as { name: string; abundance: number; description?: string }[])
 		: [];
 	const safeParsedDangers = Array.isArray(parsedDangers)
-		? parsedDangers as { type: string; level: number; description?: string }[]
+		? (parsedDangers as { type: string; level: number; description?: string }[])
 		: [];
-	const safeParsedStats = parsedStats && typeof parsedStats === 'object'
-		? parsedStats as Record<string, number>
-		: {};
+	const safeParsedStats = parsedStats && typeof parsedStats === 'object' ? (parsedStats as Record<string, number>) : {};
 
 	// Preparar los medios para el componente de galería
 	const cardMedia = useMemo(() => {
@@ -159,7 +157,7 @@ export function PlaceCard({
 	}, [color, type]);
 
 	// Datos de rareza y poder para el diseño TCG
-	const parsedMetadata = metadata && typeof metadata === 'object' ? metadata as Record<string, unknown> : {};
+	const parsedMetadata = metadata && typeof metadata === 'object' ? (metadata as Record<string, unknown>) : {};
 	const rarityLevel = (parsedMetadata.rarityLevel as number) || 1;
 	const power = (parsedMetadata.power as number) || 1;
 	const healthPoints = (parsedMetadata.healthPoints as number) || 100;

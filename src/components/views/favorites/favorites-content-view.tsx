@@ -1,20 +1,20 @@
 import { Heart } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useCallback } from 'react';
-import { cn } from '@/lib/utils';
-import type { FavoriteWithStats } from '@/types/entities/favorite/base';
-import type { FavoriteExtended } from '@/types/entities/favorite/types';
 import { FavoriteCard } from '@/components/cards/favorite-card';
-import { EmptyState } from '@/components/ui/empty-state';
-import { ViewContainer } from '@/components/views/view-container';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { ViewContainer } from '@/components/views/view-container';
 import { clientLogger } from '@/lib/logger';
-import { FAVORITE_ENTITY_EMOJIS, FAVORITE_ENTITY_COLORS } from '@/types/entities/favorite/base';
+import { cn } from '@/lib/utils';
+import type { FavoriteWithStats } from '@/types/entities/favorite/base';
+import { FAVORITE_ENTITY_COLORS, FAVORITE_ENTITY_EMOJIS } from '@/types/entities/favorite/base';
+import type { FavoriteExtended } from '@/types/entities/favorite/types';
 
 /**
  * Transforma un FavoriteWithStats a FavoriteExtended para compatibilidad con FavoriteCard
@@ -22,7 +22,7 @@ import { FAVORITE_ENTITY_EMOJIS, FAVORITE_ENTITY_COLORS } from '@/types/entities
 function transformToExtended(favorite: FavoriteWithStats): FavoriteExtended {
 	const entityIcon = FAVORITE_ENTITY_EMOJIS[favorite.entityType] || '⭐';
 	const entityColor = FAVORITE_ENTITY_COLORS[favorite.entityType] || '#6b7280';
-	
+
 	return {
 		...favorite,
 		// Propiedades adicionales requeridas por FavoriteExtended
@@ -81,13 +81,13 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 
 	if (error) {
 		return (
-				<EmptyState
-					icon={Heart}
-					title="Error al cargar favoritos"
-					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-					actions={<Button onClick={handleRetry}>Reintentar</Button>}
-				/>
-			);
+			<EmptyState
+				icon={Heart}
+				title="Error al cargar favoritos"
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				actions={<Button onClick={handleRetry}>Reintentar</Button>}
+			/>
+		);
 	}
 
 	return (

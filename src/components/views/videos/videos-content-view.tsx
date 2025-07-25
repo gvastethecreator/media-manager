@@ -1,16 +1,15 @@
 import { Play, RefreshCw, Video } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { EmptyState } from '@/components/ui/empty-state';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { VideoWithStats } from '@/types/entities/video';
-import { EntityStatsType, type EntityWithStats, type AnyEntityWithStats } from '@/types/migration';
-import { isVideoWithStats } from '@/types/migration';
+import { type AnyEntityWithStats, EntityStatsType, type EntityWithStats, isVideoWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('VideoContentView');
@@ -71,7 +70,7 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	const handleVideoDoubleClick = useCallback(
 		(video: AnyEntityWithStats) => {
 			if (!isVideoWithStats(video)) return;
-			
+
 			const videoItem = video as VideoWithStats;
 			logger.info('🖱️ Doble click en video:', videoItem.name);
 

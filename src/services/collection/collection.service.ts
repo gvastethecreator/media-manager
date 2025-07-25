@@ -134,23 +134,23 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		// Construir query
 		let query = db
 			.select({
-					id: collections.id,
-					name: collections.name,
-					description: collections.description,
-					emoji: collections.emoji,
-					color: collections.color,
-					featuredImage: collections.featuredImage,
-					isPublic: collections.isPublic,
-					isFavorite: collections.isFavorite,
-					totalImages: collections.totalImages,
-					totalVideos: collections.totalVideos,
-					totalSize: collections.totalSize,
-					lastImageAddedAt: collections.lastImageAddedAt,
-					lastVideoAddedAt: collections.lastVideoAddedAt,
-					parentId: collections.parentId,
-					createdAt: collections.createdAt,
-					updatedAt: collections.updatedAt,
-				})
+				id: collections.id,
+				name: collections.name,
+				description: collections.description,
+				emoji: collections.emoji,
+				color: collections.color,
+				featuredImage: collections.featuredImage,
+				isPublic: collections.isPublic,
+				isFavorite: collections.isFavorite,
+				totalImages: collections.totalImages,
+				totalVideos: collections.totalVideos,
+				totalSize: collections.totalSize,
+				lastImageAddedAt: collections.lastImageAddedAt,
+				lastVideoAddedAt: collections.lastVideoAddedAt,
+				parentId: collections.parentId,
+				createdAt: collections.createdAt,
+				updatedAt: collections.updatedAt,
+			})
 			.from(collections);
 
 		// Aplicar filtros
@@ -263,7 +263,7 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 
 		const collectionsWithCounts = transformedCollections.map((collection: any) => ({
 			collection,
-			counts: collection._count
+			counts: collection._count,
 		}));
 		const result = fromDrizzleCollections(collectionsWithCounts);
 		logger.info(`✅ ${result.length} colecciones obtenidas`);

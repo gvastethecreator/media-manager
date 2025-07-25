@@ -6,8 +6,15 @@ import { db } from '@/lib/drizzle';
 import { concepts } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { fromDrizzleConcept } from '@/transformers/concept/transformer';
 import type { ConceptBase } from '@/types/entities/concept/base';
-import type { ConceptCreateInput, ConceptUpdateInput, ConceptFilters, ConceptResults } from '@/types/entities/concept/types';
+import type {
+	ConceptCreateInput,
+	ConceptFilters,
+	ConceptResults,
+	ConceptUpdateInput,
+	ConceptWithStats,
+} from '@/types/entities/concept/types';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 
@@ -32,7 +39,7 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
  * Completamente migrado a Drizzle ORM
  */
 export const ConceptService = {
-	async createConcept(data: ConceptCreateInput): Promise<ConceptBase> {
+	async createConcept(data: ConceptCreateInput): Promise<ConceptWithStats> {
 		try {
 			const result = await db
 				.insert(concepts)
@@ -80,7 +87,7 @@ export const ConceptService = {
 		}
 	},
 
-	async updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptBase> {
+	async updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptWithStats> {
 		try {
 			const updateData: Partial<typeof concepts.$inferInsert> = {
 				updatedAt: new Date(),
@@ -110,7 +117,38 @@ export const ConceptService = {
 				throw new Error('Concepto no encontrado');
 			}
 
-			const concept = result[0] as ConceptBase;
+			const updatedConcept = result[0];
+
+			// Agregar _count vacío para el transformer
+			const counts = {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			};
+
+			// Transformar usando el transformer
+			const concept = fromDrizzleConcept(
+				{
+					...updatedConcept,
+					isFavorite: Boolean(updatedConcept.isFavorite),
+					isPublic: Boolean(updatedConcept.isPublic),
+				},
+				counts
+			);
+
+			if (!concept) {
+				throw new Error('Error al transformar concepto actualizado');
+			}
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -156,7 +194,7 @@ export const ConceptService = {
 		}
 	},
 
-	async getConcept(id: string): Promise<ConceptBase | null> {
+	async getConcept(id: string): Promise<ConceptWithStats | null> {
 		try {
 			const result = await db
 				.select({
@@ -191,12 +229,32 @@ export const ConceptService = {
 
 			const rawConcept = result[0];
 
-			// Asegurar que isFavorite sea boolean
-			return {
-				...rawConcept,
-				isFavorite: Boolean(rawConcept.isFavorite),
-				isPublic: Boolean(rawConcept.isPublic),
-			} as ConceptBase;
+			// Agregar _count vacío para el transformer
+			const counts = {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			};
+
+			// Transformar usando el transformer
+			return fromDrizzleConcept(
+				{
+					...rawConcept,
+					isFavorite: Boolean(rawConcept.isFavorite),
+					isPublic: Boolean(rawConcept.isPublic),
+				},
+				counts
+			);
 		} catch (error) {
 			conceptLogger.error('Error getting concept:', { id, error });
 			throw new Error('Error al obtener concepto');
@@ -212,7 +270,7 @@ export const ConceptService = {
 
 			if (category) {
 				if (Array.isArray(category)) {
-					conditions.push(...category.map(cat => eq(concepts.category, cat)));
+					conditions.push(...category.map((cat) => eq(concepts.category, cat)));
 				} else {
 					conditions.push(eq(concepts.category, category));
 				}
@@ -283,17 +341,41 @@ export const ConceptService = {
 
 			const [{ count: total }] = await countQuery;
 
-			// Transformar resultados de Drizzle asegurando tipos correctos
-			const transformedConcepts = drizzleConcepts.map((rawConcept: typeof concepts.$inferSelect) => ({
-				...rawConcept,
-				isFavorite: Boolean(rawConcept.isFavorite),
-			}));
+			// Transformar resultados usando el transformer
+			const transformedConcepts = drizzleConcepts
+				.map((rawConcept: typeof concepts.$inferSelect) => {
+					const counts = {
+						images: 0,
+						videos: 0,
+						albums: 0,
+						collections: 0,
+						tags: 0,
+						characters: 0,
+						places: 0,
+						worldItems: 0,
+						prompts: 0,
+						notes: 0,
+						wildcards: 0,
+						properties: 0,
+						groups: 0,
+					};
+
+					return fromDrizzleConcept(
+						{
+							...rawConcept,
+							isFavorite: Boolean(rawConcept.isFavorite),
+							isPublic: Boolean(rawConcept.isPublic),
+						},
+						counts
+					);
+				})
+				.filter((concept): concept is ConceptWithStats => concept !== null);
 
 			// Obtener estadísticas
 			const stats = await this.getConceptStats();
 
 			return {
-				items: transformedConcepts as ConceptBase[],
+				items: transformedConcepts,
 				total,
 				page,
 				pageSize,
@@ -323,7 +405,7 @@ export const ConceptService = {
 			const categoriesStats = Object.fromEntries(
 				categoryStats.map((item: { category: string | null; count: number }) => [
 					item.category || 'sin categoría',
-					item.count
+					item.count,
 				])
 			);
 

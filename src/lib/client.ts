@@ -33,6 +33,3 @@ export function useIsClient(): boolean {
 
 	return mounted;
 }
-
-
-

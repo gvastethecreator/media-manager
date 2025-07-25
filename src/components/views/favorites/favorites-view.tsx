@@ -13,7 +13,7 @@ export function FavoritesView({ isVisible }: ViewProps) {
 	const selectedIds = useFavoriteStore((state) => state.selectedIds) || [];
 	const selectFavorite = useFavoriteStore((state) => state.selectFavorite);
 	const deselectFavorite = useFavoriteStore((state) => state.deselectFavorite);
-	
+
 	// Obtener el primer favorito seleccionado como selectedFavoriteId
 	const selectedFavoriteId = selectedIds.length > 0 ? selectedIds[0] : null;
 	const setSelectedFavoriteId = (id: string) => {

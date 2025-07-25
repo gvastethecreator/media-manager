@@ -279,23 +279,29 @@ const EntityCard = memo<{
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-sm truncate">{entity.name || entity.id}</CardTitle>
-					<Badge className={cn('text-xs', getTypeColor('entityType' in entity ? entity.entityType : 'unknown'))}>{'entityType' in entity ? entity.entityType : 'unknown'}</Badge>
+					<Badge className={cn('text-xs', getTypeColor('entityType' in entity ? entity.entityType : 'unknown'))}>
+						{'entityType' in entity ? entity.entityType : 'unknown'}
+					</Badge>
 				</div>
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-2 text-xs text-muted-foreground">
 					{'size' in entity && entity.size && (
-					<div className="flex justify-between">
-						<span>Tamaño:</span>
-						<span>{formatSize(entity.size)}</span>
-					</div>
-				)}
-					{'stats' in entity && entity.stats && typeof entity.stats === 'object' && 'totalItems' in entity.stats && typeof entity.stats.totalItems === 'number' && (
-				<div className="flex justify-between">
-					<span>Elementos:</span>
-					<span>{entity.stats.totalItems}</span>
-				</div>
-			)}
+						<div className="flex justify-between">
+							<span>Tamaño:</span>
+							<span>{formatSize(entity.size)}</span>
+						</div>
+					)}
+					{'stats' in entity &&
+						entity.stats &&
+						typeof entity.stats === 'object' &&
+						'totalItems' in entity.stats &&
+						typeof entity.stats.totalItems === 'number' && (
+							<div className="flex justify-between">
+								<span>Elementos:</span>
+								<span>{entity.stats.totalItems}</span>
+							</div>
+						)}
 					<div className="flex justify-between">
 						<span>Creado:</span>
 						<span>{'createdAt' in entity ? new Date(entity.createdAt).toLocaleDateString() : 'N/A'}</span>

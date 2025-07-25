@@ -3,22 +3,21 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useCreateCollection, useUpdateCollection } from '@/lib/api/collections';
 import { toastService } from '@/lib/ui/toast';
-import type { CreateCollectionInput, UpdateCollectionInput, CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionWithStats, CreateCollectionInput, UpdateCollectionInput } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,
 	COLLECTION_CATEGORY_EMOJIS,
 	CollectionCategory,
 } from '@/types/entities/collection/enums';
-
 
 // Esquema de validación
 const createCollectionSchema = z.object({
@@ -360,7 +359,13 @@ export function CreateCollectionForm({
 						<FormItem>
 							<FormLabel>Precio</FormLabel>
 							<FormControl>
-								<Input type="number" min={0} step={0.01} {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+								<Input
+									type="number"
+									min={0}
+									step={0.01}
+									{...field}
+									onChange={(e) => field.onChange(Number(e.target.value))}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -386,9 +391,7 @@ export function CreateCollectionForm({
 					<Button type="button" variant="outline" onClick={onCancel}>
 						Cancelar
 					</Button>
-					<Button type="submit">
-						{isEditing ? 'Guardar cambios' : 'Crear colección'}
-					</Button>
+					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear colección'}</Button>
 				</div>
 			</form>
 		</Form>

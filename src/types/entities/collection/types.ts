@@ -3,8 +3,8 @@
  * @module types/entities/collection/types
  */
 
-import { CollectionSortOption } from './enums';
 import type { ImageBase } from '../image/base';
+import { CollectionSortOption } from './enums';
 
 export interface CollectionBase {
 	id: string;

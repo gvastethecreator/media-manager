@@ -142,12 +142,7 @@ export function searchNotes(notes: NoteWithStats[], searchTerm: string): NoteWit
 	const term = searchTerm.toLowerCase();
 
 	return notes.filter((note) => {
-		return (
-			matchesTitle ||
-			matchesContent ||
-			matchesSummary ||
-			matchesCategory
-		);
+		return matchesTitle || matchesContent || matchesSummary || matchesCategory;
 	});
 }
 

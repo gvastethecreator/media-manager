@@ -5,9 +5,9 @@ import { DocumentCard } from '@/components/cards/document-card';
 import { FolderCard } from '@/components/cards/folder-card';
 import { ImageCard } from '@/components/cards/image-card';
 import { VideoCard } from '@/components/cards/video-card';
-import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,9 +37,15 @@ export default function MixedView({ className }: MixedViewProps) {
 	const navigate = useNavigate();
 
 	// Estados de los diferentes stores
-	const { images, isLoading: imagesLoading, error: imagesError, fetchImages } = useImageStore();
+	const images = useImageStore((state) => state.core.images);
+	const imagesLoading = useImageStore((state) => state.core.isLoading);
+	const imagesError = useImageStore((state) => state.core.error);
+	const fetchImages = useImageStore((state) => state.fetchImages);
 
-	const { videos, isLoading: videosLoading, error: videosError, fetchVideos } = useVideoStore();
+	const videos = useVideoStore((state) => state.videos);
+	const videosLoading = useVideoStore((state) => state.isLoading);
+	const videosError = useVideoStore((state) => state.error);
+	const fetchVideos = useVideoStore((state) => state.fetchVideos);
 
 	const documentsRecord = useDocumentStore((state) => state.documents);
 	const documentsLoading = useDocumentStore((state) => state.isLoading);
@@ -78,14 +84,21 @@ export default function MixedView({ className }: MixedViewProps) {
 		const items: (MixedItem & { itemType: FileType })[] = [];
 
 		// Agregar imágenes
-		images.forEach((image: ImageWithStats) => {
-			items.push({ ...image, itemType: 'images' });
+		Object.values(images || {}).forEach((image) => {
+			const imageWithStats = image as ImageWithStats;
+			items.push({ ...imageWithStats, itemType: 'images' });
 		});
 
 		// Agregar videos
-		videos.forEach((video: VideoWithStats) => {
-			items.push({ ...video, itemType: 'videos' });
-		});
+		if (Array.isArray(videos)) {
+			videos.forEach((video: VideoWithStats) => {
+				items.push({ ...video, itemType: 'videos' });
+			});
+		} else {
+			Object.values((videos as Record<string, VideoWithStats>) || {}).forEach((video: VideoWithStats) => {
+				items.push({ ...video, itemType: 'videos' });
+			});
+		}
 
 		// Agregar documentos
 		documents.forEach((document: DocumentWithStats) => {

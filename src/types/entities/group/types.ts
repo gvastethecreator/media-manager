@@ -6,8 +6,8 @@
 import type { ImageBase } from '../image/base';
 import type { GroupBase } from './base';
 
-// Re-export GroupBase from base file
-export type { GroupBase } from './base';
+// Re-export GroupBase and GroupWithStats from base file
+export type { GroupBase, GroupStatistics, GroupWithStats } from './base';
 
 export interface CreateGroupInput {
 	name: string;

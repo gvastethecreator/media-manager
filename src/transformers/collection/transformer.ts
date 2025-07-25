@@ -58,6 +58,7 @@ export function fromDrizzleCollection(
 
 		return {
 			...drizzleCollection,
+			entityType: 'collection' as const,
 			stats,
 		};
 	} catch (error) {

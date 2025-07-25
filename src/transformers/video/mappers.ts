@@ -121,9 +121,10 @@ export function mapUpdateVideoDataToDrizzle(input: VideoUpdateInput): DrizzleUpd
 		// Convertir thumbnail de Buffer a string si es necesario
 		const processedRest = {
 			...rest,
-			thumbnail: rest.thumbnail && Buffer.isBuffer(rest.thumbnail)
-				? rest.thumbnail.toString('base64')
-				: rest.thumbnail as string | null | undefined
+			thumbnail:
+				rest.thumbnail && Buffer.isBuffer(rest.thumbnail)
+					? rest.thumbnail.toString('base64')
+					: (rest.thumbnail as string | null | undefined),
 		};
 
 		return processedRest;

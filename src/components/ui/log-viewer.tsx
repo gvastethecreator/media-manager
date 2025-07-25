@@ -162,16 +162,16 @@ export function LogViewer({
 						<div className="p-2 space-y-1">
 							{filteredLogs.map((log) => (
 								<div key={log.id} className={cn('p-2 rounded text-sm font-mono break-all', LOG_COLORS[log.level])}>
-								{showTimestamp && <span className="opacity-70 mr-2">[{log.timestamp}]</span>}
-								<span className="mr-1">{LOG_ICONS[log.level]}</span>
-								{log.context && <span className="font-semibold mr-1">[{log.context}]</span>}
-								<span>{log.message}</span>
-								{log.data && (
-								<pre className="mt-1 text-xs overflow-x-auto">
-									{typeof log.data === 'string' ? log.data : JSON.stringify(log.data, null, 2)}
-								</pre>
-							)}
-							</div>
+									{showTimestamp && <span className="opacity-70 mr-2">[{log.timestamp}]</span>}
+									<span className="mr-1">{LOG_ICONS[log.level]}</span>
+									{log.context && <span className="font-semibold mr-1">[{log.context}]</span>}
+									<span>{log.message}</span>
+									{log.data && (
+										<pre className="mt-1 text-xs overflow-x-auto">
+											{typeof log.data === 'string' ? log.data : JSON.stringify(log.data, null, 2)}
+										</pre>
+									)}
+								</div>
 							))}
 						</div>
 					)}

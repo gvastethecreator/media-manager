@@ -7,26 +7,44 @@
 import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
-
-import type { AnyEntityWithStats } from '@/types/migration';
-import { isAlbumWithStats, isAudioWithStats, isCharacterWithStats, isCollectionWithStats, isConceptWithStats, isDocumentWithStats, isFolderWithStats, isGroupWithStats, isImageWithStats, isNoteWithStats, isPlaceWithStats, isPromptWithStats, isPropertyWithStats, isTagWithStats, isVideoWithStats, isWildcardWithStats, isWorldItemWithStats } from '@/types/migration';
-import type { ImageWithStats } from '@/types/entities/image';
-import type { VideoWithStats } from '@/types/entities/video';
-import type { FolderWithStats } from '@/types/entities/folder';
-import type { TagWithStats } from '@/types/entities/tag';
-import type { PlaceWithStats } from '@/types/entities/place';
-import type { WorldItemWithStats } from '@/types/entities/world-item';
-import type { NoteWithStats } from '@/types/entities/note';
-import type { PropertyWithStats } from '@/types/entities/property';
-import type { WildcardWithStats } from '@/types/entities/wildcard';
-import type { AudioWithStats } from '@/types/entities/audio';
-import type { DocumentWithStats } from '@/types/entities/document';
-import type { CollectionWithStats } from '@/types/entities/collection';
 import type { AlbumWithStats } from '@/types/entities/album';
+import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
+import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
-import type { PromptWithStats } from '@/types/entities/prompt';
+import type { DocumentWithStats } from '@/types/entities/document';
+import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { FolderWithStats } from '@/types/entities/folder';
 import type { GroupWithStats } from '@/types/entities/group';
+import type { ImageWithStats } from '@/types/entities/image';
+import type { NoteWithStats } from '@/types/entities/note';
+import type { PlaceWithStats } from '@/types/entities/place';
+import type { PromptWithStats } from '@/types/entities/prompt';
+import type { PropertyWithStats } from '@/types/entities/property';
+import type { TagWithStats } from '@/types/entities/tag';
+import type { VideoWithStats } from '@/types/entities/video';
+import type { WildcardWithStats } from '@/types/entities/wildcard';
+import type { WorldItemWithStats } from '@/types/entities/world-item';
+import type { AnyEntityWithStats } from '@/types/migration';
+import {
+	isAlbumWithStats,
+	isAudioWithStats,
+	isCharacterWithStats,
+	isCollectionWithStats,
+	isConceptWithStats,
+	isDocumentWithStats,
+	isFolderWithStats,
+	isGroupWithStats,
+	isImageWithStats,
+	isNoteWithStats,
+	isPlaceWithStats,
+	isPromptWithStats,
+	isPropertyWithStats,
+	isTagWithStats,
+	isVideoWithStats,
+	isWildcardWithStats,
+	isWorldItemWithStats,
+} from '@/types/migration';
 
 const logger = clientLogger.withContext('useEntityConversion');
 
@@ -68,12 +86,15 @@ export function useEntityConversion() {
 						wildcardCount: fileItem._count?.wildcards || 0,
 						propertyCount: fileItem._count?.properties || 0,
 						groupCount: fileItem._count?.groups || 0,
-						totalAssociations: fileItem._count ? Object.values(fileItem._count).reduce((sum, count) => sum + count, 0) : 0,
+						totalAssociations: fileItem._count
+							? Object.values(fileItem._count).reduce((sum, count) => sum + count, 0)
+							: 0,
 					},
 					thumbnailUrl: fileItem.thumbnailUrl || `/api/images/${fileItem.id}/thumbnail`,
 					fullUrl: `/api/images/${fileItem.id}/full`,
 				} as ImageWithStats;
-			} else if (isVideoWithStats(fileItem)) {
+			}
+			if (isVideoWithStats(fileItem)) {
 				return {
 					...fileItem,
 					entityType: 'video',
@@ -85,35 +106,50 @@ export function useEntityConversion() {
 						// ... otros campos de video
 					},
 				} as VideoWithStats;
-			} else if (isFolderWithStats(fileItem)) {
+			}
+			if (isFolderWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'folder' } as FolderWithStats;
-			} else if (isTagWithStats(fileItem)) {
+			}
+			if (isTagWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'tag' } as TagWithStats;
-			} else if (isPlaceWithStats(fileItem)) {
+			}
+			if (isPlaceWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'place' } as PlaceWithStats;
-			} else if (isWorldItemWithStats(fileItem)) {
+			}
+			if (isWorldItemWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'world-item' } as WorldItemWithStats;
-			} else if (isNoteWithStats(fileItem)) {
+			}
+			if (isNoteWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'note' } as NoteWithStats;
-			} else if (isPropertyWithStats(fileItem)) {
+			}
+			if (isPropertyWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'property' } as PropertyWithStats;
-			} else if (isWildcardWithStats(fileItem)) {
+			}
+			if (isWildcardWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'wildcard' } as WildcardWithStats;
-			} else if (isAudioWithStats(fileItem)) {
+			}
+			if (isAudioWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'audio' } as AudioWithStats;
-			} else if (isDocumentWithStats(fileItem)) {
+			}
+			if (isDocumentWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'document' } as DocumentWithStats;
-			} else if (isCollectionWithStats(fileItem)) {
+			}
+			if (isCollectionWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'collection' } as CollectionWithStats;
-			} else if (isAlbumWithStats(fileItem)) {
+			}
+			if (isAlbumWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'album' } as AlbumWithStats;
-			} else if (isCharacterWithStats(fileItem)) {
+			}
+			if (isCharacterWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'character' } as CharacterWithStats;
-			} else if (isConceptWithStats(fileItem)) {
+			}
+			if (isConceptWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'concept' } as ConceptWithStats;
-			} else if (isPromptWithStats(fileItem)) {
+			}
+			if (isPromptWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'prompt' } as PromptWithStats;
-			} else if (isGroupWithStats(fileItem)) {
+			}
+			if (isGroupWithStats(fileItem)) {
 				return { ...fileItem, entityType: 'group' } as GroupWithStats;
 			}
 
@@ -129,8 +165,8 @@ export function useEntityConversion() {
 	 * Convierte un array de FileItems a EntityWithStats[]
 	 */
 	const convertFileItems = useCallback(
-		(fileItems: EntityWithStats[]): EntityWithStats[] => {
-			return fileItems.map(convertSingleItem).filter((entity): entity is EntityWithStats => entity !== null);
+		(fileItems: AnyEntityWithStats[]): AnyEntityWithStats[] => {
+			return fileItems.map(convertSingleItem).filter((entity): entity is AnyEntityWithStats => entity !== null);
 		},
 		[convertSingleItem]
 	);
@@ -145,7 +181,7 @@ export function useEntityConversion() {
 
 			for (const entity of entities) {
 				// Detectar tipo usando type guards (temporalmente usando propiedades)
-				let type = entity.entityType || 'unknown';
+				const type = entity.entityType || 'unknown';
 
 				if (!grouped[type]) grouped[type] = [];
 				grouped[type].push(entity);

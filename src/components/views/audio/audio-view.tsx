@@ -105,10 +105,10 @@ export function AudioView(_props: ViewProps) {
 	}, [audios]);
 
 	return (
-			<AudioContentView
-				audios={sortedAudios}
-				isLoading={loading}
-				error={error}
+		<AudioContentView
+			audios={sortedAudios}
+			isLoading={loading}
+			error={error}
 			showForm={showForm}
 			newAudioName={newAudioName}
 			newAudioFile={newAudioFile}

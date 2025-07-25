@@ -9,7 +9,7 @@
 
 import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { EntityCard } from '@/components/cards/entity-card';
 import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
@@ -22,12 +22,12 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { EntityStatsType, type AnyEntityWithStats } from '@/types/migration';
+import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
 import { StatusBar } from './toolbar/status-bar';
 import { CardsView } from './views/cards-view';
+import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
-import { GridView } from './views/grid-view';
 
 const logger = clientLogger.withContext('FileBrowser');
 
@@ -275,7 +275,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		let filteredItems = rawItems;
 		if (searchQuery && searchQuery.trim()) {
 			const query = searchQuery.toLowerCase().trim();
-			filteredItems = rawItems.filter(item => {
+			filteredItems = rawItems.filter((item) => {
 				// Helper para obtener el nombre de la entidad
 				const getEntityName = (entity: AnyEntityWithStats): string => {
 					if ('name' in entity && typeof entity.name === 'string') return entity.name;
@@ -631,7 +631,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				/>
 			);
 		},
-		[effectiveSelectedIds, handleItemClick, handleItemDoubleClick, layout, preset, variant, size, onItemClick, onItemDoubleClick]
+		[
+			effectiveSelectedIds,
+			handleItemClick,
+			handleItemDoubleClick,
+			layout,
+			preset,
+			variant,
+			size,
+			onItemClick,
+			onItemDoubleClick,
+		]
 	);
 
 	// Renderizar contenido según el estado
@@ -699,12 +709,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	return (
 		<div className={cn('flex h-full w-full flex-col bg-background overflow-hidden', className)}>
 			<ScrollArea className="flex-1 min-h-0">
-				<div
-					ref={containerCallbackRef}
-					className="relative h-full w-full bg-transparent cursor-default"
-				>
+				<div ref={containerCallbackRef} className="relative h-full w-full bg-transparent cursor-default">
 					<AnimatePresence>
-						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							className="h-full w-full"
+						>
 							{containerWidth > 0 ? renderContent() : <Spinner />}
 						</motion.div>
 					</AnimatePresence>

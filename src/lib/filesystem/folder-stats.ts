@@ -159,7 +159,13 @@ async function processFilesWithProgress(
 ): Promise<EntityCreationStats> {
 	const totalFiles = filePaths.length;
 	let processedFiles = 0;
-	const stats: EntityCreationStats = { totalFiles: filePaths.length, processed: 0, successful: 0, failed: 0, errors: [] };
+	const stats: EntityCreationStats = {
+		totalFiles: filePaths.length,
+		processed: 0,
+		successful: 0,
+		failed: 0,
+		errors: [],
+	};
 
 	// Procesar archivos en lotes para evitar sobrecarga
 	const batchSize = 10;
@@ -172,17 +178,17 @@ async function processFilesWithProgress(
 		for (const filePath of batch) {
 			try {
 				const result = await fileEntityMapper.createEntityFromFile(filePath, folderId);
-			if (result) {
-				stats.successful++;
-			} else {
-				stats.successful++;
-			}
-			stats.processed++;
+				if (result) {
+					stats.successful++;
+				} else {
+					stats.successful++;
+				}
+				stats.processed++;
 			} catch (error) {
 				console.error(`Error procesando archivo ${filePath}:`, error);
-			stats.failed++;
-			stats.errors.push({ file: filePath, error: (error as Error).message || 'Unknown error' });
-			stats.processed++;
+				stats.failed++;
+				stats.errors.push({ file: filePath, error: (error as Error).message || 'Unknown error' });
+				stats.processed++;
 			}
 
 			processedFiles++;
@@ -241,9 +247,9 @@ async function processSubfolders(
 
 			if (existingFolder) {
 				// La carpeta ya existe, usar su ID
-			subfolderId = existingFolder.id;
-			totalStats.successful++;
-			totalStats.processed++;
+				subfolderId = existingFolder.id;
+				totalStats.successful++;
+				totalStats.processed++;
 			} else {
 				// Crear nueva carpeta
 				subfolderId = randomUUID();
@@ -261,7 +267,7 @@ async function processSubfolders(
 				});
 
 				totalStats.successful++;
-			totalStats.processed++;
+				totalStats.processed++;
 			}
 
 			// Indexar recursivamente la subcarpeta (sin emitir eventos de progreso)

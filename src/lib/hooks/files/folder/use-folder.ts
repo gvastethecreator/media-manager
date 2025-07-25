@@ -33,37 +33,37 @@ export function useFolder(options: { autoFilter?: boolean; loadOnMount?: boolean
 	// Acceso a las acciones del store
 	const {
 		fetchFolders,
-		fetchFolderById,
-		createFolder,
+		addFolder: createFolder,
 		updateFolder,
-		deleteFolder,
-		setCurrentFolderId,
-		setCurrentFolder,
-		resetError,
-		setSearchTerm,
+		removeFolder: deleteFolder,
+		selectFolder: setCurrentFolderId,
+		selectFolder: setCurrentFolder,
+		setSearchQuery: setSearchTerm,
 		setSortBy,
 		setSortDirection,
-		toggleFavorites,
+		toggleFavorites: setShowOnlyFavorites,
 		resetFilters,
 		setViewMode,
 		setItemSize,
-		toggleFolderExpanded,
+		toggleExpanded: toggleFolderExpanded,
 	} = useFolderStore();
 
 	// Acceso al estado mediante selectores para optimizar renders
-	const folders = useFolderStore(selectFolders);
-	const filteredFolders = useFolderStore(selectFilteredFolders, shallow);
-	const currentFolder = useFolderStore(selectCurrentFolder);
-	const isLoading = useFolderStore(selectIsLoading);
-	const error = useFolderStore(selectError);
-	const viewMode = useFolderStore(selectViewMode);
-	const itemSize = useFolderStore(selectItemSize);
-	const sortBy = useFolderStore(selectSortBy);
-	const sortDirection = useFolderStore(selectSortDirection);
-	const searchTerm = useFolderStore(selectSearchTerm);
-	const showFavorites = useFolderStore(selectShowFavorites);
-	const favoriteFolders = useFolderStore(selectFavoriteFolders, shallow);
-	const stats = useFolderStore(selectFolderStats, shallow);
+	const folders = useFolderStore((state) => Object.values(state.folders));
+	const filteredFolders = useFolderStore((state) => state.getFilteredFolders());
+	const currentFolder = useFolderStore((state) =>
+		state.selectedFolderId ? state.getFolder(state.selectedFolderId) : null
+	);
+	const isLoading = useFolderStore((state) => state.isLoading);
+	const error = useFolderStore((state) => state.error);
+	const viewMode = useFolderStore((state) => state.viewMode);
+	const itemSize = useFolderStore((state) => state.itemSize);
+	const sortBy = useFolderStore((state) => state.sortBy);
+	const sortDirection = useFolderStore((state) => state.sortDirection);
+	const searchTerm = useFolderStore((state) => state.searchQuery);
+	const showFavorites = useFolderStore((state) => state.showOnlyFavorites);
+	const favoriteFolders = useFolderStore((state) => Object.values(state.folders).filter((f) => f.isFavorite));
+	const stats = useFolderStore((state) => ({ totalFolders: Object.keys(state.folders).length }));
 
 	// Efecto para cargar datos al montar el componente
 	useEffect(() => {
@@ -90,13 +90,13 @@ export function useFolder(options: { autoFilter?: boolean; loadOnMount?: boolean
 
 		// Acciones
 		fetchFolders,
-		fetchFolderById,
+		fetchFolderById: (id: string) => Promise.resolve(useFolderStore.getState().getFolder(id)),
 		createFolder,
 		updateFolder,
 		deleteFolder,
 		setCurrentFolder,
 		setCurrentFolderId,
-		resetError,
+		resetError: () => useFolderStore.setState({ error: null }),
 
 		// Acciones de filtrado
 		setSearchTerm,

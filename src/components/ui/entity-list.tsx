@@ -22,14 +22,14 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon, Rows, Search, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { EntityCard, type EntityCardProps } from '@/components/cards/entity-card';
 import type { BaseCardProps } from '@/components/cards/types/card-layout.types';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Badge } from './badge';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { Badge } from './badge';
 
 export type EntityItem = Omit<BaseCardProps, 'onClick' | 'href'> & {
 	id: string;

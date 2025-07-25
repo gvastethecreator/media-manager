@@ -48,10 +48,12 @@ export const settingsSchema = z.object({
 	advanced: advancedSchema,
 	version: z.string().default('1.0.0'),
 	lastUpdate: z.date().default(() => new Date()),
-	system: z.object({
-		platform: z.string().default('web'),
-		version: z.string().default('1.0.0'),
-	}).default({}),
+	system: z
+		.object({
+			platform: z.string().default('web'),
+			version: z.string().default('1.0.0'),
+		})
+		.default({}),
 });
 
 // Esquema para actualizaciones parciales

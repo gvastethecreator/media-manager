@@ -20,7 +20,7 @@ export function toTagWithStats(tagWithCounts: TagWithCounts): TagWithStats {
 
 	// Calcular estadísticas basadas en los conteos
 	const totalRelations = Object.values(_count).reduce((sum, count) => sum + count, 0);
-	const usageDiversity = Object.values(_count).filter(count => count > 0).length;
+	const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
 	const popularity = totalRelations * (usageDiversity / Object.keys(_count).length);
 	const completenessScore = calculateCompleteness(baseTag);
 

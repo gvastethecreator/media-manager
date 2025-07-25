@@ -14,6 +14,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { fromDrizzleWildcard } from '@/transformers/wildcard/transformer';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
 
 // Logger específico para el servicio
@@ -119,36 +120,6 @@ const revalidateWildcardPaths = async (): Promise<void> => {
 };
 
 /**
- * Transforma datos de Drizzle a formato WildcardWithStats
- */
-const transformDrizzleToWildcardWithStats = (drizzleData: any): WildcardWithStats => {
-	return {
-		id: drizzleData.id,
-		name: drizzleData.name,
-		description: drizzleData.description || null,
-		emoji: drizzleData.emoji || null,
-		color: drizzleData.color || null,
-		category: drizzleData.category || null,
-		shortcut: drizzleData.shortcut || null,
-		children: drizzleData.children || null,
-		featuredImage: drizzleData.featuredImage || null,
-		isFavorite: Boolean(drizzleData.isFavorite),
-		parentId: drizzleData.parentId || null,
-		createdAt: drizzleData.createdAt,
-		updatedAt: drizzleData.updatedAt,
-		// Estadísticas vacías por ahora (TODO: implementar con subqueries)
-		_count: {
-			tags: 0,
-			images: 0,
-			characters: 0,
-			places: 0,
-			notes: 0,
-		},
-		tags: [], // Array vacío por ahora
-	};
-};
-
-/**
  * Obtiene un wildcard por su ID
  */
 export async function getWildcard(id: string): Promise<WildcardWithStats | null> {
@@ -180,7 +151,28 @@ export async function getWildcard(id: string): Promise<WildcardWithStats | null>
 			return null;
 		}
 
-		const result = transformDrizzleToWildcardWithStats(drizzleWildcard[0]);
+		// Agregar _count vacío para el transformer
+		const wildcardWithCounts = {
+			...drizzleWildcard[0],
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
+		// Usar el transformer
+		const result = fromDrizzleWildcard(wildcardWithCounts);
 		logger.info(`✅ Wildcard obtenido: ${result.name}`);
 		return result;
 	} catch (error) {
@@ -264,8 +256,29 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 				.then((result) => result[0]?.count || 0),
 		]);
 
-		// Transformar a formato WildcardWithStats
-		const result = drizzleWildcards.map(transformDrizzleToWildcardWithStats);
+		// Transformar a formato WildcardWithStats usando el transformer
+		const result = drizzleWildcards.map((wildcard) => {
+			// Agregar _count vacío para el transformer
+			const wildcardWithCounts = {
+				...wildcard,
+				_count: {
+					images: 0,
+					videos: 0,
+					albums: 0,
+					collections: 0,
+					tags: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					notes: 0,
+					properties: 0,
+					groups: 0,
+				},
+			};
+			return fromDrizzleWildcard(wildcardWithCounts);
+		});
 
 		logger.info(`✅ ${result.length} wildcards obtenidos`);
 		return {
@@ -342,8 +355,28 @@ export async function createWildcard(data: WildcardCreateInput): Promise<Wildcar
 		// Revalidar rutas
 		await revalidateWildcardPaths();
 
+		// Agregar _count vacío para el transformer
+		const wildcardWithCounts = {
+			...newWildcard,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
 		// Transformar resultado
-		const result = transformDrizzleToWildcardWithStats(newWildcard);
+		const result = fromDrizzleWildcard(wildcardWithCounts);
 
 		// Notificar creación
 		await notifyWildcardChange('create', result);
@@ -408,8 +441,28 @@ export async function updateWildcard(id: string, data: WildcardUpdateInput): Pro
 		// Revalidar rutas
 		await revalidateWildcardPaths();
 
+		// Agregar _count vacío para el transformer
+		const wildcardWithCounts = {
+			...updatedWildcard,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
 		// Transformar resultado
-		const result = transformDrizzleToWildcardWithStats(updatedWildcard);
+		const result = fromDrizzleWildcard(wildcardWithCounts);
 
 		// Notificar actualización
 		await notifyWildcardChange('update', result);

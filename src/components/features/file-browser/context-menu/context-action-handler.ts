@@ -11,10 +11,10 @@ import type { AnyEntityWithStats } from '@/types/migration';
 
 // Importaciones de stores en entidades
 
-// Importar el tipo local en lugar del tipo global
-import type { FileItem } from '@/lib/contexts/file-context';
 // Importaciones de actions de archivos
 import { deleteFile as deleteFileAction } from '@/services/file/file.service';
+// Importar el tipo desde la ubicación correcta
+import type { FileItem } from '@/types/files';
 import type { ContextMenuAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');
@@ -177,27 +177,30 @@ export const handleContextAction = async (
 				}
 				break;
 
-			case 'open':
+			case 'open': {
 				// Abrir ubicación del archivo
 				const itemPath = 'path' in item ? (item as any).path : '';
 				await customFileOperationsService.openPath(itemPath);
 				break;
+			}
 
-			case 'download':
+			case 'download': {
 				// Descargar archivo
 				const itemName = 'name' in item ? item.name : 'archivo';
 				const downloadPath = 'path' in item ? (item as any).path : '';
 				toastService.info(`Descargando: ${itemName}`);
 				await customFileOperationsService.downloadFile(downloadPath);
 				break;
+			}
 
-			case 'copy':
+			case 'copy': {
 				// Copiar al portapapeles
 				const copyPath = 'path' in item ? (item as any).path : '';
 				await customFileOperationsService.copyFileToClipboard(copyPath);
 				break;
+			}
 
-			case 'copy-path':
+			case 'copy-path': {
 				// Copiar ruta
 				const pathToCopy = 'path' in item ? (item as any).path : '';
 				await navigator.clipboard
@@ -205,14 +208,16 @@ export const handleContextAction = async (
 					.then(() => toastService.success('Ruta copiada al portapapeles'))
 					.catch(() => toastService.error('No se pudo copiar la ruta'));
 				break;
+			}
 
-			case 'delete':
+			case 'delete': {
 				// Eliminar archivo
 				const deleteItemName = 'name' in item ? item.name : 'archivo';
 				const deletePath = 'path' in item ? (item as any).path : '';
 				toastService.info(`Eliminando: ${deleteItemName}`);
 				await customFileOperationsService.deleteFile(deletePath);
 				break;
+			}
 
 			case 'add-to-collection':
 				if (data?.collectionId) {

@@ -6,7 +6,7 @@
 import { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FavoriteStore } from '..';
-import { FavoriteViewMode, FavoriteSortCriteria } from '../types';
+import { FavoriteSortCriteria, FavoriteViewMode } from '../types';
 
 // Logger específico para este slice
 const logger = clientLogger.withContext({ module: 'FavoriteStore.UISlice' });

@@ -14,8 +14,7 @@ const toastVariants = cva(
 		variants: {
 			variant: {
 				default: 'border bg-background text-foreground',
-				destructive:
-					'destructive group border-destructive bg-destructive text-destructive-foreground',
+				destructive: 'destructive group border-destructive bg-destructive text-destructive-foreground',
 			},
 		},
 		defaultVariants: {
@@ -40,7 +39,7 @@ function useToast() {
 	return {
 		toast: (props: Omit<ToastProps, 'id'>) => {
 			const { title, description, variant = 'default', action } = props;
-			
+
 			const toastContent = (
 				<div className="grid gap-1">
 					{title && <div className="text-sm font-semibold">{title}</div>}
@@ -111,12 +110,7 @@ function ToastTitle({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function ToastDescription({ className, ...props }: React.ComponentProps<'div'>) {
-	return (
-		<div
-			className={cn('text-sm opacity-90', className)}
-			{...props}
-		/>
-	);
+	return <div className={cn('text-sm opacity-90', className)} {...props} />;
 }
 
 // Viewport para compatibilidad (no se usa con sonner)
