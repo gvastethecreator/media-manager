@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import type { NavigationData } from '@/hooks/useNavigationData';
+import type { NavigationData } from '@/lib/api/navigation';
 
 interface EntityCardsContentViewProps {
 	data: NavigationData | undefined;

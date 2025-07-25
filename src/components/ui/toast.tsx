@@ -30,7 +30,8 @@ type ToastProps = VariantProps<typeof toastVariants> & {
 	description?: React.ReactNode;
 	action?: React.ReactElement;
 	id?: string;
-};
+	className?: string;
+} & React.ComponentProps<'div'>;
 
 interface ToastActionElement extends React.ReactElement {}
 

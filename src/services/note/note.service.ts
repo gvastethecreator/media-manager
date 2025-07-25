@@ -283,7 +283,7 @@ const NoteServiceImpl = {
 			} = filters;
 
 			// Construir condiciones WHERE para Drizzle
-			const conditions = [];
+		const conditions: any[] = [];
 
 			if (category) {
 				conditions.push(eq(notes.category, category));
@@ -302,7 +302,7 @@ const NoteServiceImpl = {
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 			// Determinar orden
-			const orderByClause = sortOrder === 'desc' ? desc(notes[sortBy] as any) : asc(notes[sortBy] as any);
+		const orderByClause = sortOrder === 'desc' ? desc(notes[sortBy as keyof typeof notes]) : asc(notes[sortBy as keyof typeof notes]);
 
 			// Ejecutar consultas en paralelo
 			const [drizzleNotes, totalCount] = await Promise.all([
@@ -333,7 +333,7 @@ const NoteServiceImpl = {
 					.then((result) => result[0]?.count || 0),
 			]);
 
-			const items: NoteWithStats[] = drizzleNotes.map((note) => {
+			const items: NoteWithStats[] = drizzleNotes.map((note: any) => {
 				// Calcular estadísticas básicas de contenido
 				const content = note.content || '';
 				const wordCount = content.trim() ? content.split(/\s+/).length : 0;
@@ -379,9 +379,9 @@ const NoteServiceImpl = {
 					},
 					excerpt: content.substring(0, 150) + (content.length > 150 ? '...' : ''),
 					formattedDate: note.updatedAt.toLocaleDateString(),
-					priorityLabel: NoteService.getPriorityLabel(note.priority),
-					statusLabel: NoteService.getStatusLabel(note.status),
-					categoryLabel: NoteService.getCategoryLabel(note.category),
+					priorityLabel: NoteServiceImpl.getPriorityLabel(note.priority),
+					statusLabel: NoteServiceImpl.getStatusLabel(note.status),
+					categoryLabel: NoteServiceImpl.getCategoryLabel(note.category),
 				};
 			});
 

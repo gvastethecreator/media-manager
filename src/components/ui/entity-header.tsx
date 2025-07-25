@@ -1,6 +1,7 @@
 import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -310,7 +311,7 @@ export function EntityHeader({
 												className={cn(
 													'cursor-pointer',
 													action.variant === 'destructive' &&
-													'text-destructive focus:text-destructive hover:text-destructive'
+														'text-destructive focus:text-destructive hover:text-destructive'
 												)}
 											>
 												{action.icon && <span className="mr-2">{action.icon}</span>}

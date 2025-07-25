@@ -24,10 +24,10 @@ import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { EntityStatsType, type AnyEntityWithStats } from '@/types/migration';
 import { StatusBar } from './toolbar/status-bar';
-import { VirtualizedCardsView } from './views/virtualized-cards-view';
-import { VirtualizedListView } from './views/virtualized-list-view';
-import { VirtualizedMasonryView } from './views/virtualized-masonry-view';
-import { VirtualizedSimpleGridView } from './views/virtualized-simple-grid-view';
+import { CardsView } from './views/cards-view';
+import { ListView } from './views/list-view';
+import { MasonryView } from './views/masonry-view';
+import { GridView } from './views/grid-view';
 
 const logger = clientLogger.withContext('FileBrowser');
 
@@ -408,7 +408,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 	})();
 
-	// Medir contenedor con optimización para evitar re-mediciones
+	// Medir contenedor con optimización mejorada y ResizeObserver
 	const measureContainer = useCallback((element: any) => {
 		// Evitar múltiples mediciones del mismo elemento
 		if (lastMeasuredElementRef.current === element) {
@@ -419,7 +419,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		logger.debug(`[FileBrowserV2] Intento medición ${attempt}`);
 
 		const measure = () => {
-			const width = element?.offsetWidth;
+			const width = element?.clientWidth || element?.offsetWidth;
 			if (width > 0) {
 				logger.info(`[FileBrowserV2] ✅ Medición exitosa: ${width}px`);
 				setContainerWidth(width);
@@ -429,17 +429,44 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			return false;
 		};
 
+		// Intentar medición inmediata
 		if (measure()) return;
 
-		(globalThis as any).requestAnimationFrame(() => {
-			if (measure()) return;
-			(globalThis as any).setTimeout(() => {
-				if (measure()) return;
-				logger.warn(`[FileBrowserV2] ⚠️ Falló medición, usando fallback: ${FALLBACK_WIDTH}px`);
-				setContainerWidth(FALLBACK_WIDTH);
-				lastMeasuredElementRef.current = element;
-			}, 100);
+		// Usar ResizeObserver como método principal
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const width = entry.contentRect.width;
+				if (width > 0) {
+					logger.info(`[FileBrowserV2] ✅ ResizeObserver medición: ${width}px`);
+					setContainerWidth(width);
+					lastMeasuredElementRef.current = element;
+					resizeObserver.disconnect();
+					return;
+				}
+			}
 		});
+
+		if (element) {
+			resizeObserver.observe(element);
+
+			// Fallback con requestAnimationFrame si ResizeObserver no funciona
+			(globalThis as any).requestAnimationFrame(() => {
+				if (measure()) {
+					resizeObserver.disconnect();
+					return;
+				}
+				(globalThis as any).setTimeout(() => {
+					if (measure()) {
+						resizeObserver.disconnect();
+						return;
+					}
+					logger.warn(`[FileBrowserV2] ⚠️ Falló medición, usando fallback: ${FALLBACK_WIDTH}px`);
+					setContainerWidth(FALLBACK_WIDTH);
+					lastMeasuredElementRef.current = element;
+					resizeObserver.disconnect();
+				}, 100);
+			});
+		}
 	}, []);
 
 	const containerCallbackRef = useCallback(
@@ -447,9 +474,27 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			if (element && containerRef.current !== element) {
 				containerRef.current = element;
 				measureContainer(element);
+
+				// Mantener ResizeObserver activo para cambios dinámicos de tamaño
+				const resizeObserver = new ResizeObserver((entries) => {
+					for (const entry of entries) {
+						const width = entry.contentRect.width;
+						if (width > 0 && width !== containerWidth) {
+							logger.debug(`[FileBrowserV2] 📏 Cambio de tamaño detectado: ${containerWidth}px → ${width}px`);
+							setContainerWidth(width);
+						}
+					}
+				});
+
+				resizeObserver.observe(element);
+
+				// Limpiar observer cuando el elemento se desmonte
+				return () => {
+					resizeObserver.disconnect();
+				};
 			}
 		},
-		[measureContainer]
+		[measureContainer, containerWidth]
 	);
 
 	// Manejar click en item
@@ -622,23 +667,23 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		switch (viewMode) {
 			case 'list':
-				return <VirtualizedListView {...commonViewProps} />;
+				return <ListView {...commonViewProps} />;
 			case 'grid':
-				return <VirtualizedSimpleGridView {...commonViewProps} />;
+				return <GridView {...commonViewProps} />;
 			case 'cards':
-				return <VirtualizedCardsView {...commonViewProps} />;
+				return <CardsView {...commonViewProps} />;
 			case 'simple-grid':
-				return <VirtualizedSimpleGridView {...commonViewProps} />;
+				return <GridView {...commonViewProps} />;
 			case 'masonry':
-				return <VirtualizedMasonryView {...commonViewProps} />;
+				return <MasonryView {...commonViewProps} />;
 			default:
-				return <VirtualizedCardsView {...commonViewProps} />;
+				return <CardsView {...commonViewProps} />;
 		}
 	};
 
 	return (
-		<div className={cn('flex h-full w-full flex-col bg-background', className)}>
-			<ScrollArea className="flex-1">
+		<div className={cn('flex h-full w-full flex-col bg-background overflow-hidden', className)}>
+			<ScrollArea className="flex-1 min-h-0">
 				<div
 					ref={containerCallbackRef}
 					className="relative h-full w-full bg-transparent cursor-default"

@@ -51,8 +51,9 @@ export const ConceptContentView = memo(function ConceptContentView() {
 		() => ({
 			icon: Lightbulb,
 			title: 'Concepto vacío',
-			description: `No se encontraron imágenes en ${selectedConcept?.name || 'este concepto'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				selectedConcept?.name || 'este concepto'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		}),
 		[selectedConcept?.name]
 	);
@@ -65,7 +66,7 @@ export const ConceptContentView = memo(function ConceptContentView() {
 			toggleItemSelection,
 			currentContainerId: selectedConcept?.id ?? null,
 			containerName: selectedConcept?.name ?? null,
-			setCurrentContainer: async () => { }, // No es necesario en el nuevo enfoque
+			setCurrentContainer: async () => {}, // No es necesario en el nuevo enfoque
 			emptyState,
 			onRefresh: loadConceptImages,
 		}),
@@ -96,13 +97,13 @@ export const ConceptContentView = memo(function ConceptContentView() {
 	}
 
 	return (
-		<ContentViewProvider {...contentProps}>
-			<BaseContentView>
-				{/* Concept content will be added here */}
-				<div className="p-4">
-					<p>Contenido del concepto se mostrará aquí</p>
-				</div>
-			</BaseContentView>
-		</ContentViewProvider>
-	);
+			<ContentViewProvider {...contentProps}>
+				<BaseContentView>
+					{/* Concept content will be added here */}
+					<div className="p-4">
+						<p>Contenido del concepto se mostrará aquí</p>
+					</div>
+				</BaseContentView>
+			</ContentViewProvider>
+		);
 });

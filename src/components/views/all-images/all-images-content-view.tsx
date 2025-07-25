@@ -15,7 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { EntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 import { EntityStatsType } from '@/types/migration';
 
 interface AllImagesContentViewProps {
@@ -31,8 +31,8 @@ interface AllImagesContentViewProps {
 	isIndexing: boolean;
 	progress: number;
 	startIndexing: () => void;
-	handleImageClick: (item: EntityWithStats) => void;
-	handleImageDoubleClick: (item: EntityWithStats) => void;
+	handleImageClick: (item: AnyEntityWithStats) => void;
+	handleImageDoubleClick: (item: AnyEntityWithStats) => void;
 	handleFileUpload: (files: File[]) => Promise<void>;
 	handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }

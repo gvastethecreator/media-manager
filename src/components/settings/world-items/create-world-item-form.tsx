@@ -31,6 +31,27 @@ const worldItemSchema = z.object({
 
 type WorldItemForm = z.infer<typeof worldItemSchema>;
 
+// Tipo específico para el input de creación del formulario
+type WorldItemFormInput = Pick<WorldItemCreateInput, 'name' | 'description' | 'color' | 'emoji' | 'type' | 'category' | 'rarity' | 'origin' | 'isFavorite'> & {
+	// Campos opcionales con valores por defecto
+	isPublic?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	featuredImage?: string | null;
+	parentId?: string | null;
+	shortcut?: string | null;
+	value?: string | null;
+	weight?: string | null;
+	materials?: string | null;
+	properties?: string | null;
+	uses?: string | null;
+	history?: string | null;
+	notes?: string | null;
+	attributes?: string | null;
+	effects?: string | null;
+	requirements?: string | null;
+};
+
 interface CreateWorldItemFormProps {
 	worldItem?: WorldItemComplete | null;
 	isEditing?: boolean;
@@ -74,11 +95,57 @@ export function CreateWorldItemForm({
 	useEffect(() => {
 		if (onPreview) {
 			const subscription = form.watch((data) => {
-				onPreview(data as WorldItemComplete);
+				// Crear un objeto mock para preview con los datos del formulario
+				const previewItem: WorldItemComplete = {
+					id: worldItem?.id || 'preview',
+					name: data.name || '',
+					description: data.description || null,
+					emoji: data.emoji || null,
+					color: data.color || null,
+					category: data.category || null,
+					isPublic: false,
+					isFavorite: data.isFavorite || false,
+					totalImages: 0,
+					totalVideos: 0,
+					type: data.type || null,
+					rarity: data.rarity || null,
+					origin: data.origin || null,
+					featuredImage: null,
+					parentId: null,
+					shortcut: null,
+					value: null,
+					weight: null,
+					materials: null,
+					properties: undefined,
+					uses: undefined,
+					history: undefined,
+					notes: undefined,
+					attributes: null,
+					effects: null,
+					requirements: null,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					_count: {
+						images: 0,
+						videos: 0,
+						albums: 0,
+						collections: 0,
+						tags: 0,
+						characters: 0,
+						places: 0,
+						concepts: 0,
+						prompts: 0,
+						notes: 0,
+						wildcards: 0,
+						properties: 0,
+						groups: 0
+					}
+				};
+				onPreview(previewItem);
 			});
 			return () => subscription.unsubscribe();
 		}
-	}, [form, onPreview]);
+	}, [form, onPreview, worldItem?.id]);
 
 	// Cargar datos iniciales si estamos editando
 	useEffect(() => {
@@ -106,13 +173,46 @@ export function CreateWorldItemForm({
 				// Actualizar objeto existente
 				const updatedItem = await updateWorldItemMutation.mutateAsync({ id: worldItem.id, data });
 				if (onUpdated) {
-					onUpdated(updatedItem);
+					// Convertir WorldItemWithStats a WorldItemComplete agregando las propiedades faltantes
+					const completeItem = {
+						...updatedItem,
+						totalImages: updatedItem._count?.images || 0,
+						totalVideos: updatedItem._count?.videos || 0
+					} as WorldItemComplete;
+					onUpdated(completeItem);
 				}
 			} else {
-				// Crear nuevo objeto
-				await createWorldItemMutation.mutateAsync(data);
+				// Crear nuevo objeto con valores por defecto
+				const createData: WorldItemCreateInput = {
+					name: data.name,
+					description: data.description || null,
+					emoji: data.emoji || null,
+					color: data.color || null,
+					category: data.category || null,
+					isPublic: false,
+					isFavorite: data.isFavorite || false,
+					totalImages: 0,
+					totalVideos: 0,
+					type: data.type || null,
+					rarity: data.rarity || null,
+					origin: data.origin || null,
+					featuredImage: null,
+					parentId: null,
+					shortcut: null,
+					value: null,
+					weight: null,
+					materials: null,
+					properties: null,
+					uses: null,
+					history: null,
+					notes: null,
+					attributes: null,
+					effects: null,
+					requirements: null,
+				};
+				await createWorldItemMutation.mutateAsync(createData);
 				if (onCreated) {
-					onCreated(data);
+					onCreated(createData);
 				}
 				form.reset(); // Limpiar formulario después de crear
 			}
@@ -237,16 +337,42 @@ export function CreateWorldItemForm({
 	];
 
 	return (
-		<DynamicCreateForm<WorldItemCreateInput>
+		<DynamicCreateForm<WorldItemFormInput>
 			optionalFields={optionalFields as any}
 			onSubmit={async (data) => {
 				try {
 					if (isEditing && worldItem) {
 						const updated = await updateWorldItemMutation.mutateAsync({ id: worldItem.id, data });
-						onUpdated?.(updated);
+						// Convertir WorldItemWithStats a WorldItemComplete
+				const completeUpdated = {
+					...updated,
+					totalImages: updated._count?.images || 0,
+					totalVideos: updated._count?.videos || 0
+				} as WorldItemComplete;
+				onUpdated?.(completeUpdated);
 					} else {
-						await createWorldItemMutation.mutateAsync(data);
-						onCreated?.(data);
+						// Crear con valores por defecto
+						const createData: WorldItemCreateInput = {
+							...data,
+							isPublic: false,
+							totalImages: 0,
+							totalVideos: 0,
+							featuredImage: null,
+							parentId: null,
+							shortcut: null,
+							value: null,
+							weight: null,
+							materials: null,
+							properties: null,
+							uses: null,
+							history: null,
+							notes: null,
+							attributes: null,
+							effects: null,
+							requirements: null,
+						};
+						await createWorldItemMutation.mutateAsync(createData);
+						onCreated?.(createData);
 					}
 				} catch (error) {
 					console.error('Error al procesar el world item:', error);
