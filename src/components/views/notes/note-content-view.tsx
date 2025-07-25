@@ -71,7 +71,7 @@ export function NoteContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedNote?.id ?? null,
 		containerName: selectedNote?.title ?? selectedNote?.name ?? null,
-		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
+		setCurrentContainer: async (id: string) => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: ScrollText,
 			title: 'Nota vacía',
@@ -84,7 +84,12 @@ export function NoteContentView() {
 
 	return (
 		<ContentViewProvider {...contentProps}>
-			<BaseContentView />
+			<BaseContentView>
+				{/* Note content will be added here */}
+				<div className="p-4">
+					<p>Contenido de la nota se mostrará aquí</p>
+				</div>
+			</BaseContentView>
 		</ContentViewProvider>
 	);
 }

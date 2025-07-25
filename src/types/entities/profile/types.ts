@@ -124,7 +124,7 @@ export interface ProfilePaginationOptions {
  * Respuesta paginada de perfiles
  */
 export interface PaginatedProfiles {
-	profiles: ProfileExtended[];
+	items: ProfileExtended[];
 	total: number;
 	page: number;
 	limit: number;

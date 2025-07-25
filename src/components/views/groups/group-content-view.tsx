@@ -18,9 +18,7 @@ export function GroupContentView(_props: ViewProps) {
 		data: group,
 		isLoading,
 		error,
-	} = useGroup(groupId || '', {
-		enabled: !!groupId,
-	});
+	} = useGroup(groupId || '');
 
 	if (isLoading) {
 		return <LoadingScreen />;
@@ -79,56 +77,30 @@ export function GroupContentView(_props: ViewProps) {
 					{/* Contenido de cada pestaña */}
 					<TabsContent value="all" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene {group._count?.images ?? 0} entidades en total
-						</p>
+						Este grupo contiene {group.stats?.totalItems ?? 0} entidades en total
+					</p>
 					</TabsContent>
 
 					<TabsContent value="images" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene {group._count?.images ?? 0} imágenes
+							Este grupo contiene imágenes
 						</p>
 					</TabsContent>
 
 					<TabsContent value="tags" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene {group._count?.tags ?? 0} tags
+							Este grupo contiene tags
 						</p>
 					</TabsContent>
 
 					<TabsContent value="entities" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">Este grupo contiene entidades de diferentes tipos</p>
 						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-							{/* Álbums */}
-							{(group._count?.albums ?? 0) > 0 && (
-								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
-									<p className="font-medium">Álbumes</p>
-									<p className="text-lg font-bold">{group._count?.albums}</p>
-								</div>
-							)}
-
-							{/* Colecciones */}
-							{(group._count?.collections ?? 0) > 0 && (
-								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
-									<p className="font-medium">Colecciones</p>
-									<p className="text-lg font-bold">{group._count?.collections}</p>
-								</div>
-							)}
-
-							{/* Personajes */}
-							{(group._count?.characters ?? 0) > 0 && (
-								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
-									<p className="font-medium">Personajes</p>
-									<p className="text-lg font-bold">{group._count?.characters}</p>
-								</div>
-							)}
-
-							{/* Lugares */}
-							{(group._count?.places ?? 0) > 0 && (
-								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
-									<p className="font-medium">Lugares</p>
-									<p className="text-lg font-bold">{group._count?.places}</p>
-								</div>
-							)}
+							{/* Información general */}
+							<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
+								<p className="font-medium">Total de elementos</p>
+								<p className="text-lg font-bold">{group.stats?.totalItems ?? 0}</p>
+							</div>
 
 							{/* Otros tipos... */}
 						</div>

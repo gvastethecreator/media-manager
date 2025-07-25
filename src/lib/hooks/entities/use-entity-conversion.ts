@@ -8,7 +8,25 @@ import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { formatFileSize } from '@/lib/utils/format.utils';
 
-import type { AnyEntityWithStats, isAlbumWithStats, isAudioWithStats, isCharacterWithStats, isCollectionWithStats, isConceptWithStats, isDocumentWithStats, isFolderWithStats, isGroupWithStats, isImageWithStats, isNoteWithStats, isPlaceWithStats, isPromptWithStats, isPropertyWithStats, isTagWithStats, isVideoWithStats, isWildcardWithStats, isWorldItemWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
+import { isAlbumWithStats, isAudioWithStats, isCharacterWithStats, isCollectionWithStats, isConceptWithStats, isDocumentWithStats, isFolderWithStats, isGroupWithStats, isImageWithStats, isNoteWithStats, isPlaceWithStats, isPromptWithStats, isPropertyWithStats, isTagWithStats, isVideoWithStats, isWildcardWithStats, isWorldItemWithStats } from '@/types/migration';
+import type { ImageWithStats } from '@/types/entities/image';
+import type { VideoWithStats } from '@/types/entities/video';
+import type { FolderWithStats } from '@/types/entities/folder';
+import type { TagWithStats } from '@/types/entities/tag';
+import type { PlaceWithStats } from '@/types/entities/place';
+import type { WorldItemWithStats } from '@/types/entities/world-item';
+import type { NoteWithStats } from '@/types/entities/note';
+import type { PropertyWithStats } from '@/types/entities/property';
+import type { WildcardWithStats } from '@/types/entities/wildcard';
+import type { AudioWithStats } from '@/types/entities/audio';
+import type { DocumentWithStats } from '@/types/entities/document';
+import type { CollectionWithStats } from '@/types/entities/collection';
+import type { AlbumWithStats } from '@/types/entities/album';
+import type { CharacterWithStats } from '@/types/entities/character';
+import type { ConceptWithStats } from '@/types/entities/concept';
+import type { PromptWithStats } from '@/types/entities/prompt';
+import type { GroupWithStats } from '@/types/entities/group';
 
 const logger = clientLogger.withContext('useEntityConversion');
 

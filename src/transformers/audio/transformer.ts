@@ -33,6 +33,7 @@ export function fromDrizzleAudio(drizzleAudio: AudioBase): AudioWithStats {
 
 		const audioWithStats: AudioWithStats = {
 			...drizzleAudio,
+			entityType: 'audio' as const,
 			stats,
 		};
 

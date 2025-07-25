@@ -244,4 +244,9 @@ export const createFolderCoreSlice: StateCreator<FolderStore, [], [], FolderStor
 			});
 		}
 	},
+
+	// Alias para refresh para compatibilidad
+	fetchFolders: async () => {
+		return get().refresh();
+	},
 });

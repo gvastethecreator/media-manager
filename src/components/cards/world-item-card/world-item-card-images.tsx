@@ -16,7 +16,7 @@ interface WorldItemCardImagesProps {
  * Similar a la sección de ilustración de una carta Magic.
  */
 export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor }: WorldItemCardImagesProps) {
-	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
+	const [images, setImages] = useState<{ id: string; fullUrl: string }[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -27,8 +27,8 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 			try {
 				setIsLoading(true);
 				const data = await worldItemService.getRecentWorldItemImages(worldItemId, 6);
-				// Filtrar solo imágenes con thumbnailUrl válida
-				const validImages = data.filter((img) => img.thumbnailUrl);
+				// Filtrar solo imágenes con fullUrl válida
+				const validImages = data.filter((img) => img.fullUrl);
 				setImages(validImages);
 			} catch (err) {
 				console.error('Error cargando imágenes:', err);
@@ -80,7 +80,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 							{images.map((image, index) => (
 								<div key={image.id} className="relative overflow-hidden w-full h-full">
 									<img
-										src={image.thumbnailUrl}
+										src={image.fullUrl}
 										alt={`Imagen ${index + 1}`}
 										className="w-full h-full object-cover"
 										loading="lazy"

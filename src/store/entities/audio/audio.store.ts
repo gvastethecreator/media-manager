@@ -30,6 +30,7 @@ export interface AudioState {
 	currentAudio: AudioWithStats | null;
 
 	// Estado de UI
+	isLoading: boolean;
 	loading: boolean;
 	error: string | null;
 	filters: AudioFilters;
@@ -61,18 +62,19 @@ const useAudioStoreBase = create<AudioState>()(
 			audios: [],
 			selectedAudios: [],
 			currentAudio: null,
+			isLoading: false,
 			loading: false,
 			error: null,
 			filters: {},
 
 			// Acciones de datos
 			fetchAudios: async () => {
-				set({ loading: true, error: null });
+				set({ loading: true, isLoading: true, error: null });
 				try {
 					const audios = await getAudiosFromApi();
-					set({ audios, loading: false });
+					set({ audios, loading: false, isLoading: false });
 				} catch (error) {
-					set({ error: (error as Error).message, loading: false });
+					set({ error: (error as Error).message, loading: false, isLoading: false });
 				}
 			},
 
