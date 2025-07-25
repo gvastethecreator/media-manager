@@ -1,6 +1,6 @@
 /**
- * @file Vista masonry usando TanStack Virtual con algoritmo Pinterest
- * @module components/features/file-browser/views/masonry-view
+ * @file Vista masonry verdadera estilo Pinterest
+ * @module components/features/file-browser/views/true-masonry-view
  */
 
 import { motion } from 'motion/react';
@@ -9,7 +9,7 @@ import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 
-interface MasonryViewProps {
+interface TrueMasonryViewProps {
   items: AnyEntityWithStats[];
   itemSize: number;
   selectedIds: string[];
@@ -131,7 +131,7 @@ const getEstimatedHeightForEntity = (item: AnyEntityWithStats, width: number): n
   return baseHeight;
 };
 
-export const MasonryView = memo<MasonryViewProps>(function MasonryView({
+export const TrueMasonryView = memo<TrueMasonryViewProps>(function TrueMasonryView({
   items,
   itemSize,
   selectedIds,
@@ -139,35 +139,29 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
   onItemClick,
   onItemDoubleClick,
 }) {
-  const parentRef = useRef<any>(null);
-  const [containerHeight, setContainerHeight] = useState<number>(600);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Layout calculations - verdadero masonry Pinterest-style
+  // Layout calculations
   const { layoutItems, totalHeight } = useMasonryLayout(items, containerWidth, itemSize);
 
-  // Efecto para medir y establecer altura del contenedor
+  // Intersection Observer para cargar items solo cuando son visibles
   useEffect(() => {
-    if (parentRef.current) {
-      const scrollAreaViewport = parentRef.current.closest('[data-radix-scroll-area-viewport]');
-      if (scrollAreaViewport) {
-        const observer = new ResizeObserver((entries) => {
-          for (const entry of entries) {
-            const height = entry.contentRect.height;
-            if (height > 0) {
-              setContainerHeight(height - 48); // Restar padding
-            }
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
           }
         });
-        observer.observe(scrollAreaViewport);
-        return () => observer.disconnect();
-      } else {
-        // Fallback: usar el viewport más cercano
-        const viewport = parentRef.current.closest('.flex-1, .h-full');
-        if (viewport) {
-          setContainerHeight(viewport.clientHeight - 48);
-        }
-      }
-    }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, []);
 
   // Event handlers
@@ -196,61 +190,53 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 
   return (
     <div
-      ref={parentRef}
-      className="w-full overflow-auto"
+      ref={containerRef}
+      className="w-full relative"
       style={{
-        height: `${containerHeight}px`,
-        contain: 'strict',
+        height: `${totalHeight + 48}px`, // padding extra
         padding: '24px',
       }}
     >
-      {/* Renderizado absoluto basado en posiciones calculadas para verdadero masonry */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: `${totalHeight}px`,
-        }}
-      >
-        {layoutItems.map((layoutItem, index) => {
-          const isSelected = selectedIds.includes(layoutItem.item.id);
+      {isVisible && layoutItems.map((layoutItem, index) => {
+        const { item, x, y, width, height } = layoutItem;
+        const isSelected = selectedIds.includes(item.id);
 
-          return (
-            <motion.div
-              key={layoutItem.item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: Math.min(index * 0.02, 0.3),
-                duration: 0.3,
-              }}
-              style={{
-                position: 'absolute',
-                left: `${layoutItem.x}px`,
-                top: `${layoutItem.y}px`,
-                width: `${layoutItem.width}px`,
-                height: `${layoutItem.height}px`,
-              }}
-              className={cn(
-                'cursor-pointer transition-all duration-200',
-                'hover:z-10 hover:scale-105',
-                isSelected && 'ring-2 ring-primary ring-offset-2'
-              )}
-            >
-              <EntityCard
-                entity={layoutItem.item}
-                layout="vertical"
-                size="md"
-                isSelected={isSelected}
-                compact={false}
-                className="w-full h-full"
-                onClick={createHandleClick(layoutItem.item)}
-                onDoubleClick={createHandleDoubleClick(layoutItem.item)}
-              />
-            </motion.div>
-          );
-        })}
-      </div>
+        return (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              delay: Math.min(index * 0.02, 0.5),
+              duration: 0.4,
+              ease: "easeOut"
+            }}
+            style={{
+              position: 'absolute',
+              left: `${x}px`,
+              top: `${y}px`,
+              width: `${width}px`,
+              height: `${height}px`,
+            }}
+            className={cn(
+              'cursor-pointer transition-all duration-200',
+              'hover:z-10 hover:scale-105 hover:shadow-lg',
+              isSelected && 'ring-2 ring-primary ring-offset-2 z-20'
+            )}
+          >
+            <EntityCard
+              entity={item}
+              layout="vertical"
+              size="md"
+              isSelected={isSelected}
+              compact={false}
+              className="h-full w-full"
+              onClick={createHandleClick(item)}
+              onDoubleClick={createHandleDoubleClick(item)}
+            />
+          </motion.div>
+        );
+      })}
     </div>
   );
 });

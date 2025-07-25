@@ -109,4 +109,9 @@ export const createDocumentCoreSlice: StateCreator<
 			await get().loadDocuments(); // Revertir si falla
 		}
 	},
+
+	// Alias para loadDocuments para compatibilidad
+	fetchDocuments: async () => {
+		return get().loadDocuments();
+	},
 });

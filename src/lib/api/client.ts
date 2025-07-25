@@ -46,6 +46,13 @@ export class ApiClient {
 	}
 
 	/**
+	 * Realiza una petición PATCH
+	 */
+	async patch<T>(endpoint: string, data?: unknown): Promise<T> {
+		return this.request<T>('PATCH', endpoint, data);
+	}
+
+	/**
 	 * Realiza una petición DELETE
 	 */
 	async delete<T>(endpoint: string): Promise<T> {
@@ -55,7 +62,7 @@ export class ApiClient {
 	/**
 	 * Método privado para realizar peticiones HTTP
 	 */
-	private async request<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', endpoint: string, data?: unknown): Promise<T> {
+	private async request<T>(method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', endpoint: string, data?: unknown): Promise<T> {
 		// Agregar prefijo /api si no está presente
 		const apiEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
 		const url = `${this.baseURL}${apiEndpoint}`;

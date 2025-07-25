@@ -201,7 +201,6 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			views: 0,
 			likes: 0,
 			downloads: 0,
-			shares: 0,
 			lastViewed: null,
 
 			// Estado de duplicados

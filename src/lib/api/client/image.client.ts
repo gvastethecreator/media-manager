@@ -4,8 +4,9 @@
  * @description Funciones para interactuar con los endpoints de la API de imágenes desde el cliente.
  */
 
-import type { GetImagesOptions, GetImagesResult, ImageUpdateInput } from '@/services/image/image.service';
-import type { ImageWithStats } from '@/types/entities/image/types';
+import type { GetImagesOptions, GetImagesResult } from '@/services/image/image.service';
+import type { ImageUpdateInput } from '@/types/entities/image/types';
+import type { ImageWithStats } from '@/types/entities/image/base';
 
 const API_BASE_PATH = '/api/images';
 

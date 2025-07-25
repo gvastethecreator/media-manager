@@ -51,26 +51,8 @@ export enum TagSortCriteria {
 	POPULARITY_DESC = 'popularity:desc',
 }
 
-export interface TagStatistics {
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-	totalRelations: number;
-}
-
-export interface TagWithStats extends TagBase {
-	stats: TagStatistics;
-}
+// TagStatistics y TagWithStats están definidos en base.ts
+// para evitar duplicación y conflictos de tipos
 
 export interface TagPaginationOptions {
 	page?: number;

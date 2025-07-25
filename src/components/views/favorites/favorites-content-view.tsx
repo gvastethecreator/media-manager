@@ -1,18 +1,47 @@
 import { Heart } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import type { FavoriteWithStats } from '@/types/entities/favorite/base';
+import type { FavoriteExtended } from '@/types/entities/favorite/types';
 import { FavoriteCard } from '@/components/cards/favorite-card';
-import { EmptyState } from '@/components/core/data-display';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ViewContainer } from '@/components/views/view-container';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import type { Favorite } from '@/types/entities/favorite';
+import { clientLogger } from '@/lib/logger';
+import { FAVORITE_ENTITY_EMOJIS, FAVORITE_ENTITY_COLORS } from '@/types/entities/favorite/base';
+
+/**
+ * Transforma un FavoriteWithStats a FavoriteExtended para compatibilidad con FavoriteCard
+ */
+function transformToExtended(favorite: FavoriteWithStats): FavoriteExtended {
+	const entityIcon = FAVORITE_ENTITY_EMOJIS[favorite.entityType] || '⭐';
+	const entityColor = FAVORITE_ENTITY_COLORS[favorite.entityType] || '#6b7280';
+	
+	return {
+		...favorite,
+		// Propiedades adicionales requeridas por FavoriteExtended
+		addedAt: favorite.createdAt, // Mapear createdAt a addedAt
+		notes: null, // Valor por defecto
+		category: null, // Valor por defecto
+		priority: null, // Valor por defecto
+		// Propiedades de UI
+		entityName: favorite.stats.entityTypeName,
+		entityPreview: '',
+		entityIcon,
+		entityColor,
+		isSelected: false,
+		isHovered: false,
+	};
+}
 
 interface FavoritesContentViewProps {
-	favorites: Favorite[];
+	favorites: FavoriteWithStats[];
 	isLoading: boolean;
 	error: Error | null;
 	localSearch: string;
@@ -52,16 +81,13 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 
 	if (error) {
 		return (
-			<EmptyState
-				icon={Heart}
-				title="Error al cargar favoritos"
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-				action={{
-					label: 'Reintentar',
-					onClick: handleRetry,
-				}}
-			/>
-		);
+				<EmptyState
+					icon={Heart}
+					title="Error al cargar favoritos"
+					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+					actions={<Button onClick={handleRetry}>Reintentar</Button>}
+				/>
+			);
 	}
 
 	return (
@@ -123,7 +149,7 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
 								<FavoriteCard
-									favorite={favorite}
+									favorite={transformToExtended(favorite)}
 									isSelected={favorite.id === selectedFavoriteId}
 									onSelect={() => handleFavoriteSelect(favorite.id)}
 								/>

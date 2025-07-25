@@ -15,14 +15,13 @@ type ProfileWithSettings = Profile & {
 	settings?: Settings | string | null;
 };
 
-import { Language, type ProfileBase, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
+import { Language, type ProfileBase, type ProfileExtended, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
 
 /**
- * Tipo para el perfil extendido con datos adicionales
+ * Tipo para el perfil extendido con datos adicionales para transformadores
  */
-export interface ProfileExtended extends ProfileBase {
-	parsedPreferences: ProfilePreferencesSchemaType;
+export interface ProfileTransformed extends ProfileExtended {
 	formattedCreatedAt: string;
 	formattedUpdatedAt: string;
 }
@@ -133,7 +132,7 @@ export function parseProfilePreferences(profile: ProfileWithSettings): ProfilePr
  * @param profile - Perfil de base de datos
  * @returns Perfil extendido con datos adicionales para UI
  */
-export function transformProfile(profile: ProfileWithSettings): ProfileExtended {
+export function transformProfile(profile: ProfileWithSettings): ProfileTransformed {
 	const createdAt = new Date(profile.createdAt);
 	const updatedAt = profile.updatedAt ? new Date(profile.updatedAt) : new Date();
 
@@ -153,7 +152,7 @@ export function transformProfile(profile: ProfileWithSettings): ProfileExtended 
 
 	return {
 		...baseProfile,
-		parsedPreferences: parseProfilePreferences(profile),
+		preferences: parseProfilePreferences(profile),
 		formattedCreatedAt: formatProfileDate(createdAt),
 		formattedUpdatedAt: formatProfileDate(updatedAt),
 	};
@@ -164,7 +163,7 @@ export function transformProfile(profile: ProfileWithSettings): ProfileExtended 
  * @param profiles - Lista de perfiles de base de datos
  * @returns Lista de perfiles extendidos
  */
-export function transformProfiles(profiles: ProfileWithSettings[]): ProfileExtended[] {
+export function transformProfiles(profiles: ProfileWithSettings[]): ProfileTransformed[] {
 	return profiles.map(transformProfile);
 }
 

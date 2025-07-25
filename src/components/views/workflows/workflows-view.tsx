@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { createWorkflowInApi, getWorkflowsFromApi } from '@/lib/api/client/workflow.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { WorkflowWithStats } from '@/types/entities/workflow';
+import type { WorkflowWithStats, WorkflowCreateInput } from '@/types/entities/workflow';
 
 const viewLogger = clientLogger.withContext('WorkflowsView');
 
@@ -57,7 +57,29 @@ export function WorkflowsView() {
 			return;
 		}
 		try {
-			const newWorkflow = await createWorkflowInApi({ name: newWorkflowName, description: newWorkflowDescription });
+			const workflowData: WorkflowCreateInput = {
+				name: newWorkflowName,
+				description: newWorkflowDescription || null,
+				emoji: null,
+				color: null,
+				category: null,
+				isPublic: false,
+				isFavorite: false,
+				isActive: true,
+				version: '1.0.0',
+				config: null,
+				steps: null,
+				triggers: null,
+				conditions: null,
+				actions: null,
+				schedule: null,
+				lastRun: null,
+				nextRun: null,
+				runCount: 0,
+				successCount: 0,
+				errorCount: 0,
+			};
+			const newWorkflow = await createWorkflowInApi(workflowData);
 			setWorkflows((prev) => [...prev, newWorkflow]);
 			toast({
 				title: '✅ Éxito',

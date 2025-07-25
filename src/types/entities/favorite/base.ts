@@ -42,6 +42,12 @@ export interface FavoriteBase {
 	userId: string | null;
 	profileId: string | null;
 
+	// Propiedades adicionales
+	addedAt: Date;
+	notes: string | null;
+	category: string | null;
+	priority: number | null;
+
 	// Timestamps del sistema
 	createdAt: Date;
 	updatedAt: Date;
@@ -75,3 +81,44 @@ export type FavoriteStats = FavoriteStatistics;
 export interface FavoriteWithStats extends FavoriteBase {
 	stats: FavoriteStatistics;
 }
+
+/**
+ * 🎨 Emojis para cada tipo de entidad favorita
+ */
+export const FAVORITE_ENTITY_EMOJIS: Record<FavoriteEntityType, string> = {
+	[FavoriteEntityType.IMAGE]: '🖼️',
+	[FavoriteEntityType.VIDEO]: '🎥',
+	[FavoriteEntityType.ALBUM]: '📸',
+	[FavoriteEntityType.COLLECTION]: '📚',
+	[FavoriteEntityType.FOLDER]: '📁',
+	[FavoriteEntityType.CHARACTER]: '👤',
+	[FavoriteEntityType.PLACE]: '📍',
+	[FavoriteEntityType.WORLD_ITEM]: '🌍',
+	[FavoriteEntityType.CONCEPT]: '💡',
+	[FavoriteEntityType.PROMPT]: '🤖',
+	[FavoriteEntityType.NOTE]: '📝',
+	[FavoriteEntityType.DOCUMENT]: '📄',
+	[FavoriteEntityType.FILE]: '📎',
+	[FavoriteEntityType.TAG]: '🏷️',
+	[FavoriteEntityType.GROUP]: '👥',
+};
+
+/**
+ * 🎨 Colores para cada tipo de entidad favorita
+ */
+export const FAVORITE_ENTITY_COLORS: Record<FavoriteEntityType, string> = {
+	[FavoriteEntityType.IMAGE]: '#3b82f6',
+	[FavoriteEntityType.VIDEO]: '#ef4444',
+	[FavoriteEntityType.ALBUM]: '#8b5cf6',
+	[FavoriteEntityType.COLLECTION]: '#06b6d4',
+	[FavoriteEntityType.FOLDER]: '#eab308',
+	[FavoriteEntityType.CHARACTER]: '#f59e0b',
+	[FavoriteEntityType.PLACE]: '#10b981',
+	[FavoriteEntityType.WORLD_ITEM]: '#84cc16',
+	[FavoriteEntityType.CONCEPT]: '#f97316',
+	[FavoriteEntityType.PROMPT]: '#6366f1',
+	[FavoriteEntityType.TAG]: '#ec4899',
+	[FavoriteEntityType.DOCUMENT]: '#64748b',
+	[FavoriteEntityType.FILE]: '#6b7280',
+	[FavoriteEntityType.GROUP]: '#14b8a6',
+};

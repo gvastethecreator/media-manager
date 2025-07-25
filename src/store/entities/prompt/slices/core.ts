@@ -9,7 +9,7 @@ const coreLogger = clientLogger.withContext('PromptStore:Core');
 export interface CoreSlice {
 	// Estado
 	prompts: PromptWithStats[];
-	selectedPrompt: PromptBase | null;
+	selectedPrompt: PromptWithStats | null;
 	isLoading: boolean;
 	error: string | null;
 
@@ -19,7 +19,7 @@ export interface CoreSlice {
 	createPrompt: (prompt: PromptCreateInput) => Promise<void>;
 	updatePrompt: (id: string, prompt: PromptUpdateInput) => Promise<void>;
 	deletePrompt: (id: string) => Promise<void>;
-	selectPrompt: (prompt: PromptBase | null) => void;
+	selectPrompt: (prompt: PromptWithStats | null) => void;
 	reset: () => void;
 }
 

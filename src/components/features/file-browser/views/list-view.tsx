@@ -110,12 +110,12 @@ export const ListView = memo<ListViewProps>(function ListView({
     }
   }, []);
 
-  // Configurar virtualizador
+  // Configurar virtualizador con altura fija para evitar solapamiento
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 60, // Altura estimada por fila
-    overscan: 10,
+    estimateSize: () => 88, // Altura aumentada: 72px + 16px margin/padding
+    overscan: 5,
   });
 
   return (
@@ -153,11 +153,11 @@ export const ListView = memo<ListViewProps>(function ListView({
                 top: 0,
                 left: 0,
                 width: '100%',
-                height: `${virtualItem.size}px`,
+                height: '80px', // Altura aumentada para evitar solapamiento
                 transform: `translateY(${virtualItem.start}px)`,
               }}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 mx-1 rounded-md cursor-pointer transition-all duration-200',
+                'flex items-center gap-3 px-3 py-3 mx-1 mb-2 rounded-md cursor-pointer transition-all duration-200',
                 'hover:bg-accent/50',
                 isSelected && 'bg-accent ring-2 ring-primary'
               )}

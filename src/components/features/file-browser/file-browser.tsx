@@ -9,7 +9,7 @@
 
 import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { EntityCard } from '@/components/cards/entity-card';
 import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
@@ -225,8 +225,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		debouncedLoadData();
 	}, [entityType, entityTypes, filterId, filterType, mode, debouncedLoadData]);
 
-	// Obtener items según el modo y tipo de entidad
-	const items = (() => {
+	// Obtener items según el modo y tipo de entidad - Memoizado para mejorar rendimiento y asegurar re-render con sortOptions
+	const items = useMemo(() => {
 		console.log('🔍 FileBrowser - Calculando items con:', { entityType, filterId, filterType, mode });
 		// En modo manual, usar los items proporcionados
 		if (mode === 'manual' && manualItems) {
@@ -298,6 +298,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Aplicar ordenación si existe
 		if (sortOptions.length > 0) {
+			console.log('🔧 FileBrowser - Aplicando ordenación:', sortOptions);
 			filteredItems.sort((a, b) => {
 				for (const sortOption of sortOptions) {
 					const { field, direction } = sortOption;
@@ -348,8 +349,22 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				const bDate = new Date((b as any).updatedAt || (b as any).modifiedAt || 0);
 				return bDate.getTime() - aDate.getTime();
 			});
-		} return filteredItems;
-	})();
+		}
+
+		return filteredItems;
+	}, [
+		entityType,
+		entityTypes,
+		filterId,
+		filterType,
+		mode,
+		manualItems,
+		imagesRecord,
+		getSortedImages,
+		getImagesByFolder,
+		searchQuery,
+		sortOptions, // Dependencia crítica para re-render cuando cambie la ordenación
+	]);
 
 	// Determinar estado de carga y error
 	const isLoading = (() => {
