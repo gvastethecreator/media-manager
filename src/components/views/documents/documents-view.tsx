@@ -70,7 +70,32 @@ export function DocumentsView(_props: ViewProps) {
 		// Aquí deberías manejar la subida del archivo.
 		// Por ahora, solo simularemos la creación con el nombre.
 		// En una implementación real, enviarías el archivo al backend.
-		await createDocument({ name: newDocumentName, path: newDocumentFile.name }); // Asumiendo que 'path' es el nombre del archivo
+		await createDocument({
+			name: newDocumentName,
+			path: newDocumentFile.name,
+			size: newDocumentFile.size,
+			hash: 'temp-hash', // TODO: Calcular hash real del archivo
+			mimeType: newDocumentFile.type || 'application/octet-stream',
+			extension: newDocumentFile.name.split('.').pop() || '',
+			folderId: 'default-folder', // TODO: Obtener folder actual
+			isFavorite: false,
+			isArchived: false,
+			pageCount: null,
+			wordCount: null,
+			language: null,
+			title: null,
+			author: null,
+			subject: null,
+			keywords: null,
+			creator: null,
+			producer: null,
+			creationDate: null,
+			modificationDate: null,
+			encrypted: false,
+			version: null,
+			content: null,
+			summary: null
+		});
 		setNewDocumentName('');
 		setNewDocumentFile(null);
 		setShowForm(false);

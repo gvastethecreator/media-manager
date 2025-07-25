@@ -188,7 +188,7 @@ export function toNoteWithStats(note: any): any {
 
 		// Extraer conteos de relaciones
 		const counts = note._count || {};
-		const totalItems = Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0);
+		const totalItems = Object.values(counts).reduce((sum: number, count: number) => sum + (count || 0), 0);
 
 		const statistics = {
 			totalItems,

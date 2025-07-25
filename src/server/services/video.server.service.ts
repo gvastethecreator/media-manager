@@ -346,7 +346,17 @@ export async function getVideoFormatStats() {
 			.where(eq(videos.format, videos.format)); // Solo videos con formato
 
 		// Agrupar manualmente por formato
-		const formatGroups = allVideos.reduce((acc: any, video) => {
+		const formatGroups = allVideos.reduce((acc: Record<string, {
+			format: string;
+			count: number;
+			sumSize: number;
+			sumDuration: number;
+			sumWidth: number;
+			sumHeight: number;
+			validDuration: number;
+			validWidth: number;
+			validHeight: number;
+		}>, video) => {
 			const format = video.format || 'unknown';
 			if (!acc[format]) {
 				acc[format] = {
@@ -380,7 +390,7 @@ export async function getVideoFormatStats() {
 
 		// Calcular promedios y convertir a array
 		const formatStats = Object.values(formatGroups)
-			.map((group: any) => ({
+			.map((group) => ({
 				format: group.format,
 				count: group.count,
 				sumSize: group.sumSize,
@@ -388,7 +398,7 @@ export async function getVideoFormatStats() {
 				avgWidth: group.validWidth > 0 ? group.sumWidth / group.validWidth : 0,
 				avgHeight: group.validHeight > 0 ? group.sumHeight / group.validHeight : 0,
 			}))
-			.sort((a: any, b: any) => b.count - a.count); // Ordenar por count desc
+			.sort((a, b) => b.count - a.count); // Ordenar por count desc
 
 		videoLogger.info('Estadísticas de formato de video obtenidas exitosamente');
 		return formatStats;

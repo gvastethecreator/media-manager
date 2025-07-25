@@ -44,7 +44,7 @@ export const StatusBar = memo<StatusBarProps>(function StatusBar({ totalItems, s
 	const itemsLabel = totalItems === 1 ? entityName.singular : entityName.plural;
 
 	return (
-		<div className="border-t p-2 text-xs text-muted-foreground flex justify-between">
+		<div className="border-t bg-background p-2 text-xs text-muted-foreground flex justify-between">
 			<div>
 				{isFiltered ? 'Filtrado: ' : 'Total: '}
 				{totalItems} {itemsLabel}

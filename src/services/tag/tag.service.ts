@@ -233,7 +233,7 @@ export async function getTags(options: GetTagsOptions = {}): Promise<GetTagsResu
 			isFavorite: Boolean(rawTag.isFavorite),
 		}));
 
-		const finalTags = transformedTags.map(toTagWithStats);
+		const finalTags = transformedTags.map((tag: any) => toTagWithStats(tag));
 
 		logger.info(`✅ ${finalTags.length} etiquetas obtenidas`);
 		return {

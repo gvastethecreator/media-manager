@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useNavigationData } from '@/hooks/useNavigationData';
+import { useNavigationData } from '@/lib/api/navigation';
 import EntityCardsContentView from './entity-cards-content-view';
 
 export const EntityCardsView = memo(function EntityCardsView() {

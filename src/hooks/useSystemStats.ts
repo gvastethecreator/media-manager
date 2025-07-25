@@ -1,9 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
-import { statsService } from '@/services/stats/stats.service';
+import { useSystemStats as useSystemStatsApi } from '@/lib/api/system';
 
-export const useSystemStats = () => {
-	return useQuery({
-		queryKey: ['system-stats'],
-		queryFn: () => statsService.getGeneralStats(),
-	});
-};
+export const useSystemStats = useSystemStatsApi;

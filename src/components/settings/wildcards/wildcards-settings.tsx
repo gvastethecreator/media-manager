@@ -43,6 +43,9 @@ const CreateWildcardForm = lazy(() =>
 interface WildcardWithRelations extends WildcardWithStats {
 	parent?: WildcardWithStats | null;
 	childWildcards?: WildcardWithRelations[];
+	_count: WildcardWithStats['_count'] & {
+		childWildcards: number;
+	};
 }
 
 export function WildcardsSettings() {
@@ -187,7 +190,7 @@ export function WildcardsSettings() {
 		totalChildren: wildcards.filter((w) => w.parentId).length,
 		totalValues: wildcards.reduce((acc, w) => {
 			try {
-				const children = w.children !== 'empty_array' ? JSON.parse(w.children).length : 0;
+				const children = w.children !== 'empty_array' && w.children ? JSON.parse(w.children).length : 0;
 				return acc + children;
 			} catch (_e) {
 				return acc;

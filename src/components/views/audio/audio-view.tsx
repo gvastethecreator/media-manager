@@ -17,9 +17,9 @@ export function AudioView(_props: ViewProps) {
 
 	// Usar selectores normales de Zustand en lugar de la utilidad problemática
 	const { audios, isLoading, error, fetchAudios, createAudio, updateAudio, deleteAudio } = useAudioStore((state) => ({
-		audios: state.audios,
-		isLoading: state.loading,
-		error: state.error,
+		audios: state.audios || [],
+		isLoading: state.loading || false,
+		error: state.error || null,
 		fetchAudios: state.fetchAudios,
 		createAudio: state.createAudio,
 		updateAudio: state.updateAudio,

@@ -53,7 +53,7 @@ export interface ActivityService {
  * Convierte los filtros de la aplicación a condiciones Drizzle
  */
 function buildWhereConditions(filters: ActivityFilters = {}) {
-	const conditions = [];
+	const conditions: any[] = [];
 
 	// Filtrar por tipos de actividad
 	if (filters.types && filters.types.length > 0) {
@@ -153,8 +153,13 @@ export class ActivityServiceImpl implements ActivityService {
 					type: activities.type,
 					entityType: activities.entityType,
 					entityId: activities.entityId,
+					action: activities.action,
+					userId: activities.userId,
 					description: activities.description,
 					metadata: activities.metadata,
+					ipAddress: activities.ipAddress,
+					userAgent: activities.userAgent,
+					sessionId: activities.sessionId,
 					createdAt: activities.createdAt,
 					image: {
 						id: images.id,
@@ -197,8 +202,13 @@ export class ActivityServiceImpl implements ActivityService {
 					type: activities.type,
 					entityType: activities.entityType,
 					entityId: activities.entityId,
+					action: activities.action,
+					userId: activities.userId,
 					description: activities.description,
 					metadata: activities.metadata,
+					ipAddress: activities.ipAddress,
+					userAgent: activities.userAgent,
+					sessionId: activities.sessionId,
 					createdAt: activities.createdAt,
 					image: {
 						id: images.id,
@@ -222,7 +232,7 @@ export class ActivityServiceImpl implements ActivityService {
 			const totalCount = totalCountResult[0]?.count || 0;
 
 			// Transformar resultados
-			const transformedActivities = activitiesResult.map((activity) => this.transformActivityResponse(activity));
+			const transformedActivities = activitiesResult.map((activity: any) => this.transformActivityResponse(activity));
 
 			return {
 				activities: transformedActivities,
@@ -280,7 +290,13 @@ export class ActivityServiceImpl implements ActivityService {
 			type: drizzleActivity.type,
 			entityType: drizzleActivity.entityType,
 			entityId: drizzleActivity.entityId,
+			action: drizzleActivity.action || '',
+			userId: drizzleActivity.userId || '',
 			description: drizzleActivity.description,
+			metadata: drizzleActivity.metadata,
+			ipAddress: drizzleActivity.ipAddress,
+			userAgent: drizzleActivity.userAgent,
+			sessionId: drizzleActivity.sessionId,
 			createdAt: drizzleActivity.createdAt,
 			image: drizzleActivity.image,
 			// Podríamos añadir más campos UI aquí basados en el tipo de actividad

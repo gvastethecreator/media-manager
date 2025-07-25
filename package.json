@@ -53,8 +53,8 @@
     "playwright:codegen": "bunx playwright codegen http://localhost:5173"
   },
   "dependencies": {
-    "@bull-board/api": "^6.11.2",
-    "@bull-board/express": "^6.11.2",
+    "@bull-board/api": "^6.12.0",
+    "@bull-board/express": "^6.12.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^5.1.1",
     "@libsql/client": "^0.15.10",
@@ -113,7 +113,7 @@
     "react-json-tree": "^0.20.0",
     "react-json-view-lite": "^2.4.1",
     "react-resizable-panels": "^3.0.3",
-    "react-router-dom": "^7.7.0",
+    "react-router-dom": "^7.7.1",
     "react-scan": "^0.4.3",
     "react-simplemde-editor": "^5.2.0",
     "recharts": "^3.1.0",
@@ -156,7 +156,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.21",
-    "dotenv": "^17.2.0",
+    "dotenv": "^17.2.1",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.31.0",
     "eslint-plugin-react-hooks-extra": "^1.52.3",
