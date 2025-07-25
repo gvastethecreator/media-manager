@@ -14,9 +14,9 @@ import type { CollectionBase, CollectionWithStats } from '@/types/entities/colle
  * @param counts - Conteos de relaciones (opcional)
  * @returns CollectionWithStats
  */
-export function toCollectionWithStats(collection: CollectionBase, counts?: any): CollectionWithStats {
+export function toCollectionWithStats(collection: CollectionBase, counts?: Record<string, number>): CollectionWithStats {
 	// Calcular estadísticas básicas
-	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0) : 0;
+	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: number) => sum + (count || 0), 0) : 0;
 	const imageCount = counts?.images || 0;
 	const videoCount = counts?.videos || 0;
 

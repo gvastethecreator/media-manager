@@ -48,8 +48,8 @@ export function Card3D({
 
 	// Obtener valores de configuración o usar valores predeterminados
 	const enable3DEffect = options.enable3DEffect !== undefined ? options.enable3DEffect : true;
-	const maxRotation = options.maxRotation || 5;
-	const hoverLiftHeight = options.hoverLiftHeight || 5;
+	const maxRotation = Number(options.maxRotation) || 5;
+	const hoverLiftHeight = Number(options.hoverLiftHeight) || 5;
 
 	// Manejar movimiento del ratón
 	const handleMouseMove = useCallback(
@@ -92,7 +92,7 @@ export function Card3D({
 	// Estilos dinámicos basados en hover y opciones
 	const dynamicStyles: CSSProperties = {
 		transition: 'transform 0.1s ease, box-shadow 0.3s ease, translate 0.2s ease',
-		translate: isHovering && enable3DEffect ? `0 -${Number(hoverLiftHeight)}px` : undefined,
+		translate: isHovering && enable3DEffect ? `0 -${hoverLiftHeight}px` : undefined,
 	};
 
 	return (
@@ -103,6 +103,8 @@ export function Card3D({
 				...style,
 				...dynamicStyles,
 				perspective: enable3DEffect ? 1000 : undefined,
+				rotateX: enable3DEffect ? rotateX : 0,
+				rotateY: enable3DEffect ? rotateY : 0,
 			}}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
@@ -110,10 +112,6 @@ export function Card3D({
 			onClick={onClick}
 			aria-labelledby={ariaLabelledby}
 			aria-describedby={ariaDescribedby}
-			animate={{
-				rotateX: enable3DEffect ? rotateX : 0,
-				rotateY: enable3DEffect ? rotateY : 0,
-			}}
 		>
 			{children}
 		</motion.div>

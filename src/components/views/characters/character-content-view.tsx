@@ -106,7 +106,16 @@ export const CharacterContentView = memo(function CharacterContentView() {
 	return (
 		<ContentViewProvider {...contentProps}>
 			<BaseContentView>
-				{/* Character content will be added here */}
+				<div className="p-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+						{items.map((item) => (
+							<div key={item.id} className="p-4 border rounded-lg hover:bg-accent cursor-pointer" onClick={() => handleItemSelection(item)}>
+								<h3 className="font-medium">{item.name}</h3>
+								<p className="text-sm text-muted-foreground">{item.entityType}</p>
+							</div>
+						))}
+					</div>
+				</div>
 			</BaseContentView>
 		</ContentViewProvider>
 	);
