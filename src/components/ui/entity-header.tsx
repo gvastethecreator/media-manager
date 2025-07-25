@@ -231,7 +231,11 @@ export function EntityHeader({
 							<React.Fragment key={`${item.label}-${item.href || index}`}>
 								{(backUrl || index > 0) && <BreadcrumbSeparator />}
 								<BreadcrumbItem>
-									{item.href ? <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink> : <span>{item.label}</span>}
+									{item.href ? (
+										<BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+									) : (
+										<span>{item.label}</span>
+									)}
 								</BreadcrumbItem>
 							</React.Fragment>
 						))}

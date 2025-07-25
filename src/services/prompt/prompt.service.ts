@@ -10,6 +10,7 @@ import { prompts } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { fromDrizzlePrompt } from '@/transformers/prompt/transformer';
 import type {
 	PromptCreateInput,
 	PromptSearchResult,
@@ -86,10 +87,28 @@ export const getPromptService = async (id: string): Promise<PromptWithStats | nu
 
 		const prompt = promptResult[0];
 
-		// Construir prompt con estadísticas
-		const promptWithStats: PromptWithStats = {
+		// Agregar _count vacío para el transformer
+		const promptWithCounts = {
 			...prompt,
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
 		};
+
+		// Usar el transformer
+		const promptWithStats = fromDrizzlePrompt(promptWithCounts);
 
 		logger.info(`✅ Prompt encontrado: ${prompt.name}`);
 		return promptWithStats;
@@ -117,31 +136,31 @@ export const getPromptsByIdsService = async (ids: string[]): Promise<PromptWithS
 		// Buscar prompts base
 		const promptsResult = await db.select().from(prompts).where(inArray(prompts.id, ids));
 
-		// Obtener estadísticas para cada prompt
-		const promptsWithStats = await Promise.all(
-			promptsResult.map(async (prompt) => {
-				const [imageCount, videoCount] = await Promise.all([
-					db
-						.select({ count: count() })
-						.from(promptImages)
-						.where(eq(promptImages.promptId, prompt.id))
-						.then((res) => res[0]?.count || 0),
-					db
-						.select({ count: count() })
-						.from(promptVideos)
-						.where(eq(promptVideos.promptId, prompt.id))
-						.then((res) => res[0]?.count || 0),
-				]);
+		// Transformar cada prompt usando el transformer
+		const promptsWithStats = promptsResult.map((prompt) => {
+			// Agregar _count vacío para el transformer
+			const promptWithCounts = {
+				...prompt,
+				_count: {
+					images: 0,
+					videos: 0,
+					albums: 0,
+					collections: 0,
+					tags: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					notes: 0,
+					wildcards: 0,
+					properties: 0,
+					groups: 0,
+				},
+			};
 
-				return {
-					...prompt,
-					_count: {
-						images: imageCount,
-						videos: videoCount,
-					},
-				} as PromptWithStats;
-			})
-		);
+			// Usar el transformer
+			return fromDrizzlePrompt(promptWithCounts);
+		});
 
 		logger.info(`✅ Prompts encontrados: ${promptsWithStats.length}`);
 		return promptsWithStats;
@@ -225,31 +244,31 @@ export const searchPromptsService = async (
 				.then((res) => res[0]?.count || 0),
 		]);
 
-		// Obtener estadísticas para cada prompt
-		const promptsWithStats = await Promise.all(
-			promptsResult.map(async (prompt) => {
-				const [imageCount, videoCount] = await Promise.all([
-					db
-						.select({ count: count() })
-						.from(promptImages)
-						.where(eq(promptImages.promptId, prompt.id))
-						.then((res) => res[0]?.count || 0),
-					db
-						.select({ count: count() })
-						.from(promptVideos)
-						.where(eq(promptVideos.promptId, prompt.id))
-						.then((res) => res[0]?.count || 0),
-				]);
+		// Transformar cada prompt usando el transformer
+		const promptsWithStats = promptsResult.map((prompt) => {
+			// Agregar _count vacío para el transformer
+			const promptWithCounts = {
+				...prompt,
+				_count: {
+					images: 0,
+					videos: 0,
+					albums: 0,
+					collections: 0,
+					tags: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					notes: 0,
+					wildcards: 0,
+					properties: 0,
+					groups: 0,
+				},
+			};
 
-				return {
-					...prompt,
-					_count: {
-						images: imageCount,
-						videos: videoCount,
-					},
-				} as PromptWithStats;
-			})
-		);
+			// Usar el transformer
+			return fromDrizzlePrompt(promptWithCounts);
+		});
 
 		const result: PromptSearchResult = {
 			data: promptsWithStats,
@@ -319,14 +338,28 @@ export const createPromptService = async (data: PromptCreateInput): Promise<Prom
 			})
 			.returning();
 
-		// Construir prompt con estadísticas
-		const promptWithStats: PromptWithStats = {
+		// Agregar _count vacío para el transformer
+		const promptWithCounts = {
 			...newPrompt[0],
 			_count: {
 				images: 0,
 				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
 			},
 		};
+
+		// Usar el transformer
+		const promptWithStats = fromDrizzlePrompt(promptWithCounts);
 
 		// Notificar creación
 		await notifyPromptChange('create', promptWithStats);
@@ -402,27 +435,28 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 		// Actualizar prompt usando Drizzle
 		const updatedPrompt = await db.update(prompts).set(updateData).where(eq(prompts.id, id)).returning();
 
-		// Obtener estadísticas actualizadas
-		const [imageCount, videoCount] = await Promise.all([
-			db
-				.select({ count: count() })
-				.from(promptImages)
-				.where(eq(promptImages.promptId, id))
-				.then((res) => res[0]?.count || 0),
-			db
-				.select({ count: count() })
-				.from(promptVideos)
-				.where(eq(promptVideos.promptId, id))
-				.then((res) => res[0]?.count || 0),
-		]);
-
-		const promptWithStats: PromptWithStats = {
+		// Agregar _count vacío para el transformer
+		const promptWithCounts = {
 			...updatedPrompt[0],
 			_count: {
-				images: imageCount,
-				videos: videoCount,
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
 			},
 		};
+
+		// Usar el transformer
+		const promptWithStats = fromDrizzlePrompt(promptWithCounts);
 
 		// Notificar actualización
 		await notifyPromptChange('update', promptWithStats);

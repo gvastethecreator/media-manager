@@ -5,6 +5,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { usePromptImages } from '@/lib/api/prompts';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const viewLogger = clientLogger.withContext('PromptContentView');
 
@@ -12,16 +13,9 @@ export function PromptContentView() {
 	const selectedPrompt = usePromptStore((state) => state.selectedPrompt);
 
 	// Usar React Query hook en lugar de server action
-	const {
-		data: images = [],
-		isLoading,
-		error,
-		refetch: loadPromptImages,
-	} = usePromptImages(selectedPrompt?.id || '', {
-		enabled: !!selectedPrompt?.id,
-	});
+	const { data: images = [], isLoading, error, refetch: loadPromptImages } = usePromptImages(selectedPrompt?.id || '');
 
-	const toggleItemSelection = useCallback((item) => {
+	const toggleItemSelection = useCallback((item: EntityWithStats) => {
 		// Implementar la lógica de selección de items si es necesaria
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);

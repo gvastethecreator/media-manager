@@ -3,13 +3,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useCreateCharacter, useUpdateCharacter } from '@/lib/api/characters';
 import { toastService } from '@/lib/ui/toast';
 import {
@@ -21,7 +21,6 @@ import {
 	CharacterRace,
 } from '@/types/entities/character/enums';
 import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } from '@/types/entities/character/types';
-
 
 // Esquema de validación
 const createCharacterSchema = z.object({
@@ -356,10 +355,10 @@ export function CreateCharacterForm({
 						<FormItem>
 							<FormLabel>Nivel</FormLabel>
 							<FormControl>
-								<Input 
-									type="number" 
-									min={1} 
-									max={100} 
+								<Input
+									type="number"
+									min={1}
+									max={100}
 									value={field.value ?? ''}
 									onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
 								/>
@@ -388,9 +387,7 @@ export function CreateCharacterForm({
 					<Button type="button" variant="outline" onClick={onCancel}>
 						Cancelar
 					</Button>
-					<Button type="submit">
-						{isEditing ? 'Guardar cambios' : 'Crear personaje'}
-					</Button>
+					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear personaje'}</Button>
 				</div>
 			</form>
 		</Form>

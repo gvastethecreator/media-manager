@@ -14,7 +14,7 @@ import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
-import { toPlaceWithStats } from '@/transformers/place';
+import { fromDrizzlePlace } from '@/transformers/place/transformer';
 import type { PlaceCreateInput, PlaceSearchOptions, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 // Tipo local para Drizzle Place con counts
@@ -110,7 +110,7 @@ export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithS
 			.orderBy(asc(places.name));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedPlaces = drizzlePlaces.map((rawPlace: typeof drizzlePlaces[0]) => ({
+		const transformedPlaces = drizzlePlaces.map((rawPlace: (typeof drizzlePlaces)[0]) => ({
 			...rawPlace,
 			isFavorite: Boolean(rawPlace.isFavorite),
 			// Counts vacíos por ahora (TODO: implementar subqueries)
@@ -124,7 +124,7 @@ export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithS
 			},
 		}));
 
-		return transformedPlaces.map((place: DrizzlePlaceWithCounts) => toPlaceWithStats(place));
+		return transformedPlaces.map((place: DrizzlePlaceWithCounts) => fromDrizzlePlace(place));
 	} catch (error) {
 		placeLogger.error('Error al obtener places:', error);
 		throw createPlaceError('Error al obtener lugares', EntityErrorCode.OPERATION_FAILED, error);
@@ -195,7 +195,7 @@ export async function getPlaceById(id: string): Promise<PlaceWithStats | null> {
 			},
 		};
 
-		return toPlaceWithStats(transformedPlace as DrizzlePlaceWithCounts);
+		return fromDrizzlePlace(transformedPlace as DrizzlePlaceWithCounts);
 	} catch (error) {
 		placeLogger.error(`Error al obtener place ${id}:`, error);
 		throw createPlaceError('Error al obtener lugar', EntityErrorCode.OPERATION_FAILED, error);

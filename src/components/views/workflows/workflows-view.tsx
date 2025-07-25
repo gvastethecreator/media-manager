@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { createWorkflowInApi, getWorkflowsFromApi } from '@/lib/api/client/workflow.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { WorkflowWithStats, WorkflowCreateInput } from '@/types/entities/workflow';
+import type { WorkflowCreateInput, WorkflowWithStats } from '@/types/entities/workflow';
 
 const viewLogger = clientLogger.withContext('WorkflowsView');
 

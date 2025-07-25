@@ -98,13 +98,13 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 		let md = `# ${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
 			md += `**Categoría:** ${displayPrompt.category}\n`;
-            md += `**Modelo:** ${displayPrompt.model}\n`;
+			md += `**Modelo:** ${displayPrompt.model}\n`;
 
-            // Añadir tags si existen
-            const tags: string[] = displayPrompt.tags || [];
-            if (tags.length > 0) {
-                md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
-            }
+			// Añadir tags si existen
+			const tags: string[] = displayPrompt.tags || [];
+			if (tags.length > 0) {
+				md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
+			}
 
 			// Añadir información de fecha
 			const createdAt =

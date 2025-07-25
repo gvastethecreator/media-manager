@@ -76,66 +76,67 @@ export function ServerStats() {
 	const [activeTab, setActiveTab] = useState('system');
 
 	// Usar React Query hook en lugar de server actions
-	const {
-		data: statsData,
-		isLoading: loading,
-		error,
-		refetch: fetchStats,
-	} = useSystemStats();
+	const { data: statsData, isLoading: loading, error, refetch: fetchStats } = useSystemStats();
 
 	// Crear datos mock para system y app stats ya que SystemStatsExtended no los incluye
-	const systemStats: SystemStats | null = statsData ? {
-		cpu: {
-			usage: Math.random() * 100,
-			cores: 8,
-			model: 'Intel Core i7'
-		},
-		memory: {
-			total: '16 GB',
-			free: '8 GB',
-			used: '8 GB',
-			usedPercentage: 50
-		},
-		uptime: '2 days, 4 hours',
-		platform: 'linux',
-		nodeVersion: 'v18.17.0',
-		network: [{
-			interface: 'eth0',
-			address: '192.168.1.100',
-			netmask: '255.255.255.0',
-			mac: '00:11:22:33:44:55'
-		}]
-	} : null;
+	const systemStats: SystemStats | null = statsData
+		? {
+				cpu: {
+					usage: Math.random() * 100,
+					cores: 8,
+					model: 'Intel Core i7',
+				},
+				memory: {
+					total: '16 GB',
+					free: '8 GB',
+					used: '8 GB',
+					usedPercentage: 50,
+				},
+				uptime: '2 days, 4 hours',
+				platform: 'linux',
+				nodeVersion: 'v18.17.0',
+				network: [
+					{
+						interface: 'eth0',
+						address: '192.168.1.100',
+						netmask: '255.255.255.0',
+						mac: '00:11:22:33:44:55',
+					},
+				],
+			}
+		: null;
 
-	const appStats: AppStats | null = statsData ? {
-		requests: {
-			total: 1000,
-			success: 950,
-			error: 50,
-			pending: 5,
-			successRate: '95%'
-		},
-		performance: {
-			avgResponseTime: '120ms',
-			minResponseTime: '50ms',
-			maxResponseTime: '500ms',
-			p95ResponseTime: '300ms'
-		},
-		errors: {
-			count: 50,
-			byType: { 'ValidationError': 30, 'NetworkError': 20 }
-		},
-		database: {
-			queries: 5000,
-			avgQueryTime: '25ms',
-			slowQueries: 10
-		},
-		cache: {
-			hits: 800,
-			misses: 200,
-			ratio: '80%'
-		}
-	} : null;
+	const appStats: AppStats | null = statsData
+		? {
+				requests: {
+					total: 1000,
+					success: 950,
+					error: 50,
+					pending: 5,
+					successRate: '95%',
+				},
+				performance: {
+					avgResponseTime: '120ms',
+					minResponseTime: '50ms',
+					maxResponseTime: '500ms',
+					p95ResponseTime: '300ms',
+				},
+				errors: {
+					count: 50,
+					byType: { ValidationError: 30, NetworkError: 20 },
+				},
+				database: {
+					queries: 5000,
+					avgQueryTime: '25ms',
+					slowQueries: 10,
+				},
+				cache: {
+					hits: 800,
+					misses: 200,
+					ratio: '80%',
+				},
+			}
+		: null;
 
 	const handleRefresh = useCallback(() => {
 		logger.info('🔄 Refrescando estadísticas del servidor');

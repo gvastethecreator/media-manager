@@ -1,4 +1,5 @@
 export { default as EntityCardsContentView } from './entity-cards-content-view';
+
 import { EntityCardsView } from './entity-cards-view';
 export { EntityCardsView };
 

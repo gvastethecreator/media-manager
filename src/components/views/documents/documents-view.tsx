@@ -94,7 +94,7 @@ export function DocumentsView(_props: ViewProps) {
 			encrypted: false,
 			version: null,
 			content: null,
-			summary: null
+			summary: null,
 		});
 		setNewDocumentName('');
 		setNewDocumentFile(null);

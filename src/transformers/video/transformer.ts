@@ -142,9 +142,9 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);
 		const hasAudio = (metadata?.hasAudio as boolean) ?? true; // Asumir que tiene audio por defecto
-		const hasSubtitles = Array.isArray(metadata?.subtitleLanguages) ? (metadata.subtitleLanguages.length > 0) : false;
-		const bitrate = (typeof metadata?.bitrate === 'number') ? metadata.bitrate : null;
-		const frameRate = (typeof metadata?.frameRate === 'number') ? metadata.frameRate : null;
+		const hasSubtitles = Array.isArray(metadata?.subtitleLanguages) ? metadata.subtitleLanguages.length > 0 : false;
+		const bitrate = typeof metadata?.bitrate === 'number' ? metadata.bitrate : null;
+		const frameRate = typeof metadata?.frameRate === 'number' ? metadata.frameRate : null;
 
 		// 🏷️ Auto-tagging inteligente
 		const autoTags = generateAutoTags({

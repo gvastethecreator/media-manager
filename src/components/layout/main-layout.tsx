@@ -9,8 +9,8 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { useReindexFolder } from '@/lib/api/folders';
 import { toastService } from '@/lib/ui/toast';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useImageStore } from '@/store/entities/image';
 import { useFolderStore } from '@/store/entities/folder';
+import { useImageStore } from '@/store/entities/image';
 
 export const MainLayout = memo(function MainLayout() {
 	const location = useLocation();
@@ -40,7 +40,7 @@ export const MainLayout = memo(function MainLayout() {
 	// Calcular los IDs de elementos disponibles según la vista actual
 	const allItemIds = useMemo(() => {
 		const currentView = location.pathname.split('/')[1] || 'gallery';
-		
+
 		switch (currentView) {
 			case 'folders':
 				if (currentFolderId) {
@@ -58,7 +58,7 @@ export const MainLayout = memo(function MainLayout() {
 	// Funciones para acciones de carpeta
 	const handleScanFolder = useCallback(async () => {
 		if (!currentFolderId) return;
-		
+
 		try {
 			toastService.info('Escaneando carpeta...');
 			await reindexFolderMutation.mutateAsync(currentFolderId);
@@ -71,7 +71,7 @@ export const MainLayout = memo(function MainLayout() {
 
 	const handleRefreshFolder = useCallback(async () => {
 		if (!currentFolderId) return;
-		
+
 		try {
 			toastService.info('Recargando carpeta...');
 			await reindexFolderMutation.mutateAsync(currentFolderId);
@@ -156,17 +156,17 @@ export const MainLayout = memo(function MainLayout() {
 						{/* Toolbar superior */}
 						<div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
 							<ViewToolbar
-						isLeftPanelCollapsed={isLeftCollapsed}
-						toggleLeftPanelCollapse={toggleLeftPanel}
-						isRightPanelCollapsed={isRightCollapsed}
-						toggleRightPanelCollapse={toggleRightPanel}
-						isRightPanelVisible={true}
-						allItemIds={allItemIds}
-						currentFolderId={currentFolderId || undefined}
-						onScanFolder={handleScanFolder}
-						onRefreshFolder={handleRefreshFolder}
-						isRetrying={reindexFolderMutation.isPending}
-					/>
+								isLeftPanelCollapsed={isLeftCollapsed}
+								toggleLeftPanelCollapse={toggleLeftPanel}
+								isRightPanelCollapsed={isRightCollapsed}
+								toggleRightPanelCollapse={toggleRightPanel}
+								isRightPanelVisible={true}
+								allItemIds={allItemIds}
+								currentFolderId={currentFolderId || undefined}
+								onScanFolder={handleScanFolder}
+								onRefreshFolder={handleRefreshFolder}
+								isRetrying={reindexFolderMutation.isPending}
+							/>
 						</div>{' '}
 						{/* Contenido principal */}
 						<div className="flex-1 min-h-0 bg-background">

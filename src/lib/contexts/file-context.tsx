@@ -16,8 +16,6 @@ import type { FileItem } from '@/types/files';
 // Re-export FileItem for components that need it
 export type { FileItem };
 
-
-
 interface FileContextType {
 	files: FileItem[];
 	selectedFiles: string[];

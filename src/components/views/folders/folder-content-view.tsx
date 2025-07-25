@@ -10,7 +10,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { ImageWithStats } from '@/types/entities/image';
-import { EntityStatsType, type AnyEntityWithStats } from '@/types/migration';
+import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
@@ -47,23 +47,19 @@ export function FolderContentView({
 	folderId: propFolderId,
 	onScanFolder: externalOnScanFolder,
 	onRefreshFolder: externalOnRefreshFolder,
-	isRetrying: externalIsRetrying = false
+	isRetrying: externalIsRetrying = false,
 }: FolderContentViewProps = {}) {
 	// 📂 Obtener información de la carpeta actual desde props
 	const currentFolderId = propFolderId || null;
 
 	// 🔄 Cargar información de la carpeta desde la API
-	const {
-		data: folderData,
-		isLoading: isFolderLoading,
-		error: folderError
-	} = useFolder(currentFolderId || '');
+	const { data: folderData, isLoading: isFolderLoading, error: folderError } = useFolder(currentFolderId || '');
 
 	console.log('🔍 FolderContentView - Debug data:', {
 		currentFolderId,
 		folderData,
 		isFolderLoading,
-		folderError: folderError?.message || folderError
+		folderError: folderError?.message || folderError,
 	});
 
 	// Estados globales para panel de detalles y visor
@@ -210,9 +206,7 @@ export function FolderContentView({
 	// Renderizar vista de carpeta usando BaseContentView y FileBrowser
 	// Sin header porque ya tenemos el nombre en los breadcrumbs
 	return (
-		<BaseContentView
-			showHeader={false}
-		>
+		<BaseContentView showHeader={false}>
 			<FileBrowser
 				entityType={EntityStatsType.IMAGE}
 				filterId={currentFolderId}
