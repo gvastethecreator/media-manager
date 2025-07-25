@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptExtended } from '@/types/entities/prompt/types';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
+import type { PromptBase, PromptExtended } from '@/types/entities/prompt/types';
 
 const validatorsLogger = serverLogger.withContext('PromptValidators');
 

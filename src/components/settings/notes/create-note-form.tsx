@@ -4,17 +4,17 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
 import { toastService } from '@/lib/ui/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
-import type { NoteCreateInput, NoteBase, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
+import type { NoteBase, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
 
 // Esquema de validación con Zod, alineado con los tipos canónicos
 const noteSchema = z.object({
@@ -218,9 +218,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 							Vista previa
 						</Button>
 					)}
-					<Button type="submit">
-						{isEditing ? 'Guardar Cambios' : 'Crear Nota'}
-					</Button>
+					<Button type="submit">{isEditing ? 'Guardar Cambios' : 'Crear Nota'}</Button>
 				</div>
 			</form>
 		</Form>

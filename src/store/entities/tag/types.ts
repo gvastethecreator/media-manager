@@ -5,8 +5,8 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag/base';
 import type { TagSortCriteria } from '@/types/entities/tag';
+import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag/base';
 
 // --- ENUMS ESPECÍFICOS DEL STORE ---
 

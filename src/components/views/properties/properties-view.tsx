@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { ViewProps } from '@/components/views/types';
-import { ViewContainer } from '@/components/views/view-container';
+// ViewContainer removido - obsoleto
 import { useCategoryData } from '@/lib/api/navigation';
 import { useCreateProperty, useDeleteProperty, useUpdateProperty } from '@/lib/api/properties'; // Importar los hooks de mutación
 
@@ -59,9 +59,9 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 		}
 
 		if (editingProperty) {
-			updateProperty({ id: editingProperty.id, data: { name: propertyName, value: propertyValue } });
+			updateProperty({ id: editingProperty.id, data: { name: propertyName, description: propertyValue } });
 		} else {
-			createProperty({ name: propertyName, value: propertyValue });
+			createProperty({ name: propertyName, description: propertyValue });
 		}
 		setPropertyName('');
 		setPropertyValue('');
@@ -70,13 +70,7 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 	}, [propertyName, propertyValue, editingProperty, createProperty, updateProperty]);
 
 	return (
-		<ViewContainer
-			className={className}
-			viewKey="properties"
-			data={properties}
-			isLoading={isLoading}
-			noResultsMessage="No hay propiedades disponibles."
-		>
+		<div className={className}>
 			<div className="p-4">
 				<h2 className="text-xl font-bold mb-4">Vista de Propiedades</h2>
 
@@ -167,6 +161,6 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 					<p>No hay propiedades disponibles.</p>
 				)}
 			</div>
-		</ViewContainer>
+		</div>
 	);
 });

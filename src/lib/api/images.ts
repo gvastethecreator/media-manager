@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ImageCreateInput, ImageUpdateInput } from '@/types/entities/image/types';
 import type { ImageWithStats } from '@/types/entities/image/base';
+import type { ImageCreateInput, ImageUpdateInput } from '@/types/entities/image/types';
 import { apiClient } from './client';
 
 // Tipos para filtros de imágenes
@@ -22,8 +22,6 @@ export interface ImageFilters {
 	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'width' | 'height';
 	sortOrder?: 'asc' | 'desc';
 }
-
-
 
 export interface ImagesResponse {
 	data: ImageWithStats[];

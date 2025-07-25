@@ -292,7 +292,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 							size={selectedSize}
 							preset={selectedPreset || undefined}
 							onClick={() => console.log('Clicked:', entity.name || entity.id)}
-						onDoubleClick={() => console.log('Double clicked:', entity.name || entity.id)}
+							onDoubleClick={() => console.log('Double clicked:', entity.name || entity.id)}
 						/>
 					))}
 				</div>

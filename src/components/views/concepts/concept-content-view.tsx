@@ -16,7 +16,11 @@ export const ConceptContentView = memo(function ConceptContentView() {
 	const [error, setError] = useState<string | null>(null);
 	const [currentConceptId, setCurrentConceptId] = useState(selectedConcept?.id);
 
-	const { data: conceptImages, isLoading: isLoadingImages, error: conceptError } = useConceptImages(currentConceptId || '');
+	const {
+		data: conceptImages,
+		isLoading: isLoadingImages,
+		error: conceptError,
+	} = useConceptImages(currentConceptId || '');
 
 	const loadConceptImages = useCallback(async () => {
 		if (!currentConceptId) return;
@@ -97,13 +101,13 @@ export const ConceptContentView = memo(function ConceptContentView() {
 	}
 
 	return (
-			<ContentViewProvider {...contentProps}>
-				<BaseContentView>
-					{/* Concept content will be added here */}
-					<div className="p-4">
-						<p>Contenido del concepto se mostrará aquí</p>
-					</div>
-				</BaseContentView>
-			</ContentViewProvider>
-		);
+		<ContentViewProvider {...contentProps}>
+			<BaseContentView>
+				{/* Concept content will be added here */}
+				<div className="p-4">
+					<p>Contenido del concepto se mostrará aquí</p>
+				</div>
+			</BaseContentView>
+		</ContentViewProvider>
+	);
 });

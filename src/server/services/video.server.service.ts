@@ -346,47 +346,56 @@ export async function getVideoFormatStats() {
 			.where(eq(videos.format, videos.format)); // Solo videos con formato
 
 		// Agrupar manualmente por formato
-		const formatGroups = allVideos.reduce((acc: Record<string, {
-			format: string;
-			count: number;
-			sumSize: number;
-			sumDuration: number;
-			sumWidth: number;
-			sumHeight: number;
-			validDuration: number;
-			validWidth: number;
-			validHeight: number;
-		}>, video) => {
-			const format = video.format || 'unknown';
-			if (!acc[format]) {
-				acc[format] = {
-					format,
-					count: 0,
-					sumSize: 0,
-					sumDuration: 0,
-					sumWidth: 0,
-					sumHeight: 0,
-					validDuration: 0,
-					validWidth: 0,
-					validHeight: 0,
-				};
-			}
-			acc[format].count++;
-			if (video.size) acc[format].sumSize += video.size;
-			if (video.duration) {
-				acc[format].sumDuration += video.duration;
-				acc[format].validDuration++;
-			}
-			if (video.width) {
-				acc[format].sumWidth += video.width;
-				acc[format].validWidth++;
-			}
-			if (video.height) {
-				acc[format].sumHeight += video.height;
-				acc[format].validHeight++;
-			}
-			return acc;
-		}, {});
+		const formatGroups = allVideos.reduce(
+			(
+				acc: Record<
+					string,
+					{
+						format: string;
+						count: number;
+						sumSize: number;
+						sumDuration: number;
+						sumWidth: number;
+						sumHeight: number;
+						validDuration: number;
+						validWidth: number;
+						validHeight: number;
+					}
+				>,
+				video
+			) => {
+				const format = video.format || 'unknown';
+				if (!acc[format]) {
+					acc[format] = {
+						format,
+						count: 0,
+						sumSize: 0,
+						sumDuration: 0,
+						sumWidth: 0,
+						sumHeight: 0,
+						validDuration: 0,
+						validWidth: 0,
+						validHeight: 0,
+					};
+				}
+				acc[format].count++;
+				if (video.size) acc[format].sumSize += video.size;
+				if (video.duration) {
+					acc[format].sumDuration += video.duration;
+					acc[format].validDuration++;
+				}
+				if (video.width) {
+					acc[format].sumWidth += video.width;
+					acc[format].validWidth++;
+				}
+				if (video.height) {
+					acc[format].sumHeight += video.height;
+					acc[format].validHeight++;
+				}
+				return acc;
+			},
+			{}
+		);
 
 		// Calcular promedios y convertir a array
 		const formatStats = Object.values(formatGroups)

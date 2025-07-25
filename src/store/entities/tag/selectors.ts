@@ -4,9 +4,9 @@
  */
 
 import { createTagsGroupedByCategory } from '@/lib/utils/sort';
+import type { TagWithStats } from '@/types/entities/tag';
 import { useTagStore } from './index';
 import { TagSortCriteria } from './types';
-import type { TagWithStats } from '@/types/entities/tag';
 
 // Selectores simples directos
 export const useAllTags = () => {

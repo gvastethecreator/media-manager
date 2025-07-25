@@ -5,8 +5,8 @@
  */
 
 import type { GetImagesOptions, GetImagesResult } from '@/services/image/image.service';
-import type { ImageUpdateInput } from '@/types/entities/image/types';
 import type { ImageWithStats } from '@/types/entities/image/base';
+import type { ImageUpdateInput } from '@/types/entities/image/types';
 
 const API_BASE_PATH = '/api/images';
 

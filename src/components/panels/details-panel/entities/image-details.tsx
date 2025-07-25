@@ -50,9 +50,9 @@ export const ImageDetails = memo<EntityDetailsProps<ImageWithStats>>(function Im
 							<p className="font-medium truncate">{entity.name}</p>
 						</div>
 						<div>
-				<span className="text-muted-foreground">Tamaño:</span>
-				<p className="font-medium">{formatBytes(entity.size || 0)}</p>
-			</div>
+							<span className="text-muted-foreground">Tamaño:</span>
+							<p className="font-medium">{formatBytes(entity.size || 0)}</p>
+						</div>
 						<div>
 							<span className="text-muted-foreground">Dimensiones:</span>
 							<p className="font-medium">

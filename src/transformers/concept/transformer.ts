@@ -40,6 +40,21 @@ export function fromDrizzleConcept(
 	}
 
 	try {
+		const totalAssociations =
+			counts.images +
+			counts.videos +
+			counts.albums +
+			counts.collections +
+			counts.tags +
+			counts.characters +
+			counts.places +
+			counts.worldItems +
+			counts.prompts +
+			counts.notes +
+			counts.wildcards +
+			counts.properties +
+			counts.groups;
+
 		const stats: ConceptStats = {
 			imageCount: counts.images,
 			videoCount: counts.videos,
@@ -54,11 +69,30 @@ export function fromDrizzleConcept(
 			wildcardCount: counts.wildcards,
 			propertyCount: counts.properties,
 			groupCount: counts.groups,
+			totalAssociations,
+		};
+
+		const _count = {
+			images: counts.images,
+			videos: counts.videos,
+			prompts: counts.prompts,
+			notes: counts.notes,
+			characters: counts.characters,
+			places: counts.places,
+			worldItems: counts.worldItems,
+			properties: counts.properties,
+			wildcards: counts.wildcards,
+			groups: counts.groups,
+			albums: counts.albums,
+			collections: counts.collections,
+			tags: counts.tags,
 		};
 
 		return {
 			...conceptData,
+			entityType: 'concept' as const,
 			stats,
+			_count,
 		};
 	} catch (error) {
 		logger.error('Error transformando concepto desde Drizzle', {

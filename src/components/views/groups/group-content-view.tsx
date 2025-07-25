@@ -14,11 +14,7 @@ export function GroupContentView(_props: ViewProps) {
 	const groupId = typeof params.id === 'string' ? params.id : null;
 
 	// Usar React Query hook en lugar de server action
-	const {
-		data: group,
-		isLoading,
-		error,
-	} = useGroup(groupId || '');
+	const { data: group, isLoading, error } = useGroup(groupId || '');
 
 	if (isLoading) {
 		return <LoadingScreen />;
@@ -77,20 +73,16 @@ export function GroupContentView(_props: ViewProps) {
 					{/* Contenido de cada pestaña */}
 					<TabsContent value="all" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">
-						Este grupo contiene {group.stats?.totalItems ?? 0} entidades en total
-					</p>
+							Este grupo contiene {group.stats?.totalItems ?? 0} entidades en total
+						</p>
 					</TabsContent>
 
 					<TabsContent value="images" className="space-y-4">
-						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene imágenes
-						</p>
+						<p className="text-center text-muted-foreground py-10">Este grupo contiene imágenes</p>
 					</TabsContent>
 
 					<TabsContent value="tags" className="space-y-4">
-						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene tags
-						</p>
+						<p className="text-center text-muted-foreground py-10">Este grupo contiene tags</p>
 					</TabsContent>
 
 					<TabsContent value="entities" className="space-y-4">
