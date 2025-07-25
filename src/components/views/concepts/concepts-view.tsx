@@ -63,9 +63,8 @@ export function ConceptsView() {
 				emoji: '💡',
 				color: '#3b82f6',
 				category: 'general',
+				content: newConceptDescription || '',
 				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
 			});
 			setNewConceptName('');
 			setNewConceptDescription('');

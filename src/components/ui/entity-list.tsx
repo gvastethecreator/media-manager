@@ -24,11 +24,12 @@ import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { EntityCard, type EntityCardProps } from '@/components/cards/entity-card';
-import type { BaseCardProps } from '@/components/cards/base-card-props';
+import type { BaseCardProps } from '@/components/cards/types/card-layout.types';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 export type EntityItem = Omit<BaseCardProps, 'onClick' | 'href'> & {
 	id: string;
@@ -40,6 +41,9 @@ export type EntityItem = Omit<BaseCardProps, 'onClick' | 'href'> & {
 	updatedAt?: Date;
 	category?: string;
 	sortValue?: string | number;
+	title: string;
+	description?: string;
+	subtitle?: string;
 };
 
 export interface EntityListProps {
@@ -138,6 +142,11 @@ export interface EntityListProps {
 	onItemClick?: (id: string) => void;
 
 	/**
+	 * Función llamada al hacer doble clic en item
+	 */
+	onItemDoubleClick?: (id: string) => void;
+
+	/**
 	 * Modo TCG para las tarjetas
 	 */
 	tcgMode?: boolean;
@@ -170,6 +179,7 @@ export function EntityList({
 	tagFilters = [],
 	className,
 	onItemClick,
+	onItemDoubleClick,
 	tcgMode = false,
 }: EntityListProps) {
 	// Estados para la UI
@@ -318,17 +328,22 @@ export function EntityList({
 
 					// Props comunes para el EntityCard
 					const cardProps: EntityCardProps = {
-						...item,
+						entity: item as AnyEntityWithStats,
 						onClick: () => handleItemClick(item.id),
 						className: cn(isSelected && allowSelection && 'ring-2 ring-primary', item.className),
 						compact: viewType === 'compact',
 						tcgMode: tcgMode,
+						isSelected: isSelected,
+						onDoubleClick: onItemDoubleClick ? () => onItemDoubleClick(item.id) : undefined,
 					};
 
-					// Si el item tiene href y no estamos en modo selección, usarlo
+					// Si el item tiene href y no estamos en modo selección, manejarlo en el onClick
 					if (item.href && !allowSelection) {
-						cardProps.href = item.href;
-						cardProps.onClick = undefined;
+						cardProps.onClick = () => {
+							if (item.href) {
+								window.open(item.href, '_blank');
+							}
+						};
 					}
 
 					return (

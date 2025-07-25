@@ -15,23 +15,20 @@ import type { WildcardBase } from '@/types/entities/wildcard/base';
 import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
 
 // Esquema Zod adaptado para el formulario
-const formSchema = CreateWildcardSchema.pick({
-	name: true,
-	emoji: true,
-	color: true,
-	description: true,
-	shortcut: true,
-	category: true,
-	parentId: true,
-	featuredImage: true,
-	viewMode: true,
-}).extend({
-	isFavorite: z.boolean().optional(),
+const formSchema = z.object({
+	name: z.string().min(1, 'El nombre es obligatorio'),
+	emoji: z.string(),
+	color: z.string(),
+	description: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	parentId: z.string().nullable().optional(),
+	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean(),
 	children: z.array(z.object({ value: z.string() })),
 });
 
 type FormData = z.infer<typeof formSchema>;
-type FormValues = FormData;
 
 interface CreateWildcardFormProps {
 	wildcard?: WildcardBase;
@@ -40,29 +37,20 @@ interface CreateWildcardFormProps {
 	onCancel: () => void;
 }
 
-// Función para convertir FormValues a CreateWildcardSchema
-const convertFormToSchema = (data: FormValues): z.infer<typeof CreateWildcardSchema> => {
-	return {
-		...data,
-		children: JSON.stringify(data.children.map((c) => c.value).filter(Boolean)),
-	};
-};
-
 export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, onCancel }: CreateWildcardFormProps) {
 	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: wildcard?.name || '',
-			emoji: wildcard?.emoji || '',
-			color: wildcard?.color || '#3b82f6',
+			emoji: wildcard?.emoji || '🎭',
+			color: wildcard?.color || '#6366F1',
 			description: wildcard?.description || null,
 			shortcut: wildcard?.shortcut || null,
 			category: wildcard?.category || null,
 			children: wildcard?.children ? JSON.parse(wildcard.children).map((c: string) => ({ value: c })) : [],
 			featuredImage: wildcard?.featuredImage || null,
-			isFavorite: wildcard?.isFavorite || false,
+			isFavorite: wildcard?.isFavorite ?? false,
 			parentId: wildcard?.parentId || null,
-			viewMode: wildcard?.viewMode || 'grid',
 		},
 	});
 
@@ -71,7 +59,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 		name: 'children',
 	});
 
-	const handleSubmit: SubmitHandler<FormValues> = (data) => {
+	const handleSubmit: SubmitHandler<FormData> = (data) => {
 		// Convertir los datos del formulario al formato esperado
 		const wildcardData = {
 			...data,

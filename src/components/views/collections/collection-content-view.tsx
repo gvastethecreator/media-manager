@@ -126,13 +126,13 @@ export function CollectionContentView() {
 	}
 
 	return (
-		<ContentViewProvider {...contentProps}>
-			<BaseContentView>
-				{/* Collection content will be added here */}
-				<div className="p-4">
-					<p>Contenido de la colección se mostrará aquí</p>
-				</div>
-			</BaseContentView>
-		</ContentViewProvider>
-	);
+			<ContentViewProvider {...contentProps}>
+				<BaseContentView>
+					{/* Collection content will be added here */}
+					<div className="p-4">
+						<p>Contenido de la colección se mostrará aquí</p>
+					</div>
+				</BaseContentView>
+			</ContentViewProvider>
+		);
 }

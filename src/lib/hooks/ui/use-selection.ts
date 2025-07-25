@@ -34,7 +34,7 @@ export const useSelection = () => {
 		// 📊 Información de selección
 		getSelectionStats: () => ({
 			count: store.selectedItems.length,
-			totalSize: store.selectedItems.reduce((acc, item) => acc + (item.size ?? 0), 0),
+			totalSize: store.selectedItems.reduce((acc: number, item: FileItem) => acc + (item.size ?? 0), 0),
 			hasSelection: store.selectedItems.length > 0,
 			isMultipleSelection: store.selectedItems.length > 1,
 			selectedTypes: [...new Set(store.selectedItems.map((item) => item.type ?? 'unknown'))],

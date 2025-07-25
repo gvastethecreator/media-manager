@@ -78,7 +78,7 @@ export async function getAudios(): Promise<AudioWithStats[]> {
 
 		// Transformar usando deserializer moderno
 		// Normalización defensiva: solo campos válidos según schema Drizzle
-		const audioList = drizzleAudios.map((rawAudio) => {
+		const audioList = drizzleAudios.map((rawAudio: any) => {
 			const audio = deserializeAudio({
 				...rawAudio,
 				// Normalización mínima para compatibilidad con el schema de la app
@@ -381,7 +381,7 @@ export async function getAudioFormatStats() {
 
 		// Agrupar manualmente por formato
 		const formatGroups = allAudios.reduce(
-			(acc, audio) => {
+			(acc: Record<string, any>, audio: any) => {
 				const format = audio.format || 'unknown';
 				if (!acc[format]) {
 					acc[format] = {
@@ -417,7 +417,7 @@ export async function getAudioFormatStats() {
 				avgDuration: stat.validDurations > 0 ? stat.totalDuration / stat.validDurations : null,
 				avgBitrate: stat.validBitrates > 0 ? stat.totalBitrate / stat.validBitrates : null,
 			}))
-			.sort((a, b) => b.count - a.count);
+			.sort((a: any, b: any) => b.count - a.count);
 	} catch (error) {
 		audioLogger.error('Error al obtener estadísticas de formatos:', error);
 		throw createAudioError(
@@ -437,7 +437,7 @@ export async function getAudioGenreStats() {
 
 		// Agrupar manualmente por género
 		const genreGroups = allAudios.reduce(
-			(acc, audio) => {
+			(acc: Record<string, any>, audio: any) => {
 				const genre = audio.genre || 'unknown';
 				if (!acc[genre]) {
 					acc[genre] = {
@@ -456,7 +456,7 @@ export async function getAudioGenreStats() {
 				genre: stat.genre,
 				count: stat.count,
 			}))
-			.sort((a, b) => b.count - a.count);
+			.sort((a: any, b: any) => b.count - a.count);
 	} catch (error) {
 		audioLogger.error('Error al obtener estadísticas de géneros:', error);
 		throw createAudioError(

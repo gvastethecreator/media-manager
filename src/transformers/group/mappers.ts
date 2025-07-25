@@ -14,9 +14,9 @@ import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entitie
  * @param counts - Conteos de relaciones (opcional)
  * @returns GroupWithStats
  */
-export function toGroupWithStats(group: GroupBase, counts?: any): GroupWithStats {
+export function toGroupWithStats(group: GroupBase, counts?: Record<string, number>): GroupWithStats {
 	// Calcular estadísticas básicas
-	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: any) => sum + (count || 0), 0) : 0;
+	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: number) => sum + (count || 0), 0) : 0;
 
 	// Calcular completitud basada en campos importantes
 	const completenessScore = calculateCompleteness(group, ['name', 'description', 'category']);

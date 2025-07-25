@@ -93,6 +93,17 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 					.filter((img: EntityWithStats) => isImageWithStats(img))
 					.map((img: EntityWithStats) => {
 						const imageData = img as ImageWithStats;
+						// Derive mimeType from file extension since ImageWithStats doesn't have mimeType
+						const extension = imageData.path?.split('.').pop()?.toLowerCase();
+						const derivedMimeType = extension ? {
+							'jpg': 'image/jpeg',
+							'jpeg': 'image/jpeg',
+							'png': 'image/png',
+							'gif': 'image/gif',
+							'bmp': 'image/bmp',
+							'webp': 'image/webp',
+							'svg': 'image/svg+xml'
+						}[extension] || 'image/jpeg' : 'image/jpeg';
 						return {
 							id: imageData.id,
 							name: imageData.name || '',
@@ -104,7 +115,7 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 							type: 'image',
 							path: imageData.path || '',
 							size: imageData.size || 0,
-							mimeType: imageData.mimeType || '',
+							mimeType: derivedMimeType,
 							metadata: null,
 							url: `/api/images/${imageData.id}/content`,
 							parsedMetadata: undefined,

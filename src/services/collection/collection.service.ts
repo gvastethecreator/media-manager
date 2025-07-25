@@ -116,17 +116,17 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		// Construir condiciones de filtro
 		const conditions: any[] = [];
 
-		if (options.filters?.search) {
+		if (options.where?.search) {
 			conditions.push(
 				or(
-					like(collections.name, `%${options.filters.search}%`),
-					like(collections.description, `%${options.filters.search}%`)
+					like(collections.name, `%${options.where.search}%`),
+					like(collections.description, `%${options.where.search}%`)
 				)
 			);
 		}
 
-		if (options.filters?.isFavorite !== undefined) {
-			conditions.push(eq(collections.isFavorite, options.filters.isFavorite ? 1 : 0));
+		if (options.where?.isFavorite !== undefined) {
+			conditions.push(eq(collections.isFavorite, options.where.isFavorite ? 1 : 0));
 		}
 
 		// Nota: La tabla collections no tiene campo category, se omite este filtro
@@ -134,23 +134,23 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		// Construir query
 		let query = db
 			.select({
-				id: collections.id,
-				name: collections.name,
-				description: collections.description,
-				emoji: collections.emoji,
-				color: collections.color,
-				featuredImage: collections.featuredImage,
-				isPublic: collections.isPublic,
-				isFavorite: collections.isFavorite,
-				totalImages: collections.totalImages,
-				totalVideos: collections.totalVideos,
-				totalSize: collections.totalSize,
-				lastImageAddedAt: collections.lastImageAddedAt,
-				lastVideoAddedAt: collections.lastVideoAddedAt,
-				parentId: collections.parentId,
-				createdAt: collections.createdAt,
-				updatedAt: collections.updatedAt,
-			})
+					id: collections.id,
+					name: collections.name,
+					description: collections.description,
+					emoji: collections.emoji,
+					color: collections.color,
+					featuredImage: collections.featuredImage,
+					isPublic: collections.isPublic,
+					isFavorite: collections.isFavorite,
+					totalImages: collections.totalImages,
+					totalVideos: collections.totalVideos,
+					totalSize: collections.totalSize,
+					lastImageAddedAt: collections.lastImageAddedAt,
+					lastVideoAddedAt: collections.lastVideoAddedAt,
+					parentId: collections.parentId,
+					createdAt: collections.createdAt,
+					updatedAt: collections.updatedAt,
+				})
 			.from(collections);
 
 		// Aplicar filtros
@@ -176,14 +176,20 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 
 		const drizzleCollections = await query;
 
-		const transformedCollections = drizzleCollections.map((rawCollection) => ({
+		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
+			isPublic: Boolean(rawCollection.isPublic || false),
+			totalImages: rawCollection.totalImages || 0,
+			totalVideos: rawCollection.totalVideos || 0,
+			totalSize: rawCollection.totalSize || 0,
+			lastImageAddedAt: rawCollection.lastImageAddedAt || null,
+			lastVideoAddedAt: rawCollection.lastVideoAddedAt || null,
 		}));
 
 		// Transformar usando el transformer correcto
 		const result = transformedCollections
-			.map((collection) => fromDrizzleCollection(collection))
+			.map((collection: any) => fromDrizzleCollection(collection, collection._count))
 			.filter((c): c is CollectionWithStats => c !== null);
 
 		logger.info(`✅ ${result.length} colecciones encontradas`);
@@ -228,9 +234,15 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 			.from(collections)
 			.orderBy(desc(collections.createdAt));
 
-		const transformedCollections = drizzleCollections.map((rawCollection) => ({
+		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
+			isPublic: Boolean(rawCollection.isPublic || false),
+			totalImages: rawCollection.totalImages || 0,
+			totalVideos: rawCollection.totalVideos || 0,
+			totalSize: rawCollection.totalSize || 0,
+			lastImageAddedAt: rawCollection.lastImageAddedAt || null,
+			lastVideoAddedAt: rawCollection.lastVideoAddedAt || null,
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
 				images: 0,
@@ -249,7 +261,11 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 			},
 		}));
 
-		const result = fromDrizzleCollections(transformedCollections as any);
+		const collectionsWithCounts = transformedCollections.map((collection: any) => ({
+			collection,
+			counts: collection._count
+		}));
+		const result = fromDrizzleCollections(collectionsWithCounts);
 		logger.info(`✅ ${result.length} colecciones obtenidas`);
 		return result;
 	} catch (error) {
@@ -303,6 +319,12 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 		const transformedCollection = {
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
+			isPublic: Boolean(rawCollection.isPublic || false),
+			totalImages: rawCollection.totalImages || 0,
+			totalVideos: rawCollection.totalVideos || 0,
+			totalSize: rawCollection.totalSize || 0,
+			lastImageAddedAt: rawCollection.lastImageAddedAt || null,
+			lastVideoAddedAt: rawCollection.lastVideoAddedAt || null,
 			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
 				images: 0,
@@ -321,7 +343,7 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 			},
 		};
 
-		const result = fromDrizzleCollection(transformedCollection as any);
+		const result = fromDrizzleCollection(transformedCollection as any, transformedCollection._count);
 		if (!result) {
 			throw new CollectionServiceError('Error al transformar la colección', 'TRANSFORM_FAILED');
 		}
@@ -354,10 +376,7 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 				emoji: data.emoji || '📋',
 				color: data.color || '#3b82f6',
 				description: data.description || null,
-				shortcut: data.shortcut || null,
 				category: data.category || null,
-				sortBy: data.sortBy || null,
-				filters: data.filters || null,
 				url: data.url || null,
 				alternativeUrl: data.alternativeUrl || null,
 				sourceImage: data.sourceImage || null,
@@ -365,9 +384,6 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 				price: data.price || null,
 				network: data.network || null,
 				tokenId: data.tokenId || null,
-				tokenAddress: data.tokenAddress || null,
-				contractAddress: data.contractAddress || null,
-				contractType: data.contractType || null,
 				editions: data.editions || null,
 				featuredImage: data.featuredImage || null,
 				isFavorite: data.isFavorite || false,
@@ -436,10 +452,7 @@ export const updateCollection = async (id: string, data: CollectionUpdateInput):
 				emoji: data.emoji || '📋',
 				color: data.color || '#3b82f6',
 				description: data.description || null,
-				shortcut: data.shortcut || null,
 				category: data.category || null,
-				sortBy: data.sortBy || null,
-				filters: data.filters || null,
 				url: data.url || null,
 				alternativeUrl: data.alternativeUrl || null,
 				sourceImage: data.sourceImage || null,
@@ -447,9 +460,6 @@ export const updateCollection = async (id: string, data: CollectionUpdateInput):
 				price: data.price || null,
 				network: data.network || null,
 				tokenId: data.tokenId || null,
-				tokenAddress: data.tokenAddress || null,
-				contractAddress: data.contractAddress || null,
-				contractType: data.contractType || null,
 				editions: data.editions || null,
 				featuredImage: data.featuredImage || null,
 				isFavorite: data.isFavorite || false,

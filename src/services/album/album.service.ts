@@ -11,7 +11,8 @@ import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { toAlbumWithStats } from '@/transformers/album';
-import type { AlbumWithStats, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
+import type { AlbumWithStats } from '@/types/entities/album';
+import type { AlbumCreateInput, AlbumUpdateInput } from '@/lib/api/albums';
 
 const logger = serverLogger.withContext('AlbumService');
 
@@ -51,6 +52,13 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,
+				isPublic: albums.isPublic,
+				totalImages: albums.totalImages,
+				totalVideos: albums.totalVideos,
+				totalSize: albums.totalSize,
+				metadata: albums.metadata,
+				lastImageAddedAt: albums.lastImageAddedAt,
+				lastVideoAddedAt: albums.lastVideoAddedAt,
 				createdAt: albums.createdAt,
 				updatedAt: albums.updatedAt,
 			})
@@ -68,9 +76,16 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 		const transformedAlbum = {
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
+			isPublic: Boolean(rawAlbum.isPublic || false),
+			totalImages: rawAlbum.totalImages || 0,
+			totalVideos: rawAlbum.totalVideos || 0,
+			totalSize: rawAlbum.totalSize || 0,
+			metadata: rawAlbum.metadata || null,
+			lastImageAddedAt: rawAlbum.lastImageAddedAt || null,
+			lastVideoAddedAt: rawAlbum.lastVideoAddedAt || null,
 		};
 
-		return toAlbumWithStats(transformedAlbum as any);
+		return toAlbumWithStats(transformedAlbum);
 	} catch (error) {
 		logger.error(`❌ Error al obtener el álbum ${id}`, { error });
 		throw new Error(`No se pudo obtener el álbum: ${error instanceof Error ? error.message : 'Error desconocido'}`);
@@ -128,6 +143,13 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,
+				isPublic: albums.isPublic,
+				totalImages: albums.totalImages,
+				totalVideos: albums.totalVideos,
+				totalSize: albums.totalSize,
+				metadata: albums.metadata,
+				lastImageAddedAt: albums.lastImageAddedAt,
+				lastVideoAddedAt: albums.lastVideoAddedAt,
 				createdAt: albums.createdAt,
 				updatedAt: albums.updatedAt,
 			})
@@ -151,12 +173,19 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		const [{ count: total }] = await countQuery;
 
 		// Transformar resultados de Drizzle a formato compatible con transformadores legacy
-		const transformedAlbums = drizzleAlbums.map((rawAlbum) => ({
+		const transformedAlbums = drizzleAlbums.map((rawAlbum: any) => ({
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
+			isPublic: Boolean(rawAlbum.isPublic || false),
+			totalImages: rawAlbum.totalImages || 0,
+			totalVideos: rawAlbum.totalVideos || 0,
+			totalSize: rawAlbum.totalSize || 0,
+			metadata: rawAlbum.metadata || null,
+			lastImageAddedAt: rawAlbum.lastImageAddedAt || null,
+			lastVideoAddedAt: rawAlbum.lastVideoAddedAt || null,
 		}));
 
-		const finalAlbums = transformedAlbums.map((album) => toAlbumWithStats(album as any));
+		const finalAlbums = transformedAlbums.map((album: any) => toAlbumWithStats(album));
 
 		return {
 			albums: finalAlbums,
@@ -173,7 +202,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 /**
  * Crea un nuevo álbum
  */
-export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStats> {
+export async function createAlbum(data: AlbumCreateInput): Promise<AlbumWithStats> {
 	try {
 		logger.info('📝 Creando nuevo álbum', { name: data.name });
 
@@ -218,7 +247,7 @@ export async function createAlbum(data: CreateAlbumInput): Promise<AlbumWithStat
 /**
  * Actualiza un álbum existente
  */
-export async function updateAlbum(id: string, data: UpdateAlbumInput): Promise<AlbumWithStats> {
+export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<AlbumWithStats> {
 	try {
 		logger.info(`🔄 Actualizando álbum: ${id}`, { data });
 

@@ -59,7 +59,7 @@ import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
 
-interface EntityCardProps extends BaseCardProps {
+export interface EntityCardProps extends BaseCardProps {
 	entity: AnyEntityWithStats;
 	/** Preset de layout específico para el contexto */
 	preset?: string;

@@ -66,12 +66,24 @@ export interface GetImagesOptions {
 	search?: string;
 	sortBy?: string;
 	sortOrder?: 'asc' | 'desc';
+	tagIds?: string[];
+	isFavorite?: boolean;
+	pageSize?: number;
+	page?: number;
 }
 
 export interface GetImagesResult {
-	images: any[];
+	images: ImageWithStats[];
 	total: number;
 	hasMore: boolean;
+	pagination?: {
+		page: number;
+		pageSize: number;
+		total: number;
+		totalPages: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	};
 }
 
 import * as crypto from 'crypto';
@@ -311,21 +323,27 @@ class ImageService {
 			const imageWithStats: ImageWithStats = {
 				...image,
 				isFavorite: Boolean(image.isFavorite),
-				// TODO: Implementar lógica para obtener conteos reales
-				_count: {
-					tags: 0,
-					albums: 0,
-					collections: 0,
-					characters: 0,
-					places: 0,
-					worldItems: 0,
-					concepts: 0,
-					prompts: 0,
-					notes: 0,
-					wildcards: 0,
-					properties: 0,
-					groups: 0,
+				entityType: 'image',
+				stats: {
+					viewCount: 0,
+					downloadCount: 0,
+					likeCount: 0,
+					commentCount: 0,
+					tagCount: 0,
+					albumCount: 0,
+					collectionCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
 				},
+				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+				fullUrl: `/api/images/${image.id}/original`,
 			};
 
 			imageLogger.info('✅ Imagen obtenida correctamente');
@@ -532,11 +550,32 @@ class ImageService {
 
 			const [{ count: total }] = await countQuery;
 
-			const transformedImages = drizzleImages.map((raw) => {
+			const transformedImages = drizzleImages.map((raw: any) => {
 				return {
 					...raw,
 					metadata: raw.metadata ? JSON.parse(raw.metadata) : null,
 					isFavorite: Boolean(raw.isFavorite),
+					entityType: 'image',
+					stats: {
+						viewCount: 0,
+						downloadCount: 0,
+						likeCount: 0,
+						commentCount: 0,
+						tagCount: 0,
+						albumCount: 0,
+						collectionCount: 0,
+						characterCount: 0,
+						placeCount: 0,
+						worldItemCount: 0,
+						conceptCount: 0,
+						promptCount: 0,
+						noteCount: 0,
+						wildcardCount: 0,
+						propertyCount: 0,
+						groupCount: 0,
+					},
+					thumbnailUrl: `/api/images/${raw.id}/thumbnail`,
+					fullUrl: `/api/images/${raw.id}/original`,
 					folder: raw.folderRealId
 						? {
 								id: raw.folderRealId,
@@ -544,20 +583,6 @@ class ImageService {
 								path: raw.folderPath ?? '',
 							}
 						: null,
-					_count: {
-						tags: 0,
-						albums: 0,
-						collections: 0,
-						characters: 0,
-						places: 0,
-						worldItems: 0,
-						concepts: 0,
-						prompts: 0,
-						notes: 0,
-						wildcards: 0,
-						properties: 0,
-						groups: 0,
-					},
 				} as ImageWithStats;
 			});
 
@@ -764,19 +789,27 @@ class ImageService {
 			const imageWithStats: ImageWithStats = {
 				...image,
 				isFavorite: Boolean(image.isFavorite),
-				// TODO: Implementar lógica para obtener conteos reales
-				_count: {
-					tags: 0,
-					albums: 0,
-					collections: 0,
-					characters: 0,
-					concepts: 0,
-					prompts: 0,
-					notes: 0,
-					wilcards: 0,
-					properties: 0,
-					groups: 0,
+				entityType: 'image',
+				stats: {
+					viewCount: 0,
+					downloadCount: 0,
+					likeCount: 0,
+					commentCount: 0,
+					tagCount: 0,
+					albumCount: 0,
+					collectionCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
 				},
+				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+				fullUrl: `/api/images/${image.id}/original`,
 			};
 
 			return imageWithStats;

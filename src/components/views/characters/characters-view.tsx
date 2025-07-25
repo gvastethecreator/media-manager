@@ -10,7 +10,7 @@ import CharactersContentView from './characters-content-view';
 
 const viewLogger = clientLogger.withContext('CharactersView');
 
-export function CharactersView({ isVisible }: ViewProps) {
+export function CharactersView({}: ViewProps) {
 	const { selectedCharacterId, selectCharacter } = useCharacterStore();
 	const { mutate: createCharacter } = useCreateCharacter();
 
@@ -61,8 +61,6 @@ export function CharactersView({ isVisible }: ViewProps) {
 		viewLogger.info('🔄 Reintentando cargar characters');
 		refetch();
 	}, [refetch]);
-
-	if (!isVisible) return null;
 
 	return (
 		<CharactersContentView

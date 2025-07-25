@@ -208,11 +208,10 @@ export function FolderContentView({
 	}
 
 	// Renderizar vista de carpeta usando BaseContentView y FileBrowser
+	// Sin header porque ya tenemos el nombre en los breadcrumbs
 	return (
 		<BaseContentView
-			title={folderData?.name || 'Carpeta'}
-			description={folderData?.description || `Contenido de la carpeta ${folderData?.name || ''}`}
-			icon="📁"
+			showHeader={false}
 		>
 			<FileBrowser
 				entityType={EntityStatsType.IMAGE}

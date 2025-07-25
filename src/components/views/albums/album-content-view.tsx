@@ -18,7 +18,7 @@ export function AlbumContentView() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	// React Query hook must be at top level - only call if currentAlbumId is not null
+	// React Query hook must be at top level
 	const { data: albumImages, isLoading: isLoadingImages, error: albumError } = useAlbumImages(currentAlbumId || '');
 
 	// Usar el hook de eventos optimistas del cliente
@@ -64,15 +64,15 @@ export function AlbumContentView() {
 		containerName: album?.name ?? null,
 		emptyState: !currentAlbumId
 			? {
-				icon: Album,
-				title: 'No hay álbum seleccionado',
-				description: 'Selecciona un álbum para ver su contenido.',
-			}
+					icon: Album,
+					title: 'No hay álbum seleccionado',
+					description: 'Selecciona un álbum para ver su contenido.',
+				}
 			: {
-				icon: Album,
-				title: 'Álbum sin imágenes',
-				description: 'Este álbum no tiene imágenes asociadas.',
-			},
+					icon: Album,
+					title: 'Álbum sin imágenes',
+					description: 'Este álbum no tiene imágenes asociadas.',
+				},
 		onRefresh: loadAlbumImages,
 	};
 
@@ -92,11 +92,11 @@ export function AlbumContentView() {
 
 	return (
 		<ContentViewProvider {...contentProps}>
-			<BaseContentView
-				title="Contenido del Álbum"
-				description="Visualizando contenido del álbum seleccionado"
-			>
-				<div>Contenido del álbum en desarrollo</div>
+			<BaseContentView>
+				<div className="p-4">
+					<h2 className="text-lg font-semibold mb-4">{album?.name || 'Álbum'}</h2>
+					{/* Contenido del álbum */}
+				</div>
 			</BaseContentView>
 		</ContentViewProvider>
 	);
