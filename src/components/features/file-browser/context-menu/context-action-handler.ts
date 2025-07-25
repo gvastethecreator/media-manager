@@ -7,6 +7,7 @@
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import tagService, { addImageToTag } from '@/services/tag/tag.service';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 // Importaciones de stores en entidades
 
@@ -153,9 +154,9 @@ const customFileOperationsService = {
 
 export const handleContextAction = async (
 	action: ContextMenuAction,
-	item: FileItem,
+	item: AnyEntityWithStats,
 	data?: Record<string, unknown>,
-	handleItemDoubleClick?: (item: FileItem) => void,
+	handleItemDoubleClick?: (item: AnyEntityWithStats) => void,
 	toggleSelectFile?: (id: string) => void
 ): Promise<void> => {
 	try {
@@ -178,32 +179,39 @@ export const handleContextAction = async (
 
 			case 'open':
 				// Abrir ubicación del archivo
-				await customFileOperationsService.openPath(item.path);
+				const itemPath = 'path' in item ? (item as any).path : '';
+				await customFileOperationsService.openPath(itemPath);
 				break;
 
 			case 'download':
 				// Descargar archivo
-				toastService.info(`Descargando: ${item.name}`);
-				await customFileOperationsService.downloadFile(item.path);
+				const itemName = 'name' in item ? item.name : 'archivo';
+				const downloadPath = 'path' in item ? (item as any).path : '';
+				toastService.info(`Descargando: ${itemName}`);
+				await customFileOperationsService.downloadFile(downloadPath);
 				break;
 
 			case 'copy':
 				// Copiar al portapapeles
-				await customFileOperationsService.copyFileToClipboard(item.path);
+				const copyPath = 'path' in item ? (item as any).path : '';
+				await customFileOperationsService.copyFileToClipboard(copyPath);
 				break;
 
 			case 'copy-path':
 				// Copiar ruta
+				const pathToCopy = 'path' in item ? (item as any).path : '';
 				await navigator.clipboard
-					.writeText(item.path)
+					.writeText(pathToCopy)
 					.then(() => toastService.success('Ruta copiada al portapapeles'))
 					.catch(() => toastService.error('No se pudo copiar la ruta'));
 				break;
 
 			case 'delete':
 				// Eliminar archivo
-				toastService.info(`Eliminando: ${item.name}`);
-				await customFileOperationsService.deleteFile(item.path);
+				const deleteItemName = 'name' in item ? item.name : 'archivo';
+				const deletePath = 'path' in item ? (item as any).path : '';
+				toastService.info(`Eliminando: ${deleteItemName}`);
+				await customFileOperationsService.deleteFile(deletePath);
 				break;
 
 			case 'add-to-collection':

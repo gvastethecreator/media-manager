@@ -53,6 +53,7 @@ export interface FolderStore {
 	// Funciones de utilidad
 	clear: () => void;
 	refresh: () => Promise<void>;
+	fetchFolders: () => Promise<void>; // Alias para refresh
 }
 
 /**

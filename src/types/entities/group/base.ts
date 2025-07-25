@@ -45,6 +45,7 @@ export interface GroupStatistics {
 	noteCount: number;
 	wildcardCount: number;
 	propertyCount: number;
+	totalItems: number;
 	// Alias para compatibilidad
 	totalImages?: number;
 	totalVideos?: number;

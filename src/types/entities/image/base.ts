@@ -74,6 +74,20 @@ export interface ImageWithStats extends ImageBase {
 	stats: ImageStatistics;
 	thumbnailUrl: string;
 	fullUrl: string;
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 export interface DrizzleImageWithCounts extends ImageBase {

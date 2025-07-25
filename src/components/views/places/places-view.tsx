@@ -2,7 +2,7 @@ import { MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { PlaceCard } from '@/components/cards/place-card';
-import { EmptyState } from '@/components/core/data-display';
+import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 
 	// Usar React Query hook en lugar de server action
 	const {
-		data: places = [],
+		data: placesResponse,
 		isLoading,
 		error,
 		refetch,
@@ -38,6 +38,8 @@ export function PlacesView({ isVisible }: ViewProps) {
 		sortBy: 'name',
 		sortOrder: 'asc',
 	});
+
+	const places = placesResponse?.data || [];
 
 	const handlePlaceSelect = useCallback(
 		(placeId: string) => {
@@ -81,10 +83,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 				icon={MapPin}
 				title="Error al cargar lugares"
 				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-				action={{
-					label: 'Reintentar',
-					onClick: handleRetry,
-				}}
+				actions={<Button onClick={handleRetry}>Reintentar</Button>}
 			/>
 		);
 	}
@@ -148,9 +147,9 @@ export function PlacesView({ isVisible }: ViewProps) {
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
 								<PlaceCard
-									place={place}
-									isSelected={place.id === selectedPlaceId}
-									onSelect={() => handlePlaceSelect(place.id)}
+									placeId={place.id}
+									onClick={() => handlePlaceSelect(place.id)}
+									className={place.id === selectedPlaceId ? 'ring-2 ring-primary' : ''}
 								/>
 							</motion.div>
 						))}

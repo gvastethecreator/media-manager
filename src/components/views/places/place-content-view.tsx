@@ -98,7 +98,12 @@ export const PlaceContentView = memo(function PlaceContentView() {
 			emptyState={emptyStateConfig}
 			onRefresh={loadPlaceImages}
 		>
-			<BaseContentView />
+			<BaseContentView>
+				{/* Place content will be added here */}
+				<div className="p-4">
+					<p>Contenido del lugar se mostrará aquí</p>
+				</div>
+			</BaseContentView>
 		</ContentViewProvider>
 	);
 });

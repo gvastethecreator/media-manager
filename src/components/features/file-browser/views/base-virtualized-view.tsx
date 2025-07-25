@@ -43,19 +43,49 @@ export function useVirtualizedContainer({
 
   const updateDimensions = useCallback((element: Element) => {
     const rect = element.getBoundingClientRect();
-    const newHeight = Math.max(rect.height - paddingTop - paddingBottom, minHeight);
-    const newWidth = rect.width;
+    let newHeight = Math.max(rect.height - paddingTop - paddingBottom, minHeight);
+    let newWidth = rect.width;
 
-    if (newHeight !== containerHeight || newWidth !== containerWidth) {
+    // Si las dimensiones son muy pequeñas, intentar con diferentes estrategias
+    if (newHeight < minHeight || newWidth < 100) {
+      // Estrategia 1: Buscar el contenedor de scroll más cercano
+      const scrollContainer = element.closest('[data-radix-scroll-area-viewport]') ||
+        element.closest('.overflow-auto') ||
+        element.closest('.h-full');
+
+      if (scrollContainer) {
+        const scrollRect = scrollContainer.getBoundingClientRect();
+        if (scrollRect.height > newHeight) {
+          newHeight = Math.max(scrollRect.height - paddingTop - paddingBottom, minHeight);
+        }
+        if (scrollRect.width > newWidth) {
+          newWidth = scrollRect.width;
+        }
+      }
+
+      // Estrategia 2: Si aún es muy pequeño, usar el viewport
+      if (newHeight < minHeight) {
+        const viewportHeight = window.innerHeight;
+        newHeight = Math.max(viewportHeight * 0.6, minHeight); // 60% del viewport como fallback
+      }
+      if (newWidth < 100) {
+        const viewportWidth = window.innerWidth;
+        newWidth = Math.max(viewportWidth * 0.8, 300); // 80% del viewport como fallback
+      }
+    }
+
+    if (Math.abs(newHeight - containerHeight) > 1 || Math.abs(newWidth - containerWidth) > 1) {
       logger.debug('📏 Actualizando dimensiones del contenedor:', {
         height: `${containerHeight}px → ${newHeight}px`,
         width: `${containerWidth}px → ${newWidth}px`,
+        element: element.tagName,
+        rect: `${rect.width}x${rect.height}`,
       });
 
       setContainerHeight(newHeight);
       setContainerWidth(newWidth);
 
-      if (!isReady && newHeight > 0 && newWidth > 0) {
+      if (!isReady && newHeight > minHeight && newWidth > 100) {
         setIsReady(true);
         logger.info('✅ Contenedor virtualizado listo:', { height: newHeight, width: newWidth });
       }
@@ -92,19 +122,38 @@ export function useVirtualizedContainer({
     resizeObserverRef.current = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        const adjustedHeight = Math.max(height - paddingTop - paddingBottom, minHeight);
+        let adjustedHeight = Math.max(height - paddingTop - paddingBottom, minHeight);
+        let adjustedWidth = width;
 
-        if (width > 0 && adjustedHeight > 0) {
-          if (adjustedHeight !== containerHeight || width !== containerWidth) {
+        // Aplicar las mismas estrategias de fallback que en updateDimensions
+        if (adjustedHeight < minHeight || adjustedWidth < 100) {
+          const scrollContainer = element.closest('[data-radix-scroll-area-viewport]') ||
+            element.closest('.overflow-auto') ||
+            element.closest('.h-full');
+
+          if (scrollContainer) {
+            const scrollRect = scrollContainer.getBoundingClientRect();
+            if (scrollRect.height > adjustedHeight) {
+              adjustedHeight = Math.max(scrollRect.height - paddingTop - paddingBottom, minHeight);
+            }
+            if (scrollRect.width > adjustedWidth) {
+              adjustedWidth = scrollRect.width;
+            }
+          }
+        }
+
+        if (adjustedWidth > 0 && adjustedHeight > 0) {
+          if (Math.abs(adjustedHeight - containerHeight) > 1 || Math.abs(adjustedWidth - containerWidth) > 1) {
             logger.debug('🔄 ResizeObserver detectó cambio:', {
               height: `${containerHeight}px → ${adjustedHeight}px`,
-              width: `${containerWidth}px → ${width}px`,
+              width: `${containerWidth}px → ${adjustedWidth}px`,
+              original: `${width}x${height}`,
             });
 
             setContainerHeight(adjustedHeight);
-            setContainerWidth(width);
+            setContainerWidth(adjustedWidth);
 
-            if (!isReady) {
+            if (!isReady && adjustedHeight > minHeight && adjustedWidth > 100) {
               setIsReady(true);
               logger.info('✅ Contenedor virtualizado listo (ResizeObserver)');
             }
@@ -187,6 +236,8 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
             height: `${height}px`,
             width: `${width}px`,
             padding: `${paddingObj.top}px ${paddingObj.right}px ${paddingObj.bottom}px ${paddingObj.left}px`,
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <div className="animate-pulse">Preparando vista...</div>
@@ -201,9 +252,16 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
         style={{
           height: `${height}px`,
           width: `${width}px`,
-          contain: 'strict',
+          minHeight: `${height}px`,
+          maxHeight: `${height}px`,
+          minWidth: `${width}px`,
+          maxWidth: `${width}px`,
+          contain: 'layout style size',
           padding: `${paddingObj.top}px ${paddingObj.right}px ${paddingObj.bottom}px ${paddingObj.left}px`,
-          overflow: 'hidden', // Prevenir overlapping
+          overflow: 'hidden',
+          position: 'relative',
+          zIndex: 1,
+          isolation: 'isolate', // Crear un nuevo contexto de apilamiento
         }}
       >
         {children}

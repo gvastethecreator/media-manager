@@ -9,7 +9,8 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { VideoWithStats } from '@/types/entities/video';
-import { EntityStatsType, type EntityWithStats } from '@/types/migration';
+import { EntityStatsType, type EntityWithStats, type AnyEntityWithStats } from '@/types/migration';
+import { isVideoWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('VideoContentView');
@@ -57,7 +58,7 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	}, [currentVideoId, currentVideo, isLoading, fetchVideo]);
 
 	const handleVideoSelect = useCallback(
-		(video: EntityWithStats) => {
+		(video: AnyEntityWithStats) => {
 			logger.info('🖱️ Video seleccionado:', video.name);
 
 			// Mostrar panel de detalles con el video seleccionado
@@ -68,8 +69,11 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	);
 
 	const handleVideoDoubleClick = useCallback(
-		(video: EntityWithStats) => {
-			logger.info('🖱️ Doble click en video:', video.name);
+		(video: AnyEntityWithStats) => {
+			if (!isVideoWithStats(video)) return;
+			
+			const videoItem = video as VideoWithStats;
+			logger.info('🖱️ Doble click en video:', videoItem.name);
 
 			// Obtener todos los videos para el visor
 			const allVideos = getVideos();
@@ -88,7 +92,7 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 				metadata: v.metadata,
 			}));
 
-			const currentIndex = videoItems.findIndex((item) => item.id === video.id);
+			const currentIndex = videoItems.findIndex((item) => item.id === videoItem.id);
 
 			// Abrir el visor con todos los videos
 			openViewer(videoItems, Math.max(0, currentIndex));
@@ -166,7 +170,7 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 		<BaseContentView
 			title={currentVideo.name || 'Video'}
 			description={currentVideo.description || undefined}
-			icon={currentVideo.emoji || undefined}
+			icon={undefined}
 			headerControls={
 				<>
 					<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>

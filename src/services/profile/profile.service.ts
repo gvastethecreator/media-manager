@@ -8,7 +8,7 @@ import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema/index';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
-import { transformProfile } from '@/transformers/profile/profile-transformers';
+import { transformProfile, type ProfileTransformed } from '@/transformers/profile/profile-transformers';
 import {
 	type ProfileCreateInput,
 	type ProfileExtended,
@@ -158,7 +158,7 @@ class ProfileServiceImpl {
 	/**
 	 * Crea un nuevo perfil
 	 */
-	async createProfile(data: ProfileCreateInput): Promise<ProfileExtended> {
+	async createProfile(data: ProfileCreateInput): Promise<ProfileTransformed> {
 		try {
 			const [newProfile] = await db.insert(profiles).values(data).returning();
 			return transformProfile(newProfile);
@@ -174,7 +174,7 @@ class ProfileServiceImpl {
 	/**
 	 * Actualiza un perfil existente
 	 */
-	async updateProfile(id: string, data: ProfileUpdateInput): Promise<ProfileExtended> {
+	async updateProfile(id: string, data: ProfileUpdateInput): Promise<ProfileTransformed> {
 		try {
 			const [updatedProfile] = await db.update(profiles).set(data).where(eq(profiles.id, id)).returning();
 			return transformProfile(updatedProfile);
@@ -212,7 +212,7 @@ class ProfileServiceImpl {
 	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
 	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
-	async getActiveProfile(): Promise<ProfileExtended | null> {
+	async getActiveProfile(): Promise<ProfileTransformed | null> {
 		try {
 			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
 			const drizzleProfile = await db
@@ -283,7 +283,7 @@ class ProfileServiceImpl {
 	 * 🔄 MIGRACIÓN DRIZZLE: Este método usa Drizzle como ORM principal
 	 * con validación de tipos en desarrollo para asegurar consistencia.
 	 */
-	async getById(id: string): Promise<ProfileExtended | null> {
+	async getById(id: string): Promise<ProfileTransformed | null> {
 		try {
 			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
 			const drizzleProfile = await db

@@ -66,7 +66,7 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 			<div className="flex h-full flex-col items-center justify-center space-y-4">
 				<div className="text-center">
 					<h3 className="text-lg font-semibold text-destructive">Error al cargar carpetas</h3>
-					<p className="text-sm text-muted-foreground">{error}</p>
+					<p className="text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
 				</div>
 				<Button onClick={handleManualRetry} variant="outline">
 					<RefreshCw className="mr-2 h-4 w-4" />

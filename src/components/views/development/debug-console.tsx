@@ -12,7 +12,13 @@ const debugLogger = clientLogger.withContext('DebugConsole');
 export function DebugConsole() {
 	const [activeTab, setActiveTab] = useState('console');
 	const { logs, addLog, clearLogs, debug, info, warn, error, success } = useLogViewer();
-	const { startCapture, stopCapture, isCapturing } = useConsoleCapture(addLog);
+	
+	// Crear un wrapper para adaptar la signatura de addLog a LogEntry
+	const handleCaptureLog = (logEntry: any) => {
+		addLog(logEntry.level, logEntry.message, logEntry.context, logEntry.data);
+	};
+	
+	const { startCapture, stopCapture, isCapturing } = useConsoleCapture(handleCaptureLog);
 
 	// Iniciar captura al montar el componente
 	useEffect(() => {

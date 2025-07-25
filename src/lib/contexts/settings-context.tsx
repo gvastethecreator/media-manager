@@ -2,7 +2,7 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { profileClient } from '@/services/profile/client';
-import { type ProfileCreate, type ProfileUpdate, type ProfileWithStats } from '@/services/profile-service-export';
+import { type CreateProfileInput, type UpdateProfileInput, type ProfileExtended } from '@/services/profile';
 import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
 
@@ -24,7 +24,7 @@ export interface Settings {
 	shortcuts?: { [key: string]: string };
 
 	// Colecciones, etiquetas y perfiles
-	profiles?: ProfileWithStats[];
+	profiles?: ProfileExtended[];
 	activeProfile?: string | null;
 
 	// Información del sistema
@@ -44,7 +44,7 @@ interface SettingsContextType {
 
 	// Funciones para colecciones, etiquetas y perfiles
 
-	updateProfile: (id: string | null, data: ProfileCreate | ProfileUpdate) => Promise<void>;
+	updateProfile: (id: string | null, data: CreateProfileInput | UpdateProfileInput) => Promise<void>;
 	setActiveProfile: (id: string) => Promise<void>;
 	deleteProfile: (id: string) => Promise<void>;
 }
@@ -206,12 +206,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	};
 
 	// Actualizar perfil
-	const updateProfile = async (id: string | null, data: ProfileCreate | ProfileUpdate) => {
+	const updateProfile = async (id: string | null, data: CreateProfileInput | UpdateProfileInput) => {
 		try {
 			if (id) {
-				await profileClient.updateProfile(id, data as ProfileUpdate);
+				await profileClient.updateProfile(id, data as UpdateProfileInput);
 			} else {
-				await profileClient.createProfile(data as ProfileCreate);
+				await profileClient.createProfile(data as CreateProfileInput);
 			}
 			// Recargar los perfiles para obtener la lista actualizada
 			await loadProfiles();

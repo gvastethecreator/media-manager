@@ -24,6 +24,7 @@ export type DocumentFilterState = Record<string, never>;
 
 export interface DocumentCoreActions {
 	loadDocuments: () => Promise<void>;
+	fetchDocuments: () => Promise<void>; // Alias para loadDocuments
 	createDocument: (data: DocumentCreateInput) => Promise<void>;
 	updateDocument: (id: string, data: DocumentUpdateInput) => Promise<void>;
 	deleteDocument: (id: string) => Promise<void>;

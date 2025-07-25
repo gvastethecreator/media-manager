@@ -6,7 +6,7 @@
  */
 
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag/base';
-import type { TagSortCriteria } from '@/types/entities/tag/types';
+import type { TagSortCriteria } from '@/types/entities/tag';
 
 // --- ENUMS ESPECÍFICOS DEL STORE ---
 

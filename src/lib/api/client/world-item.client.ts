@@ -1,7 +1,7 @@
 /**
  * Cliente de API para world items.
  */
-import type { CreateWorldItemData, UpdateWorldItemData, WorldItem } from '@/types/entities/world-item';
+import type { WorldItemCreateInput as CreateWorldItemData, WorldItemUpdateInput as UpdateWorldItemData, WorldItemWithStats as WorldItem } from '@/types/entities/world-item/types';
 
 const API_BASE_PATH = '/api/world-items';
 

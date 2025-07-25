@@ -1,7 +1,7 @@
 /**
  * @file Transformer optimizado para la entidad Image
  * @module transformers/image/transformer
- 
+
  * Beneficios: 60-80% más rápido vs include completo
  * Última actualización: 2025-01-27
  */
@@ -134,7 +134,6 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 	const views = Math.floor(totalAssociations * 10 + Math.random() * 100);
 	const likes = Math.floor(totalAssociations * 2 + Math.random() * 20);
 	const downloads = Math.floor(totalAssociations * 1.5 + Math.random() * 15);
-	const shares = Math.floor(totalAssociations * 0.8 + Math.random() * 8);
 
 	// Metadatos AI
 	const aiConfidence = calculateAIConfidence(drizzleImage);

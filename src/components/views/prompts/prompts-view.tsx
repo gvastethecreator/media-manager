@@ -22,7 +22,7 @@ const viewLogger = clientLogger.withContext('PromptsView');
 
 export function PromptsView({ isVisible }: ViewProps) {
 	const navigate = useNavigate();
-	const { selectedPromptId, setSelectedPromptId } = usePromptStore();
+	const { selectedPrompt, selectPrompt } = usePromptStore();
 	const { mutate: createPrompt } = useCreatePrompt();
 
 	const [localSearch, setLocalSearch] = useState('');
@@ -33,7 +33,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 
 	// Usar React Query hook en lugar de server action
 	const {
-		data: prompts = [],
+		data: promptsResponse,
 		isLoading,
 		error,
 		refetch,
@@ -43,13 +43,18 @@ export function PromptsView({ isVisible }: ViewProps) {
 		sortOrder: 'asc',
 	});
 
+	const prompts = promptsResponse?.data || [];
+
 	const handlePromptSelect = useCallback(
 		(promptId: string) => {
 			viewLogger.info('🤖 Seleccionando prompt', { promptId });
-			setSelectedPromptId(promptId);
+			const prompt = prompts.find(p => p.id === promptId);
+			if (prompt) {
+				selectPrompt(prompt);
+			}
 			clientEvents.emit('prompt:selected', { promptId });
 		},
-		[setSelectedPromptId]
+		[selectPrompt, prompts]
 	);
 
 	const handlePromptEdit = useCallback(
@@ -180,10 +185,9 @@ export function PromptsView({ isVisible }: ViewProps) {
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
 								<MemoizedPromptCard
-									prompt={prompt}
-									isSelected={prompt.id === selectedPromptId}
-									onSelect={() => handlePromptSelect(prompt.id)}
-									onEdit={() => handlePromptEdit(prompt.id)}
+									promptId={prompt.id}
+									onClick={() => handlePromptSelect(prompt.id)}
+									className={prompt.id === selectedPrompt?.id ? 'ring-2 ring-primary' : ''}
 								/>
 							</motion.div>
 						))}

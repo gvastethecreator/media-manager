@@ -1,7 +1,7 @@
 import { asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { profiles } from '@/lib/drizzle/schema/index';
-import { transformProfiles } from '@/transformers/profile/profile-transformers';
+import { transformProfiles, type ProfileTransformed } from '@/transformers/profile/profile-transformers';
 import {
 	Language,
 	type PaginatedProfiles,

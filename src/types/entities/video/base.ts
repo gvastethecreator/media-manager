@@ -90,7 +90,6 @@ export interface VideoStatistics {
 	views: number;
 	likes: number;
 	downloads: number;
-	shares: number;
 	lastViewed: Date | null;
 
 	// Estado de duplicados
@@ -111,4 +110,21 @@ export interface VideoWithStats extends VideoBase {
 	entityType: 'video';
 	stats: VideoStatistics;
 	thumbnailUrl: string | null;
+	fullUrl: string;
+	fps?: number;
+	codec?: string;
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }

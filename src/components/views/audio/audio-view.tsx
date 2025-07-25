@@ -15,16 +15,15 @@ const viewLogger = clientLogger.withContext('AudioView');
 export function AudioView(_props: ViewProps) {
 	const navigate = useNavigate();
 
-	// Usar selectores normales de Zustand en lugar de la utilidad problemática
-	const { audios, isLoading, error, fetchAudios, createAudio, updateAudio, deleteAudio } = useAudioStore((state) => ({
-		audios: state.audios || [],
-		isLoading: state.loading || false,
-		error: state.error || null,
-		fetchAudios: state.fetchAudios,
-		createAudio: state.createAudio,
-		updateAudio: state.updateAudio,
-		deleteAudio: state.deleteAudio,
-	}));
+	// Usar el store completo para evitar errores de tipado
+	const audioStore = useAudioStore();
+	const audios = audioStore.audios || [];
+	const loading = audioStore.loading || false;
+	const error = audioStore.error || null;
+	const fetchAudios = audioStore.fetchAudios;
+	const createAudio = audioStore.createAudio;
+	const updateAudio = audioStore.updateAudio;
+	const deleteAudio = audioStore.deleteAudio;
 
 	const [showForm, setShowForm] = useState(false);
 	const [newAudioName, setNewAudioName] = useState('');
@@ -106,10 +105,10 @@ export function AudioView(_props: ViewProps) {
 	}, [audios]);
 
 	return (
-		<AudioContentView
-			audios={sortedAudios}
-			isLoading={isLoading}
-			error={error}
+			<AudioContentView
+				audios={sortedAudios}
+				isLoading={loading}
+				error={error}
 			showForm={showForm}
 			newAudioName={newAudioName}
 			newAudioFile={newAudioFile}

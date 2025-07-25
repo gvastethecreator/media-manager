@@ -20,7 +20,7 @@ import type { ViewProps } from '../types';
 const viewLogger = clientLogger.withContext('WildcardsView');
 
 export function WildcardsView({ isVisible }: ViewProps) {
-	const { selectedWildcardId, setSelectedWildcardId } = useWildcardStore();
+	const { ui: { currentWildcardId }, setCurrentWildcard } = useWildcardStore();
 	const { mutate: createWildcard } = useCreateWildcard();
 
 	const [localSearch, setLocalSearch] = useState('');
@@ -30,7 +30,7 @@ export function WildcardsView({ isVisible }: ViewProps) {
 
 	// Usar React Query hook en lugar de server action
 	const {
-		data: wildcards = [],
+		data: wildcardsResponse,
 		isLoading,
 		error,
 		refetch,
@@ -40,13 +40,15 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		sortOrder: 'asc',
 	});
 
+	const wildcards = wildcardsResponse?.data || [];
+
 	const handleWildcardSelect = useCallback(
 		(wildcardId: string) => {
 			viewLogger.info('✨ Seleccionando wildcard', { wildcardId });
-			setSelectedWildcardId(wildcardId);
+			setCurrentWildcard(wildcardId);
 			clientEvents.emit('wildcard:selected', { wildcardId });
 		},
-		[setSelectedWildcardId]
+		[setCurrentWildcard]
 	);
 
 	const { toast } = useToast();
@@ -151,8 +153,8 @@ export function WildcardsView({ isVisible }: ViewProps) {
 							>
 								<WildcardCard
 									wildcard={wildcard}
-									isSelected={wildcard.id === selectedWildcardId}
-									onSelect={() => handleWildcardSelect(wildcard.id)}
+									onClick={() => handleWildcardSelect(wildcard.id)}
+									className={wildcard.id === currentWildcardId ? 'ring-2 ring-primary' : ''}
 								/>
 							</motion.div>
 						))}

@@ -9,6 +9,7 @@
  */
 export enum FavoriteEntityType {
 	IMAGE = 'image',
+	VIDEO = 'video',
 	ALBUM = 'album',
 	COLLECTION = 'collection',
 	FOLDER = 'folder',
@@ -18,6 +19,10 @@ export enum FavoriteEntityType {
 	CONCEPT = 'concept',
 	PROMPT = 'prompt',
 	NOTE = 'note',
+	DOCUMENT = 'document',
+	FILE = 'file',
+	TAG = 'tag',
+	GROUP = 'group',
 }
 
 /**
@@ -118,6 +123,7 @@ export interface FavoriteUpdateInput extends Partial<FavoriteCreateInput> {
 // Constantes para mapeo de entidades
 export const FAVORITE_ENTITY_EMOJIS: Record<string, string> = {
 	[FavoriteEntityType.IMAGE]: '🖼️',
+	[FavoriteEntityType.VIDEO]: '🎥',
 	[FavoriteEntityType.ALBUM]: '📸',
 	[FavoriteEntityType.COLLECTION]: '🌟',
 	[FavoriteEntityType.FOLDER]: '📁',
@@ -127,11 +133,16 @@ export const FAVORITE_ENTITY_EMOJIS: Record<string, string> = {
 	[FavoriteEntityType.CONCEPT]: '💡',
 	[FavoriteEntityType.PROMPT]: '🎯',
 	[FavoriteEntityType.NOTE]: '📝',
+	[FavoriteEntityType.DOCUMENT]: '📄',
+	[FavoriteEntityType.FILE]: '📎',
+	[FavoriteEntityType.TAG]: '🏷️',
+	[FavoriteEntityType.GROUP]: '👥',
 	default: '⭐',
 };
 
 export const FAVORITE_ENTITY_COLORS: Record<string, string> = {
 	[FavoriteEntityType.IMAGE]: '#3b82f6',
+	[FavoriteEntityType.VIDEO]: '#ef4444',
 	[FavoriteEntityType.ALBUM]: '#f97316',
 	[FavoriteEntityType.COLLECTION]: '#8b5cf6',
 	[FavoriteEntityType.FOLDER]: '#22c55e',
@@ -141,11 +152,16 @@ export const FAVORITE_ENTITY_COLORS: Record<string, string> = {
 	[FavoriteEntityType.CONCEPT]: '#fbbf24',
 	[FavoriteEntityType.PROMPT]: '#10b981',
 	[FavoriteEntityType.NOTE]: '#ef4444',
+	[FavoriteEntityType.DOCUMENT]: '#64748b',
+	[FavoriteEntityType.FILE]: '#6b7280',
+	[FavoriteEntityType.TAG]: '#ec4899',
+	[FavoriteEntityType.GROUP]: '#14b8a6',
 	default: '#3b82f6',
 };
 
 export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<string, string> = {
 	[FavoriteEntityType.IMAGE]: 'Imágenes',
+	[FavoriteEntityType.VIDEO]: 'Videos',
 	[FavoriteEntityType.ALBUM]: 'Álbumes',
 	[FavoriteEntityType.COLLECTION]: 'Colecciones',
 	[FavoriteEntityType.FOLDER]: 'Carpetas',
@@ -155,6 +171,10 @@ export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<string, string> = {
 	[FavoriteEntityType.CONCEPT]: 'Conceptos',
 	[FavoriteEntityType.PROMPT]: 'Prompts',
 	[FavoriteEntityType.NOTE]: 'Notas',
+	[FavoriteEntityType.DOCUMENT]: 'Documentos',
+	[FavoriteEntityType.FILE]: 'Archivos',
+	[FavoriteEntityType.TAG]: 'Etiquetas',
+	[FavoriteEntityType.GROUP]: 'Grupos',
 	default: 'Favoritos',
 };
 

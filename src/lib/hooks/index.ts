@@ -32,5 +32,4 @@ export * from './utils/use-mobile';
 export { useIsMobile } from './utils/use-mobile';
 export * from './utils/use-profile-theme';
 export * from './utils/use-settings';
-export { useSettings } from './utils/use-settings';
 export * from './utils/use-window-size';

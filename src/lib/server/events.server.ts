@@ -1,5 +1,5 @@
 import { ENV } from '@/config/env';
-import type { ProcessStatus } from '@/types/process';
+import type { ProcessStatus } from '@/types/folders';
 
 // Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
 const EVENT_PATHS: Record<EventType, string[]> = {

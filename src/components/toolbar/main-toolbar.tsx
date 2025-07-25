@@ -40,6 +40,7 @@ import {
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useDebouncedCallback } from 'use-debounce';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -82,20 +83,20 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const currentView = location.pathname.split('/')[1] || 'gallery';
 
 	// 🔄 Usar los nuevos stores de Zustand
-	const viewMode = useViewOptionsStore((state) => state.viewMode);
-	const setViewMode = useViewOptionsStore((state) => state.setViewMode);
-	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
-	const addSortOption = useViewOptionsStore((state) => state.addSortOption);
-	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
-	const setSearchQuery = useViewOptionsStore((state) => state.setSearchQuery);
-	const itemSize = useViewOptionsStore((state) => state.itemSize);
-	const setItemSize = useViewOptionsStore((state) => state.setItemSize);
+	const viewMode = useViewOptionsStore((state: any) => state.viewMode);
+	const setViewMode = useViewOptionsStore((state: any) => state.setViewMode);
+	const sortOptions = useViewOptionsStore((state: any) => state.sortOptions);
+	const addSortOption = useViewOptionsStore((state: any) => state.addSortOption);
+	const searchQuery = useViewOptionsStore((state: any) => state.searchQuery);
+	const setSearchQuery = useViewOptionsStore((state: any) => state.setSearchQuery);
+	const itemSize = useViewOptionsStore((state: any) => state.itemSize);
+	const setItemSize = useViewOptionsStore((state: any) => state.setItemSize);
 
 	// 🔄 Store de selección
-	const selectedIds = useSelectionStore((state) => state.selectedIds);
-	const clearSelection = useSelectionStore((state) => state.clearSelection);
-	const selectAll = useSelectionStore((state) => state.selectAll);
-	const invertSelection = useSelectionStore((state) => state.invertSelection);
+	const selectedIds = useSelectionStore((state: any) => state.selectedIds);
+	const clearSelection = useSelectionStore((state: any) => state.clearSelection);
+	const selectAll = useSelectionStore((state: any) => state.selectAll);
+	const invertSelection = useSelectionStore((state: any) => state.invertSelection);
 
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 
@@ -183,16 +184,21 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	// 🔄 Manejador de ordenación
 	const handleSort = useCallback(
 		(field: string) => {
-			const currentSortOption = sortOptions.find((option) => option.field === field);
+			console.log('🔧 Toolbar - handleSort llamado:', { field, currentSortOptions: sortOptions });
+			const currentSortOption = sortOptions.find((option: any) => option.field === field);
 			if (currentSortOption) {
 				// Cambiar dirección si ya existe
-				addSortOption({
+				const newOption = {
 					field,
 					direction: currentSortOption.direction === 'asc' ? 'desc' : 'asc',
-				});
+				};
+				console.log('🔧 Toolbar - Cambiando dirección:', newOption);
+				addSortOption(newOption);
 			} else {
 				// Añadir nueva opción de ordenación
-				addSortOption({ field, direction: 'asc' });
+				const newOption = { field, direction: 'asc' };
+				console.log('🔧 Toolbar - Añadiendo nueva opción:', newOption);
+				addSortOption(newOption);
 			}
 		},
 		[sortOptions, addSortOption]
@@ -207,12 +213,23 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		invertSelection(allItemIds);
 	}, [invertSelection, allItemIds]);
 
-	// 🔄 Manejador de cambio de tamaño
+	// 🔄 Manejador de cambio de tamaño optimizado con debounce
+	const debouncedSizeChange = useDebouncedCallback(
+		(newSize: number) => {
+			setItemSize(newSize);
+		},
+		100 // Debounce de 100ms para evitar renders excesivos
+	);
+
 	const handleSizeChange = useCallback(
 		(delta: number) => {
-			setItemSize(Math.max(50, Math.min(300, itemSize + delta)));
+			const newSize = Math.max(50, Math.min(300, itemSize + delta));
+			// Actualizar inmediatamente el estado local para feedback visual rápido
+			setItemSize(newSize);
+			// También aplicar el debounce por si el usuario hace múltiples clicks rápidos
+			debouncedSizeChange(newSize);
 		},
-		[itemSize, setItemSize]
+		[itemSize, setItemSize, debouncedSizeChange]
 	);
 
 	const renderSortButtons = () => (
@@ -222,17 +239,17 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				size="icon"
 				className={cn(
 					'h-7 hover:bg-accent',
-					sortOptions.some((opt) => opt.field === 'name') ? 'w-10 bg-accent/50' : 'w-7'
+					sortOptions.some((opt: any) => opt.field === 'name') ? 'w-10 bg-accent/50' : 'w-7'
 				)}
 				title="Ordenar por nombre"
 				onClick={() => handleSort('name')}
-				data-active={sortOptions.some((opt) => opt.field === 'name')}
+				data-active={sortOptions.some((opt: any) => opt.field === 'name')}
 			>
 				<div className="flex items-center justify-center gap-0.5">
-					<FileText className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'name') ? 'text-primary' : 'text-muted-foreground')} />
-					{sortOptions.some((opt) => opt.field === 'name') && (
+					<FileText className={cn('h-3.5 w-3.5', sortOptions.some((opt: any) => opt.field === 'name') ? 'text-primary' : 'text-muted-foreground')} />
+					{sortOptions.some((opt: any) => opt.field === 'name') && (
 						<div className="flex items-center">
-							{sortOptions.find((opt) => opt.field === 'name')?.direction === 'asc' ? (
+							{sortOptions.find((opt: any) => opt.field === 'name')?.direction === 'asc' ? (
 								<ArrowUp className="h-2.5 w-2.5 text-primary" />
 							) : (
 								<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -246,17 +263,17 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				size="icon"
 				className={cn(
 					'h-7 hover:bg-accent',
-					sortOptions.some((opt) => opt.field === 'modifiedAt') ? 'w-10 bg-accent/50' : 'w-7'
+					sortOptions.some((opt: any) => opt.field === 'modifiedAt') ? 'w-10 bg-accent/50' : 'w-7'
 				)}
 				title="Ordenar por fecha de modificación"
 				onClick={() => handleSort('modifiedAt')}
-				data-active={sortOptions.some((opt) => opt.field === 'modifiedAt')}
+				data-active={sortOptions.some((opt: any) => opt.field === 'modifiedAt')}
 			>
 				<div className="flex items-center justify-center gap-0.5">
-					<Clock className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'modifiedAt') ? 'text-primary' : 'text-muted-foreground')} />
-					{sortOptions.some((opt) => opt.field === 'modifiedAt') && (
+					<Clock className={cn('h-3.5 w-3.5', sortOptions.some((opt: any) => opt.field === 'modifiedAt') ? 'text-primary' : 'text-muted-foreground')} />
+					{sortOptions.some((opt: any) => opt.field === 'modifiedAt') && (
 						<div className="flex items-center">
-							{sortOptions.find((opt) => opt.field === 'modifiedAt')?.direction === 'asc' ? (
+							{sortOptions.find((opt: any) => opt.field === 'modifiedAt')?.direction === 'asc' ? (
 								<ArrowUp className="h-2.5 w-2.5 text-primary" />
 							) : (
 								<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -270,19 +287,19 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				size="icon"
 				className={cn(
 					'h-7 hover:bg-accent',
-					sortOptions.some((opt) => opt.field === 'createdAt') ? 'w-10 bg-accent/50' : 'w-7'
+					sortOptions.some((opt: any) => opt.field === 'createdAt') ? 'w-10 bg-accent/50' : 'w-7'
 				)}
 				title="Ordenar por fecha de creación"
 				onClick={() => handleSort('createdAt')}
-				data-active={sortOptions.some((opt) => opt.field === 'createdAt')}
+				data-active={sortOptions.some((opt: any) => opt.field === 'createdAt')}
 			>
 				<div className="flex items-center justify-center gap-0.5">
 					<Calendar
-						className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'createdAt') ? 'text-primary' : 'text-muted-foreground')}
+						className={cn('h-3.5 w-3.5', sortOptions.some((opt: any) => opt.field === 'createdAt') ? 'text-primary' : 'text-muted-foreground')}
 					/>
-					{sortOptions.some((opt) => opt.field === 'createdAt') && (
+					{sortOptions.some((opt: any) => opt.field === 'createdAt') && (
 						<div className="flex items-center">
-							{sortOptions.find((opt) => opt.field === 'createdAt')?.direction === 'asc' ? (
+							{sortOptions.find((opt: any) => opt.field === 'createdAt')?.direction === 'asc' ? (
 								<ArrowUp className="h-2.5 w-2.5 text-primary" />
 							) : (
 								<ArrowDown className="h-2.5 w-2.5 text-primary" />

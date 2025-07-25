@@ -7,7 +7,7 @@ const API_BASE_PATH = '/api/places';
 
 export async function getPlacesFromApi(options: PlaceSearchOptions = {}): Promise<PlaceWithStats[]> {
 	const params = new URLSearchParams();
-	if (options.search) params.append('search', options.search);
+	if (options.query) params.append('search', options.query);
 	if (options.limit) params.append('limit', String(options.limit));
 	if (options.offset) params.append('offset', String(options.offset));
 	if (options.sortBy) params.append('sortBy', options.sortBy);

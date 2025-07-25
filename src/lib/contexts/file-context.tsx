@@ -108,7 +108,6 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				await logActivity.mutateAsync({
 					type: 'view',
 					description: `Vista de ${item.name}`,
-					imageId: item.id,
 				});
 			} catch (error) {
 				console.error('Error registrando actividad:', error);

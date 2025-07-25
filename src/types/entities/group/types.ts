@@ -35,6 +35,8 @@ export interface UpdateGroupInput {
 	filters?: any;
 }
 
+export type GroupSortKey = 'name' | 'category' | 'createdAt';
+
 export interface GroupFilters {
 	search?: string;
 	hasImages?: boolean;

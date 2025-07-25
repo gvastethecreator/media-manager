@@ -1,7 +1,7 @@
 /**
  * @file Transformador principal para la entidad Prompt
  * @module transformers/prompt/transformer
- 
+
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -27,7 +27,6 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 		const stats: PromptStats = {
 			useCount: _count?.uses || 0,
 			favoriteCount: _count?.favorites || 0,
-			shareCount: _count?.shares || 0,
 			wordCount,
 			parameterCount,
 			tagCount: baseData.tags ? baseData.tags.length : 0,

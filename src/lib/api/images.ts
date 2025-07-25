@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
+import type { ImageCreateInput, ImageUpdateInput } from '@/types/entities/image/types';
+import type { ImageWithStats } from '@/types/entities/image/base';
 import { apiClient } from './client';
 
 // Tipos para filtros de imágenes

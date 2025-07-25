@@ -36,7 +36,7 @@ export const FolderCard = memo(function FolderCard({
 			},
 			totalFiles: folder.stats?.totalItems ?? folder.totalFiles ?? 0,
 			totalSize: folder.stats?.totalSize ?? folder.totalSize ?? 0,
-			recentImageUrls: folder.stats?.recentImages?.map((img) => img.path) || [],
+			recentImageUrls: folder.recentImages?.map((img) => img.thumbnailUrl) || [],
 			childrenCount: folder.stats?.folderCount ?? 0,
 			lastIndexed: folder.lastIndexed ?? null,
 		};

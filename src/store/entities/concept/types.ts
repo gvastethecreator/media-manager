@@ -1,5 +1,5 @@
 import type { ConceptBase, ConceptWithStats } from '@/types/entities/concept/base';
-import type { ConceptFilters, ConceptSortOption, ConceptViewMode } from '@/types/entities/concept/types';
+import type { ConceptCreateInput, ConceptFilters, ConceptSortOption, ConceptUpdateInput, ConceptViewMode } from '@/types/entities/concept/types';
 import { EntityType } from '@/types/entities/entities';
 
 /**
@@ -11,8 +11,8 @@ export interface ConceptCoreSlice {
 	isLoading: boolean;
 	error: string | null;
 	loadConcepts: () => Promise<void>;
-	createConcept: (data: Omit<ConceptBase, 'id'>) => Promise<void>;
-	updateConcept: (id: string, data: Partial<ConceptBase>) => Promise<void>;
+	createConcept: (data: ConceptCreateInput) => Promise<void>;
+	updateConcept: (id: string, data: ConceptUpdateInput) => Promise<void>;
 	deleteConcept: (id: string) => Promise<void>;
 	selectConcept: (concept: ConceptWithStats | null) => void;
 	reset: () => void;

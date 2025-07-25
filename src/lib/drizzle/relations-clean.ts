@@ -136,10 +136,12 @@ export const albumRelations = relations(albums, ({ many }) => ({
  * 🎨 Relaciones de Collection
  */
 export const collectionRelations = relations(collections, ({ one, many }) => ({
-  folder: one(folders, {
-    fields: [collections.folderId],
-    references: [folders.id],
+  parent: one(collections, {
+    fields: [collections.parentId],
+    references: [collections.id],
+    relationName: "CollectionParent"
   }),
+  children: many(collections, { relationName: "CollectionParent" }),
   images: many(imageCollections),
 }));
 
@@ -153,33 +155,33 @@ export const tagRelations = relations(tags, ({ many }) => ({
 // Relaciones de tablas pivot
 export const imageAlbumRelations = relations(imageAlbums, ({ one }) => ({
   image: one(images, {
-    fields: [imageAlbums.imageId],
+    fields: [imageAlbums.A],
     references: [images.id],
   }),
   album: one(albums, {
-    fields: [imageAlbums.albumId],
+    fields: [imageAlbums.B],
     references: [albums.id],
   }),
 }));
 
 export const imageCollectionRelations = relations(imageCollections, ({ one }) => ({
   image: one(images, {
-    fields: [imageCollections.imageId],
+    fields: [imageCollections.A],
     references: [images.id],
   }),
   collection: one(collections, {
-    fields: [imageCollections.collectionId],
+    fields: [imageCollections.B],
     references: [collections.id],
   }),
 }));
 
 export const imageTagRelations = relations(imageTags, ({ one }) => ({
   image: one(images, {
-    fields: [imageTags.imageId],
+    fields: [imageTags.A],
     references: [images.id],
   }),
   tag: one(tags, {
-    fields: [imageTags.tagId],
+    fields: [imageTags.B],
     references: [tags.id],
   }),
 }));

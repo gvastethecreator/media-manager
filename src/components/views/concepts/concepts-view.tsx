@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useConceptStore } from '@/store/entities/concept';
+import type { ConceptCreateInput } from '@/types/entities/concept';
 import type { ViewProps } from '../types';
 import ConceptsContentView from './concepts-content-view';
 
@@ -57,7 +58,7 @@ export function ConceptsView() {
 		}
 
 		try {
-			await createConcept({
+			const conceptData: ConceptCreateInput = {
 				name: newConceptName,
 				description: newConceptDescription || null,
 				emoji: '💡',
@@ -65,7 +66,11 @@ export function ConceptsView() {
 				category: 'general',
 				content: newConceptDescription || '',
 				isFavorite: false,
-			});
+				isPublic: false,
+				totalImages: 0,
+				totalVideos: 0,
+			};
+			await createConcept(conceptData);
 			setNewConceptName('');
 			setNewConceptDescription('');
 			setShowForm(false);

@@ -6,8 +6,8 @@ import {
 	incrementImageDownloadInApi,
 	incrementImageViewInApi,
 } from '@/lib/api/client/stats.client';
-import { clientLogger } from '@/lib/logger/client-logger';
 import type { GeneralStats } from '@/types/stats';
+import { serverLogger } from '@/lib/logger';
 
 // Tipo local para ImageStats (equivalente a Drizzle)
 type DrizzleImageStats = {
@@ -15,7 +15,6 @@ type DrizzleImageStats = {
 	imageId: string;
 	views: number;
 	downloads: number;
-	shares: number;
 	favorites: number;
 	lastViewedAt: Date | null;
 	lastDownloadedAt: Date | null;

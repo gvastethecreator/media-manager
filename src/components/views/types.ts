@@ -9,6 +9,18 @@ export interface ViewProps {
 	 * Clase CSS adicional para personalizar la vista
 	 */
 	className?: string;
+	/**
+	 * Indica si la vista es visible
+	 */
+	isVisible?: boolean;
+	/**
+	 * ID del favorito seleccionado
+	 */
+	selectedFavoriteId?: string;
+	/**
+	 * Función para establecer el ID del favorito seleccionado
+	 */
+	setSelectedFavoriteId?: (id: string) => void;
 }
 
 /**
