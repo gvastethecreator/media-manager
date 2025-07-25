@@ -15,24 +15,23 @@ const viewLogger = clientLogger.withContext('File3DView');
 export function File3DView(_props: ViewProps) {
 	const navigate = useNavigate();
 
-	// Usar selectores individuales para evitar recrear objetos
-	const file3dsRecord = useFile3DStore((s) => s.file3Ds);
-	const isLoading = useFile3DStore((s) => s.isLoading);
-	const error = useFile3DStore((s) => s.error);
-	const loadFile3Ds = useFile3DStore((s) => s.loadFile3Ds);
-	const createFile3D = useFile3DStore((s) => s.createFile3D); // Obtener la función createFile3D
-	const getSortedFile3Ds = useFile3DStore((s) => s.getSortedFile3Ds);
+	// Usar selectores normales de Zustand
+	const file3ds = useFile3DStore((state) => state.file3Ds) || [];
+	const loading = useFile3DStore((state) => state.loading) || false;
+	const error = useFile3DStore((state) => state.error) || null;
+	const fetchFile3Ds = useFile3DStore((state) => state.fetchFile3Ds);
+	const createFile3D = useFile3DStore((state) => state.createFile3D);
 
 	const [showForm, setShowForm] = useState(false);
 	const [newFile3DName, setNewFile3DName] = useState('');
 	const [newFile3DFile, setNewFile3DFile] = useState<File | null>(null);
 
 	useEffect(() => {
-		if (Object.keys(file3dsRecord).length === 0) {
+		if (file3ds.length === 0) {
 			viewLogger.info('Store de archivos 3D vacío, cargando desde el servidor...');
-			loadFile3Ds();
+			fetchFile3Ds();
 		}
-	}, [loadFile3Ds, file3dsRecord]);
+	}, [fetchFile3Ds, file3ds]);
 
 	const handleFile3DClick = useCallback(
 		(file3d: File3DWithStats) => {
@@ -61,21 +60,48 @@ export function File3DView(_props: ViewProps) {
 		// Aquí deberías manejar la subida del archivo.
 		// Por ahora, solo simularemos la creación con el nombre.
 		// En una implementación real, enviarías el archivo al backend.
-		await createFile3D({ name: newFile3DName, path: newFile3DFile.name }); // Asumiendo que 'path' es el nombre del archivo
+		// TODO: Implementar la subida real del archivo y obtener los metadatos necesarios
+		await createFile3D({
+			name: newFile3DName,
+			path: newFile3DFile.name,
+			size: newFile3DFile.size,
+			hash: '', // TODO: Calcular hash del archivo
+			mimeType: newFile3DFile.type,
+			extension: newFile3DFile.name.split('.').pop() || '',
+			folderId: '', // TODO: Obtener folderId actual
+			isFavorite: false,
+			isArchived: false,
+			format: newFile3DFile.name.split('.').pop() || null,
+			version: null,
+			vertices: null,
+			faces: null,
+			triangles: null,
+			materials: null,
+			textures: null,
+			animations: null,
+			bones: null,
+			scenes: null,
+			cameras: null,
+			lights: null,
+			hasUV: null,
+			hasNormals: null,
+			hasColors: null,
+			boundingBox: null,
+		});
 		setNewFile3DName('');
 		setNewFile3DFile(null);
 		setShowForm(false);
 	}, [newFile3DName, newFile3DFile, createFile3D]);
 
-	// Cachear el resultado de getSortedFile3Ds
+	// Usar directamente el array de file3ds
 	const sortedFile3Ds = useMemo(() => {
-		return getSortedFile3Ds();
-	}, [getSortedFile3Ds]);
+		return file3ds;
+	}, [file3ds]);
 
 	return (
 		<File3DContentView
 			file3ds={sortedFile3Ds}
-			isLoading={isLoading}
+			isLoading={loading}
 			error={error}
 			showForm={showForm}
 			newFile3DName={newFile3DName}

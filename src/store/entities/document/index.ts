@@ -23,6 +23,8 @@ export const useDocumentStore = create<DocumentStore>()(
 	devtools(
 		immer((...a) => ({
 			...createDocumentCoreSlice(...a),
+			...createDocumentFilterSlice(...a),
+			...createDocumentUISlice(...a),
 		})),
 		{ name: 'DocumentStore' }
 	)

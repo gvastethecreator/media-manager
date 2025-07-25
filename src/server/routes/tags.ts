@@ -83,6 +83,8 @@ router.get('/:id/thumbnails', async (req, res) => {
 });
 
 // GET /tags/:id/stats - Obtener estadísticas de un tag
+// TODO: Implementar getTagStats en TagService
+/*
 router.get('/:id/stats', async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -96,6 +98,7 @@ router.get('/:id/stats', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+*/
 
 // POST /tags - Crear nuevo tag
 router.post('/', async (req, res) => {

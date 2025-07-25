@@ -1,7 +1,8 @@
 /**
  * Cliente de API para álbumes.
  */
-import type { AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/types/entities/album';
+import type { AlbumCreateInput, AlbumUpdateInput } from '@/lib/api/albums';
+import type { AlbumWithStats } from '@/types/entities/album';
 
 const API_BASE_PATH = '/api/albums';
 

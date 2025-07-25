@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 // import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
 import { useTagStore } from '@/store/entities/tag';
+import { useSelectedTag } from '@/store/entities/tag/selectors';
 import type { EntityWithStats } from '@/types/entities/entity.types';
 
 /**
@@ -10,7 +11,7 @@ import type { EntityWithStats } from '@/types/entities/entity.types';
  */
 export function TagContentView() {
 	const selectedId = useTagStore((state) => state.selectedId);
-	const selectedTag = useTagStore((state) => state.items.find((tag) => tag.id === selectedId));
+	const selectedTag = useSelectedTag();
 
 	const [_images, setImages] = useState<EntityWithStats[]>([]);
 	const [_isLoading, setIsLoading] = useState(false);

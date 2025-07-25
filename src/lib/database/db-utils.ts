@@ -4,8 +4,8 @@
 
 import { eq, sql } from 'drizzle-orm';
 import { db } from './db';
-import * as schema from './schema';
-import { albums, collections, folders, images, imageStats, tags } from './schema';
+import * as schema from '@/lib/drizzle/schema';
+import { albums, collections, folders, images, imageStats, tags } from '@/lib/drizzle/schema';
 
 type DrizzleTransactionClient = typeof db._;
 
@@ -82,15 +82,15 @@ export async function getDatabaseStats() {
  */
 export async function cleanupOrphanedRecords() {
 	return withTransaction(async (tx) => {
-		// Eliminar imágenes sin carpeta asociada
-		const deletedImages = await tx.delete(images).where(eq(images.folderId, null)).execute();
-
-		// Eliminar estadísticas de imágenes sin imagen asociada
-		const deletedStats = await tx.delete(imageStats).where(eq(imageStats.imageId, null)).execute();
+		// Eliminar estadísticas de imágenes que ya no existen
+		const deletedStats = await tx
+			.delete(imageStats)
+			.where(
+				sql`${imageStats.imageId} NOT IN (SELECT ${images.id} FROM ${images})`
+			);
 
 		return {
-			deletedImages: deletedImages.rowsAffected,
-			deletedStats: deletedStats.rowsAffected,
+			deletedStats: deletedStats.rowsAffected || 0,
 		};
 	});
 }

@@ -22,6 +22,7 @@ import type {
 	QueueJobExtended,
 	QueueJobFilters,
 	QueueJobPaginationOptions,
+	QueueJobStatus,
 	QueueStats,
 	UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
@@ -88,7 +89,7 @@ export function useUpdateQueueJob() {
 export function useDeleteQueueJob() {
 	const queryClient = useQueryClient();
 
-	return useMutation<void, Error, string>({
+	return useMutation<boolean, Error, string>({
 		mutationFn: (id) => deleteQueueJob(id),
 		onSuccess: (_, id) => {
 			queryClient.invalidateQueries({ queryKey: queueKeys.lists() });
@@ -140,7 +141,7 @@ export function useRecentQueueJobs(limit = 5) {
 	});
 }
 
-export function useQueueJobsByStatus(status: string, limit = 10) {
+export function useQueueJobsByStatus(status: QueueJobStatus, limit = 10) {
 	return useQuery<QueueJobExtended[], Error>({
 		queryKey: queueKeys.byStatus(status, limit),
 		queryFn: () => findQueueJobsByStatus(status, limit),

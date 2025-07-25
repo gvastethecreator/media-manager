@@ -20,7 +20,7 @@ const viewLogger = clientLogger.withContext('JsonFilesView');
 
 const MemoizedJsonFileCard = React.memo(
 	({ jsonFile, onJsonFileClick }: { jsonFile: JsonFileWithStats; onJsonFileClick: () => void }) => (
-		<JsonFileCard jsonFile={jsonFile} onClick={onJsonFileClick} className="h-full" />
+		<JsonFileCard jsonFileId={jsonFile.id} onClick={onJsonFileClick} className="h-full" />
 	),
 	(prevProps, nextProps) =>
 		prevProps.jsonFile.id === nextProps.jsonFile.id &&
@@ -36,7 +36,7 @@ MemoizedJsonFileCard.displayName = 'MemoizedJsonFileCard';
 export function JsonFilesView(_props: ViewProps) {
 	// Usar selectores individuales para evitar recrear objetos
 	const jsonFilesRecord = useJsonFileStore((s) => s.jsonFiles);
-	const isLoading = useJsonFileStore((s) => s.loading);
+	const loading = useJsonFileStore((s) => s.loading);
 	const error = useJsonFileStore((s) => s.error);
 	const fetchJsonFiles = useJsonFileStore((s) => s.fetchJsonFiles);
 	const { mutate: createJsonFile } = useCreateJsonFile();
@@ -78,15 +78,34 @@ export function JsonFilesView(_props: ViewProps) {
 			});
 			return;
 		}
-		createJsonFile({ name: newJsonFileName, content: newJsonFileContent });
+		
+		// Crear objeto con todas las propiedades requeridas
+		const jsonFileData = {
+			name: newJsonFileName,
+			path: `/json-files/${newJsonFileName}`,
+			size: new Blob([newJsonFileContent]).size,
+			hash: crypto.randomUUID(), // Temporal, debería ser un hash real
+			mimeType: 'application/json',
+			extension: '.json',
+			folderId: 'default', // Valor por defecto
+			content: newJsonFileContent,
+			isFavorite: false,
+			isArchived: false,
+			isValid: true,
+			validationErrors: null,
+			keyCount: Object.keys(JSON.parse(newJsonFileContent)).length,
+			depth: 1, // Simplificado, debería calcularse recursivamente
+		};
+		
+		createJsonFile(jsonFileData);
 		setNewJsonFileName('');
 		setNewJsonFileContent('');
 		setShowForm(false);
-	}, [newJsonFileName, newJsonFileContent, createJsonFile]);
+	}, [newJsonFileName, newJsonFileContent, createJsonFile, toast]);
 
 	// Cachear el resultado de ordenamiento de archivos JSON
 	const sortedJsonFiles = useMemo(() => {
-		return jsonFilesRecord.sort((a, b) => a.name.localeCompare(b.name));
+		return jsonFilesRecord.sort((a: JsonFileWithStats, b: JsonFileWithStats) => a.name.localeCompare(b.name));
 	}, [jsonFilesRecord]);
 
 	if (error) {
@@ -97,7 +116,7 @@ export function JsonFilesView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading && (!jsonFilesRecord || jsonFilesRecord.length === 0)) {
+	if (loading && (!jsonFilesRecord || jsonFilesRecord.length === 0)) {
 		return <LoadingScreen />;
 	}
 
@@ -135,7 +154,7 @@ export function JsonFilesView(_props: ViewProps) {
 					</div>
 				)}
 
-				{(!sortedJsonFiles || sortedJsonFiles.length === 0) && !isLoading && !showForm ? (
+				{(!sortedJsonFiles || sortedJsonFiles.length === 0) && !loading && !showForm ? (
 					<EmptyState
 						icon={Braces}
 						title="No hay archivos JSON"
@@ -143,7 +162,7 @@ export function JsonFilesView(_props: ViewProps) {
 					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{sortedJsonFiles?.map((jsonFile, index) => {
+						{sortedJsonFiles?.map((jsonFile: JsonFileWithStats, index: number) => {
 							const onJsonFileClick = () => handleJsonFileClick(jsonFile);
 							return (
 								<motion.div

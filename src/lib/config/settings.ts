@@ -1,7 +1,9 @@
 import { merge } from 'lodash';
 
-
 import type { Settings } from '@/types/settings';
+
+// Clave para almacenar configuraciones en localStorage
+const SETTINGS_KEY = 'app-settings';
 
 const DEFAULT_SETTINGS: Settings = {
 	appearance: {
@@ -27,11 +29,15 @@ const DEFAULT_SETTINGS: Settings = {
 		devMode: false,
 		experimentalFeatures: false,
 	},
+	version: '1.0.0',
+	lastUpdate: new Date(),
+	system: {
+		platform: 'web',
+		version: '1.0.0',
+	},
 };
 
-type AppSettings = Settings;
-
-export function loadSettings(): AppSettings {
+export function loadSettings(): Settings {
 	try {
 		const savedSettings = localStorage.getItem(SETTINGS_KEY);
 		if (!savedSettings) {
@@ -46,7 +52,7 @@ export function loadSettings(): AppSettings {
 	}
 }
 
-export function saveSettings(settings: AppSettings): void {
+export function saveSettings(settings: Settings): void {
 	try {
 		localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 	} catch (error) {
@@ -54,24 +60,24 @@ export function saveSettings(settings: AppSettings): void {
 	}
 }
 
-export function resetSettings(): AppSettings {
+export function resetSettings(): Settings {
 	localStorage.removeItem(SETTINGS_KEY);
 	return DEFAULT_SETTINGS;
 }
 
-export function updateSettings(settings: Partial<AppSettings>): AppSettings {
+export function updateSettings(settings: Partial<Settings>): Settings {
 	const currentSettings = loadSettings();
 	const newSettings = merge(currentSettings, settings);
 	saveSettings(newSettings);
 	return newSettings;
 }
 
-export function getSetting<K extends keyof AppSettings>(key: K): AppSettings[K] {
+export function getSetting<K extends keyof Settings>(key: K): Settings[K] {
 	const settings = loadSettings();
 	return settings[key];
 }
 
-export function setSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]): void {
+export function setSetting<K extends keyof Settings>(key: K, value: Settings[K]): void {
 	const settings = loadSettings();
 	settings[key] = value;
 	saveSettings(settings);
@@ -84,7 +90,7 @@ export function exportSettings(): string {
 }
 
 // Función para importar la configuración
-export function importSettings(jsonString: string): AppSettings {
+export function importSettings(jsonString: string): Settings {
 	try {
 		const importedSettings = JSON.parse(jsonString);
 		const mergedSettings = merge(DEFAULT_SETTINGS, importedSettings);
@@ -97,20 +103,20 @@ export function importSettings(jsonString: string): AppSettings {
 }
 
 // Función para migrar la configuración a una nueva versión
-export function migrateSettings(settings: AppSettings): AppSettings {
+export function migrateSettings(settings: Settings): Settings {
 	// Aquí puedes agregar lógica para migrar configuraciones antiguas
 	// Por ejemplo, si cambias la estructura de la configuración en una nueva versión
 	return settings;
 }
 
 // Función para validar la configuración
-export function validateSettings(settings: unknown): settings is AppSettings {
+export function validateSettings(settings: unknown): settings is Settings {
 	if (!settings || typeof settings !== 'object') {
 		return false;
 	}
 
 	// Aquí puedes agregar más validaciones según tus necesidades
-	const requiredKeys: (keyof AppSettings)[] = ['version', 'lastUpdate', 'system'];
+	const requiredKeys: (keyof Settings)[] = ['version', 'lastUpdate', 'system'];
 
 	return requiredKeys.every((key) => key in settings);
 }

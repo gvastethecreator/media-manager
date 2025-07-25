@@ -4,4 +4,4 @@
  */
 
 export { useAudioStore } from './audio.store';
-export type { AudioState } from './types';
+export type { AudioState } from './audio.store';

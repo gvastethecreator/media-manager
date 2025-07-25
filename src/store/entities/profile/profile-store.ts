@@ -3,7 +3,7 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { useUpdateTheme } from '@/lib/api/profiles';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
-import { transformProfile } from '@/transformers/profile/profile-transformers';
+import { transformProfile, type ProfileTransformed } from '@/transformers/profile/profile-transformers';
 import {
 	type PaginatedProfiles,
 	type ProfileExtended,
@@ -16,12 +16,12 @@ import {
 // Estado inicial
 const initialState = {
 	// Estado actual
-	activeProfile: null as ProfileExtended | null,
+	activeProfile: null as ProfileTransformed | null,
 	isLoadingActive: false,
 	activeProfileError: null as string | null,
 
 	// Lista de perfiles
-	profiles: [] as ProfileExtended[],
+	profiles: [] as ProfileTransformed[],
 	isLoadingProfiles: false,
 	profilesError: null as string | null,
 	totalProfiles: 0,
@@ -43,7 +43,7 @@ type ProfileState = typeof initialState;
 // Acciones del store
 interface ProfileActions {
 	// Acciones para perfil activo
-	fetchActiveProfile: () => Promise<ProfileExtended | null>;
+	fetchActiveProfile: () => Promise<ProfileTransformed | null>;
 	setActiveProfileById: (id: string) => Promise<boolean>;
 
 	// Acciones para lista de perfiles

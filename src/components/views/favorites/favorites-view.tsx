@@ -9,7 +9,20 @@ import FavoritesContentView from './favorites-content-view';
 const viewLogger = clientLogger.withContext('FavoritesView');
 
 export function FavoritesView({ isVisible }: ViewProps) {
-	const { selectedFavoriteId, setSelectedFavoriteId } = useFavoriteStore();
+	// Usar selectores normales de Zustand
+	const selectedIds = useFavoriteStore((state) => state.selectedIds) || [];
+	const selectFavorite = useFavoriteStore((state) => state.selectFavorite);
+	const deselectFavorite = useFavoriteStore((state) => state.deselectFavorite);
+	
+	// Obtener el primer favorito seleccionado como selectedFavoriteId
+	const selectedFavoriteId = selectedIds.length > 0 ? selectedIds[0] : null;
+	const setSelectedFavoriteId = (id: string) => {
+		if (selectedIds.includes(id)) {
+			deselectFavorite(id);
+		} else {
+			selectFavorite(id);
+		}
+	};
 	const { mutate: createFavorite } = useCreateFavorite();
 
 	const [localSearch, setLocalSearch] = useState('');
@@ -19,15 +32,17 @@ export function FavoritesView({ isVisible }: ViewProps) {
 
 	// Usar React Query hook en lugar de server action
 	const {
-		data: favorites = [],
+		data: favoritesResponse,
 		isLoading,
 		error,
 		refetch,
 	} = useFavorites({
 		search: localSearch,
-		sortBy: 'name' as 'name' | 'createdAt' | 'updatedAt',
-		sortOrder: 'asc' as 'asc' | 'desc',
+		sortBy: 'addedAt',
+		sortOrder: 'desc',
 	});
+
+	const favorites = favoritesResponse?.data || [];
 
 	const handleFavoriteSelect = useCallback(
 		(favoriteId: string) => {
@@ -48,7 +63,8 @@ export function FavoritesView({ isVisible }: ViewProps) {
 			// });
 			return;
 		}
-		createFavorite({ name: newFavoriteName, description: newFavoriteDescription });
+		// TODO: Implementar correctamente con entityId y entityType
+		// createFavorite({ entityId: 'temp', entityType: FavoriteEntityType.IMAGE, userId: null, addedAt: new Date(), notes: newFavoriteDescription, category: null, priority: null });
 		setNewFavoriteName('');
 		setNewFavoriteDescription('');
 		setShowForm(false);

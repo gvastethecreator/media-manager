@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense, useEffect, useState } from 'react';
+import { lazy, memo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -7,9 +7,10 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Carga perezosa del StatsPanel compatible con Vite/React 19
 const StatsPanel = lazy(() => import('../stats-panel/stats-panel'));
+const FolderStats = lazy(() => import('../stats-panel/components/folder-stats').then(m => ({ default: m.FolderStats })));
 
 // Componente para manejar la carga perezosa del StatsPanel
-const LazyStatsPanel = memo(function LazyStatsPanel() {
+const LazyStatsPanel = memo(function LazyStatsPanel({ folderId, folderName }: { folderId?: string; folderName?: string }) {
 	// Usamos un estado para controlar si el panel ha sido visible por suficiente tiempo
 	const [shouldRender, setShouldRender] = useState(false);
 
@@ -32,7 +33,11 @@ const LazyStatsPanel = memo(function LazyStatsPanel() {
 
 	return (
 		<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
-			<StatsPanel />
+			{folderId ? (
+				<FolderStats folderId={folderId} folderName={folderName} />
+			) : (
+				<StatsPanel />
+			)}
 		</Suspense>
 	);
 });
@@ -65,10 +70,22 @@ export const RightPanel = memo(function RightPanel({
 	// Ocultar el panel cuando estamos en la vista de settings
 	const isInSettingsView = location.pathname === '/settings';
 
-	// Determina si debemos mostrar el panel
-	const shouldShowPanel = !isInSettingsView && (isVisible || hasSelectedItems);
-	// Determina si debemos mostrar las estadísticas
-	const shouldShowStats = !isInSettingsView && !hasSelectedItems && showStatsWhenEmpty;
+	// Extraer información de la carpeta desde la URL
+	const currentFolderInfo = useMemo(() => {
+		const pathParts = location.pathname.split('/');
+		if (pathParts[1] === 'folders' && pathParts[2]) {
+			return {
+				folderId: decodeURIComponent(pathParts[2]),
+				folderName: decodeURIComponent(pathParts[2])
+			};
+		}
+		return { folderId: undefined, folderName: undefined };
+	}, [location.pathname]);
+
+	// Determina si debemos mostrar el panel - siempre mostrar en views con contenido
+	const shouldShowPanel = !isInSettingsView && (isVisible || hasSelectedItems || showStatsWhenEmpty);
+	// Determina si debemos mostrar las estadísticas - mostrar cuando no hay items seleccionados
+	const shouldShowStats = !isInSettingsView && !hasSelectedItems;
 
 	// Al montar el componente, marcamos que estamos listos para renderizar
 	useEffect(() => {
@@ -86,7 +103,7 @@ export const RightPanel = memo(function RightPanel({
 	const panelTitle = hasSelectedItems ? 'Detalles' : 'Estadísticas';
 
 	// No mostramos nada si no hay razón para mostrar el panel
-	if (!shouldShowPanel && !shouldShowStats) {
+	if (!shouldShowPanel) {
 		return null;
 	}
 
@@ -110,7 +127,7 @@ export const RightPanel = memo(function RightPanel({
 						</div>
 					</ScrollArea>
 				) : (
-					shouldShowStats && <LazyStatsPanel />
+					shouldShowStats && <LazyStatsPanel folderId={currentFolderInfo.folderId} folderName={currentFolderInfo.folderName} />
 				))}
 		</div>
 	);

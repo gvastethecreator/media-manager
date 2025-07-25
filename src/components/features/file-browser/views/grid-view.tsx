@@ -5,7 +5,8 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
+import { EntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 import {
@@ -70,6 +71,22 @@ export const GridView = memo<GridViewProps>(function GridView({
     return items.slice(startIndex, endIndex);
   };
 
+  // Handlers para evitar recreación en cada render
+  const createHandleClick = useCallback(
+    (item: AnyEntityWithStats) => (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onItemClick(item, e);
+    },
+    [onItemClick]
+  );
+
+  const createHandleDoubleClick = useCallback(
+    (item: AnyEntityWithStats) => () => {
+      onItemDoubleClick(item);
+    },
+    [onItemDoubleClick]
+  );
+
   return (
     <VirtualizedContainer
       ref={parentRef}
@@ -124,35 +141,22 @@ export const GridView = memo<GridViewProps>(function GridView({
                       }}
                       className={cn(
                         'relative cursor-pointer transition-all duration-200',
-                        'bg-card border rounded-lg p-2 hover:shadow-md',
-                        isSelected && 'ring-2 ring-primary bg-primary/5'
+                        'hover:z-10',
+                        isSelected && 'ring-2 ring-primary ring-offset-2'
                       )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onItemClick(item, e);
-                      }}
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        onItemDoubleClick(item);
-                      }}
                       style={{
                         width: `${cellSize}px`,
                         height: `${cellSize}px`,
                       }}
                     >
-                      <div className="h-full flex flex-col items-center justify-center text-center">
-                        <div className="w-8 h-8 bg-primary/10 rounded mb-1 flex items-center justify-center">
-                          <span className="text-xs font-semibold text-primary">
-                            {(item.name || item.id || 'U').charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="text-xs font-medium truncate w-full px-1">
-                          {item.name || item.id || 'Unknown'}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {'stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats ? item.stats.imageCount : 0}
-                        </div>
-                      </div>
+                      <EntityCard
+                        entity={item}
+                        isSelected={isSelected}
+                        compact={true}
+                        className="h-full"
+                        onClick={createHandleClick(item)}
+                        onDoubleClick={createHandleDoubleClick(item)}
+                      />
                     </motion.div>
                   );
                 })}

@@ -12,7 +12,7 @@ const viewLogger = clientLogger.withContext('WorldItemContentView');
 
 export const WorldItemContentView = memo(function WorldItemContentView() {
 	const selectedId = useWorldItemStore((state) => state.ui.selectedId);
-	const selectedWorldItem = useWorldItemStore((state) => state.worldItems.find((item) => item.id === selectedId));
+	const selectedWorldItem = useWorldItemStore((state) => state.getWorldItemById(selectedId || ''));
 	const { toggleSelection } = useSelectionStore();
 
 	const { data: images = [], isLoading, error, refetch } = useWorldItemImages(selectedId || '');
@@ -57,7 +57,11 @@ export const WorldItemContentView = memo(function WorldItemContentView() {
 
 	return (
 		<ContentViewProvider {...contentProps}>
-			<BaseContentView />
+			<BaseContentView>
+      <div className="p-4">
+        <p>World item content view</p>
+      </div>
+    </BaseContentView>
 		</ContentViewProvider>
 	);
 });

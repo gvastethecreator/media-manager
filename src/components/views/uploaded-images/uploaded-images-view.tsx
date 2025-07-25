@@ -37,7 +37,7 @@ import { toastService } from '@/services/toast';
 import { UploadedFileType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';
-import type { UploadedImageResult } from '@/types/entities/uploaded-image/types';
+import type { UploadedImageResult } from '@/types/uploaded-images';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 
@@ -396,7 +396,7 @@ export function UploadedImagesView() {
 									onChange={(e) =>
 										setFilters({
 											...filters,
-											type: e.target.value as UploadedImageType,
+											type: e.target.value as UploadedFileType,
 										})
 									}
 								>

@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteTag, useTags } from '@/lib/api/tags';
 import { toastService } from '@/lib/ui/toast';
 import { TagCategory } from '@/types/entities/tag';
-import type { TagBase as UITag } from '@/types/entities/tag/types';
+import type { TagBase as UITag } from '@/types/entities/tag';
 import { CreateTagForm } from './create-tag-form';
 
 interface TagsSettingsProps {

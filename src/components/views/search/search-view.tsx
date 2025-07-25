@@ -10,7 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
-import type { EntityWithStats } from '@/types/migration';
+import type { EntityWithStats, AnyEntityWithStats } from '@/types/migration';
+import { isImageWithStats } from '@/types/migration';
+import type { ImageWithStats } from '@/types/entities/image';
 import type { ViewProps } from '../types';
 
 interface SearchFilters {
@@ -68,35 +70,42 @@ export function SearchView(_props: ViewProps) {
 		}
 	}, [filters, loadImages]);
 
-	const handleItemSelect = useCallback((item: EntityWithStats) => {
+	const handleItemSelect = useCallback((item: AnyEntityWithStats) => {
 		// TODO: Implementar selección con el nuevo sistema
 		console.log('Item seleccionado:', item.id);
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			// ✅ MIGRADO: Usar EntityWithStats en lugar de FileItem
-			if (item.type === 'image') {
-				const imageItems = (items || []).filter((i: EntityWithStats) => i.type === 'image');
-				const currentIndex = imageItems.findIndex((i: EntityWithStats) => i.id === item.id);
+			if (isImageWithStats(item)) {
+				const image = item as ImageWithStats;
+				const imageItems = (items || []).filter((i: AnyEntityWithStats) => isImageWithStats(i));
+				const currentIndex = imageItems.findIndex((i: AnyEntityWithStats) => i.id === item.id);
 
 				// Convertir EntityWithStats a formato compatible con viewer
-				const viewerItems = imageItems.map((img: EntityWithStats) => ({
-					id: img.id,
-					name: img.name || '',
-					src: img.thumbnailUrl || `/api/images/${img.id}/content`,
-					alt: img.name || '',
-					width: 'width' in img ? img.width : 0,
-					height: 'height' in img ? img.height : 0,
-					thumbnail: img.thumbnailUrl || null,
-					type: 'image',
-					path: img.path || '',
-					size: 'size' in img ? img.size : 0,
-					mimeType: 'mimeType' in img ? img.mimeType : '',
-					metadata: null,
-					url: img.thumbnailUrl || `/api/images/${img.id}/content`,
-					parsedMetadata: undefined,
-				}));
+				const viewerItems = imageItems.map((img: AnyEntityWithStats) => {
+					if (isImageWithStats(img)) {
+						const imageItem = img as ImageWithStats;
+						return {
+							id: imageItem.id,
+							name: imageItem.name || '',
+							src: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
+							alt: imageItem.name || '',
+							width: imageItem.width || 0,
+							height: imageItem.height || 0,
+							thumbnail: imageItem.thumbnailUrl || null,
+							type: 'image',
+							path: '',
+							size: imageItem.size || 0,
+							mimeType: 'image/jpeg', // Default mime type since mimeType is not available in ImageWithStats
+							metadata: null,
+							url: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
+							parsedMetadata: undefined,
+						};
+					}
+					return null;
+				}).filter(Boolean);
 
 				openViewer(viewerItems, currentIndex);
 			}

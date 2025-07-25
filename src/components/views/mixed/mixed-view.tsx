@@ -5,7 +5,8 @@ import { DocumentCard } from '@/components/cards/document-card';
 import { FolderCard } from '@/components/cards/folder-card';
 import { ImageCard } from '@/components/cards/image-card';
 import { VideoCard } from '@/components/cards/video-card';
-import { EmptyState, LoadingScreen } from '@/components/core/data-display';
+import { EmptyState } from '@/components/ui/empty-state';
+import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -40,11 +41,22 @@ export default function MixedView({ className }: MixedViewProps) {
 
 	const { videos, isLoading: videosLoading, error: videosError, fetchVideos } = useVideoStore();
 
-	const { documents, isLoading: documentsLoading, error: documentsError, fetchDocuments } = useDocumentStore();
+	const documentsRecord = useDocumentStore((state) => state.documents);
+	const documentsLoading = useDocumentStore((state) => state.isLoading);
+	const documentsError = useDocumentStore((state) => state.error);
+	const fetchDocuments = useDocumentStore((state) => state.fetchDocuments);
+	const documents = Object.values(documentsRecord || {});
 
-	const { audios, isLoading: audiosLoading, error: audiosError, fetchAudios } = useAudioStore();
+	const audios: AudioWithStats[] = useAudioStore((state) => state.audios) || [];
+	const audiosLoading: boolean = useAudioStore((state) => state.isLoading) || false;
+	const audiosError: string | null = useAudioStore((state) => state.error) || null;
+	const fetchAudios = useAudioStore((state) => state.fetchAudios);
 
-	const { folders, isLoading: foldersLoading, error: foldersError, fetchFolders } = useFolderStore();
+	const foldersRecord = useFolderStore((state) => state.folders);
+	const foldersLoading = useFolderStore((state) => state.isLoading);
+	const foldersError = useFolderStore((state) => state.error);
+	const fetchFolders = useFolderStore((state) => state.fetchFolders);
+	const folders = Object.values(foldersRecord || {});
 
 	// Estados locales
 	const [selectedType, setSelectedType] = useState<FileType>('all');
@@ -66,27 +78,27 @@ export default function MixedView({ className }: MixedViewProps) {
 		const items: (MixedItem & { itemType: FileType })[] = [];
 
 		// Agregar imágenes
-		images.forEach((image) => {
+		images.forEach((image: ImageWithStats) => {
 			items.push({ ...image, itemType: 'images' });
 		});
 
 		// Agregar videos
-		videos.forEach((video) => {
+		videos.forEach((video: VideoWithStats) => {
 			items.push({ ...video, itemType: 'videos' });
 		});
 
 		// Agregar documentos
-		documents.forEach((document) => {
+		documents.forEach((document: DocumentWithStats) => {
 			items.push({ ...document, itemType: 'documents' });
 		});
 
 		// Agregar audios
-		audios.forEach((audio) => {
+		audios.forEach((audio: AudioWithStats) => {
 			items.push({ ...audio, itemType: 'audios' });
 		});
 
 		// Agregar carpetas
-		folders.forEach((folder) => {
+		folders.forEach((folder: FolderWithStats) => {
 			items.push({ ...folder, itemType: 'folders' });
 		});
 
@@ -113,7 +125,7 @@ export default function MixedView({ className }: MixedViewProps) {
 			filtered = filtered.filter(
 				(item) =>
 					item.name.toLowerCase().includes(query) ||
-					(item.description && item.description.toLowerCase().includes(query))
+					('description' in item && item.description && item.description.toLowerCase().includes(query))
 			);
 		}
 
@@ -127,7 +139,7 @@ export default function MixedView({ className }: MixedViewProps) {
 	// Manejar clic en elemento
 	const handleItemClick = useCallback(
 		(item: MixedItem & { itemType: FileType }) => {
-			logger.info('🖱️ Elemento seleccionado:', item.name, 'tipo:', item.itemType);
+			logger.info(`🖱️ Elemento seleccionado: ${item.name}, tipo: ${item.itemType}`);
 
 			// Navegar según el tipo de elemento
 			switch (item.itemType) {
@@ -147,7 +159,7 @@ export default function MixedView({ className }: MixedViewProps) {
 					navigate(`/folders/${item.id}`);
 					break;
 				default:
-					logger.warn('Tipo de elemento no reconocido:', item.itemType);
+					logger.warn(`Tipo de elemento no reconocido: ${item.itemType}`);
 			}
 		},
 		[navigate]
@@ -179,7 +191,7 @@ export default function MixedView({ className }: MixedViewProps) {
 					return (
 						<ImageCard
 							key={key}
-							image={item as ImageWithStats}
+							imageId={item.id}
 							onClick={() => handleItemClick(item)}
 							className="cursor-pointer hover:shadow-lg transition-shadow"
 						/>
@@ -188,7 +200,7 @@ export default function MixedView({ className }: MixedViewProps) {
 					return (
 						<VideoCard
 							key={key}
-							video={item as VideoWithStats}
+							videoId={item.id}
 							onClick={() => handleItemClick(item)}
 							className="cursor-pointer hover:shadow-lg transition-shadow"
 						/>
@@ -236,10 +248,7 @@ export default function MixedView({ className }: MixedViewProps) {
 					icon={Grid}
 					title="Error al cargar archivos"
 					description="No se pudieron cargar algunos tipos de archivos. Verifica tu conexión e inténtalo de nuevo."
-					action={{
-						label: 'Reintentar',
-						onClick: handleRetry,
-					}}
+					actions={<Button onClick={handleRetry}>Reintentar</Button>}
 				/>
 			</div>
 		);

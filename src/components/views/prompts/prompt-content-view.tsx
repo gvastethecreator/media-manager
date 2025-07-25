@@ -38,7 +38,7 @@ export function PromptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedPrompt?.id ?? null,
 		containerName: selectedPrompt?.name ?? null,
-		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
+		setCurrentContainer: async (id: string) => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Terminal,
 			title: 'Prompt vacío',
@@ -51,7 +51,12 @@ export function PromptContentView() {
 
 	return (
 		<ContentViewProvider {...contentProps}>
-			<BaseContentView />
+			<BaseContentView>
+				{/* Prompt content will be added here */}
+				<div className="p-4">
+					<p>Contenido del prompt se mostrará aquí</p>
+				</div>
+			</BaseContentView>
 		</ContentViewProvider>
 	);
 }

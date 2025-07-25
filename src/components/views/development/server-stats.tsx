@@ -81,10 +81,7 @@ export function ServerStats() {
 		isLoading: loading,
 		error,
 		refetch: fetchStats,
-	} = useSystemStats({
-		refetchInterval: 30000, // Actualizar cada 30 segundos
-		refetchIntervalInBackground: false,
-	});
+	} = useSystemStats();
 
 	// Crear datos mock para system y app stats ya que SystemStatsExtended no los incluye
 	const systemStats: SystemStats | null = statsData ? {

@@ -66,7 +66,7 @@ export const ConceptContentView = memo(function ConceptContentView() {
 			toggleItemSelection,
 			currentContainerId: selectedConcept?.id ?? null,
 			containerName: selectedConcept?.name ?? null,
-			setCurrentContainer: async () => {}, // No es necesario en el nuevo enfoque
+			setCurrentContainer: async (id: string) => {}, // No es necesario en el nuevo enfoque
 			emptyState,
 			onRefresh: loadConceptImages,
 		}),

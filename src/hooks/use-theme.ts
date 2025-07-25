@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - Migrado de Next.js a React nativo
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Definimos los temas personalizados
 const customThemes = [

@@ -1,5 +1,6 @@
 export { default as EntityCardsContentView } from './entity-cards-content-view';
-export { EntityCardsView } from './entity-cards-view';
+import { EntityCardsView } from './entity-cards-view';
+export { EntityCardsView };
 
 // Container component for conditional rendering
 export const EntityCardsViewContainer = () => {

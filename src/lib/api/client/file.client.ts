@@ -1,7 +1,7 @@
 /**
  * Cliente de API para operaciones de archivos.
  */
-import type { DirectoryReadResult } from '@/types/entities/file/base';
+import type { DirectoryReadResult } from '@/types/entities/file/types';
 
 const API_BASE_PATH = '/api/files';
 

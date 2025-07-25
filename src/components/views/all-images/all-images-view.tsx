@@ -5,7 +5,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { EntityWithStats } from '@/types/migration';
+import type { EntityWithStats, AnyEntityWithStats } from '@/types/migration';
 import { isImageWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 import AllImagesContentView from './all-images-content-view';
@@ -65,7 +65,7 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 	}, [getSortedImages]);
 
 	const handleImageClick = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			// Verificar que sea una imagen usando type guard
 			if (isImageWithStats(item)) {
 				const image = item as ImageWithStats;
@@ -82,48 +82,18 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 	);
 
 	const handleImageDoubleClick = useCallback(
-		(item: EntityWithStats) => {
+		(item: AnyEntityWithStats) => {
 			// Verificar que sea una imagen usando type guard
 			if (isImageWithStats(item)) {
 				const image = item as ImageWithStats;
 				viewLogger.info('🖱️ Doble click en imagen:', image.name);
 
 				// Abrir visor de imágenes
-				const imageItems = (sortedImages || [])
-					.filter((img: EntityWithStats) => isImageWithStats(img))
-					.map((img: EntityWithStats) => {
-						const imageData = img as ImageWithStats;
-						// Derive mimeType from file extension since ImageWithStats doesn't have mimeType
-						const extension = imageData.path?.split('.').pop()?.toLowerCase();
-						const derivedMimeType = extension ? {
-							'jpg': 'image/jpeg',
-							'jpeg': 'image/jpeg',
-							'png': 'image/png',
-							'gif': 'image/gif',
-							'bmp': 'image/bmp',
-							'webp': 'image/webp',
-							'svg': 'image/svg+xml'
-						}[extension] || 'image/jpeg' : 'image/jpeg';
-						return {
-							id: imageData.id,
-							name: imageData.name || '',
-							src: `/api/images/${imageData.id}/content`,
-							alt: imageData.name || '',
-							width: imageData.width || 0,
-							height: imageData.height || 0,
-							thumbnail: `/api/images/${imageData.id}/thumbnail`,
-							type: 'image',
-							path: imageData.path || '',
-							size: imageData.size || 0,
-							mimeType: derivedMimeType,
-							metadata: null,
-							url: `/api/images/${imageData.id}/content`,
-							parsedMetadata: undefined,
-						};
-					});
+			const imageEntities = (sortedImages || [])
+				.filter((img: AnyEntityWithStats) => isImageWithStats(img));
 
-				const currentIndex = imageItems.findIndex((img: any) => img.id === image.id);
-				openViewer(imageItems, currentIndex);
+			const currentIndex = imageEntities.findIndex((img: AnyEntityWithStats) => img.id === image.id);
+			openViewer(imageEntities, currentIndex);
 			} else {
 				viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
 			}

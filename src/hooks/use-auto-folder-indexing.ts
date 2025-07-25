@@ -16,7 +16,7 @@ export interface AutoIndexingStatus {
 	isIndexing: boolean;
 	indexedFolders: number;
 	totalFolders: number;
-	currentFolder?: string;
+	currentFolder: string | null;
 	errors: Array<{ folderId: string; message: string }>;
 }
 
@@ -52,6 +52,7 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 		isIndexing: false,
 		indexedFolders: 0,
 		totalFolders: 0,
+		currentFolder: null,
 		errors: [],
 	});
 
@@ -136,6 +137,7 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 			isIndexing: true,
 			indexedFolders: 0,
 			totalFolders: foldersToProcess.length,
+			currentFolder: null,
 			errors: [],
 		});
 
@@ -180,6 +182,7 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 			isIndexing: false,
 			indexedFolders: indexedCount,
 			totalFolders: foldersToProcess.length,
+			currentFolder: null,
 			errors,
 		};
 

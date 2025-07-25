@@ -62,7 +62,7 @@ export function WorldItemsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<WorldItemCard worldItem={worldItem} onClick={handleWorldItemClick} className="h-full" />
+							<WorldItemCard worldItemId={worldItem.id} onClick={handleWorldItemClick} className="h-full" />
 						</motion.div>
 					))}
 				</div>

@@ -64,7 +64,7 @@ export async function updateFolderStats(
 
 	// Evitar procesamiento duplicado y bucles infinitos
 	if (processedPaths.has(folder.path) || currentDepth >= maxDepth) {
-		return { created: 0, updated: 0, errors: 0 };
+		return { totalFiles: 0, processed: 0, successful: 0, failed: 0, errors: [] };
 	}
 	processedPaths.add(folder.path);
 
@@ -75,15 +75,15 @@ export async function updateFolderStats(
 	// Emitir progreso inicial
 	if (emitProgressEvents && currentDepth === 0) {
 		await emitProgress('folder:progress', {
-			type: 'folder:progress',
-			data: {
-				folderId,
-				status: 'processing',
-				progress: 0,
-				totalFiles: filePaths.length,
-				processedFiles: 0,
-				message: 'Iniciando indexación de archivos...',
-			},
+			folderId,
+			status: 'processing',
+			isProcessing: true,
+			progress: 0,
+			totalFiles: filePaths.length,
+			filesProcessed: 0,
+			message: 'Iniciando indexación de archivos...',
+			phase: 'starting',
+			timestamp: Date.now(),
 		});
 	}
 
@@ -116,9 +116,11 @@ export async function updateFolderStats(
 
 	// Combinar estadísticas de archivos y subcarpetas
 	const result = {
-		created: entityStats.created + subfolderStats.created,
-		updated: entityStats.updated + subfolderStats.updated,
-		errors: entityStats.errors + subfolderStats.errors,
+		totalFiles: entityStats.totalFiles + subfolderStats.totalFiles,
+		processed: entityStats.processed + subfolderStats.processed,
+		successful: entityStats.successful + subfolderStats.successful,
+		failed: entityStats.failed + subfolderStats.failed,
+		errors: [...entityStats.errors, ...subfolderStats.errors],
 		...(syncResult && { syncResult }),
 	};
 
@@ -157,7 +159,7 @@ async function processFilesWithProgress(
 ): Promise<EntityCreationStats> {
 	const totalFiles = filePaths.length;
 	let processedFiles = 0;
-	const stats: EntityCreationStats = { created: 0, updated: 0, errors: 0 };
+	const stats: EntityCreationStats = { totalFiles: filePaths.length, processed: 0, successful: 0, failed: 0, errors: [] };
 
 	// Procesar archivos en lotes para evitar sobrecarga
 	const batchSize = 10;
@@ -170,14 +172,17 @@ async function processFilesWithProgress(
 		for (const filePath of batch) {
 			try {
 				const result = await fileEntityMapper.createEntityFromFile(filePath, folderId);
-				if (result) {
-					stats.created++;
-				} else {
-					stats.updated++;
-				}
+			if (result) {
+				stats.successful++;
+			} else {
+				stats.successful++;
+			}
+			stats.processed++;
 			} catch (error) {
 				console.error(`Error procesando archivo ${filePath}:`, error);
-				stats.errors++;
+			stats.failed++;
+			stats.errors.push({ file: filePath, error: (error as Error).message || 'Unknown error' });
+			stats.processed++;
 			}
 
 			processedFiles++;
@@ -187,14 +192,17 @@ async function processFilesWithProgress(
 				const progress = Math.round((processedFiles / totalFiles) * 100);
 				await emitProgress('folder:progress', {
 					folderId,
-					status: processedFiles < totalFiles ? 'processing' : 'complete',
+					status: processedFiles < totalFiles ? 'processing' : 'completed',
+					isProcessing: processedFiles < totalFiles,
 					progress,
 					totalFiles,
-					processedFiles,
+					filesProcessed: processedFiles,
 					message:
 						processedFiles === totalFiles
 							? 'Indexación completada'
 							: `Procesando archivos... ${processedFiles}/${totalFiles}`,
+					phase: processedFiles === totalFiles ? 'complete' : 'processing',
+					timestamp: Date.now(),
 				});
 			}
 		}
@@ -219,7 +227,7 @@ async function processSubfolders(
 	maxDepth: number,
 	currentDepth: number
 ): Promise<EntityCreationStats> {
-	const totalStats: EntityCreationStats = { created: 0, updated: 0, errors: 0 };
+	const totalStats: EntityCreationStats = { totalFiles: 0, processed: 0, successful: 0, failed: 0, errors: [] };
 
 	for (const directory of directories) {
 		try {
@@ -233,8 +241,9 @@ async function processSubfolders(
 
 			if (existingFolder) {
 				// La carpeta ya existe, usar su ID
-				subfolderId = existingFolder.id;
-				totalStats.updated++;
+			subfolderId = existingFolder.id;
+			totalStats.successful++;
+			totalStats.processed++;
 			} else {
 				// Crear nueva carpeta
 				subfolderId = randomUUID();
@@ -251,7 +260,8 @@ async function processSubfolders(
 					autoReindex: false,
 				});
 
-				totalStats.created++;
+				totalStats.successful++;
+			totalStats.processed++;
 			}
 
 			// Indexar recursivamente la subcarpeta (sin emitir eventos de progreso)
@@ -263,12 +273,16 @@ async function processSubfolders(
 				false, // No sincronizar subcarpetas
 				false // No emitir eventos de progreso en subcarpetas
 			);
-			totalStats.created += subfolderStats.created;
-			totalStats.updated += subfolderStats.updated;
-			totalStats.errors += subfolderStats.errors;
+			totalStats.totalFiles += subfolderStats.totalFiles;
+			totalStats.processed += subfolderStats.processed;
+			totalStats.successful += subfolderStats.successful;
+			totalStats.failed += subfolderStats.failed;
+			totalStats.errors.push(...subfolderStats.errors);
 		} catch (error) {
 			console.error(`Error procesando subcarpeta ${directory.path}:`, error);
-			totalStats.errors++;
+			totalStats.failed++;
+			totalStats.processed++;
+			totalStats.errors.push({ file: directory.path, error: (error as Error).message || 'Unknown error' });
 		}
 	}
 

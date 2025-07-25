@@ -1,10 +1,10 @@
 // Debug temporal para probar getAllFolders
-import { getAllFolders } from '@/services/folder/folder.service';
+import { getFolders } from '@/services/folder/folder.service';
 
 export async function testGetAllFolders() {
 	try {
-		console.log('🧪 [Debug] Probando getAllFolders...');
-		const result = await getAllFolders();
+		console.log('🧪 [Debug] Probando getFolders...');
+		const result = await getFolders();
 
 		console.log('🧪 [Debug] Resultado de getAllFolders:', {
 			isArray: Array.isArray(result),
