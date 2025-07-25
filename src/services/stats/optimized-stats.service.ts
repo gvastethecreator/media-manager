@@ -387,34 +387,43 @@ export class OptimizedStatsService {
 
 				// Convertir array de resultados a objeto con clave tagId
 				const statsArray = Array.isArray(batchTagStatsQuery) ? batchTagStatsQuery : [batchTagStatsQuery];
-				return statsArray.reduce((acc: Record<string, {
-					imageCount: number;
-					totalSize: number;
-					groupCount: number;
-					propertyCount: number;
-					wildcardCount: number;
-					_count: {
-						images: number;
-						groups: number;
-						properties: number;
-						wildcards: number;
-					};
-				}>, stats: any) => {
-					acc[stats.tagId] = {
-						imageCount: Number(stats.imageCount) || 0,
-						totalSize: Number(stats.totalSize) || 0,
-						groupCount: Number(stats.groupCount) || 0,
-						propertyCount: Number(stats.propertyCount) || 0,
-						wildcardCount: Number(stats.wildcardCount) || 0,
-						_count: {
-							images: Number(stats.imageCount) || 0,
-							groups: Number(stats.groupCount) || 0,
-							properties: Number(stats.propertyCount) || 0,
-							wildcards: Number(stats.wildcardCount) || 0,
-						},
-					};
-					return acc;
-				}, {});
+				return statsArray.reduce(
+					(
+						acc: Record<
+							string,
+							{
+								imageCount: number;
+								totalSize: number;
+								groupCount: number;
+								propertyCount: number;
+								wildcardCount: number;
+								_count: {
+									images: number;
+									groups: number;
+									properties: number;
+									wildcards: number;
+								};
+							}
+						>,
+						stats: any
+					) => {
+						acc[stats.tagId] = {
+							imageCount: Number(stats.imageCount) || 0,
+							totalSize: Number(stats.totalSize) || 0,
+							groupCount: Number(stats.groupCount) || 0,
+							propertyCount: Number(stats.propertyCount) || 0,
+							wildcardCount: Number(stats.wildcardCount) || 0,
+							_count: {
+								images: Number(stats.imageCount) || 0,
+								groups: Number(stats.groupCount) || 0,
+								properties: Number(stats.propertyCount) || 0,
+								wildcards: Number(stats.wildcardCount) || 0,
+							},
+						};
+						return acc;
+					},
+					{}
+				);
 			} catch (error) {
 				this.logger.error('❌ Error al obtener estadísticas por lotes de tags:', { tagIds, error });
 				throw error;
@@ -485,34 +494,43 @@ export class OptimizedStatsService {
 				const statsArray = Array.isArray(batchCollectionStatsQuery)
 					? batchCollectionStatsQuery
 					: [batchCollectionStatsQuery];
-				return statsArray.reduce((acc: Record<string, {
-				imageCount: number;
-				totalSize: number;
-				groupCount: number;
-				propertyCount: number;
-				wildcardCount: number;
-				_count: {
-					images: number;
-					groups: number;
-					properties: number;
-					wildcards: number;
-				};
-			}>, stats: any) => {
-					acc[stats.collectionId] = {
-						imageCount: Number(stats.imageCount) || 0,
-						totalSize: Number(stats.totalSize) || 0,
-						groupCount: Number(stats.groupCount) || 0,
-						propertyCount: Number(stats.propertyCount) || 0,
-						wildcardCount: Number(stats.wildcardCount) || 0,
-						_count: {
-							images: Number(stats.imageCount) || 0,
-							groups: Number(stats.groupCount) || 0,
-							properties: Number(stats.propertyCount) || 0,
-							wildcards: Number(stats.wildcardCount) || 0,
-						},
-					};
-					return acc;
-				}, {});
+				return statsArray.reduce(
+					(
+						acc: Record<
+							string,
+							{
+								imageCount: number;
+								totalSize: number;
+								groupCount: number;
+								propertyCount: number;
+								wildcardCount: number;
+								_count: {
+									images: number;
+									groups: number;
+									properties: number;
+									wildcards: number;
+								};
+							}
+						>,
+						stats: any
+					) => {
+						acc[stats.collectionId] = {
+							imageCount: Number(stats.imageCount) || 0,
+							totalSize: Number(stats.totalSize) || 0,
+							groupCount: Number(stats.groupCount) || 0,
+							propertyCount: Number(stats.propertyCount) || 0,
+							wildcardCount: Number(stats.wildcardCount) || 0,
+							_count: {
+								images: Number(stats.imageCount) || 0,
+								groups: Number(stats.groupCount) || 0,
+								properties: Number(stats.propertyCount) || 0,
+								wildcards: Number(stats.wildcardCount) || 0,
+							},
+						};
+						return acc;
+					},
+					{}
+				);
 			} catch (error) {
 				this.logger.error('❌ Error al obtener estadísticas por lotes de colecciones:', { collectionIds, error });
 				throw error;
@@ -547,14 +565,14 @@ export class OptimizedStatsService {
 				`);
 
 				const stats = favoriteStatsQuery[0] as {
-				characterCount: number;
-				placeCount: number;
-				worldItemCount: number;
-				collectionCount: number;
-				conceptCount: number;
-				promptCount: number;
-				noteCount: number;
-			};
+					characterCount: number;
+					placeCount: number;
+					worldItemCount: number;
+					collectionCount: number;
+					conceptCount: number;
+					promptCount: number;
+					noteCount: number;
+				};
 
 				const characterCount = Number(stats.characterCount) || 0;
 				const placeCount = Number(stats.placeCount) || 0;
@@ -626,14 +644,16 @@ export class OptimizedStatsService {
 					LIMIT ${limit}
 				`);
 
-				return (topTagsQuery as Array<{
-				id: string;
-				name: string;
-				color: string;
-				imageCount: number;
-				videoCount: number;
-				totalCount: number;
-			}>).map((tag) => ({
+				return (
+					topTagsQuery as Array<{
+						id: string;
+						name: string;
+						color: string;
+						imageCount: number;
+						videoCount: number;
+						totalCount: number;
+					}>
+				).map((tag) => ({
 					id: tag.id,
 					name: tag.name,
 					color: tag.color || '#6B7280',

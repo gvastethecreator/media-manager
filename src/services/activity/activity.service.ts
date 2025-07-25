@@ -62,12 +62,7 @@ function buildWhereConditions(filters: ActivityFilters = {}) {
 
 	// Filtrar por imagen (usando entityId y entityType)
 	if (filters.imageId) {
-		conditions.push(
-			and(
-				eq(activities.entityId, filters.imageId),
-				eq(activities.entityType, 'image')
-			)
-		);
+		conditions.push(and(eq(activities.entityId, filters.imageId), eq(activities.entityType, 'image')));
 	}
 
 	// Filtrar por fechas
@@ -168,10 +163,7 @@ export class ActivityServiceImpl implements ActivityService {
 					},
 				})
 				.from(activities)
-				.leftJoin(images, and(
-					eq(activities.entityId, images.id),
-					eq(activities.entityType, 'image')
-				))
+				.leftJoin(images, and(eq(activities.entityId, images.id), eq(activities.entityType, 'image')))
 				.where(eq(activities.id, id))
 				.limit(1);
 
@@ -217,10 +209,7 @@ export class ActivityServiceImpl implements ActivityService {
 					},
 				})
 				.from(activities)
-				.leftJoin(images, and(
-					eq(activities.entityId, images.id),
-					eq(activities.entityType, 'image')
-				))
+				.leftJoin(images, and(eq(activities.entityId, images.id), eq(activities.entityType, 'image')))
 				.where(whereConditions)
 				.orderBy(desc(activities.createdAt))
 				.limit(limit)

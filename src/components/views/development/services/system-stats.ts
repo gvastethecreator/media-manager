@@ -108,11 +108,14 @@ export async function getFilesHistoricalData(): Promise<
 			.where(gte(images.createdAt, sevenDaysAgo));
 
 		// Agrupar por día
-		const groupedByDay = files.reduce((acc: Record<string, number>, file: { createdAt: Date }) => {
-			const date = file.createdAt.toISOString().split('T')[0];
-			acc[date] = (acc[date] || 0) + 1;
-			return acc;
-		}, {} as Record<string, number>);
+		const groupedByDay = files.reduce(
+			(acc: Record<string, number>, file: { createdAt: Date }) => {
+				const date = file.createdAt.toISOString().split('T')[0];
+				acc[date] = (acc[date] || 0) + 1;
+				return acc;
+			},
+			{} as Record<string, number>
+		);
 
 		// Crear array para los últimos 7 días
 		const result = [];
@@ -149,11 +152,14 @@ export async function getTagsHistoricalData(): Promise<
 		const tagsData = await db.select({ createdAt: tags.createdAt }).from(tags).where(gte(tags.createdAt, sevenDaysAgo));
 
 		// Agrupar por día
-		const groupedByDay = tagsData.reduce((acc: Record<string, number>, tag: { createdAt: Date }) => {
-			const date = tag.createdAt.toISOString().split('T')[0];
-			acc[date] = (acc[date] || 0) + 1;
-			return acc;
-		}, {} as Record<string, number>);
+		const groupedByDay = tagsData.reduce(
+			(acc: Record<string, number>, tag: { createdAt: Date }) => {
+				const date = tag.createdAt.toISOString().split('T')[0];
+				acc[date] = (acc[date] || 0) + 1;
+				return acc;
+			},
+			{} as Record<string, number>
+		);
 
 		// Crear array acumulativo para los últimos 7 días
 		const result = [];

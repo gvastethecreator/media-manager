@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { FilterOption, SortOption } from '../store/ui/view-options.slice';
+import { FilterOption, SortOption } from '@/store/ui/view-options.slice';
 
 type FilterableData = Record<string, any>[];
 

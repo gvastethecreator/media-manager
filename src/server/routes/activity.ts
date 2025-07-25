@@ -1,8 +1,8 @@
 import express from 'express';
 import { z } from 'zod';
-import { ActivityService } from '../../services/activity/activity.service';
-import type { ActivityFilters } from '@/types/entities/activity/types';
 import type { ExpressHandler } from '@/lib/express-types';
+import type { ActivityFilters } from '@/types/entities/activity/types';
+import { ActivityService } from '../../services/activity/activity.service';
 
 const router = express.Router();
 const activityService = new ActivityService();
@@ -35,7 +35,13 @@ const createActivity: ExpressHandler = async (req, res) => {
 		const activity = await activityService.create({
 			type: validatedData.type,
 			entityType: 'general',
-			entityId: validatedData.imageId || validatedData.albumId || validatedData.folderId || validatedData.characterId || validatedData.collectionId || '',
+			entityId:
+				validatedData.imageId ||
+				validatedData.albumId ||
+				validatedData.folderId ||
+				validatedData.characterId ||
+				validatedData.collectionId ||
+				'',
 			action: 'create',
 			userId: 'system',
 			description: validatedData.message,

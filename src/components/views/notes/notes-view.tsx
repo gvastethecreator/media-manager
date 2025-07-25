@@ -19,7 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { ViewProps } from '@/components/views/types';
-import { ViewContainer } from '@/components/views/view-container';
+// ViewContainer removido - obsoleto
 import { useCategoryData } from '@/lib/api/navigation';
 import { useCreateNote, useDeleteNote, useUpdateNote } from '@/lib/api/notes'; // Importar los hooks de mutación
 
@@ -60,9 +60,9 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 		}
 
 		if (editingNote) {
-			updateNote({ id: editingNote.id, data: { name: noteTitle, content: noteContent } });
+			updateNote({ id: editingNote.id, data: { title: noteTitle, content: noteContent } });
 		} else {
-			createNote({ name: noteTitle, content: noteContent });
+			createNote({ title: noteTitle, content: noteContent });
 		}
 		setNoteTitle('');
 		setNoteContent('');
@@ -71,13 +71,7 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 	}, [noteTitle, noteContent, editingNote, createNote, updateNote]);
 
 	return (
-		<ViewContainer
-			className={className}
-			viewKey="notes"
-			data={notes}
-			isLoading={isLoading}
-			noResultsMessage="No hay notas disponibles."
-		>
+		<div className={className}>
 			<div className="p-4">
 				<h2 className="text-xl font-bold mb-4">Vista de Notas</h2>
 
@@ -168,6 +162,6 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 					<p>No hay notas disponibles.</p>
 				)}
 			</div>
-		</ViewContainer>
+		</div>
 	);
 });

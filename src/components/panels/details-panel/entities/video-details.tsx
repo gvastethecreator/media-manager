@@ -84,9 +84,9 @@ export const VideoDetails = memo<EntityDetailsProps<VideoWithStats>>(function Vi
 							<p className="font-medium truncate">{entity.name}</p>
 						</div>
 						<div>
-				<span className="text-muted-foreground">Tamaño:</span>
-				<p className="font-medium">{formatBytes(entity.size || 0)}</p>
-			</div>
+							<span className="text-muted-foreground">Tamaño:</span>
+							<p className="font-medium">{formatBytes(entity.size || 0)}</p>
+						</div>
 						<div>
 							<span className="text-muted-foreground">Resolución:</span>
 							<p className="font-medium">
@@ -519,9 +519,7 @@ export const VideoMetadata = memo<EntityMetadataProps<VideoWithStats>>(function 
 					<CardContent>
 						<div className="text-sm text-muted-foreground">
 							<p>Asociaciones: {entity.stats.totalAssociations || 0}</p>
-						{entity.stats.totalItems !== undefined && (
-							<p>Elementos relacionados: {entity.stats.totalItems}</p>
-							)}
+							{entity.stats.totalItems !== undefined && <p>Elementos relacionados: {entity.stats.totalItems}</p>}
 						</div>
 					</CardContent>
 				</Card>

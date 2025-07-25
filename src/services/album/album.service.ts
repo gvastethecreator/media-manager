@@ -6,13 +6,13 @@
  */
 
 import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
+import type { AlbumCreateInput, AlbumUpdateInput } from '@/lib/api/albums';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumWithStats } from '@/types/entities/album';
-import type { AlbumCreateInput, AlbumUpdateInput } from '@/lib/api/albums';
 
 const logger = serverLogger.withContext('AlbumService');
 

@@ -11,8 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteTag, useTags } from '@/lib/api/tags';
 import { toastService } from '@/lib/ui/toast';
-import { TagCategory } from '@/types/entities/tag';
 import type { TagBase as UITag } from '@/types/entities/tag';
+import { TagCategory } from '@/types/entities/tag';
 import { CreateTagForm } from './create-tag-form';
 
 interface TagsSettingsProps {
@@ -286,7 +286,10 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 													</Badge>
 												)}
 											</div>
-											<div className="w-4 h-4 rounded-full border" style={{ backgroundColor: tag.color || '#6b7280' }} />
+											<div
+												className="w-4 h-4 rounded-full border"
+												style={{ backgroundColor: tag.color || '#6b7280' }}
+											/>
 										</div>
 									</CardContent>
 								</Card>

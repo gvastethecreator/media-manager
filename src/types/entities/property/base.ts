@@ -107,6 +107,7 @@ export interface PropertyWithStats extends PropertyBase {
  */
 export interface PropertyCreateInput {
 	name: string;
+	value?: string | number;
 	description?: string | null;
 	emoji?: string | null;
 	color?: string | null;
@@ -121,6 +122,7 @@ export interface PropertyCreateInput {
  */
 export interface PropertyUpdateInput {
 	name?: string;
+	value?: string | number;
 	description?: string | null;
 	emoji?: string | null;
 	color?: string | null;

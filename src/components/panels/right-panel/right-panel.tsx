@@ -7,10 +7,18 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Carga perezosa del StatsPanel compatible con Vite/React 19
 const StatsPanel = lazy(() => import('../stats-panel/stats-panel'));
-const FolderStats = lazy(() => import('../stats-panel/components/folder-stats').then(m => ({ default: m.FolderStats })));
+const FolderStats = lazy(() =>
+	import('../stats-panel/components/folder-stats').then((m) => ({ default: m.FolderStats }))
+);
 
 // Componente para manejar la carga perezosa del StatsPanel
-const LazyStatsPanel = memo(function LazyStatsPanel({ folderId, folderName }: { folderId?: string; folderName?: string }) {
+const LazyStatsPanel = memo(function LazyStatsPanel({
+	folderId,
+	folderName,
+}: {
+	folderId?: string;
+	folderName?: string;
+}) {
 	// Usamos un estado para controlar si el panel ha sido visible por suficiente tiempo
 	const [shouldRender, setShouldRender] = useState(false);
 
@@ -33,11 +41,7 @@ const LazyStatsPanel = memo(function LazyStatsPanel({ folderId, folderName }: { 
 
 	return (
 		<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
-			{folderId ? (
-				<FolderStats folderId={folderId} folderName={folderName} />
-			) : (
-				<StatsPanel />
-			)}
+			{folderId ? <FolderStats folderId={folderId} folderName={folderName} /> : <StatsPanel />}
 		</Suspense>
 	);
 });
@@ -76,7 +80,7 @@ export const RightPanel = memo(function RightPanel({
 		if (pathParts[1] === 'folders' && pathParts[2]) {
 			return {
 				folderId: decodeURIComponent(pathParts[2]),
-				folderName: decodeURIComponent(pathParts[2])
+				folderName: decodeURIComponent(pathParts[2]),
 			};
 		}
 		return { folderId: undefined, folderName: undefined };
@@ -127,7 +131,9 @@ export const RightPanel = memo(function RightPanel({
 						</div>
 					</ScrollArea>
 				) : (
-					shouldShowStats && <LazyStatsPanel folderId={currentFolderInfo.folderId} folderName={currentFolderInfo.folderName} />
+					shouldShowStats && (
+						<LazyStatsPanel folderId={currentFolderInfo.folderId} folderName={currentFolderInfo.folderName} />
+					)
 				))}
 		</div>
 	);

@@ -19,7 +19,7 @@ export const PlaceContentView = memo(function PlaceContentView() {
 	const [error, setError] = useState<string | null>(null);
 	const [currentPlaceId, setCurrentPlaceId] = useState(selectedPlaceId);
 
-	const { data: placeImages, isLoading: isLoadingImages, error: placeError } = usePlaceImages(currentPlaceId);
+	const { data: placeImages, isLoading: isLoadingImages, error: placeError } = usePlaceImages(currentPlaceId || '');
 
 	const loadPlaceImages = useCallback(async () => {
 		if (!currentPlaceId) return;

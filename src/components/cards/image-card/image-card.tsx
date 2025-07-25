@@ -117,14 +117,14 @@ export const ImageCard = memo(function ImageCard({
 	};
 
 	// Determinar color primario para efectos TCG
-    const getPrimaryColor = () => {
-        // Usar el color de la primera etiqueta si hay etiquetas
-        if (imageData?.tags && imageData.tags.length > 0) {
-            return imageData.tags[0].color || '#3b82f6';
-        }
-        // Color predeterminado
-        return '#3b82f6';
-    };
+	const getPrimaryColor = () => {
+		// Usar el color de la primera etiqueta si hay etiquetas
+		if (imageData?.tags && imageData.tags.length > 0) {
+			return imageData.tags[0].color || '#3b82f6';
+		}
+		// Color predeterminado
+		return '#3b82f6';
+	};
 
 	// Renderizar cargando
 	if (isLoading) {

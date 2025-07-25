@@ -5,7 +5,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { EntityWithStats, AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats, EntityWithStats } from '@/types/migration';
 import { isImageWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 import AllImagesContentView from './all-images-content-view';
@@ -89,11 +89,12 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 				viewLogger.info('🖱️ Doble click en imagen:', image.name);
 
 				// Abrir visor de imágenes
-			const imageEntities = (sortedImages || [])
-				.filter((img: AnyEntityWithStats) => isImageWithStats(img));
+				const imageEntities = (sortedImages || []).filter((img: AnyEntityWithStats) =>
+					isImageWithStats(img)
+				) as EntityWithStats[];
 
-			const currentIndex = imageEntities.findIndex((img: AnyEntityWithStats) => img.id === image.id);
-			openViewer(imageEntities, currentIndex);
+				const currentIndex = imageEntities.findIndex((img: EntityWithStats) => img.id === image.id);
+				openViewer(imageEntities, currentIndex);
 			} else {
 				viewLogger.warn('⚠️ Item con doble click no es una imagen:', item);
 			}

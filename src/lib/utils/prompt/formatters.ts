@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptExtended } from '@/types/entities/prompt/types';
 import { PromptModel } from '@/types/entities/prompt/enums';
+import type { PromptBase, PromptExtended } from '@/types/entities/prompt/types';
 import { extractVariablesFromContent } from './helpers';
 
 const formattersLogger = serverLogger.withContext('PromptFormatters');

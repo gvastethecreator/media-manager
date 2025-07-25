@@ -15,7 +15,13 @@ type ProfileWithSettings = Profile & {
 	settings?: Settings | string | null;
 };
 
-import { Language, type ProfileBase, type ProfileExtended, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
+import {
+	Language,
+	type ProfileBase,
+	type ProfileExtended,
+	type ProfilePreferencesSchemaType,
+	ThemeMode,
+} from '@/types/entities/profile';
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
 
 /**

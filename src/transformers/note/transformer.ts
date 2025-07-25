@@ -28,24 +28,37 @@ export function fromDrizzleNoteWithCounts(data: NoteComplete): NoteWithStats {
 		id: data.id,
 		title: data.title,
 		content: data.content,
+		summary: data.summary,
+		emoji: data.emoji,
+		color: data.color,
 		category: data.category,
 		priority: data.priority,
 		status: data.status,
-		color: data.color,
-		emoji: data.emoji,
 		featuredImage: data.featuredImage,
 		isFavorite: data.isFavorite,
 		presetId: data.presetId,
 		createdAt: data.createdAt,
 		updatedAt: data.updatedAt,
 		entityType: 'note' as const,
+		// Propiedades requeridas para compatibilidad con AnyEntityWithStats
+		name: data.title, // Alias para title
+		description: data.summary || generateExcerpt(data.content), // Alias para summary o excerpt
 		stats: statistics,
-		// Campos derivados calculados
-		excerpt: generateExcerpt(data.content),
-		formattedDate: formatDate(data.updatedAt),
-		priorityLabel: getPriorityLabel(data.priority),
-		statusLabel: getStatusLabel(data.status),
-		categoryLabel: getCategoryLabel(data.category),
+		_count: {
+			images: data._count?.images || 0,
+			videos: data._count?.videos || 0,
+			albums: data._count?.albums || 0,
+			collections: data._count?.collections || 0,
+			tags: data._count?.tags || 0,
+			characters: data._count?.characters || 0,
+			places: data._count?.places || 0,
+			worldItems: data._count?.worldItems || 0,
+			concepts: data._count?.concepts || 0,
+			prompts: data._count?.prompts || 0,
+			wildcards: data._count?.wildcards || 0,
+			properties: data._count?.properties || 0,
+			groups: data._count?.groups || 0,
+		},
 	};
 }
 
@@ -53,32 +66,58 @@ export function fromDrizzleNoteWithCounts(data: NoteComplete): NoteWithStats {
  * 📊 Calcula estadísticas completas para una nota
  */
 function calculateNoteStatistics(data: NoteComplete): NoteStatistics {
-	const totalItems = data._count ? Object.values(data._count).reduce((sum, count) => sum + (count || 0), 0) : 0;
+	const imageCount = data._count?.images || 0;
+	const videoCount = data._count?.videos || 0;
+	const albumCount = data._count?.albums || 0;
+	const collectionCount = data._count?.collections || 0;
+	const tagCount = data._count?.tags || 0;
+	const characterCount = data._count?.characters || 0;
+	const placeCount = data._count?.places || 0;
+	const worldItemCount = data._count?.worldItems || 0;
+	const conceptCount = data._count?.concepts || 0;
+	const promptCount = data._count?.prompts || 0;
+	const wildcardCount = data._count?.wildcards || 0;
+	const propertyCount = data._count?.properties || 0;
+	const groupCount = data._count?.groups || 0;
+
+	const totalItems =
+		imageCount +
+		videoCount +
+		albumCount +
+		collectionCount +
+		tagCount +
+		characterCount +
+		placeCount +
+		worldItemCount +
+		conceptCount +
+		promptCount +
+		wildcardCount +
+		propertyCount +
+		groupCount;
+	const totalAssociations = totalItems;
 	const wordCount = calculateWordCount(data.content);
-	const characterCount = data.content.length;
 	const readingTime = Math.ceil(wordCount / 200); // ~200 palabras por minuto
 	const completionScore = calculateCompletionScore(data, totalItems);
 
 	return {
-		totalItems,
-		totalImages: data._count?.images || 0,
-		totalVideos: data._count?.videos || 0,
-		totalAlbums: data._count?.albums || 0,
-		totalCollections: data._count?.collections || 0,
-		totalTags: data._count?.tags || 0,
-		totalCharacters: data._count?.characters || 0,
-		totalPlaces: data._count?.places || 0,
-		totalWorldItems: data._count?.worldItems || 0,
-		totalConcepts: data._count?.concepts || 0,
-		totalPrompts: data._count?.prompts || 0,
-		totalWildcards: data._count?.wildcards || 0,
-		totalProperties: data._count?.properties || 0,
-		totalGroups: data._count?.groups || 0,
-		wordCount,
+		imageCount,
+		videoCount,
+		albumCount,
+		collectionCount,
+		tagCount,
 		characterCount,
+		placeCount,
+		worldItemCount,
+		conceptCount,
+		promptCount,
+		wildcardCount,
+		propertyCount,
+		groupCount,
+		wordCount,
 		readingTime,
 		completionScore,
-		lastUpdated: new Date(),
+		totalItems,
+		totalAssociations,
 	};
 }
 

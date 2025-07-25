@@ -10,9 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
-import type { EntityWithStats, AnyEntityWithStats } from '@/types/migration';
-import { isImageWithStats } from '@/types/migration';
 import type { ImageWithStats } from '@/types/entities/image';
+import type { AnyEntityWithStats, EntityWithStats } from '@/types/migration';
+import { isImageWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 
 interface SearchFilters {
@@ -84,28 +84,30 @@ export function SearchView(_props: ViewProps) {
 				const currentIndex = imageItems.findIndex((i: AnyEntityWithStats) => i.id === item.id);
 
 				// Convertir EntityWithStats a formato compatible con viewer
-				const viewerItems = imageItems.map((img: AnyEntityWithStats) => {
-					if (isImageWithStats(img)) {
-						const imageItem = img as ImageWithStats;
-						return {
-							id: imageItem.id,
-							name: imageItem.name || '',
-							src: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
-							alt: imageItem.name || '',
-							width: imageItem.width || 0,
-							height: imageItem.height || 0,
-							thumbnail: imageItem.thumbnailUrl || null,
-							type: 'image',
-							path: '',
-							size: imageItem.size || 0,
-							mimeType: 'image/jpeg', // Default mime type since mimeType is not available in ImageWithStats
-							metadata: null,
-							url: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
-							parsedMetadata: undefined,
-						};
-					}
-					return null;
-				}).filter(Boolean);
+				const viewerItems = imageItems
+					.map((img: AnyEntityWithStats) => {
+						if (isImageWithStats(img)) {
+							const imageItem = img as ImageWithStats;
+							return {
+								id: imageItem.id,
+								name: imageItem.name || '',
+								src: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
+								alt: imageItem.name || '',
+								width: imageItem.width || 0,
+								height: imageItem.height || 0,
+								thumbnail: imageItem.thumbnailUrl || null,
+								type: 'image',
+								path: '',
+								size: imageItem.size || 0,
+								mimeType: 'image/jpeg', // Default mime type since mimeType is not available in ImageWithStats
+								metadata: null,
+								url: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
+								parsedMetadata: undefined,
+							};
+						}
+						return null;
+					})
+					.filter(Boolean);
 
 				openViewer(viewerItems, currentIndex);
 			}

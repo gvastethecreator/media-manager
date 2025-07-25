@@ -22,24 +22,69 @@ export function fromDrizzleGroup(drizzleGroup: any): GroupWithStats {
 	try {
 		const { _count, ...baseData } = drizzleGroup;
 
+		const imageCount = _count?.images || 0;
+		const videoCount = _count?.videos || 0;
+		const albumCount = _count?.albums || 0;
+		const collectionCount = _count?.collections || 0;
+		const tagCount = _count?.tags || 0;
+		const characterCount = _count?.characters || 0;
+		const placeCount = _count?.places || 0;
+		const worldItemCount = _count?.worldItems || 0;
+		const conceptCount = _count?.concepts || 0;
+		const promptCount = _count?.prompts || 0;
+		const noteCount = _count?.notes || 0;
+		const wildcardCount = _count?.wildcards || 0;
+		const propertyCount = _count?.properties || 0;
+
+		const totalItems =
+			imageCount +
+			videoCount +
+			albumCount +
+			collectionCount +
+			tagCount +
+			characterCount +
+			placeCount +
+			worldItemCount +
+			conceptCount +
+			promptCount +
+			noteCount +
+			wildcardCount +
+			propertyCount;
+
 		const stats: GroupStatistics = {
-			imageCount: _count?.images || 0,
-			videoCount: _count?.videos || 0,
-			albumCount: _count?.albums || 0,
-			collectionCount: _count?.collections || 0,
-			tagCount: _count?.tags || 0,
-			characterCount: _count?.characters || 0,
-			placeCount: _count?.places || 0,
-			worldItemCount: _count?.worldItems || 0,
-			conceptCount: _count?.concepts || 0,
-			promptCount: _count?.prompts || 0,
-			noteCount: _count?.notes || 0,
-			wildcardCount: _count?.wildcards || 0,
-			propertyCount: _count?.properties || 0,
+			imageCount,
+			videoCount,
+			albumCount,
+			collectionCount,
+			tagCount,
+			characterCount,
+			placeCount,
+			worldItemCount,
+			conceptCount,
+			promptCount,
+			noteCount,
+			wildcardCount,
+			propertyCount,
+			totalItems,
+			// Alias para compatibilidad
+			totalImages: imageCount,
+			totalVideos: videoCount,
+			totalAlbums: albumCount,
+			totalCollections: collectionCount,
+			totalTags: tagCount,
+			totalCharacters: characterCount,
+			totalPlaces: placeCount,
+			totalWorldItems: worldItemCount,
+			totalConcepts: conceptCount,
+			totalPrompts: promptCount,
+			totalNotes: noteCount,
+			totalWildcards: wildcardCount,
+			totalProperties: propertyCount,
 		};
 
 		return {
 			...baseData,
+			entityType: 'group' as const,
 			stats,
 		};
 	} catch (error) {

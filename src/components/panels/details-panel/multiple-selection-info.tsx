@@ -71,7 +71,8 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 			// Contar colecciones
 			if ('collections' in item && Array.isArray(item.collections)) {
 				for (const collection of item.collections) {
-					const collectionName = typeof collection === 'object' && collection && 'name' in collection ? collection.name : String(collection);
+					const collectionName =
+						typeof collection === 'object' && collection && 'name' in collection ? collection.name : String(collection);
 					collections.set(collectionName, (collections.get(collectionName) || 0) + 1);
 				}
 			}
@@ -87,7 +88,8 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 			// Contar personajes
 			if ('characters' in item && Array.isArray(item.characters)) {
 				for (const character of item.characters) {
-					const characterName = typeof character === 'object' && character && 'name' in character ? character.name : String(character);
+					const characterName =
+						typeof character === 'object' && character && 'name' in character ? character.name : String(character);
 					characters.set(characterName, (characters.get(characterName) || 0) + 1);
 				}
 			}
@@ -103,7 +105,8 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 			// Contar objetos del mundo
 			if ('worldItems' in item && Array.isArray(item.worldItems)) {
 				for (const worldItem of item.worldItems) {
-					const worldItemName = typeof worldItem === 'object' && worldItem && 'name' in worldItem ? worldItem.name : String(worldItem);
+					const worldItemName =
+						typeof worldItem === 'object' && worldItem && 'name' in worldItem ? worldItem.name : String(worldItem);
 					worldItems.set(worldItemName, (worldItems.get(worldItemName) || 0) + 1);
 				}
 			}

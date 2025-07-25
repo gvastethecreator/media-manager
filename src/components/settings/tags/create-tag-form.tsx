@@ -1,20 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { ColorPicker } from '@/components/ui/color-picker';
+import { Textarea } from '@/components/ui/textarea';
 import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
-import { TagComplete, TagCategory } from '@/types/entities/tag';
 import { generateTagColor } from '@/lib/utils/string.utils';
-import { toastService } from '@/services/toast/toast.service';
 import { createTagSchema, type ValidatedCreateTagData } from '@/lib/utils/tag/validators';
-
+import { toastService } from '@/services/toast/toast.service';
+import { TagCategory, TagComplete } from '@/types/entities/tag';
 
 interface CreateTagFormProps {
 	tag?: TagComplete | null;
@@ -132,7 +131,12 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Emoji</FormLabel>
 							<FormControl>
-								<EmojiPicker value={field.value || undefined} onEmojiSelect={field.onChange} compact showLabel={false} />
+								<EmojiPicker
+									value={field.value || undefined}
+									onEmojiSelect={field.onChange}
+									compact
+									showLabel={false}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -185,12 +189,7 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Descripción</FormLabel>
 							<FormControl>
-								<Textarea
-									placeholder="Descripción de la etiqueta..."
-									rows={3}
-									{...field}
-									value={field.value ?? ''}
-								/>
+								<Textarea placeholder="Descripción de la etiqueta..." rows={3} {...field} value={field.value ?? ''} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -221,9 +220,7 @@ export function CreateTagForm({
 							Vista previa
 						</Button>
 					)}
-					<Button type="submit">
-						{isEditing ? 'Guardar cambios' : 'Crear etiqueta'}
-					</Button>
+					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear etiqueta'}</Button>
 				</div>
 			</form>
 		</Form>

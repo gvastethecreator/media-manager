@@ -13,6 +13,7 @@ import { calculateCompleteness } from '@/lib/utils/transformers/calculate-comple
 import { TransformerError } from '@/lib/utils/transformers/errors';
 import {
 	WildcardCreateInput,
+	WildcardStatistics,
 	WildcardUpdateInput,
 	WildcardWithCounts,
 	WildcardWithStats,
@@ -41,19 +42,22 @@ export function toWildcardWithStats(wildcard: WildcardWithCounts): WildcardWithS
 	const popularity = relationCounts.reduce((sum, count) => sum + count, 0);
 	const usageDiversity = relationCounts.filter((count) => count > 0).length;
 
-	const stats: WildcardWithStats = {
+	const statistics: WildcardStatistics = {
+		popularity,
+		usageDiversity,
+		completenessScore: calculateCompleteness(completenessFields),
+		// Lógica de adaptabilidad basada en diversidad de uso
+		adaptabilityScore: (usageDiversity / 5) * 100,
+	};
+
+	const result: WildcardWithStats = {
 		...rest,
-		statistics: {
-			popularity,
-			usageDiversity,
-			completenessScore: calculateCompleteness(completenessFields),
-			// Lógica de adaptabilidad basada en diversidad de uso
-			adaptabilityScore: (usageDiversity / 5) * 100,
-		},
+		entityType: 'wildcard' as const,
+		statistics,
 		_count,
 	};
 
-	return stats;
+	return result;
 }
 
 /**

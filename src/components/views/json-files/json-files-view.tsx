@@ -78,7 +78,7 @@ export function JsonFilesView(_props: ViewProps) {
 			});
 			return;
 		}
-		
+
 		// Crear objeto con todas las propiedades requeridas
 		const jsonFileData = {
 			name: newJsonFileName,
@@ -96,7 +96,7 @@ export function JsonFilesView(_props: ViewProps) {
 			keyCount: Object.keys(JSON.parse(newJsonFileContent)).length,
 			depth: 1, // Simplificado, debería calcularse recursivamente
 		};
-		
+
 		createJsonFile(jsonFileData);
 		setNewJsonFileName('');
 		setNewJsonFileContent('');

@@ -1,6 +1,21 @@
 import { sql } from 'drizzle-orm';
 import { db } from '@/lib/database/db';
-import { albums, characters, collections, concepts, folders, images, notes, places, prompts, properties, tags, videos, wildcards, worldItems } from '@/lib/drizzle/schema';
+import {
+	albums,
+	characters,
+	collections,
+	concepts,
+	folders,
+	images,
+	notes,
+	places,
+	prompts,
+	properties,
+	tags,
+	videos,
+	wildcards,
+	worldItems,
+} from '@/lib/drizzle/schema';
 
 const entityTableMap = {
 	album: albums,

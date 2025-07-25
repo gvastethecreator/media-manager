@@ -486,43 +486,43 @@ export function FolderCard({
 									<div className="flex items-center gap-1 flex-wrap">
 										{/* Imágenes */}
 										{(folderStats?.totalImages || 0) > 0 && (
-										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-											<Image className="h-2.5 w-2.5" />
-											{folderStats?.totalImages || 0}
-										</Badge>
-									)}
+											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+												<Image className="h-2.5 w-2.5" />
+												{folderStats?.totalImages || 0}
+											</Badge>
+										)}
 
 										{/* Videos */}
-									{(folderStats?.totalVideos || 0) > 0 && (
-										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-											<Video className="h-2.5 w-2.5" />
-											{folderStats?.totalVideos || 0}
-										</Badge>
-									)}
+										{(folderStats?.totalVideos || 0) > 0 && (
+											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+												<Video className="h-2.5 w-2.5" />
+												{folderStats?.totalVideos || 0}
+											</Badge>
+										)}
 
 										{/* Audio */}
-									{(folderStats?.totalAudio || 0) > 0 && (
-										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-											<Music className="h-2.5 w-2.5" />
-											{folderStats?.totalAudio || 0}
-										</Badge>
-									)}
+										{(folderStats?.totalAudio || 0) > 0 && (
+											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+												<Music className="h-2.5 w-2.5" />
+												{folderStats?.totalAudio || 0}
+											</Badge>
+										)}
 
 										{/* Documentos */}
-									{(folderStats?.totalDocuments || 0) > 0 && (
-										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-											<FileText className="h-2.5 w-2.5" />
-											{folderStats?.totalDocuments || 0}
-										</Badge>
-									)}
+										{(folderStats?.totalDocuments || 0) > 0 && (
+											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+												<FileText className="h-2.5 w-2.5" />
+												{folderStats?.totalDocuments || 0}
+											</Badge>
+										)}
 
 										{/* Otros archivos */}
-									{(folderStats?.totalOthers || 0) > 0 && (
-										<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
-											<File className="h-2.5 w-2.5" />
-											{folderStats?.totalOthers || 0}
-										</Badge>
-									)}
+										{(folderStats?.totalOthers || 0) > 0 && (
+											<Badge variant="secondary" className="text-[10px] px-1.5 h-4 flex items-center gap-1">
+												<File className="h-2.5 w-2.5" />
+												{folderStats?.totalOthers || 0}
+											</Badge>
+										)}
 
 										{/* Subcarpetas */}
 										{folder.children && folder.children.length > 0 && (
@@ -535,39 +535,39 @@ export function FolderCard({
 
 									<div className="flex items-center gap-1">
 										<Badge variant="secondary" className="text-[10px] px-1 h-4">
-									{formatBytes(Number(folderStats?.totalSize || 0))}
-								</Badge>
+											{formatBytes(Number(folderStats?.totalSize || 0))}
+										</Badge>
 										<FolderIndexStatusBadge status={indexStatus} lastIndexed={folder.lastIndexed} />
 									</div>
 								</div>
 
 								{/* Últimas 4 imágenes */}
-							{folderStats?.recentImages && folderStats.recentImages.length > 0 && (
-								<div className="flex items-center gap-1 mt-1">
-									<span className="text-[10px] text-muted-foreground mr-1">Recientes:</span>
-									<div className="flex gap-0.5">
-										{folderStats.recentImages.slice(0, 4).map((image, index) => (
-											<div
-												key={image.id || index}
-												className="w-6 h-6 rounded border overflow-hidden bg-muted flex items-center justify-center"
-											>
-												{image.thumbnailUrl ? (
-													<img src={image.thumbnailUrl} alt={image.name} className="w-full h-full object-cover" />
-												) : (
-													<Image className="h-3 w-3 text-muted-foreground" />
-												)}
-											</div>
-										))}
-										{folderStats.recentImages.length > 4 && (
-											<div className="w-6 h-6 rounded border bg-muted/50 flex items-center justify-center">
-												<span className="text-[8px] text-muted-foreground font-medium">
-													+{folderStats.recentImages.length - 4}
-												</span>
-											</div>
-										)}
+								{folderStats?.recentImages && folderStats.recentImages.length > 0 && (
+									<div className="flex items-center gap-1 mt-1">
+										<span className="text-[10px] text-muted-foreground mr-1">Recientes:</span>
+										<div className="flex gap-0.5">
+											{folderStats.recentImages.slice(0, 4).map((image, index) => (
+												<div
+													key={image.id || index}
+													className="w-6 h-6 rounded border overflow-hidden bg-muted flex items-center justify-center"
+												>
+													{image.thumbnailUrl ? (
+														<img src={image.thumbnailUrl} alt={image.name} className="w-full h-full object-cover" />
+													) : (
+														<Image className="h-3 w-3 text-muted-foreground" />
+													)}
+												</div>
+											))}
+											{folderStats.recentImages.length > 4 && (
+												<div className="w-6 h-6 rounded border bg-muted/50 flex items-center justify-center">
+													<span className="text-[8px] text-muted-foreground font-medium">
+														+{folderStats.recentImages.length - 4}
+													</span>
+												</div>
+											)}
+										</div>
 									</div>
-								</div>
-							)}
+								)}
 							</div>
 						</div>
 
@@ -608,8 +608,8 @@ export function FolderCard({
 					className="mt-3 pl-4 border-l-2 border-border space-y-2"
 				>
 					{folder.children.map((child) => {
-// Hook calls need to be moved to the top level of the component
-// This line should be removed from here and the stats should be passed down as props
+						// Hook calls need to be moved to the top level of the component
+						// This line should be removed from here and the stats should be passed down as props
 						const childStats = childStatsQuery.data as FolderStatsResponse | undefined;
 						return (
 							<div key={child.id} className="flex items-center justify-between p-2 rounded-md bg-muted/30">

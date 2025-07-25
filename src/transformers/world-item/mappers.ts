@@ -227,19 +227,19 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	// Calcular poder basado en stats, efectos y rareza
 	const powerLevel = Math.round(
 		statsData.length * 10 +
-		effects.length * 15 +
-		(rarityScores[worldItem.rarity?.toLowerCase() || 'common'] || 10) +
-		(worldItem.isFavorite ? 5 : 0)
+			effects.length * 15 +
+			(rarityScores[worldItem.rarity?.toLowerCase() || 'common'] || 10) +
+			(worldItem.isFavorite ? 5 : 0)
 	);
 
 	// Calcular completitud
 	const completenessScore = Math.round(
 		(worldItem.description ? 20 : 0) +
-		(attributes.length > 0 ? 20 : 0) +
-		(effects.length > 0 ? 20 : 0) +
-		(requirements.length > 0 ? 10 : 0) +
-		(statsData.length > 0 ? 15 : 0) +
-		(worldItem.featuredImage ? 15 : 0)
+			(attributes.length > 0 ? 20 : 0) +
+			(effects.length > 0 ? 20 : 0) +
+			(requirements.length > 0 ? 10 : 0) +
+			(statsData.length > 0 ? 15 : 0) +
+			(worldItem.featuredImage ? 15 : 0)
 	);
 
 	// Calcular popularidad basada en relaciones

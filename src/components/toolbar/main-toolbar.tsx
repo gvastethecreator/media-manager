@@ -246,7 +246,12 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				data-active={sortOptions.some((opt: any) => opt.field === 'name')}
 			>
 				<div className="flex items-center justify-center gap-0.5">
-					<FileText className={cn('h-3.5 w-3.5', sortOptions.some((opt: any) => opt.field === 'name') ? 'text-primary' : 'text-muted-foreground')} />
+					<FileText
+						className={cn(
+							'h-3.5 w-3.5',
+							sortOptions.some((opt: any) => opt.field === 'name') ? 'text-primary' : 'text-muted-foreground'
+						)}
+					/>
 					{sortOptions.some((opt: any) => opt.field === 'name') && (
 						<div className="flex items-center">
 							{sortOptions.find((opt: any) => opt.field === 'name')?.direction === 'asc' ? (
@@ -270,7 +275,12 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				data-active={sortOptions.some((opt: any) => opt.field === 'modifiedAt')}
 			>
 				<div className="flex items-center justify-center gap-0.5">
-					<Clock className={cn('h-3.5 w-3.5', sortOptions.some((opt: any) => opt.field === 'modifiedAt') ? 'text-primary' : 'text-muted-foreground')} />
+					<Clock
+						className={cn(
+							'h-3.5 w-3.5',
+							sortOptions.some((opt: any) => opt.field === 'modifiedAt') ? 'text-primary' : 'text-muted-foreground'
+						)}
+					/>
 					{sortOptions.some((opt: any) => opt.field === 'modifiedAt') && (
 						<div className="flex items-center">
 							{sortOptions.find((opt: any) => opt.field === 'modifiedAt')?.direction === 'asc' ? (
@@ -295,7 +305,10 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 			>
 				<div className="flex items-center justify-center gap-0.5">
 					<Calendar
-						className={cn('h-3.5 w-3.5', sortOptions.some((opt: any) => opt.field === 'createdAt') ? 'text-primary' : 'text-muted-foreground')}
+						className={cn(
+							'h-3.5 w-3.5',
+							sortOptions.some((opt: any) => opt.field === 'createdAt') ? 'text-primary' : 'text-muted-foreground'
+						)}
 					/>
 					{sortOptions.some((opt: any) => opt.field === 'createdAt') && (
 						<div className="flex items-center">
@@ -536,7 +549,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 								<span className="text-xs">{isRetrying ? 'Recargando...' : 'Recargar'}</span>
 							</Button>
 						)}
-						{(currentFolderId && (onScanFolder || onRefreshFolder)) && (
+						{currentFolderId && (onScanFolder || onRefreshFolder) && (
 							<Separator orientation="vertical" className="h-4 mx-1" />
 						)}
 						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">

@@ -3,7 +3,7 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { useUpdateTheme } from '@/lib/api/profiles';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
-import { transformProfile, type ProfileTransformed } from '@/transformers/profile/profile-transformers';
+import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
 import {
 	type PaginatedProfiles,
 	type ProfileExtended,

@@ -7,8 +7,8 @@
 import type { ComponentType } from 'react';
 import type { ConceptBase, ConceptExtended, ConceptWithStats } from '@/types/entities/concept/base';
 import type { EntityWithStats } from '@/types/entities/entity.types';
-import { getEntityStatsType } from '@/types/migration';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { getEntityStatsType } from '@/types/migration';
 
 // Tipos base para los componentes de detalles
 export interface EntityDetailsProps<T extends AnyEntityWithStats = AnyEntityWithStats> {

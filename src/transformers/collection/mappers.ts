@@ -14,18 +14,28 @@ import type { CollectionBase, CollectionWithStats } from '@/types/entities/colle
  * @param counts - Conteos de relaciones (opcional)
  * @returns CollectionWithStats
  */
-export function toCollectionWithStats(collection: CollectionBase, counts?: Record<string, number>): CollectionWithStats {
+export function toCollectionWithStats(
+	collection: CollectionBase,
+	counts?: Record<string, number>
+): CollectionWithStats {
 	// Calcular estadísticas básicas
-	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: number) => sum + (count || 0), 0) : 0;
 	const imageCount = counts?.images || 0;
 	const videoCount = counts?.videos || 0;
 
 	const stats = {
-		totalItems,
 		imageCount,
 		videoCount,
-		totalValue: 0,
-		lastActivity: new Date(),
+		albumCount: counts?.albums || 0,
+		tagCount: counts?.tags || 0,
+		characterCount: counts?.characters || 0,
+		placeCount: counts?.places || 0,
+		worldItemCount: counts?.worldItems || 0,
+		conceptCount: counts?.concepts || 0,
+		promptCount: counts?.prompts || 0,
+		noteCount: counts?.notes || 0,
+		wildcardCount: counts?.wildcards || 0,
+		propertyCount: counts?.properties || 0,
+		groupCount: counts?.groups || 0,
 	};
 
 	return {

@@ -108,7 +108,7 @@ export function mapCreateAlbumDataToDrizzle(data: CreateAlbumInput): DrizzleCrea
 		filters: data.filters || null,
 		shortcut: data.shortcut || null,
 		category: data.category || null,
-		metadata: data.metadata || null,
+		metadata: typeof data.metadata === 'string' ? data.metadata : JSON.stringify(data.metadata) || null,
 		lastImageAddedAt: data.lastImageAddedAt || null,
 		lastVideoAddedAt: data.lastVideoAddedAt || null,
 	};

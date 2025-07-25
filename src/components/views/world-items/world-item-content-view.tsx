@@ -58,10 +58,10 @@ export const WorldItemContentView = memo(function WorldItemContentView() {
 	return (
 		<ContentViewProvider {...contentProps}>
 			<BaseContentView>
-      <div className="p-4">
-        <p>World item content view</p>
-      </div>
-    </BaseContentView>
+				<div className="p-4">
+					<p>World item content view</p>
+				</div>
+			</BaseContentView>
 		</ContentViewProvider>
 	);
 });

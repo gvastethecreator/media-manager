@@ -6,21 +6,10 @@ import {
 	incrementImageDownloadInApi,
 	incrementImageViewInApi,
 } from '@/lib/api/client/stats.client';
-import type { GeneralStats } from '@/types/stats';
 import { serverLogger } from '@/lib/logger';
-
-// Tipo local para ImageStats (equivalente a Drizzle)
-type DrizzleImageStats = {
-	id: string;
-	imageId: string;
-	views: number;
-	downloads: number;
-	favorites: number;
-	lastViewedAt: Date | null;
-	lastDownloadedAt: Date | null;
-	createdAt: Date;
-	updatedAt: Date;
-};
+import type { ImageStatistics } from '@/types/entities/image';
+import type { GeneralStats } from '@/types/stats';
+import { transformSystemStatsToGeneralStats } from '@/types/stats';
 
 const statsLogger = serverLogger.withContext('StatsHook');
 
@@ -43,10 +32,11 @@ export function useStats() {
 		isLoading,
 		isError,
 	} = useQuery<GeneralStats>({
-		queryKey: STATS_QUERY_KEYS.general(),
+		queryKey: ['general-stats'],
 		queryFn: async () => {
 			try {
-				return await getSystemStatsFromApi();
+				const systemStats = await getSystemStatsFromApi();
+				return transformSystemStatsToGeneralStats(systemStats);
 			} catch (error) {
 				statsLogger.error('Error al obtener estadísticas', { error });
 				throw error;
@@ -80,7 +70,7 @@ export function useImageStats(imageId: string) {
 		error,
 		isLoading,
 		isError,
-	} = useQuery<DrizzleImageStats>({
+	} = useQuery({
 		queryKey: STATS_QUERY_KEYS.image(imageId),
 		queryFn: async () => {
 			try {

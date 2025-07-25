@@ -62,7 +62,11 @@ export class ApiClient {
 	/**
 	 * Método privado para realizar peticiones HTTP
 	 */
-	private async request<T>(method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', endpoint: string, data?: unknown): Promise<T> {
+	private async request<T>(
+		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+		endpoint: string,
+		data?: unknown
+	): Promise<T> {
 		// Agregar prefijo /api si no está presente
 		const apiEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
 		const url = `${this.baseURL}${apiEndpoint}`;

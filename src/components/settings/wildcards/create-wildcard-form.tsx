@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
-import { useFieldArray, useForm, type SubmitHandler } from 'react-hook-form';
+import { type SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

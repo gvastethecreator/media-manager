@@ -9,8 +9,8 @@ import {
 	ContextMenuSubTrigger,
 } from '@/components/ui/context-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { FileItem } from '@/lib/contexts/file-context';
 import { cn } from '@/lib/utils';
+import type { FileItem } from '@/types/files';
 import type { ContextMenuAction } from '../types';
 import { SubmenuSearch } from './submenu-search';
 

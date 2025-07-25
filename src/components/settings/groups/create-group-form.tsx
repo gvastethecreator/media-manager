@@ -1,15 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import type { GroupWithStats } from '@/types/entities/group/base';
-import type { CreateGroupInput, UpdateGroupInput } from '@/types/entities/group/types';
-import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+import type { GroupWithStats } from '@/types/entities/group/base';
+import type { CreateGroupInput, UpdateGroupInput } from '@/types/entities/group/types';
 
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({
@@ -34,13 +34,7 @@ interface CreateGroupFormProps {
 	onPreview?: () => void;
 }
 
-export function CreateGroupForm({
-	group,
-	isEditing = false,
-	onSubmit,
-	onCancel,
-	onPreview,
-}: CreateGroupFormProps) {
+export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, onPreview }: CreateGroupFormProps) {
 	// Inicializar el formulario con el tipo correcto
 	const form = useForm<FormData>({
 		resolver: zodResolver(groupFormSchema),
@@ -170,9 +164,7 @@ export function CreateGroupForm({
 							Vista previa
 						</Button>
 					)}
-					<Button type="submit">
-						{isEditing ? 'Guardar cambios' : 'Crear grupo'}
-					</Button>
+					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear grupo'}</Button>
 				</div>
 			</form>
 		</Form>

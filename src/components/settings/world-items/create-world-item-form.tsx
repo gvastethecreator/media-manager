@@ -32,7 +32,10 @@ const worldItemSchema = z.object({
 type WorldItemForm = z.infer<typeof worldItemSchema>;
 
 // Tipo específico para el input de creación del formulario
-type WorldItemFormInput = Pick<WorldItemCreateInput, 'name' | 'description' | 'color' | 'emoji' | 'type' | 'category' | 'rarity' | 'origin' | 'isFavorite'> & {
+type WorldItemFormInput = Pick<
+	WorldItemCreateInput,
+	'name' | 'description' | 'color' | 'emoji' | 'type' | 'category' | 'rarity' | 'origin' | 'isFavorite'
+> & {
 	// Campos opcionales con valores por defecto
 	isPublic?: boolean;
 	totalImages?: number;
@@ -118,7 +121,7 @@ export function CreateWorldItemForm({
 					materials: null,
 					properties: undefined,
 					uses: null,
-      history: null,
+					history: null,
 					notes: undefined,
 					attributes: null,
 					effects: null,
@@ -138,8 +141,8 @@ export function CreateWorldItemForm({
 						notes: 0,
 						wildcards: 0,
 						properties: 0,
-						groups: 0
-					}
+						groups: 0,
+					},
 				};
 				onPreview(previewItem);
 			});
@@ -177,7 +180,7 @@ export function CreateWorldItemForm({
 					const completeItem = {
 						...updatedItem,
 						totalImages: updatedItem._count?.images || 0,
-						totalVideos: updatedItem._count?.videos || 0
+						totalVideos: updatedItem._count?.videos || 0,
 					} as WorldItemComplete;
 					onUpdated(completeItem);
 				}
@@ -344,12 +347,12 @@ export function CreateWorldItemForm({
 					if (isEditing && worldItem) {
 						const updated = await updateWorldItemMutation.mutateAsync({ id: worldItem.id, data });
 						// Convertir WorldItemWithStats a WorldItemComplete
-				const completeUpdated = {
-					...updated,
-					totalImages: updated._count?.images || 0,
-					totalVideos: updated._count?.videos || 0
-				} as WorldItemComplete;
-				onUpdated?.(completeUpdated);
+						const completeUpdated = {
+							...updated,
+							totalImages: updated._count?.images || 0,
+							totalVideos: updated._count?.videos || 0,
+						} as WorldItemComplete;
+						onUpdated?.(completeUpdated);
 					} else {
 						// Crear con valores por defecto
 						const createData: WorldItemCreateInput = {

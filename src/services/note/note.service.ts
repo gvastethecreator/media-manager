@@ -9,7 +9,14 @@ import { db } from '@/lib/drizzle';
 import { notes } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { fromDrizzleNoteWithCounts } from '@/transformers/note/transformer';
+import type {
+	NoteComplete,
+	NoteCreateInput,
+	NoteStatistics,
+	NoteUpdateInput,
+	NoteWithStats,
+} from '@/types/entities/note';
 
 const noteLogger = serverLogger.withContext('NoteService');
 
@@ -283,7 +290,7 @@ const NoteServiceImpl = {
 			} = filters;
 
 			// Construir condiciones WHERE para Drizzle
-		const conditions: any[] = [];
+			const conditions: any[] = [];
 
 			if (category) {
 				conditions.push(eq(notes.category, category));
@@ -302,7 +309,8 @@ const NoteServiceImpl = {
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 			// Determinar orden
-		const orderByClause = sortOrder === 'desc' ? desc(notes[sortBy as keyof typeof notes]) : asc(notes[sortBy as keyof typeof notes]);
+			const orderByClause =
+				sortOrder === 'desc' ? desc(notes[sortBy as keyof typeof notes]) : asc(notes[sortBy as keyof typeof notes]);
 
 			// Ejecutar consultas en paralelo
 			const [drizzleNotes, totalCount] = await Promise.all([
@@ -334,14 +342,8 @@ const NoteServiceImpl = {
 			]);
 
 			const items: NoteWithStats[] = drizzleNotes.map((note: any) => {
-				// Calcular estadísticas básicas de contenido
-				const content = note.content || '';
-				const wordCount = content.trim() ? content.split(/\s+/).length : 0;
-				const characterCount = content.length;
-				const readingTime = Math.ceil(wordCount / 200);
-				const completionScore = Math.min(100, Math.max(0, wordCount / 10 + characterCount / 100));
-
-				return {
+				// Crear un objeto NoteComplete para usar con el transformer
+				const noteComplete: NoteComplete = {
 					...note,
 					name: note.title,
 					description: '',
@@ -356,33 +358,25 @@ const NoteServiceImpl = {
 					completedAt: null,
 					parentId: null,
 					isFavorite: Boolean(note.isFavorite),
-					statistics: {
-						totalItems: 0,
-						totalImages: 0,
-						totalVideos: 0,
-						totalAlbums: 0,
-						totalCollections: 0,
-						totalTags: 0,
-						totalCharacters: 0,
-						totalPlaces: 0,
-						totalWorldItems: 0,
-						totalConcepts: 0,
-						totalPrompts: 0,
-						totalWildcards: 0,
-						totalProperties: 0,
-						totalGroups: 0,
-						wordCount,
-						characterCount,
-						readingTime,
-						completionScore,
-						lastUpdated: note.updatedAt,
+					_count: {
+						images: 0,
+						videos: 0,
+						albums: 0,
+						collections: 0,
+						tags: 0,
+						characters: 0,
+						places: 0,
+						worldItems: 0,
+						concepts: 0,
+						prompts: 0,
+						groups: 0,
+						properties: 0,
+						wildcards: 0,
 					},
-					excerpt: content.substring(0, 150) + (content.length > 150 ? '...' : ''),
-					formattedDate: note.updatedAt.toLocaleDateString(),
-					priorityLabel: NoteServiceImpl.getPriorityLabel(note.priority),
-					statusLabel: NoteServiceImpl.getStatusLabel(note.status),
-					categoryLabel: NoteServiceImpl.getCategoryLabel(note.category),
 				};
+
+				// Usar el transformer para obtener NoteWithStats
+				return fromDrizzleNoteWithCounts(noteComplete);
 			});
 
 			noteLogger.info(`✅ Notas obtenidas: ${items.length}/${totalCount}`);

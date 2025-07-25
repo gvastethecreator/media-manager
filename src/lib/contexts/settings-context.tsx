@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { type CreateProfileInput, type ProfileExtended, type UpdateProfileInput } from '@/services/profile';
 import { profileClient } from '@/services/profile/client';
-import { type CreateProfileInput, type UpdateProfileInput, type ProfileExtended } from '@/services/profile';
 import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
 

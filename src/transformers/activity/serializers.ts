@@ -233,6 +233,10 @@ export function serializeActivity(activity: Activity): Record<string, any> {
 		return {
 			id: activity.id || 'unknown',
 			type: activity.type || 'unknown',
+			entityType: activity.entityType || 'unknown',
+			entityId: activity.entityId || 'unknown',
+			action: activity.action || 'unknown',
+			userId: activity.userId || 'unknown',
 			description: activity.description || 'Error de serialización',
 			createdAt: new Date().toISOString(),
 			_error: true,

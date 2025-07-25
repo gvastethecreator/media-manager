@@ -96,14 +96,12 @@ export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function 
 						<div className="space-y-2">
 							<div className="flex justify-between text-xs">
 								<span>Carpetas: {entity.stats.folderCount || 0}</span>
-								<span>Archivos: {entity.stats.totalItems ? (entity.stats.totalItems - (entity.stats.folderCount || 0)) : 0}</span>
+								<span>
+									Archivos: {entity.stats.totalItems ? entity.stats.totalItems - (entity.stats.folderCount || 0) : 0}
+								</span>
 							</div>
 							<Progress
-								value={
-									entity.stats?.totalItems
-										? ((entity.stats.folderCount || 0) / entity.stats.totalItems) * 100
-										: 0
-								}
+								value={entity.stats?.totalItems ? ((entity.stats.folderCount || 0) / entity.stats.totalItems) * 100 : 0}
 								className="h-2"
 							/>
 						</div>

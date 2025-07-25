@@ -54,17 +54,17 @@ const MemoizedAlbumCard = React.memo(
 		onDelete: (albumId: string) => void;
 	}) => (
 		<div className="relative h-full">
-			<AlbumCard 
+			<AlbumCard
 				album={{
 					...album,
 					metadata: {
 						itemCount: album.stats?.imageCount || 0,
 						imageCount: album.stats?.imageCount || 0,
 						videoCount: album.stats?.videoCount || 0,
-						lastModified: album.updatedAt
-					}
-				}} 
-				onClick={onAlbumClick} 
+						lastModified: album.updatedAt,
+					},
+				}}
+				onClick={onAlbumClick}
 				className="h-full"
 			/>
 			<div className="absolute top-2 right-2 flex gap-1">

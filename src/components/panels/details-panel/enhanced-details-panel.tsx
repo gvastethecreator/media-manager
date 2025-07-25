@@ -48,9 +48,11 @@ const DefaultEntityDetails = memo<{ entity: AnyEntityWithStats; onAction?: (acti
 				<CardContent>
 					<div className="space-y-2 text-sm">
 						<div className="flex justify-between">
-						<span className="text-muted-foreground">Nombre:</span>
-						<span className="font-medium truncate max-w-[60%]">{('name' in entity ? entity.name : undefined) || 'Sin nombre'}</span>
-					</div>
+							<span className="text-muted-foreground">Nombre:</span>
+							<span className="font-medium truncate max-w-[60%]">
+								{('name' in entity ? entity.name : undefined) || 'Sin nombre'}
+							</span>
+						</div>
 						<div className="flex justify-between">
 							<span className="text-muted-foreground">Tipo:</span>
 							<Badge variant="secondary" className="text-xs">
@@ -58,11 +60,11 @@ const DefaultEntityDetails = memo<{ entity: AnyEntityWithStats; onAction?: (acti
 							</Badge>
 						</div>
 						{'createdAt' in entity && entity.createdAt && (
-						<div className="flex justify-between">
-							<span className="text-muted-foreground">Creado:</span>
-							<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
-						</div>
-					)}
+							<div className="flex justify-between">
+								<span className="text-muted-foreground">Creado:</span>
+								<span className="font-medium text-xs">{new Date(entity.createdAt).toLocaleDateString()}</span>
+							</div>
+						)}
 					</div>
 				</CardContent>
 			</Card>
@@ -71,102 +73,103 @@ const DefaultEntityDetails = memo<{ entity: AnyEntityWithStats; onAction?: (acti
 );
 
 // Componente para mostrar múltiples elementos seleccionados
-const MultipleSelectionDetails = memo<{ entities: AnyEntityWithStats[]; onAction?: (action: string, data?: any) => void }>(
-	function MultipleSelectionDetails({ entities, onAction }) {
-		const entityCounts = useMemo(() => {
-			const counts: Record<string, number> = {};
-			for (const entity of entities) {
-				const type = getEntityStatsType(entity);
-				if (type === null) continue;
-				counts[type] = (counts[type] || 0) + 1;
+const MultipleSelectionDetails = memo<{
+	entities: AnyEntityWithStats[];
+	onAction?: (action: string, data?: any) => void;
+}>(function MultipleSelectionDetails({ entities, onAction }) {
+	const entityCounts = useMemo(() => {
+		const counts: Record<string, number> = {};
+		for (const entity of entities) {
+			const type = getEntityStatsType(entity);
+			if (type === null) continue;
+			counts[type] = (counts[type] || 0) + 1;
+		}
+		return counts;
+	}, [entities]);
+
+	const totalSize = useMemo(() => {
+		return entities.reduce((acc, entity) => {
+			if ('size' in entity && typeof entity.size === 'number') {
+				return acc + entity.size;
 			}
-			return counts;
-		}, [entities]);
+			return acc;
+		}, 0);
+	}, [entities]);
 
-		const totalSize = useMemo(() => {
-			return entities.reduce((acc, entity) => {
-				if ('size' in entity && typeof entity.size === 'number') {
-					return acc + entity.size;
-				}
-				return acc;
-			}, 0);
-		}, [entities]);
-
-		return (
-			<div className="space-y-4">
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-sm">Selección múltiple ({entities.length} elementos)</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-3">
-							{/* Resumen por tipos */}
-							<div className="space-y-2">
-								<h4 className="text-xs font-medium text-muted-foreground">Por tipo:</h4>
-								{Object.entries(entityCounts).map(([type, count]) => (
-									<div key={type} className="flex justify-between text-sm">
-										<span className="capitalize">{type}:</span>
-										<Badge variant="outline" className="text-xs">
-											{count}
-										</Badge>
-									</div>
-								))}
-							</div>
-
-							{/* Tamaño total si aplica */}
-							{totalSize > 0 && (
-								<>
-									<Separator />
-									<div className="flex justify-between text-sm">
-										<span className="text-muted-foreground">Tamaño total:</span>
-										<span className="font-medium">{(totalSize / (1024 * 1024)).toFixed(1)} MB</span>
-									</div>
-								</>
-							)}
-
-							{/* Acciones en lote */}
-							<Separator />
-							<div className="grid grid-cols-2 gap-2">
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => onAction?.('bulk-tag', { entities })}
-									className="text-xs"
-								>
-									Etiquetar todo
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => onAction?.('bulk-move', { entities })}
-									className="text-xs"
-								>
-									Mover todo
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => onAction?.('bulk-favorite', { entities })}
-									className="text-xs"
-								>
-									Favoritos
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => onAction?.('bulk-delete', { entities })}
-									className="text-xs text-destructive"
-								>
-									Eliminar
-								</Button>
-							</div>
+	return (
+		<div className="space-y-4">
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-sm">Selección múltiple ({entities.length} elementos)</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="space-y-3">
+						{/* Resumen por tipos */}
+						<div className="space-y-2">
+							<h4 className="text-xs font-medium text-muted-foreground">Por tipo:</h4>
+							{Object.entries(entityCounts).map(([type, count]) => (
+								<div key={type} className="flex justify-between text-sm">
+									<span className="capitalize">{type}:</span>
+									<Badge variant="outline" className="text-xs">
+										{count}
+									</Badge>
+								</div>
+							))}
 						</div>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
-);
+
+						{/* Tamaño total si aplica */}
+						{totalSize > 0 && (
+							<>
+								<Separator />
+								<div className="flex justify-between text-sm">
+									<span className="text-muted-foreground">Tamaño total:</span>
+									<span className="font-medium">{(totalSize / (1024 * 1024)).toFixed(1)} MB</span>
+								</div>
+							</>
+						)}
+
+						{/* Acciones en lote */}
+						<Separator />
+						<div className="grid grid-cols-2 gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onAction?.('bulk-tag', { entities })}
+								className="text-xs"
+							>
+								Etiquetar todo
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onAction?.('bulk-move', { entities })}
+								className="text-xs"
+							>
+								Mover todo
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onAction?.('bulk-favorite', { entities })}
+								className="text-xs"
+							>
+								Favoritos
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onAction?.('bulk-delete', { entities })}
+								className="text-xs text-destructive"
+							>
+								Eliminar
+							</Button>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+		</div>
+	);
+});
 
 // Componente principal del panel de detalles mejorado
 export const EnhancedDetailsPanel = memo(function EnhancedDetailsPanel() {

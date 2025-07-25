@@ -2,7 +2,7 @@ import { Library } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
-import { useCollectionImages, useRemoveImageFromCollection, useAddImageToCollection } from '@/lib/api/collections';
+import { useAddImageToCollection, useCollectionImages, useRemoveImageFromCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { EntityWithStats } from '@/types/entities/entity.types';
@@ -126,13 +126,13 @@ export function CollectionContentView() {
 	}
 
 	return (
-			<ContentViewProvider {...contentProps}>
-				<BaseContentView>
-					{/* Collection content will be added here */}
-					<div className="p-4">
-						<p>Contenido de la colección se mostrará aquí</p>
-					</div>
-				</BaseContentView>
-			</ContentViewProvider>
-		);
+		<ContentViewProvider {...contentProps}>
+			<BaseContentView>
+				{/* Collection content will be added here */}
+				<div className="p-4">
+					<p>Contenido de la colección se mostrará aquí</p>
+				</div>
+			</BaseContentView>
+		</ContentViewProvider>
+	);
 }

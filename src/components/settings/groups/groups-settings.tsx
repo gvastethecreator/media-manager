@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Toggle } from '@/components/ui/toggle';
 import { useCreateGroup, useDeleteGroup, useGroups, useUpdateGroup } from '@/lib/api/groups';
 import { toastService } from '@/lib/ui/toast';
-import type { CreateGroupInput, UpdateGroupInput, GroupWithStats } from '@/types/entities/group';
+import type { CreateGroupInput, GroupWithStats, UpdateGroupInput } from '@/types/entities/group';
 import { GroupSortCriteria } from '@/types/entities/group';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
