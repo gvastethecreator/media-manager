@@ -6,15 +6,13 @@
  */
 
 import type {
-	NoteCategory,
 	NoteComplete,
 	NoteCreateInput,
-	NotePriority,
 	NoteStatistics,
-	NoteStatus,
 	NoteUpdateInput,
 	NoteWithStats,
-} from '@/types/entities/note';
+} from '../../types/entities/note';
+import { NoteCategory, NotePriority, NoteStatus } from '../../types/entities/note';
 
 /**
  * 📝 Convierte datos de Drizzle con conteos a NoteWithStats optimizado
@@ -190,7 +188,7 @@ function formatDate(date: Date): string {
  */
 function getPriorityLabel(priority: number | null): string {
 	if (priority === null || priority === undefined) return 'Sin definir';
-	
+
 	switch (priority) {
 		case NotePriority.HIGHEST:
 			return 'Crítica';
@@ -212,7 +210,7 @@ function getPriorityLabel(priority: number | null): string {
  */
 function getStatusLabel(status: string | null): string {
 	if (!status) return 'Sin estado';
-	
+
 	switch (status) {
 		case NoteStatus.ACTIVE:
 			return 'Activa';
@@ -234,7 +232,7 @@ function getStatusLabel(status: string | null): string {
  */
 function getCategoryLabel(category: string | null): string {
 	if (!category) return 'Sin categoría';
-	
+
 	switch (category) {
 		case NoteCategory.GENERAL:
 			return 'General';

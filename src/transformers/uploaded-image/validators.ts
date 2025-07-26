@@ -6,6 +6,11 @@
  * @updated 2025-01-27
  */
 
+import type {
+	UploadedImageBase,
+	UploadedImageCreateInput,
+	UploadedImageUpdateInput,
+} from '../../types/entities/uploaded-image';
 import {
 	ZodUploadedImageCreateSchema,
 	type ZodUploadedImageCreateType,

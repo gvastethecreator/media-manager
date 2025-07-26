@@ -106,7 +106,7 @@ export interface ServerImage {
 	thumbnailSize: number | null;
 	thumbnailWidth: number | null;
 	thumbnailHeight: number | null;
-	isPublic?: boolean; // Campo opcional - no existe en todos los modelos
+
 	isFavorite: boolean;
 	folderId: string;
 	createdAt: Date;
@@ -150,7 +150,7 @@ export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
 			thumbnailError: null,
 			thumbnailErrorAt: null,
 			thumbnailOptimizedAt: null,
-			isPublic: image.isPublic ?? false,
+
 			isFavorite: image.isFavorite ?? false,
 			folderId: image.folderId,
 			createdAt: image.createdAt,

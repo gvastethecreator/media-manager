@@ -54,7 +54,7 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 				emoji: worldItems.emoji,
 				color: worldItems.color,
 				category: worldItems.category,
-				isPublic: worldItems.isPublic,
+
 				isFavorite: worldItems.isFavorite,
 				totalImages: worldItems.totalImages,
 				totalVideos: worldItems.totalVideos,
@@ -80,7 +80,6 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 		const transformedWorldItems = drizzleWorldItems.map((rawWorldItem: (typeof drizzleWorldItems)[0]) => ({
 			...rawWorldItem,
 			isFavorite: Boolean(rawWorldItem.isFavorite),
-			isPublic: Boolean(rawWorldItem.isPublic),
 		}));
 
 		// Transformar a WorldItemWithStats
@@ -211,7 +210,7 @@ export async function createWorldItem(input: WorldItemCreateInput): Promise<Worl
 				emoji: input.emoji || '🌍',
 				color: input.color || '#3b82f6',
 				category: input.category || null,
-				isPublic: input.isPublic || false,
+
 				isFavorite: input.isFavorite || false,
 				totalImages: input.totalImages || 0,
 				totalVideos: input.totalVideos || 0,
@@ -238,7 +237,6 @@ export async function createWorldItem(input: WorldItemCreateInput): Promise<Worl
 		const complete: WorldItemComplete = {
 			...worldItem,
 			isFavorite: Boolean(worldItem.isFavorite),
-			isPublic: Boolean(worldItem.isPublic),
 		};
 
 		// Emitir eventos
@@ -274,7 +272,7 @@ export async function updateWorldItem(id: string, input: WorldItemUpdateInput): 
 		if (input.emoji !== undefined) updateData.emoji = input.emoji;
 		if (input.color !== undefined) updateData.color = input.color;
 		if (input.category !== undefined) updateData.category = input.category;
-		if (input.isPublic !== undefined) updateData.isPublic = input.isPublic;
+
 		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
 		if (input.totalImages !== undefined) updateData.totalImages = input.totalImages;
 		if (input.totalVideos !== undefined) updateData.totalVideos = input.totalVideos;
@@ -303,7 +301,6 @@ export async function updateWorldItem(id: string, input: WorldItemUpdateInput): 
 		const complete: WorldItemComplete = {
 			...worldItem,
 			isFavorite: Boolean(worldItem.isFavorite),
-			isPublic: Boolean(worldItem.isPublic),
 		};
 
 		// Emitir eventos

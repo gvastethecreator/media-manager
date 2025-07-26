@@ -103,7 +103,6 @@ export type CreateImageInput = {
 	hash: string;
 	folderId: string;
 	metadata?: Record<string, string | number | boolean | string[] | null | undefined>;
-	isPublic?: boolean;
 };
 
 export type ImageProcessingOptions = {
@@ -260,7 +259,7 @@ class ImageService {
 					hash: data.hash,
 					metadata: data.metadata ? JSON.stringify(data.metadata) : null,
 					folderId: data.folderId,
-					isPublic: data.isPublic || false,
+
 					isFavorite: false,
 					createdAt: new Date(),
 					updatedAt: new Date(),
@@ -753,17 +752,17 @@ class ImageService {
 				.limit(1);
 
 			return {
-			total: totalImages[0]?.count || 0,
-			processed: processedImages[0]?.count || 0,
-			failed: erroredImages[0]?.count || 0,
-			pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
-			totalFiles: totalImages[0]?.count || 0,
-			totalSize: Number(totalThumbnailSize[0].sum || 0),
-			processedSize: Number(totalThumbnailSize[0].sum || 0),
-			errors: [],
-			averageProcessingTime: 0,
-			lastProcessedAt: lastProcessedImage[0]?.date || undefined,
-		};
+				total: totalImages[0]?.count || 0,
+				processed: processedImages[0]?.count || 0,
+				failed: erroredImages[0]?.count || 0,
+				pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
+				totalFiles: totalImages[0]?.count || 0,
+				totalSize: Number(totalThumbnailSize[0].sum || 0),
+				processedSize: Number(totalThumbnailSize[0].sum || 0),
+				errors: [],
+				averageProcessingTime: 0,
+				lastProcessedAt: lastProcessedImage[0]?.date || undefined,
+			};
 		} catch (error) {
 			imageLogger.error('Error al obtener estadísticas de miniaturas:', error);
 			throw toServiceError(error, {

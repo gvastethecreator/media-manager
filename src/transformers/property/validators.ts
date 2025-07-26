@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import type { PropertyBase, PropertyCreateInput, PropertyUpdateInput } from '../../types/entities/property';
 
 export const PropertyCreateSchema = z.object({
 	key: z.string().min(1).max(100),

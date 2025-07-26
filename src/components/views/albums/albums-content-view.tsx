@@ -58,9 +58,11 @@ const MemoizedAlbumCard = React.memo(
 				album={{
 					...album,
 					metadata: {
-						itemCount: album.stats?.imageCount || 0,
+						itemCount: (album.stats?.imageCount || 0) + (album.stats?.videoCount || 0),
 						imageCount: album.stats?.imageCount || 0,
 						videoCount: album.stats?.videoCount || 0,
+						coverImageUrl: album.featuredImage || undefined,
+						thumbnailUrls: [],
 						lastModified: album.updatedAt,
 					},
 				}}

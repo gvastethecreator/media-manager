@@ -17,7 +17,7 @@ export type {
 } from './base';
 
 // --- 📚 Tipos Adicionales ---
-export type { PlaceSearchOptions } from './types';
+export type { PlaceFilters, PlaceSearchOptions } from './types';
 
 // --- 💀 Tipos Legacy (Obsoletos) ---
 // @deprecated Estos tipos se mantienen por retrocompatibilidad y serán eliminados.

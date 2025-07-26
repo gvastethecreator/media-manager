@@ -8,7 +8,7 @@
 /**
  * 📁 Tipo base para una carpeta - Campos principales
  */
-import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
+import type { EntityBase, EntityWithStats } from '../entity.types';
 
 /**
  * 📁 Tipo base para una carpeta - Campos principales

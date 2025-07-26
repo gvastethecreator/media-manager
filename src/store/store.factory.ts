@@ -8,6 +8,15 @@ export interface StoreOptions<T> {
 	logger?: typeof clientLogger;
 	persistOptions?: PersistOptions<T, Partial<T>>;
 	devtoolOptions?: DevtoolsOptions;
+	initialState?: Partial<T>;
+	actions?: {
+		beforeCreate?: (data: any) => Promise<any> | any;
+		afterCreate?: (item: any) => Promise<void> | void;
+		beforeUpdate?: (id: string, data: any) => Promise<any> | any;
+		afterUpdate?: (item: any) => Promise<void> | void;
+		beforeDelete?: (id: string) => Promise<void> | void;
+		afterDelete?: (id: string) => Promise<void> | void;
+	};
 }
 
 /**
@@ -30,8 +39,16 @@ export function createStore<T extends object>(createFn: StateCreator<T, [], []>,
 	// Aplicar middleware en orden específico:
 	// 1. persist - para guardar el state en localStorage
 	// 2. devtools - para conectar con Redux DevTools
+	if (options.persistOptions) {
+		return create<T>()(
+			devtools(persist(createFn, options.persistOptions), {
+				name: storeName,
+				...options.devtoolOptions,
+			})
+		);
+	}
 	return create<T>()(
-		devtools(options.persistOptions ? persist(createFn, options.persistOptions) : createFn, {
+		devtools(createFn, {
 			name: storeName,
 			...options.devtoolOptions,
 		})

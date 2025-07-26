@@ -28,6 +28,4 @@ export type {
 } from './types';
 
 // --- Enums ---
-export {
-	VideoViewMode,
-} from './types';
+export { VideoViewMode } from './types';

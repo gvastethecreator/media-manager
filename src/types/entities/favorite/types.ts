@@ -34,6 +34,7 @@ export interface FavoriteBase {
 	entityId: string;
 	entityType: FavoriteEntityType;
 	userId: string | null;
+	profileId: string | null;
 	addedAt: Date;
 	notes: string | null;
 	category: string | null;

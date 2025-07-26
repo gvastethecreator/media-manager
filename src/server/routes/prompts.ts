@@ -14,7 +14,7 @@ const legacyPromptService = new PromptService(); // Para métodos legacy
 const PromptFiltersSchema = z.object({
 	search: z.string().optional(),
 	category: z.string().nullable().optional(),
-	isPublic: z.boolean().optional(),
+
 	isFavorite: z.boolean().optional(),
 	limit: z.number().int().positive().max(100).default(50).optional(),
 	offset: z.number().int().min(0).default(0).optional(),
@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
 
 		// Construir condiciones WHERE
 		if (filters.category) conditions.push(eq(prompts.category, filters.category));
-		if (filters.isPublic !== undefined) conditions.push(eq(prompts.isPublic, filters.isPublic));
+
 		if (filters.isFavorite !== undefined) conditions.push(eq(prompts.isFavorite, filters.isFavorite));
 
 		// Búsqueda por texto
@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {
 					emoji: prompts.emoji,
 					color: prompts.color,
 					category: prompts.category,
-					isPublic: prompts.isPublic,
+
 					isFavorite: prompts.isFavorite,
 					totalImages: prompts.totalImages,
 					totalVideos: prompts.totalVideos,
@@ -162,7 +162,7 @@ router.get('/:id', async (req, res) => {
 				emoji: prompts.emoji,
 				color: prompts.color,
 				category: prompts.category,
-				isPublic: prompts.isPublic,
+
 				isFavorite: prompts.isFavorite,
 				totalImages: prompts.totalImages,
 				totalVideos: prompts.totalVideos,

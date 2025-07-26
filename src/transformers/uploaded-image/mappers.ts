@@ -5,7 +5,13 @@
  
  */
 
-import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '@/types/entities/uploaded-image/types';
+import { calculateCompleteness } from '../../lib/utils/stats';
+import type {
+	UploadedImageBase,
+	UploadedImageStatistics,
+	UploadedImageWithStats,
+} from '../../types/entities/uploaded-image';
+import type { UploadedImageCreateInput, UploadedImageUpdateInput } from '../../types/entities/uploaded-image/types';
 
 // Tipos de datos para Drizzle
 type DrizzleUploadedImageCreateInput = {

@@ -5,9 +5,9 @@
  
  */
 
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { File3DBase, File3DWithStats } from '@/types/entities/file3d';
+import type { File3DBase, File3DStatistics, File3DWithStats } from '@/types/entities/file3d';
 
 const logger = serverLogger.withContext('File3DTransformer');
 
@@ -24,13 +24,13 @@ export function fromDrizzleFile3D(drizzleFile3D: File3DBase): File3DWithStats {
 	}
 
 	try {
-		// TODO: Implementar la lógica real para calcular estas estadísticas
-		const stats = {
-			polygonCount: 0,
-			textureSize: 0,
-			format: drizzleFile3D.format,
-			vertexCount: 0,
-			materialCount: 0,
+		// Calcular estadísticas basadas en los datos disponibles
+		const stats: File3DStatistics = {
+			polygonCount: drizzleFile3D.faces || 0,
+			textureSize: 0, // TODO: Calcular basado en texturas
+			format: drizzleFile3D.format || 'unknown',
+			vertexCount: drizzleFile3D.vertices || 0,
+			materialCount: drizzleFile3D.materials || 0,
 		};
 
 		const file3DWithStats: File3DWithStats = {

@@ -6,19 +6,19 @@
  * Última actualización: 2025-01-27
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
+import { clientLogger } from '../../lib/logger/client-logger';
 
 const logger = clientLogger.withContext('ImageTransformer');
 
-import { formatFileSize } from '@/lib/utils/format.utils';
+import { formatFileSize } from '../../lib/utils/format.utils';
 import type {
 	ImageCreateInput,
 	ImageMetadata,
 	ImageStatistics,
 	ImageUpdateInput,
 	ImageWithStats,
-} from '@/types/entities/image';
-import type { DrizzleImageWithCounts } from '@/types/entities/image/base';
+} from '../../types/entities/image';
+import type { DrizzleImageWithCounts } from '../../types/entities/image/base';
 
 /**
  * 🔄 Transforma DrizzleImageWithCounts a ImageWithStats
@@ -32,10 +32,10 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
 
 		const imageWithStats: ImageWithStats = {
 			...drizzleImage,
-			entityType: 'image',
+			entityType: 'image' as const,
 			stats: statistics,
-			thumbnailUrl: drizzleImage.thumbnail || '',
-			fullUrl: drizzleImage.path,
+			thumbnailUrl: drizzleImage.thumbnail ? `/api/images/${drizzleImage.id}/thumbnail` : '',
+			fullUrl: `/api/images/${drizzleImage.id}/full`,
 			tags: drizzleImage.tags || [],
 		};
 

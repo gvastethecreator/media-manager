@@ -13,12 +13,7 @@ export {
 	toFavoriteWithStatsList,
 } from './mappers';
 // --- Schema de Drizzle ---
-export {
-	type FavoriteInsert,
-	type FavoriteSchema,
-	favoriteEntityTypeEnum,
-	favoritesTable,
-} from './schema';
+// TODO: Implementar schema cuando sea necesario
 // --- Serializadores ---
 export {
 	serializeFavoriteBase,

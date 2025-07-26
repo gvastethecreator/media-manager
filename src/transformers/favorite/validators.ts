@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { FavoriteEntityType } from '@/types/entities/favorite';
+import { FavoriteEntityType } from '../../types/entities/favorite';
 
 /**
  * ⭐ Esquema base para validar favoritos.

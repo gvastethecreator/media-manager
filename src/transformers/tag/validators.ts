@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { TagBase } from '@/types/entities/tag';
+import type { TagBase } from '../../types/entities/tag';
 
 const logger = serverLogger.withContext('TagValidators');
 

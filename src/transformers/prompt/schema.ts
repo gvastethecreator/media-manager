@@ -14,7 +14,7 @@ export const PromptBaseSchema = z.object({
 	category: z.string().max(100).nullable(),
 	tags: z.array(z.string()),
 	parameters: z.any(),
-	isPublic: z.boolean(),
+
 	isFavorite: z.boolean(),
 	createdAt: z.date(),
 	updatedAt: z.date(),

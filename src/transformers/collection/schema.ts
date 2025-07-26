@@ -17,7 +17,7 @@ export const CollectionBaseSchema = z.object({
 	emoji: z.string().nullable(),
 	color: z.string().nullable(),
 	featuredImage: z.string().nullable(),
-	isPublic: z.boolean().default(false),
+
 	isFavorite: z.boolean().default(false),
 	totalImages: z.number().int().min(0).default(0),
 	totalVideos: z.number().int().min(0).default(0),
@@ -93,7 +93,7 @@ export const CollectionCreateSchema = z.object({
 	emoji: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
-	isPublic: z.boolean().optional(),
+
 	isFavorite: z.boolean().optional(),
 	parentId: z.string().nullable().optional(),
 });

@@ -27,7 +27,7 @@ export const useGroupStore = create<GroupStore>()(
 					expandedIds: state.expandedIds,
 					sortBy: state.sortBy,
 				}),
-			},
+			}
 		),
 		{ name: 'GroupStore' }
 	)

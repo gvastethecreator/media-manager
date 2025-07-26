@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { ThumbnailQuality } from '@/types/entities/thumbnail/base';
+import { ThumbnailQuality } from '../../types/entities/thumbnail/base';
 
 /**
  * Schema Zod para ThumbnailBase

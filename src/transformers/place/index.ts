@@ -6,6 +6,8 @@
  
  */
 
+// Exportar funciones de extensión desde types
+export { extendPlace, extendPlaces, type PlaceFilters } from '../../types/entities/place/types';
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
 export * from './schema';

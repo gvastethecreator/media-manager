@@ -40,7 +40,7 @@ const AlbumCreateSchema = z.object({
 	emoji: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
-	isPublic: z.boolean().default(false),
+
 	isFavorite: z.boolean().default(false),
 	totalImages: z.number().int().min(0).default(0),
 	totalVideos: z.number().int().min(0).default(0),
@@ -60,7 +60,7 @@ const AlbumUpdateSchema = z.object({
 	emoji: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
-	isPublic: z.boolean().optional(),
+
 	isFavorite: z.boolean().optional(),
 	totalImages: z.number().int().min(0).optional(),
 	totalVideos: z.number().int().min(0).optional(),
@@ -221,7 +221,7 @@ const createAlbumHandler = async (req: Request, res: Response) => {
 			name: albums.name,
 			description: albums.description,
 			color: albums.color,
-			isPublic: albums.isPublic,
+
 			createdAt: albums.createdAt,
 			updatedAt: albums.updatedAt,
 			featuredImage: albums.featuredImage,
@@ -273,7 +273,7 @@ const updateAlbumHandler = async (req: Request, res: Response) => {
 			name: albums.name,
 			description: albums.description,
 			color: albums.color,
-			isPublic: albums.isPublic,
+
 			createdAt: albums.createdAt,
 			updatedAt: albums.updatedAt,
 			featuredImage: albums.featuredImage,

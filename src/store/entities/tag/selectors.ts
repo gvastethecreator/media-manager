@@ -94,14 +94,17 @@ export const useFilteredAndSortedTags = () => {
  * Agrupa tags por categoría
  */
 const groupTagsByCategory = (tags: TagWithStats[]) => {
-	return tags.reduce((acc, tag) => {
-		const category = tag.category || 'general';
-		if (!acc[category]) {
-			acc[category] = [];
-		}
-		acc[category].push(tag);
-		return acc;
-	}, {} as Record<string, TagWithStats[]>);
+	return tags.reduce(
+		(acc, tag) => {
+			const category = tag.category || 'general';
+			if (!acc[category]) {
+				acc[category] = [];
+			}
+			acc[category].push(tag);
+			return acc;
+		},
+		{} as Record<string, TagWithStats[]>
+	);
 };
 
 /**

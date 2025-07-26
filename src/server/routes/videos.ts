@@ -27,7 +27,7 @@ const VideoCreateSchema = z.object({
 	thumbnailSize: z.number().int().min(0).nullable().optional(),
 	thumbnailWidth: z.number().int().min(0).nullable().optional(),
 	thumbnailHeight: z.number().int().min(0).nullable().optional(),
-	isPublic: z.boolean().optional(),
+
 	isFavorite: z.boolean().optional(),
 	isHidden: z.boolean().optional(),
 	folderId: z.string().min(1),
@@ -80,7 +80,7 @@ router.post('/', async (req, res) => {
 			thumbnailSize: rawData.thumbnailSize ?? null,
 			thumbnailWidth: rawData.thumbnailWidth ?? null,
 			thumbnailHeight: rawData.thumbnailHeight ?? null,
-			isPublic: rawData.isPublic ?? false,
+
 			isFavorite: rawData.isFavorite ?? false,
 			isHidden: rawData.isHidden ?? false,
 		};

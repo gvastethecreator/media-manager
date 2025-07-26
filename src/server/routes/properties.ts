@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { PropertyService } from '@/services/property/property.service';
 
 const propertyService = new PropertyService();
+
 import { toPropertyWithStats } from '@/transformers/property';
 
 const router = Router();

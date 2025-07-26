@@ -6,7 +6,7 @@
  
  */
 
-import type { Album, AlbumStatistics, AlbumWithStats, AlbumCreateInput } from '@/types/entities/album/index';
+import type { Album, AlbumCreateInput, AlbumStatistics, AlbumWithStats } from '../../types/entities/album/index';
 
 /**
  * Tipo para datos de álbum que vienen de Drizzle con relaciones
@@ -18,7 +18,7 @@ type DrizzleAlbumWithRelations = {
 	emoji: string | null;
 	color: string | null;
 	featuredImage: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -55,7 +55,7 @@ type DrizzleCreateAlbumData = {
 	emoji?: string | null;
 	color?: string | null;
 	featuredImage?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -96,21 +96,21 @@ type DrizzleFindManyArgs = {
 export function mapCreateAlbumDataToDrizzle(data: AlbumCreateInput): DrizzleCreateAlbumData {
 	return {
 		name: data.name,
-		description: data.description || null,
-		emoji: data.emoji || null,
-		color: data.color || null,
-		featuredImage: data.featuredImage || null,
-		isPublic: data.isPublic || false,
-		isFavorite: data.isFavorite || false,
-		totalImages: data.totalImages || 0,
-		totalVideos: data.totalVideos || 0,
-		totalSize: data.totalSize || 0,
-		filters: data.filters || null,
-		shortcut: data.shortcut || null,
-		category: data.category || null,
-		metadata: typeof data.metadata === 'string' ? data.metadata : JSON.stringify(data.metadata) || null,
-		lastImageAddedAt: data.lastImageAddedAt || null,
-		lastVideoAddedAt: data.lastVideoAddedAt || null,
+		description: data.description ?? null,
+		emoji: data.emoji ?? null,
+		color: data.color ?? null,
+		featuredImage: data.featuredImage ?? null,
+
+		isFavorite: data.isFavorite ?? false,
+		totalImages: 0,
+		totalVideos: 0,
+		totalSize: 0,
+		filters: data.filters ?? null,
+		shortcut: data.shortcut ?? null,
+		category: data.category ?? null,
+		metadata: null,
+		lastImageAddedAt: null,
+		lastVideoAddedAt: null,
 	};
 }
 
@@ -204,7 +204,7 @@ export function toAlbumWithStats(drizzleAlbum: DrizzleAlbumWithRelations): Album
 		emoji: drizzleAlbum.emoji,
 		color: drizzleAlbum.color,
 		featuredImage: drizzleAlbum.featuredImage,
-		isPublic: drizzleAlbum.isPublic,
+
 		isFavorite: drizzleAlbum.isFavorite,
 		totalImages: drizzleAlbum.totalImages,
 		totalVideos: drizzleAlbum.totalVideos,

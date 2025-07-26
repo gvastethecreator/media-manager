@@ -390,7 +390,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 			description: parsed.description || null,
 			content: parsed.content,
 			category: parsed.category || null,
-			isPublic: parsed.isPublic || false,
+
 			isFavorite: parsed.isFavorite || false,
 			totalImages: 0,
 			totalVideos: 0,

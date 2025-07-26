@@ -15,7 +15,7 @@ type DrizzleAudio = {
 	channels?: number | null;
 	metadata?: string | null; // JSON
 	thumbnail?: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	folderId: string;
 	createdAt: Date;

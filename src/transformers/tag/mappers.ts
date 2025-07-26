@@ -5,8 +5,8 @@
  
  */
 
-import { calculateCompleteness } from '@/lib/utils/transformers';
-import { TagStatistics, TagWithCounts, TagWithStats } from '@/types/entities/tag';
+import { calculateCompleteness } from '../../lib/utils/stats';
+import type { TagBase, TagStatistics, TagWithStats } from '../../types/entities/tag';
 
 /**
  * Convierte un objeto Tag de Drizzle (con conteos) a un objeto TagWithStats.
@@ -19,8 +19,9 @@ export function toTagWithStats(tagWithCounts: TagWithCounts): TagWithStats {
 	const { _count, ...baseTag } = tagWithCounts;
 
 	// Calcular estadísticas basadas en los conteos
-	const totalRelations = Object.values(_count).reduce((sum, count) => sum + count, 0);
-	const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
+	const countValues = Object.values(_count) as number[];
+	const totalRelations = countValues.reduce((sum: number, count: number) => sum + count, 0);
+	const usageDiversity = countValues.filter((count: number) => count > 0).length;
 	const popularity = totalRelations * (usageDiversity / Object.keys(_count).length);
 	const completenessScore = calculateCompleteness(baseTag);
 

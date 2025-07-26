@@ -97,25 +97,25 @@ class UploadedImagesService {
 				});
 
 			// Usar el transformer para convertir el registro a la respuesta
-		const entity = fromDB(image);
-		const result = {
-			id: entity.id,
-			name: entity.name,
-			path: entity.path,
-			type: entity.type as UploadedImageType,
-			category: entity.category || '',
-			hash: entity.hash,
-			imageId: entity.imageId,
-			size: entity.size,
-			width: entity.width || 0,
-			height: entity.height || 0,
-			metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
-			dimensions: entity.dimensions,
-			url: entity.url,
-			thumbnailUrl: entity.thumbnailUrl,
-			createdAt: entity.createdAt,
-			updatedAt: entity.updatedAt,
-		} as UploadedImageResult;
+			const entity = fromDB(image);
+			const result = {
+				id: entity.id,
+				name: entity.name,
+				path: entity.path,
+				type: entity.type as UploadedImageType,
+				category: entity.category || '',
+				hash: entity.hash,
+				imageId: entity.imageId,
+				size: entity.size,
+				width: entity.width || 0,
+				height: entity.height || 0,
+				metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
+				dimensions: entity.dimensions,
+				url: entity.url,
+				thumbnailUrl: entity.thumbnailUrl,
+				createdAt: entity.createdAt,
+				updatedAt: entity.updatedAt,
+			} as UploadedImageResult;
 
 			// Emitir evento de creación
 			await this.emitEvent(this.EVENTS.IMAGE_CREATED, result);
@@ -234,25 +234,25 @@ class UploadedImagesService {
 				});
 
 			// Usar el transformer para convertir el registro a la respuesta
-		const entity = fromDB(image);
-		const result = {
-			id: entity.id,
-			name: entity.name,
-			path: entity.path,
-			type: entity.type as UploadedImageType,
-			category: entity.category || '',
-			hash: entity.hash,
-			imageId: entity.imageId,
-			size: entity.size,
-			width: entity.width || 0,
-			height: entity.height || 0,
-			metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
-			dimensions: entity.dimensions,
-			url: entity.url,
-			thumbnailUrl: entity.thumbnailUrl,
-			createdAt: entity.createdAt,
-			updatedAt: entity.updatedAt,
-		} as UploadedImageResult;
+			const entity = fromDB(image);
+			const result = {
+				id: entity.id,
+				name: entity.name,
+				path: entity.path,
+				type: entity.type as UploadedImageType,
+				category: entity.category || '',
+				hash: entity.hash,
+				imageId: entity.imageId,
+				size: entity.size,
+				width: entity.width || 0,
+				height: entity.height || 0,
+				metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
+				dimensions: entity.dimensions,
+				url: entity.url,
+				thumbnailUrl: entity.thumbnailUrl,
+				createdAt: entity.createdAt,
+				updatedAt: entity.updatedAt,
+			} as UploadedImageResult;
 
 			// Emitir evento de actualización
 			await this.emitEvent(this.EVENTS.IMAGE_UPDATED, result);
@@ -419,28 +419,28 @@ class UploadedImagesService {
 				.offset((page - 1) * pageSize);
 
 			// Transformar los resultados usando el transformer
-		const items = rawImages.map((image: (typeof rawImages)[0]) => {
-			const entity = fromDB(image);
-			// Mapear UploadedImageExtended a UploadedImageResult
-			return {
-				id: entity.id,
-				name: entity.name,
-				path: entity.path,
-				type: entity.type as UploadedImageType,
-				category: entity.category || '',
-				hash: entity.hash,
-				imageId: entity.imageId,
-				size: entity.size,
-				width: entity.width || 0,
-				height: entity.height || 0,
-				metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
-				dimensions: entity.dimensions,
-				url: entity.url,
-				thumbnailUrl: entity.thumbnailUrl,
-				createdAt: entity.createdAt,
-				updatedAt: entity.updatedAt,
-			} as UploadedImageResult;
-		});
+			const items = rawImages.map((image: (typeof rawImages)[0]) => {
+				const entity = fromDB(image);
+				// Mapear UploadedImageExtended a UploadedImageResult
+				return {
+					id: entity.id,
+					name: entity.name,
+					path: entity.path,
+					type: entity.type as UploadedImageType,
+					category: entity.category || '',
+					hash: entity.hash,
+					imageId: entity.imageId,
+					size: entity.size,
+					width: entity.width || 0,
+					height: entity.height || 0,
+					metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
+					dimensions: entity.dimensions,
+					url: entity.url,
+					thumbnailUrl: entity.thumbnailUrl,
+					createdAt: entity.createdAt,
+					updatedAt: entity.updatedAt,
+				} as UploadedImageResult;
+			});
 
 			// Obtener estadísticas si se incluyen en la respuesta
 			const stats = await this.getImageStats();
@@ -497,27 +497,27 @@ class UploadedImagesService {
 			const image = imageQuery[0];
 
 			// Transformar usando el transformer
-		const entity = fromDB(image);
-		const result = {
-			id: entity.id,
-			name: entity.name,
-			path: entity.path,
-			type: entity.type as UploadedImageType,
-			category: entity.category || '',
-			hash: entity.hash,
-			imageId: entity.imageId,
-			size: entity.size,
-			width: entity.width || 0,
-			height: entity.height || 0,
-			metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
-			dimensions: entity.dimensions,
-			url: entity.url,
-			thumbnailUrl: entity.thumbnailUrl,
-			createdAt: entity.createdAt,
-			updatedAt: entity.updatedAt,
-		} as UploadedImageResult;
+			const entity = fromDB(image);
+			const result = {
+				id: entity.id,
+				name: entity.name,
+				path: entity.path,
+				type: entity.type as UploadedImageType,
+				category: entity.category || '',
+				hash: entity.hash,
+				imageId: entity.imageId,
+				size: entity.size,
+				width: entity.width || 0,
+				height: entity.height || 0,
+				metadata: entity.metadata ? JSON.parse(entity.metadata) : null,
+				dimensions: entity.dimensions,
+				url: entity.url,
+				thumbnailUrl: entity.thumbnailUrl,
+				createdAt: entity.createdAt,
+				updatedAt: entity.updatedAt,
+			} as UploadedImageResult;
 
-		return result;
+			return result;
 		} catch (error) {
 			uploadedImagesLogger.error('Error obteniendo imagen subida por ID:', error);
 			throw toServiceError(error, {

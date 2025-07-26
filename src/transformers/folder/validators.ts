@@ -6,8 +6,8 @@
  */
 
 import { z } from 'zod';
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { FolderBase, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
 
 const logger = serverLogger.withContext('FolderValidators');

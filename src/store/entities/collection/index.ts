@@ -25,7 +25,7 @@ const initialState: CollectionState = {
 	// Estado UI
 	viewConfig: {
 		viewType: 'grid',
-	
+
 		gridColumns: 3,
 		cardSize: 'medium',
 		sortBy: 'name',

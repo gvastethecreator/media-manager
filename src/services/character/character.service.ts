@@ -119,7 +119,7 @@ export async function getCharacter(id: string): Promise<CharacterWithStats | nul
 				description: characters.description,
 				emoji: characters.emoji,
 				color: characters.color,
-				isPublic: characters.isPublic,
+
 				isFavorite: characters.isFavorite,
 				totalImages: characters.totalImages,
 				totalVideos: characters.totalVideos,
@@ -198,7 +198,7 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 				equipment: characters.equipment,
 				notes: characters.notes,
 				featuredImage: characters.featuredImage,
-				isPublic: characters.isPublic,
+
 				isFavorite: characters.isFavorite,
 				totalImages: characters.totalImages,
 				totalVideos: characters.totalVideos,
@@ -297,7 +297,7 @@ export async function createCharacter(data: CharacterCreateInput): Promise<Chara
 				notes: data.notes || null,
 				featuredImage: data.featuredImage || null,
 				parentId: data.parentId || null,
-				isPublic: data.isPublic || false,
+
 				isFavorite: data.isFavorite || false,
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -371,7 +371,7 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
 		if (data.notes !== undefined) updateData.notes = data.notes;
 		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 		if (data.parentId !== undefined) updateData.parentId = data.parentId;
-		if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
+
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
 		await db.update(characters).set(updateData).where(eq(characters.id, id));

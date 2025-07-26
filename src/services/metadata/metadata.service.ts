@@ -59,7 +59,7 @@ export async function getAllMetadata(): Promise<MetadataExtended[]> {
 				key: metadatas.key,
 				value: metadatas.value,
 				type: metadatas.type,
-				isPublic: metadatas.isPublic,
+
 				category: metadatas.category,
 				description: metadatas.description,
 				createdAt: metadatas.createdAt,
@@ -71,7 +71,6 @@ export async function getAllMetadata(): Promise<MetadataExtended[]> {
 		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadatas = drizzleMetadatas.map((rawMetadata: (typeof drizzleMetadatas)[0]) => ({
 			...rawMetadata,
-			isPublic: Boolean(rawMetadata.isPublic),
 		}));
 
 		return transformMetadatas(transformedMetadatas as any);
@@ -97,7 +96,7 @@ export async function getMetadataByImageId(imageId: string): Promise<MetadataExt
 				key: metadatas.key,
 				value: metadatas.value,
 				type: metadatas.type,
-				isPublic: metadatas.isPublic,
+
 				category: metadatas.category,
 				description: metadatas.description,
 				createdAt: metadatas.createdAt,
@@ -114,7 +113,6 @@ export async function getMetadataByImageId(imageId: string): Promise<MetadataExt
 		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...drizzleMetadata[0],
-			isPublic: Boolean(drizzleMetadata[0].isPublic),
 		};
 
 		return transformMetadata(transformedMetadata as any);
@@ -140,7 +138,7 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
 				key: metadatas.key,
 				value: metadatas.value,
 				type: metadatas.type,
-				isPublic: metadatas.isPublic,
+
 				category: metadatas.category,
 				description: metadatas.description,
 				createdAt: metadatas.createdAt,
@@ -157,7 +155,6 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
 		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...drizzleMetadata[0],
-			isPublic: Boolean(drizzleMetadata[0].isPublic),
 		};
 
 		return transformMetadata(transformedMetadata as any);
@@ -186,7 +183,7 @@ export async function createMetadata(data: MetadataCreateInput): Promise<Metadat
 				key: drizzleData.key,
 				value: drizzleData.value || null,
 				type: drizzleData.type || 'string',
-				isPublic: drizzleData.isPublic || false,
+
 				category: drizzleData.category || null,
 				description: drizzleData.description || null,
 				createdAt: new Date(),
@@ -199,7 +196,6 @@ export async function createMetadata(data: MetadataCreateInput): Promise<Metadat
 		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...newMetadata,
-			isPublic: Boolean(newMetadata.isPublic),
 		};
 
 		return transformMetadata(transformedMetadata as any);
@@ -237,7 +233,6 @@ export async function updateMetadata(
 		// Transformar a formato compatible con transformadores legacy
 		const transformedMetadata = {
 			...updatedMetadata,
-			isPublic: Boolean(updatedMetadata.isPublic),
 		};
 
 		return transformMetadata(transformedMetadata as any);
@@ -427,7 +422,13 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 
 	// Verificar cache
 	const cached = metadataCache.get(normalizedPath);
-	if (cached && typeof cached === 'object' && 'width' in cached && typeof cached.width === 'number' && cached.width > 0) {
+	if (
+		cached &&
+		typeof cached === 'object' &&
+		'width' in cached &&
+		typeof cached.width === 'number' &&
+		cached.width > 0
+	) {
 		metadataLogger.info('Metadatos obtenidos de caché:', path);
 		return cached;
 	}

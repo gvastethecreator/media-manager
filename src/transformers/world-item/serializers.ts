@@ -6,9 +6,9 @@
  * @module transformers/world-item/serializers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { safeJsonParse } from '@/lib/utils/json';
-import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement } from '@/types/entities/world-item';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { safeJsonParse } from '../../lib/utils/json';
+import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement } from '../../types/entities/world-item';
 
 // Tipos para serializers compatibles
 type WorldItemAttribute = {

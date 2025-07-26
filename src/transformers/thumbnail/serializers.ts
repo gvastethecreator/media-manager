@@ -6,7 +6,7 @@
  * @updated 2025-01-27
  */
 
-import { ThumbnailBase, ThumbnailWithStats } from '@/types/entities/thumbnail';
+import { ThumbnailBase, ThumbnailWithStats } from '../../types/entities/thumbnail';
 
 /**
  * Serializa ThumbnailBase para respuestas de API

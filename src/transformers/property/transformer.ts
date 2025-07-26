@@ -4,11 +4,12 @@
  * @description Contiene funciones para convertir objetos Property entre diferentes formatos.
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import { calculateCompleteness } from '@/lib/utils/transformers';
-import type { PropertyBase, PropertyStatistics, PropertyWithStats } from '@/types/entities/property';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { calculateCompleteness } from '../../lib/utils/stats';
+import type { PropertyBase, PropertyStatistics, PropertyWithStats } from '../../types/entities/property';
 
-const propertyTransformerLogger = clientLogger.withContext('PropertyTransformer');
+const propertyTransformerLogger = serverLogger.withContext('PropertyTransformer');
 
 /**
  * Convierte un objeto Property de Drizzle a PropertyWithStats.
@@ -31,8 +32,9 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 		if (hasCounts) {
 			const { _count, ...baseProperty } = drizzleProperty;
 
-			const totalRelations = Object.values(_count).reduce((sum, count) => sum + (count as number), 0);
-			const usageDiversity = Object.values(_count).filter((count) => count > 0).length;
+			const countValues = Object.values(_count) as number[];
+			const totalRelations = countValues.reduce((sum: number, count: number) => sum + count, 0);
+			const usageDiversity = countValues.filter((count: number) => count > 0).length;
 			const totalPossibleRelations = Object.keys(_count).length;
 			const diversityRatio = totalPossibleRelations > 0 ? usageDiversity / totalPossibleRelations : 0;
 			const popularity = Math.log1p(totalRelations) * diversityRatio;

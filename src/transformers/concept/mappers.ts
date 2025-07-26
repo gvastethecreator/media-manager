@@ -3,7 +3,7 @@
  * @module transformers/concept/mappers
  * @description Estas funciones se encargan de transformar la entrada de la aplicación
  * (ej. desde formularios o actions) a los tipos que Drizzle espera para las operaciones de BD.
- 
+
  */
 
 import type {
@@ -11,9 +11,9 @@ import type {
 	ConceptCreateInput,
 	ConceptFilters,
 	ConceptSearchOptions,
-	ConceptSortOption,
 	ConceptUpdateInput,
 } from '@/types/entities/concept';
+import { ConceptSortOption } from '@/types/entities/concept/enums';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleConceptCreateInput = {
@@ -23,7 +23,7 @@ type DrizzleConceptCreateInput = {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -45,7 +45,7 @@ type DrizzleConceptUpdateInput = {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -65,7 +65,7 @@ type DrizzleConceptWhereInput = {
 	name?: { contains?: string };
 	description?: { contains?: string };
 	category?: { in?: string[] } | string;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	type?: { in?: string[] };
 	complexity?: { in?: string[] };
@@ -124,7 +124,7 @@ export function toCreateDataDrizzle(input: ConceptCreateInput): DrizzleConceptCr
 		emoji: input.emoji || '💡',
 		color: input.color || '#3b82f6',
 		category: input.category || 'general',
-		isPublic: input.isPublic || false,
+
 		isFavorite: input.isFavorite || false,
 		totalImages: input.totalImages || 0,
 		totalVideos: input.totalVideos || 0,
@@ -287,16 +287,17 @@ export function processConcepts(
 	// Aplicar ordenamiento
 	filteredConcepts.sort((a, b) => {
 		switch (sortBy) {
-			case 'name':
+			case ConceptSortOption.NAME_ASC:
 				return a.name.localeCompare(b.name);
-			case 'name-desc':
+			case ConceptSortOption.NAME_DESC:
 				return b.name.localeCompare(a.name);
-			case 'created':
+			case ConceptSortOption.CREATED_ASC:
 				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-			case 'created-desc':
+			case ConceptSortOption.CREATED_DESC:
 				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-			case 'updated':
+			case ConceptSortOption.UPDATED_ASC:
 				return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+			case ConceptSortOption.UPDATED_DESC:
 			default:
 				return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
 		}

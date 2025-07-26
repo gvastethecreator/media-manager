@@ -27,13 +27,13 @@ export enum QueueJobType {
  * Estados posibles de un trabajo en cola
  */
 export enum QueueJobStatus {
-	PENDING = 'PENDING',
-	ACTIVE = 'ACTIVE',
-	COMPLETED = 'COMPLETED',
-	FAILED = 'FAILED',
-	DELAYED = 'DELAYED',
-	PAUSED = 'PAUSED',
-	CANCELLED = 'CANCELLED',
+	PENDING = 'pending',
+	PROCESSING = 'processing',
+	COMPLETED = 'completed',
+	FAILED = 'failed',
+	RETRYING = 'retrying',
+	CANCELLED = 'cancelled',
+	PAUSED = 'paused',
 }
 
 /**

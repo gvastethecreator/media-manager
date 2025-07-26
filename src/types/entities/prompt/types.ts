@@ -317,7 +317,7 @@ export interface DrizzleWhereFilter {
 	name?: any;
 	category?: any;
 	type?: any;
-	isPublic?: any;
+
 	isFavorite?: any;
 	content?: any;
 	purpose?: any;

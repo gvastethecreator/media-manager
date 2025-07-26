@@ -5,8 +5,8 @@
 
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { CharacterWithStats } from '@/types/entities/character';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type { CharacterWithStats } from '../../types/entities/character';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleCharacterWithCounts = {
@@ -16,7 +16,7 @@ type DrizzleCharacterWithCounts = {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -59,7 +59,6 @@ type DrizzleCharacterCreateInput = {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
 	isFavorite?: boolean;
 	age?: string | null;
 	gender?: string | null;
@@ -147,6 +146,8 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			personality: baseData.personality != null ? baseData.personality : null,
 			equipment: baseData.equipment != null ? baseData.equipment : null,
 			notes: baseData.notes != null ? baseData.notes : null,
+			// Asegurar que emoji nunca sea undefined
+			emoji: baseData.emoji ?? '👤',
 
 			// Conteos originales para compatibilidad
 			_count,
@@ -155,7 +156,7 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			entityType: 'character' as const,
 
 			// Estadísticas pre-calculadas optimizadas
-			stats: {
+			statistics: {
 				totalImages,
 				totalVideos,
 				totalTags,
@@ -221,7 +222,7 @@ export function toDrizzleCharacterCreate(character: Partial<CharacterWithStats>)
 		emoji: baseData.emoji || '👤',
 		color: baseData.color || '#CCCCCC',
 		category: baseData.category || null,
-		isPublic: baseData.isPublic || false,
+
 		isFavorite: baseData.isFavorite || false,
 		age: baseData.age || null,
 		gender: baseData.gender || null,

@@ -36,10 +36,12 @@ export interface ViewOptionsState {
 const DEFAULT_STATE = {
 	viewMode: 'grid' as ViewMode,
 	itemSize: 150,
-	sortOptions: [{ field: 'createdAt', direction: 'desc' }],
+	sortOptions: [{ field: 'createdAt', direction: 'desc' as const }],
 	filterOptions: [],
 	searchQuery: '',
 };
+
+export type ViewOptionsStore = ViewOptionsState;
 
 export const useViewOptionsStore = create<ViewOptionsState>()(
 	persist(

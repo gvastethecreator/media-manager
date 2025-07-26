@@ -1,6 +1,6 @@
 // Serializers para File3D
 
-import type { File3DWithStats } from '@/types/entities/file3d';
+import type { File3DWithStats } from '../../types/entities/file3d';
 
 export function validateFile3D(input: unknown): File3DWithStats {
 	// Por ahora, una implementación simple hasta que esté listo el schema

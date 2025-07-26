@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { FileType } from '@/types/entities/file';
+import { FileType } from '../../types/entities/file';
 
 /**
  * 📁 Esquema base para validar archivos.

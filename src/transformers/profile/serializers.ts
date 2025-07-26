@@ -4,7 +4,7 @@
  
  */
 
-import type { ProfileWithStats } from '@/types/entities/profile';
+import { ProfileBase, ProfileWithStats } from '../../types/entities/profile';
 
 /**
  * Serializa un objeto Profile para respuesta de API

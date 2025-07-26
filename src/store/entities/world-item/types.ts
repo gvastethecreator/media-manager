@@ -7,9 +7,9 @@
 
 import type {
 	WorldItemCreateInput as CreateWorldItemData,
-	WorldItemUpdateInput as UpdateWorldItemData,
 	WorldItemFilters,
 	WorldItemSortCriteria,
+	WorldItemUpdateInput,
 	WorldItemViewMode,
 	WorldItemWithStats,
 } from '@/types/entities/world-item';
@@ -19,13 +19,7 @@ import type {
  */
 export type WorldItem = WorldItemWithStats;
 
-/**
- * Datos para actualizar un WorldItem desde la UI.
- * Es un Partial de WorldItem, pero asegura la compatibilidad con UpdateWorldItemData.
- */
-export type WorldItemUpdateData = Partial<
-	Omit<WorldItem, 'id' | 'createdAt' | 'updatedAt' | 'category' | '_stats'> & { category: string }
->;
+// WorldItemUpdateData se define en hooks.ts para evitar duplicación
 
 /**
  * 🎮 Estado de UI del store
@@ -60,7 +54,7 @@ export interface WorldItemActions {
 
 	// 📝 Gestión de items
 	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
-	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
+	updateWorldItem: (id: string, item: WorldItemUpdateInput) => Promise<void>;
 	deleteWorldItem: (id: string) => Promise<void>;
 
 	// 🔍 Selectores y getters

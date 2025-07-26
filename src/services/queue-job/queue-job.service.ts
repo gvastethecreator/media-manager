@@ -274,7 +274,7 @@ export async function findQueueJobs(
 			whereConditions.push(eq(queueJobs.status, filters.status));
 		}
 
-		if (filters.priority !== undefined) {
+		if (filters.priority !== undefined && filters.priority !== null) {
 			whereConditions.push(eq(queueJobs.priority, filters.priority));
 		}
 

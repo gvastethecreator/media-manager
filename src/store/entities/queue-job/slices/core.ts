@@ -17,7 +17,12 @@ import {
 	updateQueueJobInApi,
 } from '@/lib/api/client/queue-job.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { CreateQueueJobInput, QueueJobExtended, QueueJobFilters, UpdateQueueJobInput } from '@/types/entities/queue-job';
+import type {
+	CreateQueueJobInput,
+	QueueJobExtended,
+	QueueJobFilters,
+	UpdateQueueJobInput,
+} from '@/types/entities/queue-job';
 import type { QueueJobState } from '../types';
 
 // Logger para el slice
@@ -52,21 +57,21 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 	// Carga los trabajos en cola según los filtros y paginación actuales
 	loadJobs: async () => {
 		try {
-				coreLogger.info('Cargando trabajos en cola');
-				set((state) => ({ ...state, isLoading: true, error: null }));
+			coreLogger.info('Cargando trabajos en cola');
+			set((state) => ({ ...state, isLoading: true, error: null }));
 
-				const { filters, pagination } = get();
+			const { filters, pagination } = get();
 			const result = await getQueueJobsFromApi(filters as QueueJobFilters, pagination);
 
-				set((state) => ({
-					...state,
-					items: result.items,
-					total: result.total,
-					page: result.page,
-					limit: result.limit,
-					totalPages: result.totalPages,
-					isLoading: false,
-				}));
+			set((state) => ({
+				...state,
+				items: result.items,
+				total: result.total,
+				page: result.page,
+				limit: result.limit,
+				totalPages: result.totalPages,
+				isLoading: false,
+			}));
 
 			coreLogger.info(`Cargados ${result.items.length} trabajos de ${result.total} totales`);
 		} catch (error) {
