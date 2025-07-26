@@ -4,12 +4,12 @@ import * as path from 'node:path';
 import { createAudio, getAudioByHash } from '@/services/audio/audio.service';
 import { createDocument, getDocumentByHash } from '@/services/document/document.service';
 import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
+import type { CreateImageInput } from '@/services/image/image.service';
 import { ImageService } from '@/services/image/image.service';
 import { createVideo, getVideoByHash } from '@/services/video/video.service';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { DocumentCreateInput } from '@/types/entities/document';
 import type { File3DCreateInput } from '@/types/entities/file3d';
-import type { CreateImageInput } from '@/services/image/image.service';
 import type { VideoCreateInput } from '@/types/entities/video';
 import {
 	ENTITY_TYPE_MAPPING,

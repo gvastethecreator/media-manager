@@ -886,7 +886,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 		if ('color' in entity && !('emoji' in entity)) return EntityStatsType.TAG;
 		if ('gender' in entity) return EntityStatsType.CHARACTER;
 		if ('conceptType' in entity) return EntityStatsType.CONCEPT;
-		if ('isPublic' in entity && !('path' in entity)) return EntityStatsType.COLLECTION;
+		if ('category' in entity && !('path' in entity)) return EntityStatsType.COLLECTION;
 		// Fallback genérico
 		return EntityStatsType.IMAGE; // Por defecto asumimos imagen
 	},

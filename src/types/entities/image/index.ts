@@ -14,8 +14,7 @@
 
 // --- Tipos Canónicos ---
 export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
-// Alias para compatibilidad
-export type Image = ImageWithStats;
+
 // --- Enumeraciones ---
 export { ImageFormat, ImageStatus } from './enums';
 export type {
@@ -25,6 +24,8 @@ export type {
 } from './types';
 
 // --- Tipos derivados ---
+import type { ImageBase, ImageWithStats } from './base';
+export type Image = ImageWithStats;
 export type ImageComplete = ImageWithStats;
 export type ImageCreateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
 export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;

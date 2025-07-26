@@ -63,16 +63,17 @@ export enum PromptViewMode {
 /**
  * Opciones de ordenación para prompts
  */
-export type PromptSortOption =
-	| 'name_asc'
-	| 'name_desc'
-	| 'created_asc'
-	| 'created_desc'
-	| 'updated_asc'
-	| 'updated_desc'
-	| 'category_asc'
-	| 'category_desc'
-	| 'favorites_first';
+export enum PromptSortOption {
+	NAME_ASC = 'name_asc',
+	NAME_DESC = 'name_desc',
+	CREATED_ASC = 'created_asc',
+	CREATED_DESC = 'created_desc',
+	UPDATED_ASC = 'updated_asc',
+	UPDATED_DESC = 'updated_desc',
+	CATEGORY_ASC = 'category_asc',
+	CATEGORY_DESC = 'category_desc',
+	FAVORITES_FIRST = 'favorites_first',
+}
 
 /**
  * Criterios de ordenación para prompts

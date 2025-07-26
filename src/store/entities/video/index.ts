@@ -13,8 +13,8 @@ import { createVideoUISlice, initialUIState, type VideoUISlice } from './slices/
 // Tipo del store completo
 export type VideoStore = VideoCoreSlice & VideoUISlice & VideoFiltersSlice & VideoPlayerSlice;
 
-// Estado inicial plano
-const initialState: VideoStore = {
+// Estado inicial plano (solo datos, no funciones)
+const initialState = {
 	...initialCoreState,
 	...initialUIState,
 	...initialFiltersState,
@@ -39,7 +39,6 @@ export const useVideoStore = create<VideoStore>()(
 					// Filters
 					sortBy: state.sortBy,
 					filterFavorites: state.filterFavorites,
-					filterPublic: state.filterPublic,
 					// UI
 					viewMode: state.viewMode,
 					// Player

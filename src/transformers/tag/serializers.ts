@@ -4,8 +4,8 @@
  * ✅ MIGRADO A DRIZZLE - Julio 2025
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { TagBase } from '@/types/entities/tag';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type { TagBase } from '../../types/entities/tag';
 
 const logger = serverLogger.withContext('TagSerializers');
 

@@ -17,9 +17,18 @@ export const ConceptBaseSchema = z.object({
 	color: z.string().min(1, 'Color es requerido'),
 	description: z.string().nullable(),
 	content: z.string().min(1, 'Contenido es requerido'),
-	category: z.string().min(1, 'Categoría es requerida'),
-	featuredImage: z.string().nullable(),
+	category: z.string().nullable(),
 	isFavorite: z.boolean().default(false),
+	totalImages: z.number().int().min(0).default(0),
+	totalVideos: z.number().int().min(0).default(0),
+	type: z.string().nullable(),
+	complexity: z.string().nullable(),
+	applications: z.string().nullable(),
+	examples: z.string().nullable(),
+	relatedConcepts: z.string().nullable(),
+	notes: z.string().nullable(),
+	featuredImage: z.string().nullable(),
+	parentId: z.string().nullable(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -41,13 +50,30 @@ export const ConceptStatisticsSchema = z.object({
 	wildcardCount: z.number().int().min(0).default(0),
 	propertyCount: z.number().int().min(0).default(0),
 	groupCount: z.number().int().min(0).default(0),
+	totalAssociations: z.number().int().min(0).default(0),
 });
 
 /**
  * ✨ Esquema Zod para ConceptWithStats (tipo canónico).
  */
 export const ConceptWithStatsSchema = ConceptBaseSchema.extend({
+	entityType: z.literal('concept'),
 	stats: ConceptStatisticsSchema,
+	_count: z.object({
+		images: z.number().int().min(0).default(0),
+		videos: z.number().int().min(0).default(0),
+		prompts: z.number().int().min(0).default(0),
+		notes: z.number().int().min(0).default(0),
+		characters: z.number().int().min(0).default(0),
+		places: z.number().int().min(0).default(0),
+		worldItems: z.number().int().min(0).default(0),
+		properties: z.number().int().min(0).default(0),
+		wildcards: z.number().int().min(0).default(0),
+		groups: z.number().int().min(0).default(0),
+		albums: z.number().int().min(0).default(0),
+		collections: z.number().int().min(0).default(0),
+		tags: z.number().int().min(0).default(0),
+	}),
 });
 
 /**

@@ -3,7 +3,7 @@
  * @module store/entities/folder/types
  */
 
-import type { FolderWithStats, FolderViewConfig } from '@/types/entities/folder';
+import type { FolderViewConfig, FolderWithStats } from '@/types/entities/folder';
 import type { FolderSortCriteria, FolderViewMode } from '@/types/entities/folder/enums';
 
 /**

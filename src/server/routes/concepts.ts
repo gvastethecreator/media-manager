@@ -58,7 +58,7 @@ const getConceptsHandler = async (req: Request, res: Response) => {
 					emoji: concepts.emoji,
 					color: concepts.color,
 					category: concepts.category,
-					isPublic: concepts.isPublic,
+
 					isFavorite: concepts.isFavorite,
 					totalImages: concepts.totalImages,
 					totalVideos: concepts.totalVideos,
@@ -124,7 +124,7 @@ const getConceptByIdHandler = async (req: Request, res: Response) => {
 				emoji: concepts.emoji,
 				color: concepts.color,
 				category: concepts.category,
-				isPublic: concepts.isPublic,
+
 				isFavorite: concepts.isFavorite,
 				totalImages: concepts.totalImages,
 				totalVideos: concepts.totalVideos,

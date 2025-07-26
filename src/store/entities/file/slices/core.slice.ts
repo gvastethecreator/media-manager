@@ -7,7 +7,7 @@ import { StateCreator } from 'zustand';
 // Refactor 2025-07: se usa cliente API para obtener info de directorio
 import { getDirectoryInfoFromApi } from '@/lib/api/client/file.client';
 import { toFileWithStatsList } from '@/transformers/file/mappers';
-import { FileWithStats, FileBase } from '@/types/entities/file/base';
+import { FileBase, FileWithStats } from '@/types/entities/file/base';
 import type { DirectoryReadResult, FileBase as FileBaseFromTypes } from '@/types/entities/file/types';
 import { FileStore } from '..';
 

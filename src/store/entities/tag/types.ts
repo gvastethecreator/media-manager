@@ -87,7 +87,7 @@ export interface TagFilters {
 	/** Filtro por categoría */
 	category: TagCategory | null;
 	/** Filtro por rareza - @deprecated La rareza no es una propiedad del modelo de datos actual. */
-	rarity?: TagRarity | null;
+	rarity?: string | null;
 }
 
 /**

@@ -13,7 +13,7 @@ export {
 	TypeMismatchError,
 	UIError,
 	ValidationError,
-} from '@/lib/utils/transformers/errors';
+} from '@/lib/errors/transformer-error';
 
 const _errorLogger = serverLogger.withContext('ErrorHandler');
 

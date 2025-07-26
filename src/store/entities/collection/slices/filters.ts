@@ -58,15 +58,15 @@ export const createCollectionFiltersSlice: StateCreator<
 				rarity: [],
 				priceRange: [0, 1000] as [number, number],
 				rating: 0,
-		
+
 				hasItems: null,
 			};
-			
+
 			const newFilter = {
 				...currentFilter,
 				category: category ? [category] : [],
 			};
-			
+
 			return { activeFilters: [newFilter] };
 		});
 		return get().getFilteredCollections();
@@ -83,15 +83,15 @@ export const createCollectionFiltersSlice: StateCreator<
 				rarity: [],
 				priceRange: [0, 1000] as [number, number],
 				rating: 0,
-		
+
 				hasItems: null,
 			};
-			
+
 			const newFilter = {
 				...currentFilter,
 				rarity: rarity ? [rarity] : [],
 			};
-			
+
 			return { activeFilters: [newFilter] };
 		});
 		return get().getFilteredCollections();
@@ -109,15 +109,15 @@ export const createCollectionFiltersSlice: StateCreator<
 				rarity: [],
 				priceRange: [0, 1000] as [number, number],
 				rating: 0,
-		
+
 				hasItems: null,
 			};
-			
+
 			const newFilter = {
 				...currentFilter,
 				priceRange: [minPrice || 0, maxPrice || 1000] as [number, number],
 			};
-			
+
 			return { activeFilters: [newFilter] };
 		});
 		return get().getFilteredCollections();
@@ -146,7 +146,7 @@ export const createCollectionFiltersSlice: StateCreator<
 	 */
 	getGroupedCollections: (groupBy?: 'category' | 'rarity' | 'platform' | null) => {
 		const { groupBy: currentGroupBy } = get();
-		let collectionsArray = get().getFilteredCollections();
+		const collectionsArray = get().getFilteredCollections();
 
 		const groupByOption = groupBy || currentGroupBy;
 
@@ -220,9 +220,9 @@ export const createCollectionFiltersSlice: StateCreator<
 
 		// Aplicar filtros activos
 		for (const filter of activeFilters) {
-			collections = collections.filter(collection => {
+			collections = collections.filter((collection) => {
 				const fieldValue = (collection as any)[filter.field];
-				
+
 				switch (filter.operator) {
 					case 'equals':
 						return fieldValue === filter.value;
@@ -240,9 +240,10 @@ export const createCollectionFiltersSlice: StateCreator<
 						return Number(fieldValue) < Number(filter.value);
 					case 'lte':
 						return Number(fieldValue) <= Number(filter.value);
-					case 'between':
+					case 'between': {
 						const [min, max] = Array.isArray(filter.value) ? filter.value : [0, 0];
 						return Number(fieldValue) >= Number(min) && Number(fieldValue) <= Number(max);
+					}
 					default:
 						return true;
 				}

@@ -18,7 +18,7 @@ import {
 	updateQueueJob,
 } from '@/services/queue-job/queue-job.service';
 import { serializeQueueJobMetadata } from '@/transformers/queue-job';
-import { CreateQueueJobInputSchema, UpdateQueueJobInputSchema } from '@/types/entities/queue-job/schema';  
+import { CreateQueueJobInputSchema, UpdateQueueJobInputSchema } from '@/types/entities/queue-job/schema';
 import { QueueJobStatus, QueueJobUpdateInput } from '@/types/entities/queue-job/types';
 
 export const queueRouter = Router();
@@ -77,13 +77,13 @@ queueRouter.get('/:id', async (req, res) => {
 queueRouter.put('/:id', async (req, res) => {
 	try {
 		const validatedData = UpdateQueueJobInputSchema.parse(req.body);
-		
+
 		// Crear el objeto de actualización correctamente tipado
 		const updateData: QueueJobUpdateInput = {
 			...validatedData,
 			metadata: validatedData.metadata ? serializeQueueJobMetadata(validatedData.metadata) : undefined,
 		};
-		
+
 		const job = await updateQueueJob(req.params.id, updateData);
 		res.json(job);
 		return;
@@ -172,7 +172,7 @@ queueRouter.get('/status/:status', async (req, res) => {
 	try {
 		const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 10;
 		const statusParam = req.params.status;
-		
+
 		// Validar que el status es válido
 		if (!Object.values(QueueJobStatus).includes(statusParam as QueueJobStatus)) {
 			res.status(400).json({
@@ -181,7 +181,7 @@ queueRouter.get('/status/:status', async (req, res) => {
 			});
 			return;
 		}
-		
+
 		const status = statusParam as QueueJobStatus;
 		const jobs = await findQueueJobsByStatus(status, limit);
 		res.json(jobs);

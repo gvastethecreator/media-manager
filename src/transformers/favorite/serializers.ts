@@ -5,7 +5,7 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { FavoriteBase, FavoriteWithStats } from '@/types/entities/favorite';
+import type { FavoriteBase, FavoriteWithStats } from '../../types/entities/favorite';
 
 /**
  * ⭐ Serializa un favorito base para respuestas API.

@@ -1,10 +1,11 @@
 /**
  * @file Validadores para la entidad Prompt
  * @module transformers/prompt/validators
- 
+
  */
 
 import { z } from 'zod';
+import type { PromptBase, PromptCreateInput, PromptUpdateInput } from '../../types/entities/prompt';
 
 export const PromptCreateSchema = z.object({
 	title: z.string().min(1).max(255),
@@ -13,7 +14,7 @@ export const PromptCreateSchema = z.object({
 	category: z.string().max(100).optional(),
 	tags: z.array(z.string()).default([]),
 	parameters: z.any().default({}),
-	isPublic: z.boolean().default(false),
+
 	isFavorite: z.boolean().default(false),
 });
 
@@ -24,7 +25,7 @@ export const PromptUpdateSchema = z.object({
 	category: z.string().max(100).optional(),
 	tags: z.array(z.string()).optional(),
 	parameters: z.any().optional(),
-	isPublic: z.boolean().optional(),
+
 	isFavorite: z.boolean().optional(),
 });
 
@@ -36,7 +37,7 @@ export const PromptSchema = z.object({
 	category: z.string().nullable(),
 	tags: z.array(z.string()),
 	parameters: z.any(),
-	isPublic: z.boolean(),
+
 	isFavorite: z.boolean(),
 	createdAt: z.date(),
 	updatedAt: z.date(),

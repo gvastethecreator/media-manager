@@ -55,7 +55,7 @@ export function serializeAlbum(album: AlbumWithStats): Record<string, unknown> {
 			emoji: album.emoji,
 			color: album.color,
 			featuredImage: album.featuredImage,
-			isPublic: album.isPublic,
+
 			isFavorite: album.isFavorite,
 			totalImages: album.totalImages,
 			totalVideos: album.totalVideos,
@@ -123,7 +123,7 @@ export function deserializeAlbum(data: Record<string, unknown>): AlbumWithStats 
 			emoji: data.emoji as string | null,
 			color: data.color as string | null,
 			featuredImage: data.featuredImage as string | null,
-			isPublic: Boolean(data.isPublic),
+
 			isFavorite: Boolean(data.isFavorite),
 			totalImages: Number(data.totalImages) || 0,
 			totalVideos: Number(data.totalVideos) || 0,
@@ -131,7 +131,7 @@ export function deserializeAlbum(data: Record<string, unknown>): AlbumWithStats 
 			filters: data.filters as string | null,
 			shortcut: data.shortcut as string | null,
 			category: data.category as string | null,
-			metadata: data.metadata as string | null,
+			metadata: data.metadata as Record<string, any> | null,
 			lastImageAddedAt,
 			lastVideoAddedAt,
 			createdAt,

@@ -4,9 +4,9 @@
 
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { PromptBase, PromptStatistics, PromptWithStats } from '@/types/entities/prompt/base';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type { PromptBase, PromptStatistics, PromptWithStats } from '../../types/entities/prompt/base';
 
 const logger = serverLogger.withContext('PromptTransformer');
 
@@ -174,7 +174,7 @@ function calculateUsabilityScore(prompt: PromptBase): number {
 	if (prompt.description && prompt.description.length > 20) score += 25;
 	if (prompt.category) score += 15;
 	if (prompt.notes) score += 15;
-	if (prompt.isPublic) score += 15;
+
 	return Math.min(100, score);
 }
 
@@ -198,7 +198,7 @@ export function toDrizzlePrompt(prompt: PromptBase): any {
 		notes: prompt.notes,
 		featuredImage: prompt.featuredImage,
 		parentId: prompt.parentId,
-		isPublic: prompt.isPublic,
+
 		isFavorite: prompt.isFavorite,
 		createdAt: prompt.createdAt,
 		updatedAt: prompt.updatedAt,

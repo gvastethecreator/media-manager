@@ -5,13 +5,13 @@ import { useUpdateTheme } from '@/lib/api/profiles';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
 import {
+	Language,
 	type PaginatedProfiles,
 	type ProfileExtended,
 	type ProfileFilters,
 	type ProfilePaginationOptions,
 	type ProfilePreferences,
 	ThemeMode,
-	Language,
 } from '@/types/entities/profile/types';
 
 // Estado inicial
@@ -135,34 +135,34 @@ export const useProfileStore = create<ProfileStore>()(
 						const result = await getPaginatedProfiles(filters, pagination);
 
 						set((state) => {
-				state.profiles = result.items.map(transformProfile);
-				state.totalProfiles = result.total;
-				state.currentPage = result.page;
-				state.filters = filters;
-				state.pagination = pagination;
-				
-				// Inicializar preferences si no existe en el perfil activo
-				if (state.activeProfile && !state.activeProfile.preferences) {
-					state.activeProfile.preferences = {
-						theme: ThemeMode.SYSTEM,
-						color: '#3b82f6',
-						emoji: '👤',
-						language: Language.SPANISH,
-						enableAnimations: true,
-						enableSounds: false,
-						enableHaptics: false,
-						enableNotifications: true,
-						defaultView: 'grid',
-						defaultSort: 'name',
-						itemsPerPage: 20,
-						showHiddenFiles: false,
-						highContrast: false,
-						reducedMotion: false,
-						fontSize: 'medium',
-						outlineElements: false
-					};
-				}
-			});
+							state.profiles = result.items.map(transformProfile);
+							state.totalProfiles = result.total;
+							state.currentPage = result.page;
+							state.filters = filters;
+							state.pagination = pagination;
+
+							// Inicializar preferences si no existe en el perfil activo
+							if (state.activeProfile && !state.activeProfile.preferences) {
+								state.activeProfile.preferences = {
+									theme: ThemeMode.SYSTEM,
+									color: '#3b82f6',
+									emoji: '👤',
+									language: Language.SPANISH,
+									enableAnimations: true,
+									enableSounds: false,
+									enableHaptics: false,
+									enableNotifications: true,
+									defaultView: 'grid',
+									defaultSort: 'name',
+									itemsPerPage: 20,
+									showHiddenFiles: false,
+									highContrast: false,
+									reducedMotion: false,
+									fontSize: 'medium',
+									outlineElements: false,
+								};
+							}
+						});
 
 						return result;
 					} catch (error) {
@@ -214,7 +214,24 @@ export const useProfileStore = create<ProfileStore>()(
 					set((state) => {
 						if (state.activeProfile) {
 							if (!state.activeProfile.preferences) {
-								state.activeProfile.preferences = {};
+								state.activeProfile.preferences = {
+									theme: ThemeMode.SYSTEM,
+									color: '#3b82f6',
+									emoji: '👤',
+									language: Language.SPANISH,
+									enableAnimations: true,
+									enableSounds: false,
+									enableHaptics: false,
+									enableNotifications: true,
+									defaultView: 'grid',
+									defaultSort: 'name',
+									itemsPerPage: 20,
+									showHiddenFiles: false,
+									highContrast: false,
+									reducedMotion: false,
+									fontSize: 'medium',
+									outlineElements: false,
+								};
 							}
 
 							// Actualizar preferencia específica

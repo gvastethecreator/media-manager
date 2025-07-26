@@ -147,7 +147,7 @@ export enum CharacterClass {
 	MONK = 'monk',
 	SORCERER = 'sorcerer',
 	WARLOCK = 'warlock',
-	WIZARD = 'wizard'
+	WIZARD = 'wizard',
 }
 
 export enum CharacterRace {
@@ -160,7 +160,7 @@ export enum CharacterRace {
 	TIEFLING = 'tiefling',
 	DRAGONBORN = 'dragonborn',
 	HALF_ELF = 'half-elf',
-	HALF_ORC = 'half-orc'
+	HALF_ORC = 'half-orc',
 }
 
 export enum CharacterAlignment {
@@ -172,7 +172,7 @@ export enum CharacterAlignment {
 	CHAOTIC_NEUTRAL = 'chaotic-neutral',
 	LAWFUL_EVIL = 'lawful-evil',
 	NEUTRAL_EVIL = 'neutral-evil',
-	CHAOTIC_EVIL = 'chaotic-evil'
+	CHAOTIC_EVIL = 'chaotic-evil',
 }
 
 export enum CharacterCategory {
@@ -184,7 +184,7 @@ export enum CharacterCategory {
 	MERCHANT = 'merchant',
 	GUARD = 'guard',
 	NOBLE = 'noble',
-	COMMONER = 'commoner'
+	COMMONER = 'commoner',
 }
 
 /**

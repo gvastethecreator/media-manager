@@ -4,10 +4,10 @@
  * ✅ MIGRADO A DRIZZLE - Julio 2025
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { calculateCompleteness } from '@/lib/utils/transformers';
-import { handleTransformerError } from '@/lib/utils/transformers/errors';
-import type { TagBase, TagStatistics, TagWithStats } from '@/types/entities/tag';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { calculateCompleteness } from '../../lib/utils/transformers';
+import type { TagBase, TagStatistics, TagWithStats } from '../../types/entities/tag';
 import { fromStorageTag, normalizeTag, sanitizeTagForClient, toStorageTag } from './serializers';
 import { safeValidateTag, validateTag } from './validators';
 
@@ -34,7 +34,7 @@ export function fromDatabase(dbData: unknown): TagBase {
 		return validated;
 	} catch (error) {
 		logger.error('❌ Error transformando Tag desde DB:', error);
-		throw handleTransformerError(error as Error);
+		throw TransformerError.wrap(error as Error, 'Error transformando Tag desde DB');
 	}
 }
 
@@ -59,7 +59,7 @@ export function toDatabase(tag: TagBase): Record<string, unknown> {
 		return serialized as unknown as Record<string, unknown>;
 	} catch (error) {
 		logger.error('❌ Error transformando Tag para DB:', error);
-		throw handleTransformerError(error as Error);
+		throw TransformerError.wrap(error as Error, 'Error transformando Tag para DB');
 	}
 }
 
@@ -77,7 +77,7 @@ export function normalize(tag: Partial<TagBase>): TagBase {
 		return validated;
 	} catch (error) {
 		logger.error('❌ Error normalizando Tag:', error);
-		throw handleTransformerError(error as Error);
+		throw TransformerError.wrap(error as Error, 'Error normalizando Tag');
 	}
 }
 
@@ -98,7 +98,7 @@ export function forClient(tag: TagBase): TagBase {
 		return sanitized;
 	} catch (error) {
 		logger.error('❌ Error preparando Tag para cliente:', error);
-		throw handleTransformerError(error as Error);
+		throw TransformerError.wrap(error as Error, 'Error preparando Tag para cliente');
 	}
 }
 

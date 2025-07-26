@@ -33,9 +33,10 @@ export const createPropertyCoreSlice: StateCreator<
 	PropertyStore,
 	[['zustand/immer', never]],
 	[],
-	PropertyCoreState & PropertyCoreActions & {
-		setProperties: (properties: PropertyWithStats[]) => void;
-	}
+	PropertyCoreState &
+		PropertyCoreActions & {
+			setProperties: (properties: PropertyWithStats[]) => void;
+		}
 > = (set, get) => ({
 	...initialState,
 

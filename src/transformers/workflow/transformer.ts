@@ -7,7 +7,7 @@
  * @updated 2025-01-27
  */
 
-import { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
+import { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
 import { validateWorkflow } from './validators';
 
 /**
@@ -82,7 +82,7 @@ function normalizeWorkflowData(data: WorkflowInputData): WorkflowBase {
 		emoji: data.emoji || null,
 		color: data.color || null,
 		category: data.category || null,
-		isPublic: data.isPublic ?? false,
+
 		isFavorite: data.isFavorite ?? false,
 		isActive: data.isActive ?? true,
 		version: data.version || '1.0.0',

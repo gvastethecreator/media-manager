@@ -62,7 +62,18 @@ export function AlbumsView(_props: ViewProps) {
 		if (editingAlbum) {
 			updateAlbum({ id: editingAlbum.id, data: { name: albumName, description: albumDescription } });
 		} else {
-			createAlbum({ name: albumName, description: albumDescription });
+			createAlbum({
+				name: albumName,
+				description: albumDescription,
+				emoji: '📸',
+				color: '#3b82f6',
+				isFavorite: false,
+				filters: '[]',
+				sortBy: 'name',
+				featuredImage: undefined,
+				shortcut: undefined,
+				category: undefined,
+			});
 		}
 		setAlbumName('');
 		setAlbumDescription('');

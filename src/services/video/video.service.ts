@@ -43,7 +43,7 @@ export async function findVideos(
 	if (filters.search) params.append('search', filters.search);
 	if (filters.folders?.length) params.append('folders', filters.folders.join(','));
 	if (filters.isFavorite !== undefined) params.append('isFavorite', filters.isFavorite.toString());
-	if (filters.isPublic !== undefined) params.append('isPublic', filters.isPublic.toString());
+
 	if (filters.minDuration) params.append('minDuration', filters.minDuration.toString());
 	if (filters.maxDuration) params.append('maxDuration', filters.maxDuration.toString());
 	if (filters.minSize) params.append('minSize', filters.minSize.toString());
@@ -132,24 +132,6 @@ export async function toggleVideoFavorite(id: string, isFavorite: boolean): Prom
 	});
 	if (!response.ok) {
 		throw new Error('No se pudo actualizar el estado de favorito.');
-	}
-	return response.json();
-}
-
-/**
- * Cambia la visibilidad de un video
- * @param id ID del video
- * @param isPublic Si debe ser público o no
- * @returns Video actualizado con estadísticas
- */
-export async function setVideoVisibility(id: string, isPublic: boolean): Promise<VideoWithStats> {
-	const response = await fetch(`/api/videos/${id}/visibility`, {
-		method: 'PUT',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ isPublic }),
-	});
-	if (!response.ok) {
-		throw new Error('No se pudo actualizar la visibilidad.');
 	}
 	return response.json();
 }

@@ -6,7 +6,7 @@
  * @updated 2025-01-27
  */
 
-import type { WildcardBase, WildcardWithStats } from '@/types/entities/wildcard';
+import { WildcardBase, WildcardWithStats } from '../../types/entities/wildcard';
 
 /**
  * Serializa WildcardBase para respuestas de API
@@ -35,12 +35,14 @@ export function serializeWildcardWithStats(wildcard: WildcardWithStats): Record<
 	return {
 		...serializeWildcard(wildcard),
 		entityType: wildcard.entityType,
-		statistics: wildcard.statistics ? {
-			adaptabilityScore: wildcard.statistics.adaptabilityScore,
-			usageDiversity: wildcard.statistics.usageDiversity,
-			completenessScore: wildcard.statistics.completenessScore,
-			popularity: wildcard.statistics.popularity,
-		} : null,
+		statistics: wildcard.statistics
+			? {
+					adaptabilityScore: wildcard.statistics.adaptabilityScore,
+					usageDiversity: wildcard.statistics.usageDiversity,
+					completenessScore: wildcard.statistics.completenessScore,
+					popularity: wildcard.statistics.popularity,
+				}
+			: null,
 		_count: {
 			tags: wildcard._count.tags,
 			images: wildcard._count.images,

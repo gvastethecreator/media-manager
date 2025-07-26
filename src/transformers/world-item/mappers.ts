@@ -4,8 +4,8 @@
 
  */
 
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
 	WorldItemComplete,
 	WorldItemCreateInput,
@@ -14,7 +14,7 @@ import type {
 	WorldItemStatistics,
 	WorldItemUpdateInput,
 	WorldItemWithStats,
-} from '@/types/entities/world-item';
+} from '../../types/entities/world-item';
 
 // Las funciones de serialización ya no se usan en este archivo
 
@@ -155,7 +155,8 @@ function mapWorldItemFiltersToDrizzle(filters: WorldItemFilters): DrizzleWorldIt
 		where.OR = [{ name: { contains: filters.query } }, { description: { contains: filters.query } }];
 	}
 	if (filters.type && Array.isArray(filters.type) && filters.type.length) where.type = { in: filters.type };
-	if (filters.category && Array.isArray(filters.category) && filters.category.length) where.category = { in: filters.category };
+	if (filters.category && Array.isArray(filters.category) && filters.category.length)
+		where.category = { in: filters.category };
 	if (filters.rarity && Array.isArray(filters.rarity) && filters.rarity.length) where.rarity = { in: filters.rarity };
 	if (filters.isFavorite !== undefined) where.isFavorite = filters.isFavorite;
 	if (filters.hasImage !== undefined) {

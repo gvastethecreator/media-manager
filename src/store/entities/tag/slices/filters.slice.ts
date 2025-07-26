@@ -6,7 +6,7 @@
 import { StateCreator } from 'zustand';
 import type { TagWithStats } from '@/types/entities/tag';
 import { TagSortCriteria } from '@/types/entities/tag';
-import type { TagStore } from '../types';
+import type { TagCategory, TagStore } from '../types';
 
 /**
  * 🔍 Filtros para tags
@@ -17,7 +17,7 @@ export interface TagFilters {
 	/** Término de búsqueda */
 	searchTerm: string;
 	/** Filtro por categoría */
-	category: string | null; // Assuming category is a string
+	category: TagCategory | null;
 	/** Filtro por rareza - @deprecated La rareza no es una propiedad del modelo de datos actual. */
 	rarity?: string | null;
 }

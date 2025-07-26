@@ -110,7 +110,7 @@ export async function getVideos(filters: z.infer<typeof VideoFiltersSchema>) {
 					thumbnailSize: videos.thumbnailSize,
 					thumbnailWidth: videos.thumbnailWidth,
 					thumbnailHeight: videos.thumbnailHeight,
-					isPublic: videos.isPublic,
+
 					isFavorite: videos.isFavorite,
 					folderId: videos.folderId,
 					createdAt: videos.createdAt,
@@ -173,7 +173,7 @@ export async function getVideoById(id: string) {
 				thumbnailSize: videos.thumbnailSize,
 				thumbnailWidth: videos.thumbnailWidth,
 				thumbnailHeight: videos.thumbnailHeight,
-				isPublic: videos.isPublic,
+
 				isFavorite: videos.isFavorite,
 				folderId: videos.folderId,
 				createdAt: videos.createdAt,

@@ -212,10 +212,6 @@ export const searchPromptsService = async (
 			conditions.push(eq(prompts.category, filters.category));
 		}
 
-		if (filters.isPublic !== undefined) {
-			conditions.push(eq(prompts.isPublic, filters.isPublic));
-		}
-
 		if (filters.isFavorite !== undefined) {
 			conditions.push(eq(prompts.isFavorite, filters.isFavorite));
 		}
@@ -317,7 +313,7 @@ export const createPromptService = async (data: PromptCreateInput): Promise<Prom
 				emoji: data.emoji,
 				color: data.color,
 				category: data.category,
-				isPublic: data.isPublic || false,
+
 				isFavorite: data.isFavorite || false,
 				type: data.type,
 				content: data.content,
@@ -417,7 +413,7 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 		if (data.emoji !== undefined) updateData.emoji = data.emoji;
 		if (data.color !== undefined) updateData.color = data.color;
 		if (data.category !== undefined) updateData.category = data.category;
-		if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
+
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 		if (data.type !== undefined) updateData.type = data.type;
 		if (data.content !== undefined) updateData.content = data.content;

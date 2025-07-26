@@ -5,7 +5,7 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { FileBase, FileWithStats } from '@/types/entities/file';
+import type { FileBase, FileWithStats } from '../../types/entities/file';
 
 /**
  * 📁 Serializa un archivo base para respuestas API.

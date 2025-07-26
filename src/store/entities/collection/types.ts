@@ -97,7 +97,9 @@ export interface CollectionStore {
 	addCollection: (collection: Omit<CollectionWithStats, 'id' | 'createdAt' | 'updatedAt' | 'statistics'>) => void;
 	updateCollection: (id: string, updates: Partial<CollectionWithStats>) => void;
 	removeCollection: (id: string) => void;
-	bulkAddCollections: (collections: Omit<CollectionWithStats, 'id' | 'createdAt' | 'updatedAt' | 'statistics'>[]) => void;
+	bulkAddCollections: (
+		collections: Omit<CollectionWithStats, 'id' | 'createdAt' | 'updatedAt' | 'statistics'>[]
+	) => void;
 	bulkUpdateCollections: (updates: Record<string, Partial<CollectionWithStats>>) => void;
 	bulkRemoveCollections: (ids: string[]) => void;
 

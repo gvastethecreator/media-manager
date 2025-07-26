@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import type { GroupBase, GroupCreateInput, GroupUpdateInput } from '@/types/entities/group';
+import type { GroupBase, GroupCreateInput, GroupUpdateInput } from '../../types/entities/group';
 
 /**
  * Valida datos para crear un grupo

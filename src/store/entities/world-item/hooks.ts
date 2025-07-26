@@ -4,9 +4,14 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { WorldItemUpdateInput } from '@/types/entities/world-item/types';
 import { WORLD_ITEM_SORT_OPTIONS } from './constants';
 import { useWorldItemStore } from './index';
-import type { WorldItemUpdateData } from './types';
+
+/**
+ * Datos para actualizar un WorldItem desde la UI.
+ */
+export type WorldItemUpdateData = WorldItemUpdateInput;
 
 /**
  * Hook para acceder a todos los objetos del mundo, con filtrado y ordenamiento

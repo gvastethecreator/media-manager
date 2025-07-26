@@ -33,12 +33,15 @@ interface ThumbnailStore {
 }
 
 const initialStats: ThumbnailStats = {
-	pending: 0,
+	total: 0,
 	processed: 0,
-	totalFiles: 0,
-	withThumbnail: 0,
+	failed: 0,
+	pending: 0,
 	totalSize: 0,
+	processedSize: 0,
+	totalFiles: 0,
 	errors: [],
+	averageProcessingTime: 0,
 };
 
 const initialProcessStatus: ProcessStatus = {

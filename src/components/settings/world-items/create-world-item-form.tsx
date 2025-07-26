@@ -106,7 +106,7 @@ export function CreateWorldItemForm({
 					emoji: data.emoji || null,
 					color: data.color || null,
 					category: data.category || null,
-		
+
 					isFavorite: data.isFavorite || false,
 					totalImages: 0,
 					totalVideos: 0,
@@ -192,7 +192,7 @@ export function CreateWorldItemForm({
 					emoji: data.emoji || null,
 					color: data.color || null,
 					category: data.category || null,
-		
+
 					isFavorite: data.isFavorite || false,
 					totalImages: 0,
 					totalVideos: 0,
@@ -357,7 +357,7 @@ export function CreateWorldItemForm({
 						// Crear con valores por defecto
 						const createData: WorldItemCreateInput = {
 							...data,
-				
+
 							totalImages: 0,
 							totalVideos: 0,
 							featuredImage: null,

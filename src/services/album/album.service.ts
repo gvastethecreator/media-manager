@@ -6,13 +6,12 @@
  */
 
 import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
-import type { AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { toAlbumWithStats } from '@/transformers/album';
-import type { AlbumWithStats } from '@/types/entities/album';
+import type { AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/types/entities/album';
 
 const logger = serverLogger.withContext('AlbumService');
 
@@ -52,7 +51,7 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,
-				isPublic: albums.isPublic,
+
 				totalImages: albums.totalImages,
 				totalVideos: albums.totalVideos,
 				totalSize: albums.totalSize,
@@ -76,7 +75,7 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 		const transformedAlbum = {
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
-			isPublic: Boolean(rawAlbum.isPublic || false),
+
 			totalImages: rawAlbum.totalImages || 0,
 			totalVideos: rawAlbum.totalVideos || 0,
 			totalSize: rawAlbum.totalSize || 0,
@@ -143,7 +142,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,
-				isPublic: albums.isPublic,
+
 				totalImages: albums.totalImages,
 				totalVideos: albums.totalVideos,
 				totalSize: albums.totalSize,
@@ -176,7 +175,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 		const transformedAlbums = drizzleAlbums.map((rawAlbum: any) => ({
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
-			isPublic: Boolean(rawAlbum.isPublic || false),
+
 			totalImages: rawAlbum.totalImages || 0,
 			totalVideos: rawAlbum.totalVideos || 0,
 			totalSize: rawAlbum.totalSize || 0,
@@ -215,17 +214,16 @@ export async function createAlbum(data: AlbumCreateInput): Promise<AlbumWithStat
 				color: data.color || '#3b82f6',
 				description: data.description || null,
 				featuredImage: data.featuredImage || null,
-				isPublic: data.isPublic || false,
+
 				isFavorite: data.isFavorite || false,
-				totalImages: data.totalImages || 0,
-				totalVideos: data.totalVideos || 0,
-				totalSize: data.totalSize || 0,
+				totalImages: 0,
+				totalVideos: 0,
+				totalSize: 0,
 				filters: data.filters || null,
 				shortcut: data.shortcut || null,
 				category: data.category || null,
-				metadata: data.metadata || null,
-				lastImageAddedAt: data.lastImageAddedAt || null,
-				lastVideoAddedAt: data.lastVideoAddedAt || null,
+				lastImageAddedAt: null,
+				lastVideoAddedAt: null,
 			})
 			.returning();
 
@@ -259,17 +257,12 @@ export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<A
 				color: data.color,
 				description: data.description,
 				featuredImage: data.featuredImage,
-				isPublic: data.isPublic,
+
 				isFavorite: data.isFavorite,
-				totalImages: data.totalImages,
-				totalVideos: data.totalVideos,
-				totalSize: data.totalSize,
+
 				filters: data.filters,
 				shortcut: data.shortcut,
 				category: data.category,
-				metadata: data.metadata,
-				lastImageAddedAt: data.lastImageAddedAt,
-				lastVideoAddedAt: data.lastVideoAddedAt,
 				updatedAt: sql`(strftime('%s', 'now'))`,
 			})
 			.where(eq(albums.id, id))

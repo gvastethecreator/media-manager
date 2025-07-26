@@ -35,8 +35,8 @@ export interface VideoBase {
 	thumbnailHeight: number | null;
 
 	// Estados
-
 	isFavorite: boolean;
+	isHidden: boolean;
 
 	// Relaciones
 	folderId: string;

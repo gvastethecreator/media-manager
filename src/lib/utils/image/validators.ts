@@ -84,7 +84,6 @@ export const updateImageSchema = z.object({
 	description: z.string().optional(),
 	presetId: z.string().nullable().optional(),
 	isFavorite: z.boolean().optional(),
-	isPublic: z.boolean().optional(),
 });
 
 /**

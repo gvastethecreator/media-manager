@@ -20,7 +20,7 @@ type DrizzlePlaceWithCounts = {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -57,7 +57,7 @@ type DrizzleCreatePlaceData = {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -90,8 +90,8 @@ type DrizzleWhereFilter = {
 	name?: { contains?: string; equals?: string };
 	description?: { contains?: string; equals?: string };
 	history?: { contains?: string; equals?: string };
-	category?: { equals?: string };
-	type?: { equals?: string };
+	category?: { equals?: string; in?: string[] };
+	type?: { equals?: string; in?: string[] };
 	location?: { equals?: string };
 	isFavorite?: boolean;
 };
@@ -141,6 +141,8 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 
 	const result: PlaceWithStats = {
 		...rest,
+		lore: undefined,
+		shortcut: undefined,
 		entityType: 'place' as const,
 		_stats: statistics,
 		stats: statistics,
@@ -158,7 +160,7 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 		characters: _count?.characters ?? 0,
 		collections: _count?.collections ?? 0,
 		concepts: _count?.concepts ?? 0,
-	};
+	} as unknown as PlaceWithStats;
 
 	return result;
 }
@@ -251,11 +253,19 @@ export function createFilterForDrizzle(filters: PlaceSearchOptions['filters'] = 
 	}
 
 	if (filters?.category) {
-		where.category = { equals: filters.category };
+		if (Array.isArray(filters.category)) {
+			where.category = { in: filters.category };
+		} else {
+			where.category = { equals: filters.category };
+		}
 	}
 
 	if (filters?.type) {
-		where.type = { equals: filters.type };
+		if (Array.isArray(filters.type)) {
+			where.type = { in: filters.type };
+		} else {
+			where.type = { equals: filters.type };
+		}
 	}
 
 	if (filters?.location) {

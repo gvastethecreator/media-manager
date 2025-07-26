@@ -6,12 +6,12 @@
 
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { formatFileSize } from '@/lib/utils/format.utils';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { VideoStatistics } from '@/types/entities/video/base';
-import type { VideoComplete, VideoWithStats } from '@/types/entities/video/types';
-import { VideoQuality } from '@/types/entities/video/types';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { formatFileSize } from '../../lib/utils/format.utils';
+import type { VideoStatistics } from '../../types/entities/video/base';
+import type { VideoComplete, VideoWithStats } from '../../types/entities/video/types';
+import { VideoQuality } from '../../types/entities/video/types';
 
 // Enum para calidad de video (definición local si no existe en types)
 enum VideoQualityLocal {
@@ -146,7 +146,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		});
 
 		// 📈 Determinar technical grade
-		const technicalGrade = determineTechnicalGrade(qualityScore, qualityLevel as VideoQuality, megabytes);
+		const technicalGrade = determineTechnicalGrade(qualityScore, qualityLevel as unknown as VideoQuality, megabytes);
 
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);
@@ -157,7 +157,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 
 		// 🏷️ Auto-tagging inteligente
 		const autoTags = generateAutoTags({
-			qualityLevel,
+			qualityLevel: qualityLevel as unknown as VideoQuality,
 			durationMinutes,
 			hasAudio,
 			hasSubtitles,
@@ -223,12 +223,11 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			thumbnail: baseData.thumbnail ? baseData.thumbnail.toString('base64') : null,
 			folderId: baseData.folderId || '',
 			entityType: 'video' as const,
+			isHidden: false,
 			stats: statistics,
 			thumbnailUrl: baseData.thumbnail ? `/api/videos/${baseData.id}/thumbnail` : null,
 			description: null,
 			hash: '',
-			isPublic: false,
-			isHidden: false,
 		};
 	} catch (error) {
 		logger.error('Error al transformar video de Drizzle:', { error, videoId: drizzleVideo?.id });
@@ -256,10 +255,9 @@ export function fromDrizzleVideo(videoFromDrizzle: DrizzleVideoFromDrizzle | nul
 			folderId: videoFromDrizzle.folderId || '',
 			thumbnail: videoFromDrizzle.thumbnail ? videoFromDrizzle.thumbnail.toString('base64') : null,
 			// Propiedades requeridas faltantes
+			isHidden: false,
 			description: null,
 			hash: '',
-			isPublic: false,
-			isHidden: false,
 			// Simplificar relaciones para evitar dependencias circulares
 			tags: (videoFromDrizzle.tags || []) as unknown as any[],
 			albums: (videoFromDrizzle.albums || []) as unknown as any[],

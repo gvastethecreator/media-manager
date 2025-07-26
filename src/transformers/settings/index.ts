@@ -19,12 +19,12 @@ export * from './validators';
 
 // ===== FUNCIONES DE COMPATIBILIDAD LEGACY =====
 
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { handleTransformerError } from '@/lib/utils/transformers/errors';
 import type { Settings } from '@/types/settings';
 import { deserializeSettingsJson, serializeSettingsJson } from './serializers';
-import { validateSettings as validateSettingsInternal } from './validators';
 import { forClient, normalize } from './transformer';
+import { validateSettings as validateSettingsInternal } from './validators';
 
 const _logger = serverLogger.withContext('SettingsTransformer:legacy');
 
@@ -152,7 +152,7 @@ export function deserializeSettingsJsonLegacy<T>(settingsData: T): T {
 	try {
 		return deserializeSettingsJson(settingsData);
 	} catch (error) {
-		throw handleTransformerError(error as Error);
+		throw TransformerError.wrap(error as Error, 'Error deserializando configuración JSON');
 	}
 }
 
@@ -165,7 +165,7 @@ export function serializeSettingsJsonLegacy<T>(settingsData: T): T {
 	try {
 		return serializeSettingsJson(settingsData);
 	} catch (error) {
-		throw handleTransformerError(error as Error);
+		throw TransformerError.wrap(error as Error, 'Error serializando configuración JSON');
 	}
 }
 
@@ -178,7 +178,7 @@ export function validateSettingsLegacy<T>(settingsData: T): T {
 	try {
 		return validateSettingsInternal(settingsData as any) as T;
 	} catch (error) {
-		throw handleTransformerError(error as Error);
+		throw TransformerError.wrap(error as Error, 'Error validando configuración');
 	}
 }
 

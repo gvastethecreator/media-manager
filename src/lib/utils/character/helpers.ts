@@ -48,7 +48,7 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
 		color: overrides.color || color,
 		description: overrides.description || null,
 		category: overrides.category || null,
-		isPublic: overrides.isPublic || false,
+
 		isFavorite: overrides.isFavorite || false,
 		totalImages: overrides.totalImages || 0,
 		totalVideos: overrides.totalVideos || 0,

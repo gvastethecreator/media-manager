@@ -1,12 +1,12 @@
 /**
  * @file Transformador principal para la entidad Place
  * @module transformers/place/transformer
- 
+
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { PlaceBase, PlaceStatistics, PlaceWithStats } from '@/types/entities/place';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type { PlaceBase, PlaceStatistics, PlaceWithStats } from '../../types/entities/place';
 
 const logger = serverLogger.withContext('PlaceTransformer');
 

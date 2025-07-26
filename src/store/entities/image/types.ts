@@ -5,7 +5,12 @@
  * Última actualización: 2025-01-27
  */
 
-import type { ImageSortCriteria, ImageViewConfig, ImageViewMode, ImageWithStats } from '../../../types/entities/image/types';
+import type {
+	ImageSortCriteria,
+	ImageViewConfig,
+	ImageViewMode,
+	ImageWithStats,
+} from '../../../types/entities/image/types';
 
 /**
  * Tipos de agrupamiento para imágenes

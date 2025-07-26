@@ -4,7 +4,7 @@
  
  */
 
-import type { JsonFileBase, JsonFileCreateInput, JsonFileUpdateInput } from '@/types/entities/json-file';
+import type { JsonFileBase, JsonFileCreateInput, JsonFileUpdateInput } from '../../types/entities/json-file';
 
 /**
  * Mapea datos de creación a formato Drizzle

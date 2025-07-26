@@ -74,7 +74,7 @@ export function normalizeAlbumFilters(filters: {
 	searchQuery?: string;
 	categories?: string[];
 	isFavorite?: boolean;
-	isPublic?: boolean;
+
 	startDate?: Date | string;
 	endDate?: Date | string;
 	limit?: number;
@@ -84,7 +84,7 @@ export function normalizeAlbumFilters(filters: {
 		searchQuery: filters.searchQuery || '',
 		categories: filters.categories || [],
 		isFavorite: filters.isFavorite ?? false,
-		isPublic: filters.isPublic ?? true,
+
 		startDate: filters.startDate || new Date(0),
 		endDate: filters.endDate || new Date(),
 		limit: Math.min(filters.limit || 20, 100), // Máximo 100

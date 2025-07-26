@@ -214,7 +214,7 @@ export function createPromptFromTemplate(templateId: string, variables?: Record<
 			parameters: JSON.stringify(varsToUse),
 			tags: template.tags,
 			isFavorite: false,
-			isPublic: false,
+
 			totalImages: 0,
 			totalVideos: 0,
 			emoji: '📝',

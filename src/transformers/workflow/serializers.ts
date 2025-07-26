@@ -6,7 +6,7 @@
  * @updated 2025-01-27
  */
 
-import { WorkflowBase, WorkflowWithStats } from '@/types/entities/workflow';
+import { WorkflowBase, WorkflowWithStats } from '../../types/entities/workflow';
 
 /**
  * Serializa WorkflowBase para respuestas de API
@@ -19,7 +19,7 @@ export function serializeWorkflow(workflow: WorkflowBase): Record<string, unknow
 		emoji: workflow.emoji,
 		color: workflow.color,
 		category: workflow.category,
-		isPublic: workflow.isPublic,
+
 		isFavorite: workflow.isFavorite,
 		isActive: workflow.isActive,
 		version: workflow.version,

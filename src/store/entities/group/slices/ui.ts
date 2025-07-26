@@ -5,9 +5,9 @@
 
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { GroupViewMode, GroupViewConfig, GroupWithStats } from '@/types/entities/group';
+import type { GroupViewConfig, GroupViewMode, GroupWithStats } from '@/types/entities/group';
 import type { GroupDisplayState as GroupDisplayStateFromTypes } from '@/types/entities/group/types';
-import type { GroupStore, GroupDisplayState } from '../types';
+import type { GroupDisplayState, GroupStore } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupUI');
 
@@ -162,7 +162,7 @@ export const createGroupUISlice: StateCreator<GroupStore, [], [], GroupUISlice> 
 		const currentGroupId = get().currentGroupId;
 		if (!currentGroupId) return null;
 		const groups = get().groups;
-		return groups.find(group => group.id === currentGroupId) || null;
+		return groups.find((group) => group.id === currentGroupId) || null;
 	},
 
 	// Modo de visualización
@@ -230,7 +230,7 @@ export const createGroupUISlice: StateCreator<GroupStore, [], [], GroupUISlice> 
 
 	expandAllGroups: () => {
 		groupLogger.info('📂 Expandiendo todos los grupos');
-		const allGroupIds = get().groups.map(group => group.id);
+		const allGroupIds = get().groups.map((group) => group.id);
 		set({ expandedIds: allGroupIds });
 	},
 

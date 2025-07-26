@@ -19,6 +19,7 @@ export type {
 	TagCreateInput,
 	TagStatistics,
 	TagUpdateInput,
+	TagWithCounts,
 	TagWithStats,
 } from './base';
 // --- Tipos Canónicos (NUEVO) ---

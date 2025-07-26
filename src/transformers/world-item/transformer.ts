@@ -4,7 +4,14 @@
  * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
  */
 
-import type { WorldItemComplete } from '@/types/entities/world-item';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type {
+	WorldItemBase,
+	WorldItemComplete,
+	WorldItemStatistics,
+	WorldItemWithStats,
+} from '../../types/entities/world-item';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleWorldItemFromDrizzle = {
@@ -73,7 +80,7 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		// Propiedades faltantes con valores por defecto
 		emoji: null,
 		color: null,
-		isPublic: false,
+
 		totalImages: 0,
 		totalVideos: 0,
 		materials: null,

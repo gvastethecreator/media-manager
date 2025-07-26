@@ -146,7 +146,7 @@ export function CreatePlaceForm({
 					shortcut: normalize(values.shortcut),
 					featuredImage: normalize(values.featuredImage),
 					isFavorite: !!values.isFavorite,
-	
+
 					totalImages: 0,
 					totalVideos: 0,
 					location: null,

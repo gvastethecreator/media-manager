@@ -22,7 +22,6 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 		const result = drizzleCollections.map((collection: any) => ({
 			...collection,
 			isFavorite: Boolean(collection.isFavorite),
-			isPublic: Boolean(collection.isPublic),
 			stats: {
 				imageCount: collection.totalImages || 0,
 				videoCount: collection.totalVideos || 0,

@@ -4,9 +4,9 @@
  * @description Contiene funciones para manejar la serialización de campos complejos (JSON) de la entidad Video.
  */
 
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { VideoMetadata } from '@/types/entities/video';
+import type { VideoMetadata } from '../../types/entities/video';
 
 const logger = serverLogger.withContext('VideoSerializers');
 

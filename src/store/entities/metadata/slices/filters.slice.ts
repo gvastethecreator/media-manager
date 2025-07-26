@@ -135,11 +135,9 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 			// Filtro por búsqueda de texto
 			if (filterOptions.searchTerm && filterOptions.searchTerm.trim() !== '') {
 				const searchTerm = filterOptions.searchTerm.toLowerCase();
-				const searchableText = [
-					metadata.format,
-					metadata.colorSpace,
-					`${metadata.width}x${metadata.height}`,
-				].join(' ').toLowerCase();
+				const searchableText = [metadata.format, metadata.colorSpace, `${metadata.width}x${metadata.height}`]
+					.join(' ')
+					.toLowerCase();
 
 				if (!searchableText.includes(searchTerm)) {
 					return false;

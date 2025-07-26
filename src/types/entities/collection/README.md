@@ -33,7 +33,7 @@ graph TD
 import type { CollectionBase, CollectionCreateInput } from '@/types/entities/collection';
 import { CollectionSchema } from '@/types/entities/collection/types';
 
-const nueva: CollectionCreateInput = { name: 'NFTs', type: 'digital', isPublic: true, isFavorite: false };
+const nueva: CollectionCreateInput = { name: 'NFTs', type: 'digital', isFavorite: false };
 const validada = CollectionSchema.parse(nueva);
 ```
 

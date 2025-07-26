@@ -5,8 +5,8 @@
  */
 
 import { z } from 'zod';
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { Settings } from '@/types/settings';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type { Settings } from '../../types/settings';
 import { settingsSchema, type UpdateSettings, updateSettingsSchema } from './schema';
 
 const logger = serverLogger.withContext('SettingsValidators');
