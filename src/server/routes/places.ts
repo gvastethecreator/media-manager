@@ -21,7 +21,7 @@ const PlaceFiltersSchema = z.object({
 router.get('/', async (req, res) => {
 	const parse = PlaceFiltersSchema.safeParse(req.query);
 	if (!parse.success) {
-		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });; return;
 	}
 
 	const { search, limit, offset, sortBy, sortOrder, category, isFavorite } = parse.data;
@@ -92,7 +92,7 @@ router.get('/:id', async (req, res) => {
 		});
 
 		if (!place) {
-			return res.status(404).json({ error: 'Lugar no encontrado' });
+			res.status(404).json({ error: 'Lugar no encontrado' });; return;
 		}
 
 		res.json(place);

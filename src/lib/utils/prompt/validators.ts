@@ -127,37 +127,37 @@ export function validatePrompt(prompt: PromptBase | PromptExtended): {
 	try {
 		const errors: Record<string, string> = {};
 
-		// Validar título
-		if (!isValidPromptTitle(prompt.title)) {
+		// Validar título (usando title o name, con null safety)
+		const title = prompt.title || prompt.name || '';
+		if (!isValidPromptTitle(title)) {
 			errors.title = 'El título debe tener entre 3 y 100 caracteres';
 		}
 
-		// Validar contenido
-		if (!isValidPromptContent(prompt.content)) {
+		// Validar contenido (con null safety)
+		if (!isValidPromptContent(prompt.content || '')) {
 			errors.content = 'El contenido debe tener al menos 5 caracteres';
 		}
 
-		// Validar categoría
-		if (!isValidPromptCategory(prompt.category)) {
+		// Validar categoría (con null safety)
+		if (!isValidPromptCategory(prompt.category || '')) {
 			errors.category = 'La categoría seleccionada no es válida';
 		}
 
-		// Validar modelo
-		if (!isValidPromptModel(prompt.model)) {
+		// Validar modelo (con null safety)
+		const model = prompt.model || '';
+		if (!isValidPromptModel(model)) {
 			errors.model = 'El modelo seleccionado no es válido';
 		}
 
-		// Validar parámetros
+		// Validar parámetros (con null safety)
 		const params = 'parsedParameters' in prompt ? prompt.parsedParameters : prompt.parameters;
-
-		if (!isValidPromptParameters(params)) {
+		if (params && !isValidPromptParameters(params)) {
 			errors.parameters = 'Los parámetros tienen un formato inválido';
 		}
 
-		// Validar tags
+		// Validar tags (con null safety)
 		const tags = 'parsedTags' in prompt ? prompt.parsedTags : prompt.tags;
-
-		if (!isValidPromptTags(tags)) {
+		if (tags && !isValidPromptTags(tags)) {
 			errors.tags = 'Los tags tienen un formato inválido';
 		}
 

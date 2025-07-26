@@ -1,7 +1,9 @@
 /**
  * @file Servicio para gestión de colecciones
  * @module services/collection
- * @description Servicio centralizado para operaciones CRUD y lógica de negocio de colecciones
+ * @description Servicio centralizado para ope		if (options.where.isFavorite !== undefined) {
+			conditions.push(eq(collections.isFavorite, options.where.isFavorite));
+		}iones CRUD y lógica de negocio de colecciones
  * @updated 2025-01-27
  */
 
@@ -9,9 +11,9 @@ import * as crypto from 'crypto';
 import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
-import { collections, images } from '@/lib/drizzle/schema/index';
+import { collections, images, imageCollections } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit } from '@/lib/server/events.server';
+import { emit, type EventType } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';
@@ -86,7 +88,7 @@ export const notifyCollectionChange = async (
 
 	// Emitir evento al sistema central
 	await emit({
-		type: eventType,
+		type: eventType as EventType,
 		data: { action, collection },
 	});
 
@@ -126,7 +128,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		}
 
 		if (options.where?.isFavorite !== undefined) {
-			conditions.push(eq(collections.isFavorite, options.where.isFavorite ? 1 : 0));
+			conditions.push(eq(collections.isFavorite, Boolean(options.where.isFavorite)));
 		}
 
 		// Nota: La tabla collections no tiene campo category, se omite este filtro
@@ -190,7 +192,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		// Transformar usando el transformer correcto
 		const result = transformedCollections
 			.map((collection: any) => fromDrizzleCollection(collection, collection._count))
-			.filter((c): c is CollectionWithStats => c !== null);
+			.filter((c: CollectionWithStats | null): c is CollectionWithStats => c !== null);
 
 		logger.info(`✅ ${result.length} colecciones encontradas`);
 		return result;
@@ -418,7 +420,21 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 		// Revalidar rutas
 		await revalidateCollectionPaths();
 
-		const collectionWithStats = fromDrizzleCollection(transformedCollection as any);
+		const collectionWithStats = fromDrizzleCollection(transformedCollection as any, {
+			images: 0,
+			videos: 0,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+			characters: 0,
+			places: 0,
+			concepts: 0,
+			prompts: 0,
+			notes: 0,
+			wildcards: 0,
+			properties: 0,
+			groups: 0,
+		});
 		if (!collectionWithStats) {
 			throw new CollectionServiceError('Error al transformar la colección recién creada', 'TRANSFORM_FAILED');
 		}
@@ -551,7 +567,8 @@ export const getCollectionImages = async (id: string): Promise<{ id: string; nam
 				path: images.path,
 			})
 			.from(images)
-			.innerJoin(collections, eq(images.collectionId, collections.id))
+			.innerJoin(imageCollections, eq(images.id, imageCollections.A))
+			.innerJoin(collections, eq(imageCollections.B, collections.id))
 			.where(eq(collections.id, id))
 			.orderBy(desc(images.createdAt));
 

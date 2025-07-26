@@ -24,6 +24,8 @@ export const STATS_EVENTS = {
 	PROMPT_CHANGE: 'prompt_change',
 	NOTE_CHANGE: 'note_change',
 	GROUP_CHANGE: 'group_change',
+	PROPERTY_CHANGE: 'property_change',
+	WILDCARD_CHANGE: 'wildcard_change',
 } as const;
 
 // Mapeo de eventos internos a EventType compatible
@@ -45,6 +47,8 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 	[STATS_EVENTS.FILES_CHANGE]: 'files:modified',
 	[STATS_EVENTS.PROMPT_CHANGE]: 'prompts:modified',
 	[STATS_EVENTS.NOTE_CHANGE]: 'notes:modified',
+	[STATS_EVENTS.PROPERTY_CHANGE]: 'properties:modified',
+	[STATS_EVENTS.WILDCARD_CHANGE]: 'wildcards:modified',
 } as const;
 
 export type StatsEventType = (typeof STATS_EVENTS)[keyof typeof STATS_EVENTS];

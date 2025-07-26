@@ -71,6 +71,7 @@ export interface WildcardWithCounts extends WildcardBase {
 		characters: number;
 		places: number;
 		notes: number;
+		childWildcards: number;
 	};
 }
 
@@ -90,6 +91,7 @@ export interface WildcardWithStats extends WildcardBase {
 		characters: number;
 		places: number;
 		notes: number;
+		childWildcards: number;
 	};
 }
 

@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
 		const property = await propertyService.getPropertyById(id);
 
 		if (!property) {
-			return res.status(404).json({ error: 'Property no encontrada' });
+			res.status(404).json({ error: 'Property no encontrada' });; return;
 		}
 
 		res.json(toPropertyWithStats(property));
@@ -74,7 +74,7 @@ router.post('/', async (req, res) => {
 		const { name, value, type, description, isPublic } = req.body;
 
 		if (!name || !value) {
-			return res.status(400).json({ error: 'El nombre y valor son requeridos' });
+			res.status(400).json({ error: 'El nombre y valor son requeridos' });; return;
 		}
 
 		const property = await propertyService.createProperty({
@@ -107,7 +107,7 @@ router.put('/:id', async (req, res) => {
 		});
 
 		if (!property) {
-			return res.status(404).json({ error: 'Property no encontrada' });
+			res.status(404).json({ error: 'Property no encontrada' });; return;
 		}
 
 		res.json(toPropertyWithStats(property));
@@ -125,7 +125,7 @@ router.delete('/:id', async (req, res) => {
 		const deleted = await propertyService.deleteProperty(id);
 
 		if (!deleted) {
-			return res.status(404).json({ error: 'Property no encontrada' });
+			res.status(404).json({ error: 'Property no encontrada' });; return;
 		}
 
 		res.status(204).send();

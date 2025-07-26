@@ -71,7 +71,7 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 			.orderBy(desc(file3Ds.createdAt));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D) => ({
+		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D: typeof drizzleFile3Ds[0]) => ({
 			...rawFile3D,
 			isFavorite: Boolean(rawFile3D.isFavorite),
 		}));

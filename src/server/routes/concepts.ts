@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = ConceptFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			return res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });; return;
 		}
 
 		const filters = filtersResult.data;
@@ -82,7 +82,7 @@ router.get('/', async (req, res) => {
 				.select({ count: count() })
 				.from(concepts)
 				.where(whereClause)
-				.then((result) => result[0]?.count || 0),
+				.then((result: any) => result[0]?.count || 0),
 		]);
 
 		res.json({
@@ -109,7 +109,7 @@ router.get('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
 		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de concepto inválido' });
+			res.status(400).json({ error: 'ID de concepto inválido' });; return;
 		}
 
 		const conceptResult = await db
@@ -140,7 +140,7 @@ router.get('/:id', async (req, res) => {
 			.limit(1);
 
 		if (!conceptResult.length) {
-			return res.status(404).json({ error: 'Concepto no encontrado' });
+			res.status(404).json({ error: 'Concepto no encontrado' });; return;
 		}
 
 		res.json(conceptResult[0]);

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import type { ExpressHandler } from '@/lib/express-types';
 import {
 	createAudio,
 	deleteAudio,
@@ -40,14 +41,14 @@ const AudioCreateSchema = z.object({
 	comment: z.string().nullable().optional(),
 	lyrics: z.string().nullable().optional(),
 	bpm: z.number().nullable().optional(),
-	key: z.string().nullable().optional(),
+	key: z.string().nullable(),
 	mood: z.string().nullable().optional(),
 });
 
 const AudioUpdateSchema = AudioCreateSchema.partial();
 
 // GET /api/audio
-router.get('/', async (_req, res) => {
+const getAudiosHandler: ExpressHandler = async (_req, res) => {
 	try {
 		const audios = await getAudios();
 		res.json(audios);
@@ -58,16 +59,18 @@ router.get('/', async (_req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.get('/', (req, res) => getAudiosHandler(req, res));
 
 // GET /api/audio/:id
-router.get('/:id', async (req, res) => {
+const getAudioByIdHandler: ExpressHandler = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const audio = await getAudioById(id);
 
 		if (!audio) {
-			return res.status(404).json({ error: 'Archivo de audio no encontrado' });
+			res.status(404).json({ error: 'Archivo de audio no encontrado' });; return;
 		}
 
 		res.json(audio);
@@ -78,10 +81,12 @@ router.get('/:id', async (req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.get('/:id', (req, res) => getAudioByIdHandler(req, res));
 
 // POST /api/audio
-router.post('/', async (req, res) => {
+const createAudioHandler: ExpressHandler = async (req, res) => {
 	try {
 		const validatedData = AudioCreateSchema.parse(req.body);
 		const newAudio = await createAudio(validatedData);
@@ -93,10 +98,12 @@ router.post('/', async (req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.post('/', (req, res) => createAudioHandler(req, res));
 
 // PUT /api/audio/:id
-router.put('/:id', async (req, res) => {
+const updateAudioHandler: ExpressHandler = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const validatedData = AudioUpdateSchema.parse(req.body);
@@ -109,15 +116,17 @@ router.put('/:id', async (req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.put('/:id', (req, res) => updateAudioHandler(req, res));
 
 // DELETE /api/audio/:id
-router.delete('/:id', async (req, res) => {
+const deleteAudioHandler: ExpressHandler = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const result = await deleteAudio(id);
 		if (!result.success) {
-			return res.status(404).json({ error: 'Archivo de audio no encontrado' });
+			res.status(404).json({ error: 'Archivo de audio no encontrado' });; return;
 		}
 		res.json({
 			success: true,
@@ -131,10 +140,12 @@ router.delete('/:id', async (req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.delete('/:id', (req, res) => deleteAudioHandler(req, res));
 
 // GET /api/audio/stats/formats
-router.get('/stats/formats', async (_req, res) => {
+const getAudioFormatStatsHandler: ExpressHandler = async (_req, res) => {
 	try {
 		const formatStats = await getAudioFormatStats();
 		res.json({
@@ -147,10 +158,12 @@ router.get('/stats/formats', async (_req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.get('/stats/formats', (req, res) => getAudioFormatStatsHandler(req, res));
 
 // GET /api/audio/stats/genres
-router.get('/stats/genres', async (_req, res) => {
+const getAudioGenreStatsHandler: ExpressHandler = async (_req, res) => {
 	try {
 		const genreStats = await getAudioGenreStats();
 		res.json({
@@ -163,6 +176,8 @@ router.get('/stats/genres', async (_req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.get('/stats/genres', (req, res) => getAudioGenreStatsHandler(req, res));
 
 export { router as audioRouter };

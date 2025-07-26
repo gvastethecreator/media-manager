@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = PromptFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			return res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });; return;
 		}
 
 		const filters = filtersResult.data;
@@ -153,7 +153,7 @@ router.get('/:id', async (req, res) => {
 		const { id } = req.params;
 
 		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de prompt inválido' });
+			res.status(400).json({ error: 'ID de prompt inválido' });; return;
 		}
 
 		const promptResult = await db
@@ -189,7 +189,7 @@ router.get('/:id', async (req, res) => {
 
 		const prompt = promptResult[0];
 		if (!prompt) {
-			return res.status(404).json({ error: 'Prompt no encontrado' });
+			res.status(404).json({ error: 'Prompt no encontrado' });; return;
 		}
 
 		// Formatear respuesta para compatibilidad

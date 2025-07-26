@@ -337,8 +337,8 @@ export class OptimizedStatsService {
 				const batchTagStatsQuery =
 					tagIds && tagIds.length > 0
 						? await db.all(
-								sql.raw(
-									`
+							sql.raw(
+								`
 						SELECT
 							t.id as tagId,
 							t.name,
@@ -360,9 +360,9 @@ export class OptimizedStatsService {
 						WHERE t.id IN (${tagIds.map(() => '?').join(',')})
 						GROUP BY t.id, t.name, t.color
 					`,
-									tagIds
-								)
+								tagIds
 							)
+						)
 						: await db.all(sql`
 						SELECT
 							t.id as tagId,
@@ -445,8 +445,8 @@ export class OptimizedStatsService {
 				const batchCollectionStatsQuery =
 					collectionIds && collectionIds.length > 0
 						? await db.all(
-								sql.raw(
-									`
+							sql.raw(
+								`
 						SELECT
 							c.id as collectionId,
 							c.name,
@@ -467,9 +467,9 @@ export class OptimizedStatsService {
 						WHERE c.id IN (${collectionIds.map(() => '?').join(',')})
 						GROUP BY c.id, c.name
 					`,
-									collectionIds
-								)
+								collectionIds
 							)
+						)
 						: await db.all(sql`
 						SELECT
 							c.id as collectionId,
@@ -653,7 +653,7 @@ export class OptimizedStatsService {
 						videoCount: number;
 						totalCount: number;
 					}>
-				).map((tag) => ({
+				).map((tag: typeof topTagsQuery[0]) => ({
 					id: tag.id,
 					name: tag.name,
 					color: tag.color || '#6B7280',
