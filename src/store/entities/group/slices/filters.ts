@@ -101,35 +101,35 @@ export const createGroupFiltersSlice: StateCreator<GroupStore, [], [], GroupFilt
 	applyFilters: (groups: GroupWithStats[]) => {
 		const state = get();
 		const { searchQuery, filterByType, filterByCategory, filterFavorites } = state;
-		
-		return groups.filter(group => {
+
+		return groups.filter((group) => {
 			// Filtro por búsqueda
 			if (searchQuery && !group.name.toLowerCase().includes(searchQuery.toLowerCase())) {
 				return false;
 			}
-			
+
 			// Filtro por tipo
 			if (filterByType && group.category !== filterByType) {
 				return false;
 			}
-			
+
 			// Filtro por categoría
 			if (filterByCategory && group.category !== filterByCategory) {
 				return false;
 			}
-			
+
 			// Filtro por favoritos
 			if (filterFavorites && !group.isFavorite) {
 				return false;
 			}
-			
+
 			return true;
 		});
 	},
 
 	applySort: (groups: GroupWithStats[]) => {
 		const { sortBy } = get();
-		
+
 		return [...groups].sort((a, b) => {
 			switch (sortBy) {
 				case GroupSortCriteria.NAME_ASC:

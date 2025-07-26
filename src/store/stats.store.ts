@@ -157,56 +157,108 @@ const updateStats = async (_id: string, _data: StatsUpdate) => {
 	}
 };
 
-// Crear el store base usando StoreFactory
-export const useStatsBaseStore = createStoreFactory<StatsData, Record<string, unknown>, StatsCreate, StatsUpdate>(
-	{
-		name: 'stats',
-		logger: statsLogger,
-		initialState: {
-			items: [],
-			loading: false,
-			error: null,
-			currentPage: 1,
-			totalPages: 1,
-			itemsPerPage: 1,
-			selectedItem: null,
-			selectedItems: [],
-			lastSelectedItem: null,
-		},
-		actions: {
-			beforeCreate: async (data) => {
-				// Validaciones antes de crear
-				if (!data.timestamp) {
-					data.timestamp = Date.now();
-				}
-				return data;
-			},
-			afterCreate: async (stats) => {
-				statsLogger.info('Estadísticas creadas exitosamente', { stats });
-			},
-			beforeUpdate: async (_id, data) => {
-				// Validaciones antes de actualizar
-				if (data.timestamp === undefined) {
-					data.timestamp = Date.now();
-				}
-				return data;
-			},
-			afterUpdate: async (stats) => {
-				statsLogger.info('Estadísticas actualizadas exitosamente', { stats });
-			},
-		},
+// Crear el store usando Zustand directamente
+export const useStatsBaseStore = create<{
+	stats: StatsData | null;
+	loading: boolean;
+	error: string | null;
+	fetchStats: () => Promise<void>;
+	updateStats: (data: StatsUpdate) => Promise<void>;
+}>((set, get) => ({
+	stats: null,
+	loading: false,
+	error: null,
+	fetchStats: async () => {
+		set({ loading: true, error: null });
+		try {
+			const data = await getSystemStatsFromApi();
+			if (!data) throw new Error('No se pudieron obtener las estadísticas');
+			set({
+				stats: {
+					id: 'stats',
+					name: 'Estadísticas',
+					...data,
+					// Propiedades adicionales requeridas por StatsData
+					totalFavorites: 0,
+					totalViews: 0,
+					totalDownloads: 0,
+					totalSize: data.storageUsed || 0,
+					totalPlaces: 0,
+					totalWorldItems: 0,
+					totalActivities: 0,
+					totalDocuments: 0,
+					totalJsonFiles: 0,
+					totalWorkflows: 0,
+					totalFile3D: 0,
+					// Listas detalladas
+					folders: [],
+					collections: [],
+					tags: [],
+					albums: [],
+					characters: [],
+					places: [],
+					worldItems: [],
+					topTags: [],
+					recentActivity: [],
+					// Metadata
+					timestamp: Date.now(),
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				},
+				loading: false,
+			});
+		} catch (error) {
+			statsLogger.error('Error al obtener estadísticas:', error);
+			set({ error: error instanceof Error ? error.message : 'Error desconocido', loading: false });
+		}
 	},
-	{
-		getItems: getStats,
-		updateItem: updateStats,
-		createItem: async () => {
-			throw new Error('No se pueden crear estadísticas manualmente');
-		},
-		deleteItem: async () => {
-			throw new Error('No se pueden eliminar estadísticas manualmente');
-		},
-	}
-);
+	updateStats: async (data: StatsUpdate) => {
+		set({ loading: true, error: null });
+		try {
+			await invalidateStatsInApi();
+			const updatedData = await getSystemStatsFromApi();
+			if (!updatedData) throw new Error('Error al actualizar estadísticas');
+			set({
+				stats: {
+					id: 'stats',
+					name: 'Estadísticas',
+					...updatedData,
+					// Propiedades adicionales requeridas por StatsData
+					totalFavorites: 0,
+					totalViews: 0,
+					totalDownloads: 0,
+					totalSize: updatedData.storageUsed || 0,
+					totalPlaces: 0,
+					totalWorldItems: 0,
+					totalActivities: 0,
+					totalDocuments: 0,
+					totalJsonFiles: 0,
+					totalWorkflows: 0,
+					totalFile3D: 0,
+					// Listas detalladas
+					folders: [],
+					collections: [],
+					tags: [],
+					albums: [],
+					characters: [],
+					places: [],
+					worldItems: [],
+					topTags: [],
+					recentActivity: [],
+					// Metadata
+					timestamp: Date.now(),
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				},
+				loading: false,
+			});
+			statsLogger.info('Estadísticas actualizadas exitosamente');
+		} catch (error) {
+			statsLogger.error('Error al actualizar estadísticas:', error);
+			set({ error: error instanceof Error ? error.message : 'Error desconocido', loading: false });
+		}
+	},
+}));
 
 // Crear el store para el estado extendido
 export const useStatsFiltersStore = create<StatsFilters>((set) => ({
@@ -243,11 +295,11 @@ export const useStats = () => {
 	const filtersStore = useStatsFiltersStore();
 
 	return {
-		stats: baseStore.items[0], // Siempre usamos el primer item ya que solo hay un conjunto de estadísticas
+		stats: baseStore.stats,
 		loading: baseStore.loading,
 		error: baseStore.error,
-		refresh: baseStore.refreshItems,
-		updateStats: baseStore.updateItem,
+		refresh: baseStore.fetchStats,
+		updateStats: baseStore.updateStats,
 		filters: filtersStore.filters,
 		refreshInterval: filtersStore.refreshInterval,
 		lastRefresh: filtersStore.lastRefresh,

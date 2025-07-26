@@ -9,7 +9,7 @@ import {
 	type UploadedImageBase,
 	type UploadedImageDimensions,
 	type UploadedImageExtended,
-} from '@/types/entities/uploaded-image/types';
+} from '../../types/entities/uploaded-image/types';
 
 // Tipos locales para uploaded image (migración a Drizzle)
 type DrizzleUploadedImageWithRelations = {

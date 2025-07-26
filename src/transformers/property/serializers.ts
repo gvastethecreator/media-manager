@@ -4,7 +4,7 @@
  
  */
 
-import type { PropertyWithStats } from '@/types/entities/property';
+import type { PropertyWithStats } from '../../types/entities/property';
 
 /**
  * Serializa un objeto Property para respuesta de API
@@ -12,13 +12,17 @@ import type { PropertyWithStats } from '@/types/entities/property';
 export function serializeProperty(property: PropertyWithStats) {
 	return {
 		id: property.id,
-		key: property.key,
+		name: property.name,
 		value: property.value,
-		type: property.type,
-		entityId: property.entityId,
+		description: property.description,
+		emoji: property.emoji,
+		color: property.color,
+		shortcut: property.shortcut,
+		category: property.category,
+		featuredImage: property.featuredImage,
+		isFavorite: property.isFavorite,
 		entityType: property.entityType,
-		isSystem: property.isSystem,
-		isRequired: property.isRequired,
+		type: property.type,
 		createdAt: property.createdAt.toISOString(),
 		updatedAt: property.updatedAt.toISOString(),
 		stats: property.stats,

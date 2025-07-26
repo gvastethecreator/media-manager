@@ -177,12 +177,12 @@ export const useConceptStore = create<ConceptStore>()(
 				name: 'concept-store',
 				version: 1,
 				partialize: (state) => ({
-				filters: state.filters,
-				sortBy: state.sortBy,
-				page: state.page,
-				pageSize: state.pageSize,
-				viewMode: state.viewMode
-			}),
+					filters: state.filters,
+					sortBy: state.sortBy,
+					page: state.page,
+					pageSize: state.pageSize,
+					viewMode: state.viewMode,
+				}),
 			}
 		),
 		{

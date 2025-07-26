@@ -12,7 +12,7 @@ export interface SelectionSlice {
 	isMultiSelectMode: boolean;
 
 	// Acciones - selección individual
-  selectNote: (note: NoteWithStats | null) => void;
+	selectNote: (note: NoteWithStats | null) => void;
 	unselectNote: () => void;
 
 	// Acciones - selección múltiple
@@ -38,10 +38,10 @@ export const createSelectionSlice: StateCreator<NoteStore, [], [], SelectionSlic
 
 	// Acciones - selección individual
 	selectNote: (note) => {
-    const id = note?.id || null;
-    selectionLogger.info('🔍 Seleccionando nota', { id });
-    set({ selectedNote: note, selectedNoteId: id });
-  },
+		const id = note?.id || null;
+		selectionLogger.info('🔍 Seleccionando nota', { id });
+		set({ selectedNote: note, selectedNoteId: id });
+	},
 
 	unselectNote: () => {
 		selectionLogger.info('🔍 Deseleccionando nota');

@@ -6,6 +6,7 @@
  * @updated 2025-01-27
  */
 
+import type { WildcardBase, WildcardCreateInput, WildcardUpdateInput } from '../../types/entities/wildcard';
 import {
 	ZodWildcardCreateSchema,
 	type ZodWildcardCreateType,

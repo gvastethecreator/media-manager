@@ -4,8 +4,8 @@
  
  */
 
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 import type {
 	CharacterCreateInput,
 	CharacterFilters,
@@ -21,7 +21,7 @@ type DrizzleCharacterCreateInput = {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -47,7 +47,7 @@ type DrizzleCharacterUpdateInput = {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -71,7 +71,7 @@ type DrizzleCharacterWhereInput = {
 	name?: { contains?: string };
 	description?: { contains?: string };
 	category?: { in?: string[] };
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	age?: { gte?: number; lte?: number };
 	gender?: { in?: string[] };

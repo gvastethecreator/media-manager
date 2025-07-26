@@ -13,7 +13,6 @@ export interface VideoFiltersState {
 	searchQuery: string;
 	filterByFolderId: string | null;
 	filterFavorites: boolean;
-	filterPublic: boolean;
 	filterByDuration: {
 		min: number | null;
 		max: number | null;
@@ -30,7 +29,6 @@ export const initialFiltersState: VideoFiltersState = {
 	searchQuery: '',
 	filterByFolderId: null,
 	filterFavorites: false,
-	filterPublic: false,
 	filterByDuration: {
 		min: null,
 		max: null,
@@ -49,7 +47,6 @@ export interface VideoFiltersSlice extends VideoFiltersState {
 	setSearchQuery: (query: string) => void;
 	setFilterByFolder: (folderId: string | null) => void;
 	setFilterFavorites: (onlyFavorites: boolean) => void;
-	setFilterPublic: (onlyPublic: boolean) => void;
 	setFilterByDuration: (min: number | null, max: number | null) => void;
 	setFilterByResolution: (resolution: string | null) => void;
 	setDateRange: (from: Date | null, to: Date | null) => void;
@@ -69,7 +66,6 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 	setSearchQuery: (query) => set({ searchQuery: query }),
 	setFilterByFolder: (folderId) => set({ filterByFolderId: folderId }),
 	setFilterFavorites: (onlyFavorites) => set({ filterFavorites: onlyFavorites }),
-	setFilterPublic: (onlyPublic) => set({ filterPublic: onlyPublic }),
 	setFilterByDuration: (min, max) => set({ filterByDuration: { min, max } }),
 	setFilterByResolution: (resolution) => set({ filterByResolution: resolution }),
 	setDateRange: (from, to) => set({ dateRange: { from, to } }),
@@ -78,7 +74,6 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 			searchQuery: '',
 			filterByFolderId: null,
 			filterFavorites: false,
-			filterPublic: false,
 			filterByDuration: { min: null, max: null },
 			filterByResolution: null,
 			dateRange: { from: null, to: null },
@@ -91,15 +86,7 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 	},
 
 	applyFilters: (videos: VideoWithStats[]) => {
-		const {
-			searchQuery,
-			filterByFolderId,
-			filterFavorites,
-			filterPublic,
-			filterByDuration,
-			filterByResolution,
-			dateRange,
-		} = get();
+		const { searchQuery, filterByFolderId, filterFavorites, filterByDuration, filterByResolution, dateRange } = get();
 
 		return videos.filter((video) => {
 			// Filtrado por búsqueda
@@ -118,11 +105,6 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 
 			// Filtrado por favoritos
 			if (filterFavorites && !video.isFavorite) {
-				return false;
-			}
-
-			// Filtrado por público/privado
-			if (filterPublic && !video.isPublic) {
 				return false;
 			}
 

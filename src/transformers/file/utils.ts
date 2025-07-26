@@ -13,9 +13,9 @@ import {
 	getMimeTypeFromExtension,
 	isImageExtension,
 	isVideoExtension,
-} from '@/lib/utils/file/helpers';
-import { FileType } from '@/types/entities/file/enums';
-import type { DirectoryReadResult, FileInfo, FileOperationResult } from '@/types/entities/file/types';
+} from '../../lib/utils/file/helpers';
+import { FileType } from '../../types/entities/file/enums';
+import type { DirectoryReadResult, FileInfo, FileOperationResult } from '../../types/entities/file/types';
 
 /**
  * Determina el tipo de archivo basado en su extensión

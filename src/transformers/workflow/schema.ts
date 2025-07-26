@@ -19,7 +19,7 @@ export const ZodWorkflowSchema = z.object({
 	emoji: z.string().nullable(),
 	color: z.string().nullable(),
 	category: z.string().nullable(),
-	isPublic: z.boolean(),
+
 	isFavorite: z.boolean(),
 	isActive: z.boolean(),
 	version: z.string(),
@@ -52,7 +52,7 @@ export const ZodWorkflowCreateSchema = ZodWorkflowSchema.omit({
 	errorCount: true,
 }).extend({
 	isActive: z.boolean().default(true),
-	isPublic: z.boolean().default(false),
+
 	isFavorite: z.boolean().default(false),
 	version: z.string().default('1.0.0'),
 	runCount: z.number().default(0),

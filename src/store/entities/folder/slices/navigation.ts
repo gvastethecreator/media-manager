@@ -4,9 +4,7 @@
  */
 
 import { StateCreator } from 'zustand';
-import type { FolderNavigationState, FolderNavigationSlice, CompleteFolderStore } from '../types';
-
-
+import type { CompleteFolderStore, FolderNavigationSlice, FolderNavigationState } from '../types';
 
 const initialNavigationState: FolderNavigationState = {
 	currentFolderId: null,
@@ -16,7 +14,10 @@ const initialNavigationState: FolderNavigationState = {
 };
 
 // Creador del slice de navegación
-export const createFolderNavigationSlice: StateCreator<CompleteFolderStore, [], [], FolderNavigationSlice> = (set, get) => ({
+export const createFolderNavigationSlice: StateCreator<CompleteFolderStore, [], [], FolderNavigationSlice> = (
+	set,
+	get
+) => ({
 	...initialNavigationState,
 
 	// Navegación

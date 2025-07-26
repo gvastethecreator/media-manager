@@ -4,7 +4,7 @@
  
  */
 
-import type { MetadataExtended } from '@/types/entities/metadata';
+import type { MetadataExtended } from '../../types/entities/metadata';
 
 /**
  * Serializa un objeto Metadata para respuesta de API

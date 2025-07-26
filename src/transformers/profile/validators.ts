@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '../../types/entities/profile';
 
 export const ProfileCreateSchema = z.object({
 	name: z.string().min(1).max(100),

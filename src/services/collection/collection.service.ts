@@ -142,7 +142,7 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 				emoji: collections.emoji,
 				color: collections.color,
 				featuredImage: collections.featuredImage,
-				isPublic: collections.isPublic,
+
 				isFavorite: collections.isFavorite,
 				totalImages: collections.totalImages,
 				totalVideos: collections.totalVideos,
@@ -181,7 +181,6 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
-			isPublic: Boolean(rawCollection.isPublic || false),
 			totalImages: rawCollection.totalImages || 0,
 			totalVideos: rawCollection.totalVideos || 0,
 			totalSize: rawCollection.totalSize || 0,
@@ -222,7 +221,7 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 				color: collections.color,
 				description: collections.description,
 				featuredImage: collections.featuredImage,
-				isPublic: collections.isPublic,
+
 				isFavorite: collections.isFavorite,
 				totalImages: collections.totalImages,
 				totalVideos: collections.totalVideos,
@@ -239,7 +238,6 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
-			isPublic: Boolean(rawCollection.isPublic || false),
 			totalImages: rawCollection.totalImages || 0,
 			totalVideos: rawCollection.totalVideos || 0,
 			totalSize: rawCollection.totalSize || 0,
@@ -296,7 +294,7 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 				color: collections.color,
 				description: collections.description,
 				featuredImage: collections.featuredImage,
-				isPublic: collections.isPublic,
+
 				isFavorite: collections.isFavorite,
 				totalImages: collections.totalImages,
 				totalVideos: collections.totalVideos,
@@ -321,7 +319,6 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 		const transformedCollection = {
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
-			isPublic: Boolean(rawCollection.isPublic || false),
 			totalImages: rawCollection.totalImages || 0,
 			totalVideos: rawCollection.totalVideos || 0,
 			totalSize: rawCollection.totalSize || 0,

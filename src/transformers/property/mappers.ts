@@ -4,8 +4,8 @@
  * @description Contiene funciones para transformar datos de la entidad Property.
  */
 
-import { calculateCompleteness } from '@/lib/utils/transformers';
-import { PropertyStatistics, PropertyWithCounts, PropertyWithStats } from '@/types/entities/property';
+import { calculateCompleteness } from '../../lib/utils/stats';
+import type { PropertyStatistics, PropertyWithCounts, PropertyWithStats } from '../../types/entities/property';
 
 /**
  

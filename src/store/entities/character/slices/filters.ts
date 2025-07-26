@@ -289,10 +289,11 @@ export const createCharacterFiltersSlice: StateCreator<
 				case 'category':
 					groupKey = character.category || 'uncategorized';
 					break;
-				case 'level':
+				case 'level': {
 					const level = character.level || 1;
-      groupKey = `Level ${Math.floor(level / 5) * 5}-${Math.floor(level / 5) * 5 + 4}`;
+					groupKey = `Level ${Math.floor(level / 5) * 5}-${Math.floor(level / 5) * 5 + 4}`;
 					break;
+				}
 				default:
 					groupKey = 'all';
 			}

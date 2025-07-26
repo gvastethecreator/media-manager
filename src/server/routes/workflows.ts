@@ -17,7 +17,7 @@ const WorkflowCreateSchema = z.object({
 	emoji: z.string().nullish(),
 	color: z.string().nullish(),
 	category: z.string().nullish(),
-	isPublic: z.boolean().optional(),
+
 	isFavorite: z.boolean().optional(),
 	isActive: z.boolean().optional(),
 	version: z.string().nullish(),
@@ -83,7 +83,7 @@ router.post('/', async (req, res) => {
 			schedule: rawData.schedule ?? null,
 			lastRun: rawData.lastRun ?? null,
 			nextRun: rawData.nextRun ?? null,
-			isPublic: rawData.isPublic ?? false,
+
 			isFavorite: rawData.isFavorite ?? false,
 			isActive: rawData.isActive ?? false,
 			runCount: rawData.runCount ?? 0,
@@ -119,7 +119,7 @@ router.put('/:id', async (req, res) => {
 		if (rawData.schedule !== undefined) validatedData.schedule = rawData.schedule ?? null;
 		if (rawData.lastRun !== undefined) validatedData.lastRun = rawData.lastRun ?? null;
 		if (rawData.nextRun !== undefined) validatedData.nextRun = rawData.nextRun ?? null;
-		if (rawData.isPublic !== undefined) validatedData.isPublic = rawData.isPublic;
+
 		if (rawData.isFavorite !== undefined) validatedData.isFavorite = rawData.isFavorite;
 		if (rawData.isActive !== undefined) validatedData.isActive = rawData.isActive;
 		if (rawData.runCount !== undefined) validatedData.runCount = rawData.runCount;

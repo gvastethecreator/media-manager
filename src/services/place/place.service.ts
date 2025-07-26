@@ -25,7 +25,6 @@ type DrizzlePlaceWithCounts = {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -84,7 +83,7 @@ export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithS
 				emoji: places.emoji,
 				color: places.color,
 				category: places.category,
-				isPublic: places.isPublic,
+
 				isFavorite: places.isFavorite,
 				totalImages: places.totalImages,
 				totalVideos: places.totalVideos,
@@ -147,7 +146,7 @@ export async function getPlaceById(id: string): Promise<PlaceWithStats | null> {
 				emoji: places.emoji,
 				color: places.color,
 				category: places.category,
-				isPublic: places.isPublic,
+
 				isFavorite: places.isFavorite,
 				totalImages: places.totalImages,
 				totalVideos: places.totalVideos,
@@ -236,7 +235,7 @@ export async function createPlace(input: PlaceCreateInput): Promise<PlaceWithSta
 				isFavorite: input.isFavorite || false,
 				totalImages: 0,
 				totalVideos: 0,
-				isPublic: input.isPublic || false,
+
 				type: input.type || null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -301,7 +300,7 @@ export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<
 		if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
 		if (input.parentId !== undefined) updateData.parentId = input.parentId;
 		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
-		if (input.isPublic !== undefined) updateData.isPublic = input.isPublic;
+
 		if (input.type !== undefined) updateData.type = input.type;
 
 		await db.update(places).set(updateData).where(eq(places.id, id));

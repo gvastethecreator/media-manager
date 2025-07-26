@@ -3,7 +3,7 @@
  * @module transformers/json-file/serializers
  */
 
-import type { JsonFileWithStats } from '@/types/entities/json-file';
+import type { JsonFileWithStats } from '../../types/entities/json-file';
 
 /**
  * Valida y serializa datos de entrada para crear un JsonFile

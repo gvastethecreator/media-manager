@@ -5,7 +5,7 @@
  
  */
 
-import type { GroupWithStats } from '@/types/entities/group';
+import type { GroupWithStats } from '../../types/entities/group';
 
 /**
  * Serializa un objeto GroupWithStats para respuesta de API

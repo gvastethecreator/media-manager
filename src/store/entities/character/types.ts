@@ -4,7 +4,13 @@
  */
 
 import type { CharacterFilterItem, CharacterViewConfig, CharacterWithStats } from '@/types/entities/character';
-import type { CharacterSortOption, CharacterClass, CharacterRace, CharacterCategory, CharacterAlignment } from '@/types/entities/character/enums';
+import type {
+	CharacterAlignment,
+	CharacterCategory,
+	CharacterClass,
+	CharacterRace,
+	CharacterSortOption,
+} from '@/types/entities/character/enums';
 
 /**
  * 🎭 Función de utilidad para convertir array a Record
