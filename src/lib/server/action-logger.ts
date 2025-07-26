@@ -1,5 +1,21 @@
 import { serverLogger } from '../logger/server-logger';
 
+// Interfaz para las opciones del logger de acciones
+export interface ActionLoggerOptions {
+	showParams?: boolean;
+	showResult?: boolean;
+	sensitiveParamFields?: string[];
+	sensitiveResultFields?: string[];
+}
+
+// Opciones predeterminadas
+const defaultOptions: ActionLoggerOptions = {
+	showParams: true,
+	showResult: false,
+	sensitiveParamFields: ['password', 'token', 'secret', 'key'],
+	sensitiveResultFields: ['password', 'token', 'secret', 'key'],
+};
+
 // Logger específico para Server Actions con funciones mejoradas
 export const actionLogger = {
 	/**
@@ -84,7 +100,7 @@ export const actionLogger = {
 							);
 						}
 
-						return result;
+						return result as ReturnType<T>;
 					} catch (error) {
 						const executionTime = Date.now() - startTime;
 

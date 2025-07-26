@@ -5,16 +5,16 @@
  * completas que pueden ser tratadas como "archivos" en la UI.
  */
 
-import type { AlbumComplete } from './entities/album';
+import type { AlbumWithStats } from './entities/album';
 import type { CharacterWithStats } from './entities/character';
 import type { CollectionWithStats } from './entities/collection';
 import type { ConceptWithStats } from './entities/concept';
 import type { GroupWithStats } from './entities/group';
-import type { ImageComplete } from './entities/image';
-import type { NoteComplete } from './entities/note';
-import type { PlaceComplete } from './entities/place';
-import type { PromptComplete } from './entities/prompt';
-import type { PropertyComplete } from './entities/property';
+import type { ImageWithStats } from './entities/image';
+import type { NoteWithStats } from './entities/note';
+import type { PlaceWithStats } from './entities/place';
+import type { PromptWithStats } from './entities/prompt';
+import type { PropertyWithStats } from './entities/property';
 import type { TagWithStats } from './entities/tag/types';
 import type { VideoWithStats } from './entities/video';
 import type { WildcardWithStats } from './entities/wildcard';
@@ -55,19 +55,19 @@ export enum FileProcessingStatus {
  * Es una unión de todos los tipos `...Complete` de las entidades principales.
  */
 export type FileItem =
-	| (ImageComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date })
+	| (ImageWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (VideoWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (AlbumComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date })
+	| (AlbumWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (CollectionWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (TagWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (CharacterWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (PlaceComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date })
+	| (PlaceWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (WorldItemWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (ConceptWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (PromptComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (NoteComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date })
+	| (PromptWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
+	| (NoteWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (WildcardWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (PropertyComplete & { size?: number; type?: string; folderId?: string; createdAt?: Date })
+	| (PropertyWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
 	| (GroupWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date });
 
 /**

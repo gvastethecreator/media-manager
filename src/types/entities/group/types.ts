@@ -54,3 +54,42 @@ export interface GroupFilters {
 		| 'featuredImage';
 	sortOrder?: 'asc' | 'desc';
 }
+
+export interface GroupRelations {
+	images?: ImageBase[];
+	albums?: any[];
+	collections?: any[];
+	tags?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+}
+
+export interface GroupSearchResult {
+	groups: GroupBase[];
+	total: number;
+	page: number;
+	limit: number;
+	hasMore: boolean;
+}
+
+export interface GroupCoreSlice {
+	groups: GroupBase[];
+	selectedGroupId: string | null;
+	loading: boolean;
+	error: string | null;
+}
+
+export interface GroupDisplayState {
+	viewMode: 'grid' | 'list' | 'detail';
+	sortBy: string;
+	sortOrder: 'asc' | 'desc';
+	filters: GroupFilters;
+	selectedItems: string[];
+	showFavorites: boolean;
+}

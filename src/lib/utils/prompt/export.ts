@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptExtended } from '@/types/entities/prompt/types';
-import { preparePromptForDisplay, preparePromptForSaving } from './helpers';
+import type { PromptBase } from '@/types/entities/prompt/types';
+import type { PromptExtended } from '@/types/entities/prompt/extended';
 
 const exportLogger = serverLogger.withContext('PromptExport');
 
@@ -71,13 +71,20 @@ export interface PromptExportResult {
  * @param includeMetadata Si se incluyen metadatos adicionales
  * @returns Prompt en formato JSON
  */
-// Cambios: title -> name, model -> purpose (según tipos canónicos)
 function exportPromptToJSON(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
+		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
+
 		if (!includeMetadata) {
-			const { id, name, content, category, model, parameters } = displayPrompt;
-			return JSON.stringify({ id, name, content, category, model, parameters }, null, 2);
+			// Crear un objeto compatible con las propiedades disponibles
+			const simpleExport = {
+				id: displayPrompt.id,
+				name: displayPrompt.name,
+				content: displayPrompt.content,
+				category: displayPrompt.category,
+				parameters: displayPrompt.parameters,
+			};
+			return JSON.stringify(simpleExport, null, 2);
 		}
 		return JSON.stringify(displayPrompt, null, 2);
 	} catch (error) {
@@ -94,19 +101,22 @@ function exportPromptToJSON(prompt: PromptBase | PromptExtended, includeMetadata
  */
 function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
+		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
 		let md = `# ${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
-			md += `**Categoría:** ${displayPrompt.category}\n`;
-			md += `**Modelo:** ${displayPrompt.model}\n`;
-
-			// Añadir tags si existen
-			const tags: string[] = displayPrompt.tags || [];
-			if (tags.length > 0) {
-				md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
+			if (displayPrompt.category) {
+				md += `**Categoría:** ${displayPrompt.category}\n`;
+			}
+			if (displayPrompt.type) {
+				md += `**Tipo:** ${displayPrompt.type}\n`;
 			}
 
-			// Añadir información de fecha
+			// Añadir tags si existen
+			const extendedPrompt = displayPrompt as any;
+			const tags: string[] = extendedPrompt.parsedTags || [];
+			if (tags.length > 0) {
+				md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
+			}			// Añadir información de fecha
 			const createdAt =
 				displayPrompt.createdAt instanceof Date
 					? displayPrompt.createdAt.toISOString().split('T')[0]
@@ -121,7 +131,8 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 
 		// Añadir parámetros si existen y se solicitan metadatos
 		if (includeMetadata) {
-			const parameters = displayPrompt.parsedParameters || {};
+			const extendedPrompt = displayPrompt as any;
+			const parameters = extendedPrompt.parsedParameters || {};
 			if (Object.keys(parameters).length > 0) {
 				md += '## Parámetros\n\n';
 				for (const [key, value] of Object.entries(parameters)) {
@@ -141,20 +152,24 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
  * Exporta un prompt a formato de texto plano
  * @param prompt Prompt a exportar
  * @param includeMetadata Si se incluyen metadatos adicionales
- * @returns Prompt en formato texto
+ * @returns Prompt en formato de texto
  */
 function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
+		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
 		let text = `${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
-			text += `Categoría: ${displayPrompt.category}
+			if (displayPrompt.category) {
+				text += `Categoría: ${displayPrompt.category}
 `;
-			text += `Modelo: ${displayPrompt.model}
+			}
+			if (displayPrompt.type) {
+				text += `Tipo: ${displayPrompt.type}
 `;
+			}
 
 			// Añadir tags si existen
-			const tags = displayPrompt.tags || [];
+			const tags = ('parsedTags' in displayPrompt && displayPrompt.parsedTags) || [];
 			if (tags.length > 0) {
 				text += `Tags: ${tags.join(', ')}
 `;
@@ -162,7 +177,7 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
 
 			text += '\n-----------------\n\n';
 		}
-		text += `${displayPrompt.content}\n`;
+		text += `${displayPrompt.content || ''}\n`;
 		return text;
 	} catch (error) {
 		exportLogger.error('❌ Error al exportar prompt a texto:', error);
@@ -178,7 +193,7 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
  */
 function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
+		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
 		const escapeHtml = (text: string) => {
 			return text
 				.replace(/&/g, '&amp;')
@@ -207,12 +222,18 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 		// Añadir metadatos si se solicitan
 		if (includeMetadata) {
 			html += `
-  <div class="metadata">
-    <p><strong>Categoría:</strong> ${escapeHtml(displayPrompt.category)}</p>
-    <p><strong>Modelo:</strong> ${escapeHtml(displayPrompt.model)}</p>`;
+  <div class="metadata">`;
+			if (displayPrompt.category) {
+				html += `
+    <p><strong>Categoría:</strong> ${escapeHtml(displayPrompt.category)}</p>`;
+			}
+			if (displayPrompt.type) {
+				html += `
+    <p><strong>Tipo:</strong> ${escapeHtml(displayPrompt.type)}</p>`;
+			}
 
 			// Añadir tags si existen
-			const tags: string[] = displayPrompt.tags || [];
+			const tags: string[] = ('parsedTags' in displayPrompt && displayPrompt.parsedTags) || [];
 			if (tags.length > 0) {
 				html += `
     <p><strong>Tags:</strong> ${tags.map((tag: string) => `<span class="tag">${escapeHtml(tag)}</span>`).join(' ')}</p>`;
@@ -231,11 +252,11 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 
 		// Añadir contenido
 		html += `
-  <div class="content">${escapeHtml(displayPrompt.content)}</div>`;
+  <div class="content">${escapeHtml(displayPrompt.content || '')}</div>`;
 
 		// Añadir parámetros si existen y se solicitan metadatos
 		if (includeMetadata) {
-			const parameters = displayPrompt.parsedParameters || {};
+			const parameters = ('parsedParameters' in displayPrompt && displayPrompt.parsedParameters) || {};
 			if (Object.keys(parameters).length > 0) {
 				html += `
   <div class="parameters">
@@ -305,10 +326,10 @@ export function exportPrompt(prompt: PromptBase | PromptExtended, config: Prompt
 
 			case PromptExportFormat.CSV: {
 				// Implementación simplificada para CSV (solo una fila)
-				const fields = [prompt.id, prompt.name, prompt.content, prompt.category, prompt.purpose];
+				const fields = [prompt.id, prompt.name, prompt.content || '', prompt.category || '', prompt.type || ''];
 				content = includeMetadata
-					? `id,name,content,category,purpose\n"${fields.join('","')}"`
-					: `"${prompt.name}","${prompt.content}"`;
+					? `id,name,content,category,type\n"${fields.join('","')}"`
+					: `"${prompt.name}","${prompt.content || ''}"`;
 				mimeType = 'text/csv';
 				fileExtension = 'csv';
 				break;
@@ -368,20 +389,25 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 			color: parsed.color || '#3b82f6',
 			description: parsed.description || null,
 			content: parsed.content,
-			model: parsed.model || '',
-			category: parsed.category || 'GENERAL',
-			parameters: parsed.parameters || {},
-			tags: parsed.tags || [],
+			category: parsed.category || null,
+			isPublic: parsed.isPublic || false,
+			isFavorite: parsed.isFavorite || false,
+			totalImages: 0,
+			totalVideos: 0,
+			type: parsed.type || null,
+			parameters: typeof parsed.parameters === 'string' ? parsed.parameters : JSON.stringify(parsed.parameters || {}),
+			style: parsed.style || null,
+			mood: parsed.mood || null,
+			lighting: parsed.lighting || null,
+			composition: parsed.composition || null,
+			technique: parsed.technique || null,
+			inspiration: parsed.inspiration || null,
+			notes: parsed.notes || null,
 			featuredImage: parsed.featuredImage || null,
-			isFavorite: false,
+			parentId: parsed.parentId || null,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
-
-		// Si el prompt tiene formato extendido, prepararlo para guardar
-		if ('parsedTags' in parsed || 'parsedParameters' in parsed) {
-			return preparePromptForSaving(parsed as PromptExtended);
-		}
 
 		return prompt;
 	} catch (error) {

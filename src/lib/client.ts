@@ -6,6 +6,8 @@ import React from 'react';
  */
 
 export * from './contexts';
+// Resolver conflicto de exportación duplicada de useSettings
+export { useSettings } from './contexts/settings-context';
 export * from './hooks';
 // Re-exportar utilidades del cliente
 export * from './utils';

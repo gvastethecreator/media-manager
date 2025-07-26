@@ -10,6 +10,33 @@
  */
 
 /**
+ * 🗂️ Store principal de UI para gestión de estado de interfaz
+ */
+export interface UIStore {
+	theme: 'light' | 'dark' | 'auto';
+	sidebarCollapsed: boolean;
+	viewMode: 'grid' | 'list' | 'masonry' | 'cards';
+	gridSize: 'small' | 'medium' | 'large' | 'xl';
+	showMetadata: boolean;
+	showThumbnails: boolean;
+	animationsEnabled: boolean;
+	notifications: {
+		enabled: boolean;
+		position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+		duration: number;
+	};
+	modals: {
+		open: string[];
+		data: Record<string, unknown>;
+	};
+	loading: {
+		global: boolean;
+		operations: Record<string, boolean>;
+	};
+	error: string | null;
+}
+
+/**
  * Configuración específica para vista Grid
  */
 export interface GridViewConfig {

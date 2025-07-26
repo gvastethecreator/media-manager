@@ -3,7 +3,9 @@
  * @module types/entities/wildcard/types
  */
 
-import type { WildcardWithStats } from './base';
+
+// Re-export tipo base para compatibilidad
+export type { WildcardWithStats } from './base';
 
 /**
  * Criterios de ordenación para wildcards

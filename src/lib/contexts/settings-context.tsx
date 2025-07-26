@@ -303,7 +303,7 @@ export function useThemeSync() {
 		theme: settings.theme,
 		setTheme: (theme: 'light' | 'dark' | 'system') => {
 			console.log(`🎨 Actualizando tema a: ${theme}`);
-			updateSettings({ appearance: { theme } });
+			updateSettings({ theme });
 		},
 	};
 }

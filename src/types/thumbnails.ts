@@ -123,6 +123,7 @@ export enum ProcessStatus {
 export interface ThumbnailError extends Error {
 	code?: string;
 	details?: Record<string, unknown>;
+	timestamp?: string;
 }
 
 // Validaciones Zod

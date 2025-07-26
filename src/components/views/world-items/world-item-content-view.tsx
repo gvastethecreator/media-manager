@@ -50,7 +50,9 @@ export const WorldItemContentView = memo(function WorldItemContentView() {
 			currentContainerId: selectedId ?? null,
 			containerName: selectedWorldItem?.name ?? null,
 			emptyState,
-			onRefresh: () => refetch(),
+			onRefresh: async () => {
+				await refetch();
+			},
 		}),
 		[images, isLoading, error, handleItemSelection, selectedId, selectedWorldItem?.name, emptyState, refetch]
 	);

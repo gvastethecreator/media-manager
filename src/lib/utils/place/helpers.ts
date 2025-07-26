@@ -3,7 +3,8 @@
  * @module utils/place/helpers
  */
 
-import type { Place, PlaceFilters, PlaceWithCounts } from '@/types/entities/place';
+import type { PlaceWithStats } from '@/types/entities/place';
+import type { PlaceFilters } from '@/lib/api/places';
 
 /**
  * Ordena una lista de lugares según el criterio especificado.
@@ -11,9 +12,9 @@ import type { Place, PlaceFilters, PlaceWithCounts } from '@/types/entities/plac
  * @param sortBy Criterio de ordenación (ej: 'name_asc', 'population_desc').
  * @returns Lista ordenada de lugares.
  */
-export function sortPlaces(places: Place[], sortBy = 'name_asc'): Place[] {
+export function sortPlaces(places: PlaceWithStats[], sortBy = 'name_asc'): PlaceWithStats[] {
 	const sortedPlaces = [...places];
-	const [sortProperty, sortOrder] = sortBy.split('_') as [keyof Place, 'asc' | 'desc'];
+	const [sortProperty, sortOrder] = sortBy.split('_') as [keyof PlaceWithStats, 'asc' | 'desc'];
 	const isDesc = sortOrder === 'desc';
 
 	sortedPlaces.sort((a, b) => {
@@ -52,7 +53,7 @@ export function sortPlaces(places: Place[], sortBy = 'name_asc'): Place[] {
  * @param filters Filtros a aplicar.
  * @returns Lista filtrada de lugares.
  */
-export function filterPlaces(places: PlaceWithCounts[], filters: PlaceFilters): PlaceWithCounts[] {
+export function filterPlaces(places: PlaceWithStats[], filters: PlaceFilters): PlaceWithStats[] {
 	if (!filters || Object.keys(filters).length === 0) {
 		return places;
 	}
@@ -87,20 +88,18 @@ export function filterPlaces(places: PlaceWithCounts[], filters: PlaceFilters): 
 		}
 
 		// Filtrar por conteo mínimo de imágenes
-		if (filters.minImageCount && place._count.images < filters.minImageCount) {
+		if (filters.limit && place._count && place._count.images && place._count.images < filters.limit) {
 			return false;
 		}
 
-		// Filtrar por tags
-		if (filters.tags && filters.tags.length > 0) {
-			// Esta lógica asume que los tags están cargados en el objeto `place`.
-			// Si no, se requeriría un `PlaceWithRelations`.
-			// Por ahora, lo dejamos pendiente de implementación si es necesario.
+		// Filtrar por tipo
+		if (filters.type && place.type !== filters.type) {
+			return false;
 		}
 
-		// Filtrar por characters
-		if (filters.characters && filters.characters.length > 0) {
-			// Misma consideración que para los tags.
+		// Filtrar por ubicación
+		if (filters.location && place.location !== filters.location) {
+			return false;
 		}
 
 		return true;
@@ -112,9 +111,10 @@ export function filterPlaces(places: PlaceWithCounts[], filters: PlaceFilters): 
  * @param places Lista de lugares.
  * @returns Un objeto con una lista de lugares raíz y un árbol de regiones.
  */
-export function buildPlaceTree(places: Place[]) {
-	const tree: Record<string, { places: Place[]; children: any }> = {};
-	const rootPlaces: Place[] = [];
+export function buildPlaceTree(places: PlaceWithStats[]) {
+	const tree: Record<string, { places: PlaceWithStats[]; children: any }> = {};
+	const rootPlaces: PlaceWithStats[] = [];
+
 
 	for (const place of places) {
 		if (!place.region) {
@@ -141,14 +141,14 @@ export function buildPlaceTree(places: Place[]) {
 /**
  * Encuentra un lugar por su ID en una lista.
  */
-export function findPlaceById(places: Place[], id: string): Place | undefined {
+export function findPlaceById(places: PlaceWithStats[], id: string): PlaceWithStats | undefined {
 	return places.find((place) => place.id === id);
 }
 
 /**
  * Encuentra múltiples lugares por sus IDs en una lista.
  */
-export function findPlacesByIds(places: Place[], ids: string[]): Place[] {
+export function findPlacesByIds(places: PlaceWithStats[], ids: string[]): PlaceWithStats[] {
 	const idSet = new Set(ids);
 	return places.filter((place) => idSet.has(place.id));
 }
@@ -158,7 +158,7 @@ export function findPlacesByIds(places: Place[], ids: string[]): Place[] {
  * @param places Lista de lugares.
  * @returns Un objeto con estadísticas como total, conteo por categoría, etc.
  */
-export function calculatePlaceStats(places: Place[]) {
+export function calculatePlaceStats(places: PlaceWithStats[]) {
 	return {
 		total: places.length,
 		byCategory: countByProperty(places, 'category'),
@@ -169,7 +169,7 @@ export function calculatePlaceStats(places: Place[]) {
 	};
 }
 
-function countByProperty(places: Place[], property: keyof Place): Record<string, number> {
+function countByProperty(places: PlaceWithStats[], property: keyof PlaceWithStats): Record<string, number> {
 	return places.reduce(
 		(acc, place) => {
 			const key = place[property];
@@ -182,9 +182,12 @@ function countByProperty(places: Place[], property: keyof Place): Record<string,
 	);
 }
 
-function calculateAveragePopulation(places: Place[]): number {
+function calculateAveragePopulation(places: PlaceWithStats[]): number {
 	const populatedPlaces = places.filter((p) => typeof p.population === 'number');
 	if (populatedPlaces.length === 0) return 0;
-	const totalPopulation = populatedPlaces.reduce((sum, p) => sum + (p.population || 0), 0);
+	const totalPopulation = populatedPlaces.reduce((sum, p) => {
+		const population = typeof p.population === 'number' ? p.population : 0;
+		return sum + population;
+	}, 0);
 	return totalPopulation / populatedPlaces.length;
 }

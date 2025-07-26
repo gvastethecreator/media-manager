@@ -12,6 +12,7 @@
 export interface PromptBase {
 	id: string;
 	name: string;
+	title?: string; // Alias para name en algunos contextos
 	description: string | null;
 	emoji: string | null;
 	color: string | null;
@@ -32,6 +33,9 @@ export interface PromptBase {
 	notes: string | null;
 	featuredImage: string | null;
 	parentId: string | null;
+	model?: string | null; // Modelo de IA asociado
+	purpose?: string | null; // Propósito del prompt
+	tags?: string[] | string; // Tags serializados
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -111,7 +115,24 @@ export interface PromptCounts {
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface PromptWithStats extends PromptBase {
+	entityType: 'prompt';
 	stats: PromptStatistics;
+	tags?: any; // Para compatibilidad con prompt-card.tsx
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tagEntities?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 /**

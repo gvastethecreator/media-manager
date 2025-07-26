@@ -26,3 +26,21 @@ export type TaskRelations = Record<string, never>;
 export type TaskCreateInput = Omit<TaskBase, 'id' | 'createdAt' | 'updatedAt'>;
 
 export type TaskUpdateInput = Partial<TaskBase>;
+
+/**
+ * 📋 Task extendido con información adicional para UI
+ */
+export interface TaskExtended extends TaskBase {
+	title: string;
+	description?: string | null;
+	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+	priority: 'low' | 'medium' | 'high' | 'urgent';
+	dueDate?: Date | null;
+	completedAt?: Date | null;
+	assignedTo?: string | null;
+	tags?: string[];
+	progress?: number;
+	estimatedHours?: number;
+	actualHours?: number;
+	notes?: string | null;
+}

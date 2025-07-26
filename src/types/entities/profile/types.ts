@@ -67,6 +67,30 @@ export type CreateProfileInput = ProfileCreateInput;
 export type UpdateProfileInput = ProfileUpdateInput;
 
 /**
+ * Estadísticas del perfil
+ */
+export interface ProfileStatistics {
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	folderCount: number;
+	tagCount: number;
+	placeCount: number;
+	lastAccessed: Date | null;
+	totalStorageUsed: number;
+	activeDays: number;
+	createdThisMonth: number;
+}
+
+/**
+ * Perfil con estadísticas
+ */
+export interface ProfileWithStats extends ProfileBase {
+	stats: ProfileStatistics;
+	entityType: 'profile';
+}
+
+/**
  * Tipo extendido para UI con información adicional
  */
 export interface ProfileExtended extends ProfileBase {

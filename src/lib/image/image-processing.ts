@@ -5,7 +5,7 @@ import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/ty
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 
-export async function processImage(
+export async function processUploadedImage(
 	sourcePath: string,
 	options: UploadedImageProcessingOptions
 ): Promise<{ path: string; metadata: UploadedImageMetadata }> {

@@ -116,11 +116,11 @@ export function parseProfilePreferences(profile: ProfileWithSettings): ProfilePr
 			const colorRegex = /^#[0-9A-Fa-f]{6}$/;
 			if (!colorRegex.test(rawPreferences.color)) {
 				console.warn(`[Profile Transformer] Invalid color format '${rawPreferences.color}' found. Using default.`);
-				rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue(); // Use schema default
+				rawPreferences.color = '#3b82f6'; // Use default color
 			}
 		} else if ('color' in rawPreferences && typeof rawPreferences.color !== 'string') {
 			console.warn(`[Profile Transformer] Invalid type for color ('${typeof rawPreferences.color}'). Using default.`);
-			rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue();
+			rawPreferences.color = '#3b82f6'; // Use default color
 		} // No else needed, if color is missing, Zod default applies
 
 		// Validar y parsear con Zod (ahora con rawPreferences más seguro)

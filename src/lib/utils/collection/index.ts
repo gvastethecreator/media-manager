@@ -31,10 +31,7 @@ export function sortCollections(collections: CollectionWithStats[], sortOption: 
 				aValue = a.name?.toLowerCase() || '';
 				bValue = b.name?.toLowerCase() || '';
 				break;
-			case 'price':
-				aValue = a.price || 0;
-				bValue = b.price || 0;
-				break;
+
 			case 'created':
 			case 'createdAt':
 				aValue = new Date(a.createdAt).getTime();
@@ -45,17 +42,10 @@ export function sortCollections(collections: CollectionWithStats[], sortOption: 
 				aValue = new Date(a.updatedAt).getTime();
 				bValue = new Date(b.updatedAt).getTime();
 				break;
-			case 'category':
-				aValue = a.category?.toLowerCase() || '';
-				bValue = b.category?.toLowerCase() || '';
-				break;
-			case 'platform':
-				aValue = a.platform?.toLowerCase() || '';
-				bValue = b.platform?.toLowerCase() || '';
-				break;
+
 			case 'totalItems':
-				aValue = a.stats?.totalItems || 0;
-				bValue = b.stats?.totalItems || 0;
+				aValue = (a.stats?.imageCount || 0) + (a.stats?.videoCount || 0);
+		bValue = (b.stats?.imageCount || 0) + (b.stats?.videoCount || 0);
 				break;
 			default:
 				aValue = a.name?.toLowerCase() || '';
@@ -82,7 +72,7 @@ export function sortCollections(collections: CollectionWithStats[], sortOption: 
  */
 export function groupCollections(
 	collections: CollectionWithStats[],
-	groupBy: 'category' | 'rarity' | 'platform' | null
+	groupBy: 'rarity' | null
 ): Record<string, CollectionWithStats[]> {
 	if (!collections || collections.length === 0 || !groupBy) {
 		return { Todas: collections || [] };
@@ -94,15 +84,9 @@ export function groupCollections(
 		let groupKey: string;
 
 		switch (groupBy) {
-			case 'category':
-				groupKey = collection.category || 'Sin categoría';
-				break;
-			case 'platform':
-				groupKey = collection.platform || 'Sin plataforma';
-				break;
 			case 'rarity': {
 				// Determinar rareza basada en el número de elementos
-				const totalItems = collection.stats?.totalItems || 0;
+				const totalItems = (collection.stats?.imageCount || 0) + (collection.stats?.videoCount || 0);
 				if (totalItems > 100) groupKey = 'Mítica';
 				else if (totalItems > 50) groupKey = 'Rara';
 				else if (totalItems > 20) groupKey = 'Poco común';
@@ -149,9 +133,7 @@ export function filterCollectionsBySearch(
 	return collections.filter(
 		(collection) =>
 			collection.name.toLowerCase().includes(term) ||
-			collection.description?.toLowerCase().includes(term) ||
-			collection.category?.toLowerCase().includes(term) ||
-			collection.platform?.toLowerCase().includes(term)
+			collection.description?.toLowerCase().includes(term)
 	);
 }
 
@@ -193,17 +175,8 @@ export function getCollectionStats(collections: CollectionWithStats[]) {
 		}
 
 		// Valor total
-		if (collection.price) {
-			stats.totalValue += collection.price;
-		}
-
-		// Categorías
-		const category = collection.category || 'Sin categoría';
-		stats.categories[category] = (stats.categories[category] || 0) + 1;
-
-		// Plataformas
-		const platform = collection.platform || 'Sin plataforma';
-		stats.platforms[platform] = (stats.platforms[platform] || 0) + 1;
+		// totalValue no está disponible en CollectionStatistics
+	// stats.totalValue += collection.stats.totalValue;
 	}
 
 	return stats;

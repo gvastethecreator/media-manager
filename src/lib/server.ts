@@ -8,8 +8,8 @@ export * from './config';
 export * from './utils';
 
 // Servidor específico
-export const isServer = typeof window === 'undefined';
-export const isClient = !isServer;
+const isServer = typeof window === 'undefined';
+const isClient = !isServer;
 
 /**
  * Ejecuta código solo en el servidor

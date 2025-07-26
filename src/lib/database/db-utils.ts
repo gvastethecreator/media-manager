@@ -7,7 +7,7 @@ import * as schema from '@/lib/drizzle/schema';
 import { albums, collections, folders, imageStats, images, tags } from '@/lib/drizzle/schema';
 import { db } from './db';
 
-type DrizzleTransactionClient = typeof db._;
+type DrizzleTransactionClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /**
  * 🔄 Ejecuta una transacción de Drizzle con reintentos en caso de error

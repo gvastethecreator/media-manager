@@ -6,7 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ConceptBase, ConceptStats, ConceptWithStats } from '@/types/entities/concept';
+import type { ConceptBase, ConceptStatistics, ConceptWithStats } from '@/types/entities/concept';
 
 const logger = serverLogger.withContext('ConceptTransformer');
 
@@ -55,7 +55,7 @@ export function fromDrizzleConcept(
 			counts.properties +
 			counts.groups;
 
-		const stats: ConceptStats = {
+		const stats: ConceptStatistics = {
 			imageCount: counts.images,
 			videoCount: counts.videos,
 			albumCount: counts.albums,
