@@ -6,6 +6,7 @@
  * @updated 2025-01-27
  */
 
+import type { WorldItemBase, WorldItemCreateInput, WorldItemUpdateInput } from '../../types/entities/world-item';
 import {
 	ZodWorldItemCreateSchema,
 	type ZodWorldItemCreateType,

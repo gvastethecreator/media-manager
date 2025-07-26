@@ -4,23 +4,25 @@
 
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { calculateCompleteness } from '../../lib/utils/stats';
 import type {
+	DrizzleCreatePromptData,
+	DrizzleOrderBy,
+	DrizzleUpdateArgs,
+	DrizzleUpdatePromptData,
+	DrizzleWhereFilter,
 	PromptBase,
 	PromptComplete,
 	PromptCreateInput,
 	PromptFilters,
+	PromptRelated,
+	PromptStatistics,
 	PromptUpdateInput,
 	PromptWithRelations,
 	PromptWithStats,
-	DrizzleCreatePromptData,
-	DrizzleUpdatePromptData,
-	DrizzleWhereFilter,
-	DrizzleOrderBy,
-	DrizzleUpdateArgs,
-	PromptRelated,
-} from '@/types/entities/prompt';
-import { PromptSortCriteria } from '@/types/entities/prompt/enums';
+} from '../../types/entities/prompt';
+import { PromptSortCriteria } from '../../types/entities/prompt/enums';
 import { serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');
@@ -52,53 +54,26 @@ function normalizeRelation(relation: RelationInput | undefined): RelationObject[
  * @returns Objeto compatible con inserción en Drizzle.
  */
 export function mapCreatePromptDataToDrizzle(data: PromptCreateInput): DrizzleCreatePromptData {
-	try {
-		const { tags, groups, properties, wildcards, ...restData } = data;
-
-		return {
-			...restData,
-			emoji: data.emoji || '💬',
-			color: data.color || '#3B82F6',
-			parameters: serializeParameters(data.parameters),
-			tags: serializeTags((tags || []).map((t) => (typeof t === 'string' ? t : t.id))),
-			// Las relaciones groups, properties, wildcards, tagEntities se manejan por separado en Drizzle
-		};
-	} catch (error) {
-		logger.error('Error mapeando datos de creación:', { data, error });
-		throw new Error(
-			`Error al mapear datos de creación de prompt: ${error instanceof Error ? error.message : String(error)}`
-		);
-	}
+	return {
+		...data,
+		// Serializar parámetros si existen - convertir string a null si es necesario
+		parameters: typeof data.parameters === 'string' ? data.parameters : null,
+	};
 }
 
 /**
  * 🔄 Mapea datos de actualización de Prompt a formato Drizzle.
  * ✅ MIGRADO A DRIZZLE
- * @param id ID del prompt a actualizar.
  * @param data Datos de actualización.
  * @returns Objeto compatible con actualización en Drizzle.
  */
-export function mapUpdatePromptDataToDrizzle(id: string, data: PromptUpdateInput): DrizzleUpdateArgs {
-	try {
-		const { tags, groups, properties, wildcards, parameters, ...restData } = data;
-		const updateData: DrizzleUpdatePromptData = { ...restData };
-
-		if (parameters) {
-			if (typeof parameters === 'string') {
-				updateData.parameters = parameters;
-			} else {
-				updateData.parameters = JSON.stringify(parameters);
-			}
-		}
-		// Las relaciones tags, groups, properties, wildcards se manejan por separado en Drizzle
-
-		return { set: updateData, where: { id } };
-	} catch (error) {
-		logger.error('Error mapeando datos de actualización:', { id, data, error });
-		throw new Error(
-			`Error al mapear datos de actualización: ${error instanceof Error ? error.message : String(error)}`
-		);
-	}
+export function mapUpdatePromptDataToDrizzle(data: PromptUpdateInput): DrizzleUpdatePromptData {
+	return {
+		...data,
+		// Serializar parámetros si existen - convertir string a null si es necesario
+		parameters: typeof data.parameters === 'string' ? data.parameters : null,
+		updatedAt: new Date(),
+	};
 }
 
 // #endregion
@@ -117,10 +92,7 @@ export function mapPromptFiltersToDrizzle(filters: PromptFilters = {}): DrizzleW
 	// Buscar por texto en múltiples campos
 	const searchText = filters.searchQuery || filters.search;
 	if (searchText) {
-		where.OR = [
-			{ name: searchText },
-			{ content: searchText }
-		];
+		where.OR = [{ name: searchText }, { content: searchText }];
 	}
 
 	// Filtrar por categorías
@@ -177,7 +149,6 @@ export function mapPromptToRelated(prompt: PromptComplete | PromptWithRelations)
 		emoji: prompt.emoji,
 		color: prompt.color,
 		category: prompt.category,
-		type: prompt.type,
 		createdAt: prompt.createdAt,
 		updatedAt: prompt.updatedAt,
 	};
@@ -216,13 +187,13 @@ export function filterPrompts(prompts: PromptBase[], filters: PromptFilters = {}
 	// Filtrar por categorías
 	const categories = filters.categories || filters.category;
 	if (categories?.length) {
-		filtered = filtered.filter((prompt) => categories.includes(prompt.category));
+		filtered = filtered.filter((prompt) => prompt.category && categories.includes(prompt.category));
 	}
 
 	// Filtrar por propósitos
 	const purposes = filters.purposes || filters.purpose;
 	if (purposes?.length) {
-		filtered = filtered.filter((prompt) => purposes.includes(prompt.purpose));
+		filtered = filtered.filter((prompt) => prompt.purpose && purposes.includes(prompt.purpose));
 	}
 
 	// Filtrar solo favoritos
@@ -339,20 +310,107 @@ export function processPrompts(
  * @returns Prompt con estadísticas calculadas.
  */
 export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
+	// Calcular estadísticas
 	const stats: PromptStatistics = {
-		totalUsages: 0, // Se debería calcular desde la base de datos
-		averageRating: 0, // Se debería calcular desde la base de datos
-		lastUsedAt: null, // Se debería obtener desde la base de datos
-		relatedEntitiesCount: {
-			groups: prompt.groups?.length || 0,
-			properties: prompt.properties?.length || 0,
-			wildcards: prompt.wildcards?.length || 0,
-			tags: prompt.tagEntities?.length || 0,
-		},
+		// Conteos de relaciones
+		totalImages: prompt.totalImages || 0,
+		totalVideos: prompt.totalVideos || 0,
+		totalAlbums: 0,
+		totalCollections: 0,
+		totalTags: 0,
+		totalCharacters: 0,
+		totalPlaces: 0,
+		totalWorldItems: 0,
+		totalConcepts: 0,
+		totalNotes: 0,
+		totalWildcards: 0,
+		totalProperties: 0,
+		totalGroups: 0,
+
+		// Métricas de contenido
+		totalContentItems: 0,
+		averageContentLength: prompt.content?.length || 0,
+		parametersCount: prompt.parameters
+			? (() => {
+					try {
+						return Object.keys(JSON.parse(prompt.parameters!)).length;
+					} catch {
+						return 0;
+					}
+				})()
+			: 0,
+		tagsCount: Array.isArray(prompt.tags) ? prompt.tags.length : 0,
+
+		// Métricas de IA y uso
+		executionCount: 0,
+		successRate: 0,
+		averageExecutionTime: 0,
+		confidenceScore: 0,
+		popularityScore: 0,
+
+		// Análisis temporal
+		lastExecutedAt: null,
+		createdThisMonth: false,
+		updatedThisWeek: false,
+		executedToday: false,
+
+		// Análisis de calidad
+		hasDescription: !!prompt.description,
+		hasFeaturedImage: !!prompt.featuredImage,
+		isWellStructured:
+			!!prompt.description && !!prompt.content && (Array.isArray(prompt.tags) ? prompt.tags.length > 0 : false),
+		qualityGrade: calculateQualityGrade(prompt),
+		completenessScore: 0,
+		creativityScore: 0,
+		technicalScore: 0,
+		usabilityScore: 0,
 	};
 
 	return {
 		...prompt,
+		entityType: 'prompt' as const,
 		stats,
 	};
+}
+
+function calculateQualityGrade(prompt: PromptComplete): 'A' | 'B' | 'C' | 'D' {
+	let score = 0;
+	let maxScore = 0;
+
+	// Nombre (obligatorio)
+	maxScore += 20;
+	if (prompt.name && prompt.name.length > 3) score += 20;
+
+	// Descripción
+	maxScore += 20;
+	if (prompt.description && prompt.description.length > 10) score += 20;
+
+	// Contenido
+	maxScore += 20;
+	if (prompt.content && prompt.content.length > 20) score += 20;
+
+	// Tags
+	maxScore += 15;
+	if (Array.isArray(prompt.tags) && prompt.tags.length > 0) score += 15;
+
+	// Parámetros
+	maxScore += 15;
+	if (prompt.parameters) {
+		try {
+			const params = JSON.parse(prompt.parameters);
+			if (Object.keys(params).length > 0) score += 15;
+		} catch {
+			// Parámetros inválidos
+		}
+	}
+
+	// Imagen destacada
+	maxScore += 10;
+	if (prompt.featuredImage) score += 10;
+
+	const percentage = Math.round((score / maxScore) * 100);
+	if (percentage >= 90) return 'A';
+	if (percentage >= 75) return 'B';
+	if (percentage >= 60) return 'C';
+	return 'D';
 }

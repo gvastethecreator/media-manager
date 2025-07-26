@@ -6,9 +6,9 @@
 
 import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { serverLogger } from '@/lib/logger/server-logger';
-import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
-import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { deserializeJsonField, serializeJsonField } from '../../lib/utils/transformers/common';
+import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '../../types/entities/queue-job';
 
 // Tipo local equivalente a Drizzle (migración a Drizzle)
 type DrizzleQueueJob = {
@@ -101,11 +101,7 @@ export function isQueueJobActive(job: DrizzleQueueJob): boolean {
  * @returns true si el trabajo puede ser reintentado
  */
 export function canRetryQueueJob(job: DrizzleQueueJob): boolean {
-	return (
-		job.status === 'failed' &&
-		job.attempts < job.maxAttempts &&
-		(!job.retryAt || job.retryAt <= new Date())
-	);
+	return job.status === 'failed' && job.attempts < job.maxAttempts && (!job.retryAt || job.retryAt <= new Date());
 }
 
 /**

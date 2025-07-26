@@ -19,16 +19,9 @@ import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';
 
 export type GroupCoreSlice = GroupCoreState & GroupCoreActions;
 
-
-
 const logger = clientLogger.withContext('GroupCoreSlice');
 
-export const createGroupCoreSlice: StateCreator<
-	GroupStore,
-	[],
-	[],
-	GroupCoreSlice
-> = (set, get) => ({
+export const createGroupCoreSlice: StateCreator<GroupStore, [], [], GroupCoreSlice> = (set, get) => ({
 	// Estado inicial
 	groups: [],
 	isLoading: false,
@@ -69,7 +62,7 @@ export const createGroupCoreSlice: StateCreator<
 		try {
 			const updatedGroup = await updateGroupInApi(id, data);
 			const currentGroups = get().groups;
-			const groupIndex = currentGroups.findIndex(g => g.id === id);
+			const groupIndex = currentGroups.findIndex((g) => g.id === id);
 			if (groupIndex !== -1) {
 				const newGroups = [...currentGroups];
 				newGroups[groupIndex] = updatedGroup;
@@ -89,8 +82,8 @@ export const createGroupCoreSlice: StateCreator<
 
 	deleteGroup: async (id) => {
 		const currentGroups = get().groups;
-		const groupName = currentGroups.find(g => g.id === id)?.name ?? id;
-		set({ groups: currentGroups.filter(group => group.id !== id) });
+		const groupName = currentGroups.find((g) => g.id === id)?.name ?? id;
+		set({ groups: currentGroups.filter((group) => group.id !== id) });
 		try {
 			await deleteGroupFromApi(id);
 			set({ lastUpdated: Date.now() });

@@ -8,7 +8,7 @@ import type { StateCreator } from 'zustand';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterSortOption } from '@/types/entities/character/enums';
-import type { CharacterState, CharacterCoreSlice } from '../types';
+import type { CharacterCoreSlice, CharacterState } from '../types';
 
 const logger = serverLogger.withContext('CharacterCoreSlice');
 
@@ -64,7 +64,7 @@ export const createCharacterCoreSlice: StateCreator<
 > = (set, get) => ({
 	// Estado inicial
 	...initialState,
-	
+
 	// Conversión y utilidades optimizadas
 	charactersToRecord,
 
@@ -157,10 +157,10 @@ export const createCharacterCoreSlice: StateCreator<
 				const existingCharacter = updatedCharacters[id];
 				if (existingCharacter) {
 					updatedCharacters[id] = {
-					...existingCharacter,
-					...updateData,
-					updatedAt: now,
-				};
+						...existingCharacter,
+						...updateData,
+						updatedAt: now,
+					};
 				}
 			}
 

@@ -38,11 +38,11 @@ export class OptimizedStatsService {
 		entitiesCount: number;
 		breakdown: Record<string, number>;
 	}> => {
-			this.logger.debug(`📊 Obteniendo estadísticas optimizadas para álbum: ${albumId}`);
+		this.logger.debug(`📊 Obteniendo estadísticas optimizadas para álbum: ${albumId}`);
 
-			try {
-				// 🚀 Consulta optimizada usando Drizzle con SQL raw para joins complejos
-				const statsQuery = await db.all(sql`
+		try {
+			// 🚀 Consulta optimizada usando Drizzle con SQL raw para joins complejos
+			const statsQuery = await db.all(sql`
 					SELECT
 						COUNT(DISTINCT i.id) as imageCount,
 						COUNT(DISTINCT v.id) as videoCount,
@@ -89,33 +89,33 @@ export class OptimizedStatsService {
 					WHERE a.id = ${albumId}
 				`);
 
-				const stats = statsQuery[0] as any;
+			const stats = statsQuery[0] as any;
 
-				const breakdown = {
-					collections: Number(stats.collectionsCount) || 0,
-					tags: Number(stats.tagsCount) || 0,
-					characters: Number(stats.charactersCount) || 0,
-					places: Number(stats.placesCount) || 0,
-					worldItems: Number(stats.worldItemsCount) || 0,
-					concepts: Number(stats.conceptsCount) || 0,
-					prompts: Number(stats.promptsCount) || 0,
-					notes: Number(stats.notesCount) || 0,
-					wildcards: Number(stats.wildcardsCount) || 0,
-					properties: Number(stats.propertiesCount) || 0,
-					groups: Number(stats.groupsCount) || 0,
-				};
+			const breakdown = {
+				collections: Number(stats.collectionsCount) || 0,
+				tags: Number(stats.tagsCount) || 0,
+				characters: Number(stats.charactersCount) || 0,
+				places: Number(stats.placesCount) || 0,
+				worldItems: Number(stats.worldItemsCount) || 0,
+				concepts: Number(stats.conceptsCount) || 0,
+				prompts: Number(stats.promptsCount) || 0,
+				notes: Number(stats.notesCount) || 0,
+				wildcards: Number(stats.wildcardsCount) || 0,
+				properties: Number(stats.propertiesCount) || 0,
+				groups: Number(stats.groupsCount) || 0,
+			};
 
-				return {
-					imageCount: Number(stats.imageCount) || 0,
-					videoCount: Number(stats.videoCount) || 0,
-					totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
-					entitiesCount: Object.values(breakdown).reduce((sum, count) => sum + count, 0),
-					breakdown,
-				};
-			} catch (error) {
-				this.logger.error('❌ Error al obtener estadísticas de álbum:', { albumId, error });
-				throw error;
-			}
+			return {
+				imageCount: Number(stats.imageCount) || 0,
+				videoCount: Number(stats.videoCount) || 0,
+				totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
+				entitiesCount: Object.values(breakdown).reduce((sum, count) => sum + count, 0),
+				breakdown,
+			};
+		} catch (error) {
+			this.logger.error('❌ Error al obtener estadísticas de álbum:', { albumId, error });
+			throw error;
+		}
 	};
 
 	/**
@@ -123,13 +123,13 @@ export class OptimizedStatsService {
 	 * ✅ MIGRADO A DRIZZLE
 	 */
 	getBatchAlbumStats = async (albumIds: string[]): Promise<Record<string, any>> => {
-			if (albumIds.length === 0) return {};
+		if (albumIds.length === 0) return {};
 
-			this.logger.debug(`📊 Obteniendo estadísticas por lotes para ${albumIds.length} álbumes`);
+		this.logger.debug(`📊 Obteniendo estadísticas por lotes para ${albumIds.length} álbumes`);
 
-			try {
-				// 🚀 Una consulta para todos los álbumes en lugar de N consultas separadas
-				const batchStatsQuery = await db.all(sql`
+		try {
+			// 🚀 Una consulta para todos los álbumes en lugar de N consultas separadas
+			const batchStatsQuery = await db.all(sql`
 					SELECT
 						a.id as albumId,
 						a.name as albumName,
@@ -144,29 +144,29 @@ export class OptimizedStatsService {
 					LEFT JOIN Image i ON ai.B = i.id
 					LEFT JOIN _AlbumToVideo av ON a.id = av.A
 					LEFT JOIN Video v ON av.B = v.id
-					WHERE a.id IN (${albumIds.map(id => `'${id}'`).join(',')})
+					WHERE a.id IN (${albumIds.map((id) => `'${id}'`).join(',')})
 					GROUP BY a.id, a.name
 				`);
 
-				return (batchStatsQuery as any[]).reduce(
-					(acc, stats) => {
-						acc[stats.albumId] = {
-							albumId: stats.albumId,
-							albumName: stats.albumName,
-							imageCount: Number(stats.imageCount) || 0,
-							videoCount: Number(stats.videoCount) || 0,
-							totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
-							favoritesCount: (Number(stats.favoriteImagesCount) || 0) + (Number(stats.favoriteVideosCount) || 0),
-							totalCount: (Number(stats.imageCount) || 0) + (Number(stats.videoCount) || 0),
-						};
-						return acc;
-					},
-					{} as Record<string, any>
-				);
-			} catch (error) {
-				this.logger.error('❌ Error al obtener estadísticas por lotes:', { albumIds, error });
-				throw error;
-			}
+			return (batchStatsQuery as any[]).reduce(
+				(acc, stats) => {
+					acc[stats.albumId] = {
+						albumId: stats.albumId,
+						albumName: stats.albumName,
+						imageCount: Number(stats.imageCount) || 0,
+						videoCount: Number(stats.videoCount) || 0,
+						totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
+						favoritesCount: (Number(stats.favoriteImagesCount) || 0) + (Number(stats.favoriteVideosCount) || 0),
+						totalCount: (Number(stats.imageCount) || 0) + (Number(stats.videoCount) || 0),
+					};
+					return acc;
+				},
+				{} as Record<string, any>
+			);
+		} catch (error) {
+			this.logger.error('❌ Error al obtener estadísticas por lotes:', { albumIds, error });
+			throw error;
+		}
 	};
 
 	/**
@@ -189,11 +189,11 @@ export class OptimizedStatsService {
 		totalDownloads: number;
 		totalFavorites: number;
 	}> => {
-			this.logger.debug('📊 Obteniendo estadísticas globales optimizadas');
+		this.logger.debug('📊 Obteniendo estadísticas globales optimizadas');
 
-			try {
-				// 🚀 Una sola consulta SQL para todos los conteos globales usando Drizzle
-				const globalStatsQuery = await db.all(sql`
+		try {
+			// 🚀 Una sola consulta SQL para todos los conteos globales usando Drizzle
+			const globalStatsQuery = await db.all(sql`
 					SELECT
 						(SELECT COUNT(*) FROM Image) as totalImages,
 						(SELECT COUNT(*) FROM Video) as totalVideos,
@@ -211,28 +211,28 @@ export class OptimizedStatsService {
 						(SELECT COUNT(*) FROM Video WHERE isFavorite = true) as totalFavoriteVideos
 				`);
 
-				const stats = globalStatsQuery[0] as any;
+			const stats = globalStatsQuery[0] as any;
 
-				return {
-					totalImages: Number(stats.totalImages) || 0,
-					totalVideos: Number(stats.totalVideos) || 0,
-					totalFolders: Number(stats.totalFolders) || 0,
-					totalCollections: Number(stats.totalCollections) || 0,
-					totalTags: Number(stats.totalTags) || 0,
-					totalAlbums: Number(stats.totalAlbums) || 0,
-					totalCharacters: Number(stats.totalCharacters) || 0,
-					totalPlaces: Number(stats.totalPlaces) || 0,
-					totalWorldItems: Number(stats.totalWorldItems) || 0,
-					totalActivities: Number(stats.totalActivities) || 0,
-					totalSize: (Number(stats.totalImagesSize) || 0) + (Number(stats.totalVideosSize) || 0),
-					totalViews: 0, // TODO: Implementar cuando tengamos tabla de vistas
-					totalDownloads: 0, // TODO: Implementar cuando tengamos tabla de descargas
-					totalFavorites: (Number(stats.totalFavoriteImages) || 0) + (Number(stats.totalFavoriteVideos) || 0),
-				};
-			} catch (error) {
-				this.logger.error('❌ Error al obtener estadísticas globales:', { error });
-				throw error;
-			}
+			return {
+				totalImages: Number(stats.totalImages) || 0,
+				totalVideos: Number(stats.totalVideos) || 0,
+				totalFolders: Number(stats.totalFolders) || 0,
+				totalCollections: Number(stats.totalCollections) || 0,
+				totalTags: Number(stats.totalTags) || 0,
+				totalAlbums: Number(stats.totalAlbums) || 0,
+				totalCharacters: Number(stats.totalCharacters) || 0,
+				totalPlaces: Number(stats.totalPlaces) || 0,
+				totalWorldItems: Number(stats.totalWorldItems) || 0,
+				totalActivities: Number(stats.totalActivities) || 0,
+				totalSize: (Number(stats.totalImagesSize) || 0) + (Number(stats.totalVideosSize) || 0),
+				totalViews: 0, // TODO: Implementar cuando tengamos tabla de vistas
+				totalDownloads: 0, // TODO: Implementar cuando tengamos tabla de descargas
+				totalFavorites: (Number(stats.totalFavoriteImages) || 0) + (Number(stats.totalFavoriteVideos) || 0),
+			};
+		} catch (error) {
+			this.logger.error('❌ Error al obtener estadísticas globales:', { error });
+			throw error;
+		}
 	};
 
 	/**
@@ -254,11 +254,11 @@ export class OptimizedStatsService {
 			tags: number;
 		};
 	}> => {
-			this.logger.debug(`📊 Obteniendo estadísticas optimizadas para grupo: ${groupId}`);
+		this.logger.debug(`📊 Obteniendo estadísticas optimizadas para grupo: ${groupId}`);
 
-			try {
-				// 🚀 Una sola consulta SQL raw en lugar de múltiples count() separadas usando Drizzle
-				const groupStatsQuery = await db.all(sql`
+		try {
+			// 🚀 Una sola consulta SQL raw en lugar de múltiples count() separadas usando Drizzle
+			const groupStatsQuery = await db.all(sql`
 					SELECT
 						COUNT(DISTINCT gti.B) as imageCount,
 						COUNT(DISTINCT gtv.B) as videoCount,
@@ -276,30 +276,30 @@ export class OptimizedStatsService {
 					WHERE g.id = ${groupId}
 				`);
 
-				const stats = groupStatsQuery[0] as any;
+			const stats = groupStatsQuery[0] as any;
 
-				const imageCount = Number(stats.imageCount) || 0;
-				const videoCount = Number(stats.videoCount) || 0;
-				const albumCount = Number(stats.albumCount) || 0;
-				const tagCount = Number(stats.tagCount) || 0;
+			const imageCount = Number(stats.imageCount) || 0;
+			const videoCount = Number(stats.videoCount) || 0;
+			const albumCount = Number(stats.albumCount) || 0;
+			const tagCount = Number(stats.tagCount) || 0;
 
-				return {
-					imageCount,
-					videoCount,
-					albumCount,
-					tagCount,
-					totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
-					itemCounts: {
-						images: imageCount,
-						videos: videoCount,
-						albums: albumCount,
-						tags: tagCount,
-					},
-				};
-			} catch (error) {
-				this.logger.error('❌ Error al obtener estadísticas de grupo:', { groupId, error });
-				throw error;
-			}
+			return {
+				imageCount,
+				videoCount,
+				albumCount,
+				tagCount,
+				totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
+				itemCounts: {
+					images: imageCount,
+					videos: videoCount,
+					albums: albumCount,
+					tags: tagCount,
+				},
+			};
+		} catch (error) {
+			this.logger.error('❌ Error al obtener estadísticas de grupo:', { groupId, error });
+			throw error;
+		}
 	};
 
 	/**
@@ -307,13 +307,13 @@ export class OptimizedStatsService {
 	 * ✅ MIGRADO A DRIZZLE
 	 */
 	getBatchTagStatsOptimized = async (tagIds?: string[]): Promise<Record<string, any>> => {
-			this.logger.debug('📊 Obteniendo estadísticas por lotes para tags');
+		this.logger.debug('📊 Obteniendo estadísticas por lotes para tags');
 
-			try {
-				// Si no se proporcionan IDs, obtener todos los tags
-				const batchTagStatsQuery =
-					tagIds && tagIds.length > 0
-						? await db.all(sql`
+		try {
+			// Si no se proporcionan IDs, obtener todos los tags
+			const batchTagStatsQuery =
+				tagIds && tagIds.length > 0
+					? await db.all(sql`
 						SELECT
 							t.id as tagId,
 							t.name,
@@ -332,10 +332,10 @@ export class OptimizedStatsService {
 						LEFT JOIN Property p ON pt.A = p.id
 						LEFT JOIN _TagToWildcard tw ON t.id = tw.A
 						LEFT JOIN Wildcard w ON tw.B = w.id
-						WHERE t.id IN (${tagIds.map(id => `'${id}'`).join(',')})
+						WHERE t.id IN (${tagIds.map((id) => `'${id}'`).join(',')})
 						GROUP BY t.id, t.name, t.color
 					`)
-						: await db.all(sql`
+					: await db.all(sql`
 						SELECT
 							t.id as tagId,
 							t.name,
@@ -357,49 +357,49 @@ export class OptimizedStatsService {
 						GROUP BY t.id, t.name, t.color
 					`);
 
-				// Convertir array de resultados a objeto con clave tagId
-				const statsArray = Array.isArray(batchTagStatsQuery) ? batchTagStatsQuery : [batchTagStatsQuery];
-				return statsArray.reduce(
-					(
-						acc: Record<
-							string,
-							{
-								imageCount: number;
-								totalSize: number;
-								groupCount: number;
-								propertyCount: number;
-								wildcardCount: number;
-								_count: {
-									images: number;
-									groups: number;
-									properties: number;
-									wildcards: number;
-								};
-							}
-						>,
-						stats: any
-					) => {
-						acc[stats.tagId] = {
-							imageCount: Number(stats.imageCount) || 0,
-							totalSize: Number(stats.totalSize) || 0,
-							groupCount: Number(stats.groupCount) || 0,
-							propertyCount: Number(stats.propertyCount) || 0,
-							wildcardCount: Number(stats.wildcardCount) || 0,
+			// Convertir array de resultados a objeto con clave tagId
+			const statsArray = Array.isArray(batchTagStatsQuery) ? batchTagStatsQuery : [batchTagStatsQuery];
+			return statsArray.reduce(
+				(
+					acc: Record<
+						string,
+						{
+							imageCount: number;
+							totalSize: number;
+							groupCount: number;
+							propertyCount: number;
+							wildcardCount: number;
 							_count: {
-								images: Number(stats.imageCount) || 0,
-								groups: Number(stats.groupCount) || 0,
-								properties: Number(stats.propertyCount) || 0,
-								wildcards: Number(stats.wildcardCount) || 0,
-							},
-						};
-						return acc;
-					},
-					{}
-				);
-			} catch (error) {
-				this.logger.error('❌ Error al obtener estadísticas por lotes de tags:', { tagIds, error });
-				throw error;
-			}
+								images: number;
+								groups: number;
+								properties: number;
+								wildcards: number;
+							};
+						}
+					>,
+					stats: any
+				) => {
+					acc[stats.tagId] = {
+						imageCount: Number(stats.imageCount) || 0,
+						totalSize: Number(stats.totalSize) || 0,
+						groupCount: Number(stats.groupCount) || 0,
+						propertyCount: Number(stats.propertyCount) || 0,
+						wildcardCount: Number(stats.wildcardCount) || 0,
+						_count: {
+							images: Number(stats.imageCount) || 0,
+							groups: Number(stats.groupCount) || 0,
+							properties: Number(stats.propertyCount) || 0,
+							wildcards: Number(stats.wildcardCount) || 0,
+						},
+					};
+					return acc;
+				},
+				{}
+			);
+		} catch (error) {
+			this.logger.error('❌ Error al obtener estadísticas por lotes de tags:', { tagIds, error });
+			throw error;
+		}
 	};
 
 	/**
@@ -407,12 +407,12 @@ export class OptimizedStatsService {
 	 * ✅ MIGRADO A DRIZZLE
 	 */
 	getBatchCollectionStatsOptimized = async (collectionIds?: string[]): Promise<Record<string, any>> => {
-			this.logger.debug('📊 Obteniendo estadísticas por lotes para colecciones');
+		this.logger.debug('📊 Obteniendo estadísticas por lotes para colecciones');
 
-			try {
-				const batchCollectionStatsQuery =
-					collectionIds && collectionIds.length > 0
-						? await db.all(sql`
+		try {
+			const batchCollectionStatsQuery =
+				collectionIds && collectionIds.length > 0
+					? await db.all(sql`
 						SELECT
 							c.id as collectionId,
 							c.name,
@@ -430,10 +430,10 @@ export class OptimizedStatsService {
 						LEFT JOIN Property p ON cp.B = p.id
 						LEFT JOIN _CollectionToWildcard cw ON c.id = cw.A
 						LEFT JOIN Wildcard w ON cw.B = w.id
-						WHERE c.id IN (${collectionIds.map(id => `'${id}'`).join(',')})
+						WHERE c.id IN (${collectionIds.map((id) => `'${id}'`).join(',')})
 						GROUP BY c.id, c.name
 					`)
-						: await db.all(sql`
+					: await db.all(sql`
 						SELECT
 							c.id as collectionId,
 							c.name,
@@ -454,50 +454,50 @@ export class OptimizedStatsService {
 						GROUP BY c.id, c.name
 					`);
 
-				const statsArray = Array.isArray(batchCollectionStatsQuery)
-					? batchCollectionStatsQuery
-					: [batchCollectionStatsQuery];
-				return statsArray.reduce(
-					(
-						acc: Record<
-							string,
-							{
-								imageCount: number;
-								totalSize: number;
-								groupCount: number;
-								propertyCount: number;
-								wildcardCount: number;
-								_count: {
-									images: number;
-									groups: number;
-									properties: number;
-									wildcards: number;
-								};
-							}
-						>,
-						stats: any
-					) => {
-						acc[stats.collectionId] = {
-							imageCount: Number(stats.imageCount) || 0,
-							totalSize: Number(stats.totalSize) || 0,
-							groupCount: Number(stats.groupCount) || 0,
-							propertyCount: Number(stats.propertyCount) || 0,
-							wildcardCount: Number(stats.wildcardCount) || 0,
+			const statsArray = Array.isArray(batchCollectionStatsQuery)
+				? batchCollectionStatsQuery
+				: [batchCollectionStatsQuery];
+			return statsArray.reduce(
+				(
+					acc: Record<
+						string,
+						{
+							imageCount: number;
+							totalSize: number;
+							groupCount: number;
+							propertyCount: number;
+							wildcardCount: number;
 							_count: {
-								images: Number(stats.imageCount) || 0,
-								groups: Number(stats.groupCount) || 0,
-								properties: Number(stats.propertyCount) || 0,
-								wildcards: Number(stats.wildcardCount) || 0,
-							},
-						};
-						return acc;
-					},
-					{}
-				);
-			} catch (error) {
-				this.logger.error('❌ Error al obtener estadísticas por lotes de colecciones:', { collectionIds, error });
-				throw error;
-			}
+								images: number;
+								groups: number;
+								properties: number;
+								wildcards: number;
+							};
+						}
+					>,
+					stats: any
+				) => {
+					acc[stats.collectionId] = {
+						imageCount: Number(stats.imageCount) || 0,
+						totalSize: Number(stats.totalSize) || 0,
+						groupCount: Number(stats.groupCount) || 0,
+						propertyCount: Number(stats.propertyCount) || 0,
+						wildcardCount: Number(stats.wildcardCount) || 0,
+						_count: {
+							images: Number(stats.imageCount) || 0,
+							groups: Number(stats.groupCount) || 0,
+							properties: Number(stats.propertyCount) || 0,
+							wildcards: Number(stats.wildcardCount) || 0,
+						},
+					};
+					return acc;
+				},
+				{}
+			);
+		} catch (error) {
+			this.logger.error('❌ Error al obtener estadísticas por lotes de colecciones:', { collectionIds, error });
+			throw error;
+		}
 	};
 
 	/**
@@ -508,11 +508,11 @@ export class OptimizedStatsService {
 		total: number;
 		byType: Record<string, number>;
 	}> => {
-			this.logger.debug('📊 Obteniendo estadísticas de favoritos optimizadas');
+		this.logger.debug('📊 Obteniendo estadísticas de favoritos optimizadas');
 
-			try {
-				// 🚀 Una sola consulta SQL para todos los conteos de favoritos usando Drizzle
-				const favoriteStatsQuery = await db.all(sql`
+		try {
+			// 🚀 Una sola consulta SQL para todos los conteos de favoritos usando Drizzle
+			const favoriteStatsQuery = await db.all(sql`
 					SELECT
 						(SELECT COUNT(*) FROM Character WHERE isFavorite = true) as characterCount,
 						(SELECT COUNT(*) FROM Place WHERE isFavorite = true) as placeCount,
@@ -523,43 +523,43 @@ export class OptimizedStatsService {
 						(SELECT COUNT(*) FROM Note WHERE isFavorite = true) as noteCount
 				`);
 
-				const stats = favoriteStatsQuery[0] as {
-					characterCount: number;
-					placeCount: number;
-					worldItemCount: number;
-					collectionCount: number;
-					conceptCount: number;
-					promptCount: number;
-					noteCount: number;
-				};
+			const stats = favoriteStatsQuery[0] as {
+				characterCount: number;
+				placeCount: number;
+				worldItemCount: number;
+				collectionCount: number;
+				conceptCount: number;
+				promptCount: number;
+				noteCount: number;
+			};
 
-				const characterCount = Number(stats.characterCount) || 0;
-				const placeCount = Number(stats.placeCount) || 0;
-				const worldItemCount = Number(stats.worldItemCount) || 0;
-				const collectionCount = Number(stats.collectionCount) || 0;
-				const conceptCount = Number(stats.conceptCount) || 0;
-				const promptCount = Number(stats.promptCount) || 0;
-				const noteCount = Number(stats.noteCount) || 0;
+			const characterCount = Number(stats.characterCount) || 0;
+			const placeCount = Number(stats.placeCount) || 0;
+			const worldItemCount = Number(stats.worldItemCount) || 0;
+			const collectionCount = Number(stats.collectionCount) || 0;
+			const conceptCount = Number(stats.conceptCount) || 0;
+			const promptCount = Number(stats.promptCount) || 0;
+			const noteCount = Number(stats.noteCount) || 0;
 
-				const total =
-					characterCount + placeCount + worldItemCount + collectionCount + conceptCount + promptCount + noteCount;
+			const total =
+				characterCount + placeCount + worldItemCount + collectionCount + conceptCount + promptCount + noteCount;
 
-				return {
-					total,
-					byType: {
-						character: characterCount,
-						place: placeCount,
-						'world-item': worldItemCount,
-						collection: collectionCount,
-						concept: conceptCount,
-						prompt: promptCount,
-						note: noteCount,
-					},
-				};
-			} catch (error) {
-				this.logger.error('❌ Error al obtener estadísticas de favoritos:', { error });
-				throw error;
-			}
+			return {
+				total,
+				byType: {
+					character: characterCount,
+					place: placeCount,
+					'world-item': worldItemCount,
+					collection: collectionCount,
+					concept: conceptCount,
+					prompt: promptCount,
+					note: noteCount,
+				},
+			};
+		} catch (error) {
+			this.logger.error('❌ Error al obtener estadísticas de favoritos:', { error });
+			throw error;
+		}
 	};
 
 	/**
@@ -578,11 +578,11 @@ export class OptimizedStatsService {
 			videoCount: number;
 		}>
 	> => {
-			this.logger.debug(`📊 Obteniendo top ${limit} tags optimizado`);
+		this.logger.debug(`📊 Obteniendo top ${limit} tags optimizado`);
 
-			try {
-				// 🚀 Una consulta optimizada para obtener tags con conteos usando Drizzle
-				const topTagsQuery = await db.all(sql`
+		try {
+			// 🚀 Una consulta optimizada para obtener tags con conteos usando Drizzle
+			const topTagsQuery = await db.all(sql`
 					SELECT
 						t.id,
 						t.name,
@@ -599,27 +599,27 @@ export class OptimizedStatsService {
 					LIMIT ${limit}
 				`);
 
-				return (
-					topTagsQuery as Array<{
-						id: string;
-						name: string;
-						color: string;
-						imageCount: number;
-						videoCount: number;
-						totalCount: number;
-					}>
-				).map((tag: (typeof topTagsQuery)[0]) => ({
-					id: tag.id,
-					name: tag.name,
-					color: tag.color || '#6B7280',
-					count: Number(tag.totalCount) || 0,
-					imageCount: Number(tag.imageCount) || 0,
-					videoCount: Number(tag.videoCount) || 0,
-				}));
-			} catch (error) {
-				this.logger.error('❌ Error al obtener top tags:', { limit, error });
-				throw error;
-			}
+			return (
+				topTagsQuery as Array<{
+					id: string;
+					name: string;
+					color: string;
+					imageCount: number;
+					videoCount: number;
+					totalCount: number;
+				}>
+			).map((tag: (typeof topTagsQuery)[0]) => ({
+				id: tag.id,
+				name: tag.name,
+				color: tag.color || '#6B7280',
+				count: Number(tag.totalCount) || 0,
+				imageCount: Number(tag.imageCount) || 0,
+				videoCount: Number(tag.videoCount) || 0,
+			}));
+		} catch (error) {
+			this.logger.error('❌ Error al obtener top tags:', { limit, error });
+			throw error;
+		}
 	};
 }
 

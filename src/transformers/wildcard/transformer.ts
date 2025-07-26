@@ -4,8 +4,8 @@
  * @description Contiene funciones para convertir objetos Wildcard entre diferentes formatos.
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import type { WildcardWithStats } from '@/types/entities/wildcard';
+import { clientLogger } from '../../lib/logger/client-logger';
+import type { WildcardWithStats } from '../../types/entities/wildcard';
 import { toWildcardWithStats } from './mappers';
 
 const wildcardTransformerLogger = clientLogger.withContext('WildcardTransformer');

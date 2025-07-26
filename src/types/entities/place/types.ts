@@ -75,6 +75,12 @@ export interface PlaceSearchOptions {
 	offset?: number;
 	sortBy?: PlaceSortCriteria;
 	sortOrder?: 'asc' | 'desc';
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	filters?: PlaceFilters;
+	pagination?: {
+		skip?: number;
+		take?: number;
+	};
 }
 
 // Alias para compatibilidad
@@ -82,8 +88,9 @@ export type PlaceComplete = PlaceWithStats;
 
 export interface PlaceFilters {
 	search?: string;
-	category?: PlaceCategory[];
-	type?: PlaceType[];
+	category?: PlaceCategory[] | PlaceCategory;
+	type?: PlaceType[] | PlaceType;
+	location?: string;
 	isFavorite?: boolean;
 	hasImages?: boolean;
 	hasVideos?: boolean;

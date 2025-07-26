@@ -111,9 +111,6 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 				}
 
 				// Filtro de público/privado
-				if (filters.isPublic !== undefined && video.isPublic !== filters.isPublic) {
-					return false;
-				}
 
 				// Filtros de duración
 				if (filters.minDuration && video.duration < filters.minDuration) return false;
@@ -150,6 +147,11 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 			filtered.sort((a, b) => {
 				const aVal = a[sortBy];
 				const bVal = b[sortBy];
+
+				// Handle null/undefined values
+				if (aVal == null && bVal == null) return 0;
+				if (aVal == null) return sortDirection === 'asc' ? 1 : -1;
+				if (bVal == null) return sortDirection === 'asc' ? -1 : 1;
 
 				if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
 				if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
@@ -261,8 +263,9 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 			const video = await getVideoFromApi(id);
 			if (video) {
 				get().addVideo(video);
+				return video;
 			}
-			return video;
+			return undefined;
 		} catch (e) {
 			videoLogger.error('Failed to fetch video', { error: e });
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch video';

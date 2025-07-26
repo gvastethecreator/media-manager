@@ -41,7 +41,6 @@ export interface VideoUISlice extends VideoUIState {
 	closeViewer: () => void;
 	nextVideo: () => void;
 	previousVideo: () => void;
-	isViewerOpen: () => boolean;
 	getCurrentVideo: () => string | null;
 
 	// Modo de visualización
@@ -121,7 +120,6 @@ export const createVideoUISlice: StateCreator<VideoStore, [], [], VideoUISlice> 
 		set({ currentVideoId: videoArray[prevIndex].id });
 	},
 
-	isViewerOpen: () => get().isViewerOpen,
 	getCurrentVideo: () => get().currentVideoId,
 
 	// Modo de visualización

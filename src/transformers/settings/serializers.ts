@@ -4,9 +4,9 @@
  * ✅ MIGRADO A DRIZZLE - Julio 2025
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
-import type { Settings } from '@/types/settings';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { deserializeJsonField, serializeJsonField } from '../../lib/utils/transformers/common';
+import type { Settings } from '../../types/settings';
 
 const logger = serverLogger.withContext('SettingsSerializers');
 

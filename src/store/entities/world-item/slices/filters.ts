@@ -6,11 +6,16 @@
 import type { StateCreator } from 'zustand';
 import { WorldItemSortCriteria } from '@/types/entities/world-item/enums';
 import type { WorldItemFilters } from '@/types/entities/world-item/types';
-import type { WorldItemActions, WorldItemState, WorldItem } from '../types';
+import type { WorldItem, WorldItemActions, WorldItemState } from '../types';
+
+// Extender WorldItemFilters para incluir sortBy
+interface ExtendedWorldItemFilters extends WorldItemFilters {
+	sortBy: WorldItemSortCriteria;
+}
 
 export interface WorldItemFiltersSlice {
-	filters: WorldItemFilters;
-	updateFilters: (filters: Partial<WorldItemFilters>) => void;
+	filters: ExtendedWorldItemFilters;
+	updateFilters: (filters: Partial<ExtendedWorldItemFilters>) => void;
 	clearFilters: () => void;
 	getFilteredWorldItems: () => WorldItem[];
 	getSortedWorldItems: () => WorldItem[];
@@ -26,20 +31,20 @@ export const createWorldItemFiltersSlice: StateCreator<
 	filters: {
 		sortBy: WorldItemSortCriteria.NAME_ASC,
 		searchTerm: '',
-		category: null,
-		rarity: null,
-		type: null,
-	},
+		category: undefined,
+		rarity: undefined,
+		type: undefined,
+	} as ExtendedWorldItemFilters,
 	updateFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
 	clearFilters: () =>
 		set({
 			filters: {
 				sortBy: WorldItemSortCriteria.NAME_ASC,
 				searchTerm: '',
-				category: null,
-				rarity: null,
-				type: null,
-			},
+				category: undefined,
+				rarity: undefined,
+				type: undefined,
+			} as ExtendedWorldItemFilters,
 		}),
 	setSearchQuery: (query) => set((state) => ({ filters: { ...state.filters, searchTerm: query } })),
 	getFilteredWorldItems: () => {
@@ -54,9 +59,9 @@ export const createWorldItemFiltersSlice: StateCreator<
 		});
 	},
 	getSortedWorldItems: () => {
-		const {
-			filters: { sortBy },
-		} = get();
+		const { filters } = get();
+		const extendedFilters = filters as ExtendedWorldItemFilters;
+		const { sortBy } = extendedFilters;
 		const filtered = get().getFilteredWorldItems();
 		return [...filtered].sort((a, b) => {
 			switch (sortBy) {

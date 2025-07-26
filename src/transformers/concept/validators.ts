@@ -5,8 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
 import type { ConceptBase, ConceptStats, ConceptWithStats } from '@/types/entities/concept';
 import {
 	ConceptBaseSchema,

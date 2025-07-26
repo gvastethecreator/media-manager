@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { FolderSortCriteria, FolderViewMode } from '@/types/entities/folder/enums';
-import type { FolderFiltersSlice, CompleteFolderStore } from '../types';
+import type { CompleteFolderStore, FolderFiltersSlice } from '../types';
 
 export interface FolderFiltersState {
 	sortBy: FolderSortCriteria;

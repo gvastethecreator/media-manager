@@ -6,8 +6,8 @@
  
  */
 
-import { safeJsonParse } from '@/lib/utils/safe-json-parse';
-import type { WorkflowStatistics, WorkflowWithStats } from '@/types/entities/workflow';
+import { safeJsonParse } from '../../lib/utils/safe-json-parse';
+import type { WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
 
 // Tipo local para workflow (migración a Drizzle)
 type DrizzleWorkflow = {

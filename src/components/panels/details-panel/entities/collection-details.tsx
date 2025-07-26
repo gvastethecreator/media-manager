@@ -98,7 +98,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 							<div className="flex items-center gap-2 mt-2">
 								<Badge variant="secondary" className="text-xs">
 									{entity.stats?.imageCount + entity.stats?.videoCount || 0} elementos
-						</Badge>
+								</Badge>
 								{entity.isFavorite && <Heart className="h-3 w-3 text-red-500 fill-current" />}
 							</div>
 						</div>

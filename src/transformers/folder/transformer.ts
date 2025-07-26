@@ -4,16 +4,16 @@
  * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos optimizados.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { formatFileSize } from '@/lib/utils/format.utils';
-import { TransformerError } from '@/lib/utils/transformers/errors';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { formatFileSize } from '../../lib/utils/format.utils';
 import type {
 	FolderComplete,
 	FolderExtended,
 	FolderExtendedComplete,
 	FolderStatistics,
 	FolderWithStats,
-} from '@/types/entities/folder';
+} from '../../types/entities/folder';
 
 const logger = serverLogger.withContext('FolderTransformer');
 
@@ -71,7 +71,7 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 
 	// Generar breadcrumbs
 	const pathParts = path.split('/').filter(Boolean);
-	const breadcrumbs = pathParts.map((part, index) => ({
+	const breadcrumbs = pathParts.map((part: string, index: number) => ({
 		id: `breadcrumb-${index}`,
 		name: part,
 		path: `/${pathParts.slice(0, index + 1).join('/')}`,
@@ -130,6 +130,12 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 		contentDiversity,
 		organizationScore,
 		totalItems,
+		folderCount,
+		totalFolders: folderCount,
+		totalImages: imageCount,
+		totalVideos: videoCount,
+		totalDocuments: 0,
+		totalFiles: totalFiles || 0,
 
 		// Métricas de uso
 		accessFrequency,
@@ -140,10 +146,12 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 		videoCount,
 		noteCount: 0,
 		documentCount: 0,
-		folderCount,
+		totalAudio: 0,
+		totalOthers: 0,
 
 		// Métricas de tamaño
 		formattedSize,
+		totalSize: totalSize || 0,
 		averageFileSize,
 		largestFile,
 
@@ -166,16 +174,8 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 		// Relaciones
 		totalRelations,
 
-		// 🔧 Propiedades adicionales para compatibilidad con componentes
-		totalFiles: totalFiles || 0,
-		totalSize: totalSize || 0,
-		totalImages: imageCount,
-		totalVideos: videoCount,
-		totalAudio: 0,
-		totalDocuments: 0,
-		totalOthers: 0,
+		// Compatibilidad con componentes
 		lastScanned: lastIndexed?.toISOString(),
-		directoryCount: folderCount,
 		recentImages: [],
 	};
 }
@@ -329,13 +329,6 @@ export function fromDrizzleFolders(drizzleFolders: any[]): FolderComplete[] {
 export function transformFolderToExtended(folder: FolderComplete, level = 0): FolderExtended {
 	const extendedFolder: FolderExtended = {
 		...folder,
-		isSelected: false,
-		isOpen: false,
-		isLoading: false,
-		hasError: false,
-		isDragging: false,
-		isDropTarget: false,
-		level,
 	};
 
 	if (folder.children && folder.children.length > 0) {

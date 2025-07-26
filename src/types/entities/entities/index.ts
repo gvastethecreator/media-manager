@@ -46,4 +46,4 @@ export interface EntityRelation {
 }
 
 // Re-export for backwards compatibility
-export { UploadedImageType } from '@/types/entities/uploaded-image';
+export { UploadedImageType } from '../uploaded-image';

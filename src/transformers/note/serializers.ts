@@ -3,16 +3,16 @@
  * @module transformers/note/serializers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import { NoteSchema } from '@/types/entities/note/schema';
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { NoteSchema } from '../../types/entities/note/schema';
 import type {
 	NoteBase,
 	NoteComplete,
 	NoteCreateInput,
 	NoteTransformerOptions,
 	NoteUpdateInput,
-} from '@/types/entities/note/types';
+} from '../../types/entities/note/types';
 
 // Logger específico para el transformer de Note
 const logger = serverLogger.withContext('NoteSerializer');

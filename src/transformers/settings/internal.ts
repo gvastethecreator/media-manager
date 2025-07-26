@@ -5,9 +5,9 @@
  * @deprecated Este archivo será reemplazado por la nueva estructura estándar
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { deserializeJsonField, serializeJsonField } from '@/lib/utils/transformers/common';
-import { settingsSchema } from '@/types/settings';
+import { serverLogger } from '../../lib/logger/server-logger';
+import { deserializeJsonField, serializeJsonField } from '../../lib/utils/transformers/common';
+import { settingsSchema } from '../../types/settings';
 
 const logger = serverLogger.withContext('SettingsTransformer:internal');
 

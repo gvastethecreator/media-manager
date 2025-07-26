@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { AlbumWithStats, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
+import type { AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/types/entities/album';
 
 // Re-export for compatibility
 export type { AlbumCreateInput as CreateAlbumInput, AlbumUpdateInput as UpdateAlbumInput };
@@ -23,16 +23,14 @@ export interface AlbumUIState {
 	currentAlbumId: string | null;
 }
 
-export interface AlbumFilterState {
-	// Placeholder for future filter state
-}
+export type AlbumFilterState = {};
 
 // --- Acciones del Slice ---
 
 export interface AlbumCoreActions {
 	loadAlbums: () => Promise<void>;
 	createAlbum: (data: AlbumCreateInput) => Promise<void>;
-  updateAlbum: (id: string, data: AlbumUpdateInput) => Promise<void>;
+	updateAlbum: (id: string, data: AlbumUpdateInput) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
 	// Getters
 	getSortedAlbums: () => AlbumWithStats[];
@@ -42,9 +40,7 @@ export interface AlbumUIActions {
 	setCurrentAlbumId: (id: string | null) => void;
 }
 
-export interface AlbumFilterActions {
-	// Placeholder for future filter actions
-}
+export type AlbumFilterActions = {};
 
 // --- Store Completo ---
 

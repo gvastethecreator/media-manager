@@ -17,7 +17,7 @@ export const albumBaseSchema = z.object({
 	emoji: z.string().nullable(),
 	color: z.string().nullable(),
 	featuredImage: z.string().nullable(),
-	isPublic: z.boolean(),
+
 	isFavorite: z.boolean(),
 	totalImages: z.number().nonnegative(),
 	totalVideos: z.number().nonnegative(),
@@ -61,7 +61,7 @@ export const albumFiltersSchema = z.object({
 	searchQuery: z.string().optional(),
 	categories: z.array(z.string()).optional(),
 	isFavorite: z.boolean().optional(),
-	isPublic: z.boolean().optional(),
+
 	startDate: z.union([z.string(), z.date()]).optional(),
 	endDate: z.union([z.string(), z.date()]).optional(),
 	limit: z.number().positive().max(100).optional(),

@@ -3,9 +3,10 @@
  * @module transformers/audio/transformer
  * @description Contiene la lógica para convertir un objeto Audio de Drizzle a nuestro tipo canónico.
  */
-import { serverLogger } from '@/lib/logger/server-logger';
-import { TransformerError } from '@/lib/utils/transformers/errors';
-import type { AudioBase, AudioWithStats } from '@/types/entities/audio';
+
+import { TransformerError } from '../../lib/errors/transformer-error';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type { AudioBase, AudioWithStats } from '../../types/entities/audio';
 
 const logger = serverLogger.withContext('AudioTransformer');
 

@@ -4,8 +4,8 @@
  */
 
 import { z } from 'zod';
+import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { handleTransformerError } from '@/lib/utils/transformers/errors';
 import type { ImageBase, ImageWithStats } from '@/types/entities/image/base';
 
 const logger = serverLogger.withContext('ImageSerializer');
@@ -105,7 +105,7 @@ export function extendImage(
 		return extended;
 	} catch (error) {
 		logger.error('Error al extender imagen con datos adicionales', { error });
-		throw handleTransformerError(error);
+		throw TransformerError.wrap(error, 'Error al extender imagen con datos adicionales');
 	}
 }
 
@@ -156,6 +156,6 @@ export function parseImageFilters(filters: unknown): Record<string, unknown> {
 			});
 			throw new Error(`Filtros inválidos: ${error.errors.map((e) => e.message).join(', ')}`);
 		}
-		throw handleTransformerError(error);
+		throw TransformerError.wrap(error, 'Error al parsear filtros de imagen');
 	}
 }

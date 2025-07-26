@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import { foldersToRecord, getFolderById } from '@/transformers/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
-import type { FolderStore, CompleteFolderStore } from '../types';
+import type { CompleteFolderStore, FolderStore } from '../types';
 
 // Estado inicial
 const initialState = {
