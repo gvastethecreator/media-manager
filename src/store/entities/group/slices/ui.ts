@@ -5,13 +5,27 @@
 
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { GroupDisplayState, GroupViewMode } from '@/types/entities/group';
-import type { GroupState } from '../types';
+import type { GroupViewMode, GroupViewConfig, GroupWithStats } from '@/types/entities/group';
+import type { GroupDisplayState as GroupDisplayStateFromTypes } from '@/types/entities/group/types';
+import type { GroupStore, GroupDisplayState } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupUI');
 
 // Slice para estado de UI
 export interface GroupUISlice {
+	// Estado de UI
+	selectedIds: string[];
+	setSelectedIds: (ids: string[]) => void;
+	viewMode: GroupViewMode;
+	isViewerOpen: boolean;
+	currentGroupId: string | null;
+	displayState: Record<string, GroupDisplayState>;
+	draggedGroupId: string | null;
+	dropTargetGroupId: string | null;
+	highlightedId: string | null;
+	expandedIds: string[];
+	viewConfig: GroupViewConfig;
+
 	// Selección de grupos
 	selectGroup: (id: string | null) => void;
 	deselectGroup: (id: string) => void;
@@ -24,8 +38,7 @@ export interface GroupUISlice {
 	// Visor de grupos
 	openViewer: (groupId: string) => void;
 	closeViewer: () => void;
-	isViewerOpen: () => boolean;
-	getCurrentGroup: () => string | null;
+	getCurrentGroup: () => GroupWithStats | null;
 
 	// Modo de visualización
 	setViewMode: (viewMode: GroupViewMode) => void;
@@ -55,276 +68,200 @@ export interface GroupUISlice {
 }
 
 // Creador del slice
-export const createGroupUISlice: StateCreator<GroupState, [], [], GroupUISlice> = (set, get) => ({
+export const createGroupUISlice: StateCreator<GroupStore, [], [], GroupUISlice> = (set, get) => ({
+	// Estado inicial de UI
+	selectedIds: [],
+	viewMode: 'grid' as GroupViewMode,
+	isViewerOpen: false,
+	currentGroupId: null,
+	displayState: {},
+	draggedGroupId: null,
+	dropTargetGroupId: null,
+	highlightedId: null,
+	expandedIds: [],
+	viewConfig: {
+		viewType: 'grid',
+		gridColumns: 4,
+		cardSize: 'medium',
+		sortBy: 'name',
+		sortDirection: 'asc',
+		showImages: true,
+		imageCount: 3,
+		enableAnimations: true,
+		groupBy: null,
+		showStats: true,
+		compactView: false,
+	},
+	setSelectedIds: (ids: string[]) => {
+		groupLogger.info('📝 Estableciendo IDs seleccionados:', ids.length);
+		set({ selectedIds: ids });
+	},
+
 	// Selección de grupos
 	selectGroup: (id) => {
 		// Si id es null, limpiar la selección
 		if (id === null) {
 			groupLogger.info('🧹 Limpiando selección de grupos');
-			set((state) => ({
-				ui: {
-					...state.ui,
-					selectedIds: [],
-				},
-			}));
+			set({ selectedIds: [] });
 			return;
 		}
 
 		groupLogger.info('🎯 Seleccionando grupo:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [id],
-			},
-		}));
+		set({ selectedIds: [id] });
 	},
 
 	deselectGroup: (id) => {
 		groupLogger.info('⭕ Deseleccionando grupo:', id);
-		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
-			const currentSelectedIds = state.ui.selectedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
-				},
-			};
-		});
+		const currentSelectedIds = get().selectedIds || [];
+		set({ selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id) });
 	},
 
 	toggleGroupSelection: (id) => {
 		groupLogger.info('🔄 Alternando selección de grupo:', id);
-		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
-			const currentSelectedIds = state.ui.selectedIds || [];
-			const isSelected = currentSelectedIds.includes(id);
-
-			return {
-				ui: {
-					...state.ui,
-					selectedIds: isSelected
-						? currentSelectedIds.filter((selectedId) => selectedId !== id)
-						: [...currentSelectedIds, id],
-				},
-			};
+		const currentSelectedIds = get().selectedIds || [];
+		const isSelected = currentSelectedIds.includes(id);
+		set({
+			selectedIds: isSelected
+				? currentSelectedIds.filter((selectedId) => selectedId !== id)
+				: [...currentSelectedIds, id],
 		});
 	},
 
 	selectMultipleGroups: (ids) => {
 		groupLogger.info('📑 Seleccionando múltiples grupos:', ids.length);
-		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
-			const currentSelectedIds = state.ui.selectedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					selectedIds: [...new Set([...currentSelectedIds, ...ids])],
-				},
-			};
-		});
+		const currentSelectedIds = get().selectedIds || [];
+		set({ selectedIds: [...new Set([...currentSelectedIds, ...ids])] });
 	},
 
 	clearSelection: () => {
 		groupLogger.info('🧹 Limpiando selección de grupos');
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [],
-			},
-		}));
+		set({ selectedIds: [] });
 	},
 
 	getSelectedGroups: () => {
-		// Asegurarse de que selectedIds está inicializado
-		return get().ui.selectedIds || [];
+		return get().selectedIds || [];
 	},
 
 	isGroupSelected: (id) => {
-		// Asegurarse de que selectedIds está inicializado
-		const selectedIds = get().ui.selectedIds || [];
+		const selectedIds = get().selectedIds || [];
 		return selectedIds.includes(id);
 	},
 
 	// Visor de grupos
 	openViewer: (groupId) => {
 		groupLogger.info('👁️ Abriendo visor para grupo:', groupId);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				isViewerOpen: true,
-				currentGroupId: groupId,
-			},
-		}));
+		set({ isViewerOpen: true, currentGroupId: groupId });
 	},
 
 	closeViewer: () => {
 		groupLogger.info('🚪 Cerrando visor de grupo');
-		set((state) => ({
-			ui: {
-				...state.ui,
-				isViewerOpen: false,
-				currentGroupId: null,
-			},
-		}));
-	},
-
-	isViewerOpen: () => {
-		return get().ui.isViewerOpen;
+		set({ isViewerOpen: false, currentGroupId: null });
 	},
 
 	getCurrentGroup: () => {
-		return get().ui.currentGroupId;
+		const currentGroupId = get().currentGroupId;
+		if (!currentGroupId) return null;
+		const groups = get().groups;
+		return groups.find(group => group.id === currentGroupId) || null;
 	},
 
 	// Modo de visualización
 	setViewMode: (viewMode) => {
 		groupLogger.info('🔍 Cambiando modo de visualización:', viewMode);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				viewMode,
-			},
-		}));
+		set({ viewMode });
 	},
 
 	getViewMode: () => {
-		return get().ui.viewMode;
+		return get().viewMode;
 	},
 
 	// Estado de visualización
 	setGroupDisplayState: (id, displayState) => {
 		set((state) => ({
-			ui: {
-				...state.ui,
-				displayState: {
-					...state.ui.displayState,
-					[id]: displayState,
-				},
+			displayState: {
+				...state.displayState,
+				[id]: displayState,
 			},
 		}));
 	},
 
 	getGroupDisplayState: (id) => {
-		return get().ui.displayState[id] || { isExpanded: false, isVisible: true };
+		const state = get().displayState[id];
+		if (!state) {
+			// Retornar un GroupDisplayState por defecto
+			return {
+				isExpanded: false,
+				isVisible: true,
+			};
+		}
+		return state;
 	},
 
 	// Expansión de grupos
 	expandGroup: (id) => {
 		groupLogger.info('📂 Expandiendo grupo:', id);
-		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
-			const currentExpandedIds = state.ui.expandedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					expandedIds: currentExpandedIds.includes(id) ? currentExpandedIds : [...currentExpandedIds, id],
-				},
-			};
-		});
+		const currentExpandedIds = get().expandedIds || [];
+		if (!currentExpandedIds.includes(id)) {
+			set({ expandedIds: [...currentExpandedIds, id] });
+		}
 	},
 
 	collapseGroup: (id) => {
 		groupLogger.info('📁 Colapsando grupo:', id);
-		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
-			const currentExpandedIds = state.ui.expandedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
-				},
-			};
-		});
+		const currentExpandedIds = get().expandedIds || [];
+		set({ expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id) });
 	},
 
 	toggleGroupExpansion: (id) => {
 		groupLogger.info('🔄 Alternando expansión de grupo:', id);
-		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
-			const currentExpandedIds = state.ui.expandedIds || [];
-			const isExpanded = currentExpandedIds.includes(id);
-
-			return {
-				ui: {
-					...state.ui,
-					expandedIds: isExpanded
-						? currentExpandedIds.filter((expandedId) => expandedId !== id)
-						: [...currentExpandedIds, id],
-				},
-			};
+		const currentExpandedIds = get().expandedIds || [];
+		const isExpanded = currentExpandedIds.includes(id);
+		set({
+			expandedIds: isExpanded
+				? currentExpandedIds.filter((expandedId) => expandedId !== id)
+				: [...currentExpandedIds, id],
 		});
 	},
 
 	isGroupExpanded: (id) => {
-		// Asegurarse de que expandedIds está inicializado
-		const expandedIds = get().ui.expandedIds || [];
+		const expandedIds = get().expandedIds || [];
 		return expandedIds.includes(id);
 	},
 
 	expandAllGroups: () => {
 		groupLogger.info('📂 Expandiendo todos los grupos');
-		const allGroupIds = Object.keys(get().core.groups);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: allGroupIds,
-			},
-		}));
+		const allGroupIds = get().groups.map(group => group.id);
+		set({ expandedIds: allGroupIds });
 	},
 
 	collapseAllGroups: () => {
 		groupLogger.info('📁 Colapsando todos los grupos');
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: [],
-			},
-		}));
+		set({ expandedIds: [] });
 	},
 
 	// Drag & Drop
 	setDraggedGroup: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				draggedGroupId: id,
-			},
-		}));
+		set({ draggedGroupId: id });
 	},
 
 	setDropTargetGroup: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				dropTargetGroupId: id,
-			},
-		}));
+		set({ dropTargetGroupId: id });
 	},
 
 	getDraggedGroup: () => {
-		return get().ui.draggedGroupId;
+		return get().draggedGroupId;
 	},
 
 	getDropTargetGroup: () => {
-		return get().ui.dropTargetGroupId;
+		return get().dropTargetGroupId;
 	},
 
 	// Resaltado
 	highlightGroup: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				highlightedId: id,
-			},
-		}));
+		set({ highlightedId: id });
 	},
 
 	getHighlightedGroup: () => {
-		return get().ui.highlightedId;
+		return get().highlightedId;
 	},
 });

@@ -13,20 +13,19 @@ import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/
 // Tipo local equivalente a Drizzle (migración a Drizzle)
 type DrizzleQueueJob = {
 	id: string;
-	type: string;
-	status: QueueJobStatus;
-	priority: number;
+	queue: string;
+	data: string; // JSON
+	status: string; // Drizzle devuelve string, no enum
 	attempts: number;
 	maxAttempts: number;
-	progress: number;
-	data: string; // JSON
-	metadata?: string | null; // JSON
-	result?: string | null; // JSON
 	error?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+	progress: number;
 	startedAt?: Date | null;
 	finishedAt?: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
+	priority: number;
+	metadata?: string | null; // JSON
 	retryAt?: Date | null;
 };
 
@@ -92,7 +91,7 @@ export function parseQueueJobMetadata(job: DrizzleQueueJob): QueueJobMetadata | 
  * @returns true si el trabajo está activo
  */
 export function isQueueJobActive(job: DrizzleQueueJob): boolean {
-	return job.status === QueueJobStatus.PENDING || job.status === QueueJobStatus.PROCESSING;
+	return job.status === 'pending' || job.status === 'processing';
 }
 
 /**
@@ -103,7 +102,7 @@ export function isQueueJobActive(job: DrizzleQueueJob): boolean {
  */
 export function canRetryQueueJob(job: DrizzleQueueJob): boolean {
 	return (
-		job.status === QueueJobStatus.FAILED &&
+		job.status === 'failed' &&
 		job.attempts < job.maxAttempts &&
 		(!job.retryAt || job.retryAt <= new Date())
 	);
@@ -116,7 +115,7 @@ export function canRetryQueueJob(job: DrizzleQueueJob): boolean {
  * @returns true si el trabajo puede ser cancelado
  */
 export function canCancelQueueJob(job: DrizzleQueueJob): boolean {
-	return job.status === QueueJobStatus.PENDING || job.status === QueueJobStatus.RETRYING;
+	return job.status === 'pending' || job.status === 'retrying';
 }
 
 /**
@@ -134,6 +133,7 @@ export function transformQueueJob(job: DrizzleQueueJob): QueueJobExtended {
 
 	return {
 		...job,
+		status: job.status as QueueJobStatus, // Convertir string a enum
 		parsedMetadata: parseQueueJobMetadata(job),
 		formattedCreatedAt: formatQueueJobDate(createdAt),
 		formattedUpdatedAt: formatQueueJobDate(updatedAt),

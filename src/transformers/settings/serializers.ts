@@ -126,6 +126,12 @@ export function mergeSettingsData(base: Partial<Settings>, override: Partial<Set
 			devMode: override.advanced?.devMode ?? base.advanced?.devMode ?? false,
 			experimentalFeatures: override.advanced?.experimentalFeatures ?? base.advanced?.experimentalFeatures ?? false,
 		},
+		version: override.version ?? base.version ?? '1.0.0',
+		lastUpdate: override.lastUpdate ?? base.lastUpdate ?? new Date(),
+		system: {
+			platform: override.system?.platform ?? base.system?.platform ?? 'web',
+			version: override.system?.version ?? base.system?.version ?? '1.0.0',
+		},
 	};
 
 	logger.debug('✅ Configuración combinada exitosamente', { merged });

@@ -44,6 +44,7 @@ export function toDocumentWithStats(document: DocumentBase): DocumentWithStats {
 	return {
 		...document,
 		stats,
+		entityType: 'document',
 	};
 }
 

@@ -24,15 +24,18 @@ const initialState: CollectionState = {
 
 	// Estado UI
 	viewConfig: {
-		mode: 'grid',
+		viewType: 'grid',
+	
 		gridColumns: 3,
 		cardSize: 'medium',
-		showStats: true,
-		showDescription: true,
-		defaultView: 'cards',
 		sortBy: 'name',
 		sortDirection: 'asc',
+		showImages: true,
+		imageCount: 10,
+		enableAnimations: true,
 		groupBy: null,
+		showStats: true,
+		compactView: false,
 	},
 	selectedCollectionId: null,
 	hoveredCollectionId: null,

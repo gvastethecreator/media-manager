@@ -273,7 +273,7 @@ export const metadatas = sqliteTable(
 		key: text('key').notNull(),
 		value: text('value'),
 		type: text('type').default('string'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		category: text('category'),
 		description: text('description'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
@@ -323,7 +323,7 @@ export const workflows = sqliteTable(
 		emoji: text('emoji').default('⚙️'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isActive: integer('isActive', { mode: 'boolean' }).notNull().default(true),
 		version: text('version').default('1.0.0'),

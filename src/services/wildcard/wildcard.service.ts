@@ -173,7 +173,9 @@ export async function getWildcard(id: string): Promise<WildcardWithStats | null>
 
 		// Usar el transformer
 		const result = fromDrizzleWildcard(wildcardWithCounts);
-		logger.info(`✅ Wildcard obtenido: ${result.name}`);
+		if (result) {
+			logger.info(`✅ Wildcard obtenido: ${result.name}`);
+		}
 		return result;
 	} catch (error) {
 		logger.error('❌ Error al obtener wildcard:', { id, error });
@@ -191,7 +193,7 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 		logger.info('🔍 Obteniendo wildcards', { options });
 
 		// Construir filtros dinámicamente
-		const conditions: any[] = [];
+		const conditions: Array<any> = [];
 
 		if (onlyFavorites) {
 			conditions.push(eq(wildcards.isFavorite, true));
@@ -253,11 +255,11 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 				.select({ count: count() })
 				.from(wildcards)
 				.where(whereClause)
-				.then((result) => result[0]?.count || 0),
+				.then((result: any) => result[0]?.count || 0),
 		]);
 
 		// Transformar a formato WildcardWithStats usando el transformer
-		const result = drizzleWildcards.map((wildcard: (typeof drizzleWildcards)[0]) => {
+		const result = drizzleWildcards.map((wildcard: any) => {
 			// Agregar _count vacío para el transformer
 			const wildcardWithCounts = {
 				...wildcard,
@@ -377,6 +379,9 @@ export async function createWildcard(data: WildcardCreateInput): Promise<Wildcar
 
 		// Transformar resultado
 		const result = fromDrizzleWildcard(wildcardWithCounts);
+		if (!result) {
+			throw createWildcardError('Error al transformar wildcard creado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Notificar creación
 		await notifyWildcardChange('create', result);
@@ -463,6 +468,9 @@ export async function updateWildcard(id: string, data: WildcardUpdateInput): Pro
 
 		// Transformar resultado
 		const result = fromDrizzleWildcard(wildcardWithCounts);
+		if (!result) {
+			throw createWildcardError('Error al transformar wildcard actualizado', EntityErrorCode.OPERATION_FAILED);
+		}
 
 		// Notificar actualización
 		await notifyWildcardChange('update', result);
@@ -488,7 +496,7 @@ export async function deleteWildcard(id: string): Promise<void> {
 		logger.warn(`🗑️ Eliminando wildcard: ${id}`);
 
 		// Usar una transacción para asegurar la atomicidad de la operación
-		await db.transaction(async (tx) => {
+		await db.transaction(async (tx: any) => {
 			// Obtener información del wildcard a eliminar
 			const wildcard = await tx
 				.select({

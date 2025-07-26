@@ -28,6 +28,7 @@ export type {
 	FolderStatistics as FolderStats,
 	FolderUIProps,
 	FolderUpdateInput,
+	FolderViewConfig,
 	FolderWithRelations,
 	FolderWithStats,
 	UpdateFolderData,

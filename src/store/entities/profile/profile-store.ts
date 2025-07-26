@@ -11,6 +11,7 @@ import {
 	type ProfilePaginationOptions,
 	type ProfilePreferences,
 	ThemeMode,
+	Language,
 } from '@/types/entities/profile/types';
 
 // Estado inicial
@@ -134,12 +135,34 @@ export const useProfileStore = create<ProfileStore>()(
 						const result = await getPaginatedProfiles(filters, pagination);
 
 						set((state) => {
-							state.profiles = result.items;
-							state.totalProfiles = result.total;
-							state.currentPage = result.page;
-							state.filters = filters;
-							state.pagination = pagination;
-						});
+				state.profiles = result.items.map(transformProfile);
+				state.totalProfiles = result.total;
+				state.currentPage = result.page;
+				state.filters = filters;
+				state.pagination = pagination;
+				
+				// Inicializar preferences si no existe en el perfil activo
+				if (state.activeProfile && !state.activeProfile.preferences) {
+					state.activeProfile.preferences = {
+						theme: ThemeMode.SYSTEM,
+						color: '#3b82f6',
+						emoji: '👤',
+						language: Language.SPANISH,
+						enableAnimations: true,
+						enableSounds: false,
+						enableHaptics: false,
+						enableNotifications: true,
+						defaultView: 'grid',
+						defaultSort: 'name',
+						itemsPerPage: 20,
+						showHiddenFiles: false,
+						highContrast: false,
+						reducedMotion: false,
+						fontSize: 'medium',
+						outlineElements: false
+					};
+				}
+			});
 
 						return result;
 					} catch (error) {

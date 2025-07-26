@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import { desc, eq } from 'drizzle-orm';
 // Imports para extracción de metadatos (migrados desde server actions)
-import { promises as fs } from 'fs';
+import { promises as fs, Stats } from 'fs';
 import sharp from 'sharp';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
@@ -21,7 +21,7 @@ import {
 	transformMetadatas,
 } from '@/transformers/metadata';
 import { MetadataExtended } from '@/types/entities/metadata/extended';
-import { MetadataBase } from '@/types/entities/metadata/types';
+import { MetadataBase, MetadataCreateInput } from '@/types/entities/metadata/types';
 import type { MediaMetadata } from '@/types/metadata.types';
 
 const metadataLogger = serverLogger.withContext('MetadataService');
@@ -172,7 +172,7 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
  * @param data - Datos para crear metadatos
  * @returns Metadatos creados o null si hay error
  */
-export async function createMetadata(data: Partial<MetadataBase>): Promise<MetadataExtended | null> {
+export async function createMetadata(data: MetadataCreateInput): Promise<MetadataExtended | null> {
 	try {
 		const drizzleData = mapCreateInputToDrizzle(data);
 
@@ -427,7 +427,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 
 	// Verificar cache
 	const cached = metadataCache.get(normalizedPath);
-	if (cached?.width && cached.width > 0) {
+	if (cached && typeof cached === 'object' && 'width' in cached && typeof cached.width === 'number' && cached.width > 0) {
 		metadataLogger.info('Metadatos obtenidos de caché:', path);
 		return cached;
 	}
@@ -438,7 +438,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	}
 
 	// Obtener estadísticas del archivo
-	const stats = await withRetry<fs.Stats>(() => fs.stat(path), options?.retry || DEFAULT_RETRY_CONFIG);
+	const stats = await withRetry<Stats>(() => fs.stat(path), options?.retry || DEFAULT_RETRY_CONFIG);
 	const buffer = await withRetry<Buffer>(() => fs.readFile(path), options?.retry || DEFAULT_RETRY_CONFIG);
 
 	// Inicializar metadatos base

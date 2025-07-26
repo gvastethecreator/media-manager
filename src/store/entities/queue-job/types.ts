@@ -96,19 +96,40 @@ export const initialCoreState: QueueJobCoreState = {
 };
 
 /**
+ * Opciones de paginación
+ */
+export interface QueueJobPagination {
+	page: number;
+	limit: number;
+	sortField?: QueueJobSortField;
+	sortOrder?: QueueJobSortOrder;
+}
+
+/**
  * Estado del store completo usando la arquitectura de slices
  */
-export interface QueueJobState {
-	core: QueueJobCoreState;
+export interface QueueJobState extends QueueJobCoreState {
 	ui: typeof initialUIState;
 	filters: typeof initialFiltersState;
+	pagination: QueueJobPagination;
 }
+
+/**
+ * Estado inicial de paginación
+ */
+export const initialPaginationState: QueueJobPagination = {
+	page: 1,
+	limit: 20,
+	sortField: 'createdAt',
+	sortOrder: 'desc',
+};
 
 /**
  * Estado inicial completo del store
  */
 export const initialQueueJobState: QueueJobState = {
-	core: initialCoreState,
+	...initialCoreState,
 	ui: initialUIState,
 	filters: initialFiltersState,
+	pagination: initialPaginationState,
 };

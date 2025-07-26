@@ -61,7 +61,7 @@ export const profileFiltersSchema = z.object({
 export const profilePaginationSchema = z.object({
 	page: z.number().int().min(1).optional(),
 	limit: z.number().int().min(1).max(100).optional(),
-	sortBy: z.enum(['name', 'createdAt', 'updatedAt']).optional(),
+	sortBy: z.enum(['name', 'isActive', 'createdAt', 'updatedAt']).optional(),
 	sortDirection: z.enum(['asc', 'desc']).optional(),
 });
 

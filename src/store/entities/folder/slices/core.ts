@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import { foldersToRecord, getFolderById } from '@/transformers/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
-import type { FolderStore } from '../types';
+import type { FolderStore, CompleteFolderStore } from '../types';
 
 // Estado inicial
 const initialState = {
@@ -20,6 +20,19 @@ const initialState = {
 	selectedFolderId: null,
 	expandedFolders: new Set<string>(),
 	currentPath: [] as string[],
+	viewConfig: {
+		viewType: 'grid' as const,
+		gridColumns: 4,
+		cardSize: 'medium' as const,
+		sortBy: 'name',
+		sortDirection: 'asc' as const,
+		showImages: true,
+		imageCount: 3,
+		enableAnimations: true,
+		groupBy: null,
+		showStats: true,
+		compactView: false,
+	},
 };
 
 /**
@@ -81,7 +94,7 @@ function findRootFolders(folders: Record<string, FolderWithStats>): string[] {
 /**
  * 📁 Core slice del store de Folder
  */
-export const createFolderCoreSlice: StateCreator<FolderStore, [], [], FolderStore> = (set, get) => ({
+export const createFolderCoreSlice: StateCreator<CompleteFolderStore, [], [], FolderStore> = (set, get) => ({
 	...initialState,
 
 	// Funciones de acceso O(1)
@@ -105,7 +118,7 @@ export const createFolderCoreSlice: StateCreator<FolderStore, [], [], FolderStor
 		let currentId: string | null = id;
 
 		while (currentId && folders[currentId]) {
-			const folder = folders[currentId];
+			const folder: FolderWithStats = folders[currentId];
 			path.unshift(folder);
 			currentId = folder.parentId;
 		}

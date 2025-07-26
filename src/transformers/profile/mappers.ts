@@ -4,7 +4,7 @@
  
  */
 
-import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '@/types/entities/profile';
+import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '@/types/entities/profile/types';
 
 /**
  * Mapea datos de creación a formato Drizzle
@@ -13,15 +13,14 @@ export function mapCreateProfileDataToDrizzle(data: ProfileCreateInput) {
 	return {
 		id: crypto.randomUUID(),
 		name: data.name,
-		email: data.email,
-		avatar: data.avatar || null,
-		bio: data.bio || null,
-		website: data.website || null,
-		location: data.location || null,
+		emoji: data.emoji || '👤',
+		color: data.color || '#3B82F6',
+		description: data.description || null,
 		isActive: data.isActive ?? true,
-		preferences: data.preferences || {},
 		createdAt: new Date(),
 		updatedAt: new Date(),
+		settingsId: null,
+		imageId: null,
 	};
 }
 
@@ -42,14 +41,13 @@ export function toDrizzleProfile(profile: ProfileBase) {
 	return {
 		id: profile.id,
 		name: profile.name,
-		email: profile.email,
-		avatar: profile.avatar,
-		bio: profile.bio,
-		website: profile.website,
-		location: profile.location,
+		emoji: profile.emoji,
+		color: profile.color,
+		description: profile.description,
 		isActive: profile.isActive,
-		preferences: profile.preferences,
 		createdAt: profile.createdAt,
 		updatedAt: profile.updatedAt,
+		settingsId: profile.settingsId,
+		imageId: profile.imageId,
 	};
 }

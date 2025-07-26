@@ -6,7 +6,7 @@ export interface AlbumBase extends EntityBase {
 	emoji: string | null;
 	color: string | null;
 	featuredImage: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;

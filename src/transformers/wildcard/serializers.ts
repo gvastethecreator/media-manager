@@ -34,12 +34,20 @@ export function serializeWildcard(wildcard: WildcardBase): Record<string, unknow
 export function serializeWildcardWithStats(wildcard: WildcardWithStats): Record<string, unknown> {
 	return {
 		...serializeWildcard(wildcard),
-		stats: {
-			usageCount: wildcard.stats.usageCount,
-			complexityScore: wildcard.stats.complexityScore,
-			popularityScore: wildcard.stats.popularityScore,
-			lastUsed: wildcard.stats.lastUsed?.toISOString() || null,
-			completenessScore: wildcard.stats.completenessScore,
+		entityType: wildcard.entityType,
+		statistics: wildcard.statistics ? {
+			adaptabilityScore: wildcard.statistics.adaptabilityScore,
+			usageDiversity: wildcard.statistics.usageDiversity,
+			completenessScore: wildcard.statistics.completenessScore,
+			popularity: wildcard.statistics.popularity,
+		} : null,
+		_count: {
+			tags: wildcard._count.tags,
+			images: wildcard._count.images,
+			characters: wildcard._count.characters,
+			places: wildcard._count.places,
+			notes: wildcard._count.notes,
+			childWildcards: wildcard._count.childWildcards,
 		},
 	};
 }

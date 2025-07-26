@@ -3,7 +3,7 @@
  * @module store/entities/folder/types
  */
 
-import type { FolderWithStats } from '@/types/entities/folder';
+import type { FolderWithStats, FolderViewConfig } from '@/types/entities/folder';
 import type { FolderSortCriteria, FolderViewMode } from '@/types/entities/folder/enums';
 
 /**
@@ -44,6 +44,7 @@ export interface FolderStore {
 	selectedFolderId: string | null;
 	expandedFolders: Set<string>;
 	currentPath: string[];
+	viewConfig: FolderViewConfig;
 
 	// Funciones de UI
 	selectFolder: (id: string | null) => void;

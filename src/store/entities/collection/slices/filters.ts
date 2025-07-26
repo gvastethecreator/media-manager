@@ -5,7 +5,8 @@
 
 import type { StateCreator } from 'zustand';
 import { filterCollectionsBySearch, groupCollections, sortCollections } from '@/lib/utils/collection';
-import type { CollectionFilter, CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionFilter } from '@/types/entities/collection/types';
 import type { CollectionState } from '../types';
 
 /**
@@ -20,7 +21,7 @@ export interface CollectionFiltersSlice {
 
 	// Ordenamiento y agrupamiento
 	getSortedCollections: (sortOption?: string) => CollectionWithStats[];
-	getGroupedCollections: (groupBy?: 'category' | 'rarity' | 'platform' | null) => Record<string, CollectionWithStats[]>;
+	getGroupedCollections: (groupBy?: 'rarity' | null) => Record<string, CollectionWithStats[]>;
 
 	// Filtros avanzados
 	setActiveFilters: (filters: CollectionFilter[]) => void;
@@ -46,61 +47,139 @@ export const createCollectionFiltersSlice: StateCreator<
 	CollectionFiltersSlice
 > = (set, get) => ({
 	// Filtros básicos
+	/**
+	 * Filtra las colecciones por categoría
+	 * @param category Categoría a filtrar o null para limpiar filtro
+	 */
 	filterByCategory: (category: string | null) => {
 		set((state) => {
-			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'category');
-			if (category) {
-				newFilters.push({ field: 'category', value: category, operator: 'equals' });
-			}
-			return { activeFilters: newFilters };
+			const currentFilter = state.activeFilters[0] || {
+				category: [],
+				rarity: [],
+				priceRange: [0, 1000] as [number, number],
+				rating: 0,
+		
+				hasItems: null,
+			};
+			
+			const newFilter = {
+				...currentFilter,
+				category: category ? [category] : [],
+			};
+			
+			return { activeFilters: [newFilter] };
 		});
+		return get().getFilteredCollections();
 	},
 
+	/**
+	 * Filtra las colecciones por rareza
+	 * @param rarity Rareza a filtrar o null para limpiar filtro
+	 */
 	filterByRarity: (rarity: string | null) => {
 		set((state) => {
-			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'rarity');
-			if (rarity) {
-				newFilters.push({ field: 'rarity', value: rarity, operator: 'equals' });
-			}
-			return { activeFilters: newFilters };
+			const currentFilter = state.activeFilters[0] || {
+				category: [],
+				rarity: [],
+				priceRange: [0, 1000] as [number, number],
+				rating: 0,
+		
+				hasItems: null,
+			};
+			
+			const newFilter = {
+				...currentFilter,
+				rarity: rarity ? [rarity] : [],
+			};
+			
+			return { activeFilters: [newFilter] };
 		});
+		return get().getFilteredCollections();
 	},
 
+	/**
+	 * Filtra las colecciones por rango de precio
+	 * @param minPrice Precio mínimo o null para sin mínimo
+	 * @param maxPrice Precio máximo o null para sin máximo
+	 */
 	filterByPrice: (minPrice: number | null, maxPrice: number | null) => {
 		set((state) => {
-			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'price');
-			if (minPrice !== null && maxPrice !== null) {
-				newFilters.push({ field: 'price', value: [minPrice, maxPrice], operator: 'between' });
-			} else if (minPrice !== null) {
-				newFilters.push({ field: 'price', value: minPrice, operator: 'gte' });
-			} else if (maxPrice !== null) {
-				newFilters.push({ field: 'price', value: maxPrice, operator: 'lte' });
-			}
-			return { activeFilters: newFilters };
+			const currentFilter = state.activeFilters[0] || {
+				category: [],
+				rarity: [],
+				priceRange: [0, 1000] as [number, number],
+				rating: 0,
+		
+				hasItems: null,
+			};
+			
+			const newFilter = {
+				...currentFilter,
+				priceRange: [minPrice || 0, maxPrice || 1000] as [number, number],
+			};
+			
+			return { activeFilters: [newFilter] };
 		});
+		return get().getFilteredCollections();
 	},
 
+	/**
+	 * Filtra las colecciones por término de búsqueda
+	 * @param searchTerm Término de búsqueda
+	 */
 	filterByName: (searchTerm: string) => {
-		set((state) => {
-			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'name');
-			if (searchTerm) {
-				newFilters.push({ field: 'name', value: searchTerm, operator: 'contains' });
-			}
-			return { activeFilters: newFilters };
-		});
+		set({ searchTerm });
+		return get().getFilteredCollections();
 	},
 
 	// Ordenamiento y agrupamiento
 	getSortedCollections: (sortOption?: string) => {
-		const collections = get().getCollections();
+		const collections = Object.values(get().collections);
 		const option = sortOption || get().currentSortOption;
 		return sortCollections(collections, option);
 	},
 
+	/**
+	 * Obtiene las colecciones agrupadas según criterio especificado
+	 * @param groupBy Criterio de agrupación (usa state.groupBy si no se especifica)
+	 * @returns Objeto con grupos de colecciones
+	 */
 	getGroupedCollections: (groupBy?: 'category' | 'rarity' | 'platform' | null) => {
-		const collections = get().getCollections();
-		const groupByOption = groupBy !== undefined ? groupBy : get().groupBy;
-		return groupCollections(collections, groupByOption);
+		const { groupBy: currentGroupBy } = get();
+		let collectionsArray = get().getFilteredCollections();
+
+		const groupByOption = groupBy || currentGroupBy;
+
+		if (groupByOption === null) {
+			return { all: collectionsArray };
+		}
+
+		const groups: Record<string, CollectionWithStats[]> = {};
+
+		for (const collection of collectionsArray) {
+			let groupKey: string;
+
+			switch (groupByOption) {
+				case 'category':
+					groupKey = collection.category || 'unknown';
+					break;
+				case 'rarity':
+					groupKey = collection.category || 'unknown';
+					break;
+				case 'platform':
+					groupKey = collection.platform || 'unknown';
+					break;
+				default:
+					groupKey = 'all';
+			}
+
+			if (!groups[groupKey]) {
+				groups[groupKey] = [];
+			}
+			groups[groupKey].push(collection);
+		}
+
+		return groups;
 	},
 
 	// Filtros avanzados
@@ -116,13 +195,34 @@ export const createCollectionFiltersSlice: StateCreator<
 		});
 	},
 
+	/**
+	 * Aplica un conjunto de filtros, reemplazando los existentes
+	 * @param filters Filtros a aplicar
+	 */
 	applyFilters: (filters: CollectionFilter[]) => {
-		const collections = get().getCollections();
+		set({ activeFilters: filters });
+		return get().getFilteredCollections();
+	},
 
-		return collections.filter((collection) => {
-			return filters.every((filter) => {
-				const fieldValue = collection[filter.field as keyof CollectionWithStats];
+	// Búsqueda
+	setSearchTerm: (term: string) => {
+		set({ searchTerm: term });
+	},
 
+	getFilteredCollections: () => {
+		const { searchTerm, activeFilters } = get();
+		let collections = Object.values(get().collections);
+
+		// Aplicar búsqueda por término
+		if (searchTerm.trim()) {
+			collections = filterCollectionsBySearch(collections, searchTerm);
+		}
+
+		// Aplicar filtros activos
+		for (const filter of activeFilters) {
+			collections = collections.filter(collection => {
+				const fieldValue = (collection as any)[filter.field];
+				
 				switch (filter.operator) {
 					case 'equals':
 						return fieldValue === filter.value;
@@ -141,35 +241,12 @@ export const createCollectionFiltersSlice: StateCreator<
 					case 'lte':
 						return Number(fieldValue) <= Number(filter.value);
 					case 'between':
-						if (Array.isArray(filter.value) && filter.value.length === 2) {
-							const [min, max] = filter.value;
-							return Number(fieldValue) >= Number(min) && Number(fieldValue) <= Number(max);
-						}
-						return true;
+						const [min, max] = Array.isArray(filter.value) ? filter.value : [0, 0];
+						return Number(fieldValue) >= Number(min) && Number(fieldValue) <= Number(max);
 					default:
 						return true;
 				}
 			});
-		});
-	},
-
-	// Búsqueda
-	setSearchTerm: (term: string) => {
-		set({ searchTerm: term });
-	},
-
-	getFilteredCollections: () => {
-		const { searchTerm, activeFilters } = get();
-		let collections = get().getCollections();
-
-		// Aplicar búsqueda por término
-		if (searchTerm.trim()) {
-			collections = filterCollectionsBySearch(collections, searchTerm);
-		}
-
-		// Aplicar filtros activos
-		if (activeFilters.length > 0) {
-			collections = get().applyFilters(activeFilters);
 		}
 
 		return collections;
