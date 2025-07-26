@@ -102,9 +102,9 @@ export function filterWorldItemsBySearch(worldItems: WorldItemExtended[], search
 		(item) =>
 			item.name.toLowerCase().includes(query) ||
 			item.description?.toLowerCase().includes(query) ||
-			(item.type?.toLowerCase().includes(query)) ||
+			item.type?.toLowerCase().includes(query) ||
 			item.category?.toLowerCase().includes(query) ||
-			(item.rarity?.toLowerCase().includes(query))
+			item.rarity?.toLowerCase().includes(query)
 	);
 }
 

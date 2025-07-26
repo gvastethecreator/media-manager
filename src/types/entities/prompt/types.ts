@@ -4,7 +4,6 @@
  * @description Define las estructuras de datos, inputs y tipos para la entidad Prompt.
  */
 
-import type { PromptBase, PromptWithStats } from './base';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -18,12 +17,13 @@ import type { TagWithStats } from '../tag';
 import type { VideoWithStats } from '../video';
 import type { WildcardWithStats } from '../wildcard';
 import type { WorldItemWithStats } from '../world-item';
+import type { PromptBase, PromptWithStats } from './base';
 
 /**
  * 🎯 Tipos base canónicos para Prompt
  */
 // Re-export tipos base desde base.ts para evitar duplicación
-export type { PromptBase, PromptWithStats, PromptStatistics } from './base';
+export type { PromptBase, PromptStatistics, PromptWithStats } from './base';
 
 /**
  * Interface for prompt parameters

@@ -12,13 +12,15 @@ router.put('/:id', async (req, res) => {
 		const data = req.body;
 
 		if (!data) {
-			res.status(400).json({ error: 'Los datos de metadata son requeridos' });; return;
+			res.status(400).json({ error: 'Los datos de metadata son requeridos' });
+			return;
 		}
 
 		const updatedMetadata = await MetadataService.updateMetadata(id, data);
 
 		if (!updatedMetadata) {
-			res.status(404).json({ error: `Metadato con id ${id} no encontrado` });; return;
+			res.status(404).json({ error: `Metadato con id ${id} no encontrado` });
+			return;
 		}
 
 		res.json(updatedMetadata);

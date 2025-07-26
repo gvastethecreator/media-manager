@@ -257,7 +257,7 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 		]);
 
 		// Transformar a formato WildcardWithStats usando el transformer
-		const result = drizzleWildcards.map((wildcard: typeof drizzleWildcards[0]) => {
+		const result = drizzleWildcards.map((wildcard: (typeof drizzleWildcards)[0]) => {
 			// Agregar _count vacío para el transformer
 			const wildcardWithCounts = {
 				...wildcard,

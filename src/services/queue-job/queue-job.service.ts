@@ -656,7 +656,7 @@ export async function findProcessingTimes(since: Date): Promise<number[]> {
 			);
 
 		return completedJobs
-			.map((job: typeof completedJobs[0]) => {
+			.map((job: (typeof completedJobs)[0]) => {
 				if (job.startedAt && job.finishedAt) {
 					return job.finishedAt.getTime() - job.startedAt.getTime();
 				}

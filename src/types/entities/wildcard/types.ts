@@ -3,7 +3,6 @@
  * @module types/entities/wildcard/types
  */
 
-
 // Re-export tipo base para compatibilidad
 export type { WildcardWithStats } from './base';
 

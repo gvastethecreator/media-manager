@@ -236,7 +236,7 @@ export async function updateMultipleImagesMetadata(imageIds: string[], data: Upd
 		const validatedData = updateMetadataSchema.parse(data);
 
 		// Actualizar todas las imágenes en una transacción
-		await db.transaction(async (tx) => {
+		await db.transaction(async (tx: any) => {
 			for (const imageId of imageIds) {
 				await tx
 					.update(images)

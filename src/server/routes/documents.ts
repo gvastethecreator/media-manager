@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
 	createDocument,
@@ -51,31 +51,72 @@ router.get('/', async (_req, res) => {
 });
 
 // GET /api/documents/:id - Obtener un documento por ID
-router.get('/:id', async (req, res) => {
+const getDocumentByIdHandler = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const document = await getDocumentById(id);
 		if (!document) {
-			res.status(404).json({ error: 'Documento no encontrado' });; return;
+			res.status(404).json({ error: 'Documento no encontrado' });
+			return;
 		}
 		res.json(document);
 	} catch (error) {
 		console.error('Error al obtener documento por ID:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+router.get('/:id', getDocumentByIdHandler);
 
 // POST /api/documents - Crear un nuevo documento
-router.post('/', async (req, res) => {
+
+const createDocumentHandler = async (req: Request, res: Response) => {
 	try {
-		const validatedData = DocumentCreateSchema.parse(req.body);
+		// Validar campos obligatorios
+		const requiredFields = ['name', 'path', 'size', 'hash', 'mimeType', 'extension', 'folderId'];
+		for (const field of requiredFields) {
+			if (req.body[field] === undefined) {
+				res.status(400).json({ error: `El campo obligatorio '${field}' está ausente` });
+				return;
+			}
+		}
+		// Construir objeto solo con los campos esperados y valores normalizados
+		const body: any = {
+			name: req.body.name,
+			path: req.body.path,
+			size: req.body.size,
+			hash: req.body.hash,
+			mimeType: req.body.mimeType,
+			extension: req.body.extension,
+			folderId: req.body.folderId,
+			isFavorite: req.body.isFavorite ?? false,
+			isArchived: req.body.isArchived ?? false,
+			pageCount: req.body.pageCount ?? null,
+			wordCount: req.body.wordCount ?? null,
+			language: req.body.language ?? null,
+			title: req.body.title ?? null,
+			author: req.body.author ?? null,
+			subject: req.body.subject ?? null,
+			keywords: req.body.keywords ?? null,
+			creator: req.body.creator ?? null,
+			producer: req.body.producer ?? null,
+			creationDate: req.body.creationDate ?? null,
+			modificationDate: req.body.modificationDate ?? null,
+			encrypted: req.body.encrypted ?? null,
+			version: req.body.version ?? null,
+			content: req.body.content ?? null,
+			summary: req.body.summary ?? null,
+		};
+		const validatedData = DocumentCreateSchema.parse(body) as import('@/types/entities/document').DocumentCreateInput;
 		const newDocument = await createDocument(validatedData);
 		res.status(201).json(newDocument);
 	} catch (error) {
 		console.error('Error al crear documento:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+router.post('/', createDocumentHandler);
 
 // PUT /api/documents/:id - Actualizar un documento
 router.put('/:id', async (req, res) => {

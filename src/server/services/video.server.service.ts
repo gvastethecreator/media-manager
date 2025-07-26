@@ -133,7 +133,7 @@ export async function getVideos(filters: z.infer<typeof VideoFiltersSchema>) {
 				.select({ count: count() })
 				.from(videos)
 				.where(whereClause)
-				.then((result) => result[0]?.count || 0),
+				.then((result: any) => result[0]?.count || 0),
 		]);
 
 		return {
@@ -333,89 +333,48 @@ export async function getVideoFormatStats() {
 	try {
 		videoLogger.info('Obteniendo estadísticas de formato de video');
 
-		// Nota: Drizzle no tiene avg/sum directo, implementación manual temporal
+		// TODO: Implementar estadísticas por formato cuando se agregue el campo format al esquema
+		// Por ahora retornamos estadísticas generales
 		const allVideos = await db
 			.select({
-				format: videos.format,
 				size: videos.size,
 				duration: videos.duration,
 				width: videos.width,
 				height: videos.height,
 			})
-			.from(videos)
-			.where(eq(videos.format, videos.format)); // Solo videos con formato
+			.from(videos);
 
-		// Agrupar manualmente por formato
-		const formatGroups = allVideos.reduce(
-			(
-				acc: Record<
-					string,
-					{
-						format: string;
-						count: number;
-						sumSize: number;
-						sumDuration: number;
-						sumWidth: number;
-						sumHeight: number;
-						validDuration: number;
-						validWidth: number;
-						validHeight: number;
-					}
-				>,
-				video
-			) => {
-				const format = video.format || 'unknown';
-				if (!acc[format]) {
-					acc[format] = {
-						format,
-						count: 0,
-						sumSize: 0,
-						sumDuration: 0,
-						sumWidth: 0,
-						sumHeight: 0,
-						validDuration: 0,
-						validWidth: 0,
-						validHeight: 0,
-					};
-				}
-				acc[format].count++;
-				if (video.size) acc[format].sumSize += video.size;
-				if (video.duration) {
-					acc[format].sumDuration += video.duration;
-					acc[format].validDuration++;
-				}
-				if (video.width) {
-					acc[format].sumWidth += video.width;
-					acc[format].validWidth++;
-				}
-				if (video.height) {
-					acc[format].sumHeight += video.height;
-					acc[format].validHeight++;
-				}
-				return acc;
+		if (allVideos.length === 0) {
+			return [];
+		}
+
+		// Estadísticas generales para todos los videos
+		const totalCount = allVideos.length;
+		const totalSize = allVideos.reduce((sum: number, video: any) => sum + (video.size || 0), 0);
+		const validDurations = allVideos.filter((v: any) => v.duration && v.duration > 0);
+		const avgDuration =
+			validDurations.length > 0
+				? validDurations.reduce((sum: number, v: any) => sum + v.duration!, 0) / validDurations.length
+				: 0;
+
+		const validSizes = allVideos.filter((v: any) => v.width && v.height);
+		const avgWidth =
+			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.width!, 0) / validSizes.length : 0;
+		const avgHeight =
+			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.height!, 0) / validSizes.length : 0;
+
+		return [
+			{
+				format: 'all',
+				count: totalCount,
+				sumSize: totalSize,
+				avgDuration,
+				avgWidth,
+				avgHeight,
 			},
-			{}
-		);
-
-		// Calcular promedios y convertir a array
-		const formatStats = Object.values(formatGroups)
-			.map((group) => ({
-				format: group.format,
-				count: group.count,
-				sumSize: group.sumSize,
-				avgDuration: group.validDuration > 0 ? group.sumDuration / group.validDuration : 0,
-				avgWidth: group.validWidth > 0 ? group.sumWidth / group.validWidth : 0,
-				avgHeight: group.validHeight > 0 ? group.sumHeight / group.validHeight : 0,
-			}))
-			.sort((a, b) => b.count - a.count); // Ordenar por count desc
-
-		videoLogger.info('Estadísticas de formato de video obtenidas exitosamente');
-		return formatStats;
+		];
 	} catch (error) {
 		videoLogger.error('Error al obtener estadísticas de formato de video:', error);
-		throw toServiceError(error, {
-			serviceName: SERVICE_NAME,
-			message: 'No se pudieron obtener las estadísticas de formato de video',
-		});
+		throw error;
 	}
 }

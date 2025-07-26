@@ -58,7 +58,8 @@ router.get('/:id', async (req, res) => {
 		const note = await noteService.getNoteById(id);
 
 		if (!note) {
-			res.status(404).json({ error: 'Nota no encontrada' });; return;
+			res.status(404).json({ error: 'Nota no encontrada' });
+			return;
 		}
 
 		res.json(toNoteWithStats(note));
@@ -122,7 +123,23 @@ router.get('/statuses', async (_req, res) => {
 router.post('/', async (req, res) => {
 	try {
 		const validatedData = NoteCreateSchema.parse(req.body);
-		const newNote = await noteService.createNote(validatedData);
+		// Normalizar campos undefined a valores apropiados
+		const noteData: any = { ...validatedData };
+
+		// Convertir undefined a valores apropiados según el tipo esperado
+		Object.keys(noteData).forEach((key) => {
+			if (noteData[key] === undefined) {
+				// Para campos booleanos usar false por defecto
+				if (['isFavorite', 'isArchived', 'isPublic'].includes(key)) {
+					noteData[key] = false;
+				} else {
+					// Para otros campos usar null
+					noteData[key] = null;
+				}
+			}
+		});
+
+		const newNote = await noteService.createNote(noteData);
 		res.status(201).json(toNoteWithStats(newNote));
 	} catch (error) {
 		console.error('Error creating note:', error);
@@ -135,10 +152,27 @@ router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const validatedData = NoteUpdateSchema.parse(req.body);
-		const note = await noteService.updateNote(id, validatedData);
+		// Normalizar campos undefined a valores apropiados
+		const noteData: any = { ...validatedData };
+
+		// Convertir undefined a valores apropiados según el tipo esperado
+		Object.keys(noteData).forEach((key) => {
+			if (noteData[key] === undefined) {
+				// Para campos booleanos usar false por defecto
+				if (['isFavorite', 'isArchived', 'isPublic'].includes(key)) {
+					noteData[key] = false;
+				} else {
+					// Para otros campos usar null
+					noteData[key] = null;
+				}
+			}
+		});
+
+		const note = await noteService.updateNote(id, noteData);
 
 		if (!note) {
-			res.status(404).json({ error: 'Nota no encontrada' });; return;
+			res.status(404).json({ error: 'Nota no encontrada' });
+			return;
 		}
 
 		res.json(toNoteWithStats(note));
@@ -156,7 +190,8 @@ router.delete('/:id', async (req, res) => {
 		const deleted = await noteService.deleteNote(id);
 
 		if (!deleted) {
-			res.status(404).json({ error: 'Nota no encontrada' });; return;
+			res.status(404).json({ error: 'Nota no encontrada' });
+			return;
 		}
 
 		res.status(204).send();

@@ -191,11 +191,18 @@ export function findRelatedConcepts(
 		// Convertir a conceptos extendidos
 		return bestMatches.map((match) => {
 			return {
-					...match.concept,
-					totalAssociations: ('stats' in match.concept && (match.concept as any).stats) ? (match.concept as any).stats.totalAssociations : 0,
-					lastUsed: match.concept.updatedAt,
-					usageCount: ('_count' in match.concept && match.concept._count) ? Object.values(match.concept._count as Record<string, number>).reduce((sum: number, count: number) => sum + count, 0) : 0,
-				};
+				...match.concept,
+				totalAssociations:
+					'stats' in match.concept && (match.concept as any).stats ? (match.concept as any).stats.totalAssociations : 0,
+				lastUsed: match.concept.updatedAt,
+				usageCount:
+					'_count' in match.concept && match.concept._count
+						? Object.values(match.concept._count as Record<string, number>).reduce(
+								(sum: number, count: number) => sum + count,
+								0
+							)
+						: 0,
+			};
 		});
 	} catch (error) {
 		helpersLogger.error('❌ Error al calcular conceptos relacionados:', error);

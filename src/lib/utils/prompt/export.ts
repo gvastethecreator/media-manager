@@ -72,7 +72,7 @@ export interface PromptExportResult {
  */
 function exportPromptToJSON(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
+		const displayPrompt = 'parsedTags' in prompt ? prompt : (prompt as PromptBase);
 
 		if (!includeMetadata) {
 			// Crear un objeto compatible con las propiedades disponibles
@@ -100,7 +100,7 @@ function exportPromptToJSON(prompt: PromptBase | PromptExtended, includeMetadata
  */
 function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
+		const displayPrompt = 'parsedTags' in prompt ? prompt : (prompt as PromptBase);
 		let md = `# ${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
 			if (displayPrompt.category) {
@@ -111,10 +111,11 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 			}
 
 			// Añadir tags si existen
-			const tags: string[] = 'parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags) ? displayPrompt.parsedTags : [];
+			const tags: string[] =
+				'parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags) ? displayPrompt.parsedTags : [];
 			if (tags.length > 0) {
 				md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
-			}			// Añadir información de fecha
+			} // Añadir información de fecha
 			const createdAt =
 				displayPrompt.createdAt instanceof Date
 					? displayPrompt.createdAt.toISOString().split('T')[0]
@@ -153,7 +154,7 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
  */
 function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
+		const displayPrompt = 'parsedTags' in prompt ? prompt : (prompt as PromptBase);
 		let text = `${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
 			if (displayPrompt.category) {
@@ -166,9 +167,8 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
 			}
 
 			// Añadir tags si existen
-			const tags: string[] = ('parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags))
-				? displayPrompt.parsedTags
-				: [];
+			const tags: string[] =
+				'parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags) ? displayPrompt.parsedTags : [];
 			if (tags.length > 0) {
 				text += `Tags: ${tags.join(', ')}
 `;
@@ -192,7 +192,7 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
  */
 function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		const displayPrompt = 'parsedTags' in prompt ? prompt : prompt as PromptBase;
+		const displayPrompt = 'parsedTags' in prompt ? prompt : (prompt as PromptBase);
 		const escapeHtml = (text: string) => {
 			return text
 				.replace(/&/g, '&amp;')
@@ -232,9 +232,8 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 			}
 
 			// Añadir tags si existen
-			const tags: string[] = ('parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags))
-				? displayPrompt.parsedTags
-				: [];
+			const tags: string[] =
+				'parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags) ? displayPrompt.parsedTags : [];
 			if (tags.length > 0) {
 				html += `
     <p><strong>Tags:</strong> ${tags.map((tag: string) => `<span class="tag">${escapeHtml(tag)}</span>`).join(' ')}</p>`;
