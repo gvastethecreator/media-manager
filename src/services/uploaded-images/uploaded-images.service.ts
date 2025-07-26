@@ -1,7 +1,7 @@
-import { and, asc, count, desc, eq, gte, like, lte, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { uploadedImages } from '@/lib/drizzle/schema/index';
-import { processImage } from '@/lib/image/image-processing';
+import { processUploadedImage } from '@/lib/image/image-processing';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
@@ -552,7 +552,7 @@ class UploadedImagesService {
 		options: UploadedImageProcessingOptions
 	): Promise<{ path: string; metadata: UploadedImageMetadata }> {
 		try {
-			return await processImage(path, options);
+			return await processUploadedImage(path, options);
 		} catch (error) {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_WRITE_ERROR,

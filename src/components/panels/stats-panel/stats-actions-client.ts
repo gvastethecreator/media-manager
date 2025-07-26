@@ -81,9 +81,8 @@ export async function getStatsData(): Promise<GeneralStats> {
 			return cachedStats;
 		}
 
-		// Si no hay datos en absoluto, transformar datos simulados
-		const systemStats = MOCK_STATS as ApiSystemStats;
-		return transformApiSystemStatsToGeneralStats(systemStats);
+		// Si no hay datos en absoluto, usar datos simulados directamente
+		return MOCK_STATS;
 	} catch (error) {
 		console.error('Error al obtener estadísticas:', error);
 

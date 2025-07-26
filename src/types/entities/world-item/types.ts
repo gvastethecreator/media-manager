@@ -189,9 +189,10 @@ export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 
 export interface WorldItemFilters {
 	query?: string;
-	type?: string[];
-	category?: string[];
-	rarity?: string[];
+	searchTerm?: string; // Alias para compatibilidad
+	type?: string | string[];
+	category?: string | string[];
+	rarity?: string | string[];
 	isFavorite?: boolean;
 	hasImage?: boolean;
 }
@@ -202,3 +203,12 @@ export interface WorldItemSearchOptions {
 	filters?: WorldItemFilters;
 	sortBy?: string;
 }
+
+// --- TIPOS PARA OPERACIONES ---
+
+export type CreateWorldItemData = WorldItemCreateInput;
+
+export type UpdateWorldItemData = WorldItemUpdateInput;
+
+// Alias para compatibilidad
+export type WorldItem = WorldItemWithStats;

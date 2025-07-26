@@ -422,3 +422,24 @@ export interface ImageExtended extends ImageBase {
 		groups?: number;
 	};
 }
+
+/**
+ * 🎯 Tipo completo para Image con todas las relaciones
+ * @deprecated Usar ImageWithStats en su lugar
+ */
+export interface ImageComplete extends ImageExtended {
+	// Alias para compatibilidad
+}
+
+/**
+ * 🗂️ Estado del slice de imágenes para gestión de estado
+ */
+export interface ImageCoreSlice {
+	images: ImageBase[];
+	selectedImageId: string | null;
+	loading: boolean;
+	error: string | null;
+	filters: ImageSearchOptions;
+	totalCount: number;
+	hasMore: boolean;
+}

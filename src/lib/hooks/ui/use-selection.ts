@@ -37,18 +37,18 @@ export const useSelection = () => {
 			totalSize: store.selectedItems.reduce((acc: number, item: FileItem) => acc + (item.size || 0), 0),
 			hasSelection: store.selectedItems.length > 0,
 			isMultipleSelection: store.selectedItems.length > 1,
-			selectedTypes: [...new Set(store.selectedItems.map((item) => item.type || 'unknown'))],
-			selectedFolders: [...new Set(store.selectedItems.map((item) => item.folderId || 'unknown'))],
+			selectedTypes: [...new Set(store.selectedItems.map((item) => item.entityType || 'unknown'))],
+   selectedFolders: [...new Set(store.selectedItems.map((item) => (item as any).folderId || 'unknown'))],
 		}),
 
 		// 🔍 Utilidades de selección
 		isSelected: (itemId: string) => store.selectedItems.some((item) => item.id === itemId),
 		getSelectedIds: () => store.selectedItems.map((item) => item.id),
-		getSelectedByType: (type: 'image' | 'file' | 'folder') => store.selectedItems.filter((item) => item.type === type),
+		getSelectedByType: (type: 'image' | 'file' | 'folder') => store.selectedItems.filter((item) => item.entityType === type),
 
 		// 🎨 Selección por criterios
 		selectByType: (type: 'image' | 'file' | 'folder') => {
-			const itemsOfType = store.displayedItems.filter((item) => item.type === type);
+			const itemsOfType = store.displayedItems.filter((item) => item.entityType === type);
 			for (const item of itemsOfType) {
 				store.selectItem(item);
 			}
@@ -57,7 +57,7 @@ export const useSelection = () => {
 
 		selectBySize: (minSize?: number, maxSize?: number) => {
 			const filteredItems = store.displayedItems.filter((item) => {
-				const size = item.size || 0;
+				const size = (item as any).size || 0;
 				return (!minSize || size >= minSize) && (!maxSize || size <= maxSize);
 			});
 			for (const item of filteredItems) {

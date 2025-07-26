@@ -83,7 +83,6 @@ function PromptCardComponent({
 		type, // Usar 'type' en lugar de 'purpose'
 		category = 'general',
 		parameters,
-		tags, // 'tags' ya es un array en PromptWithStats
 		isFavorite = false,
 		featuredImage,
 		createdAt,
@@ -91,19 +90,19 @@ function PromptCardComponent({
 	} = prompt;
 
 	// Calcular valores derivados
-	const imagesCount = prompt.stats?.imageCount || 0;
-	const videosCount = prompt.stats?.videoCount || 0;
-	const collectionsCount = prompt.stats?.collectionCount || 0;
-	const albumsCount = prompt.stats?.albumCount || 0;
-	const tagsCount = prompt.stats?.tagCount || 0;
-	const conceptsCount = prompt.stats?.conceptCount || 0;
-	const notesCount = prompt.stats?.noteCount || 0;
-	const charactersCount = prompt.stats?.characterCount || 0;
-	const propertiesCount = prompt.stats?.propertyCount || 0;
-	const wildcardsCount = prompt.stats?.wildcardCount || 0;
-	const groupsCount = prompt.stats?.groupCount || 0;
-	const placesCount = prompt.stats?.placeCount || 0;
-	const worldItemsCount = prompt.stats?.worldItemCount || 0;
+	const imagesCount = prompt.stats?.totalImages || 0;
+	const videosCount = prompt.stats?.totalVideos || 0;
+	const collectionsCount = prompt.stats?.totalCollections || 0;
+	const albumsCount = prompt.stats?.totalAlbums || 0;
+	const tagsCount = prompt.stats?.tagsCount || 0;
+	const conceptsCount = prompt.stats?.totalConcepts || 0;
+	const notesCount = prompt.stats?.totalNotes || 0;
+	const charactersCount = prompt.stats?.totalCharacters || 0;
+	const propertiesCount = prompt.stats?.totalProperties || 0;
+	const wildcardsCount = prompt.stats?.totalWildcards || 0;
+	const groupsCount = prompt.stats?.totalGroups || 0;
+	const placesCount = prompt.stats?.totalPlaces || 0;
+	const worldItemsCount = prompt.stats?.totalWorldItems || 0;
 
 	// Colores para el gradiente
 	const primaryColor = color || '#0ea5e9';
@@ -154,8 +153,7 @@ function PromptCardComponent({
 		[onClick, prompt]
 	);
 
-	// 'tags' y 'parameters' ya son arrays/objetos en PromptWithStats, no necesitan parseo manual
-	const parsedTags = tags || [];
+	// 'parameters' ya es un objeto en PromptWithStats, no necesita parseo manual
 	const parsedParameters = parameters || {};
 
 	// Definir estilos de la tarjeta TCG

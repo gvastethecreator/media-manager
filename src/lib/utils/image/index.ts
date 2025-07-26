@@ -6,7 +6,8 @@
 export * from './helpers';
 export * from './validators';
 
-import type { ImageExtended, ImageSortCriteria } from '@/types/entities/image/types';
+import type { ImageExtended } from '@/types/entities/image/types';
+import { ImageSortCriteria } from '@/types/entities/image/types';
 
 /**
  * 🖼️ Ordena las imágenes según la opción especificada
@@ -21,30 +22,22 @@ export function sortImages(images: ImageExtended[], sortOption: ImageSortCriteri
 
 	return [...images].sort((a, b) => {
 		switch (sortOption) {
-			case 'name_asc':
+			case ImageSortCriteria.NAME_ASC:
 				return a.name.localeCompare(b.name);
-			case 'name_desc':
+			case ImageSortCriteria.NAME_DESC:
 				return b.name.localeCompare(a.name);
-			case 'date_asc':
+			case ImageSortCriteria.DATE_ASC:
 				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-			case 'date_desc':
+			case ImageSortCriteria.DATE_DESC:
 				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-			case 'size_asc':
+			case ImageSortCriteria.SIZE_ASC:
 				return a.size - b.size;
-			case 'size_desc':
+			case ImageSortCriteria.SIZE_DESC:
 				return b.size - a.size;
-			case 'width_asc':
+			case ImageSortCriteria.DIMENSIONS_ASC:
 				return a.width - b.width;
-			case 'width_desc':
+			case ImageSortCriteria.DIMENSIONS_DESC:
 				return b.width - a.width;
-			case 'height_asc':
-				return a.height - b.height;
-			case 'height_desc':
-				return b.height - a.height;
-			case 'favorite_first':
-				return (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0);
-			case 'favorite_last':
-				return (a.isFavorite ? 1 : 0) - (b.isFavorite ? 1 : 0);
 			default:
 				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 		}

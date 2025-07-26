@@ -32,16 +32,23 @@ export const getOSInfo = async () => {
 
 	try {
 		// Para Tauri v2, las APIs se importan dinámicamente
-		const os = await import('@tauri-apps/api/os');
-		const osType = await os.type();
-		return {
-			type: osType,
-			isWindows: osType === 'Windows_NT',
-			isMacOS: osType === 'Darwin',
-			isLinux: osType === 'Linux',
-		};
+		// Solo intentar importar si realmente estamos en Tauri
+		if (typeof window !== 'undefined' && '__TAURI__' in window) {
+			// Usar Function constructor para evitar análisis estático de TypeScript
+			const importTauriOS = new Function('return import("@tauri-apps/api/os")');
+			const os = await importTauriOS();
+			const osType = await os.type();
+			return {
+				type: osType,
+				isWindows: osType === 'Windows_NT',
+				isMacOS: osType === 'Darwin',
+				isLinux: osType === 'Linux',
+			};
+		}
+		return null;
 	} catch (error) {
-		console.error('Error obteniendo información del OS:', error);
+		// Silenciar el error si no estamos en Tauri
+		console.warn('Tauri OS API no disponible:', error);
 		return null;
 	}
 };

@@ -8,8 +8,9 @@ import {
 } from '@/lib/api/client/stats.client';
 import { serverLogger } from '@/lib/logger';
 import type { ImageStatistics } from '@/types/entities/image';
-import type { GeneralStats } from '@/types/stats';
-import { transformSystemStatsToGeneralStats } from '@/types/stats';
+import type { GeneralStats, SystemStats } from '@/types/stats';
+import { transformSystemStatsToGeneralStats, type SystemStats as TypesSystemStats } from '@/types/stats';
+import type { SystemStats as ApiSystemStats } from '@/lib/api/system';
 
 const statsLogger = serverLogger.withContext('StatsHook');
 
@@ -35,8 +36,33 @@ export function useStats() {
 		queryKey: ['general-stats'],
 		queryFn: async () => {
 			try {
-				const systemStats = await getSystemStatsFromApi();
-				return transformSystemStatsToGeneralStats(systemStats);
+				statsLogger.debug('📊 Obteniendo estadísticas del sistema...');
+				const apiStats = await getSystemStatsFromApi() as ApiSystemStats;
+				statsLogger.debug('✅ Estadísticas obtenidas', { apiStats });
+
+				// Crear SystemStats compatible con la función de transformación
+				const systemStats: TypesSystemStats = {
+					images: { count: apiStats.totalImages, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					tags: { count: apiStats.totalTags, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					collections: { count: apiStats.totalCollections, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					albums: { count: apiStats.totalAlbums, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					characters: { count: apiStats.totalCharacters, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					places: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					worldItems: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					concepts: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					prompts: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					notes: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					groups: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					properties: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					wildcards: { count: 0, recentlyAdded: 0, recentlyUpdated: 0, withImages: 0, withoutImages: 0 },
+					thumbnails: { total: 0, processed: 0, errors: 0, totalSize: apiStats.storageUsed, totalFiles: apiStats.totalImages, pending: 0 }
+				};
+
+				// Transformar SystemStats a GeneralStats
+				const generalStats = transformSystemStatsToGeneralStats(systemStats);
+				statsLogger.debug('🔄 Estadísticas transformadas', { generalStats });
+
+				return generalStats;
 			} catch (error) {
 				statsLogger.error('Error al obtener estadísticas', { error });
 				throw error;

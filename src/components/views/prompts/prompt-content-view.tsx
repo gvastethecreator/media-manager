@@ -20,9 +20,9 @@ export function PromptContentView() {
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);
 
-	const handleRefresh = useCallback(() => {
+	const handleRefresh = useCallback(async () => {
 		viewLogger.info('🔄 Refrescando imágenes del prompt:', selectedPrompt?.id);
-		loadPromptImages();
+		await loadPromptImages();
 	}, [loadPromptImages, selectedPrompt?.id]);
 
 	const contentProps: BaseContentProps = {

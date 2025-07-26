@@ -4,6 +4,7 @@
  */
 
 import type { SystemStats } from '@/lib/api/system';
+import type { GeneralStats } from '@/types/stats';
 
 // Función para generar fechas relativas
 const getRandomDate = () => {

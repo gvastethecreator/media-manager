@@ -1,4 +1,4 @@
-import type { BaseEntity } from '@/types/store.types';
+import type { EntityBase } from '@/types/entities/entity.types';
 
 export interface BaseFormData {
 	id?: string;
@@ -9,12 +9,12 @@ export interface BaseFormData {
 }
 
 // Interfaz para entidades con emoji y shortcut
-interface ExtendedEntity extends BaseEntity {
+interface ExtendedEntity extends EntityBase {
 	emoji?: string;
 	shortcut?: string;
 }
 
-export function baseToFormData<T extends BaseEntity>(entity: T): BaseFormData {
+export function baseToFormData<T extends EntityBase>(entity: T): BaseFormData {
 	return {
 		id: entity.id,
 		name: entity.name,
@@ -24,7 +24,7 @@ export function baseToFormData<T extends BaseEntity>(entity: T): BaseFormData {
 	};
 }
 
-export function formDataToBase<T extends BaseEntity>(data: BaseFormData, id?: string): Partial<T> {
+export function formDataToBase<T extends EntityBase>(data: BaseFormData, id?: string): Partial<T> {
 	return {
 		...(id ? { id } : {}),
 		name: data.name,
@@ -59,14 +59,14 @@ export interface ExtendedStats extends BaseStats {
 }
 
 // Interfaz para entidades con contadores y estado
-interface EntityWithStats extends BaseEntity {
+interface EntityWithStatsLocal extends EntityBase {
 	_count?: { images: number };
 	totalSize?: number;
 	isArchived?: boolean;
 	isFavorite?: boolean;
 }
 
-export function calculateStats<T extends EntityWithStats>(
+export function calculateStats<T extends EntityWithStatsLocal>(
 	items: T[],
 	getCount = (item: T) => item._count?.images || 0,
 	getSize = (item: T) => item.totalSize || 0

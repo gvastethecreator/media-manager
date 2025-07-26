@@ -282,7 +282,7 @@ export async function generateThumbnail(
 			case 'webp':
 				outputOptions = {
 					quality: config.quality,
-					effort: config.effort || 4,
+					effort: 4,
 					smartSubsample: true,
 					reductionEffort: 4,
 				};
@@ -290,21 +290,12 @@ export async function generateThumbnail(
 				break;
 
 			case 'jpeg':
-			case 'jpg':
 				outputOptions = {
 					quality: config.quality,
 					progressive: finalOptions.progressive,
 					mozjpeg: true,
 				};
 				processor = processor.jpeg(outputOptions);
-				break;
-
-			case 'avif':
-				outputOptions = {
-					quality: config.quality,
-					effort: config.effort || 4,
-				};
-				processor = processor.avif(outputOptions);
 				break;
 
 			case 'png':

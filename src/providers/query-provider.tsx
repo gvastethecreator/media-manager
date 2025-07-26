@@ -16,7 +16,6 @@ export function QueryProvider({ children }: { children: ReactNode }) {
 			{children}
 			{process.env.NODE_ENV === 'development' && (
 				<Suspense fallback={null}>
-					{/* @ts-expect-error -- Devtools solo se carga en modo dev */}
 					<ReactQueryDevtools initialIsOpen={false} />
 				</Suspense>
 			)}

@@ -14,7 +14,7 @@ import type { AlbumWithStats } from '@/types/entities/album/types';
  * @param height Alto opcional de la miniatura
  * @returns URL para la miniatura
  */
-export function generateAlbumThumbnailUrl(album: Album | string, width?: number, height?: number): string {
+export function generateAlbumThumbnailUrl(album: AlbumWithStats | string, width?: number, height?: number): string {
 	const albumId = typeof album === 'string' ? album : album.id;
 	const url = `/api/albums/${albumId}/thumbnail`;
 
@@ -44,18 +44,16 @@ export function formatAlbumSize(album?: AlbumWithStats): string {
  */
 export function getAlbumTypeDescription(type: AlbumType): string {
 	switch (type) {
-		case 'standard':
+		case AlbumType.STANDARD:
 			return 'Álbum estándar';
-		case 'event':
-			return 'Evento';
-		case 'collection':
-			return 'Colección';
-		case 'project':
-			return 'Proyecto';
-		case 'portfolio':
-			return 'Portafolio';
-		case 'theme':
-			return 'Temático';
+		case AlbumType.SMART:
+			return 'Álbum inteligente';
+		case AlbumType.FAVORITES:
+			return 'Favoritos';
+		case AlbumType.RECENT:
+			return 'Recientes';
+		case AlbumType.ARCHIVE:
+			return 'Archivo';
 		default:
 			return 'Álbum';
 	}
@@ -76,7 +74,7 @@ export function isAlbumEmpty(album: AlbumWithStats): boolean {
  * @returns true si tiene sub-álbumes
  * @deprecated Album no tiene jerarquía en el modelo actual
  */
-export function hasSubAlbums(_album: Album): boolean {
+export function hasSubAlbums(_album: AlbumWithStats): boolean {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return false;
 }
@@ -88,7 +86,7 @@ export function hasSubAlbums(_album: Album): boolean {
  * @returns Array con la ruta jerárquica completa
  * @deprecated Album no tiene jerarquía en el modelo actual
  */
-export function getAlbumPath(album: Album, _allAlbums: Record<string, Album>): Album[] {
+export function getAlbumPath(album: AlbumWithStats, _allAlbums: Record<string, AlbumWithStats>): AlbumWithStats[] {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return [album];
 }
@@ -98,7 +96,7 @@ export function getAlbumPath(album: Album, _allAlbums: Record<string, Album>): A
  * @param albumPath Ruta del álbum (array de álbumes padres)
  * @returns Texto formateado para la ruta
  */
-export function formatAlbumBreadcrumb(albumPath: Album[]): string {
+export function formatAlbumBreadcrumb(albumPath: AlbumWithStats[]): string {
 	return albumPath.map((album) => album.name).join(' / ');
 }
 
@@ -109,7 +107,7 @@ export function formatAlbumBreadcrumb(albumPath: Album[]): string {
  * @returns Array con todos los álbumes descendientes
  * @deprecated Album no tiene jerarquía en el modelo actual
  */
-export function getAllDescendants(_albumId: string, _allAlbums: Record<string, Album>): Album[] {
+export function getAllDescendants(_albumId: string, _allAlbums: Record<string, AlbumWithStats>): AlbumWithStats[] {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return [];
 }

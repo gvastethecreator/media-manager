@@ -99,10 +99,10 @@ export function useEntityConversion() {
 					...fileItem,
 					entityType: 'video',
 					stats: fileItem.stats || {
-						duration: fileItem.duration,
-						fps: fileItem.fps,
-						codec: fileItem.codec || 'unknown',
-						resolution: `${fileItem.width}x${fileItem.height}`,
+						duration: (fileItem as any).duration || 0,
+						fps: (fileItem as any).fps || 30,
+						codec: (fileItem as any).codec || 'unknown',
+						resolution: `${fileItem.width || 0}x${fileItem.height || 0}`,
 						// ... otros campos de video
 					},
 				} as VideoWithStats;

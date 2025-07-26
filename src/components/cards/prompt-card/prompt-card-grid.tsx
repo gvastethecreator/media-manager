@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { debounceEvent } from '@/lib/system/event-throttler';
-import { getPrompts } from '@/services/prompt/prompt.service';
+import { searchPromptsService } from '@/services/prompt/prompt.service';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import { PromptCard } from './prompt-card';
 
@@ -57,7 +57,7 @@ export function PromptCardGrid({
 		debounceEvent(async (query: string) => {
 			try {
 				setLoading(true);
-				const results = await getPrompts({ search: query }, { pageSize: maxPrompts });
+				const results = await searchPromptsService({ search: query }, { pageSize: maxPrompts });
 				setPrompts(results.data);
 			} catch (error) {
 				console.error('Error al buscar prompts:', error);

@@ -18,6 +18,8 @@ import { CreateAlbumSchema, UpdateAlbumSchema } from './schema';
 
 // --- Tipos Canónicos ---
 export type { AlbumBase, AlbumStatistics, AlbumWithStats } from './base';
+// Alias para compatibilidad
+export type Album = AlbumWithStats;
 
 // --- Alias de Compatibilidad ---
 export type Album = AlbumWithStats;
