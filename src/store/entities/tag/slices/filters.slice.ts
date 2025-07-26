@@ -5,21 +5,8 @@
 
 import { StateCreator } from 'zustand';
 import type { TagWithStats } from '@/types/entities/tag';
+import { TagSortCriteria } from '@/types/entities/tag';
 import type { TagStore } from '../types';
-
-/**
- * Criterios de ordenación para etiquetas
- */
-export enum TagSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	USAGE_ASC = 'usage:asc',
-	USAGE_DESC = 'usage:desc',
-	CREATED_ASC = 'createdAt:asc',
-	CREATED_DESC = 'createdAt:desc',
-	UPDATED_ASC = 'updatedAt:asc',
-	UPDATED_DESC = 'updatedAt:desc',
-}
 
 /**
  * 🔍 Filtros para tags

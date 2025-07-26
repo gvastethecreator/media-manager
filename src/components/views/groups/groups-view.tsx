@@ -14,9 +14,9 @@ export function GroupsView(_props: ViewProps) {
 
 	// Leer el estado y las acciones directamente del store de Zustand
 	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
-		groups: Object.values(state.core.groups) as GroupWithStats[],
-		isLoading: state.core.isLoading,
-		error: state.core.error,
+		groups: Object.values(state.groups) as GroupWithStats[],
+		isLoading: state.isLoading,
+		error: state.error,
 		fetchGroups: state.loadGroups,
 		addGroup: state.createGroup,
 	}));

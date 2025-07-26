@@ -26,6 +26,13 @@ export interface WildcardBase {
 	featuredImage: string | null;
 	isFavorite: boolean;
 	parentId: string | null;
+	type: string | null;
+	content: string | null;
+	difficulty: string | null;
+	theme: string | null;
+	isActive: boolean;
+	version: number;
+	author: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 	// Relaciones

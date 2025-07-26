@@ -9,66 +9,25 @@ import { GroupSortCriteria, GroupViewMode } from '@/types/entities/group';
 import { createGroupCoreSlice, type GroupCoreSlice } from './slices/core';
 import { createGroupFiltersSlice, type GroupFiltersSlice } from './slices/filters';
 import { createGroupUISlice, type GroupUISlice } from './slices/ui';
-import type { GroupState } from './types';
-
-// Combinación de todos los slices
-export type GroupStore = GroupState & GroupCoreSlice & GroupUISlice & GroupFiltersSlice;
-
-// Estado inicial
-const initialState: GroupState = {
-	core: {
-		groups: {},
-		groupItems: {},
-		isLoading: false,
-		error: null,
-		lastUpdated: null,
-	},
-	ui: {
-		selectedIds: [],
-		viewMode: GroupViewMode.GRID,
-		isViewerOpen: false,
-		currentGroupId: null,
-		displayState: {},
-		draggedGroupId: null,
-		dropTargetGroupId: null,
-		highlightedId: null,
-		expandedIds: [],
-	},
-	filters: {
-		sortBy: GroupSortCriteria.DATE_CREATED_DESC,
-		searchQuery: '',
-		filterByType: null,
-		filterByCategory: null,
-		filterFavorites: false,
-		dateRange: {
-			from: null,
-			to: null,
-		},
-	},
-};
+import type { GroupStore } from './types';
 
 // Crear store combinando slices
 export const useGroupStore = create<GroupStore>()(
 	devtools(
 		persist(
-			(set, get, ...rest) => ({
-				...initialState,
-				...createGroupCoreSlice(set, get, ...rest),
-				...createGroupUISlice(set, get, ...rest),
-				...createGroupFiltersSlice(set, get, ...rest),
+			(set, get, api) => ({
+				...createGroupCoreSlice(set, get, api),
+				...createGroupUISlice(set, get, api),
+				...createGroupFiltersSlice(set, get, api),
 			}),
 			{
 				name: 'group-store',
 				partialize: (state) => ({
-					ui: {
-						viewMode: state.ui.viewMode,
-						expandedIds: state.ui.expandedIds,
-					},
-					filters: {
-						sortBy: state.filters.sortBy,
-					},
+					viewMode: state.viewMode,
+					expandedIds: state.expandedIds,
+					sortBy: state.sortBy,
 				}),
-			}
+			},
 		),
 		{ name: 'GroupStore' }
 	)

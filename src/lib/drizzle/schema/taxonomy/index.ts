@@ -96,7 +96,7 @@ export const characters = sqliteTable(
 		emoji: text('emoji').default('👤'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -130,7 +130,7 @@ export const places = sqliteTable(
 		emoji: text('emoji').default('📍'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -169,7 +169,7 @@ export const worldItems = sqliteTable(
 		category: text('category'),
 		shortcut: text('shortcut'),
 		subtype: text('subtype'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
@@ -212,7 +212,7 @@ export const concepts = sqliteTable(
 		emoji: text('emoji').default('💡'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -242,7 +242,7 @@ export const prompts = sqliteTable(
 		emoji: text('emoji').default('🔮'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),

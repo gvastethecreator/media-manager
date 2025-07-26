@@ -100,6 +100,9 @@ export interface ProfileExtended extends ProfileBase {
 	lastAccessed?: Date | null;
 	// Preferencias del perfil
 	preferences?: ProfilePreferences;
+	// Propiedades adicionales para UI
+	theme?: ThemeMode;
+	avatarUrl?: string | null;
 }
 
 /**
@@ -140,7 +143,7 @@ export interface ProfileFilters {
 export interface ProfilePaginationOptions {
 	page?: number;
 	limit?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt';
+	sortBy?: 'name' | 'isActive' | 'createdAt' | 'updatedAt';
 	sortDirection?: 'asc' | 'desc';
 }
 

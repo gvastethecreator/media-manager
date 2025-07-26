@@ -146,7 +146,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		});
 
 		// 📈 Determinar technical grade
-		const technicalGrade = determineTechnicalGrade(qualityScore, qualityLevel, megabytes);
+		const technicalGrade = determineTechnicalGrade(qualityScore, qualityLevel as VideoQuality, megabytes);
 
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);

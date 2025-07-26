@@ -106,11 +106,11 @@ export const createQueueJobUISlice: StateCreator<QueueJobState, [], [], QueueJob
 			},
 		});
 
-		// Asegurarse de que el trabajo esté seleccionado en el estado core
-		const { core } = get();
-		const job = core.items.find((item) => item.id === jobId);
+		// Asegurarse de que el trabajo esté seleccionado en el estado
+		const state = get();
+		const job = state.items.find((item) => item.id === jobId);
 		if (job) {
-			set({ core: { ...core, selectedJob: job } });
+			set((currentState) => ({ ...currentState, selectedJob: job }));
 		}
 	},
 

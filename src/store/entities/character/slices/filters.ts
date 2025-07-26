@@ -290,7 +290,8 @@ export const createCharacterFiltersSlice: StateCreator<
 					groupKey = character.category || 'uncategorized';
 					break;
 				case 'level':
-					groupKey = `Level ${Math.floor(character.level / 5) * 5}-${Math.floor(character.level / 5) * 5 + 4}`;
+					const level = character.level || 1;
+      groupKey = `Level ${Math.floor(level / 5) * 5}-${Math.floor(level / 5) * 5 + 4}`;
 					break;
 				default:
 					groupKey = 'all';
@@ -331,15 +332,15 @@ export const createCharacterFiltersSlice: StateCreator<
 						const levelValue = filter.value as string;
 						if (levelValue.includes('-')) {
 							const [min, max] = levelValue.split('-').map(Number);
-							return character.level >= min && character.level <= max;
+							return (character.level || 1) >= min && (character.level || 1) <= max;
 						}
 						if (levelValue.endsWith('+')) {
 							const min = Number(levelValue.slice(0, -1));
-							return character.level >= min;
+							return (character.level || 1) >= min;
 						}
 						if (levelValue.startsWith('<')) {
 							const max = Number(levelValue.slice(1));
-							return character.level < max;
+							return (character.level || 1) < max;
 						}
 						return true;
 					}

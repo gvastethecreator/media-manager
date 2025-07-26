@@ -13,48 +13,19 @@ import type {
 	PromptUpdateInput,
 	PromptWithRelations,
 	PromptWithStats,
+	DrizzleCreatePromptData,
+	DrizzleUpdatePromptData,
+	DrizzleWhereFilter,
+	DrizzleOrderBy,
+	DrizzleUpdateArgs,
+	PromptRelated,
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt/enums';
 import { serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');
 
-// #region Tipos de datos para Drizzle
-
-type DrizzleCreatePromptData = {
-	name: string;
-	description?: string | null;
-	content: string;
-	category: string;
-	purpose: string;
-	emoji: string;
-	color: string;
-	parameters: string; // JSON
-	tags: string; // JSON
-	isFavorite: boolean;
-};
-
-type DrizzleUpdatePromptData = Partial<DrizzleCreatePromptData>;
-
-type DrizzleWhereFilter = {
-	AND?: DrizzleWhereFilter[];
-	OR?: DrizzleWhereFilter[];
-	name?: { contains?: string; equals?: string };
-	description?: { contains?: string; equals?: string };
-	content?: { contains?: string; equals?: string };
-	category?: { in?: string[] };
-	purpose?: { in?: string[] };
-	isFavorite?: boolean;
-};
-
-type DrizzleOrderBy = {
-	[key: string]: 'asc' | 'desc';
-};
-
-type DrizzleUpdateArgs = {
-	where: { id: string };
-	data: DrizzleUpdatePromptData;
-};
+// #region Tipos auxiliares
 
 type RelationObject = { id: string };
 type RelationInput = (string | RelationObject)[];
@@ -113,15 +84,15 @@ export function mapUpdatePromptDataToDrizzle(id: string, data: PromptUpdateInput
 		const updateData: DrizzleUpdatePromptData = { ...restData };
 
 		if (parameters) {
-			updateData.parameters = serializeParameters(parameters);
+			if (typeof parameters === 'string') {
+				updateData.parameters = parameters;
+			} else {
+				updateData.parameters = JSON.stringify(parameters);
+			}
 		}
-		if (tags) {
-			updateData.tags = serializeTags(tags.map((t) => (typeof t === 'string' ? t : t.id)));
-			// Las relaciones tagEntities se manejan por separado en Drizzle
-		}
-		// Las relaciones groups, properties, wildcards se manejan por separado en Drizzle
+		// Las relaciones tags, groups, properties, wildcards se manejan por separado en Drizzle
 
-		return { where: { id }, data: updateData };
+		return { set: updateData, where: { id } };
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización:', { id, data, error });
 		throw new Error(
@@ -143,18 +114,29 @@ export function mapUpdatePromptDataToDrizzle(id: string, data: PromptUpdateInput
 export function mapPromptFiltersToDrizzle(filters: PromptFilters = {}): DrizzleWhereFilter {
 	const where: DrizzleWhereFilter = {};
 
-	if (filters.searchQuery) {
-		const query = filters.searchQuery;
-		where.OR = [{ name: { contains: query } }, { description: { contains: query } }, { content: { contains: query } }];
+	// Buscar por texto en múltiples campos
+	const searchText = filters.searchQuery || filters.search;
+	if (searchText) {
+		where.OR = [
+			{ name: searchText },
+			{ content: searchText }
+		];
 	}
 
-	if (filters.categories?.length) {
-		where.category = { in: filters.categories };
+	// Filtrar por categorías
+	const categories = filters.categories || filters.category;
+	if (categories?.length) {
+		where.category = categories;
 	}
-	if (filters.purposes?.length) {
-		where.purpose = { in: filters.purposes };
+
+	// Filtrar por propósitos
+	const purposes = filters.purposes || filters.purpose;
+	if (purposes?.length) {
+		where.purpose = purposes;
 	}
-	if (filters.onlyFavorites) {
+
+	// Filtrar solo favoritos
+	if (filters.onlyFavorites || filters.isFavorite) {
 		where.isFavorite = true;
 	}
 
@@ -168,7 +150,7 @@ export function mapPromptFiltersToDrizzle(filters: PromptFilters = {}): DrizzleW
  * @returns Objeto compatible con ordenación de Drizzle.
  */
 export function mapPromptSortCriteriaToDrizzle(
-	sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_DESC
+	sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_AT_DESC
 ): DrizzleOrderBy {
 	const [field, direction] = sortBy.split(':');
 	const sortDir = direction === 'asc' ? 'asc' : 'desc';
@@ -187,12 +169,17 @@ export function mapPromptSortCriteriaToDrizzle(
  * 🔄 Mapea un Prompt a un formato simplificado para mostrar en relaciones.
  * ✅ MIGRADO A DRIZZLE
  */
-export function mapPromptToRelated(prompt: PromptComplete | PromptWithRelations) {
+export function mapPromptToRelated(prompt: PromptComplete | PromptWithRelations): PromptRelated {
 	return {
 		id: prompt.id,
 		name: prompt.name,
+		description: prompt.description,
 		emoji: prompt.emoji,
 		color: prompt.color,
+		category: prompt.category,
+		type: prompt.type,
+		createdAt: prompt.createdAt,
+		updatedAt: prompt.updatedAt,
 	};
 }
 
@@ -200,7 +187,7 @@ export function mapPromptToRelated(prompt: PromptComplete | PromptWithRelations)
  * 🔄 Mapea un array de Prompts a un formato simplificado.
  * ✅ MIGRADO A DRIZZLE
  */
-export function mapPromptsToRelated(prompts: (PromptComplete | PromptWithRelations)[]) {
+export function mapPromptsToRelated(prompts: (PromptComplete | PromptWithRelations)[]): PromptRelated[] {
 	return prompts.map(mapPromptToRelated);
 }
 
@@ -214,25 +201,32 @@ export function mapPromptsToRelated(prompts: (PromptComplete | PromptWithRelatio
 export function filterPrompts(prompts: PromptBase[], filters: PromptFilters = {}): PromptBase[] {
 	let filtered = [...prompts];
 
-	if (filters.searchQuery) {
-		const query = filters.searchQuery.toLowerCase();
+	// Buscar por texto
+	const searchText = filters.searchQuery || filters.search;
+	if (searchText) {
+		const query = searchText.toLowerCase();
 		filtered = filtered.filter(
 			(prompt) =>
 				prompt.name.toLowerCase().includes(query) ||
 				prompt.description?.toLowerCase().includes(query) ||
-				prompt.content.toLowerCase().includes(query)
+				prompt.content?.toLowerCase().includes(query)
 		);
 	}
 
-	if (filters.categories?.length) {
-		filtered = filtered.filter((prompt) => filters.categories.includes(prompt.category));
+	// Filtrar por categorías
+	const categories = filters.categories || filters.category;
+	if (categories?.length) {
+		filtered = filtered.filter((prompt) => categories.includes(prompt.category));
 	}
 
-	if (filters.purposes?.length) {
-		filtered = filtered.filter((prompt) => filters.purposes.includes(prompt.purpose));
+	// Filtrar por propósitos
+	const purposes = filters.purposes || filters.purpose;
+	if (purposes?.length) {
+		filtered = filtered.filter((prompt) => purposes.includes(prompt.purpose));
 	}
 
-	if (filters.onlyFavorites) {
+	// Filtrar solo favoritos
+	if (filters.onlyFavorites || filters.isFavorite) {
 		filtered = filtered.filter((prompt) => prompt.isFavorite);
 	}
 
@@ -270,7 +264,7 @@ export function paginatePrompts<T>(items: T[], page = 1, limit = 20) {
  */
 export function sortPrompts(
 	prompts: PromptBase[],
-	sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_DESC
+	sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_AT_DESC
 ): PromptBase[] {
 	const [field, direction] = sortBy.split(':');
 	const isAsc = direction === 'asc';

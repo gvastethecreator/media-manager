@@ -71,6 +71,7 @@ export interface UploadedImageStatistics {
  * Versión extendida con dimensiones y estadísticas
  */
 export interface UploadedImageExtended extends UploadedImageBase {
+	uploadedAt: Date;
 	dimensions: UploadedImageDimensions;
 	url: string;
 	thumbnailUrl?: string;

@@ -8,8 +8,17 @@ import type { CharacterViewConfig } from '@/types/entities/character';
 import type { CharacterState, CharacterUISlice } from '../types';
 
 const defaultViewConfig: CharacterViewConfig = {
-	gridColumns: 4, // Default to 4 columns
-	cardSize: 'medium', // Default card size
+	viewType: 'grid',
+	gridColumns: 4,
+	cardSize: 'medium',
+	sortBy: 'name',
+	sortDirection: 'asc',
+	showImages: true,
+	imageCount: 10,
+	enableAnimations: true,
+	groupBy: null,
+	showStats: true,
+	compactView: false,
 };
 
 /**

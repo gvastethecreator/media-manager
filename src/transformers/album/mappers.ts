@@ -6,7 +6,7 @@
  
  */
 
-import type { Album, AlbumStatistics, AlbumWithStats, CreateAlbumInput } from '@/types/entities/album/index';
+import type { Album, AlbumStatistics, AlbumWithStats, AlbumCreateInput } from '@/types/entities/album/index';
 
 /**
  * Tipo para datos de álbum que vienen de Drizzle con relaciones
@@ -93,7 +93,7 @@ type DrizzleFindManyArgs = {
  * @param data Datos de creación de álbum
  * @returns Objeto formateado para Drizzle
  */
-export function mapCreateAlbumDataToDrizzle(data: CreateAlbumInput): DrizzleCreateAlbumData {
+export function mapCreateAlbumDataToDrizzle(data: AlbumCreateInput): DrizzleCreateAlbumData {
 	return {
 		name: data.name,
 		description: data.description || null,

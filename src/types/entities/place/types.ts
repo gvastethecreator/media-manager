@@ -44,7 +44,7 @@ export interface PlaceBase {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -104,27 +104,17 @@ export function extendPlace(place: PlaceBase): PlaceWithStats {
 	return {
 		...place,
 		entityType: 'place' as const,
-		stats: {
-			totalImages: place.totalImages || 0,
-			totalVideos: place.totalVideos || 0,
-			totalAlbums: 0,
-			totalCollections: 0,
-			totalTags: 0,
-			totalCharacters: 0,
-			totalConcepts: 0,
-			totalPrompts: 0,
-			totalNotes: 0,
-			totalWildcards: 0,
-			totalProperties: 0,
-			totalGroups: 0,
-			totalRelations: 0,
-			totalSize: 0,
-			averageSize: 0,
-			averageRelations: 0,
-			popularityScore: 0,
+		_stats: {
+			spatialRelevance: 0,
 			completenessScore: 0,
-			usageCount: 0,
-			lastUsed: null,
+			geoContextLevel: 0,
+			popularity: 0,
+		},
+		stats: {
+			spatialRelevance: 0,
+			completenessScore: 0,
+			geoContextLevel: 0,
+			popularity: 0,
 		},
 	};
 }

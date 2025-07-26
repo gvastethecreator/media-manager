@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { FolderSortCriteria, FolderViewMode } from '@/types/entities/folder/enums';
-import type { FolderFiltersSlice, FolderStore } from '../types';
+import type { FolderFiltersSlice, CompleteFolderStore } from '../types';
 
 export interface FolderFiltersState {
 	sortBy: FolderSortCriteria;
@@ -33,7 +33,7 @@ export const initialFiltersState: FolderFiltersState = {
 };
 
 // Creador del slice de filtros
-export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderFiltersSlice> = (set, get) => ({
+export const createFolderFiltersSlice: StateCreator<CompleteFolderStore, [], [], FolderFiltersSlice> = (set, get) => ({
 	...initialFiltersState,
 
 	// Establecer filtros
@@ -65,7 +65,7 @@ export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderF
 				const matchesName = folder.name.toLowerCase().includes(query);
 				const matchesDescription = folder.description?.toLowerCase().includes(query);
 				const matchesPath = folder.path.toLowerCase().includes(query);
-				const matchesTags = folder.statistics.autoTags.some((tag) => tag.toLowerCase().includes(query));
+				const matchesTags = folder.stats.autoTags.some((tag) => tag.toLowerCase().includes(query));
 
 				if (!matchesName && !matchesDescription && !matchesPath && !matchesTags) {
 					return false;
@@ -78,17 +78,17 @@ export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderF
 			}
 
 			// Filtrado por score de organización
-			if (folder.statistics.organizationScore < minOrganizationScore) {
+			if (folder.stats.organizationScore < minOrganizationScore) {
 				return false;
 			}
 
 			// Filtrado por carpetas vacías
-			if (!showEmptyFolders && folder.statistics.totalItems === 0) {
+			if (!showEmptyFolders && folder.stats.totalItems === 0) {
 				return false;
 			}
 
 			// Filtrado por profundidad máxima
-			if (maxDepth !== null && folder.statistics.hierarchyDepth > maxDepth) {
+			if (maxDepth !== null && folder.stats.hierarchyDepth > maxDepth) {
 				return false;
 			}
 
@@ -117,28 +117,28 @@ export const createFolderFiltersSlice: StateCreator<FolderStore, [], [], FolderF
 					return b.totalSize - a.totalSize;
 
 				case FolderSortCriteria.FILES_ASC:
-					return a.statistics.totalItems - b.statistics.totalItems;
+					return a.stats.totalItems - b.stats.totalItems;
 				case FolderSortCriteria.FILES_DESC:
-					return b.statistics.totalItems - a.statistics.totalItems;
+					return b.stats.totalItems - a.stats.totalItems;
 
 				case FolderSortCriteria.ORGANIZATION_ASC:
-					return a.statistics.organizationScore - b.statistics.organizationScore;
+					return a.stats.organizationScore - b.stats.organizationScore;
 				case FolderSortCriteria.ORGANIZATION_DESC:
-					return b.statistics.organizationScore - a.statistics.organizationScore;
+					return b.stats.organizationScore - a.stats.organizationScore;
 
 				case FolderSortCriteria.DEPTH_ASC:
-					return a.statistics.hierarchyDepth - b.statistics.hierarchyDepth;
+					return a.stats.hierarchyDepth - b.stats.hierarchyDepth;
 				case FolderSortCriteria.DEPTH_DESC:
-					return b.statistics.hierarchyDepth - a.statistics.hierarchyDepth;
+					return b.stats.hierarchyDepth - a.stats.hierarchyDepth;
 
 				case FolderSortCriteria.ACTIVITY_ASC: {
-					const aActivity = a.statistics.lastActivity?.getTime() || 0;
-					const bActivity = b.statistics.lastActivity?.getTime() || 0;
+					const aActivity = a.stats.lastActivity?.getTime() || 0;
+					const bActivity = b.stats.lastActivity?.getTime() || 0;
 					return aActivity - bActivity;
 				}
 				case FolderSortCriteria.ACTIVITY_DESC: {
-					const aActivityDesc = a.statistics.lastActivity?.getTime() || 0;
-					const bActivityDesc = b.statistics.lastActivity?.getTime() || 0;
+					const aActivityDesc = a.stats.lastActivity?.getTime() || 0;
+					const bActivityDesc = b.stats.lastActivity?.getTime() || 0;
 					return bActivityDesc - aActivityDesc;
 				}
 

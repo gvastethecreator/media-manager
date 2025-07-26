@@ -41,7 +41,7 @@ interface NoteServiceFilters {
 	priority?: number;
 	status?: string;
 	search?: string;
-	sortBy?: 'createdAt' | 'title' | 'category' | 'priority' | 'status';
+	sortBy?: 'createdAt' | 'updatedAt' | 'title' | 'category' | 'priority' | 'status';
 	sortOrder?: 'asc' | 'desc';
 	page?: number;
 	pageSize?: number;
@@ -265,7 +265,7 @@ const NoteServiceImpl = {
 				},
 			};
 
-			noteLogger.info(`✅ Nota encontrada: ${result.name}`);
+			noteLogger.info(`✅ Nota encontrada: ${result.title}`);
 			return result;
 		} catch (error) {
 			noteLogger.error('Error getting note:', { id, error });
@@ -309,8 +309,28 @@ const NoteServiceImpl = {
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 			// Determinar orden
-			const orderByClause =
-				sortOrder === 'desc' ? desc(notes[sortBy as keyof typeof notes]) : asc(notes[sortBy as keyof typeof notes]);
+			let orderByClause;
+			switch (sortBy) {
+				case 'title':
+					orderByClause = sortOrder === 'desc' ? desc(notes.title) : asc(notes.title);
+					break;
+				case 'category':
+					orderByClause = sortOrder === 'desc' ? desc(notes.category) : asc(notes.category);
+					break;
+				case 'priority':
+					orderByClause = sortOrder === 'desc' ? desc(notes.priority) : asc(notes.priority);
+					break;
+				case 'status':
+					orderByClause = sortOrder === 'desc' ? desc(notes.status) : asc(notes.status);
+					break;
+				case 'updatedAt':
+					orderByClause = sortOrder === 'desc' ? desc(notes.updatedAt) : asc(notes.updatedAt);
+					break;
+				case 'createdAt':
+				default:
+					orderByClause = sortOrder === 'desc' ? desc(notes.createdAt) : asc(notes.createdAt);
+					break;
+			}
 
 			// Ejecutar consultas en paralelo
 			const [drizzleNotes, totalCount] = await Promise.all([
@@ -338,7 +358,7 @@ const NoteServiceImpl = {
 					.select({ count: count() })
 					.from(notes)
 					.where(whereClause)
-					.then((result) => result[0]?.count || 0),
+					.then((result: { count: number }[]) => result[0]?.count || 0),
 			]);
 
 			const items: NoteWithStats[] = drizzleNotes.map((note: any) => {
@@ -440,7 +460,7 @@ const NoteServiceImpl = {
  * Clase de servicio para gestión de notas (wrapper para compatibilidad)
  */
 export class NoteService {
-	async getNotes(filters?: any): Promise<{ notes: NoteWithStats[]; total: number }> {
+	async getNotes(filters?: NoteServiceFilters): Promise<{ notes: NoteWithStats[]; total: number }> {
 		const result = await NoteServiceImpl.getNotes(filters || {});
 		return { notes: result.items, total: result.total };
 	}
@@ -458,32 +478,44 @@ export class NoteService {
 
 		return {
 			...note,
-			statistics: {
-				totalItems: 0,
-				totalImages: 0,
-				totalVideos: 0,
-				totalAlbums: 0,
-				totalCollections: 0,
-				totalTags: 0,
-				totalCharacters: 0,
-				totalPlaces: 0,
-				totalWorldItems: 0,
-				totalConcepts: 0,
-				totalPrompts: 0,
-				totalWildcards: 0,
-				totalProperties: 0,
-				totalGroups: 0,
-				wordCount,
+			name: note.title,
+			description: note.content,
+			entityType: 'note' as const,
+			stats: {
+				imageCount: 0,
+				videoCount: 0,
+				albumCount: 0,
+				collectionCount: 0,
+				tagCount: 0,
 				characterCount,
+				placeCount: 0,
+				worldItemCount: 0,
+				conceptCount: 0,
+				promptCount: 0,
+				wildcardCount: 0,
+				propertyCount: 0,
+				groupCount: 0,
+				wordCount,
 				readingTime,
 				completionScore,
-				lastUpdated: note.updatedAt,
+				totalItems: 0,
+				totalAssociations: 0,
 			},
-			excerpt: content.substring(0, 150) + (content.length > 150 ? '...' : ''),
-			formattedDate: note.updatedAt.toLocaleDateString(),
-			priorityLabel: NoteServiceImpl.getPriorityLabel(note.priority),
-			statusLabel: NoteServiceImpl.getStatusLabel(note.status),
-			categoryLabel: NoteServiceImpl.getCategoryLabel(note.category),
+			_count: {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
 		};
 	}
 
@@ -513,19 +545,19 @@ export class NoteService {
 		}
 	}
 
-	async getNoteImages(id: string): Promise<any[]> {
+	async getNoteImages(id: string): Promise<unknown[]> {
 		// TODO: Implementar lógica para obtener imágenes de la nota
 		noteLogger.info(`Obteniendo imágenes de la nota ${id}`);
 		return [];
 	}
 
-	async getRecentNoteImages(id: string, limit: number): Promise<any[]> {
+	async getRecentNoteImages(id: string, limit: number): Promise<unknown[]> {
 		// TODO: Implementar lógica para obtener imágenes recientes de la nota
 		noteLogger.info(`Obteniendo imágenes recientes de la nota ${id} (limit: ${limit})`);
 		return [];
 	}
 
-	async getNoteCounts(id: string): Promise<any> {
+	async getNoteCounts(id: string): Promise<Record<string, number>> {
 		// TODO: Implementar lógica para obtener conteos de la nota
 		noteLogger.info(`Obteniendo conteos de la nota ${id}`);
 		return {

@@ -5,13 +5,14 @@
 
 import { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { FavoriteExtended } from '@/types/entities/favorite';
 
 import { FavoriteStore } from '..';
 import { DEFAULT_FILTERS } from '../constants';
 import { FavoriteFilters } from '../types';
 
 // Logger específico para este slice
-const logger = clientLogger.withContext({ module: 'FavoriteStore.FiltersSlice' });
+const logger = clientLogger.withContext('FavoriteStore.FiltersSlice');
 
 // Estado
 export interface FiltersState {

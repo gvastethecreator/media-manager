@@ -4,7 +4,7 @@
  
  */
 
-import type { PlaceWithStats } from '@/types/entities/place';
+import type { PlaceWithStats } from '@/types/entities/place/base';
 
 /**
  * Serializa un objeto Place para respuesta de API
@@ -15,15 +15,21 @@ export function serializePlace(place: PlaceWithStats) {
 		name: place.name,
 		description: place.description,
 		type: place.type,
-		coordinates: place.coordinates,
-		address: place.address,
-		country: place.country,
+		location: place.location,
 		region: place.region,
-		city: place.city,
+		climate: place.climate,
+		population: place.population,
+		government: place.government,
+		economy: place.economy,
+		culture: place.culture,
+		history: place.history,
+		geography: place.geography,
+		landmarks: place.landmarks,
 		isFavorite: place.isFavorite,
 		createdAt: place.createdAt.toISOString(),
 		updatedAt: place.updatedAt.toISOString(),
 		stats: place.stats,
+		_count: place._count,
 	};
 }
 
@@ -35,15 +41,14 @@ export function serializePlaces(places: PlaceWithStats[]) {
 }
 
 /**
- * Normaliza las coordenadas de un lugar
+ * Serializa un objeto Place con estadísticas completas
  */
-export function normalizeCoordinates(coordinates: any): { lat: number; lng: number } | null {
-	if (!coordinates) return null;
-
-	const lat = Number.parseFloat(coordinates.lat);
-	const lng = Number.parseFloat(coordinates.lng);
-
-	if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
-
-	return { lat, lng };
+export function serializePlaceWithStats(place: PlaceWithStats) {
+	return {
+		...serializePlace(place),
+		_stats: place._stats,
+		parsedDangers: place.parsedDangers,
+		parsedResources: place.parsedResources,
+		metadata: place.metadata,
+	};
 }

@@ -50,7 +50,7 @@ export const ConceptService = {
 					emoji: data.emoji || '💡',
 					color: data.color || '#3b82f6',
 					category: data.category || null,
-					isPublic: data.isPublic || false,
+			
 					isFavorite: data.isFavorite || false,
 					totalImages: data.totalImages || 0,
 					totalVideos: data.totalVideos || 0,
@@ -119,7 +119,7 @@ export const ConceptService = {
 			if (data.emoji !== undefined) updateData.emoji = data.emoji;
 			if (data.color !== undefined) updateData.color = data.color;
 			if (data.category !== undefined) updateData.category = data.category;
-			if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
+		
 			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 			if (data.totalImages !== undefined) updateData.totalImages = data.totalImages;
 			if (data.totalVideos !== undefined) updateData.totalVideos = data.totalVideos;
@@ -162,7 +162,7 @@ export const ConceptService = {
 				{
 					...updatedConcept,
 					isFavorite: Boolean(updatedConcept.isFavorite),
-					isPublic: Boolean(updatedConcept.isPublic),
+			
 				},
 				counts
 			);
@@ -225,7 +225,7 @@ export const ConceptService = {
 					category: concepts.category,
 					emoji: concepts.emoji,
 					color: concepts.color,
-					isPublic: concepts.isPublic,
+			
 					isFavorite: concepts.isFavorite,
 					totalImages: concepts.totalImages,
 					totalVideos: concepts.totalVideos,
@@ -272,7 +272,7 @@ export const ConceptService = {
 				{
 					...rawConcept,
 					isFavorite: Boolean(rawConcept.isFavorite),
-					isPublic: Boolean(rawConcept.isPublic),
+			
 				},
 				counts
 			);
@@ -325,7 +325,7 @@ export const ConceptService = {
 					category: concepts.category,
 					emoji: concepts.emoji,
 					color: concepts.color,
-					isPublic: concepts.isPublic,
+			
 					isFavorite: concepts.isFavorite,
 					totalImages: concepts.totalImages,
 					totalVideos: concepts.totalVideos,
@@ -389,7 +389,7 @@ export const ConceptService = {
 							color: rawConcept.color || '#3b82f6',
 							updatedAt: rawConcept.updatedAt || new Date(),
 							isFavorite: Boolean(rawConcept.isFavorite),
-							isPublic: Boolean(rawConcept.isPublic),
+					
 						},
 						counts
 					);

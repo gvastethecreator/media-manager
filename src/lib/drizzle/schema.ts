@@ -171,7 +171,7 @@ export const videos = sqliteTable(
 		thumbnailSize: integer('thumbnailSize'),
 		thumbnailWidth: integer('thumbnailWidth'),
 		thumbnailHeight: integer('thumbnailHeight'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isHidden: integer('isHidden', { mode: 'boolean' }).notNull().default(false),
 		folderId: text('folderId').notNull(),
@@ -273,7 +273,7 @@ export const albums = sqliteTable(
 		emoji: text('emoji').default('📔'),
 		color: text('color').default('#3b82f6'),
 		featuredImage: text('featuredImage'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -302,7 +302,7 @@ export const collections = sqliteTable(
 		emoji: text('emoji').default('📚'),
 		color: text('color').default('#3b82f6'),
 		featuredImage: text('featuredImage'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -394,7 +394,7 @@ export const characters = sqliteTable(
 		emoji: text('emoji').default('👤'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -428,7 +428,7 @@ export const places = sqliteTable(
 		emoji: text('emoji').default('📍'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -465,7 +465,7 @@ export const worldItems = sqliteTable(
 		emoji: text('emoji').default('🎯'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -499,7 +499,7 @@ export const concepts = sqliteTable(
 		emoji: text('emoji').default('💡'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -529,7 +529,7 @@ export const prompts = sqliteTable(
 		emoji: text('emoji').default('🔮'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -745,7 +745,7 @@ export const metadatas = sqliteTable(
 		key: text('key').notNull(),
 		value: text('value'),
 		type: text('type').default('string'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		category: text('category'),
 		description: text('description'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),

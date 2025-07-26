@@ -4,7 +4,7 @@
  */
 
 import type { CharacterFilterItem, CharacterViewConfig, CharacterWithStats } from '@/types/entities/character';
-import type { CharacterSortOption } from '@/types/entities/character/enums';
+import type { CharacterSortOption, CharacterClass, CharacterRace, CharacterCategory, CharacterAlignment } from '@/types/entities/character/enums';
 
 /**
  * 🎭 Función de utilidad para convertir array a Record
@@ -146,7 +146,7 @@ export interface CharacterFiltersSlice {
 	setDefaultSortOption: (option: CharacterSortOption) => void;
 
 	// 📊 Agrupamiento
-	setGroupBy: (groupBy: string) => void;
+	setGroupBy: (groupBy: 'none' | 'class' | 'race' | 'category' | 'level') => void;
 
 	// 📖 Getters computados
 	getFilteredCharacters: () => CharacterWithStats[];

@@ -107,3 +107,4 @@ export const transformToUploadedImage = transformToUploadedImageFromDrizzle;
 /**
  * @deprecated Usar transformToUploadedImageWithRelationsFromDrizzle
  */
+export const transformToUploadedImageWithRelations = transformToUploadedImageWithRelationsFromDrizzle;

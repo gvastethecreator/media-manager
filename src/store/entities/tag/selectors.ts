@@ -3,10 +3,9 @@
  * @module store/entities/tag/selectors
  */
 
-import { createTagsGroupedByCategory } from '@/lib/utils/sort';
 import type { TagWithStats } from '@/types/entities/tag';
+import { TagSortCriteria } from '@/types/entities/tag';
 import { useTagStore } from './index';
-import { TagSortCriteria } from './types';
 
 // Selectores simples directos
 export const useAllTags = () => {
@@ -92,11 +91,25 @@ export const useFilteredAndSortedTags = () => {
 };
 
 /**
+ * Agrupa tags por categoría
+ */
+const groupTagsByCategory = (tags: TagWithStats[]) => {
+	return tags.reduce((acc, tag) => {
+		const category = tag.category || 'general';
+		if (!acc[category]) {
+			acc[category] = [];
+		}
+		acc[category].push(tag);
+		return acc;
+	}, {} as Record<string, TagWithStats[]>);
+};
+
+/**
  * Devuelve tags agrupados por categoría
  */
 export const useTagsGroupedByCategory = () => {
 	const filteredAndSortedTags = useFilteredAndSortedTags();
-	return createTagsGroupedByCategory(filteredAndSortedTags);
+	return groupTagsByCategory(filteredAndSortedTags);
 };
 
 /**

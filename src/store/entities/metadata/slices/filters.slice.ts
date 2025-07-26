@@ -4,11 +4,11 @@
  */
 
 import { StateCreator } from 'zustand';
-import { MetadataExtended } from '@/types/entities/metadata/extended';
+import { MetadataWithStats } from '@/types/entities/metadata/base';
 import { MetadataStore } from '..';
 
-// Tipos para filtros
-export type SortField = 'createdAt' | 'updatedAt' | 'size' | 'width' | 'height';
+// Tipos para ordenamiento
+export type SortField = 'format' | 'width' | 'height' | 'size' | 'createdAt' | 'updatedAt';
 export type SortDirection = 'asc' | 'desc';
 
 export interface MetadataFilterOptions {
@@ -47,8 +47,8 @@ export interface FiltersActions {
 	resetFilters: () => void;
 
 	// Selectores
-	getFilteredMetadatas: () => MetadataExtended[];
-	getFilteredAndSortedMetadatas: () => MetadataExtended[];
+	getFilteredMetadatas: () => MetadataWithStats[];
+	getFilteredAndSortedMetadatas: () => MetadataWithStats[];
 }
 
 // Estado inicial
@@ -84,18 +84,19 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 	resetFilters: () => set({ filterOptions: {} }),
 
 	// Selectores
-	getFilteredMetadatas: () => {
-		const { metadatas, filterOptions } = get();
+	getFilteredMetadatas: (): MetadataWithStats[] => {
+		const { metadatas } = get();
+		const { filterOptions } = get();
 
 		return metadatas.filter((metadata) => {
-			// Formato - acceder a la propiedad format de la base
+			// Filtro por formato
 			if (filterOptions.format && filterOptions.format.length > 0) {
 				if (!filterOptions.format.includes(metadata.format)) {
 					return false;
 				}
 			}
 
-			// Dimensiones - acceder a las propiedades width y height de la base
+			// Filtro por dimensiones
 			if (filterOptions.minWidth !== undefined && metadata.width < filterOptions.minWidth) {
 				return false;
 			}
@@ -117,28 +118,28 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 				return false;
 			}
 
-			// Color Space - acceder a la propiedad colorSpace de la base
+			// Filtro por espacio de color
 			if (filterOptions.colorSpace && filterOptions.colorSpace.length > 0) {
 				if (!metadata.colorSpace || !filterOptions.colorSpace.includes(metadata.colorSpace)) {
 					return false;
 				}
 			}
 
-			// Alpha - acceder a la propiedad hasAlpha de la base
+			// Filtro por canal alfa
 			if (filterOptions.hasAlpha !== undefined) {
 				if (metadata.hasAlpha !== filterOptions.hasAlpha) {
 					return false;
 				}
 			}
 
-			// Término de búsqueda (formato, dimensiones)
-			if (filterOptions.searchTerm) {
+			// Filtro por búsqueda de texto
+			if (filterOptions.searchTerm && filterOptions.searchTerm.trim() !== '') {
 				const searchTerm = filterOptions.searchTerm.toLowerCase();
-				const searchableText = `
-          ${metadata.format.toLowerCase()}
-          ${metadata.dimensions.toLowerCase()}
-          ${metadata.colorSpace?.toLowerCase() || ''}
-        `;
+				const searchableText = [
+					metadata.format,
+					metadata.colorSpace,
+					`${metadata.width}x${metadata.height}`,
+				].join(' ').toLowerCase();
 
 				if (!searchableText.includes(searchTerm)) {
 					return false;
@@ -149,7 +150,7 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 		});
 	},
 
-	getFilteredAndSortedMetadatas: () => {
+	getFilteredAndSortedMetadatas: (): MetadataWithStats[] => {
 		const { sortBy, sortDirection } = get();
 		const filteredMetadatas = get().getFilteredMetadatas();
 
@@ -158,6 +159,9 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 
 			// Ordenar por el campo específico
 			switch (sortBy) {
+				case 'format':
+					comparison = a.format.localeCompare(b.format);
+					break;
 				case 'createdAt':
 				case 'updatedAt':
 					comparison = new Date(a[sortBy]).getTime() - new Date(b[sortBy]).getTime();

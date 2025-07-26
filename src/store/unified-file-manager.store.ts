@@ -31,7 +31,7 @@ import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cach
 import { clientLogger } from '@/lib/logger/client-logger';
 // 🎯 Cache y throttling optimizados
 import { throttleEvent } from '@/lib/system/event-throttler';
-import type {
+import {
 	EntityStatsType,
 	EntityWithStats,
 	isFolderWithStats,

@@ -65,6 +65,7 @@ export function toFileWithStats(file: FileBase): FileWithStats {
 	return {
 		...file,
 		stats,
+		entityType: 'file',
 	};
 }
 

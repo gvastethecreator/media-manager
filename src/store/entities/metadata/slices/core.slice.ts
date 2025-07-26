@@ -4,13 +4,13 @@
  */
 
 import { StateCreator } from 'zustand';
-import { MetadataExtended } from '@/types/entities/metadata/extended';
+import { MetadataWithStats } from '@/types/entities/metadata/base';
 import { MetadataStore } from '..';
 
 // Estado
 export interface CoreState {
 	// Datos
-	metadatas: MetadataExtended[];
+	metadatas: MetadataWithStats[];
 	isLoading: boolean;
 	error: string | null;
 }
@@ -18,13 +18,13 @@ export interface CoreState {
 // Acciones
 export interface CoreActions {
 	// Setters básicos
-	setMetadatas: (metadatas: MetadataExtended[]) => void;
+	setMetadatas: (metadatas: MetadataWithStats[]) => void;
 	setIsLoading: (isLoading: boolean) => void;
 	setError: (error: string | null) => void;
 
 	// Operaciones
-	addMetadata: (metadata: MetadataExtended) => void;
-	updateMetadata: (id: string, metadata: Partial<MetadataExtended>) => void;
+	addMetadata: (metadata: MetadataWithStats) => void;
+	updateMetadata: (id: string, metadata: Partial<MetadataWithStats>) => void;
 	removeMetadata: (id: string) => void;
 
 	// Operaciones masivas

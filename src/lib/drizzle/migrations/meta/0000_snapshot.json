@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c1ad6c64-fd49-4821-88c0-d0ff9d636a13",
+  "id": "d6cdba92-a548-464c-aa43-5b43d95ec773",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Activity": {
@@ -145,14 +145,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "isFavorite": {
           "name": "isFavorite",
@@ -578,14 +570,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -771,14 +755,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -908,14 +884,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "isFavorite": {
           "name": "isFavorite",
@@ -3033,14 +3001,6 @@
           "autoincrement": false,
           "default": "'string'"
         },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
         "category": {
           "name": "category",
           "type": "text",
@@ -3240,14 +3200,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "isFavorite": {
           "name": "isFavorite",
@@ -3538,14 +3490,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "isFavorite": {
           "name": "isFavorite",
@@ -4850,14 +4794,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -5098,14 +5034,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "isFavorite": {
           "name": "isFavorite",
@@ -5479,14 +5407,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "isFavorite": {
           "name": "isFavorite",

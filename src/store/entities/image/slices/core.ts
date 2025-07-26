@@ -249,3 +249,6 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		}
 	},
 });
+
+// Exportar el slice para uso en otros módulos
+export type ImageCoreSlice = ImageCoreState;

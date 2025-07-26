@@ -98,12 +98,7 @@ export const CollectionDetails = memo<EntityDetailsProps<CollectionWithStats>>(f
 							<div className="flex items-center gap-2 mt-2">
 								<Badge variant="secondary" className="text-xs">
 									{entity.stats?.imageCount + entity.stats?.videoCount || 0} elementos
-								</Badge>
-								{entity.isPublic && (
-									<Badge variant="outline" className="text-xs">
-										Pública
-									</Badge>
-								)}
+						</Badge>
 								{entity.isFavorite && <Heart className="h-3 w-3 text-red-500 fill-current" />}
 							</div>
 						</div>
@@ -453,11 +448,7 @@ export const CollectionMetadata = memo<EntityMetadataProps<CollectionWithStats>>
 			value: 'Desconocido', // entity.createdBy no existe en CollectionWithStats
 			category: 'basic',
 		},
-		{
-			label: 'Visibilidad',
-			value: entity.isPublic ? 'Pública' : 'Privada',
-			category: 'basic',
-		},
+
 		{
 			label: 'Fecha creación',
 			value: entity.createdAt ? new Date(entity.createdAt).toLocaleDateString() : 'N/A',

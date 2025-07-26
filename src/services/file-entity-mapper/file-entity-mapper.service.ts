@@ -9,7 +9,7 @@ import { createVideo, getVideoByHash } from '@/services/video/video.service';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { DocumentCreateInput } from '@/types/entities/document';
 import type { File3DCreateInput } from '@/types/entities/file3d';
-import type { ImageCreateInput } from '@/types/entities/image';
+import type { CreateImageInput } from '@/services/image/image.service';
 import type { VideoCreateInput } from '@/types/entities/video';
 import {
 	ENTITY_TYPE_MAPPING,
@@ -202,15 +202,14 @@ export class FileEntityMapperService {
 
 			switch (entityType) {
 				case EntityType.IMAGE: {
-					const imageData: ImageCreateInput = {
+					const imageData: CreateImageInput = {
 						name: fileInfo.name,
 						path: fileInfo.path,
 						size: fileInfo.size,
-						hash: fileInfo.hash!,
-						folderId,
 						width: 0, // Will be updated after processing
 						height: 0, // Will be updated after processing
-						isFavorite: false,
+						hash: fileInfo.hash!,
+						folderId,
 					};
 					const image = await this.imageService.createImage(imageData);
 					entityId = image.id;

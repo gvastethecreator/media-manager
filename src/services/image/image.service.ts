@@ -588,6 +588,8 @@ class ImageService {
 
 			return {
 				images: transformedImages,
+				total,
+				hasMore: page * pageSize < total,
 				pagination: {
 					page,
 					pageSize,
@@ -639,11 +641,11 @@ class ImageService {
 			// Procesar la imagen para crear el thumbnail
 			const { buffer, metadata } = await this.processImage(image.path, config);
 
-			// Guardar el thumbnail y sus metadatos en la entidad Image
+			// Actualizar la imagen con el thumbnail generado
 			await db
 				.update(images)
 				.set({
-					thumbnail: buffer,
+					thumbnail: buffer.toString('base64'), // Convertir Buffer a string base64
 					thumbnailSize: buffer.length,
 					thumbnailWidth: metadata.width ?? config.width,
 					thumbnailHeight: metadata.height ?? config.height,
@@ -684,7 +686,8 @@ class ImageService {
 			}
 
 			if (image.thumbnail) {
-				return image.thumbnail;
+				// Convertir string base64 a Buffer
+				return Buffer.from(image.thumbnail, 'base64');
 			}
 
 			await this.generateThumbnail(imageId);
@@ -692,7 +695,8 @@ class ImageService {
 			if (!updatedImage || !updatedImage.thumbnail) {
 				throw createFileNotFoundError(`Miniatura para la imagen ${imageId} no encontrada después de la generación`);
 			}
-			return updatedImage.thumbnail;
+			// Convertir string base64 a Buffer
+			return Buffer.from(updatedImage.thumbnail, 'base64');
 		} catch (error) {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
@@ -749,12 +753,17 @@ class ImageService {
 				.limit(1);
 
 			return {
-				total: totalImages[0]?.count || 0,
-				processed: processedImages[0]?.count || 0,
-				errors: erroredImages[0].count,
-				totalSize: Number(totalThumbnailSize[0].sum || 0),
-				lastProcessed: lastProcessedImage[0]?.date || undefined,
-			};
+			total: totalImages[0]?.count || 0,
+			processed: processedImages[0]?.count || 0,
+			failed: erroredImages[0]?.count || 0,
+			pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
+			totalFiles: totalImages[0]?.count || 0,
+			totalSize: Number(totalThumbnailSize[0].sum || 0),
+			processedSize: Number(totalThumbnailSize[0].sum || 0),
+			errors: [],
+			averageProcessingTime: 0,
+			lastProcessedAt: lastProcessedImage[0]?.date || undefined,
+		};
 		} catch (error) {
 			imageLogger.error('Error al obtener estadísticas de miniaturas:', error);
 			throw toServiceError(error, {

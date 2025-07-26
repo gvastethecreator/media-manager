@@ -102,7 +102,7 @@ export const videos = sqliteTable(
 		thumbnailSize: integer('thumbnailSize'),
 		thumbnailWidth: integer('thumbnailWidth'),
 		thumbnailHeight: integer('thumbnailHeight'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isHidden: integer('isHidden', { mode: 'boolean' }).notNull().default(false),
 		folderId: text('folderId').notNull(),

@@ -24,6 +24,10 @@ export type {
 	VideoSortCriteria,
 	VideoStats,
 	VideoUpdateInput,
-	VideoViewMode,
 	VideoWithStats,
+} from './types';
+
+// --- Enums ---
+export {
+	VideoViewMode,
 } from './types';

@@ -17,7 +17,7 @@ import {
 	updateQueueJobInApi,
 } from '@/lib/api/client/queue-job.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { CreateQueueJobInput, QueueJobExtended, UpdateQueueJobInput } from '@/types/entities/queue-job';
+import type { CreateQueueJobInput, QueueJobExtended, QueueJobFilters, UpdateQueueJobInput } from '@/types/entities/queue-job';
 import type { QueueJobState } from '../types';
 
 // Logger para el slice
@@ -52,34 +52,30 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 	// Carga los trabajos en cola según los filtros y paginación actuales
 	loadJobs: async () => {
 		try {
-			coreLogger.info('Cargando trabajos en cola');
-			set({ core: { ...get().core, isLoading: true, error: null } });
+				coreLogger.info('Cargando trabajos en cola');
+				set((state) => ({ ...state, isLoading: true, error: null }));
 
-			const { filters, pagination } = get();
-			const result = await getQueueJobsFromApi(filters, pagination);
+				const { filters, pagination } = get();
+			const result = await getQueueJobsFromApi(filters as QueueJobFilters, pagination);
 
-			set({
-				core: {
-					...get().core,
+				set((state) => ({
+					...state,
 					items: result.items,
 					total: result.total,
 					page: result.page,
 					limit: result.limit,
 					totalPages: result.totalPages,
 					isLoading: false,
-				},
-			});
+				}));
 
 			coreLogger.info(`Cargados ${result.items.length} trabajos de ${result.total} totales`);
 		} catch (error) {
 			coreLogger.error('Error al cargar trabajos en cola', { error });
-			set({
-				core: {
-					...get().core,
-					error: error as Error,
-					isLoading: false,
-				},
-			});
+			set((state) => ({
+				...state,
+				error: error as Error,
+				isLoading: false,
+			}));
 			throw error;
 		}
 	},
@@ -88,28 +84,24 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 	loadStats: async () => {
 		try {
 			coreLogger.info('Cargando estadísticas de cola');
-			set({ core: { ...get().core, isLoading: true, error: null } });
+			set((state) => ({ ...state, isLoading: true, error: null }));
 
 			const stats = await getQueueStatsFromApi();
 
-			set({
-				core: {
-					...get().core,
-					stats,
-					isLoading: false,
-				},
-			});
+			set((state) => ({
+				...state,
+				stats,
+				isLoading: false,
+			}));
 
 			coreLogger.info('Estadísticas de cola cargadas', { stats });
 		} catch (error) {
 			coreLogger.error('Error al cargar estadísticas de cola', { error });
-			set({
-				core: {
-					...get().core,
-					error: error as Error,
-					isLoading: false,
-				},
-			});
+			set((state) => ({
+				...state,
+				error: error as Error,
+				isLoading: false,
+			}));
 			throw error;
 		}
 	},
@@ -123,17 +115,15 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			const job = await createQueueJobInApi(input);
 
 			// Actualizar lista si el trabajo coincide con los filtros actuales
-			const { core, filters } = get();
-			const matchesFiltersResult = matchesFilters(job, filters);
+			const { filters } = get();
+			const matchesFiltersResult = matchesFilters(job, filters as QueueJobFilters);
 
 			if (matchesFiltersResult) {
-				set({
-					core: {
-						...core,
-						items: [job, ...core.items],
-						total: core.total + 1,
-					},
-				});
+				set((state) => ({
+					...state,
+					items: [job, ...state.items],
+					total: state.total + 1,
+				}));
 			}
 
 			set({ ui: { ...get().ui, isCreating: false } });
@@ -141,16 +131,14 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			return job;
 		} catch (error) {
 			coreLogger.error('Error al crear trabajo en cola', { error, input });
-			set({
-				core: {
-					...get().core,
-					error: error as Error,
-				},
+			set((state) => ({
+				...state,
+				error: error as Error,
 				ui: {
-					...get().ui,
+					...state.ui,
 					isCreating: false,
 				},
-			});
+			}));
 			throw error;
 		}
 	},
@@ -164,35 +152,31 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			const job = await updateQueueJobInApi(id, input);
 
 			// Actualizar job en la lista
-			const { core } = get();
-			const updatedItems = core.items.map((item) => (item.id === id ? job : item));
-
-			set({
-				core: {
-					...core,
+			set((state) => {
+				const updatedItems = state.items.map((item) => (item.id === id ? job : item));
+				return {
+					...state,
 					items: updatedItems,
-					selectedJob: core.selectedJob?.id === id ? job : core.selectedJob,
-				},
-				ui: {
-					...get().ui,
-					isUpdating: false,
-				},
+					selectedJob: state.selectedJob?.id === id ? job : state.selectedJob,
+					ui: {
+						...state.ui,
+						isUpdating: false,
+					},
+				};
 			});
 
 			coreLogger.info('Trabajo en cola actualizado', { jobId: id });
 			return job;
 		} catch (error) {
 			coreLogger.error('Error al actualizar trabajo en cola', { error, id, input });
-			set({
-				core: {
-					...get().core,
-					error: error as Error,
-				},
+			set((state) => ({
+				...state,
+				error: error as Error,
 				ui: {
-					...get().ui,
+					...state.ui,
 					isUpdating: false,
 				},
-			});
+			}));
 			throw error;
 		}
 	},
@@ -206,35 +190,31 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			await deleteQueueJobFromApi(id);
 
 			// Eliminar job de la lista
-			const { core } = get();
-			const updatedItems = core.items.filter((item) => item.id !== id);
-
-			set({
-				core: {
-					...core,
+			set((state) => {
+				const updatedItems = state.items.filter((item) => item.id !== id);
+				return {
+					...state,
 					items: updatedItems,
-					total: Math.max(0, core.total - 1),
-					selectedJob: core.selectedJob?.id === id ? null : core.selectedJob,
-				},
-				ui: {
-					...get().ui,
-					isDeleting: false,
-				},
+					total: Math.max(0, state.total - 1),
+					selectedJob: state.selectedJob?.id === id ? null : state.selectedJob,
+					ui: {
+						...state.ui,
+						isDeleting: false,
+					},
+				};
 			});
 
 			coreLogger.info('Trabajo en cola eliminado', { jobId: id });
 		} catch (error) {
 			coreLogger.error('Error al eliminar trabajo en cola', { error, id });
-			set({
-				core: {
-					...get().core,
-					error: error as Error,
-				},
+			set((state) => ({
+				...state,
+				error: error as Error,
 				ui: {
-					...get().ui,
+					...state.ui,
 					isDeleting: false,
 				},
-			});
+			}));
 			throw error;
 		}
 	},
@@ -248,35 +228,31 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			const job = await retryQueueJobInApi(id);
 
 			// Actualizar job en la lista
-			const { core } = get();
-			const updatedItems = core.items.map((item) => (item.id === id ? job : item));
-
-			set({
-				core: {
-					...core,
+			set((state) => {
+				const updatedItems = state.items.map((item) => (item.id === id ? job : item));
+				return {
+					...state,
 					items: updatedItems,
-					selectedJob: core.selectedJob?.id === id ? job : core.selectedJob,
-				},
-				ui: {
-					...get().ui,
-					isRetrying: false,
-				},
+					selectedJob: state.selectedJob?.id === id ? job : state.selectedJob,
+					ui: {
+						...state.ui,
+						isRetrying: false,
+					},
+				};
 			});
 
 			coreLogger.info('Trabajo en cola reintentado', { jobId: id });
 			return job;
 		} catch (error) {
 			coreLogger.error('Error al reintentar trabajo en cola', { error, id });
-			set({
-				core: {
-					...get().core,
-					error: error as Error,
-				},
+			set((state) => ({
+				...state,
+				error: error as Error,
 				ui: {
-					...get().ui,
+					...state.ui,
 					isRetrying: false,
 				},
-			});
+			}));
 			throw error;
 		}
 	},
@@ -290,35 +266,31 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 			const job = await cancelQueueJobInApi(id);
 
 			// Actualizar job en la lista
-			const { core } = get();
-			const updatedItems = core.items.map((item) => (item.id === id ? job : item));
-
-			set({
-				core: {
-					...core,
+			set((state) => {
+				const updatedItems = state.items.map((item) => (item.id === id ? job : item));
+				return {
+					...state,
 					items: updatedItems,
-					selectedJob: core.selectedJob?.id === id ? job : core.selectedJob,
-				},
-				ui: {
-					...get().ui,
-					isCancelling: false,
-				},
+					selectedJob: state.selectedJob?.id === id ? job : state.selectedJob,
+					ui: {
+						...state.ui,
+						isCancelling: false,
+					},
+				};
 			});
 
 			coreLogger.info('Trabajo en cola cancelado', { jobId: id });
 			return job;
 		} catch (error) {
 			coreLogger.error('Error al cancelar trabajo en cola', { error, id });
-			set({
-				core: {
-					...get().core,
-					error: error as Error,
-				},
+			set((state) => ({
+				...state,
+				error: error as Error,
 				ui: {
-					...get().ui,
+					...state.ui,
 					isCancelling: false,
 				},
-			});
+			}));
 			throw error;
 		}
 	},
@@ -326,24 +298,22 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 	// Selecciona un trabajo en cola
 	selectJob: (job?: QueueJobExtended) => {
 		coreLogger.info('Seleccionando trabajo en cola', { jobId: job?.id });
-		set({ core: { ...get().core, selectedJob: job || null } });
+		set((state) => ({ ...state, selectedJob: job || null }));
 	},
 
 	// Resetea el estado de los trabajos en cola
 	resetJobs: () => {
 		coreLogger.info('Reseteando estado de trabajos en cola');
-		set({
-			core: {
-				...get().core,
-				items: [],
-				total: 0,
-				page: 1,
-				limit: 10,
-				totalPages: 0,
-				selectedJob: null,
-				isLoading: false,
-				error: null,
-			},
-		});
+		set((state) => ({
+			...state,
+			items: [],
+			total: 0,
+			page: 1,
+			limit: 10,
+			totalPages: 0,
+			selectedJob: null,
+			isLoading: false,
+			error: null,
+		}));
 	},
 });

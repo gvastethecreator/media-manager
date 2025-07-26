@@ -6,18 +6,17 @@
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { handleTransformerError } from '@/lib/utils/transformers/errors';
-import type { ImageComplete } from '@/types/entities/image/types';
-import { ImageSchema } from '@/types/entities/image/types';
+import type { ImageBase, ImageWithStats } from '@/types/entities/image/base';
 
 const logger = serverLogger.withContext('ImageSerializer');
 
 /**
- * Transforma datos planos a una entidad ImageComplete (solo campos canónicos)
- * @param data Objeto plano compatible con ImageComplete
+ * Transforma datos planos a una entidad ImageWithStats (solo campos canónicos)
+ * @param data Objeto plano compatible con ImageBase
  */
-export function fromDrizzleImage(data: Partial<ImageComplete>): ImageComplete {
-	if (!data.id) throw new Error('El campo id es obligatorio en ImageComplete');
-	if (!data.folder) throw new Error('El campo folder es obligatorio en ImageComplete');
+export function fromDrizzleImage(data: Partial<ImageBase>): ImageWithStats {
+	if (!data.id) throw new Error('El campo id es obligatorio en ImageWithStats');
+	if (!data.folderId) throw new Error('El campo folderId es obligatorio en ImageWithStats');
 	return {
 		id: data.id,
 		name: data.name ?? '',
@@ -30,35 +29,43 @@ export function fromDrizzleImage(data: Partial<ImageComplete>): ImageComplete {
 		metadata: data.metadata ?? null,
 		isFavorite: data.isFavorite ?? false,
 		addedAt: data.addedAt ?? new Date(),
-		sortBy: data.sortBy ?? 'name',
-		filters: data.filters ?? '{}',
-		// Thumbnail y relaciones
+		createdAt: data.createdAt ?? new Date(),
+		updatedAt: data.updatedAt ?? new Date(),
+		// Thumbnail
 		thumbnail: data.thumbnail ?? null,
 		thumbnailSize: data.thumbnailSize ?? null,
 		thumbnailWidth: data.thumbnailWidth ?? null,
 		thumbnailHeight: data.thumbnailHeight ?? null,
+		thumbnailMimeType: data.thumbnailMimeType ?? null,
 		thumbnailError: data.thumbnailError ?? null,
 		thumbnailErrorAt: data.thumbnailErrorAt ?? null,
 		thumbnailOptimizedAt: data.thumbnailOptimizedAt ?? null,
-		// Relaciones mínimas
-		folder: data.folder,
-		stats: data.stats,
-		activities: data.activities,
-		uploadedImages: data.uploadedImages,
-		profiles: data.profiles,
-		albums: data.albums,
-		collections: data.collections,
-		tags: data.tags,
-		characters: data.characters,
-		places: data.places,
-		worldItems: data.worldItems,
-		concepts: data.concepts,
-		prompts: data.prompts,
-		notes: data.notes,
-		wildcards: data.wildcards,
-		properties: data.properties,
-		groups: data.groups,
-		// Conteos
+		// Relaciones
+		folderId: data.folderId,
+		noteId: data.noteId ?? null,
+		tags: data.tags ?? [],
+		// Campos requeridos para ImageWithStats
+		entityType: 'image' as const,
+		stats: {
+			viewCount: 0,
+			downloadCount: 0,
+			likeCount: 0,
+			commentCount: 0,
+			tagCount: 0,
+			albumCount: 0,
+			collectionCount: 0,
+			characterCount: 0,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 0,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+		},
+		thumbnailUrl: data.thumbnail ?? '',
+		fullUrl: data.path ?? '',
 		_count: data._count,
 	};
 }
@@ -66,22 +73,30 @@ export function fromDrizzleImage(data: Partial<ImageComplete>): ImageComplete {
 /**
  * Valida una imagen completa
  */
-export function validateImage(data: unknown): ImageComplete {
-	const parsed = ImageSchema.parse(data);
-	if (!('folder' in parsed)) throw new Error('El campo folder es obligatorio en ImageComplete');
-	return parsed as ImageComplete;
+export function validateImage(data: unknown): ImageWithStats {
+	if (typeof data !== 'object' || data === null) {
+		throw new Error('Los datos deben ser un objeto válido');
+	}
+	const imageData = data as Record<string, unknown>;
+	if (!imageData.id || typeof imageData.id !== 'string') {
+		throw new Error('El campo id es obligatorio y debe ser string');
+	}
+	if (!imageData.folderId || typeof imageData.folderId !== 'string') {
+		throw new Error('El campo folderId es obligatorio y debe ser string');
+	}
+	return data as ImageWithStats;
 }
 
 /**
  * Extiende una imagen con datos adicionales
  */
 export function extendImage(
-	image: ImageComplete,
+	image: ImageWithStats,
 	_options: {
 		includeStats?: boolean;
 		includeRelations?: boolean;
 	} = {}
-): ImageComplete {
+): ImageWithStats {
 	try {
 		// Aquí se pueden añadir datos adicionales que no vienen directamente
 		// de la base de datos, como estadísticas calculadas, datos de sistemas externos, etc.

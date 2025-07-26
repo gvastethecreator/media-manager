@@ -12,7 +12,15 @@ import { ActivityCategory, ActivitySortCriteria, ActivityType } from '../../type
 export const activityBaseSchema = z.object({
 	id: z.string(),
 	type: z.string(),
+	entityType: z.string(),
+	entityId: z.string(),
+	action: z.string(),
+	userId: z.string(),
 	description: z.string(),
+	metadata: z.record(z.string(), z.unknown()).nullable().optional(),
+	ipAddress: z.string().nullable().optional(),
+	userAgent: z.string().nullable().optional(),
+	sessionId: z.string().nullable().optional(),
 	imageId: z.string().nullable().optional(),
 	createdAt: z.union([z.string(), z.date()]),
 });

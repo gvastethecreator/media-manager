@@ -54,7 +54,7 @@ const createCoreSlice: StateCreator<ConceptStore, [], [], ConceptCoreSlice> = (s
 		set({ isLoading: true, error: null });
 		try {
 			const concepts = await getConceptsFromApi();
-			const transformedConcepts = concepts.items.map(transformConceptToWithStats);
+			const transformedConcepts = concepts.map(transformConceptToWithStats);
 			set({ concepts: transformedConcepts, isLoading: false });
 			storeLogger.info(`✅ Loaded ${transformedConcepts.length} concepts.`);
 		} catch (error) {
@@ -175,11 +175,14 @@ export const useConceptStore = create<ConceptStore>()(
 			}),
 			{
 				name: 'concept-store',
-				version: VERSIONING.STORE,
-				partialize: (state) => {
-					const { concepts, isLoading, error, selectedConcept, ...rest } = state;
-					return rest; // Persist only UI and filter state
-				},
+				version: 1,
+				partialize: (state) => ({
+				filters: state.filters,
+				sortBy: state.sortBy,
+				page: state.page,
+				pageSize: state.pageSize,
+				viewMode: state.viewMode
+			}),
 			}
 		),
 		{

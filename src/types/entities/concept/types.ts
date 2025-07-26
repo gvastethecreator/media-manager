@@ -33,7 +33,7 @@ export interface ConceptCreateInput {
 	description?: string | null;
 	content?: string;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;

@@ -17,7 +17,7 @@ export interface PromptBase {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -144,7 +144,7 @@ export interface PromptCreateInput {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	type?: string | null;
 	content?: string | null;
@@ -169,7 +169,7 @@ export interface PromptUpdateInput {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	type?: string | null;
 	content?: string | null;

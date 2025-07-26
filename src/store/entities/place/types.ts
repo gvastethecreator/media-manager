@@ -12,7 +12,7 @@ import type {
 	PlaceWithStats,
 } from '@/types/entities/place';
 
-type PlaceFilters = PlaceSearchOptions['filters'];
+import type { PlaceFilters } from '@/types/entities/place/types';
 
 /**
  * Estado base del store de Place

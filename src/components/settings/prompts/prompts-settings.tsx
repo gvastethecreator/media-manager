@@ -37,7 +37,7 @@ interface PromptWithNullable {
 	updatedAt: Date;
 	presetId: string | null;
 	// Propiedades adicionales requeridas
-	isPublic: boolean;
+
 	totalImages: number;
 	totalVideos: number;
 	type: string | null;
@@ -59,7 +59,7 @@ interface CreatePromptFormPrompt {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -101,7 +101,7 @@ export const PromptSettings = () => {
 			description: prompt.description || null,
 			category: prompt.category || null,
 			isFavorite: prompt.isFavorite || false,
-			isPublic: prompt.isPublic || false,
+
 			totalImages: prompt.totalImages || 0,
 			totalVideos: prompt.totalVideos || 0,
 			type: prompt.type || null,
@@ -148,7 +148,7 @@ export const PromptSettings = () => {
 			...prompt,
 			emoji: prompt.emoji || '📝',
 			category: prompt.category || '',
-			isPublic: prompt.isPublic || false,
+
 			totalImages: prompt.totalImages || 0,
 			totalVideos: prompt.totalVideos || 0,
 			type: prompt.type || null,

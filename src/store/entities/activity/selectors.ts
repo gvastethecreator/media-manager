@@ -112,7 +112,10 @@ export const selectFilteredActivities = (state: ActivityStore) => {
 
 	// Filtrar por imagen
 	if (state.filterByImageId) {
-		activities = activities.filter((activity) => activity.imageId === state.filterByImageId);
+		activities = activities.filter((activity) => 
+			(activity.entityType === 'image' && activity.entityId === state.filterByImageId) ||
+			(activity.image?.id === state.filterByImageId)
+		);
 	}
 
 	// Filtrar por rango de fechas

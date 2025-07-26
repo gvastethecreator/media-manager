@@ -154,9 +154,9 @@ function mapWorldItemFiltersToDrizzle(filters: WorldItemFilters): DrizzleWorldIt
 	if (filters.query) {
 		where.OR = [{ name: { contains: filters.query } }, { description: { contains: filters.query } }];
 	}
-	if (filters.type?.length) where.type = { in: filters.type };
-	if (filters.category?.length) where.category = { in: filters.category };
-	if (filters.rarity?.length) where.rarity = { in: filters.rarity };
+	if (filters.type && Array.isArray(filters.type) && filters.type.length) where.type = { in: filters.type };
+	if (filters.category && Array.isArray(filters.category) && filters.category.length) where.category = { in: filters.category };
+	if (filters.rarity && Array.isArray(filters.rarity) && filters.rarity.length) where.rarity = { in: filters.rarity };
 	if (filters.isFavorite !== undefined) where.isFavorite = filters.isFavorite;
 	if (filters.hasImage !== undefined) {
 		where.images = filters.hasImage ? { some: {} } : { none: {} };

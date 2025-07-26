@@ -344,7 +344,7 @@ export const NoteSchema = z.object({
 	status: z.string().nullable(),
 	priority: z.number().nullable(),
 	tags: z.string().nullable(),
-	isPublic: z.boolean(),
+
 	isFavorite: z.boolean(),
 	parentId: z.string().nullable(),
 	createdAt: z.date(),

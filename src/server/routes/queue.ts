@@ -17,7 +17,9 @@ import {
 	retryQueueJob,
 	updateQueueJob,
 } from '@/services/queue-job/queue-job.service';
-import { CreateQueueJobInputSchema, UpdateQueueJobInputSchema } from '@/types/entities/queue-job/schema';
+import { serializeQueueJobMetadata } from '@/transformers/queue-job';
+import { CreateQueueJobInputSchema, UpdateQueueJobInputSchema } from '@/types/entities/queue-job/schema';  
+import { QueueJobStatus, QueueJobUpdateInput } from '@/types/entities/queue-job/types';
 
 export const queueRouter = Router();
 const logger = serverLogger.withContext('QueueRoutes');
@@ -75,8 +77,16 @@ queueRouter.get('/:id', async (req, res) => {
 queueRouter.put('/:id', async (req, res) => {
 	try {
 		const validatedData = UpdateQueueJobInputSchema.parse(req.body);
-		const job = await updateQueueJob(req.params.id, validatedData);
+		
+		// Crear el objeto de actualización correctamente tipado
+		const updateData: QueueJobUpdateInput = {
+			...validatedData,
+			metadata: validatedData.metadata ? serializeQueueJobMetadata(validatedData.metadata) : undefined,
+		};
+		
+		const job = await updateQueueJob(req.params.id, updateData);
 		res.json(job);
+		return;
 	} catch (error) {
 		logger.error('Error en PUT /api/queue/:id', { error });
 		res.status(400).json({
@@ -161,14 +171,28 @@ queueRouter.get('/recent', async (req, res) => {
 queueRouter.get('/status/:status', async (req, res) => {
 	try {
 		const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 10;
-		const jobs = await findQueueJobsByStatus(req.params.status, limit);
+		const statusParam = req.params.status;
+		
+		// Validar que el status es válido
+		if (!Object.values(QueueJobStatus).includes(statusParam as QueueJobStatus)) {
+			res.status(400).json({
+				message: 'Estado inválido',
+				validStatuses: Object.values(QueueJobStatus),
+			});
+			return;
+		}
+		
+		const status = statusParam as QueueJobStatus;
+		const jobs = await findQueueJobsByStatus(status, limit);
 		res.json(jobs);
+		return;
 	} catch (error) {
 		logger.error('Error en GET /api/queue/status/:status', { error });
 		res.status(500).json({
 			message: 'Error al buscar trabajos por estado',
 			error: error instanceof Error ? error.message : String(error),
 		});
+		return;
 	}
 });
 

@@ -15,8 +15,7 @@ export const UIFieldsSchema = z.object({
  * 📊 Esquema para campos de metadata
  */
 export const MetadataFieldsSchema = z.object({
-	createdAt: z.date().optional(),
-	updatedAt: z.date().optional(),
+	// createdAt y updatedAt ya están definidos en BaseEntitySchema
 });
 
 /**
@@ -24,7 +23,9 @@ export const MetadataFieldsSchema = z.object({
  */
 import { BaseEntitySchema } from './base';
 
-export interface BaseEntity extends z.infer<typeof BaseEntitySchema>, UIFields, MetadataFields {}
+export interface BaseEntity extends z.infer<typeof BaseEntitySchema>, UIFields {
+	// MetadataFields removido para evitar conflicto con createdAt/updatedAt de BaseEntitySchema
+}
 
 /**
  * 🔍 Tipo para opciones de búsqueda

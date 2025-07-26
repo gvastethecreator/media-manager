@@ -33,7 +33,7 @@ export const collectionCreateSchema = z.object({
 	emoji: z.string().optional(),
 	color: z.string().optional(),
 	isFavorite: z.boolean().optional().default(false),
-	isPublic: z.boolean().optional().default(false),
+
 });
 
 /**

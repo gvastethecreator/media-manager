@@ -4,12 +4,14 @@
  * @description Convierte entre NoteComplete y NoteWithStats para mantener compatibilidad
  */
 
-import type {
+import {
 	NoteCategory,
-	NoteComplete,
 	NotePriority,
-	NoteStatistics,
 	NoteStatus,
+} from '@/types/entities/note';
+import type {
+	NoteComplete,
+	NoteStatistics,
 	NoteWithStats,
 } from '@/types/entities/note';
 
@@ -20,7 +22,7 @@ import type {
  */
 export function adaptNoteCompleteToWithStats(note: NoteComplete): NoteWithStats {
 	// Si ya es NoteWithStats, devolverlo tal como está
-	if ('statistics' in note && note.statistics) {
+	if ('stats' in note && note.stats) {
 		return note as NoteWithStats;
 	}
 
@@ -38,48 +40,62 @@ export function adaptNoteCompleteToWithStats(note: NoteComplete): NoteWithStats 
 	const completionScore = calculateCompletionScore(note, totalItems);
 
 	const statistics: NoteStatistics = {
-		totalItems,
-		totalImages: counts.images || 0,
-		totalVideos: counts.videos || 0,
-		totalAlbums: counts.albums || 0,
-		totalCollections: counts.collections || 0,
-		totalTags: counts.tags || 0,
-		totalCharacters: counts.characters || 0,
-		totalPlaces: counts.places || 0,
-		totalWorldItems: counts.worldItems || 0,
-		totalConcepts: counts.concepts || 0,
-		totalPrompts: counts.prompts || 0,
-		totalWildcards: counts.wildcards || 0,
-		totalProperties: counts.properties || 0,
-		totalGroups: counts.groups || 0,
+		imageCount: counts.images || 0,
+		videoCount: counts.videos || 0,
+		albumCount: counts.albums || 0,
+		collectionCount: counts.collections || 0,
+		tagCount: counts.tags || 0,
+		characterCount: counts.characters || 0,
+		placeCount: counts.places || 0,
+		worldItemCount: counts.worldItems || 0,
+		conceptCount: counts.concepts || 0,
+		promptCount: counts.prompts || 0,
+		wildcardCount: counts.wildcards || 0,
+		propertyCount: counts.properties || 0,
+		groupCount: counts.groups || 0,
 		wordCount,
-		characterCount,
 		readingTime,
 		completionScore,
-		lastUpdated: new Date(),
+		totalItems,
+		totalAssociations: totalItems,
 	};
 
 	return {
 		id: note.id,
 		title: note.title,
 		content: note.content,
+		summary: note.summary,
+		emoji: note.emoji,
+		color: note.color,
 		category: note.category,
 		priority: note.priority,
 		status: note.status,
-		color: note.color,
-		emoji: note.emoji,
 		featuredImage: note.featuredImage,
 		isFavorite: note.isFavorite,
 		presetId: note.presetId,
+		tags: note.tags,
 		createdAt: note.createdAt,
 		updatedAt: note.updatedAt,
-		statistics,
-		// Campos derivados
-		excerpt: generateExcerpt(content),
-		formattedDate: formatDate(note.updatedAt),
-		priorityLabel: getPriorityLabel(note.priority),
-		statusLabel: getStatusLabel(note.status),
-		categoryLabel: getCategoryLabel(note.category),
+		entityType: 'note' as const,
+		// Propiedades requeridas para compatibilidad
+		name: note.title, // Alias para title
+		description: note.summary || note.content, // Alias para summary o content
+		stats: statistics,
+		_count: {
+			images: counts.images || 0,
+			videos: counts.videos || 0,
+			albums: counts.albums || 0,
+			collections: counts.collections || 0,
+			tags: counts.tags || 0,
+			characters: counts.characters || 0,
+			places: counts.places || 0,
+			worldItems: counts.worldItems || 0,
+			concepts: counts.concepts || 0,
+			prompts: counts.prompts || 0,
+			wildcards: counts.wildcards || 0,
+			properties: counts.properties || 0,
+			groups: counts.groups || 0,
+		},
 	};
 }
 

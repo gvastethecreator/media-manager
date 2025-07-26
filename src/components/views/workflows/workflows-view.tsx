@@ -63,7 +63,7 @@ export function WorkflowsView() {
 				emoji: null,
 				color: null,
 				category: null,
-				isPublic: false,
+	
 				isFavorite: false,
 				isActive: true,
 				version: '1.0.0',

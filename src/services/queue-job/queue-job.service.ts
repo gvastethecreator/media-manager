@@ -3,6 +3,7 @@
  * @module services/queue-job
  */
 
+import * as crypto from 'crypto';
 import { and, eq, gte, lte, sql } from 'drizzle-orm';
 import { db } from '@/lib/database/db';
 import { queueJobs } from '@/lib/database/schema';
@@ -316,9 +317,12 @@ export async function findQueueJobs(
 		return {
 			items: transformedJobs,
 			total,
-			page,
-			limit,
-			totalPages,
+			pagination: {
+				page,
+				limit,
+				total,
+				totalPages,
+			},
 		};
 	} catch (error) {
 		logger.error('❌ Error al buscar trabajos en cola:', error);

@@ -6,9 +6,9 @@
 import { StateCreator } from 'zustand';
 // Refactor 2025-07: se usa cliente API para obtener info de directorio
 import { getDirectoryInfoFromApi } from '@/lib/api/client/file.client';
-import { toFileWithStatsList } from '@/transformers/file';
-import { FileBase, FileWithStats } from '@/types/entities/file';
-import type { DirectoryReadResult } from '@/types/entities/file/types';
+import { toFileWithStatsList } from '@/transformers/file/mappers';
+import { FileWithStats, FileBase } from '@/types/entities/file/base';
+import type { DirectoryReadResult, FileBase as FileBaseFromTypes } from '@/types/entities/file/types';
 import { FileStore } from '..';
 
 // Estado
@@ -46,7 +46,7 @@ export interface CoreActions {
 	navigateToDirectory: (path: string) => Promise<void>;
 	navigateUp: () => Promise<void>;
 	updateDirectoryContents: (result: DirectoryReadResult) => void;
-	updateFilesFromRaw: (files: FileBase[]) => void;
+	updateFilesFromRaw: (files: FileBaseFromTypes[]) => void;
 
 	// Operaciones masivas
 	reset: () => void;
@@ -153,7 +153,30 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 	},
 
 	updateDirectoryContents: (result) => {
-		const transformedFiles = toFileWithStatsList(result.items);
+		// Convertir FileBaseFromTypes a FileBase
+		const convertedFiles: FileBase[] = result.items.map((rawFile) => ({
+			id: rawFile.id,
+			name: rawFile.name,
+			path: rawFile.path,
+			size: rawFile.size,
+			hash: rawFile.hash,
+			mimeType: rawFile.mimeType,
+			extension: rawFile.extension,
+			type: rawFile.fileType as any, // Conversión temporal
+			isDirectory: false, // Valor por defecto, debería venir del API
+			parentPath: '', // Valor por defecto
+			absolutePath: rawFile.path,
+			relativePath: rawFile.path,
+			modifiedAt: rawFile.updatedAt,
+			accessedAt: rawFile.lastAccessed || rawFile.updatedAt,
+			folderId: rawFile.folderId,
+			isHidden: rawFile.isHidden,
+			isReadonly: false, // Valor por defecto
+			createdAt: rawFile.createdAt,
+			updatedAt: rawFile.updatedAt,
+		}));
+
+		const transformedFiles = toFileWithStatsList(convertedFiles);
 
 		set({
 			files: transformedFiles,
@@ -166,12 +189,35 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 		});
 	},
 
-	updateFilesFromRaw: (rawFiles) => {
-		const transformedFiles = toFileWithStatsList(rawFiles);
+	updateFilesFromRaw: (rawFiles: FileBaseFromTypes[]) => {
+		// Convertir FileBaseFromTypes a FileBase
+		const convertedFiles: FileBase[] = rawFiles.map((rawFile) => ({
+			id: rawFile.id,
+			name: rawFile.name,
+			path: rawFile.path,
+			size: rawFile.size,
+			hash: rawFile.hash,
+			mimeType: rawFile.mimeType,
+			extension: rawFile.extension,
+			type: rawFile.fileType as any, // Conversión temporal
+			isDirectory: false, // Valor por defecto, debería venir del API
+			parentPath: '', // Valor por defecto
+			absolutePath: rawFile.path,
+			relativePath: rawFile.path,
+			modifiedAt: rawFile.updatedAt,
+			accessedAt: rawFile.lastAccessed || rawFile.updatedAt,
+			folderId: rawFile.folderId,
+			isHidden: rawFile.isHidden,
+			isReadonly: false, // Valor por defecto
+			createdAt: rawFile.createdAt,
+			updatedAt: rawFile.updatedAt,
+		}));
+
+		const transformedFiles = toFileWithStatsList(convertedFiles);
 
 		// Actualizar estadísticas
-		const fileCount = transformedFiles.filter((file: FileWithStats) => file.type !== 'folder').length;
-		const directoryCount = transformedFiles.filter((file: FileWithStats) => file.type === 'folder').length;
+		const fileCount = transformedFiles.filter((file: FileWithStats) => !file.isDirectory).length;
+		const directoryCount = transformedFiles.filter((file: FileWithStats) => file.isDirectory).length;
 		const totalSize = transformedFiles.reduce((acc: number, file: FileWithStats) => acc + (file.size || 0), 0);
 
 		set({

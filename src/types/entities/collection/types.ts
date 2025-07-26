@@ -13,7 +13,7 @@ export interface CollectionBase {
 	emoji: string | null;
 	color: string | null;
 	featuredImage: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;
@@ -57,7 +57,7 @@ export interface CreateCollectionInput {
 	emoji?: string | null;
 	color?: string | null;
 	featuredImage?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	parentId?: string | null;
 }
@@ -68,7 +68,7 @@ export interface UpdateCollectionInput {
 	emoji?: string | null;
 	color?: string | null;
 	featuredImage?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	parentId?: string | null;
 }
@@ -81,15 +81,24 @@ export interface CollectionFilter {
 
 export interface CollectionFilters {
 	search?: string;
-	isPublic?: boolean;
+
 	hasImages?: boolean;
 	sortBy?: CollectionSortOption;
 	sortOrder?: 'asc' | 'desc';
 }
 
 export interface CollectionViewConfig {
+	viewType: 'grid' | 'list' | 'table';
 	gridColumns: number;
 	cardSize: 'small' | 'medium' | 'large';
+	sortBy: string;
+	sortDirection: 'asc' | 'desc';
+	showImages: boolean;
+	imageCount: number;
+	enableAnimations: boolean;
+	groupBy: string | null;
+	showStats: boolean;
+	compactView: boolean;
 }
 
 /**
@@ -98,4 +107,19 @@ export interface CollectionViewConfig {
 export interface CollectionSortBy {
 	field: string;
 	order: 'asc' | 'desc';
+}
+
+// Tipos adicionales para compatibilidad
+export type CollectionCreateInput = CreateCollectionInput;
+export type CollectionUpdateInput = UpdateCollectionInput;
+export type CollectionComplete = CollectionWithStats;
+export type CollectionExtended = CollectionWithStats;
+export type CollectionStatistics = CollectionWithStats['stats'];
+
+export interface CollectionSearchOptions {
+	skip?: number;
+	take?: number;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	filters?: CollectionFilters;
+	include?: Record<string, boolean>;
 }

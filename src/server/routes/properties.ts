@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import * as propertyService from '@/services/property/property.service';
+import { PropertyService } from '@/services/property/property.service';
+
+const propertyService = new PropertyService();
 import { toPropertyWithStats } from '@/transformers/property';
 
 const router = Router();
@@ -45,9 +47,11 @@ router.get('/', async (req, res) => {
 				hasPrev: filters.offset > 0,
 			},
 		});
+		return;
 	} catch (error) {
 		console.error('Error getting properties:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
+		return;
 	}
 });
 
@@ -63,16 +67,18 @@ router.get('/:id', async (req, res) => {
 		}
 
 		res.json(toPropertyWithStats(property));
+		return;
 	} catch (error) {
 		console.error('Error getting property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
+		return;
 	}
 });
 
 // POST /properties - Crear nueva property
 router.post('/', async (req, res) => {
 	try {
-		const { name, value, type, description, isPublic } = req.body;
+		const { name, value, category, description, isPublic } = req.body;
 
 		if (!name || !value) {
 			res.status(400).json({ error: 'El nombre y valor son requeridos' });
@@ -82,15 +88,17 @@ router.post('/', async (req, res) => {
 		const property = await propertyService.createProperty({
 			name,
 			value,
-			type,
+			category,
 			description,
-			isPublic,
+			isFavorite: isPublic,
 		});
 
 		res.status(201).json(toPropertyWithStats(property));
+		return;
 	} catch (error) {
 		console.error('Error creating property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
+		return;
 	}
 });
 
@@ -98,14 +106,14 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { name, value, type, description, isPublic } = req.body;
+		const { name, value, category, description, isPublic } = req.body;
 
 		const property = await propertyService.updateProperty(id, {
 			name,
 			value,
-			type,
+			category,
 			description,
-			isPublic,
+			isFavorite: isPublic,
 		});
 
 		if (!property) {
@@ -114,9 +122,11 @@ router.put('/:id', async (req, res) => {
 		}
 
 		res.json(toPropertyWithStats(property));
+		return;
 	} catch (error) {
 		console.error('Error updating property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
+		return;
 	}
 });
 
@@ -132,11 +142,15 @@ router.delete('/:id', async (req, res) => {
 			return;
 		}
 
-		res.status(204).send();
+		res.json({ message: 'Property eliminada correctamente' });
+		return;
 	} catch (error) {
 		console.error('Error deleting property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
+		return;
 	}
 });
+
+export { router as propertiesRouter };
 
 export default router;

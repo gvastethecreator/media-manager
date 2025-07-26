@@ -102,16 +102,24 @@ class ProfileServiceImpl {
 			}
 
 			// 3. Aplicar ordenamiento dinámico
-			const orderColumn =
-				sortBy === 'name'
-					? profiles.name
-					: sortBy === 'isActive'
-						? profiles.isActive
-						: sortBy === 'createdAt'
-							? profiles.createdAt
-							: sortBy === 'updatedAt'
-								? profiles.updatedAt
-								: profiles.name; // default fallback
+			let orderColumn;
+			switch (sortBy) {
+				case 'name':
+					orderColumn = profiles.name;
+					break;
+				case 'isActive':
+					orderColumn = profiles.isActive;
+					break;
+				case 'createdAt':
+					orderColumn = profiles.createdAt;
+					break;
+				case 'updatedAt':
+					orderColumn = profiles.updatedAt;
+					break;
+				default:
+					orderColumn = profiles.name;
+					break;
+			}
 
 			const orderDirection = sortDirection === 'desc' ? desc(orderColumn) : asc(orderColumn);
 			query = query.orderBy(orderDirection);
