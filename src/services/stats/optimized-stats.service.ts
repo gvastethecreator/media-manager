@@ -29,16 +29,15 @@ export class OptimizedStatsService {
 	 * 🎯 Reemplazo optimizado para getAlbumStats() - Una consulta Drizzle en lugar de 15+
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getAlbumStatsOptimized = unstable_cache(
-		async (
-			albumId: string
-		): Promise<{
-			imageCount: number;
-			videoCount: number;
-			totalSize: number;
-			entitiesCount: number;
-			breakdown: Record<string, number>;
-		}> => {
+	getAlbumStatsOptimized = async (
+		albumId: string
+	): Promise<{
+		imageCount: number;
+		videoCount: number;
+		totalSize: number;
+		entitiesCount: number;
+		breakdown: Record<string, number>;
+	}> => {
 			this.logger.debug(`📊 Obteniendo estadísticas optimizadas para álbum: ${albumId}`);
 
 			try {
@@ -117,27 +116,20 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener estadísticas de álbum:', { albumId, error });
 				throw error;
 			}
-		},
-		['album-stats'],
-		{ revalidate: 300, tags: ['album-stats'] } // Cache por 5 minutos
-	);
+	};
 
 	/**
 	 * 🎯 Estadísticas por lotes para múltiples álbumes - Evita N+1 queries
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getBatchAlbumStats = unstable_cache(
-		async (albumIds: string[]): Promise<Record<string, any>> => {
+	getBatchAlbumStats = async (albumIds: string[]): Promise<Record<string, any>> => {
 			if (albumIds.length === 0) return {};
 
 			this.logger.debug(`📊 Obteniendo estadísticas por lotes para ${albumIds.length} álbumes`);
 
 			try {
 				// 🚀 Una consulta para todos los álbumes en lugar de N consultas separadas
-				const placeholders = albumIds.map(() => '?').join(',');
-				const batchStatsQuery = await db.all(
-					sql.raw(
-						`
+				const batchStatsQuery = await db.all(sql`
 					SELECT
 						a.id as albumId,
 						a.name as albumName,
@@ -152,12 +144,9 @@ export class OptimizedStatsService {
 					LEFT JOIN Image i ON ai.B = i.id
 					LEFT JOIN _AlbumToVideo av ON a.id = av.A
 					LEFT JOIN Video v ON av.B = v.id
-					WHERE a.id IN (${placeholders})
+					WHERE a.id IN (${albumIds.map(id => `'${id}'`).join(',')})
 					GROUP BY a.id, a.name
-				`,
-						albumIds
-					)
-				);
+				`);
 
 				return (batchStatsQuery as any[]).reduce(
 					(acc, stats) => {
@@ -178,32 +167,28 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener estadísticas por lotes:', { albumIds, error });
 				throw error;
 			}
-		},
-		['batch-album-stats'],
-		{ revalidate: 300, tags: ['album-stats'] }
-	);
+	};
 
 	/**
 	 * 🎯 Estadísticas globales optimizadas - Una consulta en lugar de 13+
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getGlobalStatsOptimized = unstable_cache(
-		async (): Promise<{
-			totalImages: number;
-			totalVideos: number;
-			totalFolders: number;
-			totalCollections: number;
-			totalTags: number;
-			totalAlbums: number;
-			totalCharacters: number;
-			totalPlaces: number;
-			totalWorldItems: number;
-			totalActivities: number;
-			totalSize: number;
-			totalViews: number;
-			totalDownloads: number;
-			totalFavorites: number;
-		}> => {
+	getGlobalStatsOptimized = async (): Promise<{
+		totalImages: number;
+		totalVideos: number;
+		totalFolders: number;
+		totalCollections: number;
+		totalTags: number;
+		totalAlbums: number;
+		totalCharacters: number;
+		totalPlaces: number;
+		totalWorldItems: number;
+		totalActivities: number;
+		totalSize: number;
+		totalViews: number;
+		totalDownloads: number;
+		totalFavorites: number;
+	}> => {
 			this.logger.debug('📊 Obteniendo estadísticas globales optimizadas');
 
 			try {
@@ -248,31 +233,27 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener estadísticas globales:', { error });
 				throw error;
 			}
-		},
-		['global-stats'],
-		{ revalidate: 300, tags: ['global-stats'] }
-	);
+	};
 
 	/**
 	 * 🎯 Estadísticas de grupo optimizadas - Reemplaza múltiples count() queries
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getGroupStatsOptimized = unstable_cache(
-		async (
-			groupId: string
-		): Promise<{
-			imageCount: number;
-			videoCount: number;
-			albumCount: number;
-			tagCount: number;
-			totalSize: number;
-			itemCounts: {
-				images: number;
-				videos: number;
-				albums: number;
-				tags: number;
-			};
-		}> => {
+	getGroupStatsOptimized = async (
+		groupId: string
+	): Promise<{
+		imageCount: number;
+		videoCount: number;
+		albumCount: number;
+		tagCount: number;
+		totalSize: number;
+		itemCounts: {
+			images: number;
+			videos: number;
+			albums: number;
+			tags: number;
+		};
+	}> => {
 			this.logger.debug(`📊 Obteniendo estadísticas optimizadas para grupo: ${groupId}`);
 
 			try {
@@ -319,26 +300,20 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener estadísticas de grupo:', { groupId, error });
 				throw error;
 			}
-		},
-		['group-stats'],
-		{ revalidate: 300, tags: ['group-stats'] }
-	);
+	};
 
 	/**
 	 * 🎯 Estadísticas de tags optimizadas - Reemplaza N+1 aggregate queries
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getBatchTagStatsOptimized = unstable_cache(
-		async (tagIds?: string[]): Promise<Record<string, any>> => {
+	getBatchTagStatsOptimized = async (tagIds?: string[]): Promise<Record<string, any>> => {
 			this.logger.debug('📊 Obteniendo estadísticas por lotes para tags');
 
 			try {
 				// Si no se proporcionan IDs, obtener todos los tags
 				const batchTagStatsQuery =
 					tagIds && tagIds.length > 0
-						? await db.all(
-								sql.raw(
-									`
+						? await db.all(sql`
 						SELECT
 							t.id as tagId,
 							t.name,
@@ -357,12 +332,9 @@ export class OptimizedStatsService {
 						LEFT JOIN Property p ON pt.A = p.id
 						LEFT JOIN _TagToWildcard tw ON t.id = tw.A
 						LEFT JOIN Wildcard w ON tw.B = w.id
-						WHERE t.id IN (${tagIds.map(() => '?').join(',')})
+						WHERE t.id IN (${tagIds.map(id => `'${id}'`).join(',')})
 						GROUP BY t.id, t.name, t.color
-					`,
-									tagIds
-								)
-							)
+					`)
 						: await db.all(sql`
 						SELECT
 							t.id as tagId,
@@ -428,25 +400,19 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener estadísticas por lotes de tags:', { tagIds, error });
 				throw error;
 			}
-		},
-		['batch-tag-stats'],
-		{ revalidate: 300, tags: ['tag-stats'] }
-	);
+	};
 
 	/**
 	 * 🎯 Estadísticas de colecciones optimizadas - Similar a álbumes
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getBatchCollectionStatsOptimized = unstable_cache(
-		async (collectionIds?: string[]): Promise<Record<string, any>> => {
+	getBatchCollectionStatsOptimized = async (collectionIds?: string[]): Promise<Record<string, any>> => {
 			this.logger.debug('📊 Obteniendo estadísticas por lotes para colecciones');
 
 			try {
 				const batchCollectionStatsQuery =
 					collectionIds && collectionIds.length > 0
-						? await db.all(
-								sql.raw(
-									`
+						? await db.all(sql`
 						SELECT
 							c.id as collectionId,
 							c.name,
@@ -464,12 +430,9 @@ export class OptimizedStatsService {
 						LEFT JOIN Property p ON cp.B = p.id
 						LEFT JOIN _CollectionToWildcard cw ON c.id = cw.A
 						LEFT JOIN Wildcard w ON cw.B = w.id
-						WHERE c.id IN (${collectionIds.map(() => '?').join(',')})
+						WHERE c.id IN (${collectionIds.map(id => `'${id}'`).join(',')})
 						GROUP BY c.id, c.name
-					`,
-									collectionIds
-								)
-							)
+					`)
 						: await db.all(sql`
 						SELECT
 							c.id as collectionId,
@@ -535,20 +498,16 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener estadísticas por lotes de colecciones:', { collectionIds, error });
 				throw error;
 			}
-		},
-		['batch-collection-stats'],
-		{ revalidate: 300, tags: ['collection-stats'] }
-	);
+	};
 
 	/**
 	 * 🎯 Estadísticas de favoritos optimizadas - Una consulta en lugar de múltiples count()
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getFavoriteStatsOptimized = unstable_cache(
-		async (): Promise<{
-			total: number;
-			byType: Record<string, number>;
-		}> => {
+	getFavoriteStatsOptimized = async (): Promise<{
+		total: number;
+		byType: Record<string, number>;
+	}> => {
 			this.logger.debug('📊 Obteniendo estadísticas de favoritos optimizadas');
 
 			try {
@@ -601,28 +560,24 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener estadísticas de favoritos:', { error });
 				throw error;
 			}
-		},
-		['favorite-stats'],
-		{ revalidate: 300, tags: ['favorite-stats'] }
-	);
+	};
 
 	/**
 	 * 🎯 Top tags optimizado con una sola consulta
 	 * ✅ MIGRADO A DRIZZLE
 	 */
-	getTopTagsOptimized = unstable_cache(
-		async (
-			limit = 10
-		): Promise<
-			Array<{
-				id: string;
-				name: string;
-				color: string;
-				count: number;
-				imageCount: number;
-				videoCount: number;
-			}>
-		> => {
+	getTopTagsOptimized = async (
+		limit = 10
+	): Promise<
+		Array<{
+			id: string;
+			name: string;
+			color: string;
+			count: number;
+			imageCount: number;
+			videoCount: number;
+		}>
+	> => {
 			this.logger.debug(`📊 Obteniendo top ${limit} tags optimizado`);
 
 			try {
@@ -665,10 +620,7 @@ export class OptimizedStatsService {
 				this.logger.error('❌ Error al obtener top tags:', { limit, error });
 				throw error;
 			}
-		},
-		['top-tags'],
-		{ revalidate: 600, tags: ['top-tags'] } // Cache por 10 minutos
-	);
+	};
 }
 
 /**

@@ -22,7 +22,8 @@ export * from './validators';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { handleTransformerError } from '@/lib/utils/transformers/errors';
 import type { Settings } from '@/types/settings';
-import { serializers } from './internal';
+import { deserializeSettingsJson, serializeSettingsJson } from './serializers';
+import { validateSettings as validateSettingsInternal } from './validators';
 import { forClient, normalize } from './transformer';
 
 const _logger = serverLogger.withContext('SettingsTransformer:legacy');
@@ -146,10 +147,10 @@ export function hasSettingsChanged(oldSettings: Settings, newSettings: Settings)
  * @deprecated Usar deserializeSettingsJson() desde serializers.ts
  * Deserializa campos JSON en la configuración
  */
-export function deserializeSettingsJson<T>(settingsData: T): T {
+export function deserializeSettingsJsonLegacy<T>(settingsData: T): T {
 	_logger.warn('⚠️ Usando función legacy deserializeSettingsJson, migrar a serializers');
 	try {
-		return serializers.deserializeSettingsJson(settingsData);
+		return deserializeSettingsJson(settingsData);
 	} catch (error) {
 		throw handleTransformerError(error as Error);
 	}
@@ -159,10 +160,10 @@ export function deserializeSettingsJson<T>(settingsData: T): T {
  * @deprecated Usar serializeSettingsJson() desde serializers.ts
  * Serializa campos a JSON en la configuración
  */
-export function serializeSettingsJson<T>(settingsData: T): T {
+export function serializeSettingsJsonLegacy<T>(settingsData: T): T {
 	_logger.warn('⚠️ Usando función legacy serializeSettingsJson, migrar a serializers');
 	try {
-		return serializers.serializeSettingsJson(settingsData);
+		return serializeSettingsJson(settingsData);
 	} catch (error) {
 		throw handleTransformerError(error as Error);
 	}
@@ -172,10 +173,10 @@ export function serializeSettingsJson<T>(settingsData: T): T {
  * @deprecated Usar validateSettings() desde validators.ts
  * Valida los datos de configuración
  */
-export function validateSettings<T>(settingsData: T): T {
+export function validateSettingsLegacy<T>(settingsData: T): T {
 	_logger.warn('⚠️ Usando función legacy validateSettings, migrar a validators');
 	try {
-		return serializers.validateSettings(settingsData);
+		return validateSettingsInternal(settingsData as any) as T;
 	} catch (error) {
 		throw handleTransformerError(error as Error);
 	}
@@ -186,7 +187,7 @@ export function validateSettings<T>(settingsData: T): T {
  * Compatibilidad para código existente
  */
 export const SettingsTransformer = {
-	deserializeJson: deserializeSettingsJson,
-	serializeJson: serializeSettingsJson,
-	validate: validateSettings,
+	deserializeJson: deserializeSettingsJsonLegacy,
+	serializeJson: serializeSettingsJsonLegacy,
+	validate: validateSettingsLegacy,
 };

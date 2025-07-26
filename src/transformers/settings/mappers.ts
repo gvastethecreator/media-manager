@@ -58,6 +58,12 @@ export function fromDbToSettings(dbSettings: DbSettings): Settings {
 			devMode: Boolean(parsedData.devMode),
 			experimentalFeatures: Boolean(parsedData.experimentalFeatures),
 		},
+		version: parsedData.version || '1.0.0',
+		lastUpdate: parsedData.lastUpdate ? new Date(parsedData.lastUpdate) : new Date(),
+		system: {
+			platform: parsedData.system?.platform || 'web',
+			version: parsedData.system?.version || '1.0.0',
+		},
 	};
 }
 
@@ -89,6 +95,10 @@ export function fromSettingsToDbInsert(settings: Settings, profileId: string): O
 		apiKey: settings.advanced.apiKey,
 		devMode: settings.advanced.devMode,
 		experimentalFeatures: settings.advanced.experimentalFeatures,
+
+		version: settings.version,
+		lastUpdate: settings.lastUpdate.toISOString(),
+		system: settings.system,
 	};
 
 	return {
@@ -186,6 +196,20 @@ export function fromSettingsUpdateToDb(updateData: Partial<Settings>): Partial<O
 			dataObj.experimentalFeatures = updateData.advanced.experimentalFeatures;
 			hasDataChanges = true;
 		}
+	}
+
+	// Manejar campos adicionales
+	if (updateData.version !== undefined) {
+		dataObj.version = updateData.version;
+		hasDataChanges = true;
+	}
+	if (updateData.lastUpdate !== undefined) {
+		dataObj.lastUpdate = updateData.lastUpdate.toISOString();
+		hasDataChanges = true;
+	}
+	if (updateData.system !== undefined) {
+		dataObj.system = updateData.system;
+		hasDataChanges = true;
 	}
 
 	if (hasDataChanges) {

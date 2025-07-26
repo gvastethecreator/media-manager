@@ -8,7 +8,7 @@ export type WorkflowBase = {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	isActive: boolean;
 	version: string;

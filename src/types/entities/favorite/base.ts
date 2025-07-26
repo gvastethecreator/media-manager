@@ -117,6 +117,7 @@ export const FAVORITE_ENTITY_COLORS: Record<FavoriteEntityType, string> = {
 	[FavoriteEntityType.WORLD_ITEM]: '#84cc16',
 	[FavoriteEntityType.CONCEPT]: '#f97316',
 	[FavoriteEntityType.PROMPT]: '#6366f1',
+	[FavoriteEntityType.NOTE]: '#22c55e',
 	[FavoriteEntityType.TAG]: '#ec4899',
 	[FavoriteEntityType.DOCUMENT]: '#64748b',
 	[FavoriteEntityType.FILE]: '#6b7280',

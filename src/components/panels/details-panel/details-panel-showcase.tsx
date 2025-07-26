@@ -87,7 +87,7 @@ const mockEntities: AnyEntityWithStats[] = [
 		thumbnailErrorAt: null,
 		thumbnailOptimizedAt: null,
 		isFavorite: false,
-		isPublic: true,
+
 		isHidden: false,
 		folderId: 'folder1',
 		noteId: null,
@@ -203,7 +203,7 @@ const mockEntities: AnyEntityWithStats[] = [
 		emoji: '📸',
 		color: '#3B82F6',
 		featuredImage: null,
-		isPublic: true,
+
 		isFavorite: false,
 		totalImages: 12,
 		totalVideos: 3,

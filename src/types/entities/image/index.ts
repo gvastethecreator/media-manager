@@ -21,7 +21,6 @@ export { ImageFormat, ImageStatus } from './enums';
 export type {
 	ImageFilters,
 	ImageMetadata,
-	ImageMetadata,
 	ImageSearchResult,
 } from './types';
 

@@ -61,16 +61,19 @@ router.post('/bulk-generate', async (req, res) => {
 		const { imageIds, ...options } = req.body;
 
 		if (!imageIds || !Array.isArray(imageIds)) {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'imageIds (array) es requerido',
 			});
+			return;
 		}
 
 		const result = await bulkGenerateThumbnails(imageIds, options);
 		res.json(result);
+		return;
 	} catch (error) {
 		console.error('Error in bulk thumbnail generation:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
+		return;
 	}
 });
 

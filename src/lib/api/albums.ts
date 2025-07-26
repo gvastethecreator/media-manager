@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AlbumWithStats } from '@/types/entities/album';
+import type { AlbumWithStats, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
 import type { ImageWithStats } from '@/types/entities/image';
 import { apiClient } from './client';
+
+// Re-export types for external use
+export type { AlbumWithStats, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
 
 export interface AlbumFilters {
 	search?: string;
@@ -11,45 +14,7 @@ export interface AlbumFilters {
 	sortOrder?: 'asc' | 'desc';
 }
 
-export interface AlbumCreateInput {
-	name: string;
-	description?: string | null;
-	color?: string | null;
-	isPublic?: boolean;
-	emoji?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	totalSize?: number;
-	filters?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	metadata?: string | null;
-	lastImageAddedAt?: Date | null;
-	lastVideoAddedAt?: Date | null;
-	parentId?: string | null;
-}
 
-export interface AlbumUpdateInput {
-	name?: string;
-	description?: string | null;
-	color?: string | null;
-	isPublic?: boolean;
-	emoji?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	totalImages?: number;
-	totalVideos?: number;
-	totalSize?: number;
-	filters?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	metadata?: string | null;
-	lastImageAddedAt?: Date | null;
-	lastVideoAddedAt?: Date | null;
-	parentId?: string | null;
-}
 
 export interface AlbumsResponse {
 	data: AlbumWithStats[];

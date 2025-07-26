@@ -35,7 +35,7 @@ export interface VideoBase {
 	thumbnailHeight: number | null;
 
 	// Estados
-	isPublic: boolean;
+
 	isFavorite: boolean;
 
 	// Relaciones

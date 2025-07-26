@@ -132,23 +132,35 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 		(_count?.collections ?? 0) +
 		(_count?.tags ?? 0);
 
-	const stats: PlaceWithStats = {
-		...rest,
-		dangers: safeJsonParse(rest.dangers, []),
-		resources: safeJsonParse(rest.resources, []),
-		stats: null, // Placeholder para estadísticas adicionales
-		filters: null, // Placeholder para filtros adicionales
-		_stats: {
-			popularity,
-			completenessScore: calculateCompleteness(completenessFields),
-			// TODO: Implementar lógica real para estas métricas
-			spatialRelevance: 0,
-			geoContextLevel: 0,
-		},
-		_count: _count || {},
+	const statistics = {
+		popularity,
+		completenessScore: calculateCompleteness(completenessFields),
+		spatialRelevance: 0,
+		geoContextLevel: 0,
 	};
 
-	return stats;
+	const result: PlaceWithStats = {
+		...rest,
+		entityType: 'place' as const,
+		_stats: statistics,
+		stats: statistics,
+		_count: _count || {},
+		parsedDangers: safeJsonParse(rest.dangers, []),
+		parsedResources: safeJsonParse(rest.resources, []),
+		parsedStats: {},
+		metadata: {},
+		region: null,
+		// Conteos individuales para compatibilidad
+		images: _count?.images ?? 0,
+		videos: _count?.images ?? 0, // Usar images como fallback
+		tags: _count?.tags ?? 0,
+		notes: _count?.notes ?? 0,
+		characters: _count?.characters ?? 0,
+		collections: _count?.collections ?? 0,
+		concepts: _count?.concepts ?? 0,
+	};
+
+	return result;
 }
 
 /**

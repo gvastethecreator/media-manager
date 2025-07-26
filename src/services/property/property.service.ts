@@ -228,7 +228,7 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 				.select({ count: count() })
 				.from(properties)
 				.where(whereClause)
-				.then((result) => result[0]?.count || 0),
+				.then((result: { count: number }[]) => result[0]?.count || 0),
 		]);
 
 		const result: PropertyWithStats[] = drizzleProperties.map((rawProperty: (typeof drizzleProperties)[0]) => ({

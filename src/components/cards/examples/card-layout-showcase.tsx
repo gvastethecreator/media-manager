@@ -83,7 +83,7 @@ const mockEntities: AnyEntityWithStats[] = [
 		emoji: '📸',
 		color: '#3b82f6',
 		featuredImage: null,
-		isPublic: true,
+
 		isFavorite: false,
 		parentId: null,
 		category: 'personal',

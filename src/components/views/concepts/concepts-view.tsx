@@ -66,7 +66,7 @@ export function ConceptsView() {
 				category: 'general',
 				content: newConceptDescription || '',
 				isFavorite: false,
-				isPublic: false,
+	
 				totalImages: 0,
 				totalVideos: 0,
 			};

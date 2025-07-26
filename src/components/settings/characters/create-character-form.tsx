@@ -195,7 +195,7 @@ export function CreateCharacterForm({
 				category: data.category || null,
 				emoji: data.emoji || '👤',
 				color: data.color || '#3b82f6',
-				isPublic: true,
+
 				isFavorite: data.isFavorite || false,
 				totalImages: 0,
 				totalVideos: 0,

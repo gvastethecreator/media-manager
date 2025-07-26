@@ -23,7 +23,7 @@ export {
 	type FileSchema,
 	filesTable,
 	fileTypeEnum,
-} from './schema.ts';
+} from './schema';
 // --- Serializadores ---
 export {
 	serializeDirectoryStructure,

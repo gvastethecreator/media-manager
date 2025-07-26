@@ -7,7 +7,8 @@
 import type { StateCreator } from 'zustand';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
-import type { CharacterCoreSlice, CharacterState } from '../types';
+import { CharacterSortOption } from '@/types/entities/character/enums';
+import type { CharacterState, CharacterCoreSlice } from '../types';
 
 const logger = serverLogger.withContext('CharacterCoreSlice');
 
@@ -23,6 +24,36 @@ export function charactersToRecord(characters: CharacterWithStats[]): Record<str
 }
 
 /**
+ * 🎭 Estado inicial del slice de Character
+ */
+const initialState: CharacterState = {
+	characters: {},
+	viewConfig: {
+		viewType: 'grid',
+		gridColumns: 4,
+		cardSize: 'medium',
+		sortBy: 'name',
+		sortDirection: 'asc',
+		showImages: true,
+		imageCount: 10,
+		enableAnimations: true,
+		groupBy: null,
+		showStats: true,
+		compactView: false,
+	},
+	selectedCharacterId: null,
+	hoveredCharacterId: null,
+	expandedCharacterIds: [],
+	isLoading: false,
+	error: null,
+	activeFilters: [],
+	searchTerm: '',
+	defaultSortOption: CharacterSortOption.NAME_ASC,
+	currentSortOption: CharacterSortOption.NAME_ASC,
+	groupBy: 'none',
+};
+
+/**
  * Crea el slice principal optimizado para Character.
  */
 export const createCharacterCoreSlice: StateCreator<
@@ -31,6 +62,9 @@ export const createCharacterCoreSlice: StateCreator<
 	[],
 	CharacterState & CharacterCoreSlice
 > = (set, get) => ({
+	// Estado inicial
+	...initialState,
+	
 	// Conversión y utilidades optimizadas
 	charactersToRecord,
 
@@ -114,19 +148,19 @@ export const createCharacterCoreSlice: StateCreator<
 		logger.info(`➕ ${characters.length} personajes añadidos al store en lote`);
 	},
 
-	bulkUpdateCharacters: (updates: Array<{ id: string; data: Partial<CharacterWithStats> }>) => {
+	bulkUpdateCharacters: (updates: Array<{ id: string; updates: Partial<CharacterWithStats> }>) => {
 		set((state) => {
 			const updatedCharacters = { ...state.characters };
 			const now = new Date();
 
-			for (const { id, data } of updates) {
+			for (const { id, updates: updateData } of updates) {
 				const existingCharacter = updatedCharacters[id];
 				if (existingCharacter) {
 					updatedCharacters[id] = {
-						...existingCharacter,
-						...data,
-						updatedAt: now,
-					};
+					...existingCharacter,
+					...updateData,
+					updatedAt: now,
+				};
 				}
 			}
 
@@ -211,7 +245,7 @@ export const createCharacterCoreSlice: StateCreator<
 				return state;
 			}
 
-			const newLevel = Math.min(character.level + 1, 100); // Máximo nivel 100
+			const newLevel = Math.min((character.level || 1) + 1, 100); // Máximo nivel 100
 			return {
 				characters: {
 					...state.characters,
@@ -234,7 +268,7 @@ export const createCharacterCoreSlice: StateCreator<
 				return state;
 			}
 
-			const newLevel = Math.max(character.level - 1, 1); // Mínimo nivel 1
+			const newLevel = Math.max((character.level || 1) - 1, 1); // Mínimo nivel 1
 			return {
 				characters: {
 					...state.characters,
@@ -247,6 +281,38 @@ export const createCharacterCoreSlice: StateCreator<
 			};
 		});
 		logger.info(`⬇️ Nivel decrementado para personaje: ${characterId}`);
+	},
+
+	/**
+	 * Limpia todos los personajes
+	 */
+	clearCharacters: () => {
+		set({ characters: {} });
+	},
+
+	/**
+	 * Sincroniza personajes con una lista externa
+	 * @param characters Lista de personajes para sincronizar
+	 */
+	syncCharacters: (characters: CharacterWithStats[]) => {
+		set({ characters: charactersToRecord(characters) });
+	},
+
+	/**
+	 * Refresca un personaje específico
+	 * @param id ID del personaje a refrescar
+	 */
+	refreshCharacter: async (id: string) => {
+		// Implementación placeholder - en una app real, esto haría una llamada a la API
+		console.log(`Refreshing character ${id}`);
+	},
+
+	/**
+	 * Refresca todos los personajes
+	 */
+	refreshAllCharacters: async () => {
+		// Implementación placeholder - en una app real, esto haría una llamada a la API
+		console.log('Refreshing all characters');
 	},
 
 	// Gestión del estado de carga

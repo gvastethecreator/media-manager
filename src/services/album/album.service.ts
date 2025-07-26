@@ -6,7 +6,7 @@
  */
 
 import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
-import type { AlbumCreateInput, AlbumUpdateInput } from '@/lib/api/albums';
+import type { AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';

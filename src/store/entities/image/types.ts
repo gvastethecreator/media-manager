@@ -5,7 +5,7 @@
  * Última actualización: 2025-01-27
  */
 
-import type { ImageSortCriteria, ImageViewMode, ImageWithStats } from '../../../types/entities/image/types';
+import type { ImageSortCriteria, ImageViewConfig, ImageViewMode, ImageWithStats } from '../../../types/entities/image/types';
 
 /**
  * Tipos de agrupamiento para imágenes
@@ -76,6 +76,7 @@ export interface ImageUIState {
 	currentImageId: string | null;
 	highlightedId: string | null;
 	expandedIds: string[];
+	viewConfig: ImageViewConfig;
 }
 
 /**

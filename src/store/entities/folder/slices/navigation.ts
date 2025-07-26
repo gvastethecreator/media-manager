@@ -3,17 +3,12 @@
  * @module store/entities/folder/slices/navigation
  */
 
-import type { StateCreator } from 'zustand';
-import type { FolderNavigationSlice, FolderStore } from '../types';
+import { StateCreator } from 'zustand';
+import type { FolderNavigationState, FolderNavigationSlice, CompleteFolderStore } from '../types';
 
-export interface FolderNavigationState {
-	currentFolderId: string | null;
-	breadcrumbs: Array<{ id: string; name: string; path: string }>;
-	history: string[];
-	historyIndex: number;
-}
 
-export const initialNavigationState: FolderNavigationState = {
+
+const initialNavigationState: FolderNavigationState = {
 	currentFolderId: null,
 	breadcrumbs: [],
 	history: [],
@@ -21,7 +16,7 @@ export const initialNavigationState: FolderNavigationState = {
 };
 
 // Creador del slice de navegación
-export const createFolderNavigationSlice: StateCreator<FolderStore, [], [], FolderNavigationSlice> = (set, get) => ({
+export const createFolderNavigationSlice: StateCreator<CompleteFolderStore, [], [], FolderNavigationSlice> = (set, get) => ({
 	...initialNavigationState,
 
 	// Navegación

@@ -29,7 +29,7 @@ export interface WorldItemBase {
 	emoji: string | null;
 	color: string | null;
 	category: string | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	totalImages: number;
 	totalVideos: number;

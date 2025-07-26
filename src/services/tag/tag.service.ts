@@ -6,9 +6,9 @@
  */
 
 import * as crypto from 'crypto';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, or, isNotNull } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { imageTags, tags } from '@/lib/drizzle/schema/index';
+import { imageTags, tags, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -594,8 +594,8 @@ export async function addImageToTag(tagId: string, imageId: string): Promise<voi
 
 		// **MIGRACIÓN A DRIZZLE**
 		await db.insert(imageTags).values({
-			tagId,
-			imageId,
+			A: imageId, // imageId
+			B: tagId,   // tagId
 		});
 
 		// Revalidar rutas y notificar
@@ -608,6 +608,48 @@ export async function addImageToTag(tagId: string, imageId: string): Promise<voi
 		throw new TagServiceError(
 			`Error al agregar imagen a etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 			'ADD_IMAGE_TO_TAG_FAILED',
+			error
+		);
+	}
+}
+
+/**
+ * Obtener thumbnails de imágenes asociadas a una etiqueta
+ */
+export async function getTagThumbnails(tagId: string, limit = 6): Promise<Array<{ id: string; name?: string | null; thumbnailUrl: string }>> {
+	try {
+		logger.info(`🔄 Obteniendo thumbnails para etiqueta: ${tagId}, límite: ${limit}`);
+
+		// Obtener imágenes asociadas a la etiqueta con thumbnails
+		const tagImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+			})
+			.from(images)
+			.innerJoin(imageTags, eq(imageTags.A, images.id))
+			.where(and(
+				eq(imageTags.B, tagId),
+				isNotNull(images.thumbnail)
+			))
+			.orderBy(desc(images.updatedAt))
+			.limit(limit);
+
+		// Mapear a formato de respuesta con URL de thumbnail
+		const thumbnails = tagImages.map((image: { id: string; name: string | null; path: string }) => ({
+			id: image.id,
+			name: image.name,
+			thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+		}));
+
+		logger.info(`✅ Obtenidos ${thumbnails.length} thumbnails para etiqueta ${tagId}`);
+		return thumbnails;
+	} catch (error) {
+		logger.error(`❌ Error obteniendo thumbnails de etiqueta`, { error, tagId, limit });
+		throw new TagServiceError(
+			`Error al obtener thumbnails de etiqueta: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			'GET_TAG_THUMBNAILS_FAILED',
 			error
 		);
 	}
@@ -668,6 +710,10 @@ export class TagService {
 	async addImageToTag(tagId: string, imageId: string): Promise<void> {
 		// TODO: Implementar lógica para agregar imagen a etiqueta
 		logger.info(`Agregando imagen ${imageId} a etiqueta ${tagId}`);
+	}
+
+	async getTagThumbnails(id: string, limit: number = 6): Promise<Array<{ id: string; name?: string | null; thumbnailUrl: string }>> {
+		return await getTagThumbnails(id, limit);
 	}
 }
 

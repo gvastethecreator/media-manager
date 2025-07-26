@@ -7,19 +7,19 @@
 
 import type {
 	GroupCreateInput,
-	GroupSortCriteria,
-	GroupType,
 	GroupUpdateInput,
+	GroupViewConfig,
 	GroupViewMode,
 	GroupWithStats,
 } from '@/types/entities/group';
+import { GroupSortCriteria, GroupType } from '@/types/entities/group/enums';
 
 /**
  * Estado del core para el store de grupos
  */
 export interface GroupCoreState {
-	/** Mapa de grupos indexados por ID */
-	groups: Record<string, GroupWithStats>;
+	/** Array de grupos */
+	groups: GroupWithStats[];
 	/** Estado de carga */
 	isLoading: boolean;
 	/** Error si existe */
@@ -56,6 +56,8 @@ export interface GroupUIState {
 	highlightedId: string | null;
 	/** IDs de grupos expandidos */
 	expandedIds: string[];
+	/** Configuración de vista */
+	viewConfig: GroupViewConfig;
 }
 
 /**
@@ -94,6 +96,39 @@ export interface GroupCoreActions {
  */
 export interface GroupUIActions {
 	setSelectedIds: (ids: string[]) => void;
+	// Selección de grupos
+	selectGroup: (id: string | null) => void;
+	deselectGroup: (id: string) => void;
+	toggleGroupSelection: (id: string) => void;
+	selectMultipleGroups: (ids: string[]) => void;
+	clearSelection: () => void;
+	getSelectedGroups: () => string[];
+	isGroupSelected: (id: string) => boolean;
+	// Visor de grupos
+	openViewer: (groupId: string) => void;
+	closeViewer: () => void;
+	getCurrentGroup: () => GroupWithStats | null;
+	// Modo de visualización
+	setViewMode: (viewMode: GroupViewMode) => void;
+	getViewMode: () => GroupViewMode;
+	// Estado de visualización
+	setGroupDisplayState: (id: string, state: GroupDisplayState) => void;
+	getGroupDisplayState: (id: string) => GroupDisplayState;
+	// Expansión de grupos
+	expandGroup: (id: string) => void;
+	collapseGroup: (id: string) => void;
+	toggleGroupExpansion: (id: string) => void;
+	isGroupExpanded: (id: string) => boolean;
+	expandAllGroups: () => void;
+	collapseAllGroups: () => void;
+	// Drag & Drop
+	setDraggedGroup: (id: string | null) => void;
+	setDropTargetGroup: (id: string | null) => void;
+	getDraggedGroup: () => string | null;
+	getDropTargetGroup: () => string | null;
+	// Resaltado
+	highlightGroup: (id: string | null) => void;
+	getHighlightedGroup: () => string | null;
 }
 
 /**
@@ -101,6 +136,15 @@ export interface GroupUIActions {
  */
 export interface GroupFilterActions {
 	setSearchQuery: (query: string) => void;
+	setSortBy: (sortBy: GroupSortCriteria) => void;
+	setFilterByType: (type: GroupType | null) => void;
+	setFilterByCategory: (category: string | null) => void;
+	setFilterFavorites: (onlyFavorites: boolean) => void;
+	setDateRange: (from: Date | null, to: Date | null) => void;
+	resetFilters: () => void;
+	getFilteredGroups: () => GroupWithStats[];
+	applySort: (groups: GroupWithStats[]) => GroupWithStats[];
+	applyFilters: (groups: GroupWithStats[]) => GroupWithStats[];
 }
 
 /**

@@ -96,7 +96,7 @@ export interface PromptCreateInput {
 	emoji?: string | null;
 	color?: string | null;
 	category?: string | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	totalImages?: number;
 	totalVideos?: number;
@@ -112,12 +112,46 @@ export interface PromptCreateInput {
 	notes?: string | null;
 	featuredImage?: string | null;
 	parentId?: string | null;
+	purpose?: string | null;
+	// Relaciones
+	tags?: (string | { id: string })[];
+	groups?: (string | { id: string })[];
+	properties?: (string | { id: string })[];
+	wildcards?: (string | { id: string })[];
 }
 
 /**
  * 🔄 Input para actualizar un prompt existente.
  */
-export type PromptUpdateInput = Partial<PromptCreateInput>;
+export interface PromptUpdateInput {
+	name?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
+	purpose?: string | null;
+	// Relaciones
+	tags?: (string | { id: string })[];
+	groups?: (string | { id: string })[];
+	properties?: (string | { id: string })[];
+	wildcards?: (string | { id: string })[];
+}
 
 /**
  * 🔍 Opciones para buscar y filtrar prompts.
@@ -198,11 +232,16 @@ export interface PromptExecutionParams {
  */
 export interface PromptFilters {
 	category?: string[];
+	categories?: string[]; // Alias para compatibilidad
 	type?: string[];
 	tags?: string[];
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	search?: string;
+	searchQuery?: string; // Alias para compatibilidad
+	purpose?: string[];
+	purposes?: string[]; // Alias para compatibilidad
+	onlyFavorites?: boolean;
 	dateRange?: {
 		from?: Date;
 		to?: Date;
@@ -214,4 +253,101 @@ export interface PromptFilters {
  */
 export interface PromptWithRelations extends PromptComplete {
 	// Alias para compatibilidad
+}
+
+/**
+ * 🗄️ Tipos para Drizzle ORM
+ */
+export interface DrizzleCreatePromptData {
+	id?: string;
+	name: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
+	purpose?: string | null;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+export interface DrizzleUpdatePromptData {
+	name?: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+
+	isFavorite?: boolean;
+	totalImages?: number;
+	totalVideos?: number;
+	type?: string | null;
+	content?: string | null;
+	parameters?: string | null;
+	style?: string | null;
+	mood?: string | null;
+	lighting?: string | null;
+	composition?: string | null;
+	technique?: string | null;
+	inspiration?: string | null;
+	notes?: string | null;
+	featuredImage?: string | null;
+	parentId?: string | null;
+	purpose?: string | null;
+	updatedAt?: Date;
+}
+
+export interface DrizzleWhereFilter {
+	id?: any;
+	name?: any;
+	category?: any;
+	type?: any;
+	isPublic?: any;
+	isFavorite?: any;
+	content?: any;
+	purpose?: any;
+	createdAt?: any;
+	updatedAt?: any;
+	AND?: DrizzleWhereFilter[];
+	OR?: DrizzleWhereFilter[];
+	NOT?: DrizzleWhereFilter;
+}
+
+export interface DrizzleOrderBy {
+	[key: string]: 'asc' | 'desc';
+}
+
+export interface DrizzleUpdateArgs {
+	set: DrizzleUpdatePromptData;
+	where: DrizzleWhereFilter;
+}
+
+/**
+ * 🔗 Tipos relacionados para mappers
+ */
+export interface PromptRelated {
+	id: string;
+	name: string;
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	category?: string | null;
+	type?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }

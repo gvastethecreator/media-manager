@@ -31,6 +31,8 @@ const initialState: CharacterState = {
 		groupBy: null,
 		showStats: true,
 		compactView: false,
+		gridColumns: 4,
+		cardSize: 'medium',
 	},
 	selectedCharacterId: null,
 	hoveredCharacterId: null,

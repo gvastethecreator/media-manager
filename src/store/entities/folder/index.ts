@@ -41,33 +41,33 @@ export const folderStoreHelpers = {
 	/**
 	 * 🔍 Busca carpetas por texto
 	 */
-	searchFolders: (folders: Record<string, any>, query: string) => {
+	searchFolders: (folders: Record<string, any>, query: string): any[] => {
 		const searchTerm = query.toLowerCase();
 		return Object.values(folders).filter(
-			(folder) =>
+			(folder: any) =>
 				folder.name.toLowerCase().includes(searchTerm) ||
 				folder.description?.toLowerCase().includes(searchTerm) ||
 				folder.path.toLowerCase().includes(searchTerm) ||
-				folder.statistics.autoTags.some((tag: string) => tag.toLowerCase().includes(searchTerm))
+				folder.stats.autoTags.some((tag: string) => tag.toLowerCase().includes(searchTerm))
 		);
 	},
 
 	/**
 	 * 📊 Filtra por score de organización
 	 */
-	filterByOrganization: (folders: Record<string, any>, minScore: number) => {
-		return Object.values(folders).filter((folder) => folder.statistics.organizationScore >= minScore);
+	filterByOrganization: (folders: Record<string, any>, minScore: number): any[] => {
+		return Object.values(folders).filter((folder: any) => folder.stats.organizationScore >= minScore);
 	},
 
 	/**
 	 * 🍞 Construye breadcrumbs para una carpeta
 	 */
-	buildBreadcrumbs: (folders: Record<string, any>, folderId: string) => {
+	buildBreadcrumbs: (folders: Record<string, any>, folderId: string): any[] => {
 		const breadcrumbs: any[] = [];
 		let currentId: string | null = folderId;
 
 		while (currentId && folders[currentId]) {
-			const folder = folders[currentId];
+			const folder: any = folders[currentId];
 			breadcrumbs.unshift(folder);
 			currentId = folder.parentId;
 		}
@@ -78,13 +78,13 @@ export const folderStoreHelpers = {
 	/**
 	 * 🛤️ Encuentra el camino entre dos carpetas
 	 */
-	findPath: (folders: Record<string, any>, fromId: string, toId: string) => {
+	findPath: (folders: Record<string, any>, fromId: string, toId: string): string[] => {
 		// Implementación simplificada - encontrar ancestro común
 		const fromPath = folderStoreHelpers.buildBreadcrumbs(folders, fromId);
 		const toPath = folderStoreHelpers.buildBreadcrumbs(folders, toId);
 
 		// Retornar IDs del camino
-		return [...fromPath.map((f) => f.id), ...toPath.map((f) => f.id)];
+		return [...fromPath.map((f: any) => f.id), ...toPath.map((f: any) => f.id)];
 	},
 };
 

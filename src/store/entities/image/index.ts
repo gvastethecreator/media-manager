@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { ImageViewMode } from '../../../types/entities/image/types';
+import { ImageViewMode, ImageSortOption, ImageSortCriteria } from '../../../types/entities/image/types';
 import { createImageCoreSlice, type ImageCoreSlice } from './slices/core';
 import { createImageUISlice, type ImageUISlice } from './slices/ui';
 import type { ImageState } from './types';
@@ -28,9 +28,26 @@ const initialState: ImageState = {
 		currentImageId: null,
 		highlightedId: null,
 		expandedIds: [],
+		viewConfig: {
+			viewMode: ImageViewMode.GRID,
+			sortBy: ImageSortOption.DATE,
+			sortDirection: 'desc',
+			gridSize: 'medium',
+			showMetadata: true,
+			showThumbnails: true,
+			showFilenames: false,
+			showDimensions: false,
+			showFileSize: false,
+			groupBy: null,
+			enableAnimations: true,
+			autoPlay: false,
+			showFavorites: false,
+			enableZoom: true,
+			enableFullscreen: true,
+		},
 	},
 	filters: {
-		sortBy: 'date_desc',
+		sortBy: ImageSortCriteria.DATE_DESC,
 		searchQuery: '',
 		filterByTag: [],
 		filterByAlbum: [],
@@ -44,7 +61,7 @@ const initialState: ImageState = {
 	},
 	grouping: {
 		groupBy: null,
-		sortCriteria: 'date_desc',
+		sortCriteria: ImageSortCriteria.DATE_DESC,
 		groupedImages: [],
 		filteredImages: [],
 		stats: {

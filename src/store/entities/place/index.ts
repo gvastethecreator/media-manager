@@ -99,11 +99,11 @@ export const usePlaceStore = create<PlaceStore>()(
 			setSearchQuery: (query) => set({ searchQuery: query }),
 			setTypeFilter: (type) =>
 				set((state) => ({
-					filters: { ...state.filters, type: type || undefined },
+					filters: { ...state.filters, type: type ? [type] : undefined },
 				})),
 			setCategoryFilter: (category) =>
 				set((state) => ({
-					filters: { ...state.filters, category: category || undefined },
+					filters: { ...state.filters, category: category ? [category] : undefined },
 				})),
 			setRegionFilter: (region) =>
 				set((state) => ({

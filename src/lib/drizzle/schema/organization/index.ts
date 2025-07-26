@@ -41,7 +41,7 @@ export const albums = sqliteTable(
 		emoji: text('emoji').default('📔'),
 		color: text('color').default('#3b82f6'),
 		featuredImage: text('featuredImage'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
@@ -70,7 +70,7 @@ export const collections = sqliteTable(
 		emoji: text('emoji').default('📚'),
 		color: text('color').default('#3b82f6'),
 		featuredImage: text('featuredImage'),
-		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
+
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),

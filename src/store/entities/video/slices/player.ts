@@ -61,8 +61,8 @@ export interface VideoPlayerSlice extends VideoPlayerState {
 	getBufferedPercentage: () => number;
 	getPlayState: () => VideoPlayState;
 	getVolume: () => number;
-	isFullscreen: () => boolean;
-	isMuted: () => boolean;
+	getIsFullscreen: () => boolean;
+	getIsMuted: () => boolean;
 
 	// Eventos de reproducción
 	onTimeUpdate: (currentTime: number) => void;
@@ -106,8 +106,8 @@ export const createVideoPlayerSlice: StateCreator<VideoStore, [], [], VideoPlaye
 	getBufferedPercentage: () => get().bufferedPercentage,
 	getPlayState: () => get().playState,
 	getVolume: () => get().volume,
-	isFullscreen: () => get().isFullscreen,
-	isMuted: () => get().isMuted,
+	getIsFullscreen: () => get().isFullscreen,
+	getIsMuted: () => get().isMuted,
 
 	// Eventos de reproducción
 	onTimeUpdate: (currentTime) => set({ currentTime }),

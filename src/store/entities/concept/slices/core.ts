@@ -38,7 +38,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('🔄 Cargando conceptos');
 
 			// Llamar a API para obtener conceptos
-			const { items: concepts } = await conceptsApi.getAll();
+			const concepts = await conceptsApi.getAll();
 
 			set({ concepts, isLoading: false });
 			coreLogger.info('✅ Conceptos cargados:', { count: concepts.length });

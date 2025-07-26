@@ -93,3 +93,17 @@ export interface GroupDisplayState {
 	selectedItems: string[];
 	showFavorites: boolean;
 }
+
+export interface GroupViewConfig {
+	viewType: 'grid' | 'list' | 'table';
+	gridColumns: number;
+	cardSize: 'small' | 'medium' | 'large';
+	sortBy: string;
+	sortDirection: 'asc' | 'desc';
+	showImages: boolean;
+	imageCount: number;
+	enableAnimations: boolean;
+	groupBy: string | null;
+	showStats: boolean;
+	compactView: boolean;
+}

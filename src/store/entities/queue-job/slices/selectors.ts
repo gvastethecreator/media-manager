@@ -11,25 +11,25 @@ import type { QueueJobState } from '../types';
  */
 export const coreSelectors = {
 	// Selector de todos los jobs
-	jobs: (state: QueueJobState) => state.core.items,
+	jobs: (state: QueueJobState) => state.items,
 
 	// Selector de job seleccionado
-	selectedJob: (state: QueueJobState) => state.core.selectedJob,
+	selectedJob: (state: QueueJobState) => state.selectedJob,
 
 	// Selector de ID de job seleccionado
-	selectedJobId: (state: QueueJobState) => state.core.selectedJob?.id || null,
+	selectedJobId: (state: QueueJobState) => state.selectedJob?.id || null,
 
 	// Selector de estadísticas
-	stats: (state: QueueJobState) => state.core.stats,
+	stats: (state: QueueJobState) => state.stats,
 
 	// Selector de estado de carga
-	isLoading: (state: QueueJobState) => state.core.isLoading,
+	isLoading: (state: QueueJobState) => state.isLoading,
 
 	// Selector de estado de error
-	error: (state: QueueJobState) => state.core.error,
+	error: (state: QueueJobState) => state.error,
 
 	// Selector para verificar si hay algún job
-	hasJobs: (state: QueueJobState) => state.core.items.length > 0,
+	hasJobs: (state: QueueJobState) => state.items.length > 0,
 };
 
 /**
@@ -106,21 +106,31 @@ export const filterSelectors = {
  */
 export const computedSelectors = {
 	// Selector para obtener job por ID
-	getJobById: (state: QueueJobState) => (id: string) => state.core.items.find((job) => job.id === id),
+	getJobById: (state: QueueJobState) => (id: string) => state.items.find((job: any) => job.id === id),
 
 	// Selector para obtener lista de jobs seleccionados
-	selectedJobs: (state: QueueJobState) => state.core.items.filter((job) => state.ui.selectedIds.includes(job.id)),
+	selectedJobs: (state: QueueJobState) => state.items.filter((job: any) => state.ui.selectedIds.includes(job.id)),
 
 	// Selector para verificar si un job está seleccionado por ID
 	isJobSelected: (state: QueueJobState) => (id: string) => state.ui.selectedIds.includes(id),
 
 	// Selector para estadísticas filtradas por estado
 	jobCountByStatus: (state: QueueJobState) => {
-		const stats = state.core.stats || {};
+		const stats = state.stats;
+		if (!stats) {
+			return {
+				total: state.items.length,
+				pending: 0,
+				processing: 0,
+				completed: 0,
+				failed: 0,
+				cancelled: 0,
+			};
+		}
 		return {
-			total: stats.total || state.core.items.length,
+			total: state.total,
 			pending: stats.pending || 0,
-			active: stats.active || 0,
+			processing: stats.processing || 0,
 			completed: stats.completed || 0,
 			failed: stats.failed || 0,
 			cancelled: stats.cancelled || 0,
@@ -128,10 +138,10 @@ export const computedSelectors = {
 	},
 
 	// Selector para trabajos filtrados por estado
-	jobsByStatus: (state: QueueJobState) => (status: string) => state.core.items.filter((job) => job.status === status),
+	jobsByStatus: (state: QueueJobState) => (status: string) => state.items.filter((job: any) => job.status === status),
 
 	// Selector para verificar si hay un error en cualquier parte del estado
-	hasError: (state: QueueJobState) => !!state.core.error,
+	hasError: (state: QueueJobState) => !!state.error,
 
 	// Selector para información de paginación
 	paginationInfo: (state: QueueJobState) => {
@@ -155,7 +165,27 @@ export const computedSelectors = {
  * Exportación de todos los selectores agrupados
  */
 export const queueJobSelectors = {
-	...coreSelectors,
+	// Selectores básicos
+	jobs: (state: QueueJobState) => state.items,
+
+	// Trabajo seleccionado
+	selectedJob: (state: QueueJobState) => state.selectedJob,
+
+	// ID del trabajo seleccionado
+	selectedJobId: (state: QueueJobState) => state.selectedJob?.id || null,
+
+	// Estadísticas
+	stats: (state: QueueJobState) => state.stats,
+
+	// Estados de carga
+	isLoading: (state: QueueJobState) => state.isLoading,
+
+	// Errores
+	error: (state: QueueJobState) => state.error,
+
+	// Verificar si hay trabajos
+	hasJobs: (state: QueueJobState) => state.items.length > 0,
+
 	...uiSelectors,
 	...filterSelectors,
 	...computedSelectors,

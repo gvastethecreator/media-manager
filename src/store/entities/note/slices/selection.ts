@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { NoteWithStats } from '@/types/entities/note/types';
 import type { NoteStore } from '../types';
 
 const selectionLogger = clientLogger.withContext('NoteStore:Selection');
@@ -11,7 +12,7 @@ export interface SelectionSlice {
 	isMultiSelectMode: boolean;
 
 	// Acciones - selección individual
-	selectNote: (id: string) => void;
+  selectNote: (note: NoteWithStats | null) => void;
 	unselectNote: () => void;
 
 	// Acciones - selección múltiple
@@ -36,10 +37,11 @@ export const createSelectionSlice: StateCreator<NoteStore, [], [], SelectionSlic
 	...initialSelectionState,
 
 	// Acciones - selección individual
-	selectNote: (id) => {
-		selectionLogger.info('🔍 Seleccionando nota', { id });
-		set({ selectedNoteId: id });
-	},
+	selectNote: (note) => {
+    const id = note?.id || null;
+    selectionLogger.info('🔍 Seleccionando nota', { id });
+    set({ selectedNote: note, selectedNoteId: id });
+  },
 
 	unselectNote: () => {
 		selectionLogger.info('🔍 Deseleccionando nota');

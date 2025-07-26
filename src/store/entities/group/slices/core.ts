@@ -5,7 +5,6 @@
  * @updated 2025-01-27
  */
 
-import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
 // Uso de cliente de API para grupos
 import {
@@ -15,99 +14,92 @@ import {
 	updateGroupInApi,
 } from '@/lib/api/client/group.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/lib/ui/toast';
+import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
 import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';
+
+export type GroupCoreSlice = GroupCoreState & GroupCoreActions;
+
+
 
 const logger = clientLogger.withContext('GroupCoreSlice');
 
-const initialState: GroupCoreState = {
-	groups: {},
+export const createGroupCoreSlice: StateCreator<
+	GroupStore,
+	[],
+	[],
+	GroupCoreSlice
+> = (set, get) => ({
+	// Estado inicial
+	groups: [],
 	isLoading: false,
 	error: null,
 	lastUpdated: null,
-};
-
-export const createGroupCoreSlice: StateCreator<
-	GroupStore,
-	[['zustand/immer', never]],
-	[],
-	GroupCoreState & GroupCoreActions
-> = (set, get) => ({
-	...initialState,
 
 	loadGroups: async () => {
-		if (get().isLoading) return;
-		set((state) => {
-			state.isLoading = true;
-			state.error = null;
-		});
-
+		set({ isLoading: true, error: null });
 		try {
 			const groups = await getGroupsFromApi();
-			set((state) => {
-				state.groups = groups.reduce(
-					(acc, group) => {
-						acc[group.id] = group;
-						return acc;
-					},
-					{} as Record<string, (typeof groups)[0]>
-				);
-				state.lastUpdated = Date.now();
-			});
+			set({ groups: groups || [], lastUpdated: Date.now(), isLoading: false });
 			logger.info(`✅ ${groups.length} grupos cargados.`);
 		} catch (error) {
-			const errorMsg = '❌ Error al cargar los grupos.';
-			logger.error(errorMsg, error);
-			set((state) => {
-				state.error = errorMsg;
-			});
-			toastService.error(errorMsg);
-		} finally {
-			set((state) => {
-				state.isLoading = false;
-			});
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			set({ error: errorMessage, isLoading: false });
+			logger.error('❌ Error al cargar grupos:', errorMessage);
 		}
 	},
 
 	createGroup: async (data) => {
 		try {
-			await createGroupInApi(data);
-			toastService.success(`Grupo "${data.name}" creado.`);
-			await get().loadGroups();
+			const newGroup = await createGroupInApi(data);
+			const currentGroups = get().groups;
+			set({
+				groups: [...currentGroups, newGroup],
+				lastUpdated: Date.now(),
+			});
+			logger.info('✅ Grupo creado:', newGroup.name);
 		} catch (error) {
-			const errorMsg = `❌ Error al crear el grupo "${data.name}".`;
-			logger.error(errorMsg, error);
-			toastService.error(errorMsg);
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			set({ error: errorMessage });
+			logger.error('❌ Error al crear grupo:', errorMessage);
+			throw error;
 		}
 	},
 
 	updateGroup: async (id, data) => {
 		try {
-			await updateGroupInApi(id, data);
-			toastService.success('Grupo actualizado.');
-			await get().loadGroups();
+			const updatedGroup = await updateGroupInApi(id, data);
+			const currentGroups = get().groups;
+			const groupIndex = currentGroups.findIndex(g => g.id === id);
+			if (groupIndex !== -1) {
+				const newGroups = [...currentGroups];
+				newGroups[groupIndex] = updatedGroup;
+				set({
+					groups: newGroups,
+					lastUpdated: Date.now(),
+				});
+			}
+			logger.info('✅ Grupo actualizado:', updatedGroup.name);
 		} catch (error) {
-			const errorMsg = '❌ Error al actualizar el grupo.';
-			logger.error(errorMsg, error);
-			toastService.error(errorMsg);
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			set({ error: errorMessage });
+			logger.error('❌ Error al actualizar grupo:', errorMessage);
+			throw error;
 		}
 	},
 
 	deleteGroup: async (id) => {
-		const groupName = get().groups[id]?.name ?? id;
-		set(
-			produce((draft) => {
-				delete draft.groups[id];
-			})
-		);
+		const currentGroups = get().groups;
+		const groupName = currentGroups.find(g => g.id === id)?.name ?? id;
+		set({ groups: currentGroups.filter(group => group.id !== id) });
 		try {
 			await deleteGroupFromApi(id);
-			toastService.success(`Grupo "${groupName}" eliminado.`);
+			set({ lastUpdated: Date.now() });
+			logger.info('✅ Grupo eliminado:', groupName);
 		} catch (error) {
-			const errorMsg = '❌ Error al eliminar el grupo.';
-			logger.error(errorMsg, { id, error });
-			toastService.error(errorMsg);
-			await get().loadGroups(); // Revertir si falla
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			set({ error: errorMessage });
+			logger.error('❌ Error al eliminar grupo:', errorMessage);
+			throw error;
 		}
 	},
 });

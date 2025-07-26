@@ -63,7 +63,7 @@ export const useTaskStore = create<TaskStore>()(
 					set({ isLoading: true, error: null });
 					taskLogger.info('🔄 Cargando tareas...');
 					// TODO: Implementar acción del servidor
-					const tasks = [];
+					const tasks: any[] = [];
 					set({ tasks, isLoading: false, lastUpdated: Date.now() });
 					taskLogger.info('✅ Tareas cargadas correctamente');
 				} catch (error) {

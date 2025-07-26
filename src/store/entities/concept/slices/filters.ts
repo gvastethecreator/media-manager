@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { ConceptSortOption } from '@/types/entities/concept/enums';
-import type { ConceptFilters } from '@/types/entities/concept/types';
+import { ConceptSortOption } from '@/types/entities/concept/enums';
+import type { ConceptFilters, ConceptWithStats } from '@/types/entities/concept';
 import type { ConceptStore } from '../types';
 
 const filtersLogger = clientLogger.withContext('ConceptStore:Filters');

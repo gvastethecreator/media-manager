@@ -5,7 +5,7 @@
  
  */
 
-import type { Album, CreateAlbumInput, UpdateAlbumInput } from '@/types/entities/album';
+import type { Album, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
 import { CreateAlbumSchema, UpdateAlbumSchema } from '@/types/entities/album';
 
 /**
@@ -14,8 +14,8 @@ import { CreateAlbumSchema, UpdateAlbumSchema } from '@/types/entities/album';
  * @returns Datos validados o error
  */
 export function validateCreateAlbumData(
-	data: CreateAlbumInput
-): { success: true; data: CreateAlbumInput } | { success: false; error: string } {
+	data: AlbumCreateInput
+): { success: true; data: AlbumCreateInput } | { success: false; error: string } {
 	try {
 		const result = CreateAlbumSchema.parse(data);
 		return { success: true, data: result };
@@ -34,8 +34,8 @@ export function validateCreateAlbumData(
  * @returns Datos validados o error
  */
 export function validateUpdateAlbumData(
-	data: UpdateAlbumInput
-): { success: true; data: UpdateAlbumInput } | { success: false; error: string } {
+	data: AlbumUpdateInput
+): { success: true; data: AlbumUpdateInput } | { success: false; error: string } {
 	try {
 		const result = UpdateAlbumSchema.parse(data);
 		return { success: true, data: result };

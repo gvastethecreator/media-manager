@@ -128,14 +128,14 @@ function calculateCompletionScore(data: NoteComplete, totalItems: number): numbe
 	let score = 0;
 
 	// Contenido base (40 puntos)
-	if (data.title.length > 0) score += 10;
-	if (data.content.length > 50) score += 20;
-	if (data.content.length > 200) score += 10;
+	if (data.title && data.title.length > 0) score += 10;
+	if (data.content && data.content.length > 50) score += 20;
+	if (data.content && data.content.length > 200) score += 10;
 
 	// Categorización (20 puntos)
 	if (data.category && data.category !== 'general') score += 10;
-	if (data.priority > 0) score += 5;
-	if (data.status !== 'draft') score += 5;
+	if (data.priority && data.priority > 0) score += 5;
+	if (data.status && data.status !== 'draft') score += 5;
 
 	// Metadatos (20 puntos)
 	if (data.featuredImage) score += 10;
@@ -153,7 +153,7 @@ function calculateCompletionScore(data: NoteComplete, totalItems: number): numbe
 /**
  * 📝 Genera excerpt automático del contenido
  */
-function generateExcerpt(content: string, maxLength = 150): string {
+function generateExcerpt(content: string | null, maxLength = 150): string {
 	if (!content) return '';
 
 	const cleaned = content.replace(/[#*_`]/g, '').trim();
@@ -188,7 +188,9 @@ function formatDate(date: Date): string {
 /**
  * 🏷️ Obtiene etiqueta legible de prioridad
  */
-function getPriorityLabel(priority: number): string {
+function getPriorityLabel(priority: number | null): string {
+	if (priority === null || priority === undefined) return 'Sin definir';
+	
 	switch (priority) {
 		case NotePriority.HIGHEST:
 			return 'Crítica';
@@ -208,7 +210,9 @@ function getPriorityLabel(priority: number): string {
 /**
  * 📊 Obtiene etiqueta legible de estado
  */
-function getStatusLabel(status: string): string {
+function getStatusLabel(status: string | null): string {
+	if (!status) return 'Sin estado';
+	
 	switch (status) {
 		case NoteStatus.ACTIVE:
 			return 'Activa';
@@ -228,7 +232,9 @@ function getStatusLabel(status: string): string {
 /**
  * 📂 Obtiene etiqueta legible de categoría
  */
-function getCategoryLabel(category: string): string {
+function getCategoryLabel(category: string | null): string {
+	if (!category) return 'Sin categoría';
+	
 	switch (category) {
 		case NoteCategory.GENERAL:
 			return 'General';
@@ -258,7 +264,7 @@ function getCategoryLabel(category: string): string {
 /**
  * 📊 Calcula número de palabras en el contenido
  */
-function calculateWordCount(content: string): number {
+function calculateWordCount(content: string | null): number {
 	if (!content) return 0;
 	return content
 		.trim()
