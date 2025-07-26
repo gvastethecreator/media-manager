@@ -40,15 +40,27 @@ export function useFilteredData<T extends FilterableData>(
 						case 'neq':
 							return value !== filter.value;
 						case 'gt':
-							return value > filter.value;
+							return filter.value !== null && value > filter.value;
 						case 'lt':
-							return value < filter.value;
+							return filter.value !== null && value < filter.value;
 						case 'contains':
-							return typeof value === 'string' && value.toLowerCase().includes(String(filter.value).toLowerCase());
+							return (
+								typeof value === 'string' &&
+								filter.value !== null &&
+								value.toLowerCase().includes(String(filter.value).toLowerCase())
+							);
 						case 'startsWith':
-							return typeof value === 'string' && value.toLowerCase().startsWith(String(filter.value).toLowerCase());
+							return (
+								typeof value === 'string' &&
+								filter.value !== null &&
+								value.toLowerCase().startsWith(String(filter.value).toLowerCase())
+							);
 						case 'endsWith':
-							return typeof value === 'string' && value.toLowerCase().endsWith(String(filter.value).toLowerCase());
+							return (
+								typeof value === 'string' &&
+								filter.value !== null &&
+								value.toLowerCase().endsWith(String(filter.value).toLowerCase())
+							);
 						default:
 							return true;
 					}

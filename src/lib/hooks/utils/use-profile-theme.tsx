@@ -7,7 +7,8 @@ import { getColorStyles, getContrastColor, getThemeClass } from '@/transformers/
 import { ThemeMode } from '@/types/entities/profile/types';
 
 export function useProfileTheme() {
-	const { profile, isDarkMode, applyTheme, isLoading } = useProfile();
+	const { profile, isDarkMode, isLoading } = useProfile();
+	const applyTheme = (profile as any)?.applyTheme || (() => {});
 	const profileColor = useProfileStore(selectProfileColor);
 
 	const styles = useMemo(() => {
@@ -15,8 +16,8 @@ export function useProfileTheme() {
 	}, [profileColor]);
 
 	const themeClass = useMemo(() => {
-		return getThemeClass(profile?.theme);
-	}, [profile?.theme]);
+		return getThemeClass((profile as any)?.theme);
+	}, [(profile as any)?.theme]);
 
 	const contrastTextColor = useMemo(() => {
 		return getContrastColor(profileColor);
@@ -30,9 +31,9 @@ export function useProfileTheme() {
 	const toggleTheme = () => {
 		if (!profile) return;
 
-		if (profile.theme === ThemeMode.DARK) {
+		if ((profile as any).theme === ThemeMode.DARK) {
 			setTheme(ThemeMode.LIGHT);
-		} else if (profile.theme === ThemeMode.LIGHT) {
+		} else if ((profile as any).theme === ThemeMode.LIGHT) {
 			setTheme(ThemeMode.SYSTEM);
 		} else {
 			setTheme(ThemeMode.DARK);
@@ -40,7 +41,7 @@ export function useProfileTheme() {
 	};
 
 	return {
-		theme: profile?.theme || ThemeMode.SYSTEM,
+		theme: (profile as any)?.theme || ThemeMode.SYSTEM,
 		themeClass,
 		isDarkMode,
 		profileColor,

@@ -4,6 +4,7 @@
  */
 
 import { useEffect } from 'react';
+import type { AppearanceSettings, NotificationsSettings, PrivacySettings, AdvancedSettings } from '@/types/settings';
 import {
 	selectActiveProfileId,
 	selectAdvanced,

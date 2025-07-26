@@ -13,6 +13,15 @@ import type { VideoStatistics } from '@/types/entities/video/base';
 import type { VideoComplete, VideoWithStats } from '@/types/entities/video/types';
 import { VideoQuality } from '@/types/entities/video/types';
 
+// Enum para calidad de video (definición local si no existe en types)
+enum VideoQualityLocal {
+	UNKNOWN = 'unknown',
+	LOW = 'low',
+	MEDIUM = 'medium',
+	HIGH = 'high',
+	ULTRA = 'ultra',
+}
+
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
 type DrizzleVideoWithCounts = {
 	id: string;
@@ -350,17 +359,17 @@ function formatResolution(width: number | null, height: number | null): string {
 /**
  * 🏆 Determina el nivel de calidad basado en resolución
  */
-function determineQualityLevel(width: number | null, height: number | null): VideoQuality {
-	if (!width || !height) return VideoQuality.UNKNOWN;
+function determineQualityLevel(width: number | null, height: number | null): VideoQualityLocal {
+	if (!width || !height) return VideoQualityLocal.UNKNOWN;
 
 	const pixels = width * height;
 
-	if (pixels >= 8294400) return VideoQuality.ULTRA; // 3840x2160 (4K)
-	if (pixels >= 2073600) return VideoQuality.HIGH; // 1920x1080 (2K/FHD)
-	if (pixels >= 921600) return VideoQuality.MEDIUM; // 1280x720 (HD)
-	if (pixels >= 307200) return VideoQuality.MEDIUM; // 640x480 (SD)
+	if (pixels >= 8294400) return VideoQualityLocal.ULTRA; // 3840x2160 (4K)
+	if (pixels >= 2073600) return VideoQualityLocal.HIGH; // 1920x1080 (2K/FHD)
+	if (pixels >= 921600) return VideoQualityLocal.MEDIUM; // 1280x720 (HD)
+	if (pixels >= 307200) return VideoQualityLocal.MEDIUM; // 640x480 (SD)
 
-	return VideoQuality.LOW;
+	return VideoQualityLocal.LOW;
 }
 
 /**
@@ -514,13 +523,13 @@ function formatDuration(seconds: number): string {
 /**
  * 🏷️ Obtiene etiqueta de calidad legible
  */
-function getQualityLabel(qualityLevel: VideoQuality, technicalGrade: string): string {
+function getQualityLabel(qualityLevel: VideoQualityLocal, technicalGrade: string): string {
 	const qualityNames = {
-		[VideoQuality.ULTRA]: '4K Ultra HD',
-		[VideoQuality.HIGH]: '2K Full HD',
-		[VideoQuality.MEDIUM]: 'HD',
-		[VideoQuality.LOW]: 'Baja',
-		[VideoQuality.UNKNOWN]: 'Desconocida',
+		[VideoQualityLocal.ULTRA]: '4K Ultra HD',
+		[VideoQualityLocal.HIGH]: '2K Full HD',
+		[VideoQualityLocal.MEDIUM]: 'HD',
+		[VideoQualityLocal.LOW]: 'SD',
+		[VideoQualityLocal.UNKNOWN]: 'Unknown',
 	};
 
 	return `${qualityNames[qualityLevel]} (${technicalGrade})`;

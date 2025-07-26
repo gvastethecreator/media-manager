@@ -1,10 +1,25 @@
 import type { FileOperationResult } from '@/lib/types';
 import type { FileInfo } from '@/types/file-entity-mapper';
 
-// TODO: Definir estos tipos correctamente si se usan en la API
-type DirectoryReadResult = any;
-type FileCopyMoveResult = any;
-type FileOperationOptions = any;
+// Tipos definidos para las operaciones de archivos
+interface DirectoryReadResult {
+	files: FileInfo[];
+	total: number;
+	path: string;
+}
+
+interface FileCopyMoveResult {
+	success: boolean;
+	sourcePath: string;
+	destPath: string;
+	message?: string;
+}
+
+interface FileOperationOptions {
+	overwrite?: boolean;
+	recursive?: boolean;
+	preserveTimestamps?: boolean;
+}
 
 import apiClient from '../client';
 

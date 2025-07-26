@@ -105,6 +105,10 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			try {
 				await logActivity.mutateAsync({
 					type: 'view',
+					entityType: 'file',
+					entityId: item.id,
+					action: 'view',
+					userId: 'anonymous', // TODO: obtener del contexto de usuario
 					description: `Vista de ${item.name}`,
 				});
 			} catch (error) {

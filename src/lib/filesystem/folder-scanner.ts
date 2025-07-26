@@ -280,7 +280,7 @@ export async function folderExists(folderPath: string): Promise<boolean> {
  * @param folderPath Ruta de la carpeta
  * @returns Información básica de la carpeta
  */
-export async function getFolderStats(folderPath: string): Promise<{
+export async function getFolderFileSystemStats(folderPath: string): Promise<{
 	exists: boolean;
 	isDirectory: boolean;
 	size?: number;

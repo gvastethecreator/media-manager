@@ -45,13 +45,13 @@ export function sortWorldItems(worldItems: WorldItemExtended[], sortBy: WorldIte
 		case 'name:desc':
 			return sorted.sort((a, b) => b.name.localeCompare(a.name));
 		case 'type:asc':
-			return sorted.sort((a, b) => a.type.localeCompare(b.type));
+			return sorted.sort((a, b) => (a.type || '').localeCompare(b.type || ''));
 		case 'type:desc':
-			return sorted.sort((a, b) => b.type.localeCompare(a.type));
+			return sorted.sort((a, b) => (b.type || '').localeCompare(a.type || ''));
 		case 'rarity:asc':
-			return sorted.sort((a, b) => getRarityWeight(a.rarity) - getRarityWeight(b.rarity));
+			return sorted.sort((a, b) => getRarityWeight(a.rarity || 'common') - getRarityWeight(b.rarity || 'common'));
 		case 'rarity:desc':
-			return sorted.sort((a, b) => getRarityWeight(b.rarity) - getRarityWeight(a.rarity));
+			return sorted.sort((a, b) => getRarityWeight(b.rarity || 'common') - getRarityWeight(a.rarity || 'common'));
 		case 'created:asc':
 			return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 		case 'created:desc':
@@ -102,9 +102,9 @@ export function filterWorldItemsBySearch(worldItems: WorldItemExtended[], search
 		(item) =>
 			item.name.toLowerCase().includes(query) ||
 			item.description?.toLowerCase().includes(query) ||
-			item.type.toLowerCase().includes(query) ||
+			(item.type?.toLowerCase().includes(query)) ||
 			item.category?.toLowerCase().includes(query) ||
-			item.rarity.toLowerCase().includes(query)
+			(item.rarity?.toLowerCase().includes(query))
 	);
 }
 
@@ -200,24 +200,36 @@ export function getRarityWeight(rarity: string): number {
 export function applyWorldItemFilters(worldItems: WorldItemExtended[], filters: WorldItemFilters): WorldItemExtended[] {
 	return worldItems.filter((item) => {
 		// Filtro por búsqueda
-		if (filters.searchTerm) {
-			const matchesSearch = filterWorldItemsBySearch([item], filters.searchTerm).length > 0;
-			if (!matchesSearch) return false;
+		if (filters.searchTerm || filters.query) {
+			const searchTerm = filters.searchTerm || filters.query;
+			if (searchTerm) {
+				const matchesSearch = filterWorldItemsBySearch([item], searchTerm).length > 0;
+				if (!matchesSearch) return false;
+			}
 		}
 
 		// Filtro por tipo
-		if (filters.type && filters.type !== item.type) {
-			return false;
+		if (filters.type) {
+			const typeFilter = Array.isArray(filters.type) ? filters.type : [filters.type];
+			if (!item.type || !typeFilter.includes(item.type)) {
+				return false;
+			}
 		}
 
 		// Filtro por categoría
-		if (filters.category && filters.category !== item.category) {
-			return false;
+		if (filters.category) {
+			const categoryFilter = Array.isArray(filters.category) ? filters.category : [filters.category];
+			if (!item.category || !categoryFilter.includes(item.category)) {
+				return false;
+			}
 		}
 
 		// Filtro por rareza
-		if (filters.rarity && filters.rarity !== item.rarity) {
-			return false;
+		if (filters.rarity) {
+			const rarityFilter = Array.isArray(filters.rarity) ? filters.rarity : [filters.rarity];
+			if (!item.rarity || !rarityFilter.includes(item.rarity)) {
+				return false;
+			}
 		}
 
 		// Filtro por favoritos

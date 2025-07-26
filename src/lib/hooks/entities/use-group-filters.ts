@@ -59,7 +59,7 @@ export function useGroupFilters({ groups }: UseGroupFiltersProps) {
 
 		// Filtrar favoritos
 		if (filters.onlyFavorites) {
-			matches = matches && group.isFavorite;
+			matches = matches && (group.isFavorite === true);
 		}
 
 		return matches;

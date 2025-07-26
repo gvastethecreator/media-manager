@@ -5,48 +5,51 @@
  *              tipos legacy para una migración progresiva.
  */
 
+import { WildcardWithStats } from './base';
+
 // --- 🏗️ Tipos Base y Estadísticas (Nuevo Patrón) ---
 // Tipos canónicos que deben usarse en toda la aplicación nueva.
 export type {
-	WildcardBase,
-	WildcardCreateInput,
-	WildcardPreview,
-	WildcardStatistics,
-	WildcardUpdateInput,
-	WildcardWithStats,
+  WildcardBase,
+  WildcardCreateInput,
+  WildcardPreview,
+  WildcardStatistics,
+  WildcardUpdateInput,
+  WildcardWithStats,
 } from './base';
 
-// --- 🛡️ Esquemas de Validación (Zod) ---
-// Esquemas para validación de datos en runtime.
+// --- 🎨 Enums y Constantes ---
 export {
-	CreateWildcardSchema,
-	UpdateWildcardSchema,
-	WildcardChildSchema,
-	WildcardFiltersSchema,
-	WildcardRelationsSchema,
-	WildcardSchema,
-	WildcardStatsSchema,
-} from './schema';
-
-// --- 💀 Tipos Legacy (Obsoletos) ---
-// @deprecated Estos tipos se mantienen por retrocompatibilidad y serán eliminados.
-//             No usar en código nuevo. Refactorizar para usar WildcardWithStats.
-// export type {
-// 	CreateWildcardData,
-// 	UpdateWildcardData,
-// 	WildcardBulkUpdateData,
-// 	WildcardChild,
-// 	WildcardComplete,
-// 	WildcardDeserialized,
-// 	WildcardRelated,
-// 	WildcardSearchFilters,
-// 	WildcardSearchOptions,
-// } from './types';
-
-// --- 🎨 Enums y Constantes (a Mover) ---
-// TODO: Mover a un archivo `enums.ts` dedicado.
-export {
-	WILDCARD_SORT_PROPERTY_MAP,
-	WildcardSortCriteria,
-	WildcardViewMode,
+  WILDCARD_SORT_PROPERTY_MAP,
+  WildcardSortCriteria,
+  WildcardViewMode,
 } from './types';
+
+// --- 🔄 Aliases for compatibility ---
+export type WildcardComplete = WildcardWithStats;
+
+// --- 🔍 Filter types ---
+export interface WildcardFilters {
+  search?: string;
+  searchQuery?: string; // Alias para compatibilidad
+  category?: string | string[];
+  categories?: string[]; // Plural para compatibilidad
+  type?: string | string[];
+  onlyFavorites?: boolean;
+  tags?: string[];
+  parentId?: string;
+  hasChildren?: boolean;
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+// --- 📊 Response types ---
+export interface WildcardResponse {
+  success: boolean;
+  data: WildcardWithStats[];
+  total: number;
+  page: number;
+  totalPages: number;
+}

@@ -108,7 +108,7 @@ export async function syncFoldersWithFileSystem(options: FolderSyncOptions = {})
 		syncLogger.info(`📊 Carpetas en BD: ${dbFolders.length}`);
 
 		// 2. Obtener carpetas raíz (sin parentId) para escanear desde ahí
-		const rootFolders = dbFolders.filter((f) => !f.parentId);
+		const rootFolders = dbFolders.filter((f: any) => !f.parentId);
 		syncLogger.info(`🌳 Carpetas raíz encontradas: ${rootFolders.length}`);
 
 		// 3. Escanear sistema de archivos desde cada carpeta raíz

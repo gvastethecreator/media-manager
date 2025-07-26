@@ -104,6 +104,7 @@ export interface EventData<T = unknown> {
 	worldItemId?: string;
 	imageId?: string;
 	data?: T;
+	timestamp?: number;
 }
 
 // Store para eventos en memoria (compartido con el endpoint)

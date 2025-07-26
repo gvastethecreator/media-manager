@@ -89,18 +89,32 @@ export function calculateConceptsStats(concepts: ConceptBase[]): {
 			if (concept.isFavorite) favorites++;
 
 			// Si hay recuento disponible
-			if ('_count' in concept) {
-				const count = concept._count;
+			if ('_count' in concept && concept._count) {
+				const count = concept._count as {
+					images?: number;
+					videos?: number;
+					prompts?: number;
+					notes?: number;
+					characters?: number;
+					places?: number;
+					worldItems?: number;
+					properties?: number;
+					wildcards?: number;
+					groups?: number;
+					albums?: number;
+					collections?: number;
+					tags?: number;
+				};
 
-				if (count?.images && count.images > 0) {
+				if (count.images && count.images > 0) {
 					withImages++;
 				}
 
 				if (
-					(count?.places && count.places > 0) ||
-					(count?.worldItems && count.worldItems > 0) ||
-					(count?.notes && count.notes > 0) ||
-					(count?.prompts && count.prompts > 0)
+					(count.places && count.places > 0) ||
+					(count.worldItems && count.worldItems > 0) ||
+					(count.notes && count.notes > 0) ||
+					(count.prompts && count.prompts > 0)
 				) {
 					withRelations++;
 				}
@@ -139,13 +153,6 @@ export function findRelatedConcepts(
 		// Si no hay otros conceptos para comparar
 		if (otherConcepts.length === 0) return [];
 
-		// Obtener las etiquetas del concepto de referencia
-		const conceptTagsArray = Array.isArray(concept.tags)
-			? concept.tags
-			: typeof concept.tags === 'string'
-				? deserializeTags(concept.tags as string)
-				: [];
-
 		const conceptCategory = concept.category || '';
 
 		// Calcular puntuación de relación para cada concepto
@@ -157,16 +164,10 @@ export function findRelatedConcepts(
 				score += 3;
 			}
 
-			// Obtener las etiquetas del concepto a comparar
-			const cTagsArray = Array.isArray(c.tags)
-				? c.tags
-				: typeof c.tags === 'string'
-					? deserializeTags(c.tags as string)
-					: [];
-
-			// Puntos por tags coincidentes
-			const commonTags = conceptTagsArray.filter((tag: string) => cTagsArray.includes(tag));
-			score += commonTags.length * 2;
+			// Puntos por tipo coincidente
+			if (c.type === concept.type && concept.type) {
+				score += 2;
+			}
 
 			return { concept: c, score };
 		});
@@ -189,16 +190,12 @@ export function findRelatedConcepts(
 
 		// Convertir a conceptos extendidos
 		return bestMatches.map((match) => {
-			const { tags, ...rest } = match.concept;
-			const parsedTags = Array.isArray(tags) ? tags : typeof tags === 'string' ? deserializeTags(tags as string) : [];
-
 			return {
-				...rest,
-				tags,
-				parsedTags,
-				previewContent: match.concept.content ? `${match.concept.content.substring(0, 100)}...` : undefined,
-				lastUpdated: match.concept.updatedAt,
-			};
+					...match.concept,
+					totalAssociations: ('stats' in match.concept && (match.concept as any).stats) ? (match.concept as any).stats.totalAssociations : 0,
+					lastUsed: match.concept.updatedAt,
+					usageCount: ('_count' in match.concept && match.concept._count) ? Object.values(match.concept._count as Record<string, number>).reduce((sum: number, count: number) => sum + count, 0) : 0,
+				};
 		});
 	} catch (error) {
 		helpersLogger.error('❌ Error al calcular conceptos relacionados:', error);

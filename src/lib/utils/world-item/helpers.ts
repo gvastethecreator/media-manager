@@ -140,11 +140,11 @@ export function compareWorldItems(a: WorldItemExtended, b: WorldItemExtended, cr
 
 	// Ordenar por tipo
 	if (criteria === 'type_asc') {
-		return a.type.localeCompare(b.type);
+		return (a.type || '').localeCompare(b.type || '');
 	}
 
 	if (criteria === 'type_desc') {
-		return b.type.localeCompare(a.type);
+		return (b.type || '').localeCompare(a.type || '');
 	}
 
 	// Ordenar por rareza (mapeo especial para asegurar orden correcto)

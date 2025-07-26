@@ -79,3 +79,59 @@ export interface PlaceSearchOptions {
 
 // Alias para compatibilidad
 export type PlaceComplete = PlaceWithStats;
+
+export interface PlaceFilters {
+	search?: string;
+	category?: PlaceCategory[];
+	type?: PlaceType[];
+	isFavorite?: boolean;
+	hasImages?: boolean;
+	hasVideos?: boolean;
+	dateRange?: {
+		start?: Date;
+		end?: Date;
+	};
+	populationRange?: {
+		min?: number;
+		max?: number;
+	};
+}
+
+/**
+ * Función para extender un lugar con información adicional
+ */
+export function extendPlace(place: PlaceBase): PlaceWithStats {
+	return {
+		...place,
+		entityType: 'place' as const,
+		stats: {
+			totalImages: place.totalImages || 0,
+			totalVideos: place.totalVideos || 0,
+			totalAlbums: 0,
+			totalCollections: 0,
+			totalTags: 0,
+			totalCharacters: 0,
+			totalConcepts: 0,
+			totalPrompts: 0,
+			totalNotes: 0,
+			totalWildcards: 0,
+			totalProperties: 0,
+			totalGroups: 0,
+			totalRelations: 0,
+			totalSize: 0,
+			averageSize: 0,
+			averageRelations: 0,
+			popularityScore: 0,
+			completenessScore: 0,
+			usageCount: 0,
+			lastUsed: null
+		}
+	};
+}
+
+/**
+ * Función para extender múltiples lugares
+ */
+export function extendPlaces(places: PlaceBase[]): PlaceWithStats[] {
+	return places.map(extendPlace);
+}

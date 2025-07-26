@@ -84,10 +84,12 @@ export default function MixedView({ className }: MixedViewProps) {
 		const items: (MixedItem & { itemType: FileType })[] = [];
 
 		// Agregar imágenes
-		Object.values(images || {}).forEach((image) => {
-			const imageWithStats = image as ImageWithStats;
-			items.push({ ...imageWithStats, itemType: 'images' });
-		});
+		if (images && typeof images === 'object') {
+			Object.values(images).forEach((image) => {
+				const imageWithStats = image as ImageWithStats;
+				items.push({ ...imageWithStats, itemType: 'images' });
+			});
+		}
 
 		// Agregar videos
 		if (Array.isArray(videos)) {

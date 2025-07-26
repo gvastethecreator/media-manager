@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { AlbumBase } from '@/types/entities/album';
-import { AlbumPrivacyLevel, AlbumType } from '../../types/entities/album/enums';
+import { AlbumPrivacyLevel, AlbumType } from '@/types/entities/album/enums';
 
 /**
  * Determina si un tipo de álbum es válido

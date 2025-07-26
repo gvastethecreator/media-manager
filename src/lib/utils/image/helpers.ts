@@ -3,7 +3,7 @@
  * @module utils/image/helpers
  */
 
-import type { Image, ImageFormat, ImageMetadata } from '../../types/entities/image';
+import type { Image, ImageFormat, ImageMetadata } from '@/types/entities/image';
 import { isValidImageFormat } from './validators';
 
 // formatImageSize se ha movido a @/lib/utils/format.utils.ts para evitar duplicación

@@ -47,11 +47,11 @@ export const characterFilterSchema = z.object({
  * Esquema de validación para relaciones entre personajes
  */
 export const characterRelationshipSchema = z.object({
-	characterId: z.string().uuid(),
-	name: z.string().min(1),
-	type: z.nativeEnum(CharacterRelationshipType),
+	targetId: z.string().uuid(),
+	targetName: z.string().min(1),
+	type: z.string(),
 	strength: z.number().int().min(0).max(100),
-	notes: z.string().optional(),
+	description: z.string().optional(),
 });
 
 /**

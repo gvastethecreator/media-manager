@@ -92,12 +92,12 @@ export function useThumbnailEvents() {
 						setProcessStatus(data as ProcessStatus);
 					} else if (data.type === 'stats') {
 						const stats = {
-							...data,
-							errors: data.errors?.map((error: ThumbnailError) => ({
-								...error,
-								timestamp: error.timestamp.toString(),
-							})),
-						};
+						...data,
+						errors: data.errors?.map((error: ThumbnailError) => ({
+							...error,
+							timestamp: (error as any).timestamp || new Date().toISOString(),
+						})),
+					};
 						setStats(stats);
 					} else if (data.type === 'complete') {
 						setProcessing(false);

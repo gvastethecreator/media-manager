@@ -10,6 +10,9 @@ import type { ConceptBase } from './base';
 // Re-export tipos base desde base.ts para evitar duplicación
 export type { ConceptBase, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
 
+// Re-export enums desde enums.ts para evitar duplicación
+export { ConceptSortOption, ConceptViewMode } from './enums';
+
 /**
  * Tipo extendido de Concept con campos adicionales
  */
@@ -90,23 +93,7 @@ export interface ConceptResults {
 		categoriesStats: Record<string, number>;
 	};
 }
-export enum ConceptSortOption {
-	NAME_ASC = 'name_asc',
-	NAME_DESC = 'name_desc',
-	CREATED_AT_ASC = 'created_at_asc',
-	CREATED_AT_DESC = 'created_at_desc',
-	UPDATED_AT_ASC = 'updated_at_asc',
-	UPDATED_AT_DESC = 'updated_at_desc',
-}
 
-/**
- * Modos de vista para conceptos
- */
-export enum ConceptViewMode {
-	GRID = 'grid',
-	LIST = 'list',
-	CARDS = 'cards',
-}
 
 /**
  * Esquema Zod para validación de Concept

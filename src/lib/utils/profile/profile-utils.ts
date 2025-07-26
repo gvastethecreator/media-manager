@@ -1,7 +1,8 @@
 import { asc, count, desc, eq, like, or } from 'drizzle-orm';
+import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { db } from '@/lib/drizzle';
 import { profiles } from '@/lib/drizzle/schema/index';
-import { type ProfileTransformed, transformProfiles } from '@/transformers/profile/profile-transformers';
+import { transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
 	Language,
 	type PaginatedProfiles,
@@ -16,14 +17,13 @@ type DrizzleProfile = {
 	id: string;
 	name: string;
 	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	theme: string;
-	language: string;
+	emoji: string;
+	color: string;
 	isActive: boolean;
-	preferences: string | null;
 	createdAt: Date;
-	updatedAt: Date;
+	updatedAt: Date | null;
+	settingsId: string | null;
+	imageId: string | null;
 };
 
 /**
@@ -43,15 +43,8 @@ export function buildProfileFilters(filters: ProfileFilters = {}) {
 		conditions.push(eq(profiles.isActive, filters.isActive));
 	}
 
-	// Filtro por tema
-	if (filters.theme) {
-		conditions.push(eq(profiles.theme, filters.theme));
-	}
-
-	// Filtro por idioma
-	if (filters.language) {
-		conditions.push(eq(profiles.language, filters.language));
-	}
+	// Nota: Los filtros por tema e idioma requieren join con la tabla settings
+	// TODO: Implementar filtros por tema e idioma con join a settings
 
 	return conditions;
 }
@@ -83,10 +76,13 @@ export async function getPaginatedProfiles(
 	const skip = (page - 1) * limit;
 
 	// Construir ordenación
+	const validSortFields = ['name', 'createdAt', 'updatedAt'] as const;
+	const validSortBy = validSortFields.includes(sortBy as any) ? sortBy as keyof typeof profiles : 'name';
+
 	const orderBy =
 		sortDirection === 'asc'
-			? asc(profiles[sortBy as keyof typeof profiles])
-			: desc(profiles[sortBy as keyof typeof profiles]);
+			? asc(profiles[validSortBy] as any)
+			: desc(profiles[validSortBy] as any);
 
 	// Consultar registros
 	const profilesData = await db
@@ -133,7 +129,7 @@ export async function setActiveProfile(id: string): Promise<boolean> {
 		}
 
 		// Transacción: desactivar todos los perfiles y activar solo el solicitado
-		await db.transaction(async (tx) => {
+		await db.transaction(async (tx: LibSQLDatabase) => {
 			await tx.update(profiles).set({ isActive: false }).where(eq(profiles.isActive, true));
 
 			await tx.update(profiles).set({ isActive: true }).where(eq(profiles.id, id));
@@ -181,16 +177,14 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 	const [newProfile] = await db
 		.insert(profiles)
 		.values({
+			id: `profile-${Date.now()}`,
 			name: 'Perfil por defecto',
 			emoji: '👤',
 			color: '#3b82f6',
-			theme: ThemeMode.SYSTEM,
-			language: Language.SPANISH,
 			isActive: true,
 			description: null,
-			preferences: null,
-			createdAt: new Date(),
-			updatedAt: new Date(),
+			settingsId: null,
+			imageId: null,
 		})
 		.returning();
 

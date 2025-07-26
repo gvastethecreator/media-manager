@@ -102,7 +102,7 @@ export function useFolder(options: { autoFilter?: boolean; loadOnMount?: boolean
 		setSearchTerm,
 		setSortBy,
 		setSortDirection,
-		toggleFavorites,
+		toggleFavorites: setShowOnlyFavorites,
 		resetFilters,
 
 		// Acciones de UI
