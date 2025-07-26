@@ -10,7 +10,7 @@ import charactersRouter from './routes/characters';
 import collectionsRouter from './routes/collections';
 import conceptsRouter from './routes/concepts';
 import debugRouter from './routes/debug.js';
-import { documentsRouter } from './routes/documents.js';
+import documentsRouter from './routes/documents.js';
 import downloadRouter from './routes/download.js';
 import eventsRouter from './routes/events';
 import favoritesRouter from './routes/favorites';

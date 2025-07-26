@@ -13,7 +13,7 @@ import { db } from '@/lib/drizzle';
 import { documents } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit } from '@/lib/server/events.server';
+import { emit, type EventType } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
@@ -87,7 +87,7 @@ export async function getDocuments(): Promise<DocumentWithStats[]> {
 			.orderBy(asc(documents.name));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedDocuments = drizzleDocuments.map((rawDocument) => ({
+		const transformedDocuments = drizzleDocuments.map((rawDocument: typeof documents.$inferSelect) => ({
 			...rawDocument,
 			isFavorite: Boolean(rawDocument.isFavorite),
 		}));
@@ -230,7 +230,7 @@ export async function updateDocument(id: string, data: DocumentUpdateInput): Pro
 		// Verificar que el documento existe
 		const exists = await documentExists(id);
 		if (!exists) {
-			throw createDocumentError('Documento no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+			throw createDocumentError('Documento no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// **MIGRACIÓN A DRIZZLE**
@@ -294,7 +294,7 @@ export async function deleteDocument(id: string): Promise<void> {
 		// Verificar que el documento existe
 		const exists = await documentExists(id);
 		if (!exists) {
-			throw createDocumentError('Documento no encontrado', EntityErrorCode.ENTITY_NOT_FOUND);
+			throw createDocumentError('Documento no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// **MIGRACIÓN A DRIZZLE**

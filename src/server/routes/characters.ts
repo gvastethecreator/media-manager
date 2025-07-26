@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
+import type { ExpressHandler } from '@/lib/express-types';
 import { db } from '@/lib/drizzle';
 import { characters } from '@/lib/drizzle/schema/index';
 
@@ -18,10 +19,10 @@ const CharacterFiltersSchema = z.object({
 });
 
 // GET /api/characters - Listar personajes
-router.get('/', async (req, res) => {
+const getCharactersHandler: ExpressHandler = async (req, res) => {
 	const parse = CharacterFiltersSchema.safeParse(req.query);
 	if (!parse.success) {
-		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });; return;
 	}
 
 	const { search, limit, offset, sortBy, sortOrder, category, isFavorite } = parse.data;
@@ -76,10 +77,12 @@ router.get('/', async (req, res) => {
 		console.error('🚨 [ERROR] Error en /api/characters:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+router.get('/', (req, res) => getCharactersHandler(req, res));
 
 // GET /api/characters/:id - Obtener personaje específico
-router.get('/:id', async (req, res) => {
+const getCharacterByIdHandler: ExpressHandler = async (req, res) => {
 	try {
 		const { id } = req.params;
 
@@ -88,7 +91,7 @@ router.get('/:id', async (req, res) => {
 		});
 
 		if (!character) {
-			return res.status(404).json({ error: 'Personaje no encontrado' });
+			res.status(404).json({ error: 'Personaje no encontrado' });; return;
 		}
 
 		res.json(character);
@@ -96,6 +99,8 @@ router.get('/:id', async (req, res) => {
 		console.error('Error getting character:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+router.get('/:id', (req, res) => getCharacterByIdHandler(req, res));
 
 export default router;

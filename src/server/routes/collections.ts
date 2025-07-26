@@ -19,7 +19,7 @@ const CollectionFiltersSchema = z.object({
 router.get('/', async (req, res) => {
 	const parse = CollectionFiltersSchema.safeParse(req.query);
 	if (!parse.success) {
-		return res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });; return;
 	}
 
 	const { search, limit, offset, sortBy, sortOrder } = parse.data;
@@ -77,7 +77,7 @@ router.get('/:id', async (req, res) => {
 		});
 
 		if (!collection) {
-			return res.status(404).json({ error: 'Colección no encontrada' });
+			res.status(404).json({ error: 'Colección no encontrada' });; return;
 		}
 
 		res.json(collection);

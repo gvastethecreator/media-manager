@@ -2,10 +2,10 @@ import express from 'express';
 import { z } from 'zod';
 import type { ExpressHandler } from '@/lib/express-types';
 import type { ActivityFilters } from '@/types/entities/activity/types';
-import { ActivityService } from '../../services/activity/activity.service';
+import { getActivityService } from '../../services/activity/activity.service';
 
 const router = express.Router();
-const activityService = new ActivityService();
+const activityService = getActivityService();
 
 // Schema para validación
 const createActivitySchema = z.object({
@@ -23,10 +23,11 @@ const createActivitySchema = z.object({
 const createActivity: ExpressHandler = async (req, res) => {
 	const validatedResult = createActivitySchema.safeParse(req.body);
 	if (!validatedResult.success) {
-		return res.status(400).json({
+		res.status(400).json({
 			error: 'Datos de entrada inválidos',
 			details: validatedResult.error.errors,
 		});
+		return;
 	}
 
 	const validatedData = validatedResult.data;
@@ -135,7 +136,8 @@ const getActivityById: ExpressHandler = async (req, res) => {
 		const activity = await activityService.findById(id);
 
 		if (!activity) {
-			return res.status(404).json({ error: 'Actividad no encontrada' });
+			res.status(404).json({ error: 'Actividad no encontrada' });
+			return;
 		}
 
 		res.json({ data: activity });
@@ -155,7 +157,8 @@ const deleteActivity: ExpressHandler = async (req, res) => {
 		const success = await activityService.delete(id);
 
 		if (!success) {
-			return res.status(404).json({ error: 'Actividad no encontrada' });
+			res.status(404).json({ error: 'Actividad no encontrada' });
+			return;
 		}
 
 		res.json({ message: 'Actividad eliminada exitosamente' });

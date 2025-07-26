@@ -30,6 +30,7 @@ export class StatsError extends Error {
 // Códigos de error genéricos para entidades
 export enum EntityErrorCode {
 	NOT_FOUND = 'NOT_FOUND',
+	ENTITY_NOT_FOUND = 'ENTITY_NOT_FOUND',
 	VALIDATION_ERROR = 'VALIDATION_ERROR',
 	OPERATION_FAILED = 'OPERATION_FAILED',
 }

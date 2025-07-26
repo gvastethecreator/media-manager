@@ -86,7 +86,7 @@ router.get('/:id/card-data', async (req, res) => {
 		const wildcard = await getWildcard(id);
 
 		if (!wildcard) {
-			return res.status(404).json({ error: 'Wildcard no encontrado' });
+			res.status(404).json({ error: 'Wildcard no encontrado' });; return;
 		}
 
 		// TODO: Implementar obtención de imágenes recientes cuando esté disponible
@@ -112,7 +112,7 @@ router.get('/:id', async (req, res) => {
 		const wildcard = await getWildcard(id);
 
 		if (!wildcard) {
-			return res.status(404).json({ error: 'Wildcard no encontrado' });
+			res.status(404).json({ error: 'Wildcard no encontrado' });; return;
 		}
 
 		res.json(wildcard);
@@ -141,7 +141,7 @@ router.post('/', async (req, res) => {
 		const { name, content, description, category, tags } = req.body;
 
 		if (!name || !content) {
-			return res.status(400).json({ error: 'El nombre y contenido son requeridos' });
+			res.status(400).json({ error: 'El nombre y contenido son requeridos' });; return;
 		}
 
 		const wildcard = await getWildcard(id).then((wildcard) => {
@@ -152,7 +152,7 @@ router.post('/', async (req, res) => {
 		});
 
 		if (!wildcard) {
-			return res.status(500).json({ error: 'Error al obtener el wildcard' });
+			res.status(500).json({ error: 'Error al obtener el wildcard' });; return;
 		}
 
 		const updatedWildcard = await getWildcard(wildcard.id).then((wildcard) => {
@@ -170,7 +170,7 @@ router.post('/', async (req, res) => {
 		});
 
 		if (!updatedWildcard) {
-			return res.status(500).json({ error: 'Error al actualizar el wildcard' });
+			res.status(500).json({ error: 'Error al actualizar el wildcard' });; return;
 		}
 
 		res.status(200).json(toWildcardWithStats(updatedWildcard));
@@ -189,7 +189,7 @@ router.put('/:id', async (req, res) => {
 		const wildcard = await getWildcard(id);
 
 		if (!wildcard) {
-			return res.status(404).json({ error: 'Wildcard no encontrado' });
+			res.status(404).json({ error: 'Wildcard no encontrado' });; return;
 		}
 
 		const updatedWildcard = {
@@ -209,7 +209,7 @@ router.put('/:id', async (req, res) => {
 		});
 
 		if (!result) {
-			return res.status(500).json({ error: 'Wildcard ya existe' });
+			res.status(500).json({ error: 'Wildcard ya existe' });; return;
 		}
 
 		res.status(200).json(toWildcardWithStats(result));
@@ -227,7 +227,7 @@ router.delete('/:id', async (req, res) => {
 		const deleted = await getWildcard(id);
 
 		if (!deleted) {
-			return res.status(404).json({ error: 'Wildcard no encontrado' });
+			res.status(404).json({ error: 'Wildcard no encontrado' });; return;
 		}
 
 		res.status(204).send();

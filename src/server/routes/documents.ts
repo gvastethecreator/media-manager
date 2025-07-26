@@ -56,7 +56,7 @@ router.get('/:id', async (req, res) => {
 		const { id } = req.params;
 		const document = await getDocumentById(id);
 		if (!document) {
-			return res.status(404).json({ error: 'Documento no encontrado' });
+			res.status(404).json({ error: 'Documento no encontrado' });; return;
 		}
 		res.json(document);
 	} catch (error) {
@@ -102,4 +102,4 @@ router.delete('/:id', async (req, res) => {
 	}
 });
 
-export { router as documentsRouter };
+export default router;

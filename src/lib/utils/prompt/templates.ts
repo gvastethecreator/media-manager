@@ -207,15 +207,28 @@ export function createPromptFromTemplate(templateId: string, variables?: Record<
 		// Crear nuevo prompt
 		const newPrompt: PromptBase = {
 			id: `prompt_${Date.now()}`,
-			title: template.name,
-			model: template.model,
+			name: template.name,
+			description: template.description,
 			content,
 			category: template.category,
-			parameters: varsToUse,
+			parameters: JSON.stringify(varsToUse),
 			tags: template.tags,
 			isFavorite: false,
+			isPublic: false,
+			totalImages: 0,
+			totalVideos: 0,
 			emoji: '📝',
 			color: '#3b82f6',
+			type: template.templateType,
+			style: null,
+			mood: null,
+			lighting: null,
+			composition: null,
+			technique: null,
+			inspiration: null,
+			notes: null,
+			featuredImage: null,
+			parentId: null,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
@@ -254,8 +267,8 @@ export function convertPromptToTemplate(
 	templateName?: string
 ): PromptTemplate {
 	try {
-		// Extraer variables del contenido
-		const variables = extractVariablesFromContent(prompt.content);
+		// Extraer variables del contenido (con null safety)
+		const variables = extractVariablesFromContent(prompt.content || '');
 
 		// Crear parámetros básicos
 		const parameters: Record<string, any> = {};
@@ -277,11 +290,11 @@ export function convertPromptToTemplate(
 
 		return {
 			id: `template_${Date.now()}`,
-			name: templateName || prompt.title,
-			description: `Plantilla basada en el prompt: ${prompt.title}`,
-			category: prompt.category as PromptCategory,
-			model: prompt.model as PromptModel,
-			content: prompt.content,
+			name: templateName || prompt.name || 'Plantilla sin nombre',
+			description: `Plantilla basada en el prompt: ${prompt.name || 'Sin título'}`,
+			category: (prompt.category as PromptCategory) || PromptCategory.TEXT,
+			model: PromptModel.GPT_3_5,
+			content: prompt.content || '',
 			templateType,
 			parameters,
 			tags,

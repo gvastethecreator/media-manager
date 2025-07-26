@@ -137,7 +137,7 @@ export const getPromptsByIdsService = async (ids: string[]): Promise<PromptWithS
 		const promptsResult = await db.select().from(prompts).where(inArray(prompts.id, ids));
 
 		// Transformar cada prompt usando el transformer
-		const promptsWithStats = promptsResult.map((prompt) => {
+		const promptsWithStats = promptsResult.map((prompt: typeof promptsResult[0]) => {
 			// Agregar _count vacío para el transformer
 			const promptWithCounts = {
 				...prompt,
@@ -245,7 +245,7 @@ export const searchPromptsService = async (
 		]);
 
 		// Transformar cada prompt usando el transformer
-		const promptsWithStats = promptsResult.map((prompt) => {
+		const promptsWithStats = promptsResult.map((prompt: typeof promptsResult[0]) => {
 			// Agregar _count vacío para el transformer
 			const promptWithCounts = {
 				...prompt,

@@ -53,7 +53,7 @@ export async function getWorkflows(): Promise<WorkflowWithStats[]> {
 			.orderBy(asc(workflows.name));
 
 		// Crear estadísticas básicas para cada workflow
-		return drizzleWorkflows.map((workflow) => {
+		return drizzleWorkflows.map((workflow: typeof drizzleWorkflows[0]) => {
 			const configLength = workflow.config ? workflow.config.length : 0;
 			const stepsLength = workflow.steps ? workflow.steps.length : 0;
 			const contentLength = configLength + stepsLength;
