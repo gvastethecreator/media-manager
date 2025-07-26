@@ -100,10 +100,10 @@ export function truncatePromptContent(content: string, maxLength = 150): string 
 export function generatePromptPreview(prompt: PromptBase | PromptExtended): string {
 	try {
 		// Extraer variables del contenido
-		const variables = extractVariablesFromContent(prompt.content);
+		const variables = extractVariablesFromContent(prompt.content || '');
 
 		// Crear vista previa
-		let preview = truncatePromptContent(prompt.content);
+		let preview = truncatePromptContent(prompt.content || '');
 
 		// Añadir información sobre variables
 		if (variables.length > 0) {
@@ -113,7 +113,7 @@ export function generatePromptPreview(prompt: PromptBase | PromptExtended): stri
 		return preview;
 	} catch (error) {
 		formattersLogger.error('❌ Error al generar vista previa de prompt:', error);
-		return truncatePromptContent(prompt.content);
+		return truncatePromptContent(prompt.content || '');
 	}
 }
 

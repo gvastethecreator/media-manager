@@ -16,6 +16,7 @@ import { useCreatePrompt, usePrompts } from '@/lib/api/prompts';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
+import type { PromptWithStats } from '@/types/entities/prompt/base';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('PromptsView');
@@ -48,7 +49,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 	const handlePromptSelect = useCallback(
 		(promptId: string) => {
 			viewLogger.info('🤖 Seleccionando prompt', { promptId });
-			const prompt = prompts.find((p) => p.id === promptId);
+			const prompt = prompts.find((p) => p.id === promptId) as PromptWithStats | undefined;
 			if (prompt) {
 				selectPrompt(prompt);
 			}

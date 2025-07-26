@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeParameters, deserializeTags } from '@/transformers/prompt';
-import type { PromptComplete, PromptParameter } from '@/types/entities/prompt/types';
+import type { PromptComplete, PromptParameter, PromptExtended } from '@/types/entities/prompt/types';
 
 const helpersLogger = serverLogger.withContext('PromptHelpers');
 
@@ -93,15 +93,7 @@ export function replaceVariablesInContent(content: string, variables: Record<str
 	}
 }
 
-/**
- * Tipo extendido de PromptComplete para la UI con campos adicionales
- */
-export interface PromptExtended extends PromptComplete {
-	parsedTags: string[];
-	parsedParameters: PromptParameter[];
-	previewContent?: string;
-	lastUpdated?: Date;
-}
+// PromptExtended is now imported from types
 
 /**
  * Convierte un prompt básico a un prompt extendido con propiedades serializadas

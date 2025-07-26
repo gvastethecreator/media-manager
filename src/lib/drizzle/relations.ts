@@ -367,10 +367,8 @@ export const imageStatsRelations = relations(schema.imageStats, ({ one }) => ({
  * 📋 Relaciones de Activity
  */
 export const activityRelations = relations(schema.activities, ({ one }) => ({
-	image: one(schema.images, {
-		fields: [schema.activities.imageId],
-		references: [schema.images.id],
-	}),
+	// Las actividades usan relaciones polimórficas basadas en entityType y entityId
+	// La relación con imágenes se resuelve en el código de aplicación
 }));
 
 /**

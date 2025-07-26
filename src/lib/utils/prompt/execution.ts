@@ -1,6 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PromptModel } from '@/types/entities/prompt/enums';
-import type { PromptBase, PromptExecutionResult } from '@/types/entities/prompt/types';
+import type { PromptBase } from '@/types/entities/prompt/types';
+import type { PromptExecutionResult } from '@/types/entities/prompt/extended';
 import { replaceVariablesInContent } from './helpers';
 import { estimateTokenCount } from './usage';
 
@@ -74,14 +75,14 @@ function preparePromptContent(prompt: PromptBase, variables?: Record<string, any
 	try {
 		// Si no hay variables, devolver el contenido original
 		if (!variables || Object.keys(variables).length === 0) {
-			return prompt.content;
+			return prompt.content || '';
 		}
 
 		// Reemplazar variables en el contenido
-		return replaceVariablesInContent(prompt.content, variables);
+		return replaceVariablesInContent(prompt.content || '', variables);
 	} catch (error) {
 		executionLogger.error('❌ Error al preparar contenido del prompt:', error);
-		return prompt.content;
+		return prompt.content || '';
 	}
 }
 
@@ -132,20 +133,18 @@ export async function executePrompt(
 	try {
 		// Configuración por defecto
 		const defaultConfig: PromptExecutionConfig = {
-			model: prompt.model,
+			model: prompt.type || 'default',
 			temperature: 0.7,
 			maxTokens: 1000,
 			saveToHistory: true,
 			timeoutMs: 30000,
-		};
-
-		// Combinar configuración por defecto con la proporcionada
+		};		// Combinar configuración por defecto con la proporcionada
 		const finalConfig = { ...defaultConfig, ...config };
 
 		// Preparar contenido reemplazando variables
 		const preparedContent = preparePromptContent(prompt, finalConfig.variables);
 
-		executionLogger.info(`🚀 Ejecutando prompt: ${prompt.title}`);
+		executionLogger.info(`🚀 Ejecutando prompt: ${prompt.name}`);
 
 		// Por ahora, simulamos la ejecución para desarrollo
 		// En producción, aquí se conectaría con la API del modelo específico
@@ -187,7 +186,7 @@ export async function executePrompt(
 		return {
 			promptId: prompt.id,
 			content: `Error: ${error instanceof Error ? error.message : 'Error desconocido'}`,
-			model: (config.model as string) || prompt.model,
+			model: (config.model as string) || prompt.type || 'default',
 			executionTime,
 			timestamp: new Date(),
 		};

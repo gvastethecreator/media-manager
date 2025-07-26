@@ -37,11 +37,7 @@ export function sortCollections(
 		case CollectionSortOption.ITEMS_DESC:
 			return clonedCollections.sort((a, b) => (b.stats?.totalItems || 0) - (a.stats?.totalItems || 0));
 
-		case CollectionSortOption.PRICE_ASC:
-			return clonedCollections.sort((a, b) => (a.price || 0) - (b.price || 0));
 
-		case CollectionSortOption.PRICE_DESC:
-			return clonedCollections.sort((a, b) => (b.price || 0) - (a.price || 0));
 
 		default:
 			return clonedCollections;
@@ -60,29 +56,14 @@ export function filterCollections(collections: CollectionWithStats[], filters: a
 	}
 
 	return collections.filter((collection) => {
-		// Filtrar por categoría
-		if (filters.category && collection.category !== filters.category) {
-			return false;
-		}
 
-		// Filtrar por plataforma
-		if (filters.platform && collection.platform !== filters.platform) {
-			return false;
-		}
 
 		// Filtrar por favoritos
 		if (filters.isFavorite !== undefined && collection.isFavorite !== filters.isFavorite) {
 			return false;
 		}
 
-		// Filtrar por rango de precios
-		if (filters.minPrice !== undefined && (collection.price || 0) < filters.minPrice) {
-			return false;
-		}
 
-		if (filters.maxPrice !== undefined && (collection.price || 0) > filters.maxPrice) {
-			return false;
-		}
 
 		// Filtrar por número de imágenes
 		if (filters.minImages !== undefined) {
@@ -144,7 +125,7 @@ export function calculateTotalValue(collections: CollectionWithStats[]): number 
 	}
 
 	return collections.reduce((total, collection) => {
-		return total + (collection.price || 0);
+		return total + (collection.stats?.totalValue || 0);
 	}, 0);
 }
 

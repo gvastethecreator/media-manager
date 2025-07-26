@@ -45,7 +45,7 @@ export function NoteContentView() {
 		loadNoteImages();
 	}, [loadNoteImages]);
 
-	const toggleItemSelection = useCallback((item: EntityWithStats) => {
+	const toggleItemSelection = useCallback((item: EntityWithStats): void => {
 		// Implementar la lógica de selección de items si es necesaria
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);

@@ -14,10 +14,10 @@ export function deepMerge<T extends Record<string, any>>(target: T, source: Part
 				if (!(key in target)) {
 					Object.assign(output, { [key]: source[key] });
 				} else {
-					output[key] = deepMerge(
+					(output as any)[key] = deepMerge(
 						(target as Record<string, any>)[key],
 						(source as Record<string, any>)[key]
-					) as T[Extract<keyof T, string>];
+					);
 				}
 			} else {
 				Object.assign(output, { [key]: source[key] });

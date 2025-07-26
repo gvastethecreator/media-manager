@@ -167,10 +167,10 @@ export function LogViewer({
 									{log.context && <span className="font-semibold mr-1">[{log.context}]</span>}
 									<span>{log.message}</span>
 									{log.data && (
-										<pre className="mt-1 text-xs overflow-x-auto">
-											{typeof log.data === 'string' ? log.data : JSON.stringify(log.data, null, 2)}
-										</pre>
-									)}
+								<pre className="mt-1 text-xs overflow-x-auto">
+									{String(typeof log.data === 'string' ? log.data : JSON.stringify(log.data, null, 2))}
+								</pre>
+							)}
 								</div>
 							))}
 						</div>
