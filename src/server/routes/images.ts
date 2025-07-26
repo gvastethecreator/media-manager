@@ -104,7 +104,8 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = ImageFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });; return;
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			return;
 		}
 
 		const filters = filtersResult.data;
@@ -172,11 +173,11 @@ router.get('/', async (req, res) => {
 				.select({ count: count() })
 				.from(images)
 				.where(whereClause)
-				.then((result) => result[0]?.count || 0),
+				.then((result: any) => result[0]?.count || 0),
 		]);
 
 		// Formatear respuesta para compatibilidad
-		const formattedImages = imageResults.map((img) => ({
+		const formattedImages = imageResults.map((img: any) => ({
 			...img,
 			entityType: 'image' as const,
 			// Agregar thumbnailUrl si hay thumbnail
@@ -240,7 +241,8 @@ router.get('/:id/thumbnail', async (req, res) => {
 		const { id } = req.params;
 		const buffer = await imageService.getThumbnail(id);
 		if (!buffer) {
-			res.status(404).send('Thumbnail not found');; return;
+			res.status(404).send('Thumbnail not found');
+			return;
 		}
 		res.set({
 			'Content-Type': 'image/webp', // Asumimos WEBP por defecto, se puede mejorar
@@ -260,7 +262,8 @@ router.get('/:id', async (req, res) => {
 		const { id } = req.params;
 
 		if (!z.string().uuid().safeParse(id).success) {
-			res.status(400).json({ error: 'ID de imagen inválido' });; return;
+			res.status(400).json({ error: 'ID de imagen inválido' });
+			return;
 		}
 
 		const imageResult = await db
@@ -296,7 +299,8 @@ router.get('/:id', async (req, res) => {
 
 		const image = imageResult[0];
 		if (!image) {
-			res.status(404).json({ error: 'Imagen no encontrada' });; return;
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
 		}
 
 		// Formatear respuesta para compatibilidad
@@ -343,7 +347,7 @@ router.post('/:id/thumbnail/generate', async (req, res) => {
 		const { id } = req.params;
 		const { quality: requestedQuality = 'medium', force = false } = req.body || {};
 		const quality = normalizeQuality(requestedQuality);
-		await generateThumbnailWithForce(id, quality, force);
+		await imageService.generateThumbnail(id);
 		res.json({ status: 'success', quality });
 	} catch (error) {
 		console.error('Error generating thumbnail:', error);

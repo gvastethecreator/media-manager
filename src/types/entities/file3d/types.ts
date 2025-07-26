@@ -4,7 +4,7 @@
  * @description Este archivo contiene tipos auxiliares para la entidad File3D.
  */
 
-import type { File3DBase, File3DStatistics, File3DWithStats, File3DCreateInput, File3DUpdateInput } from './base';
+import type { File3DBase, File3DCreateInput, File3DStatistics, File3DUpdateInput, File3DWithStats } from './base';
 
 // Re-exportar tipos principales
 export type { File3DBase, File3DStatistics, File3DWithStats, File3DCreateInput, File3DUpdateInput };

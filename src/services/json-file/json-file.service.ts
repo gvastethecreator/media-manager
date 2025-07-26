@@ -81,7 +81,7 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 			.orderBy(asc(jsonFiles.name));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile: typeof drizzleJsonFiles[0]) => ({
+		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile: (typeof drizzleJsonFiles)[0]) => ({
 			...rawJsonFile,
 			isFavorite: Boolean(rawJsonFile.isFavorite),
 		}));
@@ -170,19 +170,12 @@ export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFil
 				folderId: data.folderId,
 				isFavorite: data.isFavorite || false,
 				isArchived: data.isArchived || false,
-				validJson: data.validJson || false,
-				schemaVersion: data.schemaVersion || null,
-				keys: data.keys || null,
-				values: data.values || null,
-				depth: data.depth || null,
-				hasArrays: data.hasArrays || false,
-				hasObjects: data.hasObjects || false,
-				encoding: data.encoding || null,
-				compressed: data.compressed || false,
-				minified: data.minified || false,
-				prettyPrinted: data.prettyPrinted || false,
+				isValid: data.isValid || true,
+				schema: data.schema || null,
+				validationErrors: data.validationErrors || null,
+				keyCount: data.keyCount || 0,
+				depth: data.depth || 0,
 				content: data.content || null,
-				parsedContent: data.parsedContent || null,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
@@ -209,7 +202,10 @@ export async function createJsonFile(data: JsonFileCreateInput): Promise<JsonFil
 /**
  * Actualiza un archivo JSON existente
  */
-export async function updateJsonFile(id: string, data: JsonFileUpdateInput): Promise<JsonFileWithStats> {
+export async function updateJsonFile(
+	id: string,
+	data: JsonFileUpdateInput & { validJson?: boolean }
+): Promise<JsonFileWithStats> {
 	try {
 		jsonFileLogger.info('🔄 Actualizando archivo JSON:', id);
 
@@ -234,19 +230,12 @@ export async function updateJsonFile(id: string, data: JsonFileUpdateInput): Pro
 		if (data.folderId !== undefined) updateData.folderId = data.folderId;
 		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
 		if (data.isArchived !== undefined) updateData.isArchived = Boolean(data.isArchived);
-		if (data.validJson !== undefined) updateData.validJson = Boolean(data.validJson);
-		if (data.schemaVersion !== undefined) updateData.schemaVersion = data.schemaVersion;
-		if (data.keys !== undefined) updateData.keys = data.keys;
-		if (data.values !== undefined) updateData.values = data.values;
-		if (data.depth !== undefined) updateData.depth = data.depth;
-		if (data.hasArrays !== undefined) updateData.hasArrays = Boolean(data.hasArrays);
-		if (data.hasObjects !== undefined) updateData.hasObjects = Boolean(data.hasObjects);
-		if (data.encoding !== undefined) updateData.encoding = data.encoding;
-		if (data.compressed !== undefined) updateData.compressed = Boolean(data.compressed);
-		if (data.minified !== undefined) updateData.minified = Boolean(data.minified);
-		if (data.prettyPrinted !== undefined) updateData.prettyPrinted = Boolean(data.prettyPrinted);
+		if (data.isValid !== undefined) updateData.isValid = Boolean(data.isValid);
+		if (data.schema !== undefined) updateData.schema = data.schema;
+		if (data.validationErrors !== undefined) updateData.validationErrors = data.validationErrors;
+		if (data.keyCount !== undefined) updateData.keyCount = Number(data.keyCount) || 0;
+		if (data.depth !== undefined) updateData.depth = Number(data.depth) || 0;
 		if (data.content !== undefined) updateData.content = data.content;
-		if (data.parsedContent !== undefined) updateData.parsedContent = data.parsedContent;
 
 		const result = await db.update(jsonFiles).set(updateData).where(eq(jsonFiles.id, id)).returning();
 

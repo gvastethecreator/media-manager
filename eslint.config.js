@@ -154,8 +154,6 @@ export default [
 			'@typescript-eslint/prefer-as-const': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'warn',
 
-
-
 			// Reglas generales que complementan Biome
 			'no-console': 'off',
 			'no-debugger': 'error',

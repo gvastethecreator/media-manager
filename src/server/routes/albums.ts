@@ -1,7 +1,6 @@
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
-import type { ExpressHandler } from '@/lib/express-types';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -107,17 +106,18 @@ interface ThumbnailImage {
 }
 
 // GET /api/albums - Listar albums
-const getAlbumsHandler: ExpressHandler = async (req: Request, res: Response) => {
+const getAlbumsHandler = async (req: Request, res: Response) => {
 	try {
 		// Verificar si existen albums
 		const albumCount = await db.select({ count: count() }).from(albums);
 
 		if (albumCount[0].count === 0) {
-			return res.json({
+			res.json({
 				data: [],
 				pagination: { total: 0, limit: 0, offset: 0 },
 				message: 'No hay albums disponibles',
 			});
+			return;
 		}
 
 		// Test básico con solo 1 album
@@ -135,16 +135,15 @@ const getAlbumsHandler: ExpressHandler = async (req: Request, res: Response) => 
 		console.error('Error en /api/albums:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
-			details: error instanceof Error ? error.message : 'Error desconocido'
+			details: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
 };
 
 albumsRouter.get('/', getAlbumsHandler);
 
-
 // GET /api/albums/:id - Obtener album específico
-const getAlbumByIdHandler: ExpressHandler = async (req, res) => {
+const getAlbumByIdHandler = async (req: Request, res: Response) => {
 	const { id } = req.params;
 
 	try {
@@ -171,7 +170,7 @@ const getAlbumByIdHandler: ExpressHandler = async (req, res) => {
 albumsRouter.get('/:id', getAlbumByIdHandler);
 
 // GET /api/albums/:id/images - Obtener imágenes del album
-const getAlbumImagesHandler: ExpressHandler = async (req, res) => {
+const getAlbumImagesHandler = async (req: Request, res: Response) => {
 	const { id } = req.params;
 
 	try {
@@ -194,7 +193,8 @@ const getAlbumImagesHandler: ExpressHandler = async (req, res) => {
 		});
 
 		if (!album) {
-			res.status(404).json({ error: 'Album no encontrado' });; return;
+			res.status(404).json({ error: 'Album no encontrado' });
+			return;
 		}
 
 		// Serializar imágenes (usar serializeImage si existe)
@@ -208,10 +208,11 @@ const getAlbumImagesHandler: ExpressHandler = async (req, res) => {
 albumsRouter.get('/:id/images', getAlbumImagesHandler);
 
 // POST /api/albums - Crear album
-const createAlbumHandler: ExpressHandler = async (req, res) => {
+const createAlbumHandler = async (req: Request, res: Response) => {
 	const parse = AlbumCreateSchema.safeParse(req.body);
 	if (!parse.success) {
-		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });; return;
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+		return;
 	}
 
 	try {
@@ -230,7 +231,8 @@ const createAlbumHandler: ExpressHandler = async (req, res) => {
 		});
 
 		if (!newAlbum) {
-			res.status(500).json({ error: 'Error creando álbum' });; return;
+			res.status(500).json({ error: 'Error creando álbum' });
+			return;
 		}
 
 		// Para serializar el álbum, necesitamos las relaciones. Realizamos una nueva consulta.
@@ -242,7 +244,8 @@ const createAlbumHandler: ExpressHandler = async (req, res) => {
 		});
 
 		if (!album) {
-			res.status(500).json({ error: 'Error obteniendo álbum creado' });; return;
+			res.status(500).json({ error: 'Error obteniendo álbum creado' });
+			return;
 		}
 
 		res.status(201).json(serializeAlbum(album));
@@ -255,12 +258,13 @@ const createAlbumHandler: ExpressHandler = async (req, res) => {
 albumsRouter.post('/', createAlbumHandler);
 
 // PUT /api/albums/:id - Actualizar album
-const updateAlbumHandler: ExpressHandler = async (req, res) => {
+const updateAlbumHandler = async (req: Request, res: Response) => {
 	const { id } = req.params;
 	const parse = AlbumUpdateSchema.safeParse(req.body);
 
 	if (!parse.success) {
-		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });; return;
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+		return;
 	}
 
 	try {
@@ -279,7 +283,8 @@ const updateAlbumHandler: ExpressHandler = async (req, res) => {
 		});
 
 		if (!updatedAlbum) {
-			res.status(404).json({ error: 'Album no encontrado' });; return;
+			res.status(404).json({ error: 'Album no encontrado' });
+			return;
 		}
 
 		// Para serializar el álbum, necesitamos las relaciones. Realizamos una nueva consulta.
@@ -291,7 +296,8 @@ const updateAlbumHandler: ExpressHandler = async (req, res) => {
 		});
 
 		if (!album) {
-			res.status(500).json({ error: 'Error obteniendo álbum actualizado' });; return;
+			res.status(500).json({ error: 'Error obteniendo álbum actualizado' });
+			return;
 		}
 
 		res.json(serializeAlbum(album));
@@ -352,7 +358,7 @@ albumsRouter.delete('/:id/images/:imageId', async (req, res) => {
  * GET /albums/:id/card-data
  * Obtiene los datos de un álbum para mostrar en una tarjeta
  */
-albumsRouter.get('/:id/card-data', async (req, res) => {
+const getAlbumCardDataHandler = async (req: Request, res: Response) => {
 	try {
 		const { id: albumId } = req.params;
 
@@ -402,7 +408,8 @@ albumsRouter.get('/:id/card-data', async (req, res) => {
 		});
 
 		if (!album) {
-			res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });; return;
+			res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });
+			return;
 		}
 
 		// Obtener imágenes recientes relacionadas con este álbum
@@ -502,7 +509,9 @@ albumsRouter.get('/:id/card-data', async (req, res) => {
 		albumLogger.error('Error getting album card data', { error, albumId: req.params.id });
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+albumsRouter.get('/:id/card-data', getAlbumCardDataHandler);
 
 /**
  * GET /albums/cards
@@ -547,20 +556,20 @@ albumsRouter.get('/cards', async (req, res) => {
 			where: conditions.length > 0 ? and(...conditions) : undefined,
 			with: includeStatsFlag
 				? {
-					images: { columns: { id: true } },
-					videos: { columns: { id: true } },
-					collections: { columns: { id: true } },
-					tags: { columns: { id: true } },
-					characters: { columns: { id: true } },
-					places: { columns: { id: true } },
-					worldItems: { columns: { id: true } },
-					concepts: { columns: { id: true } },
-					prompts: { columns: { id: true } },
-					notes: { columns: { id: true } },
-					wildcards: { columns: { id: true } },
-					properties: { columns: { id: true } },
-					groups: { columns: { id: true } },
-				}
+						images: { columns: { id: true } },
+						videos: { columns: { id: true } },
+						collections: { columns: { id: true } },
+						tags: { columns: { id: true } },
+						characters: { columns: { id: true } },
+						places: { columns: { id: true } },
+						worldItems: { columns: { id: true } },
+						concepts: { columns: { id: true } },
+						prompts: { columns: { id: true } },
+						notes: { columns: { id: true } },
+						wildcards: { columns: { id: true } },
+						properties: { columns: { id: true } },
+						groups: { columns: { id: true } },
+					}
 				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
@@ -571,35 +580,35 @@ albumsRouter.get('/cards', async (req, res) => {
 			...album,
 			stats: includeStatsFlag
 				? {
-					imageCount: album.images?.length || 0,
-					videoCount: album.videos?.length || 0,
-					collectionCount: album.collections?.length || 0,
-					tagCount: album.tags?.length || 0,
-					characterCount: album.characters?.length || 0,
-					placeCount: album.places?.length || 0,
-					worldItemCount: album.worldItems?.length || 0,
-					conceptCount: album.concepts?.length || 0,
-					promptCount: album.prompts?.length || 0,
-					noteCount: album.notes?.length || 0,
-					wildcardCount: album.wildcards?.length || 0,
-					propertyCount: album.properties?.length || 0,
-					groupCount: album.groups?.length || 0,
-				}
+						imageCount: album.images?.length || 0,
+						videoCount: album.videos?.length || 0,
+						collectionCount: album.collections?.length || 0,
+						tagCount: album.tags?.length || 0,
+						characterCount: album.characters?.length || 0,
+						placeCount: album.places?.length || 0,
+						worldItemCount: album.worldItems?.length || 0,
+						conceptCount: album.concepts?.length || 0,
+						promptCount: album.prompts?.length || 0,
+						noteCount: album.notes?.length || 0,
+						wildcardCount: album.wildcards?.length || 0,
+						propertyCount: album.properties?.length || 0,
+						groupCount: album.groups?.length || 0,
+					}
 				: {
-					imageCount: 0,
-					videoCount: 0,
-					collectionCount: 0,
-					tagCount: 0,
-					characterCount: 0,
-					placeCount: 0,
-					worldItemCount: 0,
-					conceptCount: 0,
-					promptCount: 0,
-					noteCount: 0,
-					wildcardCount: 0,
-					propertyCount: 0,
-					groupCount: 0,
-				},
+						imageCount: 0,
+						videoCount: 0,
+						collectionCount: 0,
+						tagCount: 0,
+						characterCount: 0,
+						placeCount: 0,
+						worldItemCount: 0,
+						conceptCount: 0,
+						promptCount: 0,
+						noteCount: 0,
+						wildcardCount: 0,
+						propertyCount: 0,
+						groupCount: 0,
+					},
 		}));
 
 		res.json(results);
@@ -613,7 +622,7 @@ albumsRouter.get('/cards', async (req, res) => {
  * GET /albums/:id/recent-media
  * Obtiene medios recientes de un álbum
  */
-albumsRouter.get('/:id/recent-media', async (req, res) => {
+const getAlbumRecentMediaHandler = async (req: Request, res: Response) => {
 	try {
 		const { id: albumId } = req.params;
 		const { limit = '6' } = req.query;
@@ -628,7 +637,8 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 		});
 
 		if (!album) {
-			res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });; return;
+			res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });
+			return;
 		}
 
 		const media: ThumbnailImage[] = [];
@@ -698,7 +708,9 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 		albumLogger.error('Error getting recent album media', { error, albumId: req.params.id });
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+albumsRouter.get('/:id/recent-media', getAlbumRecentMediaHandler);
 
 /**
  * GET /albums/:id/stats
@@ -719,7 +731,7 @@ albumsRouter.get('/:id/stats', async (req, res) => {
  * GET /albums/search
  * Busca álbumes con filtros avanzados
  */
-albumsRouter.get('/search', async (req, res) => {
+const searchAlbumsHandler = async (req: Request, res: Response) => {
 	try {
 		const {
 			searchTerm,
@@ -733,7 +745,8 @@ albumsRouter.get('/search', async (req, res) => {
 		} = req.query;
 
 		if (!searchTerm) {
-			res.status(400).json({ error: 'searchTerm es requerido' });; return;
+			res.status(400).json({ error: 'searchTerm es requerido' });
+			return;
 		}
 
 		const limitNum = Number.parseInt(limit as string, 10);
@@ -761,20 +774,20 @@ albumsRouter.get('/search', async (req, res) => {
 			where: and(...conditions),
 			with: includeStatsFlag
 				? {
-					images: { columns: { id: true } },
-					videos: { columns: { id: true } },
-					collections: { columns: { id: true } },
-					tags: { columns: { id: true } },
-					characters: { columns: { id: true } },
-					places: { columns: { id: true } },
-					worldItems: { columns: { id: true } },
-					concepts: { columns: { id: true } },
-					prompts: { columns: { id: true } },
-					notes: { columns: { id: true } },
-					wildcards: { columns: { id: true } },
-					properties: { columns: { id: true } },
-					groups: { columns: { id: true } },
-				}
+						images: { columns: { id: true } },
+						videos: { columns: { id: true } },
+						collections: { columns: { id: true } },
+						tags: { columns: { id: true } },
+						characters: { columns: { id: true } },
+						places: { columns: { id: true } },
+						worldItems: { columns: { id: true } },
+						concepts: { columns: { id: true } },
+						prompts: { columns: { id: true } },
+						notes: { columns: { id: true } },
+						wildcards: { columns: { id: true } },
+						properties: { columns: { id: true } },
+						groups: { columns: { id: true } },
+					}
 				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
@@ -786,35 +799,35 @@ albumsRouter.get('/search', async (req, res) => {
 			...album,
 			stats: includeStatsFlag
 				? {
-					imageCount: album.images?.length || 0,
-					videoCount: album.videos?.length || 0,
-					collectionCount: album.collections?.length || 0,
-					tagCount: album.tags?.length || 0,
-					characterCount: album.characters?.length || 0,
-					placeCount: album.places?.length || 0,
-					worldItemCount: album.worldItems?.length || 0,
-					conceptCount: album.concepts?.length || 0,
-					promptCount: album.prompts?.length || 0,
-					noteCount: album.notes?.length || 0,
-					wildcardCount: album.wildcards?.length || 0,
-					propertyCount: album.properties?.length || 0,
-					groupCount: album.groups?.length || 0,
-				}
+						imageCount: album.images?.length || 0,
+						videoCount: album.videos?.length || 0,
+						collectionCount: album.collections?.length || 0,
+						tagCount: album.tags?.length || 0,
+						characterCount: album.characters?.length || 0,
+						placeCount: album.places?.length || 0,
+						worldItemCount: album.worldItems?.length || 0,
+						conceptCount: album.concepts?.length || 0,
+						promptCount: album.prompts?.length || 0,
+						noteCount: album.notes?.length || 0,
+						wildcardCount: album.wildcards?.length || 0,
+						propertyCount: album.properties?.length || 0,
+						groupCount: album.groups?.length || 0,
+					}
 				: {
-					imageCount: 0,
-					videoCount: 0,
-					collectionCount: 0,
-					tagCount: 0,
-					characterCount: 0,
-					placeCount: 0,
-					worldItemCount: 0,
-					conceptCount: 0,
-					promptCount: 0,
-					noteCount: 0,
-					wildcardCount: 0,
-					propertyCount: 0,
-					groupCount: 0,
-				},
+						imageCount: 0,
+						videoCount: 0,
+						collectionCount: 0,
+						tagCount: 0,
+						characterCount: 0,
+						placeCount: 0,
+						worldItemCount: 0,
+						conceptCount: 0,
+						promptCount: 0,
+						noteCount: 0,
+						wildcardCount: 0,
+						propertyCount: 0,
+						groupCount: 0,
+					},
 		}));
 
 		res.json(results);
@@ -822,7 +835,9 @@ albumsRouter.get('/search', async (req, res) => {
 		albumLogger.error('Error searching albums', { error });
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+albumsRouter.get('/search', searchAlbumsHandler);
 
 /**
  * Helper function para obtener estadísticas de un álbum

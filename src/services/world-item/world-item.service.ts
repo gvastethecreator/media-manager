@@ -77,14 +77,14 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 			.orderBy(asc(worldItems.name));
 
 		// Transformar a formato esperado
-		const transformedWorldItems = drizzleWorldItems.map((rawWorldItem: typeof drizzleWorldItems[0]) => ({
+		const transformedWorldItems = drizzleWorldItems.map((rawWorldItem: (typeof drizzleWorldItems)[0]) => ({
 			...rawWorldItem,
 			isFavorite: Boolean(rawWorldItem.isFavorite),
 			isPublic: Boolean(rawWorldItem.isPublic),
 		}));
 
 		// Transformar a WorldItemWithStats
-		return transformedWorldItems.map((item: typeof transformedWorldItems[0]) => {
+		return transformedWorldItems.map((item: (typeof transformedWorldItems)[0]) => {
 			// Crear WorldItemComplete directamente
 			const complete: WorldItemComplete = item as WorldItemComplete;
 			return toWorldItemWithStats(complete);
@@ -400,7 +400,7 @@ export async function getWorldItemImages(worldItemId: string): Promise<{ images:
 			.orderBy(desc(images.isFavorite), desc(images.createdAt));
 
 		// Transformar a formato esperado
-		const transformedImages = worldItemImages.map((img: typeof worldItemImages[0]) => ({
+		const transformedImages = worldItemImages.map((img: (typeof worldItemImages)[0]) => ({
 			...img,
 			isFavorite: Boolean(img.isFavorite),
 		}));

@@ -9,14 +9,15 @@ router.get('/', async (req, res) => {
 		const { query, limit = '100', type = 'all', sortBy = 'relevance', sortOrder = 'desc' } = req.query;
 
 		if (!query || typeof query !== 'string') {
-			res.status(400).json({ error: 'El parámetro query es requerido' });; return;
+			res.status(400).json({ error: 'El parámetro query es requerido' });
+			return;
 		}
 
 		const startTime = Date.now();
 
 		// Por ahora solo implementamos búsqueda de imágenes
 		// TODO: Expandir para videos, audio, etc.
-		let items = [];
+		let items: any[] = [];
 		if (type === 'images' || type === 'all') {
 			items = await searchImages(query, Number.parseInt(limit as string));
 		}
@@ -41,7 +42,8 @@ router.get('/images', async (req, res) => {
 		const { query, limit = '100' } = req.query;
 
 		if (!query || typeof query !== 'string') {
-			res.status(400).json({ error: 'El parámetro query es requerido' });; return;
+			res.status(400).json({ error: 'El parámetro query es requerido' });
+			return;
 		}
 
 		const startTime = Date.now();

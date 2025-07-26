@@ -1,5 +1,5 @@
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { collections } from '@/lib/drizzle/schema/index';
@@ -16,10 +16,11 @@ const CollectionFiltersSchema = z.object({
 });
 
 // GET /api/collections - Listar colecciones
-router.get('/', async (req, res) => {
+const getCollectionsHandler = async (req: Request, res: Response) => {
 	const parse = CollectionFiltersSchema.safeParse(req.query);
 	if (!parse.success) {
-		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });; return;
+		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+		return;
 	}
 
 	const { search, limit, offset, sortBy, sortOrder } = parse.data;
@@ -65,10 +66,12 @@ router.get('/', async (req, res) => {
 		console.error('🚨 [ERROR] Error en /api/collections:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+router.get('/', getCollectionsHandler);
 
 // GET /api/collections/:id - Obtener colección específica
-router.get('/:id', async (req, res) => {
+const getCollectionByIdHandler = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 
@@ -77,7 +80,8 @@ router.get('/:id', async (req, res) => {
 		});
 
 		if (!collection) {
-			res.status(404).json({ error: 'Colección no encontrada' });; return;
+			res.status(404).json({ error: 'Colección no encontrada' });
+			return;
 		}
 
 		res.json(collection);
@@ -85,6 +89,8 @@ router.get('/:id', async (req, res) => {
 		console.error('Error getting collection:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+router.get('/:id', getCollectionByIdHandler);
 
 export default router;

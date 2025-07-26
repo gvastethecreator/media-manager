@@ -106,21 +106,21 @@ export function preparePromptForDisplay(prompt: PromptComplete): PromptExtended 
 		const { notes: _, ...basePrompt } = prompt;
 
 		return {
-		...basePrompt,
-		notes: prompt.notes ? JSON.stringify(prompt.notes) : null,
-		parsedTags: Array.isArray(prompt.tags)
-			? prompt.tags
-			: typeof prompt.tags === 'string'
-				? deserializeTags(prompt.tags)
-				: [],
-		parsedParameters:
-			typeof prompt.parameters === 'string' && prompt.parameters !== null
-				? deserializeParameters(prompt.parameters)
-				: [],
-		previewContent: prompt.content ? `${prompt.content.substring(0, 100)}...` : undefined,
-		lastUpdated: prompt.updatedAt,
-		notesEntities: prompt.notes,
-	};
+			...basePrompt,
+			notes: prompt.notes ? JSON.stringify(prompt.notes) : null,
+			parsedTags: Array.isArray(prompt.tags)
+				? prompt.tags
+				: typeof prompt.tags === 'string'
+					? deserializeTags(prompt.tags)
+					: [],
+			parsedParameters:
+				typeof prompt.parameters === 'string' && prompt.parameters !== null
+					? deserializeParameters(prompt.parameters)
+					: [],
+			previewContent: prompt.content ? `${prompt.content.substring(0, 100)}...` : undefined,
+			lastUpdated: prompt.updatedAt,
+			notesEntities: prompt.notes,
+		};
 	} catch (error) {
 		helpersLogger.error('❌ Error al preparar prompt para mostrar:', error);
 		// Extraer propiedades base sin notes para el caso de error
@@ -147,14 +147,7 @@ export function preparePromptForSaving(extendedPrompt: PromptExtended): PromptCo
 		const serializedTags = JSON.stringify(extendedPrompt.parsedTags || []);
 
 		// Destructurar para separar las propiedades extendidas de las base
-		const {
-			parsedTags,
-			parsedParameters,
-			previewContent,
-			lastUpdated,
-			notesEntities,
-			...basePrompt
-		} = extendedPrompt;
+		const { parsedTags, parsedParameters, previewContent, lastUpdated, notesEntities, ...basePrompt } = extendedPrompt;
 
 		return {
 			...basePrompt,

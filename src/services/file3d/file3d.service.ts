@@ -71,7 +71,7 @@ export async function getFile3Ds(): Promise<File3DWithStats[]> {
 			.orderBy(desc(file3Ds.createdAt));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D: typeof drizzleFile3Ds[0]) => ({
+		const transformedFile3Ds = drizzleFile3Ds.map((rawFile3D: (typeof drizzleFile3Ds)[0]) => ({
 			...rawFile3D,
 			isFavorite: Boolean(rawFile3D.isFavorite),
 		}));
@@ -95,14 +95,16 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 			.select({
 				id: file3Ds.id,
 				name: file3Ds.name,
-				description: file3Ds.description,
-				emoji: file3Ds.emoji,
-				color: file3Ds.color,
-				shortcut: file3Ds.shortcut,
-				category: file3Ds.category,
-				filePath: file3Ds.filePath,
-				fileName: file3Ds.fileName,
-				fileSize: file3Ds.fileSize,
+				// description: file3Ds.description, // No existe en esquema
+				// emoji: file3Ds.emoji, // No existe en esquema
+				// color: file3Ds.color, // No existe en esquema
+				// shortcut: file3Ds.shortcut, // No existe en esquema
+				// category: file3Ds.category, // No existe en esquema
+				// filePath: file3Ds.filePath, // No existe en esquema (usar path)
+				// fileName: file3Ds.fileName, // No existe en esquema (usar name)
+				// fileSize: file3Ds.fileSize, // No existe en esquema (usar size)
+				path: file3Ds.path,
+				size: file3Ds.size,
 				mimeType: file3Ds.mimeType,
 				format: file3Ds.format,
 				vertices: file3Ds.vertices,
@@ -110,11 +112,11 @@ export async function getFile3DById(id: string): Promise<File3DWithStats | null>
 				materials: file3Ds.materials,
 				textures: file3Ds.textures,
 				animations: file3Ds.animations,
-				tags: file3Ds.tags,
-				metadata: file3Ds.metadata,
-				sortBy: file3Ds.sortBy,
-				filters: file3Ds.filters,
-				featuredImage: file3Ds.featuredImage,
+				// tags: file3Ds.tags, // No existe en esquema
+				// metadata: file3Ds.metadata, // No existe en esquema
+				// sortBy: file3Ds.sortBy, // No existe en esquema
+				// filters: file3Ds.filters, // No existe en esquema
+				// featuredImage: file3Ds.featuredImage, // No existe en esquema
 				isFavorite: file3Ds.isFavorite,
 				createdAt: file3Ds.createdAt,
 				updatedAt: file3Ds.updatedAt,

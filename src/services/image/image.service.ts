@@ -578,10 +578,10 @@ class ImageService {
 					fullUrl: `/api/images/${raw.id}/original`,
 					folder: raw.folderRealId
 						? {
-							id: raw.folderRealId,
-							name: raw.folderName ?? '',
-							path: raw.folderPath ?? '',
-						}
+								id: raw.folderRealId,
+								name: raw.folderName ?? '',
+								path: raw.folderPath ?? '',
+							}
 						: null,
 				} as ImageWithStats;
 			});

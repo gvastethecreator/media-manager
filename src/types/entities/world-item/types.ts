@@ -111,7 +111,8 @@ export interface WorldItemStatistics {
 	lastUsed: Date | null;
 }
 
-export interface WorldItemWithStats extends Omit<WorldItemBase, 'totalImages' | 'totalVideos' | 'properties' | 'notes'> {
+export interface WorldItemWithStats
+	extends Omit<WorldItemBase, 'totalImages' | 'totalVideos' | 'properties' | 'notes'> {
 	entityType: 'world-item';
 	_stats: WorldItemStatistics;
 	_count?: {
@@ -181,7 +182,7 @@ export interface WorldItemComplete extends Omit<WorldItemBase, 'properties' | 'n
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> { }
+export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {}
 
 export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 

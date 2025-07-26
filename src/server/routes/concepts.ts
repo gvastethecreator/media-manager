@@ -1,5 +1,5 @@
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { concepts } from '@/lib/drizzle/schema/index';
@@ -19,11 +19,12 @@ const ConceptFiltersSchema = z.object({
 });
 
 // GET /concepts - MIGRADO A DRIZZLE
-router.get('/', async (req, res) => {
+const getConceptsHandler = async (req: Request, res: Response) => {
 	try {
 		const filtersResult = ConceptFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });; return;
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			return;
 		}
 
 		const filters = filtersResult.data;
@@ -102,14 +103,17 @@ router.get('/', async (req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.get('/', getConceptsHandler);
 
 // GET /concepts/:id - MIGRADO A DRIZZLE
-router.get('/:id', async (req, res) => {
+const getConceptByIdHandler = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		if (!z.string().uuid().safeParse(id).success) {
-			res.status(400).json({ error: 'ID de concepto inválido' });; return;
+			res.status(400).json({ error: 'ID de concepto inválido' });
+			return;
 		}
 
 		const conceptResult = await db
@@ -140,7 +144,8 @@ router.get('/:id', async (req, res) => {
 			.limit(1);
 
 		if (!conceptResult.length) {
-			res.status(404).json({ error: 'Concepto no encontrado' });; return;
+			res.status(404).json({ error: 'Concepto no encontrado' });
+			return;
 		}
 
 		res.json(conceptResult[0]);
@@ -151,7 +156,9 @@ router.get('/:id', async (req, res) => {
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
 	}
-});
+};
+
+router.get('/:id', getConceptByIdHandler);
 
 // GET /concepts/:id/stats - Obtener estadísticas de un concepto (métodos de escritura pendientes)
 router.get('/:id/stats', async (_req, res) => {

@@ -6,7 +6,8 @@ import { images } from '@/lib/drizzle/schema/index';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto
-import type { LastProcessedThumbnail, ProcessOptions, ThumbnailStats } from '@/types/thumbnails';
+import type { ThumbnailStats } from '@/types/stats';
+import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
@@ -222,7 +223,7 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 			},
 		});
 
-		return imagesData.map((image) => ({
+		return imagesData.map((image: any) => ({
 			id: image.id,
 			path: image.path,
 			processedAt: image.updatedAt,
@@ -278,7 +279,9 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 		return {
 			total: totalFiles,
 			processed: withThumbnail,
+			pending: pending,
 			errors: errors.length,
+			totalFiles: totalFiles,
 			totalSize: totalSize,
 		};
 	} catch (error) {
@@ -311,7 +314,7 @@ export async function bulkGenerateThumbnails(imageIds: string[], options?: Proce
 
 	for (const imageId of imageIds) {
 		try {
-			await getThumbnail(imageId, options?.quality);
+			await getThumbnail(imageId, options?.quality as any);
 			generated.push(imageId);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';

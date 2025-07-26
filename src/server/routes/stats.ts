@@ -70,7 +70,8 @@ router.get('/folders', async (_req, res) => {
 	try {
 		const stats = await getFolderStats();
 		if (!stats) {
-			res.status(500).json({ error: 'No se pudieron obtener las estadísticas de carpetas' });; return;
+			res.status(500).json({ error: 'No se pudieron obtener las estadísticas de carpetas' });
+			return;
 		}
 		res.json(stats);
 	} catch (error) {

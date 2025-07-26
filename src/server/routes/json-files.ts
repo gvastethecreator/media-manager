@@ -38,7 +38,8 @@ router.get('/:id', async (req, res) => {
 		const jsonFile = await getJsonFileById(id);
 
 		if (!jsonFile) {
-			res.status(404).json({ error: 'Archivo JSON no encontrado' });; return;
+			res.status(404).json({ error: 'Archivo JSON no encontrado' });
+			return;
 		}
 
 		res.json(jsonFile);
@@ -88,7 +89,23 @@ router.put('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
 	try {
 		const validatedData = JsonFileCreateSchema.parse(req.body);
-		const newJsonFile = await createJsonFile(validatedData);
+		// Normalizar campos undefined a valores apropiados
+		const jsonFileData: any = { ...validatedData };
+
+		// Convertir undefined a valores apropiados según el tipo esperado
+		Object.keys(jsonFileData).forEach((key) => {
+			if (jsonFileData[key] === undefined) {
+				// Para campos booleanos usar false por defecto
+				if (['isFavorite', 'isArchived'].includes(key)) {
+					jsonFileData[key] = false;
+				} else {
+					// Para otros campos usar null
+					jsonFileData[key] = null;
+				}
+			}
+		});
+
+		const newJsonFile = await createJsonFile(jsonFileData);
 		res.status(201).json(newJsonFile);
 	} catch (error) {
 		console.error('Error al crear archivo JSON:', error);

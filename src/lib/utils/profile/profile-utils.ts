@@ -77,12 +77,9 @@ export async function getPaginatedProfiles(
 
 	// Construir ordenación
 	const validSortFields = ['name', 'createdAt', 'updatedAt'] as const;
-	const validSortBy = validSortFields.includes(sortBy as any) ? sortBy as keyof typeof profiles : 'name';
+	const validSortBy = validSortFields.includes(sortBy as any) ? (sortBy as keyof typeof profiles) : 'name';
 
-	const orderBy =
-		sortDirection === 'asc'
-			? asc(profiles[validSortBy] as any)
-			: desc(profiles[validSortBy] as any);
+	const orderBy = sortDirection === 'asc' ? asc(profiles[validSortBy] as any) : desc(profiles[validSortBy] as any);
 
 	// Consultar registros
 	const profilesData = await db

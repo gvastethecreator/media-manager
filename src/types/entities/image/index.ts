@@ -16,13 +16,13 @@
 export type { ImageBase, ImageStatistics, ImageWithStats } from './base';
 // Alias para compatibilidad
 export type Image = ImageWithStats;
-export type { ImageMetadata } from './types';
 // --- Enumeraciones ---
 export { ImageFormat, ImageStatus } from './enums';
 export type {
 	ImageFilters,
-	ImageSearchResult,
 	ImageMetadata,
+	ImageMetadata,
+	ImageSearchResult,
 } from './types';
 
 // --- Tipos derivados ---
