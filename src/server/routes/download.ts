@@ -1,24 +1,27 @@
 import express from 'express';
 import fs from 'fs/promises';
+import type { ExpressHandler } from '@/lib/express-types';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { getFileInfo } from '@/services/file/file.service';
 
 const router = express.Router();
 const downloadLogger = serverLogger.withContext('DownloadAPI');
 
-router.post('/', async (req, res) => {
+const downloadPostHandler: ExpressHandler = async (req, res) => {
 	try {
 		const filePath = req.body.path as string | undefined;
 		if (!filePath) {
 			downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
-			res.status(400).json({ error: 'Se requiere una ruta de archivo' });; return;
+			res.status(400).json({ error: 'Se requiere una ruta de archivo' });
+			return;
 		}
 		let fileInfo: Awaited<ReturnType<typeof getFileInfo>>;
 		try {
 			fileInfo = await getFileInfo(filePath);
 		} catch (error) {
 			downloadLogger.error(`❌ Error al obtener información del archivo: ${filePath}`, error);
-			res.status(404).json({ error: 'Archivo no encontrado o inaccesible' });; return;
+			res.status(404).json({ error: 'Archivo no encontrado o inaccesible' });
+			return;
 		}
 		try {
 			const fileBuffer = await fs.readFile(fileInfo.path);
@@ -37,33 +40,37 @@ router.post('/', async (req, res) => {
 		downloadLogger.error('❌ Error inesperado en la descarga de archivo:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
 
-router.get('/', (req, res) => {
+const downloadGetHandler: ExpressHandler = (req, res) => {
 	const filePath = req.query.path as string | undefined;
 	if (!filePath) {
 		downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
-		res.status(400).json({ error: 'Se requiere una ruta de archivo' });; return;
+		res.status(400).json({ error: 'Se requiere una ruta de archivo' });
+		return;
 	}
 	res.send(`<!DOCTYPE html>
 <html>
   <head>
-    <title>Descargando archivo...</title>
-    <style>
-      body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f5f5f5; color: #333; }
-      .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+	<title>Descargando archivo...</title>
+	<style>
+	  body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f5f5f5; color: #333; }
+	  .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+	  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+	</style>
   </head>
   <body>
-    <div class="loader"></div>
-    <p>Iniciando descarga...</p>
-    <form id="downloadForm" method="POST" action="/api/download">
-      <input type="hidden" name="path" value="${filePath}">
-    </form>
-    <script>document.addEventListener('DOMContentLoaded',function(){document.getElementById('downloadForm').submit();});</script>
+	<div class="loader"></div>
+	<p>Iniciando descarga...</p>
+	<form id="downloadForm" method="POST" action="/api/download">
+	  <input type="hidden" name="path" value="${filePath}">
+	</form>
+	<script>document.addEventListener('DOMContentLoaded',function(){document.getElementById('downloadForm').submit();});</script>
   </body>
 </html>`);
-});
+};
+
+router.post('/', downloadPostHandler);
+router.get('/', downloadGetHandler);
 
 export default router;

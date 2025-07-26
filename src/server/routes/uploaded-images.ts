@@ -26,7 +26,8 @@ router.get('/stats', async (_req, res) => {
 	const result = await getUploadedImageStats();
 
 	if (!result.success) {
-		res.status(500).json({ error: result.error });; return;
+		res.status(500).json({ error: result.error });
+		return;
 	}
 
 	res.json(result.stats);
@@ -48,7 +49,8 @@ router.get('/', async (req, res) => {
 	const result = await getUploadedImages(filters);
 
 	if (!result.success) {
-		res.status(500).json({ error: result.error });; return;
+		res.status(500).json({ error: result.error });
+		return;
 	}
 
 	res.json({
@@ -71,7 +73,8 @@ router.get('/:id', async (req, res) => {
 	const result = await getUploadedImage(id);
 
 	if (!result.success) {
-		res.status(404).json({ error: result.error });; return;
+		res.status(404).json({ error: result.error });
+		return;
 	}
 
 	res.json(result.item);
@@ -84,7 +87,8 @@ router.delete('/:id', async (req, res) => {
 	const result = await deleteUploadedImage(id);
 
 	if (!result.success) {
-		res.status(500).json({ error: result.error });; return;
+		res.status(500).json({ error: result.error });
+		return;
 	}
 
 	res.json(result);
@@ -97,7 +101,8 @@ router.post('/', async (req, res) => {
 	const result = await uploadImages(formData);
 
 	if (!result.success) {
-		res.status(500).json({ error: result.error });; return;
+		res.status(500).json({ error: result.error });
+		return;
 	}
 
 	res.status(201).json(result);

@@ -69,7 +69,7 @@ export async function getAllMetadata(): Promise<MetadataExtended[]> {
 			.orderBy(desc(metadatas.updatedAt));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedMetadatas = drizzleMetadatas.map((rawMetadata: typeof drizzleMetadatas[0]) => ({
+		const transformedMetadatas = drizzleMetadatas.map((rawMetadata: (typeof drizzleMetadatas)[0]) => ({
 			...rawMetadata,
 			isPublic: Boolean(rawMetadata.isPublic),
 		}));

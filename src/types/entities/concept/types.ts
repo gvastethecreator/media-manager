@@ -94,7 +94,6 @@ export interface ConceptResults {
 	};
 }
 
-
 /**
  * Esquema Zod para validación de Concept
  */

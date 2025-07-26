@@ -65,7 +65,8 @@ router.post('/directory', async (req, res) => {
 		const { path, options } = req.body;
 
 		if (!path) {
-			res.status(400).json({ error: 'Ruta de directorio requerida' });; return;
+			res.status(400).json({ error: 'Ruta de directorio requerida' });
+			return;
 		}
 
 		const result = await createDirectory(path, options);
@@ -133,7 +134,8 @@ router.put('/rename', async (req, res) => {
 		const { oldPath, newPath, options } = req.body;
 
 		if (!oldPath || !newPath) {
-			res.status(400).json({ error: 'Rutas oldPath y newPath requeridas' });; return;
+			res.status(400).json({ error: 'Rutas oldPath y newPath requeridas' });
+			return;
 		}
 
 		const result = await renameFile(oldPath, newPath, options);
@@ -155,7 +157,8 @@ router.post('/copy', async (req, res) => {
 		const { sourcePath, destPath, options } = req.body;
 
 		if (!sourcePath || !destPath) {
-			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });; return;
+			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
+			return;
 		}
 
 		const result = await copyFile(sourcePath, destPath, options);
@@ -177,7 +180,8 @@ router.post('/move', async (req, res) => {
 		const { sourcePath, destPath, options } = req.body;
 
 		if (!sourcePath || !destPath) {
-			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });; return;
+			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
+			return;
 		}
 
 		const result = await moveFile(sourcePath, destPath, options);

@@ -78,7 +78,7 @@ export const ConceptService = {
 				tags: 0,
 				characters: 0,
 				places: 0,
-				concepts: 0,
+				worldItems: 0,
 				prompts: 0,
 				notes: 0,
 				wildcards: 0,
@@ -96,6 +96,10 @@ export const ConceptService = {
 				type: EVENT_TYPE_MAPPING[EVENTS.CONCEPTS_CHANGED],
 				data: { action: 'change', eventType: EVENTS.CONCEPTS_CHANGED },
 			});
+
+			if (!concept) {
+				throw new Error('Error al transformar el concepto creado');
+			}
 
 			return concept;
 		} catch (error) {
@@ -287,7 +291,7 @@ export const ConceptService = {
 
 			if (category) {
 				if (Array.isArray(category)) {
-					conditions.push(...category.map((cat: typeof category[0]) => eq(concepts.category, cat)));
+					conditions.push(...category.map((cat: (typeof category)[0]) => eq(concepts.category, cat)));
 				} else {
 					conditions.push(eq(concepts.category, category));
 				}

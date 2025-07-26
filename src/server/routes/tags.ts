@@ -45,7 +45,8 @@ router.get('/:id', async (req, res) => {
 		const tag = await tagService.getTagById(id);
 
 		if (!tag) {
-			res.status(404).json({ error: 'Tag no encontrado' });; return;
+			res.status(404).json({ error: 'Tag no encontrado' });
+			return;
 		}
 
 		res.json(toTagWithStats(tag));
@@ -106,7 +107,8 @@ router.post('/', async (req, res) => {
 		const { name, description, color, emoji } = req.body;
 
 		if (!name) {
-			res.status(400).json({ error: 'El nombre es requerido' });; return;
+			res.status(400).json({ error: 'El nombre es requerido' });
+			return;
 		}
 
 		const tag = await tagService.createTag({
@@ -137,7 +139,8 @@ router.put('/:id', async (req, res) => {
 		});
 
 		if (!tag) {
-			res.status(404).json({ error: 'Tag no encontrado' });; return;
+			res.status(404).json({ error: 'Tag no encontrado' });
+			return;
 		}
 
 		res.json(toTagWithStats(tag));
@@ -155,7 +158,8 @@ router.delete('/:id', async (req, res) => {
 		const deleted = await tagService.deleteTag(id);
 
 		if (!deleted) {
-			res.status(404).json({ error: 'Tag no encontrado' });; return;
+			res.status(404).json({ error: 'Tag no encontrado' });
+			return;
 		}
 
 		res.status(204).send();

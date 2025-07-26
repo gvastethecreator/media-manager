@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { shallow } from 'zustand/shallow';
 
-import { useNoteStore, type NoteStore } from '@/store/entities/note';
+import { type NoteStore, useNoteStore } from '@/store/entities/note';
 import { EntityType } from '@/types/entities/entities';
 
 /**
@@ -10,14 +10,12 @@ import { EntityType } from '@/types/entities/entities';
  */
 export const useNoteRelations = () => {
 	// Seleccionar solo las acciones relacionadas con relaciones
-	const { addNoteToEntity, removeNoteFromEntity, isLoading, error } = useNoteStore(
-		(state: NoteStore) => ({
-			addNoteToEntity: state.addNoteToEntity,
-			removeNoteFromEntity: state.removeNoteFromEntity,
-			isLoading: state.isLoading,
-			error: state.error,
-		})
-	);
+	const { addNoteToEntity, removeNoteFromEntity, isLoading, error } = useNoteStore((state: NoteStore) => ({
+		addNoteToEntity: state.addNoteToEntity,
+		removeNoteFromEntity: state.removeNoteFromEntity,
+		isLoading: state.isLoading,
+		error: state.error,
+	}));
 
 	// Función para asociar una nota a una entidad
 	const attachNoteToEntity = useCallback(

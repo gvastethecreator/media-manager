@@ -45,7 +45,7 @@ export function sortCollections(collections: CollectionWithStats[], sortOption: 
 
 			case 'totalItems':
 				aValue = (a.stats?.imageCount || 0) + (a.stats?.videoCount || 0);
-		bValue = (b.stats?.imageCount || 0) + (b.stats?.videoCount || 0);
+				bValue = (b.stats?.imageCount || 0) + (b.stats?.videoCount || 0);
 				break;
 			default:
 				aValue = a.name?.toLowerCase() || '';
@@ -131,9 +131,7 @@ export function filterCollectionsBySearch(
 	const term = searchTerm.toLowerCase();
 
 	return collections.filter(
-		(collection) =>
-			collection.name.toLowerCase().includes(term) ||
-			collection.description?.toLowerCase().includes(term)
+		(collection) => collection.name.toLowerCase().includes(term) || collection.description?.toLowerCase().includes(term)
 	);
 }
 
@@ -176,7 +174,7 @@ export function getCollectionStats(collections: CollectionWithStats[]) {
 
 		// Valor total
 		// totalValue no está disponible en CollectionStatistics
-	// stats.totalValue += collection.stats.totalValue;
+		// stats.totalValue += collection.stats.totalValue;
 	}
 
 	return stats;
