@@ -124,8 +124,8 @@ export function extendPlace(place: PlaceBase): PlaceWithStats {
 			popularityScore: 0,
 			completenessScore: 0,
 			usageCount: 0,
-			lastUsed: null
-		}
+			lastUsed: null,
+		},
 	};
 }
 

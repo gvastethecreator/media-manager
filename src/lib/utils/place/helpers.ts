@@ -3,8 +3,8 @@
  * @module utils/place/helpers
  */
 
-import type { PlaceWithStats } from '@/types/entities/place';
 import type { PlaceFilters } from '@/lib/api/places';
+import type { PlaceWithStats } from '@/types/entities/place';
 
 /**
  * Ordena una lista de lugares según el criterio especificado.
@@ -114,7 +114,6 @@ export function filterPlaces(places: PlaceWithStats[], filters: PlaceFilters): P
 export function buildPlaceTree(places: PlaceWithStats[]) {
 	const tree: Record<string, { places: PlaceWithStats[]; children: any }> = {};
 	const rootPlaces: PlaceWithStats[] = [];
-
 
 	for (const place of places) {
 		if (!place.region) {

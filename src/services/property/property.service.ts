@@ -231,7 +231,7 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 				.then((result) => result[0]?.count || 0),
 		]);
 
-		const result: PropertyWithStats[] = drizzleProperties.map((rawProperty: typeof drizzleProperties[0]) => ({
+		const result: PropertyWithStats[] = drizzleProperties.map((rawProperty: (typeof drizzleProperties)[0]) => ({
 			...rawProperty,
 			isFavorite: Boolean(rawProperty.isFavorite),
 			_count: {
@@ -517,7 +517,7 @@ export async function searchProperties(query: string): Promise<PropertyWithStats
 			.where(or(like(properties.name, `%${query}%`), like(properties.description, `%${query}%`)))
 			.orderBy(desc(properties.isFavorite), asc(properties.name));
 
-		const result: PropertyWithStats[] = drizzleProperties.map((p: typeof drizzleProperties[0]) => ({
+		const result: PropertyWithStats[] = drizzleProperties.map((p: (typeof drizzleProperties)[0]) => ({
 			...p,
 			_count: {
 				images: 0,

@@ -13,7 +13,7 @@ import { db } from '@/lib/drizzle';
 import { documents } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit, type EventType } from '@/lib/server/events.server';
+import { type EventType, emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';

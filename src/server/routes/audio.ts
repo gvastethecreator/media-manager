@@ -61,7 +61,7 @@ const getAudiosHandler: ExpressHandler = async (_req, res) => {
 	}
 };
 
-router.get('/', (req, res) => getAudiosHandler(req, res));
+router.get('/', getAudiosHandler);
 
 // GET /api/audio/:id
 const getAudioByIdHandler: ExpressHandler = async (req, res) => {
@@ -70,7 +70,8 @@ const getAudioByIdHandler: ExpressHandler = async (req, res) => {
 		const audio = await getAudioById(id);
 
 		if (!audio) {
-			res.status(404).json({ error: 'Archivo de audio no encontrado' });; return;
+			res.status(404).json({ error: 'Archivo de audio no encontrado' });
+			return;
 		}
 
 		res.json(audio);
@@ -83,13 +84,29 @@ const getAudioByIdHandler: ExpressHandler = async (req, res) => {
 	}
 };
 
-router.get('/:id', (req, res) => getAudioByIdHandler(req, res));
+router.get('/:id', getAudioByIdHandler);
 
 // POST /api/audio
 const createAudioHandler: ExpressHandler = async (req, res) => {
 	try {
 		const validatedData = AudioCreateSchema.parse(req.body);
-		const newAudio = await createAudio(validatedData);
+		// Normalizar campos undefined a null para compatibilidad con AudioCreateInput
+		const audioData: any = { ...validatedData };
+
+		// Convertir undefined a valores apropiados según el tipo esperado
+		Object.keys(audioData).forEach((key) => {
+			if (audioData[key] === undefined) {
+				// Para campos booleanos usar false por defecto
+				if (['isFavorite', 'isArchived'].includes(key)) {
+					audioData[key] = false;
+				} else {
+					// Para otros campos usar null
+					audioData[key] = null;
+				}
+			}
+		});
+
+		const newAudio = await createAudio(audioData);
 		res.status(201).json(newAudio);
 	} catch (error) {
 		console.error('Error al crear archivo de audio:', error);
@@ -100,7 +117,7 @@ const createAudioHandler: ExpressHandler = async (req, res) => {
 	}
 };
 
-router.post('/', (req, res) => createAudioHandler(req, res));
+router.post('/', createAudioHandler);
 
 // PUT /api/audio/:id
 const updateAudioHandler: ExpressHandler = async (req, res) => {
@@ -118,7 +135,7 @@ const updateAudioHandler: ExpressHandler = async (req, res) => {
 	}
 };
 
-router.put('/:id', (req, res) => updateAudioHandler(req, res));
+router.put('/:id', updateAudioHandler);
 
 // DELETE /api/audio/:id
 const deleteAudioHandler: ExpressHandler = async (req, res) => {
@@ -126,7 +143,8 @@ const deleteAudioHandler: ExpressHandler = async (req, res) => {
 		const { id } = req.params;
 		const result = await deleteAudio(id);
 		if (!result.success) {
-			res.status(404).json({ error: 'Archivo de audio no encontrado' });; return;
+			res.status(404).json({ error: 'Archivo de audio no encontrado' });
+			return;
 		}
 		res.json({
 			success: true,
@@ -142,7 +160,7 @@ const deleteAudioHandler: ExpressHandler = async (req, res) => {
 	}
 };
 
-router.delete('/:id', (req, res) => deleteAudioHandler(req, res));
+router.delete('/:id', deleteAudioHandler);
 
 // GET /api/audio/stats/formats
 const getAudioFormatStatsHandler: ExpressHandler = async (_req, res) => {
@@ -160,7 +178,7 @@ const getAudioFormatStatsHandler: ExpressHandler = async (_req, res) => {
 	}
 };
 
-router.get('/stats/formats', (req, res) => getAudioFormatStatsHandler(req, res));
+router.get('/stats/formats', getAudioFormatStatsHandler);
 
 // GET /api/audio/stats/genres
 const getAudioGenreStatsHandler: ExpressHandler = async (_req, res) => {
@@ -178,6 +196,6 @@ const getAudioGenreStatsHandler: ExpressHandler = async (_req, res) => {
 	}
 };
 
-router.get('/stats/genres', (req, res) => getAudioGenreStatsHandler(req, res));
+router.get('/stats/genres', getAudioGenreStatsHandler);
 
 export { router as audioRouter };

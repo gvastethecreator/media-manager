@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
@@ -15,7 +15,7 @@ export interface LogEntry {
 	level: 'debug' | 'info' | 'warn' | 'error' | 'success';
 	message: string;
 	context?: string;
-	data?: unknown;
+	data?: any;
 }
 
 interface LogViewerProps {
@@ -41,6 +41,15 @@ const LOG_ICONS = {
 	warn: '⚠️',
 	error: '❌',
 	success: '✅',
+};
+
+// Helper function to safely render log data
+const renderLogData = (data: unknown): ReactNode => {
+	try {
+		return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+	} catch {
+		return String(data);
+	}
 };
 
 export function LogViewer({
@@ -160,19 +169,23 @@ export function LogViewer({
 						<div className="flex items-center justify-center h-20 text-muted-foreground">No hay logs para mostrar</div>
 					) : (
 						<div className="p-2 space-y-1">
-							{filteredLogs.map((log) => (
-								<div key={log.id} className={cn('p-2 rounded text-sm font-mono break-all', LOG_COLORS[log.level])}>
-									{showTimestamp && <span className="opacity-70 mr-2">[{log.timestamp}]</span>}
-									<span className="mr-1">{LOG_ICONS[log.level]}</span>
-									{log.context && <span className="font-semibold mr-1">[{log.context}]</span>}
-									<span>{log.message}</span>
-									{log.data && (
-						<pre className="mt-1 text-xs overflow-x-auto">
-							{typeof log.data === 'string' ? log.data : JSON.stringify(log.data, null, 2)}
-						</pre>
-					)}
-								</div>
-							))}
+							{filteredLogs.map((log) => {
+								const logDataText = log.data
+									? typeof log.data === 'string'
+										? log.data
+										: JSON.stringify(log.data, null, 2) || String(log.data)
+									: null;
+
+								return (
+									<div key={log.id} className={cn('p-2 rounded text-sm font-mono break-all', LOG_COLORS[log.level])}>
+										{showTimestamp && <span className="opacity-70 mr-2">[{log.timestamp}]</span>}
+										<span className="mr-1">{LOG_ICONS[log.level]}</span>
+										{log.context && <span className="font-semibold mr-1">[{log.context}]</span>}
+										<span>{log.message}</span>
+										{logDataText && <pre className="mt-1 text-xs overflow-x-auto">{logDataText}</pre>}
+									</div>
+								);
+							})}
 						</div>
 					)}
 				</ScrollArea>
@@ -204,7 +217,7 @@ export function LogViewer({
 export function useLogViewer() {
 	const [logs, setLogs] = useState<LogEntry[]>([]);
 
-	const addLog = (level: LogEntry['level'], message: string, context?: string, data?: unknown) => {
+	const addLog = (level: LogEntry['level'], message: string, context?: string, data?: LogEntry['data']) => {
 		const newLog: LogEntry = {
 			id: Date.now().toString(),
 			timestamp: new Date().toISOString(),
@@ -225,10 +238,10 @@ export function useLogViewer() {
 		logs,
 		addLog,
 		clearLogs,
-		debug: (message: string, context?: string, data?: unknown) => addLog('debug', message, context, data),
-		info: (message: string, context?: string, data?: unknown) => addLog('info', message, context, data),
-		warn: (message: string, context?: string, data?: unknown) => addLog('warn', message, context, data),
-		error: (message: string, context?: string, data?: unknown) => addLog('error', message, context, data),
-		success: (message: string, context?: string, data?: unknown) => addLog('success', message, context, data),
+		debug: (message: string, context?: string, data?: LogEntry['data']) => addLog('debug', message, context, data),
+		info: (message: string, context?: string, data?: LogEntry['data']) => addLog('info', message, context, data),
+		warn: (message: string, context?: string, data?: LogEntry['data']) => addLog('warn', message, context, data),
+		error: (message: string, context?: string, data?: LogEntry['data']) => addLog('error', message, context, data),
+		success: (message: string, context?: string, data?: LogEntry['data']) => addLog('success', message, context, data),
 	};
 }

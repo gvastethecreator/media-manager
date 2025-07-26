@@ -11,9 +11,9 @@ import * as crypto from 'crypto';
 import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
-import { collections, images, imageCollections } from '@/lib/drizzle/schema/index';
+import { collections, imageCollections, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit, type EventType } from '@/lib/server/events.server';
+import { type EventType, emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';

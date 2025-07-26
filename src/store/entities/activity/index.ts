@@ -158,8 +158,8 @@ export const useActivityStore = create<ActivityStore>()(
 					},
 
 					getActivitiesByImageId: (imageId: string) => {
-						return Object.values(get().activities).filter((activity) =>
-							activity.entityType === 'image' && activity.entityId === imageId
+						return Object.values(get().activities).filter(
+							(activity) => activity.entityType === 'image' && activity.entityId === imageId
 						);
 					},
 

@@ -372,7 +372,7 @@ class UploadedImagesService {
 				.offset((page - 1) * pageSize);
 
 			// Transformar los resultados usando el transformer
-			const items = rawImages.map((image: typeof rawImages[0]) => {
+			const items = rawImages.map((image: (typeof rawImages)[0]) => {
 				const entity = fromDB(image);
 				return transformUploadedImage(entity);
 			});

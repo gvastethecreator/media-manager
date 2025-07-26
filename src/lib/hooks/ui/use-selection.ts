@@ -38,13 +38,14 @@ export const useSelection = () => {
 			hasSelection: store.selectedItems.length > 0,
 			isMultipleSelection: store.selectedItems.length > 1,
 			selectedTypes: [...new Set(store.selectedItems.map((item) => item.entityType || 'unknown'))],
-   selectedFolders: [...new Set(store.selectedItems.map((item) => (item as any).folderId || 'unknown'))],
+			selectedFolders: [...new Set(store.selectedItems.map((item) => (item as any).folderId || 'unknown'))],
 		}),
 
 		// 🔍 Utilidades de selección
 		isSelected: (itemId: string) => store.selectedItems.some((item) => item.id === itemId),
 		getSelectedIds: () => store.selectedItems.map((item) => item.id),
-		getSelectedByType: (type: 'image' | 'file' | 'folder') => store.selectedItems.filter((item) => item.entityType === type),
+		getSelectedByType: (type: 'image' | 'file' | 'folder') =>
+			store.selectedItems.filter((item) => item.entityType === type),
 
 		// 🎨 Selección por criterios
 		selectByType: (type: 'image' | 'file' | 'folder') => {

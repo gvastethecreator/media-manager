@@ -37,8 +37,6 @@ export function sortCollections(
 		case CollectionSortOption.ITEMS_DESC:
 			return clonedCollections.sort((a, b) => (b.stats?.totalItems || 0) - (a.stats?.totalItems || 0));
 
-
-
 		default:
 			return clonedCollections;
 	}
@@ -56,14 +54,10 @@ export function filterCollections(collections: CollectionWithStats[], filters: a
 	}
 
 	return collections.filter((collection) => {
-
-
 		// Filtrar por favoritos
 		if (filters.isFavorite !== undefined && collection.isFavorite !== filters.isFavorite) {
 			return false;
 		}
-
-
 
 		// Filtrar por número de imágenes
 		if (filters.minImages !== undefined) {

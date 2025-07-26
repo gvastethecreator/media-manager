@@ -26,10 +26,6 @@ const PromptFiltersSchema = z.object({
 			'totalImages',
 			'totalVideos',
 			'type',
-			'complexity',
-			'applications',
-			'examples',
-			'relatedConcepts',
 			'notes',
 			'featuredImage',
 			'parentId',
@@ -44,7 +40,8 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = PromptFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });; return;
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			return;
 		}
 
 		const filters = filtersResult.data;
@@ -113,11 +110,11 @@ router.get('/', async (req, res) => {
 				.select({ count: count() })
 				.from(prompts)
 				.where(whereClause)
-				.then((result) => result[0]?.count || 0),
+				.then((result: any) => result[0]?.count || 0),
 		]);
 
 		// Formatear respuesta para compatibilidad
-		const transformedPrompts = promptResults.map((prompt) => ({
+		const transformedPrompts = promptResults.map((prompt: any) => ({
 			...prompt,
 			// Para compatibilidad con transformer
 			images: [],
@@ -153,7 +150,8 @@ router.get('/:id', async (req, res) => {
 		const { id } = req.params;
 
 		if (!z.string().uuid().safeParse(id).success) {
-			res.status(400).json({ error: 'ID de prompt inválido' });; return;
+			res.status(400).json({ error: 'ID de prompt inválido' });
+			return;
 		}
 
 		const promptResult = await db
@@ -189,7 +187,8 @@ router.get('/:id', async (req, res) => {
 
 		const prompt = promptResult[0];
 		if (!prompt) {
-			res.status(404).json({ error: 'Prompt no encontrado' });; return;
+			res.status(404).json({ error: 'Prompt no encontrado' });
+			return;
 		}
 
 		// Formatear respuesta para compatibilidad

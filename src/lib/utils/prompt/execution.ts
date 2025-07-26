@@ -1,7 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PromptModel } from '@/types/entities/prompt/enums';
-import type { PromptBase } from '@/types/entities/prompt/types';
 import type { PromptExecutionResult } from '@/types/entities/prompt/extended';
+import type { PromptBase } from '@/types/entities/prompt/types';
 import { replaceVariablesInContent } from './helpers';
 import { estimateTokenCount } from './usage';
 
@@ -138,7 +138,7 @@ export async function executePrompt(
 			maxTokens: 1000,
 			saveToHistory: true,
 			timeoutMs: 30000,
-		};		// Combinar configuración por defecto con la proporcionada
+		}; // Combinar configuración por defecto con la proporcionada
 		const finalConfig = { ...defaultConfig, ...config };
 
 		// Preparar contenido reemplazando variables

@@ -4,7 +4,6 @@
  */
 
 import { useEffect } from 'react';
-import type { AppearanceSettings, NotificationsSettings, PrivacySettings, AdvancedSettings } from '@/types/settings';
 import {
 	selectActiveProfileId,
 	selectAdvanced,
@@ -20,6 +19,7 @@ import {
 	selectTheme,
 	useSettingsStore,
 } from '@/store/settings.store';
+import type { AdvancedSettings, AppearanceSettings, NotificationsSettings, PrivacySettings } from '@/types/settings';
 
 /**
  * Hook personalizado que proporciona acceso a la configuración global

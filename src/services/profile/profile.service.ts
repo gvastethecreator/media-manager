@@ -123,7 +123,7 @@ class ProfileServiceImpl {
 			const drizzleProfiles = await query;
 
 			// 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
-			const drizzleResults = drizzleProfiles.map((raw: typeof drizzleProfiles[0]) => ({
+			const drizzleResults = drizzleProfiles.map((raw: (typeof drizzleProfiles)[0]) => ({
 				id: raw.id,
 				name: raw.name,
 				emoji: raw.emoji,
@@ -136,12 +136,12 @@ class ProfileServiceImpl {
 				imageId: raw.imageId,
 				settings: raw.settingsRealId
 					? {
-						id: raw.settingsRealId,
-						theme: raw.settingsTheme,
-						language: raw.settingsLanguage,
-						data: raw.settingsData,
-						profileId: raw.id,
-					}
+							id: raw.settingsRealId,
+							theme: raw.settingsTheme,
+							language: raw.settingsLanguage,
+							data: raw.settingsData,
+							profileId: raw.id,
+						}
 					: null,
 			}));
 
@@ -257,12 +257,12 @@ class ProfileServiceImpl {
 					// Crear objeto settings compatible con transformador legacy
 					settings: raw.settingsRealId
 						? {
-							id: raw.settingsRealId,
-							theme: raw.settingsTheme,
-							language: raw.settingsLanguage,
-							data: raw.settingsData,
-							profileId: raw.id,
-						}
+								id: raw.settingsRealId,
+								theme: raw.settingsTheme,
+								language: raw.settingsLanguage,
+								data: raw.settingsData,
+								profileId: raw.id,
+							}
 						: null,
 				};
 			}
@@ -328,12 +328,12 @@ class ProfileServiceImpl {
 					// Crear objeto settings compatible con transformador legacy
 					settings: raw.settingsRealId
 						? {
-							id: raw.settingsRealId,
-							theme: raw.settingsTheme,
-							language: raw.settingsLanguage,
-							data: raw.settingsData,
-							profileId: raw.id,
-						}
+								id: raw.settingsRealId,
+								theme: raw.settingsTheme,
+								language: raw.settingsLanguage,
+								data: raw.settingsData,
+								profileId: raw.id,
+							}
 						: null,
 				};
 			}
