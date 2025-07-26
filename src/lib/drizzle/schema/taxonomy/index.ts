@@ -18,7 +18,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para las etiquetas
 export const tags = sqliteTable(
@@ -167,20 +167,31 @@ export const worldItems = sqliteTable(
 		emoji: text('emoji').default('🎯'),
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
+		shortcut: text('shortcut'),
+		subtype: text('subtype'),
 		isPublic: integer('isPublic', { mode: 'boolean' }).notNull().default(false),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
 		totalVideos: integer('totalVideos').notNull().default(0),
 		type: text('type'),
 		rarity: text('rarity'),
 		value: text('value'),
 		weight: text('weight'),
+		size: text('size'),
+		material: text('material'),
 		materials: text('materials'),
+		crafting: text('crafting'),
+		requirements: text('requirements'),
+		effects: text('effects'),
 		origin: text('origin'),
 		properties: text('properties'),
 		uses: text('uses'),
 		history: text('history'),
 		notes: text('notes'),
+		lore: text('lore'),
+		sortBy: text('sortBy'),
+		filters: text('filters'),
 		featuredImage: text('featuredImage'),
 		parentId: text('parentId'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),

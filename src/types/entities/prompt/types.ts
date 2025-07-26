@@ -43,6 +43,8 @@ export interface PromptExtended extends PromptBase {
 	parsedParameters: PromptParameter[];
 	previewContent?: string;
 	lastUpdated?: Date;
+	// Additional fields for UI
+	notesEntities?: NoteWithStats[];
 }
 
 /**
@@ -147,19 +149,6 @@ export interface PromptStats {
 }
 
 /**
- * 🎯 Resultado de la ejecución de un prompt
- */
-export interface PromptExecutionResult {
-	promptId: string;
-	content: string;
-	model: string;
-	executionTime: number;
-	timestamp: Date;
-}
-
-
-
-/**
  * 🔍 Resultado de búsqueda de prompts
  */
 export interface PromptSearchResult {
@@ -184,6 +173,12 @@ export interface PromptExecutionResult {
 	status: 'pending' | 'running' | 'completed' | 'failed';
 	error?: string;
 	executionTime?: number;
+	model?: string;
+	tokens?: {
+		total?: number;
+		prompt?: number;
+		completion?: number;
+	};
 	createdAt: Date;
 	completedAt?: Date;
 }

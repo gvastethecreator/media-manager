@@ -1,4 +1,3 @@
-import { ENV } from '@/config/env';
 import type { ProcessStatus } from '@/types/folders';
 
 // Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
@@ -22,6 +21,9 @@ const EVENT_PATHS: Record<EventType, string[]> = {
 	'images:modified': ['/images'],
 	'files:modified': ['/files'],
 	'folders:modified': ['/folders'],
+	'properties:modified': ['/properties'],
+	'entities:modified': ['/entities'],
+	'wildcards:modified': ['/wildcards'],
 	'folder:progress': ['/folders'],
 	'folder:error': ['/folders'],
 	'folder:complete': ['/folders'],
@@ -70,6 +72,9 @@ export type EventType =
 	| 'images:modified'
 	| 'files:modified'
 	| 'folders:modified'
+	| 'properties:modified'
+	| 'entities:modified'
+	| 'wildcards:modified'
 	| 'folder:progress'
 	| 'folder:error'
 	| 'folder:complete'
@@ -148,7 +153,7 @@ function emitDirect(event: EventData) {
 	}
 
 	// Notificar a suscriptores
-	eventSubscribers.forEach((subscriber) => {
+	eventSubscribers.forEach((subscriber: (event: EventData) => void) => {
 		try {
 			subscriber(event);
 		} catch (error) {

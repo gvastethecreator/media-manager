@@ -28,7 +28,7 @@ const initialState = {
 function buildParentIndex(folders: Record<string, FolderWithStats>): Record<string, string[]> {
 	const index: Record<string, string[]> = {};
 
-	Object.values(folders).forEach((folder) => {
+	Object.values(folders).forEach((folder: FolderWithStats) => {
 		const parentKey = folder.parentId || 'root';
 		if (!index[parentKey]) {
 			index[parentKey] = [];
@@ -55,14 +55,14 @@ function buildTreeIndex(folders: Record<string, FolderWithStats>): Record<string
 			.map((f) => f.id);
 
 		const allDescendants = [...directChildren];
-		directChildren.forEach((childId) => {
+		directChildren.forEach((childId: string) => {
 			allDescendants.push(...getDescendants(childId, visited));
 		});
 
 		return allDescendants;
 	}
 
-	Object.keys(folders).forEach((folderId) => {
+	Object.keys(folders).forEach((folderId: string) => {
 		tree[folderId] = getDescendants(folderId);
 	});
 
@@ -214,7 +214,7 @@ export const createFolderCoreSlice: StateCreator<FolderStore, [], [], FolderStor
 		const { expandedFolders } = get();
 		const newExpanded = new Set(expandedFolders);
 
-		path.forEach((id) => newExpanded.add(id));
+		path.forEach((id: string) => newExpanded.add(id));
 
 		set({
 			expandedFolders: newExpanded,

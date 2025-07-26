@@ -53,6 +53,7 @@ export enum ServiceErrorCode {
 	// Database errors
 	DATABASE_CONNECTION_ERROR = 'database_connection_error',
 	DATABASE_QUERY_ERROR = 'database_query_error',
+	DATABASE_ERROR = 'database_error',
 	TRANSACTION_ERROR = 'transaction_error',
 
 	// File system errors
@@ -131,6 +132,7 @@ const ErrorCodeCategoryMap: Record<ServiceErrorCode, ServiceErrorCategory> = {
 	// Database errors
 	[ServiceErrorCode.DATABASE_CONNECTION_ERROR]: ServiceErrorCategory.DATABASE,
 	[ServiceErrorCode.DATABASE_QUERY_ERROR]: ServiceErrorCategory.DATABASE,
+	[ServiceErrorCode.DATABASE_ERROR]: ServiceErrorCategory.DATABASE,
 	[ServiceErrorCode.TRANSACTION_ERROR]: ServiceErrorCategory.DATABASE,
 
 	// File system errors

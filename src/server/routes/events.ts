@@ -33,10 +33,11 @@ router.post('/', async (req, res) => {
 
 		// Validar estructura del evento
 		if (!event.type) {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'Tipo de evento requerido',
 				code: 'INVALID_EVENT_TYPE',
 			});
+			return;
 		}
 
 		// Almacenar evento (para debugging)
@@ -56,7 +57,7 @@ router.post('/', async (req, res) => {
 		}
 
 		// Notificar a suscriptores (para futuras implementaciones de WebSocket/SSE)
-		eventSubscribers.forEach((subscriber) => {
+		eventSubscribers.forEach((subscriber: (event: any) => void) => {
 			try {
 				subscriber(event);
 			} catch (error) {

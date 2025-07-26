@@ -301,7 +301,7 @@ export async function findQueueJobs(
 			.limit(limit);
 
 		// Calcular información de paginación
-		const { totalPages } = getPaginationInfo(total, limit);
+		const { totalPages } = getPaginationInfo(page, limit, total);
 
 		// Transformar resultados
 		const transformedJobs = transformQueueJobs(queueJobsData);
@@ -656,7 +656,7 @@ export async function findProcessingTimes(since: Date): Promise<number[]> {
 			);
 
 		return completedJobs
-			.map((job) => {
+			.map((job: typeof completedJobs[0]) => {
 				if (job.startedAt && job.finishedAt) {
 					return job.finishedAt.getTime() - job.startedAt.getTime();
 				}

@@ -1,6 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase } from '@/types/entities/prompt/types';
-import type { PromptExtended } from '@/types/entities/prompt/extended';
+import type { PromptBase, PromptExtended } from '@/types/entities/prompt/types';
 
 const exportLogger = serverLogger.withContext('PromptExport');
 
@@ -112,8 +111,7 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 			}
 
 			// Añadir tags si existen
-			const extendedPrompt = displayPrompt as any;
-			const tags: string[] = extendedPrompt.parsedTags || [];
+			const tags: string[] = 'parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags) ? displayPrompt.parsedTags : [];
 			if (tags.length > 0) {
 				md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
 			}			// Añadir información de fecha
@@ -131,12 +129,11 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 
 		// Añadir parámetros si existen y se solicitan metadatos
 		if (includeMetadata) {
-			const extendedPrompt = displayPrompt as any;
-			const parameters = extendedPrompt.parsedParameters || {};
-			if (Object.keys(parameters).length > 0) {
+			const parameters = 'parsedParameters' in displayPrompt ? displayPrompt.parsedParameters : [];
+			if (Array.isArray(parameters) && parameters.length > 0) {
 				md += '## Parámetros\n\n';
-				for (const [key, value] of Object.entries(parameters)) {
-					md += `- **${key}:** ${JSON.stringify(value)}\n`;
+				for (const param of parameters) {
+					md += `- **${param.key}:** ${JSON.stringify(param.value)}\n`;
 				}
 			}
 		}
@@ -169,7 +166,9 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
 			}
 
 			// Añadir tags si existen
-			const tags = ('parsedTags' in displayPrompt && displayPrompt.parsedTags) || [];
+			const tags: string[] = ('parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags))
+				? displayPrompt.parsedTags
+				: [];
 			if (tags.length > 0) {
 				text += `Tags: ${tags.join(', ')}
 `;
@@ -233,7 +232,9 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 			}
 
 			// Añadir tags si existen
-			const tags: string[] = ('parsedTags' in displayPrompt && displayPrompt.parsedTags) || [];
+			const tags: string[] = ('parsedTags' in displayPrompt && Array.isArray(displayPrompt.parsedTags))
+				? displayPrompt.parsedTags
+				: [];
 			if (tags.length > 0) {
 				html += `
     <p><strong>Tags:</strong> ${tags.map((tag: string) => `<span class="tag">${escapeHtml(tag)}</span>`).join(' ')}</p>`;
@@ -256,15 +257,15 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 
 		// Añadir parámetros si existen y se solicitan metadatos
 		if (includeMetadata) {
-			const parameters = ('parsedParameters' in displayPrompt && displayPrompt.parsedParameters) || {};
-			if (Object.keys(parameters).length > 0) {
+			const parameters = 'parsedParameters' in displayPrompt ? displayPrompt.parsedParameters : [];
+			if (Array.isArray(parameters) && parameters.length > 0) {
 				html += `
   <div class="parameters">
     <h2>Parámetros</h2>
     <ul>`;
-				for (const [key, value] of Object.entries(parameters)) {
+				for (const param of parameters) {
 					html += `
-      <li><strong>${escapeHtml(key)}:</strong> ${escapeHtml(JSON.stringify(value))}</li>`;
+      <li><strong>${escapeHtml(param.key)}:</strong> ${escapeHtml(JSON.stringify(param.value))}</li>`;
 				}
 				html += `
     </ul>

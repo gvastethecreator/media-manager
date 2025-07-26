@@ -38,7 +38,7 @@ router.get('/:id', async (req, res) => {
 		const jsonFile = await getJsonFileById(id);
 
 		if (!jsonFile) {
-			return res.status(404).json({ error: 'Archivo JSON no encontrado' });
+			res.status(404).json({ error: 'Archivo JSON no encontrado' });; return;
 		}
 
 		res.json(jsonFile);
@@ -96,7 +96,4 @@ router.post('/', async (req, res) => {
 	}
 });
 
-export { router as jsonFilesRouter };
-
-// Exportación default para compatibilidad con server/index.ts
 export default router;

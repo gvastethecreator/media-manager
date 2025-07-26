@@ -11,14 +11,14 @@ router.post('/', async (req, res) => {
 		const filePath = req.body.path as string | undefined;
 		if (!filePath) {
 			downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
-			return res.status(400).json({ error: 'Se requiere una ruta de archivo' });
+			res.status(400).json({ error: 'Se requiere una ruta de archivo' });; return;
 		}
 		let fileInfo: Awaited<ReturnType<typeof getFileInfo>>;
 		try {
 			fileInfo = await getFileInfo(filePath);
 		} catch (error) {
 			downloadLogger.error(`❌ Error al obtener información del archivo: ${filePath}`, error);
-			return res.status(404).json({ error: 'Archivo no encontrado o inaccesible' });
+			res.status(404).json({ error: 'Archivo no encontrado o inaccesible' });; return;
 		}
 		try {
 			const fileBuffer = await fs.readFile(fileInfo.path);
@@ -43,7 +43,7 @@ router.get('/', (req, res) => {
 	const filePath = req.query.path as string | undefined;
 	if (!filePath) {
 		downloadLogger.error('❌ Descarga fallida: No se proporcionó ruta de archivo');
-		return res.status(400).json({ error: 'Se requiere una ruta de archivo' });
+		res.status(400).json({ error: 'Se requiere una ruta de archivo' });; return;
 	}
 	res.send(`<!DOCTYPE html>
 <html>

@@ -41,7 +41,7 @@
  */
 
 import { createHash } from 'crypto';
-import { and, asc, count, desc, eq, like, or, sum } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { imageConfig } from '@/lib/config';
@@ -578,10 +578,10 @@ class ImageService {
 					fullUrl: `/api/images/${raw.id}/original`,
 					folder: raw.folderRealId
 						? {
-								id: raw.folderRealId,
-								name: raw.folderName ?? '',
-								path: raw.folderPath ?? '',
-							}
+							id: raw.folderRealId,
+							name: raw.folderName ?? '',
+							path: raw.folderPath ?? '',
+						}
 						: null,
 				} as ImageWithStats;
 			});
@@ -735,16 +735,16 @@ class ImageService {
 			const processedImages = await db
 				.select({ count: count() })
 				.from(images)
-				.where(images.thumbnailOptimizedAt.isNotNull());
-			const erroredImages = await db.select({ count: count() }).from(images).where(images.thumbnailError.isNotNull());
+				.where(isNotNull(images.thumbnailOptimizedAt));
+			const erroredImages = await db.select({ count: count() }).from(images).where(isNotNull(images.thumbnailError));
 			const totalThumbnailSize = await db
 				.select({ sum: sum(images.thumbnailSize) })
 				.from(images)
-				.where(images.thumbnailSize.isNotNull());
+				.where(isNotNull(images.thumbnailSize));
 			const lastProcessedImage = await db
 				.select({ date: images.thumbnailOptimizedAt })
 				.from(images)
-				.where(images.thumbnailOptimizedAt.isNotNull())
+				.where(isNotNull(images.thumbnailOptimizedAt))
 				.orderBy(desc(images.thumbnailOptimizedAt))
 				.limit(1);
 

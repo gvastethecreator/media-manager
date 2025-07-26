@@ -78,7 +78,8 @@ export interface ActivityStore extends ActivityState {
 	createActivity: (data: {
 		type: string;
 		description?: string;
-		imageId?: string;
+		entityType?: string;
+		entityId?: string;
 		metadata?: Record<string, any>;
 	}) => Promise<ActivityComplete | undefined>;
 	removeActivity: (id: string) => Promise<boolean>;
@@ -157,7 +158,9 @@ export const useActivityStore = create<ActivityStore>()(
 					},
 
 					getActivitiesByImageId: (imageId: string) => {
-						return Object.values(get().activities).filter((activity) => activity.imageId === imageId);
+						return Object.values(get().activities).filter((activity) =>
+							activity.entityType === 'image' && activity.entityId === imageId
+						);
 					},
 
 					// Operaciones síncronas
@@ -298,7 +301,8 @@ export const useActivityStore = create<ActivityStore>()(
 					createActivity: async (data: {
 						type: string;
 						description?: string;
-						imageId?: string;
+						entityType?: string;
+						entityId?: string;
 						metadata?: Record<string, any>;
 					}) => {
 						try {
@@ -310,7 +314,10 @@ export const useActivityStore = create<ActivityStore>()(
 							const createdActivity = await createActivityInApi({
 								type: data.type,
 								description: data.description ?? '',
-								imageId: data.imageId,
+								entityType: data.entityType ?? 'system',
+								entityId: data.entityId ?? '',
+								action: 'create',
+								userId: 'system', // TODO: Get from auth
 							});
 							const extendedActivity = extendActivity(createdActivity);
 

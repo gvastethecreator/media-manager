@@ -368,7 +368,7 @@ export function getActivityService(): ActivityService {
 }
 
 // Alias para compatibilidad con rutas del servidor
-export { ActivityServiceImpl as ActivityService };
+export const ActivityService = getActivityService();
 
 /**
  * Función de inicialización del servicio

@@ -120,7 +120,8 @@ export function calculatePromptStats(
 			// Sumar costo
 			const inputTokens = execution.tokens?.prompt || 0;
 			const outputTokens = execution.tokens?.completion || 0;
-			totalCost += calculateCost(execution.model || prompt.model, inputTokens, outputTokens);
+			const modelToUse = execution.model || PromptModel.GPT_3_5;
+			totalCost += calculateCost(modelToUse, inputTokens, outputTokens);
 
 			// Sumar tiempo de ejecución
 			totalExecutionTime += execution.executionTime || 0;

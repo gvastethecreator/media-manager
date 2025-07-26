@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
-import { Router } from 'express';
+import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
+import type { ExpressHandler } from '@/lib/express-types';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -23,7 +24,7 @@ import type { AlbumWithStats } from '@/types/entities/album';
  *  - DELETE /api/albums/:id/images/:imageId → Quitar imagen del album
  */
 
-export const albumsRouter = Router();
+export const albumsRouter = express.Router();
 
 // Schemas de validación
 const AlbumFiltersSchema = z.object({
@@ -76,10 +77,10 @@ const AlbumUpdateSchema = z.object({
 
 const albumLogger = serverLogger.withContext('AlbumsAPI');
 
-interface AlbumCardData extends Omit<AlbumWithStats, 'filters'> {
+interface AlbumCardData extends Omit<AlbumWithStats, 'filters' | 'metadata'> {
 	recentImages?: string[];
 	recentVideos?: string[];
-	totalSize?: number;
+	totalSize: number; // Make required to match expected type
 	filters?: unknown[] | string;
 	metadata?: {
 		itemCount?: number;
@@ -89,7 +90,7 @@ interface AlbumCardData extends Omit<AlbumWithStats, 'filters'> {
 		thumbnailUrls?: string[];
 		lastModified?: Date | string;
 		entitiesCount?: number;
-	};
+	} | null;
 	viewConfig?: {
 		theme?: string;
 		layout?: string;
@@ -106,7 +107,7 @@ interface ThumbnailImage {
 }
 
 // GET /api/albums - Listar albums
-albumsRouter.get('/', async (req, res) => {
+const getAlbumsHandler: ExpressHandler = async (req: Request, res: Response) => {
 	try {
 		// Verificar si existen albums
 		const albumCount = await db.select({ count: count() }).from(albums);
@@ -132,12 +133,18 @@ albumsRouter.get('/', async (req, res) => {
 		});
 	} catch (error) {
 		console.error('Error en /api/albums:', error);
-		res.status(500).json({ error: 'Error interno del servidor', details: error?.message });
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			details: error instanceof Error ? error.message : 'Error desconocido'
+		});
 	}
-});
+};
+
+albumsRouter.get('/', getAlbumsHandler);
+
 
 // GET /api/albums/:id - Obtener album específico
-albumsRouter.get('/:id', async (req, res) => {
+const getAlbumByIdHandler: ExpressHandler = async (req, res) => {
 	const { id } = req.params;
 
 	try {
@@ -149,7 +156,8 @@ albumsRouter.get('/:id', async (req, res) => {
 		});
 
 		if (!album) {
-			return res.status(404).json({ error: 'Album no encontrado' });
+			res.status(404).json({ error: 'Album no encontrado' });
+			return;
 		}
 
 		const albumWithStats = toAlbumWithStats(album);
@@ -158,10 +166,12 @@ albumsRouter.get('/:id', async (req, res) => {
 		console.error('Error obteniendo album:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+albumsRouter.get('/:id', getAlbumByIdHandler);
 
 // GET /api/albums/:id/images - Obtener imágenes del album
-albumsRouter.get('/:id/images', async (req, res) => {
+const getAlbumImagesHandler: ExpressHandler = async (req, res) => {
 	const { id } = req.params;
 
 	try {
@@ -184,7 +194,7 @@ albumsRouter.get('/:id/images', async (req, res) => {
 		});
 
 		if (!album) {
-			return res.status(404).json({ error: 'Album no encontrado' });
+			res.status(404).json({ error: 'Album no encontrado' });; return;
 		}
 
 		// Serializar imágenes (usar serializeImage si existe)
@@ -193,13 +203,15 @@ albumsRouter.get('/:id/images', async (req, res) => {
 		console.error('Error obteniendo imágenes del album:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+albumsRouter.get('/:id/images', getAlbumImagesHandler);
 
 // POST /api/albums - Crear album
-albumsRouter.post('/', async (req, res) => {
+const createAlbumHandler: ExpressHandler = async (req, res) => {
 	const parse = AlbumCreateSchema.safeParse(req.body);
 	if (!parse.success) {
-		return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });; return;
 	}
 
 	try {
@@ -218,7 +230,7 @@ albumsRouter.post('/', async (req, res) => {
 		});
 
 		if (!newAlbum) {
-			return res.status(500).json({ error: 'Error creando álbum' });
+			res.status(500).json({ error: 'Error creando álbum' });; return;
 		}
 
 		// Para serializar el álbum, necesitamos las relaciones. Realizamos una nueva consulta.
@@ -230,7 +242,7 @@ albumsRouter.post('/', async (req, res) => {
 		});
 
 		if (!album) {
-			return res.status(500).json({ error: 'Error obteniendo álbum creado' });
+			res.status(500).json({ error: 'Error obteniendo álbum creado' });; return;
 		}
 
 		res.status(201).json(serializeAlbum(album));
@@ -238,15 +250,17 @@ albumsRouter.post('/', async (req, res) => {
 		console.error('Error creando album:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+albumsRouter.post('/', createAlbumHandler);
 
 // PUT /api/albums/:id - Actualizar album
-albumsRouter.put('/:id', async (req, res) => {
+const updateAlbumHandler: ExpressHandler = async (req, res) => {
 	const { id } = req.params;
 	const parse = AlbumUpdateSchema.safeParse(req.body);
 
 	if (!parse.success) {
-		return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });; return;
 	}
 
 	try {
@@ -265,7 +279,7 @@ albumsRouter.put('/:id', async (req, res) => {
 		});
 
 		if (!updatedAlbum) {
-			return res.status(404).json({ error: 'Album no encontrado' });
+			res.status(404).json({ error: 'Album no encontrado' });; return;
 		}
 
 		// Para serializar el álbum, necesitamos las relaciones. Realizamos una nueva consulta.
@@ -277,7 +291,7 @@ albumsRouter.put('/:id', async (req, res) => {
 		});
 
 		if (!album) {
-			return res.status(500).json({ error: 'Error obteniendo álbum actualizado' });
+			res.status(500).json({ error: 'Error obteniendo álbum actualizado' });; return;
 		}
 
 		res.json(serializeAlbum(album));
@@ -285,7 +299,9 @@ albumsRouter.put('/:id', async (req, res) => {
 		console.error('Error actualizando album:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
-});
+};
+
+albumsRouter.put('/:id', updateAlbumHandler);
 
 // DELETE /api/albums/:id - Eliminar album
 albumsRouter.delete('/:id', async (req, res) => {
@@ -386,14 +402,14 @@ albumsRouter.get('/:id/card-data', async (req, res) => {
 		});
 
 		if (!album) {
-			return res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });
+			res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });; return;
 		}
 
 		// Obtener imágenes recientes relacionadas con este álbum
 		const recentImages = await db.query.images.findMany({
 			where: inArray(
 				images.id,
-				album.images.map((img) => img.id)
+				album.images.map((img: any) => img.id)
 			),
 			columns: {
 				id: true,
@@ -405,13 +421,13 @@ albumsRouter.get('/:id/card-data', async (req, res) => {
 			limit: 6,
 		});
 
-		const recentImagePaths = recentImages.map((img) => `/api/thumbnails/${img.id}`);
+		const recentImagePaths = recentImages.map((img: any) => `/api/thumbnails/${img.id}`);
 
 		// Obtener videos recientes relacionados con este álbum
 		const recentVideos = await db.query.videos.findMany({
 			where: inArray(
 				videos.id,
-				album.videos.map((vid) => vid.id)
+				album.videos.map((vid: any) => vid.id)
 			),
 			columns: {
 				id: true,
@@ -423,7 +439,7 @@ albumsRouter.get('/:id/card-data', async (req, res) => {
 			limit: 3,
 		});
 
-		const recentVideoPaths = recentVideos.map((video) => `/api/video-thumbnails/${video.id}`);
+		const recentVideoPaths = recentVideos.map((video: any) => `/api/video-thumbnails/${video.id}`);
 
 		// Intentar parsear el campo filters si existe
 		let filters = [];
@@ -531,59 +547,59 @@ albumsRouter.get('/cards', async (req, res) => {
 			where: conditions.length > 0 ? and(...conditions) : undefined,
 			with: includeStatsFlag
 				? {
-						images: { columns: { id: true } },
-						videos: { columns: { id: true } },
-						collections: { columns: { id: true } },
-						tags: { columns: { id: true } },
-						characters: { columns: { id: true } },
-						places: { columns: { id: true } },
-						worldItems: { columns: { id: true } },
-						concepts: { columns: { id: true } },
-						prompts: { columns: { id: true } },
-						notes: { columns: { id: true } },
-						wildcards: { columns: { id: true } },
-						properties: { columns: { id: true } },
-						groups: { columns: { id: true } },
-					}
+					images: { columns: { id: true } },
+					videos: { columns: { id: true } },
+					collections: { columns: { id: true } },
+					tags: { columns: { id: true } },
+					characters: { columns: { id: true } },
+					places: { columns: { id: true } },
+					worldItems: { columns: { id: true } },
+					concepts: { columns: { id: true } },
+					prompts: { columns: { id: true } },
+					notes: { columns: { id: true } },
+					wildcards: { columns: { id: true } },
+					properties: { columns: { id: true } },
+					groups: { columns: { id: true } },
+				}
 				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
 		});
 
 		// Transformar resultados a AlbumCardData
-		const results: AlbumCardData[] = albumResults.map((album) => ({
+		const results: AlbumCardData[] = albumResults.map((album: any) => ({
 			...album,
 			stats: includeStatsFlag
 				? {
-						imageCount: album.images?.length || 0,
-						videoCount: album.videos?.length || 0,
-						collectionCount: album.collections?.length || 0,
-						tagCount: album.tags?.length || 0,
-						characterCount: album.characters?.length || 0,
-						placeCount: album.places?.length || 0,
-						worldItemCount: album.worldItems?.length || 0,
-						conceptCount: album.concepts?.length || 0,
-						promptCount: album.prompts?.length || 0,
-						noteCount: album.notes?.length || 0,
-						wildcardCount: album.wildcards?.length || 0,
-						propertyCount: album.properties?.length || 0,
-						groupCount: album.groups?.length || 0,
-					}
+					imageCount: album.images?.length || 0,
+					videoCount: album.videos?.length || 0,
+					collectionCount: album.collections?.length || 0,
+					tagCount: album.tags?.length || 0,
+					characterCount: album.characters?.length || 0,
+					placeCount: album.places?.length || 0,
+					worldItemCount: album.worldItems?.length || 0,
+					conceptCount: album.concepts?.length || 0,
+					promptCount: album.prompts?.length || 0,
+					noteCount: album.notes?.length || 0,
+					wildcardCount: album.wildcards?.length || 0,
+					propertyCount: album.properties?.length || 0,
+					groupCount: album.groups?.length || 0,
+				}
 				: {
-						imageCount: 0,
-						videoCount: 0,
-						collectionCount: 0,
-						tagCount: 0,
-						characterCount: 0,
-						placeCount: 0,
-						worldItemCount: 0,
-						conceptCount: 0,
-						promptCount: 0,
-						noteCount: 0,
-						wildcardCount: 0,
-						propertyCount: 0,
-						groupCount: 0,
-					},
+					imageCount: 0,
+					videoCount: 0,
+					collectionCount: 0,
+					tagCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
+				},
 		}));
 
 		res.json(results);
@@ -612,7 +628,7 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 		});
 
 		if (!album) {
-			return res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });
+			res.status(404).json({ error: `Álbum no encontrado: ${albumId}` });; return;
 		}
 
 		const media: ThumbnailImage[] = [];
@@ -622,7 +638,7 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 			const recentImages = await db.query.images.findMany({
 				where: inArray(
 					images.id,
-					album.images.map((img) => img.id)
+					album.images.map((img: any) => img.id)
 				),
 				columns: {
 					id: true,
@@ -635,7 +651,7 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 
 			media.push(
 				...recentImages.map(
-					(img): ThumbnailImage => ({
+					(img: any): ThumbnailImage => ({
 						id: img.id,
 						name: img.name,
 						thumbnailUrl: `/api/thumbnails/${img.id}`,
@@ -651,7 +667,7 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 			const recentVideos = await db.query.videos.findMany({
 				where: inArray(
 					videos.id,
-					album.videos.map((vid) => vid.id)
+					album.videos.map((vid: any) => vid.id)
 				),
 				columns: {
 					id: true,
@@ -664,7 +680,7 @@ albumsRouter.get('/:id/recent-media', async (req, res) => {
 
 			media.push(
 				...recentVideos.map(
-					(video): ThumbnailImage => ({
+					(video: any): ThumbnailImage => ({
 						id: video.id,
 						name: video.name,
 						thumbnailUrl: `/api/video-thumbnails/${video.id}`,
@@ -717,7 +733,7 @@ albumsRouter.get('/search', async (req, res) => {
 		} = req.query;
 
 		if (!searchTerm) {
-			return res.status(400).json({ error: 'searchTerm es requerido' });
+			res.status(400).json({ error: 'searchTerm es requerido' });; return;
 		}
 
 		const limitNum = Number.parseInt(limit as string, 10);
@@ -731,9 +747,10 @@ albumsRouter.get('/search', async (req, res) => {
 			conditions.push(eq(albums.category, category as string));
 		}
 
-		if (!includeHiddenFlag) {
-			conditions.push(eq(albums.isHidden, false));
-		}
+		// Note: isHidden column doesn't exist in albums table
+		// if (!includeHiddenFlag) {
+		//	conditions.push(eq(albums.isHidden, false));
+		// }
 
 		// Ordenamiento
 		const orderColumn =
@@ -744,20 +761,20 @@ albumsRouter.get('/search', async (req, res) => {
 			where: and(...conditions),
 			with: includeStatsFlag
 				? {
-						images: { columns: { id: true } },
-						videos: { columns: { id: true } },
-						collections: { columns: { id: true } },
-						tags: { columns: { id: true } },
-						characters: { columns: { id: true } },
-						places: { columns: { id: true } },
-						worldItems: { columns: { id: true } },
-						concepts: { columns: { id: true } },
-						prompts: { columns: { id: true } },
-						notes: { columns: { id: true } },
-						wildcards: { columns: { id: true } },
-						properties: { columns: { id: true } },
-						groups: { columns: { id: true } },
-					}
+					images: { columns: { id: true } },
+					videos: { columns: { id: true } },
+					collections: { columns: { id: true } },
+					tags: { columns: { id: true } },
+					characters: { columns: { id: true } },
+					places: { columns: { id: true } },
+					worldItems: { columns: { id: true } },
+					concepts: { columns: { id: true } },
+					prompts: { columns: { id: true } },
+					notes: { columns: { id: true } },
+					wildcards: { columns: { id: true } },
+					properties: { columns: { id: true } },
+					groups: { columns: { id: true } },
+				}
 				: undefined,
 			orderBy: orderDirection(orderColumn),
 			limit: limitNum,
@@ -765,39 +782,39 @@ albumsRouter.get('/search', async (req, res) => {
 		});
 
 		// Transformar resultados
-		const results: AlbumCardData[] = albumResults.map((album) => ({
+		const results: AlbumCardData[] = albumResults.map((album: any) => ({
 			...album,
 			stats: includeStatsFlag
 				? {
-						imageCount: album.images?.length || 0,
-						videoCount: album.videos?.length || 0,
-						collectionCount: album.collections?.length || 0,
-						tagCount: album.tags?.length || 0,
-						characterCount: album.characters?.length || 0,
-						placeCount: album.places?.length || 0,
-						worldItemCount: album.worldItems?.length || 0,
-						conceptCount: album.concepts?.length || 0,
-						promptCount: album.prompts?.length || 0,
-						noteCount: album.notes?.length || 0,
-						wildcardCount: album.wildcards?.length || 0,
-						propertyCount: album.properties?.length || 0,
-						groupCount: album.groups?.length || 0,
-					}
+					imageCount: album.images?.length || 0,
+					videoCount: album.videos?.length || 0,
+					collectionCount: album.collections?.length || 0,
+					tagCount: album.tags?.length || 0,
+					characterCount: album.characters?.length || 0,
+					placeCount: album.places?.length || 0,
+					worldItemCount: album.worldItems?.length || 0,
+					conceptCount: album.concepts?.length || 0,
+					promptCount: album.prompts?.length || 0,
+					noteCount: album.notes?.length || 0,
+					wildcardCount: album.wildcards?.length || 0,
+					propertyCount: album.properties?.length || 0,
+					groupCount: album.groups?.length || 0,
+				}
 				: {
-						imageCount: 0,
-						videoCount: 0,
-						collectionCount: 0,
-						tagCount: 0,
-						characterCount: 0,
-						placeCount: 0,
-						worldItemCount: 0,
-						conceptCount: 0,
-						promptCount: 0,
-						noteCount: 0,
-						wildcardCount: 0,
-						propertyCount: 0,
-						groupCount: 0,
-					},
+					imageCount: 0,
+					videoCount: 0,
+					collectionCount: 0,
+					tagCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
+				},
 		}));
 
 		res.json(results);
@@ -817,7 +834,7 @@ async function getAlbumStats(albumId: string): Promise<{
 	entitiesCount: number;
 }> {
 	try {
-		const stats = await OptimizedStatsService.getAlbumStats(albumId);
+		const stats = await OptimizedStatsService.getInstance().getAlbumStatsOptimized(albumId);
 		return {
 			imageCount: stats.imageCount || 0,
 			videoCount: stats.videoCount || 0,
