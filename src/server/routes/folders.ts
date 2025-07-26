@@ -57,7 +57,7 @@ router.get('/', async (_req, res) => {
 			.orderBy(asc(folders.name));
 
 		// Transformar a formato compatible
-		const transformedFolders = drizzleFolders.map((folder) => ({
+		const transformedFolders = drizzleFolders.map((folder: any) => ({
 			...folder,
 			isFavorite: Boolean(folder.isFavorite),
 			autoReindex: Boolean(folder.autoReindex),

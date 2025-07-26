@@ -1,7 +1,7 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response, RequestHandler } from 'express';
 import { Router } from 'express';
 
-export type ExpressHandler = (req: Request, res: Response, next?: NextFunction) => Promise<any> | any;
+export type ExpressHandler = RequestHandler;
 
 export const createTypedRouter = (): Router => {
 	return Router();

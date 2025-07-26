@@ -81,7 +81,7 @@ export async function getJsonFiles(): Promise<JsonFileWithStats[]> {
 			.orderBy(asc(jsonFiles.name));
 
 		// Transformar a formato compatible con transformadores legacy
-		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile) => ({
+		const transformedJsonFiles = drizzleJsonFiles.map((rawJsonFile: typeof drizzleJsonFiles[0]) => ({
 			...rawJsonFile,
 			isFavorite: Boolean(rawJsonFile.isFavorite),
 		}));

@@ -699,7 +699,7 @@ export async function getRecentGroupMediaService(groupId: string, limit = 6) {
 			.limit(Math.floor(limit / 2));
 
 		// Combinar y formatear los resultados
-		const imageResults = recentImages.map((img) => ({
+		const imageResults = recentImages.map((img: typeof recentImages[0]) => ({
 			id: img.imageId,
 			name: `Image ${img.imageId}`,
 			thumbnailUrl: `/api/images/${img.imageId}/thumbnail`,
@@ -707,7 +707,7 @@ export async function getRecentGroupMediaService(groupId: string, limit = 6) {
 			isVideo: false,
 		}));
 
-		const videoResults = recentVideos.map((video) => ({
+		const videoResults = recentVideos.map((video: typeof recentVideos[0]) => ({
 			id: video.videoId,
 			name: `Video ${video.videoId}`,
 			thumbnailUrl: `/api/videos/${video.videoId}/thumbnail`,
@@ -742,8 +742,8 @@ export async function getGroupCardDataService(groupId: string) {
 
 		// Obtener imágenes y videos recientes
 		const recentMedia = await getRecentGroupMediaService(groupData.id, 6);
-		const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
-		const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
+		const recentImagePaths = recentMedia.filter((media: typeof recentMedia[0]) => !media.isVideo).map((media: typeof recentMedia[0]) => media.thumbnailUrl);
+		const recentVideoPaths = recentMedia.filter((media: typeof recentMedia[0]) => media.isVideo).map((media: typeof recentMedia[0]) => media.thumbnailUrl);
 
 		// Contar entidades relacionadas (usando Drizzle)
 		const [

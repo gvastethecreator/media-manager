@@ -52,7 +52,7 @@ router.get('/:id', async (req, res) => {
 		const { id } = req.params;
 		const workflow = await getWorkflowById(id);
 		if (!workflow) {
-			return res.status(404).json({ error: 'Workflow no encontrado' });
+			res.status(404).json({ error: 'Workflow no encontrado' });; return;
 		}
 		res.json(workflow);
 	} catch (error) {

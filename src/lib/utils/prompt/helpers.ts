@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeParameters, deserializeTags } from '@/transformers/prompt';
-import type { PromptComplete, PromptParameter, PromptExtended } from '@/types/entities/prompt/types';
+import type { PromptComplete, PromptExtended } from '@/types/entities/prompt/types';
 
 const helpersLogger = serverLogger.withContext('PromptHelpers');
 
@@ -102,46 +102,96 @@ export function replaceVariablesInContent(content: string, variables: Record<str
  */
 export function preparePromptForDisplay(prompt: PromptComplete): PromptExtended {
 	try {
+		// Extraer propiedades base sin notes
+		const { notes: _, ...basePrompt } = prompt;
+
 		return {
-			...prompt,
-			parsedTags: Array.isArray(prompt.tags)
-				? prompt.tags
-				: typeof prompt.tags === 'string'
-					? deserializeTags(prompt.tags)
-					: [],
-			parsedParameters:
-				typeof prompt.parameters === 'object' && prompt.parameters !== null
-					? Object.entries(prompt.parameters).map(([key, value]) => ({ key, value }))
-					: typeof prompt.parameters === 'string'
-						? deserializeParameters(prompt.parameters)
-						: [],
-			previewContent: prompt.content ? `${prompt.content.substring(0, 100)}...` : undefined,
-			lastUpdated: prompt.updatedAt,
-		};
+		...basePrompt,
+		notes: prompt.notes ? JSON.stringify(prompt.notes) : null,
+		parsedTags: Array.isArray(prompt.tags)
+			? prompt.tags
+			: typeof prompt.tags === 'string'
+				? deserializeTags(prompt.tags)
+				: [],
+		parsedParameters:
+			typeof prompt.parameters === 'string' && prompt.parameters !== null
+				? deserializeParameters(prompt.parameters)
+				: [],
+		previewContent: prompt.content ? `${prompt.content.substring(0, 100)}...` : undefined,
+		lastUpdated: prompt.updatedAt,
+		notesEntities: prompt.notes,
+	};
 	} catch (error) {
 		helpersLogger.error('❌ Error al preparar prompt para mostrar:', error);
+		// Extraer propiedades base sin notes para el caso de error
+		const { notes: _, ...basePrompt } = prompt;
 		return {
-			...prompt,
+			...basePrompt,
+			notes: null,
 			parsedTags: [],
 			parsedParameters: [],
+			notesEntities: [],
 		};
 	}
 }
 
 /**
  * Convierte un prompt extendido a formato para guardar en la base de datos
- * @param prompt Prompt extendido desde UI
+ * @param extendedPrompt Prompt extendido desde UI
  * @returns Prompt básico para guardar
  */
-export function preparePromptForSaving(prompt: PromptExtended): PromptComplete {
+export function preparePromptForSaving(extendedPrompt: PromptExtended): PromptComplete {
 	try {
+		// Serializar parsedParameters y parsedTags
+		const serializedParameters = JSON.stringify(extendedPrompt.parsedParameters || []);
+		const serializedTags = JSON.stringify(extendedPrompt.parsedTags || []);
+
+		// Destructurar para separar las propiedades extendidas de las base
+		const {
+			parsedTags,
+			parsedParameters,
+			previewContent,
+			lastUpdated,
+			notesEntities,
+			...basePrompt
+		} = extendedPrompt;
+
 		return {
-			...prompt,
-			tags: prompt.parsedTags || [],
-			parameters: prompt.parsedParameters || [],
+			...basePrompt,
+			tags: serializedTags,
+			parameters: serializedParameters,
+			notes: notesEntities,
 		};
 	} catch (error) {
 		helpersLogger.error('❌ Error al preparar prompt para guardar:', error);
-		return prompt;
+		// Crear un objeto mínimo válido para PromptComplete
+		const baseFields = {
+			id: extendedPrompt.id,
+			name: extendedPrompt.name,
+			description: extendedPrompt.description || null,
+			emoji: extendedPrompt.emoji || null,
+			color: extendedPrompt.color || null,
+			category: extendedPrompt.category || null,
+			isPublic: extendedPrompt.isPublic || false,
+			isFavorite: extendedPrompt.isFavorite || false,
+			totalImages: extendedPrompt.totalImages || 0,
+			totalVideos: extendedPrompt.totalVideos || 0,
+			type: extendedPrompt.type || null,
+			content: extendedPrompt.content || null,
+			parameters: extendedPrompt.parameters || null,
+			style: extendedPrompt.style || null,
+			mood: extendedPrompt.mood || null,
+			lighting: extendedPrompt.lighting || null,
+			composition: extendedPrompt.composition || null,
+			technique: extendedPrompt.technique || null,
+			inspiration: extendedPrompt.inspiration || null,
+			featuredImage: extendedPrompt.featuredImage || null,
+			parentId: extendedPrompt.parentId || null,
+			purpose: extendedPrompt.purpose || null,
+			createdAt: extendedPrompt.createdAt,
+			updatedAt: extendedPrompt.updatedAt,
+			tags: '[]',
+		};
+		return baseFields;
 	}
 }

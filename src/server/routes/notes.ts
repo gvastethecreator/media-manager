@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
 		const note = await noteService.getNoteById(id);
 
 		if (!note) {
-			return res.status(404).json({ error: 'Nota no encontrada' });
+			res.status(404).json({ error: 'Nota no encontrada' });; return;
 		}
 
 		res.json(toNoteWithStats(note));
@@ -138,7 +138,7 @@ router.put('/:id', async (req, res) => {
 		const note = await noteService.updateNote(id, validatedData);
 
 		if (!note) {
-			return res.status(404).json({ error: 'Nota no encontrada' });
+			res.status(404).json({ error: 'Nota no encontrada' });; return;
 		}
 
 		res.json(toNoteWithStats(note));
@@ -156,7 +156,7 @@ router.delete('/:id', async (req, res) => {
 		const deleted = await noteService.deleteNote(id);
 
 		if (!deleted) {
-			return res.status(404).json({ error: 'Nota no encontrada' });
+			res.status(404).json({ error: 'Nota no encontrada' });; return;
 		}
 
 		res.status(204).send();

@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = GroupFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			return res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });; return;
 		}
 
 		const filters = filtersResult.data;
@@ -105,7 +105,7 @@ router.get('/:id', async (req, res) => {
 		const { id } = req.params;
 
 		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de grupo inválido' });
+			res.status(400).json({ error: 'ID de grupo inválido' });; return;
 		}
 
 		const groupResult = await db
@@ -122,7 +122,7 @@ router.get('/:id', async (req, res) => {
 
 		const group = groupResult[0];
 		if (!group) {
-			return res.status(404).json({ error: 'Grupo no encontrado' });
+			res.status(404).json({ error: 'Grupo no encontrado' });; return;
 		}
 
 		// Formatear respuesta para compatibilidad

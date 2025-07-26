@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
 		const { query, limit = '100', type = 'all', sortBy = 'relevance', sortOrder = 'desc' } = req.query;
 
 		if (!query || typeof query !== 'string') {
-			return res.status(400).json({ error: 'El parámetro query es requerido' });
+			res.status(400).json({ error: 'El parámetro query es requerido' });; return;
 		}
 
 		const startTime = Date.now();
@@ -41,7 +41,7 @@ router.get('/images', async (req, res) => {
 		const { query, limit = '100' } = req.query;
 
 		if (!query || typeof query !== 'string') {
-			return res.status(400).json({ error: 'El parámetro query es requerido' });
+			res.status(400).json({ error: 'El parámetro query es requerido' });; return;
 		}
 
 		const startTime = Date.now();

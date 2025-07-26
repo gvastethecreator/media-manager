@@ -17,16 +17,46 @@ import {
 	serializeFileOperationResult,
 } from '@/transformers/file';
 import {
-	type DirectoryReadResult,
 	type FileBase,
-	type FileCopyMoveResult,
 	FileErrorCode,
 	FileEventType,
-	type FileInfo,
-	type FileOperationOptions,
-	type FileOperationResult,
 	FileType,
 } from '@/types/entities/file';
+
+// Tipos temporales para compilación
+interface FileInfo {
+	id: string;
+	name: string;
+	path: string;
+	type: FileType;
+	size: number;
+	isDirectory: boolean;
+	mimeType: string;
+	createdAt: Date;
+	modifiedAt: Date;
+}
+
+interface DirectoryReadResult {
+	path: string;
+	items: FileInfo[];
+	total: number;
+}
+
+interface FileOperationOptions {
+	overwrite?: boolean;
+	recursive?: boolean;
+}
+
+interface FileOperationResult {
+	success: boolean;
+	path: string;
+	message?: string;
+}
+
+interface FileCopyMoveResult extends FileOperationResult {
+	source: string;
+	destination: string;
+}
 
 const logger = serverLogger.withContext('FileService');
 

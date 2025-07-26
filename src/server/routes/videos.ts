@@ -100,7 +100,7 @@ router.delete('/:id', async (req, res) => {
 		const { id } = req.params;
 		const result = await deleteVideo(id);
 		if (!result.success) {
-			return res.status(404).json({ error: 'Video no encontrado' });
+			res.status(404).json({ error: 'Video no encontrado' });; return;
 		}
 		res.json({
 			success: true,

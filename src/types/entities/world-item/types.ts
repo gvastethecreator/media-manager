@@ -16,7 +16,7 @@ import type { NoteWithStats } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagWithStats } from '../tag/types';
+import type { TagWithStats } from '../tag';
 import type { VideoWithStats } from '../video';
 import type { WildcardWithStats } from '../wildcard';
 
@@ -111,7 +111,7 @@ export interface WorldItemStatistics {
 	lastUsed: Date | null;
 }
 
-export interface WorldItemWithStats extends Omit<WorldItemBase, 'totalImages' | 'totalVideos'> {
+export interface WorldItemWithStats extends Omit<WorldItemBase, 'totalImages' | 'totalVideos' | 'properties' | 'notes'> {
 	entityType: 'world-item';
 	_stats: WorldItemStatistics;
 	_count?: {
@@ -148,7 +148,7 @@ export interface WorldItemWithStats extends Omit<WorldItemBase, 'totalImages' | 
 /**
  * 🌍 WorldItem completo con relaciones
  */
-export interface WorldItemComplete extends WorldItemBase {
+export interface WorldItemComplete extends Omit<WorldItemBase, 'properties' | 'notes'> {
 	images?: ImageWithStats[];
 	videos?: VideoWithStats[];
 	albums?: AlbumWithStats[];
@@ -181,7 +181,7 @@ export interface WorldItemComplete extends WorldItemBase {
 
 // --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface WorldItemCreateInput extends Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt'> { }
 
 export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
 

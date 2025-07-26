@@ -104,7 +104,7 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = ImageFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			return res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });; return;
 		}
 
 		const filters = filtersResult.data;
@@ -240,7 +240,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 		const { id } = req.params;
 		const buffer = await imageService.getThumbnail(id);
 		if (!buffer) {
-			return res.status(404).send('Thumbnail not found');
+			res.status(404).send('Thumbnail not found');; return;
 		}
 		res.set({
 			'Content-Type': 'image/webp', // Asumimos WEBP por defecto, se puede mejorar
@@ -260,7 +260,7 @@ router.get('/:id', async (req, res) => {
 		const { id } = req.params;
 
 		if (!z.string().uuid().safeParse(id).success) {
-			return res.status(400).json({ error: 'ID de imagen inválido' });
+			res.status(400).json({ error: 'ID de imagen inválido' });; return;
 		}
 
 		const imageResult = await db
@@ -296,7 +296,7 @@ router.get('/:id', async (req, res) => {
 
 		const image = imageResult[0];
 		if (!image) {
-			return res.status(404).json({ error: 'Imagen no encontrada' });
+			res.status(404).json({ error: 'Imagen no encontrada' });; return;
 		}
 
 		// Formatear respuesta para compatibilidad

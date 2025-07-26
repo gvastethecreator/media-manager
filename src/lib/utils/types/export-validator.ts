@@ -13,7 +13,7 @@ import type { CollectionWithStats } from '@/types/entities/collection/types';
 import type { ConceptWithStats } from '@/types/entities/concept/types';
 import type { FolderWithStats } from '@/types/entities/folder/types';
 import type { GroupWithStats } from '@/types/entities/group/types';
-import type { ImageComplete } from '@/types/entities/image/types';
+import type { ImageComplete } from '@/types/entities/image';
 import type { NoteComplete } from '@/types/entities/note/types';
 import type { PlaceComplete } from '@/types/entities/place/types';
 import type { PromptComplete } from '@/types/entities/prompt/types';

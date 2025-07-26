@@ -67,7 +67,24 @@ export const ConceptService = {
 				})
 				.returning();
 
-			const concept = result[0] as ConceptBase;
+			const conceptBase = result[0] as ConceptBase;
+
+			// Transformar a ConceptWithStats
+			const concept = fromDrizzleConcept(conceptBase, {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			});
 
 			// Emitir eventos con el nuevo sistema
 			await emit({
@@ -270,7 +287,7 @@ export const ConceptService = {
 
 			if (category) {
 				if (Array.isArray(category)) {
-					conditions.push(...category.map((cat) => eq(concepts.category, cat)));
+					conditions.push(...category.map((cat: typeof category[0]) => eq(concepts.category, cat)));
 				} else {
 					conditions.push(eq(concepts.category, category));
 				}
@@ -363,13 +380,17 @@ export const ConceptService = {
 					return fromDrizzleConcept(
 						{
 							...rawConcept,
+							content: rawConcept.description || '', // Usar description como content por compatibilidad
+							emoji: rawConcept.emoji || '💡',
+							color: rawConcept.color || '#3b82f6',
+							updatedAt: rawConcept.updatedAt || new Date(),
 							isFavorite: Boolean(rawConcept.isFavorite),
 							isPublic: Boolean(rawConcept.isPublic),
 						},
 						counts
 					);
 				})
-				.filter((concept): concept is ConceptWithStats => concept !== null);
+				.filter((concept: ConceptWithStats | null): concept is ConceptWithStats => concept !== null);
 
 			// Obtener estadísticas
 			const stats = await this.getConceptStats();

@@ -20,7 +20,7 @@ const logger = serverLogger.withContext('FilesAPI');
 // 		const { path: filePath } = req.query;
 
 // 		if (!filePath || typeof filePath !== 'string') {
-// 			return res.status(400).json({ error: 'Parámetro path requerido' });
+// 			res.status(400).json({ error: 'Parámetro path requerido' });; return;
 // 		}
 
 // 		const fileInfo = await getFileInfo(filePath);
@@ -43,7 +43,7 @@ const logger = serverLogger.withContext('FilesAPI');
 // 		const dirPath = req.params[0]; // Captura toda la ruta después de /directory/
 //
 // 		if (!dirPath) {
-// 			return res.status(400).json({ error: 'Ruta de directorio requerida' });
+// 			res.status(400).json({ error: 'Ruta de directorio requerida' });; return;
 // 		}
 //
 // 		const directoryInfo = await getDirectoryInfo(dirPath);
@@ -65,7 +65,7 @@ router.post('/directory', async (req, res) => {
 		const { path, options } = req.body;
 
 		if (!path) {
-			return res.status(400).json({ error: 'Ruta de directorio requerida' });
+			res.status(400).json({ error: 'Ruta de directorio requerida' });; return;
 		}
 
 		const result = await createDirectory(path, options);
@@ -88,7 +88,7 @@ router.post('/directory', async (req, res) => {
 // 		const filePath = req.params[0]; // Captura toda la ruta
 //
 // 		if (!filePath) {
-// 			return res.status(400).json({ error: 'Ruta de archivo requerida' });
+// 			res.status(400).json({ error: 'Ruta de archivo requerida' });; return;
 // 		}
 //
 // 		const result = await deleteFile(filePath);
@@ -111,7 +111,7 @@ router.post('/directory', async (req, res) => {
 // 		const filePath = req.params[0]; // Captura toda la ruta después de /dataurl/
 //
 // 		if (!filePath) {
-// 			return res.status(400).json({ error: 'Ruta de archivo requerida' });
+// 			res.status(400).json({ error: 'Ruta de archivo requerida' });; return;
 // 		}
 //
 // 		const dataUrl = await getFileAsDataUrl(filePath);
@@ -133,7 +133,7 @@ router.put('/rename', async (req, res) => {
 		const { oldPath, newPath, options } = req.body;
 
 		if (!oldPath || !newPath) {
-			return res.status(400).json({ error: 'Rutas oldPath y newPath requeridas' });
+			res.status(400).json({ error: 'Rutas oldPath y newPath requeridas' });; return;
 		}
 
 		const result = await renameFile(oldPath, newPath, options);
@@ -155,7 +155,7 @@ router.post('/copy', async (req, res) => {
 		const { sourcePath, destPath, options } = req.body;
 
 		if (!sourcePath || !destPath) {
-			return res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
+			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });; return;
 		}
 
 		const result = await copyFile(sourcePath, destPath, options);
@@ -177,7 +177,7 @@ router.post('/move', async (req, res) => {
 		const { sourcePath, destPath, options } = req.body;
 
 		if (!sourcePath || !destPath) {
-			return res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
+			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });; return;
 		}
 
 		const result = await moveFile(sourcePath, destPath, options);
