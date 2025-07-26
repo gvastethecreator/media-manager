@@ -83,8 +83,22 @@ export interface ThumbnailResult {
 	metadata: JSONString<ThumbnailMetadata>;
 }
 
-// ThumbnailStats se importa desde @/types/stats.ts para evitar duplicación
-// export interface ThumbnailStats - REMOVIDO: usar import { ThumbnailStats } from '@/types/stats'
+/**
+ * Estadísticas de thumbnails
+ */
+export interface ThumbnailStats {
+	total: number;
+	processed: number;
+	failed: number;
+	pending: number;
+	totalSize: number;
+	processedSize: number;
+	totalFiles: number;
+	errors: Array<{ message: string; path: string; timestamp: Date }>;
+	averageProcessingTime: number;
+	processingRate?: number;
+	lastProcessedAt?: Date;
+}
 
 /**
  * Último thumbnail procesado
@@ -108,9 +122,19 @@ export interface ProcessOptions {
 }
 
 /**
+ * Estado de procesamiento de thumbnails
+ */
+export interface ProcessStatus {
+	processed: number;
+	total: number;
+	current?: string;
+	progress: number;
+}
+
+/**
  * Estados de procesamiento
  */
-export enum ProcessStatus {
+export enum ProcessState {
 	PENDING = 'pending',
 	PROCESSING = 'processing',
 	COMPLETED = 'completed',
@@ -118,12 +142,13 @@ export enum ProcessStatus {
 }
 
 /**
- * Errores de thumbnail
+ * Error de thumbnail
  */
-export interface ThumbnailError extends Error {
+export interface ThumbnailError {
+	message: string;
 	code?: string;
-	details?: Record<string, unknown>;
-	timestamp?: string;
+	path?: string;
+	details?: unknown;
 }
 
 // Validaciones Zod

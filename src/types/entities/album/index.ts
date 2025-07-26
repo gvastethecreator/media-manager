@@ -21,15 +21,12 @@ export type { AlbumBase, AlbumStatistics, AlbumWithStats } from './base';
 // Alias para compatibilidad
 export type Album = AlbumWithStats;
 
-// --- Alias de Compatibilidad ---
-export type Album = AlbumWithStats;
-
 // --- Esquemas de Validación ---
 export { CreateAlbumSchema, UpdateAlbumSchema } from './schema';
 
 // --- Tipos inferidos de esquemas ---
-export type CreateAlbumInput = z.infer<typeof CreateAlbumSchema>;
-export type UpdateAlbumInput = z.infer<typeof UpdateAlbumSchema>;
+export type AlbumCreateInput = z.infer<typeof CreateAlbumSchema>;
+export type AlbumUpdateInput = z.infer<typeof UpdateAlbumSchema>;
 
 // --- Tipos de compatibilidad legacy ---
 export type AlbumComplete = AlbumWithStats;

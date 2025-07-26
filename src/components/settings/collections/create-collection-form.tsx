@@ -191,7 +191,7 @@ export function CreateCollectionForm({
 					emoji: data.emoji || undefined,
 					description: data.description || undefined,
 					isFavorite: data.isFavorite || false,
-					isPublic: data.isFavorite || false,
+	
 				};
 				const updated = await updateCollectionMutation.mutateAsync({
 					id: collection.id,
@@ -209,7 +209,7 @@ export function CreateCollectionForm({
 					color: data.color || undefined,
 					emoji: data.emoji || undefined,
 					description: data.description || undefined,
-					isPublic: data.isFavorite || false,
+	
 					isFavorite: data.isFavorite || false,
 				} as CreateCollectionInput);
 				onCreated?.(created);

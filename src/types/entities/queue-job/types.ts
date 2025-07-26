@@ -58,6 +58,7 @@ export interface QueueJobCreateInput {
 	data: string;
 	maxAttempts?: number;
 	priority?: number;
+	metadata?: QueueJobMetadata;
 }
 
 /**
@@ -100,8 +101,21 @@ export interface QueueJobExtended extends QueueJobBase {
  */
 export interface QueueJobFilters {
 	queue?: string;
-	status?: QueueJobStatus;
-	priority?: number;
+	status?: QueueJobStatus | null;
+	statusList?: QueueJobStatus[];
+	type?: string | null;
+	typeList?: string[];
+	startDate?: Date | null;
+	endDate?: Date | null;
+	userId?: string | null;
+	priority?: number | null;
+	sortField?: string;
+	sortOrder?: string;
+	page?: number;
+	pageSize?: number;
+	totalItems?: number;
+	totalPages?: number;
+	searchTerm?: string;
 	createdAfter?: Date;
 	createdBefore?: Date;
 }
@@ -121,6 +135,7 @@ export interface QueueJobPaginationOptions {
  */
 export interface PaginatedQueueJobs {
 	items: QueueJobBase[];
+	total: number;
 	pagination: {
 		page: number;
 		limit: number;

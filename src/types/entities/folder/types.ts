@@ -77,6 +77,23 @@ export interface FolderSearchOptions {
 }
 
 /**
+ * 📁 Configuración de vista para carpetas
+ */
+export interface FolderViewConfig {
+	viewType: 'grid' | 'list' | 'tree';
+	gridColumns: number;
+	cardSize: 'small' | 'medium' | 'large';
+	sortBy: string;
+	sortDirection: 'asc' | 'desc';
+	showImages: boolean;
+	imageCount: number;
+	enableAnimations: boolean;
+	groupBy: string | null;
+	showStats: boolean;
+	compactView: boolean;
+}
+
+/**
  * 📁 Propiedades de UI para carpetas
  */
 export interface FolderUIProps {

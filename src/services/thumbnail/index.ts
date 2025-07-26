@@ -3,27 +3,7 @@
  * @module services/thumbnail
  */
 
-import type { ProcessOptions } from '@/types/thumbnails';
-
-/**
- * Estado de procesamiento de thumbnails
- */
-export type ProcessStatus = {
-	processed: number;
-	total: number;
-	current?: string;
-	progress: number;
-};
-
-/**
- * Error de thumbnail
- */
-export type ThumbnailError = {
-	message: string;
-	code?: string;
-	path?: string;
-	details?: unknown;
-};
+import type { ProcessOptions, ProcessStatus, ThumbnailError } from '@/types/thumbnails';
 
 /**
  * Servicio básico de thumbnails (implementación mínima)

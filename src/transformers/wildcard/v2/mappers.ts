@@ -237,10 +237,16 @@ function applyFilters(where: Record<string, unknown>, filters: WildcardSearchFil
 
 	// Filtrar por IDs a excluir
 	if (filters.excludeIds && filters.excludeIds.length > 0) {
-		where.id = {
-			...where.id,
-			notIn: filters.excludeIds,
-		};
+		if (where.id && typeof where.id === 'object') {
+			where.id = {
+				...where.id,
+				notIn: filters.excludeIds,
+			};
+		} else {
+			where.id = {
+				notIn: filters.excludeIds,
+			};
+		}
 	}
 
 	// Filtrar por fecha de creación

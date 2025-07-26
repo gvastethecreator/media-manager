@@ -181,25 +181,25 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 
 		return [...videos].sort((a, b) => {
 			switch (sortBy) {
-				case 'name_asc':
+				case VideoSortCriteria.NAME_ASC:
 					return a.name.localeCompare(b.name);
-				case 'name_desc':
+				case VideoSortCriteria.NAME_DESC:
 					return b.name.localeCompare(a.name);
-				case 'date_asc':
+				case VideoSortCriteria.DATE_ASC:
 					return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-				case 'date_desc':
+				case VideoSortCriteria.DATE_DESC:
 					return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-				case 'size_asc':
+				case VideoSortCriteria.SIZE_ASC:
 					return (a.size || 0) - (b.size || 0);
-				case 'size_desc':
+				case VideoSortCriteria.SIZE_DESC:
 					return (b.size || 0) - (a.size || 0);
-				case 'duration_asc':
+				case VideoSortCriteria.DURATION_ASC:
 					return (a.duration || 0) - (b.duration || 0);
-				case 'duration_desc':
+				case VideoSortCriteria.DURATION_DESC:
 					return (b.duration || 0) - (a.duration || 0);
-				case 'resolution_asc':
+				case VideoSortCriteria.RESOLUTION_ASC:
 					return (a.width || 0) * (a.height || 0) - (b.width || 0) * (b.height || 0);
-				case 'resolution_desc':
+				case VideoSortCriteria.RESOLUTION_DESC:
 					return (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0);
 				default:
 					return 0;

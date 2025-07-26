@@ -241,7 +241,7 @@ export const searchPromptsService = async (
 				.select({ count: count() })
 				.from(prompts)
 				.where(whereClause)
-				.then((res) => res[0]?.count || 0),
+				.then((res: { count: number }[]) => res[0]?.count || 0),
 		]);
 
 		// Transformar cada prompt usando el transformer

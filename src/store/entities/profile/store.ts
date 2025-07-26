@@ -27,16 +27,16 @@ const initialState: ProfileStoreState = {
 
 	// Estado de filtros y paginación
 	filters: {
-		status: 'all',
-		theme: 'all',
-		language: 'all',
+		isActive: undefined,
+		theme: undefined,
+		language: undefined,
 		search: '',
 	},
 	pagination: {
 		page: 1,
 		limit: 10,
-		orderBy: 'createdAt',
-		order: 'desc',
+		sortBy: 'createdAt',
+		sortDirection: 'desc',
 	},
 
 	// Estado de la configuración de vista

@@ -84,7 +84,7 @@ const initialState: UIState = {
 	isRenameModalOpen: false,
 	activeFileId: null,
 	clipboardFiles: [],
-	breadcrumbItems: [],
+	breadcrumbItems: [] as { id: string; path: string; name: string }[],
 };
 
 // Crear slice
@@ -197,7 +197,7 @@ export const createUISlice: StateCreator<FileStore, [], [], UIState & UIActions>
 
 		// Dividir la ruta en segmentos
 		const segments = path.split('/').filter(Boolean);
-		const breadcrumbs = [];
+		const breadcrumbs: { id: string; path: string; name: string }[] = [];
 
 		// Construir la ruta acumulativa
 		let currentPath = '';

@@ -24,10 +24,12 @@ router.put('/:id', async (req, res) => {
 		}
 
 		res.json(updatedMetadata);
+		return;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 		console.error(`Error actualizando metadatos ${req.params.id}:`, errorMessage);
 		res.status(500).json({ error: 'Error interno del servidor', details: errorMessage });
+		return;
 	}
 });
 
@@ -133,17 +135,20 @@ router.put('/bulk-update', async (req, res) => {
 		const { updates } = req.body;
 
 		if (!updates || !Array.isArray(updates)) {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'El campo "updates" (un array de objetos con id y data) es requerido',
 			});
+			return;
 		}
 
 		const result = await MetadataService.updateMultipleMetadata(updates);
 		res.json(result);
+		return;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 		console.error('Error en la actualización masiva de metadatos:', errorMessage);
 		res.status(500).json({ error: 'Error interno del servidor', details: errorMessage });
+		return;
 	}
 });
 

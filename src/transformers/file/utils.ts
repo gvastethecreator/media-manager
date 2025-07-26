@@ -14,7 +14,7 @@ import {
 	isImageExtension,
 	isVideoExtension,
 } from '@/lib/utils/file/helpers';
-import type { FileType } from '@/types/entities/file/enums';
+import { FileType } from '@/types/entities/file/enums';
 import type { DirectoryReadResult, FileInfo, FileOperationResult } from '@/types/entities/file/types';
 
 /**

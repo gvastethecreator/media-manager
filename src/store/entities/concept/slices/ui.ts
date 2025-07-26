@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { ConceptViewMode } from '@/types/entities/concept';
 
 import type { ConceptStore } from '../types';
 

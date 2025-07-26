@@ -103,11 +103,21 @@ export function SearchView(_props: ViewProps) {
 								metadata: null,
 								url: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
 								parsedMetadata: undefined,
+								// Propiedades requeridas por EntityWithStats
+								entityType: 'image' as const,
+								stats: {
+									totalItems: 1,
+									lastAccessed: new Date(),
+									accessCount: 0,
+								},
+								description: imageItem.description || '',
+								createdAt: imageItem.createdAt,
+								updatedAt: imageItem.updatedAt,
 							};
 						}
 						return null;
 					})
-					.filter(Boolean);
+					.filter((item): item is NonNullable<typeof item> => item !== null);
 
 				openViewer(viewerItems, currentIndex);
 			}

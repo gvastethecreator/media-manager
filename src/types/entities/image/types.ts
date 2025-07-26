@@ -432,6 +432,34 @@ export interface ImageComplete extends ImageExtended {
 }
 
 /**
+ * 📊 Image con estadísticas
+ */
+export interface ImageWithStats extends ImageExtended {
+	statistics?: {
+		views: number;
+		likes: number;
+		shares: number;
+		downloads: number;
+		qualityScore: number;
+		aestheticScore: number;
+		technicalScore: number;
+		popularityScore: number;
+		lastViewedAt?: Date;
+		lastLikedAt?: Date;
+		lastSharedAt?: Date;
+		lastDownloadedAt?: Date;
+	};
+	dimensions?: {
+		width: number;
+		height: number;
+		aspectratio: number;
+		orientation: 'landscape' | 'portrait' | 'square';
+	};
+	url?: string;
+	averageSize?: number;
+}
+
+/**
  * 🗂️ Estado del slice de imágenes para gestión de estado
  */
 export interface ImageCoreSlice {

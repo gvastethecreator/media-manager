@@ -94,7 +94,7 @@ export interface VideoBase {
 	thumbnailSize: number | null;
 	thumbnailWidth: number | null;
 	thumbnailHeight: number | null;
-	isPublic: boolean;
+
 	isFavorite: boolean;
 	isHidden: boolean;
 	folderId: string;
@@ -119,7 +119,7 @@ export interface VideoCreateInput {
 	thumbnailSize?: number | null;
 	thumbnailWidth?: number | null;
 	thumbnailHeight?: number | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	folderId: string;
 
@@ -154,7 +154,7 @@ export interface VideoUpdateInput {
 	thumbnailSize?: number | null;
 	thumbnailWidth?: number | null;
 	thumbnailHeight?: number | null;
-	isPublic?: boolean;
+
 	isFavorite?: boolean;
 	folderId?: string;
 
@@ -188,7 +188,7 @@ export interface VideoFilters {
 		end?: Date;
 	};
 	isFavorite?: boolean;
-	isPublic?: boolean;
+
 	qualityLevel?: VideoQuality[];
 	minDuration?: number;
 	maxDuration?: number;
@@ -363,7 +363,7 @@ export const VideoSchema = z.object({
 	thumbnailSize: z.number().nullable(),
 	thumbnailWidth: z.number().nullable(),
 	thumbnailHeight: z.number().nullable(),
-	isPublic: z.boolean(),
+
 	isFavorite: z.boolean(),
 	folderId: z.string(),
 	createdAt: z.date(),

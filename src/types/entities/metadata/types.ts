@@ -21,7 +21,7 @@ export type MetadataBase = {
 	key: string;
 	value: string | null;
 	type: string | null;
-	isPublic: boolean;
+
 	category: string | null;
 	description: string | null;
 	createdAt: Date;

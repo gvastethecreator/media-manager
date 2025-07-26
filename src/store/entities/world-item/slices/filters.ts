@@ -6,7 +6,7 @@
 import type { StateCreator } from 'zustand';
 import { WorldItemSortCriteria } from '@/types/entities/world-item/enums';
 import type { WorldItemFilters } from '@/types/entities/world-item/types';
-import type { WorldItemActions, WorldItemState } from '../types';
+import type { WorldItemActions, WorldItemState, WorldItem } from '../types';
 
 export interface WorldItemFiltersSlice {
 	filters: WorldItemFilters;

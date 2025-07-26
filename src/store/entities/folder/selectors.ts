@@ -48,7 +48,7 @@ export const selectFolderStats = (state: CompleteFolderStore) => {
 	return {
 		total: allFolders.length,
 		favorites: allFolders.filter((f) => f.isFavorite).length,
-		withImages: allFolders.filter((f) => f.statistics.imageCount > 0).length,
-		empty: allFolders.filter((f) => f.statistics.imageCount === 0).length,
+		withImages: allFolders.filter((f) => f.stats.imageCount > 0).length,
+  empty: allFolders.filter((f) => f.stats.imageCount === 0).length,
 	};
 };

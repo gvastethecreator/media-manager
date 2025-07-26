@@ -3,6 +3,9 @@
  */
 import type { PlaceSearchOptions, PlaceWithStats } from '@/types/entities/place';
 
+// Re-exportar tipos para uso externo
+export type { PlaceSearchOptions };
+
 const API_BASE_PATH = '/api/places';
 
 export async function getPlacesFromApi(options: PlaceSearchOptions = {}): Promise<PlaceWithStats[]> {

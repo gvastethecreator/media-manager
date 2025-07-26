@@ -3,12 +3,12 @@
  * @module transformers/image/mappers
  */
 
-import type { ImageComplete } from '@/types/entities/image/types';
+import type { ImageBase, ImageWithStats } from '@/types/entities/image/base';
 
 /**
- * Convierte cualquier objeto plano a ImageComplete (rellena campos obligatorios)
+ * Convierte cualquier objeto plano a ImageWithStats (rellena campos obligatorios)
  */
-export function mapImageToComplete(image: Partial<ImageComplete>): ImageComplete {
+export function mapImageToComplete(image: Partial<ImageBase>): ImageWithStats {
 	return {
 		id: image.id ?? '',
 		name: image.name ?? '',
@@ -33,13 +33,34 @@ export function mapImageToComplete(image: Partial<ImageComplete>): ImageComplete
 		addedAt: image.addedAt ?? new Date(),
 		createdAt: image.createdAt ?? new Date(),
 		updatedAt: image.updatedAt ?? new Date(),
+		entityType: 'image' as const,
+		stats: {
+			viewCount: 0,
+			downloadCount: 0,
+			likeCount: 0,
+			commentCount: 0,
+			tagCount: 0,
+			albumCount: 0,
+			collectionCount: 0,
+			characterCount: 0,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 0,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+		},
+		thumbnailUrl: image.thumbnail ?? '',
+		fullUrl: image.path ?? '',
 	};
 }
 
 /**
  * Mapea una imagen a un resumen para listados
  */
-export function mapToImageSummary(image: ImageComplete): {
+export function mapToImageSummary(image: ImageWithStats): {
 	id: string;
 	name: string;
 	path: string;
@@ -72,6 +93,6 @@ export function mapToImageSummary(image: ImageComplete): {
 /**
  * Mapea un array de imágenes a resúmenes
  */
-export function mapToImageSummaries(images: ImageComplete[]): ReturnType<typeof mapToImageSummary>[] {
+export function mapToImageSummaries(images: ImageWithStats[]): ReturnType<typeof mapToImageSummary>[] {
 	return images.map(mapToImageSummary);
 }

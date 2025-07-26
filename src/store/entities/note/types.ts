@@ -1,5 +1,6 @@
 import { EntityType } from '@/types/entities/entities';
-import type { NoteSortOption, NoteViewMode } from '@/types/entities/note/enums';
+import type { NoteSortOption } from '@/types/entities/note/enums';
+import type { NoteViewMode } from '@/types/entities/note/types';
 import type { NoteCreateInput, NoteFilters, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
 
 /**

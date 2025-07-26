@@ -22,13 +22,13 @@ const NoteUpdateSchema = NoteCreateSchema.partial();
 // GET /notes - Listar notas con filtros
 router.get('/', async (req, res) => {
 	try {
-		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc' } = req.query;
+		const { search, limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'asc' } = req.query;
 
 		const filters = {
 			search: search as string,
 			limit: Number.parseInt(limit as string),
 			offset: Number.parseInt(offset as string),
-			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
+			sortBy: sortBy as 'title' | 'createdAt' | 'updatedAt',
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};
 
@@ -74,9 +74,8 @@ router.get('/:id/images', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const images = await noteService.getNoteImages(id);
-		const transformedImages = images.map(toImageWithStats);
-
-		res.json(transformedImages);
+		// TODO: Implementar transformación cuando getNoteImages devuelva el tipo correcto
+		res.json(images);
 	} catch (error) {
 		console.error('Error getting note images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
