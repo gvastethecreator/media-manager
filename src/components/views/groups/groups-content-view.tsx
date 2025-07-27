@@ -1,6 +1,6 @@
 import { Group as GroupIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { GroupCard } from '@/components/cards/group-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

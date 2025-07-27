@@ -72,7 +72,7 @@ export function FolderContentView({
 	const isRetrying = externalIsRetrying || internalIsRetrying;
 
 	const handleImageSelect = useCallback(
-		(item: AnyEntityWithStats, e: React.MouseEvent) => {
+		(item: AnyEntityWithStats, _e: React.MouseEvent) => {
 			const image = item as ImageWithStats;
 			logger.info('🖱️ Imagen seleccionada:', image.name);
 
@@ -164,7 +164,7 @@ export function FolderContentView({
 	// Resetear estado cuando cambia la carpeta
 	useEffect(() => {
 		setInternalIsRetrying(false);
-	}, [currentFolderId]);
+	}, []);
 
 	// ️ Validación: verificar que hay una carpeta seleccionada
 	if (!currentFolderId) {

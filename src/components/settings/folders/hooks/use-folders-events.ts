@@ -215,7 +215,7 @@ export function useFoldersEvents({
 				eventSourceRef.current = null;
 			}
 		};
-	}, [handleProgress, handleError, handleComplete, handleStats]);
+	}, [handleProgress, handleError, handleComplete, handleStats, onReindexAllProgress]);
 
 	// También devolvemos funciones útiles para depuración
 	return {

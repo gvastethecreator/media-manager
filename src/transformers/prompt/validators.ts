@@ -5,7 +5,6 @@
  */
 
 import { z } from 'zod';
-import type { PromptBase, PromptCreateInput, PromptUpdateInput } from '../../types/entities/prompt';
 
 export const PromptCreateSchema = z.object({
 	title: z.string().min(1).max(255),

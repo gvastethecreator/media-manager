@@ -1,4 +1,4 @@
-import { Code, File, FileWarning, Folder, HelpCircle } from 'lucide-react';
+import { Code, File, Folder, HelpCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';

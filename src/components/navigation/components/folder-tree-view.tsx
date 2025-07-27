@@ -1,4 +1,4 @@
-import { Folder, FolderOpen } from 'lucide-react';
+import { Folder } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type TreeNode, TreeView } from '@/components/tree-view';

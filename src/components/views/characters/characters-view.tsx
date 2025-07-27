@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCharacters, useCreateCharacter } from '@/lib/api/characters';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';

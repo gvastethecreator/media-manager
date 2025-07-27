@@ -28,7 +28,7 @@ export function useEvents<T>(initialState: T) {
 		if (currentStateStr !== newStateStr) {
 			setState(initialState);
 		}
-	}, [initialState, state, setState]);
+	}, [initialState, state]);
 
 	const addEvent = useCallback((event: EventData) => {
 		eventsLogger.info('📨 Evento recibido (MOCK):', event);

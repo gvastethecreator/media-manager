@@ -280,24 +280,22 @@ class Fase3MigrationPlanner {
 		console.log(chalk.cyan(`📋 FASES TOTALES: ${this.migrationPlan.migration_phases.length}`));
 
 		console.log(chalk.yellow('\n📋 FASES DE MIGRACIÓN:'));
-		this.migrationPlan.migration_phases.forEach((phase, index) => {
+		for (const phase of this.migrationPlan.migration_phases) {
 			const priority = phase.priority === 'CRÍTICA' ? '🔴' : '🟡';
 			console.log(`   ${priority} ${phase.phase} (${phase.duration})`);
 			console.log(`      📝 ${phase.tasks.length} tareas | 📦 ${phase.deliverables.length} entregables`);
-		});
+		}
 
 		console.log(chalk.red('\n⚠️  RIESGOS PRINCIPALES:'));
-		this.migrationPlan.risk_assessment
-			.filter((risk) => risk.impact === 'ALTO')
-			.forEach((risk) => {
-				console.log(`   🔴 ${risk.category}: ${risk.risk}`);
-			});
+		for (const risk of this.migrationPlan.risk_assessment.filter((risk) => risk.impact === 'ALTO')) {
+			console.log(`   🔴 ${risk.category}: ${risk.risk}`);
+		}
 
 		console.log(chalk.green('\n🔄 ESTRATEGIAS DE FALLBACK:'));
-		this.migrationPlan.fallback_strategy.forEach((strategy) => {
+		for (const strategy of this.migrationPlan.fallback_strategy) {
 			console.log(`   🔄 ${strategy.scenario}`);
 			console.log(`      ➡️  ${strategy.action}`);
-		});
+		}
 
 		console.log(chalk.blue('\n🎯 CHECKPOINT_4 COMPLETADO: Plan de migración FASE 3 generado'));
 		console.log(chalk.green('✅ FASE 2 COMPLETADA: Optimización Híbrida finalizada'));

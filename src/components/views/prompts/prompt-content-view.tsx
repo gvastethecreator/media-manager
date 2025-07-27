@@ -32,7 +32,7 @@ export function PromptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedPrompt?.id ?? null,
 		containerName: selectedPrompt?.name ?? null,
-		setCurrentContainer: async (id: string) => {}, // No es necesario en el nuevo enfoque
+		setCurrentContainer: async (_id: string) => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Terminal,
 			title: 'Prompt vacío',

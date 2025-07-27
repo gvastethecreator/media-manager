@@ -1,4 +1,4 @@
-import type { ConceptStatistics, ConceptStats, ConceptWithStats } from '@/types/entities/concept';
+import type { ConceptStats, ConceptWithStats } from '@/types/entities/concept';
 
 export interface ConceptCardProps {
 	conceptId: string;

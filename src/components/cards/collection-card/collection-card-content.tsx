@@ -1,6 +1,6 @@
 import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { CollectionEdition } from '@/types/entities/collection';
 

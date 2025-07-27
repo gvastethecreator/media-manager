@@ -1,6 +1,6 @@
 import { AlertCircle, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -81,7 +81,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 		setNewPromptContent('');
 		setNewPromptDescription('');
 		setShowForm(false);
-	}, [newPromptName, newPromptContent, newPromptDescription, createPrompt]);
+	}, [newPromptName, newPromptContent, newPromptDescription, createPrompt, toast]);
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar prompts');

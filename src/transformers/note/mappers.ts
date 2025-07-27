@@ -5,14 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	NoteCreateInput,
-	NoteFilters,
-	NoteSearchOptions,
-	NoteStatistics,
-	NoteUpdateInput,
-	NoteWithStats,
-} from '@/types/entities/note';
+import type { NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
 
 const logger = serverLogger.withContext('NoteMappers');
 

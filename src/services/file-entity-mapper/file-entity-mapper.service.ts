@@ -53,7 +53,7 @@ export class FileEntityMapperService {
 		}
 
 		for (const [entityType, extensions] of Object.entries(ENTITY_TYPE_MAPPING)) {
-			if (extensions && extensions.includes(normalizedExt)) {
+			if (extensions?.includes(normalizedExt)) {
 				return entityType as EntityType;
 			}
 		}
@@ -136,27 +136,32 @@ export class FileEntityMapperService {
 	/**
 	 * Verifica si ya existe una entidad para el archivo
 	 */
-	private async checkExistingEntity(fileInfo: FileInfo, entityType: EntityType, folderId: string): Promise<boolean> {
+	private async checkExistingEntity(fileInfo: FileInfo, entityType: EntityType): Promise<boolean> {
 		try {
 			switch (entityType) {
 				case EntityType.IMAGE: {
-					const existingImage = await this.imageService.getImageByHash(fileInfo.hash!);
+					if (!fileInfo.hash) return false;
+					const existingImage = await this.imageService.getImageByHash(fileInfo.hash);
 					return !!existingImage;
 				}
 				case EntityType.VIDEO: {
-					const existingVideo = await getVideoByHash(fileInfo.hash!);
+					if (!fileInfo.hash) return false;
+					const existingVideo = await getVideoByHash(fileInfo.hash);
 					return !!existingVideo;
 				}
 				case EntityType.AUDIO: {
-					const existingAudio = await getAudioByHash(fileInfo.hash!);
+					if (!fileInfo.hash) return false;
+					const existingAudio = await getAudioByHash(fileInfo.hash);
 					return !!existingAudio;
 				}
 				case EntityType.FILE3D: {
-					const existingFile3D = await getFile3DByHash(fileInfo.hash!);
+					if (!fileInfo.hash) return false;
+					const existingFile3D = await getFile3DByHash(fileInfo.hash);
 					return !!existingFile3D;
 				}
 				case EntityType.DOCUMENT: {
-					const existingDocument = await getDocumentByHash(fileInfo.hash!);
+					if (!fileInfo.hash) return false;
+					const existingDocument = await getDocumentByHash(fileInfo.hash);
 					return !!existingDocument;
 				}
 				default:
@@ -188,7 +193,7 @@ export class FileEntityMapperService {
 			}
 
 			// Verificar si ya existe una entidad para este archivo
-			const exists = await this.checkExistingEntity(fileInfo, entityType, folderId);
+			const exists = await this.checkExistingEntity(fileInfo, entityType);
 			if (exists) {
 				return {
 					success: true,
@@ -202,13 +207,16 @@ export class FileEntityMapperService {
 
 			switch (entityType) {
 				case EntityType.IMAGE: {
+					if (!fileInfo.hash) {
+						throw new Error('File hash is required for image creation');
+					}
 					const imageData: CreateImageInput = {
 						name: fileInfo.name,
 						path: fileInfo.path,
 						size: fileInfo.size,
 						width: 0, // Will be updated after processing
 						height: 0, // Will be updated after processing
-						hash: fileInfo.hash!,
+						hash: fileInfo.hash,
 						folderId,
 					};
 					const image = await this.imageService.createImage(imageData);
@@ -217,11 +225,14 @@ export class FileEntityMapperService {
 				}
 
 				case EntityType.VIDEO: {
+					if (!fileInfo.hash) {
+						throw new Error('File hash is required for video creation');
+					}
 					const videoData: VideoCreateInput = {
 						name: fileInfo.name,
 						path: fileInfo.path,
 						size: fileInfo.size,
-						hash: fileInfo.hash!,
+						hash: fileInfo.hash,
 						folderId,
 						duration: 0, // Will be updated after processing
 						isFavorite: false,
@@ -232,10 +243,13 @@ export class FileEntityMapperService {
 				}
 
 				case EntityType.AUDIO: {
+					if (!fileInfo.hash) {
+						throw new Error('File hash is required for audio creation');
+					}
 					const audioData: AudioCreateInput = {
 						name: fileInfo.name,
 						path: fileInfo.path,
-						hash: fileInfo.hash!,
+						hash: fileInfo.hash,
 						size: fileInfo.size,
 						folderId,
 						mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
@@ -270,10 +284,13 @@ export class FileEntityMapperService {
 				}
 
 				case EntityType.FILE3D: {
+					if (!fileInfo.hash) {
+						throw new Error('File hash is required for file3d creation');
+					}
 					const file3dData: File3DCreateInput = {
 						name: fileInfo.name,
 						path: fileInfo.path,
-						hash: fileInfo.hash!,
+						hash: fileInfo.hash,
 						size: fileInfo.size,
 						mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
 						extension: fileInfo.extension,
@@ -303,10 +320,13 @@ export class FileEntityMapperService {
 				}
 
 				case EntityType.DOCUMENT: {
+					if (!fileInfo.hash) {
+						throw new Error('File hash is required for document creation');
+					}
 					const documentData: DocumentCreateInput = {
 						name: fileInfo.name,
 						path: fileInfo.path,
-						hash: fileInfo.hash!,
+						hash: fileInfo.hash,
 						size: fileInfo.size,
 						mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
 						extension: fileInfo.extension,

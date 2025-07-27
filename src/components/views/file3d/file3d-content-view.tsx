@@ -1,6 +1,6 @@
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { File3DCard } from '@/components/cards/file3d-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
