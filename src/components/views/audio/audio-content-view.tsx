@@ -1,6 +1,6 @@
 import { Edit, Music, Pause, Play, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AudioCard } from '@/components/cards/audio-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

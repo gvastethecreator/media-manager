@@ -68,7 +68,7 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 		setNoteContent('');
 		setEditingNote(null);
 		setShowForm(false);
-	}, [noteTitle, noteContent, editingNote, createNote, updateNote]);
+	}, [noteTitle, noteContent, editingNote, createNote, updateNote, toast]);
 
 	return (
 		<div className={className}>

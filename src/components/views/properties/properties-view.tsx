@@ -67,7 +67,7 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 		setPropertyValue('');
 		setEditingProperty(null);
 		setShowForm(false);
-	}, [propertyName, propertyValue, editingProperty, createProperty, updateProperty]);
+	}, [propertyName, propertyValue, editingProperty, createProperty, updateProperty, toast]);
 
 	return (
 		<div className={className}>

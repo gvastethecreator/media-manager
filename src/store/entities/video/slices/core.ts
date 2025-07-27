@@ -191,7 +191,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 			const newVideos: Record<string, VideoWithStats> = { ...state.videos };
 			const folderVideos = { ...state.folderVideos };
 
-			videos.forEach((video: (typeof videos)[0]) => {
+			for (const video of videos) {
 				newVideos[video.id] = video;
 
 				// Actualizar índice por folder
@@ -202,7 +202,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 				if (!folderVideos[folderId].includes(video.id)) {
 					folderVideos[folderId] = [...folderVideos[folderId], video.id];
 				}
-			});
+			}
 
 			return {
 				videos: newVideos,

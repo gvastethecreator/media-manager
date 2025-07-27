@@ -6,7 +6,6 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { GroupViewConfig, GroupViewMode, GroupWithStats } from '@/types/entities/group';
-import type { GroupDisplayState as GroupDisplayStateFromTypes } from '@/types/entities/group/types';
 import type { GroupDisplayState, GroupStore } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupUI');

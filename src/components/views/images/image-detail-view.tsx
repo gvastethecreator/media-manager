@@ -1,7 +1,6 @@
-import { ArrowLeft, Download, Heart, Share2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Download, Heart, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';

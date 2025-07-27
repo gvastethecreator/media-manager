@@ -301,25 +301,21 @@ class DependencyAnalyzer {
 		console.log(chalk.red(`⚠️  PROBLEMAS POTENCIALES: ${this.analysis.potential_issues.length}`));
 
 		console.log(chalk.cyan('\n🔌 PLUGINS DE VITE:'));
-		this.analysis.vite_plugins.forEach((plugin) => {
+		for (const plugin of this.analysis.vite_plugins) {
 			const complexity =
 				plugin.migration_complexity === 'low' ? '🟢' : plugin.migration_complexity === 'medium' ? '🟡' : '🔴';
 			console.log(`   ${complexity} ${plugin.name} - ${plugin.purpose}`);
-		});
+		}
 
 		console.log(chalk.yellow('\n🔄 MIGRACIONES CRÍTICAS:'));
-		this.analysis.requires_migration
-			.filter((item) => item.priority === 'critical')
-			.forEach((item) => {
-				console.log(`   🔴 ${item.name} - ${item.reason}`);
-			});
+		for (const item of this.analysis.requires_migration.filter((item) => item.priority === 'critical')) {
+			console.log(`   🔴 ${item.name} - ${item.reason}`);
+		}
 
 		console.log(chalk.red('\n⚠️  PRINCIPALES DESAFÍOS:'));
-		this.analysis.potential_issues
-			.filter((issue) => issue.impact === 'high')
-			.forEach((issue) => {
-				console.log(`   🔴 ${issue.category}: ${issue.description}`);
-			});
+		for (const issue of this.analysis.potential_issues.filter((issue) => issue.impact === 'high')) {
+			console.log(`   🔴 ${issue.category}: ${issue.description}`);
+		}
 
 		console.log(chalk.blue('\n🎯 CHECKPOINT_3 COMPLETADO: Análisis de dependencias finalizado'));
 		console.log(chalk.yellow('🔄 Siguiente: CHECKPOINT_4 - Preparación para migración completa'));

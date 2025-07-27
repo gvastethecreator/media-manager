@@ -18,7 +18,7 @@ import {
 const router = express.Router();
 
 // GET /api/system/navigation - Obtener datos de navegación
-router.get('/navigation', async (req, res) => {
+router.get('/navigation', async (_req, res) => {
 	try {
 		console.log('🧭 [SystemRouter] Iniciando obtención de datos de navegación');
 		console.log('🔍 [DEBUG] Petición recibida en /api/system/navigation');

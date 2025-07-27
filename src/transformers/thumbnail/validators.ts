@@ -6,7 +6,6 @@
  * @updated 2025-01-27
  */
 
-import type { ThumbnailBase, ThumbnailCreateInput, ThumbnailUpdateInput } from '../../types/entities/thumbnail';
 import {
 	ZodThumbnailCreateSchema,
 	type ZodThumbnailCreateType,

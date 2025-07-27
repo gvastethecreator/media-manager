@@ -5,8 +5,6 @@
  */
 
 import type { ComponentType } from 'react';
-import type { ConceptBase, ConceptExtended, ConceptWithStats } from '@/types/entities/concept/base';
-import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { getEntityStatsType } from '@/types/migration';
 

@@ -7,11 +7,11 @@
 import type { AlbumWithStats } from '@/types/entities/album';
 // Imports para los tipos re-exportados
 // Re-exportar tipos reales en lugar de definiciones temporales
-import type { AudioBase, AudioWithStats } from '@/types/entities/audio';
+import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
-import type { CollectionBase, CollectionWithStats } from '@/types/entities/collection';
+import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
-import type { DocumentBase, DocumentWithStats } from '@/types/entities/document';
+import type { DocumentWithStats } from '@/types/entities/document';
 import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { GroupWithStats } from '@/types/entities/group';

@@ -263,14 +263,14 @@ export function buildFolderTree(folders: FolderWithStats[]): FolderWithStats[] {
 	const folderMap = new Map<string, FolderWithStats & { children: FolderWithStats[] }>();
 
 	// Crear mapa de carpetas con array de hijos
-	folders.forEach((folder: (typeof folders)[0]) => {
+	for (const folder of folders) {
 		folderMap.set(folder.id, { ...folder, children: [] });
-	});
+	}
 
 	const rootFolders: FolderWithStats[] = [];
 
 	// Construir jerarquía
-	folders.forEach((folder: (typeof folders)[0]) => {
+	for (const folder of folders) {
 		if (folder.parentId && folderMap.has(folder.parentId)) {
 			const parent = folderMap.get(folder.parentId) as FolderWithStats & { children: FolderWithStats[] };
 			const child = folderMap.get(folder.id) as FolderWithStats & { children: FolderWithStats[] };
@@ -279,7 +279,7 @@ export function buildFolderTree(folders: FolderWithStats[]): FolderWithStats[] {
 			// Carpeta raíz
 			rootFolders.push(folderMap.get(folder.id) as FolderWithStats & { children: FolderWithStats[] });
 		}
-	});
+	}
 
 	return rootFolders;
 }

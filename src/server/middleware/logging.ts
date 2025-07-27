@@ -50,14 +50,14 @@ function writeLog(message: string, level: 'info' | 'warn' | 'error' = 'info') {
 
 		// Usar múltiples métodos para asegurar que aparezca
 		console.log(consoleMessage);
-		process.stdout.write(consoleMessage + '\n');
+		process.stdout.write(`${consoleMessage}\n`);
 		process.stderr.write(`${colors.magenta}[STDERR-LOG]${colors.reset} ${message}\n`);
 	}
 
 	// Log a archivo
 	if (LOG_TO_FILE && logFile) {
 		try {
-			fs.appendFileSync(logFile, logMessage + '\n');
+			fs.appendFileSync(logFile, `${logMessage}\n`);
 		} catch (error) {
 			console.error('❌ Error escribiendo log a archivo:', error);
 		}
@@ -75,7 +75,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 	// 🚨 LOG DIRECTO INMEDIATO
 	const startMessage = `🌐 [${timestamp}] ${method} ${url} - IP: ${ip} - START`;
 	console.log(startMessage);
-	process.stdout.write(startMessage + '\n');
+	process.stdout.write(`${startMessage}\n`);
 	logInfo(startMessage);
 
 	// Usar evento 'finish' de Express para capturar el final
@@ -89,7 +89,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 		const endMessage = `${statusEmoji} [${endTimestamp}] ${method} ${url} - ${statusCode} - ${duration}ms - IP: ${ip} - END`;
 
 		console.log(endMessage);
-		process.stdout.write(endMessage + '\n');
+		process.stdout.write(`${endMessage}\n`);
 
 		if (statusCode >= 400) {
 			logError(endMessage);
@@ -102,7 +102,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 };
 
 // Middleware para logging de errores
-export function errorLogger(error: any, req: Request, res: Response, next: NextFunction) {
+export function errorLogger(error: any, req: Request, _res: Response, next: NextFunction) {
 	const { method, url, ip } = req;
 	const errorMessage = `💥 ERROR - ${method} ${url} - IP: ${ip} - Error: ${error.message || error}`;
 

@@ -6,7 +6,7 @@
  
  */
 
-import type { Album, AlbumCreateInput, AlbumStatistics, AlbumWithStats } from '../../types/entities/album/index';
+import type { AlbumCreateInput, AlbumStatistics, AlbumWithStats } from '../../types/entities/album/index';
 
 /**
  * Tipo para datos de álbum que vienen de Drizzle con relaciones

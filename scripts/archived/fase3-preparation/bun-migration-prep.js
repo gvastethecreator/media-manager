@@ -583,6 +583,6 @@ export default ViteToBunMigration;
 		console.log('='.repeat(60));
 
 		console.log(chalk.cyan(`\n📁 ARCHIVOS CREADOS: ${this.migrationReport.files_created.length}`));
-		this.migrationReport.files_created.forEach(file => {
+		for (const file of this.migrationReport.files_created) {
 			console.log(`   ✅ ${file}`);
-		});
+		}

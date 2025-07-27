@@ -5,4 +5,3 @@
  * Currently empty, serves as a placeholder for consistent structure.
  */
 
-import { UploadedImageBase, UploadedImageWithStats } from '../../types/entities/uploaded-image';

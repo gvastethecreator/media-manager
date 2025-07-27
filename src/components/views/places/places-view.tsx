@@ -1,6 +1,6 @@
 import { MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PlaceCard } from '@/components/cards/place-card';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
@@ -64,7 +64,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 		setNewPlaceName('');
 		setNewPlaceDescription('');
 		setShowForm(false);
-	}, [newPlaceName, newPlaceDescription, createPlace]);
+	}, [newPlaceName, newPlaceDescription, createPlace, toast]);
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar places');

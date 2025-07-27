@@ -63,7 +63,7 @@ if (typeof foldersRouter !== 'function' || typeof imagesRouter !== 'function') {
 }
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
 	const uptime = process.uptime();
 	const timestamp = new Date().toISOString();
 

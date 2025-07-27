@@ -35,7 +35,6 @@ import { cn } from '@/lib/utils';
 import { toastService } from '@/services/toast';
 import { UploadedFileType } from '@/types/entities/uploaded-image/types';
 import type { EntityWithStats } from '@/types/migration';
-import type { UploadedImageResult } from '@/types/uploaded-images';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 

@@ -14,7 +14,6 @@ import {
 	updateGroupInApi,
 } from '@/lib/api/client/group.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
 import type { GroupCoreActions, GroupCoreState, GroupStore } from '../types';
 
 export type GroupCoreSlice = GroupCoreState & GroupCoreActions;

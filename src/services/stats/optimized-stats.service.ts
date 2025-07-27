@@ -4,7 +4,6 @@
 import { sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { unstable_cache } from '@/lib/server/revalidate';
 
 /**
  * 🚀 Servicio optimizado que agrupa consultas SUM y usa caché inteligente

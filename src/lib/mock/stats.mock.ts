@@ -3,7 +3,6 @@
  * Esto reduce las consultas a la base de datos durante el desarrollo local
  */
 
-import type { SystemStats } from '@/lib/api/system';
 import type { GeneralStats } from '@/types/stats';
 
 // Función para generar fechas relativas

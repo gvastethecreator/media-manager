@@ -93,7 +93,7 @@ router.post('/', async (req, res) => {
 		const jsonFileData: any = { ...validatedData };
 
 		// Convertir undefined a valores apropiados según el tipo esperado
-		Object.keys(jsonFileData).forEach((key) => {
+		for (const key of Object.keys(jsonFileData)) {
 			if (jsonFileData[key] === undefined) {
 				// Para campos booleanos usar false por defecto
 				if (['isFavorite', 'isArchived'].includes(key)) {
@@ -103,7 +103,7 @@ router.post('/', async (req, res) => {
 					jsonFileData[key] = null;
 				}
 			}
-		});
+		}
 
 		const newJsonFile = await createJsonFile(jsonFileData);
 		res.status(201).json(newJsonFile);

@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { WildcardCard } from '@/components/cards/wildcard-card';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
@@ -68,7 +68,7 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		setNewWildcardName('');
 		setNewWildcardDescription('');
 		setShowForm(false);
-	}, [newWildcardName, newWildcardDescription, createWildcard]);
+	}, [newWildcardName, newWildcardDescription, createWildcard, toast]);
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar wildcards');

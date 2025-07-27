@@ -6,7 +6,6 @@
  * @updated 2025-07-01
  */
 
-import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -20,7 +19,7 @@ import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
 import type { VideoWithStats } from '../video';
 import type { WildcardWithStats } from '../wildcard';
-import type { WorldItemBase, WorldItemComplete, WorldItemStatistics, WorldItemWithStats } from './base';
+import type { WorldItemBase, WorldItemWithStats } from './base';
 
 // Re-export tipos base
 export type { WorldItemBase, WorldItemComplete, WorldItemStatistics, WorldItemWithStats } from './base';

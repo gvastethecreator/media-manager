@@ -2,7 +2,6 @@ import { create } from 'zustand';
 // Se sustituye el uso de servicios por el cliente de API
 import { getSystemStatsFromApi, invalidateStatsInApi } from '@/lib/api/client/stats.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { createStoreFactory } from './store.factory';
 import type { BaseEntity } from './types';
 
 const statsLogger = clientLogger.withContext('StatsStore');
@@ -168,7 +167,7 @@ export const useStatsBaseStore = create<{
 	error: string | null;
 	fetchStats: () => Promise<void>;
 	updateStats: (data: StatsUpdate) => Promise<void>;
-}>((set, get) => ({
+}>((set, _get) => ({
 	stats: null,
 	loading: false,
 	error: null,
@@ -216,7 +215,7 @@ export const useStatsBaseStore = create<{
 			set({ error: error instanceof Error ? error.message : 'Error desconocido', loading: false });
 		}
 	},
-	updateStats: async (data: StatsUpdate) => {
+	updateStats: async (_data: StatsUpdate) => {
 		set({ loading: true, error: null });
 		try {
 			await invalidateStatsInApi();

@@ -39,6 +39,68 @@ export function VideoCard({
 	const { data: video, isLoading, error } = useVideo(videoId);
 	const [isHovered, setIsHovered] = useState(false);
 
+	// Calcular colores basados en la calidad técnica
+	const primaryColor = useMemo(() => {
+		if (!video) return '#6b7280';
+		const grade = video.stats?.technicalGrade || 'unknown';
+		switch (grade) {
+			case 'A':
+				return '#10b981'; // Verde esmeralda - Ultra calidad
+			case 'B':
+				return '#3b82f6'; // Azul - Alta calidad
+			case 'C':
+				return '#f59e0b'; // Ámbar - Calidad media
+			case 'D':
+				return '#ef4444'; // Rojo - Baja calidad
+			default:
+				return '#6b7280'; // Gris - Desconocida
+		}
+	}, [video?.stats?.technicalGrade, video]);
+
+	const secondaryColor = useMemo(() => {
+		// Oscurecer el color primario
+		const hex = primaryColor.slice(1);
+		const r = Number.parseInt(hex.slice(0, 2), 16);
+		const g = Number.parseInt(hex.slice(2, 4), 16);
+		const b = Number.parseInt(hex.slice(4, 6), 16);
+
+		const darkenFactor = 0.7;
+		const darkerR = Math.floor(r * darkenFactor);
+		const darkerG = Math.floor(g * darkenFactor);
+		const darkerB = Math.floor(b * darkenFactor);
+
+		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+	}, [primaryColor]);
+
+	// Calcular nivel de rareza basado en quality score
+	const rarityLevel = useMemo(() => {
+		if (!video) return 1;
+		const score = video.stats?.qualityScore || 0;
+		if (score >= 90) return 10; // Mítico
+		if (score >= 80) return 9; // Legendario
+		if (score >= 70) return 7; // Épico
+		if (score >= 60) return 5; // Raro
+		if (score >= 50) return 3; // Poco común
+		return 1; // Común
+	}, [video?.stats?.qualityScore, video]);
+
+	// Manejar eventos
+	const handleClick = useCallback(() => {
+		if (!disabled && onClick && video) {
+			onClick(video);
+		}
+	}, [onClick, disabled, video]);
+
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick && video) {
+				e.preventDefault();
+				onClick(video);
+			}
+		},
+		[onClick, disabled, video]
+	);
+
 	// Si no hay datos del video o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
 		return (
@@ -67,67 +129,7 @@ export function VideoCard({
 	}
 
 	// Extraer datos del video
-	const { id, name, isFavorite, description, createdAt, updatedAt } = video;
-
-	// Calcular colores basados en la calidad técnica
-	const primaryColor = useMemo(() => {
-		const grade = video.stats?.technicalGrade || 'unknown';
-		switch (grade) {
-			case 'A':
-				return '#10b981'; // Verde esmeralda - Ultra calidad
-			case 'B':
-				return '#3b82f6'; // Azul - Alta calidad
-			case 'C':
-				return '#f59e0b'; // Ámbar - Calidad media
-			case 'D':
-				return '#ef4444'; // Rojo - Baja calidad
-			default:
-				return '#6b7280'; // Gris - Desconocida
-		}
-	}, [video.stats?.technicalGrade]);
-
-	const secondaryColor = useMemo(() => {
-		// Oscurecer el color primario
-		const hex = primaryColor.slice(1);
-		const r = Number.parseInt(hex.slice(0, 2), 16);
-		const g = Number.parseInt(hex.slice(2, 4), 16);
-		const b = Number.parseInt(hex.slice(4, 6), 16);
-
-		const darkenFactor = 0.7;
-		const darkerR = Math.floor(r * darkenFactor);
-		const darkerG = Math.floor(g * darkenFactor);
-		const darkerB = Math.floor(b * darkenFactor);
-
-		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	}, [primaryColor]);
-
-	// Calcular nivel de rareza basado en quality score
-	const rarityLevel = useMemo(() => {
-		const score = video.stats?.qualityScore || 0;
-		if (score >= 90) return 10; // Mítico
-		if (score >= 80) return 9; // Legendario
-		if (score >= 70) return 7; // Épico
-		if (score >= 60) return 5; // Raro
-		if (score >= 50) return 3; // Poco común
-		return 1; // Común
-	}, [video.stats?.qualityScore]);
-
-	// Manejar eventos
-	const handleClick = useCallback(() => {
-		if (!disabled && onClick) {
-			onClick(video);
-		}
-	}, [onClick, disabled, video]);
-
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
-				e.preventDefault();
-				onClick(video);
-			}
-		},
-		[onClick, disabled, video]
-	);
+	const { id, name } = video;
 
 	// ID de carta para TCG
 	const cardId = `V${id.substring(0, 6).toUpperCase()}`;
@@ -136,7 +138,8 @@ export function VideoCard({
 	const totalRelations = video.stats?.totalRelations || 0;
 
 	return (
-		<motion.div
+		<motion.button
+			type="button"
 			className={cn(
 				'relative group cursor-pointer select-none',
 				'transition-all duration-300 ease-out',
@@ -152,8 +155,7 @@ export function VideoCard({
 			onMouseLeave={() => setIsHovered(false)}
 			whileHover={!disabled ? { y: -4, scale: 1.02 } : {}}
 			whileTap={!disabled ? { scale: 0.98 } : {}}
-			tabIndex={disabled ? -1 : 0}
-			role="button"
+			disabled={disabled}
 			aria-label={`Video: ${name}`}
 		>
 			<CardContainer
@@ -203,6 +205,6 @@ export function VideoCard({
 					/>
 				</div>
 			</CardContainer>
-		</motion.div>
+		</motion.button>
 	);
 }

@@ -4,7 +4,6 @@
  */
 
 import type { CollectionWithStats } from '@/types/entities/collection';
-import type { CollectionFilter as CollectionFilterType } from '@/types/entities/collection/types';
 
 export interface CollectionViewConfig {
 	viewType: 'grid' | 'list' | 'table';

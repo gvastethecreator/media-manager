@@ -1,4 +1,4 @@
-import { FileText, Filter, Grid, Image, Music, Plus, RefreshCw, Video } from 'lucide-react';
+import { Filter, Grid, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DocumentCard } from '@/components/cards/document-card';
@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
@@ -85,37 +85,37 @@ export default function MixedView({ className }: MixedViewProps) {
 
 		// Agregar imágenes
 		if (images && typeof images === 'object') {
-			Object.values(images).forEach((image) => {
+			for (const image of Object.values(images)) {
 				const imageWithStats = image as ImageWithStats;
 				items.push({ ...imageWithStats, itemType: 'images' });
-			});
+			}
 		}
 
 		// Agregar videos
 		if (Array.isArray(videos)) {
-			videos.forEach((video: VideoWithStats) => {
+			for (const video of videos) {
 				items.push({ ...video, itemType: 'videos' });
-			});
+			}
 		} else {
-			Object.values((videos as Record<string, VideoWithStats>) || {}).forEach((video: VideoWithStats) => {
+			for (const video of Object.values((videos as Record<string, VideoWithStats>) || {})) {
 				items.push({ ...video, itemType: 'videos' });
-			});
+			}
 		}
 
 		// Agregar documentos
-		documents.forEach((document: DocumentWithStats) => {
+		for (const document of documents) {
 			items.push({ ...document, itemType: 'documents' });
-		});
+		}
 
 		// Agregar audios
-		audios.forEach((audio: AudioWithStats) => {
+		for (const audio of audios) {
 			items.push({ ...audio, itemType: 'audios' });
-		});
+		}
 
 		// Agregar carpetas
-		folders.forEach((folder: FolderWithStats) => {
+		for (const folder of folders) {
 			items.push({ ...folder, itemType: 'folders' });
-		});
+		}
 
 		// Ordenar por fecha de modificación (más recientes primero)
 		return items.sort((a, b) => {

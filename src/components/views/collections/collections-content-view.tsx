@@ -1,6 +1,6 @@
 import { BookMarked } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 import { CollectionCard } from '@/components/cards/collection-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

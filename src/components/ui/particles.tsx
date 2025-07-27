@@ -182,7 +182,8 @@ const Particles: React.FC<ParticlesProps> = ({
 
 	const animate = useCallback(() => {
 		clearContext();
-		circles.current.forEach((circle: Circle, i: number) => {
+		for (let i = circles.current.length - 1; i >= 0; i--) {
+			const circle = circles.current[i];
 			const edge = [
 				circle.x + circle.translateX - circle.size,
 				canvasSize.current.w - circle.x - circle.translateX - circle.size,
@@ -216,9 +217,9 @@ const Particles: React.FC<ParticlesProps> = ({
 				const newCircle = circleParams();
 				drawCircle(newCircle);
 			}
-		});
+		}
 		rafID.current = window.requestAnimationFrame(animate);
-	}, [circleParams, clearContext, drawCircle, ease, staticity, vx, vy]);
+	}, [circleParams, clearContext, drawCircle, ease, staticity, vx, vy, remapValue]);
 
 	const onMouseMove = useCallback(() => {
 		if (canvasRef.current) {

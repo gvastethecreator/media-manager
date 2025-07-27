@@ -51,14 +51,14 @@ export function FilesView({ className }: ViewProps) {
 
 	// Función para manejar el upload de archivos
 	const handleFileUpload = useCallback(
-		async (files: File[]) => {
+		async (_files: File[]) => {
 			// Esto debería ser manejado por el content view, pero aquí se recargan los archivos
 			navigateToDirectory('/');
 		},
 		[navigateToDirectory]
 	);
 
-	const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileSelect = useCallback((_event: React.ChangeEvent<HTMLInputElement>) => {
 		// Esto debería ser manejado por el content view
 	}, []);
 

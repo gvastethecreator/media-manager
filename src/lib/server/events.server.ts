@@ -153,13 +153,13 @@ function emitDirect(event: EventData) {
 	}
 
 	// Notificar a suscriptores
-	eventSubscribers.forEach((subscriber: (event: EventData) => void) => {
+	for (const subscriber of eventSubscribers) {
 		try {
 			subscriber(event);
 		} catch (error) {
 			console.error('Error notificando suscriptor:', error);
 		}
-	});
+	}
 }
 
 /**

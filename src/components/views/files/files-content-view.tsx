@@ -1,6 +1,6 @@
 import { FileIcon, Upload } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
@@ -111,7 +111,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 				setIsUploadDialogOpen(false);
 			}
 		},
-		[toast, handleFileUpload]
+		[toast, handleFileUpload, setIsUploading, setUploadProgress, setUploadFiles, setIsUploadDialogOpen]
 	);
 
 	const handleFileSelectInternal = useCallback(
@@ -122,7 +122,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 				handleFileSelect(event); // Call the prop function
 			}
 		},
-		[handleFileSelect]
+		[handleFileSelect, setUploadFiles]
 	);
 
 	if (isLoading) {

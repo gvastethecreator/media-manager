@@ -4,7 +4,6 @@
  * @description Contiene funciones para convertir objetos Property entre diferentes formatos.
  */
 
-import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { calculateCompleteness } from '../../lib/utils/stats';
 import type { PropertyBase, PropertyStatistics, PropertyWithStats } from '../../types/entities/property';

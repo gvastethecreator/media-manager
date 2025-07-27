@@ -17,7 +17,7 @@ export function useProfileTheme() {
 
 	const themeClass = useMemo(() => {
 		return getThemeClass((profile as any)?.theme);
-	}, [(profile as any)?.theme]);
+	}, [profile]);
 
 	const contrastTextColor = useMemo(() => {
 		return getContrastColor(profileColor);

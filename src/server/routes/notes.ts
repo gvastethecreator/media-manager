@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import * as noteService from '@/services/note/note.service';
-import { toImageWithStats } from '@/transformers/image';
 import { toNoteWithStats } from '@/transformers/note';
 
 const router = Router();
@@ -126,7 +125,7 @@ router.post('/', async (req, res) => {
 		const noteData: any = { ...validatedData };
 
 		// Convertir undefined a valores apropiados según el tipo esperado
-		Object.keys(noteData).forEach((key) => {
+		for (const key of Object.keys(noteData)) {
 			if (noteData[key] === undefined) {
 				// Para campos booleanos usar false por defecto
 				if (['isFavorite', 'isArchived', 'isPublic'].includes(key)) {
@@ -136,7 +135,7 @@ router.post('/', async (req, res) => {
 					noteData[key] = null;
 				}
 			}
-		});
+		}
 
 		const newNote = await noteService.createNote(noteData);
 		res.status(201).json(toNoteWithStats(newNote));
@@ -155,7 +154,7 @@ router.put('/:id', async (req, res) => {
 		const noteData: any = { ...validatedData };
 
 		// Convertir undefined a valores apropiados según el tipo esperado
-		Object.keys(noteData).forEach((key) => {
+		for (const key of Object.keys(noteData)) {
 			if (noteData[key] === undefined) {
 				// Para campos booleanos usar false por defecto
 				if (['isFavorite', 'isArchived', 'isPublic'].includes(key)) {
@@ -165,7 +164,7 @@ router.put('/:id', async (req, res) => {
 					noteData[key] = null;
 				}
 			}
-		});
+		}
 
 		const note = await noteService.updateNote(id, noteData);
 
