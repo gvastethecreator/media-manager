@@ -8,8 +8,7 @@ import {
 } from '@/lib/api/client/stats.client';
 import type { SystemStats as ApiSystemStats } from '@/lib/api/system';
 import { serverLogger } from '@/lib/logger';
-import type { ImageStatistics } from '@/types/entities/image';
-import type { GeneralStats, SystemStats } from '@/types/stats';
+import type { GeneralStats } from '@/types/stats';
 import { type SystemStats as TypesSystemStats, transformSystemStatsToGeneralStats } from '@/types/stats';
 
 const statsLogger = serverLogger.withContext('StatsHook');

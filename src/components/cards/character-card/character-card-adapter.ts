@@ -3,7 +3,7 @@
  * @module components/cards/character-card/character-card-adapter
  */
 
-import { CharacterBase, CharacterStats, CharacterWithStats } from '@/types/entities/character/types';
+import { CharacterStats, CharacterWithStats } from '@/types/entities/character/types';
 import type { CharacterCardData } from './character-card.types';
 
 /**

@@ -7,7 +7,6 @@ import type { ErrorResponse, ProcessStatus } from '@/types/folders';
 import { type ExtendedProcessStatus, initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';
-import { useFoldersPolling } from './use-folders-polling';
 import { useFoldersState } from './use-folders-state';
 
 const folderLogger = clientLogger.withContext('useFolders');

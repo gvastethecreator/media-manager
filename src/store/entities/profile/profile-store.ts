@@ -1,13 +1,11 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { useUpdateTheme } from '@/lib/api/profiles';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
 import {
 	Language,
 	type PaginatedProfiles,
-	type ProfileExtended,
 	type ProfileFilters,
 	type ProfilePaginationOptions,
 	type ProfilePreferences,
@@ -202,7 +200,7 @@ export const useProfileStore = create<ProfileStore>()(
 
 				// ===== GESTIÓN DE PREFERENCIAS =====
 
-				updateTheme: (theme: ThemeMode) => {
+				updateTheme: (_theme: ThemeMode) => {
 					// TODO: Implement theme update logic. This should not directly call React hooks.
 					// Consider dispatching an event or calling a utility function that handles theme updates.
 					console.warn('Theme update logic needs to be implemented outside the store.');

@@ -346,7 +346,9 @@ export async function addImageToAlbum(albumId: string, imageId: string): Promise
 		});
 
 		// Revalidar rutas
-		REVALIDATE_PATHS.forEach((path: string) => revalidatePath(path));
+		for (const path of REVALIDATE_PATHS) {
+			revalidatePath(path);
+		}
 		revalidatePath(`/albums/${albumId}`);
 
 		logger.info('✅ Imagen agregada exitosamente al álbum');
@@ -368,7 +370,9 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 		await db.delete(imageAlbums).where(and(eq(imageAlbums.A, imageId), eq(imageAlbums.B, albumId)));
 
 		// Revalidar rutas
-		REVALIDATE_PATHS.forEach((path: string) => revalidatePath(path));
+		for (const path of REVALIDATE_PATHS) {
+			revalidatePath(path);
+		}
 		revalidatePath(`/albums/${albumId}`);
 
 		logger.info('✅ Imagen removida exitosamente del álbum');

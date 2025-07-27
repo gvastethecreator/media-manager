@@ -1,6 +1,6 @@
 import { Heart } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { FavoriteCard } from '@/components/cards/favorite-card';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { ViewContainer } from '@/components/views/view-container';
-import { clientLogger } from '@/lib/logger';
-import { cn } from '@/lib/utils';
 import type { FavoriteWithStats } from '@/types/entities/favorite/base';
 import { FAVORITE_ENTITY_COLORS, FAVORITE_ENTITY_EMOJIS } from '@/types/entities/favorite/base';
 import type { FavoriteExtended } from '@/types/entities/favorite/types';

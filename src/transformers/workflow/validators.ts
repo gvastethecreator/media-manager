@@ -6,7 +6,6 @@
  * @updated 2025-01-27
  */
 
-import type { WorkflowBase, WorkflowCreateInput, WorkflowUpdateInput } from '../../types/entities/workflow';
 import {
 	ZodWorkflowCreateSchema,
 	type ZodWorkflowCreateType,

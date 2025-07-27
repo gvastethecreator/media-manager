@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCharacter, useRecentCharacterMedia } from '@/lib/api/characters';
 import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
-import type { CharacterCardData, CharacterCardProps } from './character-card.types';
+import type { CharacterCardProps } from './character-card.types';
 import { adaptCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';
@@ -99,7 +99,7 @@ export function CharacterCard({
 			)}
 			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled || !character ? undefined : () => onClick && onClick(character)}
+			onClick={disabled || !character ? undefined : () => onClick?.(character)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !onClick ? -1 : 0}
 			role={onClick ? 'button' : 'article'}

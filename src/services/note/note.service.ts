@@ -10,13 +10,7 @@ import { notes } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromDrizzleNoteWithCounts } from '@/transformers/note/transformer';
-import type {
-	NoteComplete,
-	NoteCreateInput,
-	NoteStatistics,
-	NoteUpdateInput,
-	NoteWithStats,
-} from '@/types/entities/note';
+import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 
 const noteLogger = serverLogger.withContext('NoteService');
 
@@ -323,7 +317,6 @@ const NoteServiceImpl = {
 				case 'updatedAt':
 					orderByClause = sortOrder === 'desc' ? desc(notes.updatedAt) : asc(notes.updatedAt);
 					break;
-				case 'createdAt':
 				default:
 					orderByClause = sortOrder === 'desc' ? desc(notes.createdAt) : asc(notes.createdAt);
 					break;

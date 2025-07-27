@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
-import { ConceptCardImages } from './concept-card-images';
 
 export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
 	const { data: concept, isLoading, error } = useConcept(conceptId);

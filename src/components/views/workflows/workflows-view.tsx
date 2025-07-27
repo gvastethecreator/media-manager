@@ -44,7 +44,7 @@ export function WorkflowsView() {
 
 	useEffect(() => {
 		loadWorkflows();
-	}, []);
+	}, [loadWorkflows]);
 
 	const { toast } = useToast();
 	const handleCreateWorkflow = useCallback(async () => {

@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand';
 import { createPrompt, deletePromptFromApi, getPrompts, updatePrompt } from '@/lib/api/client/prompt.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
+import type { PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
 import type { PromptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('PromptStore:Core');

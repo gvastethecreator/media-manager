@@ -15,7 +15,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { deserializeAudio } from '@/transformers/audio';
-import type { Audio, AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
+import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 
 const audioLogger = serverLogger.withContext('AudioService');
 

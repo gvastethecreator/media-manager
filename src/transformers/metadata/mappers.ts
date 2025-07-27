@@ -4,7 +4,6 @@
  
  */
 
-import { formatBytes } from '@/lib/utils/format.utils';
 import type { MetadataExtended } from '@/types/entities/metadata/extended';
 import type { MetadataBase, MetadataCreateInput, MetadataUpdateInput } from '@/types/entities/metadata/types';
 

@@ -149,13 +149,13 @@ export function calculateQualityScore(factors: {
 	let totalScore = 0;
 	let totalWeight = 0;
 
-	Object.entries(factors).forEach(([factor, score]) => {
+	for (const [factor, score] of Object.entries(factors)) {
 		if (score !== undefined && factor in weights) {
 			const weight = weights[factor as keyof typeof weights];
 			totalScore += score * weight;
 			totalWeight += weight;
 		}
-	});
+	}
 
 	return totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
 }

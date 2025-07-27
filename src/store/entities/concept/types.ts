@@ -1,4 +1,4 @@
-import type { ConceptBase, ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptWithStats } from '@/types/entities/concept/base';
 import type {
 	ConceptCreateInput,
 	ConceptFilters,

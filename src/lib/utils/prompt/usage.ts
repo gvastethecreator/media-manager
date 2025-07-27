@@ -84,7 +84,7 @@ export function calculateCost(model: PromptModel | string, inputTokens: number, 
  * @returns Estadísticas calculadas
  */
 export function calculatePromptStats(
-	prompt: PromptBase,
+	_prompt: PromptBase,
 	executions: PromptExecutionResult[]
 ): {
 	totalExecutions: number;

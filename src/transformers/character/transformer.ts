@@ -6,14 +6,7 @@
  */
 
 import { serverLogger } from '../../lib/logger/server-logger';
-import type {
-	CharacterAssociationStats,
-	CharacterBase,
-	CharacterCreateInput,
-	CharacterUpdateInput,
-	CharacterWithStats,
-} from '../../types/entities/character';
-import type { PlaceWithStats } from '../../types/entities/place';
+import type { CharacterAssociationStats, CharacterWithStats } from '../../types/entities/character';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleCharacterWithCounts = {

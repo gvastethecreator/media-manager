@@ -3,4 +3,3 @@
  * @module types/entities/property/extended
  */
 
-import type { PropertyComplete } from './types';

@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { ConceptFilters, ConceptWithStats } from '@/types/entities/concept';
+import type { ConceptFilters } from '@/types/entities/concept';
 import { ConceptSortOption } from '@/types/entities/concept/enums';
 import type { ConceptStore } from '../types';
 

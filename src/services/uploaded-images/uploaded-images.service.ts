@@ -388,7 +388,6 @@ class UploadedImagesService {
 				case 'type':
 					orderByColumn = uploadedImages.type;
 					break;
-				case 'createdAt':
 				default:
 					orderByColumn = uploadedImages.createdAt;
 					break;

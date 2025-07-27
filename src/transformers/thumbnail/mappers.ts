@@ -6,7 +6,6 @@
  * @updated 2025-01-27
  */
 
-import { calculateCompleteness } from '../../lib/utils/stats';
 import type { ThumbnailBase, ThumbnailStatistics, ThumbnailWithStats } from '../../types/entities/thumbnail';
 
 /**

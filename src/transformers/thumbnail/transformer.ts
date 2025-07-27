@@ -7,9 +7,7 @@
  * @updated 2025-01-27
  */
 
-import { TransformerError } from '../../lib/errors/transformer-error';
-import { serverLogger } from '../../lib/logger/server-logger';
-import type { ThumbnailBase, ThumbnailStatistics, ThumbnailWithStats } from '../../types/entities/thumbnail';
+import type { ThumbnailBase, ThumbnailWithStats } from '../../types/entities/thumbnail';
 import { ThumbnailQuality } from '../../types/entities/thumbnail';
 import { toThumbnailWithStats } from './mappers';
 import { validateThumbnail } from './validators';

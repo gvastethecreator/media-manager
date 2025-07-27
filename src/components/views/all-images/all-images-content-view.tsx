@@ -1,7 +1,6 @@
-import { AlertTriangle, FolderSync, ImageIcon, Upload } from 'lucide-react';
+import { AlertTriangle, FolderSync, Upload } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
-import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Badge } from '@/components/ui/badge';
