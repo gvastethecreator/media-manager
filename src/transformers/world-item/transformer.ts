@@ -74,6 +74,54 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 
 	const { _count, tags: relationTags, properties: relationProperties, ...baseData } = worldItem;
 
+	const statistics: WorldItemStatistics = {
+		imageCount: _count?.images ?? 0,
+		videoCount: _count?.videos ?? 0,
+		albumCount: _count?.albums ?? 0,
+		collectionCount: _count?.collections ?? 0,
+		tagCount: _count?.tags ?? 0,
+		characterCount: _count?.characters ?? 0,
+		placeCount: _count?.places ?? 0,
+		conceptCount: _count?.concepts ?? 0,
+		promptCount: _count?.prompts ?? 0,
+		noteCount: _count?.notes ?? 0,
+		wildcardCount: _count?.wildcards ?? 0,
+		propertyCount: _count?.properties ?? 0,
+		groupCount: _count?.groups ?? 0,
+		totalImages: _count?.images ?? 0,
+		totalVideos: _count?.videos ?? 0,
+		totalAlbums: _count?.albums ?? 0,
+		totalCollections: _count?.collections ?? 0,
+		totalTags: _count?.tags ?? 0,
+		totalCharacters: _count?.characters ?? 0,
+		totalPlaces: _count?.places ?? 0,
+		totalConcepts: _count?.concepts ?? 0,
+		totalPrompts: _count?.prompts ?? 0,
+		totalNotes: _count?.notes ?? 0,
+		totalWildcards: _count?.wildcards ?? 0,
+		totalProperties: _count?.properties ?? 0,
+		totalGroups: _count?.groups ?? 0,
+		powerLevel: 1,
+		rarityScore: 50,
+		completenessScore: 75,
+		popularityScore: 25,
+		hasDescription: !!baseData.description,
+		hasAttributes: !!worldItem.attributes,
+		hasEffects: !!worldItem.effects,
+		hasRequirements: !!worldItem.requirements,
+		hasStats: !!worldItem.stats,
+		mediaRichness: (_count?.images ?? 0) + (_count?.videos ?? 0),
+		createdThisMonth: false,
+		updatedThisWeek: false,
+		daysSinceCreation: 0,
+		daysSinceLastUpdate: 0,
+		totalAttributes: 0,
+		totalEffects: 0,
+		totalRequirements: 0,
+		totalStats: 0,
+		itemTier: 'common' as const,
+	};
+
 	return {
 		...baseData,
 
@@ -103,20 +151,33 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		properties: JSON.parse(worldItem.propertiesJson || '{}'),
 		tags: JSON.parse(worldItem.tagsJson || '[]'),
 
-		// Mapeo de relaciones - simplificado para evitar dependencias circulares
-		images: (worldItem.images || []) as unknown as any[],
-		videos: (worldItem.videos || []) as unknown as any[],
-		albums: (worldItem.albums || []) as unknown as any[],
-		collections: (worldItem.collections || []) as unknown as any[],
-		characters: (worldItem.characters || []) as unknown as any[],
-		places: (worldItem.places || []) as unknown as any[],
-		concepts: (worldItem.concepts || []) as unknown as any[],
-		prompts: (worldItem.prompts || []) as unknown as any[],
-		notes: (worldItem.notes || []) as unknown as any[],
-		wildcards: (worldItem.wildcards || []) as unknown as any[],
-		groups: (worldItem.groups || []) as unknown as any[],
+		// Propiedad notes como string
+		notes: null,
 
-		// Las relaciones tags y properties ya están deserializadas arriba
+		// Tipo de entidad
+		entityType: 'world-item' as const,
+
+		// Estadísticas calculadas
+		statistics,
+
+		// Alias para compatibilidad
+		_stats: statistics,
+
+		// Relaciones
+		relations: {
+			images: (worldItem.images || []).map((img) => img.id),
+			videos: (worldItem.videos || []).map((vid) => vid.id),
+			albums: (worldItem.albums || []).map((album) => album.id),
+			collections: (worldItem.collections || []).map((collection) => collection.id),
+			characters: (worldItem.characters || []).map((character) => character.id),
+			places: (worldItem.places || []).map((place) => place.id),
+			concepts: (worldItem.concepts || []).map((concept) => concept.id),
+			prompts: (worldItem.prompts || []).map((prompt) => prompt.id),
+			notes: (worldItem.notes || []).map((note) => note.id),
+			wildcards: (worldItem.wildcards || []).map((wildcard) => wildcard.id),
+			properties: (worldItem.properties || []).map((property) => property.key),
+			groups: (worldItem.groups || []).map((group) => group.id),
+		},
 
 		// Conteo de relaciones
 		_count: {

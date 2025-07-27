@@ -198,7 +198,7 @@ function mapFolderFiltersToDrizzle(filters: FolderFilters): DrizzleFolderWhereIn
 export function transformCompleteFolderToDrizzle(folder: FolderComplete): DrizzleFolder {
 	try {
 		// Extraer propiedades no persistibles
-		const { children, parent, stats, _count, metadata, ...persistableData } = folder;
+		const { children, parent, images, videos, _count, ...persistableData } = folder;
 
 		// Convertir el objeto a formato Drizzle
 		return {

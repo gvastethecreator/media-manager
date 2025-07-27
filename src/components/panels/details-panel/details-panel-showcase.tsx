@@ -63,6 +63,10 @@ const mockEntities: AnyEntityWithStats[] = [
 			lastDownloadedAt: new Date(),
 			lastLikedAt: new Date(),
 			lastCommentedAt: new Date(),
+			aspectRatio: 1920 / 1080,
+		},
+		get statistics() {
+			return this.stats;
 		},
 	} as AnyEntityWithStats,
 	{
@@ -87,7 +91,7 @@ const mockEntities: AnyEntityWithStats[] = [
 		thumbnailErrorAt: null,
 		thumbnailOptimizedAt: null,
 		isFavorite: false,
-
+		isPublic: true,
 		isHidden: false,
 		folderId: 'folder1',
 		noteId: null,
@@ -137,6 +141,9 @@ const mockEntities: AnyEntityWithStats[] = [
 			lastViewed: new Date(),
 			duplicateStatus: 'unique' as const,
 			thumbnailUrl: '/videos/demo-thumb.jpg',
+		},
+		get statistics() {
+			return this.stats;
 		},
 	} as AnyEntityWithStats,
 	{
@@ -194,6 +201,9 @@ const mockEntities: AnyEntityWithStats[] = [
 			lastScanned: new Date().toISOString(),
 			recentImages: [],
 		},
+		get statistics() {
+			return this.stats;
+		},
 	} as AnyEntityWithStats,
 	{
 		id: '4',
@@ -236,6 +246,9 @@ const mockEntities: AnyEntityWithStats[] = [
 			wildcardCount: 0,
 			propertyCount: 1,
 			groupCount: 0,
+		},
+		get statistics() {
+			return this.stats;
 		},
 	} as AnyEntityWithStats,
 ];

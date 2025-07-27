@@ -101,6 +101,7 @@ export function mapFormDataToCreateInput(formData: AudioFormData): AudioCreateIn
 		hash: formData.hash,
 		mimeType: formData.mimeType,
 		extension: formData.extension,
+		description: formData.description,
 		folderId: formData.folderId,
 		isFavorite: formData.isFavorite,
 		isArchived: formData.isArchived,

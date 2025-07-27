@@ -7,6 +7,12 @@
  * @updated 2025-01-27
  */
 
+export type { VideoBase, VideoStatistics, VideoWithStats } from '../../types/entities/video/base';
 export type { VideoComplete } from '../../types/entities/video/types';
-export { toVideoWithStats } from './mappers';
+export {
+	mapCreateVideoDataToDrizzle,
+	mapUpdateVideoDataToDrizzle,
+	mapVideoFiltersToDrizzleArgs,
+	toVideoWithStats,
+} from './mappers';
 export { fromDrizzleVideo } from './transformer';

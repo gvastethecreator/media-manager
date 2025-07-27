@@ -240,6 +240,7 @@ export class FileEntityMapperService {
 						folderId,
 						mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
 						extension: fileInfo.extension,
+						description: null,
 						isFavorite: false,
 						isArchived: false,
 						duration: null,

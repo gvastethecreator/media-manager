@@ -162,13 +162,13 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 			hash: rawFile.hash,
 			mimeType: rawFile.mimeType,
 			extension: rawFile.extension,
-			type: rawFile.fileType as any, // Conversión temporal
+			type: rawFile.type, // Conversión temporal
 			isDirectory: false, // Valor por defecto, debería venir del API
 			parentPath: '', // Valor por defecto
 			absolutePath: rawFile.path,
 			relativePath: rawFile.path,
 			modifiedAt: rawFile.updatedAt,
-			accessedAt: rawFile.lastAccessed || rawFile.updatedAt,
+			accessedAt: rawFile.accessedAt || rawFile.updatedAt,
 			folderId: rawFile.folderId,
 			isHidden: rawFile.isHidden,
 			isReadonly: false, // Valor por defecto
@@ -199,13 +199,13 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 			hash: rawFile.hash,
 			mimeType: rawFile.mimeType,
 			extension: rawFile.extension,
-			type: rawFile.fileType as any, // Conversión temporal
+			type: rawFile.type, // Conversión temporal
 			isDirectory: false, // Valor por defecto, debería venir del API
 			parentPath: '', // Valor por defecto
 			absolutePath: rawFile.path,
 			relativePath: rawFile.path,
 			modifiedAt: rawFile.updatedAt,
-			accessedAt: rawFile.lastAccessed || rawFile.updatedAt,
+			accessedAt: rawFile.accessedAt || rawFile.updatedAt,
 			folderId: rawFile.folderId,
 			isHidden: rawFile.isHidden,
 			isReadonly: false, // Valor por defecto

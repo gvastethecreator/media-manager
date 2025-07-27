@@ -43,14 +43,23 @@ export function serializeWildcardWithStats(wildcard: WildcardWithStats): Record<
 					popularity: wildcard.statistics.popularity,
 				}
 			: null,
-		_count: {
-			tags: wildcard._count.tags,
-			images: wildcard._count.images,
-			characters: wildcard._count.characters,
-			places: wildcard._count.places,
-			notes: wildcard._count.notes,
-			childWildcards: wildcard._count.childWildcards,
-		},
+		_count: wildcard._count
+			? {
+					tags: wildcard._count.tags || 0,
+					images: wildcard._count.images || 0,
+					characters: wildcard._count.characters || 0,
+					places: wildcard._count.places || 0,
+					notes: wildcard._count.notes || 0,
+					childWildcards: wildcard._count.childWildcards || 0,
+				}
+			: {
+					tags: 0,
+					images: 0,
+					characters: 0,
+					places: 0,
+					notes: 0,
+					childWildcards: 0,
+				},
 	};
 }
 

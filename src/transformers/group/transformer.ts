@@ -80,12 +80,15 @@ export function fromDrizzleGroup(drizzleGroup: any): GroupWithStats {
 			totalNotes: noteCount,
 			totalWildcards: wildcardCount,
 			totalProperties: propertyCount,
+			completeness: totalItems > 0 ? Math.min(100, Math.round((totalItems / 10) * 100)) : 0,
+			popularity: Math.round((imageCount + videoCount) * 0.1),
+			lastUpdated: baseData.updatedAt || new Date(),
 		};
 
 		return {
 			...baseData,
 			entityType: 'group' as const,
-			stats,
+			statistics: stats,
 		};
 	} catch (error) {
 		logger.error('Error transformando grupo desde Drizzle', {

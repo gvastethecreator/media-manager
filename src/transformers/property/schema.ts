@@ -20,10 +20,12 @@ export const PropertyBaseSchema = z.object({
 });
 
 export const PropertyStatisticsSchema = z.object({
-	usageCount: z.number().int().min(0),
-	lastUsed: z.date().optional(),
-	isIndexed: z.boolean(),
-	dataSize: z.number().int().min(0),
+	totalRelations: z.number().int().min(0),
+	totalAssociations: z.number().int().min(0),
+	usageDiversity: z.number().min(0),
+	popularity: z.number().min(0),
+	completenessScore: z.number().min(0).max(100),
+	lastUpdated: z.date(),
 });
 
 export const PropertyWithStatsSchema = PropertyBaseSchema.extend({

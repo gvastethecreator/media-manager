@@ -6,6 +6,7 @@
  * @updated 2025-07-01
  */
 
+import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
@@ -19,39 +20,12 @@ import type { PropertyComplete } from '../property';
 import type { TagWithStats } from '../tag';
 import type { VideoWithStats } from '../video';
 import type { WildcardWithStats } from '../wildcard';
+import type { WorldItemBase, WorldItemComplete, WorldItemStatistics, WorldItemWithStats } from './base';
 
-// --- TIPOS BASE Y RELACIONES ---
+// Re-export tipos base
+export type { WorldItemBase, WorldItemComplete, WorldItemStatistics, WorldItemWithStats } from './base';
 
-export interface WorldItemBase {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-
-	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	type: string | null;
-	rarity: string | null;
-	value: string | null;
-	weight: string | null;
-	materials: string | null;
-	origin: string | null;
-	properties: string | null;
-	uses: string | null;
-	history: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	shortcut: string | null;
-	attributes: string | null;
-	effects: string | null;
-	requirements: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-}
+// --- TIPOS PARA RELACIONES ---
 
 export interface WorldItemRelations {
 	images?: ImageWithStats[];
@@ -70,99 +44,6 @@ export interface WorldItemRelations {
 }
 
 export interface WorldItemCounts {
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
-
-export interface WorldItemStatistics {
-	totalImages: number;
-	totalVideos: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalWildcards: number;
-	totalProperties: number;
-	totalGroups: number;
-	totalRelations: number;
-	totalSize: number;
-	averageSize: number;
-	averageRelations: number;
-	popularityScore: number;
-	completenessScore: number;
-	usageCount: number;
-	lastUsed: Date | null;
-}
-
-export interface WorldItemWithStats
-	extends Omit<WorldItemBase, 'totalImages' | 'totalVideos' | 'properties' | 'notes'> {
-	entityType: 'world-item';
-	_stats: WorldItemStatistics;
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-	// Relaciones opcionales
-	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	concepts?: ConceptWithStats[];
-	prompts?: PromptComplete[];
-	notes?: NoteWithStats[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
-}
-
-/**
- * 🌍 WorldItem completo con relaciones
- */
-export interface WorldItemComplete extends Omit<WorldItemBase, 'properties' | 'notes'> {
-	images?: ImageWithStats[];
-	videos?: VideoWithStats[];
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	concepts?: ConceptWithStats[];
-	prompts?: PromptComplete[];
-	notes?: NoteWithStats[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
 	_count?: {
 		images?: number;
 		videos?: number;

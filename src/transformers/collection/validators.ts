@@ -139,9 +139,7 @@ export function sanitizeCollectionData(data: Partial<CollectionBase>): Partial<C
 	}
 
 	// Valores por defecto para booleanos
-	if (sanitized.isPublic === undefined) {
-		sanitized.isPublic = false;
-	}
+	// Nota: isPublic no existe en CollectionBase, removido
 	if (sanitized.isFavorite === undefined) {
 		sanitized.isFavorite = false;
 	}

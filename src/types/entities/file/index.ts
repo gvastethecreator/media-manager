@@ -19,7 +19,13 @@ export type {
 	FileStatistics,
 	FileWithStats,
 } from './base';
-
 // --- Enums ---
 export { FileType } from './base';
 export { FileErrorCode, FileEventType } from './enums';
+// --- Tipos adicionales ---
+export type {
+	DirectoryReadResult,
+	FileCopyMoveResult,
+	FileOperationOptions,
+	FileOperationResult,
+} from './types';

@@ -21,6 +21,7 @@ import type { PlaceWithStats } from '@/types/entities/place';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import type { PropertyWithStats } from '@/types/entities/property';
 import type { TagWithStats } from '@/types/entities/tag';
+import type { UploadedImageWithStats } from '@/types/entities/uploaded-image';
 import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
@@ -43,7 +44,8 @@ export type AnyEntityWithStats =
 	| AudioWithStats
 	| DocumentWithStats
 	| CollectionWithStats
-	| AlbumWithStats;
+	| AlbumWithStats
+	| UploadedImageWithStats;
 
 // Export del tipo principal para compatibilidad
 export type { EntityWithStats };
@@ -67,6 +69,7 @@ export enum EntityStatsType {
 	CONCEPT = 'concept',
 	PROMPT = 'prompt',
 	GROUP = 'group',
+	UPLOADED_IMAGE = 'uploaded-image',
 }
 
 // Función helper para verificar si es una entidad con el campo entityType
@@ -246,6 +249,16 @@ export function isGroupWithStats(entity: unknown): entity is GroupWithStats {
 	);
 }
 
+export function isUploadedImageWithStats(entity: unknown): entity is UploadedImageWithStats {
+	return (
+		typeof entity === 'object' &&
+		entity !== null &&
+		'id' in entity &&
+		hasEntityType(entity) &&
+		entity.entityType === 'uploaded-image'
+	);
+}
+
 // Función helper para obtener el tipo de estadísticas de una entidad
 export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsType | null {
 	if (isImageWithStats(entity)) return EntityStatsType.IMAGE;
@@ -265,6 +278,7 @@ export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsType 
 	if (isConceptWithStats(entity)) return EntityStatsType.CONCEPT;
 	if (isPromptWithStats(entity)) return EntityStatsType.PROMPT;
 	if (isGroupWithStats(entity)) return EntityStatsType.GROUP;
+	if (isUploadedImageWithStats(entity)) return EntityStatsType.UPLOADED_IMAGE;
 	return null;
 }
 

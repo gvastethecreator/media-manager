@@ -5,6 +5,15 @@
  
  */
 
+// Exportar tipos
+export type {
+	FolderBase,
+	FolderCreateInput,
+	FolderStatistics,
+	FolderUpdateInput,
+	FolderWithStats,
+} from '../../types/entities/folder/types';
+
 // Exportar mappers y serializers
 export * from './mappers';
 export * from './schema';

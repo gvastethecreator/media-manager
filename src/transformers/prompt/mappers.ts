@@ -5,7 +5,7 @@
  */
 
 import { serverLogger } from '../../lib/logger/server-logger';
-import { calculateCompleteness } from '../../lib/utils/stats';
+import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
 import type {
 	DrizzleCreatePromptData,
 	DrizzleOrderBy,
@@ -310,22 +310,34 @@ export function processPrompts(
  * @returns Prompt con estadísticas calculadas.
  */
 export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
+	// Calcular completeness score
+	const completenessScore = calculateCompleteness([
+		prompt.name,
+		prompt.description,
+		prompt.content,
+		prompt.parameters,
+		prompt.category,
+		prompt.style,
+		prompt.mood,
+		prompt.featuredImage,
+	]);
+
 	// Calcular estadísticas
 	const stats: PromptStatistics = {
 		// Conteos de relaciones
-		totalImages: prompt.totalImages || 0,
-		totalVideos: prompt.totalVideos || 0,
-		totalAlbums: 0,
-		totalCollections: 0,
-		totalTags: 0,
-		totalCharacters: 0,
-		totalPlaces: 0,
-		totalWorldItems: 0,
-		totalConcepts: 0,
-		totalNotes: 0,
-		totalWildcards: 0,
-		totalProperties: 0,
-		totalGroups: 0,
+		totalImages: prompt._count?.images || 0,
+		totalVideos: prompt._count?.videos || 0,
+		totalAlbums: prompt._count?.albums || 0,
+		totalCollections: prompt._count?.collections || 0,
+		totalTags: prompt._count?.tagEntities || 0,
+		totalCharacters: prompt._count?.characters || 0,
+		totalPlaces: prompt._count?.places || 0,
+		totalWorldItems: prompt._count?.worldItems || 0,
+		totalConcepts: prompt._count?.concepts || 0,
+		totalNotes: prompt._count?.notes || 0,
+		totalWildcards: prompt._count?.wildcards || 0,
+		totalProperties: prompt._count?.properties || 0,
+		totalGroups: prompt._count?.groups || 0,
 
 		// Métricas de contenido
 		totalContentItems: 0,
@@ -360,7 +372,7 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 		isWellStructured:
 			!!prompt.description && !!prompt.content && (Array.isArray(prompt.tags) ? prompt.tags.length > 0 : false),
 		qualityGrade: calculateQualityGrade(prompt),
-		completenessScore: 0,
+		completenessScore: completenessScore,
 		creativityScore: 0,
 		technicalScore: 0,
 		usabilityScore: 0,

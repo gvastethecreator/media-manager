@@ -34,7 +34,10 @@ export function fromDatabase(dbData: unknown): TagBase {
 		return validated;
 	} catch (error) {
 		logger.error('❌ Error transformando Tag desde DB:', error);
-		throw TransformerError.wrap(error as Error, 'Error transformando Tag desde DB');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'fromDatabase',
+			message: 'Error transformando Tag desde DB',
+		});
 	}
 }
 
@@ -59,7 +62,10 @@ export function toDatabase(tag: TagBase): Record<string, unknown> {
 		return serialized as unknown as Record<string, unknown>;
 	} catch (error) {
 		logger.error('❌ Error transformando Tag para DB:', error);
-		throw TransformerError.wrap(error as Error, 'Error transformando Tag para DB');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'toDatabase',
+			message: 'Error transformando Tag para DB',
+		});
 	}
 }
 
@@ -77,7 +83,7 @@ export function normalize(tag: Partial<TagBase>): TagBase {
 		return validated;
 	} catch (error) {
 		logger.error('❌ Error normalizando Tag:', error);
-		throw TransformerError.wrap(error as Error, 'Error normalizando Tag');
+		throw TransformerError.wrap(error as Error, { operation: 'normalize', message: 'Error normalizando Tag' });
 	}
 }
 
@@ -98,7 +104,10 @@ export function forClient(tag: TagBase): TagBase {
 		return sanitized;
 	} catch (error) {
 		logger.error('❌ Error preparando Tag para cliente:', error);
-		throw TransformerError.wrap(error as Error, 'Error preparando Tag para cliente');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'forClient',
+			message: 'Error preparando Tag para cliente',
+		});
 	}
 }
 
@@ -167,7 +176,7 @@ export function fromDrizzleTag(drizzleTag: Record<string, unknown> | null): TagW
 			return {
 				...baseTag,
 				entityType: 'tag',
-				stats,
+				statistics: stats,
 			} as TagWithStats;
 		}
 
@@ -195,7 +204,7 @@ export function fromDrizzleTag(drizzleTag: Record<string, unknown> | null): TagW
 		return {
 			...baseTag,
 			entityType: 'tag',
-			stats,
+			statistics: stats,
 		} as TagWithStats;
 	} catch (error) {
 		logger.error('❌ Error transformando tag legacy:', error);

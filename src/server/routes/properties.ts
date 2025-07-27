@@ -4,7 +4,7 @@ import { PropertyService } from '@/services/property/property.service';
 
 const propertyService = new PropertyService();
 
-import { toPropertyWithStats } from '@/transformers/property';
+import { toPropertyWithStats } from '@/transformers/property/mappers';
 
 const router = Router();
 

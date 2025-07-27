@@ -4,6 +4,10 @@
  */
 
 import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
+import type { TagWithStats } from './base';
+
+// Re-export TagWithStats for external use
+export type { TagWithStats } from './base';
 
 export interface TagBase extends EntityBase {
 	name: string;
@@ -74,6 +78,7 @@ export interface TagsResponse {
 }
 
 export type TagComplete = TagWithStats;
+export type TagWithCounts = TagWithStats; // Alias para compatibilidad
 
 export interface TagPreview extends Pick<TagBase, 'id' | 'name' | 'color' | 'emoji'> {
 	stats?: {

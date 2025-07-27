@@ -711,6 +711,13 @@ export class TagService {
 		// TODO: Implementar lógica para agregar imagen a etiqueta
 		logger.info(`Agregando imagen ${imageId} a etiqueta ${tagId}`);
 	}
+
+	async getTagThumbnails(
+		id: string,
+		limit = 6
+	): Promise<Array<{ id: string; name?: string | null; thumbnailUrl: string }>> {
+		return await getTagThumbnails(id, limit);
+	}
 }
 
 // Servicio principal
