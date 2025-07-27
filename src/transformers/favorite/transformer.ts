@@ -50,7 +50,12 @@ export function transformFavorite(favorite: DrizzleFavorite, options: TransformF
 		id: favorite.id,
 		entityId: favorite.entityId,
 		entityType: favorite.entityType as FavoriteEntityType,
+		userId: null, // Valor por defecto
 		profileId: favorite.profileId,
+		addedAt: favorite.createdAt, // Usar createdAt como addedAt
+		notes: null, // Valor por defecto
+		category: null, // Valor por defecto
+		priority: null, // Valor por defecto
 		createdAt: favorite.createdAt,
 		updatedAt: favorite.updatedAt,
 	};

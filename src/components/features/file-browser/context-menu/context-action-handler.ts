@@ -6,14 +6,8 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import tagService, { addImageToTag } from '@/services/tag/tag.service';
-import type { AnyEntityWithStats } from '@/types/migration';
-
-// Importaciones de stores en entidades
-
-// Importaciones de actions de archivos
 import { deleteFile as deleteFileAction } from '@/services/file/file.service';
-// Importar el tipo desde la ubicación correcta
+import tagService, { addImageToTag } from '@/services/tag/tag.service';
 import type { FileItem } from '@/types/files';
 import type { ContextMenuAction } from './types';
 
@@ -154,9 +148,9 @@ const customFileOperationsService = {
 
 export const handleContextAction = async (
 	action: ContextMenuAction,
-	item: AnyEntityWithStats,
+	item: FileItem,
 	data?: Record<string, unknown>,
-	handleItemDoubleClick?: (item: AnyEntityWithStats) => void,
+	handleItemDoubleClick?: (item: FileItem) => void,
 	toggleSelectFile?: (id: string) => void
 ): Promise<void> => {
 	try {

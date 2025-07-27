@@ -22,19 +22,28 @@ export function fromDrizzleProfile(drizzleProfile: any): ProfileWithStats {
 		const { _count, ...baseData } = drizzleProfile;
 
 		const stats: ProfileStatistics = {
+			imageCount: _count?.images || 0,
+			videoCount: _count?.videos || 0,
+			albumCount: _count?.albums || 0,
+			folderCount: _count?.folders || 0,
+			tagCount: _count?.tags || 0,
+			placeCount: _count?.places || 0,
+			lastAccessed: _count?.lastActivity || baseData.updatedAt,
+			totalStorageUsed: _count?.totalStorageUsed || 0,
+			activeDays: _count?.activeDays || 0,
+			createdThisMonth: _count?.createdThisMonth || 0,
+			// Propiedades adicionales para compatibilidad
+			joinDate: baseData.createdAt,
 			totalImages: _count?.images || 0,
 			totalVideos: _count?.videos || 0,
 			totalCollections: _count?.collections || 0,
-			totalFavorites: _count?.favorites || 0,
-			totalActivities: _count?.activities || 0,
-			lastActivity: _count?.lastActivity || baseData.updatedAt,
-			joinDate: baseData.createdAt,
 			isVerified: !!(baseData.isActive && baseData.email),
 		};
 
 		return {
 			...baseData,
 			stats,
+			entityType: 'profile' as const,
 		};
 	} catch (error) {
 		logger.error('Error transformando perfil desde Drizzle', {

@@ -58,6 +58,7 @@ export interface ImageStatistics {
 	wildcardCount: number;
 	propertyCount: number;
 	groupCount: number;
+	aspectRatio: number;
 }
 
 /**

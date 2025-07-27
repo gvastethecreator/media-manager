@@ -141,8 +141,6 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 
 	const result: PlaceWithStats = {
 		...rest,
-		lore: undefined,
-		shortcut: undefined,
 		entityType: 'place' as const,
 		_stats: statistics,
 		stats: statistics,
@@ -154,13 +152,12 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 		region: null,
 		// Conteos individuales para compatibilidad
 		images: _count?.images ?? 0,
-		videos: _count?.images ?? 0, // Usar images como fallback
 		tags: _count?.tags ?? 0,
-		notes: _count?.notes ?? 0,
+		notesCount: _count?.notes ?? 0,
 		characters: _count?.characters ?? 0,
 		collections: _count?.collections ?? 0,
 		concepts: _count?.concepts ?? 0,
-	} as unknown as PlaceWithStats;
+	};
 
 	return result;
 }

@@ -9,7 +9,7 @@ const emptyModule = resolve(__dirname, 'src/empty.ts');
 export default defineConfig({
 	plugins: [
 		react({
-			// Optimización para Bun: usar SWC en lugar de Babel cuando sea posible
+			// Optimizaci?n para Bun: usar SWC en lugar de Babel cuando sea posible
 			jsxRuntime: 'automatic',
 			babel: {
 				parserOpts: {
@@ -27,9 +27,9 @@ export default defineConfig({
 		}),
 	],
 	esbuild: {
-		// Optimización para Bun: target más moderno
+		// Optimizaci?n para Bun: target m?s moderno
 		target: 'esnext',
-		// Mejorar performance de transformación
+		// Mejorar performance de transformaci?n
 		minifyIdentifiers: false,
 		minifySyntax: true,
 		minifyWhitespace: true,
@@ -39,21 +39,21 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		host: true,
-		// Optimización HMR para Bun
+		// Optimizaci?n HMR para Bun
 		hmr: {
 			port: 5175,
 			// Mejorar compatibilidad con Bun
 			clientPort: 5175,
 			host: 'localhost',
 		},
-		// Configuración adicional para mejorar compatibilidad con Bun
+		// Configuraci?n adicional para mejorar compatibilidad con Bun
 		middlewareMode: false,
 		fs: {
 			strict: false,
 			// Permitir acceso a archivos fuera del workspace
 			allow: ['..', '../..'],
 		},
-		// Optimización de proxy para mejor rendimiento
+		// Optimizaci?n de proxy para mejor rendimiento
 		proxy: {
 			'/api': {
 				target: 'http://localhost:4000',
@@ -62,10 +62,9 @@ export default defineConfig({
 				// Optimizaciones de proxy
 				timeout: 30000,
 				proxyTimeout: 30000,
-				keepalive: true,
 			},
 		},
-		// Optimización de watch para Bun
+		// Optimizaci?n de watch para Bun
 		watch: {
 			usePolling: false,
 			ignored: ['**/node_modules/**', '**/dist/**', '**/logs/**'],
@@ -82,7 +81,7 @@ export default defineConfig({
 		chunkSizeWarningLimit: 1000,
 		rollupOptions: {
 			output: {
-				// Optimización de chunks más granular
+				// Optimizaci?n de chunks m?s granular
 				manualChunks: {
 					react: ['react', 'react-dom'],
 					router: ['react-router-dom'],
@@ -104,25 +103,25 @@ export default defineConfig({
 				manualPureFunctions: ['console.log', 'console.info'],
 			},
 		},
-		// Optimización de minificación
+		// Optimizaci?n de minificaci?n
 		minify: 'esbuild',
 		// Optimizar assets
 		assetsInlineLimit: 4096,
-		// Optimización de CSS
+		// Optimizaci?n de CSS
 		cssCodeSplit: true,
 		cssMinify: true,
 	},
 	define: {
 		// Definir variables de entorno para el cliente
 		'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-		// Optimización: definir variables en tiempo de build
+		// Optimizaci?n: definir variables en tiempo de build
 		__DEV__: process.env.NODE_ENV !== 'production',
 		__PROD__: process.env.NODE_ENV === 'production',
 	},
 	optimizeDeps: {
-		// Optimización de dependencias para Bun
+		// Optimizaci?n de dependencias para Bun
 		exclude: [
-			// Excluir módulos de Node.js
+			// Excluir m?dulos de Node.js
 			'fs',
 			'fs/promises',
 			'path',
@@ -133,7 +132,7 @@ export default defineConfig({
 			'@tauri-apps/api',
 		],
 		include: [
-			// Pre-bundlear dependencias críticas
+			// Pre-bundlear dependencias cr?ticas
 			'react',
 			'react-dom',
 			'react-router-dom',
@@ -147,19 +146,19 @@ export default defineConfig({
 			'clsx',
 			'tailwind-merge',
 		],
-		// Optimización de ESBuild para dependencias
+		// Optimizaci?n de ESBuild para dependencias
 		esbuildOptions: {
 			target: 'esnext',
 			platform: 'browser',
 			mainFields: ['browser', 'module', 'main'],
 			conditions: ['browser', 'module', 'import'],
 		},
-		// Forzar re-optimización en desarrollo
+		// Forzar re-optimizaci?n en desarrollo
 		force: process.env.NODE_ENV === 'development',
 	},
 	resolve: {
 		alias: [
-			// Alias para módulos de Node.js que no deben incluirse en el bundle del cliente
+			// Alias para m?dulos de Node.js que no deben incluirse en el bundle del cliente
 			{ find: 'fs/promises', replacement: emptyModule },
 			{ find: 'fs', replacement: emptyModule },
 			{ find: 'path', replacement: emptyModule },
@@ -167,17 +166,17 @@ export default defineConfig({
 			{ find: 'sharp', replacement: emptyModule },
 			{ find: 'http', replacement: emptyModule },
 		],
-		// Optimización de resolución de módulos
+		// Optimizaci?n de resoluci?n de m?dulos
 		mainFields: ['browser', 'module', 'main'],
 		conditions: ['browser', 'module', 'import'],
 		extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
 	},
-	// Configuración específica para Bun
+	// Configuraci?n espec?fica para Bun
 	worker: {
 		format: 'es',
-		plugins: [react()],
+		plugins: () => [react()],
 	},
-	// Optimización de logs
+	// Optimizaci?n de logs
 	logLevel: process.env.NODE_ENV === 'development' ? 'info' : 'warn',
 	clearScreen: false,
 });

@@ -7,5 +7,8 @@
  * @updated 2025-01-27
  */
 
+// Exportar tipos
+export type { ThumbnailBase, ThumbnailStatistics, ThumbnailWithStats } from '../../types/entities/thumbnail/base';
+
 export { toThumbnailWithStats } from './mappers';
 export { type ThumbnailComplete, transformThumbnail } from './transformer';

@@ -5,7 +5,14 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
+import type {
+	NoteCreateInput,
+	NoteFilters,
+	NoteSearchOptions,
+	NoteStatistics,
+	NoteUpdateInput,
+	NoteWithStats,
+} from '@/types/entities/note';
 
 const logger = serverLogger.withContext('NoteMappers');
 
@@ -183,50 +190,100 @@ export function toNoteWithStats(note: any): any {
 		const readingTime = Math.max(1, Math.ceil(wordCount / 200)); // ~200 palabras por minuto
 
 		// Calcular puntuación de completitud
-		const completenessFields = [note.title, note.content, note.category, note.status];
-		const completenessScore = Math.round((completenessFields.filter(Boolean).length / completenessFields.length) * 100);
+		let completenessScore = 0;
+		if (note.title) completenessScore += 20;
+		if (note.content) completenessScore += 30;
+		if (note.summary) completenessScore += 15;
+		if (note.category) completenessScore += 10;
+		if (note.priority !== null && note.priority !== undefined) completenessScore += 10;
+		if (note.status) completenessScore += 10;
+		if (note.featuredImage) completenessScore += 5;
 
 		// Extraer conteos de relaciones
 		const counts = note._count || {};
-		const totalItems = Object.values(counts).reduce((sum: number, count: number) => sum + (count || 0), 0);
+		const imageCount = counts.images || 0;
+		const videoCount = counts.videos || 0;
+		const albumCount = counts.albums || 0;
+		const collectionCount = counts.collections || 0;
+		const tagCount = counts.tags || 0;
+		const characterCountStat = counts.characters || 0;
+		const placeCount = counts.places || 0;
+		const worldItemCount = counts.worldItems || 0;
+		const conceptCount = counts.concepts || 0;
+		const promptCount = counts.prompts || 0;
+		const wildcardCount = counts.wildcards || 0;
+		const propertyCount = counts.properties || 0;
+		const groupCount = counts.groups || 0;
 
 		const statistics = {
-			totalItems,
-			totalImages: counts.images || 0,
-			totalVideos: counts.videos || 0,
-			totalAlbums: counts.albums || 0,
-			totalCollections: counts.collections || 0,
-			totalTags: counts.tags || 0,
-			totalCharacters: counts.characters || 0,
-			totalPlaces: counts.places || 0,
-			totalWorldItems: counts.worldItems || 0,
-			totalConcepts: counts.concepts || 0,
-			totalPrompts: counts.prompts || 0,
-			totalWildcards: counts.wildcards || 0,
-			totalProperties: counts.properties || 0,
-			totalGroups: counts.groups || 0,
+			imageCount,
+			videoCount,
+			albumCount,
+			collectionCount,
+			tagCount,
+			characterCount: characterCountStat,
+			placeCount,
+			worldItemCount,
+			conceptCount,
+			promptCount,
+			wildcardCount,
+			propertyCount,
+			groupCount,
 			wordCount,
-			characterCount,
 			readingTime,
 			completionScore: completenessScore,
-			lastUpdated: note.updatedAt,
+			totalItems: imageCount + videoCount + albumCount + collectionCount,
+			totalAssociations:
+				imageCount +
+				videoCount +
+				albumCount +
+				collectionCount +
+				tagCount +
+				characterCountStat +
+				placeCount +
+				worldItemCount +
+				conceptCount +
+				promptCount +
+				wildcardCount +
+				propertyCount +
+				groupCount,
 		};
 
 		// Campos derivados
-		const excerpt = note.content ? note.content.substring(0, 150) + (note.content.length > 150 ? '...' : '') : '';
-		const formattedDate = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
+		const excerpt =
+			note.summary || (note.content ? note.content.substring(0, 150) + (note.content.length > 150 ? '...' : '') : '');
+		const formattedDate = note.createdAt ? new Date(note.createdAt).toLocaleDateString() : '';
 		const priorityLabel = getPriorityLabel(note.priority || 0);
 		const statusLabel = getStatusLabel(note.status || 'draft');
 		const categoryLabel = getCategoryLabel(note.category || 'general');
 
 		return {
 			...note,
-			statistics,
+			entityType: 'note' as const,
+			// Propiedades requeridas para compatibilidad con AnyEntityWithStats
+			name: note.title,
+			description: note.summary || note.content || null,
+			stats: statistics,
 			excerpt,
 			formattedDate,
 			priorityLabel,
 			statusLabel,
 			categoryLabel,
+			_count: {
+				images: imageCount,
+				videos: videoCount,
+				albums: albumCount,
+				collections: collectionCount,
+				tags: tagCount,
+				characters: characterCountStat,
+				places: placeCount,
+				worldItems: worldItemCount,
+				concepts: conceptCount,
+				prompts: promptCount,
+				wildcards: wildcardCount,
+				properties: propertyCount,
+				groups: groupCount,
+			},
 		};
 	} catch (error) {
 		logger.error('Error transformando nota con stats:', error);

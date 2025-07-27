@@ -94,21 +94,45 @@ export interface TagStatistics {
  */
 export interface TagWithStats extends TagBase {
 	entityType: 'tag';
+	statistics: TagStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
 	stats: TagStatistics;
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * 🌟 Tipo completo de Tag con todas las relaciones
+ */
+export interface TagComplete extends TagWithStats {
+	tags: string[];
+	relations: {
+		images: string[];
+		videos: string[];
+		albums: string[];
+		collections: string[];
+		characters: string[];
+		places: string[];
+		worldItems: string[];
+		concepts: string[];
+		prompts: string[];
+		notes: string[];
+		wildcards: string[];
+		properties: string[];
+		groups: string[];
 	};
 }
 

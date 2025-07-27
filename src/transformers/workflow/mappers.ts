@@ -7,17 +7,11 @@
  */
 
 import { safeJsonParse } from '../../lib/utils/safe-json-parse';
-import type { WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
+import type { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
 
-// Tipo local para workflow (migración a Drizzle)
-type DrizzleWorkflow = {
-	id: string;
-	name: string;
-	description: string | null;
-	definition: string;
-	isActive: boolean;
-	createdAt: Date;
-	updatedAt: Date;
+// Usar WorkflowBase directamente en lugar de tipo local
+type DrizzleWorkflow = WorkflowBase & {
+	definition?: string; // Campo legacy para compatibilidad
 };
 
 /**
@@ -56,10 +50,13 @@ function calculateWorkflowStats(
 ): WorkflowStatistics {
 	const { totalExecutions, successfulExecutions, _avg, _max } = aggregates;
 
-	// Parsear la definición para contar nodos y conexiones
-	const definition = safeJsonParse<WorkflowDefinition>(workflow.definition, { nodes: [], edges: [] });
-	const nodeCount = definition.nodes?.length ?? 0;
-	const connectionCount = definition.edges?.length ?? 0;
+	// Parsear los pasos para contar nodos y conexiones
+	const steps = safeJsonParse<WorkflowDefinition>(workflow.steps || workflow.definition || '{}', {
+		nodes: [],
+		edges: [],
+	});
+	const nodeCount = steps.nodes?.length ?? 0;
+	const connectionCount = steps.edges?.length ?? 0;
 
 	const successRate = totalExecutions > 0 ? (successfulExecutions / totalExecutions) * 100 : 0;
 
@@ -91,6 +88,7 @@ export function toWorkflowWithStats(
 	return {
 		...workflow,
 		stats,
+		entityType: 'workflow' as const,
 	};
 }
 

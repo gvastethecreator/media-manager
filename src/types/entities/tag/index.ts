@@ -16,6 +16,7 @@
 export { TagCategory } from '@/store/entities/tag/types';
 export type {
 	TagBase,
+	TagComplete,
 	TagCreateInput,
 	TagStatistics,
 	TagUpdateInput,
@@ -31,7 +32,7 @@ export {
 	TagImageRelationSchema,
 	TagSchema,
 } from './schema';
-// --- Tipos Complete ---
-export type { TagComplete, TagPreview } from './types';
+// --- Tipos adicionales ---
+export type { TagPreview } from './types';
 // --- Enumeraciones ---
 export { TagSortCriteria } from './types';

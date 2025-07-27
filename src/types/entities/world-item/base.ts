@@ -59,6 +59,21 @@ export interface WorldItemStatistics {
 	propertyCount: number;
 	groupCount: number;
 
+	// Alias para compatibilidad
+	totalImages: number;
+	totalVideos: number;
+	totalAlbums: number;
+	totalCollections: number;
+	totalTags: number;
+	totalCharacters: number;
+	totalPlaces: number;
+	totalConcepts: number;
+	totalPrompts: number;
+	totalNotes: number;
+	totalWildcards: number;
+	totalProperties: number;
+	totalGroups: number;
+
 	// Métricas RPG
 	powerLevel: number; // Nivel de poder calculado
 	rarityScore: number; // Puntuación de rareza (0-100)
@@ -91,5 +106,44 @@ export interface WorldItemStatistics {
  * 🎮 Tipo principal optimizado con estadísticas pre-calculadas
  */
 export interface WorldItemWithStats extends WorldItemBase {
+	entityType: 'world-item';
+	statistics: WorldItemStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
 	_stats: WorldItemStatistics;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * 🌟 Tipo completo de WorldItem con todas las relaciones
+ */
+export interface WorldItemComplete extends WorldItemWithStats {
+	tags: string[];
+	relations: {
+		images: string[];
+		videos: string[];
+		albums: string[];
+		collections: string[];
+		characters: string[];
+		places: string[];
+		concepts: string[];
+		prompts: string[];
+		notes: string[];
+		wildcards: string[];
+		properties: string[];
+		groups: string[];
+	};
 }

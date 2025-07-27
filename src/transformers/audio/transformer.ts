@@ -24,18 +24,19 @@ export function fromDrizzleAudio(drizzleAudio: AudioBase): AudioWithStats {
 
 	try {
 		// TODO: Implementar la lógica real para calcular estas estadísticas
-		const stats = {
-			duration: drizzleAudio.duration ?? 0,
-			format: drizzleAudio.format ?? 'unknown',
-			bitrate: 0,
+		const audioStats = {
+			duration: drizzleAudio.duration || 0,
+			format: drizzleAudio.format || 'unknown',
+			bitrate: drizzleAudio.bitrate || 0,
 			volumePeaks: [],
-			sampleRate: 0,
+			sampleRate: drizzleAudio.sampleRate || 0,
 		};
 
 		const audioWithStats: AudioWithStats = {
 			...drizzleAudio,
-			entityType: 'audio' as const,
-			stats,
+			entityType: 'audio',
+			statistics: audioStats,
+			stats: audioStats,
 		};
 
 		return audioWithStats;

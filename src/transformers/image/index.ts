@@ -4,6 +4,9 @@
  
  */
 
+// Exportar tipos
+export type { ImageBase, ImageStatistics, ImageWithStats } from '../../types/entities/image/base';
+
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
 export * from './schema';

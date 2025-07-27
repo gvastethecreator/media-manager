@@ -13,7 +13,7 @@ import type {
 	ConceptSearchOptions,
 	ConceptUpdateInput,
 } from '@/types/entities/concept';
-import { ConceptSortOption } from '@/types/entities/concept/enums';
+import { ConceptSortOption } from '@/types/entities/concept';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleConceptCreateInput = {
@@ -181,12 +181,12 @@ export function toUpdateDataDrizzle(input: ConceptUpdateInput): DrizzleConceptUp
 /**
  * Crea la cláusula `orderBy` para las consultas de Drizzle.
  * ✅ MIGRADO A DRIZZLE
- * @param options - Opciones de búsqueda que contienen el `orderBy`.
+ * @param options - Opciones de búsqueda que contienen el `sortBy` y `sortOrder`.
  * @returns El objeto `orderBy` para Drizzle.
  */
 export function createOrderByDrizzle(options: ConceptSearchOptions = {}): DrizzleConceptOrderByInput | undefined {
-	if (options.orderBy) {
-		return options.orderBy as DrizzleConceptOrderByInput;
+	if (options.sortBy && options.sortOrder) {
+		return { [options.sortBy]: options.sortOrder } as DrizzleConceptOrderByInput;
 	}
 	return { updatedAt: 'desc' };
 }
@@ -197,37 +197,35 @@ export function createOrderByDrizzle(options: ConceptSearchOptions = {}): Drizzl
  * @param filters - Los filtros de búsqueda de la aplicación.
  * @returns El objeto `where` para Drizzle.
  */
-export function createFilterDrizzle(filters: ConceptSearchOptions['filters'] = {}): DrizzleConceptWhereInput {
-	const conditions: DrizzleConceptWhereInput[] = [];
+export function createFilterDrizzle(filters: ConceptSearchOptions = {}): DrizzleConceptWhereInput {
+	const conditions: Partial<DrizzleConceptWhereInput> = {};
 
 	if (filters?.search) {
 		const search = filters.search.trim();
-		conditions.push({
-			OR: [
-				{ name: { contains: search } },
-				{ description: { contains: search } },
-				{ applications: { contains: search } },
-				{ examples: { contains: search } },
-				{ relatedConcepts: { contains: search } },
-				{ notes: { contains: search } },
-			],
-		});
+		conditions.OR = [
+			{ name: { contains: search } },
+			{ description: { contains: search } },
+			{ applications: { contains: search } },
+			{ examples: { contains: search } },
+			{ relatedConcepts: { contains: search } },
+			{ notes: { contains: search } },
+		];
 	}
 
 	if (filters?.category) {
 		const categories = Array.isArray(filters.category) ? filters.category : [filters.category];
-		conditions.push({ category: { in: categories } });
+		conditions.category = { in: categories };
 	}
 
 	if (filters?.onlyFavorites) {
-		conditions.push({ isFavorite: true });
+		conditions.isFavorite = true;
 	}
 
 	if (filters?.tags && filters.tags.length > 0) {
-		conditions.push({ tagEntities: { some: { id: { in: filters.tags } } } });
+		conditions.tagEntities = { some: { id: { in: filters.tags } } };
 	}
 
-	return conditions.length > 0 ? { AND: conditions } : {};
+	return conditions as DrizzleConceptWhereInput;
 }
 
 /**
@@ -237,12 +235,15 @@ export function createFilterDrizzle(filters: ConceptSearchOptions['filters'] = {
  * @returns Argumentos para consultas de Drizzle.
  */
 export function toSearchOptionsDrizzle(options: ConceptSearchOptions = {}): DrizzleConceptFindManyArgs {
+	const skip = options.page && options.pageSize ? (options.page - 1) * options.pageSize : undefined;
+	const take = options.pageSize;
+
 	return {
-		where: createFilterDrizzle(options.filters),
+		where: createFilterDrizzle(options),
 		orderBy: createOrderByDrizzle(options),
-		skip: options.skip,
-		take: options.take,
-		include: options.includeRelations ? { _count: true } : undefined,
+		skip,
+		take,
+		include: { _count: true },
 	};
 }
 

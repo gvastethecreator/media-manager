@@ -11,7 +11,7 @@ import type { JsonFileWithStats } from '../../types/entities/json-file';
  * @returns JsonFile válido
  * @throws Error si los datos no son válidos
  */
-export function validateJsonFile(input: unknown): JsonFileWithStats {
+export function validateAndSerializeJsonFile(input: unknown): JsonFileWithStats {
 	if (!input || typeof input !== 'object') {
 		throw new Error('Los datos de entrada deben ser un objeto válido');
 	}
@@ -33,8 +33,20 @@ export function validateJsonFile(input: unknown): JsonFileWithStats {
 	const jsonFile: JsonFileWithStats = {
 		id: (data.id as string) || generateId(),
 		name: data.name as string,
-		filePath: (data.filePath as string) || '',
+		path: (data.path as string) || '',
+		size: content.length,
+		hash: generateHash(content),
+		mimeType: 'application/json',
+		extension: '.json',
+		folderId: (data.folderId as string) || '',
+		isFavorite: (data.isFavorite as boolean) || false,
+		isArchived: (data.isArchived as boolean) || false,
 		content: content,
+		schema: (data.schema as string) || null,
+		isValid: true,
+		validationErrors: null,
+		keyCount: calculateKeyCount(data.content),
+		depth: calculateNestingDepth(data.content),
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		// Estadísticas calculadas

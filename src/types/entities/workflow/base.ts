@@ -46,6 +46,7 @@ export interface WorkflowStatistics {
  */
 export interface WorkflowWithStats extends WorkflowBase {
 	stats: WorkflowStatistics;
+	entityType: 'workflow';
 }
 
 export interface WorkflowCreateInput extends Omit<WorkflowBase, 'id' | 'createdAt' | 'updatedAt'> {}

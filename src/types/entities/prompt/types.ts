@@ -256,6 +256,20 @@ export interface PromptWithRelations extends PromptComplete {
 }
 
 /**
+ * 🔗 Prompt simplificado para relaciones
+ */
+export interface PromptRelated {
+	id: string;
+	name: string;
+	description: string | null;
+	emoji: string | null;
+	color: string | null;
+	category: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+/**
  * 🗄️ Tipos para Drizzle ORM
  */
 export interface DrizzleCreatePromptData {
@@ -335,19 +349,4 @@ export interface DrizzleOrderBy {
 export interface DrizzleUpdateArgs {
 	set: DrizzleUpdatePromptData;
 	where: DrizzleWhereFilter;
-}
-
-/**
- * 🔗 Tipos relacionados para mappers
- */
-export interface PromptRelated {
-	id: string;
-	name: string;
-	description?: string | null;
-	emoji?: string | null;
-	color?: string | null;
-	category?: string | null;
-	type?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
 }

@@ -1,20 +1,11 @@
-/**
- * @file Exportaciones principales de tipos para la entidad Audio.
- * @module types/entities/audio
- * @description
- *   Este archivo centraliza todas las exportaciones de tipos para la entidad Audio.
- *   El tipo canónico para usar en la aplicación es **`AudioWithStats`**.
- */
+// Re-export all audio types
+export * from './base';
+export * from './types';
 
-export type {
-	AudioBase,
-	AudioCreateInput,
-	AudioStatistics,
-	AudioUpdateInput,
-	AudioWithStats,
-} from './base';
+// Import types for aliases
+import type { AudioCreateInput, AudioWithStats } from './base';
 
-// Alias para compatibilidad
+// Aliases for compatibility
 export type Audio = AudioWithStats;
 export type AudioFormData = AudioCreateInput;
 export type AudioUIInput = AudioCreateInput;
