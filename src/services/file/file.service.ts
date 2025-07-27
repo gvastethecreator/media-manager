@@ -4,7 +4,7 @@
  * ✅ MIGRADO DESDE SERVER ACTIONS - 2025-07-03
  */
 
-// @ts-nocheck - Problemas de tipos complejos de FileBase que requieren revisión estructural
+// Tipos corregidos para FileBase
 
 import fs, { stat } from 'fs/promises';
 import path from 'path';
@@ -18,41 +18,23 @@ import {
 	serializeDirectoryContents,
 	serializeFileOperationResult,
 } from '@/transformers/file';
-import { type FileBase, FileErrorCode, FileEventType, FileType } from '@/types/entities/file';
+import {
+	type FileBase,
+	type FileCopyMoveResult,
+	FileErrorCode,
+	FileEventType,
+	type FileOperationOptions,
+	type FileOperationResult,
+	FileType,
+} from '@/types/entities/file';
 
-// Tipos temporales para compilación
-interface FileInfo {
-	id: string;
-	name: string;
-	path: string;
-	type: FileType;
-	size: number;
-	isDirectory: boolean;
-	mimeType: string;
-	createdAt: Date;
-	modifiedAt: Date;
-}
+// Usar tipos de FileBase directamente
+type FileInfo = FileBase;
 
 interface DirectoryReadResult {
 	path: string;
 	items: FileInfo[];
 	total: number;
-}
-
-interface FileOperationOptions {
-	overwrite?: boolean;
-	recursive?: boolean;
-}
-
-interface FileOperationResult {
-	success: boolean;
-	path: string;
-	message?: string;
-}
-
-interface FileCopyMoveResult extends FileOperationResult {
-	source: string;
-	destination: string;
 }
 
 const logger = serverLogger.withContext('FileService');
@@ -178,13 +160,22 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 				id: generateFileId(itemPath),
 				name: item.name,
 				path: itemPath,
-				type: item.isDirectory() ? FileType.DIRECTORY : determineFileType(item.name),
-				extension: item.isDirectory() ? '' : path.extname(item.name),
-				mimeType: item.isDirectory() ? 'directory' : determineMimeType(item.name),
 				size: itemStats.size,
-				createdAt: itemStats.birthtime,
-				modifiedAt: itemStats.mtime,
+				hash: '',
+				mimeType: item.isDirectory() ? 'directory' : determineMimeType(item.name),
+				extension: item.isDirectory() ? '' : path.extname(item.name),
+				type: item.isDirectory() ? FileType.DIRECTORY : determineFileType(item.name),
 				isDirectory: item.isDirectory(),
+				parentPath: path.dirname(itemPath),
+				absolutePath: path.resolve(itemPath),
+				relativePath: path.relative(process.cwd(), itemPath),
+				modifiedAt: itemStats.mtime,
+				accessedAt: itemStats.atime,
+				folderId: null,
+				isHidden: item.name.startsWith('.'),
+				isReadonly: false,
+				createdAt: itemStats.birthtime,
+				updatedAt: itemStats.mtime,
 			};
 
 			processedItems.push(fileBase);
@@ -231,7 +222,7 @@ export async function createDirectory(dirPath: string, options?: FileOperationOp
 		});
 
 		logger.info('✅ Directorio creado');
-		return serializeFileOperationResult(true, normalizedPath);
+		return serializeFileOperationResult(true, normalizedPath, 'create');
 	} catch (error) {
 		logger.error('❌ Error al crear directorio:', error);
 		throw createFileError('No se pudo crear el directorio', FileErrorCode.OPERATION_FAILED, error);
@@ -266,7 +257,7 @@ export async function deleteFile(filePath: string): Promise<FileOperationResult>
 		});
 
 		logger.info('✅ Archivo eliminado');
-		return serializeFileOperationResult(true, normalizedPath);
+		return serializeFileOperationResult(true, normalizedPath, 'delete');
 	} catch (error) {
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
@@ -356,7 +347,7 @@ export async function renameFile(
 		});
 
 		logger.info('✅ Archivo renombrado');
-		return serializeFileOperationResult(true, normalizedNewPath);
+		return serializeFileOperationResult(true, normalizedNewPath, 'rename');
 	} catch (error) {
 		if (error instanceof Error && error.name === 'FileError') {
 			throw error;
@@ -395,7 +386,7 @@ export async function copyFile(
 		if (!options?.overwrite) {
 			try {
 				await stat(normalizedDestPath);
-				throw createFileError('El archivo destino ya existe', FileErrorCode.FILE_EXISTS);
+				throw createFileError('El archivo destino ya existe', FileErrorCode.ALREADY_EXISTS);
 			} catch (error: any) {
 				if (error.code !== 'ENOENT' && error.name !== 'FileError') {
 					throw error;
@@ -413,10 +404,18 @@ export async function copyFile(
 		});
 
 		logger.info('✅ Archivo copiado');
+
+		// Obtener información de los archivos
+		const sourceInfo = await getFileInfo(normalizedSourcePath);
+		const destInfo = await getFileInfo(normalizedDestPath);
+
 		return {
 			success: true,
 			sourcePath: normalizedSourcePath,
-			destinationPath: normalizedDestPath,
+			destPath: normalizedDestPath,
+			isDirectory: false,
+			sourceInfo,
+			destInfo,
 			timestamp: new Date(),
 		};
 	} catch (error) {

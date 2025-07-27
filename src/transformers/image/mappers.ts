@@ -51,6 +51,7 @@ export function mapImageToComplete(image: Partial<ImageBase>): ImageWithStats {
 			wildcardCount: 0,
 			propertyCount: 0,
 			groupCount: 0,
+			aspectRatio: image.width && image.height ? Number((image.width / image.height).toFixed(2)) : 0,
 		},
 		thumbnailUrl: image.thumbnail ?? '',
 		fullUrl: image.path ?? '',

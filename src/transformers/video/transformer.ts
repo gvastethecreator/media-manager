@@ -224,10 +224,13 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			folderId: baseData.folderId || '',
 			entityType: 'video' as const,
 			isHidden: false,
+			isPublic: false,
+			statistics: statistics,
 			stats: statistics,
 			thumbnailUrl: baseData.thumbnail ? `/api/videos/${baseData.id}/thumbnail` : null,
 			description: null,
 			hash: '',
+			_count: counts,
 		};
 	} catch (error) {
 		logger.error('Error al transformar video de Drizzle:', { error, videoId: drizzleVideo?.id });
@@ -256,8 +259,10 @@ export function fromDrizzleVideo(videoFromDrizzle: DrizzleVideoFromDrizzle | nul
 			thumbnail: videoFromDrizzle.thumbnail ? videoFromDrizzle.thumbnail.toString('base64') : null,
 			// Propiedades requeridas faltantes
 			isHidden: false,
+			isPublic: false,
 			description: null,
 			hash: '',
+			stats: undefined,
 			// Simplificar relaciones para evitar dependencias circulares
 			tags: (videoFromDrizzle.tags || []) as unknown as any[],
 			albums: (videoFromDrizzle.albums || []) as unknown as any[],

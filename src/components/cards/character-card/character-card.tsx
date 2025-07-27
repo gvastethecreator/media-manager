@@ -197,7 +197,7 @@ export function CharacterCard({
 							/>
 							<CharacterCardContent
 								description={character.description}
-								stats={character.statistics}
+								stats={character.stats}
 								abilities={character.parsedAbilities}
 								backstory={character.backstory}
 								alignment={character.alignment}

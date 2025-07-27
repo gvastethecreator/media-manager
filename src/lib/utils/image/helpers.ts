@@ -133,7 +133,12 @@ export function extractTagSuggestions(metadata?: ImageMetadata): string[] {
  * @returns true si la imagen tiene metadatos EXIF o AI, false en caso contrario
  */
 export function hasCompleteMetadata(image: Image): boolean {
-	return !!(image.metadata && (image.metadata.exif || image.metadata.ai));
+	if (!image.metadata) return false;
+
+	// Si metadata es string, parsearlo
+	const metadata = typeof image.metadata === 'string' ? (JSON.parse(image.metadata) as ImageMetadata) : image.metadata;
+
+	return !!(metadata && (metadata.exif || metadata.ai));
 }
 
 /**

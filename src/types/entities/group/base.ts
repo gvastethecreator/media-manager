@@ -46,6 +46,9 @@ export interface GroupStatistics {
 	wildcardCount: number;
 	propertyCount: number;
 	totalItems: number;
+	completeness: number;
+	popularity: number;
+	lastUpdated: string;
 	// Alias para compatibilidad
 	totalImages?: number;
 	totalVideos?: number;
@@ -68,7 +71,47 @@ export interface GroupStatistics {
  */
 export interface GroupWithStats extends GroupBase {
 	entityType: 'group';
+	statistics: GroupStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
 	stats: GroupStatistics;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * 🌟 Tipo completo de Group con todas las relaciones
+ */
+export interface GroupComplete extends GroupWithStats {
+	tags: string[];
+	relations: {
+		images: string[];
+		videos: string[];
+		albums: string[];
+		collections: string[];
+		characters: string[];
+		places: string[];
+		worldItems: string[];
+		concepts: string[];
+		prompts: string[];
+		notes: string[];
+		wildcards: string[];
+		properties: string[];
+		groups: string[];
+	};
 }
 
 /**

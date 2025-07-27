@@ -8,8 +8,95 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoCreateInput, VideoFilters, VideoUpdateInput } from '@/types/entities/video/types';
-import { calculateCompleteness } from '../../lib/utils/stats';
-import type { VideoBase, VideoStatistics, VideoWithStats } from '../../types/entities/video';
+import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
+import type { VideoBase, VideoStatistics, VideoWithStats } from '../../types/entities/video/base';
+
+/**
+ * 🔄 Transforma un VideoBase a VideoWithStats calculando las estadísticas.
+ * ✅ MIGRADO A DRIZZLE
+ */
+export function toVideoWithStats(video: VideoBase): VideoWithStats {
+	try {
+		const durationMinutes = video.duration / 60;
+		const durationHours = durationMinutes / 60;
+		const megabytes = video.size / (1024 * 1024);
+		const gigabytes = megabytes / 1024;
+		const aspectRatio = video.width && video.height ? `${video.width}:${video.height}` : 'unknown';
+		const resolution = video.width && video.height ? `${video.width}x${video.height}` : 'unknown';
+		const formattedSize = gigabytes >= 1 ? `${gigabytes.toFixed(2)} GB` : `${megabytes.toFixed(2)} MB`;
+		const formattedDuration =
+			durationHours >= 1
+				? `${Math.floor(durationHours)}h ${Math.floor(durationMinutes % 60)}m`
+				: `${Math.floor(durationMinutes)}m`;
+
+		const statistics: VideoStatistics = {
+			// Conteos de relaciones (inicializados en 0)
+			albumCount: 0,
+			collectionCount: 0,
+			tagCount: 0,
+			characterCount: 0,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 0,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+			totalRelations: 0,
+			totalAssociations: 0,
+			totalItems: 0,
+
+			// Métricas técnicas
+			durationMinutes,
+			durationHours,
+			megabytes,
+			gigabytes,
+			aspectRatio,
+			resolution,
+			formattedSize,
+			formattedDuration,
+
+			// Métricas de calidad
+			qualityLevel:
+				video.height && video.height >= 1080
+					? 'ultra'
+					: video.height && video.height >= 720
+						? 'high'
+						: video.height && video.height >= 480
+							? 'medium'
+							: 'low',
+			qualityScore: 75, // Valor por defecto
+			technicalGrade: 'B',
+			hasAudio: true, // Valor por defecto
+			hasSubtitles: false,
+			bitrate: null,
+			frameRate: null,
+
+			// Métricas de uso
+			views: 0,
+			likes: 0,
+			downloads: 0,
+			lastViewed: null,
+
+			// Estado de duplicados
+			duplicateStatus: 'unique',
+			thumbnailUrl: null,
+		};
+
+		return {
+			...video,
+			entityType: 'video',
+			statistics,
+			stats: statistics,
+			thumbnailUrl: null,
+			fullUrl: video.path,
+		};
+	} catch (error) {
+		logger.error('Error transformando video a VideoWithStats', { error, videoId: video.id });
+		throw new TransformerError('Error al transformar video a VideoWithStats.');
+	}
+}
 
 const logger = serverLogger.withContext('VideoMapper');
 

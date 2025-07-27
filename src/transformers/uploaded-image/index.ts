@@ -7,9 +7,17 @@
  * @updated 2025-01-27
  */
 
+// Exportar tipos
+export type {
+	UploadedImageBase,
+	UploadedImageCreateInput,
+	UploadedImageStatistics,
+	UploadedImageUpdateInput,
+	UploadedImageWithStats,
+} from '../../types/entities/uploaded-image/types';
+
 export { toUploadedImageExtended } from './mappers';
 export {
 	transformToUploadedImageFromDrizzle as transformUploadedImage,
 	transformToUploadedImageWithRelationsFromDrizzle as fromDB,
-	type UploadedImageComplete,
 } from './transformer';

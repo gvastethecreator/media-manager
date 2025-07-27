@@ -19,6 +19,7 @@ export type {
 	VideoComplete,
 	VideoCreateInput,
 	VideoFilters,
+	VideoMetadata,
 	VideoPaginationOptions,
 	VideoPlayState,
 	VideoSortCriteria,

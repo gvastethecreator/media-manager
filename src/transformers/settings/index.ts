@@ -64,6 +64,10 @@ export function serializeSettings(settings: Settings): Record<string, unknown> {
 		apiKey: processed.advanced.apiKey,
 		devMode: processed.advanced.devMode,
 		experimentalFeatures: processed.advanced.experimentalFeatures,
+
+		version: processed.version,
+		lastUpdate: processed.lastUpdate,
+		system: processed.system,
 	};
 }
 
@@ -90,6 +94,12 @@ export function mergeSettings(base: Settings, override: Partial<Settings>): Sett
 		advanced: {
 			...base.advanced,
 			...override.advanced,
+		},
+		version: override.version ?? base.version,
+		lastUpdate: override.lastUpdate ?? base.lastUpdate,
+		system: {
+			...base.system,
+			...override.system,
 		},
 	};
 }
@@ -152,7 +162,10 @@ export function deserializeSettingsJsonLegacy<T>(settingsData: T): T {
 	try {
 		return deserializeSettingsJson(settingsData);
 	} catch (error) {
-		throw TransformerError.wrap(error as Error, 'Error deserializando configuración JSON');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'deserializeSettingsJsonLegacy',
+			message: 'Error deserializando configuración JSON',
+		});
 	}
 }
 
@@ -165,7 +178,10 @@ export function serializeSettingsJsonLegacy<T>(settingsData: T): T {
 	try {
 		return serializeSettingsJson(settingsData);
 	} catch (error) {
-		throw TransformerError.wrap(error as Error, 'Error serializando configuración JSON');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'serializeSettingsJsonLegacy',
+			message: 'Error serializando configuración JSON',
+		});
 	}
 }
 
@@ -178,7 +194,10 @@ export function validateSettingsLegacy<T>(settingsData: T): T {
 	try {
 		return validateSettingsInternal(settingsData as any) as T;
 	} catch (error) {
-		throw TransformerError.wrap(error as Error, 'Error validando configuración');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'validateSettingsLegacy',
+			message: 'Error validando configuración',
+		});
 	}
 }
 

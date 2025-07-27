@@ -69,7 +69,6 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
 		race: overrides.race || 'human',
 		alignment: overrides.alignment || 'true neutral',
 		backstory: overrides.backstory || '',
-		stats: overrides.stats || '{}',
 		psychologicalProfile: overrides.psychologicalProfile || '',
 		socialProfile: overrides.socialProfile || '',
 		goals: overrides.goals || '[]',

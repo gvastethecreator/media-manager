@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { PromptSortOption } from '@/types/entities/prompt/enums';
+import { PromptSortOption } from '@/types/entities/prompt/enums';
 import type { PromptFilters } from '@/types/entities/prompt/extended';
 import type { PromptStore } from '../types';
 
@@ -33,7 +33,7 @@ export const createFiltersSlice: StateCreator<PromptStore, [], [], FiltersSlice>
 		tags: [],
 		onlyFavorites: false,
 	},
-	sortBy: 'name_asc',
+	sortBy: PromptSortOption.NAME_ASC,
 	page: 1,
 	pageSize: 20,
 

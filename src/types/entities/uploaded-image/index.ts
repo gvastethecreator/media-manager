@@ -8,6 +8,7 @@ export type {
 	UploadedImageCreateInput,
 	UploadedImageDimensions,
 	UploadedImageExtended,
+	UploadedImageStatistics,
 	UploadedImageUpdateInput,
 	UploadedImageWithStats,
 } from './types';

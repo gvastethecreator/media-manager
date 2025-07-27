@@ -37,6 +37,7 @@ export interface VideoBase {
 	// Estados
 	isFavorite: boolean;
 	isHidden: boolean;
+	isPublic: boolean;
 
 	// Relaciones
 	folderId: string;
@@ -108,6 +109,8 @@ export type VideoStats = VideoStatistics;
  */
 export interface VideoWithStats extends VideoBase {
 	entityType: 'video';
+	statistics: VideoStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
 	stats: VideoStatistics;
 	thumbnailUrl: string | null;
 	fullUrl: string;

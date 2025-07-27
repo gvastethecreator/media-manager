@@ -13,15 +13,14 @@ export function serializeMetadata(metadata: MetadataExtended) {
 	return {
 		id: metadata.id,
 		type: metadata.type,
-		data: metadata.data,
+		key: metadata.key,
+		value: metadata.value,
 		entityId: metadata.entityId,
 		entityType: metadata.entityType,
-		source: metadata.source,
+		category: metadata.category,
+		description: metadata.description,
 		createdAt: metadata.createdAt.toISOString(),
 		updatedAt: metadata.updatedAt.toISOString(),
-		// Propiedades extendidas si existen
-		formattedSize: metadata.formattedSize,
-		keyCount: metadata.keyCount,
 	};
 }
 

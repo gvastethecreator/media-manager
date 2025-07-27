@@ -62,7 +62,9 @@ export function validateConceptStatistics(data: unknown): ConceptStats {
  */
 export function validateConceptWithStats(data: unknown): ConceptWithStats {
 	try {
-		return ConceptWithStatsSchema.parse(data);
+		// Primero transformar los datos para agregar statistics
+		const transformedData = transformConceptWithStats(data);
+		return ConceptWithStatsSchema.parse(transformedData);
 	} catch (error) {
 		logger.error('Error validando ConceptWithStats', { error, data });
 		throw new TransformerError('Los datos de Concept con estadísticas no son válidos');
@@ -178,4 +180,51 @@ export function sanitizeConceptData(data: Partial<ConceptBase>): Partial<Concept
 	}
 
 	return sanitized;
+}
+
+/**
+ * 📊 Transforma datos de Drizzle con conteos a ConceptWithStats.
+ *
+ * @param data - Datos de Concept con conteos de Drizzle.
+ * @returns Concept con estadísticas estructuradas.
+ */
+export function transformConceptWithStats(data: any): ConceptWithStats {
+	const conceptStats = {
+		imageCount: data._count?.images ?? 0,
+		videoCount: data._count?.videos ?? 0,
+		noteCount: data._count?.notes ?? 0,
+		albumCount: data._count?.albums ?? 0,
+		collectionCount: data._count?.collections ?? 0,
+		tagCount: data._count?.tags ?? 0,
+		characterCount: data._count?.characters ?? 0,
+		placeCount: data._count?.places ?? 0,
+		worldItemCount: data._count?.worldItems ?? 0,
+		propertyCount: data._count?.properties ?? 0,
+		groupCount: data._count?.groups ?? 0,
+		wildcardCount: data._count?.wildcards ?? 0,
+		promptCount: data._count?.prompts ?? 0,
+		totalAssociations:
+			(data._count?.images ?? 0) +
+			(data._count?.videos ?? 0) +
+			(data._count?.notes ?? 0) +
+			(data._count?.albums ?? 0) +
+			(data._count?.collections ?? 0) +
+			(data._count?.tags ?? 0) +
+			(data._count?.characters ?? 0) +
+			(data._count?.places ?? 0) +
+			(data._count?.worldItems ?? 0) +
+			(data._count?.properties ?? 0) +
+			(data._count?.groups ?? 0) +
+			(data._count?.wildcards ?? 0) +
+			(data._count?.prompts ?? 0),
+		lastUpdated: new Date(),
+	};
+
+	return {
+		...data,
+		entityType: 'concept' as const,
+		statistics: conceptStats,
+		stats: conceptStats,
+		_count: data._count || {},
+	};
 }

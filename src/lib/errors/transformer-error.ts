@@ -122,6 +122,13 @@ export enum TransformerErrorCode {
 	MISSING_DATA_ERROR = 'MISSING_DATA_ERROR',
 	INVALID_TYPE_ERROR = 'INVALID_TYPE_ERROR',
 	WRAPPED_ERROR = 'WRAPPED_ERROR',
+	MAPPING_ERROR = 'MAPPING_ERROR',
+	METADATA_ERROR = 'METADATA_ERROR',
+	RELATION_ERROR = 'RELATION_ERROR',
+	SEARCH_ERROR = 'SEARCH_ERROR',
+	TYPE_MISMATCH = 'TYPE_MISMATCH',
+	UI_ERROR = 'UI_ERROR',
+	UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
 
 /**
@@ -135,4 +142,74 @@ export interface TransformerErrorContext {
 	expected?: string;
 	received?: string;
 	[key: string]: any;
+}
+
+// Additional error classes extending TransformerError
+export class MappingError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'MAPPING_ERROR', context);
+		this.name = 'MappingError';
+	}
+}
+
+export class MetadataError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'METADATA_ERROR', context);
+		this.name = 'MetadataError';
+	}
+}
+
+export class RelationError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'RELATION_ERROR', context);
+		this.name = 'RelationError';
+	}
+}
+
+export class SearchError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'SEARCH_ERROR', context);
+		this.name = 'SearchError';
+	}
+}
+
+export class SerializationError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'SERIALIZATION_ERROR', context);
+		this.name = 'SerializationError';
+	}
+}
+
+export class TypeMismatchError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'TYPE_MISMATCH', context);
+		this.name = 'TypeMismatchError';
+	}
+}
+
+export class UIError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'UI_ERROR', context);
+		this.name = 'UIError';
+	}
+}
+
+export class ValidationError extends TransformerError {
+	constructor(message: string, context?: TransformerErrorContext) {
+		super(message, 'VALIDATION_ERROR', context);
+		this.name = 'ValidationError';
+	}
+}
+
+// Utility function for handling transformer errors
+export function handleTransformerError(error: unknown, context?: TransformerErrorContext): TransformerError {
+	if (error instanceof TransformerError) {
+		return error;
+	}
+
+	if (error instanceof Error) {
+		return new TransformerError(error.message, 'UNKNOWN_ERROR', context, error);
+	}
+
+	return new TransformerError(typeof error === 'string' ? error : 'Unknown error occurred', 'UNKNOWN_ERROR', context);
 }

@@ -231,25 +231,37 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 				.then((result: { count: number }[]) => result[0]?.count || 0),
 		]);
 
-		const result: PropertyWithStats[] = drizzleProperties.map((rawProperty: (typeof drizzleProperties)[0]) => ({
-			...rawProperty,
-			isFavorite: Boolean(rawProperty.isFavorite),
-			_count: {
-				images: 0,
-				videos: 0,
-				albums: 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				groups: 0,
-			},
-		}));
+		const result: PropertyWithStats[] = drizzleProperties.map((rawProperty: (typeof drizzleProperties)[0]) => {
+			const statistics = {
+				totalRelations: 0,
+				totalAssociations: 0,
+				usageDiversity: 0,
+				popularity: 0,
+				completenessScore: 0,
+			};
+			return {
+				...rawProperty,
+				isFavorite: Boolean(rawProperty.isFavorite),
+				entityType: 'property' as const,
+				statistics,
+				stats: statistics,
+				_count: {
+					images: 0,
+					videos: 0,
+					albums: 0,
+					collections: 0,
+					tags: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					notes: 0,
+					wildcards: 0,
+					groups: 0,
+				},
+			};
+		});
 
 		logger.info(`✅ ${result.length} propiedades obtenidas`);
 		return {
@@ -293,8 +305,19 @@ export async function createProperty(data: PropertyCreateInput): Promise<Propert
 		// Revalidar rutas
 		await revalidatePropertyPaths();
 
+		const statistics = {
+			totalRelations: 0,
+			totalAssociations: 0,
+			usageDiversity: 0,
+			popularity: 0,
+			completenessScore: 0,
+		};
+
 		const result: PropertyWithStats = {
 			...newProperty,
+			entityType: 'property' as const,
+			statistics,
+			stats: statistics,
 			_count: {
 				images: 0,
 				videos: 0,
@@ -360,8 +383,19 @@ export async function updateProperty(id: string, data: PropertyUpdateInput): Pro
 		// Revalidar rutas
 		await revalidatePropertyPaths();
 
+		const statistics = {
+			totalRelations: 0,
+			totalAssociations: 0,
+			usageDiversity: 0,
+			popularity: 0,
+			completenessScore: 0,
+		};
+
 		const result: PropertyWithStats = {
 			...updatedProperty,
+			entityType: 'property' as const,
+			statistics,
+			stats: statistics,
 			_count: {
 				images: 0,
 				videos: 0,

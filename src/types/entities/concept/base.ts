@@ -51,6 +51,7 @@ export interface ConceptStatistics {
 	propertyCount: number;
 	groupCount: number;
 	totalAssociations: number;
+	lastUpdated: Date;
 }
 
 /**
@@ -59,26 +60,49 @@ export interface ConceptStatistics {
 export type ConceptStats = ConceptStatistics;
 
 /**
+ * 🧠 Concept completo con relaciones opcionales.
+ */
+export interface ConceptComplete extends ConceptBase {
+	_count?: {
+		images?: number;
+		videos?: number;
+		prompts?: number;
+		notes?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		properties?: number;
+		wildcards?: number;
+		groups?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+	};
+}
+
+/**
  * ✨ Modelo extendido de Concept con estadísticas.
  * Este es el tipo canónico que se debe usar en toda la aplicación.
  */
 export interface ConceptWithStats extends ConceptBase {
 	entityType: 'concept';
-	stats: ConceptStatistics;
-	_count: {
-		images: number;
-		videos: number;
-		prompts: number;
-		notes: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		properties: number;
-		wildcards: number;
-		groups: number;
-		albums: number;
-		collections: number;
-		tags: number;
+	statistics: ConceptStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
+	stats?: ConceptStatistics;
+	_count?: {
+		images?: number;
+		videos?: number;
+		prompts?: number;
+		notes?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		properties?: number;
+		wildcards?: number;
+		groups?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
 	};
 }
 

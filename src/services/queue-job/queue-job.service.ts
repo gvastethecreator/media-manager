@@ -91,7 +91,9 @@ export async function updateQueueJob(id: string, data: UpdateQueueJobInput): Pro
 			.set({
 				...data,
 				data: data.data ? JSON.stringify(data.data) : existingJob[0].data, // Handle data as JSON string
-				metadata: data.metadata ? serializeQueueJobMetadata(data.metadata) : null,
+				metadata: data.metadata
+					? serializeQueueJobMetadata(typeof data.metadata === 'string' ? JSON.parse(data.metadata) : data.metadata)
+					: null,
 				updatedAt: sql`(strftime('%s', 'now'))`,
 			})
 			.where(eq(queueJobs.id, id))

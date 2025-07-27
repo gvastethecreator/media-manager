@@ -70,6 +70,10 @@ interface Activity {
 
 // Interfaz base para estadísticas
 interface StatsData extends BaseEntity {
+	// Metadatos de entidad
+	createdAt: Date;
+	updatedAt: Date;
+
 	// Conteos básicos
 	totalImages: number;
 	totalFolders: number;

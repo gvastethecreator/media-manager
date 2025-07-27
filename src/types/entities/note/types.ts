@@ -9,7 +9,7 @@ import { z } from 'zod';
 import type { AlbumWithStats } from '../album';
 import type { CharacterWithStats } from '../character';
 import type { CollectionWithStats } from '../collection';
-import type { ConceptComplete } from '../concept';
+import type { ConceptWithStats } from '../concept';
 import type { GroupWithStats } from '../group';
 import type { ImageComplete } from '../image';
 import type { PlaceComplete } from '../place';

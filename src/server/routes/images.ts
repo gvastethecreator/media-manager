@@ -38,15 +38,31 @@ const CreateImageSchema = z.object({
 });
 
 // Schema de validación para actualizar imagen
-const UpdateImageSchema = CreateImageSchema.partial().omit({
-	path: true,
-	hash: true,
-	size: true,
-	width: true,
-	height: true,
-	folderId: true,
-	addedAt: true,
-});
+const UpdateImageSchema = CreateImageSchema.partial()
+	.omit({
+		path: true,
+		hash: true,
+		size: true,
+		width: true,
+		height: true,
+		folderId: true,
+		addedAt: true,
+	})
+	.extend({
+		// Agregar campos de relaciones para actualización
+		tags: z.array(z.string()).optional(),
+		albums: z.array(z.string()).optional(),
+		collections: z.array(z.string()).optional(),
+		characters: z.array(z.string()).optional(),
+		places: z.array(z.string()).optional(),
+		worldItems: z.array(z.string()).optional(),
+		concepts: z.array(z.string()).optional(),
+		prompts: z.array(z.string()).optional(),
+		notes: z.array(z.string()).optional(),
+		wildcards: z.array(z.string()).optional(),
+		properties: z.array(z.string()).optional(),
+		groups: z.array(z.string()).optional(),
+	});
 
 // Schema para filtros de búsqueda
 const ImageFiltersSchema = z.object({

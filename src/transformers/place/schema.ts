@@ -35,6 +35,7 @@ export const PlaceStatisticsSchema = z.object({
 	lastVisited: z.date().optional(),
 	distance: z.number().min(0).optional(),
 	popularity: z.number().min(0).max(100),
+	lastUpdated: z.date(),
 });
 
 export const PlaceWithStatsSchema = PlaceBaseSchema.extend({

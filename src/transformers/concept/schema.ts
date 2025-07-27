@@ -51,6 +51,7 @@ export const ConceptStatisticsSchema = z.object({
 	propertyCount: z.number().int().min(0).default(0),
 	groupCount: z.number().int().min(0).default(0),
 	totalAssociations: z.number().int().min(0).default(0),
+	lastUpdated: z.date(),
 });
 
 /**
@@ -58,22 +59,25 @@ export const ConceptStatisticsSchema = z.object({
  */
 export const ConceptWithStatsSchema = ConceptBaseSchema.extend({
 	entityType: z.literal('concept'),
+	statistics: ConceptStatisticsSchema,
 	stats: ConceptStatisticsSchema,
-	_count: z.object({
-		images: z.number().int().min(0).default(0),
-		videos: z.number().int().min(0).default(0),
-		prompts: z.number().int().min(0).default(0),
-		notes: z.number().int().min(0).default(0),
-		characters: z.number().int().min(0).default(0),
-		places: z.number().int().min(0).default(0),
-		worldItems: z.number().int().min(0).default(0),
-		properties: z.number().int().min(0).default(0),
-		wildcards: z.number().int().min(0).default(0),
-		groups: z.number().int().min(0).default(0),
-		albums: z.number().int().min(0).default(0),
-		collections: z.number().int().min(0).default(0),
-		tags: z.number().int().min(0).default(0),
-	}),
+	_count: z
+		.object({
+			images: z.number().int().min(0).default(0),
+			videos: z.number().int().min(0).default(0),
+			prompts: z.number().int().min(0).default(0),
+			notes: z.number().int().min(0).default(0),
+			characters: z.number().int().min(0).default(0),
+			places: z.number().int().min(0).default(0),
+			worldItems: z.number().int().min(0).default(0),
+			properties: z.number().int().min(0).default(0),
+			wildcards: z.number().int().min(0).default(0),
+			groups: z.number().int().min(0).default(0),
+			albums: z.number().int().min(0).default(0),
+			collections: z.number().int().min(0).default(0),
+			tags: z.number().int().min(0).default(0),
+		})
+		.optional(),
 });
 
 /**

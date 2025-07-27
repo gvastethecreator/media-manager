@@ -163,8 +163,8 @@ export function toDrizzleCollectionCreate(data: CollectionCreateInput): DrizzleC
 	// En Drizzle, las relaciones se manejan por separado
 	// Los IDs se almacenan como metadata o se crean relaciones en tablas de unión
 	const drizzleData: DrizzleCollectionCreateInput = {
-		name: data.name,
-		description: data.description || null,
+		name: data.name ?? 'Nueva Colección', // Valor por defecto si name es undefined
+		description: data.description ?? null,
 		// Serializar campos JSON si existen (estos campos no están en CollectionCreateInput actualmente)
 		// filters: data.filters ? serializeFilters(data.filters) : undefined,
 		// sortBy: data.sortBy ? serializeSortBy(data.sortBy) : undefined,

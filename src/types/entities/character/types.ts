@@ -59,8 +59,7 @@ export interface CharacterBase extends EntityBase {
 	fears?: string; // JSON string
 	beliefs?: string; // JSON string
 	abilities?: string; // JSON string
-	stats?: string; // JSON string
-	statistics?: CharacterStats;
+	rpgStats?: string; // JSON string for RPG stats
 }
 
 /**
@@ -72,12 +71,26 @@ export interface CharacterWithStats extends CharacterBase {
 	_count?: {
 		images?: number;
 		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		groups?: number;
+		properties?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		relatedCharacters?: number;
+		relatedTo?: number;
 	};
 	images?: ImageWithStats[];
 	videos?: VideoWithStats[];
-	// Estadísticas principales
-	statistics?: CharacterStats;
-	// stats is inherited from CharacterBase as string (JSON)
+	// Estadísticas de asociaciones y uso
+	statistics: CharacterAssociationStats;
+	/** Alias para compatibilidad - apunta a statistics */
+	stats: CharacterAssociationStats;
 }
 
 /**
@@ -119,8 +132,7 @@ export interface CharacterCreateInput {
 	fears?: string | null;
 	beliefs?: string | null;
 	abilities?: string | null;
-	stats?: string | null;
-	statistics?: CharacterStats;
+	rpgStats?: string | null;
 }
 
 /**
@@ -244,7 +256,7 @@ export interface CharacterRelationship {
 }
 
 /**
- * 🧑‍🎤 Estadísticas de un personaje.
+ * 🧑‍🎤 Estadísticas RPG de un personaje.
  */
 export interface CharacterStats {
 	strength?: number;
@@ -254,6 +266,35 @@ export interface CharacterStats {
 	wisdom?: number;
 	charisma?: number;
 	[key: string]: number | undefined;
+}
+
+/**
+ * 📊 Estadísticas de asociaciones y uso de un personaje.
+ */
+export interface CharacterAssociationStats {
+	totalImages: number;
+	totalVideos: number;
+	totalTags: number;
+	totalGroups: number;
+	totalProperties: number;
+	totalCollections: number;
+	totalAlbums: number;
+	totalPlaces: number;
+	totalWorldItems: number;
+	totalConcepts: number;
+	totalPrompts: number;
+	totalNotes: number;
+	totalWildcards: number;
+	totalRelatedCharacters: number;
+	totalRelatedTo: number;
+	totalAssociations: number;
+	lastUpdated: Date;
+	powerLevel: number;
+	rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+	// Propiedades RPG adicionales
+	healthPoints?: number;
+	manaPoints?: number;
+	imageCount?: number; // Alias para totalImages
 }
 
 /**
@@ -283,7 +324,7 @@ export const CharacterSchema = z.object({
 	type: z.string().nullable(),
 	alignment: z.string().nullable(),
 	backstory: z.string().nullable(),
-	stats: z.string().nullable(),
+	rpgStats: z.string().nullable(),
 	psychologicalProfile: z.string().nullable(),
 	socialProfile: z.string().nullable(),
 	relationships: z.string().nullable(),

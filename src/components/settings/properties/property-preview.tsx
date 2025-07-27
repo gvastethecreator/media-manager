@@ -82,17 +82,19 @@ export function PropertyPreview({
 						<div>
 							<h4 className="text-sm font-medium mb-2">Elementos asociados</h4>
 							<dl className="space-y-2 text-sm">
-								{Object.entries(property._count).map(
-									([key, count]) =>
-										count > 0 && (
-											<div key={key} className="flex justify-between">
-												<dt className="text-muted-foreground capitalize">
-													{key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-												</dt>
-												<dd className="font-medium">{count}</dd>
-											</div>
-										)
-								)}
+								{property._count &&
+									Object.entries(property._count).map(
+										([key, count]) =>
+											count &&
+											count > 0 && (
+												<div key={key} className="flex justify-between">
+													<dt className="text-muted-foreground capitalize">
+														{key.replace(/([A-Z])/g, ' $1').toLowerCase()}
+													</dt>
+													<dd className="font-medium">{count}</dd>
+												</div>
+											)
+									)}
 							</dl>
 						</div>
 					</div>

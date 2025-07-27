@@ -4,7 +4,7 @@
  */
 
 // Exportaciones del contexto de archivos
-export { type FileItem, FileProvider, useFiles } from './file-context';
+export { FileProvider, useFiles } from './file-context';
 
 // Exportaciones del contexto de configuración
 export {

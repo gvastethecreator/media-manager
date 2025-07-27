@@ -79,6 +79,8 @@ export type FavoriteStats = FavoriteStatistics;
  * Este es el tipo canónico que debe usarse en la aplicación.
  */
 export interface FavoriteWithStats extends FavoriteBase {
+	statistics: FavoriteStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
 	stats: FavoriteStatistics;
 }
 

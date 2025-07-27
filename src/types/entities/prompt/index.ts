@@ -13,7 +13,6 @@ export {
 	PromptCategory,
 	PromptSortCriteria,
 	PromptSortOption,
-	PromptType,
 	PromptViewMode,
 } from './enums';
 
@@ -21,6 +20,7 @@ export type {
 	PromptExecutionParams,
 	PromptExecutionResult,
 	PromptFilters,
+	PromptParameter,
 	PromptSearchOptions,
 	PromptSearchResult,
 	PromptStats,

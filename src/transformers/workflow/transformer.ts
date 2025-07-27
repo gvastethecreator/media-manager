@@ -51,6 +51,7 @@ export function transformWorkflow(
 			return {
 				...baseWorkflow,
 				stats,
+				entityType: 'workflow' as const,
 			};
 		}
 
@@ -65,6 +66,7 @@ export function transformWorkflow(
 				nodeCount: 0,
 				connectionCount: 0,
 			},
+			entityType: 'workflow' as const,
 		};
 	} catch (error) {
 		throw new Error(`Error transforming workflow: ${error instanceof Error ? error.message : 'Unknown error'}`);

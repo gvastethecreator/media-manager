@@ -22,7 +22,7 @@ export const ImageSchema = z.object({
 	width: z.number(),
 	height: z.number(),
 	metadata: z.string().nullable().optional(),
-	thumbnail: z.instanceof(Buffer).nullable().optional(),
+	thumbnail: z.string().nullable().optional(),
 	thumbnailSize: z.number().nullable().optional(),
 	thumbnailWidth: z.number().nullable().optional(),
 	thumbnailHeight: z.number().nullable().optional(),

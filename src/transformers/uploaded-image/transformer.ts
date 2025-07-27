@@ -58,6 +58,7 @@ export function transformToUploadedImageFromDrizzle(uploadedImage: DrizzleUpload
 	return {
 		...uploadedImage,
 		metadata: uploadedImage.metadata ?? null,
+		isFavorite: false, // Default value for isFavorite
 	};
 }
 
@@ -89,6 +90,7 @@ export function transformToUploadedImageWithRelationsFromDrizzle(
 		category: uploadedImage.category || null,
 		width,
 		height,
+		isFavorite: false, // Default value for isFavorite
 		uploadedAt: uploadedImage.createdAt, // Usar createdAt como uploadedAt
 		updatedAt: uploadedImage.updatedAt,
 		metadata: uploadedImage.metadata ?? null,

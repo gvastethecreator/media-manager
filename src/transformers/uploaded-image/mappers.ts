@@ -39,9 +39,9 @@ export function mapCreateInputToDrizzle(data: UploadedImageCreateInput): Drizzle
 		name: data.name,
 		path: data.path,
 		size: data.size,
-		hash: data.hash,
+		hash: crypto.randomUUID(), // Generar hash temporal
 		metadata: data.metadata || null,
-		imageId: data.imageId,
+		imageId: crypto.randomUUID(), // Generar imageId temporal
 		createdAt: new Date(),
 	};
 }

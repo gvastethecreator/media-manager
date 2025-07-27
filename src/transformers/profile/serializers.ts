@@ -37,7 +37,7 @@ export function serializePublicProfile(profile: ProfileWithStats) {
 		bio: profile.bio,
 		website: profile.website,
 		location: profile.location,
-		joinDate: profile.stats.joinDate.toISOString(),
+		joinDate: profile.stats.joinDate?.toISOString() || new Date().toISOString(),
 		stats: {
 			totalImages: profile.stats.totalImages,
 			totalVideos: profile.stats.totalVideos,

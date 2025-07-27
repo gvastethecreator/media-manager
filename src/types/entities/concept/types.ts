@@ -8,7 +8,7 @@ import { z } from 'zod';
 import type { ConceptBase } from './base';
 
 // Re-export tipos base desde base.ts para evitar duplicación
-export type { ConceptBase, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
+export type { ConceptBase, ConceptComplete, ConceptStatistics, ConceptStats, ConceptWithStats } from './base';
 
 // Re-export enums desde enums.ts para evitar duplicación
 export { ConceptSortOption, ConceptViewMode } from './enums';

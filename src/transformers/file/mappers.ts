@@ -15,11 +15,11 @@ import { type FileBase, type FileStatistics, FileType, type FileWithStats } from
  */
 function calculateFileStats(file: FileBase): FileStatistics {
 	const now = new Date();
-	const createdAt = new Date(file.createdAt);
-	const updatedAt = new Date(file.updatedAt);
+	const modifiedAt = new Date(file.modifiedAt);
+	const accessedAt = new Date(file.accessedAt);
 
-	const daysSinceCreated = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-	const daysSinceUpdated = Math.floor((now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
+	const daysSinceModified = Math.floor((now.getTime() - modifiedAt.getTime()) / (1000 * 60 * 60 * 24));
+	const daysSinceAccessed = Math.floor((now.getTime() - accessedAt.getTime()) / (1000 * 60 * 60 * 24));
 
 	const formatFileSize = (bytes: number): string => {
 		if (bytes === 0) return '0 Bytes';
@@ -31,24 +31,22 @@ function calculateFileStats(file: FileBase): FileStatistics {
 
 	return {
 		formattedSize: formatFileSize(file.size),
-		daysSinceCreated,
-		daysSinceUpdated,
-		isRecent: daysSinceUpdated <= 7,
+		typeLabel: file.type,
+		iconName: 'file',
+		colorCode: '#6B7280',
+		daysSinceModified,
+		daysSinceAccessed,
+		isRecent: daysSinceModified <= 7,
 		isLarge: file.size > 100 * 1024 * 1024, // > 100MB
-		formattedCreatedAt: createdAt.toLocaleDateString('es-ES', {
+		formattedModifiedAt: modifiedAt.toLocaleDateString('es-ES', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
 			hour: '2-digit',
 			minute: '2-digit',
 		}),
-		formattedUpdatedAt: updatedAt.toLocaleDateString('es-ES', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-		}),
+		childCount: file.isDirectory ? 0 : 0, // Valor por defecto
+		shortPath: file.relativePath || file.name,
 	};
 }
 
@@ -65,7 +63,6 @@ export function toFileWithStats(file: FileBase): FileWithStats {
 	return {
 		...file,
 		stats,
-		entityType: 'file',
 	};
 }
 

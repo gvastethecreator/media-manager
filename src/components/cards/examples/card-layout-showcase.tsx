@@ -73,6 +73,7 @@ const mockEntities: AnyEntityWithStats[] = [
 			lastDownloadedAt: new Date(),
 			lastLikedAt: new Date(),
 			lastCommentedAt: new Date(),
+			aspectRatio: 1920 / 1080,
 		},
 	} as AnyEntityWithStats,
 	{

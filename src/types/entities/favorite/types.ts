@@ -23,6 +23,7 @@ export enum FavoriteEntityType {
 	FILE = 'file',
 	TAG = 'tag',
 	GROUP = 'group',
+	FAVORITE = 'favorite',
 }
 
 /**
@@ -89,6 +90,41 @@ export interface FavoriteStats {
 }
 
 /**
+ * ⭐ Favorito con estadísticas calculadas
+ */
+export interface FavoriteWithStats extends Omit<FavoriteComplete, 'entityType'> {
+	entityType: 'favorite';
+	statistics?: FavoriteStats;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * 🔍 Resultado de búsqueda de favoritos
+ */
+export interface FavoriteSearchResult {
+	favorites: FavoriteWithStats[];
+	total: number;
+	page: number;
+	limit: number;
+	hasMore: boolean;
+}
+
+/**
  * ⭐ Agrupación de favoritos por tipo
  */
 export interface FavoritesByType {
@@ -121,6 +157,25 @@ export interface FavoriteUpdateInput extends Partial<FavoriteCreateInput> {
 	id: string;
 }
 
+/**
+ * 🔍 Opciones de búsqueda para favoritos
+ */
+export interface FavoriteSearchOptions {
+	filters?: FavoriteFilters;
+	pagination?: {
+		page?: number;
+		pageSize?: number;
+	};
+	sort?: {
+		field?: string;
+		direction?: 'asc' | 'desc';
+	};
+	include?: {
+		entity?: boolean;
+		stats?: boolean;
+	};
+}
+
 // Constantes para mapeo de entidades
 export const FAVORITE_ENTITY_EMOJIS: Record<string, string> = {
 	[FavoriteEntityType.IMAGE]: '🖼️',
@@ -138,6 +193,7 @@ export const FAVORITE_ENTITY_EMOJIS: Record<string, string> = {
 	[FavoriteEntityType.FILE]: '📎',
 	[FavoriteEntityType.TAG]: '🏷️',
 	[FavoriteEntityType.GROUP]: '👥',
+	[FavoriteEntityType.FAVORITE]: '⭐',
 	default: '⭐',
 };
 
@@ -157,6 +213,7 @@ export const FAVORITE_ENTITY_COLORS: Record<string, string> = {
 	[FavoriteEntityType.FILE]: '#6b7280',
 	[FavoriteEntityType.TAG]: '#ec4899',
 	[FavoriteEntityType.GROUP]: '#14b8a6',
+	[FavoriteEntityType.FAVORITE]: '#fbbf24',
 	default: '#3b82f6',
 };
 
@@ -176,6 +233,7 @@ export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<string, string> = {
 	[FavoriteEntityType.FILE]: 'Archivos',
 	[FavoriteEntityType.TAG]: 'Etiquetas',
 	[FavoriteEntityType.GROUP]: 'Grupos',
+	[FavoriteEntityType.FAVORITE]: 'Favoritos',
 	default: 'Favoritos',
 };
 

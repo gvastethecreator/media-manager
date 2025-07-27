@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { calculateCompleteness } from '../../lib/utils/transformers';
+import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
 import type { CollectionBase, CollectionWithStats } from '../../types/entities/collection';
 
 /**

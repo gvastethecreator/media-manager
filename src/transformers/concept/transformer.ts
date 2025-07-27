@@ -70,28 +70,30 @@ export function fromDrizzleConcept(
 			propertyCount: counts.properties,
 			groupCount: counts.groups,
 			totalAssociations,
+			lastUpdated: conceptData.updatedAt,
 		};
 
 		const _count = {
 			images: counts.images,
 			videos: counts.videos,
-			prompts: counts.prompts,
-			notes: counts.notes,
-			characters: counts.characters,
-			places: counts.places,
-			worldItems: counts.worldItems,
-			properties: counts.properties,
-			wildcards: counts.wildcards,
-			groups: counts.groups,
 			albums: counts.albums,
 			collections: counts.collections,
 			tags: counts.tags,
+			characters: counts.characters,
+			places: counts.places,
+			worldItems: counts.worldItems,
+			prompts: counts.prompts,
+			notes: counts.notes,
+			wildcards: counts.wildcards,
+			properties: counts.properties,
+			groups: counts.groups,
 		};
 
 		return {
 			...conceptData,
 			entityType: 'concept' as const,
-			stats,
+			statistics: stats,
+			stats: stats,
 			_count,
 		};
 	} catch (error) {

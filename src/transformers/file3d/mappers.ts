@@ -1,6 +1,6 @@
 // Mappers para File3D
 
-import type { File3D } from '@/types/entities/file3d';
+import type { File3DBase } from '@/types/entities/file3d';
 
 // Tipo local equivalente a Drizzle
 type DrizzleFile3D = {
@@ -38,7 +38,7 @@ type DrizzleFile3D = {
  * Convierte un objeto File3D de Drizzle al tipo de la aplicación
  * ✅ MIGRADO A DRIZZLE
  */
-export function fromDrizzleFile3D(drizzle: DrizzleFile3D): File3D {
+export function fromDrizzleFile3D(drizzle: DrizzleFile3D): File3DBase {
 	return {
 		id: drizzle.id,
 		name: drizzle.name,
@@ -75,7 +75,7 @@ export function fromDrizzleFile3D(drizzle: DrizzleFile3D): File3D {
  * Convierte un objeto File3D de la aplicación al tipo de Drizzle
  * ✅ MIGRADO A DRIZZLE
  */
-export function toDrizzleFile3D(file: File3D): DrizzleFile3D {
+export function toDrizzleFile3D(file: File3DBase): DrizzleFile3D {
 	return {
 		id: file.id,
 		name: file.name,

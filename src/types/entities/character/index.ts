@@ -16,6 +16,7 @@ export {
 } from './enums';
 
 export type {
+	CharacterAssociationStats,
 	CharacterBase,
 	CharacterCreateInput,
 	CharacterFilterItem,

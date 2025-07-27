@@ -30,7 +30,9 @@ export type {
 	ProfileFilters,
 	ProfilePaginationOptions,
 	ProfilePreferences,
+	ProfileStatistics,
 	ProfileUpdateInput,
+	ProfileWithStats,
 } from './types';
 // Exportar enums como valores
 // Exportar el esquema de validación

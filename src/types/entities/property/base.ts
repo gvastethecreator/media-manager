@@ -84,8 +84,10 @@ export interface PropertyStatistics {
 export interface PropertyWithStats extends PropertyBase {
 	entityType: 'property';
 	type?: string; // Alias para category para compatibilidad
+	statistics: PropertyStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
 	stats: PropertyStatistics;
-	_count: {
+	_count?: {
 		images: number;
 		videos: number;
 		albums: number;
@@ -99,6 +101,27 @@ export interface PropertyWithStats extends PropertyBase {
 		notes: number;
 		wildcards: number;
 		groups: number;
+	};
+}
+
+/**
+ * 🌟 Tipo completo de Property con todas las relaciones
+ */
+export interface PropertyComplete extends PropertyWithStats {
+	tags: string[];
+	relations: {
+		images: string[];
+		videos: string[];
+		albums: string[];
+		collections: string[];
+		characters: string[];
+		places: string[];
+		worldItems: string[];
+		concepts: string[];
+		prompts: string[];
+		notes: string[];
+		wildcards: string[];
+		groups: string[];
 	};
 }
 

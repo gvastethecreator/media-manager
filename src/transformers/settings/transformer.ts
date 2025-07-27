@@ -37,7 +37,10 @@ export function fromDatabase(dbData: any): Settings {
 		return validated;
 	} catch (error) {
 		logger.error('❌ Error transformando Settings desde DB:', error);
-		throw TransformerError.wrap(error as Error, 'Error transformando Settings desde DB');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'fromDatabase',
+			message: 'Error transformando Settings desde DB',
+		});
 	}
 }
 
@@ -65,7 +68,10 @@ export function toDatabase(settings: Settings, profileId: string): any {
 		return dbData;
 	} catch (error) {
 		logger.error('❌ Error transformando Settings para DB:', error);
-		throw TransformerError.wrap(error as Error, 'Error transformando Settings para DB');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'toDatabase',
+			message: 'Error transformando Settings para DB',
+		});
 	}
 }
 
@@ -88,7 +94,10 @@ export function toUpdateDatabase(updateData: Partial<Settings>): any {
 		return dbData;
 	} catch (error) {
 		logger.error('❌ Error transformando actualización de Settings para DB:', error);
-		throw TransformerError.wrap(error as Error, 'Error transformando actualización de Settings para DB');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'toUpdateDatabase',
+			message: 'Error transformando actualización de Settings para DB',
+		});
 	}
 }
 
@@ -106,7 +115,7 @@ export function normalize(settings: Partial<Settings>): Settings {
 		return validated;
 	} catch (error) {
 		logger.error('❌ Error normalizando Settings:', error);
-		throw TransformerError.wrap(error as Error, 'Error normalizando Settings');
+		throw TransformerError.wrap(error as Error, { operation: 'normalize', message: 'Error normalizando Settings' });
 	}
 }
 
@@ -127,7 +136,10 @@ export function forClient(settings: Settings): Settings {
 		return sanitized;
 	} catch (error) {
 		logger.error('❌ Error preparando Settings para cliente:', error);
-		throw TransformerError.wrap(error as Error, 'Error preparando Settings para cliente');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'forClient',
+			message: 'Error preparando Settings para cliente',
+		});
 	}
 }
 
@@ -182,6 +194,6 @@ export function merge(base: Settings, override: Partial<Settings>): Settings {
 		return merged;
 	} catch (error) {
 		logger.error('❌ Error combinando configuraciones:', error);
-		throw TransformerError.wrap(error as Error, 'Error combinando configuraciones');
+		throw TransformerError.wrap(error as Error, { operation: 'merge', message: 'Error combinando configuraciones' });
 	}
 }

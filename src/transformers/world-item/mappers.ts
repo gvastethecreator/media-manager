@@ -257,8 +257,30 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		Math.round(totalRelations * 2 + (worldItem.isFavorite ? 20 : 0) + (daysSinceLastUpdate < 7 ? 10 : 0))
 	);
 
-	const stats: WorldItemStatistics = {
+	// Determinar tier del item
+	const rarityLevel = worldItem.rarity?.toLowerCase() || 'common';
+	const itemTier = (
+		['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic', 'artifact'].includes(rarityLevel)
+			? rarityLevel
+			: 'common'
+	) as 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'artifact';
+
+	const statistics: WorldItemStatistics = {
 		// Conteos de relaciones
+		imageCount: _count?.images || 0,
+		videoCount: _count?.videos || 0,
+		albumCount: _count?.albums || 0,
+		collectionCount: _count?.collections || 0,
+		tagCount: _count?.tags || 0,
+		characterCount: _count?.characters || 0,
+		placeCount: _count?.places || 0,
+		conceptCount: _count?.concepts || 0,
+		promptCount: _count?.prompts || 0,
+		noteCount: _count?.notes || 0,
+		wildcardCount: _count?.wildcards || 0,
+		propertyCount: _count?.properties || 0,
+		groupCount: _count?.groups || 0,
+		// Alias para compatibilidad
 		totalImages: _count?.images || 0,
 		totalVideos: _count?.videos || 0,
 		totalAlbums: _count?.albums || 0,
@@ -272,19 +294,36 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		totalWildcards: _count?.wildcards || 0,
 		totalProperties: _count?.properties || 0,
 		totalGroups: _count?.groups || 0,
-		totalRelations: Object.values(_count || {}).reduce((sum, count) => sum + (count || 0), 0),
-		totalSize: 0, // TODO: calcular el tamaño total
-		averageSize: 0, // TODO: calcular el tamaño promedio
-		averageRelations: 0, // TODO: calcular el promedio de relaciones
-		popularityScore,
+		// Métricas RPG
+		powerLevel,
+		rarityScore: rarityScores[rarityLevel] || 10,
 		completenessScore,
-		usageCount: 0, // TODO: obtener el conteo de uso
-		lastUsed: null, // TODO: obtener la fecha de último uso
+		popularityScore,
+		// Análisis de contenido
+		hasDescription: !!worldItem.description,
+		hasAttributes: attributes.length > 0,
+		hasEffects: effects.length > 0,
+		hasRequirements: requirements.length > 0,
+		hasStats: statsData.length > 0,
+		mediaRichness: (_count?.images || 0) + (_count?.videos || 0),
+		// Análisis temporal
+		createdThisMonth: daysSinceCreation <= 30,
+		updatedThisWeek: daysSinceLastUpdate <= 7,
+		daysSinceCreation,
+		daysSinceLastUpdate,
+		// Metadatos RPG
+		totalAttributes: attributes.length,
+		totalEffects: effects.length,
+		totalRequirements: requirements.length,
+		totalStats: statsData.length,
+		itemTier,
 	};
 
 	return {
 		...rest,
 		entityType: 'world-item' as const,
-		_stats: stats,
+		statistics,
+		_stats: statistics,
+		_count: _count || {},
 	};
 }

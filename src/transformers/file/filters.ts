@@ -5,9 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import { FileType } from '@/types/entities/file/base';
+import { FileBase, FileType, FileWithStats } from '@/types/entities/file/base';
 import { FileFilterOptions } from '@/types/entities/file/types';
-import { FileWithStats } from './validators';
 
 /**
  * 🔍 Aplica filtros a una lista de archivos basándose en FileFilterOptions.
@@ -80,21 +79,22 @@ export function applyFileFilters(files: FileWithStats[], options: FileFilterOpti
  */
 export function applySortToFiles(
 	files: FileWithStats[],
-	sortBy: keyof FileWithStats = 'name',
+	sortBy?: 'name' | 'size' | 'type' | 'modifiedAt' | keyof FileBase,
 	sortOrder: 'asc' | 'desc' = 'asc'
 ): FileWithStats[] {
+	const actualSortBy = sortBy || 'name';
 	return [...files].sort((a, b) => {
 		let comparison = 0;
 
 		// Siempre mostrar directorios primero si se ordena por nombre
-		if (sortBy === 'name') {
+		if (actualSortBy === 'name') {
 			if (a.isDirectory !== b.isDirectory) {
 				return a.isDirectory ? -1 : 1;
 			}
 		}
 
 		// Ordenar por el campo específico
-		switch (sortBy) {
+		switch (actualSortBy) {
 			case 'name':
 				comparison = a.name.localeCompare(b.name);
 				break;
@@ -104,9 +104,7 @@ export function applySortToFiles(
 			case 'type':
 				comparison = a.type.localeCompare(b.type);
 				break;
-			case 'createdAt':
-				comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-				break;
+
 			case 'modifiedAt':
 				comparison = new Date(a.modifiedAt).getTime() - new Date(b.modifiedAt).getTime();
 				break;
@@ -130,7 +128,7 @@ export function applyFileFiltersAndSort(files: FileWithStats[], options: FileFil
 	let processed = applyFileFilters(files, options);
 
 	if (options.sortBy && options.sortOrder) {
-		processed = applySortToFiles(processed, options.sortBy, options.sortOrder);
+		processed = applySortToFiles(processed, options.sortBy as any, options.sortOrder);
 	}
 
 	return processed;

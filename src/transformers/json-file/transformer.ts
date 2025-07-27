@@ -6,7 +6,7 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file';
+import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file/base';
 
 const logger = serverLogger.withContext('JsonFileTransformer');
 
@@ -31,15 +31,17 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 			keyCount: 0,
 		};
 
-		try {
-			const content = JSON.parse(drizzleJsonFile.content);
-			stats.size = drizzleJsonFile.content.length;
-			stats.isValid = true;
-			// TODO: Implementar lógica real para nestingDepth y keyCount
-			stats.keyCount = Object.keys(content).length;
-			stats.nestingDepth = 1; // Placeholder
-		} catch (e) {
-			// El JSON no es válido, se mantienen los stats por defecto
+		if (drizzleJsonFile.content) {
+			try {
+				const content = JSON.parse(drizzleJsonFile.content);
+				stats.size = drizzleJsonFile.content.length;
+				stats.isValid = true;
+				// TODO: Implementar lógica real para nestingDepth y keyCount
+				stats.keyCount = Object.keys(content).length;
+				stats.nestingDepth = 1; // Placeholder
+			} catch (e) {
+				// El JSON no es válido, se mantienen los stats por defecto
+			}
 		}
 
 		const jsonFileWithStats: JsonFileWithStats = {

@@ -56,12 +56,7 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 	);
 
 	// 🖼️ Asegurarse de que thumbnailUrl sea una string válida
-	const thumbnailUrl =
-		typeof item.thumbnail === 'string'
-			? item.thumbnail
-			: typeof item.src === 'string'
-				? item.src
-				: `/api/images/${item.id}/thumbnail`;
+	const thumbnailUrl = ('thumbnailUrl' in item ? item.thumbnailUrl : null) || `/api/images/${item.id}/thumbnail`;
 
 	return (
 		<FileContextMenu file={item} onAction={handleAction}>
@@ -99,7 +94,7 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 				{/* ℹ️ Información */}
 				<div className="p-2 text-xs">
 					<div className="truncate font-medium">{item.name}</div>
-					<div className="text-muted-foreground">{formatFileSize(item.size)}</div>
+					<div className="text-muted-foreground">{formatFileSize(('size' in item ? item.size : null) || 0)}</div>
 				</div>
 
 				{/* ⭐ Indicadores */}

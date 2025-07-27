@@ -10,6 +10,7 @@
 export type AudioBase = {
 	id: string;
 	name: string;
+	description: string | null;
 	path: string;
 	size: number;
 	hash: string;
@@ -65,7 +66,23 @@ export interface AudioStatistics {
  */
 export interface AudioWithStats extends AudioBase {
 	entityType: 'audio';
-	stats: AudioStatistics;
+	statistics: AudioStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
+	stats?: AudioStatistics;
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 // --- TIPOS PARA MUTACIONES ---

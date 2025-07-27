@@ -14,6 +14,7 @@
 
 export type {
 	PropertyBase,
+	PropertyComplete,
 	PropertyCreateInput,
 	PropertyStatistics,
 	PropertyUpdateInput,
@@ -35,5 +36,5 @@ export * from './schema';
  */
 // export * from './types';
 
-// --- Tipos Complete ---
-export type { PropertyComplete, PropertyPreview } from './types';
+// --- Tipos adicionales ---
+export type { PropertyPreview } from './types';

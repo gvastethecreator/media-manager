@@ -50,9 +50,21 @@ export function useFilteredData<T extends FileItem[]>(
 						case 'neq':
 							return value !== filter.value;
 						case 'gt':
-							return filter.value !== null && filter.value !== undefined && value > filter.value;
+							return (
+								filter.value !== null &&
+								filter.value !== undefined &&
+								value !== null &&
+								value !== undefined &&
+								value > filter.value
+							);
 						case 'lt':
-							return filter.value !== null && filter.value !== undefined && value < filter.value;
+							return (
+								filter.value !== null &&
+								filter.value !== undefined &&
+								value !== null &&
+								value !== undefined &&
+								value < filter.value
+							);
 						case 'contains':
 							return typeof value === 'string' && value.toLowerCase().includes(String(filter.value).toLowerCase());
 						case 'startsWith':
@@ -88,8 +100,8 @@ export function useFilteredData<T extends FileItem[]>(
 
 					if (aValue === bValue) continue;
 
-					if (aValue === undefined) return 1;
-					if (bValue === undefined) return -1;
+					if (aValue === undefined || aValue === null) return 1;
+					if (bValue === undefined || bValue === null) return -1;
 
 					const direction = sort.direction === 'asc' ? 1 : -1;
 
@@ -97,7 +109,9 @@ export function useFilteredData<T extends FileItem[]>(
 						return aValue.localeCompare(bValue) * direction;
 					}
 
-					return (aValue > bValue ? 1 : -1) * direction;
+					if (aValue != null && bValue != null) {
+						return (aValue > bValue ? 1 : -1) * direction;
+					}
 				}
 
 				return 0;

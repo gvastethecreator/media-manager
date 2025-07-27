@@ -3,7 +3,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
-	plugins: [react(), tsconfigPaths()],
+	plugins: [react(), tsconfigPaths()] as any[],
 	test: {
 		globals: true,
 		environment: 'happy-dom',

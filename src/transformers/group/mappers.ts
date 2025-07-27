@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { calculateCompleteness } from '@/lib/utils/transformers';
+import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 
 /**
@@ -16,7 +16,34 @@ import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entitie
  */
 export function toGroupWithStats(group: GroupBase, counts?: Record<string, number>): GroupWithStats {
 	// Calcular estadísticas básicas
-	const totalItems = counts ? Object.values(counts).reduce((sum: number, count: number) => sum + (count || 0), 0) : 0;
+	const imageCount = counts?.images ?? 0;
+	const videoCount = counts?.videos ?? 0;
+	const albumCount = counts?.albums ?? 0;
+	const collectionCount = counts?.collections ?? 0;
+	const tagCount = counts?.tags ?? 0;
+	const characterCount = counts?.characters ?? 0;
+	const placeCount = counts?.places ?? 0;
+	const worldItemCount = counts?.worldItems ?? 0;
+	const conceptCount = counts?.concepts ?? 0;
+	const promptCount = counts?.prompts ?? 0;
+	const noteCount = counts?.notes ?? 0;
+	const wildcardCount = counts?.wildcards ?? 0;
+	const propertyCount = counts?.properties ?? 0;
+
+	const totalItems =
+		imageCount +
+		videoCount +
+		albumCount +
+		collectionCount +
+		tagCount +
+		characterCount +
+		placeCount +
+		worldItemCount +
+		conceptCount +
+		promptCount +
+		noteCount +
+		wildcardCount +
+		propertyCount;
 
 	// Calcular completitud basada en campos importantes
 	const completenessScore = calculateCompleteness(group, ['name', 'description', 'category']);
@@ -25,6 +52,19 @@ export function toGroupWithStats(group: GroupBase, counts?: Record<string, numbe
 	const popularity = Math.log1p(totalItems);
 
 	const stats: GroupStatistics = {
+		imageCount,
+		videoCount,
+		albumCount,
+		collectionCount,
+		tagCount,
+		characterCount,
+		placeCount,
+		worldItemCount,
+		conceptCount,
+		promptCount,
+		noteCount,
+		wildcardCount,
+		propertyCount,
 		totalItems,
 		completeness: completenessScore,
 		popularity: Number.parseFloat(popularity.toFixed(2)),
@@ -33,6 +73,8 @@ export function toGroupWithStats(group: GroupBase, counts?: Record<string, numbe
 
 	return {
 		...group,
+		entityType: 'group' as const,
+		statistics: stats,
 		stats,
 	};
 }

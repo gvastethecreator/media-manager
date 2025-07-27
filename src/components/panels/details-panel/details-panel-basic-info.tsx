@@ -86,11 +86,11 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 					/>
 				)}
 
-				{'fileSize' in item && item.fileSize ? (
+				{'size' in item && item.size ? (
 					<InfoItem
 						icon={<HardDrive className="h-3 w-3 text-amber-400" />}
 						label="Tamaño"
-						value={formatBytes((item as any).fileSize)}
+						value={formatBytes(item.size)}
 					/>
 				) : null}
 
@@ -115,16 +115,13 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 				)}
 			</div>
 
-			{!hasResolution &&
-				!('fileSize' in item && item.fileSize) &&
-				!('path' in item && item.path) &&
-				!metadata?.mimeType && (
-					<div className="p-2 border border-dashed border-muted-foreground/30 rounded-md">
-						<p className="text-[10px] text-muted-foreground text-center">
-							No se encontró información básica para esta imagen.
-						</p>
-					</div>
-				)}
+			{!hasResolution && !('size' in item && item.size) && !('path' in item && item.path) && !metadata?.mimeType && (
+				<div className="p-2 border border-dashed border-muted-foreground/30 rounded-md">
+					<p className="text-[10px] text-muted-foreground text-center">
+						No se encontró información básica para esta imagen.
+					</p>
+				</div>
+			)}
 		</div>
 	);
 }
