@@ -9,10 +9,8 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
 import type {
-	WildcardBase,
 	WildcardCreateInput,
 	WildcardStatistics,
 	WildcardUpdateInput,

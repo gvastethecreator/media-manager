@@ -2,8 +2,7 @@
  * 🛠️ Utilidades para trabajar con la base de datos a través de Drizzle
  */
 
-import { eq, sql } from 'drizzle-orm';
-import * as schema from '@/lib/drizzle/schema';
+import { sql } from 'drizzle-orm';
 import { albums, collections, folders, imageStats, images, tags } from '@/lib/drizzle/schema';
 import { db } from './db';
 

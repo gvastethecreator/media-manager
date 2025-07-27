@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useConceptStore } from '@/store/entities/concept';
 import type { ConceptCreateInput } from '@/types/entities/concept';
-import type { ViewProps } from '../types';
 import ConceptsContentView from './concepts-content-view';
 
 const viewLogger = clientLogger.withContext('ConceptsView');

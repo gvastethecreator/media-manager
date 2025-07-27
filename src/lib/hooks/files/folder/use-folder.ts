@@ -4,23 +4,7 @@
  */
 
 import { useEffect } from 'react';
-import { shallow } from 'zustand/shallow';
-import {
-	selectCurrentFolder,
-	selectError,
-	selectFavoriteFolders,
-	selectFilteredFolders,
-	selectFolderStats,
-	selectFolders,
-	selectIsLoading,
-	selectItemSize,
-	selectSearchTerm,
-	selectShowFavorites,
-	selectSortBy,
-	selectSortDirection,
-	selectViewMode,
-	useFolderStore,
-} from '@/store/entities/folder';
+import { useFolderStore } from '@/store/entities/folder';
 
 /**
  * Hook para facilitar el acceso al store de carpetas

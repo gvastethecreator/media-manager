@@ -6,7 +6,6 @@
  * @updated 2025-01-27
  */
 
-import type { VideoBase, VideoCreateInput, VideoUpdateInput } from '../../types/entities/video';
 import {
 	ZodVideoCreateSchema,
 	type ZodVideoCreateType,

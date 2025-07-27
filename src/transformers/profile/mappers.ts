@@ -4,14 +4,7 @@
  
  */
 
-import { calculateCompleteness } from '../../lib/utils/stats';
-import type {
-	ProfileBase,
-	ProfileCreateInput,
-	ProfileStatistics,
-	ProfileUpdateInput,
-	ProfileWithStats,
-} from '../../types/entities/profile';
+import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '../../types/entities/profile';
 
 /**
  * Mapea datos de creación a formato Drizzle

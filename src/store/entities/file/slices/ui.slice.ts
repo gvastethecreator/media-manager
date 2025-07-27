@@ -201,14 +201,15 @@ export const createUISlice: StateCreator<FileStore, [], [], UIState & UIActions>
 
 		// Construir la ruta acumulativa
 		let currentPath = '';
-		segments.forEach((segment: string, index: number) => {
+		for (let index = 0; index < segments.length; index++) {
+			const segment = segments[index];
 			currentPath += (index === 0 ? '' : '/') + segment;
 			breadcrumbs.push({
 				id: `breadcrumb-${index}`,
 				path: currentPath,
 				name: segment,
 			});
-		});
+		}
 
 		set({ breadcrumbItems: breadcrumbs });
 	},

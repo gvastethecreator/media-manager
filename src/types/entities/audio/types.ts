@@ -1,4 +1,4 @@
-import type { AudioBase, AudioStatistics, AudioWithStats } from './base';
+import type { AudioStatistics, AudioWithStats } from './base';
 
 // Re-export tipos base (sin AudioCreateInput y AudioUpdateInput para evitar duplicación)
 export type { AudioBase, AudioStatistics, AudioWithStats } from './base';

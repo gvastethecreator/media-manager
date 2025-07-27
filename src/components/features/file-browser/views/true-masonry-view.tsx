@@ -46,7 +46,7 @@ const useMasonryLayout = (items: AnyEntityWithStats[], containerWidth: number, i
 		const columnHeights: number[] = new Array(columns).fill(0);
 		const layoutItems: MasonryItem[] = [];
 
-		items.forEach((item) => {
+		for (const item of items) {
 			// Encontrar la columna más corta
 			const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
 
@@ -80,7 +80,7 @@ const useMasonryLayout = (items: AnyEntityWithStats[], containerWidth: number, i
 
 			// Actualizar altura de la columna
 			columnHeights[shortestColumnIndex] += itemHeight + gap;
-		});
+		}
 
 		const totalHeight = Math.max(...columnHeights);
 
@@ -151,11 +151,11 @@ export const TrueMasonryView = memo<TrueMasonryViewProps>(function TrueMasonryVi
 
 		const observer = new IntersectionObserver(
 			(entries) => {
-				entries.forEach((entry) => {
+				for (const entry of entries) {
 					if (entry.isIntersecting) {
 						setIsVisible(true);
 					}
-				});
+				}
 			},
 			{ threshold: 0.1 }
 		);

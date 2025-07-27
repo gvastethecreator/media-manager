@@ -19,7 +19,6 @@ import {
 	reindexFolder,
 	toggleFolderFavorite,
 	updateFolder,
-	validateFolderExists,
 } from './services/folders';
 
 export interface FolderFilters {

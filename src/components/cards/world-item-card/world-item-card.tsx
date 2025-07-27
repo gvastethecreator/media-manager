@@ -1,13 +1,28 @@
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useRecentWorldItemImages, useWorldItem } from '@/lib/api/world-items';
+import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { WorldItemRarity, WorldItemType, WorldItemWithStats } from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
 import { WorldItemCardImages } from './world-item-card-images';
+
+// Función auxiliar para oscurecer colores
+function darkenColor(color: string): string {
+	if (!color) return '#000000';
+	// Convertir hex a RGB
+	const hex = color.replace('#', '');
+	const r = Number.parseInt(hex.substr(0, 2), 16);
+	const g = Number.parseInt(hex.substr(2, 2), 16);
+	const b = Number.parseInt(hex.substr(4, 2), 16);
+	// Oscurecer reduciendo cada componente en un 30%
+	const newR = Math.floor(r * 0.7);
+	const newG = Math.floor(g * 0.7);
+	const newB = Math.floor(b * 0.7);
+	// Convertir de vuelta a hex
+	return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+}
 
 export interface WorldItemCardProps {
 	worldItemId: string;
@@ -27,20 +42,154 @@ export interface WorldItemCardProps {
  * visualmente atractivo.
  */
 export function WorldItemCard({
-	worldItemId,
-	onClick,
+	worldItem,
 	className,
 	style,
-	tcgMode = true,
-	isSelected = false,
 	compact = false,
-	disabled = false,
+	tcgMode = false,
 	interactive = true,
+	disabled = false,
+	isLoading = false,
+	error,
+	onClick,
 	...rest
 }: WorldItemCardProps) {
-	const { data: worldItem, isLoading, error } = useWorldItem(worldItemId);
-	const { data: recentImagesData } = useRecentWorldItemImages(worldItemId);
+	// Estado para efectos hover
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Procesar propiedades si es un string o formato JSON
+	const parsedProperties = useMemo(() => {
+		if (!worldItem?.properties) return [];
+		if (typeof worldItem.properties === 'string' && worldItem.properties) {
+			try {
+				return JSON.parse(worldItem.properties);
+			} catch (_e) {
+				return [];
+			}
+		}
+		return worldItem.properties || [];
+	}, [worldItem?.properties]);
+
+	// Procesar requerimientos si es un string o formato JSON
+	const parsedRequirements = useMemo(() => {
+		if (!worldItem?.requirements) return [];
+		if (typeof worldItem.requirements === 'string' && worldItem.requirements) {
+			try {
+				return JSON.parse(worldItem.requirements);
+			} catch (_e) {
+				return [];
+			}
+		}
+		return worldItem.requirements || [];
+	}, [worldItem?.requirements]);
+
+	// Procesar atributos si es un string o formato JSON
+	const parsedAttributes = useMemo(() => {
+		if (!worldItem?.attributes) return [];
+		if (typeof worldItem.attributes === 'string' && worldItem.attributes) {
+			try {
+				return JSON.parse(worldItem.attributes);
+			} catch (_e) {
+				return [];
+			}
+		}
+		return worldItem.attributes || [];
+	}, [worldItem?.attributes]);
+
+	// Procesar efectos si es un string o formato JSON
+	const parsedEffects = useMemo(() => {
+		if (!worldItem?.effects) return [];
+		if (typeof worldItem.effects === 'string' && worldItem.effects) {
+			try {
+				return JSON.parse(worldItem.effects);
+			} catch (_e) {
+				return [];
+			}
+		}
+		return worldItem.effects || [];
+	}, [worldItem?.effects]);
+
+	// Procesar estadísticas si es un string o formato JSON
+	const parsedStats = useMemo(() => {
+		if (!worldItem?._stats) return {};
+		if (typeof worldItem._stats === 'string' && worldItem._stats) {
+			try {
+				return JSON.parse(worldItem._stats);
+			} catch (_e) {
+				return {};
+			}
+		}
+		return worldItem._stats || {};
+	}, [worldItem?._stats]);
+
+	// Colores para el gradiente y el icono - derivados del tipo y rareza del objeto
+	const { primaryColor, secondaryColor, icon, intensityFactor } = useMemo(() => {
+		// Color base desde la propiedad o predeterminado
+		const baseColor = worldItem?.color || '#4F46E5';
+
+		// Colores según el tipo de objeto
+		let iconComponent: React.ReactNode;
+		let primaryCol: string;
+		let secondaryCol: string | null;
+
+		switch (worldItem?.type?.toLowerCase()) {
+			case 'artifact':
+				iconComponent = <GemIcon className="w-4 h-4" />;
+				primaryCol = baseColor || '#ad5389';
+				secondaryCol = darkenColor(baseColor) || '#3c1053';
+				break;
+			case 'book':
+				iconComponent = <BookOpenText className="w-4 h-4" />;
+				primaryCol = baseColor || '#007991';
+				secondaryCol = darkenColor(baseColor) || '#78ffd6';
+				break;
+			case 'consumable':
+				iconComponent = <Beaker className="w-4 h-4" />;
+				primaryCol = baseColor || '#659999';
+				secondaryCol = darkenColor(baseColor) || '#f4791f';
+				break;
+			case 'weapon':
+				iconComponent = <Sword className="w-4 h-4" />;
+				primaryCol = baseColor || '#8A2387';
+				secondaryCol = darkenColor(baseColor) || '#F27121';
+				break;
+			case 'equipment':
+				iconComponent = <StoreIcon className="w-4 h-4" />;
+				primaryCol = baseColor || '#3A1C71';
+				secondaryCol = darkenColor(baseColor) || '#FFAF7B';
+				break;
+			default:
+				iconComponent = <Box className="w-4 h-4" />;
+				primaryCol = baseColor || '#0f0c29';
+				secondaryCol = darkenColor(baseColor) || '#302b63';
+		}
+
+		// Ajustar intensidad según rareza
+		const rarityFactors: Record<string, number> = {
+			common: 1,
+			uncommon: 1.1,
+			rare: 1.2,
+			epic: 1.3,
+			legendary: 1.5,
+		};
+
+		const intensityFactor = rarityFactors[worldItem?.rarity?.toLowerCase() || 'common'] || 1;
+
+		return {
+			primaryColor: primaryCol,
+			secondaryColor: secondaryCol,
+			icon: iconComponent,
+			intensityFactor,
+		};
+	}, [worldItem?.color, worldItem?.type, worldItem?.rarity]);
+
+	// Manejar eventos de teclado para accesibilidad
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if ((e.key === 'Enter' || e.key === ' ') && onClick && !disabled) {
+			e.preventDefault();
+			onClick(worldItem);
+		}
+	};
 
 	// Si no hay datos del objeto del mundo o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
@@ -123,67 +272,6 @@ export function WorldItemCard({
 		propertiesCount +
 		groupsCount;
 
-	// Colores para el gradiente y el icono - derivados del tipo y rareza del objeto
-	const { primaryColor, secondaryColor, icon, intensityFactor } = useMemo(() => {
-		// Color base desde la propiedad o predeterminado
-		const baseColor = color || '#4F46E5';
-
-		// Colores según el tipo de objeto
-		let iconComponent: React.ReactNode;
-		let primaryCol: string;
-		let secondaryCol: string | null;
-
-		switch (type?.toLowerCase()) {
-			case 'artifact':
-				iconComponent = <GemIcon className="w-4 h-4" />;
-				primaryCol = baseColor || '#ad5389';
-				secondaryCol = darkenColor(baseColor) || '#3c1053';
-				break;
-			case 'book':
-				iconComponent = <BookOpenText className="w-4 h-4" />;
-				primaryCol = baseColor || '#007991';
-				secondaryCol = darkenColor(baseColor) || '#78ffd6';
-				break;
-			case 'consumable':
-				iconComponent = <Beaker className="w-4 h-4" />;
-				primaryCol = baseColor || '#659999';
-				secondaryCol = darkenColor(baseColor) || '#f4791f';
-				break;
-			case 'weapon':
-				iconComponent = <Sword className="w-4 h-4" />;
-				primaryCol = baseColor || '#8A2387';
-				secondaryCol = darkenColor(baseColor) || '#F27121';
-				break;
-			case 'equipment':
-				iconComponent = <StoreIcon className="w-4 h-4" />;
-				primaryCol = baseColor || '#3A1C71';
-				secondaryCol = darkenColor(baseColor) || '#FFAF7B';
-				break;
-			default:
-				iconComponent = <Box className="w-4 h-4" />;
-				primaryCol = baseColor || '#0f0c29';
-				secondaryCol = darkenColor(baseColor) || '#302b63';
-		}
-
-		// Ajustar intensidad según rareza
-		const rarityFactors: Record<string, number> = {
-			common: 1,
-			uncommon: 1.1,
-			rare: 1.2,
-			epic: 1.3,
-			legendary: 1.5,
-		};
-
-		const intensityFactor = rarityFactors[rarity?.toLowerCase() || 'common'] || 1;
-
-		return {
-			primaryColor: primaryCol,
-			secondaryColor: secondaryCol,
-			icon: iconComponent,
-			intensityFactor,
-		};
-	}, [color, type, rarity]);
-
 	// Colores basados en rareza para el efecto TCG
 	const rarityColorMap: Record<string, string> = {
 		common: '#6b7280',
@@ -206,77 +294,6 @@ export function WorldItemCard({
 	};
 
 	const rarityGlow = rarityGlowMap[rarity?.toLowerCase() || 'common'] || 0;
-
-	// Manejar eventos de teclado para accesibilidad
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
-				e.preventDefault();
-				onClick(worldItem);
-			}
-		},
-		[onClick, disabled, worldItem]
-	);
-
-	// Procesar propiedades si es un string o formato JSON
-	const parsedProperties = useMemo(() => {
-		if (typeof properties === 'string' && properties) {
-			try {
-				return JSON.parse(properties);
-			} catch (_e) {
-				return [];
-			}
-		}
-		return properties || [];
-	}, [properties]);
-
-	// Procesar requerimientos si es un string o formato JSON
-	const parsedRequirements = useMemo(() => {
-		if (typeof requirements === 'string' && requirements) {
-			try {
-				return JSON.parse(requirements);
-			} catch (_e) {
-				return {};
-			}
-		}
-		return requirements || {};
-	}, [requirements]);
-
-	// Procesar atributos si es un string o formato JSON
-	const parsedAttributes = useMemo(() => {
-		if (typeof attributes === 'string' && attributes) {
-			try {
-				return JSON.parse(attributes);
-			} catch (_e) {
-				return [];
-			}
-		}
-		return attributes || [];
-	}, [attributes]);
-
-	// Procesar efectos si es un string o formato JSON
-	const parsedEffects = useMemo(() => {
-		if (typeof effects === 'string' && effects) {
-			try {
-				return JSON.parse(effects);
-			} catch (_e) {
-				return [];
-			}
-		}
-		return effects || [];
-	}, [effects]);
-
-	// Procesar estadísticas si es un string o formato JSON
-	const parsedStats = useMemo(() => {
-		if (typeof _stats === 'string' && _stats) {
-			try {
-				return JSON.parse(_stats);
-			} catch (_e) {
-				return {};
-			}
-		}
-		return _stats || {};
-	}, [_stats]);
 
 	// Procesar la imagen destacada
 	const _processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
@@ -386,38 +403,14 @@ export function WorldItemCard({
 					primaryColor={rarityColor}
 				/>
 				<WorldItemCardFooter
-					worldItem={worldItem!}
+					worldItem={worldItem}
 					_totalRelations={_totalRelations}
 					primaryColor={rarityColor}
-					secondaryColor={secondaryColor as any}
+					secondaryColor={secondaryColor || '#000000'}
 					intensityFactor={intensityFactor}
 					compact={compact}
 				/>
 			</div>
 		</motion.article>
 	);
-}
-
-// Función utilitaria para oscurecer un color
-function darkenColor(color?: string | null): string | null {
-	if (!color) return null;
-
-	try {
-		// Convertir hex a RGB
-		const r = Number.parseInt(color.slice(1, 3), 16);
-		const g = Number.parseInt(color.slice(3, 5), 16);
-		const b = Number.parseInt(color.slice(5, 7), 16);
-
-		// Oscurecer los componentes
-		const darkenFactor = 0.7;
-		const darkerR = Math.floor(r * darkenFactor);
-		const darkerG = Math.floor(g * darkenFactor);
-		const darkerB = Math.floor(b * darkenFactor);
-
-		// Convertir de vuelta a hex
-		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	} catch (_e) {
-		// Si hay algún error, volver al valor por defecto
-		return null;
-	}
 }

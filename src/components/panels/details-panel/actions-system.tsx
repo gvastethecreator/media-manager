@@ -152,9 +152,9 @@ export function useActionsSystem() {
 			// Si requiere entrada de datos
 			if (action.requiresInput && action.inputFields) {
 				const defaultValues: Record<string, any> = {};
-				action.inputFields.forEach((field) => {
+				for (const field of action.inputFields) {
 					defaultValues[field.id] = field.defaultValue || '';
-				});
+				}
 				setInputValues(defaultValues);
 				setShowInputDialog(true);
 				return;

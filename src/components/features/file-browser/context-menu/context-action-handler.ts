@@ -7,7 +7,7 @@
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import { deleteFile as deleteFileAction } from '@/services/file/file.service';
-import tagService, { addImageToTag } from '@/services/tag/tag.service';
+import { addImageToTag } from '@/services/tag/tag.service';
 import type { FileItem } from '@/types/files';
 import type { ContextMenuAction } from './types';
 

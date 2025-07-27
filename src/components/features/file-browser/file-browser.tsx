@@ -22,7 +22,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { EntityWithStats } from '@/types/migration';
+
 import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
 import { StatusBar } from './toolbar/status-bar';
 import { CardsView } from './views/cards-view';
@@ -224,7 +224,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Cargar datos al montar o cuando cambian los filtros
 	useEffect(() => {
 		debouncedLoadData();
-	}, [entityType, entityTypes, filterId, filterType, mode, debouncedLoadData]);
+	}, [debouncedLoadData]);
 
 	// Obtener items según el modo y tipo de entidad - Memoizado para mejorar rendimiento y asegurar re-render con sortOptions
 	const items = useMemo(() => {
@@ -274,7 +274,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Aplicar filtro de búsqueda si existe
 		let filteredItems = rawItems;
-		if (searchQuery && searchQuery.trim()) {
+		if (searchQuery?.trim()) {
 			const query = searchQuery.toLowerCase().trim();
 			filteredItems = rawItems.filter((item) => {
 				// Helper para obtener el nombre de la entidad
@@ -303,7 +303,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			filteredItems.sort((a, b) => {
 				for (const sortOption of sortOptions) {
 					const { field, direction } = sortOption;
-					let aValue: any, bValue: any;
+					let aValue: any;
+					let bValue: any;
 
 					switch (field) {
 						case 'name': {
@@ -360,7 +361,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		filterType,
 		mode,
 		manualItems,
-		imagesRecord,
 		getSortedImages,
 		getImagesByFolder,
 		searchQuery,

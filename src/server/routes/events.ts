@@ -57,13 +57,13 @@ router.post('/', async (req, res) => {
 		}
 
 		// Notificar a suscriptores (para futuras implementaciones de WebSocket/SSE)
-		eventSubscribers.forEach((subscriber: (event: any) => void) => {
+		for (const subscriber of eventSubscribers) {
 			try {
 				subscriber(event);
 			} catch (error) {
 				logger.error('Error notificando suscriptor:', error);
 			}
-		});
+		}
 
 		// Respuesta exitosa
 		res.status(200).json({

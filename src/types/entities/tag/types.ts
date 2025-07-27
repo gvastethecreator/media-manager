@@ -3,7 +3,7 @@
  * @module types/entities/tag/types
  */
 
-import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
+import type { EntityBase } from '@/types/entities/entity.types';
 import type { TagWithStats } from './base';
 
 // Re-export TagWithStats for external use

@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { GroupWithStats } from '@/types/entities/group/base';
-import type { CreateGroupInput, UpdateGroupInput } from '@/types/entities/group/types';
+import type { CreateGroupInput } from '@/types/entities/group/types';
 
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({

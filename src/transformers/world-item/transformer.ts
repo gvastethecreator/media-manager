@@ -4,14 +4,7 @@
  * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos de la aplicación.
  */
 
-import { TransformerError } from '../../lib/errors/transformer-error';
-import { serverLogger } from '../../lib/logger/server-logger';
-import type {
-	WorldItemBase,
-	WorldItemComplete,
-	WorldItemStatistics,
-	WorldItemWithStats,
-} from '../../types/entities/world-item';
+import type { WorldItemComplete, WorldItemStatistics } from '../../types/entities/world-item';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleWorldItemFromDrizzle = {

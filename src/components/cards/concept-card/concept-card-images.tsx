@@ -4,7 +4,6 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 import { ConceptService } from '@/services/concept/concept.service';
-import type { ImageWithStats } from '@/types/entities/image';
 
 const { getRecentConceptImages } = ConceptService;
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -68,7 +68,7 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		setNewFavoriteName('');
 		setNewFavoriteDescription('');
 		setShowForm(false);
-	}, [newFavoriteName, newFavoriteDescription, createFavorite]);
+	}, [newFavoriteName]);
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar favorites');

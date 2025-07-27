@@ -15,7 +15,6 @@ import { toastService } from '@/lib/ui/toast';
 import {
 	CHARACTER_CLASS_COLORS,
 	CHARACTER_CLASS_EMOJIS,
-	CharacterAlignment,
 	CharacterCategory,
 	CharacterClass,
 	CharacterRace,

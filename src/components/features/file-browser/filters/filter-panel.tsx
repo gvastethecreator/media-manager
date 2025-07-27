@@ -167,12 +167,12 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 					const parseDate = (value: unknown): Date | null => {
 						if (!value) return null;
 						if (value instanceof Date) {
-							return isNaN(value.getTime()) ? null : value;
+							return Number.isNaN(value.getTime()) ? null : value;
 						}
 						if (typeof value === 'string' || typeof value === 'number') {
 							try {
 								const date = new Date(value);
-								return isNaN(date.getTime()) ? null : date;
+								return Number.isNaN(date.getTime()) ? null : date;
 							} catch {
 								return null;
 							}

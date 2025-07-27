@@ -9,7 +9,6 @@ import { calculateCompleteness } from '../../lib/utils/transformers/calculate-co
 import type {
 	DrizzleCreatePromptData,
 	DrizzleOrderBy,
-	DrizzleUpdateArgs,
 	DrizzleUpdatePromptData,
 	DrizzleWhereFilter,
 	PromptBase,
@@ -23,7 +22,6 @@ import type {
 	PromptWithStats,
 } from '../../types/entities/prompt';
 import { PromptSortCriteria } from '../../types/entities/prompt/enums';
-import { serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');
 

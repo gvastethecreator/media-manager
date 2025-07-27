@@ -309,7 +309,7 @@ export function PropertiesSettings() {
 
 				<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
 					<CreatePropertyForm
-						onCreated={(data) => {
+						onCreated={(_data) => {
 							setIsCreateDialogOpen(false);
 							toastService.success('Propiedad creada correctamente');
 						}}

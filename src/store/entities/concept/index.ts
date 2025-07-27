@@ -13,7 +13,6 @@ import {
 	getConceptsFromApi,
 	updateConceptInApi,
 } from '@/lib/api/client/concept.client';
-import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import {
 	ConceptCreateInput,

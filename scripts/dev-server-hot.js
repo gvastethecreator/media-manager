@@ -27,7 +27,7 @@ function loadEnvFile(filePath) {
 		const content = readFileSync(filePath, 'utf8');
 		const env = {};
 
-		content.split('\n').forEach((line) => {
+		for (let line of content.split('\n')) {
 			line = line.trim();
 			if (line && !line.startsWith('#')) {
 				const [key, ...valueParts] = line.split('=');
@@ -35,7 +35,7 @@ function loadEnvFile(filePath) {
 					env[key.trim()] = valueParts.join('=').trim();
 				}
 			}
-		});
+		}
 
 		return env;
 	} catch (error) {

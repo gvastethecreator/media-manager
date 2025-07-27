@@ -8,7 +8,6 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoCreateInput, VideoFilters, VideoUpdateInput } from '@/types/entities/video/types';
-import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
 import type { VideoBase, VideoStatistics, VideoWithStats } from '../../types/entities/video/base';
 
 /**

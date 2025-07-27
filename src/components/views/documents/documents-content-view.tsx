@@ -1,6 +1,6 @@
 import { FileText } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { DocumentCard } from '@/components/cards/document-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

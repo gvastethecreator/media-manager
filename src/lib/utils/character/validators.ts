@@ -9,7 +9,6 @@ import {
 	CharacterCategory,
 	CharacterClass,
 	CharacterRace,
-	CharacterRelationshipType,
 	CharacterSortOption,
 } from '@/types/entities/character/enums';
 

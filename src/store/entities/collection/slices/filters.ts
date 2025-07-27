@@ -4,7 +4,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { filterCollectionsBySearch, groupCollections, sortCollections } from '@/lib/utils/collection';
+import { filterCollectionsBySearch, sortCollections } from '@/lib/utils/collection';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { CollectionFilter } from '@/types/entities/collection/types';
 import type { CollectionState } from '../types';

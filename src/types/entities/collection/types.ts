@@ -3,7 +3,6 @@
  * @module types/entities/collection/types
  */
 
-import type { ImageBase } from '../image/base';
 import { CollectionSortOption } from './enums';
 
 export interface CollectionBase {

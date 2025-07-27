@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { shallow } from 'zustand/shallow';
 
 import { type NoteStore, useNoteStore } from '@/store/entities/note';
 import { EntityType } from '@/types/entities/entities';

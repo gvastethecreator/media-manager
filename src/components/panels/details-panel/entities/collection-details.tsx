@@ -39,7 +39,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { CollectionWithStats } from '@/types/entities/collection';
-import type { TagWithStats } from '@/types/entities/tag';
+
 import { isCollectionWithStats } from '@/types/migration';
 import type {
 	EntityDetailsProps,
@@ -266,9 +266,10 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 						{viewMode === 'grid' ? (
 							<div className="grid grid-cols-2 gap-2">
 								{sortedItems.map((item) => (
-									<div
+									<button
 										key={item.id}
-										className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+										type="button"
+										className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors border-0 bg-transparent"
 										onClick={() => onAction?.('open-item', { item })}
 									>
 										{item.thumbnailUrl ? (
@@ -279,15 +280,16 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 											</div>
 										)}
 										<span className="text-xs text-center truncate w-full">{item.name}</span>
-									</div>
+										</button>
 								))}
 							</div>
 						) : (
 							<div className="space-y-1">
 								{sortedItems.map((item) => (
-									<div
+									<button
 										key={item.id}
-										className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+										type="button"
+										className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors border-0 bg-transparent w-full text-left"
 										onClick={() => onAction?.('open-item', { item })}
 									>
 										{getTypeIcon(item.type)}
@@ -298,10 +300,10 @@ export const CollectionPreview = memo<EntityPreviewProps<CollectionWithStats>>(f
 											</p>
 										</div>
 										<Badge variant="outline" className="text-xs">
-											{item.type}
-										</Badge>
-									</div>
-								))}
+													{item.type}
+												</Badge>
+										</button>
+									))}
 							</div>
 						)}
 

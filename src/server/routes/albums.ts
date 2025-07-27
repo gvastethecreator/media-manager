@@ -106,7 +106,7 @@ interface ThumbnailImage {
 }
 
 // GET /api/albums - Listar albums
-const getAlbumsHandler = async (req: Request, res: Response) => {
+const getAlbumsHandler = async (_req: Request, res: Response) => {
 	try {
 		// Verificar si existen albums
 		const albumCount = await db.select({ count: count() }).from(albums);
@@ -868,7 +868,7 @@ async function getAlbumStats(albumId: string): Promise<{
 }
 
 // Middleware de captura de errores específico para albums (debe ir al final)
-albumsRouter.use((error: any, req: any, res: any, next: any) => {
+albumsRouter.use((error: any, req: any, res: any, _next: any) => {
 	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Error capturado:', error);
 	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Stack:', error.stack);
 	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Message:', error.message);

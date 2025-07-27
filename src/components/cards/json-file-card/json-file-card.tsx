@@ -1,6 +1,6 @@
 import { CheckIcon, DownloadIcon, EyeIcon, FileJsonIcon, XIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useJsonFile } from '@/lib/api/json-files';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format'; // Importar formatBytes
@@ -67,6 +67,65 @@ export function JsonFileCard({
 		setShowPreview((prev) => !prev);
 	}, []);
 
+	// Color basado en la validez del JSON
+	const primaryColor = useMemo(() => {
+		if (!jsonFile) return '#6b7280';
+		// Intentar parsear el contenido para determinar si es válido
+		try {
+			if (jsonFile.content) {
+				JSON.parse(jsonFile.content);
+				return '#10b981'; // Verde para JSON válido
+			}
+			return '#f59e0b'; // Amarillo para JSON vacío
+		} catch {
+			return '#ef4444'; // Rojo para JSON inválido
+		}
+	}, [jsonFile?.content, jsonFile]);
+
+	const secondaryColor = useMemo(() => {
+		// Oscurecer el color primario para el secundario
+		const hex = primaryColor.replace('#', '');
+		const r = Math.floor(Number.parseInt(hex.slice(0, 2), 16) * 0.6);
+		const g = Math.floor(Number.parseInt(hex.slice(2, 4), 16) * 0.6);
+		const b = Math.floor(Number.parseInt(hex.slice(4, 6), 16) * 0.6);
+		return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+	}, [primaryColor]);
+
+	// Estadísticas del JSON
+	const jsonStats = useMemo(() => {
+		if (!jsonFile) return { isValid: false, keys: 0, size: 0 };
+		try {
+			if (!jsonFile.content) return { isValid: false, keys: 0, size: 0 };
+
+			const parsed = JSON.parse(jsonFile.content);
+			const keys = typeof parsed === 'object' && parsed !== null ? Object.keys(parsed).length : 0;
+			const size = new Blob([jsonFile.content]).size;
+
+			return {
+				isValid: true,
+				keys,
+				size,
+				type: Array.isArray(parsed) ? 'Array' : typeof parsed,
+			};
+		} catch {
+			return {
+				isValid: false,
+				keys: 0,
+				size: jsonFile.content ? new Blob([jsonFile.content]).size : 0,
+			};
+		}
+	}, [jsonFile?.content, jsonFile]);
+
+	// Preview del JSON formateado
+	const jsonPreview = useMemo(() => {
+		if (!jsonFile?.content) return '';
+		try {
+			return JSON.stringify(JSON.parse(jsonFile.content), null, 2);
+		} catch {
+			return jsonFile.content; // Mostrar contenido sin formatear si es inválido
+		}
+	}, [jsonFile?.content, jsonFile]);
+
 	// Si no hay datos del archivo JSON o está cargando, mostrar un esqueleto o un mensaje de error
 	if (isLoading) {
 		return (
@@ -93,63 +152,6 @@ export function JsonFileCard({
 			</div>
 		);
 	}
-
-	// Color basado en la validez del JSON
-	const primaryColor = useMemo(() => {
-		// Intentar parsear el contenido para determinar si es válido
-		try {
-			if (jsonFile.content) {
-				JSON.parse(jsonFile.content);
-				return '#10b981'; // Verde para JSON válido
-			}
-			return '#f59e0b'; // Amarillo para JSON vacío
-		} catch {
-			return '#ef4444'; // Rojo para JSON inválido
-		}
-	}, [jsonFile.content]);
-
-	const secondaryColor = useMemo(() => {
-		// Oscurecer el color primario para el secundario
-		const hex = primaryColor.replace('#', '');
-		const r = Math.floor(Number.parseInt(hex.slice(0, 2), 16) * 0.6);
-		const g = Math.floor(Number.parseInt(hex.slice(2, 4), 16) * 0.6);
-		const b = Math.floor(Number.parseInt(hex.slice(4, 6), 16) * 0.6);
-		return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-	}, [primaryColor]);
-
-	// Estadísticas del JSON
-	const jsonStats = useMemo(() => {
-		try {
-			if (!jsonFile.content) return { isValid: false, keys: 0, size: 0 };
-
-			const parsed = JSON.parse(jsonFile.content);
-			const keys = typeof parsed === 'object' && parsed !== null ? Object.keys(parsed).length : 0;
-			const size = new Blob([jsonFile.content]).size;
-
-			return {
-				isValid: true,
-				keys,
-				size,
-				type: Array.isArray(parsed) ? 'Array' : typeof parsed,
-			};
-		} catch {
-			return {
-				isValid: false,
-				keys: 0,
-				size: jsonFile.content ? new Blob([jsonFile.content]).size : 0,
-			};
-		}
-	}, [jsonFile.content]);
-
-	// Preview del JSON formateado
-	const jsonPreview = useMemo(() => {
-		if (!jsonFile.content) return '';
-		try {
-			return JSON.stringify(JSON.parse(jsonFile.content), null, 2);
-		} catch {
-			return jsonFile.content; // Mostrar contenido sin formatear si es inválido
-		}
-	}, [jsonFile.content]);
 
 	return (
 		<CardContainer

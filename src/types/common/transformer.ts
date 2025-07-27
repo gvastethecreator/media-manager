@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { MetadataFields, UIFields } from '@/lib/utils/transformers/common';
+import type { UIFields } from '@/lib/utils/transformers/common';
 
 /**
  * 🎨 Esquema para campos de UI

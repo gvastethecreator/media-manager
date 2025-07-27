@@ -21,8 +21,8 @@ export function filterPlaces(places: PlaceWithStats[], filters: PlaceFilters): P
 			const searchLower = filters.search.toLowerCase();
 			const matchesSearch =
 				place.name.toLowerCase().includes(searchLower) ||
-				(place.description && place.description.toLowerCase().includes(searchLower)) ||
-				(place.location && place.location.toLowerCase().includes(searchLower));
+				place.description?.toLowerCase().includes(searchLower) ||
+				place.location?.toLowerCase().includes(searchLower);
 
 			if (!matchesSearch) return false;
 		}

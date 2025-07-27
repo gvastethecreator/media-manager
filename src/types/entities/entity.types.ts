@@ -3,8 +3,6 @@
  * @module types/entities/entity.types
  */
 
-import type { EntityType } from './entities/index';
-
 // Tipo específico para entityType en entidades con estadísticas
 export type EntityStatsTypeValue =
 	| 'image'

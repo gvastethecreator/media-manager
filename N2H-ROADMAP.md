@@ -2,24 +2,43 @@
 
 > **Next to Horizon Roadmap** - Plan estratégico para la evolución del Sistema de Gestión Multimedia
 
-## 📋 Visión General
+## 📋 Visión y Objetivos Estratégicos
 
-Este roadmap define las características futuras del sistema de gestión multimedia, organizadas por complejidad de implementación y valor estratégico. Cada feature incluye análisis técnico detallado y plan de implementación basado en la arquitectura actual.
+Este roadmap define la evolución del sistema de gestión multimedia. La visión es transformarlo en una aplicación integral y flexible, similar en potencia a herramientas como Notion o Anytype, pero especializada en la gestión de contenido creativo y narrativo.
 
-No debemos abordar estas tareas hasta que el sistema se encuentre en un estado estable con las herramientas básicas funcionando y optimizadas. Aunque tambien podemos ir preparando las bases para algunas de estas features.
+El objetivo principal es crear un sistema que permita a los usuarios organizar, explorar y crear contenido de manera intuitiva, con un fuerte énfasis en la personalización, la integración con herramientas como Obsidian y la asistencia de IA.
+
+### Principios Clave
+
+- **Flexibilidad y Personalización:** Permitir a los usuarios crear entidades personalizadas, dashboards y flujos de trabajo adaptados a sus necesidades.
+- **Integración Abierta:** Facilitar la conexión con otras plataformas (Obsidian, Notion, Discord) para un ecosistema de herramientas cohesivo.
+- **Inteligencia Artificial:** Utilizar IA (preferiblemente local) para automatizar la catalogación, generar contenido y ofrecer asistencia creativa.
+- **Escalabilidad:** Soportar grandes volúmenes de información y proyectos complejos, desde colecciones personales hasta producciones de estudio.
 
 ---
 
-# Nuevas entidades
+## 💡 Conceptos Fundamentales
 
-- proyectos : para agrupar proyectos grandes, con información mas especifica.
-- tareas : para proyectos, tareas que se pueden asignar a personajes, o que pueden tener un estado de avance.
-- eventos : para eventos que pueden ser relacionados con personajes, lugares, etc.
+Antes de detallar las funcionalidades, se presentan dos conceptos clave que sustentan la evolución del sistema.
 
+### 1. Sistema de Entidades Evolucionado
 
+El concepto de "entidad" se expandirá significativamente. Las entidades actuales (personajes, lugares, etc.) dejarán de ser simples contenedores de archivos para convertirse en objetos de datos ricos y personalizables.
 
+- **Nuevas Entidades:** Se introducirán tipos como **Proyectos**, **Tareas** y **Eventos**.
+- **Vistas Personalizadas:** Cada entidad tendrá vistas y dashboards específicos, con estadísticas, relaciones y herramientas contextuales. Por ejemplo, la vista de un personaje podría incluir un generador de prompts de IA basado en su biografía.
 
-## 🎯 Features Prioritarias
+### 2. Browser de Entidades
+
+Se creará un **Browser de Entidades**, una interfaz especializada para navegar y gestionar estas nuevas entidades ricas en datos. A diferencia del explorador de archivos actual, este browser estará optimizado para trabajar con las propiedades, relaciones y vistas personalizadas de cada tipo de entidad, ofreciendo una experiencia de gestión de contenido mucho más potente.
+
+---
+
+## 🎯 Features Detalladas
+
+A continuación se detallan las funcionalidades planificadas, organizadas por categoría.
+
+### ⭐ Features Prioritarias
 
 ### 1. Vista de Relaciones entre Entidades
 
@@ -82,10 +101,6 @@ Canvas navegable con visualización tipo mindmap que permita explorar conexiones
 #### ⏱️ Estimación: 3-4 semanas
 
 ---
-
-### BROWSER DE ENTIDADES
-
-Sería un sistema similar al file browser pero especificamente por entidades, las entidades pueden tener sus propias vistas que serán customizadas segun el tipo de entidad y la información que contengan, podremos customizarlas y tendran utilidades especificas para trabajar con ellas, como por ejemplo : en los personajes podremos copiar y pegar partes de sus datos o algunos botones que nos generaran prompts para casos especificos de esa entidad en particular, estadisticas, lore, etc.
 
 ### 2. Integración con IA para Generación de Contenido
 
@@ -258,7 +273,7 @@ Suite completa de herramientas para edición masiva: renombrado en lote, aplicac
 
 ---
 
-## 🗺️ Features Intermedias
+### 🗺️ Features Intermedias
 
 ### 5. Gestión Compleja de LORE y Worldbuilding
 
@@ -371,13 +386,50 @@ Herramientas especializadas para creadores de mundos complejos que necesitan man
 
 ---
 
-## 🔧 Features Avanzadas
+### 7. Asistente de Curación Inteligente
 
-### 7. Integración con Servicios Externos
+**🎨 [MEDIUM] [BIG] - Curación Automática de Contenido**
+
+#### 🎯 Funcionalidades de Curación
+
+**Selección Automática Inteligente:**
+
+- Algoritmos que identifican las "mejores" imágenes de una colección
+- Curación basada en calidad técnica, originalidad y relevancia
+- Creación automática de "highlights" o contenido destacado
+- Filtrado inteligente de contenido duplicado o de baja calidad
+
+**Herramientas de Portfolio:**
+
+- Generación automática de portfolios optimizados para diferentes audiencias
+- Selección de contenido representativo para cada estilo/período
+- Balanceado automático de diversidad en selecciones
+- Optimización para diferentes formatos (web, impresión, redes sociales)
+
+**Análisis de Tendencias:**
+
+- Identificación de patrones en el trabajo del usuario a lo largo del tiempo
+- Sugerencias de direcciones creativas basadas en evolución del estilo
+- Comparación con tendencias globales en el medio artístico
+- Predicción de qué contenido podría ser más exitoso
+
+**Casos de Uso Profesionales:**
+
+- Artista preparando portfolio para galerías o clientes
+- Fotógrafo seleccionando mejores trabajos para exhibición
+- Diseñador curando contenido para presentaciones comerciales
+
+#### ⏰ Tiempo Estimado de Desarrollo: 4-5 semanas
+
+---
+
+### 🔧 Features Avanzadas
+
+### 8. Integración con Servicios Externos
 
 **🌐 [LOW] [MEDIUM] - Conectores con Plataformas Populares**
 
-#### � Descripción del Sistema
+#### 📝 Descripción del Sistema
 
 Sistema de integración que permite conectar y sincronizar automáticamente el contenido del gestor multimedia con servicios externos populares, manteniendo la información actualizada en tiempo real.
 
@@ -415,7 +467,7 @@ Sistema de integración que permite conectar y sincronizar automáticamente el c
 
 ---
 
-### 8. Ordenamiento Semántico y Visual
+### 9. Ordenamiento Semántico y Visual
 
 **🎨 [MEDIUM] [BIG] - Análisis Avanzado de Contenido**
 
@@ -439,12 +491,12 @@ Sistema de integración que permite conectar y sincronizar automáticamente el c
 - Clasificación por técnicas y medios utilizados
 - Agrupación automática por períodos o movimientos artísticos
 
-#### � Experiencia del Usuario en Análisis Visual
+#### 🎨 Experiencia del Usuario en Análisis Visual
 
 **Organización Automática:**
 
 - Vista de "Similitudes" que muestra clusters de contenido relacionado
-- Filtros visuales por paleta de color con selector cromático
+- Filtros visuais por paleta de color con selector cromático
 - Ordenamiento automático por compatibilidad visual
 
 **Búsqueda Inteligente:**
@@ -460,56 +512,6 @@ Sistema de integración que permite conectar y sincronizar automáticamente el c
 - Coleccionista agrupando obras por movimientos artísticos
 
 #### ⏰ Tiempo Estimado de Desarrollo: 5-6 semanas
-
----
-
-## 🏗️ Features Experimentales
-
-### 9. Sistema Modular de Entidades Personalizadas
-
-**🧩 [LOW] [HEAVY] - Framework de Extensibilidad**
-
-#### 🎯 Personalización Avanzada
-
-**Creación de Entidades Personalizadas:**
-
-- Constructor visual para definir nuevos tipos de entidades
-- Campos personalizados con validación configurable
-- Relaciones específicas entre entidades creadas por el usuario
-
-**Sistema de Plugins:**
-
-- Marketplace interno de plugins creados por la comunidad
-- Instalación de un clic para extensiones de funcionalidad
-- API para desarrolladores que quieran crear sus propias extensiones
-
-**Flujos de Trabajo Personalizados:**
-
-- Definición visual de workflows específicos por industria
-- Automatizaciones basadas en reglas definidas por el usuario
-- Integración con herramientas externas específicas
-
-#### 🎨 Experiencia del Usuario en Personalización
-
-**Constructor Visual:**
-
-- Interface drag-and-drop para diseñar nuevas entidades
-- Preview en tiempo real de cómo se verán en la aplicación
-- Validación automática de campos y relaciones
-
-**Gestión de Plugins:**
-
-- Tienda integrada con calificaciones y reseñas
-- Actualizaciones automáticas de plugins instalados
-- Panel de administración para activar/desactivar funcionalidades
-
-**Casos de Uso Especializados:**
-
-- Estudio de animación creando entidades específicas para producción
-- Escritor de RPG definiendo sistemas de stats personalizados
-- Coleccionista creando categorías especializadas para su hobby
-
-#### ⏰ Tiempo Estimado de Desarrollo: 8-10 semanas
 
 ---
 
@@ -561,7 +563,7 @@ Sistema de integración que permite conectar y sincronizar automáticamente el c
 
 ---
 
-### 12. Análisis de Sentimientos y Mood Boards
+### 11. Análisis de Sentimientos y Mood Boards
 
 **😊 [LOW] [MEDIUM] - Sistema de Análisis Emocional**
 
@@ -587,147 +589,110 @@ Sistema de integración que permite conectar y sincronizar automáticamente el c
 - Escritor manteniendo consistencia tonal en narrativas
 - Terapeuta usando imágenes para trabajo emocional con pacientes
 
-### 14. Asistente de Curación Inteligente
-
-**🎨 [MEDIUM] [BIG] - Curación Automática de Contenido**
-
-#### 🎯 Funcionalidades de Curación
-
-**Selección Automática Inteligente:**
-
-- Algoritmos que identifican las "mejores" imágenes de una colección
-- Curación basada en calidad técnica, originalidad y relevancia
-- Creación automática de "highlights" o contenido destacado
-- Filtrado inteligente de contenido duplicado o de baja calidad
-
-**Herramientas de Portfolio:**
-
-- Generación automática de portfolios optimizados para diferentes audiencias
-- Selección de contenido representativo para cada estilo/período
-- Balanceado automático de diversidad en selecciones
-- Optimización para diferentes formatos (web, impresión, redes sociales)
-
-**Análisis de Tendencias:**
-
-- Identificación de patrones en el trabajo del usuario a lo largo del tiempo
-- Sugerencias de direcciones creativas basadas en evolución del estilo
-- Comparación con tendencias globales en el medio artístico
-- Predicción de qué contenido podría ser más exitoso
-
-**Casos de Uso Profesionales:**
-
-- Artista preparando portfolio para galerías o clientes
-- Fotógrafo seleccionando mejores trabajos para exhibición
-- Diseñador curando contenido para presentaciones comerciales
-
-#### ⏰ Tiempo Estimado de Desarrollo: 4-5 semanas
+#### ⏰ Tiempo Estimado de Desarrollo: 2-3 semanas
 
 ---
 
-## 🔮 Features Futuras en Consideración
+### 🏗️ Features Experimentales
 
-### Inteligencia Artificial Conversacional
+### 12. Sistema Modular de Entidades Personalizadas
+
+**🧩 [LOW] [HEAVY] - Framework de Extensibilidad**
+
+#### 🎯 Personalización Avanzada
+
+**Creación de Entidades Personalizadas:**
+
+- Constructor visual para definir nuevos tipos de entidades
+- Campos personalizados con validación configurable
+- Relaciones específicas entre entidades creadas por el usuario
+
+**Sistema de Plugins:**
+
+- Marketplace interno de plugins creados por la comunidad
+- Instalación de un clic para extensiones de funcionalidad
+- API para desarrolladores que quieran crear sus propias extensiones
+
+**Flujos de Trabajo Personalizados:**
+
+- Definición visual de workflows específicos por industria
+- Automatizaciones basadas en reglas definidas por el usuario
+- Integración con herramientas externas específicas
+
+#### 🎨 Experiencia del Usuario en Personalización
+
+**Constructor Visual:**
+
+- Interface drag-and-drop para diseñar nuevas entidades
+- Preview en tiempo real de cómo se verán en la aplicación
+- Validación automática de campos y relaciones
+
+**Gestión de Plugins:**
+
+- Tienda integrada con calificaciones y reseñas
+- Actualizaciones automáticas de plugins instalados
+- Panel de administración para activar/desactivar funcionalidades
+
+**Casos de Uso Especializados:**
+
+- Estudio de animación creando entidades específicas para producción
+- Escritor de RPG definiendo sistemas de stats personalizados
+- Coleccionista creando categorías especializadas para su hobby
+
+#### ⏰ Tiempo Estimado de Desarrollo: 8-10 semanas
+
+---
+
+### 13. Inteligencia Artificial Conversacional
 
 **🤖 [EXPERIMENTAL] [BIG] - Asistente Inteligente Avanzado**
 
-- Chatbot especializado que conoce todo el contenido del usuario
-- Búsquedas en lenguaje natural ("muéstrame todos los personajes melancólicos")
-- Generación de contenido via conversación natural
-- Asistente creativo que sugiere direcciones narrativas
+#### 📝 Descripción
+
+Integración de un asistente de IA conversacional que comprende el contexto del contenido del usuario, permitiendo interacciones en lenguaje natural.
+
+#### 🎯 Funcionalidades
+
+- **Búsqueda Semántica Avanzada:** Realizar búsquedas complejas como "muéstrame todos los personajes melancólicos creados el último mes".
+- **Generación de Contenido Dialógico:** Crear y refinar contenido a través de una conversación con la IA.
+- **Asistente Creativo Proactivo:** El asistente podrá sugerir ideas, detectar inconsistencias narrativas o proponer nuevas direcciones creativas.
+
+#### ⏰ Tiempo Estimado de Desarrollo: 6-8 semanas
 
 ---
 
-## 🎯 Plan de Implementación por Fases Actualizado
+## 📅 Plan de Implementación por Fases
 
-### Fase 1 (Q1 2025) - Foundation & Security
+El desarrollo se organizará en fases trimestrales, enfocándose en entregar valor incremental.
 
-- Vista de Relaciones entre Entidades
-- Exportación de Informes Completos
-- Sistema de Backup y Recuperación Avanzado
-- **Duración estimada: 8-11 semanas**
+### Fase 1 (Q1 2025) - Foundation & Core Tools
+*Enfoque: Establecer las bases de la nueva arquitectura y entregar herramientas de alto impacto.*
+- **Feature 1:** Vista de Relaciones entre Entidades
+- **Feature 3:** Exportación de Informes Completos
+- **Feature 4:** Herramientas de Edición Masiva
+- **Duración estimada: 8-10 semanas**
 
 ### Fase 2 (Q2 2025) - Intelligence & Automation
+*Enfoque: Integrar la inteligencia artificial y automatizar tareas de organización.*
+- **Feature 2:** Integración con IA para Generación de Contenido
+- **Feature 9:** Ordenamiento Semántico y Visual
+- **Duración estimada: 11-14 semanas**
 
-- Integración con IA para Generación de Contenido
-- Herramientas de Edición Masiva
-- Sistema de Versioning y Control de Cambios
-- **Duración estimada: 12-16 semanas**
+### Fase 3 (Q3 2025) - Advanced Creative & Narrative Tools
+*Enfoque: Potenciar la creatividad y la gestión de mundos complejos.*
+- **Feature 5:** Gestión Compleja de LORE y Worldbuilding
+- **Feature 6:** Creación de StoryBoards y Secuencias
+- **Feature 7:** Asistente de Curación Inteligente
+- **Duración estimada: 11-14 semanas**
 
-### Fase 3 (Q3 2025) - Advanced Creative Tools
-
-- Asistente de Curación Inteligente
-- Gestión Compleja de LORE y Worldbuilding
-- Creación de StoryBoards
-- Sistema de Gamificación y Logros
-- **Duración estimada: 11-16 semanas**
-
-### Fase 4 (Q4 2025) - Analysis & Integration
-
-- Ordenamiento Semántico y Visual
-- Análisis de Sentimientos y Mood Boards
-- Integración con Servicios Externos (3-4 conectores principales)
-- Generación de Webs Dinámicas
-- **Duración estimada: 13-18 semanas**
-
-### Fase 5 (2026) - Ecosystem & Community
-
-- Sistema Modular de Entidades Personalizadas
-- Marketplace y Comunidad
-- Integración con Servicios Externos (conectores adicionales)
+### Fase 4 (Q4 2025) - Integration & Extensibility
+*Enfoque: Conectar con el exterior y abrir la plataforma a la personalización.*
+- **Feature 8:** Integración con Servicios Externos
+- **Feature 10:** Generación de Webs Dinámicas
+- **Feature 12:** Sistema Modular de Entidades Personalizadas
 - **Duración estimada: 14-18 semanas**
 
-### 🔄 Desarrollo Iterativo
-
-**Principios de Implementación:**
-
-- **MVP First**: Cada feature se desarrolla primero en versión mínima viable
-- **User Feedback**: Recopilación constante de feedback entre fases
-- **Performance Monitoring**: Optimización continua basada en métricas reales
-- **Modular Development**: Cada feature puede desarrollarse independientemente
-- **Quality Gates**: Testing exhaustivo antes de pasar a la siguiente fase
-
-**Flexibilidad del Roadmap:**
-
-- Las prioridades pueden ajustarse según feedback de usuarios
-- Features pueden moverse entre fases según recursos disponibles
-- Nuevas features pueden agregarse basadas en necesidades emergentes
-- El tiempo total estimado es de **58-79 semanas** (aproximadamente 14-19 meses)
-
----
-
-## 🛠️ Consideraciones Técnicas
-
-### Arquitectura Recomendada
-
-- **Mantener Express + React + Drizzle** como base
-- **Implementar microservicios** para features pesadas (IA, análisis)
-- **Queue system robusto** para procesamiento en background
-- **WebSockets/SSE** para updates en tiempo real
-- **Vector database** para búsquedas semánticas (Pinecone, Weaviate, o Qdrant)
-
-### Performance y Escalabilidad
-
-- **Lazy loading** para componentes pesados
-- **Memoización avanzada** con React Query/SWR
-- **Worker threads** para procesamiento intensivo
-- **CDN** para assets generados
-- **Caching estratégico** en múltiples niveles
-
-### Seguridad y Privacidad
-
-- **Validación robusta** de inputs de usuario
-- **Sanitización** de contenido generado por IA
-- **Rate limiting** para APIs de IA
-- **Encriptación** de datos sensibles
-- **Audit logs** para operaciones críticas
-
----
-
-## 📊 Métricas de Éxito
-
-### KPIs Técnicos
-
-- **Tiempo de respuesta**: < 200ms para operaciones básicas
-- **Throughput**: > 1000 operaciones/minuto en batch
-- **Uptime**: > 99.5%
-- **Error rate**: < 0.1%
+### Fase 5 (Post-2025) - Future & Experimental
+*Enfoque: Explorar la siguiente frontera de la interacción y la asistencia inteligente.*
+- **Feature 11:** Análisis de Sentimientos y Mood Boards
+- **Feature 13:** Inteligencia Artificial Conversacional

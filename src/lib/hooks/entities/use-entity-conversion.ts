@@ -6,14 +6,12 @@
 
 import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { formatFileSize } from '@/lib/utils/format.utils';
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import type { DocumentWithStats } from '@/types/entities/document';
-import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { GroupWithStats } from '@/types/entities/group';
 import type { ImageWithStats } from '@/types/entities/image';

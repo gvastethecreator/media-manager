@@ -1,7 +1,6 @@
 import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import {
 	Breadcrumb,
 	BreadcrumbItem,

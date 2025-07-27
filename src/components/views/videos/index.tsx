@@ -1,6 +1,3 @@
-import { useCallback } from 'react';
-
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { ViewProps } from '../types';
 import VideosView from './videos-view';

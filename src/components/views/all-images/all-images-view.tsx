@@ -16,7 +16,7 @@ const viewLogger = clientLogger.withContext('AllImagesView');
  * Vista principal de todas las imágenes
  * Muestra una galería con todas las imágenes disponibles
  */
-export const AllImagesView = function AllImagesView({ className }: ViewProps) {
+export const AllImagesView = function AllImagesView(_props: ViewProps) {
 	// Usar selectores individuales para evitar recrear objetos
 	const imagesRecord = useImageStore((s) => s.images);
 	const isLoading = useImageStore((s) => s.isLoading);
@@ -64,22 +64,19 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 		return Array.isArray(images) ? images : [];
 	}, [getSortedImages]);
 
-	const handleImageClick = useCallback(
-		(item: AnyEntityWithStats) => {
-			// Verificar que sea una imagen usando type guard
-			if (isImageWithStats(item)) {
-				const image = item as ImageWithStats;
-				viewLogger.info('🖱️ Click en imagen:', image.name);
+	const handleImageClick = useCallback((item: AnyEntityWithStats) => {
+		// Verificar que sea una imagen usando type guard
+		if (isImageWithStats(item)) {
+			const image = item as ImageWithStats;
+			viewLogger.info('🖱️ Click en imagen:', image.name);
 
-				// Navegar a la vista de detalle de imagen
-				// Por ahora mantenemos en la misma vista
-				viewLogger.info('Imagen seleccionada:', image.name);
-			} else {
-				viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
-			}
-		},
-		[navigate]
-	);
+			// Navegar a la vista de detalle de imagen
+			// Por ahora mantenemos en la misma vista
+			viewLogger.info('Imagen seleccionada:', image.name);
+		} else {
+			viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
+		}
+	}, []);
 
 	const handleImageDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {
@@ -104,14 +101,14 @@ export const AllImagesView = function AllImagesView({ className }: ViewProps) {
 
 	// Función para manejar el upload de archivos
 	const handleFileUpload = useCallback(
-		async (files: File[]) => {
+		async (_files: File[]) => {
 			// Esto debería ser manejado por el content view, pero aquí se recargan las imágenes
 			loadImages({ refresh: true });
 		},
 		[loadImages]
 	);
 
-	const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileSelect = useCallback((_event: React.ChangeEvent<HTMLInputElement>) => {
 		// Esto debería ser manejado por el content view
 	}, []);
 

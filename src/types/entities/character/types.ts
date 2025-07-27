@@ -4,20 +4,9 @@
  * @description Estructura unificada y validada para Character, siguiendo las mejores prácticas.
  */
 
-import type { AlbumWithStats } from '../album';
-import type { CollectionWithStats } from '../collection';
-import type { ConceptWithStats } from '../concept';
 import type { EntityBase } from '../entity.types';
-import type { GroupWithStats } from '../group';
 import type { ImageWithStats } from '../image';
-import type { NoteWithStats } from '../note';
-import type { PlaceWithStats } from '../place';
-import type { PromptWithStats } from '../prompt';
-import type { PropertyWithStats } from '../property';
-import type { TagWithStats } from '../tag';
 import type { VideoWithStats } from '../video';
-import type { WildcardWithStats } from '../wildcard';
-import type { WorldItemWithStats } from '../world-item';
 
 /**
  * 🧑‍🎤 Tipo base para un personaje.

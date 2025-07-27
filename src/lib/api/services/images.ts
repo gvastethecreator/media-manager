@@ -1,4 +1,3 @@
-import type { ImageWithStats } from '@/types/entities/image/base';
 import type { TagWithStats } from '@/types/entities/tag/base';
 import { apiClient } from '../client';
 

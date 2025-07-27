@@ -1,6 +1,6 @@
 import { Album as AlbumIcon, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

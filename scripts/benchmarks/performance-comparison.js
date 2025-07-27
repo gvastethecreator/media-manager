@@ -124,7 +124,7 @@ console.log(end - start);
 			try {
 				const result = await this.runCommand(command, [tempScript]);
 				const time = Number.parseFloat(result.trim());
-				if (!isNaN(time)) {
+				if (!Number.isNaN(time)) {
 					times.push(time);
 				}
 			} catch (error) {
@@ -176,7 +176,7 @@ const path = require('path');
 			try {
 				const result = await this.runCommand(command, [tempScript]);
 				const time = Number.parseFloat(result.trim());
-				if (!isNaN(time)) {
+				if (!Number.isNaN(time)) {
 					times.push(time);
 				}
 			} catch (error) {

@@ -94,7 +94,7 @@ const createAudioHandler: ExpressHandler = async (req, res) => {
 		const audioData: any = { ...validatedData };
 
 		// Convertir undefined a valores apropiados según el tipo esperado
-		Object.keys(audioData).forEach((key) => {
+		for (const key of Object.keys(audioData)) {
 			if (audioData[key] === undefined) {
 				// Para campos booleanos usar false por defecto
 				if (['isFavorite', 'isArchived'].includes(key)) {
@@ -104,7 +104,7 @@ const createAudioHandler: ExpressHandler = async (req, res) => {
 					audioData[key] = null;
 				}
 			}
-		});
+		}
 
 		const newAudio = await createAudio(audioData);
 		res.status(201).json(newAudio);

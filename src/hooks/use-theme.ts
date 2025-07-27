@@ -58,7 +58,9 @@ export function useTheme(): UseThemeReturn {
 		const root = document.documentElement;
 
 		// Remover todas las clases de tema anteriores
-		customThemes.forEach((t: string) => root.classList.remove(t));
+		for (const t of customThemes) {
+			root.classList.remove(t);
+		}
 
 		// Aplicar nueva clase de tema
 		root.classList.add(themeToApply);

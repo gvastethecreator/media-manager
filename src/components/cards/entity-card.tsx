@@ -135,10 +135,6 @@ export const EntityCard: FC<EntityCardProps> = memo(
 					return 'polaroid';
 				case 'tcg':
 					return 'tcg';
-				case 'elevated':
-				case 'outlined':
-				case 'glass':
-				case 'default':
 				default:
 					return 'default';
 			}
