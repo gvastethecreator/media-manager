@@ -19,6 +19,7 @@ export enum FileType {
 	EXECUTABLE = 'executable',
 	FONT = 'font',
 	DATA = 'data',
+	DIRECTORY = 'directory',
 	UNKNOWN = 'unknown',
 }
 

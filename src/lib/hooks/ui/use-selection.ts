@@ -9,7 +9,7 @@ import React from 'react';
 import { useCallback, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/migration';
 
 const selectionLogger = clientLogger.withContext('SelectionHooks');
 
@@ -34,7 +34,7 @@ export const useSelection = () => {
 		// 📊 Información de selección
 		getSelectionStats: () => ({
 			count: store.selectedItems.length,
-			totalSize: store.selectedItems.reduce((acc: number, item: FileItem) => acc + (item.size || 0), 0),
+			totalSize: store.selectedItems.reduce((acc: number, item: EntityWithStats) => acc + ((item as any).size || 0), 0),
 			hasSelection: store.selectedItems.length > 0,
 			isMultipleSelection: store.selectedItems.length > 1,
 			selectedTypes: [...new Set(store.selectedItems.map((item) => item.entityType || 'unknown'))],
@@ -139,7 +139,7 @@ export const useSelectionMouse = () => {
 	const store = useUnifiedFileManager();
 
 	const handleItemClick = useCallback(
-		(item: FileItem, event: React.MouseEvent | MouseEvent) => {
+		(item: EntityWithStats, event: React.MouseEvent | MouseEvent) => {
 			const isCtrlPressed = event.ctrlKey || event.metaKey;
 			const isShiftPressed = event.shiftKey;
 
@@ -169,7 +169,7 @@ export const useSelectionMouse = () => {
 		handleItemClick,
 
 		// 🎨 Helpers para componentes
-		getItemProps: (item: FileItem) => ({
+		getItemProps: (item: EntityWithStats) => ({
 			onClick: (event: React.MouseEvent) => handleItemClick(item, event),
 			'data-selected': store.selectedItems.some((selected) => selected.id === item.id),
 			'data-last-selected': store.lastSelectedItem?.id === item.id,
@@ -182,7 +182,7 @@ export const useSelectionTouch = () => {
 	const store = useUnifiedFileManager();
 
 	const handleItemLongPress = useCallback(
-		(item: FileItem) => {
+		(item: EntityWithStats) => {
 			// 📱 Long press activa selección múltiple
 			if (store.selectedItems.length === 0) {
 				store.selectItem(item);
@@ -196,7 +196,7 @@ export const useSelectionTouch = () => {
 	);
 
 	const handleItemTap = useCallback(
-		(item: FileItem) => {
+		(item: EntityWithStats) => {
 			if (store.selectedItems.length > 0) {
 				// 📱 Si hay selección activa, hacer toggle
 				store.toggleItemSelection(item, true);
@@ -218,7 +218,7 @@ export const useSelectionTouch = () => {
 		isMultiSelectMode: store.selectedItems.length > 0,
 
 		// 🎨 Props para componentes táctiles
-		getTouchProps: (item: FileItem) => ({
+		getTouchProps: (item: EntityWithStats) => ({
 			onTouchStart: () => {
 				// TODO: Implementar timer para long press
 			},

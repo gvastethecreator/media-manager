@@ -61,7 +61,10 @@ export function fromDrizzleNote(
 	try {
 		const { includeRelations = false, includeUI = false } = options;
 
-		const noteComplete: Record<string, any> = { ...drizzleNote };
+		const noteComplete: Record<string, any> = {
+			...drizzleNote,
+			entityType: 'note' as const,
+		};
 
 		if (includeRelations) {
 			const relationsFields = [
@@ -132,7 +135,10 @@ export function fromDrizzleNote(
 export function validateNote(note: Record<string, any>): NoteComplete {
 	try {
 		const validated = NoteSchema.parse(note);
-		return validated as NoteComplete;
+		return {
+			...validated,
+			entityType: 'note' as const,
+		} as NoteComplete;
 	} catch (error) {
 		logger.error('Error validando nota', { error });
 		throw new TransformerError(`Error validando nota: ${(error as Error).message}`);
@@ -149,7 +155,6 @@ export function extendNote(note: NoteBase & Record<string, any>, options: NoteTr
 	try {
 		return fromDrizzleNote(note, {
 			...options,
-			deserializeFields: true,
 			includeUI: true,
 		});
 	} catch (error) {

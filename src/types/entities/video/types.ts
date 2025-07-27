@@ -97,6 +97,7 @@ export interface VideoBase {
 
 	isFavorite: boolean;
 	isHidden: boolean;
+	isPublic: boolean;
 	folderId: string;
 	createdAt: Date;
 	updatedAt: Date;
@@ -121,6 +122,8 @@ export interface VideoCreateInput {
 	thumbnailHeight?: number | null;
 
 	isFavorite?: boolean;
+	isHidden?: boolean;
+	isPublic?: boolean;
 	folderId: string;
 
 	// Relaciones opcionales por IDs
@@ -156,6 +159,8 @@ export interface VideoUpdateInput {
 	thumbnailHeight?: number | null;
 
 	isFavorite?: boolean;
+	isHidden?: boolean;
+	isPublic?: boolean;
 	folderId?: string;
 
 	// Relaciones opcionales por IDs
@@ -229,6 +234,7 @@ export interface VideoRelations {
  * 🎥 Video completo con relaciones
  */
 export interface VideoComplete extends VideoBase {
+	stats?: VideoStatistics;
 	albums?: AlbumWithStats[];
 	collections?: CollectionWithStats[];
 	tags?: TagWithStats[];
@@ -272,6 +278,8 @@ export interface VideoPaginationOptions {
  */
 export interface VideoWithStats extends VideoBase {
 	entityType: 'video';
+	statistics: VideoStatistics;
+	/** Alias para compatibilidad - apunta a statistics */
 	stats: VideoStatistics;
 	thumbnailUrl: string | null;
 	frameRate?: number;
@@ -292,7 +300,6 @@ export interface VideoWithStats extends VideoBase {
 		properties?: number;
 		groups?: number;
 	};
-	statistics?: VideoStatistics;
 }
 
 /**
@@ -346,6 +353,18 @@ export interface VideoPlayState {
 }
 
 /**
+ * 🎬 Metadatos de video
+ */
+export interface VideoMetadata {
+	codec?: string;
+	bitrate?: number;
+	frameRate?: number;
+	audioCodec?: string;
+	subtitles?: boolean;
+	[key: string]: any;
+}
+
+/**
  * ⚡ Esquema Zod para validación
  */
 export const VideoSchema = z.object({
@@ -365,6 +384,8 @@ export const VideoSchema = z.object({
 	thumbnailHeight: z.number().nullable(),
 
 	isFavorite: z.boolean(),
+	isHidden: z.boolean(),
+	isPublic: z.boolean(),
 	folderId: z.string(),
 	createdAt: z.date(),
 	updatedAt: z.date(),

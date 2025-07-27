@@ -8,7 +8,8 @@
 import { z } from 'zod';
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { FolderBase, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
+import { isValidFolderId } from '@/lib/utils/folder-id-generator';
+import type { FolderBase, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder/types';
 
 const logger = serverLogger.withContext('FolderValidators');
 
@@ -19,7 +20,7 @@ export const folderBaseSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1, 'El nombre es requerido').max(255, 'El nombre es demasiado largo'),
 	path: z.string().min(1, 'La ruta es requerida'),
-	description: z.string().nullable().optional(),
+	description: z.string().nullable(),
 	emoji: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
@@ -45,7 +46,10 @@ export const folderCreateSchema = z.object({
 	color: z.string().nullable().optional(),
 	featuredImage: z.string().nullable().optional(),
 	isFavorite: z.boolean().default(false),
+	totalFiles: z.number().int().min(0).default(0),
+	totalSize: z.number().int().min(0).default(0),
 	autoReindex: z.boolean().default(false),
+	lastIndexed: z.date().nullable().optional(),
 	parentId: z.string().uuid().nullable().optional(),
 	presetId: z.string().uuid().nullable().optional(),
 });
@@ -74,7 +78,8 @@ export const folderUpdateSchema = z.object({
  */
 export function validateFolderCreate(data: unknown): FolderCreateInput {
 	try {
-		return folderCreateSchema.parse(data);
+		const parsed = folderCreateSchema.parse(data);
+		return parsed as FolderCreateInput;
 	} catch (error) {
 		logger.error('Error validando datos de creación de carpeta', { error, data });
 		throw new TransformerError('Datos de creación de carpeta inválidos');
@@ -86,7 +91,8 @@ export function validateFolderCreate(data: unknown): FolderCreateInput {
  */
 export function validateFolderUpdate(data: unknown): FolderUpdateInput {
 	try {
-		return folderUpdateSchema.parse(data);
+		const parsed = folderUpdateSchema.parse(data);
+		return parsed as FolderUpdateInput;
 	} catch (error) {
 		logger.error('Error validando datos de actualización de carpeta', { error, data });
 		throw new TransformerError('Datos de actualización de carpeta inválidos');
@@ -98,7 +104,8 @@ export function validateFolderUpdate(data: unknown): FolderUpdateInput {
  */
 export function validateFolder(data: unknown): FolderBase {
 	try {
-		return folderBaseSchema.parse(data);
+		const parsed = folderBaseSchema.parse(data);
+		return parsed as FolderBase;
 	} catch (error) {
 		logger.error('Error validando carpeta', { error, data });
 		throw new TransformerError('Datos de carpeta inválidos');
@@ -143,9 +150,6 @@ export function validateFolderPath(path: string): string {
  * Valida un ID de carpeta
  */
 export function validateFolderId(id: string): string {
-	// Importar la función de validación que acepta tanto UUIDs como nombres normalizados
-	const { isValidFolderId } = require('@/lib/utils/folder-id-generator');
-
 	if (!id || typeof id !== 'string') {
 		logger.error('Error validando ID de carpeta: ID vacío o no es string', { id });
 		throw new TransformerError('ID de carpeta inválido');

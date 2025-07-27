@@ -40,6 +40,13 @@ export interface ProfileBase {
 	updatedAt: Date;
 	settingsId: string | null;
 	imageId: string | null;
+	// Propiedades adicionales para compatibilidad
+	email?: string;
+	avatar?: string | null;
+	bio?: string | null;
+	website?: string | null;
+	location?: string | null;
+	preferences?: ProfilePreferences;
 }
 
 /**
@@ -80,6 +87,12 @@ export interface ProfileStatistics {
 	totalStorageUsed: number;
 	activeDays: number;
 	createdThisMonth: number;
+	// Propiedades adicionales para compatibilidad con serializers
+	joinDate?: Date;
+	totalImages?: number;
+	totalVideos?: number;
+	totalCollections?: number;
+	isVerified?: boolean;
 }
 
 /**

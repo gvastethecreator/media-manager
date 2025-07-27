@@ -16,6 +16,8 @@
 // Tipos base desde base.ts
 export type {
 	ConceptBase,
+	ConceptComplete,
+	ConceptExtended,
 	ConceptStatistics,
 	ConceptStats,
 	ConceptWithStats,
@@ -31,11 +33,39 @@ export {
 // Tipos adicionales desde types.ts
 export type {
 	ConceptCreateInput,
-	ConceptExtended,
-	ConceptFilters,
-	ConceptSearchOptions,
-	ConceptSearchResult,
 	ConceptUpdateInput,
 } from './types';
+
+/**
+ * Filtros para búsqueda de conceptos
+ */
+export interface ConceptFilters {
+	category?: string | string[];
+	search?: string;
+	sortBy?: 'name' | 'category' | 'createdAt' | 'updatedAt';
+	sortOrder?: 'asc' | 'desc';
+	page?: number;
+	pageSize?: number;
+	tags?: string[];
+	onlyFavorites?: boolean;
+}
+
+/**
+ * Resultado de búsqueda de conceptos
+ */
+export interface ConceptResults {
+	items: import('./base').ConceptBase[];
+	total: number;
+	page: number;
+	pageSize: number;
+	stats?: {
+		totalConcepts: number;
+		categoriesStats: Record<string, number>;
+	};
+}
+
+// Alias para compatibilidad
+export type ConceptSearchResult = ConceptResults;
+export type ConceptSearchOptions = ConceptFilters;
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

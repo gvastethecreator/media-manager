@@ -11,10 +11,12 @@ import { WildcardWithStats } from './base';
 // Tipos canónicos que deben usarse en toda la aplicación nueva.
 export type {
 	WildcardBase,
+	WildcardComplete,
 	WildcardCreateInput,
 	WildcardPreview,
 	WildcardStatistics,
 	WildcardUpdateInput,
+	WildcardWithCounts,
 	WildcardWithStats,
 } from './base';
 
@@ -26,7 +28,7 @@ export {
 } from './types';
 
 // --- 🔄 Aliases for compatibility ---
-export type WildcardComplete = WildcardWithStats;
+// WildcardComplete is now exported from base.ts
 
 // --- 🔍 Filter types ---
 export interface WildcardFilters {

@@ -52,4 +52,8 @@ export interface AlbumWithStats extends AlbumBase {
 	entityType: 'album';
 	stats: AlbumStatistics;
 	isRecent?: boolean;
+	/** Tamaño total del álbum (alias para totalSize) */
+	size?: number;
+	/** URL de la imagen en miniatura */
+	thumbnailUrl?: string;
 }

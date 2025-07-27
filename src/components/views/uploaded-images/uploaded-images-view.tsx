@@ -23,7 +23,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import type { BaseContentProps } from '@/components/views/base';
+import type { BaseContentProps } from '@/components/views/base/types';
 import {
 	deleteUploadedImageFromApi,
 	getUploadedImagesFromApi,
@@ -32,11 +32,9 @@ import {
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
-import type { EntityId, JSONString } from '@/lib/utils/types/utility-types';
 import { toastService } from '@/services/toast';
 import { UploadedFileType } from '@/types/entities/uploaded-image/types';
-import type { FileItem } from '@/types/files';
-import { FileProcessingStatus, FileType } from '@/types/files';
+import type { EntityWithStats } from '@/types/migration';
 import type { UploadedImageResult } from '@/types/uploaded-images';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
@@ -50,7 +48,7 @@ export type UploadedImageFilters = {
 
 export function UploadedImagesView() {
 	const [isLoading, setIsLoading] = useState(true);
-	const [items, setItems] = useState<FileItem[]>([]);
+	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [filters, setFilters] = useState<UploadedImageFilters>({});
 	const [isUploading, setIsUploading] = useState(false);
 	const [showFilters, setShowFilters] = useState(false);
@@ -75,14 +73,15 @@ export function UploadedImagesView() {
 				response.items.map((item) => ({
 					id: item.id,
 					name: item.name,
-					path: item.path,
-					type: FileType.IMAGE,
-					size: item.size,
-					mimeType: 'image/jpeg', // Default, will be refined by adaptedItems
-					metadata: typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {}),
-					processingStatus: FileProcessingStatus.COMPLETED,
+					entityType: 'uploaded-image' as const,
+					description: null,
 					createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
 					updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+					stats: {
+						totalItems: 1,
+						totalAssociations: 0,
+						lastUpdated: new Date(),
+					},
 				})) || []
 			);
 			setTotalItems(response.total || 0);
@@ -172,7 +171,7 @@ export function UploadedImagesView() {
 
 	// Manejador para seleccionar una imagen
 	const handleSelectItem = useCallback(
-		(item: UploadedImageResult) => {
+		(item: EntityWithStats) => {
 			setSelectedImage(selectedImage === item.id ? null : item.id);
 		},
 		[selectedImage]
@@ -189,7 +188,7 @@ export function UploadedImagesView() {
 	);
 
 	// Usar eventos optimistas del cliente
-	const [optimisticItems, addOptimisticEvent] = clientEvents.useEvents<UploadedImageResult[]>(items);
+	const [optimisticItems, addOptimisticEvent] = clientEvents.useEvents<EntityWithStats[]>(items);
 
 	// Efecto para manejar el optimistic UI
 	useEffect(() => {
@@ -215,49 +214,26 @@ export function UploadedImagesView() {
 		}
 	}, [selectedImage, items, handleDeleteImage, addOptimisticEvent, optimisticItems]);
 
-	// Convertir UploadedImageResult a FileItem para compatibilidad con BaseContentView
-	const adaptedItems = useMemo<FileItem[]>(() => {
-		return optimisticItems.map((item) => {
-			// Extraer mimeType desde metadata si es posible
-			let mimeType = 'image/jpeg';
-			try {
-				if (item.metadata) {
-					const meta = typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata;
-					if (meta && typeof meta === 'object' && meta.format) {
-						// Ejemplo: meta.format = 'png' => 'image/png'
-						mimeType = `image/${meta.format.toLowerCase()}`;
-					}
-				}
-			} catch (e) {
-				void e; /* Ignorar errores de parseo de metadata */
-			}
-			// Asegurar que metadata es string JSON
-			const metadataString = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {});
-			return {
-				id: item.id as EntityId, // Forzamos el tipo, ya que es string compatible
-				name: item.name,
-				path: item.path,
-				type: FileType.IMAGE,
-				size: item.size,
-				mimeType,
-				metadata: metadataString as JSONString<any>,
-				processingStatus: FileProcessingStatus.COMPLETED, // Enum correcto
-				createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
-				updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
-			};
-		});
+	// Convertir UploadedImageResult a EntityWithStats para compatibilidad con BaseContentView
+	const adaptedItems = useMemo<EntityWithStats[]>(() => {
+		return optimisticItems.map((item) => ({
+			id: item.id,
+			name: item.name,
+			entityType: 'uploaded-image' as const,
+			description: item.description,
+			createdAt: item.createdAt,
+			updatedAt: item.updatedAt,
+			stats: item.stats,
+		}));
 	}, [optimisticItems]);
 
 	// Función para adaptar el manejador de selección
 	const adaptedToggleItemSelection = useCallback(
-		(item: FileItem, _isMultiSelect = false) => {
-			// Encontrar el item original por ID
-			const originalItem = items.find((i) => i.id === item.id);
-			if (originalItem) {
-				handleSelectItem(originalItem);
-			}
+		(item: EntityWithStats, _isMultiSelect = false) => {
+			// Usar directamente el item adaptado
+			handleSelectItem(item);
 		},
-		[items, handleSelectItem]
+		[handleSelectItem]
 	);
 
 	// Props compartidos con el componente base
@@ -441,7 +417,7 @@ export function UploadedImagesView() {
 						<AlertTitle>Error</AlertTitle>
 						<AlertDescription>{error}</AlertDescription>
 					</Alert>
-				) : optimisticItems.length === 0 ? (
+				) : adaptedItems.length === 0 ? (
 					<div className="flex flex-col items-center justify-center h-64 p-4">
 						<ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
 						<h3 className="text-lg font-medium mb-2">No hay imágenes subidas</h3>
@@ -452,7 +428,7 @@ export function UploadedImagesView() {
 					</div>
 				) : (
 					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
-						{optimisticItems.map((image) => (
+						{adaptedItems.map((image) => (
 							<MemoizedImageCard
 								key={image.id}
 								imageId={image.id}

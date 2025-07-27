@@ -39,7 +39,7 @@ export interface ImageCoreState {
 	fetchImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
 	loadImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
 	// createImage: (data: ImageCreateInput) => Promise<ImageWithStats | undefined>; // Comentado temporalmente
-	updateImage: (id: string, data: ImageUpdateInput) => Promise<ImageWithStats | undefined>;
+	updateImage: (id: string, data: any) => Promise<ImageWithStats | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
@@ -217,7 +217,27 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	updateImage: async (id, data) => {
 		set({ isLoading: true, error: null });
 		try {
-			const updatedImage = await ImageApi.updateImageInApi(id, data);
+			// Convertir TagWithStats[] a string[] si es necesario
+			const { tags, ...restData } = data;
+			const processedData: any = {
+				...restData,
+			};
+
+			// Convertir tags de TagWithStats[] a string[] si están presentes
+			if (tags && Array.isArray(tags) && tags.length > 0) {
+				const firstTag = tags[0];
+				if (firstTag && typeof firstTag === 'object') {
+					processedData.tags = tags.map((tag: any) => tag.id || tag.name || String(tag));
+				} else {
+					// Si ya son strings, mantenerlos como están
+					processedData.tags = tags;
+				}
+			} else if (tags) {
+				// Si tags existe pero no es un array, asignarlo directamente
+				processedData.tags = tags;
+			}
+
+			const updatedImage = await ImageApi.updateImageInApi(id, processedData);
 			get().addImage(updatedImage);
 			toastService.success('Imagen actualizada');
 			return updatedImage;

@@ -81,12 +81,12 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 			>
 				{processingAction === 'favorite-toggle' ? (
 					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : file.isFavorite ? (
+				) : 'isFavorite' in file && file.isFavorite ? (
 					<HeartOff className="mr-2 h-4 w-4" />
 				) : (
 					<Heart className="mr-2 h-4 w-4" />
 				)}
-				<span>{file.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}</span>
+				<span>{'isFavorite' in file && file.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}</span>
 			</button>
 
 			{/* Resto del menú contextual sin cambios */}

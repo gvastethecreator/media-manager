@@ -6,7 +6,7 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { VideoMetadata } from '../../types/entities/video';
+import type { VideoMetadata } from '../../types/entities/video/types';
 
 const logger = serverLogger.withContext('VideoSerializers');
 

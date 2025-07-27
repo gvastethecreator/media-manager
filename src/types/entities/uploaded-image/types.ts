@@ -33,6 +33,7 @@ export interface UploadedImageBase {
 	category: string | null;
 	width: number | null;
 	height: number | null;
+	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -82,6 +83,7 @@ export interface UploadedImageExtended extends UploadedImageBase {
  * Versión con estadísticas calculadas
  */
 export interface UploadedImageWithStats extends UploadedImageExtended {
+	entityType: 'uploaded-image';
 	stats: UploadedImageStatistics;
 }
 
@@ -99,11 +101,17 @@ export const UploadedImageSchema = z.object({
 	size: z.number(),
 	width: z.number(),
 	height: z.number(),
+	isFavorite: z.boolean(),
 	metadata: z.string().nullable().optional(),
 	uploadedAt: z.date(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+/**
+ * Alias para compatibilidad - UploadedImageComplete
+ */
+export type UploadedImageComplete = UploadedImageWithStats;
 
 // 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

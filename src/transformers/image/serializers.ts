@@ -63,17 +63,17 @@ export function fromDrizzleImage(data: Partial<ImageBase>): ImageWithStats {
 			wildcardCount: 0,
 			propertyCount: 0,
 			groupCount: 0,
+			aspectRatio: data.width && data.height ? Number((data.width / data.height).toFixed(2)) : 0,
 		},
 		thumbnailUrl: data.thumbnail ?? '',
 		fullUrl: data.path ?? '',
-		_count: data._count,
 	};
 }
 
 /**
- * Valida una imagen completa
+ * Valida una imagen completa para serialización
  */
-export function validateImage(data: unknown): ImageWithStats {
+export function validateImageForSerialization(data: unknown): ImageWithStats {
 	if (typeof data !== 'object' || data === null) {
 		throw new Error('Los datos deben ser un objeto válido');
 	}
@@ -105,7 +105,10 @@ export function extendImage(
 		return extended;
 	} catch (error) {
 		logger.error('Error al extender imagen con datos adicionales', { error });
-		throw TransformerError.wrap(error, 'Error al extender imagen con datos adicionales');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'extendImageWithAdditionalData',
+			message: 'Error al extender imagen con datos adicionales',
+		});
 	}
 }
 
@@ -156,6 +159,9 @@ export function parseImageFilters(filters: unknown): Record<string, unknown> {
 			});
 			throw new Error(`Filtros inválidos: ${error.errors.map((e) => e.message).join(', ')}`);
 		}
-		throw TransformerError.wrap(error, 'Error al parsear filtros de imagen');
+		throw TransformerError.wrap(error as Error, {
+			operation: 'parseImageFilters',
+			message: 'Error al parsear filtros de imagen',
+		});
 	}
 }

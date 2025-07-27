@@ -5,12 +5,8 @@
  */
 
 import { formatBytes } from '@/lib/utils/format.utils';
-import type {
-	MetadataBase,
-	MetadataCreateInput,
-	MetadataExtended,
-	MetadataUpdateInput,
-} from '@/types/entities/metadata';
+import type { MetadataExtended } from '@/types/entities/metadata/extended';
+import type { MetadataBase, MetadataCreateInput, MetadataUpdateInput } from '@/types/entities/metadata/types';
 
 // Tipos de datos para Drizzle
 type DrizzleCreateMetadataData = Omit<MetadataBase, 'id' | 'createdAt' | 'updatedAt'>;

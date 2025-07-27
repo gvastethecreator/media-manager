@@ -8,13 +8,7 @@ import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface WildcardCardProps {
-	wildcard: Wildcard & {
-		_count?: {
-			images: number;
-			videos?: number;
-			childWildcards?: number;
-		};
-	};
+	wildcard: Wildcard;
 	onClick?: (wildcard: Wildcard) => void;
 	className?: string;
 	showBadges?: boolean;

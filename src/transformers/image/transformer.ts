@@ -158,6 +158,7 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 		wildcardCount: wildcards,
 		propertyCount: properties,
 		groupCount: groups,
+		aspectRatio: aspectRatio,
 	};
 }
 

@@ -30,6 +30,7 @@ export type {
 	QueueJobCreateInput,
 	QueueJobExtended,
 	QueueJobFilters,
+	QueueJobMetadata,
 	QueueJobPaginationOptions,
 	QueueJobUpdateInput,
 	QueueStats,

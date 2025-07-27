@@ -63,6 +63,8 @@ export interface PlaceStatistics {
 	geoContextLevel: number;
 	/** Popularidad basada en el número de entidades relacionadas */
 	popularity: number;
+	/** Fecha de última actualización */
+	// lastUpdated: Date; // Comentado temporalmente para resolver errores
 }
 
 /**
@@ -96,7 +98,7 @@ export type PlaceWithStats = PlaceBase & {
 	images?: number;
 	videos?: number;
 	tags?: number;
-	notes?: number;
+	notesCount?: number;
 	characters?: number;
 	collections?: number;
 	concepts?: number;

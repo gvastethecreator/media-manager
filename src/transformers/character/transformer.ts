@@ -6,7 +6,14 @@
  */
 
 import { serverLogger } from '../../lib/logger/server-logger';
-import type { CharacterWithStats } from '../../types/entities/character';
+import type {
+	CharacterAssociationStats,
+	CharacterBase,
+	CharacterCreateInput,
+	CharacterUpdateInput,
+	CharacterWithStats,
+} from '../../types/entities/character';
+import type { PlaceWithStats } from '../../types/entities/place';
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleCharacterWithCounts = {
@@ -91,14 +98,10 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			return null;
 		}
 
-		const now = new Date().toISOString();
+		const now = new Date();
 		const { _count, ...baseData } = drizzleCharacter;
 
-		// Validar que _count existe y tiene las propiedades necesarias
-		if (!_count || typeof _count !== 'object') {
-			return null;
-		}
-		// Calcular totales desde los conteos
+		// Calcular totales desde los conteos (permitir _count undefined)
 		const totalImages = _count?.images ?? 0;
 		const totalVideos = _count?.videos ?? 0;
 		const totalTags = _count?.tags ?? 0;
@@ -137,46 +140,62 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 
 		// Determinar rareza basada en power level
 		const rarityLevel = determineRarityLevel(1, powerLevel, totalAssociations);
-		const result = {
-			...baseData,
-			// Validación null-safe para evitar errores
-			description: baseData.description != null ? baseData.description : null,
-			skills: baseData.skills != null ? baseData.skills : null,
-			relationships: baseData.relationships != null ? baseData.relationships : null,
-			personality: baseData.personality != null ? baseData.personality : null,
-			equipment: baseData.equipment != null ? baseData.equipment : null,
-			notes: baseData.notes != null ? baseData.notes : null,
-			// Asegurar que emoji nunca sea undefined
+
+		// Crear estadísticas
+		const statistics: CharacterAssociationStats = {
+			totalImages,
+			totalVideos,
+			totalTags,
+			totalGroups,
+			totalProperties,
+			totalCollections,
+			totalAlbums,
+			totalPlaces,
+			totalWorldItems,
+			totalConcepts,
+			totalPrompts,
+			totalNotes,
+			totalWildcards,
+			totalRelatedCharacters,
+			totalRelatedTo,
+			totalAssociations,
+			lastUpdated: now,
+			powerLevel,
+			rarityLevel,
+		};
+
+		const result: CharacterWithStats = {
+			id: baseData.id,
+			name: baseData.name,
+			description: baseData.description ?? null,
 			emoji: baseData.emoji ?? '👤',
-
-			// Conteos originales para compatibilidad
-			_count,
-
+			color: baseData.color ?? null,
+			category: baseData.category ?? null,
+			isFavorite: baseData.isFavorite,
+			age: baseData.age ?? null,
+			gender: baseData.gender ?? null,
+			species: baseData.species ?? null,
+			occupation: baseData.occupation ?? null,
+			personality: baseData.personality ?? null,
+			background: baseData.background ?? null,
+			relationships: baseData.relationships ?? null,
+			skills: baseData.skills ?? null,
+			equipment: baseData.equipment ?? null,
+			notes: baseData.notes ?? null,
+			featuredImage: baseData.featuredImage ?? null,
+			parentId: baseData.parentId ?? null,
+			createdAt: baseData.createdAt,
+			updatedAt: baseData.updatedAt,
+			// Conteos calculados para compatibilidad
+			totalImages,
+			totalVideos,
+			_count: _count ?? {},
 			// Tipo de entidad
 			entityType: 'character' as const,
-
-			// Estadísticas pre-calculadas optimizadas
-			statistics: {
-				totalImages,
-				totalVideos,
-				totalTags,
-				totalGroups,
-				totalProperties,
-				totalCollections,
-				totalAlbums,
-				totalPlaces,
-				totalWorldItems,
-				totalConcepts,
-				totalPrompts,
-				totalNotes,
-				totalWildcards,
-				totalRelatedCharacters,
-				totalRelatedTo,
-				totalAssociations,
-				lastUpdated: now,
-				powerLevel,
-				rarityLevel,
-			},
+			// Estadísticas
+			statistics,
+			// Alias para compatibilidad
+			stats: statistics,
 		};
 
 		return result;

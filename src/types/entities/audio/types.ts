@@ -1,16 +1,7 @@
-import type { EntityBase, EntityWithStats } from '@/types/entities/entity.types';
-import type { AudioBase, AudioStatistics, AudioWithStats as BaseAudioWithStats } from './base';
+import type { AudioBase, AudioStatistics, AudioWithStats } from './base';
 
-// Re-export tipos base
-export type { AudioBase, AudioStatistics } from './base';
-
-// Extender AudioWithStats con entityType
-export interface AudioWithStats extends BaseAudioWithStats {
-	entityType: 'audio';
-}
-
-export type AudioCreateInput = Partial<AudioBase>;
-export type AudioUpdateInput = Partial<AudioBase>;
+// Re-export tipos base (sin AudioCreateInput y AudioUpdateInput para evitar duplicación)
+export type { AudioBase, AudioStatistics, AudioWithStats } from './base';
 
 export interface AudioFilters {
 	search?: string;
@@ -135,3 +126,71 @@ export type AudioSortOption =
 	| 'track_desc';
 
 export type AudioViewMode = 'grid' | 'list' | 'compact';
+
+// Additional types for compatibility
+export interface AudioSearchOptions {
+	filters?: AudioFilters;
+	sort?: AudioSortCriteria;
+	pagination?: AudioPaginationOptions;
+}
+
+export interface AudioViewConfig {
+	viewMode: AudioViewMode;
+	sortBy: AudioSortOption;
+	filters: AudioFilters;
+}
+
+export interface AudioUIProps {
+	totalAudios: number;
+	totalSize: number;
+	totalDuration: number;
+	formats: string[];
+	genres: string[];
+	artists: string[];
+}
+
+export interface AudioCounts {
+	albums?: number;
+	collections?: number;
+	tags?: number;
+	characters?: number;
+	places?: number;
+	worldItems?: number;
+	concepts?: number;
+	prompts?: number;
+	notes?: number;
+	wildcards?: number;
+	properties?: number;
+	groups?: number;
+}
+
+export interface AudioRelations {
+	albums?: any[];
+	collections?: any[];
+	tags?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
+}
+
+export interface AudioExtended extends AudioWithStats {
+	relations?: AudioRelations;
+}
+
+export interface AudioExtendedComplete extends AudioWithStats {
+	tags: string[];
+	relations: AudioRelations;
+}
+
+export interface AudioWithRelations extends AudioWithStats {
+	relations: AudioRelations;
+}
+
+// Alias for backward compatibility
+export type AudioStats = AudioStatistics;

@@ -14,15 +14,15 @@ export function useFileList() {
 				return false;
 			}
 
-			// Tags filter
-			if (filterTags.length > 0 && !filterTags.every((tag) => file.tags?.includes(tag))) {
+			// Tags filter (safely check if tags property exists)
+			if (filterTags.length > 0 && !filterTags.every((tag) => (file as any).tags?.includes(tag))) {
 				return false;
 			}
 
-			// Collections filter
+			// Collections filter (safely check if collections property exists)
 			if (
 				filterCollections.length > 0 &&
-				!filterCollections.every((collection) => file.collections?.includes(collection))
+				!filterCollections.every((collection) => (file as any).collections?.includes(collection))
 			) {
 				return false;
 			}
@@ -39,10 +39,10 @@ export function useFileList() {
 					comparison = a.name.localeCompare(b.name);
 					break;
 				case 'date':
-					comparison = a.modified.getTime() - b.modified.getTime();
+					comparison = (a.updatedAt || a.createdAt).getTime() - (b.updatedAt || b.createdAt).getTime();
 					break;
 				case 'size':
-					comparison = a.size - b.size;
+					comparison = ((a as any).size || 0) - ((b as any).size || 0);
 					break;
 			}
 			return sortOrder === 'asc' ? comparison : -comparison;

@@ -22,6 +22,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import type { EntityWithStats } from '@/types/migration';
 import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
 import { StatusBar } from './toolbar/status-bar';
 import { CardsView } from './views/cards-view';

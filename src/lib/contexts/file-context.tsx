@@ -11,16 +11,16 @@ import {
 } from '@/lib/api/files';
 import { clientEvents } from '@/lib/client/events.client';
 
-import type { FileItem } from '@/types/files';
+import type { EntityWithStats } from '@/types/migration';
 
-// Re-export FileItem for components that need it
-export type { FileItem };
+// Re-export EntityWithStats for components that need it
+export type { EntityWithStats };
 
 interface FileContextType {
-	files: FileItem[];
+	files: EntityWithStats[];
 	selectedFiles: string[];
-	currentItems: FileItem[];
-	selectedItems: FileItem[];
+	currentItems: EntityWithStats[];
+	selectedItems: EntityWithStats[];
 	isLoading: boolean;
 	sortBy: 'name' | 'date' | 'size';
 	sortOrder: 'asc' | 'desc';
@@ -30,14 +30,14 @@ interface FileContextType {
 	error: string | null;
 
 	// Actions
-	setFiles: (files: FileItem[]) => void;
-	addFiles: (files: FileItem[]) => void;
+	setFiles: (files: EntityWithStats[]) => void;
+	addFiles: (files: EntityWithStats[]) => void;
 	removeFiles: (fileIds: string[]) => void;
 	selectFiles: (fileIds: string[]) => void;
 	deselectFiles: (fileIds: string[]) => void;
 	clearSelection: () => void;
-	handleSelectItem: (item: FileItem) => void;
-	toggleItemSelection: (item: FileItem, multiSelect?: boolean) => void;
+	handleSelectItem: (item: EntityWithStats) => void;
+	toggleItemSelection: (item: EntityWithStats, multiSelect?: boolean) => void;
 	setSortBy: (sortBy: 'name' | 'date' | 'size') => void;
 	setSortOrder: (order: 'asc' | 'desc') => void;
 	setViewMode: (mode: 'grid' | 'list') => void;
@@ -52,13 +52,13 @@ interface FileContextType {
 	renameFile: (fileId: string, newName: string) => void;
 	uploadFiles: (files: File[]) => Promise<void>;
 	downloadFiles: (fileIds: string[]) => Promise<void>;
-	getSortedFiles: () => FileItem[];
+	getSortedFiles: () => EntityWithStats[];
 }
 
 const FileContext = createContext<FileContextType | undefined>(undefined);
 
 export function FileProvider({ children }: { children: ReactNode }) {
-	const [files, setFiles] = useState<FileItem[]>([]);
+	const [files, setFiles] = useState<EntityWithStats[]>([]);
 	const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 	const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -74,7 +74,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	const logActivity = useLogActivity();
 
 	// Métodos del contexto original
-	const addFiles = useCallback((newFiles: FileItem[]) => {
+	const addFiles = useCallback((newFiles: EntityWithStats[]) => {
 		setFiles((prev) => [...prev, ...newFiles]);
 	}, []);
 
@@ -97,7 +97,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 
 	// Métodos del contexto de src/context/file-context.tsx
 	const handleSelectItem = useCallback(
-		async (item: FileItem) => {
+		async (item: EntityWithStats) => {
 			// Seleccionar el item
 			selectFiles([item.id]);
 
@@ -120,7 +120,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	);
 
 	const toggleItemSelection = useCallback(
-		(item: FileItem, multiSelect = false) => {
+		(item: EntityWithStats, multiSelect = false) => {
 			const isSelected = selectedFiles.includes(item.id);
 
 			if (isSelected) {
@@ -141,22 +141,23 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			}
 
 			// Emitir evento de actualización si es necesario
-			if (item.collections?.length) {
+			const itemAny = item as any;
+			if (itemAny.collections?.length) {
 				addEvent({ type: 'collections:modified', data: { item } });
 			}
-			if (item.tags?.length) {
+			if (itemAny.tags?.length) {
 				addEvent({ type: 'tags:modified', data: { item } });
 			}
-			if (item.characters?.length) {
+			if (itemAny.characters?.length) {
 				addEvent({ type: 'characters:modified', data: { item } });
 			}
-			if (item.places?.length) {
+			if (itemAny.places?.length) {
 				addEvent({ type: 'places:modified', data: { item } });
 			}
-			if (item.worldItems?.length) {
+			if (itemAny.worldItems?.length) {
 				addEvent({ type: 'world-items:modified', data: { item } });
 			}
-			if (item.isFavorite || item.isFavorite) {
+			if (itemAny.isFavorite) {
 				addEvent({ type: 'favorites:modified', data: { item } });
 			}
 		},
@@ -221,7 +222,11 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			setLoading(true);
 			// Implementar lógica de movimiento de archivos
 			setFiles((prev) =>
-				prev.map((file) => (fileIds.includes(file.id) ? { ...file, path: `${targetPath}/${file.name}` } : file))
+				prev.map((file) =>
+					fileIds.includes(file.id)
+						? { ...file, ...((file as any).path ? { path: `${targetPath}/${file.name}` } : {}) }
+						: file
+				)
 			);
 		} catch (err) {
 			setError('Error moving files');
@@ -240,7 +245,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				const copiedFiles = filesToCopy.map((file) => ({
 					...file,
 					id: crypto.randomUUID(),
-					path: `${targetPath}/${file.name}`,
+					...((file as any).path ? { path: `${targetPath}/${file.name}` } : {}),
 				}));
 				addFiles(copiedFiles);
 			} catch (err) {
@@ -260,7 +265,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					? {
 							...file,
 							name: newName,
-							path: file.path.replace(/[^/]+$/, newName),
+							...((file as any).path ? { path: (file as any).path.replace(/[^/]+$/, newName) } : {}),
 						}
 					: file
 			)
@@ -272,7 +277,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			try {
 				setLoading(true);
 				// Implementar lógica de carga de archivos
-				const newFiles: FileItem[] = await Promise.all(
+				const newFiles: EntityWithStats[] = await Promise.all(
 					files.map(async (file) => {
 						const reader = new FileReader();
 						const thumbnail = await new Promise<string>((resolve) => {
@@ -283,12 +288,17 @@ export function FileProvider({ children }: { children: ReactNode }) {
 						return {
 							id: crypto.randomUUID(),
 							name: file.name,
+							description: null,
+							createdAt: new Date(),
+							updatedAt: new Date(),
+							entityType: 'image' as const,
+							stats: {},
 							path: `/uploads/${file.name}`,
 							size: file.size,
 							type: file.type,
 							modified: new Date(file.lastModified),
 							thumbnail,
-						};
+						} as EntityWithStats;
 					})
 				);
 				addFiles(newFiles);
@@ -309,10 +319,11 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				const filesToDownload = files.filter((file) => fileIds.includes(file.id));
 				// Implementar lógica de descarga de archivos
 				for (const file of filesToDownload) {
-					if (!file.thumbnail) continue;
+					const fileAny = file as any;
+					if (!fileAny.thumbnail) continue;
 
 					// Crear un blob con el tipo MIME adecuado
-					const response = await fetch(file.thumbnail);
+					const response = await fetch(fileAny.thumbnail);
 					const blob = await response.blob();
 					const url = URL.createObjectURL(blob);
 
@@ -341,16 +352,24 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	const getSortedFiles = useCallback(() => {
 		return [...files].sort((a, b) => {
 			let comparison = 0;
+			const aAny = a as any;
+			const bAny = b as any;
 			switch (sortBy) {
 				case 'name':
 					comparison = a.name.localeCompare(b.name);
 					break;
-				case 'date':
-					comparison = a.modified.getTime() - b.modified.getTime();
+				case 'date': {
+					const aDate = aAny.modified || a.updatedAt;
+					const bDate = bAny.modified || b.updatedAt;
+					comparison = aDate.getTime() - bDate.getTime();
 					break;
-				case 'size':
-					comparison = a.size - b.size;
+				}
+				case 'size': {
+					const aSize = aAny.size || 0;
+					const bSize = bAny.size || 0;
+					comparison = aSize - bSize;
 					break;
+				}
 				default:
 					comparison = 0;
 			}

@@ -3,32 +3,11 @@
  */
 
 import type { DirectoryInfo, FileInfo } from '@/lib/filesystem/folder-scanner';
+import type { FileBase } from './base';
 import { FileType } from './base';
 
-export type FileBase = {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	hash: string;
-	mimeType: string;
-	extension: string;
-	fileType: string;
-	folderId: string;
-	isFavorite: boolean;
-	isArchived: boolean;
-	isHidden: boolean;
-	description: string | null;
-	tags: string | null;
-	metadata: string | null;
-	lastAccessed: Date | null;
-	accessCount: number | null;
-	isProcessed: boolean | null;
-	processingError: string | null;
-	processingStatus: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-};
+// Re-exportar tipos importados para que estén disponibles
+export type { DirectoryInfo, FileInfo, FileBase };
 
 export type FileRelations = Record<string, never>;
 
@@ -70,8 +49,8 @@ export type FileCopyMoveResult = {
 	sourcePath: string;
 	destPath: string;
 	isDirectory: boolean;
-	sourceInfo: FileInfo;
-	destInfo: FileInfo;
+	sourceInfo: FileBase;
+	destInfo: FileBase;
 	timestamp: Date;
 	error?: string;
 };
@@ -93,6 +72,6 @@ export type FileOperationResult = {
 	success: boolean;
 	path: string;
 	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
-	file?: FileInfo;
+	file?: FileBase;
 	error?: string;
 };

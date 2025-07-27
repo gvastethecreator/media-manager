@@ -12,7 +12,7 @@
  * @updated 2025-01-27
  */
 
-export type { GroupBase, GroupStatistics, GroupWithStats } from './base';
+export type { GroupBase, GroupComplete, GroupStatistics, GroupWithStats } from './base';
 export { GroupViewMode } from './base';
 export * from './enums';
 export type { CreateGroupInput as GroupCreateInput, UpdateGroupInput as GroupUpdateInput } from './types';

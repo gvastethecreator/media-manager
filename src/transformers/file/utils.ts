@@ -14,8 +14,25 @@ import {
 	isImageExtension,
 	isVideoExtension,
 } from '../../lib/utils/file/helpers';
-import { FileType } from '../../types/entities/file/enums';
-import type { DirectoryReadResult, FileInfo, FileOperationResult } from '../../types/entities/file/types';
+import type { FileBase } from '../../types/entities/file/base';
+import { FileType } from '../../types/entities/file/base';
+
+// Tipos locales para compatibilidad
+type FileInfo = FileBase;
+
+interface DirectoryReadResult {
+	path: string;
+	items: FileBase[];
+	total: number;
+}
+
+interface FileOperationResult {
+	success: boolean;
+	path: string;
+	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
+	file?: FileInfo;
+	error?: string;
+}
 
 /**
  * Determina el tipo de archivo basado en su extensión
@@ -87,7 +104,7 @@ export function determineFileType(filePath: string): FileType {
 		return FileType.ARCHIVE;
 	}
 
-	return FileType.OTHER;
+	return FileType.UNKNOWN;
 }
 
 /**
@@ -123,62 +140,66 @@ export function generateFileId(filePath?: string): string {
 export function mapStatsToFileInfo(filePath: string, stats: Stats): FileInfo {
 	const name = path.basename(filePath);
 	const extension = getFileExtension(name);
-	const type = determineFileType(filePath);
-	const mimeType = determineMimeType(filePath);
-	const parentPath = path.dirname(filePath);
+	const relativePath = path.relative(process.cwd(), filePath);
 
 	return {
 		id: generateFileId(filePath),
 		name,
 		path: filePath,
-		type,
 		size: stats.size,
-		createdAt: stats.birthtime,
-		updatedAt: stats.mtime, // Usando mtime como updatedAt
+		hash: '',
+		mimeType: determineMimeType(filePath),
+		extension,
+		type: determineFileType(filePath),
+		isDirectory: stats.isDirectory(),
+		parentPath: path.dirname(filePath),
+		absolutePath: path.resolve(filePath),
+		relativePath,
 		modifiedAt: stats.mtime,
 		accessedAt: stats.atime,
-		isDirectory: stats.isDirectory(),
-		parentPath,
-		absolutePath: path.resolve(filePath),
-		relativePath: path.relative(process.cwd(), filePath),
-		extension,
-		mimeType,
-	};
+		folderId: null,
+		isHidden: name.startsWith('.'),
+		isReadonly: false,
+		createdAt: stats.birthtime,
+		updatedAt: stats.mtime,
+	} as FileInfo;
 }
 
 /**
  * Serializa el resultado de una operación de archivo
- * @param result - Resultado de la operación
+ * @param success - Si la operación fue exitosa
+ * @param path - Ruta del archivo
+ * @param operation - Tipo de operación realizada
+ * @param file - Información del archivo (opcional)
+ * @param error - Mensaje de error (opcional)
  * @returns Resultado serializado
  */
-export function serializeFileOperationResult(result: FileOperationResult): FileOperationResult {
+export function serializeFileOperationResult(
+	success: boolean,
+	path: string,
+	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename',
+	file?: FileInfo,
+	error?: string
+): FileOperationResult {
 	return {
-		success: result.success,
-		path: result.path,
-		operation: result.operation,
-		file: result.file,
-		error: result.error,
+		success,
+		path,
+		operation,
+		file,
+		error,
 	};
 }
 
 /**
  * Serializa el contenido de un directorio
- * @param result - Resultado de lectura de directorio
+ * @param path - Ruta del directorio
+ * @param items - Lista de archivos y directorios
  * @returns Resultado serializado
  */
-export function serializeDirectoryContents(result: DirectoryReadResult): DirectoryReadResult {
+export function serializeDirectoryContents(path: string, items: FileBase[]): DirectoryReadResult {
 	return {
-		path: result.path,
-		items: result.items,
-		files: result.files.map((file: FileInfo) => ({
-			...file,
-			createdAt: file.createdAt,
-			modifiedAt: file.modifiedAt,
-			accessedAt: file.accessedAt,
-		})),
-		directories: result.directories,
-		totalItems: result.totalItems,
-		hasMore: result.hasMore,
-		totalSize: result.totalSize,
+		path,
+		items,
+		total: items.length,
 	};
 }

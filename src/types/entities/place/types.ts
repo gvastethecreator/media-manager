@@ -3,7 +3,7 @@
  * @module types/entities/place/types
  */
 
-import type { PlaceWithStats } from './base';
+import type { PlaceBase, PlaceWithStats } from './base';
 
 export enum PlaceCategory {
 	CITY = 'city',
@@ -35,36 +35,6 @@ export enum PlaceViewMode {
 	GRID = 'grid',
 	LIST = 'list',
 	DETAIL = 'detail',
-}
-
-export interface PlaceBase {
-	id: string;
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-
-	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-	type: string | null;
-	location: string | null;
-	climate: string | null;
-	population: string | null;
-	government: string | null;
-	economy: string | null;
-	culture: string | null;
-	history: string | null;
-	geography: string | null;
-	landmarks: string | null;
-	dangers: string | null;
-	resources: string | null;
-	notes: string | null;
-	featuredImage: string | null;
-	parentId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
 }
 
 export interface PlaceSearchOptions {
@@ -108,21 +78,29 @@ export interface PlaceFilters {
  * Función para extender un lugar con información adicional
  */
 export function extendPlace(place: PlaceBase): PlaceWithStats {
+	const stats = {
+		spatialRelevance: 0,
+		completenessScore: 0,
+		geoContextLevel: 0,
+		popularity: 0,
+	};
+
 	return {
 		...place,
 		entityType: 'place' as const,
-		_stats: {
-			spatialRelevance: 0,
-			completenessScore: 0,
-			geoContextLevel: 0,
-			popularity: 0,
-		},
-		stats: {
-			spatialRelevance: 0,
-			completenessScore: 0,
-			geoContextLevel: 0,
-			popularity: 0,
-		},
+		_stats: stats,
+		stats: stats,
+		parsedDangers: [],
+		parsedResources: [],
+		parsedStats: {},
+		metadata: {},
+		region: null,
+		images: 0,
+		videos: 0,
+		tags: 0,
+		characters: 0,
+		collections: 0,
+		concepts: 0,
 	};
 }
 

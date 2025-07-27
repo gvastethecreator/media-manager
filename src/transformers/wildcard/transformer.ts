@@ -16,7 +16,7 @@ const wildcardTransformerLogger = clientLogger.withContext('WildcardTransformer'
  * @param drizzleWildcard El objeto Wildcard de Drizzle
  * @returns Un objeto WildcardWithStats con estadísticas calculadas o null si el input es inválido
  */
-export function fromDrizzleWildcard(drizzleWildcard: object | null): WildcardWithStats | null {
+export function fromDrizzleWildcard(drizzleWildcard: any): WildcardWithStats | null {
 	if (!drizzleWildcard) {
 		wildcardTransformerLogger.warn('⚠️ Wildcard de Drizzle nulo o indefinido');
 		return null;
@@ -26,7 +26,7 @@ export function fromDrizzleWildcard(drizzleWildcard: object | null): WildcardWit
 		wildcardTransformerLogger.debug('🔄 Transformando wildcard');
 
 		// Usar el mapper existente toWildcardWithStats
-		return toWildcardWithStats(drizzleWildcard);
+		return toWildcardWithStats(drizzleWildcard as any);
 	} catch (error) {
 		wildcardTransformerLogger.error('❌ Error transformando wildcard:', error);
 		return null;

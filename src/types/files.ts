@@ -16,6 +16,7 @@ import type { PlaceWithStats } from './entities/place';
 import type { PromptWithStats } from './entities/prompt';
 import type { PropertyWithStats } from './entities/property';
 import type { TagWithStats } from './entities/tag/types';
+import type { UploadedImageWithStats } from './entities/uploaded-image';
 import type { VideoWithStats } from './entities/video';
 import type { WildcardWithStats } from './entities/wildcard';
 import type { WorldItemWithStats } from './entities/world-item';
@@ -51,24 +52,40 @@ export enum FileProcessingStatus {
 }
 
 /**
+ * Propiedades base comunes que todos los FileItem deben tener para funcionar en los componentes
+ */
+export interface FileItemBase {
+	id: string;
+	name: string;
+	size: number;
+	thumbnailUrl?: string;
+	createdAt: Date;
+	updatedAt: Date;
+	isFavorite?: boolean;
+	entityType: string;
+}
+
+/**
  * Representa cualquier entidad que puede ser mostrada como un item en el explorador de archivos.
- * Es una unión de todos los tipos `...Complete` de las entidades principales.
+ * Es una unión de todos los tipos `...WithStats` de las entidades principales.
+ * Compatible con AnyEntityWithStats de migration.ts
  */
 export type FileItem =
-	| (ImageWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (VideoWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (AlbumWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (CollectionWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (TagWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (CharacterWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (PlaceWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (WorldItemWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (ConceptWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (PromptWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (NoteWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (WildcardWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (PropertyWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date })
-	| (GroupWithStats & { size?: number; type?: string; folderId?: string; createdAt?: Date });
+	| ImageWithStats
+	| VideoWithStats
+	| AlbumWithStats
+	| CollectionWithStats
+	| TagWithStats
+	| CharacterWithStats
+	| PlaceWithStats
+	| WorldItemWithStats
+	| ConceptWithStats
+	| PromptWithStats
+	| NoteWithStats
+	| WildcardWithStats
+	| PropertyWithStats
+	| GroupWithStats
+	| UploadedImageWithStats;
 
 /**
  * Etiqueta relacionada para archivos
