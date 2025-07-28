@@ -26,6 +26,9 @@ function darkenColor(color: string): string {
 
 export interface WorldItemCardProps {
 	worldItemId: string;
+	worldItem?: WorldItemWithStats;
+	isLoading?: boolean;
+	error?: Error;
 	onClick?: (worldItemData: WorldItemWithStats) => void;
 	className?: string;
 	style?: React.CSSProperties;
@@ -185,7 +188,7 @@ export function WorldItemCard({
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if ((e.key === 'Enter' || e.key === ' ') && onClick && !disabled) {
+		if ((e.key === 'Enter' || e.key === ' ') && onClick && !disabled && worldItem) {
 			e.preventDefault();
 			onClick(worldItem);
 		}
@@ -317,7 +320,7 @@ export function WorldItemCard({
 			}}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled || !interactive || !onClick ? undefined : () => onClick(worldItem)}
+			onClick={disabled || !interactive || !onClick || !worldItem ? undefined : () => onClick(worldItem)}
 			onKeyDown={handleKeyDown}
 			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
 			role={onClick && interactive ? 'button' : 'article'}

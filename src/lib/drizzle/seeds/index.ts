@@ -114,6 +114,6 @@ export async function runSeeds() {
 }
 
 // Ejecutar seeds si este archivo se ejecuta directamente
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
 	runSeeds().catch(console.error);
 }

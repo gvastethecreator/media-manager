@@ -7,8 +7,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Cpu, FileImage, HardDrive, Info, Package } from 'lucide-react';
 import { memo, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useFolder } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { AnyEntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
@@ -16,15 +17,19 @@ import { AnyEntityWithStats, getEntityStatistics, getEntityStatsType } from '@/t
 // Importar el sistema de registry
 import { entityDetailsRegistry } from './entity-details-registry';
 import { useEntityActions } from './integration-hook';
+// Importar para inicializar el registro (side-effect)
+import './registry-setup';
 
-interface DetailsPanelV2Props {
+interface DetailsPanelProps {
 	selectedItems: AnyEntityWithStats[];
 	className?: string;
 }
 
 // Componente memoizado para una entidad usando el registry
 const EntityDetailsView = memo<{ item: AnyEntityWithStats }>(function EntityDetailsView({ item }) {
+	const { handleAction } = useEntityActions();
 	const type = getEntityStatsType(item);
+
 	if (type === null) {
 		return (
 			<div className="p-4 text-center text-muted-foreground">
@@ -34,7 +39,6 @@ const EntityDetailsView = memo<{ item: AnyEntityWithStats }>(function EntityDeta
 		);
 	}
 	const config = entityDetailsRegistry.getConfig(type);
-	const { handleAction } = useEntityActions();
 
 	if (!config) {
 		// Fallback para tipos no registrados
@@ -54,34 +58,38 @@ const EntityDetailsView = memo<{ item: AnyEntityWithStats }>(function EntityDeta
 	} = config;
 
 	return (
-		<div className="space-y-4">
-			{/* Vista previa */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm">Vista Previa</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="aspect-video bg-muted/30 rounded-lg overflow-hidden">
-						<PreviewComponent entity={item} size="lg" showControls={true} onAction={handleAction} />
-					</div>
-				</CardContent>
-			</Card>
+		<div className="space-y-2">
+			{/* Vista previa compacta */}
+			<div className="border-b pb-2">
+				<h3 className="text-sm font-medium mb-2">Vista Previa</h3>
+				<div className="aspect-video bg-muted/30 rounded overflow-hidden">
+					<PreviewComponent entity={item} size="sm" showControls={false} onAction={handleAction} />
+				</div>
+			</div>
 
-			{/* Componente de detalles específico */}
-			<DetailsComponent entity={item} isSelected={true} onAction={handleAction} />
+			{/* Componente de detalles específico - sin tarjetas */}
+			<div className="border-b pb-2">
+				<DetailsComponent entity={item} isSelected={true} onAction={handleAction} />
+			</div>
 
-			{/* Toolbar de acciones */}
-			<ToolbarComponent entity={item} onAction={handleAction} />
+			{/* Toolbar de acciones compacto */}
+			<div className="border-b pb-2">
+				<h3 className="text-sm font-medium mb-2">Acciones</h3>
+				<ToolbarComponent entity={item} onAction={handleAction} />
+			</div>
 
-			{/* Metadatos */}
-			<MetadataComponent
-				entity={item}
-				editable={true}
-				onUpdate={(updates) => {
-					console.log('Updating metadata:', updates);
-					// TODO: Implementar actualización de metadatos
-				}}
-			/>
+			{/* Metadatos compactos */}
+			<div>
+				<h3 className="text-sm font-medium mb-2">Información</h3>
+				<MetadataComponent
+					entity={item}
+					editable={true}
+					onUpdate={(updates) => {
+						console.log('Updating metadata:', updates);
+						// TODO: Implementar actualización de metadatos
+					}}
+				/>
+			</div>
 		</div>
 	);
 });
@@ -228,7 +236,7 @@ const MultipleSelectionView = memo<{ items: AnyEntityWithStats[] }>(function Mul
 
 								return (
 									<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
-										<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => {}} />
+										<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => { }} />
 									</div>
 								);
 							})
@@ -244,13 +252,86 @@ const MultipleSelectionView = memo<{ items: AnyEntityWithStats[] }>(function Mul
 });
 
 // Componente principal del panel
-export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2({ selectedItems, className }) {
+export const DetailsPanel = memo<DetailsPanelProps>(function DetailsPanel({ selectedItems, className }) {
 	const hasItems = selectedItems.length > 0;
 	const singleItem = selectedItems.length === 1 ? selectedItems[0] : null;
 
+	// Obtener información de la carpeta actual desde la URL
+	const params = useParams<{ id: string }>();
+	const currentFolderId = params.id;
+	const { data: currentFolder } = useFolder(currentFolderId || '');
+
 	if (!hasItems) {
+		// Si no hay elementos seleccionados pero hay una carpeta actual, mostrar detalles de la carpeta
+		if (currentFolder && currentFolderId) {
+			// Transformar FolderComplete a FolderWithStats añadiendo las propiedades necesarias
+			const folderWithStats: AnyEntityWithStats = {
+				...currentFolder,
+				entityType: 'folder' as const,
+				stats: {
+					// Métricas de jerarquía
+					hierarchyDepth: 0,
+					totalDescendants: currentFolder.children?.length || 0,
+					directChildren: currentFolder.children?.length || 0,
+
+					// Métricas de contenido
+					contentDiversity: 0,
+					organizationScore: 0,
+					totalItems: currentFolder.totalFiles || 0,
+					folderCount: currentFolder.children?.length || 0,
+					totalFiles: currentFolder.totalFiles || 0,
+					totalFolders: currentFolder.children?.length || 0,
+					totalImages: 0,
+					totalVideos: 0,
+					totalDocuments: 0,
+					imageCount: 0,
+					videoCount: 0,
+					noteCount: 0,
+					documentCount: 0,
+					totalAudio: 0,
+					totalOthers: 0,
+
+					// Métricas de tamaño
+					formattedSize: `${((currentFolder.totalSize || 0) / 1024 / 1024).toFixed(2)} MB`,
+					totalSize: currentFolder.totalSize || 0,
+					averageFileSize: currentFolder.totalSize > 0 ? currentFolder.totalSize / Math.max(currentFolder.totalFiles, 1) : 0,
+					largestFile: 0,
+
+					// Análisis de nombres y organización
+					hasConsistentNaming: false,
+					hasDeepHierarchy: false,
+					isWellOrganized: false,
+
+					// Breadcrumbs y navegación
+					breadcrumbs: [],
+					fullPath: currentFolder.path || '',
+					relativePath: currentFolder.path || '',
+
+					// Auto-tags generados
+					autoTags: [],
+
+					// Calidad general
+					qualityGrade: 'C' as const,
+
+					// Relaciones
+					totalRelations: 0,
+
+					// Métricas de uso
+					lastActivity: currentFolder.updatedAt ? new Date(currentFolder.updatedAt) : new Date(currentFolder.createdAt),
+					accessFrequency: 0,
+				}
+			};
+
+			return (
+				<div className={cn('h-full', className)}>
+					<EntityDetailsView item={folderWithStats} />
+				</div>
+			);
+		}
+
+		// Estado vacío por defecto
 		return (
-			<div className={cn('w-80 border-l bg-background', className)}>
+			<div className={cn('h-full', className)}>
 				<div className="flex items-center justify-center h-full text-muted-foreground">
 					<div className="text-center">
 						<FileImage className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -262,17 +343,13 @@ export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2(
 	}
 
 	return (
-		<div className={cn('w-80 border-l bg-background', className)}>
-			<ScrollArea className="h-full">
-				<div className="p-4">
-					{singleItem ? <EntityDetailsView item={singleItem} /> : <MultipleSelectionView items={selectedItems} />}
-				</div>
-			</ScrollArea>
+		<div className={cn('h-full', className)}>
+			{singleItem ? <EntityDetailsView item={singleItem} /> : <MultipleSelectionView items={selectedItems} />}
 		</div>
 	);
 });
 
-export default DetailsPanelV2;
+export default DetailsPanel;
 
 /**
  * 📝 Características:

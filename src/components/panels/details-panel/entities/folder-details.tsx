@@ -18,14 +18,17 @@ import {
 	List,
 	MoreHorizontal,
 	Plus,
+	RefreshCw,
+	RotateCcw,
 	Search,
 	Share,
+	Star,
 	Trash2,
 	Upload,
 } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -35,6 +38,9 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { useFavorites } from '@/lib/api/favorites';
+import { useReindexFolder } from '@/lib/api/folders';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { FolderWithStats } from '@/types/entities/folder/types';
@@ -70,53 +76,98 @@ export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function 
 	}
 
 	return (
-		<div className="space-y-4">
-			{/* Preview principal */}
-			<FolderPreview entity={entity} size="lg" onAction={handleAction} />
+		<div className="space-y-3">
+			{/* Encabezado con nombre y icono */}
+			<div className="flex items-center gap-2 pb-2 border-b">
+				<FolderOpen className="h-4 w-4 text-primary" />
+				<h2 className="text-sm font-semibold truncate">{entity.name}</h2>
+			</div>
 
-			{/* Estadísticas rápidas */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm">Estadísticas</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-3">
-					<div className="grid grid-cols-2 gap-4 text-sm">
-						<div className="text-center">
-							<p className="text-2xl font-bold text-primary">{entity.stats?.totalItems || 0}</p>
-							<p className="text-muted-foreground">Elementos</p>
-						</div>
-						<div className="text-center">
-							<p className="text-2xl font-bold text-primary">{formatBytes(entity.totalSize || 0)}</p>
-							<p className="text-muted-foreground">Tamaño total</p>
-						</div>
+			{/* Estadísticas principales */}
+			<div className="grid grid-cols-2 gap-2 text-xs">
+				<div className="bg-muted/50 rounded p-2 text-center">
+					<div className="font-bold text-sm text-primary">{entity.stats?.totalItems || 0}</div>
+					<div className="text-muted-foreground">Elementos</div>
+				</div>
+				<div className="bg-muted/50 rounded p-2 text-center">
+					<div className="font-bold text-sm text-primary">{formatBytes(entity.totalSize || 0)}</div>
+					<div className="text-muted-foreground">Tamaño</div>
+				</div>
+			</div>
+
+			{/* Distribución de archivos */}
+			{entity.stats && (
+				<div className="space-y-2">
+					<div className="text-xs font-medium">Distribución</div>
+					<div className="flex justify-between text-xs bg-muted/30 rounded p-2">
+						<span>📁 {entity.stats.folderCount || 0}</span>
+						<span>📄 {entity.stats.totalItems ? entity.stats.totalItems - (entity.stats.folderCount || 0) : 0}</span>
 					</div>
+					<Progress
+						value={entity.stats?.totalItems ? ((entity.stats.folderCount || 0) / entity.stats.totalItems) * 100 : 0}
+						className="h-1"
+					/>
+				</div>
+			)}
 
-					{/* Distribución por tipo */}
-					{entity.stats && (
-						<div className="space-y-2">
-							<div className="flex justify-between text-xs">
-								<span>Carpetas: {entity.stats.folderCount || 0}</span>
-								<span>
-									Archivos: {entity.stats.totalItems ? entity.stats.totalItems - (entity.stats.folderCount || 0) : 0}
-								</span>
-							</div>
-							<Progress
-								value={entity.stats?.totalItems ? ((entity.stats.folderCount || 0) / entity.stats.totalItems) * 100 : 0}
-								className="h-2"
-							/>
+			{/* Información de la ruta */}
+			<div className="space-y-1">
+				<div className="text-xs font-medium">Ubicación</div>
+				<div className="flex items-center gap-1 text-xs bg-muted/30 rounded p-2">
+					<Home className="h-3 w-3" />
+					<span className="truncate" title={entity.path}>{entity.path}</span>
+				</div>
+			</div>
+
+			{/* Sección de favoritos compacta */}
+			<FavoritesGrid folderId={entity.id} />
+
+			{/* Acciones principales */}
+			<div className="space-y-1">
+				<div className="text-xs font-medium">Acciones</div>
+				<div className="flex flex-wrap gap-1">
+					<Button variant="outline" size="sm" className="h-6 text-xs" onClick={() => handleAction('open')}>
+						<FolderOpen className="h-3 w-3 mr-1" />
+						Abrir
+					</Button>
+					<Button variant="outline" size="sm" className="h-6 text-xs" onClick={() => handleAction('refresh')}>
+						<RefreshCw className="h-3 w-3 mr-1" />
+						Recargar
+					</Button>
+					<Button variant="outline" size="sm" className="h-6 text-xs" onClick={() => handleAction('upload')}>
+						<Upload className="h-3 w-3 mr-1" />
+						Subir
+					</Button>
+				</div>
+			</div>
+
+			{/* Metadatos esenciales */}
+			<div className="space-y-1">
+				<div className="text-xs font-medium">Detalles</div>
+				<div className="space-y-1 text-xs">
+					<div className="flex justify-between">
+						<span className="text-muted-foreground">Tipo:</span>
+						<span>Carpeta del sistema</span>
+					</div>
+					{entity.createdAt && (
+						<div className="flex justify-between">
+							<span className="text-muted-foreground">Creada:</span>
+							<span>{new Date(entity.createdAt).toLocaleDateString()}</span>
 						</div>
 					)}
-				</CardContent>
-			</Card>
+					{entity.updatedAt && (
+						<div className="flex justify-between">
+							<span className="text-muted-foreground">Modificada:</span>
+							<span>{new Date(entity.updatedAt).toLocaleDateString()}</span>
+						</div>
+					)}
+				</div>
+			</div>
 
-			{/* Navegación de breadcrumb */}
-			<FolderBreadcrumb entity={entity} onNavigate={handleAction} />
-
-			{/* Metadatos */}
-			<FolderMetadata entity={entity} editable={true} />
-
-			{/* Toolbar de acciones */}
-			<FolderToolbar entity={entity} onAction={handleAction} />
+			{/* Permisos */}
+			<div className="text-xs bg-green-50 text-green-700 rounded p-2">
+				Permisos: ✓ Lectura ✓ Escritura ✓ Ejecución
+			</div>
 		</div>
 	);
 });
@@ -136,10 +187,10 @@ export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function 
 	}
 
 	const sizeClasses = {
-		sm: 'h-32',
-		md: 'h-48',
-		lg: 'h-64',
-		xl: 'h-80',
+		sm: 'h-20',
+		md: 'h-32',
+		lg: 'h-48',
+		xl: 'h-64',
 	};
 
 	// Mock data - en producción vendría del store
@@ -171,38 +222,36 @@ export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function 
 
 	return (
 		<Card className="overflow-hidden">
-			<CardHeader className="pb-2">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<FolderOpen className="h-4 w-4 text-primary" />
-						<CardTitle className="text-sm truncate">{entity.name}</CardTitle>
+			<CardContent className="p-2">
+				<div className="flex items-center justify-between mb-2">
+					<div className="flex items-center gap-2 min-w-0 flex-1">
+						<FolderOpen className="h-3 w-3 text-primary flex-shrink-0" />
+						<span className="text-xs font-medium truncate">{entity.name}</span>
 					</div>
 					{showContent && (
 						<div className="flex items-center gap-1">
-							<Button variant="ghost" size="sm" onClick={() => setShowHidden(!showHidden)} className="h-6 w-6 p-0">
-								{showHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+							<Button variant="ghost" size="sm" onClick={() => setShowHidden(!showHidden)} className="h-5 w-5 p-0">
+								{showHidden ? <EyeOff className="h-2 w-2" /> : <Eye className="h-2 w-2" />}
 							</Button>
 							<Button
 								variant="ghost"
 								size="sm"
 								onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-								className="h-6 w-6 p-0"
+								className="h-5 w-5 p-0"
 							>
-								{viewMode === 'grid' ? <List className="h-3 w-3" /> : <Grid className="h-3 w-3" />}
+								{viewMode === 'grid' ? <List className="h-2 w-2" /> : <Grid className="h-2 w-2" />}
 							</Button>
 						</div>
 					)}
 				</div>
-			</CardHeader>
-			<CardContent className="p-0">
 				{showContent ? (
-					<ScrollArea className={cn('p-3', sizeClasses[size])}>
+					<ScrollArea className={cn('px-1', sizeClasses[size])}>
 						{viewMode === 'grid' ? (
-							<div className="grid grid-cols-2 gap-2">
+							<div className="grid grid-cols-3 gap-1">
 								{filteredContent.map((item) => (
 									<div
 										key={item.id}
-										className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+										className="flex flex-col items-center p-1 rounded-sm hover:bg-muted/50 cursor-pointer transition-colors"
 										onClick={() => onAction?.('navigate', { path: item.name })}
 										onKeyDown={(e) => {
 											if (e.key === 'Enter' || e.key === ' ') {
@@ -215,17 +264,17 @@ export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function 
 										aria-label={`Abrir ${item.name}`}
 									>
 										{item.type === 'folder' ? (
-											<Folder className="h-8 w-8 text-primary mb-1" />
+											<Folder className="h-4 w-4 text-primary mb-1" />
 										) : (
-											<div className="w-8 h-8 bg-muted rounded mb-1 flex items-center justify-center">
+											<div className="w-4 h-4 bg-muted rounded mb-1 flex items-center justify-center">
 												{item.thumbnailUrl ? (
 													<img src={item.thumbnailUrl} alt={item.name} className="w-full h-full object-cover rounded" />
 												) : (
-													<div className="w-2 h-2 bg-muted-foreground rounded" />
+													<div className="w-1 h-1 bg-muted-foreground rounded" />
 												)}
 											</div>
 										)}
-										<span className="text-xs text-center truncate w-full">{item.name}</span>
+										<span className="text-[10px] text-center truncate w-full leading-3">{item.name}</span>
 									</div>
 								))}
 							</div>
@@ -234,7 +283,7 @@ export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function 
 								{filteredContent.map((item) => (
 									<div
 										key={item.id}
-										className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+										className="flex items-center gap-2 p-1 rounded-sm hover:bg-muted/50 cursor-pointer transition-colors"
 										onClick={() => onAction?.('navigate', { path: item.name })}
 										onKeyDown={(e) => {
 											if (e.key === 'Enter' || e.key === ' ') {
@@ -247,34 +296,34 @@ export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function 
 										aria-label={`Abrir ${item.name}`}
 									>
 										{item.type === 'folder' ? (
-											<Folder className="h-4 w-4 text-primary flex-shrink-0" />
+											<Folder className="h-3 w-3 text-primary flex-shrink-0" />
 										) : (
-											<div className="w-4 h-4 bg-muted rounded flex-shrink-0" />
+											<div className="w-3 h-3 bg-muted rounded flex-shrink-0" />
 										)}
 										<div className="flex-1 min-w-0">
-											<p className="text-sm truncate">{item.name}</p>
-											<p className="text-xs text-muted-foreground">
+											<p className="text-xs truncate">{item.name}</p>
+											<p className="text-[10px] text-muted-foreground leading-3">
 												{item.size ? formatBytes(item.size) : 'Carpeta'} • {item.modifiedAt.toLocaleDateString()}
 											</p>
 										</div>
-										<ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+										<ArrowRight className="h-2 w-2 text-muted-foreground flex-shrink-0" />
 									</div>
 								))}
 							</div>
 						)}
 
 						{filteredContent.length === 0 && (
-							<div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-								<Folder className="h-8 w-8 mb-2" />
-								<p className="text-sm">Carpeta vacía</p>
+							<div className="flex flex-col items-center justify-center h-16 text-muted-foreground">
+								<Folder className="h-4 w-4 mb-1" />
+								<p className="text-xs">Carpeta vacía</p>
 							</div>
 						)}
 					</ScrollArea>
 				) : (
 					<div className={cn('flex items-center justify-center bg-muted/20', sizeClasses[size])}>
 						<div className="text-center">
-							<FolderOpen className="h-12 w-12 text-primary mx-auto mb-2" />
-							<p className="text-sm text-muted-foreground">{entity.stats?.totalItems || 0} elementos</p>
+							<FolderOpen className="h-6 w-6 text-primary mx-auto mb-1" />
+							<p className="text-xs text-muted-foreground">{entity.stats?.totalItems || 0} elementos</p>
 						</div>
 					</div>
 				)}
@@ -291,19 +340,19 @@ const FolderBreadcrumb = memo<{ entity: FolderWithStats; onNavigate: (action: st
 
 		return (
 			<Card>
-				<CardContent className="p-3">
-					<div className="flex items-center gap-1 text-sm">
+				<CardContent className="p-2">
+					<div className="flex items-center gap-1 text-xs">
 						<Button
 							variant="ghost"
 							size="sm"
 							onClick={() => onNavigate('navigate', { path: '/' })}
-							className="h-6 px-2"
+							className="h-5 px-1"
 						>
-							<Home className="h-3 w-3" />
+							<Home className="h-2 w-2" />
 						</Button>
 						{pathSegments.map((segment: string, index: number) => (
-							<div key={index} className="flex items-center gap-1">
-								<ChevronRight className="h-3 w-3 text-muted-foreground" />
+							<div key={`segment-${index}`} className="flex items-center gap-1">
+								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 								<Button
 									variant="ghost"
 									size="sm"
@@ -311,7 +360,7 @@ const FolderBreadcrumb = memo<{ entity: FolderWithStats; onNavigate: (action: st
 										const path = `/${pathSegments.slice(0, index + 1).join('/')}`;
 										onNavigate('navigate', { path });
 									}}
-									className="h-6 px-2 text-xs"
+									className="h-5 px-1 text-[10px]"
 									disabled={index === pathSegments.length - 1}
 								>
 									{segment}
@@ -325,6 +374,126 @@ const FolderBreadcrumb = memo<{ entity: FolderWithStats; onNavigate: (action: st
 	}
 );
 
+// Componente de grilla de archivos favoritos
+const FavoritesGrid = memo<{ folderId: string }>(function FavoritesGrid() {
+	// Buscar favoritos que tengan entityType como 'folder' y entityId como folderId
+	// o mejor aún, buscar archivos favoritos que estén dentro de esta carpeta
+	const { data: favoritesResponse, isLoading } = useFavorites({
+		limit: 4,
+		sortBy: 'addedAt',
+		sortOrder: 'desc',
+	});
+
+	// Filtrar favoritos relevantes para esta carpeta
+	// En un escenario real, necesitaríamos una API específica para obtener favoritos de una carpeta
+	const favorites = favoritesResponse?.data || [];
+
+	if (isLoading) {
+		return (
+			<div className="space-y-1">
+				<div className="text-xs font-medium">Favoritos</div>
+				<div className="text-xs text-muted-foreground bg-muted/30 rounded p-2">
+					Cargando favoritos...
+				</div>
+			</div>
+		);
+	}
+
+	if (!favorites.length) {
+		return (
+			<div className="space-y-1">
+				<div className="text-xs font-medium flex items-center gap-1">
+					<Star className="h-3 w-3" />
+					Favoritos
+				</div>
+				<div className="text-xs text-muted-foreground bg-muted/30 rounded p-2">
+					Sin favoritos
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-1">
+			<div className="text-xs font-medium flex items-center gap-1">
+				<Star className="h-3 w-3 text-yellow-500" />
+				Favoritos ({favorites.length})
+			</div>
+			<div className="grid grid-cols-2 gap-1">
+				{favorites.slice(0, 4).map((favorite) => (
+					<div
+						key={favorite.id}
+						className="bg-muted/30 rounded p-1 text-xs truncate hover:bg-muted/50 cursor-pointer transition-colors"
+						title={favorite.entityId}
+					>
+						{favorite.entityId}
+					</div>
+				))}
+			</div>
+		</div>
+	);
+});
+
+// Componente de botones de acción para carpeta
+const FolderActionButtons = memo<{ folderId: string; onRefresh?: () => void }>(function FolderActionButtons({
+	folderId,
+	onRefresh,
+}) {
+	const [isReindexing, setIsReindexing] = useState(false);
+	const reindexFolderMutation = useReindexFolder();
+
+	const handleReindex = useCallback(async () => {
+		if (isReindexing || !folderId) return;
+
+		setIsReindexing(true);
+		try {
+			toastService.info('Iniciando reindexado de carpeta...');
+			await reindexFolderMutation.mutateAsync(folderId);
+			toastService.success('Carpeta reindexada correctamente');
+			onRefresh?.();
+		} catch (error) {
+			console.error('Error al reindexar carpeta:', error);
+			toastService.error('Error al reindexar la carpeta');
+		} finally {
+			setIsReindexing(false);
+		}
+	}, [folderId, isReindexing, reindexFolderMutation, onRefresh]);
+
+	const handleReload = useCallback(async () => {
+		try {
+			toastService.info('Recargando carpeta...');
+			// Forzar recarga de la carpeta
+			onRefresh?.();
+			// Simular una pequeña pausa para dar feedback visual
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			toastService.success('Carpeta recargada');
+		} catch (error) {
+			console.error('Error al recargar carpeta:', error);
+			toastService.error('Error al recargar la carpeta');
+		}
+	}, [onRefresh]);
+
+	return (
+		<Card>
+			<CardContent className="p-2">
+				<div className="flex items-center gap-2 mb-2">
+					<span className="text-xs font-medium">Acciones</span>
+				</div>
+				<div className="grid grid-cols-2 gap-1">
+					<Button variant="outline" size="sm" onClick={handleReindex} disabled={isReindexing} className="justify-start h-6 text-xs">
+						<RefreshCw className={`h-2 w-2 mr-1 ${isReindexing ? 'animate-spin' : ''}`} />
+						{isReindexing ? 'Reindexando...' : 'Reindexar'}
+					</Button>
+					<Button variant="outline" size="sm" onClick={handleReload} className="justify-start h-6 text-xs">
+						<RotateCcw className="h-2 w-2 mr-1" />
+						Recargar
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+});
+
 // Toolbar específico para carpetas
 export const FolderToolbar = memo<EntityToolbarProps<FolderWithStats>>(function FolderToolbar({ entity, onAction }) {
 	const handleAction = useCallback(
@@ -336,63 +505,63 @@ export const FolderToolbar = memo<EntityToolbarProps<FolderWithStats>>(function 
 
 	return (
 		<Card>
-			<CardHeader className="pb-2">
-				<CardTitle className="text-sm">Acciones</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<div className="grid grid-cols-2 gap-2">
+			<CardContent className="p-2">
+				<div className="flex items-center gap-2 mb-2">
+					<span className="text-xs font-medium">Opciones</span>
+				</div>
+				<div className="grid grid-cols-2 gap-1 text-xs">
 					{/* Acciones primarias */}
-					<Button variant="default" size="sm" onClick={() => handleAction('open')} className="justify-start">
-						<FolderOpen className="h-4 w-4 mr-2" />
+					<Button variant="default" size="sm" onClick={() => handleAction('open')} className="justify-start h-6">
+						<FolderOpen className="h-2 w-2 mr-1" />
 						Abrir
 					</Button>
-					<Button variant="default" size="sm" onClick={() => handleAction('new-folder')} className="justify-start">
-						<Plus className="h-4 w-4 mr-2" />
-						Nueva carpeta
+					<Button variant="default" size="sm" onClick={() => handleAction('new-folder')} className="justify-start h-6">
+						<Plus className="h-2 w-2 mr-1" />
+						Nueva
 					</Button>
 
 					{/* Gestión de archivos */}
-					<Button variant="outline" size="sm" onClick={() => handleAction('upload')} className="justify-start">
-						<Upload className="h-4 w-4 mr-2" />
-						Subir archivos
+					<Button variant="outline" size="sm" onClick={() => handleAction('upload')} className="justify-start h-6">
+						<Upload className="h-2 w-2 mr-1" />
+						Subir
 					</Button>
-					<Button variant="outline" size="sm" onClick={() => handleAction('search')} className="justify-start">
-						<Search className="h-4 w-4 mr-2" />
+					<Button variant="outline" size="sm" onClick={() => handleAction('search')} className="justify-start h-6">
+						<Search className="h-2 w-2 mr-1" />
 						Buscar
 					</Button>
 
 					{/* Acciones secundarias */}
-					<Button variant="outline" size="sm" onClick={() => handleAction('rename')} className="justify-start">
-						<Edit className="h-4 w-4 mr-2" />
+					<Button variant="outline" size="sm" onClick={() => handleAction('rename')} className="justify-start h-6">
+						<Edit className="h-2 w-2 mr-1" />
 						Renombrar
 					</Button>
-					<Button variant="outline" size="sm" onClick={() => handleAction('share')} className="justify-start">
-						<Share className="h-4 w-4 mr-2" />
+					<Button variant="outline" size="sm" onClick={() => handleAction('share')} className="justify-start h-6">
+						<Share className="h-2 w-2 mr-1" />
 						Compartir
-					</Button>
-					<Button variant="outline" size="sm" onClick={() => handleAction('download')} className="justify-start">
-						<Download className="h-4 w-4 mr-2" />
-						Descargar
 					</Button>
 
 					{/* Más opciones */}
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="sm" className="justify-start">
-								<MoreHorizontal className="h-4 w-4 mr-2" />
-								Más
+							<Button variant="outline" size="sm" className="justify-start h-6 col-span-2">
+								<MoreHorizontal className="h-2 w-2 mr-1" />
+								Más opciones
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
+							<DropdownMenuItem onClick={() => handleAction('download')}>
+								<Download className="h-3 w-3 mr-2" />
+								Descargar
+							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => handleAction('compress')}>
-								<Archive className="h-4 w-4 mr-2" />
+								<Archive className="h-3 w-3 mr-2" />
 								Comprimir
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => handleAction('copy-path')}>Copiar ruta</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => handleAction('properties')}>Propiedades</DropdownMenuItem>
 							<Separator />
 							<DropdownMenuItem onClick={() => handleAction('delete')} className="text-destructive">
-								<Trash2 className="h-4 w-4 mr-2" />
+								<Trash2 className="h-3 w-3 mr-2" />
 								Eliminar
 							</DropdownMenuItem>
 						</DropdownMenuContent>
@@ -430,6 +599,46 @@ export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(functio
 			value: entity.updatedAt ? new Date(entity.updatedAt).toLocaleDateString() : 'N/A',
 			category: 'basic',
 		},
+		{
+			label: 'Emoji',
+			value: entity.emoji || '📁',
+			category: 'basic',
+		},
+		{
+			label: 'Color',
+			value: entity.color || '#3b82f6',
+			category: 'basic',
+		},
+		{
+			label: 'Es favorita',
+			value: entity.isFavorite ? 'Sí' : 'No',
+			category: 'basic',
+		},
+		{
+			label: 'Auto-reindexar',
+			value: entity.autoReindex ? 'Habilitado' : 'Deshabilitado',
+			category: 'basic',
+		},
+		{
+			label: 'Última indexación',
+			value: entity.lastIndexed ? new Date(entity.lastIndexed).toLocaleDateString() : 'Nunca',
+			category: 'basic',
+		},
+		{
+			label: 'ID Padre',
+			value: entity.parentId || 'Carpeta raíz',
+			category: 'advanced',
+		},
+		{
+			label: 'ID Preset',
+			value: entity.presetId || 'Sin preset',
+			category: 'advanced',
+		},
+		{
+			label: 'Imagen destacada',
+			value: entity.featuredImage ? 'Configurada' : 'Sin imagen',
+			category: 'advanced',
+		},
 	];
 
 	const stats = entity.stats;
@@ -447,66 +656,126 @@ export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(functio
 				},
 				{
 					label: 'Archivos',
-					value: stats.totalItems?.toString() || '0',
+					value: (stats.totalItems - (stats.folderCount || 0))?.toString() || '0',
 					category: 'stats',
 				},
 				{
-					label: 'Tamaño total',
+					label: 'Imágenes',
+					value: stats.imageCount?.toString() || '0',
+					category: 'stats',
+				},
+				{
+					label: 'Videos',
+					value: stats.videoCount?.toString() || '0',
+					category: 'stats',
+				},
+				{
+					label: 'Documentos',
+					value: stats.documentCount?.toString() || '0',
+					category: 'stats',
+				},
+				{
+					label: 'Tamaño total (DB)',
 					value: formatBytes(entity.totalSize || 0),
+					category: 'stats',
+				},
+				{
+					label: 'Total archivos (DB)',
+					value: entity.totalFiles?.toString() || '0',
+					category: 'stats',
+				},
+				{
+					label: 'Profundidad jerarquía',
+					value: stats.hierarchyDepth?.toString() || '0',
+					category: 'stats',
+				},
+				{
+					label: 'Descendientes totales',
+					value: stats.totalDescendants?.toString() || '0',
+					category: 'stats',
+				},
+				{
+					label: 'Hijos directos',
+					value: stats.directChildren?.toString() || '0',
+					category: 'stats',
+				},
+				{
+					label: 'Diversidad contenido',
+					value: `${stats.contentDiversity?.toFixed(1) || '0'}%`,
+					category: 'stats',
+				},
+				{
+					label: 'Puntuación organización',
+					value: `${stats.organizationScore?.toFixed(1) || '0'}%`,
+					category: 'stats',
+				},
+				{
+					label: 'Frecuencia acceso',
+					value: `${stats.accessFrequency?.toFixed(1) || '0'}%`,
+					category: 'stats',
+				},
+				{
+					label: 'Última actividad',
+					value: stats.lastActivity ? new Date(stats.lastActivity).toLocaleDateString() : 'Sin actividad',
 					category: 'stats',
 				},
 			]
 		: [];
 
 	const basicMetadata = metadata.filter((m) => m.category === 'basic');
+	const advancedMetadata = metadata.filter((m) => m.category === 'advanced');
 
 	return (
-		<div className="space-y-4">
-			{/* Información básica */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm">Información básica</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-2">
-					{basicMetadata.map((meta) => (
-						<div key={meta.label} className="space-y-1">
-							<span className="text-xs text-muted-foreground">{meta.label}:</span>
-							<p className="text-sm font-medium break-all">{meta.value}</p>
+		<Card>
+			<CardContent className="p-2">
+				<div className="flex items-center gap-2 mb-2">
+					<span className="text-xs font-medium">Información</span>
+					{entity.emoji && <span className="text-sm">{entity.emoji}</span>}
+				</div>
+
+				{/* Información básica compacta */}
+				<div className="space-y-1 mb-2">
+					{basicMetadata.slice(0, 4).map((meta) => (
+						<div key={meta.label} className="flex justify-between text-xs">
+							<span className="text-muted-foreground truncate">{meta.label}:</span>
+							{meta.label === 'Color' ? (
+								<div className="flex items-center gap-1">
+									<div className="w-2 h-2 rounded border" style={{ backgroundColor: meta.value }} />
+									<span className="text-[10px]">{meta.value}</span>
+								</div>
+							) : meta.label === 'Es favorita' ? (
+								<div className="flex items-center gap-1">
+									<span>{meta.value}</span>
+									{entity.isFavorite && <span className="text-yellow-500 text-xs">⭐</span>}
+								</div>
+							) : (
+								<span className="font-medium truncate max-w-[120px]">{meta.value}</span>
+							)}
 						</div>
 					))}
-				</CardContent>
-			</Card>
+				</div>
 
-			{/* Estadísticas detalladas */}
-			{statisticsMetadata.length > 0 && (
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Estadísticas detalladas</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-2">
-						{statisticsMetadata.map((meta) => (
-							<div key={meta.label} className="flex justify-between text-sm">
-								<span className="text-muted-foreground">{meta.label}:</span>
-								<span className="font-medium">{meta.value}</span>
-							</div>
-						))}
-					</CardContent>
-				</Card>
-			)}
-
-			{/* Permisos y acceso */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm">Permisos</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="text-sm text-muted-foreground">
-						<p>Lectura: ✓ Permitido</p>
-						<p>Escritura: ✓ Permitido</p>
-						<p>Ejecución: ✓ Permitido</p>
+				{/* Estadísticas más importantes en forma compacta */}
+				{statisticsMetadata.length > 0 && (
+					<div className="border-t pt-2">
+						<div className="grid grid-cols-2 gap-1 text-xs">
+							{statisticsMetadata.slice(0, 6).map((meta) => (
+								<div key={meta.label} className="flex flex-col">
+									<span className="text-muted-foreground text-[10px] truncate">{meta.label}:</span>
+									<span className="font-medium text-xs">{meta.value}</span>
+								</div>
+							))}
+						</div>
 					</div>
-				</CardContent>
-			</Card>
-		</div>
+				)}
+
+				{/* Permisos compactos */}
+				<div className="border-t pt-2 mt-2">
+					<div className="text-[10px] text-muted-foreground">
+						<span>Permisos: ✓ Lectura ✓ Escritura ✓ Ejecución</span>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
 	);
 });
