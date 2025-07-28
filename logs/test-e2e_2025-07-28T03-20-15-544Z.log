@@ -1,0 +1,7 @@
+Comando: bunx playwright test --run src/components/features/file-browser
+Fecha: 2025-07-28T03:20:15.545Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+error: unknown option '--run'

@@ -3,16 +3,20 @@ import {
 	BookImage,
 	Copy,
 	Download,
+	Edit3,
 	ExternalLink,
+	FolderOpen,
 	Heart,
 	HeartOff,
 	Loader2,
+	Move3D,
 	Star,
 	Tag,
 	Trash,
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
+import { useContextMenuNavigation } from '@/lib/keyboard';
 import { Separator } from '@/components/ui/separator';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -31,6 +35,36 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 	const { loadingStates, loadEntityData, handleOpenChange } = useEntityLoader();
 	// Estado para controlar la acción en proceso
 	const [processingAction, setProcessingAction] = useState<ContextMenuAction | null>(null);
+
+	// Definir las acciones del menú en orden
+	const menuActions: Array<{ action: ContextMenuAction; label: string; icon: React.ReactNode; destructive?: boolean }> = [
+		{ action: 'preview', label: 'Vista previa', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
+		{ action: 'favorite-toggle', label: 'isFavorite' in file && file.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos', icon: 'isFavorite' in file && file.isFavorite ? <HeartOff className="mr-2 h-4 w-4" /> : <Heart className="mr-2 h-4 w-4" /> },
+		{ action: 'mark-toggle', label: 'Marcar/Desmarcar', icon: <Star className="mr-2 h-4 w-4" /> },
+		{ action: 'open', label: 'Abrir ubicación', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
+		{ action: 'download', label: 'Descargar', icon: <Download className="mr-2 h-4 w-4" /> },
+		{ action: 'copy', label: 'Copiar al portapapeles', icon: <Copy className="mr-2 h-4 w-4" /> },
+		{ action: 'paste', label: 'Pegar', icon: <Copy className="mr-2 h-4 w-4" /> },
+		{ action: 'rename', label: 'Renombrar', icon: <Edit3 className="mr-2 h-4 w-4" /> },
+		{ action: 'move', label: 'Mover', icon: <Move3D className="mr-2 h-4 w-4" /> },
+		{ action: 'open-in-explorer', label: 'Ver en explorador', icon: <FolderOpen className="mr-2 h-4 w-4" /> },
+		{ action: 'copy-path', label: 'Copiar ruta', icon: <Copy className="mr-2 h-4 w-4" /> },
+		{ action: 'delete', label: 'Eliminar', icon: <Trash className="mr-2 h-4 w-4" />, destructive: true },
+	];
+
+	// Configurar navegación por teclado
+	const { selectedIndex, getItemProps } = useContextMenuNavigation(menuActions.length, {
+		enabled: true,
+		onExecute: (index) => {
+			const menuAction = menuActions[index];
+			if (menuAction) {
+				handleAction(menuAction.action);
+			}
+		},
+		onClose: () => {
+			// El menú se cerrará automáticamente cuando se ejecute una acción
+		},
+	});
 
 	// Obtener datos de los stores - Ahora esto solo ocurre una vez por renderizado del GridView
 	// en lugar de una vez por cada elemento de la cuadrícula
@@ -52,57 +86,27 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 	const menuItemStyle =
 		'flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer';
 
-	// Ahora renderizamos un menú contextual personalizado
+	// Renderizar menú contextual con navegación por teclado
 	return (
 		<div className="w-64 py-1">
-			{/* Acciones principales */}
-			<button
-				type="button"
-				className={menuItemStyle}
-				onClick={() => handleAction('preview')}
-				disabled={processingAction === 'preview'}
-			>
-				{processingAction === 'preview' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : (
-					<ExternalLink className="mr-2 h-4 w-4" />
-				)}
-				<span>Vista previa</span>
-			</button>
-
-			<Separator className="my-1" />
-
-			{/* Acciones de favoritos y selección */}
-			<button
-				type="button"
-				className={menuItemStyle}
-				onClick={() => handleAction('favorite-toggle')}
-				disabled={processingAction === 'favorite-toggle'}
-			>
-				{processingAction === 'favorite-toggle' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : 'isFavorite' in file && file.isFavorite ? (
-					<HeartOff className="mr-2 h-4 w-4" />
-				) : (
-					<Heart className="mr-2 h-4 w-4" />
-				)}
-				<span>{'isFavorite' in file && file.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}</span>
-			</button>
-
-			{/* Resto del menú contextual sin cambios */}
-			<button
-				type="button"
-				className={menuItemStyle}
-				onClick={() => handleAction('mark-toggle')}
-				disabled={processingAction === 'mark-toggle'}
-			>
-				{processingAction === 'mark-toggle' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : (
-					<Star className="mr-2 h-4 w-4" />
-				)}
-				<span>Marcar/Desmarcar</span>
-			</button>
+			{/* Acciones principales con navegación por teclado */}
+			{menuActions.slice(0, 3).map((menuAction, index) => (
+				<button
+					key={menuAction.action}
+					type="button"
+					className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${selectedIndex === index ? 'bg-accent text-accent-foreground' : ''
+						}`}
+					disabled={processingAction === menuAction.action}
+					{...getItemProps(index)}
+				>
+					{processingAction === menuAction.action ? (
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					) : (
+						menuAction.icon
+					)}
+					<span>{menuAction.label}</span>
+				</button>
+			))}
 
 			<Separator className="my-1" />
 
@@ -167,79 +171,27 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 
 			<Separator className="my-1" />
 
-			{/* Acciones de archivo */}
-			<button
-				type="button"
-				className={menuItemStyle}
-				onClick={() => handleAction('open')}
-				disabled={processingAction === 'open'}
-			>
-				{processingAction === 'open' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : (
-					<ExternalLink className="mr-2 h-4 w-4" />
-				)}
-				<span>Abrir ubicación</span>
-			</button>
-
-			<button
-				type="button"
-				className={menuItemStyle}
-				onClick={() => handleAction('download')}
-				disabled={processingAction === 'download'}
-			>
-				{processingAction === 'download' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : (
-					<Download className="mr-2 h-4 w-4" />
-				)}
-				<span>Descargar</span>
-			</button>
-
-			<button
-				type="button"
-				className={menuItemStyle}
-				onClick={() => handleAction('copy')}
-				disabled={processingAction === 'copy'}
-			>
-				{processingAction === 'copy' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : (
-					<Copy className="mr-2 h-4 w-4" />
-				)}
-				<span>Copiar al portapapeles</span>
-			</button>
-
-			<button
-				type="button"
-				className={menuItemStyle}
-				onClick={() => handleAction('copy-path')}
-				disabled={processingAction === 'copy-path'}
-			>
-				{processingAction === 'copy-path' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : (
-					<Copy className="mr-2 h-4 w-4" />
-				)}
-				<span>Copiar ruta</span>
-			</button>
-
-			<Separator className="my-1" />
-
-			{/* Acciones destructivas */}
-			<button
-				type="button"
-				className={`${menuItemStyle} text-red-600 hover:text-red-600`}
-				onClick={() => handleAction('delete')}
-				disabled={processingAction === 'delete'}
-			>
-				{processingAction === 'delete' ? (
-					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-				) : (
-					<Trash className="mr-2 h-4 w-4" />
-				)}
-				<span>Eliminar</span>
-			</button>
+			{/* Acciones de archivo con navegación por teclado */}
+			{menuActions.slice(3).map((menuAction, index) => {
+				const actualIndex = index + 3;
+				return (
+					<button
+						key={menuAction.action}
+						type="button"
+						className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${selectedIndex === actualIndex ? 'bg-accent text-accent-foreground' : ''
+							}`}
+						disabled={processingAction === menuAction.action}
+						{...getItemProps(actualIndex)}
+					>
+						{processingAction === menuAction.action ? (
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						) : (
+							menuAction.icon
+						)}
+						<span>{menuAction.label}</span>
+					</button>
+				);
+			})}
 		</div>
 	);
 });

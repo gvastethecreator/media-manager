@@ -11,6 +11,8 @@ export * from './album/index';
 // Entidades de contenido
 export * from './audio/index';
 export * from './character/index';
+// Servicios del sistema
+export * from './clipboard/index';
 // Entidades organizacionales
 export * from './collection/index';
 export * from './concept/index';

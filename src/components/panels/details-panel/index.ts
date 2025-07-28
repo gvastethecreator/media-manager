@@ -1,5 +1,5 @@
 // Exportar el componente principal para uso externo
-export { DetailsPanel } from './details-panel';
+export { DetailsPanelV2 } from './details-panel';
 
 // Componentes de demostración
 export { DetailsPanelShowcase } from './details-panel-showcase';
