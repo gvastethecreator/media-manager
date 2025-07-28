@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "d6cdba92-a548-464c-aa43-5b43d95ec773",
+  "id": "b55b686f-a7c1-4ff7-afb2-82c81b675391",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Activity": {
@@ -93,7 +93,50 @@
           "default": "(CURRENT_TIMESTAMP)"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "Activity_type_idx": {
+          "name": "Activity_type_idx",
+          "columns": [
+            "type"
+          ],
+          "isUnique": false
+        },
+        "Activity_entityType_idx": {
+          "name": "Activity_entityType_idx",
+          "columns": [
+            "entityType"
+          ],
+          "isUnique": false
+        },
+        "Activity_entityId_idx": {
+          "name": "Activity_entityId_idx",
+          "columns": [
+            "entityId"
+          ],
+          "isUnique": false
+        },
+        "Activity_userId_idx": {
+          "name": "Activity_userId_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        },
+        "Activity_action_idx": {
+          "name": "Activity_action_idx",
+          "columns": [
+            "action"
+          ],
+          "isUnique": false
+        },
+        "Activity_createdAt_idx": {
+          "name": "Activity_createdAt_idx",
+          "columns": [
+            "createdAt"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -1996,6 +2039,194 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "_GroupToAlbum": {
+      "name": "_GroupToAlbum",
+      "columns": {
+        "groupId": {
+          "name": "groupId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "albumId": {
+          "name": "albumId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "_GroupToAlbum_groupId_albumId_unique": {
+          "name": "_GroupToAlbum_groupId_albumId_unique",
+          "columns": [
+            "groupId",
+            "albumId"
+          ],
+          "isUnique": true
+        },
+        "_GroupToAlbum_groupId_idx": {
+          "name": "_GroupToAlbum_groupId_idx",
+          "columns": [
+            "groupId"
+          ],
+          "isUnique": false
+        },
+        "_GroupToAlbum_albumId_idx": {
+          "name": "_GroupToAlbum_albumId_idx",
+          "columns": [
+            "albumId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "_GroupToImage": {
+      "name": "_GroupToImage",
+      "columns": {
+        "groupId": {
+          "name": "groupId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "imageId": {
+          "name": "imageId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "_GroupToImage_groupId_imageId_unique": {
+          "name": "_GroupToImage_groupId_imageId_unique",
+          "columns": [
+            "groupId",
+            "imageId"
+          ],
+          "isUnique": true
+        },
+        "_GroupToImage_groupId_idx": {
+          "name": "_GroupToImage_groupId_idx",
+          "columns": [
+            "groupId"
+          ],
+          "isUnique": false
+        },
+        "_GroupToImage_imageId_idx": {
+          "name": "_GroupToImage_imageId_idx",
+          "columns": [
+            "imageId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "_GroupToTag": {
+      "name": "_GroupToTag",
+      "columns": {
+        "groupId": {
+          "name": "groupId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tagId": {
+          "name": "tagId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "_GroupToTag_groupId_tagId_unique": {
+          "name": "_GroupToTag_groupId_tagId_unique",
+          "columns": [
+            "groupId",
+            "tagId"
+          ],
+          "isUnique": true
+        },
+        "_GroupToTag_groupId_idx": {
+          "name": "_GroupToTag_groupId_idx",
+          "columns": [
+            "groupId"
+          ],
+          "isUnique": false
+        },
+        "_GroupToTag_tagId_idx": {
+          "name": "_GroupToTag_tagId_idx",
+          "columns": [
+            "tagId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "_GroupToVideo": {
+      "name": "_GroupToVideo",
+      "columns": {
+        "groupId": {
+          "name": "groupId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "videoId": {
+          "name": "videoId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "_GroupToVideo_groupId_videoId_unique": {
+          "name": "_GroupToVideo_groupId_videoId_unique",
+          "columns": [
+            "groupId",
+            "videoId"
+          ],
+          "isUnique": true
+        },
+        "_GroupToVideo_groupId_idx": {
+          "name": "_GroupToVideo_groupId_idx",
+          "columns": [
+            "groupId"
+          ],
+          "isUnique": false
+        },
+        "_GroupToVideo_videoId_idx": {
+          "name": "_GroupToVideo_videoId_idx",
+          "columns": [
+            "videoId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "Group": {
       "name": "Group",
       "columns": {
@@ -2395,16 +2626,16 @@
           "autoincrement": false,
           "default": 0
         },
-        "downloads": {
-          "name": "downloads",
+        "likes": {
+          "name": "likes",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": 0
         },
-        "likes": {
-          "name": "likes",
+        "downloads": {
+          "name": "downloads",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -2418,6 +2649,65 @@
           "notNull": true,
           "autoincrement": false,
           "default": 0
+        },
+        "rating": {
+          "name": "rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "ratingCount": {
+          "name": "ratingCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "lastViewed": {
+          "name": "lastViewed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastLiked": {
+          "name": "lastLiked",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastDownloaded": {
+          "name": "lastDownloaded",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastCommented": {
+          "name": "lastCommented",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastRated": {
+          "name": "lastRated",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
         },
         "updatedAt": {
           "name": "updatedAt",
@@ -2434,6 +2724,34 @@
             "imageId"
           ],
           "isUnique": true
+        },
+        "ImageStats_views_idx": {
+          "name": "ImageStats_views_idx",
+          "columns": [
+            "views"
+          ],
+          "isUnique": false
+        },
+        "ImageStats_likes_idx": {
+          "name": "ImageStats_likes_idx",
+          "columns": [
+            "likes"
+          ],
+          "isUnique": false
+        },
+        "ImageStats_downloads_idx": {
+          "name": "ImageStats_downloads_idx",
+          "columns": [
+            "downloads"
+          ],
+          "isUnique": false
+        },
+        "ImageStats_rating_idx": {
+          "name": "ImageStats_rating_idx",
+          "columns": [
+            "rating"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {},
@@ -2893,6 +3211,180 @@
         "depth": {
           "name": "depth",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "emoji": {
+          "name": "emoji",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "shortcut": {
+          "name": "shortcut",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "filePath": {
+          "name": "filePath",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "fileName": {
+          "name": "fileName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "fileSize": {
+          "name": "fileSize",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "sortBy": {
+          "name": "sortBy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "filters": {
+          "name": "filters",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "featuredImage": {
+          "name": "featuredImage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "validJson": {
+          "name": "validJson",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "schemaVersion": {
+          "name": "schemaVersion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "keys": {
+          "name": "keys",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "values": {
+          "name": "values",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "hasArrays": {
+          "name": "hasArrays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "hasObjects": {
+          "name": "hasObjects",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "encoding": {
+          "name": "encoding",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "compressed": {
+          "name": "compressed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "minified": {
+          "name": "minified",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "prettyPrinted": {
+          "name": "prettyPrinted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "parsedContent": {
+          "name": "parsedContent",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -4216,6 +4708,36 @@
           "notNull": true,
           "autoincrement": false
         },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'thumbnail'"
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'user'"
+        },
+        "width": {
+          "name": "width",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "height": {
+          "name": "height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
@@ -4223,6 +4745,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {
@@ -4244,6 +4773,20 @@
           "name": "UploadedImage_hash_idx",
           "columns": [
             "hash"
+          ],
+          "isUnique": false
+        },
+        "UploadedImage_type_idx": {
+          "name": "UploadedImage_type_idx",
+          "columns": [
+            "type"
+          ],
+          "isUnique": false
+        },
+        "UploadedImage_category_idx": {
+          "name": "UploadedImage_category_idx",
+          "columns": [
+            "category"
           ],
           "isUnique": false
         }
@@ -4988,379 +5531,6 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "WorldItem": {
-      "name": "WorldItem",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "emoji": {
-          "name": "emoji",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'🎯'"
-        },
-        "color": {
-          "name": "color",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'#3b82f6'"
-        },
-        "category": {
-          "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "isFavorite": {
-          "name": "isFavorite",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "rarity": {
-          "name": "rarity",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "weight": {
-          "name": "weight",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "materials": {
-          "name": "materials",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "origin": {
-          "name": "origin",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "properties": {
-          "name": "properties",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "uses": {
-          "name": "uses",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "history": {
-          "name": "history",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "featuredImage": {
-          "name": "featuredImage",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "parentId": {
-          "name": "parentId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "WorldItem_name_key": {
-          "name": "WorldItem_name_key",
-          "columns": [
-            "name"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "_GroupToAlbum": {
-      "name": "_GroupToAlbum",
-      "columns": {
-        "groupId": {
-          "name": "groupId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "albumId": {
-          "name": "albumId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "_GroupToAlbum_groupId_albumId_unique": {
-          "name": "_GroupToAlbum_groupId_albumId_unique",
-          "columns": [
-            "groupId",
-            "albumId"
-          ],
-          "isUnique": true
-        },
-        "_GroupToAlbum_groupId_idx": {
-          "name": "_GroupToAlbum_groupId_idx",
-          "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToAlbum_albumId_idx": {
-          "name": "_GroupToAlbum_albumId_idx",
-          "columns": [
-            "albumId"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "_GroupToImage": {
-      "name": "_GroupToImage",
-      "columns": {
-        "groupId": {
-          "name": "groupId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "imageId": {
-          "name": "imageId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "_GroupToImage_groupId_imageId_unique": {
-          "name": "_GroupToImage_groupId_imageId_unique",
-          "columns": [
-            "groupId",
-            "imageId"
-          ],
-          "isUnique": true
-        },
-        "_GroupToImage_groupId_idx": {
-          "name": "_GroupToImage_groupId_idx",
-          "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToImage_imageId_idx": {
-          "name": "_GroupToImage_imageId_idx",
-          "columns": [
-            "imageId"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "_GroupToTag": {
-      "name": "_GroupToTag",
-      "columns": {
-        "groupId": {
-          "name": "groupId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "tagId": {
-          "name": "tagId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "_GroupToTag_groupId_tagId_unique": {
-          "name": "_GroupToTag_groupId_tagId_unique",
-          "columns": [
-            "groupId",
-            "tagId"
-          ],
-          "isUnique": true
-        },
-        "_GroupToTag_groupId_idx": {
-          "name": "_GroupToTag_groupId_idx",
-          "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToTag_tagId_idx": {
-          "name": "_GroupToTag_tagId_idx",
-          "columns": [
-            "tagId"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "_GroupToVideo": {
-      "name": "_GroupToVideo",
-      "columns": {
-        "groupId": {
-          "name": "groupId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "videoId": {
-          "name": "videoId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "_GroupToVideo_groupId_videoId_unique": {
-          "name": "_GroupToVideo_groupId_videoId_unique",
-          "columns": [
-            "groupId",
-            "videoId"
-          ],
-          "isUnique": true
-        },
-        "_GroupToVideo_groupId_idx": {
-          "name": "_GroupToVideo_groupId_idx",
-          "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToVideo_videoId_idx": {
-          "name": "_GroupToVideo_videoId_idx",
-          "columns": [
-            "videoId"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
     "Workflow": {
       "name": "Workflow",
       "columns": {
@@ -5531,6 +5701,269 @@
       "indexes": {
         "Workflow_name_key": {
           "name": "Workflow_name_key",
+          "columns": [
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "WorldItem": {
+      "name": "WorldItem",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "emoji": {
+          "name": "emoji",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'🎯'"
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'#3b82f6'"
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "shortcut": {
+          "name": "shortcut",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subtype": {
+          "name": "subtype",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "isFavorite": {
+          "name": "isFavorite",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "isArchived": {
+          "name": "isArchived",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "totalImages": {
+          "name": "totalImages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalVideos": {
+          "name": "totalVideos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "rarity": {
+          "name": "rarity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "weight": {
+          "name": "weight",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "size": {
+          "name": "size",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "material": {
+          "name": "material",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "materials": {
+          "name": "materials",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "crafting": {
+          "name": "crafting",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "requirements": {
+          "name": "requirements",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "effects": {
+          "name": "effects",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "properties": {
+          "name": "properties",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "uses": {
+          "name": "uses",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "history": {
+          "name": "history",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lore": {
+          "name": "lore",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "sortBy": {
+          "name": "sortBy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "filters": {
+          "name": "filters",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "featuredImage": {
+          "name": "featuredImage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "parentId": {
+          "name": "parentId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "WorldItem_name_key": {
+          "name": "WorldItem_name_key",
           "columns": [
             "name"
           ],

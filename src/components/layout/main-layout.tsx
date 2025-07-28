@@ -15,9 +15,13 @@ import { useImageStore } from '@/store/entities/image';
 export const MainLayout = memo(function MainLayout() {
 	const location = useLocation();
 	const params = useParams<{ id: string }>();
-	const { isVisible } = useDetailsPanel();
+	const { isVisible, setVisible } = useDetailsPanel();
+
 	const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
-	const [isRightCollapsed, setIsRightCollapsed] = useState(!isVisible);
+	// Inicializar con false para coincidir con el valor por defecto del store (isVisible: true -> !isVisible = false)
+	// Esto evita problemas de hidratación con Zustand persist
+	const [isRightCollapsed, setIsRightCollapsed] = useState(false);
+
 	const [isLeftAnimating, setIsLeftAnimating] = useState(false);
 	const [isRightAnimating, setIsRightAnimating] = useState(false);
 
@@ -98,6 +102,8 @@ export const MainLayout = memo(function MainLayout() {
 
 	const handleRightPanelCollapse = (collapsed: boolean) => {
 		setIsRightCollapsed(collapsed);
+		// Sincronizar con el store del details panel
+		setVisible(!collapsed);
 	};
 
 	const toggleLeftPanel = () => {
@@ -121,9 +127,11 @@ export const MainLayout = memo(function MainLayout() {
 			if (isRightCollapsed) {
 				rightPanelRef.current.expand();
 				setIsRightCollapsed(false); // Actualizar estado inmediatamente
+				setVisible(true); // Sincronizar con el store
 			} else {
 				rightPanelRef.current.collapse();
 				setIsRightCollapsed(true); // Actualizar estado inmediatamente
+				setVisible(false); // Sincronizar con el store
 			}
 			// Desactivar animaciones después de completar
 			setTimeout(() => setIsRightAnimating(false), 350);
@@ -191,7 +199,6 @@ export const MainLayout = memo(function MainLayout() {
 					{!isRightCollapsed && (
 						<RightPanel
 							isCollapsed={isRightCollapsed}
-							onToggleCollapse={toggleRightPanel}
 							isAnimating={isRightAnimating}
 						/>
 					)}

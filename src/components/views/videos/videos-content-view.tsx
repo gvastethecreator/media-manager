@@ -32,6 +32,11 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	// Asegurar que el panel esté visible al cargar la vista
+	useEffect(() => {
+		setDetailsPanelVisible(true);
+	}, [setDetailsPanelVisible]);
+
 	// Obtener el video actual
 	const currentVideo = currentVideoId ? getVideo(currentVideoId) : null;
 
