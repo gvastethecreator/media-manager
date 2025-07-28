@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useImageResources } from '@/store/image-resources.store';
 import type { AnyEntityWithStats } from '@/types/migration';
@@ -85,6 +85,26 @@ export const ListView = memo<ListViewProps>(function ListView({
 	const parentRef = useRef<any>(null);
 	const [containerHeight, setContainerHeight] = useState<number>(600);
 
+	// Handler para clicks en espacio vacío
+	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
+		// Solo actuar si el click es directamente en el contenedor de la vista
+		const target = e.target as HTMLElement;
+		const currentTarget = e.currentTarget as HTMLElement;
+
+		// Verificar si es un click en espacio vacío (no en elementos de la lista)
+		const isEmptySpaceClick = target === currentTarget ||
+			(!target.closest('.entity-card') &&
+				!target.closest('[data-entity-card]') &&
+				!target.closest('button') &&
+				!target.closest('[role="button"]') &&
+				!target.closest('[style*="position: absolute"]')); // Evitar clicks en elementos virtualizados
+
+		if (isEmptySpaceClick) {
+			// Propagar el evento hacia arriba para que FileBrowser lo maneje
+			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+		}
+	}, []);
+
 	// Efecto para medir y establecer altura del contenedor
 	useEffect(() => {
 		if (parentRef.current) {
@@ -132,6 +152,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 			className="w-full overflow-auto"
 			data-testid="listview-container"
 			data-view-type="list"
+			onClick={handleEmptySpaceClick}
 			style={{
 				height: `${containerHeight}px`,
 				contain: 'strict',

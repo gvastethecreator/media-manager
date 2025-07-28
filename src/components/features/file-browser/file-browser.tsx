@@ -22,13 +22,21 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { toastService } from '@/lib/ui/toast';
+import { useFileBrowserShortcuts } from '@/lib/keyboard';
 
 import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
+import { EmptySpaceContextMenu, handleEmptySpaceAction } from './context-menu';
+import { type EmptySpaceAction } from './context-menu/types';
 import { StatusBar } from './toolbar/status-bar';
 import { CardsView } from './views/cards-view';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
+
+// Import CSS for user-select fixes
+import './styles/user-select.css';
 
 const logger = clientLogger.withContext('FileBrowser');
 
@@ -93,16 +101,26 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const lastLoadParamsRef = useRef<string>('');
 	const isLoadingRef = useRef<boolean>(false);
 
+	// Estado para el menú contextual de espacio vacío
+	const [emptySpaceContextMenu, setEmptySpaceContextMenu] = useState<{
+		visible: boolean;
+		position: { x: number; y: number };
+	}>({ visible: false, position: { x: 0, y: 0 } });
+
 	// Estados globales
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
 	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
 	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
-	const { selectedIds: globalSelectedIds, setSelectedIds, clearSelection } = useSelectionStore();
+	const { selectedIds: globalSelectedIds, setSelectedIds, clearSelection, selectAll } = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
+	const { openViewer } = useFileViewerStore();
 
 	// Usar selectedIds globales en lugar de prop local
 	const effectiveSelectedIds = globalSelectedIds.length > 0 ? globalSelectedIds : selectedIds;
+
+	// Configurar keyboard shortcuts
+	const { register, setContext } = useFileBrowserShortcuts();
 
 	// Stores por tipo de entidad (expandir según necesidad)
 	const {
@@ -559,6 +577,130 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		[onItemDoubleClick]
 	);
 
+	// Manejar click derecho en espacio vacío
+	const handleEmptySpaceRightClick = useCallback((e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		setEmptySpaceContextMenu({
+			visible: true,
+			position: { x: e.clientX, y: e.clientY },
+		});
+	}, []);
+
+	// Manejar acciones del menú contextual de espacio vacío
+	const handleEmptySpaceMenuAction = useCallback(
+		async (action: EmptySpaceAction, data?: Record<string, unknown>) => {
+			// Cerrar el menú
+			setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
+
+			// Preparar contexto para las acciones
+			const context = {
+				currentPath: filterId || 'unknown',
+				totalItems: items.length,
+				selectAll,
+				refreshView: () => {
+					// Forzar recarga de datos
+					debouncedLoadData();
+				},
+				allItemIds: items.map(item => item.id),
+			};
+
+			// Ejecutar la acción
+			await handleEmptySpaceAction(action, data, context);
+		},
+		[filterId, items, selectAll, debouncedLoadData]
+	);
+
+	// Cerrar menú contextual al hacer click fuera y deseleccionar elementos
+	const handleContainerClick = useCallback((e: React.MouseEvent) => {
+		logger.debug('🖱️ handleContainerClick ejecutado', {
+			target: e.target?.constructor?.name,
+			currentTarget: e.currentTarget?.constructor?.name,
+			targetClass: (e.target as HTMLElement)?.className,
+			targetTag: (e.target as HTMLElement)?.tagName,
+			selectedCount: effectiveSelectedIds.length
+		});
+
+		// Solo actuar si el click es en el contenedor principal o en espacio vacío
+		// Verificar que no sea un click en un elemento interactivo
+		const target = e.target as HTMLElement;
+		const currentTarget = e.currentTarget as HTMLElement;
+
+		// Verificar si el click fue en el contenedor principal o en espacio vacío
+		const isEmptySpaceClick = target === currentTarget ||
+			(!target.closest('.entity-card') &&
+				!target.closest('[data-entity-card]') &&
+				!target.closest('.file-browser-item') &&
+				!target.closest('button') &&
+				!target.closest('[role="button"]') &&
+				!target.closest('input') &&
+				!target.closest('textarea') &&
+				!target.closest('.context-menu') &&
+				!target.closest('[data-radix-popper-content-wrapper]') &&
+				!target.closest('[data-testid="file-browser-item"]') &&
+				!target.closest('[data-testid*="view-container"]') &&
+				!target.closest('.grid > div') && // Evitar clicks en elementos de grid
+				!target.closest('[style*="position: absolute"]') && // Evitar clicks en elementos virtualizados
+				!target.closest('[data-virtualized-item="true"]')); // Mejor detección de elementos virtualizados
+
+		logger.debug('🖱️ Verificación de espacio vacío', {
+			isEmptySpaceClick,
+			targetEqualsCurrentTarget: target === currentTarget,
+			hasSelectedItems: effectiveSelectedIds.length > 0,
+			targetTagName: target.tagName,
+			targetClasses: target.className,
+			targetId: target.id,
+			targetDataTestId: target.getAttribute('data-testid'),
+			targetIsButton: target.closest('button') !== null,
+			targetIsInGrid: target.closest('.grid > div') !== null,
+			targetIsVirtualized: target.closest('[data-virtualized-item="true"]') !== null
+		});
+
+		if (isEmptySpaceClick && effectiveSelectedIds.length > 0) {
+			logger.debug('✅ Click en espacio vacío detectado - deseleccionando elementos');
+
+			// Evitar navegación accidental
+			e.preventDefault();
+			e.stopPropagation();
+
+			// Feedback visual suave antes de deseleccionar
+			const container = currentTarget;
+			container.style.transition = 'background-color 0.1s ease';
+			container.style.backgroundColor = 'rgba(var(--primary), 0.05)';
+
+			setTimeout(() => {
+				container.style.backgroundColor = '';
+				container.style.transition = '';
+			}, 100);
+
+			// Deseleccionar todos los elementos
+			clearSelection();
+
+			// Cerrar menú contextual si está abierto
+			setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
+		} else {
+			logger.debug('❌ Click no califica para deselección', {
+				isEmptySpaceClick,
+				hasSelectedItems: effectiveSelectedIds.length > 0
+			});
+		}
+	}, [clearSelection, effectiveSelectedIds.length, setEmptySpaceContextMenu]);
+
+	// Manejar click derecho en espacio vacío - mejorado para evitar conflictos
+	const handleEmptySpaceRightClickImproved = useCallback((e: React.MouseEvent) => {
+		// Solo mostrar menú si el click es en el contenedor principal, no en elementos
+		if (e.target === e.currentTarget) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			setEmptySpaceContextMenu({
+				visible: true,
+				position: { x: e.clientX, y: e.clientY },
+			});
+		}
+	}, []);
+
 	// Actualizar panel de detalles cuando cambia la selección
 	useEffect(() => {
 		if (effectiveSelectedIds.length > 0) {
@@ -570,19 +712,186 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 	}, [effectiveSelectedIds, items, setDetailsPanelItems, setDetailsPanelVisible]);
 
-	// Añadir efecto para escuchar Escape globalmente
+	// Cerrar menú contextual al hacer click fuera o presionar Escape
 	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e?.key === 'Escape') {
-				clearSelection();
+		const handleClickOutside = (e: MouseEvent) => {
+			if (emptySpaceContextMenu.visible) {
+				setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
 			}
 		};
 
-		if (typeof window !== 'undefined') {
-			window.addEventListener('keydown', handleKeyDown);
-			return () => window.removeEventListener('keydown', handleKeyDown);
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && emptySpaceContextMenu.visible) {
+				setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
+			}
+		};
+
+		if (emptySpaceContextMenu.visible) {
+			document.addEventListener('click', handleClickOutside);
+			document.addEventListener('keydown', handleKeyDown);
 		}
-	}, [clearSelection]);
+
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [emptySpaceContextMenu.visible]);
+
+	// Configurar keyboard shortcuts
+	useEffect(() => {
+		// Establecer contexto
+		setContext('file-browser');
+
+		// Registrar handlers para shortcuts
+		const handleSelectAll = () => {
+			const allIds = items.map(item => item.id);
+			selectAll(allIds);
+			toastService.info(`${allIds.length} elementos seleccionados`);
+		};
+
+		const handleDeleteSelected = () => {
+			if (effectiveSelectedIds.length === 0) {
+				toastService.warning('No hay elementos seleccionados para eliminar');
+				return;
+			}
+
+			// TODO: Implementar eliminación real cuando se mejore el context menu
+			toastService.info(`Eliminar ${effectiveSelectedIds.length} elemento(s) - Funcionalidad pendiente`);
+		};
+
+		const handleRenameSelected = () => {
+			if (effectiveSelectedIds.length === 0) {
+				toastService.warning('No hay elementos seleccionados para renombrar');
+				return;
+			}
+
+			if (effectiveSelectedIds.length > 1) {
+				toastService.warning('Solo se puede renombrar un elemento a la vez');
+				return;
+			}
+
+			// TODO: Implementar renombrado real cuando se mejore el context menu
+			toastService.info('Renombrar elemento - Funcionalidad pendiente');
+		};
+
+		const handleCancelOrClose = () => {
+			clearSelection();
+		};
+
+		const handleCopySelected = () => {
+			if (effectiveSelectedIds.length === 0) {
+				toastService.warning('No hay elementos seleccionados para copiar');
+				return;
+			}
+
+			// TODO: Implementar copiado real cuando se implemente ClipboardManager
+			toastService.info(`${effectiveSelectedIds.length} elemento(s) copiado(s) - Funcionalidad pendiente`);
+		};
+
+		const handleCutSelected = () => {
+			if (effectiveSelectedIds.length === 0) {
+				toastService.warning('No hay elementos seleccionados para cortar');
+				return;
+			}
+
+			// TODO: Implementar cortado real cuando se implemente ClipboardManager
+			toastService.info(`${effectiveSelectedIds.length} elemento(s) cortado(s) - Funcionalidad pendiente`);
+		};
+
+		const handlePaste = () => {
+			// TODO: Implementar pegado real cuando se implemente ClipboardManager
+			toastService.info('Pegar elementos - Funcionalidad pendiente');
+		};
+
+		const handleOpenSelected = () => {
+			if (effectiveSelectedIds.length === 0) {
+				toastService.warning('No hay elementos seleccionados para abrir');
+				return;
+			}
+
+			// Abrir el primer elemento seleccionado en el file viewer
+			const selectedItem = items.find(item => item.id === effectiveSelectedIds[0]);
+			if (selectedItem) {
+				// Convertir AnyEntityWithStats a ImageItem para el viewer
+				const imageItems = items.map(item => {
+					const metadata = 'metadata' in item ? item.metadata : null;
+					return {
+						id: item.id,
+						name: 'name' in item ? item.name : (item as any).title || 'Untitled',
+						type: ('type' in item ? item.type : 'image') || 'image',
+						path: 'path' in item ? item.path : '',
+						size: ('size' in item ? item.size : 0) || 0,
+						width: 'width' in item ? item.width : null,
+						height: 'height' in item ? item.height : null,
+						thumbnail: 'thumbnail' in item ? item.thumbnail : null,
+						metadata: typeof metadata === 'string' ? metadata : metadata ? JSON.stringify(metadata) : null,
+						src: 'path' in item ? item.path : '',
+						alt: 'name' in item ? item.name : (item as any).title || 'Untitled',
+					};
+				});
+
+				const initialIndex = items.findIndex(item => item.id === selectedItem.id);
+				openViewer(imageItems, initialIndex);
+			}
+		};
+
+		const handlePreviewSelected = () => {
+			if (effectiveSelectedIds.length === 0) {
+				toastService.warning('No hay elementos seleccionados para previsualizar');
+				return;
+			}
+
+			// Usar la misma lógica que abrir por ahora
+			handleOpenSelected();
+		};
+
+		// Registrar todos los shortcuts
+		register(
+			{ key: 'a', modifiers: ['ctrl'], context: 'file-browser', description: 'Seleccionar todo', action: 'select-all' },
+			handleSelectAll
+		);
+
+		register(
+			{ key: 'delete', modifiers: [], context: 'file-browser', description: 'Eliminar seleccionados', action: 'delete-selected' },
+			handleDeleteSelected
+		);
+
+		register(
+			{ key: 'f2', modifiers: [], context: 'file-browser', description: 'Renombrar seleccionado', action: 'rename-selected' },
+			handleRenameSelected
+		);
+
+		register(
+			{ key: 'escape', modifiers: [], context: 'global', description: 'Cancelar selección', action: 'cancel-or-close' },
+			handleCancelOrClose
+		);
+
+		register(
+			{ key: 'c', modifiers: ['ctrl'], context: 'file-browser', description: 'Copiar seleccionados', action: 'copy-selected' },
+			handleCopySelected
+		);
+
+		register(
+			{ key: 'x', modifiers: ['ctrl'], context: 'file-browser', description: 'Cortar seleccionados', action: 'cut-selected' },
+			handleCutSelected
+		);
+
+		register(
+			{ key: 'v', modifiers: ['ctrl'], context: 'file-browser', description: 'Pegar', action: 'paste' },
+			handlePaste
+		);
+
+		register(
+			{ key: 'enter', modifiers: [], context: 'file-browser', description: 'Abrir seleccionado', action: 'open-selected' },
+			handleOpenSelected
+		);
+
+		register(
+			{ key: ' ', modifiers: [], context: 'file-browser', description: 'Previsualizar seleccionado', action: 'preview-selected' },
+			handlePreviewSelected
+		);
+
+	}, [register, setContext, items, effectiveSelectedIds, selectAll, clearSelection, openViewer]);
 
 	// Función para renderizar item usando EntityCard
 	const renderItem = useCallback(
@@ -716,9 +1025,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	};
 
 	return (
-		<div className={cn('flex h-full w-full flex-col bg-background overflow-hidden', className)}>
+		<div
+			className={cn('flex h-full w-full flex-col bg-background overflow-hidden', className)}
+			data-testid="file-browser-container"
+			onClick={handleContainerClick}
+			onContextMenu={handleEmptySpaceRightClickImproved}
+		>
 			<ScrollArea className="flex-1 min-h-0">
-				<div ref={containerCallbackRef} className="relative h-full w-full bg-transparent cursor-default">
+				<div
+					ref={containerCallbackRef}
+					className="relative h-full w-full bg-transparent cursor-default"
+				>
 					<AnimatePresence>
 						<motion.div
 							initial={{ opacity: 0 }}
@@ -729,6 +1046,25 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							{containerWidth > 0 ? renderContent() : <Spinner />}
 						</motion.div>
 					</AnimatePresence>
+
+					{/* Menú contextual de espacio vacío */}
+					{emptySpaceContextMenu.visible && (
+						<div
+							className="fixed z-50 bg-popover border border-border rounded-md shadow-md"
+							style={{
+								left: emptySpaceContextMenu.position.x,
+								top: emptySpaceContextMenu.position.y,
+							}}
+						>
+							<EmptySpaceContextMenu
+								onAction={handleEmptySpaceMenuAction}
+								position={emptySpaceContextMenu.position}
+								currentPath={filterId}
+								totalItems={items.length}
+								canPaste={false} // Se detecta automáticamente en el componente
+							/>
+						</div>
+					)}
 				</div>
 			</ScrollArea>
 			<StatusBar

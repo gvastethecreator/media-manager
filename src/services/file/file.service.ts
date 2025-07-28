@@ -468,6 +468,9 @@ export async function moveFile(
 	}
 }
 
+// Export enhanced file operations service
+export { enhancedFileOperationsService, clipboardManager } from './enhanced-file-operations.service';
+
 // Mantener compatibilidad con nombres anteriores
 export const readDirectory = getDirectoryInfo;
 export const deleteFileOrDirectory = deleteFile;

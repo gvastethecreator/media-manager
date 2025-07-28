@@ -142,6 +142,26 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	const parentRef = useRef<any>(null);
 	const [containerHeight, setContainerHeight] = useState<number>(600);
 
+	// Handler para clicks en espacio vacío
+	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
+		// Solo actuar si el click es directamente en el contenedor de la vista
+		const target = e.target as HTMLElement;
+		const currentTarget = e.currentTarget as HTMLElement;
+
+		// Verificar si es un click en espacio vacío (no en elementos del masonry)
+		const isEmptySpaceClick = target === currentTarget ||
+			(!target.closest('.entity-card') &&
+				!target.closest('[data-entity-card]') &&
+				!target.closest('button') &&
+				!target.closest('[role="button"]') &&
+				!target.closest('[style*="position: absolute"]')); // Evitar clicks en elementos posicionados
+
+		if (isEmptySpaceClick) {
+			// Propagar el evento hacia arriba para que FileBrowser lo maneje
+			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+		}
+	}, []);
+
 	// Layout calculations - verdadero masonry Pinterest-style
 	const { layoutItems, totalHeight } = useMasonryLayout(items, containerWidth, itemSize);
 
@@ -197,6 +217,9 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 		<div
 			ref={parentRef}
 			className="w-full overflow-auto"
+			data-testid="masonry-view"
+			data-view-type="masonry"
+			onClick={handleEmptySpaceClick}
 			style={{
 				height: `${containerHeight}px`,
 				contain: 'strict',
