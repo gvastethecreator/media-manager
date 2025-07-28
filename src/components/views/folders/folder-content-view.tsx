@@ -71,11 +71,6 @@ export function FolderContentView({
 	const [internalIsRetrying, setInternalIsRetrying] = useState(false);
 	const isRetrying = externalIsRetrying || internalIsRetrying;
 
-	// Asegurar que el panel esté visible al cargar la vista
-	useEffect(() => {
-		setDetailsPanelVisible(true);
-	}, [setDetailsPanelVisible]);
-
 	const handleImageSelect = useCallback(
 		(item: AnyEntityWithStats, _e: React.MouseEvent) => {
 			const image = item as ImageWithStats;

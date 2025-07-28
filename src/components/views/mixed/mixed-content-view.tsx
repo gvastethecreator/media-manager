@@ -1,5 +1,5 @@
 import { RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { BaseContentView } from '@/components/views/base/base-content-view';
@@ -23,11 +23,6 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 
 	// Estado local para controlar operaciones
 	const [isRetrying, setIsRetrying] = useState(false);
-
-	// Asegurar que el panel esté visible al cargar la vista
-	useEffect(() => {
-		setDetailsPanelVisible(true);
-	}, [setDetailsPanelVisible]);
 
 	const handleItemSelect = useCallback(
 		(item: AnyEntityWithStats) => {

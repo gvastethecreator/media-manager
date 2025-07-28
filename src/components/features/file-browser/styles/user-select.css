@@ -1,0 +1,297 @@
+/**
+ * @file User selection CSS fixes for file browser components
+ * @description Prevents text selection conflicts with item selection/interaction
+ * while preserving accessibility for screen readers
+ */
+
+/* === FILE BROWSER CONTAINER === */
+
+/* Main file browser container - prevent text selection on interactive areas */
+[data-testid="file-browser-container"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === VIEW CONTAINERS === */
+
+/* List view container */
+[data-testid="listview-container"],
+[data-view-type="list"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Grid view container */
+[data-testid="grid-view"],
+[data-view-type="grid"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Cards view container */
+[data-testid="cards-view"],
+[data-view-type="cards"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Masonry view container */
+[data-testid="masonry-view"],
+[data-view-type="masonry"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === INTERACTIVE ELEMENTS === */
+
+/* All interactive file browser elements */
+.file-browser-item,
+.entity-card,
+.file-item,
+.folder-item,
+.image-card,
+.video-card,
+.audio-card,
+.document-card {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Button elements within cards */
+.entity-card button,
+.image-card button,
+.video-card button,
+.audio-card button,
+.document-card button {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Clickable areas within cards */
+.entity-card [role="button"],
+.entity-card button,
+.file-browser-item [role="button"],
+.file-browser-item button {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === CONTEXT MENU ELEMENTS === */
+
+/* Context menu containers */
+.context-menu,
+.context-menu-content,
+.context-menu-item {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === DRAG SELECTION AREAS === */
+
+/* Areas where drag selection might occur */
+.drag-selection-area,
+.selection-overlay {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === ACCESSIBILITY PRESERVATION === */
+
+/*
+ * Allow text selection for accessibility tools while preventing visual selection
+ * This ensures screen readers can still access text content
+ */
+.entity-card[aria-label],
+.file-browser-item[aria-label] {
+  /* Keep user-select: none for visual interaction */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Text content that should remain accessible to screen readers */
+.entity-card .sr-only,
+.file-browser-item .sr-only,
+.visually-hidden {
+  /* Allow selection for screen readers but hide visually */
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* === SPECIFIC COMPONENT FIXES === */
+
+/* EntityCard component fixes */
+.entity-card {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* EntityCard text elements that might cause selection conflicts */
+.entity-card .card-title,
+.entity-card .card-description,
+.entity-card .card-metadata {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Image thumbnails */
+.entity-card img,
+.file-browser-item img,
+.thumbnail {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* Prevent image dragging which can interfere with selection */
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* === MOTION/ANIMATION ELEMENTS === */
+
+/* Framer Motion elements used in views */
+.motion-div,
+[data-framer-motion] {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === VIRTUALIZED CONTENT === */
+
+/* TanStack Virtual containers */
+[data-virtualized-container],
+.virtualized-item {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === TOOLBAR AND STATUS BAR === */
+
+/* File browser toolbar elements */
+.file-browser-toolbar,
+.file-browser-status-bar {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === SELECTION INDICATORS === */
+
+/* Selection rings and indicators */
+.selection-ring,
+.selection-indicator,
+.selected-item-indicator {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === HOVER STATES === */
+
+/* Ensure hover states don't interfere with selection */
+.entity-card:hover,
+.file-browser-item:hover {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* === FOCUS STATES === */
+
+/* Maintain focus indicators while preventing text selection */
+.entity-card:focus,
+.file-browser-item:focus {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* Ensure focus outline is visible */
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* === BROWSER-SPECIFIC FIXES === */
+
+/* Firefox specific fixes */
+@-moz-document url-prefix() {
+
+  .entity-card,
+  .file-browser-item {
+    -moz-user-select: none;
+  }
+}
+
+/* Safari specific fixes */
+@supports (-webkit-appearance: none) {
+
+  .entity-card,
+  .file-browser-item {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* === HIGH CONTRAST MODE === */
+
+/* Ensure selection prevention works in high contrast mode */
+@media (prefers-contrast: high) {
+
+  .entity-card,
+  .file-browser-item {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+}
+
+/* === REDUCED MOTION === */
+
+/* Maintain user-select behavior even with reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .entity-card,
+  .file-browser-item {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+}

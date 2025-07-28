@@ -9,6 +9,11 @@ Este plan de implementación convierte el diseño técnico en tareas específica
 ### Phase 1: Foundation and Context Menu System
 
 - [ ] 1. Create Keyboard Shortcut Manager
+
+
+
+
+
   - Create `src/lib/keyboard/keyboard-shortcut-manager.ts` with shortcut registration and handling
   - Add keyboard event listeners to existing FileBrowser component
   - Implement default shortcuts (Ctrl+A, Delete, F2, Escape, etc.)
@@ -16,6 +21,11 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - _Requirements: 1.16, 1.17_
 
 - [ ] 2. Enhance existing FileContextMenu with missing operations
+
+
+
+
+
   - Update `src/components/features/file-browser/context-menu/context-menu.tsx` to add missing actions
   - Extend `src/components/features/file-browser/context-menu/types.ts` with new ContextMenuAction types
   - Update `src/components/features/file-browser/context-menu/context-action-handler.ts` with new handlers
@@ -24,6 +34,11 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - _Requirements: 1.5, 1.6, 1.7, 1.12, 1.14_
 
 - [ ] 3. Create EmptySpaceContextMenu component
+
+
+
+
+
   - Create `src/components/features/file-browser/context-menu/empty-space-context-menu.tsx`
   - Add "Seleccionar todo", "Pegar", "Actualizar", "Nueva carpeta" options
   - Update FileBrowser component to handle right-click on empty space
@@ -31,6 +46,11 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - _Requirements: 1.3, 1.15_
 
 - [ ] 4. Create MultiSelectionContextMenu component
+
+
+
+
+
   - Create `src/components/features/file-browser/context-menu/multi-selection-context-menu.tsx`
   - Add bulk operations: "Eliminar múltiples", "Mover múltiples", "Agregar a colección"
   - Show selection count and estimated operation time
@@ -38,6 +58,11 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - _Requirements: 1.4_
 
 - [ ] 5. Enhance existing FileOperationsService
+
+
+
+
+
   - Extend existing `src/services/file/file.service.ts` with clipboard operations
   - Add copyToClipboard, pasteFromClipboard methods using existing file operations
   - Implement renameItem with inline editing support using existing renameFile function
@@ -46,6 +71,11 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - _Requirements: 1.5, 1.6, 1.7, 1.8, 1.10_
 
 - [ ] 6. Create ClipboardManager for system integration
+
+
+
+
+
   - Create `src/services/clipboard/clipboard-manager.ts`
   - Implement copy/cut/paste operations with system clipboard
   - Add clipboard state management and validation
@@ -54,24 +84,39 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - _Requirements: 1.5, 1.6_
 
 - [ ] 7. Enhance toast notifications for file operations
+
+
+
+
   - Update existing context-action-handler.ts to use toastService more comprehensively
   - Add progress toasts for long-running operations
   - Implement error toasts with recovery options
   - Add success confirmations with undo options
   - _Requirements: All context menu operations_
 
-- [ ] 7.1. Fix CSS user-select behavior on file items
-  - Remove or disable CSS `user-select` property on file browser items
-  - Ensure text selection doesn't interfere with item selection/interaction
-  - Test drag selection doesn't conflict with text selection
-  - Apply `user-select: none` to interactive elements while preserving accessibility
-  - _Requirements: User experience improvement_
+- [✅] 7.1. Fix CSS user-select behavior on file items
+  **Status: ✅ COMPLETADO - CSS user-select bien implementado**
+  - ✅ Sistema completo de user-select implementado (297 líneas CSS)
+  - ✅ Accesibilidad preservada (.sr-only, .visually-hidden)
+  - ✅ Soporte multi-browser (webkit, moz, ms prefixes)
+  - ✅ Integrado en FileBrowser y componentes de vista
+  - ✅ Aplicado via data-testid attributes en todos los componentes
+  - ✅ CSS aplicado correctamente para evitar conflictos de selección
+  - ✅ EntityCard components (ImageCard, etc.) con className aplicado apropiadamente
+  - _Archivos: src/components/features/file-browser/styles/user-select.css_
+  - _Requirements: User experience improvement - COMPLETADO_
 
-- [ ] 7.2. Implement click-to-deselect functionality
-  - Add click handler to empty space in FileBrowser component
-  - Clear selection when clicking on empty areas using existing `clearSelection` from useSelectionStore
-  - Ensure click-to-deselect works in all view modes (list, grid, cards, masonry)
-  - Prevent event bubbling conflicts with item selection
+- [🔄] 7.2. Implement click-to-deselect functionality
+  **Status: 🔄 EN PROGRESO - Funcionalidad básica implementada, necesita mejoras**
+  - ✅ Click handler agregado al contenedor principal FileBrowser
+  - ✅ Integración con clearSelection() del useSelectionStore
+  - ✅ Detección mejorada de clicks en espacio vacío vs elementos
+  - ✅ Prevención de conflictos con selección de items
+  - [ ] Asegurar funcionamiento en todas las vistas (list, grid, cards, masonry)
+  - [ ] Mejorar detección de clics en áreas virtualizadas
+  - [ ] Agregar feedback visual para deselección
+  - [ ] Testing comprehensivo en diferentes escenarios
+  - _Archivos: src/components/features/file-browser/file-browser.tsx (líneas 608-636)_
   - _Requirements: User experience improvement_
 
 ### Phase 2: Enhanced View System

@@ -214,10 +214,11 @@ interface VirtualizedContainerProps {
 	padding?: number | { top?: number; bottom?: number; left?: number; right?: number };
 	className?: string;
 	isReady?: boolean;
+	onClick?: (e: React.MouseEvent) => void;
 }
 
 export const VirtualizedContainer = React.forwardRef<HTMLDivElement, VirtualizedContainerProps>(
-	function VirtualizedContainer({ children, height, width, padding = 16, className = '', isReady = true }, ref) {
+	function VirtualizedContainer({ children, height, width, padding = 16, className = '', isReady = true, onClick }, ref) {
 		const paddingObj =
 			typeof padding === 'number'
 				? { top: padding, bottom: padding, left: padding, right: padding }
@@ -245,6 +246,7 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 			<div
 				ref={ref}
 				className={`relative ${className}`}
+				onClick={onClick}
 				style={{
 					height: `${height}px`,
 					width: `${width}px`,
