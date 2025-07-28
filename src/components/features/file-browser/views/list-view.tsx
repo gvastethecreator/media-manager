@@ -117,10 +117,21 @@ export const ListView = memo<ListViewProps>(function ListView({
 		overscan: 5,
 	});
 
+	// Debug logging
+	console.log('🔍 ListView - Configuración del virtualizador:', {
+		itemsLength: items.length,
+		containerHeight,
+		totalSize: rowVirtualizer.getTotalSize(),
+		virtualItemsCount: rowVirtualizer.getVirtualItems().length,
+		firstItem: items[0]
+	});
+
 	return (
 		<div
 			ref={parentRef}
 			className="w-full overflow-auto"
+			data-testid="listview-container"
+			data-view-type="list"
 			style={{
 				height: `${containerHeight}px`,
 				contain: 'strict',
@@ -149,11 +160,10 @@ export const ListView = memo<ListViewProps>(function ListView({
 							}}
 							style={{
 								position: 'absolute',
-								top: 0,
+								top: `${virtualItem.start}px`,
 								left: 0,
 								width: '100%',
-								height: '80px', // Altura aumentada para evitar solapamiento
-								transform: `translateY(${virtualItem.start}px)`,
+								height: `${virtualItem.size}px`,
 							}}
 							className={cn(
 								'flex items-center gap-3 px-3 py-3 mx-1 mb-2 rounded-md cursor-pointer transition-all duration-200',

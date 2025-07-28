@@ -691,18 +691,26 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			onItemDoubleClick: handleItemDoubleClick,
 		};
 
+		console.log('🔍 FileBrowser - SWITCH de vista:', { viewMode, willRenderView: viewMode || 'default' });
+
 		switch (viewMode) {
 			case 'list':
+				console.log('🔍 FileBrowser - Renderizando ListView');
 				return <ListView {...commonViewProps} />;
 			case 'grid':
+				console.log('🔍 FileBrowser - Renderizando GridView');
 				return <GridView {...commonViewProps} />;
 			case 'cards':
+				console.log('🔍 FileBrowser - Renderizando CardsView');
 				return <CardsView {...commonViewProps} />;
 			case 'simple-grid':
+				console.log('🔍 FileBrowser - Renderizando GridView (simple-grid)');
 				return <GridView {...commonViewProps} />;
 			case 'masonry':
+				console.log('🔍 FileBrowser - Renderizando MasonryView');
 				return <MasonryView {...commonViewProps} />;
 			default:
+				console.log('🔍 FileBrowser - Renderizando CardsView (default)');
 				return <CardsView {...commonViewProps} />;
 		}
 	};
