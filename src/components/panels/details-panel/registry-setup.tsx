@@ -198,3 +198,6 @@ export function getRegistryStats() {
 
 	return stats;
 }
+
+// Auto-inicializar el registro al cargar el módulo
+initializeEntityRegistry();

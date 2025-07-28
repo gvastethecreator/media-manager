@@ -138,7 +138,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@tauri-apps/api": "^2.7.0",
     "@tauri-apps/cli": "^2.7.1",
-    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",

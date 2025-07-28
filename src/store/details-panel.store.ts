@@ -64,6 +64,13 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 				isFixed: state.isFixed,
 				showStatsWhenEmpty: state.showStatsWhenEmpty,
 			}),
+			// Merge function to ensure isVisible defaults to true
+			merge: (persistedState: any, currentState: DetailsPanelState) => ({
+				...currentState,
+				...persistedState,
+				// Always default to visible (true) unless explicitly set to false
+				isVisible: persistedState?.isVisible ?? true,
+			}),
 		}
 	)
 );
