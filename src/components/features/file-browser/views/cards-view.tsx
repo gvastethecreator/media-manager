@@ -102,6 +102,27 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 }) {
 	const parentRef = useRef<any>(null);
 
+	// Handler para clicks en espacio vacío
+	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
+		// Solo actuar si el click es directamente en el contenedor de la vista
+		const target = e.target as HTMLElement;
+		const currentTarget = e.currentTarget as HTMLElement;
+
+		// Verificar si es un click en espacio vacío (no en elementos de las cards)
+		const isEmptySpaceClick = target === currentTarget ||
+			(!target.closest('.entity-card') &&
+				!target.closest('[data-entity-card]') &&
+				!target.closest('button') &&
+				!target.closest('[role="button"]') &&
+				!target.closest('.grid > div') && // Evitar clicks en elementos de la grid
+				!target.closest('[style*="position: absolute"]')); // Evitar clicks en elementos virtualizados
+
+		if (isEmptySpaceClick) {
+			// Propagar el evento hacia arriba para que FileBrowser lo maneje
+			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+		}
+	}, []);
+
 	// Calcular configuración de la grid con mejor espaciado
 	const { columns, cardWidth, rowHeight, gap, padding } = useMemo(() => {
 		const minCardWidth = Math.max(itemSize || 200, 150); // Mínimo absoluto de 150px
@@ -197,7 +218,9 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 		<div
 			ref={parentRef}
 			data-testid="cards-view"
+			data-view-type="cards"
 			className="w-full"
+			onClick={handleEmptySpaceClick}
 			style={{
 				contain: 'layout style',
 				padding: `${padding}px`,

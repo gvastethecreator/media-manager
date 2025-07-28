@@ -14,6 +14,11 @@ export type ContextMenuAction =
 	| 'delete'
 	| 'favorite-toggle'
 	| 'mark-toggle'
+	// Nuevas acciones de archivo
+	| 'paste'
+	| 'rename'
+	| 'move'
+	| 'open-in-explorer'
 	// Acciones de entidades
 	| 'add-to-collection'
 	| 'collection-create'
@@ -34,6 +39,20 @@ export type ContextMenuAction =
 	| 'add-to-note'
 	| 'note-create';
 
+/**
+ * Tipos de acciones disponibles en el menú contextual de espacio vacío
+ */
+export type EmptySpaceAction =
+	| 'select-all'
+	| 'paste'
+	| 'refresh'
+	| 'new-folder'
+	| 'change-view'
+	| 'sort-by'
+	| 'show-hidden'
+	| 'scan-folder'
+	| 'properties';
+
 // Tipo para la data adicional en acciones de menú contextual
 export interface ContextMenuActionData {
 	id?: string;
@@ -51,6 +70,46 @@ export interface FileContextMenuProps {
 	children?: ReactNode;
 	/** Manejador de acciones del menú */
 	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
+}
+
+/**
+ * Tipos de acciones específicas para selección múltiple
+ */
+export type MultiSelectionAction =
+	| 'delete-multiple'
+	| 'move-multiple'
+	| 'copy-multiple'
+	| 'download-multiple'
+	| 'add-to-collection'
+	| 'add-to-album'
+	| 'add-tag';
+
+/**
+ * Props para el componente EmptySpaceContextMenu
+ */
+export interface EmptySpaceContextMenuProps {
+	/** Manejador de acciones del menú */
+	onAction: (action: EmptySpaceAction, data?: Record<string, unknown>) => void;
+	/** Posición del menú contextual */
+	position: { x: number; y: number };
+	/** Ruta actual (opcional) */
+	currentPath?: string;
+	/** Si se puede pegar desde el portapapeles */
+	canPaste?: boolean;
+	/** Items totales disponibles para seleccionar todo */
+	totalItems?: number;
+}
+
+/**
+ * Props para el componente MultiSelectionContextMenu
+ */
+export interface MultiSelectionContextMenuProps {
+	/** Elementos seleccionados */
+	selectedItems: FileItem[];
+	/** Manejador de acciones del menú */
+	onAction: (action: MultiSelectionAction | ContextMenuAction, items: FileItem[], data?: Record<string, unknown>) => Promise<void>;
+	/** Posición del menú contextual */
+	position: { x: number; y: number };
 }
 
 /**

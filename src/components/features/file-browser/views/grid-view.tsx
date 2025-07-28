@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { type BaseVirtualizedViewProps, useVirtualizedContainer, VirtualizedContainer } from './base-virtualized-view';
 
-interface GridViewProps extends BaseVirtualizedViewProps<AnyEntityWithStats> {}
+interface GridViewProps extends BaseVirtualizedViewProps<AnyEntityWithStats> { }
 
 export const GridView = memo<GridViewProps>(function GridView({
 	items,
@@ -28,6 +28,26 @@ export const GridView = memo<GridViewProps>(function GridView({
 
 	// Usar el ancho real del contenedor en lugar del prop
 	const effectiveWidth = actualWidth || containerWidth;
+
+	// Handler para clicks en espacio vacío
+	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
+		// Solo actuar si el click es directamente en el contenedor de la vista
+		const target = e.target as HTMLElement;
+		const currentTarget = e.currentTarget as HTMLElement;
+
+		// Verificar si es un click en espacio vacío (no en elementos de la grid)
+		const isEmptySpaceClick = target === currentTarget ||
+			(!target.closest('.entity-card') &&
+				!target.closest('[data-entity-card]') &&
+				!target.closest('button') &&
+				!target.closest('[role="button"]') &&
+				!target.closest('.grid > div')); // Evitar clicks en elementos de la grid
+
+		if (isEmptySpaceClick) {
+			// Propagar el evento hacia arriba para que FileBrowser lo maneje
+			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+		}
+	}, []);
 
 	// Calcular configuración de la grid con mejor espaciado
 	const { columns, cellSize, gap, padding } = useMemo(() => {
@@ -91,6 +111,9 @@ export const GridView = memo<GridViewProps>(function GridView({
 			padding={padding}
 			isReady={isReady}
 			className="overflow-auto"
+			data-testid="grid-view"
+			data-view-type="grid"
+			onClick={handleEmptySpaceClick}
 		>
 			<div
 				style={{
