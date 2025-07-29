@@ -19,6 +19,7 @@ import {
 import { FileErrorCode } from '@/types/entities/file';
 import { clipboardManager as comprehensiveClipboardManager } from '@/services/clipboard';
 import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
+import { getEntityPath } from '@/lib/utils/entity-properties.utils';
 
 const logger = serverLogger.withContext('EnhancedFileOperationsService');
 
@@ -210,7 +211,7 @@ export class EnhancedFileOperationsService {
         }
 
         for (const item of clipboardData.items) {
-          const sourcePath = item.path;
+          const sourcePath = getEntityPath(item);
           const fileName = item.name;
           const destPath = path.join(targetPath, fileName);
 
@@ -264,7 +265,7 @@ export class EnhancedFileOperationsService {
     try {
       logger.info('📝 Renaming item:', { from: item.name, to: newName });
 
-      const oldPath = item.path;
+      const oldPath = getEntityPath(item);
       const newPath = path.join(path.dirname(oldPath), newName);
 
       if (enableUndo) {
@@ -330,7 +331,7 @@ export class EnhancedFileOperationsService {
 
         for (const item of items) {
           try {
-            const sourcePath = item.path;
+            const sourcePath = getEntityPath(item);
             const fileName = item.name;
             const destPath = path.join(targetPath, fileName);
 
@@ -392,7 +393,8 @@ export class EnhancedFileOperationsService {
 
         for (const item of items) {
           try {
-            await deleteFile(item.path);
+            const itemPath = getEntityPath(item);
+            await deleteFile(itemPath);
             successCount++;
           } catch (itemError) {
             logger.error(`❌ Error deleting item ${item.name}:`, itemError);
@@ -446,7 +448,7 @@ export class EnhancedFileOperationsService {
         }
 
         for (const item of items) {
-          const sourcePath = item.path;
+          const sourcePath = getEntityPath(item);
           const destPath = path.join(targetPath, item.name);
 
           try {

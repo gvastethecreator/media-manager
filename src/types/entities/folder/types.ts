@@ -8,7 +8,7 @@
 /**
  * 📁 Tipo base para una carpeta - Campos principales
  */
-import type { EntityBase, EntityWithStats } from '../entity.types';
+import type { EntityBase } from '../entity.types';
 
 /**
  * 📁 Tipo base para una carpeta - Campos principales
@@ -32,15 +32,23 @@ export interface FolderBase extends EntityBase {
 /**
  * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)
  */
-export interface FolderWithStats extends FolderBase, EntityWithStats, FolderUIProps {
+export interface FolderWithStats extends FolderBase {
 	entityType: 'folder';
 	stats: FolderStatistics;
+
+	// Propiedades adicionales de archivo
+	type?: string;
+
+	// Propiedades del sistema de archivos y navegación
 	children?: FolderWithStats[]; // Para estructuras recursivas
 	recentImages?: Array<{
 		id: string;
 		name: string;
 		thumbnailUrl: string;
 	}>; // Imágenes recientes para compatibilidad con ExtendedFolder
+
+	// Conteos para compatibilidad
+	_count?: FolderCounts;
 }
 
 /**
@@ -169,6 +177,15 @@ export interface FolderStatistics {
 		name: string;
 		createdAt: string;
 	}>;
+
+	// Propiedades de archivo del sistema
+	size?: number;
+	mtime?: Date;
+	birthtime?: Date;
+
+	// Funciones de archivo del sistema
+	isDirectory?: () => boolean;
+	isFile?: () => boolean;
 }
 
 /**

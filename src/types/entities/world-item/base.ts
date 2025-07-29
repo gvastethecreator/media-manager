@@ -100,6 +100,20 @@ export interface WorldItemStatistics {
 	totalRequirements: number;
 	totalStats: number;
 	itemTier: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'artifact';
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -107,9 +121,9 @@ export interface WorldItemStatistics {
  */
 export interface WorldItemWithStats extends WorldItemBase {
 	entityType: 'world-item';
-	statistics: WorldItemStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
-	_stats: WorldItemStatistics;
+	stats: WorldItemStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: WorldItemStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;

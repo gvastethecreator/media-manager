@@ -55,6 +55,7 @@ class EventEmitter {
 import { toastService } from '../toast/toast.service';
 import { copyFile, moveFile, deleteFile, renameFile } from '../file/file.service';
 import type { AnyEntityWithStats } from '@/types/entities';
+import { getEntityPath } from '@/lib/utils/entity-properties.utils';
 
 // Undo/Redo action types
 export interface UndoableAction {
@@ -276,14 +277,16 @@ class UndoRedoManager extends EventEmitter {
       description: `Copiar ${items.length} elemento(s)`,
       execute: async () => {
         for (const item of items) {
+          const itemPath = getEntityPath(item);
           const targetFilePath = `${targetPath}/${item.name}`;
-          await copyFile(item.path, targetFilePath);
+          await copyFile(itemPath, targetFilePath);
           copiedItems.push({ ...item, path: targetFilePath });
         }
       },
       undo: async () => {
         for (const item of copiedItems) {
-          await deleteFile(item.path);
+          const itemPath = getEntityPath(item);
+          await deleteFile(itemPath);
         }
         copiedItems.length = 0;
       },
@@ -300,7 +303,7 @@ class UndoRedoManager extends EventEmitter {
     items: AnyEntityWithStats[],
     targetPath: string
   ): UndoableAction {
-    const originalPaths = items.map(item => item.path);
+    const originalPaths = items.map(item => getEntityPath(item));
 
     return {
       id: this.generateId(),
@@ -309,8 +312,9 @@ class UndoRedoManager extends EventEmitter {
       description: `Mover ${items.length} elemento(s)`,
       execute: async () => {
         for (const item of items) {
+          const itemPath = getEntityPath(item);
           const targetFilePath = `${targetPath}/${item.name}`;
-          await moveFile(item.path, targetFilePath);
+          await moveFile(itemPath, targetFilePath);
         }
       },
       undo: async () => {
@@ -336,7 +340,8 @@ class UndoRedoManager extends EventEmitter {
       description: `Eliminar ${items.length} elemento(s)`,
       execute: async () => {
         for (const item of items) {
-          await deleteFile(item.path);
+          const itemPath = getEntityPath(item);
+          await deleteFile(itemPath);
         }
       },
       undo: async () => {
@@ -364,10 +369,12 @@ class UndoRedoManager extends EventEmitter {
       timestamp: Date.now(),
       description: `Renombrar "${originalName}" a "${newName}"`,
       execute: async () => {
-        await renameFile(item.path, newName);
+        const itemPath = getEntityPath(item);
+        await renameFile(itemPath, newName);
       },
       undo: async () => {
-        const newPath = item.path.replace(item.name, newName);
+        const itemPath = getEntityPath(item);
+        const newPath = itemPath.replace(item.name, newName);
         await renameFile(newPath, originalName);
       },
       canUndo: () => true,

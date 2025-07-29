@@ -11,7 +11,12 @@ import { CardInfoOverlay } from './card-info-overlay';
 import { CardActionButtons } from './card-action-buttons';
 import { useCardsViewConfig } from '@/hooks/use-cards-view-config';
 import { cn } from '@/lib/utils';
+import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { FileContextMenu } from '@/components/features/file-browser/context-menu/context-menu';
+import { handleContextAction } from '@/components/features/file-browser/context-menu';
 import type { AnyEntityWithStats } from '@/types/migration';
+import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
+import { entityToFileItem } from '@/types/file-browser/file-item';
 
 interface CardsViewProps {
 	items: AnyEntityWithStats[];
@@ -19,6 +24,7 @@ interface CardsViewProps {
 	containerWidth: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
+	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 }
 
 // Componente interno memoizado para cada carta
@@ -30,6 +36,7 @@ const CardItem = memo<{
 	cardHeight: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
+	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 }>(function CardItem({
 	item,
 	isSelected,
@@ -38,6 +45,7 @@ const CardItem = memo<{
 	cardHeight,
 	onItemClick,
 	onItemDoubleClick,
+	onContextAction,
 }) {
 	const { config } = useCardsViewConfig();
 	const [isHovered, setIsHovered] = useState(false);
@@ -71,6 +79,26 @@ const CardItem = memo<{
 	const handleDoubleClick = useCallback(() => {
 		onItemDoubleClick(item);
 	}, [item, onItemDoubleClick]);
+
+	// Handler para acciones del menú contextual
+	const handleContextMenuAction = useCallback(
+		async (action: ContextMenuAction, data?: Record<string, unknown>) => {
+			if (onContextAction) {
+				onContextAction(action, item, data);
+			} else {
+				// Fallback al handler por defecto - convertir item a FileItem
+				const fileItem = entityToFileItem(item);
+				await handleContextAction(
+					action,
+					fileItem,
+					undefined, // items array no se usa aquí
+					undefined, // toggleSelection no disponible en view component
+					undefined  // refreshView no disponible en view component
+				);
+			}
+		},
+		[onContextAction, item]
+	);
 
 	const cardStyleClasses = useMemo(() => {
 		const baseClasses = 'relative overflow-hidden transition-all duration-200';
@@ -118,15 +146,25 @@ const CardItem = memo<{
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 		>
-			{/* Tarjeta base */}
-			<EntityCard
-				entity={item}
-				isSelected={isSelected}
-				compact={config.cardStyle === 'compact'}
-				className="h-full w-full"
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-			/>
+			{/* Tarjeta base con menú contextual */}
+			<ContextMenu>
+				<ContextMenuTrigger asChild>
+					<EntityCard
+						entity={item}
+						isSelected={isSelected}
+						compact={config.cardStyle === 'compact'}
+						className="h-full w-full"
+						onClick={handleClick}
+						onDoubleClick={handleDoubleClick}
+					/>
+				</ContextMenuTrigger>
+				<ContextMenuContent>
+					<FileContextMenu
+						file={entityToFileItem(item)}
+						onAction={(action, file, data) => handleContextMenuAction(action, data)}
+					/>
+				</ContextMenuContent>
+			</ContextMenu>
 
 			{/* Overlay de información */}
 			{config.interactiveConfig.enabled && config.interactiveConfig.showInfoOverlay && (
@@ -158,6 +196,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
+	onContextAction,
 }) {
 	const parentRef = useRef<any>(null);
 	const { config, calculateLayout } = useCardsViewConfig();
@@ -188,7 +227,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 		if (isEmptySpaceClick) {
 			// Propagar el evento hacia arriba para que el FileBrowser maneje la deselección
 			// No hacer preventDefault() para permitir que el evento burbujee
-			
+
 			// Feedback visual opcional si hay elementos seleccionados
 			if (selectedIds.length > 0) {
 				currentTarget.style.transition = 'background-color 0.15s ease';
@@ -293,6 +332,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 												cardHeight={layout.cardHeight}
 												onItemClick={onItemClick}
 												onItemDoubleClick={onItemDoubleClick}
+												onContextAction={onContextAction}
 											/>
 										);
 									})}

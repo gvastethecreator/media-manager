@@ -42,6 +42,20 @@ export interface ThumbnailStatistics {
 	qualityScore: number; // Score de calidad basado en resolución y formato
 	usageCount: number; // Número de veces que se ha usado este thumbnail
 	storageEfficiency: number; // Eficiencia de almacenamiento (calidad vs tamaño)
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**

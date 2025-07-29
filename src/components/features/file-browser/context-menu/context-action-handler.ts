@@ -7,8 +7,6 @@
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import {
-	deleteFile as deleteFileAction,
-	renameFile as renameFileService,
 	moveFile as moveFileService,
 	copyFile as copyFileService,
 	getFileAsDataUrl
@@ -16,8 +14,8 @@ import {
 import { enhancedFileOperationsService } from '@/services/file/enhanced-file-operations.service';
 import { enhancedDownloadService } from '@/services/download/download.service';
 import { addImageToTag } from '@/services/tag/tag.service';
-import type { FileItem } from '@/types/files';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { FileItem } from '@/types/file-browser/file-item';
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { ContextMenuAction, MultiSelectionAction, EmptySpaceAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');
@@ -81,6 +79,116 @@ function _redirectLegacyAction(action: ContextMenuAction): {
 	return { newAction: action };
 }
 
+// Helper function to convert FileItem to AnyEntityWithStats
+function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
+	// Create basic stats object for compatibility with ImageStatistics
+	const basicImageStats = {
+		viewCount: 0,
+		downloadCount: 0,
+		likeCount: 0,
+		commentCount: 0,
+		tagCount: 0,
+		albumCount: 0,
+		collectionCount: 0,
+		characterCount: 0,
+		placeCount: 0,
+		worldItemCount: 0,
+		conceptCount: 0,
+		promptCount: 0,
+		noteCount: 0,
+		wildcardCount: 0,
+		propertyCount: 0,
+		groupCount: 0,
+		aspectRatio: 1,
+	};
+
+	// Base entity properties
+	const baseEntity = {
+		id: item.id,
+		name: item.name,
+		description: null,
+		createdAt: item.modifiedAt || new Date(),
+		updatedAt: item.modifiedAt || new Date(),
+		path: item.path,
+		size: item.size,
+		isFavorite: item.isFavorite || false,
+		addedAt: new Date(),
+	};
+
+	// Type-specific properties
+	if (item.isDirectory) {
+		return {
+			...baseEntity,
+			entityType: 'folder' as const,
+			emoji: '📁',
+			color: '#6B7280',
+			featuredImage: null,
+			totalFiles: 0,
+			totalFolders: 0,
+			totalSize: item.size,
+			isHidden: false,
+			isPublic: true,
+			parentId: null,
+			depth: 0,
+			stats: basicImageStats,
+		} as any; // Cast to any to satisfy type constraints
+	} else if (item.mimeType?.startsWith('video/')) {
+		return {
+			...baseEntity,
+			entityType: 'video' as const,
+			hash: '',
+			mimeType: item.mimeType,
+			width: item.metadata?.width || 0,
+			height: item.metadata?.height || 0,
+			duration: item.metadata?.duration || null,
+			fps: null,
+			bitrate: null,
+			codec: null,
+			metadata: null,
+			thumbnail: null,
+			thumbnailSize: null,
+			thumbnailWidth: null,
+			thumbnailHeight: null,
+			thumbnailMimeType: null,
+			thumbnailError: null,
+			thumbnailErrorAt: null,
+			thumbnailOptimizedAt: null,
+			folderId: '',
+			noteId: null,
+			thumbnailUrl: item.thumbnailUrl || '',
+			fullUrl: item.path,
+			statistics: { isHidden: false, isPublic: true },
+			isHidden: false,
+			isPublic: true,
+			stats: basicImageStats,
+		} as any; // Cast to any to satisfy type constraints
+	} else {
+		// Default to image
+		return {
+			...baseEntity,
+			entityType: 'image' as const,
+			hash: '',
+			mimeType: item.mimeType || 'image/jpeg',
+			width: item.metadata?.width || 0,
+			height: item.metadata?.height || 0,
+			metadata: null,
+			thumbnail: null,
+			thumbnailSize: null,
+			thumbnailWidth: null,
+			thumbnailHeight: null,
+			thumbnailMimeType: null,
+			thumbnailError: null,
+			thumbnailErrorAt: null,
+			thumbnailOptimizedAt: null,
+			folderId: '',
+			noteId: null,
+			thumbnailUrl: item.thumbnailUrl || '',
+			fullUrl: item.path,
+			stats: basicImageStats,
+		} as any; // Cast to any to satisfy type constraints
+	}
+}
+
 // Implementación del servicio de operaciones de archivos
 const customFileOperationsService = {
 	// Abre la ubicación del archivo en el explorador del sistema
@@ -88,7 +196,6 @@ const customFileOperationsService = {
 		try {
 			// En navegador web, podemos intentar abrir una ventana nueva
 			// con la ruta en formato file:// (esto funciona en algunos navegadores)
-			const _url = `file://${path}`;
 			const folderPath = path.substring(0, path.lastIndexOf('/'));
 			const folderUrl = `file://${folderPath}`;
 
@@ -109,7 +216,7 @@ const customFileOperationsService = {
 	}) => {
 		try {
 			const filename = path.split('/').pop() || 'download';
-			
+
 			// Create a FileItem-like object for the enhanced download service
 			const fileItem = {
 				id: path,
@@ -117,8 +224,11 @@ const customFileOperationsService = {
 				path: path
 			};
 
+			// Convert to proper entity
+			const entity = convertFileItemToEntity(fileItem as FileItem);
+
 			// Use enhanced download service
-			const result = await enhancedDownloadService.downloadFile(fileItem, {
+			const result = await enhancedDownloadService.downloadFile(entity, {
 				format: options?.format || 'original',
 				quality: options?.quality || 'original',
 				showProgress: options?.showProgress !== false
@@ -172,20 +282,56 @@ const customFileOperationsService = {
 	renameFile: async (oldPath: string, newName: string) => {
 		try {
 			actionLogger.info('✏️ Renombrando archivo con undo/redo:', { oldPath, newName });
-			// Create entity for enhanced service
+
+			// Create a valid file entity for the rename operation
 			const entity: AnyEntityWithStats = {
 				id: oldPath,
 				name: oldPath.split('/').pop() || '',
-				path: oldPath,
-				size: 0,
-				mimeType: 'application/octet-stream',
-				extension: '',
-				updatedAt: new Date(),
+				description: null,
 				createdAt: new Date(),
-				isDirectory: false,
-				type: 'file' as const,
+				updatedAt: new Date(),
+				entityType: 'image',
+				stats: {
+					viewCount: 0,
+					downloadCount: 0,
+					likeCount: 0,
+					commentCount: 0,
+					tagCount: 0,
+					albumCount: 0,
+					collectionCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
+					aspectRatio: 1,
+				},
+				path: oldPath,
+				hash: '',
+				size: 0,
+				width: 0,
+				height: 0,
+				metadata: null,
+				thumbnail: null,
+				thumbnailSize: null,
+				thumbnailWidth: null,
+				thumbnailHeight: null,
+				thumbnailMimeType: null,
+				thumbnailError: null,
+				thumbnailErrorAt: null,
+				thumbnailOptimizedAt: null,
+				isFavorite: false,
+				folderId: '',
+				noteId: null,
+				addedAt: new Date(),
+				thumbnailUrl: '',
+				fullUrl: '',
 			} as AnyEntityWithStats;
-			
+
 			await enhancedFileOperationsService.renameItem(entity, newName);
 			return Promise.resolve();
 		} catch (error) {
@@ -209,7 +355,7 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Copia un archivo - fallback to original service for single file copies
+	// Copia un archivo usando el servicio original
 	copyFile: async (sourcePath: string, destPath: string) => {
 		try {
 			await copyFileService(sourcePath, destPath);
@@ -223,35 +369,32 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Pega archivos desde el portapapeles
+	// Pega archivos desde el portapapeles - with undo/redo support
 	pasteFiles: async (targetPath: string) => {
 		try {
 			const clipboardData = clipboardManager.getClipboardData();
 			if (!clipboardData) {
-				throw new Error('No hay archivos en el portapapeles');
+				toastService.error('No hay archivos en el portapapeles');
+				return Promise.reject(new Error('No clipboard data'));
 			}
 
-			const results = [];
-			for (const item of clipboardData.items) {
-				const sourcePath = 'path' in item ? (item as any).path : '';
-				const fileName = item.name;
-				const destPath = `${targetPath}/${fileName}`;
+			actionLogger.info('📋 Pegando archivos con undo/redo:', {
+				count: clipboardData.items.length,
+				operation: clipboardData.operation,
+				target: targetPath
+			});
 
-				if (clipboardData.operation === 'copy') {
-					await customFileOperationsService.copyFile(sourcePath, destPath);
-				} else if (clipboardData.operation === 'cut') {
-					await customFileOperationsService.moveFile(sourcePath, destPath);
-				}
-				results.push(destPath);
-			}
+			// Convert FileItems to entities
+			const entities = clipboardData.items.map(convertFileItemToEntity);
 
-			// Si fue una operación de cortar, limpiar el portapapeles
-			if (clipboardData.operation === 'cut') {
+			if (clipboardData.operation === 'copy') {
+				await enhancedFileOperationsService.copyItems(entities, targetPath);
+			} else {
+				await enhancedFileOperationsService.moveItems(entities, targetPath);
+				// Clear clipboard after move operation
 				clipboardManager.clear();
 			}
 
-			actionLogger.info('✅ Archivos pegados:', results.length);
-			toastService.success(`${results.length} archivo(s) pegado(s) correctamente`);
 			return Promise.resolve();
 		} catch (error) {
 			actionLogger.error('❌ Error al pegar archivos:', error);
@@ -260,24 +403,28 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Elimina el archivo - now with undo/redo support
+	// Elimina un archivo - now with undo support
 	deleteFile: async (path: string) => {
 		try {
-			actionLogger.info('🗑️ Eliminando archivo con undo/redo:', path);
-			// Create entity for enhanced service
-			const entity: AnyEntityWithStats = {
+			actionLogger.info('🗑️ Eliminando archivo con undo:', path);
+
+			// Create FileItem for the delete operation
+			const fileItem: FileItem = {
 				id: path,
 				name: path.split('/').pop() || '',
 				path: path,
 				size: 0,
 				mimeType: 'application/octet-stream',
 				extension: '',
-				updatedAt: new Date(),
-				createdAt: new Date(),
+				modifiedAt: new Date(),
 				isDirectory: false,
 				type: 'file' as const,
-			} as AnyEntityWithStats;
-			
+			};
+
+			// Convert to entity
+			const entity = convertFileItemToEntity(fileItem);
+
+			// Use enhanced service for undo support
 			await enhancedFileOperationsService.deleteItems([entity]);
 			return Promise.resolve();
 		} catch (error) {
@@ -288,384 +435,182 @@ const customFileOperationsService = {
 	},
 };
 
-// Helper function to convert FileItem to AnyEntityWithStats
-function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
-	// Handle different entity types
-	const baseEntity = {
-		id: item.id,
-		name: item.name,
-		path: 'path' in item ? (item as any).path : '',
-		size: 'size' in item ? (item as any).size : 0,
-		mimeType: 'mimeType' in item ? (item as any).mimeType || 'application/octet-stream' : 'application/octet-stream',
-		extension: 'extension' in item ? (item as any).extension || '' : '',
-		updatedAt: 'modifiedAt' in item ? (item as any).modifiedAt || new Date() : new Date(),
-		createdAt: 'createdAt' in item ? (item as any).createdAt || new Date() : new Date(),
-		isDirectory: 'isDirectory' in item ? (item as any).isDirectory || false : false,
-		type: 'file' as const,
-	};
-	
-	return baseEntity as AnyEntityWithStats;
-}
+// Main context action handler with enhanced operations
+export const contextActionHandler = {
+	// Función para obtener las acciones disponibles
+	getActions: (item: FileItem, isMultiSelect: boolean) => {
+		const actions: ContextMenuAction[] = [];
 
-export const handleMultiSelectionAction = async (
-	action: MultiSelectionAction,
-	items: FileItem[],
-	data?: Record<string, unknown>
-): Promise<void> => {
-	try {
-		// Convert FileItems to AnyEntityWithStats for enhanced operations
-		const entityItems = items.map(convertFileItemToEntity);
-
-		switch (action) {
-			case 'delete-multiple': {
-				// Use enhanced service with undo/redo support
-				await enhancedFileOperationsService.deleteItems(entityItems);
-				actionLogger.info('✅ Múltiples archivos eliminados con undo/redo:', items.length);
-				break;
-			}
-
-			case 'move-multiple': {
-				// Mover múltiples archivos - por ahora mostrar prompt simple para destino
-				const destPath = prompt('Ruta de destino para mover los archivos:');
-				if (destPath) {
-					// Use enhanced service with undo/redo support
-					await enhancedFileOperationsService.moveItems(entityItems, destPath);
-					actionLogger.info('✅ Múltiples archivos movidos con undo/redo:', items.length);
-				}
-				break;
-			}
-
-			case 'copy-multiple': {
-				// Use enhanced clipboard manager
-				enhancedFileOperationsService.copyToClipboard(entityItems);
-				actionLogger.info('✅ Múltiples archivos copiados al portapapeles:', items.length);
-				break;
-			}
-
-			case 'download-multiple': {
-				// Descargar múltiples archivos usando el servicio mejorado
-				const downloadItems = items.map(item => ({
-					id: item.id,
-					name: item.name,
-					path: 'path' in item ? (item as any).path : ''
-				}));
-
-				// Use enhanced download service for batch download
-				const result = await enhancedDownloadService.downloadMultipleFiles(downloadItems, {
-					batchOptimization: items.length > 5, // Use ZIP for large batches
-					showProgress: true,
-					maxConcurrent: 3
-				});
-
-				if (result.success) {
-					actionLogger.info('✅ Descarga múltiple completada:', {
-						totalFiles: result.totalFiles,
-						successful: result.successfulDownloads,
-						failed: result.failedDownloads,
-						totalSize: result.totalSize,
-						duration: result.totalDuration
-					});
+		if (isMultiSelect) {
+			// Acciones para multi-selección - usar solo tipos válidos
+			actions.push('download', 'delete', 'add-to-album', 'add-to-collection');
+		} else {
+			// Acciones para un solo elemento
+			if (item.isDirectory) {
+				actions.push('open', 'rename', 'delete', 'copy-path');
+			} else {
+				if (item.mimeType?.startsWith('image/')) {
+					actions.push(
+						'preview',
+						'open',
+						'download',
+						'copy',
+						'add-to-album',
+						'add-to-collection',
+						'add-tag',
+						'rename',
+						'delete',
+						'copy-path'
+					);
+				} else if (item.mimeType?.startsWith('video/')) {
+					actions.push(
+						'preview',
+						'open',
+						'download',
+						'add-to-album',
+						'add-to-collection',
+						'add-tag',
+						'rename',
+						'delete',
+						'copy-path'
+					);
 				} else {
-					actionLogger.error('❌ Error en descarga múltiple:', result);
+					actions.push('download', 'rename', 'delete', 'copy-path');
 				}
-				break;
 			}
-
-			case 'add-to-collection': {
-				if (data?.collectionId) {
-					// TODO: Implementar cuando addImageToCollection esté disponible
-					// const collectionId = data.collectionId as string;
-					// const addPromises = items.map(item => addImageToCollection(item.id, collectionId));
-					// await Promise.all(addPromises);
-					toastService.info(`Función añadir ${items.length} elemento${items.length > 1 ? 's' : ''} a colección pendiente de implementación`);
-				}
-				break;
-			}
-
-			case 'add-to-album': {
-				if (data?.albumId) {
-					// TODO: Implementar cuando addImageToAlbum esté disponible
-					// const albumId = data.albumId as string;
-					// const addPromises = items.map(item => addImageToAlbum(item.id, albumId));
-					// await Promise.all(addPromises);
-					toastService.info(`Función añadir ${items.length} elemento${items.length > 1 ? 's' : ''} a álbum pendiente de implementación`);
-				}
-				break;
-			}
-
-			case 'add-tag': {
-				if (data?.tagId) {
-					// Añadir etiqueta a múltiples elementos
-					const tagId = data.tagId as string;
-					const addPromises = items.map(item => addImageToTag(tagId, item.id));
-					await Promise.all(addPromises);
-					actionLogger.info('✅ Etiqueta añadida a múltiples elementos:', items.length);
-					toastService.success(`Etiqueta añadida a ${items.length} elemento${items.length > 1 ? 's' : ''}`);
-				}
-				break;
-			}
-
-			default:
-				console.warn(`Acción de selección múltiple no implementada: ${action}`);
 		}
-	} catch (error) {
-		actionLogger.error(`Error al ejecutar acción de selección múltiple ${action}:`, error);
-		toastService.error(`Error al ejecutar la acción: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-	}
-};
 
-export const handleEmptySpaceAction = async (
-	action: EmptySpaceAction,
-	data?: Record<string, unknown>,
-	context?: {
-		currentPath?: string;
-		totalItems?: number;
-		selectAll?: (allIds: string[]) => void;
-		refreshView?: () => void;
-		allItemIds?: string[];
-	}
-): Promise<void> => {
-	try {
-		switch (action) {
-			case 'select-all':
-				if (context?.selectAll && context?.allItemIds) {
-					context.selectAll(context.allItemIds);
-					toastService.info(`${context.allItemIds.length} elementos seleccionados`);
-				} else {
-					toastService.warning('No hay elementos para seleccionar');
-				}
-				break;
+		return actions;
+	},
 
-			case 'paste':
-				if (context?.currentPath) {
-					// Use enhanced service with undo/redo support
-					await enhancedFileOperationsService.pasteFromClipboard(context.currentPath);
-				} else {
-					toastService.warning('No se puede pegar: ruta no disponible');
-				}
-				break;
+	// Ejecutor de acciones individuales
+	executeAction: async (
+		action: ContextMenuAction | MultiSelectionAction | EmptySpaceAction,
+		item?: FileItem,
+		items?: FileItem[],
+		toggleSelection?: ToggleItemSelectionFunction,
+		refreshView?: () => void
+	) => {
+		try {
+			actionLogger.info('🎯 Ejecutando acción:', { action, itemCount: items?.length || (item ? 1 : 0) });
 
-			case 'refresh':
-				if (context?.refreshView) {
-					context.refreshView();
-					toastService.info('Vista actualizada');
-				} else {
-					// Fallback: recargar la página
-					window.location.reload();
-				}
-				break;
-
-			case 'new-folder':
-				if (context?.currentPath) {
-					const folderName = prompt('Nombre de la nueva carpeta:', 'Nueva carpeta');
-					if (folderName) {
-						// TODO: Implementar creación de carpeta cuando esté disponible el servicio
-						toastService.info(`Crear carpeta "${folderName}" - Funcionalidad pendiente`);
+			switch (action) {
+				// Acciones de navegación
+				case 'open':
+					if (item) {
+						if (item.isDirectory) {
+							window.open(`/browse${item.path}`, '_self');
+						} else {
+							window.open(`/view${item.path}`, '_blank');
+						}
 					}
-				} else {
-					toastService.warning('No se puede crear carpeta: ruta no disponible');
-				}
-				break;
+					break;
 
-			case 'change-view':
-				// Esta acción se maneja típicamente en el componente padre
-				toastService.info('Cambiar vista - Usar toolbar de vista');
-				break;
+				case 'preview':
+					if (item) {
+						window.open(`/view${item.path}`, '_blank');
+					}
+					break;
 
-			case 'sort-by':
-				// Esta acción se maneja típicamente en el componente padre
-				toastService.info('Ordenar por - Usar toolbar de ordenación');
-				break;
+				// Acciones de descarga
+				case 'download':
+					if (item) {
+						await customFileOperationsService.downloadFile(item.path);
+					}
+					break;
 
-			case 'show-hidden':
-				// Esta acción se maneja típicamente en el componente padre
-				toastService.info('Mostrar archivos ocultos - Funcionalidad pendiente');
-				break;
+				// Acciones de portapapeles
+				case 'copy':
+					if (item && item.mimeType?.startsWith('image/')) {
+						await customFileOperationsService.copyFileToClipboard(item.path);
+					} else if (items && items.length > 0) {
+						clipboardManager.copy(items);
+						toastService.success(`${items.length} elemento(s) copiado(s)`);
+					}
+					break;
 
-			case 'scan-folder':
-				if (context?.currentPath) {
-					toastService.info(`Escaneando carpeta: ${context.currentPath}`);
-					// TODO: Implementar escaneo de carpeta cuando esté disponible
-				} else {
-					toastService.warning('No se puede escanear: ruta no disponible');
-				}
-				break;
+				case 'copy-path':
+					if (item) {
+						await navigator.clipboard.writeText(item.path);
+						toastService.success('Ruta copiada al portapapeles');
+					}
+					break;
 
-			case 'properties':
-				if (context?.currentPath) {
-					toastService.info(`Propiedades de: ${context.currentPath}`);
-					// TODO: Implementar propiedades de carpeta cuando esté disponible
-				} else {
-					toastService.warning('No se pueden mostrar propiedades: ruta no disponible');
-				}
-				break;
+				case 'paste':
+					if (item?.isDirectory) {
+						await customFileOperationsService.pasteFiles(item.path);
+						refreshView?.();
+					}
+					break;
 
-			default:
-				console.warn(`Acción de espacio vacío no implementada: ${action}`);
+				// Acciones de archivo
+				case 'rename':
+					if (item) {
+						const newName = prompt('Nuevo nombre:', item.name);
+						if (newName && newName !== item.name) {
+							await customFileOperationsService.renameFile(item.path, newName);
+							refreshView?.();
+						}
+					}
+					break;
+
+				case 'delete':
+					if (item) {
+						if (confirm(`¿Estás seguro de que quieres eliminar "${item.name}"?`)) {
+							await customFileOperationsService.deleteFile(item.path);
+							refreshView?.();
+						}
+					} else if (items && items.length > 0) {
+						if (confirm(`¿Estás seguro de que quieres eliminar ${items.length} elemento(s)?`)) {
+							const entities = items.map(convertFileItemToEntity);
+							await enhancedFileOperationsService.deleteItems(entities);
+							refreshView?.();
+						}
+					}
+					break;
+
+				// Acciones de organización
+				case 'add-to-album':
+					toastService.info('Funcionalidad de álbumes próximamente');
+					break;
+
+				case 'add-to-collection':
+					toastService.info('Funcionalidad de colecciones próximamente');
+					break;
+
+				case 'add-tag':
+					if (item) {
+						const tags = prompt('Etiquetas (separadas por comas):');
+						if (tags) {
+							const tagList = tags.split(',').map(t => t.trim()).filter(t => t);
+							for (const tag of tagList) {
+								await addImageToTag(item.path, tag);
+							}
+							toastService.success(`${tagList.length} etiqueta(s) agregada(s)`);
+						}
+					}
+					break;
+
+				// Otras acciones
+				case 'move':
+				case 'open-in-explorer':
+				case 'favorite-toggle':
+				case 'mark-toggle':
+					toastService.info('Funcionalidad próximamente');
+					break;
+
+				default:
+					actionLogger.warn('🤷 Acción no reconocida:', action);
+					break;
+			}
+		} catch (error) {
+			actionLogger.error('❌ Error ejecutando acción:', { action, error });
+			toastService.error(`Error al ejecutar la acción: ${action}`);
 		}
-	} catch (error) {
-		actionLogger.error(`Error al ejecutar acción de espacio vacío ${action}:`, error);
-		toastService.error(`Error al ejecutar la acción: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-	}
+	},
 };
 
-export const handleContextAction = async (
-	action: ContextMenuAction,
-	item: FileItem,
-	data?: Record<string, unknown>,
-	handleItemDoubleClick?: (item: FileItem) => void,
-	toggleSelectFile?: (id: string) => void
-): Promise<void> => {
-	try {
-		switch (action) {
-			case 'preview':
-				if (handleItemDoubleClick) {
-					handleItemDoubleClick(item);
-				}
-				break;
-
-			case 'favorite-toggle':
-				// Esta acción se maneja en el componente FileContextMenu
-				break;
-
-			case 'mark-toggle':
-				if (toggleSelectFile) {
-					toggleSelectFile(item.id);
-				}
-				break;
-
-			case 'open': {
-				// Abrir ubicación del archivo
-				const itemPath = 'path' in item ? (item as any).path : '';
-				await customFileOperationsService.openPath(itemPath);
-				break;
-			}
-
-			case 'download': {
-				// Descargar archivo usando el servicio mejorado
-				const itemName = 'name' in item ? item.name : 'archivo';
-				const downloadPath = 'path' in item ? (item as any).path : '';
-				
-				// Create download item for enhanced service
-				const downloadItem = {
-					id: item.id,
-					name: itemName,
-					path: downloadPath
-				};
-				
-				// Use enhanced download service with progress tracking
-				const result = await enhancedDownloadService.downloadFile(downloadItem, {
-					format: 'original',
-					showProgress: true
-				});
-				
-				if (!result.success) {
-					throw new Error(result.error || 'Download failed');
-				}
-				break;
-			}
-
-			case 'copy': {
-				// Copiar al portapapeles del sistema (imagen)
-				const copyPath = 'path' in item ? (item as any).path : '';
-				await customFileOperationsService.copyFileToClipboard(copyPath);
-				// También copiar al portapapeles interno para operaciones de archivo
-				clipboardManager.copy([item]);
-				break;
-			}
-
-			case 'copy-path': {
-				// Copiar ruta
-				const pathToCopy = 'path' in item ? (item as any).path : '';
-				await navigator.clipboard
-					.writeText(pathToCopy)
-					.then(() => toastService.success('Ruta copiada al portapapeles'))
-					.catch(() => toastService.error('No se pudo copiar la ruta'));
-				break;
-			}
-
-			case 'paste': {
-				// Pegar archivos
-				const targetPath = 'path' in item ? (item as any).path : '';
-				const targetDir = targetPath.substring(0, targetPath.lastIndexOf('/'));
-				await customFileOperationsService.pasteFiles(targetDir);
-				break;
-			}
-
-			case 'rename': {
-				// Renombrar archivo - por ahora mostrar prompt simple
-				const currentName = 'name' in item ? item.name : 'archivo';
-				const newName = prompt('Nuevo nombre:', currentName);
-				if (newName && newName !== currentName) {
-					const renamePath = 'path' in item ? (item as any).path : '';
-					await customFileOperationsService.renameFile(renamePath, newName);
-				}
-				break;
-			}
-
-			case 'move': {
-				// Mover archivo - por ahora mostrar prompt simple para destino
-				const sourcePath = 'path' in item ? (item as any).path : '';
-				const destPath = prompt('Ruta de destino:', sourcePath);
-				if (destPath && destPath !== sourcePath) {
-					await customFileOperationsService.moveFile(sourcePath, destPath);
-				}
-				break;
-			}
-
-			case 'open-in-explorer': {
-				// Ver en explorador - usar la implementación existente mejorada
-				const explorerPath = 'path' in item ? (item as any).path : '';
-				await customFileOperationsService.openPath(explorerPath);
-				break;
-			}
-
-			case 'delete': {
-				// Eliminar archivo
-				const deleteItemName = 'name' in item ? item.name : 'archivo';
-				const deletePath = 'path' in item ? (item as any).path : '';
-
-				// Confirmar eliminación
-				const confirmed = confirm(`¿Estás seguro de que quieres eliminar "${deleteItemName}"?`);
-				if (confirmed) {
-					toastService.info(`Eliminando: ${deleteItemName}`);
-					await customFileOperationsService.deleteFile(deletePath);
-				}
-				break;
-			}
-
-			case 'add-to-collection':
-				if (data?.collectionId) {
-					// TODO: Implementar cuando addImageToCollection esté disponible
-					// const collectionId = data.collectionId as string;
-					// await addImageToCollection(item.id, collectionId);
-					toastService.info('Función añadir a colección pendiente de implementación');
-				}
-				break;
-
-			case 'add-to-album':
-				if (data?.albumId) {
-					// TODO: Implementar cuando addImageToAlbum esté disponible
-					// const albumId = data.albumId as string;
-					// await addImageToAlbum(item.id, albumId);
-					toastService.info('Función añadir a álbum pendiente de implementación');
-				}
-				break;
-
-			case 'add-tag':
-				if (data?.tagId) {
-					// Añadir etiqueta
-					const tagId = data.tagId as string;
-					await addImageToTag(tagId, item.id);
-					toastService.success('Etiqueta añadida a la imagen');
-				}
-				break;
-
-			default:
-				console.warn(`Acción no implementada: ${action}`);
-		}
-	} catch (error) {
-		actionLogger.error(`Error al ejecutar acción ${action}:`, error);
-		toastService.error(`Error al ejecutar la acción: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-	}
-};
+// Export the main functions that other components expect
+export const handleContextAction = contextActionHandler.executeAction;
+export const handleEmptySpaceAction = contextActionHandler.executeAction;
+export const handleMultiSelectionAction = contextActionHandler.executeAction;
