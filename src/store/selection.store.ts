@@ -11,15 +11,24 @@ const selectionLogger = clientLogger.withContext('SelectionStore');
 export interface SelectionState {
 	// Estado
 	selectedItems: EntityWithStats[];
+	selectedIds: string[];
 	lastSelectedItem: EntityWithStats | null;
+	focusedId: string | null;
 	isMultiSelectMode: boolean;
 
 	// Acciones
-	toggleSelection: (id: string, item: EntityWithStats) => void;
+	toggleSelection: (id: string, item?: EntityWithStats) => void;
 	selectItem: (item: EntityWithStats) => void;
 	deselectItem: (id: string) => void;
 	clearSelection: () => void;
 	setMultiSelectMode: (enabled: boolean) => void;
+	setFocusedId: (id: string | null) => void;
+	addToSelection: (id: string) => void;
+	removeFromSelection: (id: string) => void;
+	setSelection: (ids: string[]) => void;
+	selectRange: (ids: string[]) => void;
+	setSelectedIds: (ids: string[]) => void;
+	selectAll: (items: EntityWithStats[]) => void;
 
 	// Selectores
 	isItemSelected: (id: string) => boolean;
@@ -35,22 +44,25 @@ export const useSelectionStore = create<SelectionState>()(
 		(set, get) => ({
 			// Estado inicial
 			selectedItems: [],
+			selectedIds: [],
 			lastSelectedItem: null,
+			focusedId: null,
 			isMultiSelectMode: false,
 
 			// Acciones
-			toggleSelection: (id: string, item: EntityWithStats) => {
-				const { selectedItems, isMultiSelectMode } = get();
-				const isSelected = selectedItems.some((item) => item.id === id);
+			toggleSelection: (id: string, item?: EntityWithStats) => {
+				const { selectedItems, selectedIds, isMultiSelectMode } = get();
+				const isSelected = selectedIds.includes(id);
 
 				// En modo de selección única, reemplazar selección
 				if (!isMultiSelectMode) {
 					if (isSelected) {
-						set({ selectedItems: [], lastSelectedItem: null });
+						set({ selectedItems: [], selectedIds: [], lastSelectedItem: null });
 						selectionLogger.debug('🚫 Deseleccionado único item:', id);
-					} else {
+					} else if (item) {
 						set({
 							selectedItems: [item],
+							selectedIds: [id],
 							lastSelectedItem: item,
 						});
 						selectionLogger.debug('✅ Seleccionado único item:', id);
@@ -60,14 +72,18 @@ export const useSelectionStore = create<SelectionState>()(
 
 				// En modo multi-selección, toggle individual
 				if (isSelected) {
+					const newSelectedItems = selectedItems.filter((item) => item.id !== id);
+					const newSelectedIds = selectedIds.filter((itemId) => itemId !== id);
 					set({
-						selectedItems: selectedItems.filter((item) => item.id !== id),
-						lastSelectedItem: selectedItems.length > 1 ? selectedItems[0] : null,
+						selectedItems: newSelectedItems,
+						selectedIds: newSelectedIds,
+						lastSelectedItem: newSelectedItems.length > 0 ? newSelectedItems[0] : null,
 					});
 					selectionLogger.debug('🚫 Deseleccionado item en modo multi:', id);
-				} else {
+				} else if (item) {
 					set({
 						selectedItems: [...selectedItems, item],
+						selectedIds: [...selectedIds, id],
 						lastSelectedItem: item,
 					});
 					selectionLogger.debug('✅ Seleccionado item en modo multi:', id);
@@ -75,14 +91,15 @@ export const useSelectionStore = create<SelectionState>()(
 			},
 
 			selectItem: (item: EntityWithStats) => {
-				const { isMultiSelectMode, selectedItems } = get();
+				const { isMultiSelectMode, selectedItems, selectedIds } = get();
 
 				// En modo multi-selección, añadir a selección existente
 				if (isMultiSelectMode) {
 					// Solo añadir si no está ya seleccionado
-					if (!selectedItems.some((i) => i.id === item.id)) {
+					if (!selectedIds.includes(item.id)) {
 						set({
 							selectedItems: [...selectedItems, item],
+							selectedIds: [...selectedIds, item.id],
 							lastSelectedItem: item,
 						});
 						selectionLogger.debug('➕ Añadido item a selección múltiple:', item.id);
@@ -91,6 +108,7 @@ export const useSelectionStore = create<SelectionState>()(
 					// En modo selección única, reemplazar selección
 					set({
 						selectedItems: [item],
+						selectedIds: [item.id],
 						lastSelectedItem: item,
 					});
 					selectionLogger.debug('🔄 Reemplazada selección con item:', item.id);
@@ -98,24 +116,28 @@ export const useSelectionStore = create<SelectionState>()(
 			},
 
 			deselectItem: (id: string) => {
-				const { selectedItems } = get();
-				const filtered = selectedItems.filter((item) => item.id !== id);
+				const { selectedItems, selectedIds } = get();
+				const newSelectedItems = selectedItems.filter((item) => item.id !== id);
+				const newSelectedIds = selectedIds.filter((itemId) => itemId !== id);
 
 				set({
-					selectedItems: filtered,
-					lastSelectedItem: filtered.length > 0 ? filtered[0] : null,
+					selectedItems: newSelectedItems,
+					selectedIds: newSelectedIds,
+					lastSelectedItem: newSelectedItems.length > 0 ? newSelectedItems[0] : null,
 				});
 
-				selectionLogger.debug('🚫 Deseleccionado item específico:', id);
+				selectionLogger.debug('🚫 Deseleccionado:', id);
 			},
 
 			clearSelection: () => {
 				set({
 					selectedItems: [],
+					selectedIds: [],
 					lastSelectedItem: null,
+					focusedId: null,
 				});
 
-				selectionLogger.debug('🧹 Limpiando toda la selección');
+				selectionLogger.debug('🧹 Selección limpiada');
 			},
 
 			setMultiSelectMode: (enabled: boolean) => {
@@ -134,9 +156,61 @@ export const useSelectionStore = create<SelectionState>()(
 				selectionLogger.debug(`${enabled ? '✅' : '❌'} Modo multi-selección: ${enabled ? 'activado' : 'desactivado'}`);
 			},
 
+			setFocusedId: (id: string | null) => {
+				set({ focusedId: id });
+				selectionLogger.debug('🎯 Foco establecido en:', id);
+			},
+
+			addToSelection: (id: string) => {
+				const { selectedIds } = get();
+				if (!selectedIds.includes(id)) {
+					set({ selectedIds: [...selectedIds, id] });
+					selectionLogger.debug('➕ Agregado a selección:', id);
+				}
+			},
+
+			removeFromSelection: (id: string) => {
+				const { selectedIds } = get();
+				set({ selectedIds: selectedIds.filter(itemId => itemId !== id) });
+				selectionLogger.debug('➖ Removido de selección:', id);
+			},
+
+			setSelection: (ids: string[]) => {
+				set({ selectedIds: ids });
+				selectionLogger.debug('📝 Selección establecida:', `${ids.length} items`);
+			},
+
+			selectRange: (ids: string[]) => {
+				const { selectedIds, isMultiSelectMode } = get();
+				if (isMultiSelectMode) {
+					const newIds = [...new Set([...selectedIds, ...ids])];
+					set({ selectedIds: newIds });
+					selectionLogger.debug('📊 Rango agregado a selección:', `${ids.length} items`);
+				} else {
+					set({ selectedIds: ids });
+					selectionLogger.debug('📊 Rango seleccionado:', `${ids.length} items`);
+				}
+			},
+
+			setSelectedIds: (ids: string[]) => {
+				set({ selectedIds: ids });
+				selectionLogger.debug('📝 Selección establecida:', `${ids.length} items`);
+			},
+
+			selectAll: (items: EntityWithStats[]) => {
+				const allIds = items.map(item => item.id);
+				set({
+					selectedItems: items,
+					selectedIds: allIds,
+					lastSelectedItem: items.length > 0 ? items[items.length - 1] : null,
+					isMultiSelectMode: items.length > 1
+				});
+				selectionLogger.debug('🎯 Seleccionados todos los items:', `${items.length} items`);
+			},
+
 			// Selectores
 			isItemSelected: (id: string) => {
-				return get().selectedItems.some((item) => item.id === id);
+				return get().selectedIds.includes(id);
 			},
 		}),
 		{

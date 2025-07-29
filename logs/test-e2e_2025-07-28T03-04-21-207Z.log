@@ -1,7 +1,0 @@
-Comando: bunx playwright test src/services/clipboard/clipboard-manager.test.ts --run
-Fecha: 2025-07-28T03:04:21.209Z
-Directorio: D:\DEV\image-manager
-Modo tolerante: SÍ
-Tipo: Testing
-===============================================
-error: unknown option '--run'

@@ -1,89 +1,62 @@
 /**
- * @file Vista de lista usando TanStack Virtual
+ * @file Vista de lista con columnas configurables usando TanStack Virtual
  * @module components/features/file-browser/views/list-view
  */
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { useImageResources } from '@/store/image-resources.store';
+import { useListViewConfig } from '@/hooks/use-list-view-config';
+import { ListViewHeader } from './list-view-header';
+import { ListViewRow } from './list-view-row';
 import type { AnyEntityWithStats } from '@/types/migration';
 
 interface ListViewProps {
 	items: AnyEntityWithStats[];
-	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
+	sortBy?: string;
+	sortDirection?: 'asc' | 'desc';
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
+	onItemContextMenu?: (event: React.MouseEvent, item: AnyEntityWithStats) => void;
+	onSort?: (columnKey: string, direction: 'asc' | 'desc') => void;
+	entityType?: string;
+	className?: string;
 }
-
-// Componente interno para manejar thumbnails de imágenes
-const ImageThumbnail = memo(function ImageThumbnail({
-	imageId,
-	imageName,
-	className,
-}: {
-	imageId: string;
-	imageName: string;
-	className: string;
-}) {
-	const { getThumbnail, isLoading: isResourceLoading } = useImageResources();
-	const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-	const [thumbnailLoading, setThumbnailLoading] = useState(false);
-
-	useEffect(() => {
-		const loadThumbnail = async () => {
-			if (!imageId || thumbnailUrl) return;
-
-			setThumbnailLoading(true);
-			try {
-				const url = await getThumbnail(imageId);
-				if (url) {
-					setThumbnailUrl(url);
-				}
-			} catch (error) {
-				console.error('Error cargando thumbnail:', error);
-			} finally {
-				setThumbnailLoading(false);
-			}
-		};
-
-		loadThumbnail();
-	}, [imageId, getThumbnail, thumbnailUrl]);
-
-	const displayThumbnailUrl = thumbnailUrl || `/api/images/${imageId}/thumbnail`;
-	const shouldShowLoading = thumbnailLoading || isResourceLoading(imageId);
-
-	if (shouldShowLoading) {
-		return <div className={cn(className, 'animate-pulse bg-muted')} />;
-	}
-
-	return (
-		<img
-			src={displayThumbnailUrl}
-			alt={imageName}
-			className={className}
-			onError={(e) => {
-				console.warn(`Error cargando thumbnail para ${imageId}:`, e);
-				// Fallback visual
-				const target = e.target as HTMLImageElement;
-				target.style.display = 'none';
-			}}
-		/>
-	);
-});
 
 export const ListView = memo<ListViewProps>(function ListView({
 	items,
 	selectedIds,
 	containerWidth,
+	sortBy,
+	sortDirection = 'asc',
 	onItemClick,
 	onItemDoubleClick,
+	onItemContextMenu,
+	onSort,
+	entityType = 'default',
+	className = '',
 }) {
-	const parentRef = useRef<any>(null);
+	const parentRef = useRef<HTMLDivElement>(null);
+	const tableRef = useRef<HTMLTableElement>(null);
 	const [containerHeight, setContainerHeight] = useState<number>(600);
+
+	// Usar hook de configuración de ListView
+	const {
+		config,
+		visibleColumns,
+		updateColumn,
+		reorderColumns,
+		toggleColumnVisibility,
+		getColumnsWithRenderers,
+	} = useListViewConfig();
+
+	// Obtener columnas con renderers para el tipo de entidad actual
+	const columnsWithRenderers = useMemo(() => {
+		return getColumnsWithRenderers(entityType);
+	}, [getColumnsWithRenderers, entityType]);
 
 	// Handler para clicks en espacio vacío
 	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
@@ -93,16 +66,69 @@ export const ListView = memo<ListViewProps>(function ListView({
 
 		// Verificar si es un click en espacio vacío (no en elementos de la lista)
 		const isEmptySpaceClick = target === currentTarget ||
-			(!target.closest('.entity-card') &&
-				!target.closest('[data-entity-card]') &&
+			(!target.closest('[data-testid^="list-row-"]') &&
+				!target.closest('th') &&
 				!target.closest('button') &&
 				!target.closest('[role="button"]') &&
-				!target.closest('[style*="position: absolute"]')); // Evitar clicks en elementos virtualizados
+				!target.closest('input') &&
+				!target.closest('textarea') &&
+				!target.closest('[data-radix-dropdown-menu-content]') &&
+				!target.closest('[data-radix-dropdown-menu-trigger]'));
 
-		if (isEmptySpaceClick) {
-			// Propagar el evento hacia arriba para que FileBrowser lo maneje
-			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+		if (isEmptySpaceClick && selectedIds.length > 0) {
+			// Feedback visual para la deselección
+			currentTarget.style.transition = 'background-color 0.15s ease';
+			currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
+
+			setTimeout(() => {
+				currentTarget.style.backgroundColor = '';
+				currentTarget.style.transition = '';
+			}, 150);
 		}
+
+		// Propagar el evento hacia arriba para que FileBrowser lo maneje
+		// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+	}, [selectedIds.length]);
+
+	// Navegación por teclado para vista de lista
+	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+		if (!parentRef.current) return;
+
+		const focusedElement = document.activeElement as HTMLElement;
+		if (!focusedElement?.closest('[data-testid^="list-row-"]')) return;
+
+		const rows = Array.from(parentRef.current.querySelectorAll('[data-testid^="list-row-"]')) as HTMLElement[];
+		const currentIndex = rows.findIndex(row => row.contains(focusedElement));
+		if (currentIndex === -1) return;
+
+		let nextIndex = currentIndex;
+
+		switch (e.key) {
+			case 'ArrowDown':
+				nextIndex = Math.min(currentIndex + 1, rows.length - 1);
+				break;
+			case 'ArrowUp':
+				nextIndex = Math.max(currentIndex - 1, 0);
+				break;
+			case 'Home':
+				nextIndex = 0;
+				break;
+			case 'End':
+				nextIndex = rows.length - 1;
+				break;
+			case 'PageDown':
+				nextIndex = Math.min(currentIndex + 10, rows.length - 1);
+				break;
+			case 'PageUp':
+				nextIndex = Math.max(currentIndex - 10, 0);
+				break;
+			default:
+				return;
+		}
+
+		e.preventDefault();
+		rows[nextIndex]?.focus();
+		rows[nextIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 	}, []);
 
 	// Efecto para medir y establecer altura del contenedor
@@ -129,110 +155,134 @@ export const ListView = memo<ListViewProps>(function ListView({
 		}
 	}, []);
 
-	// Configurar virtualizador con altura fija para evitar solapamiento
+	// Configurar virtualizador
 	const rowVirtualizer = useVirtualizer({
 		count: items.length,
 		getScrollElement: () => parentRef.current,
-		estimateSize: () => 88, // Altura aumentada: 72px + 16px margin/padding
+		estimateSize: () => config.rowHeight + config.rowGap,
 		overscan: 5,
 	});
 
-	// Debug logging
-	console.log('🔍 ListView - Configuración del virtualizador:', {
-		itemsLength: items.length,
-		containerHeight,
-		totalSize: rowVirtualizer.getTotalSize(),
-		virtualItemsCount: rowVirtualizer.getVirtualItems().length,
-		firstItem: items[0]
-	});
+	// Handlers para funcionalidades del header
+	const handleColumnResize = useCallback(async (columnKey: string, width: number) => {
+		await updateColumn(columnKey, { width });
+	}, [updateColumn]);
+
+	const handleColumnReorder = useCallback(async (fromIndex: number, toIndex: number) => {
+		await reorderColumns(fromIndex, toIndex);
+	}, [reorderColumns]);
+
+	const handleColumnToggle = useCallback(async (columnKey: string) => {
+		await toggleColumnVisibility(columnKey);
+	}, [toggleColumnVisibility]);
+
+	// Calcular altura de header
+	const headerHeight = config.showHeader ? 40 : 0;
 
 	return (
 		<div
-			ref={parentRef}
-			className="w-full overflow-auto"
+			className={cn("w-full overflow-hidden", className)}
 			data-testid="listview-container"
 			data-view-type="list"
-			onClick={handleEmptySpaceClick}
-			style={{
-				height: `${containerHeight}px`,
-				contain: 'strict',
-				padding: '8px 16px',
-			}}
+			role="grid"
+			aria-label={`Vista de lista con ${items.length} elementos`}
+			aria-describedby="list-view-instructions"
+			onKeyDown={handleKeyDown}
 		>
-			<div
-				style={{
-					height: `${rowVirtualizer.getTotalSize()}px`,
-					width: '100%',
-					position: 'relative',
-				}}
+			<div id="list-view-instructions" className="sr-only">
+				Usa las flechas arriba y abajo para navegar, Home y End para ir al inicio o final, PageUp y PageDown para navegar rápidamente.
+			</div>
+			{/* Tabla con header fijo */}
+			<table
+				ref={tableRef}
+				className="w-full table-fixed"
 			>
-				{rowVirtualizer.getVirtualItems().map((virtualItem) => {
-					const item = items[virtualItem.index];
-					const isSelected = selectedIds.includes(item.id);
+				{/* Header */}
+				{config.showHeader && (
+					<ListViewHeader
+						columns={columnsWithRenderers}
+						sortBy={sortBy}
+						sortDirection={sortDirection}
+						onSort={onSort}
+						onColumnResize={handleColumnResize}
+						onColumnReorder={handleColumnReorder}
+						onColumnToggle={handleColumnToggle}
+						showSettings={true}
+					/>
+				)}
+			</table>
 
-					return (
-						<motion.div
-							key={item.id}
-							initial={{ opacity: 0, x: -20 }}
-							animate={{ opacity: 1, x: 0 }}
-							transition={{
-								delay: Math.min(virtualItem.index * 0.01, 0.3),
-								duration: 0.3,
-							}}
-							style={{
-								position: 'absolute',
-								top: `${virtualItem.start}px`,
-								left: 0,
-								width: '100%',
-								height: `${virtualItem.size}px`,
-							}}
-							className={cn(
-								'flex items-center gap-3 px-3 py-3 mx-1 mb-2 rounded-md cursor-pointer transition-all duration-200',
-								'hover:bg-accent/50',
-								isSelected && 'bg-accent ring-2 ring-primary'
-							)}
-							onClick={(e) => {
-								e.stopPropagation();
-								onItemClick(item, e);
-							}}
-							onDoubleClick={(e) => {
-								e.stopPropagation();
-								onItemDoubleClick(item);
-							}}
-						>
-							{/* Thumbnail o icono */}
-							<div className="w-12 h-12 bg-muted rounded flex-shrink-0 flex items-center justify-center">
-								{'entityType' in item && item.entityType === 'image' && item.id ? (
-									<ImageThumbnail
-										imageId={item.id}
-										imageName={('name' in item ? item.name : undefined) || item.id || 'unknown'}
-										className="w-12 h-12 object-cover rounded"
-									/>
-								) : (
-									<div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center">
-										<span className="text-xs font-semibold text-primary">
-											{'name' in item && item.name ? item.name.charAt(0).toUpperCase() : 'U'}
-										</span>
-									</div>
-								)}
-							</div>
+			{/* Contenedor virtualizado */}
+			<div
+				ref={parentRef}
+				className="w-full overflow-auto"
+				onClick={handleEmptySpaceClick}
+				style={{
+					height: `${containerHeight - headerHeight}px`,
+					contain: 'strict',
+				}}
+				role="rowgroup"
+				aria-live="polite"
+				aria-busy={false}
+			>
+				<div
+					style={{
+						height: `${rowVirtualizer.getTotalSize()}px`,
+						width: '100%',
+						position: 'relative',
+					}}
+				>
+					{rowVirtualizer.getVirtualItems().map((virtualItem) => {
+						const item = items[virtualItem.index];
+						const isSelected = selectedIds.includes(item.id);
+						const isEven = virtualItem.index % 2 === 0;
 
-							{/* Información del item */}
-							<div className="flex-1 min-w-0">
-								<div className="font-medium text-sm truncate">
-									{('name' in item ? item.name : undefined) || item.id || 'Unknown'}
-								</div>
-								<div className="text-xs text-muted-foreground">
-									{'entityType' in item ? item.entityType : 'unknown'} •
-									{'stats' in item && item.stats && typeof item.stats === 'object' && 'imageCount' in item.stats
-										? item.stats.imageCount
-										: 0}{' '}
-									imágenes
-								</div>
-							</div>
-						</motion.div>
-					);
-				})}
+						return (
+							<motion.div
+								key={item.id}
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{
+									delay: Math.min(virtualItem.index * 0.005, 0.2),
+									duration: 0.2,
+								}}
+								style={{
+									position: 'absolute',
+									top: `${virtualItem.start}px`,
+									left: 0,
+									width: '100%',
+									height: `${virtualItem.size}px`,
+								}}
+								role="row"
+								aria-rowindex={virtualItem.index + 1}
+								aria-setsize={items.length}
+								tabIndex={virtualItem.index === 0 ? 0 : -1}
+							>
+								<table className="w-full table-fixed">
+									<tbody>
+										<ListViewRow
+											item={item}
+											columns={columnsWithRenderers}
+											index={virtualItem.index}
+											isSelected={isSelected}
+											isEven={isEven}
+											showZebraStripes={config.showZebraStripes}
+											rowHeight={config.rowHeight}
+											cellPadding={config.cellPadding}
+											showThumbnails={config.showThumbnails}
+											thumbnailSize={config.thumbnailSize}
+											onClick={onItemClick}
+											onDoubleClick={onItemDoubleClick}
+											onContextMenu={onItemContextMenu}
+											aria-selected={isSelected}
+											aria-describedby={`row-${item.id}-description`}
+										/>
+									</tbody>
+								</table>
+							</motion.div>
+						);
+					})}
+				</div>
 			</div>
 		</div>
 	);

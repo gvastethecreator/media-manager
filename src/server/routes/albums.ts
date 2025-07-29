@@ -93,7 +93,7 @@ interface AlbumCardData extends Omit<AlbumWithStats, 'filters' | 'metadata'> {
 	viewConfig?: {
 		theme?: string;
 		layout?: string;
-		thumbnailSize?: 'small' | 'medium' | 'large';
+		thumbnailSize?: 'none' | 'small' | 'medium' | 'large';
 	};
 }
 
@@ -476,7 +476,7 @@ const getAlbumCardDataHandler = async (req: Request, res: Response) => {
 		const viewConfig = {
 			theme: 'default',
 			layout: 'grid',
-			thumbnailSize: 'medium' as 'small' | 'medium' | 'large',
+			thumbnailSize: 'medium' as 'none' | 'small' | 'medium' | 'large',
 		};
 
 		const result: AlbumCardData = {

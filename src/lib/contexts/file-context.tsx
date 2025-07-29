@@ -3,11 +3,11 @@
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 import { useLogActivity } from '@/lib/api/activity';
 import {
-	useAddTags,
-	useAddToCollection,
-	useRemoveFromCollection,
-	useRemoveTags,
-	useToggleFavorite,
+    useAddTags,
+    useAddToCollection,
+    useRemoveFromCollection,
+    useRemoveTags,
+    useToggleFavorite,
 } from '@/lib/api/files';
 import { clientEvents } from '@/lib/client/events.client';
 
@@ -25,7 +25,7 @@ interface FileContextType {
 	sortBy: 'name' | 'date' | 'size';
 	sortOrder: 'asc' | 'desc';
 	viewMode: 'grid' | 'list';
-	thumbnailSize: 'small' | 'medium' | 'large';
+	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
 	loading: boolean;
 	error: string | null;
 
@@ -41,7 +41,7 @@ interface FileContextType {
 	setSortBy: (sortBy: 'name' | 'date' | 'size') => void;
 	setSortOrder: (order: 'asc' | 'desc') => void;
 	setViewMode: (mode: 'grid' | 'list') => void;
-	setThumbnailSize: (size: 'small' | 'medium' | 'large') => void;
+	setThumbnailSize: (size: 'none' | 'small' | 'medium' | 'large') => void;
 	toggleFavorite: (fileId: string) => void;
 	addToCollection: (fileIds: string[], collectionId: string) => void;
 	removeFromCollection: (fileIds: string[], collectionId: string) => void;
@@ -63,7 +63,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-	const [thumbnailSize, setThumbnailSize] = useState<'small' | 'medium' | 'large'>('medium');
+	const [thumbnailSize, setThumbnailSize] = useState<'none' | 'small' | 'medium' | 'large'>('medium');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
