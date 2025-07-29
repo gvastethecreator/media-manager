@@ -8,7 +8,7 @@
 import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/services/toast';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 import {
   copyFile,
   deleteFile,
@@ -18,6 +18,7 @@ import {
 } from './file.service';
 import { FileErrorCode } from '@/types/entities/file';
 import { clipboardManager as comprehensiveClipboardManager } from '@/services/clipboard';
+import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
 
 const logger = serverLogger.withContext('EnhancedFileOperationsService');
 
@@ -170,9 +171,9 @@ export class EnhancedFileOperationsService {
   }
 
   /**
-   * Paste items from clipboard to target path
+   * Paste items from clipboard to target path with undo support
    */
-  async pasteFromClipboard(targetPath: string): Promise<AnyEntityWithStats[]> {
+  async pasteFromClipboard(targetPath: string, enableUndo: boolean = true): Promise<AnyEntityWithStats[]> {
     try {
       logger.info('📋 Pasting from clipboard to:', targetPath);
 
@@ -181,54 +182,73 @@ export class EnhancedFileOperationsService {
         throw createFileError('No hay elementos en el portapapeles', FileErrorCode.OPERATION_FAILED);
       }
 
-      const results: AnyEntityWithStats[] = [];
       const operation = clipboardData.operation;
 
-      // Show progress toast for multiple items
-      if (clipboardData.items.length > 1) {
-        const operationText = operation === 'copy' ? 'Copiando' : 'Moviendo';
-        toastService.info(`${operationText} ${clipboardData.items.length} elementos...`);
-      }
+      if (enableUndo) {
+        // Create and execute undoable action
+        const action = operation === 'copy'
+          ? undoRedoManager.createCopyAction(clipboardData.items, targetPath)
+          : undoRedoManager.createMoveAction(clipboardData.items, targetPath);
 
-      for (const item of clipboardData.items) {
-        const sourcePath = item.path;
-        const fileName = item.name;
-        const destPath = path.join(targetPath, fileName);
+        await undoRedoManager.execute(action);
 
-        try {
-          if (operation === 'copy') {
-            const result = await copyFile(sourcePath, destPath);
-            if (result.success && result.destInfo) {
-              const entityResult = convertFileInfoToEntity(result.destInfo);
-              results.push(entityResult);
-            }
-          } else if (operation === 'cut') {
-            const result = await moveFile(sourcePath, destPath);
-            if (result.success && result.destInfo) {
-              const entityResult = convertFileInfoToEntity(result.destInfo);
-              results.push(entityResult);
-            }
-          }
-        } catch (itemError) {
-          logger.error(`❌ Error processing item ${fileName}:`, itemError);
-          // Continue with other items, don't fail the entire operation
+        // Clear clipboard if cut operation was successful
+        if (operation === 'cut') {
+          clipboardManager.clear();
         }
+
+        // Return the target data from the action
+        return action.targetData?.copiedItems || [];
+      } else {
+        // Legacy implementation without undo support
+        const results: AnyEntityWithStats[] = [];
+
+        // Show progress toast for multiple items
+        if (clipboardData.items.length > 1) {
+          const operationText = operation === 'copy' ? 'Copiando' : 'Moviendo';
+          toastService.info(`${operationText} ${clipboardData.items.length} elementos...`);
+        }
+
+        for (const item of clipboardData.items) {
+          const sourcePath = item.path;
+          const fileName = item.name;
+          const destPath = path.join(targetPath, fileName);
+
+          try {
+            if (operation === 'copy') {
+              const result = await copyFile(sourcePath, destPath);
+              if (result.success && result.destInfo) {
+                const entityResult = convertFileInfoToEntity(result.destInfo);
+                results.push(entityResult);
+              }
+            } else if (operation === 'cut') {
+              const result = await moveFile(sourcePath, destPath);
+              if (result.success && result.destInfo) {
+                const entityResult = convertFileInfoToEntity(result.destInfo);
+                results.push(entityResult);
+              }
+            }
+          } catch (itemError) {
+            logger.error(`❌ Error processing item ${fileName}:`, itemError);
+            // Continue with other items, don't fail the entire operation
+          }
+        }
+
+        // Clear clipboard if cut operation was successful
+        if (operation === 'cut' && results.length > 0) {
+          clipboardManager.clear();
+        }
+
+        // Show success toast
+        const operationText = operation === 'copy' ? 'copiados' : 'movidos';
+        const message = results.length === 1
+          ? `"${results[0].name}" ${operationText.slice(0, -1)} correctamente`
+          : `${results.length} elementos ${operationText} correctamente`;
+        toastService.success(message);
+
+        logger.info('✅ Paste operation completed:', results.length);
+        return results;
       }
-
-      // Clear clipboard if cut operation was successful
-      if (operation === 'cut' && results.length > 0) {
-        clipboardManager.clear();
-      }
-
-      // Show success toast
-      const operationText = operation === 'copy' ? 'copiados' : 'movidos';
-      const message = results.length === 1
-        ? `"${results[0].name}" ${operationText.slice(0, -1)} correctamente`
-        : `${results.length} elementos ${operationText} correctamente`;
-      toastService.success(message);
-
-      logger.info('✅ Paste operation completed:', results.length);
-      return results;
 
     } catch (error) {
       logger.error('❌ Error pasting from clipboard:', error);
@@ -238,28 +258,44 @@ export class EnhancedFileOperationsService {
   }
 
   /**
-   * Rename item with inline editing support
+   * Rename item with inline editing support and undo support
    */
-  async renameItem(item: AnyEntityWithStats, newName: string): Promise<AnyEntityWithStats> {
+  async renameItem(item: AnyEntityWithStats, newName: string, enableUndo: boolean = true): Promise<AnyEntityWithStats> {
     try {
       logger.info('📝 Renaming item:', { from: item.name, to: newName });
 
       const oldPath = item.path;
       const newPath = path.join(path.dirname(oldPath), newName);
 
-      const result = await renameFile(oldPath, newPath);
+      if (enableUndo) {
+        // Create and execute undoable action
+        const action = undoRedoManager.createRenameAction(oldPath, newPath);
+        await undoRedoManager.execute(action);
 
-      if (result.success) {
-        // Get updated file info
-        const updatedFileInfo = await getFileInfo(newPath);
-        const updatedEntity = convertFileInfoToEntity(updatedFileInfo);
+        // Return the renamed item data from the action
+        if (action.targetData?.renamedItem) {
+          return action.targetData.renamedItem;
+        }
 
-        toastService.success(`"${item.name}" renombrado a "${newName}"`);
-        logger.info('✅ Item renamed successfully');
-        return updatedEntity;
+        // Fallback: get the file info directly
+        const fileInfo = await getFileInfo(newPath);
+        return convertFileInfoToEntity(fileInfo);
+      } else {
+        // Legacy implementation without undo support
+        const result = await renameFile(oldPath, newPath);
+
+        if (result.success) {
+          // Get updated file info
+          const updatedFileInfo = await getFileInfo(newPath);
+          const updatedEntity = convertFileInfoToEntity(updatedFileInfo);
+
+          toastService.success(`"${item.name}" renombrado a "${newName}"`);
+          logger.info('✅ Item renamed successfully');
+          return updatedEntity;
+        }
+
+        throw createFileError('Error en la operación de renombrado', FileErrorCode.OPERATION_FAILED);
       }
-
-      throw createFileError('Error en la operación de renombrado', FileErrorCode.OPERATION_FAILED);
 
     } catch (error) {
       logger.error('❌ Error renaming item:', error);
@@ -269,52 +305,62 @@ export class EnhancedFileOperationsService {
   }
 
   /**
-   * Move multiple items to target path (batch operation)
+   * Move multiple items to target path with undo support (batch operation)
    */
-  async moveItems(items: AnyEntityWithStats[], targetPath: string): Promise<AnyEntityWithStats[]> {
+  async moveItems(items: AnyEntityWithStats[], targetPath: string, enableUndo: boolean = true): Promise<AnyEntityWithStats[]> {
     try {
       logger.info('🚚 Moving items:', { count: items.length, target: targetPath });
 
-      // Show progress toast for multiple items
-      if (items.length > 1) {
-        toastService.info(`Moviendo ${items.length} elementos...`);
-      }
+      if (enableUndo) {
+        // Create and execute undoable action
+        const action = undoRedoManager.createMoveAction(items, targetPath);
+        await undoRedoManager.execute(action);
 
-      const results: AnyEntityWithStats[] = [];
-      const errors: string[] = [];
-
-      for (const item of items) {
-        try {
-          const sourcePath = item.path;
-          const fileName = item.name;
-          const destPath = path.join(targetPath, fileName);
-
-          const result = await moveFile(sourcePath, destPath);
-
-          if (result.success && result.destInfo) {
-            const entityResult = convertFileInfoToEntity(result.destInfo);
-            results.push(entityResult);
-          }
-        } catch (itemError) {
-          logger.error(`❌ Error moving item ${item.name}:`, itemError);
-          errors.push(`Error moviendo "${item.name}"`);
+        // Return the moved items data from the action
+        return action.targetData?.movedItems || [];
+      } else {
+        // Legacy implementation without undo support
+        // Show progress toast for multiple items
+        if (items.length > 1) {
+          toastService.info(`Moviendo ${items.length} elementos...`);
         }
-      }
 
-      // Show results
-      if (results.length > 0) {
-        const message = results.length === 1
-          ? `"${results[0].name}" movido correctamente`
-          : `${results.length} elementos movidos correctamente`;
-        toastService.success(message);
-      }
+        const results: AnyEntityWithStats[] = [];
+        const errors: string[] = [];
 
-      if (errors.length > 0) {
-        toastService.error(`${errors.length} elementos no pudieron ser movidos`);
-      }
+        for (const item of items) {
+          try {
+            const sourcePath = item.path;
+            const fileName = item.name;
+            const destPath = path.join(targetPath, fileName);
 
-      logger.info('✅ Move operation completed:', { success: results.length, errors: errors.length });
-      return results;
+            const result = await moveFile(sourcePath, destPath);
+
+            if (result.success && result.destInfo) {
+              const entityResult = convertFileInfoToEntity(result.destInfo);
+              results.push(entityResult);
+            }
+          } catch (itemError) {
+            logger.error(`❌ Error moving item ${item.name}:`, itemError);
+            errors.push(`Error moviendo "${item.name}"`);
+          }
+        }
+
+        // Show results
+        if (results.length > 0) {
+          const message = results.length === 1
+            ? `"${results[0].name}" movido correctamente`
+            : `${results.length} elementos movidos correctamente`;
+          toastService.success(message);
+        }
+
+        if (errors.length > 0) {
+          toastService.error(`${errors.length} elementos no pudieron ser movidos`);
+        }
+
+        logger.info('✅ Move operation completed:', { success: results.length, errors: errors.length });
+        return results;
+      }
 
     } catch (error) {
       logger.error('❌ Error moving items:', error);
@@ -324,48 +370,111 @@ export class EnhancedFileOperationsService {
   }
 
   /**
-   * Delete multiple items (batch operation)
+   * Delete multiple items with undo support
    */
-  async deleteItems(items: AnyEntityWithStats[]): Promise<void> {
+  async deleteItems(items: AnyEntityWithStats[], enableUndo: boolean = true): Promise<void> {
     try {
       logger.info('🗑️ Deleting items:', items.length);
 
-      // Show progress toast for multiple items
-      if (items.length > 1) {
-        toastService.info(`Eliminando ${items.length} elementos...`);
-      }
-
-      const errors: string[] = [];
-      let successCount = 0;
-
-      for (const item of items) {
-        try {
-          await deleteFile(item.path);
-          successCount++;
-        } catch (itemError) {
-          logger.error(`❌ Error deleting item ${item.name}:`, itemError);
-          errors.push(`Error eliminando "${item.name}"`);
+      if (enableUndo) {
+        // Create and execute undoable action
+        const action = undoRedoManager.createDeleteAction(items);
+        await undoRedoManager.execute(action);
+      } else {
+        // Legacy implementation without undo support
+        // Show progress toast for multiple items
+        if (items.length > 1) {
+          toastService.info(`Eliminando ${items.length} elementos...`);
         }
-      }
 
-      // Show results
-      if (successCount > 0) {
-        const message = successCount === 1
-          ? `1 elemento eliminado correctamente`
-          : `${successCount} elementos eliminados correctamente`;
-        toastService.success(message);
-      }
+        const errors: string[] = [];
+        let successCount = 0;
 
-      if (errors.length > 0) {
-        toastService.error(`${errors.length} elementos no pudieron ser eliminados`);
-      }
+        for (const item of items) {
+          try {
+            await deleteFile(item.path);
+            successCount++;
+          } catch (itemError) {
+            logger.error(`❌ Error deleting item ${item.name}:`, itemError);
+            errors.push(`Error eliminando "${item.name}"`);
+          }
+        }
 
-      logger.info('✅ Delete operation completed:', { success: successCount, errors: errors.length });
+        // Show results
+        if (successCount > 0) {
+          const message = successCount === 1
+            ? `1 elemento eliminado correctamente`
+            : `${successCount} elementos eliminados correctamente`;
+          toastService.success(message);
+        }
+
+        if (errors.length > 0) {
+          toastService.error(`${errors.length} elementos no pudieron ser eliminados`);
+        }
+
+        logger.info('✅ Delete operation completed:', { success: successCount, errors: errors.length });
+      }
 
     } catch (error) {
       logger.error('❌ Error deleting items:', error);
       toastService.error('Error al eliminar elementos');
       throw createFileError('No se pudieron eliminar los elementos', FileErrorCode.OPERATION_FAILED, error);
+    }
+  }
+
+  /**
+   * Copy multiple items to a target directory with undo support
+   */
+  async copyItems(items: AnyEntityWithStats[], targetPath: string, enableUndo: boolean = true): Promise<AnyEntityWithStats[]> {
+    try {
+      logger.info('📋 Copying items:', { count: items.length, targetPath });
+
+      if (enableUndo) {
+        // Create and execute undoable action
+        const action = undoRedoManager.createCopyAction(items, targetPath);
+        await undoRedoManager.execute(action);
+
+        // Return the copied items data from the action
+        return action.targetData?.copiedItems || [];
+      } else {
+        // Legacy implementation without undo support
+        const results: AnyEntityWithStats[] = [];
+
+        // Show progress toast for multiple items
+        if (items.length > 1) {
+          toastService.info(`Copiando ${items.length} elementos...`);
+        }
+
+        for (const item of items) {
+          const sourcePath = item.path;
+          const destPath = path.join(targetPath, item.name);
+
+          try {
+            const result = await copyFile(sourcePath, destPath);
+            if (result.success && result.destInfo) {
+              const entityResult = convertFileInfoToEntity(result.destInfo);
+              results.push(entityResult);
+            }
+          } catch (itemError) {
+            logger.error(`❌ Error copying item ${item.name}:`, itemError);
+            // Continue with other items, don't fail the entire operation
+          }
+        }
+
+        // Show success toast
+        const message = results.length === 1
+          ? `"${results[0].name}" copiado correctamente`
+          : `${results.length} elementos copiados correctamente`;
+        toastService.success(message);
+
+        logger.info('✅ Copy operation completed:', results.length);
+        return results;
+      }
+
+    } catch (error) {
+      logger.error('❌ Error copying items:', error);
+      toastService.error('Error al copiar los elementos');
+      throw createFileError('No se pudieron copiar los elementos', FileErrorCode.OPERATION_FAILED, error);
     }
   }
 

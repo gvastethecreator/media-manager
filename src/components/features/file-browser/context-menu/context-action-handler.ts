@@ -13,9 +13,12 @@ import {
 	copyFile as copyFileService,
 	getFileAsDataUrl
 } from '@/services/file/file.service';
+import { enhancedFileOperationsService } from '@/services/file/enhanced-file-operations.service';
+import { enhancedDownloadService } from '@/services/download/download.service';
 import { addImageToTag } from '@/services/tag/tag.service';
 import type { FileItem } from '@/types/files';
-import type { ContextMenuAction, MultiSelectionAction } from './types';
+import type { AnyEntityWithStats } from '@/types/migration';
+import type { ContextMenuAction, MultiSelectionAction, EmptySpaceAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');
 
@@ -98,35 +101,42 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Descarga el archivo al dispositivo del usuario
-	downloadFile: async (path: string) => {
+	// Descarga el archivo al dispositivo del usuario con funcionalidad mejorada
+	downloadFile: async (path: string, options?: {
+		format?: 'original' | 'zip' | 'pdf';
+		quality?: 'original' | 'high' | 'medium' | 'low';
+		showProgress?: boolean;
+	}) => {
 		try {
-			// Crear un enlace temporal para descargar
 			const filename = path.split('/').pop() || 'download';
+			
+			// Create a FileItem-like object for the enhanced download service
+			const fileItem = {
+				id: path,
+				name: filename,
+				path: path
+			};
 
-			// Si es una ruta local, necesitamos convertirla a una URL descargable
-			// Para esto, debemos tener un endpoint que permita acceder al archivo
-			const downloadUrl = `/api/images/${filename}/content`;
+			// Use enhanced download service
+			const result = await enhancedDownloadService.downloadFile(fileItem, {
+				format: options?.format || 'original',
+				quality: options?.quality || 'original',
+				showProgress: options?.showProgress !== false
+			});
 
-			// Usar fetch para obtener el archivo como blob
-			const response = await fetch(downloadUrl);
-			const blob = await response.blob();
-			const secureUrl = URL.createObjectURL(blob);
-
-			const a = document.createElement('a');
-			a.href = secureUrl;
-			a.download = filename;
-			a.rel = 'noopener noreferrer';
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-
-			// Liberar el objeto URL
-			URL.revokeObjectURL(secureUrl);
-
-			actionLogger.info('✅ Archivo descargado:', path);
-			return Promise.resolve();
+			if (result.success) {
+				actionLogger.info('✅ Archivo descargado con servicio mejorado:', {
+					path,
+					filename: result.filename,
+					size: result.size,
+					duration: result.duration
+				});
+				return Promise.resolve();
+			} else {
+				throw new Error(result.error || 'Download failed');
+			}
 		} catch (error) {
+			actionLogger.error('❌ Error al descargar archivo:', error);
 			return Promise.reject(error);
 		}
 	},
@@ -158,15 +168,25 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Renombra un archivo
+	// Renombra un archivo - now with undo/redo support
 	renameFile: async (oldPath: string, newName: string) => {
 		try {
-			const directory = oldPath.substring(0, oldPath.lastIndexOf('/'));
-			const newPath = `${directory}/${newName}`;
-
-			await renameFileService(oldPath, newPath);
-			actionLogger.info('✅ Archivo renombrado:', { from: oldPath, to: newPath });
-			toastService.success('Archivo renombrado correctamente');
+			actionLogger.info('✏️ Renombrando archivo con undo/redo:', { oldPath, newName });
+			// Create entity for enhanced service
+			const entity: AnyEntityWithStats = {
+				id: oldPath,
+				name: oldPath.split('/').pop() || '',
+				path: oldPath,
+				size: 0,
+				mimeType: 'application/octet-stream',
+				extension: '',
+				updatedAt: new Date(),
+				createdAt: new Date(),
+				isDirectory: false,
+				type: 'file' as const,
+			} as AnyEntityWithStats;
+			
+			await enhancedFileOperationsService.renameItem(entity, newName);
 			return Promise.resolve();
 		} catch (error) {
 			actionLogger.error('❌ Error al renombrar archivo:', error);
@@ -175,7 +195,7 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Mueve un archivo
+	// Mueve un archivo - fallback to original service for single file moves
 	moveFile: async (sourcePath: string, destPath: string) => {
 		try {
 			await moveFileService(sourcePath, destPath);
@@ -189,7 +209,7 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Copia un archivo
+	// Copia un archivo - fallback to original service for single file copies
 	copyFile: async (sourcePath: string, destPath: string) => {
 		try {
 			await copyFileService(sourcePath, destPath);
@@ -240,20 +260,52 @@ const customFileOperationsService = {
 		}
 	},
 
-	// Elimina el archivo
+	// Elimina el archivo - now with undo/redo support
 	deleteFile: async (path: string) => {
 		try {
-			// Usar la server action para eliminar el archivo
-			await deleteFileAction(path);
-			actionLogger.info('✅ Archivo eliminado:', path);
-			toastService.success('Archivo eliminado correctamente');
+			actionLogger.info('🗑️ Eliminando archivo con undo/redo:', path);
+			// Create entity for enhanced service
+			const entity: AnyEntityWithStats = {
+				id: path,
+				name: path.split('/').pop() || '',
+				path: path,
+				size: 0,
+				mimeType: 'application/octet-stream',
+				extension: '',
+				updatedAt: new Date(),
+				createdAt: new Date(),
+				isDirectory: false,
+				type: 'file' as const,
+			} as AnyEntityWithStats;
+			
+			await enhancedFileOperationsService.deleteItems([entity]);
 			return Promise.resolve();
 		} catch (error) {
+			actionLogger.error('❌ Error al eliminar archivo:', error);
 			toastService.error('Error al eliminar el archivo');
 			return Promise.reject(error);
 		}
 	},
 };
+
+// Helper function to convert FileItem to AnyEntityWithStats
+function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
+	// Handle different entity types
+	const baseEntity = {
+		id: item.id,
+		name: item.name,
+		path: 'path' in item ? (item as any).path : '',
+		size: 'size' in item ? (item as any).size : 0,
+		mimeType: 'mimeType' in item ? (item as any).mimeType || 'application/octet-stream' : 'application/octet-stream',
+		extension: 'extension' in item ? (item as any).extension || '' : '',
+		updatedAt: 'modifiedAt' in item ? (item as any).modifiedAt || new Date() : new Date(),
+		createdAt: 'createdAt' in item ? (item as any).createdAt || new Date() : new Date(),
+		isDirectory: 'isDirectory' in item ? (item as any).isDirectory || false : false,
+		type: 'file' as const,
+	};
+	
+	return baseEntity as AnyEntityWithStats;
+}
 
 export const handleMultiSelectionAction = async (
 	action: MultiSelectionAction,
@@ -261,17 +313,14 @@ export const handleMultiSelectionAction = async (
 	data?: Record<string, unknown>
 ): Promise<void> => {
 	try {
+		// Convert FileItems to AnyEntityWithStats for enhanced operations
+		const entityItems = items.map(convertFileItemToEntity);
+
 		switch (action) {
 			case 'delete-multiple': {
-				// Eliminar múltiples archivos
-				const deletePromises = items.map(async (item) => {
-					const deletePath = 'path' in item ? (item as any).path : '';
-					return customFileOperationsService.deleteFile(deletePath);
-				});
-
-				await Promise.all(deletePromises);
-				actionLogger.info('✅ Múltiples archivos eliminados:', items.length);
-				toastService.success(`${items.length} archivo${items.length > 1 ? 's' : ''} eliminado${items.length > 1 ? 's' : ''} correctamente`);
+				// Use enhanced service with undo/redo support
+				await enhancedFileOperationsService.deleteItems(entityItems);
+				actionLogger.info('✅ Múltiples archivos eliminados con undo/redo:', items.length);
 				break;
 			}
 
@@ -279,39 +328,46 @@ export const handleMultiSelectionAction = async (
 				// Mover múltiples archivos - por ahora mostrar prompt simple para destino
 				const destPath = prompt('Ruta de destino para mover los archivos:');
 				if (destPath) {
-					const movePromises = items.map(async (item) => {
-						const sourcePath = 'path' in item ? (item as any).path : '';
-						const fileName = item.name;
-						const fullDestPath = `${destPath}/${fileName}`;
-						return customFileOperationsService.moveFile(sourcePath, fullDestPath);
-					});
-
-					await Promise.all(movePromises);
-					actionLogger.info('✅ Múltiples archivos movidos:', items.length);
-					toastService.success(`${items.length} archivo${items.length > 1 ? 's' : ''} movido${items.length > 1 ? 's' : ''} correctamente`);
+					// Use enhanced service with undo/redo support
+					await enhancedFileOperationsService.moveItems(entityItems, destPath);
+					actionLogger.info('✅ Múltiples archivos movidos con undo/redo:', items.length);
 				}
 				break;
 			}
 
 			case 'copy-multiple': {
-				// Copiar múltiples archivos al portapapeles interno
-				clipboardManager.copy(items);
+				// Use enhanced clipboard manager
+				enhancedFileOperationsService.copyToClipboard(entityItems);
 				actionLogger.info('✅ Múltiples archivos copiados al portapapeles:', items.length);
-				toastService.success(`${items.length} archivo${items.length > 1 ? 's' : ''} copiado${items.length > 1 ? 's' : ''} al portapapeles`);
 				break;
 			}
 
 			case 'download-multiple': {
-				// Descargar múltiples archivos
-				const downloadPromises = items.map(async (item) => {
-					const downloadPath = 'path' in item ? (item as any).path : '';
-					return customFileOperationsService.downloadFile(downloadPath);
+				// Descargar múltiples archivos usando el servicio mejorado
+				const downloadItems = items.map(item => ({
+					id: item.id,
+					name: item.name,
+					path: 'path' in item ? (item as any).path : ''
+				}));
+
+				// Use enhanced download service for batch download
+				const result = await enhancedDownloadService.downloadMultipleFiles(downloadItems, {
+					batchOptimization: items.length > 5, // Use ZIP for large batches
+					showProgress: true,
+					maxConcurrent: 3
 				});
 
-				toastService.info(`Descargando ${items.length} archivo${items.length > 1 ? 's' : ''}...`);
-				await Promise.all(downloadPromises);
-				actionLogger.info('✅ Múltiples archivos descargados:', items.length);
-				toastService.success(`${items.length} archivo${items.length > 1 ? 's' : ''} descargado${items.length > 1 ? 's' : ''} correctamente`);
+				if (result.success) {
+					actionLogger.info('✅ Descarga múltiple completada:', {
+						totalFiles: result.totalFiles,
+						successful: result.successfulDownloads,
+						failed: result.failedDownloads,
+						totalSize: result.totalSize,
+						duration: result.totalDuration
+					});
+				} else {
+					actionLogger.error('❌ Error en descarga múltiple:', result);
+				}
 				break;
 			}
 
@@ -382,7 +438,8 @@ export const handleEmptySpaceAction = async (
 
 			case 'paste':
 				if (context?.currentPath) {
-					await customFileOperationsService.pasteFiles(context.currentPath);
+					// Use enhanced service with undo/redo support
+					await enhancedFileOperationsService.pasteFromClipboard(context.currentPath);
 				} else {
 					toastService.warning('No se puede pegar: ruta no disponible');
 				}
@@ -485,11 +542,26 @@ export const handleContextAction = async (
 			}
 
 			case 'download': {
-				// Descargar archivo
+				// Descargar archivo usando el servicio mejorado
 				const itemName = 'name' in item ? item.name : 'archivo';
 				const downloadPath = 'path' in item ? (item as any).path : '';
-				toastService.info(`Descargando: ${itemName}`);
-				await customFileOperationsService.downloadFile(downloadPath);
+				
+				// Create download item for enhanced service
+				const downloadItem = {
+					id: item.id,
+					name: itemName,
+					path: downloadPath
+				};
+				
+				// Use enhanced download service with progress tracking
+				const result = await enhancedDownloadService.downloadFile(downloadItem, {
+					format: 'original',
+					showProgress: true
+				});
+				
+				if (!result.success) {
+					throw new Error(result.error || 'Download failed');
+				}
 				break;
 			}
 

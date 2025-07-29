@@ -1,0 +1,445 @@
+/**
+ * Undo/Redo Manager Service
+ * 
+ * This service provides undo/redo capabilities for file operations
+ * such as copy, move, delete, and rename operations. It maintains
+ * an action history and allows users to revert operations.
+ */
+
+// Browser-compatible EventEmitter implementation
+class EventEmitter {
+  private events: { [key: string]: Function[] } = {};
+
+  on(event: string, listener: Function): this {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(listener);
+    return this;
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    if (!this.events[event]) {
+      return false;
+    }
+    this.events[event].forEach(listener => {
+      try {
+        listener(...args);
+      } catch (error) {
+        console.error('Error in event listener:', error);
+      }
+    });
+    return true;
+  }
+
+  removeListener(event: string, listener: Function): this {
+    if (!this.events[event]) {
+      return this;
+    }
+    const index = this.events[event].indexOf(listener);
+    if (index > -1) {
+      this.events[event].splice(index, 1);
+    }
+    return this;
+  }
+
+  removeAllListeners(event?: string): this {
+    if (event) {
+      delete this.events[event];
+    } else {
+      this.events = {};
+    }
+    return this;
+  }
+}
+import { toastService } from '../toast/toast.service';
+import { copyFile, moveFile, deleteFile, renameFile } from '../file/file.service';
+import type { AnyEntityWithStats } from '@/types/entities';
+
+// Undo/Redo action types
+export interface UndoableAction {
+  /** Unique action identifier */
+  id: string;
+  /** Action type */
+  type: UndoActionType;
+  /** Timestamp when action was executed */
+  timestamp: number;
+  /** Action description for UI */
+  description: string;
+  /** Execute the action */
+  execute: () => Promise<void>;
+  /** Undo the action */
+  undo: () => Promise<void>;
+  /** Check if action can be undone */
+  canUndo: () => boolean;
+  /** Original data for undo operation */
+  originalData?: any;
+  /** Target data for redo operation */
+  targetData?: any;
+}
+
+export type UndoActionType =
+  | 'copy' | 'move' | 'delete' | 'rename'
+  | 'create-folder' | 'paste' | 'duplicate'
+  | 'add-to-collection' | 'remove-from-collection'
+  | 'add-tag' | 'remove-tag';
+
+export interface UndoRedoOptions {
+  /** Maximum number of actions to keep in history */
+  maxHistorySize?: number;
+  /** Enable automatic cleanup of old actions */
+  autoCleanup?: boolean;
+  /** Cleanup interval in milliseconds */
+  cleanupInterval?: number;
+}
+
+export interface UndoRedoState {
+  /** Current position in history */
+  currentIndex: number;
+  /** Total actions in history */
+  totalActions: number;
+  /** Can undo current action */
+  canUndo: boolean;
+  /** Can redo next action */
+  canRedo: boolean;
+  /** Last action description */
+  lastAction?: string;
+}
+
+/**
+ * Undo/Redo Manager Service
+ * Manages action history and provides undo/redo functionality
+ */
+class UndoRedoManager extends EventEmitter {
+  private history: UndoableAction[] = [];
+  private currentIndex: number = -1;
+  private options: Required<UndoRedoOptions>;
+  private cleanupTimer?: number;
+
+  constructor(options: UndoRedoOptions = {}) {
+    super();
+    this.options = {
+      maxHistorySize: 50,
+      autoCleanup: true,
+      cleanupInterval: 300000, // 5 minutes
+      ...options,
+    };
+
+    if (this.options.autoCleanup) {
+      this.startCleanupTimer();
+    }
+  }
+
+  /**
+   * Execute an undoable action
+   */
+  async execute(action: UndoableAction): Promise<void> {
+    try {
+      // Execute the action
+      await action.execute();
+
+      // Remove any actions after current index (for branching)
+      this.history = this.history.slice(0, this.currentIndex + 1);
+
+      // Add new action to history
+      this.history.push(action);
+      this.currentIndex = this.history.length - 1;
+
+      // Trim history if it exceeds max size
+      this.trimHistory();
+
+      // Emit state change
+      this.emitStateChange();
+
+      // Show success toast
+      toastService.success(action.description);
+
+    } catch (error) {
+      console.error('Failed to execute action:', error);
+      toastService.error(`Error: ${action.description}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Undo the last action
+   */
+  async undo(): Promise<void> {
+    if (!this.canUndoAction()) {
+      toastService.warning('No hay acciones para deshacer');
+      return;
+    }
+
+    const action = this.history[this.currentIndex];
+
+    try {
+      if (!action.canUndo()) {
+        toastService.warning('Esta acción no se puede deshacer');
+        return;
+      }
+
+      await action.undo();
+      this.currentIndex--;
+
+      this.emitStateChange();
+      toastService.success(`Deshecho: ${action.description}`);
+
+    } catch (error) {
+      console.error('Failed to undo action:', error);
+      toastService.error(`Error al deshacer: ${action.description}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Redo the next action
+   */
+  async redo(): Promise<void> {
+    if (!this.canRedoAction()) {
+      toastService.warning('No hay acciones para rehacer');
+      return;
+    }
+
+    const action = this.history[this.currentIndex + 1];
+
+    try {
+      await action.execute();
+      this.currentIndex++;
+
+      this.emitStateChange();
+      toastService.success(`Rehecho: ${action.description}`);
+
+    } catch (error) {
+      console.error('Failed to redo action:', error);
+      toastService.error(`Error al rehacer: ${action.description}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if undo is possible
+   */
+  canUndoAction(): boolean {
+    return this.currentIndex >= 0 && this.history.length > 0;
+  }
+
+  /**
+   * Check if redo is possible
+   */
+  canRedoAction(): boolean {
+    return this.currentIndex < this.history.length - 1;
+  }
+
+  /**
+   * Get current state
+   */
+  getState(): UndoRedoState {
+    return {
+      currentIndex: this.currentIndex,
+      totalActions: this.history.length,
+      canUndo: this.canUndoAction(),
+      canRedo: this.canRedoAction(),
+      lastAction: this.history[this.currentIndex]?.description,
+    };
+  }
+
+  /**
+   * Get action history
+   */
+  getHistory(): UndoableAction[] {
+    return [...this.history];
+  }
+
+  /**
+   * Clear all history
+   */
+  clear(): void {
+    this.history = [];
+    this.currentIndex = -1;
+    this.emitStateChange();
+    toastService.info('Historial de acciones limpiado');
+  }
+
+  /**
+   * Create a copy action
+   */
+  createCopyAction(
+    items: AnyEntityWithStats[],
+    targetPath: string
+  ): UndoableAction {
+    const copiedItems: AnyEntityWithStats[] = [];
+
+    return {
+      id: this.generateId(),
+      type: 'copy',
+      timestamp: Date.now(),
+      description: `Copiar ${items.length} elemento(s)`,
+      execute: async () => {
+        for (const item of items) {
+          const targetFilePath = `${targetPath}/${item.name}`;
+          await copyFile(item.path, targetFilePath);
+          copiedItems.push({ ...item, path: targetFilePath });
+        }
+      },
+      undo: async () => {
+        for (const item of copiedItems) {
+          await deleteFile(item.path);
+        }
+        copiedItems.length = 0;
+      },
+      canUndo: () => copiedItems.length > 0,
+      originalData: items,
+      targetData: { targetPath, copiedItems },
+    };
+  }
+
+  /**
+   * Create a move action
+   */
+  createMoveAction(
+    items: AnyEntityWithStats[],
+    targetPath: string
+  ): UndoableAction {
+    const originalPaths = items.map(item => item.path);
+
+    return {
+      id: this.generateId(),
+      type: 'move',
+      timestamp: Date.now(),
+      description: `Mover ${items.length} elemento(s)`,
+      execute: async () => {
+        for (const item of items) {
+          const targetFilePath = `${targetPath}/${item.name}`;
+          await moveFile(item.path, targetFilePath);
+        }
+      },
+      undo: async () => {
+        for (let i = 0; i < items.length; i++) {
+          const newPath = `${targetPath}/${items[i].name}`;
+          await moveFile(newPath, originalPaths[i]);
+        }
+      },
+      canUndo: () => true,
+      originalData: { items, originalPaths },
+      targetData: { targetPath },
+    };
+  }
+
+  /**
+   * Create a delete action
+   */
+  createDeleteAction(items: AnyEntityWithStats[]): UndoableAction {
+    return {
+      id: this.generateId(),
+      type: 'delete',
+      timestamp: Date.now(),
+      description: `Eliminar ${items.length} elemento(s)`,
+      execute: async () => {
+        for (const item of items) {
+          await deleteFile(item.path);
+        }
+      },
+      undo: async () => {
+        // Note: This is a simplified undo for delete
+        // In a real implementation, you might want to move to trash first
+        toastService.warning('No se puede deshacer la eliminación de archivos');
+      },
+      canUndo: () => false, // Delete operations typically can't be undone
+      originalData: items,
+    };
+  }
+
+  /**
+   * Create a rename action
+   */
+  createRenameAction(
+    item: AnyEntityWithStats,
+    newName: string
+  ): UndoableAction {
+    const originalName = item.name;
+
+    return {
+      id: this.generateId(),
+      type: 'rename',
+      timestamp: Date.now(),
+      description: `Renombrar "${originalName}" a "${newName}"`,
+      execute: async () => {
+        await renameFile(item.path, newName);
+      },
+      undo: async () => {
+        const newPath = item.path.replace(item.name, newName);
+        await renameFile(newPath, originalName);
+      },
+      canUndo: () => true,
+      originalData: { item, originalName },
+      targetData: { newName },
+    };
+  }
+
+  /**
+   * Trim history to max size
+   */
+  private trimHistory(): void {
+    if (this.history.length > this.options.maxHistorySize) {
+      const removeCount = this.history.length - this.options.maxHistorySize;
+      this.history.splice(0, removeCount);
+      this.currentIndex -= removeCount;
+      if (this.currentIndex < -1) {
+        this.currentIndex = -1;
+      }
+    }
+  }
+
+  /**
+   * Emit state change event
+   */
+  private emitStateChange(): void {
+    this.emit('stateChanged', this.getState());
+  }
+
+  /**
+   * Generate unique ID
+   */
+  private generateId(): string {
+    return `undo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Start cleanup timer
+   */
+  private startCleanupTimer(): void {
+    this.cleanupTimer = setInterval(() => {
+      this.cleanupOldActions();
+    }, this.options.cleanupInterval);
+  }
+
+  /**
+   * Cleanup old actions (older than 1 hour)
+   */
+  private cleanupOldActions(): void {
+    const oneHourAgo = Date.now() - 3600000; // 1 hour
+    const initialLength = this.history.length;
+    
+    this.history = this.history.filter(action => action.timestamp > oneHourAgo);
+    
+    if (this.history.length !== initialLength) {
+      this.currentIndex = Math.min(this.currentIndex, this.history.length - 1);
+      this.emitStateChange();
+    }
+  }
+
+  /**
+   * Cleanup resources
+   */
+  destroy(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+    }
+    this.removeAllListeners();
+    this.clear();
+  }
+}
+
+// Export singleton instance
+export const undoRedoManager = new UndoRedoManager();
+export default undoRedoManager;
