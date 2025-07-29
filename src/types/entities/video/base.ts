@@ -96,6 +96,15 @@ export interface VideoStatistics {
 	// Estado de duplicados
 	duplicateStatus: 'unique' | 'duplicate' | 'similar';
 	thumbnailUrl: string | null;
+
+	// Propiedades de archivo del sistema
+	size?: number;
+	mtime?: Date;
+	birthtime?: Date;
+
+	// Funciones de archivo del sistema
+	isDirectory?: () => boolean;
+	isFile?: () => boolean;
 }
 
 /**
@@ -109,13 +118,17 @@ export type VideoStats = VideoStatistics;
  */
 export interface VideoWithStats extends VideoBase {
 	entityType: 'video';
-	statistics: VideoStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
 	stats: VideoStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: VideoStatistics;
 	thumbnailUrl: string | null;
 	fullUrl: string;
 	fps?: number;
 	codec?: string;
+
+	// Propiedades adicionales de archivo
+	type?: string;
+
 	_count?: {
 		albums?: number;
 		collections?: number;

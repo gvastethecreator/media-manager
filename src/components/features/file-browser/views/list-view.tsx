@@ -10,7 +10,12 @@ import { cn } from '@/lib/utils';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 import { ListViewHeader } from './list-view-header';
 import { ListViewRow } from './list-view-row';
+import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { FileContextMenu } from '@/components/features/file-browser/context-menu/context-menu';
+import { handleContextAction } from '@/components/features/file-browser/context-menu';
+import { entityToFileItem } from '@/types/file-browser/file-item';
 import type { AnyEntityWithStats } from '@/types/migration';
+import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
 
 interface ListViewProps {
 	items: AnyEntityWithStats[];
@@ -21,6 +26,7 @@ interface ListViewProps {
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 	onItemContextMenu?: (event: React.MouseEvent, item: AnyEntityWithStats) => void;
+	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 	onSort?: (columnKey: string, direction: 'asc' | 'desc') => void;
 	entityType?: string;
 	className?: string;
@@ -35,6 +41,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 	onItemClick,
 	onItemDoubleClick,
 	onItemContextMenu,
+	onContextAction,
 	onSort,
 	entityType = 'default',
 	className = '',
@@ -176,6 +183,26 @@ export const ListView = memo<ListViewProps>(function ListView({
 		await toggleColumnVisibility(columnKey);
 	}, [toggleColumnVisibility]);
 
+	// Handler para acciones del menú contextual
+	const handleContextMenuAction = useCallback(
+		(item: AnyEntityWithStats) => async (action: ContextMenuAction, data?: Record<string, unknown>) => {
+			if (onContextAction) {
+				onContextAction(action, item, data);
+			} else {
+				// Fallback al handler por defecto - convertir item a FileItem
+				const fileItem = entityToFileItem(item);
+				await handleContextAction(
+					action,
+					fileItem,
+					undefined, // items array no se usa aquí
+					undefined, // toggleSelection no disponible en view component
+					undefined  // refreshView no disponible en view component
+				);
+			}
+		},
+		[onContextAction]
+	);
+
 	// Calcular altura de header
 	const headerHeight = config.showHeader ? 40 : 0;
 
@@ -258,27 +285,37 @@ export const ListView = memo<ListViewProps>(function ListView({
 								aria-setsize={items.length}
 								tabIndex={virtualItem.index === 0 ? 0 : -1}
 							>
-								<table className="w-full table-fixed">
-									<tbody>
-										<ListViewRow
-											item={item}
-											columns={columnsWithRenderers}
-											index={virtualItem.index}
-											isSelected={isSelected}
-											isEven={isEven}
-											showZebraStripes={config.showZebraStripes}
-											rowHeight={config.rowHeight}
-											cellPadding={config.cellPadding}
-											showThumbnails={config.showThumbnails}
-											thumbnailSize={config.thumbnailSize}
-											onClick={onItemClick}
-											onDoubleClick={onItemDoubleClick}
-											onContextMenu={onItemContextMenu}
-											aria-selected={isSelected}
-											aria-describedby={`row-${item.id}-description`}
+								<ContextMenu>
+									<ContextMenuTrigger asChild>
+										<table className="w-full table-fixed">
+											<tbody>
+												<ListViewRow
+													item={item}
+													columns={columnsWithRenderers}
+													index={virtualItem.index}
+													isSelected={isSelected}
+													isEven={isEven}
+													showZebraStripes={config.showZebraStripes}
+													rowHeight={config.rowHeight}
+													cellPadding={config.cellPadding}
+													showThumbnails={config.showThumbnails}
+													thumbnailSize={config.thumbnailSize}
+													onClick={onItemClick}
+													onDoubleClick={onItemDoubleClick}
+													onContextMenu={onItemContextMenu}
+													aria-selected={isSelected}
+													aria-describedby={`row-${item.id}-description`}
+												/>
+											</tbody>
+										</table>
+									</ContextMenuTrigger>
+									<ContextMenuContent>
+										<FileContextMenu
+											file={entityToFileItem(item)}
+											onAction={(action, file, data) => handleContextMenuAction(item)(action, data)}
 										/>
-									</tbody>
-								</table>
+									</ContextMenuContent>
+								</ContextMenu>
 							</motion.div>
 						);
 					})}

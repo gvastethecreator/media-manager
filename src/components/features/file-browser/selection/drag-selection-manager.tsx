@@ -1,12 +1,12 @@
 /**
  * Drag Selection Manager Component
- * 
+ *
  * Manages drag-to-select functionality for the file browser.
  * Handles mouse events, calculates selection rectangle, and integrates with selection store.
  */
 
 import React, { useRef, useCallback, useEffect, useState } from 'react';
-import { useSelectionStore } from '@/stores/selection-store';
+import { useSelectionStore } from '@/store/selection.store';
 import { SelectionOverlay } from './selection-overlay';
 import type { AnyEntityWithStats } from '@/types/entities';
 
@@ -45,7 +45,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [selectionRect, setSelectionRect] = useState<SelectionRect | null>(null);
   const [dragStartItems, setDragStartItems] = useState<Set<string>>(new Set());
-  
+
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const isMouseDownRef = useRef(false);
 
@@ -95,7 +95,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
     ctrlKey: boolean;
     shiftKey: boolean;
   }) => {
-    const intersectingItems = items.filter(item => 
+    const intersectingItems = items.filter(item =>
       isItemInSelection(item.id, rect)
     );
 
@@ -156,7 +156,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
       const clickedItem = items.find(item => {
         const bounds = getItemBounds(item.id);
         if (!bounds) return false;
-        
+
         return (
           event.clientX >= bounds.left &&
           event.clientX <= bounds.right &&
@@ -251,7 +251,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
       style={{ userSelect: 'none' }}
     >
       {children}
-      
+
       {isDragging && selectionRect && (
         <SelectionOverlay
           rect={selectionRect}

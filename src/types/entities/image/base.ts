@@ -59,6 +59,15 @@ export interface ImageStatistics {
 	propertyCount: number;
 	groupCount: number;
 	aspectRatio: number;
+
+	// Propiedades de archivo del sistema
+	size?: number;
+	mtime?: Date;
+	birthtime?: Date;
+
+	// Funciones de archivo del sistema
+	isDirectory?: () => boolean;
+	isFile?: () => boolean;
 }
 
 /**
@@ -75,6 +84,10 @@ export interface ImageWithStats extends ImageBase {
 	stats: ImageStatistics;
 	thumbnailUrl: string;
 	fullUrl: string;
+
+	// Propiedades adicionales de archivo
+	type?: string;
+
 	_count?: {
 		albums?: number;
 		collections?: number;

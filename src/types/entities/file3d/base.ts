@@ -53,6 +53,20 @@ export interface File3DStatistics {
 	vertexCount: number;
 	/** Número de materiales utilizados en el modelo */
 	materialCount: number;
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**

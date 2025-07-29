@@ -77,9 +77,9 @@ export interface CharacterWithStats extends CharacterBase {
 	images?: ImageWithStats[];
 	videos?: VideoWithStats[];
 	// Estadísticas de asociaciones y uso
-	statistics: CharacterAssociationStats;
-	/** Alias para compatibilidad - apunta a statistics */
 	stats: CharacterAssociationStats;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: CharacterAssociationStats;
 }
 
 /**
@@ -284,6 +284,20 @@ export interface CharacterAssociationStats {
 	healthPoints?: number;
 	manaPoints?: number;
 	imageCount?: number; // Alias para totalImages
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**

@@ -63,6 +63,20 @@ export interface GroupStatistics {
 	totalNotes?: number;
 	totalWildcards?: number;
 	totalProperties?: number;
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -71,9 +85,9 @@ export interface GroupStatistics {
  */
 export interface GroupWithStats extends GroupBase {
 	entityType: 'group';
-	statistics: GroupStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
 	stats: GroupStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: GroupStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;

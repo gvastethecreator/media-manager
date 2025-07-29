@@ -1,6 +1,6 @@
 /**
  * View Configuration System
- * 
+ *
  * This module provides a unified configuration system for all file browser views.
  * It extends the existing view-specific configurations and provides a centralized
  * way to manage view settings, persistence, and customization.
@@ -12,8 +12,9 @@ import { GridViewConfig } from './grid-view-config';
 import { CardsViewConfig } from './cards-view-config';
 import { MasonryViewConfig } from './masonry-view-config';
 
-// Base view types
-export type ViewType = 'list' | 'grid' | 'cards' | 'masonry';
+// Base view types for file browser
+export type FileBrowserViewType = 'list' | 'grid' | 'cards' | 'masonry';
+export type ViewType = FileBrowserViewType; // Alias for compatibility
 
 // Common view settings that apply to all views
 export interface CommonViewSettings {
@@ -40,11 +41,11 @@ export interface CommonViewSettings {
 }
 
 // View-specific settings union
-export type ViewSpecificSettings = 
+export type ViewSpecificSettings =
   | { type: 'list'; config: ListViewSettings }
-  | { type: 'grid'; config: GridViewConfig }
-  | { type: 'cards'; config: CardsViewConfig }
-  | { type: 'masonry'; config: MasonryViewConfig };
+  | { type: 'grid'; config?: GridViewConfig }
+  | { type: 'cards'; config?: CardsViewConfig }
+  | { type: 'masonry'; config?: MasonryViewConfig };
 
 // List view specific settings (extends existing list column config)
 export interface ListViewSettings {
@@ -67,7 +68,7 @@ export interface ListViewSettings {
 // Complete view configuration
 export interface ViewConfiguration {
   /** View type identifier */
-  type: ViewType;
+  type: FileBrowserViewType;
   /** Common settings for all views */
   common: CommonViewSettings;
   /** View-specific settings */
@@ -203,9 +204,9 @@ export const ViewConfigurationSchema = z.object({
   common: CommonViewSettingsSchema,
   specific: z.union([
     z.object({ type: z.literal('list'), config: ListViewSettingsSchema }),
-    z.object({ type: z.literal('grid'), config: z.any() }), // GridViewConfig schema
-    z.object({ type: z.literal('cards'), config: z.any() }), // CardsViewConfig schema
-    z.object({ type: z.literal('masonry'), config: z.any() }), // MasonryViewConfig schema
+    z.object({ type: z.literal('grid'), config: z.any().optional() }), // GridViewConfig schema
+    z.object({ type: z.literal('cards'), config: z.any().optional() }), // CardsViewConfig schema
+    z.object({ type: z.literal('masonry'), config: z.any().optional() }), // MasonryViewConfig schema
   ]),
   metadata: ViewConfigurationMetadataSchema,
 });
@@ -235,9 +236,9 @@ export const DEFAULT_LIST_SETTINGS: ListViewSettings = {
 };
 
 // Configuration factory functions
-export function createDefaultViewConfiguration(type: ViewType): ViewConfiguration {
+export function createDefaultViewConfiguration(type: FileBrowserViewType): ViewConfiguration {
   const now = Date.now();
-  
+
   const baseConfig: Omit<ViewConfiguration, 'specific'> = {
     type,
     common: DEFAULT_COMMON_SETTINGS,
@@ -452,7 +453,7 @@ export interface GlobalViewConfig {
   /** Animation settings */
   animations: AnimationConfig;
   /** Default view mode */
-  defaultViewMode: 'list' | 'grid' | 'masonry';
+  defaultViewMode: FileBrowserViewType;
   /** Default view */
   defaultView?: string;
   /** Remember view per folder */
@@ -558,23 +559,4 @@ export interface ViewConfigurationPreset {
   };
 }
 
-// Export types for external use
-export type {
-  ViewType,
-  CommonViewSettings,
-  ViewSpecificSettings,
-  ListViewSettings,
-  ViewConfiguration,
-  ViewConfigurationMetadata,
-  ViewPreset,
-  ViewCustomizationOptions,
-  ViewTheme,
-  ColorScheme,
-  DensityOption,
-  AnimationConfig,
-  AccessibilityConfig,
-  PerformanceConfig,
-  GlobalViewConfig,
-  EntityViewConfig,
-  ViewConfigurationPreset,
-};
+// All types are already exported with their definitions above

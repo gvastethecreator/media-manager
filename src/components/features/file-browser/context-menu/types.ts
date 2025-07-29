@@ -19,10 +19,18 @@ export type ContextMenuAction =
 	| 'rename'
 	| 'move'
 	| 'open-in-explorer'
+	// Acciones específicas de navegación
+	| 'open-folder'
+	| 'open-image'
+	| 'open-video'
+	// Acciones de portapapeles
+	| 'copy-to-clipboard'
+	| 'cut'
 	// Acciones de entidades
 	| 'add-to-collection'
 	| 'collection-create'
 	| 'add-tag'
+	| 'add-tags'
 	| 'tag-create'
 	| 'add-to-album'
 	| 'album-create'
@@ -37,7 +45,15 @@ export type ContextMenuAction =
 	| 'add-to-prompt'
 	| 'prompt-create'
 	| 'add-to-note'
-	| 'note-create';
+	| 'note-create'
+	// Acciones de selección múltiple
+	| 'bulk-download'
+	| 'bulk-delete'
+	| 'bulk-add-to-album'
+	| 'bulk-add-to-collection'
+	// Acciones de selección
+	| 'select-all'
+	| 'deselect-all';
 
 /**
  * Tipos de acciones disponibles en el menú contextual de espacio vacío

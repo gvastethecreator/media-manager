@@ -12,7 +12,7 @@ import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
-import type { DocumentWithStats } from '@/types/entities/document';
+import type { DocumentWithStats } from '@/types/entities/document/base';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { GroupWithStats } from '@/types/entities/group';

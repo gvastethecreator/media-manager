@@ -10,81 +10,99 @@ import type { AnyEntityWithStats } from '@/types/entities';
  * Interfaz base para items del explorador de archivos
  */
 export interface FileItem {
-  /** ID único del item */
-  id: string;
-  /** Nombre del item */
-  name: string;
-  /** Tipo de item */
-  type: 'file' | 'directory';
-  /** Tamaño en bytes */
-  size: number;
-  /** Fecha de modificación */
-  modifiedAt: Date;
-  /** Ruta del item */
-  path: string;
-  /** Si es un directorio */
-  isDirectory: boolean;
-  /** Extensión del archivo */
-  extension: string;
-  /** Tipo MIME */
-  mimeType: string;
-  /** URL del thumbnail */
-  thumbnailUrl?: string;
-  /** Si está marcado como favorito */
-  isFavorite?: boolean;
-  /** Metadatos adicionales */
-  metadata?: {
-    /** Tamaño del archivo formateado */
-    fileSize?: string;
-    /** Título alternativo */
-    title?: string;
-    /** Descripción */
-    description?: string;
-    /** Ancho (para imágenes/videos) */
-    width?: number;
-    /** Alto (para imágenes/videos) */
-    height?: number;
-    /** Duración (para videos/audio) */
-    duration?: number;
-    /** Propiedades adicionales */
-    [key: string]: any;
-  };
+	/** ID único del item */
+	id: string;
+	/** Nombre del item */
+	name: string;
+	/** Tipo de item */
+	type: 'file' | 'directory';
+	/** Tamaño en bytes */
+	size: number;
+	/** Fecha de modificación */
+	modifiedAt: Date;
+	/** Ruta del item */
+	path: string;
+	/** Si es un directorio */
+	isDirectory: boolean;
+	/** Extensión del archivo */
+	extension: string;
+	/** Tipo MIME */
+	mimeType: string;
+	/** URL del thumbnail */
+	thumbnailUrl?: string;
+	/** Si está marcado como favorito */
+	isFavorite?: boolean;
+
+	// File system properties added for compatibility with entity statistics
+	/** Last modification time (alias for modifiedAt) */
+	mtime?: Date;
+	/** File creation time */
+	birthtime?: Date;
+	/** Whether this is a file */
+	isFile?: boolean;
+
+	/** Metadatos adicionales */
+	metadata?: {
+		/** Tamaño del archivo formateado */
+		fileSize?: string;
+		/** Título alternativo */
+		title?: string;
+		/** Descripción */
+		description?: string;
+		/** Ancho (para imágenes/videos) */
+		width?: number;
+		/** Alto (para imágenes/videos) */
+		height?: number;
+		/** Duración (para videos/audio) */
+		duration?: number;
+		/** Propiedades adicionales */
+		[key: string]: any;
+	};
 }
 
 /**
  * Función helper para convertir AnyEntityWithStats a FileItem
  */
 export function entityToFileItem(entity: AnyEntityWithStats): FileItem {
-  return {
-    id: entity.id,
-    name: 'name' in entity ? entity.name : ('title' in entity ? (entity as any).title : 'Unknown'),
-    type: 'file' as const,
-    size: 'size' in entity ? (entity as any).size : 0,
-    modifiedAt: 'updatedAt' in entity ? entity.updatedAt : ('modifiedAt' in entity ? (entity as any).modifiedAt : new Date()),
-    path: 'path' in entity ? (entity as any).path : '',
-    isDirectory: false,
-    extension: 'extension' in entity ? (entity as any).extension : '',
-    mimeType: 'mimeType' in entity ? (entity as any).mimeType : 'application/octet-stream',
-    thumbnailUrl: 'thumbnailUrl' in entity ? (entity as any).thumbnailUrl : undefined,
-    isFavorite: 'isFavorite' in entity ? (entity as any).isFavorite : false,
-    metadata: {
-      fileSize: 'size' in entity ? formatFileSize((entity as any).size) : '0 B',
-      title: 'title' in entity ? (entity as any).title : undefined,
-      description: 'description' in entity ? entity.description : undefined,
-      width: 'width' in entity ? (entity as any).width : undefined,
-      height: 'height' in entity ? (entity as any).height : undefined,
-      duration: 'duration' in entity ? (entity as any).duration : undefined,
-    }
-  };
+	const modifiedAt =
+		'updatedAt' in entity ? entity.updatedAt : 'modifiedAt' in entity ? (entity as any).modifiedAt : new Date();
+
+	return {
+		id: entity.id,
+		name: 'name' in entity ? entity.name : 'title' in entity ? (entity as any).title : 'Unknown',
+		type: 'file' as const,
+		size: 'size' in entity ? (entity as any).size : 0,
+		modifiedAt,
+		path: 'path' in entity ? (entity as any).path : '',
+		isDirectory: false,
+		extension: 'extension' in entity ? (entity as any).extension : '',
+		mimeType: 'mimeType' in entity ? (entity as any).mimeType : 'application/octet-stream',
+		thumbnailUrl: 'thumbnailUrl' in entity ? (entity as any).thumbnailUrl : undefined,
+		isFavorite: 'isFavorite' in entity ? (entity as any).isFavorite : false,
+
+		// File system properties for compatibility
+		mtime: modifiedAt,
+		birthtime: 'createdAt' in entity ? entity.createdAt : modifiedAt,
+		isFile: true,
+
+		metadata: {
+			fileSize: 'size' in entity ? formatFileSize((entity as any).size) : '0 B',
+			title: 'title' in entity ? (entity as any).title : undefined,
+			description: 'description' in entity ? entity.description || undefined : undefined,
+			width: 'width' in entity ? (entity as any).width : undefined,
+			height: 'height' in entity ? (entity as any).height : undefined,
+			duration: 'duration' in entity ? (entity as any).duration : undefined,
+		},
+	};
 }
 
 /**
  * Formatea el tamaño de archivo en bytes a una cadena legible
  */
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	if (bytes === 0) return '0 B';
+	const k = 1024;
+	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }

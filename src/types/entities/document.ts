@@ -16,6 +16,20 @@ export interface DocumentStats {
   modificationDate?: Date;
   language?: string;
   version?: string;
+
+  // File system properties for browser integration
+  /** File size in bytes */
+  size: number;
+  /** Last modification time */
+  mtime: Date;
+  /** File creation time */
+  birthtime: Date;
+  /** File type for browser compatibility */
+  type: string;
+  /** Whether this is a directory */
+  isDirectory: boolean;
+  /** Whether this is a file */
+  isFile: boolean;
 }
 
 export interface Document {
@@ -141,21 +155,60 @@ export interface DocumentExportOptions {
 
 export interface DocumentCreateInput {
   name: string;
-  path?: string;
-  size?: number;
-  type: string;
-  mimeType?: string;
-  extension?: string;
+  path: string;
+  size: number;
+  hash: string;
+  mimeType: string;
+  extension: string;
+  folderId: string;
+  isFavorite: boolean;
+  isArchived: boolean;
+  pageCount?: number | null;
+  wordCount?: number | null;
+  language?: string | null;
+  title?: string | null;
+  author?: string | null;
+  subject?: string | null;
+  keywords?: string | null;
+  creator?: string | null;
+  producer?: string | null;
+  creationDate?: Date | null;
+  modificationDate?: Date | null;
+  encrypted?: boolean | null;
+  version?: string | null;
+  content?: string | null;
+  summary?: string | null;
   description?: string;
-  isEncrypted?: boolean;
   metadata?: Record<string, any>;
   tags?: string[];
 }
 
 export interface DocumentUpdateInput {
   name?: string;
+  path?: string;
+  size?: number;
+  hash?: string;
+  mimeType?: string;
+  extension?: string;
+  folderId?: string;
+  isFavorite?: boolean;
+  isArchived?: boolean;
+  pageCount?: number | null;
+  wordCount?: number | null;
+  language?: string | null;
+  title?: string | null;
+  author?: string | null;
+  subject?: string | null;
+  keywords?: string | null;
+  creator?: string | null;
+  producer?: string | null;
+  creationDate?: Date | null;
+  modificationDate?: Date | null;
+  encrypted?: boolean | null;
+  version?: string | null;
+  content?: string | null;
+  summary?: string | null;
   description?: string;
-  isEncrypted?: boolean;
   metadata?: Record<string, any>;
   tags?: string[];
 }

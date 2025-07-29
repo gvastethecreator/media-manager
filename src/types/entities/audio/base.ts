@@ -58,6 +58,20 @@ export interface AudioStatistics {
 	volumePeaks: number[];
 	/** Tasa de muestreo en Hz */
 	sampleRate: number;
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -66,9 +80,9 @@ export interface AudioStatistics {
  */
 export interface AudioWithStats extends AudioBase {
 	entityType: 'audio';
-	statistics: AudioStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
-	stats?: AudioStatistics;
+	stats: AudioStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: AudioStatistics;
 	_count?: {
 		albums?: number;
 		collections?: number;

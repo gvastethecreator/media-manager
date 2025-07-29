@@ -32,8 +32,8 @@ import { clipboardManager } from '@/services/clipboard/clipboard-manager';
 import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
 
 import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
-import { EmptySpaceContextMenu, handleEmptySpaceAction } from './context-menu';
-import { type EmptySpaceAction } from './context-menu/types';
+import { EmptySpaceContextMenu, handleEmptySpaceAction, handleContextAction } from './context-menu';
+import { type EmptySpaceAction, type ContextMenuAction } from './context-menu/types';
 import { StatusBar } from './toolbar/status-bar';
 import { ViewToolbar } from './toolbar/ViewToolbar';
 import { CardsView } from './views/cards-view';
@@ -597,6 +597,42 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		[onItemDoubleClick]
 	);
 
+	// Manejar acciones del menú contextual
+	const handleItemContextAction = useCallback(
+		async (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => {
+			console.log('🔍 FileBrowser - handleItemContextAction ejecutado:', {
+				action,
+				itemId: item.id,
+			});
+
+			// Convertir AnyEntityWithStats a FileItem para compatibilidad
+			const fileItem = {
+				id: item.id,
+				name: ('name' in item ? item.name : 'Unknown') as string,
+				type: 'file' as const,
+				size: ('size' in item ? item.size : 0) as number,
+				modifiedAt: ('updatedAt' in item
+					? new Date(item.updatedAt)
+					: new Date()
+				),
+				path: ('path' in item ? item.path : '') as string,
+				isDirectory: false,
+				extension: ('extension' in item ? item.extension : '') as string,
+				mimeType: ('mimeType' in item ? item.mimeType : 'application/octet-stream') as string
+			};
+
+			// Ejecutar la acción usando el handler centralizado
+			await handleContextAction(
+				action,
+				fileItem,
+				data,
+				handleItemDoubleClick,
+				(id: string) => toggleSelection(id, item as any)
+			);
+		},
+		[handleItemDoubleClick, toggleSelection]
+	);
+
 	// Cerrar menú contextual al hacer click fuera y deseleccionar elementos
 	const handleContainerClick = useCallback(
 		(e: React.MouseEvent) => {
@@ -696,11 +732,61 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Versión mejorada del manejador de click derecho que también maneja deselección
 	const handleEmptySpaceRightClickImproved = useCallback((e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		const target = e.target as HTMLElement;
+		const currentTarget = e.currentTarget as HTMLElement;
+
+		// Usar la misma lógica de detección de espacio vacío que en handleContainerClick
+		const isEmptySpaceClick = (
+			target === currentTarget ||
+			(
+				!target.closest('.entity-card') &&
+				!target.closest('[data-entity-card]') &&
+				!target.closest('button') &&
+				!target.closest('[role="button"]') &&
+				!target.closest('input') &&
+				!target.closest('textarea') &&
+				!target.closest('.context-menu') &&
+				!target.closest('[data-radix-popper-content-wrapper]') &&
+				!target.closest('[data-testid="file-browser-item"]') &&
+				!target.closest('[data-testid*="view-container"]') &&
+				!target.closest('.grid > div') &&
+				!target.closest('[style*="position: absolute"]') &&
+				!target.closest('[data-virtualized-item="true"]') &&
+				!target.closest('.selection-counter') &&
+				!target.closest('.drag-selection-overlay') &&
+				!target.closest('.view-toolbar') &&
+				!target.closest('.status-bar') &&
+				// Verificar que el click no sea en un elemento interactivo
+				!target.matches('a, button, input, textarea, select, [role="button"], [tabindex]') &&
+				// Verificar que el target esté dentro del área de contenido
+				currentTarget.contains(target)
+			)
+		);
+
+		logger.debug('🎯 Right-click en contenedor:', {
+			isEmptySpaceClick,
+			targetTagName: target.tagName,
+			targetClassName: target.className,
+			targetId: target.id,
+			clickCoordinates: { x: e.clientX, y: e.clientY },
+		});
+
 		// Si es click derecho en espacio vacío, mostrar menú contextual
-		if (e.button === 2 && e.target === e.currentTarget) {
-			handleEmptySpaceRightClick(e);
+		if (isEmptySpaceClick) {
+			logger.debug('✅ Mostrando menú contextual de espacio vacío');
+			setEmptySpaceContextMenu({
+				visible: true,
+				position: { x: e.clientX, y: e.clientY },
+			});
+		} else {
+			logger.debug('❌ Click derecho no califica para menú de espacio vacío', {
+				reason: 'No es click en espacio vacío'
+			});
 		}
-	}, [handleEmptySpaceRightClick]);
+	}, [logger]);
 
 	// Manejar acciones del menú contextual de espacio vacío
 	const handleEmptySpaceMenuAction = useCallback(
@@ -1114,6 +1200,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			containerWidth,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
+			onContextAction: handleItemContextAction,
 		};
 
 		console.log('🔍 FileBrowser - SWITCH de vista:', { viewMode, willRenderView: viewMode || 'default' });
@@ -1222,7 +1309,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					items={fileItems as any}
 					getItemElement={getItemElement}
 					config={{
-						enabled: true,
+						enabled: false,
 						threshold: 5,
 						autoScroll: {
 							enabled: true,

@@ -65,6 +65,20 @@ export interface PlaceStatistics {
 	popularity: number;
 	/** Fecha de última actualización */
 	// lastUpdated: Date; // Comentado temporalmente para resolver errores
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -77,8 +91,9 @@ export interface PlaceStatistics {
 export type PlaceWithStats = PlaceBase & {
 	entityType: 'place';
 	/** Estadísticas calculadas de la entidad */
-	_stats: PlaceStatistics;
-	stats: PlaceStatistics; // Alias para _stats
+	stats: PlaceStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: PlaceStatistics;
 	/** Conteos de relaciones desde Drizzle */
 	_count?: {
 		images?: number;

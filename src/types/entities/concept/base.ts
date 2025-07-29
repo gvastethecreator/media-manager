@@ -52,6 +52,20 @@ export interface ConceptStatistics {
 	groupCount: number;
 	totalAssociations: number;
 	lastUpdated: Date;
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -86,9 +100,9 @@ export interface ConceptComplete extends ConceptBase {
  */
 export interface ConceptWithStats extends ConceptBase {
 	entityType: 'concept';
-	statistics: ConceptStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
-	stats?: ConceptStatistics;
+	stats: ConceptStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: ConceptStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;

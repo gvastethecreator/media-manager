@@ -41,7 +41,7 @@ export function handleTransformerErrors(
       // Manejar el error y re-lanzar el tipo correcto
       throw handleTransformerError(error, {
         operation: propertyKey,
-        entityType: this.entityType,
+        entityType: (this as any)?.entityType || 'unknown',
         entityId: args[0]?.id,
       });
     }

@@ -9,6 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 // Re-exportar deepMerge desde object-utils
 export { deepMerge };
 
+// Re-exportar funciones de formato desde format.utils
+export { formatFileSize, formatDuration, formatDate, formatBytes } from './utils/format.utils';
+
 /**
  * Convierte un buffer a una cadena base64 con el formato adecuado para usar como src de imagen
  * @param buffer Buffer a convertir

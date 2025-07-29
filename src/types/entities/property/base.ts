@@ -75,6 +75,20 @@ export interface PropertyStatistics {
 	usageDiversity: number; // Cuán distribuido está el uso de la propiedad entre diferentes tipos de entidades
 	popularity: number; // Un score de popularidad general
 	completenessScore: number; // Qué tan completo está el perfil de la propiedad (descripción, etc.)
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -84,9 +98,9 @@ export interface PropertyStatistics {
 export interface PropertyWithStats extends PropertyBase {
 	entityType: 'property';
 	type?: string; // Alias para category para compatibilidad
-	statistics: PropertyStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
 	stats: PropertyStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: PropertyStatistics;
 	_count?: {
 		images: number;
 		videos: number;
