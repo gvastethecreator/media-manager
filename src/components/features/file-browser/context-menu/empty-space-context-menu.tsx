@@ -10,35 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useContextMenuNavigation } from '@/lib/keyboard';
 import { clipboardManager } from './context-action-handler';
 
-/**
- * Tipos de acciones disponibles en el menú contextual de espacio vacío
- */
-export type EmptySpaceAction =
-  | 'select-all'
-  | 'paste'
-  | 'refresh'
-  | 'new-folder'
-  | 'change-view'
-  | 'sort-by'
-  | 'show-hidden'
-  | 'scan-folder'
-  | 'properties';
-
-/**
- * Props para el componente EmptySpaceContextMenu
- */
-export interface EmptySpaceContextMenuProps {
-  /** Manejador de acciones del menú */
-  onAction: (action: EmptySpaceAction, data?: Record<string, unknown>) => void;
-  /** Posición del menú contextual */
-  position: { x: number; y: number };
-  /** Ruta actual (opcional) */
-  currentPath?: string;
-  /** Si se puede pegar desde el portapapeles */
-  canPaste?: boolean;
-  /** Items totales disponibles para seleccionar todo */
-  totalItems?: number;
-}
+import type { EmptySpaceAction, EmptySpaceContextMenuProps } from './types';
 
 /**
  * Menú contextual para espacio vacío en el navegador de archivos

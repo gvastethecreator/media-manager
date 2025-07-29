@@ -1,18 +1,20 @@
 /**
- * @file Vista de tarjetas usando TanStack Virtual
+ * @file Vista de tarjetas mejorada con configuración avanzada
  * @module components/features/file-browser/views/cards-view
  */
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
+import { CardInfoOverlay } from './card-info-overlay';
+import { CardActionButtons } from './card-action-buttons';
+import { useCardsViewConfig } from '@/hooks/use-cards-view-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 
 interface CardsViewProps {
 	items: AnyEntityWithStats[];
-	itemSize: number;
 	selectedIds: string[];
 	containerWidth: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
@@ -23,29 +25,43 @@ interface CardsViewProps {
 const CardItem = memo<{
 	item: AnyEntityWithStats;
 	isSelected: boolean;
-	compact: boolean;
 	itemIndex: number;
 	cardWidth: number;
+	cardHeight: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
-	animationProps: {
-		initial: { opacity: number; y: number };
-		animate: { opacity: number; y: number };
-		baseTransition: { duration: number };
-	};
 }>(function CardItem({
 	item,
 	isSelected,
-	compact,
 	itemIndex,
 	cardWidth,
+	cardHeight,
 	onItemClick,
 	onItemDoubleClick,
-	animationProps,
 }) {
+	const { config } = useCardsViewConfig();
+	const [isHovered, setIsHovered] = useState(false);
+	const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+
+	const handleMouseEnter = useCallback(() => {
+		if (config.interactiveConfig.enabled) {
+			const timeout = setTimeout(() => {
+				setIsHovered(true);
+			}, config.interactiveConfig.hoverDelay);
+			setHoverTimeout(timeout);
+		}
+	}, [config.interactiveConfig.enabled, config.interactiveConfig.hoverDelay]);
+
+	const handleMouseLeave = useCallback(() => {
+		if (hoverTimeout) {
+			clearTimeout(hoverTimeout);
+			setHoverTimeout(null);
+		}
+		setIsHovered(false);
+	}, [hoverTimeout]);
+
 	const handleClick = useCallback(
 		(e: React.MouseEvent) => {
-			console.log('🖱️ CardsView - onClick disparado:', { itemId: item.id });
 			e.stopPropagation();
 			onItemClick(item, e);
 		},
@@ -53,166 +69,170 @@ const CardItem = memo<{
 	);
 
 	const handleDoubleClick = useCallback(() => {
-		console.log('🖱️ CardsView - onDoubleClick disparado:', { itemId: item.id });
 		onItemDoubleClick(item);
 	}, [item, onItemDoubleClick]);
 
-	const transition = useMemo(
-		() => ({
-			...animationProps.baseTransition,
+	const cardStyleClasses = useMemo(() => {
+		const baseClasses = 'relative overflow-hidden transition-all duration-200';
+		const shadowClasses = config.showShadows
+			? 'shadow-sm hover:shadow-md'
+			: '';
+		const roundedClasses = config.roundedCorners
+			? 'rounded-lg'
+			: '';
+		const selectionClasses = isSelected && config.showSelectionIndicators
+			? 'ring-2 ring-primary ring-offset-2'
+			: '';
+
+		return cn(
+			baseClasses,
+			shadowClasses,
+			roundedClasses,
+			selectionClasses,
+			'cursor-pointer',
+			'hover:z-10 hover:scale-105',
+			config.animationsEnabled && 'hover:transition-transform'
+		);
+	}, [config, isSelected]);
+
+	const transition = useMemo(() => {
+		if (!config.animationsEnabled) return {};
+
+		return {
+			duration: config.animationDuration / 1000,
 			delay: Math.min(itemIndex * 0.02, 0.3),
-		}),
-		[animationProps.baseTransition, itemIndex]
-	);
+		};
+	}, [config.animationsEnabled, config.animationDuration, itemIndex]);
 
 	return (
 		<motion.div
 			key={item.id}
-			initial={animationProps.initial}
-			animate={animationProps.animate}
+			initial={config.animationsEnabled ? { opacity: 0, y: 20 } : false}
+			animate={config.animationsEnabled ? { opacity: 1, y: 0 } : false}
 			transition={transition}
-			className={cn(
-				'relative cursor-pointer transition-all duration-200',
-				'hover:z-10',
-				isSelected && 'ring-2 ring-primary ring-offset-2'
-			)}
+			className={cardStyleClasses}
 			style={{
 				width: `${cardWidth}px`,
+				height: `${cardHeight}px`,
 			}}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
 		>
+			{/* Tarjeta base */}
 			<EntityCard
 				entity={item}
 				isSelected={isSelected}
-				compact={compact}
-				className="h-full"
+				compact={config.cardStyle === 'compact'}
+				className="h-full w-full"
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
 			/>
+
+			{/* Overlay de información */}
+			{config.interactiveConfig.enabled && config.interactiveConfig.showInfoOverlay && (
+				<CardInfoOverlay
+					entity={item}
+					visible={isHovered}
+					position={config.interactiveConfig.overlayPosition}
+					metadataConfig={config.metadataConfig}
+					animationDuration={config.animationDuration}
+				/>
+			)}
+
+			{/* Botones de acción */}
+			{config.interactiveConfig.enabled && config.interactiveConfig.showActionButtons && (
+				<CardActionButtons
+					entity={item}
+					visible={isHovered}
+					actionButtons={config.interactiveConfig.actionButtons}
+					animationDuration={config.animationDuration}
+				/>
+			)}
 		</motion.div>
 	);
 });
 
 export const CardsView = memo<CardsViewProps>(function CardsView({
 	items,
-	itemSize,
 	selectedIds,
 	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
 }) {
 	const parentRef = useRef<any>(null);
+	const { config, calculateLayout } = useCardsViewConfig();
 
-	// Handler para clicks en espacio vacío
+	// Calcular layout dinámico
+	const layout = useMemo(() => {
+		return calculateLayout(containerWidth, items.length);
+	}, [calculateLayout, containerWidth, items.length]);
+
+	// Handler para clicks en espacio vacío - mejorado para deselección
 	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
-		// Solo actuar si el click es directamente en el contenedor de la vista
 		const target = e.target as HTMLElement;
 		const currentTarget = e.currentTarget as HTMLElement;
 
-		// Verificar si es un click en espacio vacío (no en elementos de las cards)
+		// Verificar si el click fue en espacio vacío (no en un item)
 		const isEmptySpaceClick = target === currentTarget ||
 			(!target.closest('.entity-card') &&
 				!target.closest('[data-entity-card]') &&
 				!target.closest('button') &&
 				!target.closest('[role="button"]') &&
-				!target.closest('.grid > div') && // Evitar clicks en elementos de la grid
-				!target.closest('[style*="position: absolute"]')); // Evitar clicks en elementos virtualizados
+				!target.closest('input') &&
+				!target.closest('textarea') &&
+				!target.closest('[data-testid="file-browser-item"]') &&
+				!target.closest('.grid > div') &&
+				!target.closest('[style*="position: absolute"]') &&
+				!target.closest('[data-virtualized-item="true"]'));
 
 		if (isEmptySpaceClick) {
-			// Propagar el evento hacia arriba para que FileBrowser lo maneje
-			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+			// Propagar el evento hacia arriba para que el FileBrowser maneje la deselección
+			// No hacer preventDefault() para permitir que el evento burbujee
+			
+			// Feedback visual opcional si hay elementos seleccionados
+			if (selectedIds.length > 0) {
+				currentTarget.style.transition = 'background-color 0.15s ease';
+				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
+
+				setTimeout(() => {
+					currentTarget.style.backgroundColor = '';
+					currentTarget.style.transition = '';
+				}, 150);
+			}
 		}
-	}, []);
-
-	// Calcular configuración de la grid con mejor espaciado
-	const { columns, cardWidth, rowHeight, gap, padding } = useMemo(() => {
-		const minCardWidth = Math.max(itemSize || 200, 150); // Mínimo absoluto de 150px
-		const gapSize = 16;
-		const paddingSize = 24;
-		const availableWidth = Math.max(containerWidth - paddingSize * 2, minCardWidth);
-
-		// Calcular columnas de forma más precisa
-		const cols = Math.max(1, Math.floor((availableWidth + gapSize) / (minCardWidth + gapSize)));
-		const actualCardWidth = Math.floor((availableWidth - gapSize * (cols - 1)) / cols);
-
-		// Altura basada en ratio de aspecto más apropiado
-		const cardHeight = Math.floor(actualCardWidth * 1.25); // Ratio 4:5 para mejor proporción
-		const totalRowHeight = cardHeight + gapSize;
-
-		return {
-			columns: cols,
-			cardWidth: actualCardWidth,
-			rowHeight: totalRowHeight,
-			gap: gapSize,
-			padding: paddingSize,
-		};
-	}, [containerWidth, itemSize]);
-
-	// Calcular filas necesarias
-	const rowCount = Math.ceil(items.length / columns);
+	}, [selectedIds.length]);
 
 	// Estado para altura del contenedor
 	const [containerHeight, setContainerHeight] = useState<number>(0);
 
-	// Efecto para medir y establecer altura del contenedor basada en ScrollArea viewport
+	// Efecto para medir altura del contenedor
 	useEffect(() => {
 		if (parentRef.current) {
 			const scrollAreaViewport = parentRef.current.closest('[data-radix-scroll-area-viewport]');
 			if (scrollAreaViewport) {
-				// Solo aplicar padding, el StatusBar ya no necesita reserva de espacio
-				const height = scrollAreaViewport.clientHeight - padding * 2;
+				const height = scrollAreaViewport.clientHeight - layout.padding * 2;
 				setContainerHeight(height);
 			}
 		}
-	}, [padding]);
+	}, [layout.padding]);
 
 	// Configurar virtualizador para filas
 	const rowVirtualizer = useVirtualizer({
-		count: rowCount,
+		count: layout.rows,
 		getScrollElement: () => {
-			// Buscar el elemento de scroll más apropiado (ScrollArea viewport)
 			const scrollAreaViewport = parentRef.current?.closest('[data-radix-scroll-area-viewport]');
-			if (scrollAreaViewport) {
-				console.log('🔧 CardsView - Using ScrollArea viewport as scroll element');
-				return scrollAreaViewport as HTMLElement;
-			}
-			// Fallback al elemento padre o actual
-			return parentRef.current?.parentElement || parentRef.current;
+			return scrollAreaViewport || parentRef.current?.parentElement || parentRef.current;
 		},
-		estimateSize: () => rowHeight,
+		estimateSize: () => layout.cardHeight + layout.gap,
 		overscan: 5,
 	});
 
 	// Función para obtener items de una fila específica
-	const getRowItems = (rowIndex: number): AnyEntityWithStats[] => {
-		const startIndex = rowIndex * columns;
-		const endIndex = Math.min(startIndex + columns, items.length);
+	const getRowItems = useCallback((rowIndex: number): AnyEntityWithStats[] => {
+		const startIndex = rowIndex * layout.columns;
+		const endIndex = Math.min(startIndex + layout.columns, items.length);
 		return items.slice(startIndex, endIndex);
-	};
-
-	// Memoizar handlers para evitar re-renders masivos
-	const handleItemClick = useCallback(
-		(item: AnyEntityWithStats, e: React.MouseEvent) => {
-			onItemClick(item, e);
-		},
-		[onItemClick]
-	);
-
-	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
-			onItemDoubleClick(item);
-		},
-		[onItemDoubleClick]
-	);
-
-	// Memoizar objetos de animación para evitar re-renders
-	const animationProps = useMemo(
-		() => ({
-			initial: { opacity: 0, y: 20 },
-			animate: { opacity: 1, y: 0 },
-			baseTransition: { duration: 0.3 },
-		}),
-		[]
-	);
+	}, [items, layout.columns]);
 
 	return (
 		<div
@@ -223,7 +243,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 			onClick={handleEmptySpaceClick}
 			style={{
 				contain: 'layout style',
-				padding: `${padding}px`,
+				padding: `${layout.padding}px`,
 				height: containerHeight > 0 ? `${containerHeight}px` : '100%',
 				overflow: 'auto',
 			}}
@@ -235,51 +255,52 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 					position: 'relative',
 				}}
 			>
-				{rowVirtualizer.getVirtualItems().map((virtualRow) => {
-					const rowItems = getRowItems(virtualRow.index);
+				<AnimatePresence initial={false}>
+					{rowVirtualizer.getVirtualItems().map((virtualRow) => {
+						const rowItems = getRowItems(virtualRow.index);
 
-					return (
-						<div
-							key={virtualRow.key}
-							style={{
-								position: 'absolute',
-								top: 0,
-								left: 0,
-								width: '100%',
-								height: `${rowHeight}px`,
-								transform: `translateY(${virtualRow.start}px)`,
-							}}
-						>
+						return (
 							<div
-								className="grid"
+								key={virtualRow.key}
 								style={{
-									gridTemplateColumns: `repeat(${columns}, 1fr)`,
-									gap: `${gap}px`,
-									height: `${rowHeight - gap}px`,
+									position: 'absolute',
+									top: 0,
+									left: 0,
+									width: '100%',
+									height: `${layout.cardHeight + layout.gap}px`,
+									transform: `translateY(${virtualRow.start}px)`,
 								}}
 							>
-								{rowItems.map((item, columnIndex) => {
-									const isSelected = selectedIds.includes(item.id);
-									const itemIndex = virtualRow.index * columns + columnIndex;
+								<div
+									className="grid"
+									style={{
+										gridTemplateColumns: `repeat(${layout.columns}, 1fr)`,
+										gap: `${layout.gap}px`,
+										height: `${layout.cardHeight}px`,
+									}}
+								>
+									{rowItems.map((item, columnIndex) => {
+										const isSelected = selectedIds.includes(item.id);
+										const itemIndex = virtualRow.index * layout.columns + columnIndex;
 
-									return (
-										<CardItem
-											key={item.id}
-											item={item}
-											isSelected={isSelected}
-											compact={itemSize < 150}
-											itemIndex={itemIndex}
-											cardWidth={cardWidth}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											animationProps={animationProps}
-										/>
-									);
-								})}
+										return (
+											<CardItem
+												key={item.id}
+												item={item}
+												isSelected={isSelected}
+												itemIndex={itemIndex}
+												cardWidth={layout.cardWidth}
+												cardHeight={layout.cardHeight}
+												onItemClick={onItemClick}
+												onItemDoubleClick={onItemDoubleClick}
+											/>
+										);
+									})}
+								</div>
 							</div>
-						</div>
-					);
-				})}
+						);
+					})}
+				</AnimatePresence>
 			</div>
 		</div>
 	);

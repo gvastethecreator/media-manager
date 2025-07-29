@@ -6,8 +6,8 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/services/toast';
-import type { AnyEntityWithStats } from '@/types/migration';
+import { toastService } from '@/services/toast/toast.service';
+import type { AnyEntityWithStats } from '@/types/entities';
 import { getFileAsDataUrl } from '@/services/file/file.service';
 import { FileErrorCode, FileType } from '@/types/entities/file';
 

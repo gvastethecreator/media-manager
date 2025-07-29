@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ClipboardManager, ClipboardFormat } from './clipboard-manager';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 import { FileType } from '@/types/entities/file';
 
 // Mock dependencies

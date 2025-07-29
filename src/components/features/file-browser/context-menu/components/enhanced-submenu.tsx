@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/context-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import type { FileItem } from '@/types/files';
+import type { FileItem } from '@/types/file-browser/file-item';
 import type { ContextMenuAction } from '../types';
 import { SubmenuSearch } from './submenu-search';
 

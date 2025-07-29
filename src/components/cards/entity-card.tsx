@@ -11,6 +11,7 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { ConceptWithStats } from '@/types/entities/concept';
+import type { GroupWithStats } from '@/types/entities/group';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { PlaceWithStats } from '@/types/entities/place';
 import type { PromptWithStats } from '@/types/entities/prompt';
@@ -58,6 +59,9 @@ import type { BaseCardProps, CardVariant } from './types/card-layout.types';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
+
+// Importar estilos de accesibilidad
+import '../features/file-browser/styles/accessibility.css';
 
 export interface EntityCardProps extends BaseCardProps {
 	entity: AnyEntityWithStats;
@@ -146,8 +150,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			return (_videoData: VideoWithStats) => {
 				// Crear un evento sintético para mantener compatibilidad
 				const syntheticEvent = {
-					preventDefault: () => {},
-					stopPropagation: () => {},
+					preventDefault: () => { },
+					stopPropagation: () => { },
 					currentTarget: null,
 					target: null,
 				} as unknown as React.MouseEvent;
@@ -160,8 +164,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			return () => {
 				// Crear un evento sintético para mantener compatibilidad
 				const syntheticEvent = {
-					preventDefault: () => {},
-					stopPropagation: () => {},
+					preventDefault: () => { },
+					stopPropagation: () => { },
 					currentTarget: null,
 					target: null,
 				} as unknown as React.MouseEvent;
@@ -177,8 +181,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				console.log('🖱️ EntityCard - ImageCard onClick ejecutado para imagen:', imageData?.id || 'no-id');
 				// Crear un evento sintético para mantener compatibilidad
 				const syntheticEvent = {
-					preventDefault: () => {},
-					stopPropagation: () => {},
+					preventDefault: () => { },
+					stopPropagation: () => { },
 					currentTarget: null,
 					target: null,
 					shiftKey: false,
@@ -200,56 +204,162 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			});
 
 			return (
-				<ImageCard
-					imageId={entity.id}
-					onClick={imageClickHandler}
-					onDoubleClick={imageDoubleClickHandler}
-					className={className}
-					showTags={config.showTags}
-					showDetails={config.showDetails}
-					aspectRatio={config.aspectRatio as string}
-					variant={mapToImageCardVariant(config.variant)}
-					tcgMode={config.variant === 'tcg'}
-					showRelations={config.showMetadata}
-				/>
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+					role="button"
+					tabIndex={0}
+					aria-label={`Imagen: ${entity.name || 'Sin nombre'}`}
+					aria-selected={isSelected}
+					aria-describedby={`entity-${entity.id}-description`}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							if (e.key === 'Enter' && onDoubleClick) {
+								onDoubleClick();
+							} else if (onClick) {
+								const syntheticEvent = {
+									preventDefault: () => { },
+									stopPropagation: () => { },
+									currentTarget: e.currentTarget,
+									target: e.target,
+									shiftKey: e.shiftKey,
+									ctrlKey: e.ctrlKey,
+									metaKey: e.metaKey,
+								} as unknown as React.MouseEvent;
+								onClick(syntheticEvent);
+							}
+						}
+					}}
+				>
+					<ImageCard
+						imageId={entity.id}
+						onClick={imageClickHandler}
+						onDoubleClick={imageDoubleClickHandler}
+						className={className}
+						showTags={config.showTags}
+						showDetails={config.showDetails}
+						aspectRatio={config.aspectRatio as string}
+						variant={mapToImageCardVariant(config.variant)}
+						tcgMode={config.variant === 'tcg'}
+						showRelations={config.showMetadata}
+					/>
+					<div id={`entity-${entity.id}-description`} className="sr-only">
+						{`Imagen ${entity.name || 'sin nombre'}. ${isSelected ? 'Seleccionada.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
+					</div>
+				</div>
 			);
 		}
 
 		if (isVideoWithStats(entity)) {
 			return (
-				<VideoCard
-					videoId={entity.id}
-					onClick={createVideoClickHandler(onClick)}
-					className={className}
-					compact={config.layout === 'compact' || config.size === 'sm'}
-					isSelected={isSelected}
-					tcgMode={config.variant === 'tcg'}
-				/>
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+					role="button"
+					tabIndex={0}
+					aria-label={`Video: ${entity.name || 'Sin nombre'}`}
+					aria-selected={isSelected}
+					aria-describedby={`entity-${entity.id}-description`}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							if (onClick) {
+								const syntheticEvent = {
+									preventDefault: () => { },
+									stopPropagation: () => { },
+									currentTarget: e.currentTarget,
+									target: e.target,
+									shiftKey: e.shiftKey,
+									ctrlKey: e.ctrlKey,
+									metaKey: e.metaKey,
+								} as unknown as React.MouseEvent;
+								onClick(syntheticEvent);
+							}
+						}
+					}}
+				>
+					<VideoCard
+						videoId={entity.id}
+						onClick={createVideoClickHandler(onClick)}
+						className={className}
+						compact={config.layout === 'compact' || config.size === 'sm'}
+						isSelected={isSelected}
+						tcgMode={config.variant === 'tcg'}
+					/>
+					<div id={`entity-${entity.id}-description`} className="sr-only">
+						{`Video ${entity.name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
+					</div>
+				</div>
 			);
 		}
 
 		if (isAlbumWithStats(entity)) {
-			// @ts-expect-error - TODO: Fix AlbumCard props
-			return <AlbumCard album={entity} {...commonProps} />;
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+					role="button"
+					tabIndex={0}
+					aria-label={`Álbum: ${entity.name || 'Sin nombre'}`}
+					aria-selected={isSelected}
+					aria-describedby={`entity-${entity.id}-description`}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							if (onClick) {
+								const syntheticEvent = {
+									preventDefault: () => { },
+									stopPropagation: () => { },
+									currentTarget: e.currentTarget,
+									target: e.target,
+									shiftKey: e.shiftKey,
+									ctrlKey: e.ctrlKey,
+									metaKey: e.metaKey,
+								} as unknown as React.MouseEvent;
+								onClick(syntheticEvent);
+							}
+						}
+					}}
+				>
+					<AlbumCard
+						album={entity as any}
+						onClick={createSimpleClickHandler(onClick)}
+						className={className}
+						compact={config.layout === 'compact' || config.size === 'sm'}
+					/>
+					<div id={`entity-${entity.id}-description`} className="sr-only">
+						{`Álbum ${entity.name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
+					</div>
+				</div>
+			);
 		}
 
 		if (isCollectionWithStats(entity)) {
 			return (
-				<CollectionCard
-					collection={entity}
-					onClick={createSimpleClickHandler(onClick)}
-					className={className}
-					compact={config.layout === 'compact' || config.size === 'sm'}
-					showEntitiesCount={config.showStats}
-					showImagesCount={config.showStats}
-				/>
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<CollectionCard
+						collection={entity}
+						onClick={createSimpleClickHandler(onClick)}
+						className={className}
+						compact={config.layout === 'compact' || config.size === 'sm'}
+						showEntitiesCount={config.showStats}
+						showImagesCount={config.showStats}
+					/>
+				</div>
 			);
 		}
 
 		if (isCharacterWithStats(entity)) {
 			// Temporalmente deshabilitado debido a incompatibilidades de tipos
 			return (
-				<div className={className}>
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''} ${className}`}
+				>
 					<p>Character Card - En desarrollo</p>
 				</div>
 			);
@@ -257,12 +367,17 @@ export const EntityCard: FC<EntityCardProps> = memo(
 
 		if (isFolderWithStats(entity)) {
 			return (
-				<FolderCard
-					folder={entity}
-					onClick={createSimpleClickHandler(onClick)}
-					className={className}
-					interactive={!!onClick}
-				/>
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<FolderCard
+						folder={entity}
+						onClick={createSimpleClickHandler(onClick)}
+						className={className}
+						interactive={!!onClick}
+					/>
+				</div>
 			);
 		}
 
@@ -271,8 +386,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				if (!originalOnClick) return undefined;
 				return (_audioData: AudioWithStats) => {
 					const syntheticEvent = {
-						preventDefault: () => {},
-						stopPropagation: () => {},
+						preventDefault: () => { },
+						stopPropagation: () => { },
 						currentTarget: null,
 						target: null,
 					} as unknown as React.MouseEvent;
@@ -280,21 +395,45 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				};
 			};
 
-			return <AudioCard audio={entity} onClick={createAudioClickHandler(onClick)} className={className} />;
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<AudioCard audio={entity} onClick={createAudioClickHandler(onClick)} className={className} />
+				</div>
+			);
 		}
 
 		if (isDocumentWithStats(entity)) {
-			return <DocumentCard document={entity} onClick={createSimpleClickHandler(onClick)} className={className} />;
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<DocumentCard document={entity as any} onClick={createSimpleClickHandler(onClick)} className={className} />
+				</div>
+			);
 		}
 
 		if (isTagWithStats(entity)) {
-			return <TagCard tag={entity} onClick={createSimpleClickHandler(onClick)} className={className} />;
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<TagCard tag={entity} onClick={createSimpleClickHandler(onClick)} className={className} />
+				</div>
+			);
 		}
 
 		if (isNoteWithStats(entity)) {
 			// Temporalmente deshabilitado debido a incompatibilidades de tipos
 			return (
-				<div className={className}>
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''} ${className}`}
+				>
 					<p>Note Card - En desarrollo</p>
 				</div>
 			);
@@ -305,25 +444,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				if (!originalOnClick) return undefined;
 				return (_placeData: PlaceWithStats) => {
 					const syntheticEvent = {
-						preventDefault: () => {},
-						stopPropagation: () => {},
-						currentTarget: null,
-						target: null,
-					} as unknown as React.MouseEvent;
-					originalOnClick(syntheticEvent);
-				};
-			};
-
-			return <PlaceCard placeId={entity.id} onClick={createPlaceClickHandler(onClick)} className={className} />;
-		}
-
-		if (isWorldItemWithStats(entity)) {
-			const createWorldItemClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
-				if (!originalOnClick) return undefined;
-				return (_worldItemData: WorldItemWithStats) => {
-					const syntheticEvent = {
-						preventDefault: () => {},
-						stopPropagation: () => {},
+						preventDefault: () => { },
+						stopPropagation: () => { },
 						currentTarget: null,
 						target: null,
 					} as unknown as React.MouseEvent;
@@ -332,7 +454,36 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			};
 
 			return (
-				<WorldItemCard worldItemId={entity.id} onClick={createWorldItemClickHandler(onClick)} className={className} />
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<PlaceCard placeId={entity.id} onClick={createPlaceClickHandler(onClick)} className={className} />
+				</div>
+			);
+		}
+
+		if (isWorldItemWithStats(entity)) {
+			const createWorldItemClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+				if (!originalOnClick) return undefined;
+				return (_worldItemData: WorldItemWithStats) => {
+					const syntheticEvent = {
+						preventDefault: () => { },
+						stopPropagation: () => { },
+						currentTarget: null,
+						target: null,
+					} as unknown as React.MouseEvent;
+					originalOnClick(syntheticEvent);
+				};
+			};
+
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<WorldItemCard worldItemId={entity.id} onClick={createWorldItemClickHandler(onClick)} className={className} />
+				</div>
 			);
 		}
 
@@ -341,42 +492,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				if (!originalOnClick) return undefined;
 				return (_concept: ConceptWithStats) => {
 					const syntheticEvent = {
-						preventDefault: () => {},
-						stopPropagation: () => {},
-						currentTarget: null,
-						target: null,
-					} as unknown as React.MouseEvent;
-					originalOnClick(syntheticEvent);
-				};
-			};
-
-			return <ConceptCard conceptId={entity.id} onClick={createConceptClickHandler(onClick)} className={className} />;
-		}
-
-		if (isPromptWithStats(entity)) {
-			const createPromptClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
-				if (!originalOnClick) return undefined;
-				return (_promptData: PromptWithStats) => {
-					const syntheticEvent = {
-						preventDefault: () => {},
-						stopPropagation: () => {},
-						currentTarget: null,
-						target: null,
-					} as unknown as React.MouseEvent;
-					originalOnClick(syntheticEvent);
-				};
-			};
-
-			return <PromptCard promptId={entity.id} onClick={createPromptClickHandler(onClick)} className={className} />;
-		}
-
-		if (isPropertyWithStats(entity)) {
-			const createPropertyClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
-				if (!originalOnClick) return undefined;
-				return (_propertyData: PropertyWithStats) => {
-					const syntheticEvent = {
-						preventDefault: () => {},
-						stopPropagation: () => {},
+						preventDefault: () => { },
+						stopPropagation: () => { },
 						currentTarget: null,
 						target: null,
 					} as unknown as React.MouseEvent;
@@ -385,22 +502,22 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			};
 
 			return (
-				<PropertyCard propertyId={entity.id} onClick={createPropertyClickHandler(onClick)} className={className} />
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<ConceptCard conceptId={entity.id} onClick={createConceptClickHandler(onClick)} className={className} />
+				</div>
 			);
 		}
 
-		if (isGroupWithStats(entity)) {
-			// @ts-expect-error - TODO: Fix GroupCard props
-			return <GroupCard group={entity} onClick={onClick} className={className} />;
-		}
-
-		if (isWildcardWithStats(entity)) {
-			const createWildcardClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+		if (isPromptWithStats(entity)) {
+			const createPromptClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
 				if (!originalOnClick) return undefined;
-				return (_wildcard: WildcardWithStats) => {
+				return (_promptData: PromptWithStats) => {
 					const syntheticEvent = {
-						preventDefault: () => {},
-						stopPropagation: () => {},
+						preventDefault: () => { },
+						stopPropagation: () => { },
 						currentTarget: null,
 						target: null,
 					} as unknown as React.MouseEvent;
@@ -408,7 +525,86 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				};
 			};
 
-			return <WildcardCard wildcard={entity} onClick={createWildcardClickHandler(onClick)} className={className} />;
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<PromptCard promptId={entity.id} onClick={createPromptClickHandler(onClick)} className={className} />
+				</div>
+			);
+		}
+
+		if (isPropertyWithStats(entity)) {
+			const createPropertyClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+				if (!originalOnClick) return undefined;
+				return (_propertyData: PropertyWithStats) => {
+					const syntheticEvent = {
+						preventDefault: () => { },
+						stopPropagation: () => { },
+						currentTarget: null,
+						target: null,
+					} as unknown as React.MouseEvent;
+					originalOnClick(syntheticEvent);
+				};
+			};
+
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<PropertyCard propertyId={entity.id} onClick={createPropertyClickHandler(onClick)} className={className} />
+				</div>
+			);
+		}
+
+		if (isGroupWithStats(entity)) {
+			const createGroupClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+				if (!originalOnClick) return undefined;
+				return (_group: GroupWithStats) => {
+					const syntheticEvent = {
+						preventDefault: () => { },
+						stopPropagation: () => { },
+						currentTarget: null,
+						target: null,
+					} as unknown as React.MouseEvent;
+					originalOnClick(syntheticEvent);
+				};
+			};
+
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<GroupCard groupId={entity.id} onClick={createGroupClickHandler(onClick)} className={className} />
+				</div>
+			);
+		}
+
+		if (isWildcardWithStats(entity)) {
+			const createWildcardClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+				if (!originalOnClick) return undefined;
+				return (_wildcard: WildcardWithStats) => {
+					const syntheticEvent = {
+						preventDefault: () => { },
+						stopPropagation: () => { },
+						currentTarget: null,
+						target: null,
+					} as unknown as React.MouseEvent;
+					originalOnClick(syntheticEvent);
+				};
+			};
+
+			return (
+				<div
+					data-item-id={entity.id}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
+				>
+					<WildcardCard wildcard={entity} onClick={createWildcardClickHandler(onClick)} className={className} />
+				</div>
+			);
 		}
 
 		// Fallback para entidades no reconocidas

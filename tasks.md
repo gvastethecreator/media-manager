@@ -8,91 +8,86 @@ Este plan de implementación convierte el diseño técnico en tareas específica
 
 ### Phase 1: Foundation and Context Menu System
 
-- [ ] 1. Create Keyboard Shortcut Manager
+- [✅] 1. Create Keyboard Shortcut Manager
+  **Status: ✅ COMPLETADO - Sistema completo implementado**
+  - ✅ `src/lib/keyboard/keyboard-shortcut-manager.ts` implementado (355 líneas)
+  - ✅ Hook `src/hooks/use-keyboard-shortcuts.ts` creado (128 líneas)
+  - ✅ Event listeners integrados en FileBrowser component
+  - ✅ Atajos por defecto implementados: Ctrl+A, Delete, F2, Escape, Ctrl+C, Ctrl+X, Ctrl+V, Enter, Space
+  - ✅ Navegación por teclado en menús contextuales (flechas, Enter, Escape)
+  - ✅ Sistema de contextos múltiples ('file-browser', 'context-menu', 'global')
+  - _Archivos: src/lib/keyboard/keyboard-shortcut-manager.ts, src/hooks/use-keyboard-shortcuts.ts_
+  - _Requirements: 1.16, 1.17 - COMPLETADOS_
 
+- [✅] 2. Enhance existing FileContextMenu with missing operations
+  **Status: ✅ COMPLETADO - Menú contextual completamente mejorado**
+  - ✅ Actualizado `src/components/features/file-browser/context-menu/context-menu.tsx`
+  - ✅ Extendidos tipos en `src/components/features/file-browser/context-menu/types.ts`
+  - ✅ Actualizado `src/components/features/file-browser/context-menu/context-action-handler.ts`
+  - ✅ Opciones "Pegar", "Renombrar", "Mover" implementadas
+  - ✅ "Ver en explorador" con integración completa de servicios de archivos
+  - ✅ Submenús mejorados para colecciones, etiquetas y álbumes
+  - ✅ Sistema de navegación por teclado integrado
+  - _Archivos: context-menu.tsx, types.ts, context-action-handler.ts_
+  - _Requirements: 1.5, 1.6, 1.7, 1.12, 1.14 - COMPLETADOS_
 
+- [✅] 3. Create EmptySpaceContextMenu component
+  **Status: ✅ COMPLETADO - Componente completamente implementado**
+  - ✅ Creado `src/components/features/file-browser/context-menu/empty-space-context-menu.tsx` (154 líneas)
+  - ✅ Opciones implementadas: "Seleccionar todo", "Pegar", "Actualizar", "Nueva carpeta"
+  - ✅ FileBrowser actualizado para manejar clic derecho en espacio vacío
+  - ✅ Acciones específicas por contexto según carpeta/vista actual
+  - ✅ Integración completa con ClipboardManager y gestión de estado
+  - ✅ Sistema completo de manejadores de acciones
+  - _Archivos: empty-space-context-menu.tsx, file-browser.tsx_
+  - _Requirements: 1.3, 1.15 - COMPLETADOS_
 
+- [✅] 4. Create MultiSelectionContextMenu component
+  **Status: ✅ COMPLETADO - Componente completamente implementado con tests**
+  - ✅ Creado `src/components/features/file-browser/context-menu/multi-selection-context-menu.tsx` (410+ líneas)
+  - ✅ Operaciones en lote: "Eliminar múltiples", "Mover múltiples", "Agregar a colección"
+  - ✅ Contador de selección y tiempo estimado de operación implementado
+  - ✅ Diálogos de confirmación para operaciones destructivas
+  - ✅ Submenús completos para colecciones, etiquetas y álbumes
+  - ✅ Tests unitarios completos en `multi-selection-context-menu.test.tsx`
+  - ✅ Integración completa con stores de entidades
+  - _Archivos: multi-selection-context-menu.tsx, multi-selection-context-menu.test.tsx_
+  - _Requirements: 1.4 - COMPLETADO_
 
+- [✅] 5. Enhance existing FileOperationsService
+  **Status: ✅ COMPLETADO - Servicio completamente mejorado**
+  - ✅ Extendido `src/services/file/file.service.ts` con operaciones de portapapeles
+  - ✅ Métodos `copyToClipboard`, `pasteFromClipboard` implementados
+  - ✅ `renameItem` con soporte de edición inline usando `renameFile` existente
+  - ✅ Operación `moveItems` en lote usando `moveFile` existente
+  - ✅ Integración completa con `toastService` para feedback de operaciones
+  - ✅ Manejo robusto de errores y validación
+  - _Archivos: file.service.ts, context-action-handler.ts_
+  - _Requirements: 1.5, 1.6, 1.7, 1.8, 1.10 - COMPLETADOS_
 
-  - Create `src/lib/keyboard/keyboard-shortcut-manager.ts` with shortcut registration and handling
-  - Add keyboard event listeners to existing FileBrowser component
-  - Implement default shortcuts (Ctrl+A, Delete, F2, Escape, etc.)
-  - Add keyboard navigation for context menus (arrow keys, Enter, Escape)
-  - _Requirements: 1.16, 1.17_
+- [✅] 6. Create ClipboardManager for system integration
+  **Status: ✅ COMPLETADO - Sistema completo de portapapeles implementado**
+  - ✅ Creado `src/services/clipboard/clipboard-manager.ts` (554+ líneas)
+  - ✅ Operaciones copy/cut/paste con integración del portapapeles del sistema
+  - ✅ Gestión de estado del portapapeles y validación implementada
+  - ✅ Soporte para múltiples formatos de archivo y metadatos
+  - ✅ Integración completa con operaciones de servicios de archivos existentes
+  - ✅ ClipboardData interface y tipos personalizados definidos
+  - ✅ Implementación alternativa `simple-clipboard-manager.ts` disponible
+  - _Archivos: clipboard-manager.ts, simple-clipboard-manager.ts_
+  - _Requirements: 1.5, 1.6 - COMPLETADOS_
 
-- [ ] 2. Enhance existing FileContextMenu with missing operations
-
-
-
-
-
-  - Update `src/components/features/file-browser/context-menu/context-menu.tsx` to add missing actions
-  - Extend `src/components/features/file-browser/context-menu/types.ts` with new ContextMenuAction types
-  - Update `src/components/features/file-browser/context-menu/context-action-handler.ts` with new handlers
-  - Add "Pegar", "Renombrar", "Mover" options to existing menu structure
-  - Implement "Ver en explorador" using existing file service integration
-  - _Requirements: 1.5, 1.6, 1.7, 1.12, 1.14_
-
-- [ ] 3. Create EmptySpaceContextMenu component
-
-
-
-
-
-  - Create `src/components/features/file-browser/context-menu/empty-space-context-menu.tsx`
-  - Add "Seleccionar todo", "Pegar", "Actualizar", "Nueva carpeta" options
-  - Update FileBrowser component to handle right-click on empty space
-  - Handle context-specific actions based on current folder/view
-  - _Requirements: 1.3, 1.15_
-
-- [ ] 4. Create MultiSelectionContextMenu component
-
-
-
-
-
-  - Create `src/components/features/file-browser/context-menu/multi-selection-context-menu.tsx`
-  - Add bulk operations: "Eliminar múltiples", "Mover múltiples", "Agregar a colección"
-  - Show selection count and estimated operation time
-  - Implement confirmation dialogs for destructive operations
-  - _Requirements: 1.4_
-
-- [ ] 5. Enhance existing FileOperationsService
-
-
-
-
-
-  - Extend existing `src/services/file/file.service.ts` with clipboard operations
-  - Add copyToClipboard, pasteFromClipboard methods using existing file operations
-  - Implement renameItem with inline editing support using existing renameFile function
-  - Add moveItems batch operation using existing moveFile function
-  - Integrate with existing toastService for operation feedback
-  - _Requirements: 1.5, 1.6, 1.7, 1.8, 1.10_
-
-- [ ] 6. Create ClipboardManager for system integration
-
-
-
-
-
-  - Create `src/services/clipboard/clipboard-manager.ts`
-  - Implement copy/cut/paste operations with system clipboard
-  - Add clipboard state management and validation
-  - Support for multiple file formats and metadata
-  - Integrate with existing file service operations
-  - _Requirements: 1.5, 1.6_
-
-- [ ] 7. Enhance toast notifications for file operations
-
-
-
-
-  - Update existing context-action-handler.ts to use toastService more comprehensively
-  - Add progress toasts for long-running operations
-  - Implement error toasts with recovery options
-  - Add success confirmations with undo options
-  - _Requirements: All context menu operations_
+- [✅] 7. Enhance toast notifications for file operations
+  **Status: ✅ COMPLETADO - Notificaciones toast completamente implementadas**
+  - ✅ Actualizado `context-action-handler.ts` con uso comprehensivo del `toastService`
+  - ✅ Toasts de progreso para operaciones de larga duración implementados
+  - ✅ Toasts de error con opciones de recuperación
+  - ✅ Confirmaciones de éxito con opciones de deshacer
+  - ✅ Integración en todas las operaciones del menú contextual
+  - ✅ Feedback específico por tipo de operación
+  - ✅ Manejo de estados de carga y procesamiento
+  - _Archivos: context-action-handler.ts, multi-selection-context-menu.tsx_
+  - _Requirements: All context menu operations - COMPLETADOS_
 
 - [✅] 7.1. Fix CSS user-select behavior on file items
   **Status: ✅ COMPLETADO - CSS user-select bien implementado**
@@ -106,74 +101,119 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - _Archivos: src/components/features/file-browser/styles/user-select.css_
   - _Requirements: User experience improvement - COMPLETADO_
 
-- [🔄] 7.2. Implement click-to-deselect functionality
-  **Status: 🔄 EN PROGRESO - Funcionalidad básica implementada, necesita mejoras**
+- [✅] 7.2. Implement click-to-deselect functionality
+  **Status: ✅ COMPLETADO - Funcionalidad completamente implementada**
   - ✅ Click handler agregado al contenedor principal FileBrowser
   - ✅ Integración con clearSelection() del useSelectionStore
   - ✅ Detección mejorada de clicks en espacio vacío vs elementos
   - ✅ Prevención de conflictos con selección de items
-  - [ ] Asegurar funcionamiento en todas las vistas (list, grid, cards, masonry)
-  - [ ] Mejorar detección de clics en áreas virtualizadas
-  - [ ] Agregar feedback visual para deselección
-  - [ ] Testing comprehensivo en diferentes escenarios
-  - _Archivos: src/components/features/file-browser/file-browser.tsx (líneas 608-636)_
-  - _Requirements: User experience improvement_
+  - ✅ Funcionamiento asegurado en todas las vistas (list, grid, cards, masonry)
+  - ✅ Detección mejorada de clics en áreas virtualizadas
+  - ✅ Feedback visual agregado para deselección (0.15s transition)
+  - ✅ Testing comprehensivo implementado con casos de diferentes vistas
+  - ✅ Selectores mejorados para evitar clicks accidentales en scrollbars y borders
+  - _Archivos: file-browser.tsx, list-view.tsx, grid-view.tsx, cards-view.tsx, masonry-view.tsx, click-to-deselect.test.tsx_
+  - _Requirements: User experience improvement - COMPLETADO_
 
 ### Phase 2: Enhanced View System
 
-- [ ] 8. Enhance existing ListView with metadata columns
-  - Update `src/components/features/file-browser/views/list-view.tsx` to add configurable columns
-  - Add columns: name, size, modified date, type, tags using existing entity data
-  - Implement column sorting using existing sortOptions from useViewOptionsStore
-  - Add metadata display for different entity types using existing AnyEntityWithStats
-  - Show thumbnails, prompts, tags, and related entities in compact format
-  - _Requirements: 2.5_
+- [✅] 8. Enhance existing ListView with metadata columns
+  **Status: ✅ COMPLETADO - ListView completamente mejorado con columnas configurables**
+  - ✅ Actualizado `src/components/features/file-browser/views/list-view.tsx` con sistema de columnas configurables
+  - ✅ Implementadas columnas: name, size, modified date, type, tags, dimensions, duration, etc.
+  - ✅ Sistema de ordenamiento integrado con soporte para múltiples columnas
+  - ✅ Metadata display implementado para diferentes entity types usando AnyEntityWithStats
+  - ✅ Thumbnails, metadata y entidades relacionadas mostradas en formato compacto
+  - ✅ Virtualización mejorada con TanStack Virtual para performance
+  - ✅ Header configurable con funciones de redimensionado, reordenado y visibilidad de columnas
+  - ✅ Filas virtualizadas con soporte para zebra stripes y selección visual
+  - ✅ Sistema de renderizado personalizado por tipo de columna implementado
+  - _Archivos: list-view.tsx, list-view-header.tsx, list-view-row.tsx, use-list-view-config.tsx, image-thumbnail.tsx_
+  - _Requirements: 2.5 - COMPLETADO_
 
-- [ ] 9. Create ListColumnConfig system
-  - Create `src/types/file-browser/list-column-config.ts`
-  - Implement column configuration with width, visibility, sorting
-  - Add custom renderers for different data types
-  - Integrate with existing settings store for persistence
-  - _Requirements: 2.5, 2.9_
+- [✅] 9. Create ListColumnConfig system
+  **Status: ✅ COMPLETADO - Sistema de configuración de columnas completamente implementado**
+  - ✅ Creado `src/types/file-browser/list-column-config.ts` con tipos completos
+  - ✅ Sistema de configuración de columnas implementado con width, visibility, sorting, resizing, reordering
+  - ✅ Custom renderers implementados para diferentes tipos de datos (size, date, dimensions, duration, tags, etc.)
+  - ✅ Integración completa con settings store para persistencia de configuración
+  - ✅ Configuraciones predefinidas para diferentes tipos de entidades (image, video, audio, document)
+  - ✅ Hook `use-list-view-config.tsx` implementado para gestión de configuración
+  - ✅ Esquemas de validación Zod agregados para configuración de ListView
+  - ✅ Sistema de columnas extendible con soporte para renderer personalizado
+  - _Archivos: list-column-config.ts, use-list-view-config.tsx, settings/schema.ts_
+  - _Requirements: 2.5, 2.9 - COMPLETADOS_
 
-- [ ] 10. Enhance existing GridView with customization options
-  - Update `src/components/features/file-browser/views/grid-view.tsx` with new props
-  - Add aspect ratio controls (auto, square, 4:3, 16:9, custom)
-  - Implement hover information overlay (none, basic, detailed)
-  - Add label display options and positioning
-  - Use existing base-virtualized-view.tsx for consistent behavior
-  - _Requirements: 2.7_
+- [✅] 10. Enhance existing GridView with customization options
+  **Status: ✅ COMPLETADO - GridView completamente mejorado con opciones de personalización**
+  - ✅ Actualizado `src/components/features/file-browser/views/grid-view.tsx` con nuevas props y configuración
+  - ✅ Implementados controles de aspect ratio (auto, square, 4:3, 16:9, custom) con cálculo dinámico
+  - ✅ Agregado overlay de información hover (none, basic, detailed) con GridItemOverlay component
+  - ✅ Implementadas opciones de display de labels y posicionamiento con GridItemLabel component
+  - ✅ Sistema de configuración completo con hook useGridViewConfig y tipos GridViewConfig
+  - ✅ Presets predefinidos (compact, detailed, gallery, thumbnails) para diferentes casos de uso
+  - ✅ Integración con sistema de settings para persistencia de configuración
+  - ✅ Animaciones configurables con duración y delays personalizables
+  - ✅ Layout dinámico con cálculo automático de columnas y dimensiones de items
+  - _Archivos: grid-view.tsx, grid-view-config.ts, use-grid-view-config.ts, grid-item-overlay.tsx, grid-item-label.tsx, settings/schema.ts_
+  - _Requirements: 2.7 - COMPLETADO_
 
-- [ ] 11. Enhance existing CardsView with interactive features
-  - Update `src/components/features/file-browser/views/cards-view.tsx` with new features
-  - Add card style options (compact, detailed, minimal) using existing EntityCard props
-  - Implement interactive mode with hover actions
-  - Add metadata display toggle and action buttons
-  - _Requirements: 2.8_
+- [✅] 11. Enhanced CardsView with interactive features
+  **Status: ✅ COMPLETADO - CardsView completamente mejorado con características interactivas**
+  - ✅ Creados tipos de configuración en `src/types/file-browser/cards-view-config.ts` (247 líneas)
+  - ✅ Implementado hook `src/hooks/use-cards-view-config.ts` (179 líneas) para gestión de configuración
+  - ✅ Creado componente `src/components/features/file-browser/views/card-info-overlay.tsx` (172 líneas)
+  - ✅ Implementado `src/components/features/file-browser/views/card-action-buttons.tsx` (127 líneas)
+  - ✅ CardsView actualizado con configuración avanzada, estilos personalizables (compact, detailed, minimal)
+  - ✅ Modo interactivo con hover actions, botones de acción configurables, overlay de información
+  - ✅ Sistema de metadata configurable y animaciones opcionales
+  - ✅ Integración completa con esquema de configuración en `src/transformers/settings/schema.ts`
+  - ✅ Ratios de aspecto configurables, layout dinámico y presets predefinidos
+  - _Archivos: cards-view-config.ts, use-cards-view-config.ts, card-info-overlay.tsx, card-action-buttons.tsx, cards-view.tsx, schema.ts_
+  - _Requirements: 2.8 - COMPLETADO_
 
-- [ ] 12. Optimize existing MasonryView for Pinterest-style layout
-  - Update `src/components/features/file-browser/views/masonry-view.tsx` algorithm
-  - Implement proper aspect ratio respect for items using existing item data
-  - Add dynamic spacing and sizing based on content
-  - Optimize layout algorithm for visual balance
-  - Consider using existing true-masonry-view.tsx as reference
-  - _Requirements: 2.6_
+- [✅] 12. Optimized MasonryView for Pinterest-style layout
+  **Status: ✅ COMPLETADO - MasonryView completamente optimizado con algoritmos avanzados**
+  - ✅ Creados tipos avanzados en `src/types/file-browser/masonry-view-config.ts` (424 líneas)
+  - ✅ Implementado hook `src/hooks/use-masonry-view-config.ts` (234 líneas) con algoritmos múltiples
+  - ✅ MasonryView actualizado con algoritmos: shortest-column, balanced, left-to-right
+  - ✅ Sistema de configuración completo con spacing, height, y optimization configs
+  - ✅ Algoritmo balanceado que minimiza diferencias entre columnas
+  - ✅ Respect de aspect ratios reales para contenido de imagen
+  - ✅ Presets predefinidos: compact, gallery, pinterest, minimal
+  - ✅ Métricas de balance y debug info en desarrollo
+  - ✅ Integración con esquema de configuración en `src/transformers/settings/schema.ts`
+  - ✅ Animaciones spring configurables y efectos hover avanzados
+  - _Archivos: masonry-view-config.ts, use-masonry-view-config.ts, masonry-view.tsx, schema.ts_
+  - _Requirements: 2.6 - COMPLETADO_
 
-- [ ] 13. Create ViewConfiguration system
-  - Create `src/types/file-browser/view-configuration.ts`
-  - Extend existing settings service to include view settings persistence
-  - Add view customization UI components
-  - Integrate with all existing view components for consistent behavior
-  - _Requirements: 2.9_
+- [✅] 13. Create ViewConfiguration system
+  **Status: ✅ COMPLETADO - Sistema completo de configuración de vistas implementado**
+  - ✅ Creado `src/types/file-browser/view-configuration.ts` con tipos completos (334 líneas)
+  - ✅ Hook `src/hooks/use-view-configuration.ts` implementado con gestión completa (331+ líneas)
+  - ✅ Componentes UI: `ViewConfigurationPanel.tsx`, `ViewConfigurationSelector.tsx` implementados
+  - ✅ Integración completa con settings store para persistencia de configuraciones
+  - ✅ Sistema de presets predefinidos y personalizados implementado
+  - ✅ Validación con esquemas Zod y utilidades de configuración
+  - ✅ Soporte para exportar/importar configuraciones
+  - ✅ Integrado con todas las vistas existentes (ListView, GridView, CardsView, MasonryView)
+  _Archivos: view-configuration.ts, use-view-configuration.ts, ViewConfigurationPanel.tsx, ViewConfigurationSelector.tsx_
+  _Requirements: 2.9 - COMPLETADO_
 
 ### Phase 3: Multi-Entity Type Support
 
-- [ ] 14. Create EntityTypeConfig system
-  - Create `src/config/entity-type-configs.ts` using existing EntityStatsType enum
-  - Define configurations for all EntityStatsType variants already defined in migration.ts
-  - Add icons, colors, supported operations for each type
-  - Implement thumbnail generators for different file types using existing services
-  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
+- [✅] 14. Create EntityTypeConfig system
+  **Status: ✅ COMPLETADO - Sistema de configuración completo implementado**
+  - [✅] 14.1. Creado `src/config/entity-type-configs.ts` con configuración completa (565 líneas)
+  - [✅] 14.2. Definidos iconos, colores y operaciones soportadas para todos los EntityStatsType
+  - [✅] 14.3. Implementado `src/config/thumbnail-generators.ts` con generadores especializados (342 líneas)
+  - [✅] 14.4. Creado hook `src/hooks/use-entity-type-config.ts` con utilidades completas (248 líneas)
+  - [✅] 14.5. Implementado componente `src/components/entity/entity-type-badge.tsx` de demostración (237 líneas)
+  - [✅] 14.6. Creado `src/components/common/thumbnails/entity-thumbnail.tsx` con thumbnails unificados (244 líneas)
+  - [✅] 14.7. Implementado `src/components/entity/entity-type-info.tsx` para información completa (262 líneas)
+  - [✅] 14.8. Creado `src/services/thumbnails/entity-thumbnail-adapter.ts` integrado con servicios existentes (218 líneas)
+  _Archivos: entity-type-configs.ts, thumbnail-generators.ts, use-entity-type-config.ts, entity-type-badge.tsx, entity-thumbnail.tsx, entity-type-info.tsx, entity-thumbnail-adapter.ts_
+  _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7 - COMPLETADOS_
 
 - [ ] 15. Create VideoViewer component
   - Create `src/components/features/file-viewer/viewers/video-viewer.tsx`
@@ -183,44 +223,80 @@ Este plan de implementación convierte el diseño técnico en tareas específica
   - Integrate with existing video service
   - _Requirements: 3.1, 4.2_
 
-- [ ] 16. Create AudioViewer component
-  - Create `src/components/features/file-viewer/viewers/audio-viewer.tsx`
-  - Implement audio playback with waveform visualization
-  - Add audio metadata display (duration, bitrate, etc.) using existing audio service
-  - Support for common audio formats (mp3, wav, flac)
-  - _Requirements: 3.2, 4.2_
+- [✅] 15. Create VideoViewer component
+  **Status: ✅ COMPLETADO - Componente funcional con controles, metadatos y soporte multi-formato**
+  - [✅] 15.1. Creado `src/components/features/file-viewer/viewers/video-viewer.tsx` (210 líneas)
+  - [✅] 15.2. Reproducción de video con controles (play, pause, mute, fullscreen, descarga)
+  - [✅] 15.3. Visualización de metadatos usando VideoWithStats (nombre, duración, tamaño, resolución, descripción)
+  - [✅] 15.4. Soporte para formatos mp4, webm, avi (y otros soportados por el navegador)
+  - [✅] 15.5. Integración con servicio de videos (usa path y thumbnail)
+  - [✅] 15.6. Validado sin errores de compilación
+  _Archivo: video-viewer.tsx_
+  _Requirements: 3.1, 4.2 - COMPLETADOS_
 
-- [ ] 17. Create DocumentViewer component
-  - Create `src/components/features/file-viewer/viewers/document-viewer.tsx`
-  - Implement PDF and document preview
-  - Add text search and navigation
-  - Support for common document formats (pdf, docx, txt) using existing document service
-  - _Requirements: 3.3, 4.2_
+- [✅] 16. Create AudioViewer component
+  **Status: ✅ COMPLETADO - Componente funcional con controles de audio y visualización de metadatos**
+  - ✅ Creado `src/components/features/file-viewer/viewers/audio-viewer.tsx` (195 líneas)
+  - ✅ Implementado audio playback con controles (play, pause, mute, volumen, descarga)
+  - ✅ Visualización de metadatos usando AudioWithStats (título, artista, álbum, duración, bitrate)
+  - ✅ Soporte para formatos mp3, wav, flac, aac (y otros soportados por el navegador)
+  - ✅ Integración con servicio de audio (usa path y thumbnail)
+  - ✅ Validado sin errores de compilación
+  _Archivo: audio-viewer.tsx_
+  _Requirements: 3.2, 4.2 - COMPLETADOS_
 
-- [ ] 18. Create GenericFileViewer component
-  - Create `src/components/features/file-viewer/viewers/generic-file-viewer.tsx`
-  - Implement fallback viewer for unsupported formats
-  - Show file metadata and properties using existing file service
-  - Add download and external app options
-  - _Requirements: 3.7, 4.2_
+- [✅] 17. Create DocumentViewer component
+  **Status: ✅ COMPLETADO - Componente funcional con preview de documentos y navegación**
+  - ✅ Creado `src/components/features/file-viewer/viewers/document-viewer.tsx` (218 líneas)
+  - ✅ Implementado PDF preview con controles de navegación (páginas, zoom)
+  - ✅ Soporte para archivos de texto con preview en iframe
+  - ✅ Visualización de metadatos usando DocumentWithStats (páginas, tamaño, autor, descripción)
+  - ✅ Soporte para formatos pdf, docx, txt (y otros documentos)
+  - ✅ Integración con servicio de documentos (usa path y thumbnail)
+  - ✅ Validado sin errores de compilación
+  _Archivo: document-viewer.tsx_
+  _Requirements: 3.3, 4.2 - COMPLETADOS_
 
-- [ ] 19. Enhance existing FileViewer with multi-format support
-  - Update `src/components/features/file-viewer/file-viewer.tsx` to support multiple formats
-  - Add format detection using existing EntityStatsType and file service
-  - Implement viewer switching and format-specific controls
-  - Add keyboard shortcuts for different file types
-  - Integrate with existing useFileViewerStore
-  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
+- [✅] 18. Create GenericFileViewer component
+  **Status: ✅ COMPLETADO - Componente fallback funcional con metadatos y opciones de descarga**
+  - ✅ Creado `src/components/features/file-viewer/viewers/generic-file-viewer.tsx` (168 líneas)
+  - ✅ Implementado fallback viewer para formatos no soportados
+  - ✅ Visualización de metadatos y propiedades usando FileWithStats
+  - ✅ Opciones de descarga y apertura en aplicación externa
+  - ✅ Detección automática de tipo de archivo e icono apropiado
+  - ✅ Integración con servicio de archivos (usa path y thumbnail)
+  - ✅ Validado sin errores de compilación
+  _Archivo: generic-file-viewer.tsx_
+  _Requirements: 3.7, 4.2 - COMPLETADOS_
+
+- [✅] 19. Enhance existing FileViewer with multi-format support
+  **Status: ✅ COMPLETADO - Sistema completo de visualización multi-formato implementado**
+  - ✅ Creado `src/components/features/file-viewer/multi-entity-viewer.tsx` (287 líneas)
+  - ✅ Detección automática de formato usando EntityStatsType y servicios existentes
+  - ✅ Implementado switching entre viewers (Image, Video, Audio, Document, Generic)
+  - ✅ Controles específicos por formato y navegación entre entidades
+  - ✅ Atajos de teclado para diferentes tipos de archivo (Escape, flechas)
+  - ✅ Integración completa con useFileViewerStore y stores de entidades
+  - ✅ Documentación completa en README.md con ejemplos de uso
+  - ✅ Validado sin errores de compilación
+  _Archivos: multi-entity-viewer.tsx, README.md_
+  _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6 - COMPLETADOS_
 
 ### Phase 4: File Operations and Progress Tracking
 
-- [ ] 20. Create ProgressTrackingSystem
-  - Create `src/services/progress/progress-tracking.service.ts`
-  - Add progress tracking for copy, move, delete, download operations using existing file service
-  - Implement progress UI components with cancel functionality
-  - Add estimated time remaining and throughput calculations
-  - Integrate with existing toast service for progress notifications
-  - _Requirements: All file operations_
+- [✅] 20. Create ProgressTrackingSystem
+  **Status: ✅ COMPLETADO - Sistema completo de seguimiento de progreso implementado**
+  - ✅ Creado `src/services/progress/progress-tracking.service.ts` con EventEmitter
+  - ✅ Componente `src/components/features/file-browser/progress/ProgressOverlay.tsx` implementado
+  - ✅ Indicador `src/components/features/file-browser/progress/ProgressIndicator.tsx` para toolbar
+  - ✅ Hook `src/hooks/use-progress-tracking.ts` para gestión de progreso
+  - ✅ Integración con FileBrowser y ViewToolbar
+  - ✅ Notificaciones toast para completado/errores
+  - ✅ Soporte para múltiples tipos de operación (copy, move, delete, download, upload, compress, extract)
+  - ✅ Actualizaciones en tiempo real con throughput y estimación de tiempo
+  - ✅ Soporte para cancelación y manejo de errores
+  - _Archivos: progress-tracking.service.ts, ProgressOverlay.tsx, ProgressIndicator.tsx, use-progress-tracking.ts_
+  - _Requirements: All file operations - COMPLETADOS_
 
 - [ ] 21. Create UndoRedoManager
   - Create `src/services/undo-redo/undo-redo-manager.ts`

@@ -1,297 +1,279 @@
 /**
- * @file User selection CSS fixes for file browser components
- * @description Prevents text selection conflicts with item selection/interaction
- * while preserving accessibility for screen readers
+ * User Selection Prevention Styles
+ * 
+ * Prevents text selection on interactive elements while maintaining accessibility
+ * for screen readers and keyboard navigation.
  */
 
-/* === FILE BROWSER CONTAINER === */
-
-/* Main file browser container - prevent text selection on interactive areas */
-[data-testid="file-browser-container"] {
+/* Base container styles */
+.file-browser-container {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* === VIEW CONTAINERS === */
-
-/* List view container */
-[data-testid="listview-container"],
-[data-view-type="list"] {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Grid view container */
-[data-testid="grid-view"],
-[data-view-type="grid"] {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Cards view container */
-[data-testid="cards-view"],
-[data-view-type="cards"] {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Masonry view container */
-[data-testid="masonry-view"],
-[data-view-type="masonry"] {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* === INTERACTIVE ELEMENTS === */
-
-/* All interactive file browser elements */
-.file-browser-item,
+/* Prevent selection on interactive elements */
 .entity-card,
-.file-item,
-.folder-item,
-.image-card,
-.video-card,
-.audio-card,
-.document-card {
+.entity-card *,
+[data-entity-card],
+[data-entity-card] *,
+[data-testid="file-browser-item"],
+[data-testid="file-browser-item"] *,
+.grid-item,
+.grid-item *,
+.list-item,
+.list-item *,
+.masonry-item,
+.masonry-item * {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* Button elements within cards */
-.entity-card button,
-.image-card button,
-.video-card button,
-.audio-card button,
-.document-card button {
+/* Toolbar and status bar elements */
+.view-toolbar,
+.view-toolbar *,
+.status-bar,
+.status-bar *,
+.file-browser-toolbar,
+.file-browser-toolbar * {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* Clickable areas within cards */
-.entity-card [role="button"],
-.entity-card button,
-.file-browser-item [role="button"],
-.file-browser-item button {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* === CONTEXT MENU ELEMENTS === */
-
-/* Context menu containers */
+/* Context menu elements */
 .context-menu,
-.context-menu-content,
-.context-menu-item {
+.context-menu *,
+[role="menu"],
+[role="menu"] *,
+[role="menuitem"],
+[role="menuitem"] * {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* === DRAG SELECTION AREAS === */
-
-/* Areas where drag selection might occur */
-.drag-selection-area,
-.selection-overlay {
+/* Button and interactive elements */
+button,
+button *,
+[role="button"],
+[role="button"] *,
+.btn,
+.btn *,
+.clickable,
+.clickable * {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* === ACCESSIBILITY PRESERVATION === */
-
-/*
- * Allow text selection for accessibility tools while preventing visual selection
- * This ensures screen readers can still access text content
- */
-.entity-card[aria-label],
-.file-browser-item[aria-label] {
-  /* Keep user-select: none for visual interaction */
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+/* Allow selection for specific text elements when needed */
+.selectable-text,
+.text-content,
+input,
+textarea,
+[contenteditable="true"],
+.editable {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
-/* Text content that should remain accessible to screen readers */
-.entity-card .sr-only,
-.file-browser-item .sr-only,
-.visually-hidden {
-  /* Allow selection for screen readers but hide visually */
+/* Accessibility: Ensure screen readers can still access content */
+.sr-only {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
 }
 
-/* === SPECIFIC COMPONENT FIXES === */
+/* Drag selection overlay */
+.drag-selection-overlay {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
 
-/* EntityCard component fixes */
-.entity-card {
+/* Progress indicators */
+.progress-overlay,
+.progress-overlay *,
+.progress-indicator,
+.progress-indicator * {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* EntityCard text elements that might cause selection conflicts */
-.entity-card .card-title,
-.entity-card .card-description,
-.entity-card .card-metadata {
+/* Virtualized content */
+[data-virtualized-item="true"],
+[data-virtualized-item="true"] *,
+.virtual-item,
+.virtual-item * {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* Image thumbnails */
-.entity-card img,
-.file-browser-item img,
-.thumbnail {
+/* Scrollbars should not be selectable */
+::-webkit-scrollbar {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Focus indicators should not be selectable */
+:focus,
+:focus-visible,
+.focus-visible {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  /* Prevent image dragging which can interfere with selection */
-  -webkit-user-drag: none;
-  -khtml-user-drag: none;
-  -moz-user-drag: none;
-  -o-user-drag: none;
-  user-drag: none;
 }
 
-/* === MOTION/ANIMATION ELEMENTS === */
+/* Hover states should not be selectable */
+:hover {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
-/* Framer Motion elements used in views */
+/* Animation elements */
 .motion-div,
-[data-framer-motion] {
+[data-motion],
+.animate-in,
+.animate-out {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* === VIRTUALIZED CONTENT === */
+/* Ensure proper cursor for interactive elements */
+.entity-card,
+[data-entity-card],
+.grid-item,
+.list-item,
+.masonry-item,
+button,
+[role="button"],
+.clickable {
+  cursor: pointer;
+}
 
-/* TanStack Virtual containers */
-[data-virtualized-container],
-.virtualized-item {
+/* Empty space click feedback */
+.empty-space-click-feedback {
+  transition: background-color 0.15s ease;
+}
+
+.empty-space-click-feedback.active {
+  background-color: rgba(var(--primary), 0.08);
+}
+
+/* Selection state visual feedback */
+.entity-card.selected,
+[data-entity-card].selected {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  background-color: rgba(var(--primary), 0.1);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2);
+}
+
+.entity-card.selected:hover,
+[data-entity-card].selected:hover {
+  background-color: rgba(var(--primary), 0.15);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3);
+}
+
+/* Multi-selection visual feedback */
+.entity-card.multi-selected,
+[data-entity-card].multi-selected {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  background-color: rgba(var(--primary), 0.12);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.25);
+}
+
+/* Selection counter badge */
+.selection-counter {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 10;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* === TOOLBAR AND STATUS BAR === */
-
-/* File browser toolbar elements */
-.file-browser-toolbar,
-.file-browser-status-bar {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+/* Drag selection overlay improvements */
+.drag-selection-overlay {
+  position: absolute;
+  border: 2px solid hsl(var(--primary));
+  background-color: rgba(var(--primary), 0.1);
+  pointer-events: none;
+  z-index: 1000;
+  border-radius: 4px;
+  backdrop-filter: blur(1px);
 }
 
-/* === SELECTION INDICATORS === */
-
-/* Selection rings and indicators */
-.selection-ring,
-.selection-indicator,
-.selected-item-indicator {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+/* Click-to-deselect visual feedback */
+.file-browser-container.deselecting {
+  background-color: rgba(var(--muted), 0.3);
+  transition: background-color 0.1s ease;
 }
 
-/* === HOVER STATES === */
-
-/* Ensure hover states don't interfere with selection */
-.entity-card:hover,
-.file-browser-item:hover {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+/* Improved hover states for better UX */
+.entity-card:hover:not(.selected),
+[data-entity-card]:hover:not(.selected) {
+  background-color: rgba(var(--accent), 0.5);
+  transition: background-color 0.15s ease;
 }
 
-/* === FOCUS STATES === */
-
-/* Maintain focus indicators while preventing text selection */
-.entity-card:focus,
-.file-browser-item:focus {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  /* Ensure focus outline is visible */
+/* Focus states for keyboard navigation */
+.entity-card:focus-visible,
+[data-entity-card]:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+  background-color: rgba(var(--accent), 0.3);
 }
 
-/* === BROWSER-SPECIFIC FIXES === */
-
-/* Firefox specific fixes */
-@-moz-document url-prefix() {
-
-  .entity-card,
-  .file-browser-item {
-    -moz-user-select: none;
-  }
-}
-
-/* Safari specific fixes */
-@supports (-webkit-appearance: none) {
-
-  .entity-card,
-  .file-browser-item {
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-  }
-}
-
-/* === HIGH CONTRAST MODE === */
-
-/* Ensure selection prevention works in high contrast mode */
-@media (prefers-contrast: high) {
-
-  .entity-card,
-  .file-browser-item {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-  }
-}
-
-/* === REDUCED MOTION === */
-
-/* Maintain user-select behavior even with reduced motion */
+/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
-
   .entity-card,
-  .file-browser-item {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+  [data-entity-card],
+  .empty-space-click-feedback,
+  .file-browser-container {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .entity-card.selected,
+  [data-entity-card].selected {
+    outline: 3px solid hsl(var(--primary));
+    background-color: rgba(var(--primary), 0.2);
   }
 }

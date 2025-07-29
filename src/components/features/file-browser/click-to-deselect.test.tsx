@@ -7,6 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FileBrowser } from './file-browser';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { EntityStatsType } from '@/types/migration';
 
 // Mock the stores and dependencies
 vi.mock('@/store/ui/selection.slice');
@@ -21,13 +22,13 @@ vi.mock('@/lib/ui/toast');
 const mockItems: AnyEntityWithStats[] = [
   {
     id: '1',
-    entityType: 'image',
+    entityType: 'image' as const,
     name: 'Test Image 1',
     path: '/test/image1.jpg',
   },
   {
     id: '2',
-    entityType: 'image',
+    entityType: 'image' as const,
     name: 'Test Image 2',
     path: '/test/image2.jpg',
   },
@@ -80,7 +81,7 @@ describe('FileBrowser Click-to-Deselect', () => {
   it('should call clearSelection when clicking on empty space in main container', () => {
     render(
       <FileBrowser
-        entityType="image"
+        entityType={EntityStatsType.IMAGE}
         mode="manual"
         items={mockItems}
       />
@@ -97,7 +98,7 @@ describe('FileBrowser Click-to-Deselect', () => {
   it('should not call clearSelection when clicking on an item', () => {
     render(
       <FileBrowser
-        entityType="image"
+        entityType={EntityStatsType.IMAGE}
         mode="manual"
         items={mockItems}
       />
@@ -130,12 +131,12 @@ describe('FileBrowser Click-to-Deselect', () => {
       }));
 
       render(
-        <FileBrowser
-          entityType="image"
-          mode="manual"
-          items={mockItems}
-        />
-      );
+          <FileBrowser
+            entityType={EntityStatsType.IMAGE}
+            mode="manual"
+            items={mockItems}
+          />
+        );
 
       const container = screen.getByTestId('file-browser-container');
       fireEvent.click(container);

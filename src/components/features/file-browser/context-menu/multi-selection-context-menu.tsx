@@ -31,29 +31,7 @@ import type { TagWithStats } from '@/types/entities/tag';
 import { EnhancedSubmenu } from './components/enhanced-submenu';
 import type { ContextMenuAction } from './types';
 
-/**
- * Tipos de acciones específicas para selección múltiple
- */
-export type MultiSelectionAction =
-  | 'delete-multiple'
-  | 'move-multiple'
-  | 'copy-multiple'
-  | 'download-multiple'
-  | 'add-to-collection'
-  | 'add-to-album'
-  | 'add-tag';
-
-/**
- * Props para el componente MultiSelectionContextMenu
- */
-export interface MultiSelectionContextMenuProps {
-  /** Elementos seleccionados */
-  selectedItems: FileItem[];
-  /** Manejador de acciones del menú */
-  onAction: (action: MultiSelectionAction | ContextMenuAction, items: FileItem[], data?: Record<string, unknown>) => Promise<void>;
-  /** Posición del menú contextual */
-  position: { x: number; y: number };
-}
+import type { MultiSelectionAction, MultiSelectionContextMenuProps } from './types';
 
 /**
  * Información de operación para mostrar tiempo estimado
@@ -267,7 +245,7 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
             <span>{itemCount} elemento{itemCount > 1 ? 's' : ''} seleccionado{itemCount > 1 ? 's' : ''}</span>
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            Tamaño total: {selectedItems.reduce((acc, item) => acc + (item.size || 0), 0).toLocaleString()} bytes
+            Tamaño total: {selectedItems.reduce((acc, item) => acc + (('size' in item ? item.size : 0) || 0), 0).toLocaleString()} bytes
           </div>
         </div>
 

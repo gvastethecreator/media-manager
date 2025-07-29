@@ -72,7 +72,7 @@ export interface FileSelectionState {
 
 export interface ViewState {
 	currentView: 'grid' | 'list';
-	thumbnailSize: 'small' | 'medium' | 'large';
+	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
 	sortBy: 'name' | 'date' | 'size';
 	sortOrder: 'asc' | 'desc';
 	filterTags: string[];

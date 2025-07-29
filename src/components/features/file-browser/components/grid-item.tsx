@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { memo, useCallback } from 'react';
-import type { FileItem } from '@/types/files';
+import type { FileItem } from '@/types/file-browser/file-item';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';

@@ -17,7 +17,7 @@ export interface FileViewState {
 	// Preferencias de UI
 	showThumbnails: boolean;
 	showMetadata: boolean;
-	thumbnailSize: 'small' | 'medium' | 'large';
+	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
 	animationsEnabled: boolean;
 
 	// Acciones
@@ -26,7 +26,7 @@ export interface FileViewState {
 	setSortOrder: (order: 'asc' | 'desc') => void;
 	setShowThumbnails: (show: boolean) => void;
 	setShowMetadata: (show: boolean) => void;
-	setThumbnailSize: (size: 'small' | 'medium' | 'large') => void;
+	setThumbnailSize: (size: 'none' | 'small' | 'medium' | 'large') => void;
 	setAnimationsEnabled: (enabled: boolean) => void;
 	resetViewSettings: () => void;
 }
@@ -78,7 +78,7 @@ export const useFileViewStore = create<FileViewState>()(
 				set({ showMetadata: show });
 			},
 
-			setThumbnailSize: (size: 'small' | 'medium' | 'large') => {
+			setThumbnailSize: (size: 'none' | 'small' | 'medium' | 'large') => {
 				viewLogger.info(`🔄 Cambiando tamaño de miniaturas a: ${size}`);
 				set({ thumbnailSize: size });
 			},
