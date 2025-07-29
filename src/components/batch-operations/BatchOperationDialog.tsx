@@ -1,11 +1,11 @@
 /**
  * Batch Operation Dialog Component
- * 
+ *
  * A dialog for configuring batch operations before execution,
  * allowing users to set options like priority, error handling, and progress display.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -32,10 +32,8 @@ import {
   Copy,
   Move,
   Trash2,
-  AlertTriangle,
-  Info,
-  Settings,
-  FolderOpen,
+  AlertTriangle, Settings,
+  FolderOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -107,7 +105,7 @@ export function BatchOperationDialog({
   const getOperationTitle = () => {
     const itemCount = items.length;
     const itemText = itemCount === 1 ? 'elemento' : 'elementos';
-    
+
     switch (type) {
       case 'copy':
         return `Copiar ${itemCount} ${itemText}`;
@@ -131,7 +129,9 @@ export function BatchOperationDialog({
 
   const getTotalSize = () => {
     return items.reduce((total, item) => {
-      return total + (item.stats?.size || 0);
+      // Acceder a size desde la entidad base, no desde las estadísticas
+      const itemSize = 'size' in item ? (item as any).size : 0;
+      return total + (itemSize || 0);
     }, 0);
   };
 
@@ -179,7 +179,7 @@ export function BatchOperationDialog({
                 {items.length} {items.length === 1 ? 'elemento' : 'elementos'}
               </Badge>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
               <div>
                 <span className="font-medium">Tamaño total:</span>
@@ -188,8 +188,8 @@ export function BatchOperationDialog({
               <div>
                 <span className="font-medium">Tipos:</span>
                 <span className="ml-2">
-                  {items.filter(item => item.stats?.isDirectory()).length} carpetas, {' '}
-                  {items.filter(item => item.stats?.isFile()).length} archivos
+                  {items.filter(item => item.entityType === 'folder').length} carpetas, {' '}
+                  {items.filter(item => item.entityType !== 'folder').length} archivos
                 </span>
               </div>
             </div>
@@ -370,7 +370,7 @@ export function BatchOperationDialog({
           <Button variant="outline" onClick={handleCancel}>
             Cancelar
           </Button>
-          <Button 
+          <Button
             onClick={handleConfirm}
             disabled={!isValid()}
             variant={type === 'delete' ? 'destructive' : 'default'}

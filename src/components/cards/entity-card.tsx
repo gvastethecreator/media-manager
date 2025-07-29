@@ -204,9 +204,18 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			});
 
 			return (
-				<div
+				<ImageCard
+					imageId={entity.id}
+					onClick={imageClickHandler}
+					onDoubleClick={imageDoubleClickHandler}
+					className={`entity-card ${isSelected ? 'entity-card--selected' : ''} ${className || ''}`}
+					showTags={config.showTags}
+					showDetails={config.showDetails}
+					aspectRatio={config.aspectRatio as string}
+					variant={mapToImageCardVariant(config.variant)}
+					tcgMode={config.variant === 'tcg'}
+					showRelations={config.showMetadata}
 					data-item-id={entity.id}
-					className={`entity-card ${isSelected ? 'entity-card--selected' : ''}`}
 					role="button"
 					tabIndex={0}
 					aria-label={`Imagen: ${entity.name || 'Sin nombre'}`}
@@ -231,23 +240,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 							}
 						}
 					}}
-				>
-					<ImageCard
-						imageId={entity.id}
-						onClick={imageClickHandler}
-						onDoubleClick={imageDoubleClickHandler}
-						className={className}
-						showTags={config.showTags}
-						showDetails={config.showDetails}
-						aspectRatio={config.aspectRatio as string}
-						variant={mapToImageCardVariant(config.variant)}
-						tcgMode={config.variant === 'tcg'}
-						showRelations={config.showMetadata}
-					/>
-					<div id={`entity-${entity.id}-description`} className="sr-only">
-						{`Imagen ${entity.name || 'sin nombre'}. ${isSelected ? 'Seleccionada.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
-					</div>
-				</div>
+				/>
 			);
 		}
 

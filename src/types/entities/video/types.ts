@@ -278,9 +278,9 @@ export interface VideoPaginationOptions {
  */
 export interface VideoWithStats extends VideoBase {
 	entityType: 'video';
-	statistics: VideoStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
 	stats: VideoStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: VideoStatistics;
 	thumbnailUrl: string | null;
 	frameRate?: number;
 	videoCodec?: string;

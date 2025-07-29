@@ -10,6 +10,8 @@ import { toastService } from '@/services/toast/toast.service';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { getFileAsDataUrl } from '@/services/file/file.service';
 import { FileErrorCode, FileType } from '@/types/entities/file';
+import { getEntitySize, getEntityPath, isEntityDirectory } from '@/lib/utils/entity-properties.utils';
+import { formatFileSize } from '@/lib/utils/format.utils';
 
 const logger = serverLogger.withContext('ClipboardManager');
 
@@ -300,8 +302,8 @@ export class ClipboardManager {
 
     // Check if any items are images within size limit
     const hasValidImages = items.some(item =>
-      item.type === FileType.IMAGE &&
-      (item.size || 0) <= this.systemClipboardOptions.maxImageSize
+      item.entityType === 'image' &&
+      getEntitySize(item) <= this.systemClipboardOptions.maxImageSize
     );
 
     if (hasValidImages && this.systemClipboardOptions.includeImages) {
@@ -347,7 +349,8 @@ export class ClipboardManager {
       if (!item.id) {
         errors.push(`Item missing ID: ${item.name || 'unknown'}`);
       }
-      if (!item.path) {
+      const itemPath = getEntityPath(item);
+      if (!itemPath) {
         errors.push(`Item missing path: ${item.name || 'unknown'}`);
       }
       if (!item.name) {
@@ -358,25 +361,27 @@ export class ClipboardManager {
     // Operation-specific validation
     if (operation === 'cut') {
       // Check if items can be moved (not readonly)
-      const readonlyItems = items.filter(item => item.isReadonly);
+      // Note: For now, we assume all entities can be moved unless they're directories
+      const readonlyItems = items.filter(item => isEntityDirectory(item));
       if (readonlyItems.length > 0) {
-        errors.push(`Cannot cut readonly items: ${readonlyItems.map(i => i.name).join(', ')}`);
+        warnings.push(`Moving directories may have restrictions: ${readonlyItems.map(i => i.name).join(', ')}`);
       }
     }
 
     // Size validation
-    const totalSize = items.reduce((sum, item) => sum + (item.size || 0), 0);
+    const totalSize = items.reduce((sum, item) => sum + getEntitySize(item), 0);
     const maxClipboardSize = 100 * 1024 * 1024; // 100MB
     if (totalSize > maxClipboardSize) {
-      warnings.push(`Total size (${this.formatSize(totalSize)}) exceeds recommended clipboard limit`);
+      warnings.push(`Total size (${formatFileSize(totalSize)}) exceeds recommended clipboard limit`);
     }
 
     // Determine supported operations
     if (errors.length === 0) {
       supportedOperations.push('copy');
 
-      const hasNonReadonly = items.some(item => !item.isReadonly);
-      if (hasNonReadonly) {
+      // For now, allow cut operations on all non-directory items
+      const hasMovableItems = items.some(item => !isEntityDirectory(item));
+      if (hasMovableItems) {
         supportedOperations.push('cut');
       }
 
@@ -421,9 +426,10 @@ export class ClipboardManager {
         // Add image data for single image items
         if (this.systemClipboardOptions.includeImages && clipboardData.items.length === 1) {
           const item = clipboardData.items[0];
-          if (item.type === FileType.IMAGE && (item.size || 0) <= this.systemClipboardOptions.maxImageSize) {
+          if (item.entityType === 'image' && getEntitySize(item) <= this.systemClipboardOptions.maxImageSize) {
             try {
-              const dataUrlResponse = await getFileAsDataUrl(item.path);
+              const itemPath = getEntityPath(item);
+              const dataUrlResponse = await getFileAsDataUrl(itemPath);
               const base64Data = dataUrlResponse.dataUrl.split(',')[1];
               const binaryData = atob(base64Data);
               const bytes = new Uint8Array(binaryData.length);
@@ -467,15 +473,15 @@ export class ClipboardManager {
     // Add item details
     for (const item of clipboardData.items) {
       lines.push(`• ${item.name}`);
-      if (item.path) {
-        lines.push(`  Path: ${item.path}`);
+      const itemPath = getEntityPath(item);
+      if (itemPath) {
+        lines.push(`  Path: ${itemPath}`);
       }
-      if (item.size) {
-        lines.push(`  Size: ${this.formatSize(item.size)}`);
+      const itemSize = getEntitySize(item);
+      if (itemSize > 0) {
+        lines.push(`  Size: ${formatFileSize(itemSize)}`);
       }
-      if (item.type) {
-        lines.push(`  Type: ${item.type}`);
-      }
+      lines.push(`  Type: ${item.entityType}`);
       lines.push('');
     }
 
@@ -495,15 +501,15 @@ export class ClipboardManager {
     for (const item of clipboardData.items) {
       html += `<li>`;
       html += `<strong>${item.name}</strong>`;
-      if (item.path) {
-        html += `<br><small>Path: ${item.path}</small>`;
+      const itemPath = getEntityPath(item);
+      if (itemPath) {
+        html += `<br><small>Path: ${itemPath}</small>`;
       }
-      if (item.size) {
-        html += `<br><small>Size: ${this.formatSize(item.size)}</small>`;
+      const itemSize = getEntitySize(item);
+      if (itemSize > 0) {
+        html += `<br><small>Size: ${formatFileSize(itemSize)}</small>`;
       }
-      if (item.type) {
-        html += `<br><small>Type: ${item.type}</small>`;
-      }
+      html += `<br><small>Type: ${item.entityType}</small>`;
       html += `</li>`;
     }
 
@@ -520,9 +526,10 @@ export class ClipboardManager {
     const uris: string[] = [];
 
     for (const item of clipboardData.items) {
-      if (item.path) {
+      const itemPath = getEntityPath(item);
+      if (itemPath) {
         // Convert file path to file:// URI
-        const uri = `file://${item.path.replace(/\\/g, '/')}`;
+        const uri = `file://${itemPath.replace(/\\/g, '/')}`;
         uris.push(uri);
       }
     }
@@ -530,21 +537,7 @@ export class ClipboardManager {
     return uris.join('\n');
   }
 
-  /**
-   * Format file size for display
-   */
-  private formatSize(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
 
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
-  }
 }
 
 // Create and export singleton instance

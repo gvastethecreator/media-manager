@@ -24,7 +24,7 @@ import type { WorldItemWithStats } from './entities/world-item';
 /**
  * Tipo de vista para archivos
  */
-export type ViewType = 'grid' | 'list' | 'masonry' | 'table';
+export type ViewType = 'grid' | 'list' | 'masonry' | 'cards';
 
 /**
  * Tipos de archivo

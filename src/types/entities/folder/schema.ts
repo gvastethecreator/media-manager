@@ -130,7 +130,7 @@ export const FolderStatisticsSchema = z.object({
  * 📁 Schema para FolderWithStats
  */
 export const FolderWithStatsSchema = FolderBaseSchema.extend({
-	statistics: FolderStatisticsSchema,
+	stats: FolderStatisticsSchema,
 	_count: z.object({
 		children: z.number().int().min(0),
 		images: z.number().int().min(0),

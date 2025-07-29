@@ -4,11 +4,16 @@
  */
 
 import { motion, AnimatePresence } from 'motion/react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
+import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { FileContextMenu } from '@/components/features/file-browser/context-menu/context-menu';
+import { handleContextAction } from '@/components/features/file-browser/context-menu';
+import { entityToFileItem } from '@/types/file-browser/file-item';
 import { useMasonryViewConfig } from '@/hooks/use-masonry-view-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
+import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
 
 interface MasonryViewProps {
 	items: AnyEntityWithStats[];
@@ -16,10 +21,10 @@ interface MasonryViewProps {
 	containerWidth: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
+	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 }
 
-// Componente interno memoizado para cada item
-const MasonryItem = memo<{
+interface MasonryItemProps {
 	layoutItem: {
 		item: AnyEntityWithStats;
 		x: number;
@@ -32,12 +37,17 @@ const MasonryItem = memo<{
 	itemIndex: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
-}>(function MasonryItem({
+	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
+}
+
+// Componente interno memoizado para cada item
+const MasonryItem = memo<MasonryItemProps>(function MasonryItem({
 	layoutItem,
 	isSelected,
 	itemIndex,
 	onItemClick,
 	onItemDoubleClick,
+	onContextAction,
 }) {
 	const { config } = useMasonryViewConfig();
 
@@ -102,16 +112,39 @@ const MasonryItem = memo<{
 				height: `${layoutItem.height}px`,
 			}}
 		>
-			<EntityCard
-				entity={layoutItem.item}
-				layout="vertical"
-				size="md"
-				isSelected={isSelected}
-				compact={false}
-				className="w-full h-full"
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-			/>
+			<ContextMenu>
+				<ContextMenuTrigger asChild>
+					<EntityCard
+						entity={layoutItem.item}
+						layout="vertical"
+						size="md"
+						isSelected={isSelected}
+						compact={false}
+						className="w-full h-full"
+						onClick={handleClick}
+						onDoubleClick={handleDoubleClick}
+					/>
+				</ContextMenuTrigger>
+				<ContextMenuContent>
+					<FileContextMenu
+						file={entityToFileItem(layoutItem.item)}
+						onAction={(action, file, data) => {
+							if (onContextAction) {
+								onContextAction(action, layoutItem.item, data);
+							} else {
+								const fileItem = entityToFileItem(layoutItem.item);
+								handleContextAction(
+									action,
+									fileItem,
+									undefined, // items array no se usa aquí
+									undefined, // toggleSelection no disponible en view component
+									undefined  // refreshView no disponible en view component
+								);
+							}
+						}}
+					/>
+				</ContextMenuContent>
+			</ContextMenu>
 		</motion.div>
 	);
 });
@@ -122,6 +155,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
+	onContextAction,
 }) {
 	const parentRef = useRef<any>(null);
 	const [containerHeight, setContainerHeight] = useState<number>(600);
@@ -229,6 +263,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 								itemIndex={index}
 								onItemClick={onItemClick}
 								onItemDoubleClick={onItemDoubleClick}
+								onContextAction={onContextAction}
 							/>
 						);
 					})}

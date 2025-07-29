@@ -1,4 +1,6 @@
-import { useSelectionStore } from '../../store/selection.store';
+import { useSelectionStore } from '@/store/selection.store';
+import type { SelectionState } from '@/store/selection.store';
+import type { EntityWithStats } from '../../types/migration';
 
 export interface DragSelectionConfig {
   enabled: boolean;
@@ -92,7 +94,7 @@ export class DragSelectionManager {
   private selectableElements: Map<string, HTMLElement> = new Map();
   private animationFrame: number | null = null;
   private scrollInterval: NodeJS.Timeout | null = null;
-  private selectionStore: ReturnType<typeof useSelectionStore>;
+  private getSelectionStore: () => SelectionState;
 
   constructor(
     config: Partial<DragSelectionConfig> = {},
@@ -100,7 +102,7 @@ export class DragSelectionManager {
   ) {
     this.config = { ...defaultConfig, ...config };
     this.events = events;
-    this.selectionStore = useSelectionStore.getState();
+    this.getSelectionStore = () => useSelectionStore.getState() as SelectionState;
 
     this.state = {
       isActive: false,
@@ -188,7 +190,7 @@ export class DragSelectionManager {
       const entityId = isSelectableElement.getAttribute('data-entity-id');
       if (entityId) {
         // If element is already selected and we're not adding, don't start drag selection
-        const isSelected = this.selectionStore.selectedIds.includes(entityId);
+        const isSelected = this.getSelectionStore().selectedIds.includes(entityId);
         if (isSelected && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
           return;
         }
@@ -253,7 +255,7 @@ export class DragSelectionManager {
 
     // Clear existing selection if in select mode and clearOnStart is enabled
     if (this.state.mode === 'select' && this.config.clearOnStart) {
-      this.selectionStore.clearSelection();
+      this.getSelectionStore().clearSelection();
     }
 
     // Prevent text selection
@@ -303,18 +305,19 @@ export class DragSelectionManager {
     const selectedIds = Array.from(this.state.selectedElements);
 
     // Update the selection store
+    const selectionStore = this.getSelectionStore();
     switch (this.state.mode) {
       case 'select':
-        this.selectionStore.setSelection(selectedIds);
+        selectionStore.setSelection(selectedIds);
         break;
       case 'add':
-        selectedIds.forEach(id => this.selectionStore.addToSelection(id));
+        selectedIds.forEach((id: string) => selectionStore.addToSelection(id));
         break;
       case 'subtract':
-        selectedIds.forEach(id => this.selectionStore.removeFromSelection(id));
+        selectedIds.forEach((id: string) => selectionStore.removeFromSelection(id));
         break;
       case 'toggle':
-        selectedIds.forEach(id => this.selectionStore.toggleSelection(id));
+        selectedIds.forEach((id: string) => selectionStore.toggleSelection(id));
         break;
     }
 
@@ -356,11 +359,11 @@ export class DragSelectionManager {
   private updateSelectionMode(event: MouseEvent | KeyboardEvent): void {
     const { keyModifiers } = this.config;
 
-    if (this.isKeyPressed(event, keyModifiers.subtract)) {
+    if (keyModifiers?.subtract && this.isKeyPressed(event, keyModifiers.subtract)) {
       this.state.mode = 'subtract';
-    } else if (this.isKeyPressed(event, keyModifiers.add)) {
+    } else if (keyModifiers?.add && this.isKeyPressed(event, keyModifiers.add)) {
       this.state.mode = 'add';
-    } else if (this.isKeyPressed(event, keyModifiers.toggle)) {
+    } else if (keyModifiers?.toggle && this.isKeyPressed(event, keyModifiers.toggle)) {
       this.state.mode = 'toggle';
     } else {
       this.state.mode = 'select';
@@ -413,9 +416,9 @@ export class DragSelectionManager {
       };
 
       // Check intersection
-      if (this.rectsIntersect(this.state.selectionRect, relativeRect)) {
-        intersectingIds.push(entityId);
-      }
+    if (this.state.selectionRect && this.rectsIntersect(this.state.selectionRect, relativeRect)) {
+      intersectingIds.push(entityId);
+    }
     });
 
     return intersectingIds;
@@ -439,12 +442,12 @@ export class DragSelectionManager {
         break;
       case 'add':
         // Add current selection + intersecting elements
-        this.selectionStore.selectedIds.forEach(id => this.state.selectedElements.add(id));
+        this.getSelectionStore().selectedIds.forEach((id: string) => this.state.selectedElements.add(id));
         intersectingIds.forEach(id => this.state.selectedElements.add(id));
         break;
       case 'subtract':
         // Current selection - intersecting elements
-        this.selectionStore.selectedIds.forEach(id => {
+        this.getSelectionStore().selectedIds.forEach((id: string) => {
           if (!intersectingIds.includes(id)) {
             this.state.selectedElements.add(id);
           }
@@ -452,7 +455,7 @@ export class DragSelectionManager {
         break;
       case 'toggle':
         // Start with current selection
-        this.selectionStore.selectedIds.forEach(id => this.state.selectedElements.add(id));
+        this.getSelectionStore().selectedIds.forEach((id: string) => this.state.selectedElements.add(id));
         // Toggle intersecting elements
         intersectingIds.forEach(id => {
           if (this.state.selectedElements.has(id)) {
@@ -470,7 +473,8 @@ export class DragSelectionManager {
     if (!this.container) return;
 
     const containerRect = this.container.getBoundingClientRect();
-    const { scrollThreshold, scrollSpeed } = this.config;
+    const scrollThreshold = this.config.scrollThreshold ?? 50;
+    const scrollSpeed = this.config.scrollSpeed ?? 10;
 
     let scrollX = 0;
     let scrollY = 0;

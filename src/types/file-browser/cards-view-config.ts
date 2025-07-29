@@ -33,6 +33,7 @@ export interface CardsViewConfig extends Omit<BaseCardsViewConfig, 'interactiveC
  */
 export const DEFAULT_CARDS_CONFIG: CardsViewConfig = {
 	cardStyle: 'detailed',
+	thumbnailSize: 'medium',
 	cardWidth: 280,
 	minCardWidth: 200,
 	maxCardWidth: 400,
