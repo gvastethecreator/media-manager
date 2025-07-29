@@ -228,13 +228,14 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 			return (
 				<div
 					ref={ref}
-					className={`flex items-center justify-center text-muted-foreground ${className}`}
+					className={`flex items-center justify-center text-muted-foreground select-none ${className}`}
 					style={{
 						height: `${height}px`,
 						width: `${width}px`,
 						padding: `${paddingObj.top}px ${paddingObj.right}px ${paddingObj.bottom}px ${paddingObj.left}px`,
 						position: 'relative',
 						zIndex: 1,
+						userSelect: 'none',
 					}}
 				>
 					<div className="animate-pulse">Preparando vista...</div>
@@ -245,7 +246,7 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 		return (
 			<div
 				ref={ref}
-				className={`relative ${className}`}
+				className={`relative select-none ${className}`}
 				onClick={onClick}
 				style={{
 					height: `${height}px`,
@@ -260,6 +261,7 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 					position: 'relative',
 					zIndex: 1,
 					isolation: 'isolate', // Crear un nuevo contexto de apilamiento
+					userSelect: 'none', // Prevent text selection
 				}}
 			>
 				{children}

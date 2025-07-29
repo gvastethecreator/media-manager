@@ -7,7 +7,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 const uiLogger = clientLogger.withContext('UIStore');
 
 export type ViewMode = 'grid' | 'list' | 'masonry' | 'cards' | 'details';
-export type ThumbnailSize = 'small' | 'medium' | 'large';
+export type ThumbnailSize = 'none' | 'small' | 'medium' | 'large';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface UIState {

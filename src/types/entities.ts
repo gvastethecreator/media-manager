@@ -2,8 +2,10 @@
  * @file Tipos de entidad centralizados para la aplicación.
  * @module types/entities
  * @description Define uniones y tipos comunes para trabajar con diferentes entidades de forma polimórfica.
- * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
+ * Estos tipos son la base del sistema de entidades con estadísticas (EntityWithStats).
+ * @updated 2025-07-28 - MIGRADO A DRIZZLE ORM Y UNIFICADO CON ESTADÍSTICAS
  */
+
 
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { AudioWithStats } from '@/types/entities/audio';
@@ -60,8 +62,19 @@ export interface EntityDiscriminator {
 }
 
 /**
+ * Interfaz base para entidades que pueden ser mostradas en la UI.
+ */
+export interface DisplayableEntityBase {
+	id: string;
+	name: string;
+	description?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	entityType: EntityType;
+}
+
+/**
  * Representa cualquier entidad de la aplicación que pueda ser mostrada en una vista.
- 
  */
 export type DisplayableEntity =
 	| (ImageWithStats & { entityType: 'image' })
@@ -86,6 +99,44 @@ export type DisplayableEntity =
 	| (UploadedImageWithStats & { entityType: 'uploadedImage' });
 
 /**
- * Alias para mayor claridad en los componentes.
+ * 🎨 Interfaz extendida para mostrar entidades en la UI.
+ * @description Esta interfaz asegura que todas las entidades tengan
+ * las propiedades necesarias para ser mostradas en la interfaz.
+ */
+export interface DisplayableEntityExtended extends DisplayableEntityBase {
+	// Campos específicos de UI
+	path?: string;
+	url?: string;
+	thumbnailUrl?: string;
+	fullUrl?: string;
+
+	// Estado
+	isFavorite?: boolean;
+	isHidden?: boolean;
+	isPublic?: boolean;
+
+	// Relaciones
+	folderId?: string;
+	parentId?: string;
+
+	// Campos extendidos opcionales
+	emoji?: string | null;
+	color?: string | null;
+	featuredImage?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	metadata?: string | null;
+}
+
+/**
+ * 🔄 Representa cualquier entidad que pueda ser mostrada.
+ * Esta es la interfaz que los componentes deben usar.
  */
 export type AnyEntity = DisplayableEntity;
+
+/**
+ * 📊 Re-exportar el tipo principal para consistencia en la aplicación.
+ * @description Este es el tipo que debe usarse en toda la aplicación cuando
+ * se necesite referirse a una entidad con estadísticas.
+ */
+export type AnyEntityWithStats = DisplayableEntity;

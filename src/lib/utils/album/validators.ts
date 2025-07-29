@@ -64,7 +64,7 @@ export const albumViewConfigSchema = z.object({
 	showDates: z.boolean().optional(),
 	showLocations: z.boolean().optional(),
 	showDescriptions: z.boolean().optional(),
-	thumbnailSize: z.enum(['small', 'medium', 'large']).optional(),
+	thumbnailSize: z.enum(['none', 'small', 'medium', 'large']).optional(),
 	enableTransitions: z.boolean().optional(),
 	coverImageFit: z.enum(['contain', 'cover']).optional(),
 	backgroundColor: z.string().optional(),

@@ -12,7 +12,6 @@ import type { CharacterWithStats } from '@/types/entities/character';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import type { DocumentWithStats } from '@/types/entities/document';
-import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { GroupWithStats } from '@/types/entities/group';
 import type { ImageWithStats } from '@/types/entities/image';
@@ -48,7 +47,28 @@ export type AnyEntityWithStats =
 	| UploadedImageWithStats;
 
 // Export del tipo principal para compatibilidad
-export type { EntityWithStats };
+export type { EntityWithStats, EntityBase, EntityStats } from './entities/entity.types';
+
+// Re-exportar para compatibilidad
+// Solo se debe usar AnyEntityWithStats en los componentes de UI y transformadores
+export type { ImageWithStats } from './entities/image';
+export type { VideoWithStats } from './entities/video';
+export type { FolderWithStats } from './entities/folder';
+export type { TagWithStats } from './entities/tag';
+export type { PlaceWithStats } from './entities/place';
+export type { WorldItemWithStats } from './entities/world-item';
+export type { NoteWithStats } from './entities/note';
+export type { PropertyWithStats } from './entities/property';
+export type { WildcardWithStats } from './entities/wildcard';
+export type { CharacterWithStats } from './entities/character';
+export type { ConceptWithStats } from './entities/concept';
+export type { PromptWithStats } from './entities/prompt';
+export type { GroupWithStats } from './entities/group';
+export type { AudioWithStats } from './entities/audio';
+export type { DocumentWithStats } from './entities/document';
+export type { CollectionWithStats } from './entities/collection';
+export type { AlbumWithStats } from './entities/album';
+export type { UploadedImageWithStats } from './entities/uploaded-image';
 
 // Enum para tipos de entidades
 export enum EntityStatsType {

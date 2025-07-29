@@ -115,7 +115,7 @@ export interface ListViewConfig {
 	/** Mostrar miniaturas */
 	showThumbnails: boolean;
 	/** Tamaño de las miniaturas */
-	thumbnailSize: 'small' | 'medium' | 'large';
+	thumbnailSize: 'none' | 'small' | 'medium' | 'large';
 	/** Columnas visibles */
 	visibleColumns: {
 		name: boolean;

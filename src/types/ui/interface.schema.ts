@@ -54,7 +54,7 @@ const listViewConfigSchema = z.object({
 	rowHeight: z.number().min(40).max(120),
 	rowGap: z.number().min(0).max(16),
 	showThumbnails: z.boolean(),
-	thumbnailSize: z.enum(['small', 'medium', 'large']),
+	thumbnailSize: z.enum(['none', 'small', 'medium', 'large']),
 	visibleColumns: z.object({
 		name: z.boolean(),
 		size: z.boolean(),
