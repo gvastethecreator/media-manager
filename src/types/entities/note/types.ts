@@ -268,6 +268,20 @@ export interface NoteStatistics {
 	completionScore: number;
 	totalItems: number;
 	totalAssociations: number; // Suma de todas las asociaciones
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**

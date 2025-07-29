@@ -17,6 +17,7 @@ import {
   createDefaultViewConfiguration,
   validateViewConfiguration,
   mergeViewConfigurations,
+  cloneViewConfiguration,
   DEFAULT_COMMON_SETTINGS,
 } from '@/types/file-browser/view-configuration';
 import { GridViewConfig } from '@/types/file-browser/grid-view-config';
@@ -220,7 +221,7 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
         config: {
           ...currentConfiguration.specific.config,
           ...specificUpdates,
-        },
+        } as any, // Type assertion needed due to union type complexity
       },
     });
   }, [currentConfiguration.specific, updateConfiguration]);
@@ -235,7 +236,7 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
   const availablePresets = useMemo(() => {
     const defaultPresets = DEFAULT_PRESETS[viewType] || [];
     const customPresets = settings?.fileBrowser?.customPresets?.[viewType] || [];
-    return [...defaultPresets, ...customPresets];
+    return [...defaultPresets, ...customPresets] as ViewPreset[];
   }, [settings?.fileBrowser?.customPresets, viewType]);
   
   // Apply preset
@@ -360,8 +361,8 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
     }
   }, [availablePresets, updateConfiguration]);
 
-  const getAvailablePresets = useCallback(() => {
-    return availablePresets;
+  const getAvailablePresets = useCallback((): ViewPreset[] => {
+    return availablePresets as ViewPreset[];
   }, [availablePresets]);
 
   const exportConfigurationWithOptions = useCallback((options?: any) => {
@@ -429,5 +430,4 @@ export function useMasonryViewConfiguration() {
   return useViewConfiguration('masonry');
 }
 
-// Export types
-export type { UseViewConfigurationReturn };
+// Export types are already defined above

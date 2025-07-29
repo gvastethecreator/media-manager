@@ -7,16 +7,23 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo, useState, useRef } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
+import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { FileContextMenu } from '@/components/features/file-browser/context-menu/context-menu';
+import { handleContextAction } from '@/components/features/file-browser/context-menu';
 import { cn } from '@/lib/utils';
+import { entityToFileItem } from '@/types/file-browser/file-item';
 import { useViewConfiguration } from '../../../../hooks/use-view-configuration';
 import { useGridViewConfig } from '@/hooks/use-grid-view-config';
 import type { AnyEntityWithStats } from '@/types/migration';
 import type { GridViewConfig } from '@/types/file-browser/grid-view-config';
+import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
 import { type BaseVirtualizedViewProps, useVirtualizedContainer, VirtualizedContainer } from './base-virtualized-view';
 
 interface GridViewProps extends BaseVirtualizedViewProps<AnyEntityWithStats> {
 	/** Tipo de entidad para configuración específica */
 	entityType?: string;
+	/** Handler para acciones del menú contextual */
+	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 }
 
 export const GridView = memo<GridViewProps>(function GridView({
@@ -27,6 +34,7 @@ export const GridView = memo<GridViewProps>(function GridView({
 	onItemClick,
 	onItemDoubleClick,
 	entityType = 'default',
+	onContextAction,
 }) {
 	const [parentRef, { containerHeight, containerWidth: actualWidth, isReady }] = useVirtualizedContainer({
 		paddingTop: 20,
@@ -65,6 +73,25 @@ export const GridView = memo<GridViewProps>(function GridView({
 
 	// Estado para hover
 	const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+	// Crear función handler para el menú contextual
+	const createHandleContextMenuAction = useCallback((item: AnyEntityWithStats) => {
+		return async (action: ContextMenuAction, data?: Record<string, unknown>) => {
+			if (onContextAction) {
+				onContextAction(action, item, data);
+			} else {
+				// Fallback al handler por defecto - convertir item a FileItem
+				const fileItem = entityToFileItem(item);
+				await handleContextAction(
+					action,
+					fileItem,
+					undefined, // items array no se usa aquí
+					undefined, // toggleSelection no disponible en view component
+					undefined  // refreshView no disponible en view component
+				);
+			}
+		};
+	}, [onContextAction]);
 
 	// Usar el ancho real del contenedor en lugar del prop
 	const effectiveWidth = actualWidth || containerWidth;
@@ -281,15 +308,25 @@ export const GridView = memo<GridViewProps>(function GridView({
 											data-item-id={item.id}
 											tabIndex={itemIndex === 0 ? 0 : -1}
 										>
-											<EntityCard
-												entity={item}
-												isSelected={isSelected}
-												compact={true}
-												className="h-full w-full"
-												onClick={createHandleClick(item)}
-												onDoubleClick={createHandleDoubleClick(item)}
-												aria-label={`${item.name || 'Elemento'} - ${(item as any).entityType || 'archivo'}`}
-											/>
+											<ContextMenu>
+												<ContextMenuTrigger asChild>
+													<EntityCard
+														entity={item}
+														isSelected={isSelected}
+														compact={true}
+														className="h-full w-full"
+														onClick={createHandleClick(item)}
+														onDoubleClick={createHandleDoubleClick(item)}
+														aria-label={`${item.name || 'Elemento'} - ${(item as any).entityType || 'archivo'}`}
+													/>
+												</ContextMenuTrigger>
+												<ContextMenuContent>
+													<FileContextMenu
+														file={entityToFileItem(item)}
+														onAction={(action, file, data) => createHandleContextMenuAction(item)(action, data)}
+													/>
+												</ContextMenuContent>
+											</ContextMenu>
 
 											{/* Hover overlay */}
 											{/* TODO: Fix type incompatibility between HoverOverlayConfig and GridHoverOverlay */}

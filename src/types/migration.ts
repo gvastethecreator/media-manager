@@ -25,26 +25,8 @@ import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 
-// Tipo unión de todas las entidades con estadísticas que realmente existen
-export type AnyEntityWithStats =
-	| ImageWithStats
-	| VideoWithStats
-	| FolderWithStats
-	| TagWithStats
-	| PlaceWithStats
-	| WorldItemWithStats
-	| NoteWithStats
-	| PropertyWithStats
-	| WildcardWithStats
-	| CharacterWithStats
-	| ConceptWithStats
-	| PromptWithStats
-	| GroupWithStats
-	| AudioWithStats
-	| DocumentWithStats
-	| CollectionWithStats
-	| AlbumWithStats
-	| UploadedImageWithStats;
+// Re-export del tipo principal desde entities.ts para evitar duplicación
+export type { AnyEntityWithStats } from '@/types/entities';
 
 // Export del tipo principal para compatibilidad
 export type { EntityWithStats, EntityBase, EntityStats } from './entities/entity.types';

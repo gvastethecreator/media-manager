@@ -64,6 +64,20 @@ export interface WildcardStatistics {
 	completenessScore: number;
 	/** Popularidad basada en el número de entidades relacionadas. */
 	popularity: number;
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -91,9 +105,9 @@ export interface WildcardWithCounts extends WildcardBase {
  */
 export interface WildcardWithStats extends WildcardBase {
 	entityType: 'wildcard';
-	statistics: WildcardStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
 	stats: WildcardStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: WildcardStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;

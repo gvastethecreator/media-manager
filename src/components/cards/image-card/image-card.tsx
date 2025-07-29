@@ -21,6 +21,14 @@ interface ImageCardProps {
 	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg';
 	tcgMode?: boolean;
 	showRelations?: boolean;
+	// Props adicionales para accesibilidad y funcionalidad
+	'data-item-id'?: string;
+	role?: string;
+	tabIndex?: number;
+	'aria-label'?: string;
+	'aria-selected'?: boolean;
+	'aria-describedby'?: string;
+	onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 /**
@@ -39,6 +47,14 @@ export const ImageCard = memo(function ImageCard({
 	variant = 'default',
 	tcgMode = false,
 	showRelations = false,
+	'data-item-id': dataItemId,
+	role,
+	tabIndex,
+	'aria-label': ariaLabel,
+	'aria-selected': ariaSelected,
+	'aria-describedby': ariaDescribedBy,
+	onKeyDown,
+	...restProps
 }: ImageCardProps) {
 	const { data: imageData, isLoading, error } = useImage(imageId);
 	const [isHovered, setIsHovered] = useState(false);
@@ -217,13 +233,21 @@ export const ImageCard = memo(function ImageCard({
 				getAspectRatioClass(),
 				getVariantClasses(),
 				isHovered ? 'shadow-lg scale-[1.02]' : 'hover:shadow-lg hover:scale-[1.02]',
-				(onClick || onDoubleClick) && 'cursor-pointer'
+				(onClick || onDoubleClick) && 'cursor-pointer',
+				className
 			)}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			disabled={!onClick && !onDoubleClick}
+			data-item-id={dataItemId}
+			role={role}
+			tabIndex={tabIndex}
+			aria-label={ariaLabel}
+			aria-selected={ariaSelected}
+			aria-describedby={ariaDescribedBy}
+			onKeyDown={onKeyDown}
 		>
 			{/* Elementos decorativos TCG */}
 			{tcgMode && (

@@ -86,6 +86,20 @@ export interface TagStatistics {
 	usageDiversity: number; // Cuán distribuido está el uso del tag entre diferentes tipos de entidades
 	popularity: number; // Un score de popularidad general
 	completenessScore: number; // Qué tan completo está el perfil del tag (descripción, etc.)
+
+	// File system properties for browser integration
+	/** File size in bytes */
+	size: number;
+	/** Last modification time */
+	mtime: Date;
+	/** File creation time */
+	birthtime: Date;
+	/** File type for browser compatibility */
+	type: string;
+	/** Whether this is a directory */
+	isDirectory: boolean;
+	/** Whether this is a file */
+	isFile: boolean;
 }
 
 /**
@@ -94,9 +108,9 @@ export interface TagStatistics {
  */
 export interface TagWithStats extends TagBase {
 	entityType: 'tag';
-	statistics: TagStatistics;
-	/** Alias para compatibilidad - apunta a statistics */
 	stats: TagStatistics;
+	/** Alias para compatibilidad - apunta a stats */
+	statistics?: TagStatistics;
 	_count?: {
 		images?: number;
 		videos?: number;
