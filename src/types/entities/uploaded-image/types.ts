@@ -59,10 +59,12 @@ export interface UploadedImageDimensions {
 	aspectRatio: number;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * Estadísticas de imagen subida
  */
-export interface UploadedImageStatistics {
+export interface UploadedImageStatistics extends EntityStats {
 	totalViews: number;
 	lastAccessed: string;
 	processingTime?: number;

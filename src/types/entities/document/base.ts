@@ -5,6 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📄 Tipo base de Document directamente desde el schema de Drizzle.
  * Representa las propiedades fundamentales de un documento sin estadísticas calculadas.
@@ -57,9 +59,7 @@ export interface DocumentBase {
 /**
  * 📊 Estadísticas calculadas y métricas para un documento.
  */
-export interface DocumentStatistics {
-	/** Número total de palabras en el documento */
-	wordCount: number;
+export interface DocumentStatistics extends EntityStats {
 	/** Número total de caracteres */
 	charCount: number;
 	/** Tiempo estimado de lectura en minutos */

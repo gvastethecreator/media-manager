@@ -50,12 +50,14 @@ export interface TagBase {
 	description: string | null;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 🃏 WILDCARD STATISTICS
  *
  * Métricas para analizar la flexibilidad y adaptabilidad de un Wildcard.
  */
-export interface WildcardStatistics {
+export interface WildcardStatistics extends EntityStats {
 	/** Puntuación de adaptabilidad basada en la diversidad de su contenido y relaciones. */
 	adaptabilityScore: number;
 	/** Nivel de uso en diferentes contextos (imágenes, personajes, etc.). */
@@ -65,18 +67,8 @@ export interface WildcardStatistics {
 	/** Popularidad basada en el número de entidades relacionadas. */
 	popularity: number;
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

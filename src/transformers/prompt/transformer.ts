@@ -53,7 +53,7 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 			totalTags: _count?.tags || 0,
 			totalCharacters: _count?.characters || 0,
 			totalPlaces: _count?.places || 0,
-			totalWorldItems: _count?.worldItems || 0,
+			totalItems: _count?.worldItems || 0,
 			totalConcepts: _count?.concepts || 0,
 			totalNotes: _count?.notes || 0,
 			totalWildcards: _count?.wildcards || 0,

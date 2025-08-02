@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { FileItem } from '@/types/files';
+import type { ImageWithStats } from '@/types/entities/image';
 
 const converterLogger = serverLogger.withContext('ImageConverter');
 
@@ -125,7 +125,7 @@ export interface ServerImage {
 	wildcards?: RelatedWildcard[];
 }
 
-export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
+export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats => {
 	try {
 		// Manejar tanto Buffer (Node.js) como Uint8Array (navegador/Vite)
 		const thumbnail = image.thumbnail

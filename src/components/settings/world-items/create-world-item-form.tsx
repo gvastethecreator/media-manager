@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
 import { toastService } from '@/lib/ui/toast';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
-import type { WorldItemComplete, WorldItemCreateInput } from '@/types/entities/world-item/types';
+import type { WorldItemComplete, WorldItemCreateInput, WorldItemStatistics } from '@/types/entities/world-item/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)
@@ -99,7 +99,7 @@ export function CreateWorldItemForm({
 		if (onPreview) {
 			const subscription = form.watch((data) => {
 				// Crear un objeto mock para preview con los datos del formulario
-				const mockStatistics = {
+				const mockStatistics: WorldItemStatistics = {
 					// Conteos originales
 					imageCount: 0,
 					videoCount: 0,
@@ -114,38 +114,23 @@ export function CreateWorldItemForm({
 					wildcardCount: 0,
 					propertyCount: 0,
 					groupCount: 0,
-					// Aliases total*
-					totalImages: 0,
-					totalVideos: 0,
-					totalAlbums: 0,
-					totalCollections: 0,
-					totalTags: 0,
-					totalCharacters: 0,
-					totalPlaces: 0,
-					totalConcepts: 0,
-					totalPrompts: 0,
-					totalNotes: 0,
-					totalWildcards: 0,
-					totalProperties: 0,
-					totalGroups: 0,
-					// Estadísticas adicionales
+
+					// Propiedades requeridas por EntityStats
+					totalItems: 0,
 					totalAssociations: 0,
+					worldItemCount: 0,
 					lastUpdated: new Date(),
+					lastViewed: undefined,
+					lastModified: new Date(),
+					size: 0,
+					mtime: new Date(),
+					birthtime: new Date(),
+					type: 'world-item',
+					isDirectory: false,
+					isFile: false,
+
+					// Métricas RPG
 					powerLevel: 1,
-					rarityLevel: 'Common' as const,
-					completeness: 0,
-					usageDiversity: 0,
-					popularity: 0,
-					itemTier: 'common' as const,
-					itemValue: 0,
-					itemRarity: 0,
-					itemPower: 0,
-					itemDurability: 0,
-					itemCondition: 'new' as const,
-					itemAge: 0,
-					itemOrigin: 'unknown' as const,
-					itemCategory: 'misc' as const,
-					// Propiedades adicionales para compatibilidad
 					rarityScore: 0,
 					completenessScore: 0,
 					popularityScore: 0,
@@ -163,6 +148,7 @@ export function CreateWorldItemForm({
 					totalEffects: 0,
 					totalRequirements: 0,
 					totalStats: 0,
+					itemTier: 'common' as const,
 				};
 
 				const previewItem: WorldItemComplete = {
@@ -173,8 +159,8 @@ export function CreateWorldItemForm({
 					color: data.color || null,
 					category: data.category || null,
 					entityType: 'world-item',
-					statistics: mockStatistics,
-					_stats: mockStatistics,
+				statistics: mockStatistics,
+				stats: mockStatistics,
 					tags: [],
 					relations: {
 						images: [],

@@ -601,8 +601,15 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		}
 
 		// Fallback para entidades no reconocidas
-		console.warn('EntityCard: Tipo de entidad no reconocido:', getEntityStatsType(entity));
-		return null;
+		console.warn('EntityCard: Tipo de entidad no reconocido:', getEntityStatsType(entity as any));
+		return (
+			<div
+				data-item-id={(entity as any).id}
+				className={`entity-card ${isSelected ? 'entity-card--selected' : ''} ${className}`}
+			>
+				<p>Tipo de entidad no soportado</p>
+			</div>
+		);
 	}
 );
 

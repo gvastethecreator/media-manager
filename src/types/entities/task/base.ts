@@ -49,10 +49,12 @@ export interface TaskBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas para un Task.
  */
-export interface TaskStatistics {
+export interface TaskStatistics extends EntityStats {
 	completionRate: number; // Porcentaje de progreso
 	timeEfficiency: number; // actualHours / estimatedHours
 	priorityScore: number; // Score basado en prioridad y vencimiento

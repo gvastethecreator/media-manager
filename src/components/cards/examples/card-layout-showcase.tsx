@@ -53,13 +53,12 @@ const mockEntities: AnyEntityWithStats[] = [
 		thumbnailUrl: '/uploads/landscape-thumb.jpg',
 		fullUrl: '/uploads/landscape.jpg',
 		stats: {
-			viewCount: 10,
-			downloadCount: 2,
-			likeCount: 5,
-			commentCount: 1,
-			tagCount: 3,
+			// Conteos de relaciones base
+			imageCount: 0,
+			videoCount: 0,
 			albumCount: 2,
 			collectionCount: 1,
+			tagCount: 3,
 			characterCount: 0,
 			placeCount: 1,
 			worldItemCount: 0,
@@ -69,11 +68,27 @@ const mockEntities: AnyEntityWithStats[] = [
 			wildcardCount: 0,
 			propertyCount: 0,
 			groupCount: 0,
+			// Métricas globales
+			totalItems: 1,
+			totalAssociations: 10,
+			// Timestamps
+			lastUpdated: new Date(),
+			// Métricas de uso
+			viewCount: 10,
+			downloadCount: 2,
+			likeCount: 5,
+			commentCount: 1,
+			// Propiedades del sistema de archivos
+			size: 1024000,
+			mtime: new Date(),
+			birthtime: new Date(),
+			type: 'image',
+			// Propiedades específicas de imagen
+			aspectRatio: 1920 / 1080,
 			lastViewedAt: new Date(),
 			lastDownloadedAt: new Date(),
 			lastLikedAt: new Date(),
 			lastCommentedAt: new Date(),
-			aspectRatio: 1920 / 1080,
 		},
 	} as AnyEntityWithStats,
 	{
@@ -104,10 +119,12 @@ const mockEntities: AnyEntityWithStats[] = [
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		stats: {
+			// Conteos de relaciones base
 			imageCount: 18,
 			videoCount: 2,
-			tagCount: 5,
 			albumCount: 2,
+			collectionCount: 0,
+			tagCount: 5,
 			characterCount: 3,
 			placeCount: 2,
 			worldItemCount: 1,
@@ -117,6 +134,16 @@ const mockEntities: AnyEntityWithStats[] = [
 			wildcardCount: 0,
 			propertyCount: 1,
 			groupCount: 0,
+			// Métricas globales
+			totalItems: 20,
+			totalAssociations: 33,
+			// Timestamps
+			lastUpdated: new Date(),
+			// Propiedades del sistema de archivos
+			size: 15728640,
+			mtime: new Date(),
+			birthtime: new Date(),
+			type: 'collection',
 		},
 	} as AnyEntityWithStats,
 	{
@@ -138,12 +165,37 @@ const mockEntities: AnyEntityWithStats[] = [
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		stats: {
+			// Conteos de relaciones base
+			imageCount: 75,
+			videoCount: 3,
+			albumCount: 0,
+			collectionCount: 0,
+			tagCount: 0,
+			characterCount: 0,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 0,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+			// Métricas globales
+			totalItems: 78,
+			totalAssociations: 78,
+			// Timestamps
+			lastUpdated: new Date(),
+			// Propiedades del sistema de archivos
+			size: 52428800,
+			mtime: new Date(),
+			birthtime: new Date(),
+			type: 'folder',
+			// Propiedades específicas de carpeta
 			hierarchyDepth: 2,
 			totalDescendants: 5,
 			directChildren: 2,
 			contentDiversity: 0.8,
 			organizationScore: 0.9,
-			totalItems: 78,
 			folderCount: 2,
 			totalFolders: 2,
 			totalImages: 75,
@@ -152,9 +204,6 @@ const mockEntities: AnyEntityWithStats[] = [
 			totalFiles: 78,
 			accessFrequency: 15,
 			lastActivity: new Date(),
-			imageCount: 75,
-			videoCount: 3,
-			noteCount: 0,
 			documentCount: 0,
 			totalAudio: 0,
 			totalOthers: 0,

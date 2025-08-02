@@ -27,6 +27,7 @@ import {
 	type FileOperationResult,
 	FileType,
 } from '@/types/entities/file';
+import type { AnyEntityWithStats } from '@/types/entities';
 import { batchFileOperationsService } from './batch-operations.service';
 
 // Usar tipos de FileBase directamente

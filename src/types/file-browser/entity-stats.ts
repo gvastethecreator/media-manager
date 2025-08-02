@@ -17,7 +17,7 @@ export type EntityStatsType =
 	| 'collection'
 	| 'tag'
 	| 'character'
-	| 'worldItem'
+	| 'world-item'
 	| 'concept'
 	| 'prompt'
 	| 'note'

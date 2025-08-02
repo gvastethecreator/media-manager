@@ -135,7 +135,7 @@ export class ClipboardManager {
 
       // Show success notification
       const message = items.length === 1
-        ? `"${items[0].name}" copiado al portapapeles`
+        ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" copiado al portapapeles`
         : `${items.length} elementos copiados al portapapeles`;
       toastService.success(message);
 
@@ -173,7 +173,7 @@ export class ClipboardManager {
 
       // Show success notification
       const message = items.length === 1
-        ? `"${items[0].name}" cortado al portapapeles`
+        ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" cortado al portapapeles`
         : `${items.length} elementos cortados al portapapeles`;
       toastService.success(message);
 
@@ -286,8 +286,10 @@ export class ClipboardManager {
     source: string
   ): Promise<ClipboardData> {
     // Calculate metadata
-    const totalSize = items.reduce((sum, item) => sum + (item.size || 0), 0);
-    const fileTypes = Array.from(new Set(items.map(item => item.type).filter(Boolean))) as FileType[];
+    const totalSize = items.reduce((sum, item) => sum + getEntitySize(item), 0);
+    const fileTypes = Array.from(new Set(items.map(item => 
+      'entityType' in item ? item.entityType : 'unknown'
+    ).filter(Boolean))) as FileType[];
 
     // Determine supported formats
     const formats: ClipboardFormat[] = [ClipboardFormat.TEXT, ClipboardFormat.JSON];
@@ -347,13 +349,13 @@ export class ClipboardManager {
     // Check for required properties
     for (const item of items) {
       if (!item.id) {
-        errors.push(`Item missing ID: ${item.name || 'unknown'}`);
+        errors.push(`Item missing ID: ${'name' in item ? item.name : 'unknown'}`);
       }
       const itemPath = getEntityPath(item);
       if (!itemPath) {
-        errors.push(`Item missing path: ${item.name || 'unknown'}`);
+        errors.push(`Item missing path: ${'name' in item ? item.name : 'unknown'}`);
       }
-      if (!item.name) {
+      if (!('name' in item) || !item.name) {
         warnings.push(`Item missing name: ${item.id || 'unknown'}`);
       }
     }
@@ -364,7 +366,7 @@ export class ClipboardManager {
       // Note: For now, we assume all entities can be moved unless they're directories
       const readonlyItems = items.filter(item => isEntityDirectory(item));
       if (readonlyItems.length > 0) {
-        warnings.push(`Moving directories may have restrictions: ${readonlyItems.map(i => i.name).join(', ')}`);
+        warnings.push(`Moving directories may have restrictions: ${readonlyItems.map(i => 'name' in i ? i.name : `item-${i.id}`).join(', ')}`);
       }
     }
 
