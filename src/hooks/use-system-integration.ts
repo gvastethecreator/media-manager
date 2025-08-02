@@ -10,6 +10,24 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import type { AnyEntityWithStats } from '@/types/entities';
 
+// File System Access API types
+interface FilePickerAcceptType {
+  description?: string;
+  accept: Record<string, string | string[]>;
+}
+
+interface SaveFilePickerOptions {
+  suggestedName?: string;
+  types?: FilePickerAcceptType[];
+  excludeAcceptAllOption?: boolean;
+}
+
+interface OpenFilePickerOptions {
+  multiple?: boolean;
+  types?: FilePickerAcceptType[];
+  excludeAcceptAllOption?: boolean;
+}
+
 const logger = clientLogger.withContext('SystemIntegration');
 
 interface SystemIntegrationOptions {
@@ -244,7 +262,7 @@ export const useSystemIntegration = (
         id: item.id,
         name: item.name,
         path: 'path' in item ? item.path : '',
-        type: item.type
+        type: item.entityType
       }));
 
       await navigator.clipboard.writeText(JSON.stringify(clipboardData, null, 2));

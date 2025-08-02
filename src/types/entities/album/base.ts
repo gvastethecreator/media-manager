@@ -24,34 +24,14 @@ export type AlbumBase = {
 	updatedAt: Date;
 };
 
+import type { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas y derivadas para un Album.
- * Principalmente, los conteos de las relaciones (imágenes, videos, etc.).
+ * Extiende EntityStats con propiedades específicas de álbumes.
  */
-export interface AlbumStatistics {
-	imageCount: number;
-	videoCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
+export interface AlbumStatistics extends EntityStats {
+	// Funciones del sistema de archivos
 	/** Whether this is a directory */
 	isDirectory: boolean;
 	/** Whether this is a file */

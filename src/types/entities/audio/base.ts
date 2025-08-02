@@ -4,6 +4,8 @@
  * @description Define los tipos canónicos para la entidad Audio, siguiendo el nuevo patrón de `...WithStats`.
  */
 
+import type { EntityStats } from '../entity.types';
+
 /**
  * 🎵 Tipo base de Audio directamente desde el schema de Drizzle.
  */
@@ -45,9 +47,9 @@ export type AudioBase = {
 
 /**
  * 📊 Métricas y estadísticas calculadas para un archivo de Audio.
- * Estas métricas se enfocan en las características técnicas y de calidad del audio.
+ * Extiende EntityStats con propiedades específicas de audio.
  */
-export interface AudioStatistics {
+export interface AudioStatistics extends EntityStats {
 	/** Duración del audio en segundos */
 	duration: number;
 	/** Formato del archivo (por ejemplo, 'mp3', 'wav') */
@@ -58,16 +60,10 @@ export interface AudioStatistics {
 	volumePeaks: number[];
 	/** Tasa de muestreo en Hz */
 	sampleRate: number;
+	/** Número de canales de audio */
+	channels: number;
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
+	// Funciones del sistema de archivos
 	/** Whether this is a directory */
 	isDirectory: boolean;
 	/** Whether this is a file */

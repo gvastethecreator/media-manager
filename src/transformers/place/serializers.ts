@@ -46,7 +46,7 @@ export function serializePlaces(places: PlaceWithStats[]) {
 export function serializePlaceWithStats(place: PlaceWithStats) {
 	return {
 		...serializePlace(place),
-		_stats: place._stats,
+		stats: place.stats,
 		parsedDangers: place.parsedDangers,
 		parsedResources: place.parsedResources,
 		metadata: place.metadata,

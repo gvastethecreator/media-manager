@@ -80,6 +80,12 @@ export interface EntityStats {
 	isDuplicate?: boolean;
 	isOrphaned?: boolean;
 	needsAttention?: boolean;
+
+	// Propiedades del sistema de archivos
+	size: number;
+	mtime: Date;
+	birthtime: Date;
+	type: string;
 }
 
 /**

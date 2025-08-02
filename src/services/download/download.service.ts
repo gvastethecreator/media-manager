@@ -100,8 +100,8 @@ class EnhancedDownloadService {
     options: DownloadOptions = {}
   ): Promise<DownloadResult> {
     const startTime = Date.now();
-    const itemPath = 'path' in item ? (item as any).path : '';
-    const itemName = item.name;
+    const itemPath = 'path' in item ? item.path : ('filePath' in item ? (item as any).filePath : '');
+    const itemName = 'name' in item ? item.name : ('fileName' in item ? (item as any).fileName : `item-${(item as any).id || 'unknown'}`);
 
     logger.info('🔽 Starting enhanced download:', { itemName, options });
 

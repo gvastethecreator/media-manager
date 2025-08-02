@@ -67,7 +67,10 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 
 	const { _count, tags: relationTags, properties: relationProperties, ...baseData } = worldItem;
 
+	const totalRelations = (_count?.images ?? 0) + (_count?.videos ?? 0) + (_count?.characters ?? 0) + (_count?.places ?? 0) + (_count?.notes ?? 0) + (_count?.concepts ?? 0);
+
 	const statistics: WorldItemStatistics = {
+		// Conteos de relaciones
 		imageCount: _count?.images ?? 0,
 		videoCount: _count?.videos ?? 0,
 		albumCount: _count?.albums ?? 0,
@@ -81,19 +84,26 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		wildcardCount: _count?.wildcards ?? 0,
 		propertyCount: _count?.properties ?? 0,
 		groupCount: _count?.groups ?? 0,
-		totalImages: _count?.images ?? 0,
-		totalVideos: _count?.videos ?? 0,
-		totalAlbums: _count?.albums ?? 0,
-		totalCollections: _count?.collections ?? 0,
-		totalTags: _count?.tags ?? 0,
-		totalCharacters: _count?.characters ?? 0,
-		totalPlaces: _count?.places ?? 0,
-		totalConcepts: _count?.concepts ?? 0,
-		totalPrompts: _count?.prompts ?? 0,
-		totalNotes: _count?.notes ?? 0,
-		totalWildcards: _count?.wildcards ?? 0,
-		totalProperties: _count?.properties ?? 0,
-		totalGroups: _count?.groups ?? 0,
+
+		// Métricas globales requeridas por EntityStats
+		totalItems: totalRelations,
+		totalAssociations: totalRelations,
+		worldItemCount: 0, // No hay world items anidados en este contexto
+
+		// Timestamps requeridos por EntityStats
+		lastUpdated: baseData.updatedAt,
+		lastViewed: undefined,
+		lastModified: baseData.updatedAt,
+
+		// Propiedades del sistema de archivos requeridas por EntityStats
+		size: 0, // WorldItems no tienen tamaño físico
+		mtime: baseData.updatedAt,
+		birthtime: baseData.createdAt,
+		type: baseData.type || 'world-item',
+		isDirectory: false,
+		isFile: false,
+
+		// Métricas RPG
 		powerLevel: 1,
 		rarityScore: 50,
 		completenessScore: 75,
@@ -121,15 +131,16 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 		// Propiedades faltantes con valores por defecto
 		emoji: null,
 		color: null,
-
-		totalImages: 0,
-		totalVideos: 0,
 		materials: null,
 		origin: null,
 		uses: null,
 		history: null,
 		parentId: null,
 		shortcut: null,
+
+		// Propiedades requeridas por WorldItemBase
+		totalImages: _count?.images ?? 0,
+		totalVideos: _count?.videos ?? 0,
 
 		// Convertir value y weight de number a string
 		value: baseData.value?.toString() || null,
@@ -152,9 +163,7 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 
 		// Estadísticas calculadas
 		statistics,
-
-		// Alias para compatibilidad
-		_stats: statistics,
+		stats: statistics,
 
 		// Relaciones
 		relations: {

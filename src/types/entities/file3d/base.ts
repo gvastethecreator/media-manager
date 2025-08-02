@@ -38,11 +38,13 @@ export type File3DBase = {
 	updatedAt: Date;
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Métricas y estadísticas calculadas para un archivo 3D.
  * Estas métricas se enfocan en las características técnicas y complejidad del modelo.
  */
-export interface File3DStatistics {
+export interface File3DStatistics extends EntityStats {
 	/** Número de polígonos del modelo */
 	polygonCount: number;
 	/** Tamaño total de las texturas asociadas en MB */
@@ -54,18 +56,8 @@ export interface File3DStatistics {
 	/** Número de materiales utilizados en el modelo */
 	materialCount: number;
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

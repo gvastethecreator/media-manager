@@ -95,7 +95,7 @@ export const WorldItemPropertiesSchema = z.object({
  * 🔍 Esquema para filtros de objeto
  */
 export const WorldItemFilterSchema = z.object({
-	type: z.enum(['tag', 'character', 'place', 'concept', 'worldItem']),
+	type: z.enum(['tag', 'character', 'place', 'concept', 'world-item']),
 	operator: z.enum(['AND', 'OR', 'NOT']),
 	value: z.union([z.string(), z.number(), z.boolean()]),
 	field: z.string().optional(),

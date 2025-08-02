@@ -28,13 +28,13 @@ export type JsonFileBase = {
 	updatedAt: Date;
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Métricas y estadísticas calculadas para un archivo JSON.
  * Estas métricas se enfocan en la estructura y validez del contenido JSON.
  */
-export interface JsonFileStatistics {
-	/** Tamaño del archivo en bytes */
-	size: number;
+export interface JsonFileStatistics extends EntityStats {
 	/** Profundidad máxima de anidamiento del JSON */
 	nestingDepth: number;
 	/** Indica si el contenido JSON es válido y parseable */

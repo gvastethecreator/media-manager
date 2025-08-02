@@ -82,12 +82,12 @@ export function useDownloadManager(
   // Progress tracking integration
   const { operations } = useProgressTracking({
     trackAll: true,
-    operationTypes: ['download']
+    operationTypes: ['file_download']
   });
 
   // Calculate active downloads from progress tracking
   const activeDownloads = operations.filter(
-    op => op.type === 'download' && ['pending', 'running'].includes(op.status)
+    op => op.type === 'file_download' && ['pending', 'running'].includes(op.status)
   ).length;
 
   /**

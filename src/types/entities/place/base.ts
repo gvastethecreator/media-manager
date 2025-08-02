@@ -48,13 +48,15 @@ export type PlaceBase = {
 	updatedAt: Date;
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
  * PLACE STATISTICS
  *
  * Métricas y análisis específicos para la entidad Place.
  * Estas estadísticas proporcionan una visión más profunda del contexto y la relevancia del lugar.
  */
-export interface PlaceStatistics {
+export interface PlaceStatistics extends EntityStats {
 	/** Relevancia espacial calculada (ej: cercanía a otros puntos de interés) */
 	spatialRelevance: number;
 	/** Puntuación de la completitud de la información del lugar */
@@ -66,18 +68,8 @@ export interface PlaceStatistics {
 	/** Fecha de última actualización */
 	// lastUpdated: Date; // Comentado temporalmente para resolver errores
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

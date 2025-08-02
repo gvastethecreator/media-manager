@@ -56,10 +56,11 @@ export function serializeDocumentWithStats(document: DocumentWithStats) {
 	return {
 		...serializeDocumentBase(document),
 		stats: {
-			wordCount: document.stats.wordCount,
 			charCount: document.stats.charCount,
 			readingTime: document.stats.readingTime,
 			versionCount: document.stats.versionCount,
+			// wordCount viene del DocumentBase, no de las estadísticas
+			wordCount: document.wordCount,
 		},
 	};
 }

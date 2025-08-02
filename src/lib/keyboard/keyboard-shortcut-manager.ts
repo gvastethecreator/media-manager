@@ -7,7 +7,7 @@ export interface KeyboardShortcutConfig {
   /** Tecla principal (ej: 'a', 'Delete', 'F2', 'Escape') */
   key: string;
   /** Modificadores requeridos */
-  modifiers: ('ctrl' | 'shift' | 'alt' | 'meta')[];
+  modifiers: readonly ('ctrl' | 'shift' | 'alt' | 'meta')[];
   /** Acción a ejecutar */
   action: string;
   /** Contexto donde aplica el shortcut */

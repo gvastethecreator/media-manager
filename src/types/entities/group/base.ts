@@ -27,55 +27,18 @@ export type GroupBase = {
 	updatedAt: Date;
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas y derivadas para un Group.
  * Principalmente, los conteos de las relaciones.
  */
-export interface GroupStatistics {
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	totalItems: number;
+export interface GroupStatistics extends EntityStats {
 	completeness: number;
-	popularity: number;
 	lastUpdated: string;
-	// Alias para compatibilidad
-	totalImages?: number;
-	totalVideos?: number;
-	totalAlbums?: number;
-	totalCollections?: number;
-	totalTags?: number;
-	totalCharacters?: number;
-	totalPlaces?: number;
-	totalWorldItems?: number;
-	totalConcepts?: number;
-	totalPrompts?: number;
-	totalNotes?: number;
-	totalWildcards?: number;
-	totalProperties?: number;
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

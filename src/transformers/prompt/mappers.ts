@@ -322,20 +322,47 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 
 	// Calcular estadísticas
 	const stats: PromptStatistics = {
-		// Conteos de relaciones
+		// Conteos de relaciones base (EntityStats)
+		imageCount: prompt._count?.images || 0,
+		videoCount: prompt._count?.videos || 0,
+		albumCount: prompt._count?.albums || 0,
+		collectionCount: prompt._count?.collections || 0,
+		tagCount: prompt._count?.tagEntities || 0,
+		characterCount: prompt._count?.characters || 0,
+		placeCount: prompt._count?.places || 0,
+		worldItemCount: prompt._count?.worldItems || 0,
+		conceptCount: prompt._count?.concepts || 0,
+		promptCount: 0,
+		noteCount: prompt._count?.notes || 0,
+		wildcardCount: prompt._count?.wildcards || 0,
+		propertyCount: prompt._count?.properties || 0,
+		groupCount: prompt._count?.groups || 0,
+
+		// Métricas globales
+		totalItems: (prompt._count?.images || 0) + (prompt._count?.videos || 0) + (prompt._count?.albums || 0),
+		totalAssociations: Object.values(prompt._count || {}).reduce((sum, count) => sum + (count || 0), 0),
+
+		// Timestamps
+		lastUpdated: prompt.updatedAt,
+
+		// Propiedades del sistema de archivos
+		size: 0,
+		mtime: prompt.updatedAt,
+		birthtime: prompt.createdAt,
+		type: 'prompt',
+
+		// Conteos específicos para compatibilidad con prompt-card
 		totalImages: prompt._count?.images || 0,
 		totalVideos: prompt._count?.videos || 0,
-		totalAlbums: prompt._count?.albums || 0,
 		totalCollections: prompt._count?.collections || 0,
-		totalTags: prompt._count?.tagEntities || 0,
-		totalCharacters: prompt._count?.characters || 0,
-		totalPlaces: prompt._count?.places || 0,
-		totalWorldItems: prompt._count?.worldItems || 0,
+		totalAlbums: prompt._count?.albums || 0,
 		totalConcepts: prompt._count?.concepts || 0,
 		totalNotes: prompt._count?.notes || 0,
-		totalWildcards: prompt._count?.wildcards || 0,
+		totalCharacters: prompt._count?.characters || 0,
 		totalProperties: prompt._count?.properties || 0,
+		totalWildcards: prompt._count?.wildcards || 0,
 		totalGroups: prompt._count?.groups || 0,
+		totalPlaces: prompt._count?.places || 0,
 
 		// Métricas de contenido
 		totalContentItems: 0,
@@ -371,9 +398,13 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 			!!prompt.description && !!prompt.content && (Array.isArray(prompt.tags) ? prompt.tags.length > 0 : false),
 		qualityGrade: calculateQualityGrade(prompt),
 		completenessScore: completenessScore,
-		creativityScore: 0,
+		creativeScore: 0,
 		technicalScore: 0,
 		usabilityScore: 0,
+
+		// File system functions
+		isDirectory: false,
+		isFile: true,
 	};
 
 	return {

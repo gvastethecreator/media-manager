@@ -73,25 +73,19 @@ export type ProfileUpdateInput = Partial<Omit<ProfileBase, 'id' | 'createdAt' | 
 export type CreateProfileInput = ProfileCreateInput;
 export type UpdateProfileInput = ProfileUpdateInput;
 
+import { EntityStats } from '../entity.types';
+
 /**
  * Estadísticas del perfil
  */
-export interface ProfileStatistics {
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
+export interface ProfileStatistics extends EntityStats {
 	folderCount: number;
-	tagCount: number;
-	placeCount: number;
 	lastAccessed: Date | null;
 	totalStorageUsed: number;
 	activeDays: number;
 	createdThisMonth: number;
 	// Propiedades adicionales para compatibilidad con serializers
 	joinDate?: Date;
-	totalImages?: number;
-	totalVideos?: number;
-	totalCollections?: number;
 	isVerified?: boolean;
 }
 

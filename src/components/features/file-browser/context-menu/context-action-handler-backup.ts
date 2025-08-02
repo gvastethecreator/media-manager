@@ -317,15 +317,14 @@ const customFileOperationsService = {
 
 // Helper function to convert FileItem to AnyEntityWithStats
 function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
-	// Create basic stats object for compatibility
+	// Create complete stats object for compatibility with EntityStats
 	const basicStats = {
-		viewCount: 0,
-		downloadCount: 0,
-		likeCount: 0,
-		commentCount: 0,
-		tagCount: 0,
+		// Conteos de relaciones
+		imageCount: 0,
+		videoCount: 0,
 		albumCount: 0,
 		collectionCount: 0,
+		tagCount: 0,
 		characterCount: 0,
 		placeCount: 0,
 		worldItemCount: 0,
@@ -335,9 +334,30 @@ function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
 		wildcardCount: 0,
 		propertyCount: 0,
 		groupCount: 0,
+		// Métricas globales
 		totalItems: 0,
 		totalAssociations: 0,
+		// Timestamps
 		lastUpdated: new Date(),
+		lastViewed: new Date(),
+		lastModified: new Date(),
+		// Métricas de uso
+		viewCount: 0,
+		downloadCount: 0,
+		likeCount: 0,
+		commentCount: 0,
+		// Métricas de calidad
+		qualityScore: 0,
+		completenessScore: 0,
+		// Estado
+		isDuplicate: false,
+		isOrphaned: false,
+		needsAttention: false,
+		// Propiedades del sistema de archivos
+		size: getEntitySize(item as any) || 0,
+		mtime: new Date(),
+		birthtime: new Date(),
+		type: 'file'
 	};
 
 	// Determine entity type based on file characteristics
@@ -387,6 +407,7 @@ function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
 		description: 'description' in item ? (item as any).description : null,
 		createdAt: 'createdAt' in item ? (item as any).createdAt || new Date() : new Date(),
 		updatedAt: 'modifiedAt' in item ? (item as any).modifiedAt || new Date() : new Date(),
+		isFavorite: false,
 		entityType,
 		stats: basicStats,
 		...entityData,

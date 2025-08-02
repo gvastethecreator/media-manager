@@ -16,7 +16,7 @@ export enum FavoriteEntityType {
 	FOLDER = 'folder',
 	CHARACTER = 'character',
 	PLACE = 'place',
-	WORLD_ITEM = 'worldItem',
+	WORLD_ITEM = 'world-item',
 	CONCEPT = 'concept',
 	PROMPT = 'prompt',
 	NOTE = 'note',
@@ -53,10 +53,12 @@ export interface FavoriteBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas y métricas para un favorito.
  */
-export interface FavoriteStatistics {
+export interface FavoriteStatistics extends EntityStats {
 	/** Tipo de entidad legible para humanos */
 	entityTypeName: string;
 	/** Fecha de creación formateada */
@@ -79,10 +81,7 @@ export type FavoriteStats = FavoriteStatistics;
  * Este es el tipo canónico que debe usarse en la aplicación.
  */
 export interface FavoriteWithStats extends FavoriteBase {
-	entityType: 'favorite';
 	stats: FavoriteStatistics;
-	/** Alias para compatibilidad - apunta a stats */
-	statistics?: FavoriteStatistics;
 }
 
 /**

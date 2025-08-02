@@ -47,7 +47,7 @@ export type VerifiedEntityTypes = {
 	tag: VerifyEntityType<TagWithStats>;
 	video: VerifyEntityType<VideoWithStats>;
 	wildcard: VerifyEntityType<WildcardWithStats>;
-	worldItem: VerifyEntityType<WorldItemComplete>;
+	'world-item': VerifyEntityType<WorldItemComplete>;
 };
 
 /**

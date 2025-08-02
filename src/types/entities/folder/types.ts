@@ -112,10 +112,12 @@ export interface FolderUIProps {
 	};
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📁 Estadísticas avanzadas para carpetas
  */
-export interface FolderStatistics {
+export interface FolderStatistics extends EntityStats {
 	// Métricas de jerarquía
 	hierarchyDepth: number;
 	totalDescendants: number;
@@ -124,25 +126,19 @@ export interface FolderStatistics {
 	// Métricas de contenido
 	contentDiversity: number;
 	organizationScore: number;
-	totalItems: number; // También conocido como totalFiles
 	folderCount: number; // Número total de subcarpetas
-	totalFolders: number; // Alias para folderCount para compatibilidad
-	totalImages: number; // Alias para imageCount para compatibilidad
-	totalVideos: number; // Alias para videoCount para compatibilidad
-	totalDocuments: number; // Alias para documentCount para compatibilidad
-	totalFiles: number; // Alias para totalItems para compatibilidad
+	totalAudio: number; // Archivos de audio
+	totalOthers: number; // Otros tipos de archivos
+	totalImages: number; // Total de imágenes
+	totalVideos: number; // Total de videos
+	totalDocuments: number; // Total de documentos
+	totalFolders: number; // Total de carpetas
+	totalFiles: number; // Total de archivos
+	documentCount: number; // Conteo de documentos
 
 	// Métricas de uso
 	accessFrequency: number;
 	lastActivity: Date | null;
-
-	// Distribución de contenido
-	imageCount: number; // También conocido como totalImages
-	videoCount: number; // También conocido como totalVideos
-	noteCount: number;
-	documentCount: number; // También conocido como totalDocuments
-	totalAudio: number; // Archivos de audio
-	totalOthers: number; // Otros tipos de archivos
 
 	// Métricas de tamaño
 	formattedSize: string;
@@ -166,9 +162,6 @@ export interface FolderStatistics {
 	// Calidad general
 	qualityGrade: 'A' | 'B' | 'C' | 'D';
 
-	// Relaciones
-	totalRelations: number;
-
 	// Compatibilidad con componentes
 	lastScanned?: string;
 	recentImages?: Array<{
@@ -177,11 +170,6 @@ export interface FolderStatistics {
 		name: string;
 		createdAt: string;
 	}>;
-
-	// Propiedades de archivo del sistema
-	size?: number;
-	mtime?: Date;
-	birthtime?: Date;
 
 	// Funciones de archivo del sistema
 	isDirectory?: () => boolean;

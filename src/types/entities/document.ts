@@ -3,7 +3,10 @@
  * @module types/entities/document
  */
 
-export interface DocumentStats {
+import type { EntityStats } from './entity.types';
+
+export interface DocumentStats extends EntityStats {
+  // Propiedades específicas de documentos
   pageCount?: number;
   wordCount?: number;
   author?: string;
@@ -17,15 +20,7 @@ export interface DocumentStats {
   language?: string;
   version?: string;
 
-  // File system properties for browser integration
-  /** File size in bytes */
-  size: number;
-  /** Last modification time */
-  mtime: Date;
-  /** File creation time */
-  birthtime: Date;
-  /** File type for browser compatibility */
-  type: string;
+  // Funciones del sistema de archivos
   /** Whether this is a directory */
   isDirectory: boolean;
   /** Whether this is a file */

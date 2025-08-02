@@ -74,11 +74,8 @@ describe('ClipboardManager', () => {
     mockItems = [
       {
         id: '1',
-        name: 'test-image.png',
-        path: '/path/to/test-image.png',
-        size: 1024,
-        type: FileType.IMAGE,
-        isReadonly: false,
+        fileName: 'test-image.png',
+        filePath: '/path/to/test-image.png',
         entityType: 'image',
         stats: {
           formattedSize: '1 KB',
@@ -96,11 +93,8 @@ describe('ClipboardManager', () => {
       } as AnyEntityWithStats,
       {
         id: '2',
-        name: 'document.pdf',
-        path: '/path/to/document.pdf',
-        size: 2048,
-        type: FileType.DOCUMENT,
-        isReadonly: false,
+        fileName: 'document.pdf',
+        filePath: '/path/to/document.pdf',
         entityType: 'document',
         stats: {
           formattedSize: '2 KB',
@@ -127,7 +121,7 @@ describe('ClipboardManager', () => {
       expect(clipboardData).not.toBeNull();
       expect(clipboardData?.operation).toBe('copy');
       expect(clipboardData?.items).toHaveLength(2);
-      expect(clipboardData?.items[0].name).toBe('test-image.png');
+      expect(clipboardData?.items[0].fileName || clipboardData?.items[0].name).toBe('test-image.png');
     });
 
     it('should integrate with system clipboard', async () => {
@@ -149,8 +143,9 @@ describe('ClipboardManager', () => {
       const invalidItems = [
         {
           id: '',
-          name: 'invalid-item',
-          path: '',
+          fileName: 'invalid-item',
+          filePath: '',
+          entityType: 'file',
         } as AnyEntityWithStats,
       ];
 
@@ -176,7 +171,7 @@ describe('ClipboardManager', () => {
       const readonlyItems = [
         {
           ...mockItems[0],
-          isReadonly: true,
+          readonly: true,
         },
       ];
 
@@ -184,7 +179,7 @@ describe('ClipboardManager', () => {
     });
 
     it('should allow cut for non-readonly items', async () => {
-      const nonReadonlyItems = mockItems.filter(item => !item.isReadonly);
+      const nonReadonlyItems = mockItems.filter(item => !(item as any).readonly);
       await clipboardManager.cut(nonReadonlyItems);
 
       const clipboardData = clipboardManager.getClipboardData();

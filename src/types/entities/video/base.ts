@@ -5,6 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+import type { EntityStats } from '../entity.types';
+
 /**
  * 🎥 Tipo base de Video directamente desde el schema de Drizzle.
  * Representa las propiedades fundamentales de un video sin estadísticas calculadas.
@@ -49,25 +51,9 @@ export interface VideoBase {
 
 /**
  * 📊 Estadísticas calculadas y métricas para un video.
+ * Extiende EntityStats con propiedades específicas de videos.
  */
-export interface VideoStatistics {
-	// Conteos de relaciones
-	albumCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-	totalRelations: number;
-	totalAssociations: number;
-	totalItems: number;
-
+export interface VideoStatistics extends EntityStats {
 	// Métricas técnicas de video
 	durationMinutes: number;
 	durationHours: number;
@@ -80,14 +66,13 @@ export interface VideoStatistics {
 
 	// Métricas de calidad
 	qualityLevel: 'low' | 'medium' | 'high' | 'ultra' | 'unknown';
-	qualityScore: number; // 0-100
 	technicalGrade: 'A' | 'B' | 'C' | 'D';
 	hasAudio: boolean;
 	hasSubtitles: boolean;
 	bitrate: number | null;
 	frameRate: number | null;
 
-	// Métricas de uso
+	// Métricas de uso específicas de video
 	views: number;
 	likes: number;
 	downloads: number;
@@ -97,10 +82,8 @@ export interface VideoStatistics {
 	duplicateStatus: 'unique' | 'duplicate' | 'similar';
 	thumbnailUrl: string | null;
 
-	// Propiedades de archivo del sistema
-	size?: number;
-	mtime?: Date;
-	birthtime?: Date;
+	// Métricas de relaciones
+	totalRelations: number;
 
 	// Funciones de archivo del sistema
 	isDirectory?: () => boolean;
