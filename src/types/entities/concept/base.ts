@@ -32,39 +32,17 @@ export type ConceptBase = {
 	updatedAt: Date;
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas y derivadas para un Concept.
  * Principalmente, los conteos de las relaciones.
  */
-export interface ConceptStatistics {
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-	totalAssociations: number;
+export interface ConceptStatistics extends EntityStats {
 	lastUpdated: Date;
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

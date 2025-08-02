@@ -102,7 +102,7 @@ function PromptCardComponent({
 	const wildcardsCount = prompt.stats?.totalWildcards || 0;
 	const groupsCount = prompt.stats?.totalGroups || 0;
 	const placesCount = prompt.stats?.totalPlaces || 0;
-	const worldItemsCount = prompt.stats?.totalWorldItems || 0;
+	const worldItemsCount = prompt._count?.worldItems || 0;
 
 	// Colores para el gradiente
 	const primaryColor = color || '#0ea5e9';

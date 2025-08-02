@@ -24,10 +24,12 @@ export interface MetadataBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas para un Metadata.
  */
-export interface MetadataStatistics {
+export interface MetadataStatistics extends EntityStats {
 	aspectRatio: number; // Ratio width/height
 	resolution: number; // width * height
 	qualityScore: number; // Score de calidad basado en resolución y propiedades

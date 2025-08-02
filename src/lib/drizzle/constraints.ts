@@ -111,7 +111,7 @@ export const CONTENT_CONSTRAINTS = {
 	noteStatus: sql`status IN ('active', 'archived', 'deleted', 'draft')`,
 
 	// Tipos de entidad válidos
-	entityType: sql`entityType IN ('image', 'video', 'album', 'collection', 'tag', 'character', 'place', 'worldItem', 'concept', 'prompt', 'note', 'document', 'audio', 'jsonFile', 'file3d', 'folder', 'property', 'wildcard', 'group')`,
+	entityType: sql`entityType IN ('image', 'video', 'album', 'collection', 'tag', 'character', 'place', 'world-item', 'concept', 'prompt', 'note', 'document', 'audio', 'jsonFile', 'file3d', 'folder', 'property', 'wildcard', 'group')`,
 
 	// Tipos de archivo válidos
 	fileType: sql`fileType IN ('image', 'video', 'audio', 'document', 'text', 'archive', 'code', 'executable', 'font', 'data', 'unknown')`,

@@ -40,30 +40,30 @@ export interface PromptBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas específicas de Prompt con métricas de IA
  */
-export interface PromptStatistics {
-	// Conteos de relaciones
-	totalImages: number;
-	totalVideos: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalWorldItems: number;
-	totalConcepts: number;
-	totalNotes: number;
-	totalWildcards: number;
-	totalProperties: number;
-	totalGroups: number;
-
+export interface PromptStatistics extends EntityStats {
 	// Métricas de contenido
 	totalContentItems: number;
 	averageContentLength: number;
 	parametersCount: number;
 	tagsCount: number;
+
+	// Conteos específicos para compatibilidad con prompt-card
+	totalImages: number;
+	totalVideos: number;
+	totalCollections: number;
+	totalAlbums: number;
+	totalConcepts: number;
+	totalNotes: number;
+	totalCharacters: number;
+	totalProperties: number;
+	totalWildcards: number;
+	totalGroups: number;
+	totalPlaces: number;
 
 	// Métricas de IA y uso
 	executionCount: number;
@@ -84,22 +84,12 @@ export interface PromptStatistics {
 	isWellStructured: boolean; // Tiene parámetros y tags
 	qualityGrade: 'A' | 'B' | 'C' | 'D';
 	completenessScore: number;
-	creativityScore: number;
+	creativeScore: number;
 	technicalScore: number;
 	usabilityScore: number;
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

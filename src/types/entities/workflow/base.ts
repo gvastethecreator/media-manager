@@ -27,11 +27,13 @@ export type WorkflowBase = {
 	updatedAt: Date;
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas para un Workflow.
  * Este conjunto de métricas se enfoca en el rendimiento y la complejidad del workflow.
  */
-export interface WorkflowStatistics {
+export interface WorkflowStatistics extends EntityStats {
 	totalExecutions: number;
 	successRate: number; // Porcentaje (0-100)
 	averageDuration: number; // En milisegundos

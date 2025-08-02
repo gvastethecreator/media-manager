@@ -20,8 +20,8 @@ import {
  * Hook para gestionar la configuración de ListView
  */
 export function useListViewConfig() {
-	const settings = useSettingsStore.use.settings();
-	const updateSettings = useSettingsStore.use.updateSettings();
+	const settings = useSettingsStore(state => state.settings);
+	const updateSettings = useSettingsStore(state => state.updateSettings);
 
 	// Configuración actual del ListView
 	const listViewConfig = useMemo(() => {
@@ -164,7 +164,7 @@ function getColumnRenderer(columnKey: string) {
 		type: (item) => React.createElement(
 			'span',
 			{ className: 'text-xs uppercase tracking-wide text-muted-foreground' },
-			item.type || 'unknown'
+			item.stats?.type || item.entityType || 'unknown'
 		),
 
 		dimensions: (item) => {

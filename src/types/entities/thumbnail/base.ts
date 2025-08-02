@@ -33,28 +33,19 @@ export interface ThumbnailBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas para un Thumbnail.
  */
-export interface ThumbnailStatistics {
+export interface ThumbnailStatistics extends EntityStats {
 	aspectRatio: number; // Ratio width/height
 	compressionRatio: number; // Estimación de compresión basada en tamaño vs dimensiones
-	qualityScore: number; // Score de calidad basado en resolución y formato
 	usageCount: number; // Número de veces que se ha usado este thumbnail
 	storageEfficiency: number; // Eficiencia de almacenamiento (calidad vs tamaño)
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

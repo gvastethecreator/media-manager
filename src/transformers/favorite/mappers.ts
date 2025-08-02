@@ -65,12 +65,9 @@ function calculateFavoriteStats(favorite: FavoriteBase): FavoriteStatistics {
 export function toFavoriteWithStats(favorite: FavoriteBase): FavoriteWithStats {
 	const stats = calculateFavoriteStats(favorite);
 
-	const favoriteStats = stats;
-
 	return {
 		...favorite,
-		statistics: favoriteStats,
-		stats: favoriteStats,
+		stats,
 	};
 }
 

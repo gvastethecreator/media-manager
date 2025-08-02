@@ -37,33 +37,15 @@ export type ImageBase = {
 	tags?: TagWithStats[];
 };
 
+import type { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas y derivadas para una Image.
- * Principalmente, los conteos de las relaciones.
+ * Extiende EntityStats con propiedades específicas de imágenes.
  */
-export interface ImageStatistics {
-	viewCount: number;
-	downloadCount: number;
-	likeCount: number;
-	commentCount: number;
-	tagCount: number;
-	albumCount: number;
-	collectionCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
+export interface ImageStatistics extends EntityStats {
+	// Propiedades específicas de imágenes
 	aspectRatio: number;
-
-	// Propiedades de archivo del sistema
-	size?: number;
-	mtime?: Date;
-	birthtime?: Date;
 
 	// Funciones de archivo del sistema
 	isDirectory?: () => boolean;

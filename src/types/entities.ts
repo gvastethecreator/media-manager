@@ -38,7 +38,7 @@ export type EntityType =
 	| 'collection'
 	| 'tag'
 	| 'character'
-	| 'worldItem'
+	| 'world-item'
 	| 'concept'
 	| 'prompt'
 	| 'note'
@@ -51,7 +51,7 @@ export type EntityType =
 	| 'document'
 	| 'jsonFile'
 	| 'file3d'
-	| 'uploadedImage';
+	| 'uploaded-image';
 
 /**
  * Propiedad para discriminar entre tipos de entidad en el cliente.
@@ -84,7 +84,7 @@ export type DisplayableEntity =
 	| (CollectionWithStats & { entityType: 'collection' })
 	| (TagWithStats & { entityType: 'tag' })
 	| (CharacterWithStats & { entityType: 'character' })
-	| (WorldItemWithStats & { entityType: 'worldItem' })
+	| (WorldItemWithStats & { entityType: 'world-item' })
 	| (ConceptWithStats & { entityType: 'concept' })
 	| (PromptWithStats & { entityType: 'prompt' })
 	| (NoteWithStats & { entityType: 'note' })
@@ -96,7 +96,7 @@ export type DisplayableEntity =
 	| (DocumentWithStats & { entityType: 'document' })
 	| (JsonFileWithStats & { entityType: 'jsonFile' })
 	| (File3DWithStats & { entityType: 'file3d' })
-	| (UploadedImageWithStats & { entityType: 'uploadedImage' });
+	| (UploadedImageWithStats & { entityType: 'uploaded-image' });
 
 /**
  * 🎨 Interfaz extendida para mostrar entidades en la UI.

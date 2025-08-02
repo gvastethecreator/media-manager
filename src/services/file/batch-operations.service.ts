@@ -511,23 +511,29 @@ class BatchFileOperationsService extends EventEmitter {
         try {
           let result: FileCopyMoveResult | FileOperationResult | undefined;
 
+          // Get file path from entity
+          const itemPath = 'path' in item ? item.path : (item as any).filePath || '';
+          const itemName = 'name' in item ? item.name : (item as any).fileName || `item-${item.id}`;
+
           switch (operation.type) {
             case 'copy':
-              if (operation.targetPath) {
-                const destPath = path.join(operation.targetPath, item.name);
-                result = await copyFile(item.path, destPath, operation.options);
+              if (operation.targetPath && itemPath) {
+                const destPath = path.join(operation.targetPath, itemName);
+                result = await copyFile(itemPath, destPath, operation.options);
               }
               break;
 
             case 'move':
-              if (operation.targetPath) {
-                const destPath = path.join(operation.targetPath, item.name);
-                result = await moveFile(item.path, destPath, operation.options);
+              if (operation.targetPath && itemPath) {
+                const destPath = path.join(operation.targetPath, itemName);
+                result = await moveFile(itemPath, destPath, operation.options);
               }
               break;
 
             case 'delete':
-              result = await deleteFile(item.path);
+              if (itemPath) {
+                result = await deleteFile(itemPath);
+              }
               break;
           }
 
@@ -577,7 +583,7 @@ class BatchFileOperationsService extends EventEmitter {
         progressTrackingService.updateProgress(
           progressId,
           operation.progress.processed + operation.progress.failed,
-          item.name
+          itemName
         );
 
         this.emit('operationProgress', operation);

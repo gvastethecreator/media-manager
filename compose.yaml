@@ -1,0 +1,10 @@
+services:
+  imagemanager:
+    image: imagemanager
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 5173:5173

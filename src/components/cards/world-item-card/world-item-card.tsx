@@ -114,16 +114,16 @@ export function WorldItemCard({
 
 	// Procesar estadísticas si es un string o formato JSON
 	const parsedStats = useMemo(() => {
-		if (!worldItem?._stats) return {};
-		if (typeof worldItem._stats === 'string' && worldItem._stats) {
+		if (!worldItem?.stats) return {};
+		if (typeof worldItem.stats === 'string' && worldItem.stats) {
 			try {
-				return JSON.parse(worldItem._stats);
+				return JSON.parse(worldItem.stats);
 			} catch (_e) {
 				return {};
 			}
 		}
-		return worldItem._stats || {};
-	}, [worldItem?._stats]);
+		return worldItem.stats || {};
+	}, [worldItem?.stats]);
 
 	// Colores para el gradiente y el icono - derivados del tipo y rareza del objeto
 	const { primaryColor, secondaryColor, icon, intensityFactor } = useMemo(() => {
@@ -239,25 +239,25 @@ export function WorldItemCard({
 		attributes,
 		effects,
 		requirements,
-		_stats,
+		stats,
 		properties,
 		featuredImage,
 	} = worldItem;
 
 	// Calcular valores derivados
-	const imagesCount = _stats?.totalImages || worldItem._count?.images || 0;
-	const videosCount = _stats?.totalVideos || worldItem._count?.videos || 0;
-	const albumsCount = _stats?.totalAlbums || worldItem._count?.albums || 0;
-	const collectionsCount = _stats?.totalCollections || worldItem._count?.collections || 0;
-	const tagsCount = _stats?.totalTags || worldItem._count?.tags || 0;
-	const charactersCount = _stats?.totalCharacters || worldItem._count?.characters || 0;
-	const placesCount = _stats?.totalPlaces || worldItem._count?.places || 0;
-	const conceptsCount = _stats?.totalConcepts || worldItem._count?.concepts || 0;
-	const promptsCount = _stats?.totalPrompts || worldItem._count?.prompts || 0;
-	const notesCount = _stats?.totalNotes || worldItem._count?.notes || 0;
-	const wildcardsCount = _stats?.totalWildcards || worldItem._count?.wildcards || 0;
-	const propertiesCount = _stats?.totalProperties || worldItem._count?.properties || 0;
-	const groupsCount = _stats?.totalGroups || worldItem._count?.groups || 0;
+	const imagesCount = stats?.imageCount || worldItem.stats?.imageCount || 0;
+	const videosCount = stats?.videoCount || worldItem.stats?.videoCount || 0;
+	const albumsCount = stats?.albumCount || worldItem.stats?.albumCount || 0;
+	const collectionsCount = stats?.collectionCount || worldItem.stats?.collectionCount || 0;
+	const tagsCount = stats?.tagCount || worldItem.stats?.tagCount || 0;
+	const charactersCount = stats?.characterCount || worldItem.stats?.characterCount || 0;
+	const placesCount = stats?.placeCount || worldItem.stats?.placeCount || 0;
+	const conceptsCount = stats?.conceptCount || worldItem.stats?.conceptCount || 0;
+	const promptsCount = stats?.promptCount || worldItem.stats?.promptCount || 0;
+	const notesCount = stats?.noteCount || worldItem.stats?.noteCount || 0;
+	const wildcardsCount = stats?.wildcardCount || worldItem.stats?.wildcardCount || 0;
+	const propertiesCount = stats?.propertyCount || worldItem.stats?.propertyCount || 0;
+	const groupsCount = stats?.groupCount || worldItem.stats?.groupCount || 0;
 
 	// Calcular total de relaciones para efectos visuales
 	const _totalRelations =

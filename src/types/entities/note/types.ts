@@ -246,41 +246,18 @@ export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.UPDATED_DESC]: 'updatedAt',
 };
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas de Note
  */
-export interface NoteStatistics {
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
+export interface NoteStatistics extends EntityStats {
 	wordCount: number;
 	readingTime: number;
 	completionScore: number;
-	totalItems: number;
-	totalAssociations: number; // Suma de todas las asociaciones
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 
