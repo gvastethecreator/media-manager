@@ -1,27 +1,327 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // === TAREAS DE DESARROLLO (PRIORIDAD ALTA) ===
     {
-      "label": "dev-server",
-      "type": "shell",
-      "command": "bun dev",
-      "group": "build",
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    {
-      "label": "dev-full",
+      "label": "🚀 Desarrollo: Full Stack",
       "type": "shell",
       "command": "bun run dev:full",
-      "group": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "isBackground": true,
-      "problemMatcher": []
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "options": {
+        "statusbar": {
+          "label": "🚀 Dev Full",
+          "color": "#00ff00"
+        }
+      }
     },
     {
-      "label": "backend-server",
+      "label": "🌐 Desarrollo: Frontend (Vite)",
+      "type": "shell",
+      "command": "bun run dev:vite",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "⚙️ Desarrollo: Backend",
       "type": "shell",
       "command": "bun run dev:server:hot",
       "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "📱 Desarrollo: Tauri",
+      "type": "shell",
+      "command": "bun run dev:tauri",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    // === TAREAS DE BUILD (PRIORIDAD ALTA) ===
+    {
+      "label": "🏗️ Build: Completo",
+      "type": "shell",
+      "command": "bun run build",
+      "group": "build",
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🏗️ Build: Frontend",
+      "type": "shell",
+      "command": "bun run build:vite",
+      "group": "build",
+      "problemMatcher": [
+        "$tsc"
+      ]
+    },
+    {
+      "label": "🏗️ Build: Backend",
+      "type": "shell",
+      "command": "bun run build:server",
+      "group": "build",
+      "problemMatcher": [
+        "$tsc"
+      ]
+    },
+    {
+      "label": "🏗️ Build: Tauri",
+      "type": "shell",
+      "command": "bun run build:tauri",
+      "group": "build",
+      "problemMatcher": []
+    },
+    // === TAREAS DE TESTING (PRIORIDAD ALTA) ===
+    {
+      "label": "🧪 Test: E2E",
+      "type": "shell",
+      "command": "bun run test:e2e",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🧪 Test: E2E UI",
+      "type": "shell",
+      "command": "bun run test:ui",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Test: E2E Debug",
+      "type": "shell",
+      "command": "bun run test:e2e:debug",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    // === TAREAS DE CALIDAD DE CÓDIGO (PRIORIDAD MEDIA) ===
+    {
+      "label": "🔧 Fix: Todo",
+      "type": "shell",
+      "command": "bun run fix:all",
+      "group": "build",
+      "problemMatcher": [
+        "$eslint-stylish"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🔍 Lint: Check",
+      "type": "shell",
+      "command": "bun run lint",
+      "group": "build",
+      "problemMatcher": [
+        "$eslint-stylish"
+      ]
+    },
+    {
+      "label": "🔧 Lint: Fix",
+      "type": "shell",
+      "command": "bun run lint:fix",
+      "group": "build",
+      "problemMatcher": [
+        "$eslint-stylish"
+      ]
+    },
+    {
+      "label": "🎨 Format: Check",
+      "type": "shell",
+      "command": "bun run format:check",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎨 Format: Fix",
+      "type": "shell",
+      "command": "bun run format",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Biome: Check",
+      "type": "shell",
+      "command": "bun run biome",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🔧 Biome: Fix",
+      "type": "shell",
+      "command": "bun run biome:fix",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "📝 TypeScript: Check",
+      "type": "shell",
+      "command": "bun run tsc",
+      "group": "build",
+      "problemMatcher": [
+        "$tsc"
+      ]
+    },
+    // === TAREAS DE BASE DE DATOS (PRIORIDAD MEDIA) ===
+    {
+      "label": "🗃️ DB: Studio",
+      "type": "shell",
+      "command": "bun run db:studio",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "🗃️ DB: Push",
+      "type": "shell",
+      "command": "bun run db:push",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🗃️ DB: Generate",
+      "type": "shell",
+      "command": "bun run db:generate",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🗃️ DB: Migrate",
+      "type": "shell",
+      "command": "bun run db:migrate",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🗃️ DB: Reset",
+      "type": "shell",
+      "command": "bun run db:reset",
+      "group": "build",
+      "problemMatcher": []
+    },
+    // === TAREAS DE DOCKER (PRIORIDAD BAJA) ===
+    {
+      "type": "docker-build",
+      "label": "🐳 Docker: Build",
+      "platform": "node",
+      "dockerBuild": {
+        "dockerfile": "${workspaceFolder}/Dockerfile",
+        "context": "${workspaceFolder}",
+        "pull": true
+      },
+      "group": "build"
+    },
+    {
+      "type": "docker-run",
+      "label": "🐳 Docker: Run (Release)",
+      "dependsOn": [
+        "🐳 Docker: Build"
+      ],
+      "platform": "node",
+      "group": "build"
+    },
+    {
+      "type": "docker-run",
+      "label": "🐳 Docker: Run (Debug)",
+      "dependsOn": [
+        "🐳 Docker: Build"
+      ],
+      "dockerRun": {
+        "env": {
+          "DEBUG": "*",
+          "NODE_ENV": "development"
+        }
+      },
+      "node": {
+        "enableDebugging": true
+      },
+      "group": "build"
+    },
+    // === TAREAS UTILITARIAS (PRIORIDAD BAJA) ===
+    {
+      "label": "📊 Preview: Vite",
+      "type": "shell",
+      "command": "bun run preview:vite",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Logs: List",
+      "type": "shell",
+      "command": "bun run logs:list",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🧹 Logs: Clean",
+      "type": "shell",
+      "command": "bun run logs:clean",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "⚠️ Check: Errors",
+      "type": "shell",
+      "command": "bun run check:errors",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎭 Playwright: Install",
+      "type": "shell",
+      "command": "bun run playwright:install",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎭 Playwright: Codegen",
+      "type": "shell",
+      "command": "bun run playwright:codegen",
+      "group": "test",
       "isBackground": true,
       "problemMatcher": []
     }

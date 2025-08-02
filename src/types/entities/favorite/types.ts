@@ -15,7 +15,7 @@ export enum FavoriteEntityType {
 	FOLDER = 'folder',
 	CHARACTER = 'character',
 	PLACE = 'place',
-	WORLD_ITEM = 'worldItem',
+	WORLD_ITEM = 'world-item',
 	CONCEPT = 'concept',
 	PROMPT = 'prompt',
 	NOTE = 'note',

@@ -48,37 +48,15 @@ export interface CollectionEdition {
 	metadata?: Record<string, any>;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas y derivadas para una Collection.
  * Principalmente, los conteos de las relaciones.
  */
-export interface CollectionStatistics {
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+export interface CollectionStatistics extends EntityStats {
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

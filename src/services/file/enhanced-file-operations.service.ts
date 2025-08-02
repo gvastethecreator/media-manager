@@ -19,7 +19,7 @@ import {
 import { FileErrorCode } from '@/types/entities/file';
 import { clipboardManager as comprehensiveClipboardManager } from '@/services/clipboard';
 import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
-import { getEntityPath } from '@/lib/utils/entity-properties.utils';
+import { getEntityPath, getEntityName } from '@/lib/utils/entity-properties.utils';
 
 const logger = serverLogger.withContext('EnhancedFileOperationsService');
 
@@ -138,7 +138,7 @@ export class EnhancedFileOperationsService {
 
       // Show success toast
       const message = items.length === 1
-        ? `"${items[0].name}" copiado al portapapeles`
+        ? `"${getEntityName(items[0])}" copiado al portapapeles`
         : `${items.length} elementos copiados al portapapeles`;
       toastService.success(message);
 
@@ -160,7 +160,7 @@ export class EnhancedFileOperationsService {
 
       // Show success toast
       const message = items.length === 1
-        ? `"${items[0].name}" cortado al portapapeles`
+        ? `"${getEntityName(items[0])}" cortado al portapapeles`
         : `${items.length} elementos cortados al portapapeles`;
       toastService.success(message);
 
@@ -212,7 +212,7 @@ export class EnhancedFileOperationsService {
 
         for (const item of clipboardData.items) {
           const sourcePath = getEntityPath(item);
-          const fileName = item.name;
+          const fileName = getEntityName(item);
           const destPath = path.join(targetPath, fileName);
 
           try {
@@ -243,7 +243,7 @@ export class EnhancedFileOperationsService {
         // Show success toast
         const operationText = operation === 'copy' ? 'copiados' : 'movidos';
         const message = results.length === 1
-          ? `"${results[0].name}" ${operationText.slice(0, -1)} correctamente`
+          ? `"${getEntityName(results[0])}" ${operationText.slice(0, -1)} correctamente`
           : `${results.length} elementos ${operationText} correctamente`;
         toastService.success(message);
 
@@ -263,7 +263,7 @@ export class EnhancedFileOperationsService {
    */
   async renameItem(item: AnyEntityWithStats, newName: string, enableUndo: boolean = true): Promise<AnyEntityWithStats> {
     try {
-      logger.info('📝 Renaming item:', { from: item.name, to: newName });
+      logger.info('📝 Renaming item:', { from: getEntityName(item), to: newName });
 
       const oldPath = getEntityPath(item);
       const newPath = path.join(path.dirname(oldPath), newName);
@@ -290,7 +290,7 @@ export class EnhancedFileOperationsService {
           const updatedFileInfo = await getFileInfo(newPath);
           const updatedEntity = convertFileInfoToEntity(updatedFileInfo);
 
-          toastService.success(`"${item.name}" renombrado a "${newName}"`);
+          toastService.success(`"${getEntityName(item)}" renombrado a "${newName}"`);
           logger.info('✅ Item renamed successfully');
           return updatedEntity;
         }
@@ -300,7 +300,7 @@ export class EnhancedFileOperationsService {
 
     } catch (error) {
       logger.error('❌ Error renaming item:', error);
-      toastService.error(`Error al renombrar "${item.name}"`);
+      toastService.error(`Error al renombrar "${getEntityName(item)}"`);
       throw createFileError('No se pudo renombrar el elemento', FileErrorCode.OPERATION_FAILED, error);
     }
   }
@@ -332,7 +332,7 @@ export class EnhancedFileOperationsService {
         for (const item of items) {
           try {
             const sourcePath = getEntityPath(item);
-            const fileName = item.name;
+            const fileName = getEntityName(item);
             const destPath = path.join(targetPath, fileName);
 
             const result = await moveFile(sourcePath, destPath);
@@ -342,15 +342,15 @@ export class EnhancedFileOperationsService {
               results.push(entityResult);
             }
           } catch (itemError) {
-            logger.error(`❌ Error moving item ${item.name}:`, itemError);
-            errors.push(`Error moviendo "${item.name}"`);
+            logger.error(`❌ Error moving item ${getEntityName(item)}:`, itemError);
+            errors.push(`Error moviendo "${getEntityName(item)}"`);
           }
         }
 
         // Show results
         if (results.length > 0) {
           const message = results.length === 1
-            ? `"${results[0].name}" movido correctamente`
+            ? `"${getEntityName(results[0])}" movido correctamente`
             : `${results.length} elementos movidos correctamente`;
           toastService.success(message);
         }
@@ -397,8 +397,8 @@ export class EnhancedFileOperationsService {
             await deleteFile(itemPath);
             successCount++;
           } catch (itemError) {
-            logger.error(`❌ Error deleting item ${item.name}:`, itemError);
-            errors.push(`Error eliminando "${item.name}"`);
+            logger.error(`❌ Error deleting item ${getEntityName(item)}:`, itemError);
+            errors.push(`Error eliminando "${getEntityName(item)}"`);
           }
         }
 
@@ -449,7 +449,7 @@ export class EnhancedFileOperationsService {
 
         for (const item of items) {
           const sourcePath = getEntityPath(item);
-          const destPath = path.join(targetPath, item.name);
+          const destPath = path.join(targetPath, getEntityName(item));
 
           try {
             const result = await copyFile(sourcePath, destPath);
@@ -458,14 +458,14 @@ export class EnhancedFileOperationsService {
               results.push(entityResult);
             }
           } catch (itemError) {
-            logger.error(`❌ Error copying item ${item.name}:`, itemError);
+            logger.error(`❌ Error copying item ${getEntityName(item)}:`, itemError);
             // Continue with other items, don't fail the entire operation
           }
         }
 
         // Show success toast
         const message = results.length === 1
-          ? `"${results[0].name}" copiado correctamente`
+          ? `"${getEntityName(results[0])}" copiado correctamente`
           : `${results.length} elementos copiados correctamente`;
         toastService.success(message);
 

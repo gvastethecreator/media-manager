@@ -65,40 +65,19 @@ export interface TagWithCounts extends TagBase {
 	};
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas para un Tag.
  */
-export interface TagStatistics {
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
+export interface TagStatistics extends EntityStats {
 	totalRelations: number; // Suma de todas las relaciones
 	usageDiversity: number; // Cuán distribuido está el uso del tag entre diferentes tipos de entidades
 	popularity: number; // Un score de popularidad general
 	completenessScore: number; // Qué tan completo está el perfil del tag (descripción, etc.)
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

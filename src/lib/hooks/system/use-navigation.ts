@@ -88,14 +88,14 @@ export const useNavigation = () => {
 						count: store.currentPlace?.count,
 						emoji: store.currentPlace?.emoji,
 					};
-				case 'worldItem':
-					return {
-						type: 'worldItem',
-						id: store.currentWorldItemId,
-						name: store.currentWorldItem?.name,
-						count: store.currentWorldItem?.count,
-						emoji: store.currentWorldItem?.emoji,
-					};
+				case 'world-item':
+				return {
+					type: 'world-item',
+					id: store.currentWorldItemId,
+					name: store.currentWorldItem?.name,
+					count: store.currentWorldItem?.count,
+					emoji: store.currentWorldItem?.emoji,
+				};
 				case 'all':
 					return {
 						type: 'all',
@@ -160,16 +160,16 @@ export const useNavigation = () => {
 						{ name: store.currentPlace?.name || 'Lugar', path: `/places/${store.currentPlaceId}`, isActive: true }
 					);
 					break;
-				case 'worldItem':
-					breadcrumbs.push(
-						{ name: 'Elementos del Mundo', path: '/world-items', isActive: false },
-						{
-							name: store.currentWorldItem?.name || 'Elemento',
-							path: `/world-items/${store.currentWorldItemId}`,
-							isActive: true,
-						}
-					);
-					break;
+				case 'world-item':
+				breadcrumbs.push(
+					{ name: 'Elementos del Mundo', path: '/world-items', isActive: false },
+					{
+						name: store.currentWorldItem?.name || 'Elemento',
+						path: `/world-items/${store.currentWorldItemId}`,
+						isActive: true,
+					}
+				);
+				break;
 				case 'all':
 					breadcrumbs.push({ name: 'Todas las imágenes', path: '/images/all', isActive: true });
 					break;

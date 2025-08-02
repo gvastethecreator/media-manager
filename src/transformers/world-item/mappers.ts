@@ -280,20 +280,25 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		wildcardCount: _count?.wildcards || 0,
 		propertyCount: _count?.properties || 0,
 		groupCount: _count?.groups || 0,
-		// Alias para compatibilidad
-		totalImages: _count?.images || 0,
-		totalVideos: _count?.videos || 0,
-		totalAlbums: _count?.albums || 0,
-		totalCollections: _count?.collections || 0,
-		totalTags: _count?.tags || 0,
-		totalCharacters: _count?.characters || 0,
-		totalPlaces: _count?.places || 0,
-		totalConcepts: _count?.concepts || 0,
-		totalPrompts: _count?.prompts || 0,
-		totalNotes: _count?.notes || 0,
-		totalWildcards: _count?.wildcards || 0,
-		totalProperties: _count?.properties || 0,
-		totalGroups: _count?.groups || 0,
+
+		// Métricas globales requeridas por EntityStats
+		totalItems: totalRelations,
+		totalAssociations: totalRelations,
+		worldItemCount: 0, // No hay world items anidados en este contexto
+
+		// Timestamps requeridos por EntityStats
+		lastUpdated: updatedAt,
+		lastViewed: undefined,
+		lastModified: updatedAt,
+
+		// Propiedades del sistema de archivos requeridas por EntityStats
+		size: 0, // WorldItems no tienen tamaño físico
+		mtime: updatedAt,
+		birthtime: createdAt,
+		type: worldItem.type || 'world-item',
+		isDirectory: false,
+		isFile: false,
+
 		// Métricas RPG
 		powerLevel,
 		rarityScore: rarityScores[rarityLevel] || 10,
@@ -323,7 +328,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 		...rest,
 		entityType: 'world-item' as const,
 		statistics,
-		_stats: statistics,
+		stats: statistics,
 		_count: _count || {},
 	};
 }

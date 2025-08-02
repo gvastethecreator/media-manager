@@ -40,15 +40,16 @@ export interface QueueJobBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas para un QueueJob.
  */
-export interface QueueJobStatistics {
+export interface QueueJobStatistics extends EntityStats {
 	executionTime: number; // Tiempo de ejecución en ms (completedAt - startedAt)
 	waitTime: number; // Tiempo de espera en ms (startedAt - createdAt)
 	successRate: number; // Porcentaje de éxito basado en intentos
 	averageRetryDelay: number; // Promedio de delay entre reintentos
-	priorityScore: number; // Score de prioridad normalizado
 	isStuck: boolean; // Si el job parece estar atascado
 	performanceGrade: 'A' | 'B' | 'C' | 'D'; // Grade de rendimiento
 }

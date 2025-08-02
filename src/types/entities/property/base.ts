@@ -66,28 +66,27 @@ export interface PropertyWithCounts extends PropertyBase {
 	};
 }
 
-/**
- * 📊 Estadísticas calculadas para una Property.
- */
-export interface PropertyStatistics {
-	totalRelations: number; // Suma de todas las relaciones (también conocido como totalAssociations)
-	totalAssociations: number; // Alias para totalRelations para compatibilidad
-	usageDiversity: number; // Cuán distribuido está el uso de la propiedad entre diferentes tipos de entidades
-	popularity: number; // Un score de popularidad general
-	completenessScore: number; // Qué tan completo está el perfil de la propiedad (descripción, etc.)
+import { EntityStats } from '../entity.types';
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+/**
+ * 🏷️ PROPERTY STATISTICS
+ *
+ * Métricas para analizar el uso y relevancia de una Property.
+ */
+export interface PropertyStatistics extends EntityStats {
+	/** Número de entidades que usan esta propiedad. */
+	usageCount: number;
+	/** Diversidad de valores únicos para esta propiedad. */
+	valueDiversity: number;
+	/** Puntuación de la completitud de la información de la propiedad. */
+	completenessScore: number;
+	/** Popularidad basada en el número de entidades relacionadas. */
+	popularity: number;
+	/** Total de relaciones con otras entidades */
+	totalRelations: number;
+
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

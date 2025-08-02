@@ -23,21 +23,9 @@ export interface AlbumBase extends EntityBase {
 	updatedAt: Date;
 }
 
-export interface AlbumStatistics {
-	imageCount: number;
-	videoCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	worldItemCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-	totalSize: number;
+import { EntityStats } from '../entity.types';
+
+export interface AlbumStatistics extends EntityStats {
 	lastModified: Date | null;
 	lastImageAddedAt: Date | null;
 	lastVideoAddedAt: Date | null;

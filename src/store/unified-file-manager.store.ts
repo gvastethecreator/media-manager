@@ -146,7 +146,7 @@ interface UnifiedFileManagerState {
 	lastSelectedItem: EntityWithStats | null;
 
 	// 🧭 Estado de navegación
-	currentContext: 'folder' | 'collection' | 'tag' | 'album' | 'character' | 'place' | 'worldItem' | 'all' | null;
+	currentContext: 'folder' | 'collection' | 'tag' | 'album' | 'character' | 'place' | 'world-item' | 'all' | null;
 	currentFolderId: string | null;
 	currentCollectionId: string | null;
 	currentTagId: string | null;
@@ -774,7 +774,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 
 		const worldItem = state.worldItems.find((w) => w.id === id) || null;
 		set({
-			currentContext: 'worldItem',
+			currentContext: 'world-item',
 			currentFolderId: null,
 			currentCollectionId: null,
 			currentTagId: null,
@@ -792,7 +792,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 		});
 
 		state.clearSelection();
-		await state.loadItems('worldItem', id);
+		await state.loadItems('world-item', id);
 	},
 
 	loadAllImages: async () => {

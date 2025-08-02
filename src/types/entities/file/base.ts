@@ -62,10 +62,12 @@ export interface FileBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas calculadas y métricas para un archivo.
  */
-export interface FileStatistics {
+export interface FileStatistics extends EntityStats {
 	/** Tamaño formateado legible para humanos */
 	formattedSize: string;
 	/** Tipo de archivo legible para humanos */
@@ -88,19 +90,11 @@ export interface FileStatistics {
 	childCount: number;
 	/** Ruta relativa corta para mostrar */
 	shortPath: string;
+	/** Checksum del archivo para verificación de integridad */
+	checksum: string;
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

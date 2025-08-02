@@ -116,7 +116,7 @@ export function useGridViewConfig() {
         return {
           columns: 1,
           itemSize: config.minItemSize,
-          itemHeight: config.minItemSize * config.aspectRatio,
+          itemHeight: config.minItemSize * (config.aspectRatio || 1),
           gap: 16,
           padding: 16,
         };
@@ -153,7 +153,7 @@ export function useGridViewConfig() {
         columns = Math.max(1, columns);
       }
 
-      const itemHeight = itemSize * config.aspectRatio;
+      const itemHeight = itemSize * (config.aspectRatio || 1);
 
       return {
         columns,

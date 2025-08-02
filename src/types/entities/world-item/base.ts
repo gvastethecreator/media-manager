@@ -40,40 +40,12 @@ export interface WorldItemBase {
 	updatedAt: Date;
 }
 
+import { EntityStats } from '../entity.types';
+
 /**
  * 📊 Estadísticas específicas de WorldItem con análisis RPG
  */
-export interface WorldItemStatistics {
-	// Conteos de relaciones
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	collectionCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	conceptCount: number;
-	promptCount: number;
-	noteCount: number;
-	wildcardCount: number;
-	propertyCount: number;
-	groupCount: number;
-
-	// Alias para compatibilidad
-	totalImages: number;
-	totalVideos: number;
-	totalAlbums: number;
-	totalCollections: number;
-	totalTags: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalConcepts: number;
-	totalPrompts: number;
-	totalNotes: number;
-	totalWildcards: number;
-	totalProperties: number;
-	totalGroups: number;
-
+export interface WorldItemStatistics extends EntityStats {
 	// Métricas RPG
 	powerLevel: number; // Nivel de poder calculado
 	rarityScore: number; // Puntuación de rareza (0-100)
@@ -101,18 +73,12 @@ export interface WorldItemStatistics {
 	totalStats: number;
 	itemTier: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'artifact';
 
-	// File system properties for browser integration
-	/** File size in bytes */
-	size: number;
-	/** Last modification time */
-	mtime: Date;
-	/** File creation time */
-	birthtime: Date;
-	/** File type for browser compatibility */
-	type: string;
-	/** Whether this is a directory */
+	// Métricas de conteo
+	worldItemCount: number; // Conteo de world items relacionados
+	totalItems: number; // Total de items relacionados
+
+	// File system functions
 	isDirectory: boolean;
-	/** Whether this is a file */
 	isFile: boolean;
 }
 

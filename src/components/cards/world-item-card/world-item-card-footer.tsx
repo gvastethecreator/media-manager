@@ -25,8 +25,8 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 	intensityFactor,
 	compact = false,
 }: WorldItemCardFooterProps) => {
-	const { createdAt, updatedAt, isFavorite, category, type, _stats } = worldItem;
-	const imagesCount = _stats?.totalImages || worldItem._count?.images || 0;
+	const { createdAt, updatedAt, isFavorite, category, type, stats } = worldItem;
+	const imagesCount = stats?.imageCount || worldItem.stats?.imageCount || 0;
 	// Convertir fechas a objetos Date si son strings
 	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
 	const updatedAtDate = typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt;
