@@ -36,6 +36,8 @@ export const StatusBar = memo<StatusBarProps>(function StatusBar({ totalItems, s
 			[EntityStatsType.COLLECTION]: { singular: 'colección', plural: 'colecciones' },
 			[EntityStatsType.ALBUM]: { singular: 'álbum', plural: 'álbumes' },
 			[EntityStatsType.UPLOADED_IMAGE]: { singular: 'imagen subida', plural: 'imágenes subidas' },
+			[EntityStatsType.JSON_FILE]: { singular: 'archivo JSON', plural: 'archivos JSON' },
+			[EntityStatsType.FILE_3D]: { singular: 'archivo 3D', plural: 'archivos 3D' },
 		};
 
 		return names[entityType] || { singular: 'elemento', plural: 'elementos' };

@@ -38,7 +38,7 @@ El componente `FileBrowser` es un explorador de archivos completo con soporte pa
 - ✅ **Eliminado `virtualizer-wrapper.original.tsx`** (versión antigua)
 - ✅ **Eliminado `test-grid-view.tsx`** (componente de prueba)
 - ✅ **Extraído `GridItem` a archivo separado** para mejor modularidad
-- ✅ **Agregadas transiciones suaves** entre vistas con `framer-motion`
+- ✅ **Agregadas transiciones suaves** entre vistas con `motion`
 - ✅ **Mejorada accesibilidad** con roles ARIA apropiados
 
 ### Optimizaciones implementadas

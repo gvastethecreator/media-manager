@@ -26,12 +26,10 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 	const [newVideoName, setNewVideoName] = useState('');
 	const [newVideoPath, setNewVideoPath] = useState('');
 
-	// Cargar videos al montar el componente
+	// Cargar videos al montar el componente solo una vez
 	useEffect(() => {
-		if (videos.length === 0 && !isLoading) {
-			fetchVideos();
-		}
-	}, [videos.length, isLoading, fetchVideos]);
+		fetchVideos();
+	}, []);
 
 	// Manejar clic en video - navegar a la vista de contenido
 	const handleVideoClick = useCallback(

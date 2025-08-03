@@ -6,7 +6,7 @@
 
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { copyFile, createDirectory, moveFile, renameFile } from '@/services/file/file.service';
+import { copyFile, createDirectory, getDirectoryInfo, moveFile, renameFile } from '@/services/file/file.service';
 
 const router = express.Router();
 const logger = serverLogger.withContext('FilesAPI');
@@ -37,25 +37,27 @@ const logger = serverLogger.withContext('FilesAPI');
 /**
  * GET /api/files/directory/:path - Obtener contenido de un directorio
  */
-// Ruta temporalmente comentada por conflicto con path-to-regexp
-// router.get('/directory/*', async (req, res) => {
-// 	try {
-// 		const dirPath = req.params[0]; // Captura toda la ruta después de /directory/
-//
-// 		if (!dirPath) {
-// 			res.status(400).json({ error: 'Ruta de directorio requerida' });; return;
-// 		}
-//
-// 		const directoryInfo = await getDirectoryInfo(dirPath);
-// 		res.json({ success: true, data: directoryInfo });
-// 	} catch (error) {
-// 		logger.error('Error obteniendo contenido del directorio:', error);
-// 		res.status(500).json({
-// 			success: false,
-// 			error: error instanceof Error ? error.message : 'Error interno del servidor',
-// 		});
-// 	}
-// });
+router.get('/directory/:path', async (req, res) => {
+	try {
+		const dirPath = req.params.path;
+
+		if (!dirPath) {
+			res.status(400).json({ error: 'Ruta de directorio requerida' });
+			return;
+		}
+
+		// Decodificar la ruta URL-encoded
+		const decodedPath = decodeURIComponent(dirPath);
+		const directoryInfo = await getDirectoryInfo(decodedPath);
+		res.json({ success: true, data: directoryInfo });
+	} catch (error) {
+		logger.error('Error obteniendo contenido del directorio:', error);
+		res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Error interno del servidor',
+		});
+	}
+});
 
 /**
  * POST /api/files/directory - Crear un nuevo directorio

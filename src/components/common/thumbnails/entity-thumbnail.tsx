@@ -5,12 +5,11 @@
  * thumbnails apropiados para cualquier tipo de entidad
  */
 
-import React, { memo } from 'react';
-import { motion, type Transition } from 'framer-motion';
+import { motion, type Transition } from 'motion/react';
+import { memo } from 'react';
+import { useEntityThumbnails, useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
-import { useEntityTypeConfig, useEntityThumbnails } from '@/hooks/use-entity-type-config';
-import { type AnyEntityWithStats, getEntityStatsType } from '@/types/migration';
-import { EntityStatsType } from '@/types/migration';
+import { type AnyEntityWithStats, EntityStatsType, getEntityStatsType } from '@/types/migration';
 import { ImageThumbnail } from './image-thumbnail';
 
 interface EntityThumbnailProps {
@@ -63,25 +62,20 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 		loading = false,
 		aspectRatio,
 	}) => {
-		// Obtener tipo de entidad y configuración
+		// Obtener tipo de entidad y configuración (sin romper reglas de hooks)
 		const entityType = getEntityStatsType(entity);
-		if (!entityType) {
-			return null; // No renderizar si no se puede determinar el tipo
-		}
-
-		const { config } = useEntityTypeConfig(entityType);
+		// Fallback a un tipo seguro existente cuando no haya entityType
+		const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
 		const { getThumbnailUrl } = useEntityThumbnails();
 
 		// Obtener URL del thumbnail
-		const thumbnailUrl = getThumbnailUrl(entity);
+		const thumbnailUrl = entity ? getThumbnailUrl(entity) : undefined;
 
 		// Manejar loading state
 		const isLoading = loading;
 
-		// Verificar si la configuración existe
-		if (!config) {
-			return null;
-		}
+		// Flags de guardas para el render (evitar return temprano antes de hooks)
+		const cannotRender = !entityType || !config;
 
 		// Clases CSS del contenedor
 		const containerClasses = cn(
@@ -103,12 +97,21 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 
 		// Renderizar thumbnail específico según el tipo de entidad
 		const renderThumbnail = () => {
+			// Si no podemos determinar tipo o config, mostrar placeholder neutro
+			if (cannotRender) {
+				return (
+					<div className="w-full h-full flex items-center justify-center bg-muted/40">
+						<div className="w-4 h-4 border-2 border-muted-foreground/50 border-t-transparent rounded-full animate-spin" />
+					</div>
+				);
+			}
+
 			// Para imágenes, usar el componente ImageThumbnail existente
 			if (entityType === EntityStatsType.IMAGE) {
 				return (
 					<ImageThumbnail
-						path={(entity as any).path || '/placeholder.jpg'}
-						name={entity.name || 'Sin nombre'}
+						path={(entity as any)?.path || '/placeholder.jpg'}
+						name={entity?.name || 'Sin nombre'}
 						size={qualityToImageSize[quality]}
 						className="w-full h-full object-cover"
 					/>
@@ -122,10 +125,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 					className="w-full h-full flex items-center justify-center"
 					style={{ backgroundColor: `${config.color}20` }}
 				>
-					<IconComponent
-						className="w-1/2 h-1/2 text-muted-foreground"
-						style={{ color: config.color }}
-					/>
+					<IconComponent className="w-1/2 h-1/2 text-muted-foreground" style={{ color: config.color }} />
 				</div>
 			);
 		};
@@ -137,8 +137,8 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			return (
 				<div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-end p-2">
 					<div className="text-white text-xs">
-						<div className="font-medium truncate">{entity.name || 'Sin nombre'}</div>
-						<div className="text-white/80">{config.displayName}</div>
+						<div className="font-medium truncate">{entity?.name || 'Sin nombre'}</div>
+						<div className="text-white/80">{config?.displayName ?? ''}</div>
 					</div>
 				</div>
 			);
@@ -147,20 +147,16 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 		// Renderizar loading state
 		if (isLoading) {
 			return (
-				<div className={containerClasses}>
+				<motion.div className={containerClasses} {...motionProps}>
 					<div className="w-full h-full bg-muted animate-pulse flex items-center justify-center">
 						<div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
 					</div>
-				</div>
+				</motion.div>
 			);
 		}
 
 		return (
-			<motion.div
-				className={containerClasses}
-				onClick={onClick}
-				{...motionProps}
-			>
+			<motion.div className={containerClasses} onClick={onClick} {...motionProps}>
 				{renderThumbnail()}
 				{renderOverlay()}
 			</motion.div>
@@ -173,32 +169,30 @@ EntityThumbnail.displayName = 'EntityThumbnail';
 /**
  * Componente compacto de thumbnail para listas densas
  */
-export const EntityThumbnailCompact = memo<
-	Omit<EntityThumbnailProps, 'size' | 'showOverlay' | 'animated'>
->(({ entity, className, ...props }) => {
-	const entityType = getEntityStatsType(entity);
-	if (!entityType) return null;
+export const EntityThumbnailCompact = memo<Omit<EntityThumbnailProps, 'size' | 'showOverlay' | 'animated'>>(
+	({ entity, className, ...props }) => {
+		const entityType = getEntityStatsType(entity);
+		// Fallback a un tipo seguro existente cuando no haya entityType
+		const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
 
-	const { config } = useEntityTypeConfig(entityType);
-	if (!config) return null;
+		const IconComponent = config?.icon;
 
-	const IconComponent = config.icon;
-
-	return (
-		<div
-			className={cn(
-				'w-6 h-6 rounded flex items-center justify-center flex-shrink-0',
-				className
-			)}
-			style={{ backgroundColor: `${config.color}20` }}
-		>
-			<IconComponent
-				className="w-4 h-4"
-				style={{ color: config.color }}
-			/>
-		</div>
-	);
-});
+		return (
+			<div
+				className={cn('w-6 h-6 rounded flex items-center justify-center flex-shrink-0', className)}
+				style={{ backgroundColor: `${config?.color ?? '#888'}20` }}
+				role="img"
+				aria-label={config?.displayName ?? 'thumbnail'}
+			>
+				{IconComponent ? (
+					<IconComponent className="w-4 h-4" style={{ color: config?.color }} />
+				) : (
+					<div className="w-3 h-3 rounded-full bg-muted-foreground/60" />
+				)}
+			</div>
+		);
+	}
+);
 
 EntityThumbnailCompact.displayName = 'EntityThumbnailCompact';
 
@@ -218,6 +212,7 @@ export const EntityThumbnailGrid = memo<EntityThumbnailGridProps>(
 		const displayEntities = entities.slice(0, maxItems);
 		const remainingCount = Math.max(0, entities.length - maxItems);
 
+		// A11y: role group para colección de thumbnails
 		return (
 			<div className={cn('flex flex-wrap gap-1', className)}>
 				{displayEntities.map((entity) => (

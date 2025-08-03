@@ -1,7 +1,7 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, File, Folder, FolderOpen } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import React, { useCallback, useState } from 'react';
 import { cn } from '@/lib/utils';
 

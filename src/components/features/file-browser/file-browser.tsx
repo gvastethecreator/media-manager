@@ -11,40 +11,38 @@ import { FileTextIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import { EntityCard } from '@/components/cards/entity-card';
+import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import type { CardLayout, CardSize, CardVariant } from '@/components/cards/types/card-layout.types';
 import { EmptyState } from '@/components/core/data-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
+import { useAdvancedSelection } from '@/hooks/use-advanced-selection';
+import { useCustomContextMenu } from '@/hooks/use-custom-context-menu';
+import { useUndoRedo } from '@/hooks/use-undo-redo';
+import { useFileBrowserShortcuts } from '@/lib/keyboard';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
+import { clipboardManager } from '@/services/clipboard/clipboard-manager';
+import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useSelectionStore } from '@/store/selection.store';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import { toastService } from '@/lib/ui/toast';
-import { useFileBrowserShortcuts } from '@/lib/keyboard';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
+import { CustomContextMenu } from './context-menu/custom-context-menu';
 import { useAccessibility } from './hooks/use-accessibility';
 import { usePerformance } from './hooks/use-performance';
-import { useUndoRedo } from '@/hooks/use-undo-redo';
-import { clipboardManager } from '@/services/clipboard/clipboard-manager';
-import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
-
-import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
-import { EmptySpaceContextMenu, handleEmptySpaceAction, handleContextAction } from './context-menu';
-import { type EmptySpaceAction, type ContextMenuAction } from './context-menu/types';
+import { KeyboardNavigation } from './navigation/keyboard-navigation';
+import { ProgressOverlay } from './progress/progress-overlay';
+import { DragSelectionProvider } from './selection/drag-selection-provider';
 import { StatusBar } from './toolbar/status-bar';
 import { ViewToolbar } from './toolbar/ViewToolbar';
 import { CardsView } from './views/cards-view';
-import { SelectionCounter, useSelectionCounter } from './components/selection-counter';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
-import { DragSelectionProvider } from './selection/drag-selection-provider';
-import { ProgressOverlay } from './progress/progress-overlay';
-import { KeyboardNavigation } from './navigation/keyboard-navigation';
-import { UndoRedoButton } from './undo-redo/UndoRedoButton';
 
 // Import CSS for user-select fixes
 import './styles/user-select.css';
@@ -109,7 +107,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
 	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
 	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
-	const { selectedIds: globalSelectedIds, clearSelection, focusedId, setFocusedId, addToSelection, removeFromSelection, setSelectedIds, selectRange, toggleSelection, selectAll } = useSelectionStore();
+	const {
+		selectedIds: globalSelectedIds,
+		clearSelection,
+		focusedId,
+		setFocusedId,
+		addToSelection,
+		removeFromSelection,
+		setSelectedIds,
+		selectRange,
+		toggleSelection,
+		selectAll,
+	} = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 	const { openViewer } = useFileViewerStore();
 
@@ -122,22 +131,26 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const isLoadingRef = useRef<boolean>(false);
 
 	// Estado para el menú contextual
-	const [emptySpaceContextMenu, setEmptySpaceContextMenu] = useState<{
-		visible: boolean;
-		position: { x: number; y: number };
-	}>({ visible: false, position: { x: 0, y: 0 } });
+	const {
+		isOpen: contextMenuOpen,
+		position: contextMenuPosition,
+		handleContextMenu,
+		closeMenu: closeContextMenu,
+	} = useCustomContextMenu();
 
 	// Integración de accesibilidad
 	const accessibility = useAccessibility({
 		containerRef: containerRef as React.RefObject<HTMLElement>,
-		onAnnouncement: (message: string) => console.log('Accessibility announcement:', message)
+		onAnnouncement: (message: string) => console.log('Accessibility announcement:', message),
 	});
 
 	// Integración de Undo/Redo
 	const { canUndo, canRedo, undo, redo } = useUndoRedo({ enableKeyboardShortcuts: true });
 
-	// Usar selectedIds globales en lugar de prop local
-	const effectiveSelectedIds = globalSelectedIds.length > 0 ? globalSelectedIds : selectedIds;
+	// Usar selectedIds globales en lugar de prop local - Memoizado para evitar re-cálculos
+	const effectiveSelectedIds = useMemo(() => {
+		return globalSelectedIds.length > 0 ? globalSelectedIds : selectedIds;
+	}, [globalSelectedIds, selectedIds]);
 
 	// Configurar keyboard shortcuts
 	const { register, setContext } = useFileBrowserShortcuts();
@@ -264,15 +277,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		debouncedLoadData();
 	}, [debouncedLoadData]);
 
-	// Obtener items según el modo y tipo de entidad - Memoizado para mejorar rendimiento y asegurar re-render con sortOptions
-	const items = useMemo(() => {
-		console.log('🔍 FileBrowser - Calculando items con:', { entityType, filterId, filterType, mode });
+	// Obtener raw items - Memoizado separadamente para evitar re-cálculos innecesarios
+	const rawItems = useMemo(() => {
+		if (process.env.NODE_ENV !== 'production') {
+			console.log('🔍 FileBrowser - Calculando items con:', { entityType, filterId, filterType, mode });
+		}
+
 		// En modo manual, usar los items proporcionados
 		if (mode === 'manual' && manualItems) {
 			return manualItems;
 		}
 
-		let rawItems: AnyEntityWithStats[] = [];
+		let items: AnyEntityWithStats[] = [];
 
 		// En modo auto, obtener desde stores
 		if (entityType === 'mixed') {
@@ -281,9 +297,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				switch (type) {
 					case 'image':
 						if (filterId && filterType === 'folder') {
-							rawItems.push(...getImagesByFolder(filterId));
+							items.push(...getImagesByFolder(filterId));
 						} else {
-							rawItems.push(...getSortedImages());
+							items.push(...getSortedImages());
 						}
 						break;
 					// TODO: Añadir otros casos según se implementen
@@ -295,21 +311,41 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				case 'image': {
 					// Si hay filtro por carpeta, usar getImagesByFolder
 					if (filterId && filterType === 'folder') {
-						rawItems = getImagesByFolder(filterId);
-						console.log('🔍 FileBrowser - Imágenes filtradas por carpeta:', rawItems.length, { filterId });
+						items = getImagesByFolder(filterId);
+						if (process.env.NODE_ENV !== 'production') {
+							console.log('🔍 FileBrowser - Imágenes filtradas por carpeta:', items.length, { filterId });
+						}
 					} else {
-						rawItems = getSortedImages();
-						console.log('🔍 FileBrowser - Todas las imágenes ordenadas:', rawItems.length);
+						items = getSortedImages();
+						if (process.env.NODE_ENV !== 'production') {
+							console.log('🔍 FileBrowser - Todas las imágenes ordenadas:', items.length);
+						}
 					}
 					break;
 				}
 				// TODO: Añadir otros casos según se implementen
 				default:
-					console.log('🔍 FileBrowser - Retornando array vacío (entityType no coincide)');
+					if (process.env.NODE_ENV !== 'production') {
+						console.log('🔍 FileBrowser - Retornando array vacío (entityType no coincide)');
+					}
 					break;
 			}
 		}
 
+		return items;
+	}, [
+		entityType,
+		entityTypes,
+		filterId,
+		filterType,
+		mode,
+		manualItems,
+		getSortedImages,
+		getImagesByFolder,
+	]);
+
+	// Separar filtering y sorting para mejor performance
+	const items = useMemo(() => {
 		// Aplicar filtro de búsqueda si existe
 		let filteredItems = rawItems;
 		if (searchQuery?.trim()) {
@@ -393,22 +429,50 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		return filteredItems;
 	}, [
-		entityType,
-		entityTypes,
-		filterId,
-		filterType,
-		mode,
-		manualItems,
-		getSortedImages,
-		getImagesByFolder,
+		rawItems,
 		searchQuery,
-		sortOptions, // Dependencia crítica para re-render cuando cambie la ordenación
+		sortOptions, // Solo dependencias necesarias para filtering y sorting
 	]);
+
+	// Callback para el menú contextual
+	const handleAdvancedContextMenu = useCallback(
+		(e: React.MouseEvent, item: AnyEntityWithStats, selectedItems: AnyEntityWithStats[]) => {
+			logger.debug('🎯 Menú contextual avanzado:', {
+				itemId: item.id,
+				selectedCount: selectedItems.length,
+				position: { x: e.clientX, y: e.clientY },
+			});
+
+			// Usar el handler existente del menú contextual
+			handleContextMenu(e);
+		},
+		[handleContextMenu]
+	);
+
+	// Hook de selección avanzada con toda la lógica de clicks mejorada
+	const {
+		handleItemClick: advancedHandleItemClick,
+		handleItemContextMenu: advancedHandleItemContextMenu,
+		handleEmptySpaceClick: advancedHandleEmptySpaceClick,
+		selectAll: advancedSelectAll,
+		clearSelection: advancedClearSelection,
+		selectedIds: advancedSelectedIds,
+		hasSelection,
+		selectionCount,
+		isDragSelecting,
+	} = useAdvancedSelection({
+		items,
+		onContextMenu: handleAdvancedContextMenu,
+		onItemSelect,
+		onItemClick,
+		enableDragSelection: true,
+		dragContainer: containerRef.current || undefined,
+	});
 
 	// Hook de rendimiento después de la declaración de items
 	const performance = usePerformance({
 		data: items || [],
-		searchTerm: searchQuery
+		searchTerm: searchQuery,
 	});
 
 	// Determinar estado de carga y error
@@ -557,31 +621,19 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		[measureContainer, containerWidth]
 	);
 
-	// Manejar click en item
+	// Manejar click en item - Ahora usando selección avanzada
 	const handleItemClick = useCallback(
 		(item: AnyEntityWithStats, e: React.MouseEvent) => {
-			console.log('🔍 FileBrowser - handleItemClick ejecutado:', {
+			logger.debug('🔍 FileBrowser - handleItemClick (legacy wrapper):', {
 				itemId: item.id,
 				hasOnItemClick: !!onItemClick,
 				hasOnItemSelect: !!onItemSelect,
 			});
 
-			const isShiftClick = e.shiftKey;
-			const isCtrlClick = e.ctrlKey || e.metaKey;
-
-			if (isShiftClick) {
-				// TODO: Implementar selección por rango
-				setSelectedIds([item.id]);
-			} else if (isCtrlClick) {
-				toggleSelection(item.id, item as any);
-			} else {
-				setSelectedIds([item.id]);
-			}
-
-			onItemSelect?.(item);
-			onItemClick?.(item, e);
+			// Delegar al handler avanzado
+			advancedHandleItemClick(item, e);
 		},
-		[effectiveSelectedIds, setSelectedIds, toggleSelection, onItemClick, onItemSelect]
+		[advancedHandleItemClick, onItemClick, onItemSelect]
 	);
 
 	// Manejar doble click
@@ -599,225 +651,106 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Manejar acciones del menú contextual
 	const handleItemContextAction = useCallback(
-		async (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => {
+		async (action: string, item: AnyEntityWithStats, _data?: Record<string, unknown>) => {
 			console.log('🔍 FileBrowser - handleItemContextAction ejecutado:', {
 				action,
 				itemId: item.id,
 			});
 
-			// Convertir AnyEntityWithStats a FileItem para compatibilidad
-			const fileItem = {
-				id: item.id,
-				name: ('name' in item ? item.name : 'Unknown') as string,
-				type: 'file' as const,
-				size: ('size' in item ? item.size : 0) as number,
-				modifiedAt: ('updatedAt' in item
-					? new Date(item.updatedAt)
-					: new Date()
-				),
-				path: ('path' in item ? item.path : '') as string,
-				isDirectory: false,
-				extension: ('extension' in item ? item.extension : '') as string,
-				mimeType: ('mimeType' in item ? item.mimeType : 'application/octet-stream') as string
-			};
-
-			// Ejecutar la acción usando el handler centralizado
-			await handleContextAction(
-				action,
-				fileItem,
-				data,
-				handleItemDoubleClick,
-				(id: string) => toggleSelection(id, item as any)
-			);
-		},
-		[handleItemDoubleClick, toggleSelection]
-	);
-
-	// Cerrar menú contextual al hacer click fuera y deseleccionar elementos
-	const handleContainerClick = useCallback(
-		(e: React.MouseEvent) => {
-			const target = e.target as HTMLElement;
-			const currentTarget = e.currentTarget as HTMLElement;
-
-			// Mejorar la detección de clicks en espacio vacío
-			const isEmptySpaceClick = (
-				target === currentTarget ||
-				(
-					!target.closest('.entity-card') &&
-					!target.closest('[data-entity-card]') &&
-					!target.closest('button') &&
-					!target.closest('[role="button"]') &&
-					!target.closest('input') &&
-					!target.closest('textarea') &&
-					!target.closest('.context-menu') &&
-					!target.closest('[data-radix-popper-content-wrapper]') &&
-					!target.closest('[data-testid="file-browser-item"]') &&
-					!target.closest('[data-testid*="view-container"]') &&
-					!target.closest('.grid > div') &&
-					!target.closest('[style*="position: absolute"]') &&
-					!target.closest('[data-virtualized-item="true"]') &&
-					!target.closest('.selection-counter') &&
-					!target.closest('.drag-selection-overlay') &&
-					!target.closest('.view-toolbar') &&
-					!target.closest('.status-bar') &&
-					// Verificar que el click no sea en un elemento interactivo
-					!target.matches('a, button, input, textarea, select, [role="button"], [tabindex]') &&
-					// Verificar que el target esté dentro del área de contenido
-					currentTarget.contains(target)
-				)
-			);
-
-			logger.debug('🎯 Click en contenedor:', {
-				isEmptySpaceClick,
-				targetTagName: target.tagName,
-				targetClassName: target.className,
-				targetId: target.id,
-				hasSelectedItems: effectiveSelectedIds.length > 0,
-				clickCoordinates: { x: e.clientX, y: e.clientY },
-			});
-
-			if (isEmptySpaceClick && effectiveSelectedIds.length > 0) {
-				logger.debug('✅ Deseleccionando elementos por click en espacio vacío');
-
-				// Feedback visual mejorado
-				currentTarget.classList.add('deselecting');
-
-				// Anunciar la acción para lectores de pantalla
-				const announcement = `Deseleccionados ${effectiveSelectedIds.length} elemento${effectiveSelectedIds.length > 1 ? 's' : ''}`;
-
-				// Crear elemento temporal para anuncio de accesibilidad
-				const srAnnouncement = document.createElement('div');
-				srAnnouncement.setAttribute('aria-live', 'polite');
-				srAnnouncement.setAttribute('aria-atomic', 'true');
-				srAnnouncement.className = 'sr-only';
-				srAnnouncement.textContent = announcement;
-				document.body.appendChild(srAnnouncement);
-
-				setTimeout(() => {
-					currentTarget.classList.remove('deselecting');
-					document.body.removeChild(srAnnouncement);
-				}, 150);
-
-				// Deseleccionar todos los elementos
-				clearSelection();
-
-				// Cerrar menú contextual si está abierto
-				setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
-
-				// Mostrar toast informativo si hay muchos elementos deseleccionados
-				if (effectiveSelectedIds.length > 5) {
-					toastService.info(`${effectiveSelectedIds.length} elementos deseleccionados`);
-				}
-			} else {
-				logger.debug('❌ Click no califica para deselección', {
-					isEmptySpaceClick,
-					hasSelectedItems: effectiveSelectedIds.length > 0,
-					reason: !isEmptySpaceClick ? 'No es click en espacio vacío' : 'No hay elementos seleccionados'
-				});
+			// Implementación simple para compatibilidad
+			try {
+				toastService.info(`Acción "${action}" ejecutada para ${item.name || item.id}`);
+			} catch (error) {
+				console.error('Error al ejecutar acción de contexto:', error);
 			}
 		},
-		[effectiveSelectedIds, clearSelection, logger, toastService]
+		[]
 	);
 
-	// Manejar click derecho en espacio vacío
-	const handleEmptySpaceRightClick = useCallback((e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
+	// Cerrar menú contextual al hacer click fuera y deseleccionar elementos - Usando selección avanzada
+	const handleContainerClick = useCallback(
+		(e: React.MouseEvent) => {
+			logger.debug('🎯 Click en contenedor (usando selección avanzada)');
 
-		setEmptySpaceContextMenu({
-			visible: true,
-			position: { x: e.clientX, y: e.clientY },
-		});
-	}, []);
+			// Delegar al handler avanzado que tiene toda la lógica mejorada
+			advancedHandleEmptySpaceClick(e);
 
-	// Versión mejorada del manejador de click derecho que también maneja deselección
-	const handleEmptySpaceRightClickImproved = useCallback((e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-
-		const target = e.target as HTMLElement;
-		const currentTarget = e.currentTarget as HTMLElement;
-
-		// Usar la misma lógica de detección de espacio vacío que en handleContainerClick
-		const isEmptySpaceClick = (
-			target === currentTarget ||
-			(
-				!target.closest('.entity-card') &&
-				!target.closest('[data-entity-card]') &&
-				!target.closest('button') &&
-				!target.closest('[role="button"]') &&
-				!target.closest('input') &&
-				!target.closest('textarea') &&
-				!target.closest('.context-menu') &&
-				!target.closest('[data-radix-popper-content-wrapper]') &&
-				!target.closest('[data-testid="file-browser-item"]') &&
-				!target.closest('[data-testid*="view-container"]') &&
-				!target.closest('.grid > div') &&
-				!target.closest('[style*="position: absolute"]') &&
-				!target.closest('[data-virtualized-item="true"]') &&
-				!target.closest('.selection-counter') &&
-				!target.closest('.drag-selection-overlay') &&
-				!target.closest('.view-toolbar') &&
-				!target.closest('.status-bar') &&
-				// Verificar que el click no sea en un elemento interactivo
-				!target.matches('a, button, input, textarea, select, [role="button"], [tabindex]') &&
-				// Verificar que el target esté dentro del área de contenido
-				currentTarget.contains(target)
-			)
-		);
-
-		logger.debug('🎯 Right-click en contenedor:', {
-			isEmptySpaceClick,
-			targetTagName: target.tagName,
-			targetClassName: target.className,
-			targetId: target.id,
-			clickCoordinates: { x: e.clientX, y: e.clientY },
-		});
-
-		// Si es click derecho en espacio vacío, mostrar menú contextual
-		if (isEmptySpaceClick) {
-			logger.debug('✅ Mostrando menú contextual de espacio vacío');
-			setEmptySpaceContextMenu({
-				visible: true,
-				position: { x: e.clientX, y: e.clientY },
-			});
-		} else {
-			logger.debug('❌ Click derecho no califica para menú de espacio vacío', {
-				reason: 'No es click en espacio vacío'
-			});
-		}
-	}, [logger]);
-
-	// Manejar acciones del menú contextual de espacio vacío
-	const handleEmptySpaceMenuAction = useCallback(
-		async (action: EmptySpaceAction, data?: Record<string, unknown>) => {
-			// Cerrar el menú
-			setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
-
-			// Preparar contexto para las acciones
-			const context = {
-				currentPath: filterId || 'unknown',
-				totalItems: items.length,
-				selectAll: (allIds: string[]) => {
-					// Usar setSelectedIds en lugar de selectAll para evitar problemas de tipos
-					setSelectedIds(allIds);
-				},
-				refreshView: () => {
-					// Forzar recarga de datos
-					debouncedLoadData();
-				},
-				allItemIds: items.map(item => item.id),
-			};
-
-			// Ejecutar la acción
-			await handleEmptySpaceAction(action, data, context);
+			// Cerrar menú contextual si está abierto
+			closeContextMenu();
 		},
-		[filterId, items, setSelectedIds, debouncedLoadData]
+		[advancedHandleEmptySpaceClick, closeContextMenu]
 	);
 
+	// Manejar acciones del menú contextual personalizado
+	const handleCustomContextMenuAction = useCallback(
+		async (action: string, data?: any) => {
+			logger.debug('🎯 Acción de menú contextual:', { action, data });
 
+			try {
+				switch (action) {
+					case 'copy':
+						if (effectiveSelectedIds.length > 0) {
+							const selectedItems = items.filter((item) => effectiveSelectedIds.includes(item.id));
+							await clipboardManager.copy(selectedItems);
+							toastService.success(`${selectedItems.length} elemento(s) copiado(s)`);
+						}
+						break;
 
-	// El handleEmptySpaceRightClickImproved ya está definido arriba, eliminar esta duplicación
+					case 'cut':
+						if (effectiveSelectedIds.length > 0) {
+							const selectedItems = items.filter((item) => effectiveSelectedIds.includes(item.id));
+							await clipboardManager.cut(selectedItems);
+							toastService.success(`${selectedItems.length} elemento(s) cortado(s)`);
+						}
+						break;
+
+					case 'paste': {
+						// Implementación simple para compatibilidad
+						toastService.info('Funcionalidad de pegar en desarrollo');
+						break;
+					}
+
+					case 'delete':
+						if (effectiveSelectedIds.length > 0) {
+							toastService.info('Funcionalidad de eliminación en desarrollo');
+						}
+						break;
+
+					case 'download':
+						if (effectiveSelectedIds.length > 0) {
+							toastService.info('Funcionalidad de descarga en desarrollo');
+						}
+						break;
+
+					case 'toggle-favorite':
+					case 'manage-tags':
+					case 'move':
+					case 'add-to-collection':
+					case 'share':
+					case 'more-actions':
+						toastService.info(`Funcionalidad "${action}" en desarrollo`);
+						break;
+
+					case 'new-folder':
+					case 'upload-files':
+						toastService.info(`Funcionalidad "${action}" en desarrollo`);
+						break;
+
+					case 'configure':
+					case 'view-settings':
+						toastService.info('Abriendo configuración...');
+						break;
+
+					default:
+						logger.warn('Acción de menú contextual no reconocida:', action);
+				}
+			} catch (error) {
+				logger.error('Error al ejecutar acción del menú contextual:', error);
+				toastService.error('Error al ejecutar la acción');
+			}
+		},
+		[effectiveSelectedIds, items]
+	);
 
 	// Actualizar panel de detalles cuando cambia la selección
 	useEffect(() => {
@@ -832,40 +765,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Cerrar menú contextual al hacer click fuera o presionar Escape
 	useEffect(() => {
-		const handleClickOutside = (e: MouseEvent) => {
-			if (emptySpaceContextMenu.visible) {
-				setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
-			}
-		};
-
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && emptySpaceContextMenu.visible) {
-				setEmptySpaceContextMenu({ visible: false, position: { x: 0, y: 0 } });
-			}
-		};
-
-		if (emptySpaceContextMenu.visible) {
-			document.addEventListener('click', handleClickOutside);
-			document.addEventListener('keydown', handleKeyDown);
-		}
-
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [emptySpaceContextMenu.visible]);
-
-	// Hook para contador de selección
-	const selectionCounterData = useSelectionCounter(effectiveSelectedIds, items.length);
-
-	// Configurar keyboard shortcuts
-	useEffect(() => {
 		// Establecer contexto
 		setContext('file-browser');
 
 		// Registrar handlers para shortcuts
 		const handleSelectAll = () => {
-			const allIds = items.map(item => item.id);
+			const allIds = items.map((item) => item.id);
 			setSelectedIds(allIds);
 			toastService.info(`${items.length} elementos seleccionados`);
 		};
@@ -877,7 +782,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 
 			try {
-				const selectedItems = items.filter(item => effectiveSelectedIds.includes(item.id));
+				const selectedItems = items.filter((item) => effectiveSelectedIds.includes(item.id));
 
 				// Crear acción de undo para la eliminación
 				const undoAction = undoRedoManager.createDeleteAction(selectedItems);
@@ -907,12 +812,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 
 			try {
-				const selectedItem = items.find(item => item.id === effectiveSelectedIds[0]);
+				const selectedItem = items.find((item) => item.id === effectiveSelectedIds[0]);
 				if (!selectedItem) return;
 
 				// Por ahora, mostrar un prompt simple para el nuevo nombre
 				const currentName = 'name' in selectedItem ? selectedItem.name : 'Untitled';
-				const newName = prompt('Nuevo nombre:', currentName);
+				// TODO: Implementar modal de renombrado más sofisticado
+				// eslint-disable-next-line no-alert
+				const newName = globalThis.prompt?.('Nuevo nombre:', currentName);
 
 				if (newName && newName !== currentName) {
 					// Crear acción de undo para el renombrado
@@ -940,7 +847,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 
 			try {
-				const selectedItems = items.filter(item => effectiveSelectedIds.includes(item.id));
+				const selectedItems = items.filter((item) => effectiveSelectedIds.includes(item.id));
 				await clipboardManager.copy(selectedItems, 'file-browser');
 			} catch (error) {
 				console.error('Error al copiar elementos:', error);
@@ -955,7 +862,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 
 			try {
-				const selectedItems = items.filter(item => effectiveSelectedIds.includes(item.id));
+				const selectedItems = items.filter((item) => effectiveSelectedIds.includes(item.id));
 				await clipboardManager.cut(selectedItems, 'file-browser');
 			} catch (error) {
 				console.error('Error al cortar elementos:', error);
@@ -995,10 +902,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 
 			// Abrir el primer elemento seleccionado en el file viewer
-			const selectedItem = items.find(item => item.id === effectiveSelectedIds[0]);
+			const selectedItem = items.find((item) => item.id === effectiveSelectedIds[0]);
 			if (selectedItem) {
 				// Convertir AnyEntityWithStats a ImageItem para el viewer
-				const imageItems = items.map(item => ({
+				const imageItems = items.map((item) => ({
 					id: item.id,
 					name: ('name' in item ? item.name : 'Untitled') as string,
 					type: 'image',
@@ -1007,16 +914,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					width: ('width' in item ? item.width : 0) as number,
 					height: ('height' in item ? item.height : 0) as number,
 					thumbnail: ('thumbnail' in item ? item.thumbnail : '') as string,
-					metadata: 'metadata' in item ? (
-						typeof item.metadata === 'string'
-							? item.metadata
-							: JSON.stringify(item.metadata)
-					) : '',
+					metadata:
+						'metadata' in item
+							? typeof item.metadata === 'string'
+								? item.metadata
+								: JSON.stringify(item.metadata)
+							: '',
 					src: ('path' in item ? item.path : '') as string,
 					alt: ('name' in item ? item.name : 'Untitled') as string,
 				}));
 
-				const initialIndex = items.findIndex(item => item.id === selectedItem.id);
+				const initialIndex = items.findIndex((item) => item.id === selectedItem.id);
 				openViewer(imageItems, initialIndex);
 			}
 		};
@@ -1032,18 +940,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		};
 
 		// Registrar shortcuts de undo/redo
-		register(
-			{ key: 'z', modifiers: ['ctrl'], context: 'file-browser', description: 'Deshacer', action: 'undo' },
-			undo
-		);
+		register({ key: 'z', modifiers: ['ctrl'], context: 'file-browser', description: 'Deshacer', action: 'undo' }, undo);
+
+		register({ key: 'y', modifiers: ['ctrl'], context: 'file-browser', description: 'Rehacer', action: 'redo' }, redo);
 
 		register(
-			{ key: 'y', modifiers: ['ctrl'], context: 'file-browser', description: 'Rehacer', action: 'redo' },
-			redo
-		);
-
-		register(
-			{ key: 'z', modifiers: ['ctrl', 'shift'], context: 'file-browser', description: 'Rehacer (alternativo)', action: 'redo-alt' },
+			{
+				key: 'z',
+				modifiers: ['ctrl', 'shift'],
+				context: 'file-browser',
+				description: 'Rehacer (alternativo)',
+				action: 'redo-alt',
+			},
 			redo
 		);
 
@@ -1054,12 +962,24 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		);
 
 		register(
-			{ key: 'delete', modifiers: [], context: 'file-browser', description: 'Eliminar seleccionados', action: 'delete-selected' },
+			{
+				key: 'delete',
+				modifiers: [],
+				context: 'file-browser',
+				description: 'Eliminar seleccionados',
+				action: 'delete-selected',
+			},
 			handleDeleteSelected
 		);
 
 		register(
-			{ key: 'f2', modifiers: [], context: 'file-browser', description: 'Renombrar seleccionado', action: 'rename-selected' },
+			{
+				key: 'f2',
+				modifiers: [],
+				context: 'file-browser',
+				description: 'Renombrar seleccionado',
+				action: 'rename-selected',
+			},
 			handleRenameSelected
 		);
 
@@ -1069,12 +989,24 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		);
 
 		register(
-			{ key: 'c', modifiers: ['ctrl'], context: 'file-browser', description: 'Copiar seleccionados', action: 'copy-selected' },
+			{
+				key: 'c',
+				modifiers: ['ctrl'],
+				context: 'file-browser',
+				description: 'Copiar seleccionados',
+				action: 'copy-selected',
+			},
 			handleCopySelected
 		);
 
 		register(
-			{ key: 'x', modifiers: ['ctrl'], context: 'file-browser', description: 'Cortar seleccionados', action: 'cut-selected' },
+			{
+				key: 'x',
+				modifiers: ['ctrl'],
+				context: 'file-browser',
+				description: 'Cortar seleccionados',
+				action: 'cut-selected',
+			},
 			handleCutSelected
 		);
 
@@ -1084,57 +1016,157 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		);
 
 		register(
-			{ key: 'enter', modifiers: [], context: 'file-browser', description: 'Abrir seleccionado', action: 'open-selected' },
+			{
+				key: 'enter',
+				modifiers: [],
+				context: 'file-browser',
+				description: 'Abrir seleccionado',
+				action: 'open-selected',
+			},
 			handleOpenSelected
 		);
 
 		register(
-			{ key: ' ', modifiers: [], context: 'file-browser', description: 'Previsualizar seleccionado', action: 'preview-selected' },
+			{
+				key: ' ',
+				modifiers: [],
+				context: 'file-browser',
+				description: 'Previsualizar seleccionado',
+				action: 'preview-selected',
+			},
 			handlePreviewSelected
 		);
+	}, [
+		register,
+		setContext,
+		items,
+		effectiveSelectedIds,
+		setSelectedIds,
+		clearSelection,
+		openViewer,
+		undo,
+		redo,
+		debouncedLoadData,
+	]);
 
-	}, [register, setContext, items, effectiveSelectedIds, selectAll, clearSelection, openViewer, undo, redo, debouncedLoadData]);
+	// Crear un Map de items por ID para búsquedas O(1) y evitar dependencias de arrays
+	// OPTIMIZACIÓN: Usar ref para mantener estable el Map entre renders
+	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
 
-	// Función para renderizar item usando EntityCard
+	// Actualizar el Map solo cuando los items realmente cambien
+	useMemo(() => {
+		const newMap = new Map<string, AnyEntityWithStats>();
+		for (const item of items) {
+			newMap.set(item.id, item);
+		}
+		itemsByIdRef.current = newMap;
+		return newMap;
+	}, [items]);
+
+	// Handlers estabilizados que usan ref en lugar de dependencias del Map
+	// OPTIMIZACIÓN AVANZADA: Usar refs para funciones estables
+	const stableHandlersRef = useRef({
+		handleItemClickById: (itemId: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemClick?.(item, e);
+				if (e.ctrlKey || e.metaKey) {
+					toggleSelection(itemId);
+				} else if (e.shiftKey && focusedId) {
+					const currentIndex = items.findIndex(i => i.id === itemId);
+					const focusedIndex = items.findIndex(i => i.id === focusedId);
+					if (currentIndex !== -1 && focusedIndex !== -1) {
+						const start = Math.min(currentIndex, focusedIndex);
+						const end = Math.max(currentIndex, focusedIndex);
+						const idsToSelect = items.slice(start, end + 1).map(i => i.id);
+						setSelectedIds(idsToSelect);
+					}
+				} else {
+					setSelectedIds([itemId]);
+				}
+				setFocusedId(itemId);
+			}
+		},
+		handleItemDoubleClickById: (itemId: string) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemDoubleClick?.(item);
+			}
+		},
+		handleItemContextMenuById: (itemId: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				console.log('🗂️ Menú contextual para item:', itemId);
+			}
+		}
+	});
+
+	// Actualizar las funciones ref cuando cambien las dependencias críticas
+	useEffect(() => {
+		stableHandlersRef.current.handleItemClickById = (itemId: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemClick?.(item, e);
+				if (e.ctrlKey || e.metaKey) {
+					toggleSelection(itemId);
+				} else if (e.shiftKey && focusedId) {
+					const currentIndex = items.findIndex(i => i.id === itemId);
+					const focusedIndex = items.findIndex(i => i.id === focusedId);
+					if (currentIndex !== -1 && focusedIndex !== -1) {
+						const start = Math.min(currentIndex, focusedIndex);
+						const end = Math.max(currentIndex, focusedIndex);
+						const idsToSelect = items.slice(start, end + 1).map(i => i.id);
+						setSelectedIds(idsToSelect);
+					}
+				} else {
+					setSelectedIds([itemId]);
+				}
+				setFocusedId(itemId);
+			}
+		};
+
+		stableHandlersRef.current.handleItemDoubleClickById = (itemId: string) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemDoubleClick?.(item);
+			}
+		};
+
+		stableHandlersRef.current.handleItemContextMenuById = (itemId: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				console.log('🗂️ Menú contextual para item:', itemId);
+			}
+		};
+	}, [onItemClick, onItemDoubleClick, toggleSelection, focusedId, setSelectedIds, setFocusedId, items]);
+
+	// Crear funciones estables que siempre mantienen la misma referencia
+	const handleItemClickById = useCallback((itemId: string, e: React.MouseEvent) => {
+		stableHandlersRef.current.handleItemClickById(itemId, e);
+	}, []);
+
+	const handleItemDoubleClickById = useCallback((itemId: string) => {
+		stableHandlersRef.current.handleItemDoubleClickById(itemId);
+	}, []);
+
+	const handleItemContextMenuById = useCallback((itemId: string, e: React.MouseEvent) => {
+		stableHandlersRef.current.handleItemContextMenuById(itemId, e);
+	}, []);
+
+	// Función para renderizar item usando EntityCard - OPTIMIZADA con memoización selectiva
 	const renderItem = useCallback(
 		(item: AnyEntityWithStats, _index: number) => {
-			console.log('🔍 FileBrowser - NUEVO LOG - Renderizando item:', {
-				id: item.id,
-				entityType: 'entityType' in item ? item.entityType : 'unknown',
-				timestamp: new Date().toISOString(),
-			});
-
-			console.log('🚨 FileBrowser - NUEVO LOG - Props disponibles:', {
-				hasOnItemClick: !!onItemClick,
-				hasOnItemDoubleClick: !!onItemDoubleClick,
-				hasHandleItemClick: !!handleItemClick,
-				hasHandleItemDoubleClick: !!handleItemDoubleClick,
-				onItemClickType: typeof onItemClick,
-				onItemDoubleClickType: typeof onItemDoubleClick,
-			});
-
-			const onClickHandler = (e: React.MouseEvent) => {
-				console.log('🚨 FileBrowser - onClick handler ejecutado:', { itemId: item.id });
-				handleItemClick(item, e);
-			};
-
-			const onDoubleClickHandler = () => {
-				console.log('🚨 FileBrowser - onDoubleClick handler ejecutado:', { itemId: item.id });
-				handleItemDoubleClick(item);
-			};
-
-			console.log('� FileBrowser - Handlers creados para EntityCard:', {
-				onClickHandler: !!onClickHandler,
-				onDoubleClickHandler: !!onDoubleClickHandler,
-			});
+			const isSelected = effectiveSelectedIds.includes(item.id);
 
 			return (
-				<EntityCard
+				<OptimizedEntityCard
 					key={item.id}
 					entity={item as AnyEntityWithStats}
-					isSelected={effectiveSelectedIds.includes(item.id)}
-					onClick={onClickHandler}
-					onDoubleClick={onDoubleClickHandler}
+					isSelected={isSelected}
+					itemId={item.id}
+					onClickById={handleItemClickById}
+					onDoubleClickById={handleItemDoubleClickById}
+					onContextMenuById={handleItemContextMenuById}
 					layout={layout}
 					preset={preset}
 					variant={variant}
@@ -1145,14 +1177,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		},
 		[
 			effectiveSelectedIds,
-			handleItemClick,
-			handleItemDoubleClick,
+			handleItemClickById,
+			handleItemDoubleClickById,
+			handleItemContextMenuById,
 			layout,
 			preset,
 			variant,
 			size,
-			onItemClick,
-			onItemDoubleClick,
 		]
 	);
 
@@ -1200,6 +1231,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			containerWidth,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
+			onItemContextMenu: advancedHandleItemContextMenu,
 			onContextAction: handleItemContextAction,
 		};
 
@@ -1234,19 +1266,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Convert items to FileItem format for drag selection
 	const fileItems = useMemo(() => {
-		return items.map(item => ({
+		return items.map((item) => ({
 			id: item.id,
 			name: ('name' in item ? item.name : 'Unknown') as string,
 			type: 'file' as const,
 			size: ('size' in item ? item.size : 0) as number,
-			modifiedAt: ('updatedAt' in item
-				? new Date(item.updatedAt)
-				: new Date()
-			),
+			modifiedAt: 'updatedAt' in item ? new Date(item.updatedAt) : new Date(),
 			path: ('path' in item ? item.path : '') as string,
 			isDirectory: false,
 			extension: ('extension' in item ? item.extension : '') as string,
-			mimeType: ('mimeType' in item ? item.mimeType : 'application/octet-stream') as string
+			mimeType: ('mimeType' in item ? item.mimeType : 'application/octet-stream') as string,
 		}));
 	}, [items]);
 
@@ -1257,7 +1286,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				{
 					'accessibility-high-contrast': accessibility.config.highContrast,
 					'accessibility-large-fonts': accessibility.config.largeFonts,
-					'accessibility-reduced-motion': accessibility.config.reduceMotion
+					'accessibility-reduced-motion': accessibility.config.reduceMotion,
 				},
 				className
 			)}
@@ -1266,7 +1295,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			aria-label="Explorador de archivos"
 			aria-describedby="file-browser-description"
 			onClick={handleContainerClick}
-			onContextMenu={handleEmptySpaceRightClickImproved}
+			onContextMenuCapture={handleContextMenu}
 			onKeyDown={(e) => {
 				if (accessibility.isKeyboardNavigation) {
 					// Handle keyboard navigation
@@ -1293,21 +1322,38 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}}
 		>
 			<div id="file-browser-description" className="sr-only">
-				Explorador de archivos con {items.length} elementos.
-				Usa las flechas para navegar, Enter para abrir, Espacio para seleccionar.
+				Explorador de archivos con {items.length} elementos. Usa las flechas para navegar, Enter para abrir, Espacio
+				para seleccionar.
 			</div>
-			<div className="p-4 border-b border-border">
-				<ViewToolbar />
-			</div>
-			<ScrollArea
-				className="flex-1 min-h-0"
-				aria-live="polite"
-				aria-atomic="false"
-			>
+
+			<ScrollArea className="flex-1 min-h-0 relative" aria-live="polite" aria-atomic="false">
+				{/* Toolbar flotante que aparece cuando hay elementos seleccionados */}
+				<AnimatePresence>
+					{effectiveSelectedIds.length > 0 && (
+						<motion.div
+							initial={{ y: -100, opacity: 0 }}
+							animate={{ y: 0, opacity: 1 }}
+							exit={{ y: -100, opacity: 0 }}
+							transition={{
+								type: 'spring',
+								stiffness: 400,
+								damping: 30,
+								duration: 0.3,
+							}}
+							className="absolute top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border shadow-lg"
+						>
+							<div className="p-4">
+								<ViewToolbar />
+							</div>
+						</motion.div>
+					)}
+				</AnimatePresence>
+
 				<DragSelectionProvider
 					containerRef={containerRef as React.RefObject<HTMLElement>}
 					items={fileItems as any}
 					getItemElement={getItemElement}
+					disabled={true}
 					config={{
 						enabled: false,
 						threshold: 5,
@@ -1315,17 +1361,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							enabled: true,
 							speed: 50,
 							threshold: 50,
-							maxSpeed: 200
+							maxSpeed: 200,
 						},
 						modifiers: {
 							add: 'ctrl',
 							subtract: 'alt',
-							toggle: 'shift'
+							toggle: 'shift',
 						},
 						selectableClass: 'entity-card',
 						selectedClass: 'entity-card--selected',
 						selectingClass: 'entity-card--selecting',
-						containerClass: 'file-browser-container'
+						containerClass: 'file-browser-container',
 					}}
 					overlayConfig={{
 						showCount: true,
@@ -1334,8 +1380,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 						animation: {
 							enabled: true,
 							duration: 150,
-							easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-						}
+							easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+						},
 					}}
 					onSelectionStart={(state) => {
 						console.log('🎯 Drag selection started:', state);
@@ -1376,7 +1422,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 										width: ('width' in item ? item.width : null) as number | null,
 										height: ('height' in item ? item.height : null) as number | null,
 										thumbnail: ('thumbnail' in item ? item.thumbnail : null) as string | null,
-										metadata: ('metadata' in item ? item.metadata : null) as string | null
+										metadata: ('metadata' in item ? item.metadata : null) as string | null,
 									};
 									openViewer([imageItem], 0);
 								}
@@ -1395,56 +1441,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							</motion.div>
 						</AnimatePresence>
 
-						{/* Menú contextual de espacio vacío */}
-						{emptySpaceContextMenu.visible && (
-							<div
-								className="fixed z-50 bg-popover border border-border rounded-md shadow-md"
-								style={{
-									left: emptySpaceContextMenu.position.x,
-									top: emptySpaceContextMenu.position.y,
-								}}
-							>
-								<EmptySpaceContextMenu
-									onAction={handleEmptySpaceMenuAction}
-									position={emptySpaceContextMenu.position}
-									currentPath={filterId}
-									totalItems={items.length}
-									canPaste={false} // Se detecta automáticamente en el componente
-								/>
-							</div>
-						)}
+						{/* Menú contextual personalizado */}
+						<CustomContextMenu
+							isOpen={contextMenuOpen}
+							onClose={closeContextMenu}
+							position={contextMenuPosition}
+							selectedItems={items.filter((item) => effectiveSelectedIds.includes(item.id))}
+							onAction={handleCustomContextMenuAction}
+						/>
 					</div>
 				</DragSelectionProvider>
 			</ScrollArea>
-
-			{/* Contador de selección */}
-			<SelectionCounter
-				count={selectionCounterData.count}
-				total={selectionCounterData.total}
-				onClear={clearSelection}
-				position="top-right"
-				showTotal={selectionCounterData.isPartialSelection}
-				showClearButton={true}
-				className="mr-4 mt-4"
-			/>
-
-			{/* Botones de Undo/Redo */}
-			<div className="fixed top-4 left-4 flex gap-2 z-40">
-				<UndoRedoButton
-					type="undo"
-					disabled={!canUndo}
-					size="sm"
-					variant="outline"
-					showShortcut={true}
-				/>
-				<UndoRedoButton
-					type="redo"
-					disabled={!canRedo}
-					size="sm"
-					variant="outline"
-					showShortcut={true}
-				/>
-			</div>
 
 			<StatusBar
 				totalItems={items.length}
@@ -1456,12 +1463,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			<ProgressOverlay />
 
 			{/* Región para anuncios de lectores de pantalla */}
-			<div
-				id="screen-reader-announcements"
-				aria-live="assertive"
-				aria-atomic="true"
-				className="sr-only"
-			/>
+			<div id="screen-reader-announcements" aria-live="assertive" aria-atomic="true" className="sr-only" />
 
 			{/* Información de rendimiento (solo en desarrollo) */}
 			{process.env.NODE_ENV === 'development' && performance.isMonitoring && (

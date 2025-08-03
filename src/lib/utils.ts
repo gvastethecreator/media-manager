@@ -1,42 +1,12 @@
-import { type ClassValue, clsx } from 'clsx';
+import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { deepMerge } from './utils/object-utils';
-
-export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
-}
-
-// Re-exportar deepMerge desde object-utils
-export { deepMerge };
-
-// Re-exportar funciones de formato desde format.utils
-export { formatFileSize, formatDuration, formatDate, formatBytes } from './utils/format.utils';
 
 /**
- * Convierte un buffer a una cadena base64 con el formato adecuado para usar como src de imagen
- * @param buffer Buffer a convertir
- * @param mimeType Tipo MIME para usar en el data URL
- * @returns Cadena base64 con el formato data:image/[tipo];base64,[datos]
+ * Merges Tailwind class names, resolving any conflicts.
+ *
+ * @param inputs - An array of class names to merge.
+ * @returns A string of merged and optimized class names.
  */
-export function bufferToBase64Image(buffer: Buffer | null | undefined, mimeType = 'image/webp'): string | null {
-	if (!buffer) {
-		return null;
-	}
-
-	try {
-		// Asegurarnos de que estamos tratando con un Buffer
-		if (Buffer.isBuffer(buffer)) {
-			return `data:${mimeType};base64,${buffer.toString('base64')}`;
-		}
-		if (typeof buffer === 'object') {
-			// Intentar convertir un objeto similar a buffer
-			return `data:${mimeType};base64,${Buffer.from(buffer).toString('base64')}`;
-		}
-		return null;
-	} catch (error) {
-		console.error('Error al convertir buffer a base64:', error);
-		return null;
-	}
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }
-
-// formatDate se ha movido a @/lib/utils/format.utils.ts para evitar duplicación

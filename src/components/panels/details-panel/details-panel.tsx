@@ -8,13 +8,12 @@ import { es } from 'date-fns/locale';
 import { Calendar, Cpu, FileImage, HardDrive, Info, Package } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useFolder } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { AnyEntityWithStats, getEntityStatistics, getEntityStatsType } from '@/types/migration';
-
+import { MultiSelectionDetails } from './entities/multi-selection-details';
 // Importar el sistema de registry
 import { entityDetailsRegistry } from './entity-details-registry';
 import { useEntityActions } from './integration-hook';
@@ -28,22 +27,24 @@ interface DetailsPanelV2Props {
 
 // Componente memoizado para una entidad usando el registry
 const EntityDetailsView = memo<{ item: AnyEntityWithStats }>(function EntityDetailsView({ item }) {
+	const { handleAction } = useEntityActions();
 	const type = getEntityStatsType(item);
+
 	if (type === null) {
 		return (
-			<div className="p-4 text-center text-muted-foreground">
+			<div className="p-2 text-center text-muted-foreground">
 				<p>Tipo de entidad no reconocido</p>
 				<BasicInfoSection item={item} />
 			</div>
 		);
 	}
+
 	const config = entityDetailsRegistry.getConfig(type);
-	const { handleAction } = useEntityActions();
 
 	if (!config) {
 		// Fallback para tipos no registrados
 		return (
-			<div className="p-4 text-center text-muted-foreground">
+			<div className="p-2 text-center text-muted-foreground">
 				<p>Tipo de entidad no soportado: {type}</p>
 				<BasicInfoSection item={item} />
 			</div>
@@ -58,18 +59,14 @@ const EntityDetailsView = memo<{ item: AnyEntityWithStats }>(function EntityDeta
 	} = config;
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-3">
 			{/* Vista previa */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm">Vista Previa</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="aspect-video bg-muted/30 rounded-lg overflow-hidden">
-						<PreviewComponent entity={item} size="lg" showControls={true} onAction={handleAction} />
-					</div>
-				</CardContent>
-			</Card>
+			<div>
+				<h3 className="text-sm font-medium mb-2">Vista Previa</h3>
+				<div className="aspect-video bg-muted/30 rounded-lg overflow-hidden">
+					<PreviewComponent entity={item} size="lg" showControls={true} onAction={handleAction} />
+				</div>
+			</div>
 
 			{/* Componente de detalles específico */}
 			<DetailsComponent entity={item} isSelected={true} onAction={handleAction} />
@@ -181,72 +178,6 @@ const BasicInfoSection = memo<{ item: AnyEntityWithStats }>(function BasicInfoSe
 	);
 });
 
-// Vista de selección múltiple simplificada
-const MultipleSelectionView = memo<{ items: AnyEntityWithStats[] }>(function MultipleSelectionView({ items }) {
-	const itemsByType = useMemo(() => {
-		const groups: Record<string, AnyEntityWithStats[]> = {};
-		for (const item of items) {
-			const type = getEntityStatsType(item);
-			if (!type) continue;
-			if (!groups[type]) {
-				groups[type] = [];
-			}
-			groups[type].push(item);
-		}
-		return groups;
-	}, [items]);
-
-	return (
-		<div className="space-y-4">
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-sm">Selección Múltiple ({items.length} elementos)</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-3">
-					{Object.entries(itemsByType).map(([type, typeItems]) => (
-						<div key={type} className="flex items-center justify-between text-sm">
-							<span className="capitalize">{type}</span>
-							<span className="font-medium">{typeItems.length}</span>
-						</div>
-					))}
-				</CardContent>
-			</Card>
-
-			{/* Grid de previews */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-sm">Vista Previa</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="grid grid-cols-3 gap-2">
-						{items
-							.slice(0, 9)
-							.map((item) => {
-								const type = getEntityStatsType(item);
-								if (!type) return null;
-								const config = entityDetailsRegistry.getConfig(type);
-								if (!config) return null;
-
-								const { previewComponent: PreviewComponent } = config;
-								if (!PreviewComponent) return null;
-
-								return (
-									<div key={item.id} className="aspect-square rounded overflow-hidden bg-muted/30">
-										<PreviewComponent entity={item} size="sm" showControls={false} onAction={() => { }} />
-									</div>
-								);
-							})
-							.filter(Boolean)}
-					</div>
-					{items.length > 9 && (
-						<p className="text-xs text-muted-foreground mt-2 text-center">+{items.length - 9} elementos más</p>
-					)}
-				</CardContent>
-			</Card>
-		</div>
-	);
-});
-
 // Componente principal del panel
 export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2({ selectedItems, className }) {
 	const hasItems = selectedItems.length > 0;
@@ -261,9 +192,9 @@ export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2(
 		// Si no hay elementos seleccionados pero hay una carpeta actual, mostrar detalles de la carpeta
 		if (currentFolder && currentFolderId) {
 			return (
-				<div className={cn('w-80 border-l bg-background', className)}>
+				<div className={cn('w-full border-l bg-background', className)}>
 					<ScrollArea className="h-full">
-						<div className="p-4">
+						<div className="p-2">
 							<EntityDetailsView item={currentFolder as AnyEntityWithStats} />
 						</div>
 					</ScrollArea>
@@ -273,10 +204,10 @@ export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2(
 
 		// Estado vacío por defecto
 		return (
-			<div className={cn('w-80 border-l bg-background', className)}>
+			<div className={cn('w-full border-l bg-background', className)}>
 				<div className="flex items-center justify-center h-full text-muted-foreground">
 					<div className="text-center">
-						<FileImage className="h-12 w-12 mx-auto mb-4 opacity-50" />
+						<FileImage className="h-10 w-10 mx-auto mb-3 opacity-50" />
 						<p className="text-sm">Selecciona un elemento para ver sus detalles</p>
 					</div>
 				</div>
@@ -285,10 +216,10 @@ export const DetailsPanelV2 = memo<DetailsPanelV2Props>(function DetailsPanelV2(
 	}
 
 	return (
-		<div className={cn('w-80 border-l bg-background', className)}>
+		<div className={cn('w-full border-l bg-background', className)}>
 			<ScrollArea className="h-full">
-				<div className="p-4">
-					{singleItem ? <EntityDetailsView item={singleItem} /> : <MultipleSelectionView items={selectedItems} />}
+				<div className="p-2">
+					{singleItem ? <EntityDetailsView item={singleItem} /> : <MultiSelectionDetails items={selectedItems} />}
 				</div>
 			</ScrollArea>
 		</div>

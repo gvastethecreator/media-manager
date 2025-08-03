@@ -1,41 +1,41 @@
 import {
-	Archive,
-	ArrowDown,
-	ArrowRight,
-	ArrowUp,
-	BookImage,
-	Box,
-	Calendar,
-	Camera,
-	Clock,
-	Copy,
-	Download,
-	Edit,
-	FileText,
-	FolderIcon,
-	FolderSearch,
-	GalleryHorizontal,
-	Grid,
-	ImageIcon,
-	Info,
-	LayoutGrid,
-	List,
-	MapPin,
-	PanelLeftClose,
-	PanelLeftOpen,
-	PanelRightClose,
-	PanelRightOpen,
-	Plus,
-	RefreshCw,
-	Search,
-	Share2,
-	Star,
-	TagIcon,
-	Trash2,
-	User2,
-	X,
-	ZoomIn,
-	ZoomOut,
+    Archive,
+    ArrowDown,
+    ArrowRight,
+    ArrowUp,
+    BookImage,
+    Box,
+    Calendar,
+    Camera,
+    Clock,
+    Copy,
+    Download,
+    Edit,
+    FileText,
+    FolderIcon,
+    FolderSearch,
+    GalleryHorizontal,
+    Grid,
+    ImageIcon,
+    Info,
+    LayoutGrid,
+    List,
+    MapPin,
+    PanelLeftClose,
+    PanelLeftOpen,
+    PanelRightClose,
+    PanelRightOpen,
+    Plus,
+    RefreshCw,
+    Search,
+    Share2,
+    Star,
+    TagIcon,
+    Trash2,
+    User2,
+    X,
+    ZoomIn,
+    ZoomOut,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
@@ -45,6 +45,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ViewType } from '@/components/views/types';
+import { useDebouncedViewMode } from '@/hooks/use-debounced-view-mode';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
@@ -91,6 +92,9 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const setSearchQuery = useViewOptionsStore((state: any) => state.setSearchQuery);
 	const itemSize = useViewOptionsStore((state: any) => state.itemSize);
 	const setItemSize = useViewOptionsStore((state: any) => state.setItemSize);
+
+	// Crear versión debounced del setViewMode para mejorar performance
+	const { setViewMode: setViewModeDebounced } = useDebouncedViewMode();
 
 	// 🔄 Store de selección
 	const selectedIds = useSelectionStore((state: any) => state.selectedIds);
@@ -350,7 +354,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('masonry')}
+				onClick={() => setViewModeDebounced('masonry')}
 				title="Vista de mosaico"
 				data-active={viewMode === 'masonry'}
 			>

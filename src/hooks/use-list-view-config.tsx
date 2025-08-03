@@ -25,29 +25,34 @@ export function useListViewConfig() {
 
 	// Configuración actual del ListView
 	const listViewConfig = useMemo(() => {
-		const config = settings?.fileViews?.listView;
+		// Ajuste tipado: la rama de settings puede no tener fileViews.
+		const config = (settings as any)?.fileViews?.listView as Partial<ListViewConfig> | undefined;
 		if (!config) {
 			return DEFAULT_LIST_VIEW_CONFIG;
 		}
-
 		// Merge con configuración por defecto
 		return {
 			...DEFAULT_LIST_VIEW_CONFIG,
 			...config,
 		} as ListViewConfig;
-	}, [settings?.fileViews?.listView]);
+	}, [settings]);
 
 	// Actualizar configuración de ListView
 	const updateListViewConfig = useCallback(async (updates: Partial<ListViewConfig>) => {
-		await updateSettings({
+		// Asegurar estructura al actualizar evitando error de propiedad desconocida
+		const next = {
+			...(settings as any),
 			fileViews: {
+				...((settings as any)?.fileViews || {}),
 				listView: {
 					...listViewConfig,
 					...updates,
 				},
 			},
-		});
-	}, [listViewConfig, updateSettings]);
+		};
+		// Algunos stores aceptan función o valor directo; aquí forzamos valor directo
+		await updateSettings(next as any);
+	}, [listViewConfig, updateSettings, settings]);
 
 	// Actualizar configuración de columnas
 	const updateColumnConfig = useCallback(async (columnKey: string, updates: Partial<ListColumnConfig>) => {
