@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing';
+// import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing'; // Deshabilitado temporalmente
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -22,47 +22,67 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 	const isLoading = useImageStore((s) => s.isLoading);
 	const error = useImageStore((s) => s.error);
 	const loadImages = useImageStore((s) => s.loadImages);
-	const getSortedImages = useImageStore((s) => s.getSortedImages);
 
-	// Hook para indexación automática de carpetas
-	const { status, isIndexing, progress, startIndexing } = useAutoFolderIndexing({
-		autoStart: true,
-		maxFoldersPerBatch: 3,
-		onIndexingStart: () => {
-			viewLogger.info('🔄 Iniciando indexación automática de carpetas');
-		},
-		onIndexingComplete: (status) => {
-			viewLogger.info(`✅ Indexación completada: ${status.indexedFolders} carpetas procesadas`);
-			// Recargar imágenes después de la indexación
-			loadImages({ refresh: true });
-		},
-		onProgress: (status) => {
-			viewLogger.debug(`📊 Progreso de indexación: ${status.indexedFolders}/${status.totalFolders}`);
-		},
-	});
+	// Calcular la cantidad de imágenes
+	const imageCount = Object.keys(imagesRecord || {}).length;
+
+	// 🚀 PERFORMANCE FIX: Crear sorted images de manera estable usando useMemo
+	const sortedImages = useMemo(() => {
+		const images = Object.values(imagesRecord || {});
+
+		// Solo crear nuevo array si hay imágenes
+		if (images.length === 0) return [];
+
+		// Ordenar sin mutar el array original
+		return images.slice().sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+	}, [imagesRecord]); // Solo depende del record de imágenes
+
+	// Auto-indexing deshabilitado temporalmente para evitar loops infinitos
+	// TODO: Re-habilitar una vez corregido el problema de re-renders
+	// const { status, isIndexing, progress, startIndexing } = useAutoFolderIndexing({
+	//   autoStart: true,
+	//   maxFoldersPerBatch: 2,
+	//   checkInterval: 5 * 60 * 1000, // 5 minutos
+	//   onIndexingComplete: (status) => {
+	//     logger.info('✅ Auto-indexing completado:', status);
+	//   },
+	// });
+
+	// Valores por defecto mientras auto-indexing está deshabilitado
+	const status = {
+		isIndexing: false,
+		indexedFolders: 0,
+		totalFolders: 0,
+		currentFolder: null,
+		errors: [],
+	};
+	const isIndexing = false;
+	const progress = 0;
+	const startIndexing = () => {
+		viewLogger.info('Auto-indexing está temporalmente deshabilitado');
+	};
+
+	// Flag para controlar si ya se intentó cargar las imágenes
+	const hasTriedToLoad = useRef(false);
 
 	useEffect(() => {
 		console.log('🔍 DEBUG AllImagesView: useEffect ejecutado');
-		console.log('🔍 DEBUG AllImagesView: imagesRecord:', imagesRecord);
-		console.log('🔍 DEBUG AllImagesView: Object.keys(imagesRecord).length:', Object.keys(imagesRecord || {}).length);
+		console.log('🔍 DEBUG AllImagesView: imageCount:', imageCount);
+		console.log('🔍 DEBUG AllImagesView: hasTriedToLoad:', hasTriedToLoad.current);
 
-		if (!imagesRecord || Object.keys(imagesRecord).length === 0) {
+		// Solo cargar la primera vez cuando el componente se monta
+		if (!hasTriedToLoad.current && imageCount === 0 && !isLoading) {
+			hasTriedToLoad.current = true;
 			console.log('🚀 DEBUG AllImagesView: Store de imágenes vacío, llamando loadImages()');
 			viewLogger.info('Store de imágenes vacío, cargando desde el servidor...');
 			loadImages();
 		} else {
-			console.log('✅ DEBUG AllImagesView: Store ya tiene imágenes, no cargando');
+			console.log('✅ DEBUG AllImagesView: Ya se intentó cargar o no es necesario');
 		}
-	}, [loadImages, imagesRecord]);
+	}, [imageCount, isLoading, loadImages]); // Dependencias necesarias
 
 	const navigate = useNavigate();
 	const { openViewer } = useImageViewer();
-
-	// Cachear el resultado de getSortedImages
-	const sortedImages = useMemo(() => {
-		const images = getSortedImages();
-		return Array.isArray(images) ? images : [];
-	}, [getSortedImages]);
 
 	const handleImageClick = useCallback((item: AnyEntityWithStats) => {
 		// Verificar que sea una imagen usando type guard

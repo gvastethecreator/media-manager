@@ -3,14 +3,14 @@
  * @description Componente que muestra botones de acción al hacer hover sobre las tarjetas
  */
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
-import type { AnyEntityWithStats } from '@/types/migration';
-import type { CardActionButton } from '@/types/file-browser/cards-view-config';
+import { AnimatePresence, motion } from 'motion/react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import type { CardActionButton } from '@/types/file-browser/cards-view-config';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface CardActionButtonsProps {
 	/** Entidad sobre la que actuar */
@@ -23,22 +23,20 @@ interface CardActionButtonsProps {
 	animationDuration?: number;
 }
 
-export function CardActionButtons({
-	entity,
-	visible,
-	actionButtons,
-	animationDuration = 300,
-}: CardActionButtonsProps) {
+export function CardActionButtons({ entity, visible, actionButtons, animationDuration = 300 }: CardActionButtonsProps) {
 	// Agrupar botones por posición
 	const buttonsByPosition = actionButtons
-		.filter(btn => btn.visible)
-		.reduce((acc, button) => {
-			if (!acc[button.position]) {
-				acc[button.position] = [];
-			}
-			acc[button.position].push(button);
-			return acc;
-		}, {} as Record<string, CardActionButton[]>);
+		.filter((btn) => btn.visible)
+		.reduce(
+			(acc, button) => {
+				if (!acc[button.position]) {
+					acc[button.position] = [];
+				}
+				acc[button.position].push(button);
+				return acc;
+			},
+			{} as Record<string, CardActionButton[]>
+		);
 
 	const getPositionClasses = (position: string) => {
 		switch (position) {
@@ -120,42 +118,43 @@ export function CardActionButtons({
 	return (
 		<TooltipProvider delayDuration={200}>
 			<AnimatePresence>
-				{visible && Object.entries(buttonsByPosition).map(([position, buttons]) => (
-					<motion.div
-						key={position}
-						className={cn(
-							'absolute z-20 flex gap-1',
-							getPositionClasses(position),
-							position.includes('left') ? 'flex-row' : 'flex-row-reverse',
-							position.includes('top') ? 'flex-col' : 'flex-col-reverse'
-						)}
-						variants={getAnimationVariants(position)}
-						initial="initial"
-						animate="animate"
-						exit="exit"
-						transition={{
-							duration: animationDuration / 1000,
-							staggerChildren: 0.05,
-						}}
-					>
-						{buttons.map((button, index) => (
-							<motion.div
-								key={button.id}
-								variants={{
-									initial: { opacity: 0, scale: 0.5 },
-									animate: { opacity: 1, scale: 1 },
-									exit: { opacity: 0, scale: 0.5 },
-								}}
-								transition={{
-									delay: index * 0.05,
-									duration: animationDuration / 1000,
-								}}
-							>
-								{renderActionButton(button, index)}
-							</motion.div>
-						))}
-					</motion.div>
-				))}
+				{visible &&
+					Object.entries(buttonsByPosition).map(([position, buttons]) => (
+						<motion.div
+							key={position}
+							className={cn(
+								'absolute z-20 flex gap-1',
+								getPositionClasses(position),
+								position.includes('left') ? 'flex-row' : 'flex-row-reverse',
+								position.includes('top') ? 'flex-col' : 'flex-col-reverse'
+							)}
+							variants={getAnimationVariants(position)}
+							initial="initial"
+							animate="animate"
+							exit="exit"
+							transition={{
+								duration: animationDuration / 1000,
+								staggerChildren: 0.05,
+							}}
+						>
+							{buttons.map((button, index) => (
+								<motion.div
+									key={button.id}
+									variants={{
+										initial: { opacity: 0, scale: 0.5 },
+										animate: { opacity: 1, scale: 1 },
+										exit: { opacity: 0, scale: 0.5 },
+									}}
+									transition={{
+										delay: index * 0.05,
+										duration: animationDuration / 1000,
+									}}
+								>
+									{renderActionButton(button, index)}
+								</motion.div>
+							))}
+						</motion.div>
+					))}
 			</AnimatePresence>
 		</TooltipProvider>
 	);

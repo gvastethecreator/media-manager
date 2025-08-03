@@ -5,6 +5,7 @@ import { AllImagesView } from '@/components/views/all-images/all-images-view';
 import { DashboardView } from '@/components/views/dashboard/dashboard-view';
 import DevelopmentContentView from '@/components/views/development/development-content-view';
 import { File3DContentView as File3DDetailView } from '@/components/views/file3d/file-3d-content-view';
+import { FilesView } from '@/components/views/files/files-view';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
 import FoldersView from '@/components/views/folders/folders-view';
 import ImageDetailView from '@/components/views/images/image-detail-view';
@@ -98,12 +99,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'files',
-				element: (
-					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Archivos</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <FilesView className="h-full" />,
 			},
 			{
 				path: 'all-images',

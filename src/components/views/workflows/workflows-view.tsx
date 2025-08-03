@@ -40,11 +40,11 @@ export function WorkflowsView() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [isLoading]);
+	}, []); // Sin dependencias para evitar recreaciones innecesarias
 
 	useEffect(() => {
 		loadWorkflows();
-	}, [loadWorkflows]);
+	}, []); // Solo ejecutar al montar el componente
 
 	const { toast } = useToast();
 	const handleCreateWorkflow = useCallback(async () => {

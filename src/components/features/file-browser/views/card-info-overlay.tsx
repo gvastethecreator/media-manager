@@ -3,11 +3,11 @@
  * @description Componente que muestra información adicional al hacer hover sobre las tarjetas
  */
 
-import { motion, AnimatePresence } from 'framer-motion';
-import type { AnyEntityWithStats } from '@/types/migration';
-import { formatFileSize, formatDate } from '@/lib/utils/format.utils';
+import { AnimatePresence, motion } from 'motion/react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { formatDate, formatFileSize } from '@/lib/utils/format.utils';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface CardInfoOverlayProps {
 	/** Entidad sobre la que mostrar información */
@@ -141,17 +141,15 @@ export function CardInfoOverlay({
 					transition={{ duration: animationDuration / 1000 }}
 				>
 					{/* Información básica */}
-					<div className="space-y-1">
-						{getEntityMetadata().map(({ key, value }) => renderMetadataItem(key, value))}
-					</div>
+					<div className="space-y-1">{getEntityMetadata().map(({ key, value }) => renderMetadataItem(key, value))}</div>
 
 					{/* Etiquetas */}
 					{getEntityTags().length > 0 && (
 						<div className="mt-2 pt-2 border-t border-white/20">
 							<div className="flex flex-wrap gap-1">
-								{getEntityTags().map((tag, index) => (
+								{getEntityTags().map((tag) => (
 									<Badge
-										key={index}
+										key={typeof tag === 'string' ? tag : String(tag)}
 										variant="secondary"
 										className={cn(
 											'text-xs px-1.5 py-0.5',
@@ -173,10 +171,7 @@ export function CardInfoOverlay({
 							<div className="text-xs">
 								<span className="text-muted-foreground">Colección:</span>
 								<span className="ml-1 font-medium">
-									{Array.isArray(entity.collections)
-										? entity.collections[0]
-										: entity.collections
-									}
+									{Array.isArray(entity.collections) ? entity.collections[0] : entity.collections}
 								</span>
 							</div>
 						</div>

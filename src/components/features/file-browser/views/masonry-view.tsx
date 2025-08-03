@@ -3,17 +3,12 @@
  * @module components/features/file-browser/views/masonry-view
  */
 
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EntityCard } from '@/components/cards/entity-card';
-import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { FileContextMenu } from '@/components/features/file-browser/context-menu/context-menu';
-import { handleContextAction } from '@/components/features/file-browser/context-menu';
-import { entityToFileItem } from '@/types/file-browser/file-item';
+import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { useMasonryViewConfig } from '@/hooks/use-masonry-view-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
-import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
 
 interface MasonryViewProps {
 	items: AnyEntityWithStats[];
@@ -21,7 +16,6 @@ interface MasonryViewProps {
 	containerWidth: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
-	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 }
 
 interface MasonryItemProps {
@@ -35,60 +29,47 @@ interface MasonryItemProps {
 	};
 	isSelected: boolean;
 	itemIndex: number;
-	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: AnyEntityWithStats) => void;
-	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
+	onItemClickById: (id: string, e: React.MouseEvent) => void;
+	onItemDoubleClickById: (id: string) => void;
 }
 
-// Componente interno memoizado para cada item
+// Componente interno memoizado para cada item con optimizaciones avanzadas
 const MasonryItem = memo<MasonryItemProps>(function MasonryItem({
 	layoutItem,
 	isSelected,
 	itemIndex,
-	onItemClick,
-	onItemDoubleClick,
-	onContextAction,
+	onItemClickById,
+	onItemDoubleClickById,
 }) {
 	const { config } = useMasonryViewConfig();
 
+	// OPTIMIZACIÓN: Estabilizar handlers con dependencias mínimas
 	const handleClick = useCallback(
 		(e: React.MouseEvent) => {
 			e.stopPropagation();
-			onItemClick(layoutItem.item, e);
+			onItemClickById(layoutItem.item.id, e);
 		},
-		[layoutItem.item, onItemClick]
+		[layoutItem.item.id, onItemClickById]
 	);
 
 	const handleDoubleClick = useCallback(() => {
-		onItemDoubleClick(layoutItem.item);
-	}, [layoutItem.item, onItemDoubleClick]);
+		onItemDoubleClickById(layoutItem.item.id);
+	}, [layoutItem.item.id, onItemDoubleClickById]);
 
+	// OPTIMIZACIÓN: Memoizar clases CSS para evitar recálculos innecesarios
 	const itemClasses = useMemo(() => {
 		const baseClasses = 'absolute cursor-pointer transition-all duration-200';
-		const hoverClasses = config.hoverEffects
-			? 'hover:z-10 hover:scale-105 hover:rotate-1'
-			: '';
-		const shadowClasses = config.showShadows
-			? 'shadow-sm hover:shadow-lg'
-			: '';
-		const roundedClasses = config.roundedCorners
-			? 'rounded-lg overflow-hidden'
-			: '';
-		const selectionClasses = isSelected && config.showSelectionIndicators
-			? 'ring-2 ring-primary ring-offset-2'
-			: '';
+		const hoverClasses = config.hoverEffects ? 'hover:z-10 hover:scale-105 hover:rotate-1' : '';
+		const shadowClasses = config.showShadows ? 'shadow-sm hover:shadow-lg' : '';
+		const roundedClasses = config.roundedCorners ? 'rounded-lg overflow-hidden' : '';
+		const selectionClasses = isSelected && config.showSelectionIndicators ? 'ring-2 ring-primary ring-offset-2' : '';
 
-		return cn(
-			baseClasses,
-			hoverClasses,
-			shadowClasses,
-			roundedClasses,
-			selectionClasses
-		);
-	}, [config, isSelected]);
+		return cn(baseClasses, hoverClasses, shadowClasses, roundedClasses, selectionClasses);
+	}, [config.hoverEffects, config.showShadows, config.roundedCorners, config.showSelectionIndicators, isSelected]);
 
+	// OPTIMIZACIÓN: Solo calcular transición si las animaciones están habilitadas
 	const transition = useMemo(() => {
-		if (!config.animationsEnabled) return {};
+		if (!config.animationsEnabled) return undefined;
 
 		return {
 			duration: config.animationDuration / 1000,
@@ -99,53 +80,73 @@ const MasonryItem = memo<MasonryItemProps>(function MasonryItem({
 		};
 	}, [config.animationsEnabled, config.animationDuration, itemIndex]);
 
+	// OPTIMIZACIÓN: Memoizar props de posición y tamaño
+	const style = useMemo(() => ({
+		left: `${layoutItem.x}px`,
+		top: `${layoutItem.y}px`,
+		width: `${layoutItem.width}px`,
+		height: `${layoutItem.height}px`,
+	}), [layoutItem.x, layoutItem.y, layoutItem.width, layoutItem.height]);
+
+	// OPTIMIZACIÓN: Solo usar motion.div si las animaciones están habilitadas
+	if (!config.animationsEnabled) {
+		return (
+			<div
+				className={itemClasses}
+				style={style}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+			>
+				<OptimizedEntityCard
+					entity={layoutItem.item}
+					layout="vertical"
+					size="md"
+					isSelected={isSelected}
+					compact={false}
+					className="w-full h-full"
+					itemId={layoutItem.item.id}
+					onClickById={onItemClickById}
+					onDoubleClickById={onItemDoubleClickById}
+				/>
+			</div>
+		);
+	}
+
 	return (
 		<motion.div
-			initial={config.animationsEnabled ? { opacity: 0, y: 30, scale: 0.8 } : false}
-			animate={config.animationsEnabled ? { opacity: 1, y: 0, scale: 1 } : false}
+			initial={{ opacity: 0, y: 30, scale: 0.8 }}
+			animate={{ opacity: 1, y: 0, scale: 1 }}
 			transition={transition}
 			className={itemClasses}
-			style={{
-				left: `${layoutItem.x}px`,
-				top: `${layoutItem.y}px`,
-				width: `${layoutItem.width}px`,
-				height: `${layoutItem.height}px`,
-			}}
+			style={style}
+			onClick={handleClick}
+			onDoubleClick={handleDoubleClick}
 		>
-			<ContextMenu>
-				<ContextMenuTrigger asChild>
-					<EntityCard
-						entity={layoutItem.item}
-						layout="vertical"
-						size="md"
-						isSelected={isSelected}
-						compact={false}
-						className="w-full h-full"
-						onClick={handleClick}
-						onDoubleClick={handleDoubleClick}
-					/>
-				</ContextMenuTrigger>
-				<ContextMenuContent>
-					<FileContextMenu
-						file={entityToFileItem(layoutItem.item)}
-						onAction={(action, file, data) => {
-							if (onContextAction) {
-								onContextAction(action, layoutItem.item, data);
-							} else {
-								const fileItem = entityToFileItem(layoutItem.item);
-								handleContextAction(
-									action,
-									fileItem,
-									undefined, // items array no se usa aquí
-									undefined, // toggleSelection no disponible en view component
-									undefined  // refreshView no disponible en view component
-								);
-							}
-						}}
-					/>
-				</ContextMenuContent>
-			</ContextMenu>
+			<OptimizedEntityCard
+				entity={layoutItem.item}
+				layout="vertical"
+				size="md"
+				isSelected={isSelected}
+				compact={false}
+				className="w-full h-full"
+				itemId={layoutItem.item.id}
+				onClickById={onItemClickById}
+				onDoubleClickById={onItemDoubleClickById}
+			/>
 		</motion.div>
+	);
+}, (prevProps, nextProps) => {
+	// OPTIMIZACIÓN: Comparación personalizada para evitar re-renders innecesarios
+	return (
+		prevProps.layoutItem.item.id === nextProps.layoutItem.item.id &&
+		prevProps.layoutItem.x === nextProps.layoutItem.x &&
+		prevProps.layoutItem.y === nextProps.layoutItem.y &&
+		prevProps.layoutItem.width === nextProps.layoutItem.width &&
+		prevProps.layoutItem.height === nextProps.layoutItem.height &&
+		prevProps.isSelected === nextProps.isSelected &&
+		prevProps.itemIndex === nextProps.itemIndex &&
+		prevProps.onItemClickById === nextProps.onItemClickById &&
+		prevProps.onItemDoubleClickById === nextProps.onItemDoubleClickById
 	);
 });
 
@@ -155,11 +156,43 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
-	onContextAction,
 }) {
 	const parentRef = useRef<any>(null);
 	const [containerHeight, setContainerHeight] = useState<number>(600);
 	const { config, calculateLayout } = useMasonryViewConfig();
+
+	// Map optimizado para lookups O(1)
+	const itemsById = useMemo(() => {
+		const map = new Map<string, AnyEntityWithStats>();
+		for (const item of items) {
+			map.set(item.id, item);
+		}
+		return map;
+	}, [items]);
+
+	// Set optimizado para verificación de selección O(1)
+	const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+	// Handlers optimizados con Map lookups
+	const handleItemClickById = useCallback(
+		(id: string, e: React.MouseEvent) => {
+			const item = itemsById.get(id);
+			if (item) {
+				onItemClick(item, e);
+			}
+		},
+		[itemsById, onItemClick]
+	);
+
+	const handleItemDoubleClickById = useCallback(
+		(id: string) => {
+			const item = itemsById.get(id);
+			if (item) {
+				onItemDoubleClick(item);
+			}
+		},
+		[itemsById, onItemDoubleClick]
+	);
 
 	// Calcular layout usando el nuevo algoritmo
 	const layoutResult = useMemo(() => {
@@ -167,31 +200,35 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	}, [calculateLayout, items, containerWidth]);
 
 	// Handler para clicks en espacio vacío
-	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
-		const target = e.target as HTMLElement;
-		const currentTarget = e.currentTarget as HTMLElement;
+	const handleEmptySpaceClick = useCallback(
+		(e: React.MouseEvent) => {
+			const target = e.target as HTMLElement;
+			const currentTarget = e.currentTarget as HTMLElement;
 
-		const isEmptySpaceClick = target === currentTarget ||
-			(!target.closest('.entity-card') &&
-				!target.closest('[data-entity-card]') &&
-				!target.closest('button') &&
-				!target.closest('[role="button"]') &&
-				!target.closest('input') &&
-				!target.closest('textarea') &&
-				!target.closest('[data-testid="file-browser-item"]') &&
-				!target.closest('[style*="position: absolute"]') &&
-				!target.closest('[data-virtualized-item="true"]'));
+			const isEmptySpaceClick =
+				target === currentTarget ||
+				(!target.closest('.entity-card') &&
+					!target.closest('[data-entity-card]') &&
+					!target.closest('button') &&
+					!target.closest('[role="button"]') &&
+					!target.closest('input') &&
+					!target.closest('textarea') &&
+					!target.closest('[data-testid="file-browser-item"]') &&
+					!target.closest('[style*="position: absolute"]') &&
+					!target.closest('[data-virtualized-item="true"]'));
 
-		if (isEmptySpaceClick && selectedIds.length > 0) {
-			currentTarget.style.transition = 'background-color 0.15s ease';
-			currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
+			if (isEmptySpaceClick && selectedIds.length > 0) {
+				currentTarget.style.transition = 'background-color 0.15s ease';
+				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
 
-			setTimeout(() => {
-				currentTarget.style.backgroundColor = '';
-				currentTarget.style.transition = '';
-			}, 150);
-		}
-	}, [selectedIds.length]);
+				setTimeout(() => {
+					currentTarget.style.backgroundColor = '';
+					currentTarget.style.transition = '';
+				}, 150);
+			}
+		},
+		[selectedIds.length]
+	);
 
 	// Efecto para medir altura del contenedor
 	useEffect(() => {
@@ -253,7 +290,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 			>
 				<AnimatePresence initial={false}>
 					{layoutResult.items.map((layoutItem, index) => {
-						const isSelected = selectedIds.includes(layoutItem.item.id);
+						const isSelected = selectedIdsSet.has(layoutItem.item.id);
 
 						return (
 							<MasonryItem
@@ -261,9 +298,8 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 								layoutItem={layoutItem}
 								isSelected={isSelected}
 								itemIndex={index}
-								onItemClick={onItemClick}
-								onItemDoubleClick={onItemDoubleClick}
-								onContextAction={onContextAction}
+								onItemClickById={handleItemClickById}
+								onItemDoubleClickById={handleItemDoubleClickById}
 							/>
 						);
 					})}
