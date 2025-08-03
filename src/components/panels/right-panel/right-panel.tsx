@@ -1,6 +1,7 @@
 import { memo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
+import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -14,7 +15,6 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = memo(function LazyStatsPanel({
 	folderId,
-	folderName,
 }: {
 	folderId?: string;
 	folderName?: string;
@@ -39,9 +39,17 @@ const LazyStatsPanel = memo(function LazyStatsPanel({
 		);
 	}
 
+	if (!folderId) {
+		return (
+			<div className="p-4 text-muted-foreground text-sm text-center">
+				<p>No hay carpeta seleccionada</p>
+			</div>
+		);
+	}
+
 	return (
 		<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
-			{folderId ? <div className="p-4 text-muted-foreground text-sm">FolderStats no disponible (folderId: {folderId})</div> : <div className="p-4 text-muted-foreground text-sm">StatsPanel no disponible</div>}
+			<FolderStatsDisplay folderId={folderId} />
 		</Suspense>
 	);
 });
@@ -61,9 +69,7 @@ interface RightPanelProps {
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
 export const RightPanel = memo(function RightPanel({
-	className,
 	isCollapsed,
-	onToggleCollapse,
 	isAnimating = false,
 }: RightPanelProps) {
 	const { isVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
@@ -126,9 +132,7 @@ export const RightPanel = memo(function RightPanel({
 			{!isCollapsed &&
 				(hasSelectedItems ? (
 					<ScrollArea className="flex-1">
-						<div className="p-2">
-							<DetailsPanelV2 selectedItems={selectedItems} />
-						</div>
+						<DetailsPanelV2 selectedItems={selectedItems} />
 					</ScrollArea>
 				) : (
 					shouldShowStats && (

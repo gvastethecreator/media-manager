@@ -160,7 +160,7 @@ file-viewer/
 
 ## Dependencias
 
-- `framer-motion`: Animaciones y transiciones
+- `motion`: Animaciones y transiciones
 - `lucide-react`: Iconos
 - Componentes UI: `Button`, `Badge`, `Input`, `Textarea`
 - Tipos de entidades del sistema

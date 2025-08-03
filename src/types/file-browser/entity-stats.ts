@@ -7,27 +7,28 @@
 /**
  * Tipos de estadísticas disponibles para entidades
  */
-export type EntityStatsType =
-	| 'image'
-	| 'video'
-	| 'audio'
-	| 'document'
-	| 'folder'
-	| 'album'
-	| 'collection'
-	| 'tag'
-	| 'character'
-	| 'world-item'
-	| 'concept'
-	| 'prompt'
-	| 'note'
-	| 'place'
-	| 'group'
-	| 'property'
-	| 'wildcard'
-	| 'jsonFile'
-	| 'file3d'
-	| 'uploadedImage';
+export enum EntityStatsType {
+	IMAGE = 'image',
+	VIDEO = 'video',
+	AUDIO = 'audio',
+	DOCUMENT = 'document',
+	FOLDER = 'folder',
+	ALBUM = 'album',
+	COLLECTION = 'collection',
+	TAG = 'tag',
+	CHARACTER = 'character',
+	WORLD_ITEM = 'world-item',
+	CONCEPT = 'concept',
+	PROMPT = 'prompt',
+	NOTE = 'note',
+	PLACE = 'place',
+	GROUP = 'group',
+	PROPERTY = 'property',
+	WILDCARD = 'wildcard',
+	JSON_FILE = 'jsonFile',
+	FILE_3D = 'file3d',
+	UPLOADED_IMAGE = 'uploadedImage',
+}
 
 /**
  * Estadísticas base para todas las entidades

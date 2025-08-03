@@ -4,6 +4,8 @@
  * @description Funciones utilitarias para type checking y migración de tipos legacy a EntityWithStats
  */
 
+// Import para uso interno
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { AlbumWithStats } from '@/types/entities/album';
 // Imports para los tipos re-exportados
 // Re-exportar tipos reales en lugar de definiciones temporales
@@ -27,34 +29,35 @@ import type { WorldItemWithStats } from '@/types/entities/world-item';
 
 // Re-export del tipo principal desde entities.ts para evitar duplicación
 export type { AnyEntityWithStats } from '@/types/entities';
-
+export type { AlbumWithStats } from './entities/album';
+export type { AudioWithStats } from './entities/audio';
+export type { CharacterWithStats } from './entities/character';
+export type { CollectionWithStats } from './entities/collection';
+export type { ConceptWithStats } from './entities/concept';
+export type { DocumentWithStats } from './entities/document';
 // Export del tipo principal para compatibilidad
-export type { EntityWithStats, EntityBase, EntityStats } from './entities/entity.types';
-
+export type { EntityBase, EntityStats, EntityWithStats } from './entities/entity.types';
+export type { FolderWithStats } from './entities/folder';
+export type { GroupWithStats } from './entities/group';
 // Re-exportar para compatibilidad
 // Solo se debe usar AnyEntityWithStats en los componentes de UI y transformadores
 export type { ImageWithStats } from './entities/image';
-export type { VideoWithStats } from './entities/video';
-export type { FolderWithStats } from './entities/folder';
-export type { TagWithStats } from './entities/tag';
-export type { PlaceWithStats } from './entities/place';
-export type { WorldItemWithStats } from './entities/world-item';
 export type { NoteWithStats } from './entities/note';
-export type { PropertyWithStats } from './entities/property';
-export type { WildcardWithStats } from './entities/wildcard';
-export type { CharacterWithStats } from './entities/character';
-export type { ConceptWithStats } from './entities/concept';
+export type { PlaceWithStats } from './entities/place';
 export type { PromptWithStats } from './entities/prompt';
-export type { GroupWithStats } from './entities/group';
-export type { AudioWithStats } from './entities/audio';
-export type { DocumentWithStats } from './entities/document';
-export type { CollectionWithStats } from './entities/collection';
-export type { AlbumWithStats } from './entities/album';
+export type { PropertyWithStats } from './entities/property';
+export type { TagWithStats } from './entities/tag';
 export type { UploadedImageWithStats } from './entities/uploaded-image';
+export type { VideoWithStats } from './entities/video';
+export type { WildcardWithStats } from './entities/wildcard';
+export type { WorldItemWithStats } from './entities/world-item';
 
 // Enum para tipos de entidades
 // Import EntityStatsType from the main definition
-import { EntityStatsType } from '../file-browser/entity-stats';
+import { EntityStatsType } from './file-browser/entity-stats';
+
+// Re-export para compatibilidad
+export { EntityStatsType } from './file-browser/entity-stats';
 
 // Función helper para verificar si es una entidad con el campo entityType
 function hasEntityType(entity: unknown): entity is { entityType: string } {
@@ -245,24 +248,24 @@ export function isUploadedImageWithStats(entity: unknown): entity is UploadedIma
 
 // Función helper para obtener el tipo de estadísticas de una entidad
 export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsType | null {
-	if (isImageWithStats(entity)) return 'image';
-	if (isVideoWithStats(entity)) return 'video';
-	if (isFolderWithStats(entity)) return 'folder';
-	if (isTagWithStats(entity)) return 'tag';
-	if (isPlaceWithStats(entity)) return 'place';
-	if (isWorldItemWithStats(entity)) return 'world-item';
-	if (isNoteWithStats(entity)) return 'note';
-	if (isPropertyWithStats(entity)) return 'property';
-	if (isWildcardWithStats(entity)) return 'wildcard';
-	if (isAudioWithStats(entity)) return 'audio';
-	if (isDocumentWithStats(entity)) return 'document';
-	if (isCollectionWithStats(entity)) return 'collection';
-	if (isAlbumWithStats(entity)) return 'album';
-	if (isCharacterWithStats(entity)) return 'character';
-	if (isConceptWithStats(entity)) return 'concept';
-	if (isPromptWithStats(entity)) return 'prompt';
-	if (isGroupWithStats(entity)) return 'group';
-	if (isUploadedImageWithStats(entity)) return 'uploadedImage';
+	if (isImageWithStats(entity)) return EntityStatsType.IMAGE;
+	if (isVideoWithStats(entity)) return EntityStatsType.VIDEO;
+	if (isFolderWithStats(entity)) return EntityStatsType.FOLDER;
+	if (isTagWithStats(entity)) return EntityStatsType.TAG;
+	if (isPlaceWithStats(entity)) return EntityStatsType.PLACE;
+	if (isWorldItemWithStats(entity)) return EntityStatsType.WORLD_ITEM;
+	if (isNoteWithStats(entity)) return EntityStatsType.NOTE;
+	if (isPropertyWithStats(entity)) return EntityStatsType.PROPERTY;
+	if (isWildcardWithStats(entity)) return EntityStatsType.WILDCARD;
+	if (isAudioWithStats(entity)) return EntityStatsType.AUDIO;
+	if (isDocumentWithStats(entity)) return EntityStatsType.DOCUMENT;
+	if (isCollectionWithStats(entity)) return EntityStatsType.COLLECTION;
+	if (isAlbumWithStats(entity)) return EntityStatsType.ALBUM;
+	if (isCharacterWithStats(entity)) return EntityStatsType.CHARACTER;
+	if (isConceptWithStats(entity)) return EntityStatsType.CONCEPT;
+	if (isPromptWithStats(entity)) return EntityStatsType.PROMPT;
+	if (isGroupWithStats(entity)) return EntityStatsType.GROUP;
+	if (isUploadedImageWithStats(entity)) return EntityStatsType.UPLOADED_IMAGE;
 	return null;
 }
 

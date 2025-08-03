@@ -1,654 +1,374 @@
 /**
- * @file Componentes específicos para detalles de carpetas
- * @module components/panels/details-panel/entities/folder-details
+ * @file Componente compacto y unificado para detalles de carpetas
+ * @description Elimina duplicaciones y muestra metadata completa de manera compacta
  */
 
 import {
-	Archive,
-	ArrowRight,
-	ChevronRight,
-	Download,
-	Edit,
-	Eye,
-	EyeOff,
-	Folder,
-	FolderOpen,
-	Grid,
-	Home,
-	List,
-	MoreHorizontal,
-	Plus,
-	Search,
-	Share,
-	Trash2,
-	Upload,
+    Archive,
+    ChevronRight,
+    Grid,
+    HardDrive,
+    Home,
+    Image,
+    Info,
+    Star,
+    Tag,
+    Target,
+    TrendingUp,
 } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { FolderWithStats } from '@/types/entities/folder/types';
-import { isFolderWithStats } from '@/types/migration';
-import type {
-	EntityDetailsProps,
-	EntityMetadataProps,
-	EntityPreviewProps,
-	EntityToolbarProps,
-} from '../entity-details-registry';
+import type { EntityDetailsProps } from '../entity-details-registry';
 
-// Tipos para contenido de carpeta
-interface FolderContentItem {
-	id: string;
-	name: string;
-	type: 'file' | 'folder';
-	size?: number;
-	modifiedAt: Date;
-	thumbnailUrl?: string;
-}
+/**
+ * Componente unificado y compacto para mostrar detalles de carpetas
+ * Elimina duplicaciones y muestra toda la metadata disponible
+ */
+export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(
+	function FolderDetails({ entity, onAction }) {
+		const stats = entity.stats;
 
-// Componente principal de detalles para carpetas
-export const FolderDetails = memo<EntityDetailsProps<FolderWithStats>>(function FolderDetails({ entity, onAction }) {
-	const handleAction = useCallback(
-		(action: string, data?: any) => {
-			onAction?.(action, data);
-		},
-		[onAction]
-	);
+		// Header compacto con información principal
+		const headerInfo = useMemo(() => {
+			return {
+				name: entity.name,
+				emoji: entity.emoji || '📁',
+				path: entity.path,
+				isFavorite: entity.isFavorite,
+				qualityGrade: stats?.qualityGrade || 'D',
+				organizationScore: stats?.organizationScore || 0,
+			};
+		}, [entity, stats]);
 
-	if (!isFolderWithStats(entity)) {
-		return <div>Error: Entidad no es una carpeta válida</div>;
-	}
+		// Métricas principales en formato compacto
+		const mainMetrics = useMemo(() => {
+			return [
+				{
+					icon: <Grid className="h-4 w-4 text-blue-500" />,
+					label: 'Elementos',
+					value: stats?.totalItems?.toString() || '0',
+					sublabel: `${stats?.folderCount || 0} carpetas, ${(stats?.totalItems || 0) - (stats?.folderCount || 0)} archivos`,
+				},
+				{
+					icon: <HardDrive className="h-4 w-4 text-green-500" />,
+					label: 'Tamaño',
+					value: formatBytes(entity.totalSize || 0),
+					sublabel: stats?.averageFileSize ? `Promedio: ${formatBytes(stats.averageFileSize)}` : undefined,
+				},
+				{
+					icon: <TrendingUp className="h-4 w-4 text-purple-500" />,
+					label: 'Organización',
+					value: `${Math.round(stats?.organizationScore || 0)}%`,
+					sublabel: `Calidad: ${stats?.qualityGrade || 'D'}`,
+				},
+				{
+					icon: <Target className="h-4 w-4 text-orange-500" />,
+					label: 'Jerarquía',
+					value: `Nivel ${stats?.hierarchyDepth || 0}`,
+					sublabel: `${stats?.totalDescendants || 0} descendientes`,
+				},
+			];
+		}, [entity, stats]);
 
-	return (
-		<div className="space-y-4">
-			{/* Preview principal */}
-			<FolderPreview entity={entity} size="lg" onAction={handleAction} />
+		// Distribución de contenido por tipo
+		const contentDistribution = useMemo(() => {
+			const items = [
+				{ id: 'images', label: 'Imágenes', count: stats?.imageCount || 0, color: 'bg-blue-500' },
+				{ id: 'videos', label: 'Videos', count: stats?.videoCount || 0, color: 'bg-red-500' },
+				{ id: 'documents', label: 'Documentos', count: stats?.documentCount || 0, color: 'bg-green-500' },
+				{ id: 'audio', label: 'Audio', count: stats?.totalAudio || 0, color: 'bg-yellow-500' },
+				{ id: 'others', label: 'Otros', count: stats?.totalOthers || 0, color: 'bg-gray-500' },
+			].filter((item) => item.count > 0);
 
-			{/* Estadísticas rápidas */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm">Estadísticas</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-3">
-					<div className="grid grid-cols-2 gap-4 text-sm">
-						<div className="text-center">
-							<p className="text-2xl font-bold text-primary">{entity.stats?.totalItems || 0}</p>
-							<p className="text-muted-foreground">Elementos</p>
-						</div>
-						<div className="text-center">
-							<p className="text-2xl font-bold text-primary">{formatBytes(entity.totalSize || 0)}</p>
-							<p className="text-muted-foreground">Tamaño total</p>
-						</div>
-					</div>
+			const total = items.reduce((sum, item) => sum + item.count, 0);
+			return items.map((item) => ({
+				...item,
+				percentage: total > 0 ? (item.count / total) * 100 : 0,
+			}));
+		}, [stats]);
 
-					{/* Distribución por tipo */}
-					{entity.stats && (
-						<div className="space-y-2">
-							<div className="flex justify-between text-xs">
-								<span>Carpetas: {entity.stats.folderCount || 0}</span>
-								<span>
-									Archivos: {entity.stats.totalItems ? entity.stats.totalItems - (entity.stats.folderCount || 0) : 0}
-								</span>
-							</div>
-							<Progress
-								value={entity.stats?.totalItems ? ((entity.stats.folderCount || 0) / entity.stats.totalItems) * 100 : 0}
-								className="h-2"
-							/>
-						</div>
-					)}
-				</CardContent>
-			</Card>
+		// Breadcrumbs de navegación
+		const breadcrumbs = useMemo(() => {
+			if (stats?.breadcrumbs?.length) {
+				return stats.breadcrumbs;
+			}
+			// Fallback: generar desde path
+			const pathSegments = entity.path?.split('/').filter(Boolean) || [];
+			return pathSegments.map((segment, index) => ({
+				id: `breadcrumb-${index}`,
+				name: segment,
+				path: `/${pathSegments.slice(0, index + 1).join('/')}`,
+			}));
+		}, [entity.path, stats?.breadcrumbs]);
 
-			{/* Navegación de breadcrumb */}
-			<FolderBreadcrumb entity={entity} onNavigate={handleAction} />
+		// Tags y información adicional
+		const additionalInfo = useMemo(() => {
+			const info = [];
 
-			{/* Metadatos */}
-			<FolderMetadata entity={entity} editable={true} />
+			// Auto-tags
+			if (stats?.autoTags?.length) {
+				info.push({
+					id: 'tags',
+					type: 'tags',
+					label: 'Tags automáticos',
+					items: stats.autoTags,
+				});
+			}
 
-			{/* Toolbar de acciones */}
-			<FolderToolbar entity={entity} onAction={handleAction} />
-		</div>
-	);
-});
+			// Información de actividad
+			if (stats?.lastActivity) {
+				info.push({
+					id: 'activity',
+					type: 'activity',
+					label: 'Última actividad',
+					value: new Date(stats.lastActivity).toLocaleDateString(),
+				});
+			}
 
-// Componente de preview para carpetas
-export const FolderPreview = memo<EntityPreviewProps<FolderWithStats>>(function FolderPreview({
-	entity,
-	size = 'md',
-	onAction,
-}) {
-	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-	const [showHidden, setShowHidden] = useState(false);
-	const [showContent, setShowContent] = useState(true);
+			// Información de indexación
+			if (entity.lastIndexed) {
+				info.push({
+					id: 'indexed',
+					type: 'indexed',
+					label: 'Última indexación',
+					value: new Date(entity.lastIndexed).toLocaleDateString(),
+				});
+			}
 
-	if (!isFolderWithStats(entity)) {
-		return null;
-	}
+			return info;
+		}, [entity, stats]);
 
-	const sizeClasses = {
-		sm: 'h-32',
-		md: 'h-48',
-		lg: 'h-64',
-		xl: 'h-80',
-	};
+		// Imágenes recientes si están disponibles
+		const recentImages = useMemo(() => {
+			return entity.recentImages?.slice(0, 4) || [];
+		}, [entity.recentImages]);
 
-	// Mock data - en producción vendría del store
-	const mockContent: FolderContentItem[] = [
-		{
-			id: '1',
-			name: 'Documentos',
-			type: 'folder',
-			modifiedAt: new Date('2024-01-15'),
-		},
-		{
-			id: '2',
-			name: 'imagen.jpg',
-			type: 'file',
-			size: 2048000,
-			modifiedAt: new Date('2024-01-10'),
-			thumbnailUrl: '/api/thumbnails/imagen.jpg',
-		},
-		{
-			id: '3',
-			name: 'video.mp4',
-			type: 'file',
-			size: 15728640,
-			modifiedAt: new Date('2024-01-08'),
-		},
-	];
-
-	const filteredContent = showHidden ? mockContent : mockContent.filter((item) => !item.name.startsWith('.'));
-
-	return (
-		<Card className="overflow-hidden">
-			<CardHeader className="pb-2">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<FolderOpen className="h-4 w-4 text-primary" />
-						<CardTitle className="text-sm truncate">{entity.name}</CardTitle>
-					</div>
-					{showContent && (
-						<div className="flex items-center gap-1">
-							<Button variant="ghost" size="sm" onClick={() => setShowHidden(!showHidden)} className="h-6 w-6 p-0">
-								{showHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-							</Button>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-								className="h-6 w-6 p-0"
-							>
-								{viewMode === 'grid' ? <List className="h-3 w-3" /> : <Grid className="h-3 w-3" />}
-							</Button>
-						</div>
-					)}
-				</div>
-			</CardHeader>
-			<CardContent className="p-0">
-				{showContent ? (
-					<ScrollArea className={cn('p-3', sizeClasses[size])}>
-						{viewMode === 'grid' ? (
-							<div className="grid grid-cols-2 gap-2">
-								{filteredContent.map((item) => (
-									<div
-										key={item.id}
-										className="flex flex-col items-center p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-										onClick={() => onAction?.('navigate', { path: item.name })}
-										onKeyDown={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												e.preventDefault();
-												onAction?.('navigate', { path: item.name });
-											}
-										}}
-										tabIndex={0}
-										role="button"
-										aria-label={`Abrir ${item.name}`}
-									>
-										{item.type === 'folder' ? (
-											<Folder className="h-8 w-8 text-primary mb-1" />
-										) : (
-											<div className="w-8 h-8 bg-muted rounded mb-1 flex items-center justify-center">
-												{item.thumbnailUrl ? (
-													<img src={item.thumbnailUrl} alt={item.name} className="w-full h-full object-cover rounded" />
-												) : (
-													<div className="w-2 h-2 bg-muted-foreground rounded" />
-												)}
-											</div>
-										)}
-										<span className="text-xs text-center truncate w-full">{item.name}</span>
-									</div>
-								))}
-							</div>
-						) : (
-							<div className="space-y-1">
-								{filteredContent.map((item) => (
-									<div
-										key={item.id}
-										className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-										onClick={() => onAction?.('navigate', { path: item.name })}
-										onKeyDown={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												e.preventDefault();
-												onAction?.('navigate', { path: item.name });
-											}
-										}}
-										tabIndex={0}
-										role="button"
-										aria-label={`Abrir ${item.name}`}
-									>
-										{item.type === 'folder' ? (
-											<Folder className="h-4 w-4 text-primary flex-shrink-0" />
-										) : (
-											<div className="w-4 h-4 bg-muted rounded flex-shrink-0" />
-										)}
-										<div className="flex-1 min-w-0">
-											<p className="text-sm truncate">{item.name}</p>
-											<p className="text-xs text-muted-foreground">
-												{item.size ? formatBytes(item.size) : 'Carpeta'} • {item.modifiedAt.toLocaleDateString()}
-											</p>
-										</div>
-										<ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-									</div>
-								))}
-							</div>
-						)}
-
-						{filteredContent.length === 0 && (
-							<div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-								<Folder className="h-8 w-8 mb-2" />
-								<p className="text-sm">Carpeta vacía</p>
-							</div>
-						)}
-					</ScrollArea>
-				) : (
-					<div className={cn('flex items-center justify-center bg-muted/20', sizeClasses[size])}>
-						<div className="text-center">
-							<FolderOpen className="h-12 w-12 text-primary mx-auto mb-2" />
-							<p className="text-sm text-muted-foreground">{entity.stats?.totalItems || 0} elementos</p>
-						</div>
-					</div>
-				)}
-			</CardContent>
-		</Card>
-	);
-});
-
-// Componente de breadcrumb para navegación
-const FolderBreadcrumb = memo<{ entity: FolderWithStats; onNavigate: (action: string, data?: any) => void }>(
-	function FolderBreadcrumb({ entity, onNavigate }) {
-		// Mock path - en producción vendría del store de navegación
-		const pathSegments = entity.path?.split('/').filter(Boolean) || [entity.name];
+		const handleNavigate = (path: string) => {
+			onAction?.('navigate', { path });
+		};
 
 		return (
-			<Card>
-				<CardContent className="p-3">
-					<div className="flex items-center gap-1 text-sm">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => onNavigate('navigate', { path: '/' })}
-							className="h-6 px-2"
-						>
-							<Home className="h-3 w-3" />
-						</Button>
-						{pathSegments.map((segment: string, index: number) => (
-							<div key={index} className="flex items-center gap-1">
-								<ChevronRight className="h-3 w-3 text-muted-foreground" />
+			<div className="space-y-3">
+				{/* Header compacto */}
+				<Card>
+					<CardContent className="p-4">
+						<div className="flex items-start justify-between mb-3">
+							<div className="flex items-center gap-2 flex-1 min-w-0">
+								<span className="text-lg flex-shrink-0">{headerInfo.emoji}</span>
+								<div className="min-w-0 flex-1">
+									<h3 className="font-semibold truncate text-sm">{headerInfo.name}</h3>
+									<p className="text-xs text-muted-foreground truncate">{headerInfo.path}</p>
+								</div>
+							</div>
+							<div className="flex items-center gap-1 flex-shrink-0">
+								{headerInfo.isFavorite && <Star className="h-4 w-4 text-yellow-500" />}
+								<Badge
+									variant={headerInfo.qualityGrade === 'A' ? 'primary' : 'secondary'}
+									className="text-xs"
+								>
+									{headerInfo.qualityGrade}
+								</Badge>
+							</div>
+						</div>
+
+						{/* Breadcrumbs compactos */}
+						{breadcrumbs.length > 0 && (
+							<div className="flex items-center gap-1 text-xs mb-3 overflow-x-auto">
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => {
-										const path = `/${pathSegments.slice(0, index + 1).join('/')}`;
-										onNavigate('navigate', { path });
-									}}
-									className="h-6 px-2 text-xs"
-									disabled={index === pathSegments.length - 1}
+									onClick={() => handleNavigate('/')}
+									className="h-5 px-1 flex-shrink-0"
 								>
-									{segment}
+									<Home className="h-3 w-3" />
 								</Button>
+								{breadcrumbs.map((crumb) => (
+									<div key={crumb.id} className="flex items-center gap-1 flex-shrink-0">
+										<ChevronRight className="h-3 w-3 text-muted-foreground" />
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => handleNavigate(crumb.path)}
+											className="h-5 px-1 text-xs max-w-20 truncate"
+											disabled={crumb.id === breadcrumbs[breadcrumbs.length - 1]?.id}
+										>
+											{crumb.name}
+										</Button>
+									</div>
+								))}
 							</div>
-						))}
-					</div>
-				</CardContent>
-			</Card>
+						)}
+
+						{/* Métricas principales en grid compacto */}
+						<div className="grid grid-cols-2 gap-3">
+							{mainMetrics.map((metric) => (
+								<div key={metric.label} className="flex items-center gap-2">
+									{metric.icon}
+									<div className="min-w-0 flex-1">
+										<div className="flex items-baseline gap-1">
+											<span className="text-xs text-muted-foreground">{metric.label}:</span>
+											<span className="text-sm font-medium">{metric.value}</span>
+										</div>
+										{metric.sublabel && (
+											<p className="text-xs text-muted-foreground truncate">{metric.sublabel}</p>
+										)}
+									</div>
+								</div>
+							))}
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Distribución de contenido */}
+				{contentDistribution.length > 0 && (
+					<Card>
+						<CardContent className="p-4">
+							<div className="flex items-center gap-2 mb-3">
+								<Archive className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm font-medium">Distribución de contenido</span>
+							</div>
+							<div className="space-y-2">
+								{contentDistribution.map((item) => (
+									<div key={item.id} className="flex items-center gap-2">
+										<div className={cn('w-2 h-2 rounded-full flex-shrink-0', item.color)} />
+										<span className="text-xs text-muted-foreground min-w-0 flex-1">{item.label}</span>
+										<span className="text-xs font-medium">{item.count}</span>
+										<span className="text-xs text-muted-foreground">({Math.round(item.percentage)}%)</span>
+									</div>
+								))}
+								{/* Barra de progreso visual */}
+								<div className="flex h-2 bg-muted rounded-full overflow-hidden mt-2">
+									{contentDistribution.map((item) => (
+										<div
+											key={item.id}
+											className={cn('h-full', item.color)}
+											style={{ width: `${item.percentage}%` }}
+										/>
+									))}
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Imágenes recientes */}
+				{recentImages.length > 0 && (
+					<Card>
+						<CardContent className="p-4">
+							<div className="flex items-center gap-2 mb-3">
+								<Image className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm font-medium">Imágenes recientes</span>
+							</div>
+							<div className="grid grid-cols-4 gap-2">
+								{recentImages.map((image) => (
+									<button
+										key={image.id}
+										type="button"
+										className="aspect-square bg-muted rounded-md overflow-hidden hover:opacity-80 transition-opacity"
+										onClick={() => onAction?.('view-image', { imageId: image.id })}
+									>
+										{image.thumbnailUrl ? (
+											<img
+												src={image.thumbnailUrl}
+												alt={image.name}
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											<div className="w-full h-full flex items-center justify-center">
+												<Image className="h-4 w-4 text-muted-foreground" />
+											</div>
+										)}
+									</button>
+								))}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Información adicional y tags */}
+				{additionalInfo.length > 0 && (
+					<Card>
+						<CardContent className="p-4">
+							<div className="flex items-center gap-2 mb-3">
+								<Info className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm font-medium">Información adicional</span>
+							</div>
+							<div className="space-y-3">
+								{additionalInfo.map((info) => (
+									<div key={info.id}>
+										{info.type === 'tags' ? (
+											<div>
+												<span className="text-xs text-muted-foreground mb-2 block">{info.label}:</span>
+												<div className="flex flex-wrap gap-1">
+													{info.items?.map((tag: string, tagIndex: number) => (
+														<Badge key={`${info.id}-tag-${tagIndex}`} variant="outline" className="text-xs">
+															<Tag className="h-3 w-3 mr-1" />
+															{tag}
+														</Badge>
+													))}
+												</div>
+											</div>
+										) : (
+											<div className="flex justify-between text-sm">
+												<span className="text-muted-foreground">{info.label}:</span>
+												<span className="font-medium">{info.value}</span>
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Métricas técnicas avanzadas */}
+				{stats && (
+					<Card>
+						<CardContent className="p-4">
+							<div className="flex items-center gap-2 mb-3">
+								<TrendingUp className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm font-medium">Métricas técnicas</span>
+							</div>
+							<div className="grid grid-cols-2 gap-2 text-xs">
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Diversidad:</span>
+									<span className="font-medium">{Math.round(stats.contentDiversity || 0)}%</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Frecuencia acceso:</span>
+									<span className="font-medium">{Math.round(stats.accessFrequency || 0)}%</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Nombrado consistente:</span>
+									<span className="font-medium">{stats.hasConsistentNaming ? 'Sí' : 'No'}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Bien organizada:</span>
+									<span className="font-medium">{stats.isWellOrganized ? 'Sí' : 'No'}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Jerarquía profunda:</span>
+									<span className="font-medium">{stats.hasDeepHierarchy ? 'Sí' : 'No'}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Relaciones:</span>
+									<span className="font-medium">{(stats.imageCount || 0) + (stats.videoCount || 0) + (stats.folderCount || 0)}</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+			</div>
 		);
 	}
 );
 
-// Toolbar específico para carpetas
-export const FolderToolbar = memo<EntityToolbarProps<FolderWithStats>>(function FolderToolbar({ entity, onAction }) {
-	const handleAction = useCallback(
-		(action: string) => {
-			onAction(action, { entity });
-		},
-		[entity, onAction]
-	);
-
-	return (
-		<Card>
-			<CardHeader className="pb-2">
-				<CardTitle className="text-sm">Acciones</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<div className="grid grid-cols-2 gap-2">
-					{/* Acciones primarias */}
-					<Button variant="default" size="sm" onClick={() => handleAction('open')} className="justify-start">
-						<FolderOpen className="h-4 w-4 mr-2" />
-						Abrir
-					</Button>
-					<Button variant="default" size="sm" onClick={() => handleAction('new-folder')} className="justify-start">
-						<Plus className="h-4 w-4 mr-2" />
-						Nueva carpeta
-					</Button>
-
-					{/* Gestión de archivos */}
-					<Button variant="outline" size="sm" onClick={() => handleAction('upload')} className="justify-start">
-						<Upload className="h-4 w-4 mr-2" />
-						Subir archivos
-					</Button>
-					<Button variant="outline" size="sm" onClick={() => handleAction('search')} className="justify-start">
-						<Search className="h-4 w-4 mr-2" />
-						Buscar
-					</Button>
-
-					{/* Acciones secundarias */}
-					<Button variant="outline" size="sm" onClick={() => handleAction('rename')} className="justify-start">
-						<Edit className="h-4 w-4 mr-2" />
-						Renombrar
-					</Button>
-					<Button variant="outline" size="sm" onClick={() => handleAction('share')} className="justify-start">
-						<Share className="h-4 w-4 mr-2" />
-						Compartir
-					</Button>
-					<Button variant="outline" size="sm" onClick={() => handleAction('download')} className="justify-start">
-						<Download className="h-4 w-4 mr-2" />
-						Descargar
-					</Button>
-
-					{/* Más opciones */}
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="sm" className="justify-start">
-								<MoreHorizontal className="h-4 w-4 mr-2" />
-								Más
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent>
-							<DropdownMenuItem onClick={() => handleAction('compress')}>
-								<Archive className="h-4 w-4 mr-2" />
-								Comprimir
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleAction('copy-path')}>Copiar ruta</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleAction('properties')}>Propiedades</DropdownMenuItem>
-							<Separator />
-							<DropdownMenuItem onClick={() => handleAction('delete')} className="text-destructive">
-								<Trash2 className="h-4 w-4 mr-2" />
-								Eliminar
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</div>
-			</CardContent>
-		</Card>
-	);
-});
-
-// Componente de metadatos para carpetas
-export const FolderMetadata = memo<EntityMetadataProps<FolderWithStats>>(function FolderMetadata({ entity }) {
-	if (!isFolderWithStats(entity)) {
-		return null;
-	}
-
-	const metadata = [
-		{
-			label: 'Ruta completa',
-			value: entity.path || 'N/A',
-			category: 'basic',
-		},
-		{
-			label: 'Tipo',
-			value: 'Carpeta del sistema',
-			category: 'basic',
-		},
-		{
-			label: 'Fecha creación',
-			value: entity.createdAt ? new Date(entity.createdAt).toLocaleDateString() : 'N/A',
-			category: 'basic',
-		},
-		{
-			label: 'Última modificación',
-			value: entity.updatedAt ? new Date(entity.updatedAt).toLocaleDateString() : 'N/A',
-			category: 'basic',
-		},
-		{
-			label: 'Emoji',
-			value: entity.emoji || '📁',
-			category: 'basic',
-		},
-		{
-			label: 'Color',
-			value: entity.color || '#3b82f6',
-			category: 'basic',
-		},
-		{
-			label: 'Es favorita',
-			value: entity.isFavorite ? 'Sí' : 'No',
-			category: 'basic',
-		},
-		{
-			label: 'Auto-reindexar',
-			value: entity.autoReindex ? 'Habilitado' : 'Deshabilitado',
-			category: 'basic',
-		},
-		{
-			label: 'Última indexación',
-			value: entity.lastIndexed ? new Date(entity.lastIndexed).toLocaleDateString() : 'Nunca',
-			category: 'basic',
-		},
-		{
-			label: 'ID Padre',
-			value: entity.parentId || 'Carpeta raíz',
-			category: 'advanced',
-		},
-		{
-			label: 'ID Preset',
-			value: entity.presetId || 'Sin preset',
-			category: 'advanced',
-		},
-		{
-			label: 'Imagen destacada',
-			value: entity.featuredImage ? 'Configurada' : 'Sin imagen',
-			category: 'advanced',
-		},
-	];
-
-	const stats = entity.stats;
-	const statisticsMetadata = stats
-		? [
-				{
-					label: 'Total elementos',
-					value: stats.totalItems?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Carpetas',
-					value: stats.folderCount?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Archivos',
-					value: (stats.totalItems - (stats.folderCount || 0))?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Imágenes',
-					value: stats.imageCount?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Videos',
-					value: stats.videoCount?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Documentos',
-					value: stats.documentCount?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Tamaño total (DB)',
-					value: formatBytes(entity.totalSize || 0),
-					category: 'stats',
-				},
-				{
-					label: 'Total archivos (DB)',
-					value: entity.totalFiles?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Profundidad jerarquía',
-					value: stats.hierarchyDepth?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Descendientes totales',
-					value: stats.totalDescendants?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Hijos directos',
-					value: stats.directChildren?.toString() || '0',
-					category: 'stats',
-				},
-				{
-					label: 'Diversidad contenido',
-					value: `${stats.contentDiversity?.toFixed(1) || '0'}%`,
-					category: 'stats',
-				},
-				{
-					label: 'Puntuación organización',
-					value: `${stats.organizationScore?.toFixed(1) || '0'}%`,
-					category: 'stats',
-				},
-				{
-					label: 'Frecuencia acceso',
-					value: `${stats.accessFrequency?.toFixed(1) || '0'}%`,
-					category: 'stats',
-				},
-				{
-					label: 'Última actividad',
-					value: stats.lastActivity ? new Date(stats.lastActivity).toLocaleDateString() : 'Sin actividad',
-					category: 'stats',
-				},
-			]
-		: [];
-
-	const basicMetadata = metadata.filter((m) => m.category === 'basic');
-	const advancedMetadata = metadata.filter((m) => m.category === 'advanced');
-
-	return (
-		<div className="space-y-4">
-			{/* Información básica */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm flex items-center gap-2">
-						<span>Información básica</span>
-						{entity.emoji && <span className="text-lg">{entity.emoji}</span>}
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-2">
-					{basicMetadata.map((meta) => (
-						<div key={meta.label} className="space-y-1">
-							<span className="text-xs text-muted-foreground">{meta.label}:</span>
-							{meta.label === 'Color' ? (
-								<div className="flex items-center gap-2">
-									<div
-										className="w-4 h-4 rounded border border-border"
-										style={{ backgroundColor: meta.value }}
-									/>
-									<p className="text-sm font-medium">{meta.value}</p>
-								</div>
-							) : meta.label === 'Es favorita' ? (
-								<div className="flex items-center gap-2">
-									<p className="text-sm font-medium">{meta.value}</p>
-									{entity.isFavorite && <span className="text-yellow-500">⭐</span>}
-								</div>
-							) : (
-								<p className="text-sm font-medium break-all">{meta.value}</p>
-							)}
-						</div>
-					))}
-				</CardContent>
-			</Card>
-
-			{/* Estadísticas detalladas */}
-			{statisticsMetadata.length > 0 && (
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Estadísticas detalladas</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-2">
-						{statisticsMetadata.map((meta) => (
-							<div key={meta.label} className="flex justify-between text-sm">
-								<span className="text-muted-foreground">{meta.label}:</span>
-								<span className="font-medium">{meta.value}</span>
-							</div>
-						))}
-					</CardContent>
-				</Card>
-			)}
-
-			{/* Información avanzada */}
-			{advancedMetadata.length > 0 && (
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm">Información avanzada</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-2">
-						{advancedMetadata.map((meta) => (
-							<div key={meta.label} className="space-y-1">
-								<span className="text-xs text-muted-foreground">{meta.label}:</span>
-								{meta.label === 'Imagen destacada' && entity.featuredImage ? (
-									<div className="space-y-2">
-										<p className="text-sm font-medium">{meta.value}</p>
-										<img
-											src={entity.featuredImage}
-											alt="Imagen destacada"
-											className="w-full max-w-24 h-16 object-cover rounded border"
-										/>
-									</div>
-								) : (
-									<p className="text-sm font-medium break-all">{meta.value}</p>
-								)}
-							</div>
-						))}
-					</CardContent>
-				</Card>
-			)}
-
-			{/* Permisos y acceso */}
-			<Card>
-				<CardHeader className="pb-2">
-					<CardTitle className="text-sm">Permisos</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="text-sm text-muted-foreground">
-						<p>Lectura: ✓ Permitido</p>
-						<p>Escritura: ✓ Permitido</p>
-						<p>Ejecución: ✓ Permitido</p>
-					</div>
-				</CardContent>
-			</Card>
-		</div>
-	);
-});
+// Componentes adicionales requeridos por el registro
+export const FolderPreview = FolderDetails;
+export const FolderMetadata = FolderDetails;
+export const FolderToolbar = FolderDetails;

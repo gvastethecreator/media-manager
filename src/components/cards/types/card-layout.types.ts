@@ -86,6 +86,8 @@ export interface BaseCardProps {
 	onClick?: (e: React.MouseEvent) => void;
 	/** Callback de doble click */
 	onDoubleClick?: () => void;
+	/** Callback de menú contextual */
+	onContextMenu?: (e: React.MouseEvent) => void;
 	/** Props legacy para compatibilidad */
 	compact?: boolean;
 	tcgMode?: boolean;

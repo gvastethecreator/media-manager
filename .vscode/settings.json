@@ -25,7 +25,10 @@
     "editor.defaultFormatter": "vscode.css-language-features"
   },
   "smoothtype.duration": 160,
-  "gitlens.gitCommands.skipConfirmations": ["fetch:command", "switch:command"],
+  "gitlens.gitCommands.skipConfirmations": [
+    "fetch:command",
+    "switch:command"
+  ],
   "files.autoGuessEncoding": true,
   "editor.inlineSuggest.enabled": true,
   "editor.suggest.preview": true,
@@ -53,7 +56,7 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.preferredDarkColorTheme": "Default Dark Modern",
+  "workbench.preferredDarkColorTheme": "Bearded Theme Surprising Blueberry",
   "git.enableSmartCommit": true,
   "workbench.activityBar.location": "top",
   "powermode.enabled": true,
@@ -71,7 +74,12 @@
   "typescript.tsserver.web.typeAcquisition.enabled": false,
   "typescript.tsserver.experimental.enableProjectDiagnostics": false,
   // Configuración específica para ESLint
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
   "eslint.format.enable": true,
   "eslint.run": "onSave",
   // Configuración específica para Prettier
@@ -92,7 +100,9 @@
   "terminal.integrated.profiles.windows": {
     "PowerShell": {
       "source": "PowerShell",
-      "args": ["-NoProfile"],
+      "args": [
+        "-NoProfile"
+      ],
       "icon": "terminal-powershell"
     }
   },

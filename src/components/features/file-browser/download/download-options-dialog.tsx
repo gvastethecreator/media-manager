@@ -1,6 +1,6 @@
 /**
  * Download Options Dialog Component
- * 
+ *
  * This component provides a dialog for users to configure download options
  * including format, quality, compression, and other advanced settings.
  */
@@ -11,6 +11,7 @@ import { Download, X, Settings, Archive, FileText, Image } from 'lucide-react';
 import { toastService } from '@/lib/ui/toast';
 import { enhancedDownloadService } from '@/services/download/download.service';
 import type { FileItem } from '@/types/files';
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { DownloadFormat, DownloadQuality, DownloadOptions } from '@/services/download/download.service';
 
 interface DownloadOptionsDialogProps {
@@ -77,7 +78,7 @@ export function DownloadOptionsDialog({
     showProgress: true,
     maxConcurrent: 3
   });
-  
+
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -103,21 +104,11 @@ export function DownloadOptionsDialog({
       if (files.length === 1) {
         // Single file download
         const file = files[0];
-        const downloadItem = {
-          id: file.id,
-          name: file.name,
-          path: 'path' in file ? (file as any).path : ''
-        };
-        
+        const downloadItem: FileItem | AnyEntityWithStats = file as unknown as AnyEntityWithStats;
         await enhancedDownloadService.downloadFile(downloadItem, downloadOptions);
       } else {
         // Multiple files download
-        const downloadItems = files.map(file => ({
-          id: file.id,
-          name: file.name,
-          path: 'path' in file ? (file as any).path : ''
-        }));
-        
+        const downloadItems: (FileItem | AnyEntityWithStats)[] = files as unknown as AnyEntityWithStats[];
         await enhancedDownloadService.downloadMultipleFiles(downloadItems, downloadOptions);
       }
 
@@ -141,7 +132,7 @@ export function DownloadOptionsDialog({
   };
 
   const hasImages = files.some(file => isImageFile(file.name));
-  const availableFormats = formatOptions.filter(format => 
+  const availableFormats = formatOptions.filter(format =>
     format.value !== 'pdf' || hasImages
   );
 
@@ -157,7 +148,7 @@ export function DownloadOptionsDialog({
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
             onClick={onClose}
           />
-          
+
           {/* Dialog */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -182,6 +173,7 @@ export function DownloadOptionsDialog({
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={onClose}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
@@ -193,7 +185,7 @@ export function DownloadOptionsDialog({
               <div className="p-6 space-y-6">
                 {/* Format Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  <label htmlFor="format" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Formato de Descarga
                   </label>
                   <div className="space-y-2">
@@ -203,6 +195,7 @@ export function DownloadOptionsDialog({
                         className="flex items-start gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                       >
                         <input
+                          id={`format-${format.value}`}
                           type="radio"
                           name="format"
                           value={format.value}
@@ -229,10 +222,11 @@ export function DownloadOptionsDialog({
                 {/* Quality Selection (for images) */}
                 {hasImages && formData.format === 'original' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    <label htmlFor="quality" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                       Calidad de Imagen
                     </label>
                     <select
+                      id="quality"
                       value={formData.quality}
                       onChange={(e) => updateFormData({ quality: e.target.value as DownloadQuality })}
                       className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -254,16 +248,17 @@ export function DownloadOptionsDialog({
                       Opciones Avanzadas
                     </span>
                   </div>
-                  
+
                   <div className="space-y-3">
                     {/* Batch Optimization */}
                     {files.length > 1 && (
-                      <label className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={formData.batchOptimization}
-                          onChange={(e) => updateFormData({ batchOptimization: e.target.checked })}
-                        />
+                        <label className="flex items-center gap-3">
+                          <input
+                            id="batchOptimization"
+                            type="checkbox"
+                            checked={formData.batchOptimization}
+                            onChange={(e) => updateFormData({ batchOptimization: e.target.checked })}
+                          />
                         <div>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             Optimización por lotes
@@ -278,6 +273,7 @@ export function DownloadOptionsDialog({
                     {/* Show Progress */}
                     <label className="flex items-center gap-3">
                       <input
+                        id="showProgress"
                         type="checkbox"
                         checked={formData.showProgress}
                         onChange={(e) => updateFormData({ showProgress: e.target.checked })}
@@ -295,16 +291,20 @@ export function DownloadOptionsDialog({
                     {/* Max Concurrent Downloads */}
                     {files.length > 1 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor="maxConcurrent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Descargas simultáneas: {formData.maxConcurrent}
                         </label>
                         <input
+                          id="maxConcurrent"
                           type="range"
                           min="1"
                           max="5"
                           value={formData.maxConcurrent}
-                          onChange={(e) => updateFormData({ maxConcurrent: parseInt(e.target.value) })}
+                          onChange={(e) => updateFormData({ maxConcurrent: Number.parseInt(e.target.value) })}
                           className="w-full"
+                          aria-valuemin={1}
+                          aria-valuemax={5}
+                          aria-valuenow={formData.maxConcurrent}
                         />
                         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                           <span>1</span>
@@ -319,6 +319,7 @@ export function DownloadOptionsDialog({
               {/* Footer */}
               <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
                 <button
+                  type="button"
                   onClick={onClose}
                   disabled={isDownloading}
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
@@ -326,6 +327,7 @@ export function DownloadOptionsDialog({
                   Cancelar
                 </button>
                 <button
+                  type="button"
                   onClick={handleDownload}
                   disabled={isDownloading}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"

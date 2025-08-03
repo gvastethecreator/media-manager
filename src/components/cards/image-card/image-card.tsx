@@ -14,6 +14,7 @@ interface ImageCardProps {
 	imageId: string;
 	onClick?: (imageData?: ImageWithStats) => void;
 	onDoubleClick?: () => void;
+	onContextMenu?: (e: React.MouseEvent) => void;
 	className?: string;
 	showTags?: boolean;
 	showDetails?: boolean;
@@ -40,6 +41,7 @@ export const ImageCard = memo(function ImageCard({
 	imageId,
 	onClick,
 	onDoubleClick,
+	onContextMenu,
 	className,
 	showTags = true,
 	showDetails = true,
@@ -240,6 +242,7 @@ export const ImageCard = memo(function ImageCard({
 			onMouseLeave={() => setIsHovered(false)}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
+			onContextMenu={onContextMenu}
 			disabled={!onClick && !onDoubleClick}
 			data-item-id={dataItemId}
 			role={role}
@@ -557,4 +560,21 @@ export const ImageCard = memo(function ImageCard({
 			<Link to={`/images/${imageId}`}>{cardContent}</Link>
 		</div>
 	);
+}, (prevProps, nextProps) => {
+	// Comparación personalizada para optimizar renders
+	// Si el imageId es el mismo, y las props básicas no han cambiado, evitar re-render
+	if (prevProps.imageId !== nextProps.imageId) return false;
+	if (prevProps.className !== nextProps.className) return false;
+	if (prevProps.showTags !== nextProps.showTags) return false;
+	if (prevProps.showDetails !== nextProps.showDetails) return false;
+	if (prevProps.aspectRatio !== nextProps.aspectRatio) return false;
+	if (prevProps.variant !== nextProps.variant) return false;
+	if (prevProps.tcgMode !== nextProps.tcgMode) return false;
+	if (prevProps.showRelations !== nextProps.showRelations) return false;
+	if (prevProps['data-item-id'] !== nextProps['data-item-id']) return false;
+	if (prevProps['aria-selected'] !== nextProps['aria-selected']) return false;
+
+	// Ignorar cambios en funciones callback si el imageId es el mismo
+	// Esto evita re-renders innecesarios cuando solo cambian las funciones
+	return true;
 });
