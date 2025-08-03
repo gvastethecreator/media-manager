@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
 import { Clock, File, FileText, Folder, HardDrive, Image, Music, Video } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import type { FolderStats } from '@/types/folders';

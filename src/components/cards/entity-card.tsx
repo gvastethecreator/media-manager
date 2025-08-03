@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import type { GroupWithStats } from '@/types/entities/group';
@@ -21,24 +21,24 @@ import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 import type { AnyEntityWithStats } from '@/types/migration';
 import {
-	getEntityStatsType,
-	isAlbumWithStats,
-	isAudioWithStats,
-	isCharacterWithStats,
-	isCollectionWithStats,
-	isConceptWithStats,
-	isDocumentWithStats,
-	isFolderWithStats,
-	isGroupWithStats,
-	isImageWithStats,
-	isNoteWithStats,
-	isPlaceWithStats,
-	isPromptWithStats,
-	isPropertyWithStats,
-	isTagWithStats,
-	isVideoWithStats,
-	isWildcardWithStats,
-	isWorldItemWithStats,
+    getEntityStatsType,
+    isAlbumWithStats,
+    isAudioWithStats,
+    isCharacterWithStats,
+    isCollectionWithStats,
+    isConceptWithStats,
+    isDocumentWithStats,
+    isFolderWithStats,
+    isGroupWithStats,
+    isImageWithStats,
+    isNoteWithStats,
+    isPlaceWithStats,
+    isPromptWithStats,
+    isPropertyWithStats,
+    isTagWithStats,
+    isVideoWithStats,
+    isWildcardWithStats,
+    isWorldItemWithStats,
 } from '@/types/migration';
 // Importar componentes de tarjetas
 import { AlbumCard } from './album-card/album-card';
@@ -67,6 +67,11 @@ export interface EntityCardProps extends BaseCardProps {
 	entity: AnyEntityWithStats;
 	/** Preset de layout específico para el contexto */
 	preset?: string;
+	/** Props optimizadas para evitar re-renders masivos */
+	itemId?: string;
+	onClickById?: (itemId: string, e: React.MouseEvent) => void;
+	onDoubleClickById?: (itemId: string) => void;
+	onContextMenuById?: (itemId: string, e: React.MouseEvent) => void;
 }
 
 export const EntityCard: FC<EntityCardProps> = memo(
@@ -74,6 +79,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		entity,
 		onClick,
 		onDoubleClick,
+		onContextMenu,
 		isSelected,
 		isActive,
 		className,
@@ -86,6 +92,11 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		// Props legacy para compatibilidad
 		compact,
 		tcgMode,
+		// Props optimizadas para evitar re-renders
+		itemId,
+		onClickById,
+		onDoubleClickById,
+		onContextMenuById,
 		...props
 	}) => {
 		// Usar el hook de layout para obtener la configuración
@@ -100,16 +111,28 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				isActive,
 				onClick,
 				onDoubleClick,
+				onContextMenu,
 				compact,
 				tcgMode,
 			},
 			preset
 		);
 
+		// Crear handlers optimizados si se proporcionan props optimizadas
+		const optimizedHandlers = useMemo(() => {
+			if (itemId && (onClickById || onDoubleClickById || onContextMenuById)) {
+				return {
+					onClick: onClickById ? (e: React.MouseEvent) => onClickById(itemId, e) : undefined,
+					onDoubleClick: onDoubleClickById ? () => onDoubleClickById(itemId) : undefined,
+					onContextMenu: onContextMenuById ? (e: React.MouseEvent) => onContextMenuById(itemId, e) : undefined,
+				};
+			}
+			return { onClick, onDoubleClick, onContextMenu };
+		}, [itemId, onClickById, onDoubleClickById, onContextMenuById, onClick, onDoubleClick, onContextMenu]);
+
 		// Props comunes para todas las cards
 		const commonProps = {
-			onClick,
-			onDoubleClick,
+			...optimizedHandlers,
 			isSelected,
 			isActive,
 			className,
@@ -145,7 +168,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		};
 
 		// Crear wrappers para onClick handlers que convierten MouseEvent a datos específicos
-		const createVideoClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+		const createVideoClickHandler = useCallback((originalOnClick?: (e: React.MouseEvent) => void) => {
 			if (!originalOnClick) return undefined;
 			return (_videoData: VideoWithStats) => {
 				// Crear un evento sintético para mantener compatibilidad
@@ -157,9 +180,9 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				} as unknown as React.MouseEvent;
 				originalOnClick(syntheticEvent);
 			};
-		};
+		}, []);
 
-		const createSimpleClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
+		const createSimpleClickHandler = useCallback((originalOnClick?: (e: React.MouseEvent) => void) => {
 			if (!originalOnClick) return undefined;
 			return () => {
 				// Crear un evento sintético para mantener compatibilidad
@@ -171,14 +194,12 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				} as unknown as React.MouseEvent;
 				originalOnClick(syntheticEvent);
 			};
-		};
+		}, []);
 
 		// Crear wrapper para onClick que convierta el formato de ImageCard al formato de FileBrowser
-		const createImageClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
-			console.log('🔧 EntityCard - createImageClickHandler llamado con onClick:', !!originalOnClick);
+		const createImageClickHandler = useCallback((originalOnClick?: (e: React.MouseEvent) => void) => {
 			if (!originalOnClick) return undefined;
 			return (imageData?: ImageWithStats) => {
-				console.log('🖱️ EntityCard - ImageCard onClick ejecutado para imagen:', imageData?.id || 'no-id');
 				// Crear un evento sintético para mantener compatibilidad
 				const syntheticEvent = {
 					preventDefault: () => { },
@@ -191,18 +212,41 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				} as unknown as React.MouseEvent;
 				originalOnClick(syntheticEvent);
 			};
-		};
+		}, []);
+
+		// Crear handlers optimizados para diferentes tipos de tarjetas
+		// OPTIMIZACIÓN: Memoizar handlers de imagen con dependencias más estables
+		const imageClickHandler = useMemo(() => {
+			if (!isImageWithStats(entity)) return undefined;
+
+			if (optimizedHandlers.onClick) {
+				// Si tenemos handler optimizado, crear wrapper estable para ImageCard
+				return (_imageData?: ImageWithStats) => {
+					const syntheticEvent = {
+						preventDefault: () => { },
+						stopPropagation: () => { },
+						currentTarget: null,
+						target: null,
+						shiftKey: false,
+						ctrlKey: false,
+						metaKey: false,
+					} as unknown as React.MouseEvent;
+					optimizedHandlers.onClick?.(syntheticEvent);
+				};
+			}
+			return createImageClickHandler(onClick);
+		}, [entity, optimizedHandlers.onClick, onClick, createImageClickHandler]);
+
+		const imageDoubleClickHandler = useMemo(() => {
+			if (!isImageWithStats(entity)) return undefined;
+			if (optimizedHandlers.onDoubleClick) {
+				return optimizedHandlers.onDoubleClick;
+			}
+			return onDoubleClick ? () => onDoubleClick() : undefined;
+		}, [entity, optimizedHandlers.onDoubleClick, onDoubleClick]);
 
 		// Renderizar componente específico basado en type guards
 		if (isImageWithStats(entity)) {
-			const imageClickHandler = createImageClickHandler(onClick);
-			const imageDoubleClickHandler = onDoubleClick ? () => onDoubleClick() : undefined;
-
-			console.log('🔧 EntityCard - Renderizando ImageCard con handlers:', {
-				hasClickHandler: !!imageClickHandler,
-				hasDoubleClickHandler: !!imageDoubleClickHandler,
-			});
-
 			return (
 				<ImageCard
 					imageId={entity.id}
@@ -612,6 +656,28 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		);
 	}
 );
+
+// Añadir comparación personalizada para evitar re-renders innecesarios
+EntityCard.displayName = 'EntityCard';
+
+// Crear versión optimizada con comparación personalizada
+export const OptimizedEntityCard = React.memo(EntityCard, (prevProps, nextProps) => {
+	// Solo re-renderizar si cambian estas props críticas
+	return (
+		prevProps.entity.id === nextProps.entity.id &&
+		prevProps.isSelected === nextProps.isSelected &&
+		prevProps.isActive === nextProps.isActive &&
+		prevProps.layout === nextProps.layout &&
+		prevProps.variant === nextProps.variant &&
+		prevProps.size === nextProps.size &&
+		prevProps.className === nextProps.className &&
+		prevProps.itemId === nextProps.itemId &&
+		// Comparar updatedAt para cambios en la entidad
+		(prevProps.entity as any).updatedAt === (nextProps.entity as any).updatedAt
+	);
+});
+
+OptimizedEntityCard.displayName = 'OptimizedEntityCard';
 
 /**
  * 📝 Documentación de migración:

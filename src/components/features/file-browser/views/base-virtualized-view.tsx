@@ -202,6 +202,7 @@ export interface BaseVirtualizedViewProps<T> {
 	containerWidth: number;
 	onItemClick: (item: T, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: T) => void;
+	onItemContextMenu?: (item: T, e: React.MouseEvent) => void;
 }
 
 /**

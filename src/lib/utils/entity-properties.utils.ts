@@ -89,6 +89,31 @@ export function getEntityPath(entity: AnyEntityWithStats): string {
 }
 
 /**
+ * Obtiene el nombre de una entidad
+ */
+export function getEntityName(entity: AnyEntityWithStats): string {
+  // Verificar nombre directo
+  if ('name' in entity && typeof entity.name === 'string') {
+    return entity.name;
+  }
+
+  // Para algunos tipos de entidades, el nombre puede estar en el title
+  if ('title' in entity && typeof entity.title === 'string') {
+    return entity.title;
+  }
+
+  // Extraer nombre del path si está disponible
+  const path = getEntityPath(entity);
+  if (path) {
+    const parts = path.split(/[\\/]/);
+    return parts[parts.length - 1] || '';
+  }
+
+  // Fallback genérico
+  return `${entity.entityType}_${entity.id}`;
+}
+
+/**
  * Obtiene el tipo MIME de una entidad
  */
 export function getEntityMimeType(entity: AnyEntityWithStats): string {

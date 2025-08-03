@@ -5,28 +5,20 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { cn } from '@/lib/utils';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
+import { cn } from '@/lib/utils';
+import type { AnyEntityWithStats } from '@/types/migration';
 import { ListViewHeader } from './list-view-header';
 import { ListViewRow } from './list-view-row';
-import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { FileContextMenu } from '@/components/features/file-browser/context-menu/context-menu';
-import { handleContextAction } from '@/components/features/file-browser/context-menu';
-import { entityToFileItem } from '@/types/file-browser/file-item';
-import type { AnyEntityWithStats } from '@/types/migration';
-import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
 
 interface ListViewProps {
 	items: AnyEntityWithStats[];
 	selectedIds: string[];
-	containerWidth: number;
 	sortBy?: string;
 	sortDirection?: 'asc' | 'desc';
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
-	onItemContextMenu?: (event: React.MouseEvent, item: AnyEntityWithStats) => void;
-	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 	onSort?: (columnKey: string, direction: 'asc' | 'desc') => void;
 	entityType?: string;
 	className?: string;
@@ -35,13 +27,10 @@ interface ListViewProps {
 export const ListView = memo<ListViewProps>(function ListView({
 	items,
 	selectedIds,
-	containerWidth,
 	sortBy,
 	sortDirection = 'asc',
 	onItemClick,
 	onItemDoubleClick,
-	onItemContextMenu,
-	onContextAction,
 	onSort,
 	entityType = 'default',
 	className = '',
@@ -50,15 +39,12 @@ export const ListView = memo<ListViewProps>(function ListView({
 	const tableRef = useRef<HTMLTableElement>(null);
 	const [containerHeight, setContainerHeight] = useState<number>(600);
 
+	// Set optimizado para verificación de selección O(1)
+	const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
 	// Usar hook de configuración de ListView
-	const {
-		config,
-		visibleColumns,
-		updateColumn,
-		reorderColumns,
-		toggleColumnVisibility,
-		getColumnsWithRenderers,
-	} = useListViewConfig();
+	const { config, visibleColumns, updateColumn, reorderColumns, toggleColumnVisibility, getColumnsWithRenderers } =
+		useListViewConfig();
 
 	// Obtener columnas con renderers para el tipo de entidad actual
 	const columnsWithRenderers = useMemo(() => {
@@ -66,36 +52,40 @@ export const ListView = memo<ListViewProps>(function ListView({
 	}, [getColumnsWithRenderers, entityType]);
 
 	// Handler para clicks en espacio vacío
-	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
-		// Solo actuar si el click es directamente en el contenedor de la vista
-		const target = e.target as HTMLElement;
-		const currentTarget = e.currentTarget as HTMLElement;
+	const handleEmptySpaceClick = useCallback(
+		(e: React.MouseEvent) => {
+			// Solo actuar si el click es directamente en el contenedor de la vista
+			const target = e.target as HTMLElement;
+			const currentTarget = e.currentTarget as HTMLElement;
 
-		// Verificar si es un click en espacio vacío (no en elementos de la lista)
-		const isEmptySpaceClick = target === currentTarget ||
-			(!target.closest('[data-testid^="list-row-"]') &&
-				!target.closest('th') &&
-				!target.closest('button') &&
-				!target.closest('[role="button"]') &&
-				!target.closest('input') &&
-				!target.closest('textarea') &&
-				!target.closest('[data-radix-dropdown-menu-content]') &&
-				!target.closest('[data-radix-dropdown-menu-trigger]'));
+			// Verificar si es un click en espacio vacío (no en elementos de la lista)
+			const isEmptySpaceClick =
+				target === currentTarget ||
+				(!target.closest('[data-testid^="list-row-"]') &&
+					!target.closest('th') &&
+					!target.closest('button') &&
+					!target.closest('[role="button"]') &&
+					!target.closest('input') &&
+					!target.closest('textarea') &&
+					!target.closest('[data-radix-dropdown-menu-content]') &&
+					!target.closest('[data-radix-dropdown-menu-trigger]'));
 
-		if (isEmptySpaceClick && selectedIds.length > 0) {
-			// Feedback visual para la deselección
-			currentTarget.style.transition = 'background-color 0.15s ease';
-			currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
+			if (isEmptySpaceClick && selectedIds.length > 0) {
+				// Feedback visual para la deselección
+				currentTarget.style.transition = 'background-color 0.15s ease';
+				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
 
-			setTimeout(() => {
-				currentTarget.style.backgroundColor = '';
-				currentTarget.style.transition = '';
-			}, 150);
-		}
+				setTimeout(() => {
+					currentTarget.style.backgroundColor = '';
+					currentTarget.style.transition = '';
+				}, 150);
+			}
 
-		// Propagar el evento hacia arriba para que FileBrowser lo maneje
-		// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
-	}, [selectedIds.length]);
+			// Propagar el evento hacia arriba para que FileBrowser lo maneje
+			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
+		},
+		[selectedIds.length]
+	);
 
 	// Navegación por teclado para vista de lista
 	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -105,7 +95,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 		if (!focusedElement?.closest('[data-testid^="list-row-"]')) return;
 
 		const rows = Array.from(parentRef.current.querySelectorAll('[data-testid^="list-row-"]')) as HTMLElement[];
-		const currentIndex = rows.findIndex(row => row.contains(focusedElement));
+		const currentIndex = rows.findIndex((row) => row.contains(focusedElement));
 		if (currentIndex === -1) return;
 
 		let nextIndex = currentIndex;
@@ -171,36 +161,25 @@ export const ListView = memo<ListViewProps>(function ListView({
 	});
 
 	// Handlers para funcionalidades del header
-	const handleColumnResize = useCallback(async (columnKey: string, width: number) => {
-		await updateColumn(columnKey, { width });
-	}, [updateColumn]);
-
-	const handleColumnReorder = useCallback(async (fromIndex: number, toIndex: number) => {
-		await reorderColumns(fromIndex, toIndex);
-	}, [reorderColumns]);
-
-	const handleColumnToggle = useCallback(async (columnKey: string) => {
-		await toggleColumnVisibility(columnKey);
-	}, [toggleColumnVisibility]);
-
-	// Handler para acciones del menú contextual
-	const handleContextMenuAction = useCallback(
-		(item: AnyEntityWithStats) => async (action: ContextMenuAction, data?: Record<string, unknown>) => {
-			if (onContextAction) {
-				onContextAction(action, item, data);
-			} else {
-				// Fallback al handler por defecto - convertir item a FileItem
-				const fileItem = entityToFileItem(item);
-				await handleContextAction(
-					action,
-					fileItem,
-					undefined, // items array no se usa aquí
-					undefined, // toggleSelection no disponible en view component
-					undefined  // refreshView no disponible en view component
-				);
-			}
+	const handleColumnResize = useCallback(
+		async (columnKey: string, width: number) => {
+			await updateColumn(columnKey, { width });
 		},
-		[onContextAction]
+		[updateColumn]
+	);
+
+	const handleColumnReorder = useCallback(
+		async (fromIndex: number, toIndex: number) => {
+			await reorderColumns(fromIndex, toIndex);
+		},
+		[reorderColumns]
+	);
+
+	const handleColumnToggle = useCallback(
+		async (columnKey: string) => {
+			await toggleColumnVisibility(columnKey);
+		},
+		[toggleColumnVisibility]
 	);
 
 	// Calcular altura de header
@@ -208,7 +187,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 
 	return (
 		<div
-			className={cn("w-full overflow-hidden", className)}
+			className={cn('w-full overflow-hidden', className)}
 			data-testid="listview-container"
 			data-view-type="list"
 			role="grid"
@@ -217,13 +196,11 @@ export const ListView = memo<ListViewProps>(function ListView({
 			onKeyDown={handleKeyDown}
 		>
 			<div id="list-view-instructions" className="sr-only">
-				Usa las flechas arriba y abajo para navegar, Home y End para ir al inicio o final, PageUp y PageDown para navegar rápidamente.
+				Usa las flechas arriba y abajo para navegar, Home y End para ir al inicio o final, PageUp y PageDown para
+				navegar rápidamente.
 			</div>
 			{/* Tabla con header fijo */}
-			<table
-				ref={tableRef}
-				className="w-full table-fixed"
-			>
+			<table ref={tableRef} className="w-full table-fixed">
 				{/* Header */}
 				{config.showHeader && (
 					<ListViewHeader
@@ -261,7 +238,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 				>
 					{rowVirtualizer.getVirtualItems().map((virtualItem) => {
 						const item = items[virtualItem.index];
-						const isSelected = selectedIds.includes(item.id);
+						const isSelected = selectedIdsSet.has(item.id);
 						const isEven = virtualItem.index % 2 === 0;
 
 						return (
@@ -284,38 +261,28 @@ export const ListView = memo<ListViewProps>(function ListView({
 								aria-rowindex={virtualItem.index + 1}
 								aria-setsize={items.length}
 								tabIndex={virtualItem.index === 0 ? 0 : -1}
+								data-item-id={item.id}
+								data-selectable="true"
 							>
-								<ContextMenu>
-									<ContextMenuTrigger asChild>
-										<table className="w-full table-fixed">
-											<tbody>
-												<ListViewRow
-													item={item}
-													columns={columnsWithRenderers}
-													index={virtualItem.index}
-													isSelected={isSelected}
-													isEven={isEven}
-													showZebraStripes={config.showZebraStripes}
-													rowHeight={config.rowHeight}
-													cellPadding={config.cellPadding}
-													showThumbnails={config.showThumbnails}
-													thumbnailSize={config.thumbnailSize}
-													onClick={onItemClick}
-													onDoubleClick={onItemDoubleClick}
-													onContextMenu={onItemContextMenu}
-													aria-selected={isSelected}
-													aria-describedby={`row-${item.id}-description`}
-												/>
-											</tbody>
-										</table>
-									</ContextMenuTrigger>
-									<ContextMenuContent>
-										<FileContextMenu
-											file={entityToFileItem(item)}
-											onAction={(action, file, data) => handleContextMenuAction(item)(action, data)}
+								{/* Menú contextual deshabilitado para optimizar performance */}
+								<table className="w-full table-fixed">
+									<tbody>
+										<ListViewRow
+											item={item}
+											columns={columnsWithRenderers}
+											index={virtualItem.index}
+											isSelected={isSelected}
+											isEven={isEven}
+											showZebraStripes={config.showZebraStripes}
+											rowHeight={config.rowHeight}
+											cellPadding={config.cellPadding}
+											showThumbnails={config.showThumbnails}
+											thumbnailSize={config.thumbnailSize === 'none' ? undefined : config.thumbnailSize}
+											onClick={onItemClick}
+											onDoubleClick={onItemDoubleClick}
 										/>
-									</ContextMenuContent>
-								</ContextMenu>
+									</tbody>
+								</table>
 							</motion.div>
 						);
 					})}

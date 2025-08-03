@@ -189,7 +189,7 @@ export function useCardsViewConfig() {
 
   const getAnimationDuration = useMemo(() => {
     return (): number => {
-      return config.animationDuration / 1000; // Convert to seconds for framer-motion
+      return config.animationDuration / 1000; // Convert to seconds for motion
     };
   }, [config.animationDuration]);
 

@@ -4,19 +4,14 @@
  */
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EntityCard } from '@/components/cards/entity-card';
-import { CardInfoOverlay } from './card-info-overlay';
-import { CardActionButtons } from './card-action-buttons';
+import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { useCardsViewConfig } from '@/hooks/use-cards-view-config';
 import { cn } from '@/lib/utils';
-import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { FileContextMenu } from '@/components/features/file-browser/context-menu/context-menu';
-import { handleContextAction } from '@/components/features/file-browser/context-menu';
 import type { AnyEntityWithStats } from '@/types/migration';
-import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
-import { entityToFileItem } from '@/types/file-browser/file-item';
+import { CardActionButtons } from './card-action-buttons';
+import { CardInfoOverlay } from './card-info-overlay';
 
 interface CardsViewProps {
 	items: AnyEntityWithStats[];
@@ -24,7 +19,6 @@ interface CardsViewProps {
 	containerWidth: number;
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
-	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
 }
 
 // Componente interno memoizado para cada carta
@@ -34,19 +28,9 @@ const CardItem = memo<{
 	itemIndex: number;
 	cardWidth: number;
 	cardHeight: number;
-	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: AnyEntityWithStats) => void;
-	onContextAction?: (action: ContextMenuAction, item: AnyEntityWithStats, data?: Record<string, unknown>) => void;
-}>(function CardItem({
-	item,
-	isSelected,
-	itemIndex,
-	cardWidth,
-	cardHeight,
-	onItemClick,
-	onItemDoubleClick,
-	onContextAction,
-}) {
+	onItemClickById: (id: string, e: React.MouseEvent) => void;
+	onItemDoubleClickById: (id: string) => void;
+}>(function CardItem({ item, isSelected, itemIndex, cardWidth, cardHeight, onItemClickById, onItemDoubleClickById }) {
 	const { config } = useCardsViewConfig();
 	const [isHovered, setIsHovered] = useState(false);
 	const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -71,46 +55,20 @@ const CardItem = memo<{
 	const handleClick = useCallback(
 		(e: React.MouseEvent) => {
 			e.stopPropagation();
-			onItemClick(item, e);
+			onItemClickById(item.id, e);
 		},
-		[item, onItemClick]
+		[item.id, onItemClickById]
 	);
 
 	const handleDoubleClick = useCallback(() => {
-		onItemDoubleClick(item);
-	}, [item, onItemDoubleClick]);
-
-	// Handler para acciones del menú contextual
-	const handleContextMenuAction = useCallback(
-		async (action: ContextMenuAction, data?: Record<string, unknown>) => {
-			if (onContextAction) {
-				onContextAction(action, item, data);
-			} else {
-				// Fallback al handler por defecto - convertir item a FileItem
-				const fileItem = entityToFileItem(item);
-				await handleContextAction(
-					action,
-					fileItem,
-					undefined, // items array no se usa aquí
-					undefined, // toggleSelection no disponible en view component
-					undefined  // refreshView no disponible en view component
-				);
-			}
-		},
-		[onContextAction, item]
-	);
+		onItemDoubleClickById(item.id);
+	}, [item.id, onItemDoubleClickById]);
 
 	const cardStyleClasses = useMemo(() => {
 		const baseClasses = 'relative overflow-hidden transition-all duration-200';
-		const shadowClasses = config.showShadows
-			? 'shadow-sm hover:shadow-md'
-			: '';
-		const roundedClasses = config.roundedCorners
-			? 'rounded-lg'
-			: '';
-		const selectionClasses = isSelected && config.showSelectionIndicators
-			? 'ring-2 ring-primary ring-offset-2'
-			: '';
+		const shadowClasses = config.showShadows ? 'shadow-sm hover:shadow-md' : '';
+		const roundedClasses = config.roundedCorners ? 'rounded-lg' : '';
+		const selectionClasses = isSelected && config.showSelectionIndicators ? 'ring-2 ring-primary ring-offset-2' : '';
 
 		return cn(
 			baseClasses,
@@ -147,24 +105,15 @@ const CardItem = memo<{
 			onMouseLeave={handleMouseLeave}
 		>
 			{/* Tarjeta base con menú contextual */}
-			<ContextMenu>
-				<ContextMenuTrigger asChild>
-					<EntityCard
-						entity={item}
-						isSelected={isSelected}
-						compact={config.cardStyle === 'compact'}
-						className="h-full w-full"
-						onClick={handleClick}
-						onDoubleClick={handleDoubleClick}
-					/>
-				</ContextMenuTrigger>
-				<ContextMenuContent>
-					<FileContextMenu
-						file={entityToFileItem(item)}
-						onAction={(action, file, data) => handleContextMenuAction(action, data)}
-					/>
-				</ContextMenuContent>
-			</ContextMenu>
+			{/* Menú contextual deshabilitado para optimizar performance */}
+			<OptimizedEntityCard
+				entity={item}
+				isSelected={isSelected}
+				compact={config.cardStyle === 'compact'}
+				className="h-full w-full"
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+			/>
 
 			{/* Overlay de información */}
 			{config.interactiveConfig.enabled && config.interactiveConfig.showInfoOverlay && (
@@ -196,10 +145,42 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
-	onContextAction,
 }) {
 	const parentRef = useRef<any>(null);
 	const { config, calculateLayout } = useCardsViewConfig();
+
+	// Map optimizado para lookups O(1)
+	const itemsById = useMemo(() => {
+		const map = new Map<string, AnyEntityWithStats>();
+		for (const item of items) {
+			map.set(item.id, item);
+		}
+		return map;
+	}, [items]);
+
+	// Set optimizado para verificación de selección O(1)
+	const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+	// Handlers optimizados con Map lookups
+	const handleItemClickById = useCallback(
+		(id: string, e: React.MouseEvent) => {
+			const item = itemsById.get(id);
+			if (item) {
+				onItemClick(item, e);
+			}
+		},
+		[itemsById, onItemClick]
+	);
+
+	const handleItemDoubleClickById = useCallback(
+		(id: string) => {
+			const item = itemsById.get(id);
+			if (item) {
+				onItemDoubleClick(item);
+			}
+		},
+		[itemsById, onItemDoubleClick]
+	);
 
 	// Calcular layout dinámico
 	const layout = useMemo(() => {
@@ -207,39 +188,43 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	}, [calculateLayout, containerWidth, items.length]);
 
 	// Handler para clicks en espacio vacío - mejorado para deselección
-	const handleEmptySpaceClick = useCallback((e: React.MouseEvent) => {
-		const target = e.target as HTMLElement;
-		const currentTarget = e.currentTarget as HTMLElement;
+	const handleEmptySpaceClick = useCallback(
+		(e: React.MouseEvent) => {
+			const target = e.target as HTMLElement;
+			const currentTarget = e.currentTarget as HTMLElement;
 
-		// Verificar si el click fue en espacio vacío (no en un item)
-		const isEmptySpaceClick = target === currentTarget ||
-			(!target.closest('.entity-card') &&
-				!target.closest('[data-entity-card]') &&
-				!target.closest('button') &&
-				!target.closest('[role="button"]') &&
-				!target.closest('input') &&
-				!target.closest('textarea') &&
-				!target.closest('[data-testid="file-browser-item"]') &&
-				!target.closest('.grid > div') &&
-				!target.closest('[style*="position: absolute"]') &&
-				!target.closest('[data-virtualized-item="true"]'));
+			// Verificar si el click fue en espacio vacío (no en un item)
+			const isEmptySpaceClick =
+				target === currentTarget ||
+				(!target.closest('.entity-card') &&
+					!target.closest('[data-entity-card]') &&
+					!target.closest('button') &&
+					!target.closest('[role="button"]') &&
+					!target.closest('input') &&
+					!target.closest('textarea') &&
+					!target.closest('[data-testid="file-browser-item"]') &&
+					!target.closest('.grid > div') &&
+					!target.closest('[style*="position: absolute"]') &&
+					!target.closest('[data-virtualized-item="true"]'));
 
-		if (isEmptySpaceClick) {
-			// Propagar el evento hacia arriba para que el FileBrowser maneje la deselección
-			// No hacer preventDefault() para permitir que el evento burbujee
+			if (isEmptySpaceClick) {
+				// Propagar el evento hacia arriba para que el FileBrowser maneje la deselección
+				// No hacer preventDefault() para permitir que el evento burbujee
 
-			// Feedback visual opcional si hay elementos seleccionados
-			if (selectedIds.length > 0) {
-				currentTarget.style.transition = 'background-color 0.15s ease';
-				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
+				// Feedback visual opcional si hay elementos seleccionados
+				if (selectedIds.length > 0) {
+					currentTarget.style.transition = 'background-color 0.15s ease';
+					currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
 
-				setTimeout(() => {
-					currentTarget.style.backgroundColor = '';
-					currentTarget.style.transition = '';
-				}, 150);
+					setTimeout(() => {
+						currentTarget.style.backgroundColor = '';
+						currentTarget.style.transition = '';
+					}, 150);
+				}
 			}
-		}
-	}, [selectedIds.length]);
+		},
+		[selectedIds.length]
+	);
 
 	// Estado para altura del contenedor
 	const [containerHeight, setContainerHeight] = useState<number>(0);
@@ -267,11 +252,14 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	});
 
 	// Función para obtener items de una fila específica
-	const getRowItems = useCallback((rowIndex: number): AnyEntityWithStats[] => {
-		const startIndex = rowIndex * layout.columns;
-		const endIndex = Math.min(startIndex + layout.columns, items.length);
-		return items.slice(startIndex, endIndex);
-	}, [items, layout.columns]);
+	const getRowItems = useCallback(
+		(rowIndex: number): AnyEntityWithStats[] => {
+			const startIndex = rowIndex * layout.columns;
+			const endIndex = Math.min(startIndex + layout.columns, items.length);
+			return items.slice(startIndex, endIndex);
+		},
+		[items, layout.columns]
+	);
 
 	return (
 		<div
@@ -319,7 +307,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 									}}
 								>
 									{rowItems.map((item, columnIndex) => {
-										const isSelected = selectedIds.includes(item.id);
+										const isSelected = selectedIdsSet.has(item.id);
 										const itemIndex = virtualRow.index * layout.columns + columnIndex;
 
 										return (
@@ -330,9 +318,8 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 												itemIndex={itemIndex}
 												cardWidth={layout.cardWidth}
 												cardHeight={layout.cardHeight}
-												onItemClick={onItemClick}
-												onItemDoubleClick={onItemDoubleClick}
-												onContextAction={onContextAction}
+												onItemClickById={handleItemClickById}
+												onItemDoubleClickById={handleItemDoubleClickById}
 											/>
 										);
 									})}
